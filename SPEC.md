@@ -1,3 +1,20 @@
+## Simscape 44-to-27 Coordinate Slice and Boundary-Load Validation (MS-62, #10349)
+
+Separates kinematic projection from dynamic model reduction for Simscape upper-body replay:
+- **Coordinate Slice Module (`src/shared/python/motion_matching/coordinate_slice.py`)**:
+  - JSON-backed `SliceMap` defining 44 source coordinates (anthropometric driver spec) to 27 native Simscape coordinates with 17 omitted neck/leg DOFs.
+  - `project_kinematic_trajectory` performs name-based kinematic projection preserving shared coordinate names.
+  - `derive_boundary_wrenches` accumulates omitted-body joint efforts into six-axis boundary wrenches at cut joints.
+  - `check_slice_virtual_work` decomposes virtual power into retained and omitted contributions with fail-closed tolerance.
+  - `slice_candidate` writes sliced `.npz` candidates with receipt metadata; CLI via `python -m src.shared.python.motion_matching.coordinate_slice`.
+- **MATLAB Alignment Overrides (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/align_measured_to_model.m`)**:
+  - `opts.geometry_document` support maps anthropometry segment lengths to Simscape workspace variables (inches).
+- **Evidence (`evidence/matched/driver_g1_simscape_slice/`)**:
+  - Committed `slice_map.json`, `candidate27.npz`, `receipt.json`, `parity.json`, and `run_manifest.json`.
+  - Kinematic projection only; dynamic Simscape replay and boundary-load acceptance marked unqualified.
+- **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
+  - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
+
 ## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
 
 Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
@@ -6717,6 +6734,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
