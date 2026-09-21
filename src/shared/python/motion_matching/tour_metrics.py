@@ -1,11 +1,16 @@
-"""Standardized five shared evaluation metrics for tour motion matching.
+"""Standardized shared evaluation metrics for tour motion matching.
 
 Computes:
 1. whole_marker_rmse_m: Full trial marker tracking RMS across all valid tracked markers
 2. early_marker_rmse_m: Early prefix tracking RMS (t <= 0.60 s, address / backswing)
-3. terminal_marker_rmse_m: Terminal window tracking RMS (final 10% of frames / follow-through)
+3. terminal_marker_rmse_m: Full-marker terminal window RMS (never silently drops head)
 4. club_marker_rmse_m: Marker tracking RMS specifically for the club cluster (Marker_2 and Marker_3)
 5. pelvis_yaw_rmse_rad: Orientation RMSE in the horizontal transverse plane (pelvis heading)
+
+MS-61 (#10348) also discloses dual terminal diagnostics:
+- terminal_full_marker_rmse_m (alias of terminal_marker_rmse_m)
+- terminal_body_excluding_head_rmse_m (reduced-model diagnostic only)
+- terminal_head_cluster_rmse_m
 """
 
 from __future__ import annotations
@@ -20,22 +25,36 @@ from src.shared.python.motion_matching.tour_capture_contract import (
     TourCapture,
 )
 
+HEAD_MARKER_LABELS: tuple[str, ...] = tuple(MARKER_SEGMENTS["head"])
+
 
 @dataclass(frozen=True)
 class SharedMetrics:
-    """The five standardized metrics reported across all physical engines."""
+    """Shared kinematic metrics; terminal fields always disclose the head cluster."""
 
     whole_marker_rmse_m: float
     early_marker_rmse_m: float
     terminal_marker_rmse_m: float
     club_marker_rmse_m: float
     pelvis_yaw_rmse_rad: float
+    terminal_body_excluding_head_rmse_m: float = 0.0
+    terminal_head_cluster_rmse_m: float = 0.0
+
+    @property
+    def terminal_full_marker_rmse_m(self) -> float:
+        """Full-marker terminal RMS (authoritative; identical to terminal_marker_rmse_m)."""
+        return self.terminal_marker_rmse_m
 
     def as_dict(self) -> dict[str, float]:
         return {
             "whole_marker_rmse_m": self.whole_marker_rmse_m,
             "early_marker_rmse_m": self.early_marker_rmse_m,
             "terminal_marker_rmse_m": self.terminal_marker_rmse_m,
+            "terminal_full_marker_rmse_m": self.terminal_full_marker_rmse_m,
+            "terminal_body_excluding_head_rmse_m": (
+                self.terminal_body_excluding_head_rmse_m
+            ),
+            "terminal_head_cluster_rmse_m": self.terminal_head_cluster_rmse_m,
             "club_marker_rmse_m": self.club_marker_rmse_m,
             "pelvis_yaw_rmse_rad": self.pelvis_yaw_rmse_rad,
         }
@@ -95,12 +114,36 @@ def compute_shared_metrics(
     early_errs = dist_sq[early_mask]
     early_rmse = float(np.sqrt(np.mean(early_errs))) if len(early_errs) > 0 else 0.0
 
-    # 3. Terminal marker RMS (final terminal_ratio portion)
+    # 3. Terminal marker RMS (final terminal_ratio portion) — full markers only
     term_start = int(capture.frames * (1.0 - terminal_ratio))
     term_mask = np.zeros_like(valid)
     term_mask[term_start:, :] = valid[term_start:, :]
     term_errs = dist_sq[term_mask]
     term_rmse = float(np.sqrt(np.mean(term_errs))) if len(term_errs) > 0 else 0.0
+
+    head_set = set(HEAD_MARKER_LABELS)
+    head_indices = [i for i, label in enumerate(capture.labels) if label in head_set]
+    body_indices = [
+        i for i, label in enumerate(capture.labels) if label not in head_set
+    ]
+    head_term_mask = np.zeros_like(valid)
+    body_term_mask = np.zeros_like(valid)
+    if head_indices:
+        head_term_mask[term_start:, :][:, head_indices] = valid[term_start:, :][
+            :, head_indices
+        ]
+    if body_indices:
+        body_term_mask[term_start:, :][:, body_indices] = valid[term_start:, :][
+            :, body_indices
+        ]
+    head_term_errs = dist_sq[head_term_mask]
+    body_term_errs = dist_sq[body_term_mask]
+    head_term_rmse = (
+        float(np.sqrt(np.mean(head_term_errs))) if len(head_term_errs) > 0 else 0.0
+    )
+    body_term_rmse = (
+        float(np.sqrt(np.mean(body_term_errs))) if len(body_term_errs) > 0 else 0.0
+    )
 
     # 4. Club marker RMS
     club_labels = set(MARKER_SEGMENTS["club"])
@@ -134,4 +177,6 @@ def compute_shared_metrics(
         terminal_marker_rmse_m=term_rmse,
         club_marker_rmse_m=club_rmse,
         pelvis_yaw_rmse_rad=pelvis_yaw_rmse,
+        terminal_body_excluding_head_rmse_m=body_term_rmse,
+        terminal_head_cluster_rmse_m=head_term_rmse,
     )
