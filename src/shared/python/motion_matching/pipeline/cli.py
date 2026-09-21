@@ -176,6 +176,18 @@ def build_parser() -> argparse.ArgumentParser:
         default="enforce",
         help="joint limit policy for Pink solver",
     )
+    parser.add_argument(
+        "--ik-backend",
+        choices=["lm", "mujoco-minimize"],
+        default="lm",
+        help="MuJoCo marker IK backend (lm or mujoco-minimize)",
+    )
+    parser.add_argument(
+        "--tracking",
+        choices=["kkt", "mj-inverse"],
+        default="kkt",
+        help="computed-torque tracking backend (kkt or mj-inverse)",
+    )
     return parser
 
 
@@ -203,6 +215,12 @@ def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
             raise RuntimeError(
                 f"Pink backend requested but not available: {diag['reason']}"
             )
+    if args.backend == "pink" and getattr(args, "ik_backend", "lm") != "lm":
+        raise RuntimeError(
+            "Pink backend cannot be combined with --ik-backend mujoco-minimize"
+        )
+    if args.backend == "pink" and getattr(args, "tracking", "kkt") != "kkt":
+        raise RuntimeError("Pink backend cannot be combined with --tracking mj-inverse")
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -311,7 +329,9 @@ def _calibrate_and_scale(
         spec_bytes, fixed, scaled_offsets(offsets, femur_scale, tibia_scale), address.q
     )
     attachments = {**fixed, **offsets}
-    adapter, kin = lane.kinematics(spec_bytes, attachments)
+    adapter, kin = lane.kinematics(
+        spec_bytes, attachments, ik_backend=getattr(args, "ik_backend", "lm")
+    )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
     address_report["calibrated"] = calibrated_address_summary(
@@ -508,7 +528,9 @@ def _simulate_and_receipt(
         q_track, zmp, shooting_report = shooting_fit(
             lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain
         )
-    record, sim_q = replay(sim, lane, q_track)
+    record, sim_q = replay(
+        sim, lane, q_track, tracking_backend=getattr(args, "tracking", "kkt")
+    )
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -521,6 +543,7 @@ def _simulate_and_receipt(
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
             shooting_report=shooting_report,
+            tracking_backend=getattr(args, "tracking", "kkt"),
         )
     )
     np.savez(
@@ -548,6 +571,8 @@ def _simulate_and_receipt(
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
+            ik_backend=getattr(args, "ik_backend", "lm"),
+            tracking_backend=getattr(args, "tracking", "kkt"),
             base_spec=base_spec,
             spec_path=Path(args.spec),
             scaled_path=out_dir / "full_body_spec_hipcal_scaled.json",

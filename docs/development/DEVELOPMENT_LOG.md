@@ -141,6 +141,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Push branch, open PR with auto-merge, complete lease on #10361.
 - **Evidence:** evidence/anthropometry/identifiability_driver.json; tests/unit/motion_matching/test_capture_contract_generic.py; tests/unit/motion_matching/test_identifiability.py.
 
+### DL-#10366 · MS-16: MuJoCo Native IK and MJ_Inverse Tracking
+
+- **State:** in_review
+- **Owner:** cursor-composer-local
+- **Issue:** #10366 (MS-16, epic #10363)
+- **Branch:** fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local
+- **Paths:** src/engines/physics_engines/mujoco/python/ik_minimize.py; src/engines/physics_engines/mujoco/python/inverse_dynamics.py; src/shared/python/motion_matching/pipeline/reference.py; src/shared/python/motion_matching/pipeline/dynamics.py; src/shared/python/motion_matching/pipeline/cli.py; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 (5 MS-72 unit tests pass; ruff clean on changed files)
+- **Summary:** Added selectable `--ik-backend mujoco-minimize` (MuJoCo `minimize.least_squares` with LM warm start and plant-consistent marker residuals) and `--tracking mj-inverse` (computed torque via plant KKT inverse with native `mj_inverse` audit on realized accelerations). Wired backends through pipeline plant, dynamics replay, CLI, and receipt fields with DbC validation at API boundaries.
+- **Next step:** Open PR fixing #10366, drive CI Standard green, run canonical driver receipt under `anthro_driver_native_tools`.
+- **Evidence:** tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py
+
 ### DL-#9422 · Rig Capture Sessions Through the Tools MocapSession Contract
 
 - **State:** in_review
