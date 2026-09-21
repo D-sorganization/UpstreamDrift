@@ -112,41 +112,41 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 99 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 100 committed receipts scanned).
 
-| Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
-| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 31       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
-| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 10       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
-| **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
-| **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |
-| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
-| **Myosuite**  | —                                                                                                                              | —                  | —           | —            | 0        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
+| Engine | Candidate Lanes | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status |
+|---|---|---|---|---|---|---|
+| **Mujoco** | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron | — | — | 32 | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
+| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays | driver, iron | — | — | 10 | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress) |
+| **Drake** | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays | driver | — | — | 6 | ⚙️ IK 47 mm / tracking 382 mm REJECTED |
+| **Opensim** | ground_support, matched, tour_matching | driver | — | — | 11 | ⚠️ Staged (Moco track problem under MS-102) |
+| **Simscape** | native | driver | — | — | 38 | 🏛️ Historical Tour Authority (Simscape lane baseline) |
+| **Myosuite** | — | — | — | — | 0 | 🔬 Experimental (Fail-closed; MS-50 corrective landed) |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 
 Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):
 Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.
 
-| Gate                           | Criterion                                                     | MuJoCo              | Pinocchio      | Drake          | OpenSim    | Simscape    | MyoSuite   | Gate Status               |
-| ------------------------------ | ------------------------------------------------------------- | ------------------- | -------------- | -------------- | ---------- | ----------- | ---------- | ------------------------- |
-| **G1: Kinematic Fit**          | Whole-swing marker RMS $\le 30$ mm, 0 RoM violations          | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active**   |
-| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked                 | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending     | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |
-| **G3: Professional Release**   | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending          | ⏳ Pending     | ⏳ Pending     | ⏳ Pending | ⏳ Pending  | ❌ Blocked | **Open (Blocks Release)** |
+| Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |
+|---|---|---|---|---|---|---|---|---|
+| **G1: Kinematic Fit** | Whole-swing marker RMS $\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |
+| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |
+| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |
 
 ### 3. Matched Swing Release Issues Roadmap
 
-| Issue                                                                                | Title                                                        | Tier       | Accountable Role     | Blocker / Dependency                       | Next Executable Action                                 |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ---------- | -------------------- | ------------------------------------------ | ------------------------------------------------------ |
-| [**MS-100**](https://github.com/D-sorganization/UpstreamDrift/issues/10374) (#10374) | Fail-closed physical acceptance contract and validator       | Governance | `acceptance-lead`    | None (spec-first)                          | Implement MS-100 schema and fail-closed gate validator |
-| [**MS-101**](https://github.com/D-sorganization/UpstreamDrift/issues/10375) (#10375) | Drake native full-body trajectory optimization               | P1         | `drake-agent`        | Drake QP solver setup                      | Port trajectory optimization into Drake adapter        |
-| [**MS-102**](https://github.com/D-sorganization/UpstreamDrift/issues/10376) (#10376) | OpenSim Moco full-body muscle-driven tracking                | P1         | `opensim-agent`      | Moco CASADI license & memory budget        | Assemble full-body Moco track problem                  |
-| [**MS-103**](https://github.com/D-sorganization/UpstreamDrift/issues/10377) (#10377) | Pinocchio Crocoddyl full-body optimal control integration    | P1         | `pinocchio-agent`    | Two-window terminal cost tuning            | Wire Crocoddyl action models into full pipeline        |
-| [**MS-104**](https://github.com/D-sorganization/UpstreamDrift/issues/10378) (#10378) | Driver and 7-iron dual-club G3 coverage across all engines   | P1         | `full-body-lead`     | Single-club evidence on non-MuJoCo engines | Run and record dual-club suites per engine             |
-| [**MS-105**](https://github.com/D-sorganization/UpstreamDrift/issues/10379) (#10379) | Cross-engine physical convergence and numerical verification | P2         | `verification-agent` | Step-size and GRF divergence checks        | Run cross-engine step convergence analysis             |
-| [**MS-106**](https://github.com/D-sorganization/UpstreamDrift/issues/10380) (#10380) | Professional release gate and verified matched badge         | P2         | `release-auditor`    | G3 multi-engine cross-validation pass      | Sign off release verification audit                    |
-| [**MS-107**](https://github.com/D-sorganization/UpstreamDrift/issues/10381) (#10381) | Native automated engine benchmark regression suite           | P2         | `ci-infra`           | Runner execution time limits               | Add nightly automated cross-engine benchmark lane      |
-| [**MS-108**](https://github.com/D-sorganization/UpstreamDrift/issues/10382) (#10382) | Matched swing program end-to-end evidence release audit      | P2         | `governance-lead`    | MS-100 through MS-106                      | Final immutable evidence freeze and turnover           |
+| Issue | Title | Tier | Accountable Role | Blocker / Dependency | Next Executable Action |
+|---|---|---|---|---|---|
+| [**MS-100**](https://github.com/D-sorganization/UpstreamDrift/issues/10374) (#10374) | Fail-closed physical acceptance contract and validator | Governance | `acceptance-lead` | None (spec-first) | Implement MS-100 schema and fail-closed gate validator |
+| [**MS-101**](https://github.com/D-sorganization/UpstreamDrift/issues/10375) (#10375) | Drake native full-body trajectory optimization | P1 | `drake-agent` | Drake QP solver setup | Port trajectory optimization into Drake adapter |
+| [**MS-102**](https://github.com/D-sorganization/UpstreamDrift/issues/10376) (#10376) | OpenSim Moco full-body muscle-driven tracking | P1 | `opensim-agent` | Moco CASADI license & memory budget | Assemble full-body Moco track problem |
+| [**MS-103**](https://github.com/D-sorganization/UpstreamDrift/issues/10377) (#10377) | Pinocchio Crocoddyl full-body optimal control integration | P1 | `pinocchio-agent` | Two-window terminal cost tuning | Wire Crocoddyl action models into full pipeline |
+| [**MS-104**](https://github.com/D-sorganization/UpstreamDrift/issues/10378) (#10378) | Driver and 7-iron dual-club G3 coverage across all engines | P1 | `full-body-lead` | Single-club evidence on non-MuJoCo engines | Run and record dual-club suites per engine |
+| [**MS-105**](https://github.com/D-sorganization/UpstreamDrift/issues/10379) (#10379) | Cross-engine physical convergence and numerical verification | P2 | `verification-agent` | Step-size and GRF divergence checks | Run cross-engine step convergence analysis |
+| [**MS-106**](https://github.com/D-sorganization/UpstreamDrift/issues/10380) (#10380) | Professional release gate and verified matched badge | P2 | `release-auditor` | G3 multi-engine cross-validation pass | Sign off release verification audit |
+| [**MS-107**](https://github.com/D-sorganization/UpstreamDrift/issues/10381) (#10381) | Native automated engine benchmark regression suite | P2 | `ci-infra` | Runner execution time limits | Add nightly automated cross-engine benchmark lane |
+| [**MS-108**](https://github.com/D-sorganization/UpstreamDrift/issues/10382) (#10382) | Matched swing program end-to-end evidence release audit | P2 | `governance-lead` | MS-100 through MS-106 | Final immutable evidence freeze and turnover |
 
 <!-- end-generated:matched-swing-status -->
 
