@@ -288,9 +288,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10616 (epic #10603)
+- **Branch:** feat/nm01-learning-tasks-freeze
+- **PR:** not created
+- **Paths:** src/shared/python/neural_motion/tasks.py; src/shared/python/neural_motion/roster.py; src/shared/python/neural_motion/experiment.py; src/shared/python/neural_motion/**init**.py; tests/unit/neural_motion/test_learning_tasks.py; tests/unit/neural_motion/test_benefit_experiment.py; docs/plans/neural_motion_matching/learning_tasks.md; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment.json
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21T20:43:34Z at SELF (24 unit tests GREEN; ruff check/format clean on touched paths; freeze digest 7d93734cf5a5…)
+- **Summary:** Freeze distinct forward/inverse/masked-trajectory learning-task contracts with geometry/q0/v0/horizon/contact/mask conditioning; checkpoint dimensions from TB-00 roster (no hard-coded 27×7); inverse labels require selection or multimodal target without physical uniqueness; benefit experiment registers five baselines, all-phase latency, pilot scales, TB-02-aligned gates and break-even fail-closed when savings ≤ 0. No training executed.
+- **Next step:** Open ready-for-review PR with Fixes #10616 and arm squash auto-merge when green.
+- **Evidence:** docs/plans/neural_motion_matching/learning_tasks.md; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment.json.
+
 ### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10615 (epic #10603)
 - **Branch:** fix/issue-10615-nm00-dataset-audit
@@ -299,7 +313,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21T19:43:06Z at SELF (rebased on main a5cec3063; CO-00 test present; SPEC #10668 only; nm00_audit pointer; inventory current; cherry-picked corpus audit fix)
 - **Summary:** Fail-closed inventory of neural corpora, default checkpoints and historical training claims with retain/repair/migrate/reject/quarantine dispositions and a per-model coverage matrix keyed to TB-00 identities. No native training or speed claim.
-- **Next step:** Merge PR #10668 after green CI, then claim NM-01 (#10616).
+- **Next step:** Dispatch NM-01 (#10616) on a fresh worktree from main.
 - **Evidence:** docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/nm00_artifact_audit_receipt.json; docs/plans/neural_motion_matching/evidence/nm00_coverage_matrix.json.
 
 ### DL-#10602 · Club-Only Motion Matching Plan
@@ -341,7 +355,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Dispatch #10616 (NM-01) after #10615 merges.
+- **Next step:** Claim and implement #10616 (NM-01) after #10615 ships.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification

@@ -42,12 +42,13 @@ NM-00 -> NM-01 -> NM-02 -> NM-03 -> NM-04 -> NM-05 -> NM-06 -> NM-07 -> NM-08 ->
 -> NM-10. NM-11 follows stable service contracts; NM-12 is final acceptance.
 
 The immediate task is
-**[#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) (NM-00)
-only**. This is a dispatch-ready plan, not authorization to run every expensive
-experiment at once. Lower-cost agents handle bounded schema, adapter, fixture, CLI and
-UI work. An experienced reviewer checks model/observation semantics, force
-identifiability, contact, physical feasibility and scientific promotion. Dependencies
-are real contract gates: require merged implementation plus relevant tests/receipts, not
+**[#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) (NM-01)**
+on branch `feat/nm01-learning-tasks-freeze` after NM-00 merged on main. This is a
+dispatch-ready plan, not authorization to run every expensive experiment at once.
+Lower-cost agents handle bounded schema, adapter, fixture, CLI and UI work. An
+experienced reviewer checks model/observation semantics, force identifiability,
+contact, physical feasibility and scientific promotion. Dependencies are real
+contract gates: require merged implementation plus relevant tests/receipts, not
 merely a closed issue.
 
 External prerequisites:
