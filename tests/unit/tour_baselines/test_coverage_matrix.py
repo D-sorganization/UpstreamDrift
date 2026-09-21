@@ -36,9 +36,8 @@ def test_every_model_has_driver_and_iron_cells():
     # For each model, there must be exactly one 'driver' and one 'iron' cell
     for m_id in model_ids:
         cells = [c for c in matrix if c.model_id == m_id]
-        assert len(cells) == 2, (
-            f"Model {m_id} must have exactly 2 cells, got {len(cells)}"
-        )
+        msg = f"Model {m_id} must have exactly 2 cells, got {len(cells)}"
+        assert len(cells) == 2, msg
         captures = {c.capture for c in cells}
         assert captures == {"driver", "iron"}
 
