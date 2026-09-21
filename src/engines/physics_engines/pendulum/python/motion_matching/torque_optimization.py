@@ -186,63 +186,91 @@ def _compute_tracking_errors(
     return res_arr, rmse
 
 
-def fit_bounded_double_pendulum(
-    target_times: np.ndarray,
-    target_grip: np.ndarray,
-    target_head: np.ndarray,
+@dataclass(frozen=True)
+class DoublePendulumFitOptions:
+    """Configurable options for bounded double pendulum trajectory optimization."""
+
+    pivot: np.ndarray | None = None
+    max_nfev: int = 100
+    tau1_bounds: tuple[float, float] = (-250.0, 250.0)
+    tau2_bounds: tuple[float, float] = (-150.0, 150.0)
+    curvature_weight: float = 0.05
+    effort_weight: float = 0.001
+
+
+@dataclass(frozen=True)
+class DoublePendulumFitTarget:
+    """Target 2D kinematics and initial conditions for double pendulum fitting."""
+
+    times: np.ndarray
+    grip: np.ndarray
+    head: np.ndarray
+    l1: float
+    l2: float
+    q0: np.ndarray
+    v0: np.ndarray
+
+
+def _evaluate_unforced_baseline(
     dynamics: DoublePendulumDynamics,
-    l1: float,
-    l2: float,
-    q0: np.ndarray,
-    v0: np.ndarray,
-    *,
-    pivot: np.ndarray | None = None,
-    max_nfev: int = 100,
-    tau1_bounds: tuple[float, float] = (-250.0, 250.0),
-    tau2_bounds: tuple[float, float] = (-150.0, 150.0),
-    curvature_weight: float = 0.05,
-    effort_weight: float = 0.001,
-) -> FitTrajectoryResult:
-    """Optimize degree-6 Bernstein control points subject to explicit bounds and regularization."""
-    p0 = np.zeros(2) if pivot is None else np.asarray(pivot, dtype=float)[:2]
-    times = np.asarray(target_times, dtype=np.float64)
-    duration = float(times[-1] - times[0])
-    if duration <= 0.0:
-        raise ValueError("Target duration must be strictly positive")
-
-    grip_arr = np.asarray(target_grip, dtype=np.float64)[:, :2]
-    head_arr = np.asarray(target_head, dtype=np.float64)[:, :2]
-    observed_mask = np.isfinite(grip_arr).all(axis=1) & np.isfinite(head_arr).all(
-        axis=1
-    )
-    if not np.any(observed_mask):
-        raise ValueError("Target contains no valid observations")
-
-    # Lower and upper bounds for 14 parameters
-    lo = np.concatenate(
-        [
-            np.full(COEFFS_PER_JOINT, tau1_bounds[0]),
-            np.full(COEFFS_PER_JOINT, tau2_bounds[0]),
-        ]
-    )
-    hi = np.concatenate(
-        [
-            np.full(COEFFS_PER_JOINT, tau1_bounds[1]),
-            np.full(COEFFS_PER_JOINT, tau2_bounds[1]),
-        ]
-    )
-
-    # Compute unforced diagnostic baseline
+    target: DoublePendulumFitTarget,
+    p0: np.ndarray,
+    observed_mask: np.ndarray,
+    duration: float,
+) -> float:
+    """Evaluate unforced baseline RMSE."""
     zero_profile = BernsteinTorqueProfile(
         shoulder_controls=np.zeros(COEFFS_PER_JOINT),
         wrist_controls=np.zeros(COEFFS_PER_JOINT),
         duration_s=duration,
     )
     q_unforced, _ = integrate_double_pendulum_rollout(
-        dynamics, q0, v0, times, zero_profile
+        dynamics, target.q0, target.v0, target.times, zero_profile
     )
+    grip_arr = np.asarray(target.grip, dtype=np.float64)[:, :2]
+    head_arr = np.asarray(target.head, dtype=np.float64)[:, :2]
     _, unforced_rmse = _compute_tracking_errors(
-        q_unforced, l1, l2, p0, grip_arr, head_arr, observed_mask
+        q_unforced, target.l1, target.l2, p0, grip_arr, head_arr, observed_mask
+    )
+    return unforced_rmse
+
+
+def fit_bounded_double_pendulum(
+    target: DoublePendulumFitTarget,
+    dynamics: DoublePendulumDynamics,
+    options: DoublePendulumFitOptions | None = None,
+) -> FitTrajectoryResult:
+    """Optimize degree-6 Bernstein control points subject to explicit bounds and regularization."""
+    opts = options or DoublePendulumFitOptions()
+    p0 = np.zeros(2) if opts.pivot is None else np.asarray(opts.pivot, dtype=float)[:2]
+    times = np.asarray(target.times, dtype=np.float64)
+    duration = float(times[-1] - times[0])
+    if duration <= 0.0:
+        raise ValueError("Target duration must be strictly positive")
+
+    grip_arr = np.asarray(target.grip, dtype=np.float64)[:, :2]
+    head_arr = np.asarray(target.head, dtype=np.float64)[:, :2]
+    observed_mask = np.isfinite(grip_arr).all(axis=1) & np.isfinite(head_arr).all(
+        axis=1
+    )
+    if not np.any(observed_mask):
+        raise ValueError("Target contains no valid observations")
+
+    lo = np.concatenate(
+        [
+            np.full(COEFFS_PER_JOINT, opts.tau1_bounds[0]),
+            np.full(COEFFS_PER_JOINT, opts.tau2_bounds[0]),
+        ]
+    )
+    hi = np.concatenate(
+        [
+            np.full(COEFFS_PER_JOINT, opts.tau1_bounds[1]),
+            np.full(COEFFS_PER_JOINT, opts.tau2_bounds[1]),
+        ]
+    )
+
+    unforced_rmse = _evaluate_unforced_baseline(
+        dynamics, target, p0, observed_mask, duration
     )
 
     n_eval = 0
@@ -255,22 +283,22 @@ def fit_bounded_double_pendulum(
             wrist_controls=params[COEFFS_PER_JOINT:],
             duration_s=duration,
         )
-        q_rollout, _ = integrate_double_pendulum_rollout(dynamics, q0, v0, times, prof)
-        tracking_res, _ = _compute_tracking_errors(
-            q_rollout, l1, l2, p0, grip_arr, head_arr, observed_mask
+        q_rollout, _ = integrate_double_pendulum_rollout(
+            dynamics, target.q0, target.v0, times, prof
         )
-        curv_res = prof.curvature_penalty(curvature_weight)
-        eff_res = prof.effort_penalty(effort_weight)
+        tracking_res, _ = _compute_tracking_errors(
+            q_rollout, target.l1, target.l2, p0, grip_arr, head_arr, observed_mask
+        )
+        curv_res = prof.curvature_penalty(opts.curvature_weight)
+        eff_res = prof.effort_penalty(opts.effort_weight)
         return np.concatenate([tracking_res, curv_res, eff_res])
 
-    # Initial parameter guess: all zeros
     x0: np.ndarray = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
-
     opt_res = least_squares(
         residual_func,
         x0,
         bounds=(lo, hi),
-        max_nfev=max(max_nfev, 5),
+        max_nfev=max(opts.max_nfev, 5),
         ftol=1e-5,
         xtol=1e-5,
         gtol=1e-5,
@@ -282,10 +310,10 @@ def fit_bounded_double_pendulum(
         duration_s=duration,
     )
     best_q, best_v = integrate_double_pendulum_rollout(
-        dynamics, q0, v0, times, optimal_profile
+        dynamics, target.q0, target.v0, times, optimal_profile
     )
     _, final_rmse = _compute_tracking_errors(
-        best_q, l1, l2, p0, grip_arr, head_arr, observed_mask
+        best_q, target.l1, target.l2, p0, grip_arr, head_arr, observed_mask
     )
 
     return FitTrajectoryResult(

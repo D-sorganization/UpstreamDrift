@@ -30,6 +30,7 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
     DoublePendulumDynamics,
 )
 from src.shared.python.motion_matching.club_target import AlignOptions, ClubTarget
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult
 from src.shared.python.motion_matching.loaders.c3d import load_club_target_c3d
 from src.shared.python.motion_matching.provenance import git_commit_short
 from src.shared.python.motion_matching.provider import FitOptions
@@ -122,51 +123,18 @@ def _build_physical_metrics(
     )
 
 
-def generate_baseline_package_for_target(
-    c3d_path: Path | str,
-    capture_kind: str,
-    *,
-    maxiter: int = 50,
-) -> tuple[BaselinePackage, dict[str, Any]]:
-    """Run full fit, tighter-step replay, and construct qualified BaselinePackage."""
-    path = Path(c3d_path)
-    target = load_club_target_c3d(path, AlignOptions(sample_rate_hz=100.0))
-    provider = PendulumFitSwingProvider()
-    fit_opts = FitOptions(maxiter=maxiter)
-
-    result = provider.fit_swing(target, fit_opts)
-
-    # Reconstruct optimal profile and evaluate tighter replay
-    shoulder_ctrl = result.theta_optimal[:COEFFS_PER_JOINT]
-    wrist_ctrl = result.theta_optimal[COEFFS_PER_JOINT:]
-    duration = float(target.time[-1] - target.time[0])
-    profile = BernsteinTorqueProfile(
-        shoulder_controls=shoulder_ctrl,
-        wrist_controls=wrist_ctrl,
-        duration_s=duration,
-    )
-
-    n_frames = len(target.time)
-    pivots = np.zeros((n_frames, 3))
-    try:
-        geom = calibrate_fixed_geometry(pivots, target.butt, target.clubhead)
-        l1, l2 = geom.l1_arm_m, geom.l2_club_m
-    except (ValueError, RuntimeError, ZeroDivisionError):
-        l1, l2 = 0.65, 1.05
-
-    init_st = map_initial_state_double_pendulum(
-        target.time, pivots, target.butt, target.clubhead, l1, l2
-    )
-    q0, v0 = init_st.q0, init_st.v0
-
-    dynamics = DoublePendulumDynamics()
-    dyn_params = dynamics.parameters
-    upper_seg = dyn_params.upper_segment
-    lower_seg = dyn_params.lower_segment
-    upper_seg.length_m = l1
-    lower_seg.length_m = l2
-
-    # Standard rollout and 4x tighter replay
+def _simulate_and_evaluate_rollout(
+    dynamics: DoublePendulumDynamics,
+    q0: np.ndarray,
+    v0: np.ndarray,
+    target: ClubTarget,
+    profile: BernsteinTorqueProfile,
+    l1: float,
+    l2: float,
+) -> tuple[
+    np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[float]
+]:
+    """Integrate nominal and 4x tighter replay, computing Euclidean distance tracking."""
     q_rollout, v_rollout = integrate_double_pendulum_rollout(
         dynamics, q0, v0, target.time, profile, substeps=1
     )
@@ -174,7 +142,7 @@ def generate_baseline_package_for_target(
         dynamics, q0, v0, target.time, profile, substeps=4
     )
 
-    # Compute Euclidean tracking distances for head and grip
+    n_frames = len(target.time)
     head_dists = []
     grip_dists = []
     replay_dists = []
@@ -189,10 +157,32 @@ def generate_baseline_package_for_target(
         head_dists.append(float(np.linalg.norm(head_i - target.clubhead[i, :2])))
         replay_dists.append(float(np.linalg.norm(head_rep - head_i)))
 
-    head_arr = np.array(head_dists)
-    grip_arr = np.array(grip_dists)
-    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
+    return (
+        q_rollout,
+        v_rollout,
+        q_replay,
+        v_replay,
+        np.array(head_dists),
+        np.array(grip_dists),
+        replay_dists,
+    )
 
+
+def _assemble_baseline_package(
+    target: ClubTarget,
+    capture_kind: str,
+    result: CanonicalFitResult,
+    trajectories: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    dists: tuple[np.ndarray, np.ndarray, list[float]],
+    lengths: tuple[float, float],
+    maxiter: int,
+) -> BaselinePackage:
+    """Construct complete BaselinePackage with metadata, metrics, and statuses."""
+    q_rollout, v_rollout, q_replay, v_replay = trajectories
+    head_arr, grip_arr, replay_dists = dists
+    l1, l2 = lengths
+
+    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
     metrics = _build_physical_metrics(
         head_errors=head_arr,
         grip_errors=grip_arr,
@@ -248,7 +238,7 @@ def generate_baseline_package_for_target(
         f"--capture {capture_kind}"
     )
 
-    pkg = BaselinePackage(
+    return BaselinePackage(
         identity=identity,
         statuses=statuses,
         metrics=metrics,
@@ -269,6 +259,72 @@ def generate_baseline_package_for_target(
         },
     )
 
+
+def generate_baseline_package_for_target(
+    c3d_path: Path | str,
+    capture_kind: str,
+    *,
+    maxiter: int = 50,
+) -> tuple[BaselinePackage, dict[str, Any]]:
+    """Run full fit, tighter-step replay, and construct qualified BaselinePackage."""
+    path = Path(c3d_path)
+    target = load_club_target_c3d(path, AlignOptions(sample_rate_hz=100.0))
+    provider = PendulumFitSwingProvider()
+    fit_opts = FitOptions(maxiter=maxiter)
+
+    result = provider.fit_swing(target, fit_opts)
+
+    # Reconstruct optimal profile and evaluate tighter replay
+    shoulder_ctrl = result.theta_optimal[:COEFFS_PER_JOINT]
+    wrist_ctrl = result.theta_optimal[COEFFS_PER_JOINT:]
+    duration = float(target.time[-1] - target.time[0])
+    profile = BernsteinTorqueProfile(
+        shoulder_controls=shoulder_ctrl,
+        wrist_controls=wrist_ctrl,
+        duration_s=duration,
+    )
+
+    n_frames = len(target.time)
+    pivots = np.zeros((n_frames, 3))
+    try:
+        geom = calibrate_fixed_geometry(pivots, target.butt, target.clubhead)
+        l1, l2 = geom.l1_arm_m, geom.l2_club_m
+    except (ValueError, RuntimeError, ZeroDivisionError):
+        l1, l2 = 0.65, 1.05
+
+    init_st = map_initial_state_double_pendulum(
+        target.time, pivots, target.butt, target.clubhead, l1, l2
+    )
+    q0, v0 = init_st.q0, init_st.v0
+
+    dynamics = DoublePendulumDynamics()
+    dyn_params = dynamics.parameters
+    upper_seg = dyn_params.upper_segment
+    lower_seg = dyn_params.lower_segment
+    upper_seg.length_m = l1
+    lower_seg.length_m = l2
+
+    (
+        q_rollout,
+        v_rollout,
+        q_replay,
+        v_replay,
+        head_arr,
+        grip_arr,
+        replay_dists,
+    ) = _simulate_and_evaluate_rollout(dynamics, q0, v0, target, profile, l1, l2)
+
+    pkg = _assemble_baseline_package(
+        target=target,
+        capture_kind=capture_kind,
+        result=result,
+        trajectories=(q_rollout, v_rollout, q_replay, v_replay),
+        dists=(head_arr, grip_arr, replay_dists),
+        lengths=(l1, l2),
+        maxiter=maxiter,
+    )
+
+    qual_profile = PlanarDrivenPendulumProfile()
     verdict = evaluate_baseline_qualification(pkg, qual_profile)
     return pkg, verdict.to_dict()
 
