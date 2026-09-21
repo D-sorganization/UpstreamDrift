@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "a6684884290c54ec07462289e55257b1f2fdbe5f905196e1a886e0aca23ef9d7",
+      "fingerprint": "cc982c264eb1e949e0877e3f99e35e07a9eb1a3e44e29d5fc6416f00715dadd3",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "b3ea92cc334a28d0c210aae82a2b3ba6da3694b21336b53e387fde3586f9269f",
         "src/config/launcher_manifest.json": "721474b299891764d36c8246ee6ea4dafb08688fc21bb80b892571f40f86f783",
         "src/config/launcher_manifest_loader.py": "222144b05e4d8e1904188853ce12ae01f66c658624a2fa45a76322e1a4585aa4",
-        "src/config/models.yaml": "1d6ab125ba3d5ac4353a22d10d08aac2873f9c52df188a9bca88e33fdc0ae115",
+        "src/config/models.yaml": "28002cc5c4a10f8b8e83f874bcbf8ec26f399cf22610e8ab5a6ccef9bd3c07d3",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Reconcile launcher manifest loader with engine capability matrix MS-71 #10351"
+      "rationale": "refresh launcher atlas boundary review after capability atlas update"
     },
     "model-backends": {
       "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
