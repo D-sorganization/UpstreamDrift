@@ -21,6 +21,7 @@ from src.shared.python.motion_matching.candidate_io import (
 )
 from src.shared.python.motion_matching.simscape_run_manifest import (
     RUN_MANIFEST_SCHEMA_VERSION,
+    SimscapeRunManifestRequest,
     build_simscape_run_manifest,
     validate_simscape_run_manifest,
 )
@@ -106,26 +107,28 @@ def test_simscape_run_manifest_schema_validation() -> None:
     receipt = json.loads(RECEIPT_JSON.read_text(encoding="utf-8"))
     replay_sha = "efec8a6ecf9479c1bf0f5604d21add5224373423f1441c6250c1c3cd484e25b5"
     manifest = build_simscape_run_manifest(
-        run_id="two_window_fit_9967_102",
-        matlab_release=qualified["matlab_release"],
-        matlab_version=qualified["matlab_version"],
-        host="DeskComputer",
-        model_sha256=candidate_doc["model_sha256"],
-        candidate_sha256=str(receipt["returned_sha256"]),
-        replay_npz_sha256=replay_sha,
-        wall_clock_s=float(qualified["elapsed_s"]),
-        qualification=qualified["qualification"],
-        evidence_dir=(
-            "docs/development/simscape_tour_matching/native_evidence/"
-            "two_window_fit_9967_102"
-        ),
-        artifacts={
-            "candidate_npz": "candidate.npz",
-            "playback_gif": "playback.gif",
-            "returned_replay_npz": "returned-replay.npz",
-            "qualified_replay_json": "qualified_candidate_replay.json",
-        },
-        issue="#10347",
+        SimscapeRunManifestRequest(
+            run_id="two_window_fit_9967_102",
+            matlab_release=qualified["matlab_release"],
+            matlab_version=qualified["matlab_version"],
+            host="DeskComputer",
+            model_sha256=candidate_doc["model_sha256"],
+            candidate_sha256=str(receipt["returned_sha256"]),
+            replay_npz_sha256=replay_sha,
+            wall_clock_s=float(qualified["elapsed_s"]),
+            qualification=qualified["qualification"],
+            evidence_dir=(
+                "docs/development/simscape_tour_matching/native_evidence/"
+                "two_window_fit_9967_102"
+            ),
+            artifacts={
+                "candidate_npz": "candidate.npz",
+                "playback_gif": "playback.gif",
+                "returned_replay_npz": "returned-replay.npz",
+                "qualified_replay_json": "qualified_candidate_replay.json",
+            },
+            issue="#10347",
+        )
     )
     assert manifest["schema_version"] == RUN_MANIFEST_SCHEMA_VERSION
     assert manifest["matlab_release"] == "2025b"

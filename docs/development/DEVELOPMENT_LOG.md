@@ -123,9 +123,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10669
 - **Paths:** scripts/matlab/run_simscape_candidate.ps1; src/shared/python/motion_matching/simscape_run_manifest.py; src/shared/python/motion_matching/candidate_convert.py; src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/{write_run_manifest.m,export_candidate.m}; docs/development/simscape_tour_matching/{CHECKPOINTS.md,CHECKPOINTS_HISTORY.md}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif}
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 (converter + manifest unit tests green; committed run-102 candidate/manifest/GIF; native MATLAB replay remains licensed-host only)
+- **Last verified:** 2026-09-21 (architecture-budget fix: SimscapeRunManifestRequest; converter + manifest unit tests green; PR #10669 auto-merge squash armed)
 - **Summary:** Documented one R2025b-only scripted replay path with fail-closed run manifest (host, release, model/candidate/replay SHAs, wall-clock), converted returned-replay NPZ into MatchedSwingCandidate via DRY reuse of returned81 layout, and committed run-102 playback GIF in-tree.
-- **Next step:** Land PR; second person replay on DeskComputer under 30 minutes using CHECKPOINTS.md.
+- **Next step:** Confirm PR #10669 merges after CI re-run; then second-person DeskComputer replay under 30 minutes using CHECKPOINTS.md.
 - **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif,qualified_candidate_replay.json}; tests/unit/motion_matching/test_simscape_candidate_convert.py.
 
 ### DL-#10342 · OpenSim/MyoSuite Native Nightly Lane Receipts
