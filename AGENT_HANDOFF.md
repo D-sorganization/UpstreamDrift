@@ -1,5 +1,24 @@
 # Simscape Tour-Average Fit Continuation
 
+## MuJoCo Saved-Control Replay (#10336)
+
+Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
+PR #10448 open. See DL-#10336 in `docs/development/DEVELOPMENT_LOG.md`
+and `evidence/matched/driver_full_mujoco_replay/README.md` for reproduction.
+Forty focused tests and scoped Ruff/mypy checks pass. The diagnostic replay
+and playback are preserved, but G1 is rejected and source configuration parity
+is unverified. Merge delivers the replay path, not physical qualification;
+keep #10336 open. Commit/push hooks pass, as do 21 replay tests on pinned
+MuJoCo 3.8.0. The next step is PR CI and review, then protected merge.
+
+## Shadow Tracker Revision Integrity (#10233)
+
+Provider registration and persistence repair is locally validated on
+`fix/shadow-tracker-10233-pr`; [PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is in CI. See
+[turnover evidence](docs/plans/shadow_tracker/TURNOVER_CURRENT.md) for contracts,
+13-failure RED receipt, 306-test GREEN receipt and separate ST-11 bundle risks.
+Renderer work and the original checkout are preserved. Review the focused diff.
+
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root
@@ -94,40 +113,13 @@ coefficient-lift action assembly, objective contracts and independent replay.
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## GSPro Integration (#10188) — GS-00 Through GS-11 Complete (Epic Ready for Closure)
+## GSPro Integration (#10188, #10460)
 
-- **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
-  [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** All 12 child milestones (GS-00 through GS-11) complete:
-  GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
-  GS-05 (#10194) shared session service and local reference destination,
-  GS-06 (#10195) replay and single-impact submission,
-  GS-07 (#10196) capability-aware desktop and web controls,
-  GS-08 (#10197) Windows deployment and authenticated remote topology,
-  GS-09 (#10198) licensed acceptance and support matrix,
-  GS-10 (#10199) second commercial simulator evaluation and Flight Relay adapter, and
-  GS-11 (#10200) native avatar animation and autonomous course feedback research.
-  PRs #10201, #10208, #10213, #10215, #10217, #10220, #10222, #10225, #10226, and #10227 merged into `main`.
-- **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10200-native-avatar-course-feedback`.
-- **Delivered in GS-11:**
-  - Technical Research Document (`docs/plans/golf_simulator_integration/NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md`):
-    Exhaustive investigation into Unity runtime and Course Designer AssetBundle constraints;
-    confirms zero runtime skeletal rigging APIs;
-    characterizes Open Connect v1 unidirectional limits (absent ball landing, lie, surface, wind, elevation, and hazard feedback);
-    prohibits reverse-engineering / memory scraping / DLL injection;
-    provides turnkey vendor inquiry templates;
-    formalizes Synchronized Companion Presentation Architecture using `MonotonicReplayClock`.
-  - Capability Assertion Boundary (`src/shared/python/golf_simulator/contracts.py`):
-    `UnsupportedCapabilityError` and `assert_capability_supported()` raising explicit exceptions on unsupported capabilities.
-  - Honest Declarations: All adapters declare `native_avatar_animation`, `course_state_feedback`, and `aim_control` as `UNSUPPORTED`.
-- **Validation:**
-  - 100 unit tests in `tests/unit/golf_simulator/` pass 100%.
-  - Verified under `python -O` (Design-by-Contract assertions active regardless of optimization flag).
-  - All architecture budget, divergence inventory, and lint checks pass cleanly.
-- **Next:** Open PR for GS-11 (#10200), merge via auto-squash, close parent Epic #10188.
-- **Preserve:** Original checkout's unrelated branch/untracked work.
+- **State:** GS-00 through GS-11 merged. #10460 consumes shared Tools `launch_monitor.gspro_connect` codec (#5228).
+- **Branch:** `feat/10460-consume-tools-gspro-codec`.
+- **Implementation:** `src/shared/python/golf_simulator/adapters/gspro/codec.py` retains canonical SI/radian conversion and profile handling while delegating protocol wire encoding and response decoding to `shared.python.launch_monitor.gspro_connect`.
+- **Validation:** 106 golf simulator unit and integration tests pass cleanly; ruff, black, and mypy pass with 0 errors.
+- **Next:** Open PR referencing `Closes #10460`, arm auto-merge with squash.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 

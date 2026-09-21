@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
     _rotation_error,
+    _validate_axis_spec,
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
 
@@ -272,14 +273,9 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         for frame, (body_axis, world_dir, weight) in (axis_targets or {}).items():
             if frame not in sites:
                 raise ValueError(f"Unknown frame {frame}")
-            if weight < 0:
-                raise ValueError("Axis weights must be nonnegative")
-            a = np.asarray(body_axis, dtype=float)
-            d = np.asarray(world_dir, dtype=float)
-            if np.linalg.norm(a) < 1e-12 or np.linalg.norm(d) < 1e-12:
-                raise ValueError("Axis targets need nonzero vectors")
+            a, d = _validate_axis_spec(body_axis, world_dir, weight)
             site = self.model.site(sites[frame]).id
-            out.append((site, a / np.linalg.norm(a), d / np.linalg.norm(d), weight))
+            out.append((site, a, d, weight))
         return out
 
     def _append_axes(

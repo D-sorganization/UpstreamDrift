@@ -37,4 +37,3 @@ models:
       category: "tool"
       logo: "assets/movement_optimizer_icon.svg"
       status: "provider_ready"
-      web_route: "/tools/movement-optimizer"
