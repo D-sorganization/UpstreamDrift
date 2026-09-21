@@ -445,15 +445,21 @@ def emit_dynamics_targets(
     z_up_pts[..., 1] = -y_up_pts[..., 2]
     z_up_pts[..., 2] = y_up_pts[..., 1]
 
+    ev = audit.events
+    impact_event = ev.impact
+    top_event = ev.top
+    impact_frame = impact_event.frame
+    impact_time = impact_event.time_s
+    top_frame = top_event.frame
+    top_time = top_event.time_s
+
     body_events = (
         BodyEvent(
             label="impact",
-            frame=audit.events.impact.frame,
-            time_s=audit.events.impact.time_s,
+            frame=impact_frame,
+            time_s=impact_time,
         ),
-        BodyEvent(
-            label="top", frame=audit.events.top.frame, time_s=audit.events.top.time_s
-        ),
+        BodyEvent(label="top", frame=top_frame, time_s=top_time),
     )
     source_prov = SourceProvenance(
         filename=Path(audit.provenance.source_file).name,
@@ -466,7 +472,7 @@ def emit_dynamics_targets(
         time=capture.time_s,
         marker_xyz=z_up_pts,
         marker_names=capture.labels,
-        impact_idx=audit.events.impact.frame,
+        impact_idx=impact_frame,
         events=body_events,
         source=source_prov,
         coordinate_frame="z_up_right_handed",
@@ -491,7 +497,7 @@ def emit_dynamics_targets(
         clubhead=head_filled,
         club_quat=shaft_quats,
         time=capture.time_s,
-        impact_idx=audit.events.impact.frame,
+        impact_idx=impact_frame,
         source=source_prov,
     )
     return body_target, club_target

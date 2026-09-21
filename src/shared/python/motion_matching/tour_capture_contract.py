@@ -344,3 +344,10 @@ def load_tour_capture(path: Path) -> TourCapture:
     xyz[~valid] = np.nan
     time = np.arange(spec.frames) / spec.rate_hz
     return TourCapture(time, labels, xyz, valid, digest)
+
+
+def audit_tour_capture(kind_or_path: str | Path) -> Any:
+    """Audit canonical tour capture targets, marker semantics, events and provenance (TB-01 #10586)."""
+    from src.shared.python.tour_baselines.audit import audit_tour_capture as _audit
+
+    return _audit(kind_or_path)

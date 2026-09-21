@@ -134,6 +134,8 @@ class TargetAudit:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert audit record to serializable dictionary."""
+        m_map = self.measurement_map
+        m_entries = m_map.entries
         return {
             "capture_kind": self.capture_kind,
             "sha256": self.sha256,
@@ -145,10 +147,8 @@ class TargetAudit:
             "handedness": self.handedness,
             "labels": list(self.labels),
             "measurement_map": {
-                "version": self.measurement_map.version,
-                "entries": {
-                    k: asdict(v) for k, v in self.measurement_map.entries.items()
-                },
+                "version": m_map.version,
+                "entries": {k: asdict(v) for k, v in m_entries.items()},
             },
             "missing_spans": {k: asdict(v) for k, v in self.missing_spans.items()},
             "events": {
