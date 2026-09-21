@@ -135,6 +135,20 @@ Qualifies contact modes and native Pinocchio force feasibility:
 - **Verification Suite (`tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`)**:
   - 10 unit test fixtures validating hysteresis, COP containment, slip thresholds, Hunt-Crossley compliance, and unphysical load rejection.
 
+## Enforce Contact, Actuator and Root Constraints in Force Allocation (PF-03, #10433)
+
+Enforces contact, actuator and root constraints in force allocation:
+- **Constrained QP Inverse Dynamics (`src/shared/python/motion_matching/contact_force_allocator.py`)**:
+  - Replaces penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+  - Adds `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+  - Enforces 8-faceted polyhedral friction pyramid and non-negative normal force (\(f_n \ge 0\)) along arbitrary surface normals.
+  - Enforces contact separation mask (\(f_s = 0\) for separated contacts).
+  - Enforces strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+  - Isolates diagnostic root slack \(\Delta \tau_{\text{root}}\) so phantom root forces never produce false physical success.
+  - Adds `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+- **Verification Suite (`tests/unit/motion_matching/test_contact_force_allocator_pf03.py`)**:
+  - 10 acceptance test fixtures covering friction cones, unilateral normal forces, contact separation, actuator saturation, root slack isolation, and rate bounds.
+
 ## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
 
 Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:
