@@ -1,0 +1,300 @@
+{
+  "registry_id": "upstreamdrift-companion-capability-evidence",
+  "version": "1.0.0",
+  "engines": [
+    {
+      "id": "drake",
+      "runtime_availability": {
+        "state": "conditional",
+        "reason": "Requires the `drake` optional extra (`pip install -e \".[dev,drake]\"`); the required pull-request lane does not install it."
+      },
+      "documentation_ids": [
+        "engine-capability-evidence",
+        "engine-drake",
+        "engine-support-tiers",
+        "user-optional-features"
+      ],
+      "capabilities": [
+        {
+          "id": "forward_dynamics_rollout",
+          "title": "Forward dynamics rollout",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "tests/unit/test_drake_physics_engine.py skips when Drake is absent and no required or nightly gate installs Drake and executes an engine-level rollout test.",
+          "limitations": [
+            "Extended tier: validated through scheduled cross-engine workflows, not every required pull-request check."
+          ]
+        },
+        {
+          "id": "inverse_dynamics",
+          "title": "Inverse dynamics",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "tests/unit/test_drake_physics_engine.py::test_drake_physics_engine_compute_inverse_dynamics skips when Drake is absent; no gate records it passing against the real runtime.",
+          "limitations": [
+            "Extended tier: validated through scheduled cross-engine workflows, not every required pull-request check."
+          ]
+        },
+        {
+          "id": "counterfactual_ztcf_zvcf",
+          "title": "Zero-torque and zero-velocity counterfactuals",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "No gate executes the Drake counterfactual surface against the real runtime.",
+          "limitations": [
+            "Counterfactual attribution is descriptive on the same trajectory; it is not a validated forward prediction."
+          ]
+        },
+        {
+          "id": "cross_engine_parity",
+          "title": "Cross-engine agreement",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "The nightly cross-engine workflow installs Drake but executes validator and conformance tests against stub adapters only; real-engine agreement is owned by epic #9964.",
+          "limitations": [
+            "Agreement between engines is not established by this catalog."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mujoco",
+      "runtime_availability": {
+        "state": "conditional",
+        "reason": "Installed by the default `dev` profile (`requirements-dev.lock`); interactive rendering additionally needs a GL-capable host."
+      },
+      "documentation_ids": [
+        "engine-capability-evidence",
+        "engine-mujoco",
+        "engine-support-tiers",
+        "user-optional-features"
+      ],
+      "capabilities": [
+        {
+          "id": "forward_dynamics_rollout",
+          "title": "Forward dynamics rollout",
+          "evidence_state": "qualified",
+          "evidence": [
+            {
+              "kind": "test",
+              "path": "tests/unit/engines/mujoco/test_continuous_torque_simulate.py",
+              "selector": "tests/unit/engines/mujoco/test_continuous_torque_simulate.py::test_simulate_with_canonical_golfer_xml_rollout",
+              "gate": ".github/workflows/ci-standard.yml"
+            },
+            {
+              "kind": "test",
+              "path": "tests/unit/engines/mujoco/test_continuous_torque_simulate.py",
+              "selector": "tests/unit/engines/mujoco/test_continuous_torque_simulate.py::test_determinism_back_to_back",
+              "gate": ".github/workflows/ci-standard.yml"
+            }
+          ],
+          "reason": null,
+          "limitations": [
+            "Evidence uses the canonical golfer model with the engine's default semi-implicit Euler integrator; it does not establish agreement with other engines."
+          ]
+        },
+        {
+          "id": "inverse_dynamics",
+          "title": "Inverse dynamics",
+          "evidence_state": "qualified",
+          "evidence": [
+            {
+              "kind": "test",
+              "path": "tests/unit/engines/mujoco/test_inverse_dynamics.py",
+              "selector": "tests/unit/engines/mujoco/test_inverse_dynamics.py::TestInverseDynamicsSolver::test_compute_required_torques",
+              "gate": ".github/workflows/ci-standard.yml"
+            }
+          ],
+          "reason": null,
+          "limitations": [
+            "Evidence covers the double-pendulum reference model only."
+          ]
+        },
+        {
+          "id": "drift_control_decomposition",
+          "title": "Drift-control acceleration decomposition",
+          "evidence_state": "qualified",
+          "evidence": [
+            {
+              "kind": "test",
+              "path": "tests/unit/engines/mujoco/test_drift_control.py",
+              "selector": "tests/unit/engines/mujoco/test_drift_control.py::TestDriftControlDecomposer::test_superposition_principle",
+              "gate": ".github/workflows/ci-standard.yml"
+            }
+          ],
+          "reason": null,
+          "limitations": [
+            "Evidence covers a single-pendulum reference model only."
+          ]
+        },
+        {
+          "id": "counterfactual_ztcf_zvcf",
+          "title": "Zero-torque and zero-velocity counterfactuals",
+          "evidence_state": "qualified",
+          "evidence": [
+            {
+              "kind": "test",
+              "path": "tests/unit/engines/mujoco/test_counterfactuals.py",
+              "selector": "tests/unit/engines/mujoco/test_counterfactuals.py::TestCounterfactualPhysics::test_ztcf_plus_counterfactual_equals_observed",
+              "gate": ".github/workflows/ci-standard.yml"
+            },
+            {
+              "kind": "test",
+              "path": "tests/unit/engines/mujoco/test_counterfactuals.py",
+              "selector": "tests/unit/engines/mujoco/test_counterfactuals.py::TestCounterfactualPhysics::test_zvcf_plus_counterfactual_equals_observed",
+              "gate": ".github/workflows/ci-standard.yml"
+            }
+          ],
+          "reason": null,
+          "limitations": [
+            "Counterfactual attribution is descriptive on the same trajectory; it is not a validated forward prediction."
+          ]
+        },
+        {
+          "id": "cross_engine_parity",
+          "title": "Cross-engine agreement",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "The nightly cross-engine workflow executes validator and conformance tests against stub adapters only; real-engine agreement is owned by epic #9964.",
+          "limitations": [
+            "Agreement between engines is not established by this catalog."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "myosuite",
+      "runtime_availability": {
+        "state": "conditional",
+        "reason": "Requires the `biomechanics` optional extra; experimental tier with best-effort local validation only."
+      },
+      "documentation_ids": [
+        "engine-capability-evidence",
+        "engine-myosuite",
+        "engine-support-tiers",
+        "user-optional-features"
+      ],
+      "capabilities": [
+        {
+          "id": "forward_dynamics_rollout",
+          "title": "Forward dynamics rollout",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "No gate installs MyoSuite; tests/unit/test_myosuite_adapter.py exercises a mocked muscle system only.",
+          "limitations": [
+            "Experimental tier: missing capabilities and stub implementations are expected."
+          ]
+        },
+        {
+          "id": "muscle_actuation",
+          "title": "Muscle-driven actuation",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "The muscle surface is a stub and its adapter tests are mock-backed; no real-runtime evidence exists.",
+          "limitations": [
+            "Experimental tier: missing capabilities and stub implementations are expected."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "opensim",
+      "runtime_availability": {
+        "state": "conditional",
+        "reason": "Requires the `biomechanics` optional extra; experimental tier with best-effort local validation only."
+      },
+      "documentation_ids": [
+        "engine-capability-evidence",
+        "engine-opensim",
+        "engine-support-tiers",
+        "user-optional-features"
+      ],
+      "capabilities": [
+        {
+          "id": "forward_dynamics_rollout",
+          "title": "Forward dynamics rollout",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "No gate installs OpenSim; tests/unit/test_opensim_physics_engine.py patches a mocked `opensim` module.",
+          "limitations": [
+            "Experimental tier: missing capabilities and stub implementations are expected."
+          ]
+        },
+        {
+          "id": "muscle_biomechanics",
+          "title": "Muscle biomechanics",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "The OpenSim muscle-biomechanics surface remains a stub; no real-runtime evidence exists.",
+          "limitations": [
+            "Experimental tier: missing capabilities and stub implementations are expected."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pinocchio",
+      "runtime_availability": {
+        "state": "conditional",
+        "reason": "Requires the `pinocchio` optional extra (`pip install -e \".[dev,pinocchio]\"`); the required pull-request lane does not install it."
+      },
+      "documentation_ids": [
+        "engine-capability-evidence",
+        "engine-pinocchio",
+        "engine-support-tiers",
+        "user-optional-features"
+      ],
+      "capabilities": [
+        {
+          "id": "forward_dynamics_rollout",
+          "title": "Forward dynamics rollout",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "tests/unit/test_pinocchio_physics_engine.py skips when Pinocchio is absent and no required or nightly gate installs Pinocchio and executes an engine-level rollout test.",
+          "limitations": [
+            "Extended tier: validated through scheduled cross-engine workflows, not every required pull-request check."
+          ]
+        },
+        {
+          "id": "inverse_dynamics",
+          "title": "Inverse dynamics",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "tests/unit/test_pinocchio_physics_engine.py::test_pinocchio_physics_engine_compute_ztcf and its RNEA/CRBA siblings skip when Pinocchio is absent; no gate records them passing against the real runtime.",
+          "limitations": [
+            "Extended tier: validated through scheduled cross-engine workflows, not every required pull-request check."
+          ]
+        },
+        {
+          "id": "counterfactual_ztcf_zvcf",
+          "title": "Zero-torque and zero-velocity counterfactuals",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "No gate executes the Pinocchio counterfactual surface against the real runtime.",
+          "limitations": [
+            "Counterfactual attribution is descriptive on the same trajectory; it is not a validated forward prediction."
+          ]
+        },
+        {
+          "id": "cross_engine_parity",
+          "title": "Cross-engine agreement",
+          "evidence_state": "unqualified",
+          "evidence": [],
+          "reason": "The nightly cross-engine workflow installs Pinocchio but executes validator and conformance tests against stub adapters only; real-engine agreement is owned by epic #9964.",
+          "limitations": [
+            "Agreement between engines is not established by this catalog."
+          ]
+        }
+      ]
+    }
+  ],
+  "known_gaps": [
+    {
+      "id": "launcher-model-registry-divergence",
+      "issue": 8853,
+      "scope": "catalog",
+      "summary": "The web launcher manifest and the local model registry still disagree on program membership; `summary.single_source_program_records` counts programs that exist in only one of the two registries.",
+      "summary_metric": "single_source_program_records"
+    }
+  ]
+}
