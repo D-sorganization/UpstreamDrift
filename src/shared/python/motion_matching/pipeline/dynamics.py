@@ -202,29 +202,38 @@ def zmp_summary(zmp: dict[str, Any], times: np.ndarray) -> dict[str, float]:
     }
 
 
+@dataclass(frozen=True)
+class ShootingFitConfig:
+    """Iteration controls for contact-aware shooting fit."""
+
+    iterations: int
+    gain: float = SHOOTING_RELAXATION
+    tracking_backend: str = "kkt"
+
+
 def shooting_fit(
     lane: Lane,
     kin: FullBodyMarkerKinematics,
     sim: fs.FullBodySimulator,
     q_track: np.ndarray,
     q_ref: np.ndarray,
-    iterations: int,
     log: logging.Logger,
-    gain: float = SHOOTING_RELAXATION,
-    *,
-    tracking_backend: str = "kkt",
+    config: ShootingFitConfig,
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, Any]]:
     """Contact-aware shooting fit of the tracked reference (FB-5, MM-7b).
 
     The simulator is the plant: each iteration replays the current reference,
     measures how far the pelvis drifted from the reference pelvis path, moves
-    the pelvis command against that drift by ``gain``, re-solves the joints
-    against the markers with the command pinned (``SHOOTING_LOCKED``), and
-    low-passes the result.
+    the pelvis command against that drift by ``config.gain``, re-solves the
+    joints against the markers with the command pinned (``SHOOTING_LOCKED``),
+    and low-passes the result.
 
     Returns:
         (best_q, zmp, report): optimized reference, ZMP result, and iteration history.
     """
+    iterations = config.iterations
+    gain = config.gain
+    tracking_backend = config.tracking_backend
     root = [kin.coordinate_order.index(name) for name in SHOOTING_LOCKED]
     target = q_track[:, root].copy()
     command = target.copy()

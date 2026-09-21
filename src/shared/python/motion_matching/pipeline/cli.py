@@ -43,6 +43,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
+    ShootingFitConfig,
     build_dynamics_report,
     replay,
     shooting_fit,
@@ -512,6 +513,39 @@ def _solve_trajectory_ik(
     return q_ik, q_ref, fits, ref_fits, errors, ref_errors, None
 
 
+def _persist_dynamics_artifacts(
+    out_dir: Path,
+    record: Any,
+    sim_errors: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    kin: Any,
+    q_ref: np.ndarray,
+    sim_q: np.ndarray,
+    lookat: np.ndarray,
+) -> None:
+    """Write dynamics NPZ and render IK / tracking playback GIFs."""
+    np.savez(
+        out_dir / "dynamics_record.npz",
+        time_s=record.time_s,
+        q=record.q,
+        v=record.v,
+        tau=record.tau,
+        normal_force_n=record.normal_force_n,
+        weight_fraction=record.weight_fraction,
+        cop_m=record.centre_of_pressure_m,
+        inside=record.inside_support_polygon,
+        lowest_sphere_height_m=record.lowest_sphere_height_m,
+        sim_errors_m=sim_errors,
+    )
+    names = tuple(kin.coordinate_order)
+    render_playback(
+        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
+    )
+    render_playback(
+        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -528,6 +562,7 @@ def _simulate_and_receipt(
     args = ctx.args
     out_dir = ctx.out_dir
     log = ctx.log
+    tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
     zmp_filter_report: dict[str, Any] | None = None
@@ -536,12 +571,19 @@ def _simulate_and_receipt(
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
-            lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain,
-            tracking_backend=getattr(args, "tracking", "kkt"),
+            lane,
+            kin,
+            sim,
+            q_track,
+            q_ref,
+            log,
+            ShootingFitConfig(
+                iterations=args.shooting_fit,
+                gain=args.shooting_gain,
+                tracking_backend=tracking,
+            ),
         )
-    record, sim_q = replay(
-        sim, lane, q_track, tracking_backend=getattr(args, "tracking", "kkt")
-    )
+    record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -554,36 +596,18 @@ def _simulate_and_receipt(
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
             shooting_report=shooting_report,
-            tracking_backend=getattr(args, "tracking", "kkt"),
+            tracking_backend=tracking,
         )
     )
-    np.savez(
-        out_dir / "dynamics_record.npz",
-        time_s=record.time_s,
-        q=record.q,
-        v=record.v,
-        tau=record.tau,
-        normal_force_n=record.normal_force_n,
-        weight_fraction=record.weight_fraction,
-        cop_m=record.centre_of_pressure_m,
-        inside=record.inside_support_polygon,
-        lowest_sphere_height_m=record.lowest_sphere_height_m,
-        sim_errors_m=sim_errors,
-    )
     lookat = np.nanmean(lane.points[0], axis=0)
-    names = tuple(kin.coordinate_order)
-    render_playback(
-        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
+    _persist_dynamics_artifacts(
+        out_dir, record, sim_errors, cal_res, kin, q_ref, sim_q, lookat
     )
-    render_playback(
-        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
-    )
-
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
             ik_backend=getattr(args, "ik_backend", "lm"),
-            tracking_backend=getattr(args, "tracking", "kkt"),
+            tracking_backend=tracking,
             base_spec=base_spec,
             spec_path=Path(args.spec),
             scaled_path=out_dir / "full_body_spec_hipcal_scaled.json",
