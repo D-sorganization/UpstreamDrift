@@ -165,9 +165,9 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## MS-16 MuJoCo Native IK and MJ_Inverse Tracking (#10366)
 
 - Worktree: `Worktrees/UpstreamDrift-10660-land`, PR branch `fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local`, lease `claim:local` session `local-10660-land-ci`, DL-#10366, PR #10660.
-- Tip: on latest main; finite-bounds gate for `minimize.least_squares`; weld-aware `mj_inverse` audit; `ShootingFitConfig` keeps architecture budget; `_persist_dynamics_artifacts` keeps `_simulate_and_receipt` under function-lines.
-- Reproduction: `pytest tests/unit/motion_matching/test_mujoco_ik_minimize.py tests/unit/motion_matching/test_mujoco_mj_inverse.py -q`
-- Next: Confirm CI Standard / quality-gate green; squash auto-merge lands; close duplicate #10662.
+- Tip: on latest main; finite-bounds gate for `minimize.least_squares`; weld-aware `mj_inverse` audit; `ShootingFitConfig` keeps architecture budget; `_persist_dynamics_artifacts` keeps `_simulate_and_receipt` under function-lines; refreshed `reports/matched_swing_ledger.json` (101 receipts) after PF-06 merge so `test_ledger_freshness` passes.
+- Reproduction: `pytest tests/unit/motion_matching/test_mujoco_ik_minimize.py tests/unit/motion_matching/test_mujoco_mj_inverse.py tests/unit/motion_matching/test_ledger.py::test_ledger_freshness -q`
+- Next: Confirm unit-test-gate / quality-gate green; squash auto-merge lands; close duplicate #10662.
 
 ## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
 
@@ -1199,6 +1199,7 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-21T21:10:00Z — Refresh matched_swing ledger (101 receipts) for #10660 unit-test-gate freshness. Commit SELF.
 - 2026-09-21T20:42:00Z — Fix architecture budget on #10660: ShootingFitConfig and dynamics artifact helper. Commit SELF.
 - 2026-09-21T20:25:00Z — Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
 - 2026-09-21T10:11:03Z — CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 101 receipts. Commit SELF.
