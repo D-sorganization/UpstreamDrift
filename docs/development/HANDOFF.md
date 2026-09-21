@@ -1,5 +1,47 @@
 # Current Matching Continuation Handoff
 
+## Tools MocapSession Consumer Slice (#9422)
+
+Working directory: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9422`.
+Branch: `conductor/issue-9422`. Commit: SELF. PR: #10466.
+Development-log entry: DL-#9422. Governing issue: #9422 (readiness P6, M-track
+consumer of Tools #4706); objective: route UpstreamDrift capture sessions
+through the one canonical Tools `MocapSession` contract instead of probing it
+as absent.
+
+Completed: `src/motion_capture/rig/tools_bridge.py` probes the pinned Tools
+family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`
+(another version is `incompatible`), and `export_session_manifest` /
+`export_to_bundle` build a `MocapSessionManifest` through the Tools builders
+and `dumps_canonical`. `capture` and `record` write `mocap_session.json` beside
+`session_manifest.json` and record the outcome under `tools_schema.export`;
+`record --consent-recorded` is the recorded-consent term the Tools policy
+requires for retained raw video, otherwise the export is `rejected` as data.
+Docs: `docs/motion_capture/capture_rig.md` (Tools Schema Bridge), SPEC row.
+
+Validation: `python3 tests/fixtures/mocap_session_export/run_checks.py` — 8
+passed (Tools family resolved first, like the capture-rig worker checks);
+`python3 -m pytest tests/motion_capture/rig/test_tools_session_export.py
+tests/motion_capture/rig/test_recorder_bridge_cli.py
+tests/motion_capture/rig/test_bundle_record.py
+tests/unit/repo_hygiene/test_vendored_tools_fallback.py` — 40 passed. Known,
+pre-existing on this workstation: `python3 -I` subprocess checks
+(`test_reference_calibration_worker.py` and the new integration test) fail
+with `No module named 'numpy'` because numpy lives in the user site; CI has
+it in the system site. Pre-existing and unrelated:
+`tests/architecture/test_markerless_mocap_authority.py::test_spec_and_handoff_point_to_the_current_program`
+fails on `AGENT_HANDOFF.md` length (993 > 150).
+
+Constraints: the root test process keeps `sidekick.lab.mocap` unresolvable
+by design (`src/__init__.py`, UD's own Sidekick cached first); the ready path
+is therefore checked in a Tools-first process, not by building a hybrid
+package. D-track (Tools #4707; D3 #4717 open) and prerequisites #8865/#8866/
+#8867 stay open — #9422 is not closed by this slice.
+
+Next steps: (1) open the PR for this branch; (2) route the C3D upload path
+(#8865) through the same pinned contract; (3) surface `tools_schema.export`
+in the capture-rig UI as a disabled-reason, not a hidden failure.
+
 ## PF-04 Qualify Contact Modes and Native Pinocchio Force Feasibility (#10434)
 
 - Branch: `feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces`, PR #10499 (auto-merge armed), lease `antigravity-ud-10434`, DL-#10434.
@@ -77,6 +119,8 @@ exploratory simulator.
 
 Next: U1 (#9286) and U2 (#9542) first, per the matrix's dependency order; each
 landing PR records its merge SHA and proving test in its entry.
+
+> > > > > > > origin/main
 
 ---
 
