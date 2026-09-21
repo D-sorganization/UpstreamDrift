@@ -339,9 +339,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-21 — CO-00 merged (#10667); CO-01 observation contracts in progress on fix/issue-10605-co01-club-observation
+- **Last verified:** 2026-09-21 — CO-01 merged (#10670); CO-02 plausibility/acceptance in progress on feat/co02-golf-plausibility-priors
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land #10605 (CO-01), then dispatch #10606 (CO-02).
+- **Next step:** Land #10606 (CO-02), then dispatch #10607 (CO-03).
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -360,17 +360,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10605 · CO-01 Extend Canonical Club Observation Contracts and Calibration
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10605 (epic #10602)
 - **Branch:** fix/issue-10605-co01-club-observation
-- **PR:** #10670 (open)
+- **PR:** #10670 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — divergence inventory regenerated (`--write --no-authorship`); `python -m pytest tests/unit/scripts/test_divergence_inventory.py::test_committed_inventory_is_current_when_vendor_present -q -n 0 --no-cov --timeout=120` passed.
+- **Last verified:** 2026-09-21 — merged via #10670 onto main as prerequisite for CO-02
 - **Summary:** Adds `ClubObservation` with measured/derived/unobserved component masks, dual mid-hands/face frames and orientations, native 240 Hz clock, uncertainty/derivation metadata, SO(3) residuals/interpolation, catalog-backed `club_calibration` (fixed tool-to-model SE(3), grip-face rigidity, mid-hands→butt-end only with explicit offset), and legacy `ClubTarget` adapters that refuse invented identity quats.
-- **Next step:** Dispatch CO-02 #10606 after this PR merges.
+- **Next step:** Continue on #10606 (CO-02) plausibility priors and acceptance.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_observation_contracts.json; tests/unit/motion_matching/test_club_observation_contracts.py.
+
+### DL-#10606 · CO-02 Define Golf Plausibility Priors, Ambiguity and Acceptance
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10606 (epic #10602)
+- **Branch:** feat/co02-golf-plausibility-priors
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/club_only/priors.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/ambiguity.py; src/shared/python/motion_matching/club_only/acceptance.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21T22:40:00Z at SELF — `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); python -O DbC ValueError checks green.
+- **Summary:** Freezes per-roster observation/physical/plausibility profiles, named GolfPlausibilityPriors (not measured truth), ambiguity retention for distinct body hashes on identical club residuals, and club-only acceptance that keeps kinematic preview, torque replay, scientific, and product statuses separate while preserving full-body G3 gates.
+- **Next step:** Open PR with Fixes #10606 and enable auto-merge squash.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json; tests/unit/motion_matching/test_club_plausibility_acceptance.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
