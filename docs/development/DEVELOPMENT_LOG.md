@@ -86,6 +86,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR referencing #10359, await green CI, merge and release lease.
 - **Evidence:** docs/development/matched_swing_program/evidence/reports/sample_fit_report.md; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py.
 
+### DL-#10342 · OpenSim/MyoSuite Native Nightly Lane Receipts
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10342 (MS-43, epic #10363)
+- **Branch:** fix/issue-10342-ms-43-native-lane-local
+- **Paths:** scripts/ci/run_native_engine_lane.py; scripts/ci/run_native_engine_lane.sh; docs/development/matched_swing_program/evidence/nightly/; tests/docs/test_native_lane_freshness.py; tests/scripts/test_run_native_engine_lane.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (16 unit tests pass in test_native_lane_freshness.py and test_run_native_engine_lane.py; ruff clean; architecture budget passed; bootstrap receipts committed pending ControlTower SDK refresh)
+- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and ControlTower verification docs without editing `.github/workflows`.
+- **Next step:** Refresh receipts on ControlTower opensim-10003 venv; merge PR closing #10342.
+- **Evidence:** docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json; docs/development/matched_swing_program/evidence/nightly/myosuite_receipt.json; tests/docs/test_native_lane_freshness.py.
+
 ### DL-#10361 · MS-90: Generic Capture Contract & 44-DOF Identifiability
 
 - **State:** in_progress

@@ -63,6 +63,15 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 ## 3. Automated Program Status & Ledger Matrix
 
+### MS-43 Native Engine Nightly Lane (#10342)
+
+| Engine   | Receipt                                                         | Lane status                         | Freshness gate                          |
+| -------- | --------------------------------------------------------------- | ----------------------------------- | --------------------------------------- |
+| OpenSim  | [opensim_receipt.json](evidence/nightly/opensim_receipt.json)   | bootstrap — refresh on ControlTower | warn &gt; 7 d, fail &gt; 30 d on `main` |
+| MyoSuite | [myosuite_receipt.json](evidence/nightly/myosuite_receipt.json) | bootstrap — refresh on ControlTower | warn &gt; 7 d, fail &gt; 30 d on `main` |
+
+Refresh via `bash scripts/ci/run_native_engine_lane.sh --engine opensim --venv /home/dieterolson/opensim-10003`. See [evidence/nightly/README.md](evidence/nightly/README.md).
+
 ### MS-21 Native Replay Continuation (#10336)
 
 | Scope                             | State                                                                              | Evidence                                                                                                                                                   |
