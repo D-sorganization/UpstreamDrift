@@ -34,6 +34,38 @@
 - Validation: 12 unit tests pass 100% across PF-03 and legacy suites; ruff clean; black clean; mypy strict clean; bandit clean.
 - Next: PR #10498 open with auto-merge armed.
 
+## BunkerShot3D Product Acceptance Matrix (Epic #9541)
+
+Working directory:
+`C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9541`.
+Branch: `conductor/issue-9541`. Base HEAD `9af408974f1bb1a738461875edafe5defee2260a`;
+implementation SELF; PR #10459.
+Development-log entry: DL-#9541. Tools pin `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`
+(the worktree's `vendor/ud-tools` was empty and was materialized read-only from
+the main checkout's submodule objects for testing; nothing under `vendor/` is
+edited).
+
+Added `src/config/bunkershot3d_qualification.json`, the epic's product
+acceptance matrix, in the #9539 readiness-ledger schema so
+`src/config/industrial_readiness_loader.py` is reused without change. All
+sixteen checklist children are open with owner, dependency order and a
+narrow RED/GREEN plan; eight acceptance criteria carry their blockers;
+`release_status` is `blocked`. The gate in
+`tests/config/bunkershot3d_qualification/` additionally binds `release_status`
+to the live `shipped_register()` (zero measurements) and
+`credibility_assessment()` (validation 0 of 4), so the matrix cannot be greened
+by editing JSON. `CLAUDE.md` documents the update-on-land rule.
+
+Validation: `py -3.12 -m pytest tests/config/bunkershot3d_qualification tests/config/industrial_readiness -p no:randomly` → 37 passed; `ruff check` and `ruff format --check` clean on the new test.
+Not done and not claimed: no physics, calibration, GUI or API change; no
+measurement, rendered evidence or independent review. The tool remains an
+exploratory simulator.
+
+Next: U1 (#9286) and U2 (#9542) first, per the matrix's dependency order; each
+landing PR records its merge SHA and proving test in its entry.
+
+---
+
 Updated 2026-09-18. Governing epic #10363; documentation review branch
 `docs/matching-agent-continuation`; commit SELF; PR https://github.com/D-sorganization/UpstreamDrift/pull/10393.
 Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
