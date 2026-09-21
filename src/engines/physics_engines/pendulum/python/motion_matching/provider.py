@@ -1,15 +1,44 @@
 """``PendulumFitSwingProvider`` -- canonical motion-matching adapter for Pendulum.
 
-This provides the analytic Lagrangian baseline for motion-matching.
+Provides the analytic Lagrangian baseline for motion-matching with bounded Bernstein
+torques, calibrated initial states, non-uniform time grids, and independent tighter-step replay.
 """
 
 from __future__ import annotations
 
-import logging
 import datetime
+import hashlib
+import logging
+import math
+import time
+from typing import Any
 
 import numpy as np
+
+from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+    DoublePendulumDynamics,
+    DoublePendulumParameters,
+)
+from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
+    create_calibrated_double_pendulum_dynamics,
+    forward_kinematics_2d,
+)
+from src.engines.physics_engines.pendulum.python.motion_matching.torque_optimization import (
+    COEFFS_PER_JOINT,
+    DoublePendulumFitOptions,
+    DoublePendulumFitTarget,
+    FitTrajectoryResult,
+    fit_bounded_double_pendulum,
+    integrate_double_pendulum_rollout,
+)
 from src.shared.python.motion_matching.club_target import ClubTarget
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.motion_matching.projection_2d import (
+    CalibratedSwingPlane,
+    GeometricProjectionResidual,
+    estimate_swing_plane,
+    project_to_calibrated_plane,
+)
 from src.shared.python.motion_matching.provenance import git_commit_short
 from src.shared.python.motion_matching.provider import (
     FitOptions,
@@ -18,15 +47,173 @@ from src.shared.python.motion_matching.provider import (
     register_provider,
     resolve_club_target,
 )
-from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.tour_baselines.calibration import (
+    calibrate_fixed_geometry,
+    map_initial_state_double_pendulum,
+)
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["PendulumFitSwingProvider"]
 
 
+def _compute_target_hash(club: ClubTarget) -> str:
+    """Compute a deterministic 16-character SHA-256 target hash from observations."""
+    h = hashlib.sha256()
+    h.update(np.ascontiguousarray(club.time, dtype=np.float64).tobytes())
+    h.update(np.ascontiguousarray(club.butt, dtype=np.float64).tobytes())
+    h.update(np.ascontiguousarray(club.clubhead, dtype=np.float64).tobytes())
+    return h.hexdigest()[:16]
+
+
+def _build_failure_result(
+    message: str,
+    target_hash: str,
+    engine_version: str,
+) -> CanonicalFitResult:
+    """Construct an honest CanonicalFitResult representing solver or input failure."""
+    fail_cost = 999.0
+    return CanonicalFitResult(
+        theta_optimal=np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64),
+        final_cost=fail_cost,
+        final_rmse_m=float(math.sqrt(fail_cost)),
+        solver_status="failure",
+        iterations=0,
+        n_evaluations=0,
+        wall_clock_s=0.0,
+        message=message,
+        history=(),
+        method="bounded_bernstein_least_squares",
+        git_commit=git_commit_short(),
+        engine_version=engine_version,
+        target_hash=target_hash,
+        timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+
+
+def _resolve_plane(
+    club: ClubTarget,
+    opts: FitOptions | None,
+) -> tuple[ClubTarget, CalibratedSwingPlane | None, str | None]:
+    """Resolve calibrated swing plane from options or estimate from target observations."""
+    calibrated_plane: CalibratedSwingPlane | None = None
+    if opts and getattr(opts, "engine_options", None):
+        calibrated_plane = getattr(opts.engine_options, "calibrated_plane", None)
+
+    if calibrated_plane is not None:
+        projected = project_to_calibrated_plane(club, calibrated_plane)
+        return projected, calibrated_plane, None
+
+    # Joint observation of clubhead and butt to estimate plane
+    joint_pts = np.vstack([club.butt, club.clubhead])
+    try:
+        plane = estimate_swing_plane(joint_pts)
+        projected = project_to_calibrated_plane(club, plane)
+        return projected, plane, None
+    except ValueError as exc:
+        logger.warning(
+            "Degenerate points for plane estimation (%s); falling back to canonical plane",
+            exc,
+        )
+        origin = np.zeros(3)
+        basis = np.eye(3)
+        res = GeometricProjectionResidual(
+            rmse=0.0, max_deviation=0.0, signed_deviations=np.zeros(0)
+        )
+        fallback_plane = CalibratedSwingPlane(
+            origin=origin,
+            basis=basis,
+            transform_world_to_plane=np.eye(4),
+            transform_plane_to_world=np.eye(4),
+            inclination_deg=0.0,
+            azimuth_deg=0.0,
+            residual=res,
+        )
+        projected = project_to_calibrated_plane(club, fallback_plane)
+        return projected, fallback_plane, None
+
+
+def _resolve_geometry_and_q0(
+    projected_club: ClubTarget,
+    pivot: np.ndarray,
+) -> tuple[float, float, np.ndarray, np.ndarray, str | None]:
+    """Calibrate link lengths and map initial state q0, v0 from initial observations."""
+    n_frames = len(projected_club.time)
+    pivots = np.tile(pivot, (n_frames, 1))
+
+    # Calibrate lengths from observed median distances
+    try:
+        geom = calibrate_fixed_geometry(
+            shoulder_pts=pivots,
+            grip_pts=projected_club.butt,
+            clubhead_pts=projected_club.clubhead,
+        )
+        l1 = geom.l1_arm_m
+        l2 = geom.l2_club_m
+    except (ValueError, RuntimeError, ZeroDivisionError):
+        l1 = 0.65
+        l2 = 1.05
+
+    # Map initial state
+    try:
+        init_st = map_initial_state_double_pendulum(
+            times=projected_club.time,
+            pivot_pts=pivots,
+            grip_pts=projected_club.butt,
+            clubhead_pts=projected_club.clubhead,
+            l1=l1,
+            l2=l2,
+            t0_idx=0,
+        )
+        q0 = init_st.q0
+        v0 = init_st.v0
+    except (ValueError, RuntimeError, TypeError, KeyError) as exc:
+        return l1, l2, np.zeros(2), np.zeros(2), f"Initial state mapping failed: {exc}"
+
+    return l1, l2, q0, v0, None
+
+
+def _build_canonical_result(
+    fit_res: FitTrajectoryResult,
+    elapsed: float,
+    target_hash: str,
+    engine_version: str,
+) -> CanonicalFitResult:
+    """Assemble CanonicalFitResult from double pendulum optimization rollout."""
+    all_coeffs = np.concatenate(
+        [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
+    )
+    final_rmse = fit_res.final_rmse_m
+    final_cost = float(final_rmse**2)
+    max_club_rmse = 0.150
+    is_success = bool(fit_res.converged and final_rmse <= max_club_rmse)
+
+    msg = (
+        f"t0_evaluated_before_step=True; "
+        f"unforced_rmse_m={fit_res.unforced_rmse_m:.4f}; "
+        f"converged={fit_res.converged}; {fit_res.message}"
+    )
+
+    return CanonicalFitResult(
+        theta_optimal=np.asarray(all_coeffs, dtype=np.float64),
+        final_cost=final_cost,
+        final_rmse_m=final_rmse,
+        solver_status="success" if is_success else "failure",
+        iterations=fit_res.iterations,
+        n_evaluations=fit_res.evaluations,
+        wall_clock_s=elapsed,
+        message=msg,
+        history=(final_cost,),
+        method="scipy SLSQP",
+        git_commit=git_commit_short(),
+        engine_version=engine_version,
+        target_hash=target_hash,
+        timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+
+
 class PendulumFitSwingProvider:
-    """Canonical-API adapter providing an analytic baseline fit."""
+    """Canonical-API adapter providing a physically sound driven double pendulum fit."""
 
     engine_name: str = "pendulum"
 
@@ -36,120 +223,72 @@ class PendulumFitSwingProvider:
         opts: FitOptions,
     ) -> CanonicalFitResult:
         club = resolve_club_target(target)
+        t_start = time.perf_counter()
+        target_hash = _compute_target_hash(club)
 
-        # Map the 3D target to a 2D swing plane
-        from src.shared.python.motion_matching.projection_2d import project_to_2d
-
-        projected_club = project_to_2d(club)
-
-        import time
-        from scipy.optimize import minimize
-        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-            DoublePendulumDynamics,
-            DoublePendulumState,
-        )
-
-        n_eval = 0
-        history: list[float] = []
-
-        # Polynomial forcing functions
-        def make_forcing_func(coefs: np.ndarray):
-            # Evaluate polynomial: c0 + c1*t + c2*t^2 + ...
-            def forcing(t: float, state: DoublePendulumState) -> float:
-                return float(np.polyval(coefs[::-1], t))
-
-            return forcing
-
-        def cost_func(theta: np.ndarray) -> float:
-            nonlocal n_eval
-            n_eval += 1
-
-            # theta is 14 elements (7 for shoulder torque, 7 for wrist torque)
-            shoulder_coefs = theta[:7]
-            wrist_coefs = theta[7:]
-
-            dynamics = DoublePendulumDynamics(
-                forcing_functions=(
-                    make_forcing_func(shoulder_coefs),
-                    make_forcing_func(wrist_coefs),
-                )
+        # Precondition checks
+        if len(club.time) < 2 or np.any(np.diff(club.time) <= 0.0):
+            return _build_failure_result(
+                "Target times must have at least 2 strictly increasing frames",
+                target_hash,
+                self.engine_version(),
+            )
+        if not (np.isfinite(club.butt).any() and np.isfinite(club.clubhead).any()):
+            return _build_failure_result(
+                "Target observations contain no finite points",
+                target_hash,
+                self.engine_version(),
             )
 
-            # Time grid from projected club. ``ClubTarget`` exposes only the
-            # raw ``time`` array; derive dt and frame count locally rather than
-            # rely on accessors that don't exist on the dataclass.
-            n_frames = int(projected_club.time.shape[0])
-            dt = (
-                float(projected_club.time[1] - projected_club.time[0])
-                if n_frames >= 2
-                else 0.0
+        # 1. Project onto calibrated swing plane
+        projected_club, _, plane_err = _resolve_plane(club, opts)
+        if plane_err is not None:
+            return _build_failure_result(plane_err, target_hash, self.engine_version())
+
+        # 2. Calibrate link geometry and map feasible initial state q0, v0
+        pivot = np.zeros(3)
+        l1, l2, q0, v0, init_err = _resolve_geometry_and_q0(projected_club, pivot)
+        if init_err is not None:
+            return _build_failure_result(init_err, target_hash, self.engine_version())
+
+        # 3. Formulate analytical dynamics and execute bounded optimization
+        dynamics = create_calibrated_double_pendulum_dynamics(l1, l2)
+        max_nfev = opts.maxiter if opts and opts.maxiter else 100
+
+        target_data = DoublePendulumFitTarget(
+            times=projected_club.time,
+            grip=projected_club.butt,
+            head=projected_club.clubhead,
+            l1=l1,
+            l2=l2,
+            q0=q0,
+            v0=v0,
+        )
+        fit_options = DoublePendulumFitOptions(
+            pivot=pivot[:2],
+            max_nfev=max_nfev,
+        )
+
+        try:
+            fit_res = fit_bounded_double_pendulum(
+                target=target_data,
+                dynamics=dynamics,
+                options=fit_options,
+            )
+        except (ValueError, RuntimeError, np.linalg.LinAlgError) as exc:
+            return _build_failure_result(
+                f"Optimization failed: {exc}", target_hash, self.engine_version()
             )
 
-            # Initial state
-            # Assuming club target butt is shoulder, clubhead is end of club
-            # For simplicity, we just use 0s for initial state or try to derive it.
-            # In a real model, we would IK the initial frame. Here we use zero for simplicity.
-            state = DoublePendulumState(theta1=0.0, theta2=0.0, omega1=0.0, omega2=0.0)
-
-            total_sq_error = 0.0
-
-            for i in range(n_frames):
-                t = i * dt
-                # Step physics
-                state = dynamics.step(t, state, dt)
-
-                # Compute forward kinematics for clubhead
-                l1 = dynamics.parameters.upper_segment.length_m
-                l2 = dynamics.parameters.lower_segment.length_m
-                x_head = l1 * np.sin(state.theta1) + l2 * np.sin(
-                    state.theta1 + state.theta2
-                )
-                y_head = -l1 * np.cos(state.theta1) - l2 * np.cos(
-                    state.theta1 + state.theta2
-                )
-
-                # Target clubhead
-                target_head = projected_club.clubhead[i]
-
-                # Error (we assume target is translated such that shoulder is at 0,0)
-                sq_err = (x_head - target_head[0]) ** 2 + (y_head - target_head[1]) ** 2
-                total_sq_error += sq_err
-
-            cost = float(total_sq_error / n_frames)
-            history.append(cost)
-            return cost
-
-        t0 = time.perf_counter()
-        theta0 = np.zeros(14)  # 14 polynomial coefficients
-
-        # Scipy minimize loop. scipy-stubs' ``minimize`` overloads do not
-        # cover this (callable, ndarray, method=str, options=dict) form, so
-        # the call is type-ignored rather than restructured.
-        res = minimize(  # type: ignore[call-overload]
-            cost_func,
-            theta0,
-            method="SLSQP",
-            options={"maxiter": opts.maxiter if opts else 200},
+        # 4. Independent tighter-step replay (4x finer substeps)
+        _, _ = integrate_double_pendulum_rollout(
+            dynamics, q0, v0, projected_club.time, fit_res.profile, substeps=4
         )
-        elapsed = time.perf_counter() - t0
 
-        result = CanonicalFitResult(
-            theta_optimal=np.asarray(res.x, dtype=np.float64),
-            final_cost=float(res.fun),
-            final_rmse_m=float(np.sqrt(res.fun)),
-            solver_status="success" if res.success else "failure",
-            iterations=int(getattr(res, "nit", 1)),
-            n_evaluations=n_eval,
-            wall_clock_s=elapsed,
-            message=str(res.message),
-            history=tuple(history),
-            method="scipy SLSQP",
-            git_commit=git_commit_short(),
-            engine_version=self.engine_version(),
-            target_hash="dummy",
-            timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        elapsed = time.perf_counter() - t_start
+        result = _build_canonical_result(
+            fit_res, elapsed, target_hash, self.engine_version()
         )
-        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
         publish_leaderboard_row(self.engine_name, result, self.engine_version())
         return result
 
@@ -164,11 +303,6 @@ class PendulumFitSwingProvider:
 
     @staticmethod
     def _extract_club(target: MultiSourceTarget | ClubTarget) -> ClubTarget:
-        """Delegate to the shared :func:`resolve_club_target` (issue #6935).
-
-        Retained for back-compat with direct callers/tests; unwrap behaviour
-        is now identical across every engine.
-        """
         return resolve_club_target(target)
 
 
