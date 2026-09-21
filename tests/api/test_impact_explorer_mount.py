@@ -63,3 +63,31 @@ def test_present_bundle_is_mounted_with_html_fallback(
     resp = client.get("/impact-explorer-app/")
     assert resp.status_code == 200
     assert "roc" in resp.text
+
+
+def test_real_mount_satisfies_the_release_bundle_verifier(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The CI verifier's standalone mount and the product mount agree (#9550).
+
+    ``scripts/ci/verify_impact_explorer_bundle.py`` serves the built bundle
+    without importing this module (CI runs it without the editable install);
+    this pins that the real ``local_server`` mount passes the same contract:
+    real JavaScript with manifest digests, revision-stamped descriptor, and a
+    404 (not the index fallback) for a missing artifact.
+    """
+    from scripts.ci import verify_impact_explorer_bundle as verifier
+    from tests.ci.test_verify_impact_explorer_bundle import REVISION, _write_dist
+
+    dist = _write_dist(tmp_path)
+    monkeypatch.setattr(
+        local_server, "_resolve_impact_explorer_dist_path", lambda: dist
+    )
+    app = FastAPI()
+    local_server._mount_impact_explorer_directory(app)
+
+    from fastapi.testclient import TestClient
+
+    receipt = verifier.verify_served_bundle(TestClient(app), REVISION)
+    assert receipt["javascript_assets"] == 1
+    assert receipt["missing_artifact_status"] == 404
