@@ -302,19 +302,25 @@ def _require_openpyxl() -> Any:
     return load_workbook
 
 
-def count_numeric_samples(path: Path | str, sheet_name: str) -> int:
-    """Count non-blank numeric sample rows (column Sample #), ignoring padding."""
-    path = Path(path)
-    if not path.is_file():
-        raise ValueError(f"workbook path does not exist: {path}")
+def _open_workbook_sheet(path: Path | str, sheet_name: str) -> tuple[Any, Any]:
+    """Open a workbook sheet after path/name validation; caller must close workbook."""
+    target = Path(path)
+    if not target.is_file():
+        raise ValueError(f"workbook path does not exist: {target}")
     if not sheet_name or not str(sheet_name).strip():
         raise ValueError("sheet_name must be non-blank")
     load_workbook = _require_openpyxl()
-    workbook = load_workbook(path, read_only=True, data_only=True)
+    workbook = load_workbook(target, read_only=True, data_only=True)
+    if sheet_name not in workbook.sheetnames:
+        workbook.close()
+        raise ValueError(f"sheet {sheet_name!r} not found in {target.name}")
+    return workbook, workbook[sheet_name]
+
+
+def count_numeric_samples(path: Path | str, sheet_name: str) -> int:
+    """Count non-blank numeric sample rows (column Sample #), ignoring padding."""
+    workbook, sheet = _open_workbook_sheet(path, sheet_name)
     try:
-        if sheet_name not in workbook.sheetnames:
-            raise ValueError(f"sheet {sheet_name!r} not found in {path.name}")
-        sheet = workbook[sheet_name]
         count = 0
         for row in sheet.iter_rows(min_row=4, max_col=1, values_only=True):
             value = row[0]
@@ -332,17 +338,8 @@ def count_numeric_samples(path: Path | str, sheet_name: str) -> int:
 
 def read_sheet_event_samples(path: Path | str, sheet_name: str) -> dict[str, float]:
     """Read native event sample IDs from row 1 using shared label normalization."""
-    path = Path(path)
-    if not path.is_file():
-        raise ValueError(f"workbook path does not exist: {path}")
-    if not sheet_name or not str(sheet_name).strip():
-        raise ValueError("sheet_name must be non-blank")
-    load_workbook = _require_openpyxl()
-    workbook = load_workbook(path, read_only=True, data_only=True)
+    workbook, sheet = _open_workbook_sheet(path, sheet_name)
     try:
-        if sheet_name not in workbook.sheetnames:
-            raise ValueError(f"sheet {sheet_name!r} not found in {path.name}")
-        sheet = workbook[sheet_name]
         row1 = next(sheet.iter_rows(min_row=1, max_row=1, max_col=26, values_only=True))
         return parse_event_marker_cells(list(row1))
     finally:
@@ -351,15 +348,9 @@ def read_sheet_event_samples(path: Path | str, sheet_name: str) -> dict[str, flo
 
 def read_sheet_a1_label(path: Path | str, sheet_name: str) -> str:
     """Return the A1 ball/source label cell as a string (may be conflicting)."""
-    path = Path(path)
-    if not path.is_file():
-        raise ValueError(f"workbook path does not exist: {path}")
-    load_workbook = _require_openpyxl()
-    workbook = load_workbook(path, read_only=True, data_only=True)
+    workbook, sheet = _open_workbook_sheet(path, sheet_name)
     try:
-        if sheet_name not in workbook.sheetnames:
-            raise ValueError(f"sheet {sheet_name!r} not found in {path.name}")
-        value = workbook[sheet_name]["A1"].value
+        value = sheet["A1"].value
         if value is None:
             return ""
         return str(value).strip()
@@ -369,15 +360,8 @@ def read_sheet_a1_label(path: Path | str, sheet_name: str) -> str:
 
 def read_native_time_range(path: Path | str, sheet_name: str) -> tuple[float, float]:
     """Return (first, last) native impact-relative times for numeric samples."""
-    path = Path(path)
-    if not path.is_file():
-        raise ValueError(f"workbook path does not exist: {path}")
-    load_workbook = _require_openpyxl()
-    workbook = load_workbook(path, read_only=True, data_only=True)
+    workbook, sheet = _open_workbook_sheet(path, sheet_name)
     try:
-        if sheet_name not in workbook.sheetnames:
-            raise ValueError(f"sheet {sheet_name!r} not found in {path.name}")
-        sheet = workbook[sheet_name]
         first: float | None = None
         last: float | None = None
         for row in sheet.iter_rows(min_row=4, max_col=2, values_only=True):
@@ -401,15 +385,8 @@ def read_native_time_range(path: Path | str, sheet_name: str) -> tuple[float, fl
 
 def sheet_numeric_fingerprint(path: Path | str, sheet_name: str) -> str:
     """SHA-256 of Sample#/Time/position columns for lineage alias detection."""
-    path = Path(path)
-    if not path.is_file():
-        raise ValueError(f"workbook path does not exist: {path}")
-    load_workbook = _require_openpyxl()
-    workbook = load_workbook(path, read_only=True, data_only=True)
+    workbook, sheet = _open_workbook_sheet(path, sheet_name)
     try:
-        if sheet_name not in workbook.sheetnames:
-            raise ValueError(f"sheet {sheet_name!r} not found in {path.name}")
-        sheet = workbook[sheet_name]
         digest = hashlib.sha256()
         for row in sheet.iter_rows(min_row=4, max_col=5, values_only=True):
             sample = row[0]
