@@ -1,5 +1,46 @@
 # Current Matching Continuation Handoff
 
+## GUI Thread-Blocking Migration #8880 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-issue-8880`.
+- Branch: `fix/8880-gui-thread-blocking-sims`; base `origin/main` at `4651b8793`.
+  PR: not created yet. Governing issue #8880. Entry DL-#8880.
+- Delivered: migrated `bunker_shot_gui` (`run_design_a`/`run_comparison`/
+  `run_cross_tier` gained `_async` siblings wired to the buttons, sync core
+  unchanged for tests), `ball_flight_gui` (`_run_simulation` split into
+  `_compute_trajectory`/`_render_trajectory`, `_run_simulation_async` added),
+  and `swing_flight_pipeline` (`_run_pipeline` split into
+  `_read_provider_and_config`/`_compute_pipeline_result`/
+  `_render_pipeline_result`, `_run_pipeline_async` added) onto
+  `src/tools/async_action.py`. Added `scripts/ci/check_gui_thread_blocking_ratchet.py`
+  (lower-only ratchet, baseline 12 un-migrated `src/tools/*/gui*.py` files),
+  wired into `ci-standard.yml`. Annotated `motion_matching/gui.py` with
+  `# noqa: gui-thread/ok` (already QProcess-backed, never blocked).
+- Compatibility constraint discovered mid-migration: in
+  `swing_flight_pipeline/gui.py`, the pre-existing inline handler imported
+  `SwingBallFlightPipeline` _before_ building the swing state, so a broken
+  pipeline module reported itself in the error message. Splitting the sync
+  core naively (build swing state, then import) reordered this and broke
+  `test_run_pipeline_handles_import_error` by surfacing an unrelated
+  `SwingState` ImportError from the provider's own lazy import instead.
+  Fixed by keeping the import-before-build order inside
+  `_compute_pipeline_result`.
+- Validation: targeted suites for all four touched tools pass, except three
+  pre-existing `bunker_shot_gui` failures (`test_shot_scene_render_vtk.py`,
+  `test_uncertainty_propagation_9243.py` x2) and one pre-existing
+  `swing_flight_pipeline` failure (`test_run_pipeline_passes_ui_parameters_to_swing_state`,
+  a clubhead-orientation numeric mismatch) — all four reproduced unmodified
+  against `origin/main` before this branch touched anything.
+  `ruff check` / `ruff format --check` clean on every changed file.
+- Limitations (declared): ~9 of ~25 `src/tools/*/gui*.py` files remain
+  genuinely un-migrated (not the false positives the ratchet's coarse
+  heuristic also flags, like `starting_pose_matcher`'s existing direct-QThread
+  mixins) — see the PR body's Deferred section for the list. The ratchet only
+  catches new growth in that count; it does not itself migrate anything.
+- Next action: open the PR (`Refs #8880`, not `Closes` — most tools are still
+  inline), poll CI, merge with `--auto --squash` once green, tear down this
+  worktree and the branch.
+
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.

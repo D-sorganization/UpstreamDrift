@@ -21,11 +21,14 @@ Two behaviours are deliberate and must not be softened:
   turns red, the maps are cleared and the report states why. There is no code
   path in this package that paints a force beside a ``REFUSED`` verdict.
 
-Running a design blocks the interface for a second or two: the lofted mesh is
-solved by root-finding per station and the playability sweep is
-``playability_points ** 2`` shots. A wait cursor is shown; the work is not
-threaded, because a design tool whose answer arrives out of order with its
-inputs is worse than one that pauses.
+Running a design costs a second or two; the cross-tier check costs minutes.
+Both used to block the interface behind a wait cursor alone. They now run
+off the GUI thread through :mod:`src.tools.async_action` (issue #8880): the
+triggering button (and its siblings) is disabled for the duration of the
+run, which is what keeps a result from arriving out of order with its
+inputs -- the concern a wait cursor alone did not address. ``run_design_a``,
+``run_comparison`` and ``run_cross_tier`` stay the synchronous, testable
+core; ``run_design_a_async`` etc. are what the buttons now trigger.
 """
 
 from __future__ import annotations
@@ -56,6 +59,7 @@ from bunkershot3d.fields.store import load_field
 
 from src.launchers.help_menu import build_help_menu
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
+from src.tools.async_action import AsyncActionBar, WorkerContext
 
 from .crosstier import CrossTierComparison
 from .crosstier_run import cross_tier_check
@@ -267,11 +271,11 @@ class BunkerShotWidget(QWidget):
         column.addWidget(self._conditions)
 
         self._run_button = QPushButton("Run design A")
-        self._run_button.clicked.connect(self.run_design_a)
+        self._run_button.clicked.connect(self.run_design_a_async)
         column.addWidget(self._run_button)
 
         self._compare_button = QPushButton("Compare A vs B")
-        self._compare_button.clicked.connect(self.run_comparison)
+        self._compare_button.clicked.connect(self.run_comparison_async)
         column.addWidget(self._compare_button)
 
         # Separate button, and separate for a reason rather than for tidiness.
@@ -287,8 +291,14 @@ class BunkerShotWidget(QWidget):
             "probe is a separate march to one recorded pose. Consistency "
             "between two uncalibrated models is not validation."
         )
-        self._cross_tier_button.clicked.connect(self.run_cross_tier)
+        self._cross_tier_button.clicked.connect(self.run_cross_tier_async)
         column.addWidget(self._cross_tier_button)
+
+        self.action_bar = AsyncActionBar()
+        self.action_bar.set_trigger_buttons(
+            self._run_button, self._compare_button, self._cross_tier_button
+        )
+        column.addWidget(self.action_bar)
         column.addStretch()
 
         scroll = QScrollArea()
@@ -474,6 +484,96 @@ class BunkerShotWidget(QWidget):
         if result is None:
             return
         self.show_cross_tier(result)
+
+    # ---- async entry points (#8880) --------------------------------------
+    #
+    # The buttons call these; the synchronous run_* methods above stay the
+    # testable core. Each async wrapper reads the (cheap) inputs on the GUI
+    # thread, hands the solver call to a worker, and renders the result back
+    # on the GUI thread in on_finished. AsyncActionBar disables all three
+    # trigger buttons for the duration of a run, so a design's answer can
+    # never arrive interleaved with a different one still in flight.
+
+    def run_design_a_async(self) -> None:
+        """Evaluate design A off the GUI thread, with progress and cancel."""
+        read = self._design_a_inputs()
+        if read is None:
+            return
+        settings, sand, swing, design = read
+        self._banner.show_busy("Running the F0 solver over design A...")
+
+        def _work(ctx: WorkerContext) -> DesignEvaluation:
+            return self._model_factory(settings).evaluate(design, sand, swing)
+
+        self.action_bar.start(
+            "Design A",
+            _work,
+            on_finished=self.show_evaluation,
+            on_failed=self._report_solver_failure,
+        )
+
+    def run_comparison_async(self) -> None:
+        """Evaluate both designs off the GUI thread, with progress and cancel."""
+        inputs = self._read_inputs()
+        if inputs is None:
+            return
+        settings, sand, swing = inputs
+        try:
+            left = self._design_a.design()
+            right = self._design_b.design()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return
+        if left.name == right.name:
+            self._show_input_error(
+                WorkbenchInputError(
+                    "designs A and B need different names so the ranking can "
+                    f"report them; both are {left.name!r}"
+                )
+            )
+            return
+        self._banner.show_busy("Running the F0 solver over both designs...")
+
+        def _work(ctx: WorkerContext) -> WorkbenchComparison:
+            return self._model_factory(settings).compare(left, right, sand, swing)
+
+        self.action_bar.start(
+            "Compare A vs B",
+            _work,
+            on_finished=self.show_comparison,
+            on_failed=self._report_solver_failure,
+        )
+
+    def run_cross_tier_async(self) -> None:
+        """Put F1 beside F0 on design A off the GUI thread.
+
+        The clearest win: this check costs minutes on the GUI thread today.
+        """
+        read = self._design_a_inputs()
+        if read is None:
+            return
+        settings, sand, swing, design = read
+        self._banner.show_busy(
+            "Running the F1 continuum beside F0 on design A. This is minutes, "
+            "not milliseconds: F1 has no shot history yet, so every probe is "
+            "a separate march to one recorded pose."
+        )
+
+        def _work(ctx: WorkerContext) -> CrossTierComparison:
+            return cross_tier_check(self._model_factory(settings), design, sand, swing)
+
+        self.action_bar.start(
+            "Cross-tier check",
+            _work,
+            on_finished=self.show_cross_tier,
+            on_failed=self._report_solver_failure,
+        )
+
+    def _report_solver_failure(self, message: str) -> None:
+        """Report a worker-thread failure. GUI-thread only (on_failed)."""
+        logger.error("bunker workbench solver failed: %s", message)
+        self._banner.show_error(message)
+        self._results.setPlainText(f"The solver failed unexpectedly.\n\n{message}")
 
     def show_cross_tier(self, comparison: CrossTierComparison) -> None:
         """Display a cross-tier comparison and open its tab.
@@ -777,7 +877,8 @@ class BunkerShotWidget(QWidget):
             widget.clear()
 
     def cleanup(self) -> None:
-        """Release resources. The workbench holds none beyond its widgets."""
+        """Cancel and join any running action (#8880)."""
+        self.action_bar.shutdown()
 
 
 class BunkerShotWindow(QMainWindow):

@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8880
+- **Branch:** fix/8880-gui-thread-blocking-sims
+- **PR:** not created yet
+- **Paths:** src/tools/bunker_shot_gui/gui.py; src/tools/ball_flight_gui/gui.py; src/tools/swing_flight_pipeline/gui.py; src/tools/motion_matching/gui.py; scripts/ci/check_gui_thread_blocking_ratchet.py; scripts/config/gui_thread_blocking_baseline.json; tests/tools/bunker_shot_gui/test_async_actions.py; tests/tools/ball_flight_gui/test_async_actions.py; tests/tools/swing_flight_pipeline/test_async_actions.py; tests/unit/scripts/test_gui_thread_blocking_ratchet.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at SELF (targeted suites for the four touched tools pass except three pre-existing bunker_shot_gui failures and one pre-existing swing_flight_pipeline failure, all reproduced unmodified on origin/main; ruff check/format clean on changed files)
+- **Summary:** Migrated `bunker_shot_gui` (explicitly named in the issue), `ball_flight_gui` and `swing_flight_pipeline` onto the existing `src/tools/async_action.py` worker/progress/cancel helper, following the pattern already landed for `simulation_backends_launcher` (#9472) and `launch_monitor_analytics` (#9742). Added a lower-only ratchet (`check_gui_thread_blocking_ratchet.py`, baseline 12) that fails CI if the count of un-migrated `src/tools/*/gui*.py` files grows, wired into `ci-standard.yml`. `motion_matching/gui.py` annotated `# noqa: gui-thread/ok` (already QProcess-backed). ~9 tools remain un-migrated (see PR body).
+- **Next step:** Open the PR, then work through the remaining un-migrated tools listed in its "Deferred" section in follow-up PRs.
+
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
 - **State:** in_review
