@@ -7,6 +7,11 @@ engines agree with one another within **5 mm** grip RMSE — and must have a
 grip world-frame origin within a plausible distance of the Simscape address
 pose.
 
+MuJoCo and Drake use the same collision-free canonical URDF and right-hand
+anchor. Their default demo plants differ in contacts, topology and grip closure;
+comparing those defaults does not test identical gravity-only dynamics. This
+fixture does not qualify ground contact or bilateral grip constraints.
+
 Why ``theta = 0`` is only Simscape-equivalent at *address*
 --------------------------------------------------------
 The checked-in Simscape fixture (``trial_001``) is a *fitted, fully actuated*
@@ -41,12 +46,17 @@ import csv
 import itertools
 from collections.abc import Callable
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
     is_engine_available,
+)
+from gravity_equivalence_fixture import (
+    write_free_fall_mjcf,
+    write_free_fall_urdf,
 )
 
 pytestmark = [pytest.mark.slow, pytest.mark.gate, pytest.mark.unit]
@@ -172,35 +182,38 @@ def _run_drake() -> tuple[np.ndarray, np.ndarray]:
         simulate as sim_mod,
     )
 
-    options = sim_mod.SimOptions(
-        simulation_time_s=0.30, sample_rate_hz=1000.0, time_step_s=1.0e-3
-    )
     from pydrake.multibody.plant import MultibodyPlant
 
-    plant = MultibodyPlant(options.time_step_s)
-    sim_mod.load_humanoid_into_plant(plant, options.urdf_path or sim_mod.CANONICAL_URDF)
-    plant.Finalize()
-    n_act = sim_mod._resolve_n_actuators(plant)
-    theta = np.zeros(n_act * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
-    out = sim_mod.simulate_with_coefficients(theta, options=options)
+    with TemporaryDirectory() as directory:
+        options = sim_mod.SimOptions(
+            urdf_path=write_free_fall_urdf(Path(directory)),
+            simulation_time_s=0.30,
+            sample_rate_hz=1000.0,
+            time_step_s=1.0e-3,
+            grip_body_name="right_hand",
+        )
+        plant = MultibodyPlant(options.time_step_s)
+        sim_mod.load_humanoid_into_plant(plant, options.urdf_path)
+        plant.Finalize()
+        n_act = sim_mod._resolve_n_actuators(plant)
+        theta = np.zeros(n_act * sim_mod.COEFFS_PER_JOINT, dtype=np.float64)
+        out = sim_mod.simulate_with_coefficients(theta, options=options)
     return np.asarray(out.time), np.asarray(out.grip)
 
 
 def _run_mujoco() -> tuple[np.ndarray, np.ndarray]:
     _require_real_backend("mujoco")
-    import mujoco
-
-    from src.engines.physics_engines.mujoco._golf_swing_full_body_xml import (
-        FULL_BODY_GOLF_SWING_XML,
-    )
     from src.engines.physics_engines.mujoco.python.motion_matching import (
         simulate as sim_mod,
     )
 
-    nu = int(mujoco.MjModel.from_xml_string(FULL_BODY_GOLF_SWING_XML).nu)
-    options = sim_mod.SimOptions(T_s=0.30, output_rate_hz=1000.0)
-    theta = np.zeros(nu * 7, dtype=np.float64)
-    out = sim_mod.simulate_with_coefficients(theta, options=options)
+    with TemporaryDirectory() as directory:
+        path, nu = write_free_fall_mjcf(write_free_fall_urdf(Path(directory)))
+        options = sim_mod.SimOptions(
+            xml_path=path, T_s=0.30, dt=1.0e-3, output_rate_hz=1000.0
+        )
+        theta = np.zeros(nu * 7, dtype=np.float64)
+        out = sim_mod.simulate_with_coefficients(theta, options=options)
     return np.asarray(out.time), np.asarray(out.grip)
 
 
@@ -465,6 +478,19 @@ def test_cross_engine_grip_agreement() -> None:
                 f"pose {pose!r}: grip RMSE={rmse_mm:.3f} mm exceeds the "
                 f"{RMSE_POSITION_GATE_MM:.1f} mm gate."
             )
+
+
+@pytest.mark.parametrize("engine", ["mujoco", "drake"])
+def test_gravity_fixture_matches_analytic_free_fall(engine: str) -> None:
+    """Reject a stationary/missing anchor or a shared, incorrect gravity path."""
+    if not is_engine_available(engine):
+        pytest.skip(f"{engine} not installed")
+    time, grip = _run_engine_checked(engine)
+    displacement = grip - grip[0]
+    expected = np.zeros_like(displacement)
+    expected[:, 2] = -0.5 * 9.81 * time**2
+    error_mm = np.linalg.norm(displacement - expected, axis=1) * 1000.0
+    assert np.max(error_mm) < RMSE_POSITION_GATE_MM
 
 
 # --- Helper-level coverage (engine-independent) -------------------------
