@@ -1,0 +1,90 @@
+{
+  "candidate_sha256": "dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776",
+  "governing_issue": "#10062",
+  "step": "Step 4: Same-Input Replays in MuJoCo, Pinocchio, and Drake",
+  "engines": {
+    "pinocchio": {
+      "replay_npz": "pinocchio_returned81_replay.npz",
+      "gif": "pinocchio_returned81.gif",
+      "metrics": {
+        "whole_rms_m": 0.026366145791017103,
+        "early_rms_m": 0.011426891719752068,
+        "terminal_rms_m": 0.04630540451857026,
+        "club_cluster_rms_m": 0.015955421510975575,
+        "pelvis_yaw_error_pct": 13.92337475188468
+      },
+      "receipt": "pinocchio_receipt.json"
+    },
+    "mujoco": {
+      "replay_npz": "mujoco_returned81_replay.npz",
+      "gif": "mujoco_returned81.gif",
+      "metrics": {
+        "whole_rms_m": 0.026366145791017103,
+        "early_rms_m": 0.011426891719752068,
+        "terminal_rms_m": 0.04630540451857026,
+        "club_cluster_rms_m": 0.015955421510975575,
+        "pelvis_yaw_error_pct": 13.92337475188468
+      },
+      "marker_diff_vs_pinocchio": {
+        "max_abs_m": 2.345346139520643e-15,
+        "mean_abs_m": 1.9585670324674253e-16
+      },
+      "receipt": "mujoco_receipt.json"
+    },
+    "drake": {
+      "replay_npz": "drake_returned81_replay.npz",
+      "gif": "drake_returned81.gif",
+      "metrics": {
+        "whole_rms_m": 0.026365350715109214,
+        "early_rms_m": 0.01142617956954139,
+        "terminal_rms_m": 0.046305405150117544,
+        "club_cluster_rms_m": 0.015952762868635062,
+        "pelvis_yaw_error_pct": 13.923000255931143
+      },
+      "marker_diff_vs_pinocchio": {
+        "max_abs_m": 1.624195827958433e-5,
+        "mean_abs_m": 2.184200899169326e-6
+      },
+      "receipt": "drake_receipt.json"
+    }
+  },
+  "comparison_table": [
+    {
+      "metric": "whole_rms_m",
+      "pinocchio": 0.02636615,
+      "mujoco": 0.026366145791017103,
+      "drake": 0.026365350715109214,
+      "max_abs_diff_m": 7.992848907872885e-7
+    },
+    {
+      "metric": "early_rms_m",
+      "pinocchio": 0.01142689,
+      "mujoco": 0.011426891719752068,
+      "drake": 0.01142617956954139,
+      "max_abs_diff_m": 7.104304586107169e-7
+    },
+    {
+      "metric": "terminal_rms_m",
+      "pinocchio": 0.0463054,
+      "mujoco": 0.04630540451857026,
+      "drake": 0.046305405150117544,
+      "max_abs_diff_m": 5.150117547703115e-9
+    },
+    {
+      "metric": "club_cluster_rms_m",
+      "pinocchio": 0.01595542,
+      "mujoco": 0.015955421510975575,
+      "drake": 0.015952762868635062,
+      "max_abs_diff_m": 2.657131364939419e-6
+    },
+    {
+      "metric": "pelvis_yaw_error_pct",
+      "pinocchio": 13.92337,
+      "mujoco": 13.92337475188468,
+      "drake": 13.923000255931143,
+      "max_abs_diff_pct": 0.0003697440688572584
+    }
+  ],
+  "status": "PASS",
+  "notes": "All three engines (Pinocchio, MuJoCo, Drake) replay the identical returned81 candidate trajectory with forward kinematics marker parity to <= 1.62e-5 m, producing identical uninterrupted tracking metrics across all 5 standard gates."
+}

@@ -80,6 +80,11 @@ WIFFLE_XLSX = (
 # Canonical test trial set; same four sheets wired by #4081 / #4086.
 CANONICAL_TRIALS: tuple[str, ...] = ("TW_ProV1", "TW_wiffle", "GW_wiffle", "GW_ProV11")
 
+# Known engines that are unavailable with an explicit reason.
+KNOWN_UNAVAILABLE: dict[str, str] = {
+    "simscape": "no python provider",
+}
+
 # Per #4097, every engine in the parity matrix gets a row attempt.
 CANONICAL_ENGINES: tuple[str, ...] = (
     "simscape",
@@ -87,9 +92,11 @@ CANONICAL_ENGINES: tuple[str, ...] = (
     "drake",
     "pinocchio",
     "opensim",
+    "myosuite",
+    "pendulum",
 )
 
-# Where each engine's `fit_swing_<engine>` lives (or is expected to live).
+# Where each engine's driver lives.
 # When the import fails the orchestrator skips the engine honestly rather
 # than synthesising a misleading row.
 _FIT_DRIVER_MODULES: dict[str, tuple[str, str]] = {
@@ -98,19 +105,31 @@ _FIT_DRIVER_MODULES: dict[str, tuple[str, str]] = {
         "fit_swing_simscape",
     ),
     "mujoco": (
-        "src.engines.physics_engines.mujoco.fit_swing_mujoco",
+        "src.engines.physics_engines.mujoco.python.motion_matching.fit_swing",
         "fit_swing_mujoco",
     ),
-    "drake": ("src.engines.physics_engines.drake.fit_swing_drake", "fit_swing_drake"),
+    "drake": (
+        "src.engines.physics_engines.drake.python.motion_matching.fit_swing",
+        "fit_swing_drake",
+    ),
     "pinocchio": (
-        "src.engines.physics_engines.pinocchio.fit_swing_pinocchio",
+        "src.engines.physics_engines.pinocchio.python.motion_matching.fit_swing",
         "fit_swing_pinocchio",
     ),
     "opensim": (
-        "src.engines.physics_engines.opensim.fit_swing_opensim",
+        "src.engines.physics_engines.opensim.python.motion_matching.fit_swing",
         "fit_swing_opensim",
     ),
+    "myosuite": (
+        "src.engines.physics_engines.myosuite.python.motion_matching.provider",
+        "MyoSuiteFitSwingProvider",
+    ),
+    "pendulum": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.provider",
+        "PendulumFitSwingProvider",
+    ),
 }
+
 
 LOGGER = logging.getLogger("run_cross_engine_leaderboard")
 
@@ -156,6 +175,18 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="append",
         default=None,
         help="Limit to one or more trials by name. Repeatable. Default: all canonical trials.",
+    )
+    p.add_argument(
+        "--trials",
+        type=str,
+        default=None,
+        help="Path to trials directory or trial fixture file.",
+    )
+    p.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="Base path for output leaderboard files (.md and .json).",
     )
     p.add_argument(
         "--engine",
@@ -213,12 +244,41 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _load_target(trial: str) -> Any:
-    """Load the canonical ``ClubTarget`` for ``trial`` from the Wiffle xlsx.
+def _load_target(trial: str, trials_dir: Path | None = None) -> Any:
+    """Load the canonical ``ClubTarget`` for ``trial`` from the Wiffle xlsx or a fixture.
 
     Raises ``ImportError`` or ``FileNotFoundError`` if the loader / data
     aren't available; the caller treats those as honest skips.
     """
+    if trials_dir is not None and trials_dir.is_dir():
+        fixture_json = trials_dir / f"{trial}.json"
+        if fixture_json.exists():
+            import numpy as np
+            from src.shared.python.motion_matching.club_target import (
+                ClubTarget,
+                SourceProvenance,
+            )
+
+            data = json.loads(fixture_json.read_text(encoding="utf-8"))
+            t = np.array(data["time"], dtype=np.float64)
+            t_adj = t - t[0]
+            n = len(t_adj)
+            impact = min(n, max(1, int(data.get("impact_idx", n))))
+            return ClubTarget(
+                time=t_adj,
+                butt=np.array(data["butt"], dtype=np.float64),
+                clubhead=np.array(data["clubhead"], dtype=np.float64),
+                club_quat=np.array(data["club_quat"], dtype=np.float64),
+                impact_idx=impact,
+                source=SourceProvenance(
+                    filename=data.get("source_filename", fixture_json.name),
+                    format="synthetic",
+                    subject_id="fixture",
+                    trial_id=trial,
+                    sha256="fixture",
+                ),
+            )
+
     if not WIFFLE_XLSX.exists():
         raise FileNotFoundError(f"canonical Wiffle xlsx not found: {WIFFLE_XLSX}")
     # Late import: avoid forcing pandas / openpyxl install on report-only runs.
@@ -227,52 +287,100 @@ def _load_target(trial: str) -> Any:
     return load_club_target_excel(WIFFLE_XLSX, sheet=trial, opts=AlignOptions())
 
 
-def _load_fit_driver(engine: str):
-    """Import ``fit_swing_<engine>`` and return the callable, or ``None`` if
-    the engine is not installed / not yet implemented.
-    """
-    module_path, attr = _FIT_DRIVER_MODULES[engine]
+def _load_fit_driver(engine: str) -> Any:
+    """Obtain a callable or provider for ``engine``, or None if unavailable."""
+    if engine in KNOWN_UNAVAILABLE:
+        return None
+
+    # First try the canonical provider registry
     try:
-        mod = importlib.import_module(module_path)
-    except ImportError as exc:
-        LOGGER.info("engine %s: fit driver not importable (%s) - skipping", engine, exc)
-        return None
-    fn = getattr(mod, attr, None)
-    if fn is None:
-        LOGGER.info("engine %s: module loaded but %s missing - skipping", engine, attr)
-        return None
-    return fn
+        from src.shared.python.motion_matching.provider import get_provider
+
+        return get_provider(engine)
+    except (KeyError, ImportError):
+        pass
+    except Exception as exc:  # noqa: BLE001
+        LOGGER.info("engine %s: provider lookup failed (%s)", engine, exc)
+
+    # If not registered yet, try importing the module from _FIT_DRIVER_MODULES
+    if engine in _FIT_DRIVER_MODULES:
+        module_path, attr = _FIT_DRIVER_MODULES[engine]
+        try:
+            mod = importlib.import_module(module_path)
+            try:
+                from src.shared.python.motion_matching.provider import get_provider
+
+                return get_provider(engine)
+            except (KeyError, ImportError):
+                pass
+            return getattr(mod, attr, None)
+        except ImportError as exc:
+            LOGGER.info(
+                "engine %s: fit driver not importable (%s) - skipping", engine, exc
+            )
+            return None
+    return None
 
 
 def _coerce_to_dict(fit_result: Any) -> dict[str, Any]:
-    """Normalise a per-engine ``FitResult`` into a plain dict.
+    """Normalise a per-engine ``FitResult`` into a plain dict."""
+    out: dict[str, Any] = {}
 
-    Accepts (a) a dict, (b) a frozen dataclass, (c) any object with the
-    canonical attributes — in that order. Whatever the engine returns, we
-    only persist the leaderboard columns + a few diagnostic extras.
-    """
-    if isinstance(fit_result, dict):
-        return dict(fit_result)
-    if hasattr(fit_result, "__dataclass_fields__"):
-        return asdict(fit_result)
-    if hasattr(fit_result, "_asdict"):
-        return dict(fit_result._asdict())
-    # Fallback: read attributes by name.
+    def _get(name: str, default: Any = None) -> Any:
+        if isinstance(fit_result, dict):
+            return fit_result.get(name, default)
+        return getattr(fit_result, name, default)
+
     attrs = (
         "engine",
-        "solver",
         "trial",
         "grip_rmse_mm",
         "clubhead_rmse_mm",
+        "body_marker_rmse_mm",
         "total_work_J",
         "wall_clock_s",
         "commit",
         "run_at",
     )
-    out: dict[str, Any] = {}
     for name in attrs:
-        if hasattr(fit_result, name):
-            out[name] = getattr(fit_result, name)
+        val = _get(name)
+        if val is not None and not hasattr(val, "shape"):
+            out[name] = val
+
+    # Method / solver name
+    method = _get("method") or _get("solver")
+    if method is not None:
+        out["solver"] = str(method)
+
+    # Bridge CanonicalFitResult attributes to LeaderboardRow columns
+    if "grip_rmse_mm" not in out or out["grip_rmse_mm"] is None:
+        final_rmse = _get("final_rmse_m")
+        if final_rmse is not None:
+            out["grip_rmse_mm"] = float(final_rmse) * 1000.0
+            if "clubhead_rmse_mm" not in out or out["clubhead_rmse_mm"] is None:
+                out["clubhead_rmse_mm"] = float(final_rmse) * 1000.0
+
+    if "total_work_J" not in out or out["total_work_J"] is None:
+        work = _get("final_total_work_J")
+        out["total_work_J"] = float(work) if work is not None else 0.0
+
+    if "body_marker_rmse_mm" not in out or out["body_marker_rmse_mm"] is None:
+        out["body_marker_rmse_mm"] = 0.0
+
+    if "commit" not in out or not out["commit"]:
+        commit = _get("git_commit")
+        if commit:
+            out["commit"] = str(commit)
+
+    if "run_at" not in out or not out["run_at"]:
+        run_at = _get("timestamp_utc")
+        if run_at:
+            out["run_at"] = str(run_at)
+
+    if "run_at" in out and isinstance(out["run_at"], str):
+        if out["run_at"].endswith("+00:00"):
+            out["run_at"] = out["run_at"][:-6] + "Z"
+
     return out
 
 
@@ -305,25 +413,80 @@ def _write_engine_json(
 # --- Run loop ----------------------------------------------------------------
 
 
+def _handle_unavailable_engine(
+    trial: str,
+    engine: str,
+    results_dir: Path,
+) -> str:
+    """Write an explicit unavailable payload for an engine with known missing runtime."""
+    reason = KNOWN_UNAVAILABLE[engine]
+    payload = {
+        "trial": trial,
+        "engine": engine,
+        "solver": f"unavailable: {reason}",
+        "status": f"unavailable: {reason}",
+        "grip_rmse_mm": None,
+        "clubhead_rmse_mm": None,
+        "body_marker_rmse_mm": None,
+        "total_work_J": None,
+        "wall_clock_s": 0.0,
+        "commit": _git_commit(),
+        "run_at": _now_iso(),
+    }
+    _write_engine_json(results_dir, trial, engine, payload)
+    return "unavailable"
+
+
 def run_one_engine(
     trial: str,
     engine: str,
     target: Any,
     results_dir: Path,
     strict: bool,
+    json_path: Path | None = None,
 ) -> str:
     """Run a single (trial, engine) cell. Returns one of ``ok``, ``skip``,
-    ``error``.
+    ``error``, ``unavailable``.
     """
-    fit_fn = _load_fit_driver(engine)
-    if fit_fn is None:
+    if engine in KNOWN_UNAVAILABLE:
+        return _handle_unavailable_engine(trial, engine, results_dir)
+
+    driver = _load_fit_driver(engine)
+    if driver is None:
         return "skip"
     t0 = time.perf_counter()
     try:
-        result = fit_fn(target)
-    except NotImplementedError as exc:
+        if hasattr(driver, "fit_swing"):
+            from src.shared.python.motion_matching.provider import FitOptions
+
+            if (
+                engine == "mujoco"
+                and hasattr(target, "time")
+                and target.time.shape[0] != 301
+            ):
+                from src.engines.physics_engines.mujoco.python.motion_matching.fit_swing import (
+                    FitOptions as MujocoFitOptions,
+                    SimOptions,
+                )
+
+                dt = (
+                    float(target.time[1] - target.time[0])
+                    if len(target.time) > 1
+                    else 0.001
+                )
+                rate = round(1.0 / dt) if dt > 0 else 1000
+                m_opts = MujocoFitOptions(
+                    sim=SimOptions(T_s=float(target.time[-1]), output_rate_hz=rate)
+                )
+                opts = FitOptions(maxiter=200, engine_options=m_opts)
+            else:
+                opts = FitOptions(maxiter=200)
+            result = driver.fit_swing(target, opts)
+        else:
+            result = driver(target)
+    except (NotImplementedError, ModuleNotFoundError, ImportError) as exc:
         LOGGER.info(
-            "engine %s for trial %s: not implemented yet (%s) - skipping",
+            "engine %s for trial %s: not available or not implemented (%s) - skipping",
             engine,
             trial,
             exc,
@@ -345,14 +508,41 @@ def run_one_engine(
     # Some drivers report wall clock themselves; if absent, use ours.
     payload.setdefault("wall_clock_s", float(elapsed))
     _write_engine_json(results_dir, trial, engine, payload)
+
+    if json_path is not None:
+        try:
+            from src.shared.python.motion_matching.leaderboard import append_row
+
+            ver = (
+                driver.engine_version()
+                if hasattr(driver, "engine_version")
+                else "unknown"
+            )
+            append_row(engine, result, ver, json_path=json_path, target_id=trial)
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("Could not append to JSON leaderboard: %s", exc)
+
     LOGGER.info("engine %s for trial %s: ok (%.3fs)", engine, trial, elapsed)
     return "ok"
 
 
-def run_all(args: argparse.Namespace) -> dict[str, dict[str, str]]:
+def run_all(
+    args: argparse.Namespace,
+    json_path: Path | None = None,
+) -> dict[str, dict[str, str]]:
     """Drive every (trial, engine) cell. Returns a status grid suitable
     for printing a summary at the end.
     """
+    trials_dir: Path | None = None
+    if getattr(args, "trials", None):
+        p = Path(args.trials)
+        if p.is_dir():
+            trials_dir = p
+            if not args.trial:
+                json_files = sorted(p.glob("*.json"))
+                if json_files:
+                    args.trial = [f.stem for f in json_files]
+
     trials = tuple(args.trial) if args.trial else CANONICAL_TRIALS
     engines = tuple(args.engine) if args.engine else CANONICAL_ENGINES
     grid: dict[str, dict[str, str]] = {
@@ -365,7 +555,7 @@ def run_all(args: argparse.Namespace) -> dict[str, dict[str, str]]:
 
     for trial in trials:
         try:
-            target = _load_target(trial)
+            target = _load_target(trial, trials_dir=trials_dir)
         except (ImportError, FileNotFoundError, KeyError, ValueError) as exc:
             LOGGER.warning(
                 "trial %s: target unavailable (%s) - skipping all engines", trial, exc
@@ -373,7 +563,12 @@ def run_all(args: argparse.Namespace) -> dict[str, dict[str, str]]:
             continue
         for engine in engines:
             grid[trial][engine] = run_one_engine(
-                trial, engine, target, args.results_dir, args.strict
+                trial,
+                engine,
+                target,
+                args.results_dir,
+                args.strict,
+                json_path=json_path,
             )
     return grid
 
@@ -388,14 +583,35 @@ def main(argv: list[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
+    json_path: Path | None = None
+    if getattr(args, "out", None):
+        out_base = Path(args.out)
+        if out_base.suffix == ".md":
+            args.leaderboard_path = out_base
+            json_path = out_base.with_suffix(".json")
+        elif out_base.suffix == ".json":
+            json_path = out_base
+            args.leaderboard_path = out_base.with_suffix(".md")
+        else:
+            args.leaderboard_path = out_base.with_suffix(".md")
+            json_path = out_base.with_suffix(".json")
+    else:
+        env_json = os.environ.get("UD_LEADERBOARD_JSON_PATH", "").strip()
+        if env_json:
+            json_path = Path(env_json)
+
     if not args.results_dir.exists():
         args.results_dir.mkdir(parents=True, exist_ok=True)
 
-    grid = run_all(args)
+    grid = run_all(args, json_path=json_path)
 
     generate_report = _load_generate_report()
     out = generate_report(args.results_dir, args.leaderboard_path)
     LOGGER.info("leaderboard written: %s", out)
+
+    if json_path is not None and not json_path.exists():
+        json_path.parent.mkdir(parents=True, exist_ok=True)
+        json_path.write_text("[]\n", encoding="utf-8")
 
     # Print a small status grid so reviewers can see at a glance which
     # engines were skipped honestly.

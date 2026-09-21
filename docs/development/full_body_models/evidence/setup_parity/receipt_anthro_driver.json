@@ -1,0 +1,46 @@
+{
+  "issue": "#10099",
+  "run": "anthro_driver",
+  "club": {
+    "grip_mass_kg": 0.05,
+    "head_mass_kg": 0.198,
+    "length_m": 1.156,
+    "name": "driver",
+    "shaft_mass_kg": 0.065,
+    "total_mass_kg": 0.313,
+    "wrist_to_head_m": 1.1239999999999999
+  },
+  "timestamp_utc": "2026-09-16T20:15:03.406097+00:00",
+  "spec": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver\\full_body_spec_hipcal_scaled.json",
+  "spec_sha256": "1183f05bd9ea7b5adad7c92a995c8aa340b5dac3a388f4f69c6df89ef8ea3484",
+  "trajectory_sha256": "dfa9fe58e060676a92ba068f138d87eed114f2f15574abfd5f096f8be5d35c2e",
+  "pose": "frame 0 of the ground-support IK trajectory, by coordinate name",
+  "coordinates": 44,
+  "total_mass_kg": 79.3584923989728,
+  "tolerances": {
+    "position_m": 1e-5,
+    "rotation_rad": 2e-5
+  },
+  "engines": {
+    "mujoco": {
+      "frames": 17,
+      "passed": true,
+      "reference": true
+    },
+    "drake": {
+      "max_position_error_m": 6.3361069063758595e-6,
+      "max_rotation_error_rad": 1.0525558382885336e-5,
+      "worst_frame": "RW",
+      "frames": 17,
+      "passed": true
+    },
+    "pinocchio": {
+      "max_position_error_m": 4.967007407645019e-16,
+      "max_rotation_error_rad": 4.712160915387242e-8,
+      "worst_frame": "Clubhead",
+      "frames": 17,
+      "passed": true
+    }
+  },
+  "translation_rule": "a pose is a mapping coordinate name -> value in the document's coordinate_order; every adapter's frame_poses takes that mapping"
+}

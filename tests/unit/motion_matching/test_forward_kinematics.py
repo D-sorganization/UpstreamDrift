@@ -53,3 +53,26 @@ def test_fk_evaluator_clubhead_distance_matches_shaft_length() -> None:
     pose = forward_kinematics({}, lengths=lengths)
     d = np.linalg.norm(pose["clubhead"] - pose["butt"])
     assert d == pytest.approx(1.05, abs=1e-9)
+
+
+def test_fk_evaluator_default_excludes_lower_body_landmarks() -> None:
+    pose = forward_kinematics({})
+    assert len(pose.points) == 13
+    assert "l_hip" not in pose.points
+    assert "l_knee" not in pose.points
+
+
+def test_fk_evaluator_include_lower_body_adds_lower_limb_landmarks() -> None:
+    pose = forward_kinematics({}, include_lower_body=True)
+    assert len(pose.points) == 21
+    expected_lower = {
+        "l_hip",
+        "r_hip",
+        "l_knee",
+        "r_knee",
+        "l_ankle",
+        "r_ankle",
+        "l_foot",
+        "r_foot",
+    }
+    assert expected_lower.issubset(pose.points.keys())

@@ -46,6 +46,13 @@ class NativeMujocoFullBodyModel:
         self.data = mj.MjData(self.model)
 
         self.coordinate_order: list[str] = list(self.metadata["coordinate_order"])
+        self.upper_body_coordinates = int(spec["upper_body_counts"]["coordinates"])
+        # MJCF bodies sit at their joint follower frame; this maps a point given
+        # in the specification's body frame into the MuJoCo body frame.
+        self.body_frames: dict[str, np.ndarray] = {
+            joint["child"]: np.linalg.inv(np.asarray(joint["child_to_follower"], float))
+            for joint in spec["joints"]
+        }
         self._indices: dict[str, int] = {}
         for name in self.coordinate_order:
             j = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_JOINT, name)
@@ -133,24 +140,26 @@ class NativeMujocoFullBodyModel:
 
         return samples
 
-    def accelerations(
+    def generalized_forces(
         self,
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
-        primitive_efforts: Mapping[str, float],
-    ) -> dict[str, float]:
-        """Solve constrained dynamics with applied contact forces and dual-grip weld."""
+    ) -> tuple[np.ndarray, np.ndarray, dict[str, ContactSample]]:
+        """Return (bias, contact, samples) so that ``M a = effort + contact - bias``.
+
+        ``bias`` is MuJoCo's Coriolis, centrifugal and gravity term; ``contact``
+        is the shared law's spatial forces mapped through the sphere Jacobians.
+        Postcondition: the model state is left at ``(coordinates, rates)`` with
+        position and velocity stages computed.
+        """
         mj, model, data = self._mj, self.model, self.data
-        effort = self._vector(primitive_efforts)
         _prepare_forward_dynamics(
             mj, model, data, self._vector(coordinates), self._vector(rates)
         )
-
-        # Evaluate and apply contact forces
         samples = self.evaluate_contact_samples(coordinates, rates)
+        mj.mj_fwdVelocity(model, data)
         data.xfrc_applied[:] = 0.0
         tau_contact = np.zeros(model.nv)
-
         for s_name, sample in samples.items():
             f_contact = sample.normal_force_n + sample.friction_force_n
             if np.linalg.norm(f_contact) <= 0.0:
@@ -166,12 +175,27 @@ class NativeMujocoFullBodyModel:
             jac_pos = np.zeros((3, model.nv))
             mj.mj_jacSite(model, data, jac_pos, None, site_id)
             tau_contact += jac_pos.T @ f_contact
+        return data.qfrc_bias.copy(), tau_contact, samples
+
+    def accelerations(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        primitive_efforts: Mapping[str, float],
+    ) -> dict[str, float]:
+        """Solve constrained dynamics with applied contact forces and dual-grip weld."""
+        mj, model, data = self._mj, self.model, self.data
+        effort = self._vector(primitive_efforts)
+        bias, tau_contact, _ = self.generalized_forces(coordinates, rates)
 
         mass = np.zeros((model.nv, model.nv))
-        mj.mj_fullM(model, mass, data.qM)
+        if hasattr(data, "qM"):
+            mj.mj_fullM(model, mass, data.qM)
+        else:
+            mj.mj_fullM(model, data, mass)
 
         jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
-        total_effort = effort + tau_contact - data.qfrc_bias
+        total_effort = effort + tau_contact - bias
         acceleration = _solve_kkt_dynamics(mass, total_effort, jac, drift)
 
         if not np.isfinite(acceleration).all():
@@ -188,3 +212,7 @@ class NativeMujocoFullBodyModel:
         if self._errors is None:
             raise ValueError("Evaluate acceleration before closure errors")
         return self._errors[0].copy(), self._errors[1].copy()
+
+    def evaluate_weld_closure(self) -> tuple[np.ndarray, np.ndarray]:
+        """Evaluate weld closure Jacobian and drift for dual-grip constraint."""
+        return _evaluate_weld_closure(self._mj, self.model, self.data, self._closure)

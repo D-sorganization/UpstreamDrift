@@ -1,0 +1,28 @@
+{
+  "candidate_sha256": "a9a0fa8eb20aa1b1a4e8a4c885cc13d2d1cfe750755357eee0de25354373ee56",
+  "engine": "mujoco",
+  "replay_npz": "mujoco_returned81_replay.npz",
+  "gif": "mujoco_returned81.gif",
+  "metrics": {
+    "whole_rms_m": 0.026366145791017103,
+    "early_rms_m": 0.011426891719752068,
+    "terminal_rms_m": 0.04630540451857026,
+    "club_cluster_rms_m": 0.015955421510975575,
+    "pelvis_yaw_error_pct": 13.92337475188468
+  },
+  "marker_diff_vs_pinocchio": {
+    "max_abs_m": 2.345346139520643e-15,
+    "mean_abs_m": 1.9585670324674253e-16
+  },
+  "render_config": {
+    "resolution": [240, 320],
+    "stride": 3,
+    "frames": 103,
+    "camera": {
+      "distance": 3.2,
+      "azimuth": 135.0,
+      "elevation": -12.0,
+      "lookat": [0.792750334739685, 0.02261839252896607, 1.026339223831892]
+    }
+  }
+}

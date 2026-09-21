@@ -55,8 +55,8 @@
   "joint_count": 23,
   "input_sha256": {
     "docs/development/full_body_models/full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
-    "docs/development/full_body_models/evidence/fb4_calibration/mujoco/ik_trajectory.npz": "f955a751da8bf6f6f45ee0919fdec29b2cfcc590a95b674dc42829fe61a1fa9c",
-    "docs/development/full_body_models/evidence/fb4_calibration/mujoco/calibrated_offsets.json": "45d597b8ffd8af33d664aabdc91c8b6b0da9460efa15eb79f49df8fd911e763e",
+    "docs/development/full_body_models/evidence/fb4_calibration/mujoco/ik_trajectory.npz": "9ccbd165a02179dc628caf5c3eb8d3b6a089c46e86e531b007632bba642c54db",
+    "docs/development/full_body_models/evidence/fb4_calibration/mujoco/calibrated_offsets.json": "05d2ec360abb172478cd3554968e3930dbb0a74f959b4bcf63443ca7400c8911",
     "data/C3D_TA_Driver.c3d": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
   },
   "runs": [
@@ -66,29 +66,29 @@
       "time_grid_exact": true,
       "rtol": 1e-5,
       "atol": 1.0000000000000001e-7,
-      "ground_height_m": -1.3343133162022776,
+      "ground_height_m": -1.6702734395226526,
       "ground_unchanged": true,
-      "wall_time_s": 0.08125549997203052,
+      "wall_time_s": 0.0612097000121139,
       "contact": {
-        "max_normal_force_n": 32.03255147532959,
-        "max_friction_force_n": 17.095342880619825,
-        "max_penetration_m": 0.0006436511819118695,
+        "max_normal_force_n": 83.66100128776439,
+        "max_friction_force_n": 56.97187030630296,
+        "max_penetration_m": 0.0015751956902151087,
         "per_sphere_max_force_n": {
           "heel_r": 0.0,
-          "forefoot_r": 32.03255147532959,
-          "heel_l": 0.0,
+          "forefoot_r": 0.0,
+          "heel_l": 83.66100128776439,
           "forefoot_l": 0.0
         },
         "per_sphere_contact_ratio": {
           "heel_r": 0.0,
-          "forefoot_r": 0.9,
-          "heel_l": 0.0,
+          "forefoot_r": 0.0,
+          "heel_l": 1.0,
           "forefoot_l": 0.0
         }
       },
-      "max_closure_translation_m": 1.2656872753122124,
-      "max_closure_rotation_rad": 2.350290198363639,
-      "legacy_mixed_unit_closure_value": 2.669424712444861,
+      "max_closure_translation_m": 0.013732514257128818,
+      "max_closure_rotation_rad": 1.6570337906946455,
+      "legacy_mixed_unit_closure_value": 1.6570906931884195,
       "native_qpos_order": [
         "TranslationInputX",
         "TranslationInputY",
@@ -133,10 +133,10 @@
         "mtp_angle_l"
       ],
       "declared_order_matches_native_qpos": false,
-      "ik_initial_grip_translation_m": 1.265687275312212,
-      "dynamics_initial_grip_translation_m": 1.265687275312212,
-      "max_grip_translation_m": 1.2656872753122124,
-      "max_grip_rotation_rad": 2.350290198363639,
+      "ik_initial_grip_translation_m": 0.013732514257128818,
+      "dynamics_initial_grip_translation_m": 0.013732514257128818,
+      "max_grip_translation_m": 0.013732514257128818,
+      "max_grip_rotation_rad": 1.6570337906946455,
       "native_state": {
         "nq": 41,
         "nv": 41
@@ -148,29 +148,29 @@
       "time_grid_exact": true,
       "rtol": 1e-5,
       "atol": 1.0000000000000001e-7,
-      "ground_height_m": -1.3343133162022776,
+      "ground_height_m": -1.6702734395226526,
       "ground_unchanged": true,
-      "wall_time_s": 0.07533139997394755,
+      "wall_time_s": 0.05740079999668524,
       "contact": {
-        "max_normal_force_n": 32.03255147532959,
-        "max_friction_force_n": 17.095342880619825,
-        "max_penetration_m": 0.0006436511819118695,
+        "max_normal_force_n": 83.66100128776439,
+        "max_friction_force_n": 56.97187030630296,
+        "max_penetration_m": 0.0015751956902151087,
         "per_sphere_max_force_n": {
           "heel_r": 0.0,
-          "forefoot_r": 32.03255147532959,
-          "heel_l": 0.0,
+          "forefoot_r": 0.0,
+          "heel_l": 83.66100128776439,
           "forefoot_l": 0.0
         },
         "per_sphere_contact_ratio": {
           "heel_r": 0.0,
-          "forefoot_r": 0.9,
-          "heel_l": 0.0,
+          "forefoot_r": 0.0,
+          "heel_l": 1.0,
           "forefoot_l": 0.0
         }
       },
-      "max_closure_translation_m": 1.2656872753122124,
-      "max_closure_rotation_rad": 2.350290198363639,
-      "legacy_mixed_unit_closure_value": 2.669424712444861,
+      "max_closure_translation_m": 0.013732514257128818,
+      "max_closure_rotation_rad": 1.6570337906946455,
+      "legacy_mixed_unit_closure_value": 1.6570906931884195,
       "native_qpos_order": [
         "TranslationInputX",
         "TranslationInputY",
@@ -215,10 +215,10 @@
         "mtp_angle_l"
       ],
       "declared_order_matches_native_qpos": false,
-      "ik_initial_grip_translation_m": 1.265687275312212,
-      "dynamics_initial_grip_translation_m": 1.265687275312212,
-      "max_grip_translation_m": 1.2656872753122124,
-      "max_grip_rotation_rad": 2.350290198363639,
+      "ik_initial_grip_translation_m": 0.013732514257128818,
+      "dynamics_initial_grip_translation_m": 0.013732514257128818,
+      "max_grip_translation_m": 0.013732514257128818,
+      "max_grip_rotation_rad": 1.6570337906946455,
       "native_state": {
         "nq": 41,
         "nv": 41
@@ -230,29 +230,29 @@
       "time_grid_exact": true,
       "rtol": 1e-6,
       "atol": 1e-8,
-      "ground_height_m": -1.3343133162022776,
+      "ground_height_m": -1.6702734395226526,
       "ground_unchanged": true,
-      "wall_time_s": 0.08549490000586957,
+      "wall_time_s": 0.09951509995153174,
       "contact": {
-        "max_normal_force_n": 32.03260166895625,
-        "max_friction_force_n": 17.096396872904876,
-        "max_penetration_m": 0.0006436525185779807,
+        "max_normal_force_n": 83.66092478771469,
+        "max_friction_force_n": 56.97183348565773,
+        "max_penetration_m": 0.0015751940518059226,
         "per_sphere_max_force_n": {
           "heel_r": 0.0,
-          "forefoot_r": 32.03260166895625,
-          "heel_l": 0.0,
+          "forefoot_r": 0.0,
+          "heel_l": 83.66092478771469,
           "forefoot_l": 0.0
         },
         "per_sphere_contact_ratio": {
           "heel_r": 0.0,
-          "forefoot_r": 0.9,
-          "heel_l": 0.0,
+          "forefoot_r": 0.0,
+          "heel_l": 1.0,
           "forefoot_l": 0.0
         }
       },
-      "max_closure_translation_m": 1.2656872753122121,
-      "max_closure_rotation_rad": 2.3502901983636693,
-      "legacy_mixed_unit_closure_value": 2.6694247124449038,
+      "max_closure_translation_m": 0.013732514257128818,
+      "max_closure_rotation_rad": 1.6570337906946235,
+      "legacy_mixed_unit_closure_value": 1.6570906931883962,
       "native_qpos_order": [
         "TranslationInputX",
         "TranslationInputY",
@@ -297,10 +297,10 @@
         "mtp_angle_l"
       ],
       "declared_order_matches_native_qpos": false,
-      "ik_initial_grip_translation_m": 1.265687275312212,
-      "dynamics_initial_grip_translation_m": 1.265687275312212,
-      "max_grip_translation_m": 1.2656872753122121,
-      "max_grip_rotation_rad": 2.3502901983636693,
+      "ik_initial_grip_translation_m": 0.013732514257128818,
+      "dynamics_initial_grip_translation_m": 0.013732514257128818,
+      "max_grip_translation_m": 0.013732514257128818,
+      "max_grip_rotation_rad": 1.6570337906946235,
       "native_state": {
         "nq": 41,
         "nv": 41
@@ -316,12 +316,12 @@
     "max_rotation_difference": 0.0
   },
   "refined_q": {
-    "max_translation_difference": 2.37423414262139e-10,
-    "max_rotation_difference": 2.6674344091870417e-7
+    "max_translation_difference": 2.0234125486240373e-10,
+    "max_rotation_difference": 7.347326588108549e-8
   },
   "refined_v": {
-    "max_translation_difference": 3.683703743428968e-8,
-    "max_rotation_difference": 5.4441449579556433e-5
+    "max_translation_difference": 1.780688634600569e-7,
+    "max_rotation_difference": 6.588992478961941e-5
   },
   "environment": {
     "python": "3.13.5",
@@ -329,7 +329,7 @@
     "mujoco": "3.3.4",
     "numpy": "2.4.1"
   },
-  "git_commit": "9814c348796260f3b8377bd2e304f471d500584b",
+  "git_commit": "accff8b8ad899b30322e8a7226a5527db1c21527",
   "probe_sha256": "9bd29f6352ae268fcef0cffff84e8f3185a28b9604c8a1210e0b3c59d9155b84",
   "source_sha256": {
     "scripts/shadow_tracker/model_probe.py": "9bd29f6352ae268fcef0cffff84e8f3185a28b9604c8a1210e0b3c59d9155b84",
@@ -338,8 +338,8 @@
     "src/engines/physics_engines/mujoco/python/full_body_ik.py": "704f7b479575b285fcf7b52e19719f0734ab3081073a87e65ca70e671f75344d",
     "src/engines/physics_engines/mujoco/python/full_body_mjcf.py": "8f47f33783b335fcea2da7b9755b9cf6d4ad02ff902d48f41656816fd2a68381",
     "src/engines/physics_engines/mujoco/python/native_model.py": "1713e4f4e36c2a2ab1995606fb4336286c3b2300c8e1d455c7b7f060023da623",
-    "src/shared/python/motion_matching/full_body_forward_dynamics.py": "5e0cd83ab00b11e786340d2dfdaccd79119f748c9de990f733b26d9c07cb2547",
-    "src/shared/python/motion_matching/contact_law.py": "6de93f7c866da72562e34555e996a6900cf6a80057ffed04de3a5098e055109c"
+    "src/shared/python/motion_matching/full_body_forward_dynamics.py": "d66890b04cec3d6972468954c95af1b754bd3fba87c7804d1989b83a0eb661a2",
+    "src/shared/python/motion_matching/contact_law.py": "b25f2b1afb7a00293993b10ce042f951732eb0dc035f215a4a6d6dd22c090966"
   },
-  "timestamp_utc": "2026-09-15T03:24:42.612216+00:00"
+  "timestamp_utc": "2026-09-15T05:32:56.659291+00:00"
 }

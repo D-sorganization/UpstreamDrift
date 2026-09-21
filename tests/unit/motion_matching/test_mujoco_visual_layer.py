@@ -43,6 +43,7 @@ def test_visual_export_adds_geoms_but_keeps_physics_identical() -> None:
     np.testing.assert_allclose(d_visual.qacc, d_plain.qacc, atol=1e-9)
 
 
+@pytest.mark.requires_gl
 def test_visual_export_renders_offscreen(tmp_path: Path) -> None:
     mujoco = pytest.importorskip("mujoco")
     xml, _ = exporter.export_full_body_mjcf(FULL_BODY.read_bytes(), visual=True)
@@ -57,3 +58,28 @@ def test_visual_export_renders_offscreen(tmp_path: Path) -> None:
     image = renderer.render()
     assert image.shape == (120, 160, 3)
     assert image.mean() > 5.0  # not a black frame: floor and lit capsules visible
+
+
+def test_whole_body_com_and_scene_markers(tmp_path: Path) -> None:
+    import mujoco
+
+    from src.engines.physics_engines.mujoco.python import visual_layer
+
+    xml, _ = exporter.export_full_body_mjcf(FULL_BODY.read_bytes(), visual=True)
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    com = visual_layer.whole_body_com(model, data)
+    masses = model.body_mass[1:]
+    expected = (masses[:, None] * data.xipos[1:]).sum(axis=0) / masses.sum()
+    np.testing.assert_allclose(com, expected, atol=1e-9)
+    scene = mujoco.MjvScene(model, maxgeom=4000)
+    option = mujoco.MjvOption()
+    mujoco.mjv_updateScene(
+        model, data, option, None, mujoco.MjvCamera(), mujoco.mjtCatBit.mjCAT_ALL, scene
+    )
+    before = scene.ngeom
+    visual_layer.add_com_markers(scene, model, data, 0.0)
+    assert scene.ngeom == before + 2
+    with pytest.raises(ValueError):
+        visual_layer.add_scene_marker(scene, com, -0.01, (1, 0, 0, 1))

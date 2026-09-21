@@ -3,7 +3,8 @@
 ## Verdict
 
 **The existing MuJoCo model executes, but is not qualified for Shadow Tracker.**
-ST-01 remains open. Source/mask/camera bookkeeping can proceed under
+ST-01 scientific acceptance remains incomplete regardless of issue state.
+Source/mask/camera bookkeeping can proceed under
 [Contract Freeze](CONTRACT_FREEZE.md); fitting and scientific claims stay blocked.
 
 ## Measured Evidence
@@ -17,21 +18,28 @@ The model has 24 bodies, 23 joints and 41 scalar coordinates (`nq=nv=41`).
 - All three integrations returned the requested times and finite states.
 - Repeated nominal q/v traces were identical in this environment.
 - Ground calibration stayed fixed across each run.
-- Tighter integration tolerances changed translation by about 2.4e-10 m and
-  rotation by about 2.7e-7 rad over this short window.
-- Yet the named-coordinate dynamics path reports about **1.266 m of grip
-  displacement and 2.350 rad of grip rotation**. Numerical repeatability is
-  therefore not evidence of a valid pose or grip.
-- The native-order mismatch between `MujocoFullBodyIK.pose_fn` and `NativeMujocoFullBodyModel`
-  was addressed in #10140 (PR #10164): `MujocoFullBodyIK` now aligns coordinates with
-  native qpos layout via precomputed indexing, establishing exact forward kinematics parity.
-- When evaluated with aligned coordinates, the historical stored IK pose vector
-  (`docs/development/full_body_models/evidence/fb4_calibration/mujoco/ik_trajectory.npz`)
-  reveals identical grip displacement (1.266 m) at both the IK and dynamics boundaries.
-  This confirms that the stored trajectory itself was generated under the legacy coordinate
-  scrambling and must be recomputed before model qualification.
+- Tighter integration tolerances changed translation by about 2.0e-10 m and
+  rotation by about 7.3e-8 rad over this short window.
+- Historical scrambled baseline (commit `9814c348`): reported **1.266 m of grip
+  displacement and 2.350 rad of grip rotation** due to legacy `qpos[i] = q_arr[i]`
+  sequential copying in `MujocoFullBodyIK` (#10068).
+- Coordinate mapping fix (#10140, PR #10164): aligned `MujocoFullBodyIK` with native
+  `qpos` DOF addresses via precomputed `_qpos_indices`, establishing exact FK parity.
+- Regenerated evidence (#10167):
+  - Calibrated marker offsets re-solved on 34 markers (subsample RMS: 145.2 mm vs legacy 174.5 mm).
+  - 654-frame full trajectory IK re-solved (mean frame RMS: 133.7 mm vs legacy 157.7 mm;
+    total RMS: 138.1 mm vs legacy 159.5 mm).
+  - Initial grip translation error dropped from **1.265687 m down to 0.013733 m (13.7 mm)**,
+    matching exactly across both IK and forward dynamics paths.
+  - Initial grip rotation error improved from 2.350 rad to 1.657 rad.
+  - Historical evidence is preserved in `docs/development/full_body_models/evidence/fb4_calibration/mujoco/historical/`
+    and `docs/plans/shadow_tracker/evidence/model_probe_10_frames_historical_scrambled.json`.
+- Physical acceptance status: Despite the 92x improvement in translation closure, the rollout
+  **remains scientifically unqualified** (`scientifically_qualified: false`). The 13.7 mm translation
+  residual exceeds the 5 mm physical tolerance, and rotation residual (1.657 rad) exceeds the 0.05 rad
+  tolerance. `ForwardRolloutResult.is_closure_accepted()` fails closed as required.
 - Production closure units separation was implemented in #10141 (PR #10165):
-  `ForwardRolloutResult` and `EngineReplayOutcome` now record `max_closure_translation_m`
+  `ForwardRolloutResult` and `EngineReplayOutcome` record `max_closure_translation_m`
   and `max_closure_rotation_rad` separately and enforce physical tolerance checks via
   `is_accepted()`. Under these physical criteria, the rollout is rejected despite solver success.
 

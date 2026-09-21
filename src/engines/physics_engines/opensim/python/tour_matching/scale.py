@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 import numpy as np
+import math
 
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
@@ -81,7 +82,8 @@ def _segment_distance(
     """Compute Euclidean distance between proximal and distal marker centroids at a frame."""
     p_prox = _centroid_points(capture, proximal_labels, frame)
     p_dist = _centroid_points(capture, distal_labels, frame)
-    return float(np.linalg.norm(p_prox - p_dist))
+    diff = p_prox - p_dist
+    return float(math.sqrt(np.vdot(diff, diff)))  # Bolt optimization
 
 
 # Segment definitions: (proximal_labels, distal_labels, description)
@@ -163,6 +165,68 @@ def _validate_scale_inputs(
             )
 
 
+def _marker_is_valid(capture: TourCapture, label: str, frame: int) -> bool:
+    """Check if a marker is present and valid at a given frame."""
+    if label not in capture.labels:
+        return False
+    idx = capture.index(label)
+    return bool(
+        capture.valid[frame, idx] and np.isfinite(capture.points_m[frame, idx]).all()
+    )
+
+
+def _humerus_distance(
+    capture: TourCapture,
+    side: str,
+    frame: int,
+) -> tuple[float, str]:
+    """Compute humerus segment distance with bilateral acromion proxy correction.
+
+    When both Top and Back shoulder markers are valid, uses their centroid.
+    When one side is missing the Top marker (e.g. RShoulderTop occluded at address),
+    reconstructs the acromion proxy distance using the contralateral side's
+    (centroid / back) ratio to prevent artificial length inflation.
+    """
+    top_label = f"{side}ShoulderTop"
+    back_label = f"{side}ShoulderBack"
+    elbow_label = f"{side}ElbowOut"
+
+    has_top = _marker_is_valid(capture, top_label, frame)
+    has_back = _marker_is_valid(capture, back_label, frame)
+
+    if has_top and has_back:
+        d = _segment_distance(capture, (top_label, back_label), (elbow_label,), frame)
+        return d, f"shoulder_{side.lower()} centroid to {elbow_label}"
+
+    if has_back:
+        # Check if contralateral side has both markers to supply a geometric ratio
+        contra = "L" if side == "R" else "R"
+        c_top = f"{contra}ShoulderTop"
+        c_back = f"{contra}ShoulderBack"
+        c_elbow = f"{contra}ElbowOut"
+        if _marker_is_valid(capture, c_top, frame) and _marker_is_valid(
+            capture, c_back, frame
+        ):
+            d_c_cent = _segment_distance(capture, (c_top, c_back), (c_elbow,), frame)
+            d_c_back = _segment_distance(capture, (c_back,), (c_elbow,), frame)
+            ratio = d_c_cent / d_c_back if d_c_back > 0 else 1.0
+            d_back = _segment_distance(capture, (back_label,), (elbow_label,), frame)
+            d = d_back * ratio
+            return (
+                d,
+                f"{back_label} to {elbow_label} reconstructed via contralateral centroid/back ratio ({ratio:.4f})",
+            )
+        # Fallback to back marker alone
+        d = _segment_distance(capture, (back_label,), (elbow_label,), frame)
+        return d, f"{back_label} fallback to {elbow_label}"
+
+    if has_top:
+        d = _segment_distance(capture, (top_label,), (elbow_label,), frame)
+        return d, f"{top_label} fallback to {elbow_label}"
+
+    raise ValueError(f"Neither {top_label} nor {back_label} is valid at frame {frame}")
+
+
 def estimate_segment_scales(
     capture: TourCapture,
     *,
@@ -183,16 +247,25 @@ def estimate_segment_scales(
     for seg, (prox_labels, dist_labels, desc) in SEGMENT_DEFINITIONS.items():
         if seg not in nominal:
             continue
-        d0 = _segment_distance(capture, prox_labels, dist_labels, frame=0)
+
+        if seg in ("humerus_r", "humerus_l"):
+            side = "R" if seg == "humerus_r" else "L"
+            d0, prov_desc = _humerus_distance(capture, side, frame=0)
+            series = [
+                _humerus_distance(capture, side, frame=f)[0]
+                for f in range(evaluation_frames)
+            ]
+        else:
+            d0 = _segment_distance(capture, prox_labels, dist_labels, frame=0)
+            prov_desc = desc
+            series = [
+                _segment_distance(capture, prox_labels, dist_labels, frame=f)
+                for f in range(evaluation_frames)
+            ]
+
         measured[seg] = d0
         scales[seg] = d0 / nominal[seg]
-        provenance[seg] = desc
-
-        # Evaluate rigid assumption across first evaluation_frames
-        series = [
-            _segment_distance(capture, prox_labels, dist_labels, frame=f)
-            for f in range(evaluation_frames)
-        ]
+        provenance[seg] = prov_desc
         residuals[seg] = float(np.std(series))
 
     return SegmentScaleResult(

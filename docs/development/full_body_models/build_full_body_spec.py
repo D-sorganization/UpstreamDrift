@@ -90,11 +90,15 @@ def transform(rotation: np.ndarray, translation: np.ndarray) -> np.ndarray:
     return t
 
 
-# Permutation Q with det +1 mapping our primitive axes onto OpenSim's:
-# Rx' about OpenSim z, Ry' about OpenSim x, Rz' about OpenSim y (hip sequence Z,X,Y).
-HIP_PERMUTATION = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=float).T
-# Rz' about the offset frame x axis (walker knee primary axis).
-KNEE_PERMUTATION = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=float)
+# Permutations Q (det +1) whose COLUMNS are the OpenSim axes our primitives turn
+# about: the base frame is ``offset_frame @ Q`` so primitive Rx' turns about
+# Q[:, 0], Ry' about Q[:, 1] and Rz' about Q[:, 2].
+# Hip (OpenSim sequence Z, X, Y): Rx' about z, Ry' about x, Rz' about y.
+HIP_PERMUTATION = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=float)
+# Walker knee: the single primitive Rz' turns about the offset frame x axis.
+KNEE_PERMUTATION = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]], dtype=float)
+# v1 (spec SHA 06272a18...) had these two matrices swapped, so hip flexion turned
+# about the femur's long axis and the knee about the femur's y axis; v2 fixes it.
 
 
 def read_osim(osim: Path) -> tuple[dict, dict]:
@@ -323,7 +327,7 @@ def main() -> int:
         ),
     )
     args.output.mkdir(parents=True, exist_ok=True)
-    spec_path = save_full_body_spec(document, args.output / "full_body_spec_v1.json")
+    spec_path = save_full_body_spec(document, args.output / "full_body_spec_v2.json")
     receipt = {
         "spec_sha256": canonical_sha256(document),
         "spec_file_sha256": sha(spec_path),
@@ -355,7 +359,7 @@ def main() -> int:
             if m["offset_m"] is not None
         ),
     }
-    (args.output / "build_receipt.json").write_text(
+    (args.output / "build_receipt_v2.json").write_text(
         json.dumps(receipt, indent=2) + "\n"
     )
     return 0

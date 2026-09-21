@@ -1,0 +1,142 @@
+[
+  {
+    "body": "Clubface Vector",
+    "length_m": 0.9084,
+    "radius_m": 0.0065
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4626,
+    "radius_m": 0.05
+  },
+  {
+    "body": "tibia_r",
+    "length_m": 0.4347,
+    "radius_m": 0.055
+  },
+  {
+    "body": "tibia_l",
+    "length_m": 0.4305,
+    "radius_m": 0.055
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4226,
+    "radius_m": 0.05
+  },
+  {
+    "body": "COMRod",
+    "length_m": 0.4226,
+    "radius_m": 0.05
+  },
+  {
+    "body": "femur_r",
+    "length_m": 0.4051,
+    "radius_m": 0.072
+  },
+  {
+    "body": "femur_l",
+    "length_m": 0.3933,
+    "radius_m": 0.072
+  },
+  {
+    "body": "LUpperArm",
+    "length_m": 0.3044,
+    "radius_m": 0.0384
+  },
+  {
+    "body": "RUpperArm",
+    "length_m": 0.3044,
+    "radius_m": 0.0384
+  },
+  {
+    "body": "HubtoLS",
+    "length_m": 0.1949,
+    "radius_m": 0.04
+  },
+  {
+    "body": "HubtoRS",
+    "length_m": 0.1949,
+    "radius_m": 0.04
+  },
+  {
+    "body": "calcn_r",
+    "length_m": 0.1621,
+    "radius_m": 0.0415
+  },
+  {
+    "body": "calcn_l",
+    "length_m": 0.1602,
+    "radius_m": 0.0418
+  },
+  {
+    "body": "Spherical Solid",
+    "length_m": 0.1453,
+    "radius_m": 0.0304
+  },
+  {
+    "body": "LLowerForearm",
+    "length_m": 0.1453,
+    "radius_m": 0.0304
+  },
+  {
+    "body": "Spherical Solid1",
+    "length_m": 0.1453,
+    "radius_m": 0.0304
+  },
+  {
+    "body": "RLowerForearm",
+    "length_m": 0.1453,
+    "radius_m": 0.0304
+  },
+  {
+    "body": "LowerTorso",
+    "length_m": 0.1382,
+    "radius_m": 0.05
+  },
+  {
+    "body": "Head",
+    "length_m": 0.1193,
+    "radius_m": 0.05
+  },
+  {
+    "body": "LowerTorso",
+    "length_m": 0.0889,
+    "radius_m": 0.05
+  },
+  {
+    "body": "LowerTorso",
+    "length_m": 0.0889,
+    "radius_m": 0.05
+  },
+  {
+    "body": "talus_r",
+    "length_m": 0.0615,
+    "radius_m": 0.0191
+  },
+  {
+    "body": "talus_l",
+    "length_m": 0.0611,
+    "radius_m": 0.0191
+  },
+  {
+    "body": "toes_r",
+    "length_m": 0.0366,
+    "radius_m": 0.0364
+  },
+  {
+    "body": "toes_l",
+    "length_m": 0.0363,
+    "radius_m": 0.0365
+  },
+  {
+    "body": "RHandStandoff",
+    "length_m": 0.0127,
+    "radius_m": 0.0129
+  },
+  {
+    "body": "UpperTorsoBase",
+    "length_m": 0.006,
+    "radius_m": 0.006
+  }
+]

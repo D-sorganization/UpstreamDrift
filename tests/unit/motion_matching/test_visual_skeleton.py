@@ -194,3 +194,37 @@ def test_rejects_disconnected_or_degenerate_specs() -> None:
     spec["gravity_m_s2"] = [0.0, 0.0, 0.0]
     with pytest.raises(ValueError):
         module.derive_visual_skeleton(spec)
+
+
+def test_visual_hints_add_shapes_and_override_capsule_radius() -> None:
+    spec = json.loads(FULL_BODY.read_text())
+    club = next(
+        b["name"] for b in spec["bodies"] if b["name"].endswith("Clubface Vector")
+    )
+    head = next(
+        s["name"]
+        for s in next(b for b in spec["bodies"] if b["name"] == club)["solids"]
+        if s["name"].endswith("Clubhead")
+    )
+    spec["visual_hints"] = {
+        "shapes": {
+            head: {
+                "shape": "ellipsoid",
+                "half_size_m": [0.05, 0.06, 0.03],
+                "center_m": [0, 0, 0.064],
+            }
+        },
+        "capsule_radius_m": {club: 0.0065},
+    }
+    skeleton = module.derive_visual_skeleton(spec)
+    assert any(s.body == club and s.kind == "ellipsoid" for s in skeleton.shapes)
+    assert all(
+        c.radius_m == pytest.approx(0.0065) for c in skeleton.capsules if c.body == club
+    )
+    spec["visual_hints"]["shapes"][head]["shape"] = "cone"
+    with pytest.raises(ValueError):
+        module.derive_visual_skeleton(spec)
+    spec["visual_hints"]["shapes"][head]["shape"] = "box"
+    spec["visual_hints"]["capsule_radius_m"][club] = -1.0
+    with pytest.raises(ValueError):
+        module.derive_visual_skeleton(spec)

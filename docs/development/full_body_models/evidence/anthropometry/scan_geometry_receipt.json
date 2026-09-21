@@ -1,0 +1,155 @@
+{
+  "stature_m": 1.71,
+  "mass_kg": 78.0,
+  "metric": "swing_rms_body_m: decimated-swing IK RMS of non-head markers with static-trial offsets, no calibration",
+  "rows": [
+    {
+      "trunk_scale": 1.05,
+      "arm_scale": 1.2,
+      "shoulder_scale": 1.0,
+      "spec_sha256": "6d7c93e8cc13033c5031fd0ca35566db34dfef33deb7c9a41b445547088a516e",
+      "neutral_fit_rms_m": 0.02759267247893426,
+      "static_address_rms_m": 0.003916124839171582,
+      "address_posture": {
+        "spine_bend_deg": {
+          "total_deg": 12.45859153855757,
+          "forward_deg": 6.463034741493644,
+          "lateral_deg": 11.386193447959574
+        },
+        "clavicle_link_below_horizontal_deg": {
+          "L": -5.931611207231791,
+          "R": 7.277006557230542
+        },
+        "hips_to_shoulder_centre_m": 0.5044694860738986
+      },
+      "swing_rms_all_m": 0.0622895345094038,
+      "swing_rms_body_m": 0.06375190659153096,
+      "swing_segment_rms_m": {
+        "head": 0.04517451648738429,
+        "trunk": 0.04525374648665024,
+        "pelvis": 0.054035043603632996,
+        "left_arm": 0.07832402451365933,
+        "right_arm": 0.11476098101368486,
+        "left_leg": 0.0355813247716295,
+        "right_leg": 0.036678840416582835,
+        "club": 0.0361943275064931
+      },
+      "address_elbows_deg": {
+        "LEInput": 5.0,
+        "REInput": -3.292278726328558
+      },
+      "frames": 109
+    },
+    {
+      "trunk_scale": 1.15,
+      "arm_scale": 1.3,
+      "shoulder_scale": 1.0,
+      "spec_sha256": "502a29e95bab8079159f3818faccd9e021f9df81a7307b5bf8ab2b12ba75a50b",
+      "neutral_fit_rms_m": 0.029350211717473734,
+      "static_address_rms_m": 0.004122473068640658,
+      "address_posture": {
+        "spine_bend_deg": {
+          "total_deg": 8.497733041033621,
+          "forward_deg": -8.37429919621498,
+          "lateral_deg": 2.501294609315412
+        },
+        "clavicle_link_below_horizontal_deg": {
+          "L": -9.116613256092931,
+          "R": 11.090310899264729
+        },
+        "hips_to_shoulder_centre_m": 0.5569375646034298
+      },
+      "swing_rms_all_m": 0.0739295053206649,
+      "swing_rms_body_m": 0.07448436814159544,
+      "swing_segment_rms_m": {
+        "head": 0.06814573487704194,
+        "trunk": 0.044064021152407255,
+        "pelvis": 0.050434070716236075,
+        "left_arm": 0.0934194180608792,
+        "right_arm": 0.1403686252640767,
+        "left_leg": 0.033213873618338365,
+        "right_leg": 0.04374724100095375,
+        "club": 0.045276641305417836
+      },
+      "address_elbows_deg": {
+        "LEInput": 5.0,
+        "REInput": -1.3110718364612486
+      },
+      "frames": 109
+    },
+    {
+      "trunk_scale": 1.15,
+      "arm_scale": 1.2,
+      "shoulder_scale": 1.0,
+      "spec_sha256": "c537489c08f881fc72841939dc4c61857d2ab8f4de6d4ddcfb20459f96ac7487",
+      "neutral_fit_rms_m": 0.019937518239871003,
+      "static_address_rms_m": 0.0033257873271580595,
+      "address_posture": {
+        "spine_bend_deg": {
+          "total_deg": 12.187637228657064,
+          "forward_deg": -0.76783782616904,
+          "lateral_deg": 12.1870414284811
+        },
+        "clavicle_link_below_horizontal_deg": {
+          "L": 3.5528976466229176,
+          "R": -3.7652716313337597
+        },
+        "hips_to_shoulder_centre_m": 0.5590509162747911
+      },
+      "swing_rms_all_m": 0.07457378620532316,
+      "swing_rms_body_m": 0.07677007136368705,
+      "swing_segment_rms_m": {
+        "head": 0.04737533515179233,
+        "trunk": 0.05297506356265586,
+        "pelvis": 0.0661590118718921,
+        "left_arm": 0.10175212812890025,
+        "right_arm": 0.11249976329078401,
+        "left_leg": 0.028514755041562038,
+        "right_leg": 0.08316293736266366,
+        "club": 0.05071775845302062
+      },
+      "address_elbows_deg": {
+        "LEInput": 5.0,
+        "REInput": 5.0
+      },
+      "frames": 109
+    },
+    {
+      "trunk_scale": 1.15,
+      "arm_scale": 1.1,
+      "shoulder_scale": 1.0,
+      "spec_sha256": "bd62952e78290aca525de88993821f76f1efcc73fa3fe8295e78bd5292f745a1",
+      "neutral_fit_rms_m": 0.023731492822948556,
+      "static_address_rms_m": 0.002933132186578555,
+      "address_posture": {
+        "spine_bend_deg": {
+          "total_deg": 11.449939896777755,
+          "forward_deg": -11.350558892098267,
+          "lateral_deg": -4.253075441787653
+        },
+        "clavicle_link_below_horizontal_deg": {
+          "L": 2.366644033180216,
+          "R": -2.880174610904185
+        },
+        "hips_to_shoulder_centre_m": 0.5612195314778602
+      },
+      "swing_rms_all_m": 0.08094338198635792,
+      "swing_rms_body_m": 0.08255622317825388,
+      "swing_segment_rms_m": {
+        "head": 0.06261379270773368,
+        "trunk": 0.06907070445429354,
+        "pelvis": 0.06938619063751145,
+        "left_arm": 0.09788063031265964,
+        "right_arm": 0.12902382640432988,
+        "left_leg": 0.050115117626507034,
+        "right_leg": 0.09192749895438825,
+        "club": 0.03945510221247642
+      },
+      "address_elbows_deg": {
+        "LEInput": 5.0,
+        "REInput": 5.0
+      },
+      "frames": 109
+    }
+  ]
+}
