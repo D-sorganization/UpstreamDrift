@@ -148,13 +148,22 @@ end
 
 %% =====================================================================
 function result = local_attach_geometry_overrides(result, opts)
-%LOCAL_ATTACH_GEOMETRY_OVERRIDES  Echo workspace overrides for Simscape replay.
+%LOCAL_ATTACH_GEOMETRY_OVERRIDES  Optional Simscape workspace overrides from JSON document.
     if isfield(opts, 'workspace_overrides') && isstruct(opts.workspace_overrides) ...
             && ~isempty(fieldnames(opts.workspace_overrides))
         result.workspace_overrides = opts.workspace_overrides;
-    elseif isfield(opts, 'geometry_document') && strlength(string(opts.geometry_document)) > 0
-        result.geometry_document = char(string(opts.geometry_document));
+        return;
     end
+    if ~isfield(opts, 'geometry_document') || strlength(string(opts.geometry_document)) == 0
+        return;
+    end
+    doc_path = char(string(opts.geometry_document));
+    if ~isfile(doc_path)
+        error('align_measured_to_model:missingGeometryDocument', ...
+              'geometry_document not found: %s', doc_path);
+    end
+    result.geometry_document = doc_path;
+    result.workspace_overrides = local_geometry_document_overrides(doc_path);
 end
 
 %% =====================================================================
@@ -399,20 +408,6 @@ function R = local_align_vectors(a, b)
           v(3),    0, -v(1); ...
          -v(2),  v(1),    0];
     R = eye(3) + Vx + Vx * Vx * ((1 - c) / (s * s));
-end
-
-%% =====================================================================
-function result = local_attach_geometry_overrides(result, opts)
-%LOCAL_ATTACH_GEOMETRY_OVERRIDES  Optional Simscape workspace overrides from JSON document.
-    result.workspace_overrides = struct();
-    if ~isfield(opts, 'geometry_document') || isempty(opts.geometry_document)
-        return;
-    end
-    if ~isfile(opts.geometry_document)
-        error('align_measured_to_model:missingGeometryDocument', ...
-              'geometry_document not found: %s', opts.geometry_document);
-    end
-    result.workspace_overrides = local_geometry_document_overrides(opts.geometry_document);
 end
 
 %% =====================================================================
