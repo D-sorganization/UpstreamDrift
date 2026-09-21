@@ -477,10 +477,18 @@ class EnginePreflightChecker:
                 f"SDK not available for {self._engine_name!r}; cannot run capacity check.",
             )
 
-        # Engine-specific minimal smoke step
+        # Engine-specific minimal smoke step. Catch concrete SDK failure
+        # classes only — do not use bare ``except Exception`` (BLE001 ratchet).
         try:
             return self._run_minimal_step(sdk)
-        except Exception as exc:  # noqa: BLE001 — catch-all: surface as FAIL result
+        except (
+            AttributeError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:
             logger.warning("Capacity check for %r raised: %s", self._engine_name, exc)
             return self._make_result(
                 check,
@@ -531,7 +539,14 @@ class EnginePreflightChecker:
                 CheckOutcome.PASS,
                 f"MuJoCo mj_step completed; nq={model.nq} ✓",
             )
-        except Exception as exc:  # noqa: BLE001 — capacity checks must survive any SDK failure
+        except (
+            AttributeError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:
             return self._make_result(
                 check,
                 CheckOutcome.FAIL,
@@ -553,7 +568,14 @@ class EnginePreflightChecker:
                 CheckOutcome.PASS,
                 "Drake MultibodyPlant finalized and stepped ✓",
             )
-        except Exception as exc:  # noqa: BLE001 — capacity checks must survive any SDK failure
+        except (
+            AttributeError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:
             return self._make_result(
                 check,
                 CheckOutcome.FAIL,
@@ -576,7 +598,14 @@ class EnginePreflightChecker:
                 CheckOutcome.PASS,
                 "Pinocchio RNEA completed on neutral model ✓",
             )
-        except Exception as exc:  # noqa: BLE001 — capacity checks must survive any SDK failure
+        except (
+            AttributeError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:
             return self._make_result(
                 check,
                 CheckOutcome.FAIL,

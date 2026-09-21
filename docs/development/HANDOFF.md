@@ -1143,3 +1143,5 @@ Evidence root: simscape_tour_matching/native_evidence. Preserve raw ZIP archives
 ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts identify exact archived source and inputs. Never overwrite runs.
 
 [Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.
+
+- 2026-09-21T10:12:34Z — CI remediation for #10663: replace BLE001 noqa catch-alls in preflight capacity checks with concrete exception tuples. Commit SELF.
