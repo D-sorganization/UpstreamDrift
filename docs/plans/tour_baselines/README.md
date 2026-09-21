@@ -23,6 +23,7 @@ The **Tour Baselines Program** provides a single source of truth across all 13 p
 - [Model Identities and Topologies](model_identities.md) — Comprehensive enumeration of all registered golf models, degree-of-freedom derivation, constraint rank analysis, and club representations.
 - [Two-Capture Coverage Matrix](coverage_matrix.md) — Exhaustive model $\times$ {Driver, Iron} matrix, existing artifacts, supported observation sets, and explicit non-golf tool exclusions.
 - [Historical Reconciliation and Tools Provenance](reconciliation.md) — Audit of closed issues #9914, #9921, #10003, and submodule pin tracking for `vendor/ud-tools`.
+- [Tour Target Audit, Marker Semantics, Events, and Provenance](target_audit.md) — Exhaustive audit of Driver (360 Hz) and 7-Iron (359 Hz) captures, 4-tier measurement map, missing spans, native events, and dual target emitters.
 
 ---
 

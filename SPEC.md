@@ -1,3 +1,20 @@
+## Tour Baselines Target Audit, Marker Semantics, Events & Provenance (TB-01, #10586)
+
+Audits tour targets, marker semantics, swing event intervals, and subject/capture provenance across canonical driver and 7-iron captures:
+- **Audit Data Structures & Canonical Schemas (`src/shared/python/tour_baselines/audit_models.py`)**:
+  - Defines strict schemas: `MeasurementCategory`, `MeasurementEntry`, `MeasurementMapping`, `MarkerMissingSpan`, `EventPoint`, `EventInterval`, `SwingEvents`, `UnresolvedProvenanceItem`, `ProvenanceRecord`, and `TargetAudit`.
+  - Classifies 67 total markers across 4 functional tiers: 29 body tracking markers, 3 clubhead tracking markers, 13 anatomical calibration landmarks, and 22 auxiliary/rig markers.
+  - Documents missing frame spans and occlusion rates (Driver: 0.17% overall, ClubHead occluded frames 487-522 [36 frames]; 7-Iron: 0.08% overall, ClubHead occluded frames 500-516 [17 frames]).
+- **Audit Engine & Provenance Analysis (`src/shared/python/tour_baselines/audit.py`)**:
+  - `verify_duplicate_captures`: Verifies byte-exact duplicate captures across Simscape and Pinocchio storage trees via SHA-256.
+  - `detect_swing_intervals`: Analyzes swing event kinematics on native clocks (Driver: 360.0 Hz, 654 frames, peak speed 50.78 m/s at frame 475, address 0-300, backswing 300-397, downswing 397-475 [0.2167s], follow-through 475-653; 7-Iron: 359.0 Hz, 657 frames, peak speed 39.55 m/s at frame 478, downswing 394-478 [0.2340s]). Labels impact as inferred (`is_inferred: True`) given absent embedded C3D event parameters.
+  - `build_provenance_record`: Resolves subject anatomy (height, mass, segment dimensions) independently from capture geometry (camera setup, ground frame origin, coordinate frame orientation).
+  - `emit_reference_draft` & `emit_dynamics_targets`: Dual canonical target emitters generating `MotionDraft` (reference kinematic draft) and `(BodyTarget, ClubTarget)` (dynamics targets with finite-array gap interpolation).
+- **Evidence, Receipts & Plans**:
+  - Machine-readable audit receipts: `data/tour_baselines/driver_target_audit.json` and `data/tour_baselines/iron_target_audit.json`.
+  - Plan documentation: `docs/plans/tour_baselines/target_audit.md` and updated `docs/plans/tour_baselines/README.md`.
+  - Unit test suite: `tests/unit/tour_baselines/test_target_audit.py` (12 tests, 100% passing).
+
 ## Tour Baselines Model Identities and Coverage Matrix (TB-00, #10585)
 
 Freezes model identities, ownership, coordinate conventions, and two-capture coverage matrix under the Tour Baselines program:
