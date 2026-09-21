@@ -284,7 +284,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10668
 - **Paths:** src/shared/python/neural_motion/; src/shared/python/motion_matching/surrogate/artifact_paths.py; src/shared/python/motion_matching/surrogate/nm00_audit.py; src/shared/python/motion_matching/surrogate/perstep/extract_dataset.py; tests/unit/neural_motion/; docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T19:20:31Z at SELF (nm00_audit discovery pointer + inventory; CO-00 test present; SPEC #10668 only; pytest neural_motion green)
+- **Last verified:** 2026-09-21T19:43:06Z at SELF (rebased on main a5cec3063; CO-00 test present; SPEC #10668 only; nm00_audit pointer; inventory current; cherry-picked corpus audit fix)
 - **Summary:** Fail-closed inventory of neural corpora, default checkpoints and historical training claims with retain/repair/migrate/reject/quarantine dispositions and a per-model coverage matrix keyed to TB-00 identities. No native training or speed claim.
 - **Next step:** Merge PR #10668 after green CI, then claim NM-01 (#10616).
 - **Evidence:** docs/plans/neural_motion_matching/artifact_audit.md; docs/plans/neural_motion_matching/evidence/nm00_artifact_audit_receipt.json; docs/plans/neural_motion_matching/evidence/nm00_coverage_matrix.json.
