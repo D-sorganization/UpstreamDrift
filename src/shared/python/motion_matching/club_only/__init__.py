@@ -6,6 +6,8 @@ from .adapters import club_target_to_observation, observation_to_club_target
 from .observation import (
     OBSERVATION_SCHEMA,
     ClubObservation,
+    ClubObservationKinematics,
+    ClubObservationProvenance,
     ComponentMask,
     ComponentStatus,
     DerivationMetadata,
@@ -51,6 +53,8 @@ __all__ = [
     "UNIT_AUTHORITY",
     "WIFFLE_PROV1_SHA256",
     "ClubObservation",
+    "ClubObservationKinematics",
+    "ClubObservationProvenance",
     "ClubWorkbookIdentity",
     "ComponentMask",
     "ComponentStatus",
