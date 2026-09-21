@@ -97,11 +97,43 @@ OUTPUT_OSIM = (
 # canonical golf-club anthropometric YAML (issue ``PARITY-DIMENSIONS``)
 # will replace them once that lands.
 CLUB_MASS_KG = 0.32
-CLUB_LENGTH_M = 1.14
-CLUB_IXX = 0.139
+CLUB_LENGTH_M = 1.042
+CLUB_IXX = 0.1158
 CLUB_IYY = 0.0001
-CLUB_IZZ = 0.139
-CLUB_MASS_CENTER_M = (0.0, -CLUB_LENGTH_M / 2.0, 0.0)
+CLUB_IZZ = 0.1158
+CLUB_MASS_CENTER_M = (0.0, -0.786, 0.0)
+
+GOLF_UNLOCKED_COORDINATES: tuple[str, ...] = (
+    "lumbar_extension",
+    "lumbar_bending",
+    "lumbar_rotation",
+    "arm_flex_r",
+    "arm_add_r",
+    "arm_rot_r",
+    "elbow_flex_r",
+    "pro_sup_r",
+    "wrist_flex_r",
+    "wrist_dev_r",
+    "arm_flex_l",
+    "arm_add_l",
+    "arm_rot_l",
+    "elbow_flex_l",
+    "pro_sup_l",
+    "wrist_flex_l",
+    "wrist_dev_l",
+    "subtalar_angle_r",
+    "subtalar_angle_l",
+    "mtp_angle_r",
+    "mtp_angle_l",
+)
+
+GOLF_COORDINATE_RANGES: dict[str, tuple[float, float]] = {
+    "arm_flex_r": (math.radians(-120.0), math.radians(180.0)),
+    "arm_flex_l": (math.radians(-120.0), math.radians(180.0)),
+    "lumbar_rotation": (math.radians(-120.0), math.radians(120.0)),
+    "wrist_dev_r": (math.radians(-45.0), math.radians(45.0)),
+    "wrist_dev_l": (math.radians(-45.0), math.radians(45.0)),
+}
 
 # Grip offset on the right hand (meters). The hand_r origin is the wrist; the
 # grip sits ~6 cm distally along the hand's local +y. This is an anatomical
@@ -356,6 +388,30 @@ def _validate_attachment_bodies(
         )
 
 
+def _apply_golf_coordinate_adjustments(model: ET.Element) -> None:
+    """Unlock coordinates required for golf swing and widen excursions."""
+    unlocked_set = set(GOLF_UNLOCKED_COORDINATES)
+    jointset = _find_one(model, "JointSet")
+    objects = _find_one(jointset, "objects")
+    for joint in objects:
+        coords = joint.find("coordinates")
+        if coords is None:
+            continue
+        for coord in coords.findall("Coordinate"):
+            cname = coord.get("name")
+            if not cname:
+                continue
+            if cname in unlocked_set:
+                locked = coord.find("locked")
+                if locked is not None:
+                    locked.text = "false"
+            if cname in GOLF_COORDINATE_RANGES:
+                lo, hi = GOLF_COORDINATE_RANGES[cname]
+                range_elem = coord.find("range")
+                if range_elem is not None:
+                    range_elem.text = f"{lo:.16g} {hi:.16g}"
+
+
 def _indent(elem: ET.Element, level: int = 0, *, tab: str = "\t") -> None:
     """Pretty-print indenter that matches the Rajagopal source style (tabs)."""
     pad = "\n" + tab * level
@@ -416,7 +472,12 @@ def build(
         force_objects.append(_make_club_bushing_force(club_attachment))
 
     # ------------------------------------------------------------------
-    # 4. Add a CoordinateActuator for every coordinate in the model.
+    # 4. Apply golf swing coordinate unlocks and range widenings.
+    # ------------------------------------------------------------------
+    _apply_golf_coordinate_adjustments(model)
+
+    # ------------------------------------------------------------------
+    # 5. Add a CoordinateActuator for every coordinate in the model.
     # ------------------------------------------------------------------
     coord_names = _collect_coordinate_names(model)
     if not coord_names:
@@ -446,7 +507,8 @@ def _summary(coord_names: list[str], output: Path) -> str:
 
 def main() -> int:
     output = build()
-    coord_names = _collect_coordinate_names(_parse(output).getroot().find("Model"))
+    model = _find_one(_parse(output).getroot(), "Model")
+    coord_names = _collect_coordinate_names(model)
     sys.stdout.write(_summary(coord_names, output) + "\n")
     return 0
 

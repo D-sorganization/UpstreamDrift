@@ -9,6 +9,7 @@ from src.launchers.launcher_model_sources import (
     get_model_working_directory,
     resolve_model_artifact_path,
 )
+from src.shared.python.config import model_source_providers
 from src.shared.python.config.model_registry import ModelRegistry
 from src.shared.python.config.model_source_providers import resolve_model_source
 from src.shared.python.config.tools_vendor_authority import (
@@ -43,7 +44,8 @@ class ProviderBackedModel:
 def _authorize_tools_vendor(monkeypatch: pytest.MonkeyPatch, repo_root: Path) -> Path:
     vendor_root = (repo_root / "vendor" / "ud-tools").resolve()
     monkeypatch.setattr(
-        "src.shared.python.config.model_source_providers.inspect_tools_vendor_authority",
+        model_source_providers,
+        "inspect_tools_vendor_authority",
         lambda _repo_root: ToolsVendorAuthority(
             root=vendor_root,
             expected_sha=FAKE_TOOLS_PIN,

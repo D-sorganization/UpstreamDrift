@@ -59,6 +59,15 @@
       "status": "parity",
       "tiles": ["putting_green"]
     },
+    "tools.golf_simulator": {
+      "title": "Golf Simulator capability-aware controls and replay submission",
+      "pyqt": "src/tools/golf_simulator/gui.py",
+      "api": "src/api/routes/golf_simulator.py",
+      "web": "ui/src/pages/GolfSimulator.tsx",
+      "status": "parity",
+      "tiles": ["golf_simulator"],
+      "notes": "Parity controls across PyQt6 desktop widget and React web console backed by shared API routes."
+    },
     "tools.terrain_engine": {
       "title": "Terrain and topography configuration",
       "pyqt": null,
@@ -76,6 +85,25 @@
       "status": "parity",
       "tiles": ["dataset_generator"],
       "notes": "Web-first tool; the desktop launcher opens the web route."
+    },
+    "tools.motion_matching": {
+      "title": "Motion Matching tour-average capture matching",
+      "pyqt": "src/tools/motion_matching/gui.py",
+      "api": null,
+      "web": null,
+      "status": "parity",
+      "tiles": ["motion_matching"],
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355)."
+    },
+    "tools.matched_swing_browser": {
+      "title": "Matched Swing Results Browser",
+      "pyqt": "src/tools/matched_swing_browser/gui.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 10353,
+      "tiles": ["matched_swing_browser"],
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff."
     },
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
@@ -140,7 +168,8 @@
         "motion_capture",
         "motion_target_preview",
         "starting_pose_matcher",
-        "motion_pipeline"
+        "motion_pipeline",
+        "shadow_tracker"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406)."
     },
@@ -162,7 +191,7 @@
       "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 gave both surfaces cross-family trajectory-record import, each overlaying imported swing_sim.ball_flight_trajectory/1 records from either flight-model family and labeling them by model_family/model_name: the web BallFlight page via H3 (#9352, POST /tools/ball-flight/import), and the PyQt6 Shot Tracer via H2 (#9351, the vendored flight_interchange reader)."
     },
     "simulation.swing_objective_lab": {
-      "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
+      "title": "Swing Objective Lab \u2014 mechanism-vs-outcome downswing comparison",
       "pyqt": "src/launchers/adapters/swing_objective_lab_embed.py",
       "api": "src/api/routes/swing_objectives.py",
       "web": "ui/src/pages/SwingObjectiveLab.tsx",
@@ -260,8 +289,9 @@
       "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
       "api": "src/api/local_server.py",
       "web": "ui/src/pages/ImpactExplorer.tsx",
-      "status": "parity",
-      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
+      "status": "gap",
+      "issue": 9546,
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
       "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {

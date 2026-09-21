@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import cv2
 import numpy as np
 
@@ -65,7 +66,8 @@ def draw_segment_volumes(
     rotation, position = _camera_pose(camera)
     triangles = []
     for a, b in edges:
-        if not (valid[a] and valid[b]) or np.linalg.norm(points[b] - points[a]) <= 1e-9:
+        diff = points[b] - points[a]
+        if not (valid[a] and valid[b]) or np.vdot(diff, diff) <= 1e-18:
             continue
         vertices, faces = segment_mesh(points[a], points[b], layer.segment_radius_ratio)
         pixels, visible = project_reference_to_camera(
@@ -77,7 +79,7 @@ def draw_segment_volumes(
                 continue
             xyz = camera_vertices[face]
             normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
-            norm = float(np.linalg.norm(normal))
+            norm = float(math.sqrt(np.vdot(normal, normal)))
             if norm <= 1e-12:
                 continue
             shade = 0.35 + 0.65 * abs(float(normal[2])) / norm

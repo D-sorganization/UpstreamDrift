@@ -1,0 +1,6 @@
+{
+  "candidate_sha256": "dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776",
+  "pose": "original q0 of the native candidate (Simscape qualified start), legs zero",
+  "frame0_valid_marker_rms_m": 2.898078904737307e-13,
+  "views": ["front", "side", "top"]
+}

@@ -1,0 +1,172 @@
+{
+  "schema_version": "shadow-tracker-plan/1.0.0",
+  "epic": 10122,
+  "epic_url": "https://github.com/D-sorganization/UpstreamDrift/issues/10122",
+  "baseline_commit": "f8daa71aa263a60c54c785b1ac2d4bc060eb2a71",
+  "runtime_implemented": true,
+  "status_authority": "GitHub issues; pending is the planning snapshot",
+  "tasks": [
+    {
+      "id": "ST-00",
+      "title": "Establish the Planning Baseline",
+      "issue": 10123,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10123",
+      "depends_on": [],
+      "status": "complete",
+      "spec": "WORK_PACKAGES.md",
+      "merge_pr": 10136,
+      "merge_commit": "2331978f29c317249d9b12e7ef16b50868cd6deb"
+    },
+    {
+      "id": "ST-01",
+      "title": "Qualify Feasibility and Freeze the Benchmark Profile",
+      "issue": 10124,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10124",
+      "depends_on": ["ST-00"],
+      "status": "in_progress_scientific_qualification_blocked",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-02",
+      "title": "Implement Immutable Evidence Contracts",
+      "issue": 10125,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10125",
+      "depends_on": ["ST-01"],
+      "status": "partial_implementation_acceptance_gaps",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-03",
+      "title": "Preserve Source Video, Shots, Timing and Capture Evidence",
+      "issue": 10126,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10126",
+      "depends_on": ["ST-02"],
+      "status": "partial_implementation_acceptance_gaps",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-04",
+      "title": "Produce and Review Body/Club Silhouettes",
+      "issue": 10127,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10127",
+      "depends_on": ["ST-03"],
+      "status": "partial_implementation_acceptance_gaps",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-05",
+      "title": "Render Calibrated Silhouettes and Compute Residuals",
+      "issue": 10128,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10128",
+      "depends_on": ["ST-02"],
+      "status": "partial_implementation_acceptance_gaps",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-06",
+      "title": "Fit Subject Shape and Initial-State Hypotheses",
+      "issue": 10129,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10129",
+      "depends_on": ["ST-04", "ST-05"],
+      "status": "partial_implementation_acceptance_gaps",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-07",
+      "title": "Connect a Real Full-Body Forward Rollout",
+      "issue": 10130,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10130",
+      "depends_on": ["ST-02", "ST-05"],
+      "status": "completed",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-08",
+      "title": "Optimize Controls Against the Silhouette Sequence",
+      "issue": 10131,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10131",
+      "depends_on": ["ST-06", "ST-07"],
+      "status": "completed",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-09",
+      "title": "Quantify Ambiguity and Implement Evidence Gates",
+      "issue": 10132,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10132",
+      "depends_on": ["ST-08"],
+      "status": "completed",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-10",
+      "title": "Qualify Modern and Historical Footage Workflows",
+      "issue": 10133,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10133",
+      "depends_on": ["ST-03", "ST-04", "ST-09"],
+      "status": "completed",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-11",
+      "title": "Integrate Review, Jobs and Model Exports",
+      "issue": 10134,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10134",
+      "depends_on": ["ST-09"],
+      "status": "completed",
+      "spec": "WORK_PACKAGES.md"
+    },
+    {
+      "id": "ST-12",
+      "title": "Qualify Advertised Engines and Release",
+      "issue": 10135,
+      "url": "https://github.com/D-sorganization/UpstreamDrift/issues/10135",
+      "depends_on": ["ST-10", "ST-11"],
+      "status": "completed",
+      "spec": "WORK_PACKAGES.md"
+    }
+  ],
+  "dispatch_contract": "CONTRACT_FREEZE.md",
+  "dispatch_queue": "READY_TASKS.md",
+  "dispatch_packets": [
+    {
+      "id": "ST-02A",
+      "spec": "CONTRACT_FREEZE.md",
+      "issue": 10137,
+      "depends_on": ["handoff-10142"],
+      "parent": 10125,
+      "status": "implemented_reviewed_followup_required",
+      "merge_pr": 10145
+    },
+    {
+      "id": "ST-02C",
+      "spec": "CONTRACT_FREEZE.md",
+      "issue": 10139,
+      "depends_on": ["handoff-10142"],
+      "parent": 10125,
+      "status": "implemented_reviewed_followup_required",
+      "merge_pr": 10147
+    },
+    {
+      "id": "ST-02B",
+      "spec": "CONTRACT_FREEZE.md",
+      "issue": 10138,
+      "depends_on": ["ST-02A"],
+      "parent": 10125,
+      "status": "implemented_reviewed_followup_required",
+      "merge_pr": 10148
+    }
+  ],
+  "specialist_blockers": [10140, 10141],
+  "review": {
+    "baseline": "0ec64e45f",
+    "document": "TURNOVER_CURRENT.md",
+    "continuation_prompt": "CONTINUATION_PROMPT.md",
+    "tracking_issue": 10122,
+    "corrective_issues": [10232, 10233, 10273],
+    "full_product_implemented": false,
+    "next_independent_issue": 10233,
+    "renderer_pr": 10264,
+    "timing_merge_pr": 10253
+  }
+}

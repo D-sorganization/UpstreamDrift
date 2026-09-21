@@ -519,10 +519,13 @@ class LauncherTopBarUIMixin:
     def _setup_zoom_shortcuts(self) -> None:
         """Register the historical keyboard zoom bindings."""
         shortcut_in = QShortcut(QKeySequence("Ctrl+="), self.launcher)
+        shortcut_in.setObjectName("Zoom In")
         shortcut_in.activated.connect(lambda: self._nudge_zoom(+5))
         shortcut_in_alt = QShortcut(QKeySequence("Ctrl++"), self.launcher)
+        shortcut_in_alt.setObjectName("Zoom In")
         shortcut_in_alt.activated.connect(lambda: self._nudge_zoom(+5))
         shortcut_out = QShortcut(QKeySequence("Ctrl+-"), self.launcher)
+        shortcut_out.setObjectName("Zoom Out")
         shortcut_out.activated.connect(lambda: self._nudge_zoom(-5))
 
     def _nudge_zoom(self, delta_steps: int) -> None:

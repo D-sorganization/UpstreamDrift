@@ -122,6 +122,8 @@ class LayoutManager:
         self.current_category_filter = "All"
         self.favorites: list[str] = []
         self.launch_stats: dict[str, dict[str, Any]] = {}
+        self.workspace: dict[str, Any] | None = None
+        self.dock_state: str | None = None
 
     def record_launch(self, model_id: str) -> None:
         """Increment launch count and record the last launched time for history tracking."""
@@ -213,6 +215,15 @@ class LayoutManager:
                 "favorites": self.favorites,
                 "launch_stats": self.launch_stats,
             }
+            if "workspace" in window_state:
+                layout_data["workspace"] = window_state["workspace"]
+            elif self.workspace is not None:
+                layout_data["workspace"] = self.workspace
+
+            if "dock_state" in window_state:
+                layout_data["dock_state"] = window_state["dock_state"]
+            elif self.dock_state is not None:
+                layout_data["dock_state"] = self.dock_state
 
             with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(layout_data, f, indent=2)
@@ -235,6 +246,10 @@ class LayoutManager:
 
             with open(self.config_file, encoding="utf-8") as f:
                 layout_data = json.load(f)
+
+            from src.launchers.workspace_navigation import migrate_saved_layout
+
+            layout_data = migrate_saved_layout(layout_data)
 
             # Restore model order if valid
             saved_order = [
@@ -270,6 +285,9 @@ class LayoutManager:
                     logger.warning(
                         "Invalid tile_scale %r in saved layout: %s", raw_scale, exc
                     )
+
+            self.workspace = layout_data.get("workspace")
+            self.dock_state = layout_data.get("dock_state")
 
             return layout_data
 
@@ -435,14 +453,36 @@ class LayoutManager:
     def get_filtered_order(self) -> list[str]:
         """Get model order filtered by current search text and category.
 
+        Supports task-oriented workspaces (ORG-05), Favorites, History,
+        and legacy category filters.
+
         Returns:
             List of model IDs matching the current filters.
         """
+        from src.launchers.workspace_navigation import (
+            ALIAS_MAP,
+            PRIMARY_WORKSPACES,
+            SECONDARY_WORKSPACES,
+            get_workspace_tools,
+        )
+
+        filter_val = self.current_category_filter or "All"
+        ws_id: str | None = None
+        if filter_val.startswith("workspace:"):
+            ws_id = filter_val.split(":", 1)[1]
+        elif filter_val in PRIMARY_WORKSPACES or filter_val in SECONDARY_WORKSPACES:
+            ws_id = filter_val
+        else:
+            for pid, pinfo in {**PRIMARY_WORKSPACES, **SECONDARY_WORKSPACES}.items():
+                if pinfo.title.lower() == filter_val.lower():
+                    ws_id = pid
+                    break
+
         source_list = self.model_order
 
-        if self.current_category_filter == "Favorites":
+        if ws_id == "favorites" or filter_val == "Favorites":
             source_list = [mid for mid in self.model_order if mid in self.favorites]
-        elif self.current_category_filter == "History":
+        elif ws_id == "history" or filter_val == "History":
             launched = []
             unlaunched = []
             for mid in self.model_order:
@@ -455,18 +495,27 @@ class LayoutManager:
             launched.sort(key=lambda x: (x[1], x[2]), reverse=True)
             source_list = [x[0] for x in launched] + unlaunched
 
+        ws_tools: set[str] | None = None
+        if ws_id and ws_id not in ("all_tools", "favorites", "history"):
+            ws_tools = set(get_workspace_tools(ws_id))
+
         filtered = []
         for model_id in source_list:
             model = self._get_model(model_id)
             if not model or getattr(model, "hidden", False) is True:
                 continue
 
-            if (
-                self.current_category_filter not in ("All", "Favorites", "History")
+            if ws_tools is not None:
+                canonical = ALIAS_MAP.get(model_id, model_id)
+                if model_id not in ws_tools and canonical not in ws_tools:
+                    continue
+            elif (
+                filter_val not in ("All", "Favorites", "History")
+                and ws_id != "all_tools"
                 and not self.current_filter_text
             ):
                 categories = self.get_model_categories(model)
-                if self.current_category_filter not in categories:
+                if filter_val not in categories:
                     continue
 
             if self.current_filter_text:

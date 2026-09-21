@@ -1,0 +1,139 @@
+{
+  "status": "REJECTED",
+  "is_physically_accepted": false,
+  "engines": ["mujoco", "pinocchio", "drake"],
+  "outcomes": {
+    "mujoco": {
+      "engine": "mujoco",
+      "status": "REJECTED",
+      "shared_metrics": {
+        "whole_marker_rmse_m": 2.7379990661879527,
+        "early_marker_rmse_m": 2.404090388278514,
+        "terminal_marker_rmse_m": 3.437955476652786,
+        "club_marker_rmse_m": 3.04803885087286,
+        "pelvis_yaw_rmse_rad": 2.002802181268733
+      },
+      "contact_audit": {
+        "max_normal_force_n": 45091.164494964956,
+        "max_friction_force_n": 36072.93159597197,
+        "max_penetration_m": 0.08296525984735101,
+        "per_sphere_max_force_n": {
+          "heel_r": 45091.164494964956,
+          "forefoot_r": 23436.999220406495,
+          "heel_l": 44469.69293076068,
+          "forefoot_l": 32908.405892090464
+        },
+        "per_sphere_contact_ratio": {
+          "heel_r": 0.11773700305810397,
+          "forefoot_r": 0.10091743119266056,
+          "heel_l": 0.0764525993883792,
+          "forefoot_l": 0.08103975535168195
+        }
+      },
+      "convergence": {
+        "h_nominal": 1e-5,
+        "h_refined": 1e-6,
+        "max_q_difference": 0.003167696410066867,
+        "max_qd_difference": 3.3626644324339168,
+        "is_converged": true
+      },
+      "max_closure_residual_m": 2.675016704469631
+    },
+    "pinocchio": {
+      "engine": "pinocchio",
+      "status": "REJECTED",
+      "shared_metrics": {
+        "whole_marker_rmse_m": 2.7573124637458317,
+        "early_marker_rmse_m": 2.0826599265537746,
+        "terminal_marker_rmse_m": 3.41106738017757,
+        "club_marker_rmse_m": 2.7401197173341076,
+        "pelvis_yaw_rmse_rad": 1.8853296205998342
+      },
+      "contact_audit": {
+        "max_normal_force_n": 57129.586792134774,
+        "max_friction_force_n": 45703.66943370782,
+        "max_penetration_m": 0.09223245139810463,
+        "per_sphere_max_force_n": {
+          "heel_r": 57129.586792134774,
+          "forefoot_r": 25080.247915807486,
+          "heel_l": 51347.85444192013,
+          "forefoot_l": 38828.58704699437
+        },
+        "per_sphere_contact_ratio": {
+          "heel_r": 0.19877675840978593,
+          "forefoot_r": 0.15137614678899083,
+          "heel_l": 0.16819571865443425,
+          "forefoot_l": 0.16972477064220184
+        }
+      },
+      "convergence": {
+        "h_nominal": 1e-5,
+        "h_refined": 1e-6,
+        "max_q_difference": 2.5771091391124656e-5,
+        "max_qd_difference": 0.009710574403356986,
+        "is_converged": true
+      },
+      "max_closure_residual_m": 2.4674669363281527
+    },
+    "drake": {
+      "engine": "drake",
+      "status": "REJECTED",
+      "shared_metrics": {
+        "whole_marker_rmse_m": 2.392862692965229,
+        "early_marker_rmse_m": 2.055885419989572,
+        "terminal_marker_rmse_m": 3.5210512652727326,
+        "club_marker_rmse_m": 2.3954748975395934,
+        "pelvis_yaw_rmse_rad": 1.6255139710127382
+      },
+      "contact_audit": {
+        "max_normal_force_n": 35397.21789610067,
+        "max_friction_force_n": 26758.272029023432,
+        "max_penetration_m": 0.09419616260261757,
+        "per_sphere_max_force_n": {
+          "heel_r": 29407.833609030567,
+          "forefoot_r": 35397.21789610067,
+          "heel_l": 33447.84003627929,
+          "forefoot_l": 19620.52203733577
+        },
+        "per_sphere_contact_ratio": {
+          "heel_r": 0.07492354740061162,
+          "forefoot_r": 0.05963302752293578,
+          "heel_l": 0.09785932721712538,
+          "forefoot_l": 0.10397553516819572
+        }
+      },
+      "convergence": {
+        "h_nominal": 1e-5,
+        "h_refined": 1e-6,
+        "max_q_difference": 0.01060818424812604,
+        "max_qd_difference": 4.340371132577843,
+        "is_converged": true
+      },
+      "max_closure_residual_m": 1.908920406616382
+    }
+  },
+  "pairwise_metric_diffs": {
+    "mujoco_vs_pinocchio": {
+      "whole_marker_rmse_m_diff": 0.019313397557878975,
+      "early_marker_rmse_m_diff": 0.3214304617247392,
+      "terminal_marker_rmse_m_diff": 0.02688809647521584,
+      "club_marker_rmse_m_diff": 0.30791913353875255,
+      "pelvis_yaw_rmse_rad_diff": 0.11747256066889866
+    },
+    "mujoco_vs_drake": {
+      "whole_marker_rmse_m_diff": 0.34513637322272395,
+      "early_marker_rmse_m_diff": 0.3482049682889419,
+      "terminal_marker_rmse_m_diff": 0.08309578861994682,
+      "club_marker_rmse_m_diff": 0.6525639533332668,
+      "pelvis_yaw_rmse_rad_diff": 0.3772882102559947
+    },
+    "pinocchio_vs_drake": {
+      "whole_marker_rmse_m_diff": 0.3644497707806029,
+      "early_marker_rmse_m_diff": 0.02677450656420266,
+      "terminal_marker_rmse_m_diff": 0.10998388509516266,
+      "club_marker_rmse_m_diff": 0.3446448197945142,
+      "pelvis_yaw_rmse_rad_diff": 0.259815649587096
+    }
+  },
+  "max_marker_rmse_diff_m": 0.6525639533332668
+}

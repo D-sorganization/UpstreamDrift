@@ -1,0 +1,71 @@
+{
+  "run": "anthro_driver",
+  "name": "rootreg_legs10",
+  "settings": {
+    "cutoff_hz": null,
+    "omega_rad_s": 30.0,
+    "legs_omega_rad_s": 10.0,
+    "zeta": 1.0,
+    "acceleration_feedforward": 1.0,
+    "balance": [60.0, 15.0],
+    "root_regulation": [100.0, 20.0],
+    "transition_velocity_m_s": null,
+    "dt_s": 0.001,
+    "duration_s": 1.8138888888888889
+  },
+  "reference": {
+    "root_acceleration_max_m_s2": 491.75198087113745,
+    "root_acceleration_downswing_max_m_s2": 491.75198087113745,
+    "joint_acceleration_max_deg_s2": 218191.11213622466,
+    "deviation_from_q_ref_root_max_m": 0.0,
+    "deviation_from_q_ref_joints_max_deg": 0.0
+  },
+  "elapsed_s": 14.5,
+  "root_error_timeline_m": {
+    "0.00": 0.00024099061268056943,
+    "0.50": 0.006811792521176669,
+    "1.00": 0.005347838286396523,
+    "1.10": 0.012531046656144258,
+    "1.20": 0.023730272147575397,
+    "1.30": 0.03347787819845903,
+    "1.40": 0.03296256059592126,
+    "1.50": 0.047975441032441314,
+    "1.75": 0.1380767299900396
+  },
+  "root_error_max_m": 0.146808928511994,
+  "root_tilt_timeline_deg": {
+    "0.50": 1.8561051773113226,
+    "1.00": 1.4499702001676693,
+    "1.20": 6.368459581535085,
+    "1.30": 15.678931278831456,
+    "1.40": 11.88798081688855,
+    "1.50": 13.446903516034853,
+    "1.75": 8.5070794506704
+  },
+  "joint_tracking_rms_deg": 1.6537291109623398,
+  "weight_fraction": {
+    "min": 0.0,
+    "max": 9.381263806904387,
+    "mean": 0.9998131583506968
+  },
+  "inside_support_polygon_fraction": 0.6666666666666666,
+  "peak_joint_torque_n_m": 3690.862897795701,
+  "lowest_sphere_height_m": [-0.012508461269712813, 0.017556766386949772],
+  "marker_rms_m": 0.10312535952984135,
+  "marker_rms_comparable_to_receipt": false,
+  "segment_rms_m": {
+    "head": 0.12076309644141214,
+    "trunk": 0.08642722970571681,
+    "pelvis": 0.08406485568884717,
+    "left_arm": 0.10942406758241055,
+    "right_arm": 0.11809956562511674,
+    "left_leg": 0.05908173668874823,
+    "right_leg": 0.10188147433412628,
+    "club": 0.11948385556666127
+  },
+  "tracking_rms_vs_reference_m": 0.08355757952624837,
+  "backswing_to_1s": {
+    "root_error_max_m": 0.012178301920772176,
+    "marker_rms_m": 0.06480266783228877
+  }
+}

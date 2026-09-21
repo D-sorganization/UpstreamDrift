@@ -263,7 +263,9 @@ def angular_velocity(times: Array, rotations: Array) -> Array:
     if pairs.size:
         delta = rotations[pairs + 1] @ rotations[pairs].transpose(0, 2, 1)
         rv = Rotation.from_matrix(delta).as_rotvec()
-        rv[np.isclose(np.linalg.norm(rv, axis=1), np.pi, atol=1e-8)] = np.nan
+        rv[np.isclose(np.einsum("ij,ij->i", rv, rv), np.pi**2, atol=1e-8)] = (
+            np.nan
+        )  # ⚡ Bolt: np.einsum is faster than np.linalg.norm(..., axis=1)
         edges[pairs] = rv / np.diff(times)[pairs, None]
     result = np.full((n, 3), np.nan)
     for run in _runs(valid):
@@ -300,9 +302,10 @@ def _separation(
         np.arctan2(np.cross(p, q) @ t.up_axis_world, np.einsum("ni,ni->n", p, q)),
         dtype=float,
     )
-    angle[(np.linalg.norm(p, axis=1) < 1e-10) | (np.linalg.norm(q, axis=1) < 1e-10)] = (
-        np.nan
-    )
+    angle[
+        (np.sqrt(np.einsum("ij,ij->i", p, p)) < 1e-10)
+        | (np.sqrt(np.einsum("ij,ij->i", q, q)) < 1e-10)
+    ] = np.nan
     for run in _runs(np.isfinite(angle)):
         angle[run] = np.unwrap(angle[run])
     channels["x_factor_projected"] = MetricChannel(
@@ -415,8 +418,9 @@ def compute_golf_metrics(t: GolfTrajectory) -> GolfMetrics:
         channels["clubhead_position"] = MetricChannel(
             position, "m", "Calibrated clubhead point in world coordinates"
         )
+        vel = gap_derivative(t.times, position)
         channels["clubhead_speed"] = MetricChannel(
-            np.linalg.norm(gap_derivative(t.times, position), axis=1),
+            np.sqrt(np.einsum("ij,ij->i", vel, vel)),
             "m/s",
             "Speed of calibrated clubhead point",
         )

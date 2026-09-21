@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import QPoint, Qt
+from PyQt6.QtCore import QByteArray, QPoint, Qt
 from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import (
     QDockWidget,
@@ -820,13 +820,21 @@ class EmbeddedHostWidget(QWidget):
             | set(self._popped_out.keys())
         )
 
+    def saveState(self) -> QByteArray:  # noqa: N802 - Qt-style API
+        """Return the serialized dock and toolbar layout state."""
+        return self._host_window.saveState()
+
+    def restoreState(self, state: QByteArray) -> bool:  # noqa: N802 - Qt-style API
+        """Restore dock and toolbar layout state from a QByteArray."""
+        return self._host_window.restoreState(state)
+
     def state_snapshot(self) -> dict[str, Any]:
         """Return a serialisable snapshot of currently mounted tools.
 
         The shape is:
 
         ``{"tabs": [tool_id, ...], "docks": {tool_id: area_int},
-        "active_tab": int}``
+        "active_tab": int, "dock_geometry": str}``
 
         ``area_int`` is the integer value of the corresponding
         :class:`Qt.DockWidgetArea` enum, suitable for JSON
@@ -840,7 +848,7 @@ class EmbeddedHostWidget(QWidget):
             ),
             key=lambda pair: pair[0],
         )
-        return {
+        snapshot: dict[str, Any] = {
             "tabs": [tool_id for _, tool_id in ordered],
             "docks": {
                 tool_id: int(rec.area.value)
@@ -848,6 +856,13 @@ class EmbeddedHostWidget(QWidget):
             },
             "active_tab": int(self._tab_widget.currentIndex()),
         }
+        try:
+            raw_state = self._host_window.saveState()
+            if raw_state:
+                snapshot["dock_geometry"] = bytes(raw_state).hex()
+        except (RuntimeError, TypeError, ValueError, OSError) as exc:
+            logger.debug("state_snapshot: could not serialize dock geometry (%s)", exc)
+        return snapshot
 
     def restore_state(self, state: dict[str, Any]) -> None:
         """Re-open tabs and docks listed in ``state``.
@@ -878,6 +893,13 @@ class EmbeddedHostWidget(QWidget):
         active_tab = state.get("active_tab")
         if isinstance(active_tab, int) and 0 <= active_tab < (self._tab_widget.count()):
             self._tab_widget.setCurrentIndex(active_tab)
+
+        dock_geometry = state.get("dock_geometry")
+        if isinstance(dock_geometry, str) and dock_geometry:
+            try:
+                self._host_window.restoreState(QByteArray(bytes.fromhex(dock_geometry)))
+            except (RuntimeError, TypeError, ValueError, OSError) as exc:
+                logger.warning("restore_state: skipping dock geometry (%s)", exc)
 
     @staticmethod
     def _coerce_dock_area(area_value: Any) -> Qt.DockWidgetArea:

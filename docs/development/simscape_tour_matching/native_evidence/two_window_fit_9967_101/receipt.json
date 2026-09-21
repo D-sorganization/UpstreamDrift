@@ -1,0 +1,50 @@
+{
+  "status": "terminal",
+  "residual_evaluations": 80,
+  "jacobians": 82,
+  "primal_windows": 158,
+  "restart_roundoff": {
+    "max_abs_increment_outside_box": 5.684341886080802e-14,
+    "note": "Recovered increment of the restart over parent19 versus the run73 box; theta applies to the exact restart coefficients"
+  },
+  "reference_closure_max_abs": 1.3223644401705315e-11,
+  "zero_retraction_shift": 3.5080827132105696e-12,
+  "effort_cost_zero": 1.5280339413847164,
+  "effort_cost_run73": 1.5453277580617921,
+  "config_sha256": "3e2cef4109ff9a4c218c70baf2cb024278929e48997716c2d67d0ec3afc08152",
+  "elapsed_s": 4433.757425961001,
+  "restart_uninterrupted_metrics": {
+    "whole_rms_m": 0.02034232449869241,
+    "early_rms_m": 0.010014831763024146,
+    "terminal_rms_m": 0.03920171701461849,
+    "club_cluster_rms_m": 0.008727543584364457,
+    "pelvis_yaw_error_pct": 15.69079549819179,
+    "pelvis_yaw_diff_deg": 8.568699722001384,
+    "score": 62.9067408920623,
+    "score_with_effort": 64.43477483344702
+  },
+  "zero_displacement_parity": {
+    "whole_rms_m": 0.02034232449860394,
+    "early_rms_m": 0.010014831763024146,
+    "terminal_rms_m": 0.039201717014618345,
+    "club_cluster_rms_m": 0.008727543585503327,
+    "pelvis_yaw_error_pct": 15.690795498182789,
+    "pelvis_yaw_diff_deg": 8.568699721996467,
+    "score": 62.90674089199359,
+    "effort_penalty_cost": 1.5280339413847164,
+    "score_with_effort": 64.43477483337831,
+    "run73_score": 18.30016138273805,
+    "restart_score_with_effort": 64.43477483344702,
+    "relative_score_difference": 1.06634162570761e-12,
+    "marker_max_abs_difference_vs_saved_m": 1.3711032309515758e-11,
+    "initial_scaled_defect_norm": 6.118079296041563e-11,
+    "projected_constraint_rank": 42,
+    "projected_constraint_singular_values": [
+      339.5455057751633, 1.000000005890148
+    ],
+    "linear_model_objective_at_zero": 64.43477483337831
+  },
+  "parity_passed": true,
+  "returned_sha256": "b505d8b6bd93bd84fb7aad5d5a0e3df257ebb37827a6ce7c7a93333f367bd7db",
+  "improved_uninterrupted": false
+}
