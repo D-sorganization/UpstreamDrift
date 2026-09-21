@@ -234,20 +234,20 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-co02-10606`.
-- Branch: `feat/co02-golf-plausibility-priors`; PR not created. Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged.
+- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) open (squash auto-merge). Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged. Head `61a07e27beb9b56fba2c38419bcabc963ea7e68a`.
 - Entry DL-#10606. Delivered: `GolfPlausibilityPriors` / `PriorAssumption`, per-roster `ClubOnlyProfile` (observation/physical/plausibility + ObjectiveRule), `assess_ambiguity`, `evaluate_club_only_acceptance` with separated `ClubOnlyStatuses`, normalized position/SO(3) orientation errors, evidence JSON for all 20 registered models.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); `python -O` DbC ValueError checks green; ruff clean on touched modules.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); `python -O` DbC ValueError checks green; pre-push ruff/mypy/bandit/pytest-unit green.
 - Limitations: software contracts and synthetic acceptance cases only; no native physical qualification, retrieval/IK (CO-03), or pendulum matching (CO-04).
-- Next action: open ready-for-review PR with `Fixes #10606`, enable squash auto-merge; do not start CO-03+.
+- Next action: wait for PR #10675 CI quality-gate + squash merge; do not start CO-03+.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667 and CO-01/#10670 shipped; active child [CO-02 #10606](https://github.com/D-sorganization/UpstreamDrift/issues/10606) on `feat/co02-golf-plausibility-priors`.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667 and CO-01/#10670 shipped; active child [CO-02 #10606](https://github.com/D-sorganization/UpstreamDrift/issues/10606) via PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md).
 - **NM-00 state:** Fail-closed dataset/checkpoint/claim audit in src/shared/python/neural_motion/; surrogate path constants shared; absent/quarantined default checkpoints; data/sweep_synthetic software-contract-only; CVAE/regressor mean-baseline plateaus NOTE_ONLY. Receipts under docs/plans/neural_motion_matching/evidence/.
-- **CO-02 state:** Roster profiles, priors, ambiguity, and club-only acceptance implemented (synthetic tests + evidence receipt). DL-#10602, DL-#10604, DL-#10605, DL-#10606.
-- **Next:** Land CO-02 #10606, then dispatch CO-03 #10607 and NM-01 #10616. No new physical match, trained checkpoint, or measured speedup claimed.
+- **CO-02 state:** Roster profiles, priors, ambiguity, and club-only acceptance implemented (synthetic tests + evidence receipt); PR #10675 in review with squash auto-merge. DL-#10602, DL-#10604, DL-#10605, DL-#10606.
+- **Next:** After #10675 merges, dispatch CO-03 #10607 (and NM-01 #10616 separately). No new physical match, trained checkpoint, or measured speedup claimed.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 

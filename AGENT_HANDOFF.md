@@ -30,11 +30,11 @@ Next step: Dispatch NM-01 ([#10616](https://github.com/D-sorganization/UpstreamD
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667 and CO-01/#10670 shipped; active [CO-02 #10606](https://github.com/D-sorganization/UpstreamDrift/issues/10606) on `feat/co02-golf-plausibility-priors` (priors/profiles/ambiguity/acceptance; evidence docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667 and CO-01/#10670 shipped; active [CO-02 #10606](https://github.com/D-sorganization/UpstreamDrift/issues/10606) via PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) (squash auto-merge).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-02 roster profiles and acceptance contracts ready for review (synthetic fixtures only). NM-00 fail-closed dataset/checkpoint/claim audit landed; no trained checkpoint or measured speedup claimed.
-- **Next:** Land CO-02 #10606, then dispatch CO-03 #10607 and NM-01 #10616.
+- **State:** CO-02 roster profiles and acceptance contracts in review on #10675 (synthetic fixtures only). NM-00 fail-closed dataset/checkpoint/claim audit landed; no trained checkpoint or measured speedup claimed.
+- **Next:** After #10675 merges, dispatch CO-03 #10607 and NM-01 #10616.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
