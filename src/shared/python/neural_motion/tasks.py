@@ -13,12 +13,16 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Sequence
 
+from pathlib import Path
+
 from src.shared.python.tour_baselines.registry import get_golf_model
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
-from src.shared.python.motion_matching.provider import FitSwingProvider
+from src.shared.python.motion_matching.provider import (
+    FitOptions,
+    FitSwingProvider,
+    classical_baseline_fit_options,
+)
 from src.shared.python.training.config import TrainingConfig
-
-_FIT_ANCHORS = (CanonicalFitResult, FitSwingProvider, TrainingConfig)
 
 __all__ = [
     "ConditioningSpec",
@@ -31,6 +35,10 @@ __all__ = [
     "TaskDimensions",
     "build_default_learning_tasks",
     "dimensions_from_model",
+    "labels_from_canonical_fit",
+    "provider_engine_name",
+    "refinement_fit_options",
+    "training_config_for_task",
 ]
 
 
@@ -305,6 +313,38 @@ class MaskedTrajectoryTask:
 
 
 LearningTask = ForwardDynamicsTask | InverseDynamicsTask | MaskedTrajectoryTask
+
+
+def labels_from_canonical_fit(result: CanonicalFitResult) -> tuple[float, ...]:
+    """Derive inverse / proposal labels from a native CanonicalFitResult."""
+    return result.learning_label_coefficients()
+
+
+def refinement_fit_options(*, seed: int = 0, maxiter: int = 200) -> FitOptions:
+    """FitOptions for cold-classical and polish baselines via FitSwingProvider."""
+    return classical_baseline_fit_options(maxiter=maxiter, rng_seed=seed)
+
+
+def provider_engine_name(provider: FitSwingProvider) -> str:
+    """Return the engine id from a FitSwingProvider (DbC fail-closed)."""
+    name = getattr(provider, "engine_name", "")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("FitSwingProvider.engine_name must be a non-empty string")
+    return name
+
+
+def training_config_for_task(
+    task: LearningTask,
+    *,
+    output_dir: Path,
+    seed: int,
+) -> TrainingConfig:
+    """Bind a frozen learning task to the shared TrainingConfig schema."""
+    return TrainingConfig.for_neural_motion_pilot(
+        output_dir=output_dir,
+        model_id=task.dimensions.model_id,
+        seed=seed,
+    )
 
 
 def build_default_learning_tasks(model_id: str) -> tuple[LearningTask, ...]:

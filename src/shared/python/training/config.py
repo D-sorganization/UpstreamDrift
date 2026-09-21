@@ -7,6 +7,9 @@ deserializes it and hands it to a framework adapter.
 
 The schema is versioned (:data:`CURRENT_SCHEMA_VERSION`) so we can
 evolve the format without breaking persisted jobs.
+
+Neural motion matching (NM-01 #10616) builds pilot job budgets through
+:meth:`TrainingConfig.for_neural_motion_pilot`.
 """
 
 from __future__ import annotations
@@ -122,6 +125,42 @@ class TrainingConfig:
             MappingProxyType(dict(self.hyperparameters)),
         )
         object.__setattr__(self, "tags", MappingProxyType(dict(self.tags)))
+
+    @classmethod
+    def for_neural_motion_pilot(
+        cls,
+        *,
+        output_dir: Path,
+        model_id: str,
+        seed: int,
+        entry_point: str = (
+            "src.shared.python.neural_motion.tasks:build_default_learning_tasks"
+        ),
+        max_epochs: int | None = None,
+        max_steps: int | None = None,
+    ) -> TrainingConfig:
+        """Build a TrainingConfig for an NM-01 pilot learning job."""
+        if not isinstance(model_id, str) or not model_id.strip():
+            raise TrainingConfigError("model_id must be a non-empty string")
+        return cls(
+            framework=TrainingFramework.PYTORCH,
+            entry_point=entry_point,
+            output_dir=output_dir,
+            hyperparameters={
+                "model_id": model_id,
+                "schema": "neural-learning-tasks/1.0.0",
+                "governing_issue": "#10616",
+            },
+            seed=seed,
+            max_epochs=max_epochs,
+            max_steps=max_steps,
+            tags={
+                "campaign": "neural_motion",
+                "slice": "nm01",
+                "governing_issue": "#10616",
+                "model_id": model_id,
+            },
+        )
 
     def _validate_optional_caps(self) -> None:
         for name in ("max_epochs", "max_steps"):
