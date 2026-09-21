@@ -424,7 +424,7 @@ class ContactForceAllocator:
         # Initial point
         y0 = np.zeros(n_total_vars)
 
-        res = minimize(
+        res = minimize(  # type: ignore[call-overload]
             fun=lambda y: 0.5 * np.sum(y**2),
             x0=y0,
             jac=lambda y: y,
