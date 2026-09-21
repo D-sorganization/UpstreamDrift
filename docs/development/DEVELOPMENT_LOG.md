@@ -45,6 +45,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land PR #10499 via CI and proceed to PF-05.
 - **Evidence:** tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py; src/shared/python/motion_matching/contact_mode_qualifier.py.
 
+### DL-#10433 · Enforce Contact, Actuator and Root Constraints in Force Allocation
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10433 (PF-03, epic #10430)
+- **Branch:** feat/issue-10433-pf03-contact-actuator-root-constraints
+- **PR:** #10498 (auto-merge enabled)
+- **Paths:** src/shared/python/motion_matching/contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator_pf03.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (12 unit tests pass across contact_force_allocator and test_contact_force_allocator_pf03; ruff clean; black clean; mypy strict clean; bandit clean).
+- **Summary:** Upgrades ContactForceAllocator with constrained QP inverse dynamics. Enforces 8-faceted polyhedral friction pyramid, non-negative normal ground forces along arbitrary terrain normals, exact contact separation masks, and strict actuator bounds without post-projection. Separates diagnostic root slack so ungrounded reactions never create false physical success. Introduces FeasibilityStatus, HARD_ZERO_TRAIL mode, and verify_torque_and_rate_bounds.
+- **Next step:** Land PR #10498 via CI and proceed to PF-04.
+- **Evidence:** tests/unit/motion_matching/test_contact_force_allocator_pf03.py; tests/unit/motion_matching/test_contact_force_allocator.py.
+
 ### DL-#10588 · Calibrate Swing Planes, Fixed Geometry and Feasible Initial States
 
 - **State:** in_progress
