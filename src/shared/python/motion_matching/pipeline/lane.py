@@ -252,8 +252,25 @@ class Lane:
 
         Precondition: spec ground plane matches the toe calibration height.
         """
-        if self.plant is None:
-            self.plant = get_plant("mujoco", spec_bytes)
+        raw_bytes = (
+            spec_bytes
+            if isinstance(spec_bytes, bytes)
+            else json.dumps(spec_bytes).encode("utf-8")
+        )
+        if self.plant is None or getattr(self.plant, "_spec_bytes", None) != raw_bytes:
+            ik_backend = (
+                getattr(self.plant, "ik_backend", "scipy")
+                if self.plant is not None
+                else "scipy"
+            )
+            engine_name = (
+                getattr(self.plant, "engine_name", "mujoco")
+                if self.plant is not None
+                else "mujoco"
+            )
+            self.plant = get_plant(engine_name, spec_bytes)
+            if hasattr(self.plant, "ik_backend"):
+                self.plant.ik_backend = ik_backend
         ground_plane = self.plant.ground_plane
         ground = self.ground
         if abs(ground_plane.height_m - ground.height_m) > 1e-3:

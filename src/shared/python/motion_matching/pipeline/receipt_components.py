@@ -855,6 +855,11 @@ class IkReceipt(BaseModel):
         description="Optional constrained IK execution diagnostics and provenance",
         json_schema_extra={"unit": "compound", "stage": "ik"},
     )
+    ik_backend: str | None = Field(
+        None,
+        description="Marker inverse kinematics solver backend (scipy, mujoco-minimize)",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
 
 
 class AcceptanceGateReport(BaseModel):

@@ -130,6 +130,16 @@ class Receipt(BaseModel):
         description="Full-body dynamics and plant engine (mujoco, drake, pinocchio)",
         json_schema_extra={"unit": "string", "stage": "metadata"},
     )
+    ik_backend: str | None = Field(
+        None,
+        description="Marker inverse kinematics solver backend (scipy, mujoco-minimize)",
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
+    tracking_backend: str | None = Field(
+        None,
+        description="Forward dynamics tracking solver backend (computed-torque, mj-inverse)",
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
     base_spec_sha256: str = Field(
         ...,
         description="SHA256 hash of the initial input model specification document",

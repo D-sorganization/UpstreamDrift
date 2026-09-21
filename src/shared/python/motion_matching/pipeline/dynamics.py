@@ -90,6 +90,8 @@ def replay(
     sim: fs.FullBodySimulator,
     lane: Lane,
     q_track: np.ndarray,
+    *,
+    tracking_backend: str = "computed-torque",
 ) -> tuple[fs.SimulationRecord, np.ndarray]:
     """Track ``q_track`` with computed torque from preloaded feet.
 
@@ -97,6 +99,7 @@ def replay(
         sim: Full-body forward simulator.
         lane: Coordination lane providing times.
         q_track: (N, nq) reference trajectory to track.
+        tracking_backend: Controller tracking algorithm ("computed-torque" or "mj-inverse").
 
     Returns:
         (record, sim_q): simulation record and state resampled on the capture times.
@@ -105,9 +108,19 @@ def replay(
 
     q0 = fs.preload_feet(sim, q_track[0])
     v0 = np.gradient(q_track, lane.times, axis=0)[0]
-    controller = fs.tracking_controller(
-        sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
-    )
+    if tracking_backend == "mj-inverse":
+        from src.engines.physics_engines.mujoco.python.inverse_dynamics import (
+            MujocoInverseDynamics,
+        )
+
+        inv_dyn = MujocoInverseDynamics(sim.adapter)
+        controller = inv_dyn.create_tracking_controller(
+            sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+        )
+    else:
+        controller = fs.tracking_controller(
+            sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+        )
     record = sim.run(
         q0,
         v0,
@@ -397,6 +410,7 @@ class DynamicsReportInputs:
     zmp_filter_report: dict[str, Any] | None = None
     shooting_report: dict[str, Any] | None = None
     sim_errors: np.ndarray | None = None
+    tracking_backend: str | None = None
 
 
 def _build_reference_zmp_report(
@@ -547,15 +561,21 @@ def build_dynamics_report(
         else marker_errors(kin, sim_q, lane.points)
     )
 
+    ctrl_type = (
+        "mj_inverse tracking, unactuated root"
+        if inputs.tracking_backend == "mj-inverse"
+        else "computed torque tracking, unactuated root"
+    )
     report = {
         "duration_s": float(lane.times[-1]),
         "dt_s": DT_S,
         "controller": {
-            "type": "computed torque tracking, unactuated root",
+            "type": ctrl_type,
             "omega_rad_s": OMEGA_RAD_S,
             "zeta": 1.0,
             "balance": BALANCE,
             "tracking_cutoff_hz": TRACKING_CUTOFF_HZ,
+            "tracking_backend": inputs.tracking_backend or "computed-torque",
         },
         "contact_parameters": adapter.contact_parameters.as_document(),
         "zmp_filter": inputs.zmp_filter_report,

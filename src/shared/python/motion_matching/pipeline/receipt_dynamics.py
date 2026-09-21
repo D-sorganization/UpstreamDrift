@@ -43,6 +43,11 @@ class ControllerReceipt(BaseModel):
         description="Pre-filter cutoff frequency applied to reference commands",
         json_schema_extra={"unit": "Hz", "stage": "dynamics"},
     )
+    tracking_backend: str | None = Field(
+        None,
+        description="Forward dynamics tracking solver backend (computed-torque, mj-inverse)",
+        json_schema_extra={"unit": "string", "stage": "dynamics"},
+    )
 
 
 class ContactParametersReceipt(BaseModel):

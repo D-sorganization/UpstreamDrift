@@ -34,9 +34,11 @@ class PinocchioMatchingPlant:
         )
 
         if isinstance(spec, bytes):
+            self._spec_bytes = spec
             self.spec_dict: dict[str, Any] = json.loads(spec.decode("utf-8"))
         else:
             self.spec_dict = dict(spec)
+            self._spec_bytes = json.dumps(spec).encode("utf-8")
         self.model: FullBodyPinocchioModel = FullBodyPinocchioModel(self.spec_dict)
         self._sha = canonical_sha256(self.spec_dict)
 

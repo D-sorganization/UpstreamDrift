@@ -232,6 +232,7 @@ class IKReportInputs:
     errors: np.ndarray | None = None
     ref_errors: np.ndarray | None = None
     constrained_ik: dict[str, Any] | None = None
+    ik_backend: str | None = None
 
 
 def _build_reference_stage_report(
@@ -378,4 +379,6 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
     }
     if inputs.constrained_ik is not None:
         report["constrained_ik"] = inputs.constrained_ik
+    if inputs.ik_backend is not None:
+        report["ik_backend"] = inputs.ik_backend
     return report
