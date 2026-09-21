@@ -14,6 +14,11 @@ from enum import Enum
 from typing import Any, Sequence
 
 from src.shared.python.tour_baselines.registry import get_golf_model
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.motion_matching.provider import FitSwingProvider
+from src.shared.python.training.config import TrainingConfig
+
+_FIT_ANCHORS = (CanonicalFitResult, FitSwingProvider, TrainingConfig)
 
 __all__ = [
     "ConditioningSpec",
