@@ -1028,6 +1028,10 @@ SLSQP acceptance without recreating the solver or accepting state-reset motion.
 - OpenSim epic #10003: plan/handoff branch docs/10003-opensim-matching-epic,
   documented plan commit1a68091b6. Implementation/runtime qualification is not
   accepted. Inspect its branch and requested planning check-in before proceeding.
+- Local branch triage #9162 (branch conductor/issue-9162, DL-#9162): the
+  disposition ledger and bundle-first deletion runbook live in
+  [branch_triage_9162.md](branch_triage_9162.md). The runbook has not been
+  executed; no local branch has been deleted. Nothing in it touches matching.
 
 The documented development-log validator path is absent in this checkout; no
 validator pass is claimed. Normal configured commit/push hooks still apply.
