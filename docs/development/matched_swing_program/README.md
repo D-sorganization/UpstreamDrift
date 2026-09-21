@@ -1,7 +1,20 @@
 # Matched Swing Program — Single Source of Truth
 
+## Continuation Review Warning
+
+The 2026-09-18 source review found that this document's `acceptance_contract.py`
+reference does not exist on reviewed main. The implemented evaluator is
+`src/shared/python/motion_matching/acceptance.py`: G1 is the 0–0.85 s dynamic
+horizon (whole 25 mm, early 12 mm, terminal 35 mm), not a 30 mm full-capture IK
+milestone. Historical tables below conflict with that evaluator and epic
+#10363 and MUST NOT be used to accept a run. MS-100 (#10374) must reconcile
+and version the complete contract; do not change thresholds during fitting.
+Read the [continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
+The review does not qualify the evaluator or replace missing physical evidence.
+
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
+**Tour Baselines Epic:** [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) ([Tour Baselines Inventory](../../plans/tour_baselines/README.md))  
 **Specification:** `SPEC.md` § Motion Matching Program  
 **Acceptance Contract:** [`GATES.md`](GATES.md) (`src/shared/python/motion_matching/acceptance.py`)  
 **Wave Structure:** [`WAVES.md`](WAVES.md)  
@@ -68,14 +81,14 @@ python scripts/generate_matched_swing_status.py --write
 
 ## Program State 2026-09-18 (Hand-Written; Truth Reset #10381)
 
-| Engine    | Verified dynamic match                                                                                                           | Best kinematic fit                         | Honest status                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Pinocchio | FDDP 0.30 s window 19.7 mm whole, replay-identical (`w030r`, ControlTower)                                                       | GN IK 29.6 mm (address), 32 mm over 0.30 s | G1 continuation rejected at 46 mm in-solver / 340 mm replay (`evidence/matched/driver_g1_crocoddyl_rk45/`); MS-107 owns the next attempt |
-| MuJoCo    | none accepted (tracking 74.6 mm variant, 89 mm primary)                                                                          | 27 mm canonical IK                         | replay path for Pinocchio candidates exists (PR #10448) and rejects the decoupled controls at 0.94 m                                     |
-| Drake     | none; setup parity 6e-6 m                                                                                                        | 176 mm (FB-4)                              | needs the shared fitter on its plant (MS-13/MS-30) and native IK (MS-17)                                                                 |
-| OpenSim   | Moco rungs 0.10/0.30 s at the 41 to 42 mm calibration floor; 0.60 s converged but open-loop replay 81 mm whole / 204 mm terminal | 67.8 mm (OS-3b)                            | OG-01..09 model work merged (#10414); no accepted G1; MS-40 shared-document model is the lever                                           |
-| MyoSuite  | none                                                                                                                             | none                                       | fail-closed provider (MS-50); scene + retarget not started (MS-51/52)                                                                    |
-| Simscape  | run-102, 0 to 0.85 s, 20.3 mm whole but terminal 40.3 > 35 mm; Pinocchio parity 60 um                                            | n/a                                        | cross-validation lane; not a showpiece model                                                                                             |
+| Engine    | Verified dynamic match                                                                                                           | Best kinematic fit                         | Honest status                                                                                                                                                                                                               |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pinocchio | FDDP 0.30 s window 19.7 mm whole, replay-identical (`w030r`, ControlTower)                                                       | GN IK 29.6 mm (address), 32 mm over 0.30 s | best G1-horizon candidate 46.8 mm whole, replay-identical, converged (`evidence/matched/driver_g1_crocoddyl_rk45_b100/`, REJECTED: early 25.7, terminal 64.3, yaw 9.3 deg, penetration 17 mm); MS-107 owns the next attempt |
+| MuJoCo    | none accepted (tracking 74.6 mm variant, 89 mm primary)                                                                          | 27 mm canonical IK                         | replay path for Pinocchio candidates exists (PR #10448) and rejects the decoupled controls at 0.94 m                                                                                                                        |
+| Drake     | none; setup parity 6e-6 m                                                                                                        | 176 mm (FB-4)                              | needs the shared fitter on its plant (MS-13/MS-30) and native IK (MS-17)                                                                                                                                                    |
+| OpenSim   | Moco rungs 0.10/0.30 s at the 41 to 42 mm calibration floor; 0.60 s converged but open-loop replay 81 mm whole / 204 mm terminal | 67.8 mm (OS-3b)                            | OG-01..09 model work merged (#10414); no accepted G1; MS-40 shared-document model is the lever                                                                                                                              |
+| MyoSuite  | none                                                                                                                             | none                                       | fail-closed provider (MS-50); scene + retarget not started (MS-51/52)                                                                                                                                                       |
+| Simscape  | run-102, 0 to 0.85 s, 20.3 mm whole but terminal 40.3 > 35 mm; Pinocchio parity 60 um                                            | n/a                                        | cross-validation lane; not a showpiece model                                                                                                                                                                                |
 
 Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gates`); self-declared `accepted` flags are UNVERIFIED. Every `evidence/matched/*` receipt on main is REJECTED (see each `reevaluation.json`). The fast decoupled pipeline (`scripts/match_pinocchio_c3d.py`) is an analysis product until a replay passes.
 
@@ -83,14 +96,14 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 92 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 98 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
-| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 30       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
-| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 9        | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
-| **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, replays                                                           | driver             | —           | —            | 5        | ⚙️ Parity Replay (6e-6 m Drake-MuJoCo setup parity)                      |
-| **Opensim**   | tour_matching                                                                                                                  | driver             | —           | —            | 9        | ⚠️ Staged (Moco track problem under MS-102)                              |
+| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 31       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
+| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 10       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
+| **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
+| **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |
 | **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
 | **Myosuite**  | —                                                                                                                              | —                  | —           | —            | 0        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
 

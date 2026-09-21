@@ -5,8 +5,20 @@ Governing issue: #10338 (epic #10363, Matched Swing Program). Branch
 Last updated 2026-09-18 by claude (program truth reset, see #10381). Read this file first; it is kept current
 at every checkpoint so another agent can continue without the chat history.
 
-## State on 2026-09-18 (Read First)
+## State on 2026-09-19 (Read First)
 
+- **Best full-G1-horizon dynamic candidate (still rejected).**
+  `evidence/matched/driver_g1_crocoddyl_rk45_b100/`: continuation 0.60 to
+  0.85 s from `driver_g1_rtol6/stage_0.60s.npz` with RK45 rtol 1e-6 on both
+  solve and replay, range-barrier weight 100 (was 1,000) and trail-side effort
+  bounds raised (`RScapInput` 160, `RSInput` 250, `REInput` 180, `RFInput` 80,
+  `RWInput` 60 N m). The 0.85 s stage **converged** (99 iterations, cost 145.3
+  = marker 136.9 + velocity 6.5 + barrier 1.6) and rollout == replay at
+  46.8 mm whole / 25.7 early / 64.3 terminal / 52.6 club, pelvis yaw 9.3 deg,
+  1.49 BW peak contact, closure 0.03 mm. Fails G1 on whole, early, terminal,
+  yaw, penetration (17.2 mm) and weight fraction (min 0). The range barrier
+  was the convergence blocker, not the model: the IK reference has zero range
+  violations, the unconverged rtol6 solution had 24 coordinates out of range.
 - **What is verified.** The only replay-verified forward-dynamics match on the
   44-coordinate document is the FDDP 0.30 s window `w030r` (19.7 mm whole,
   14.2 mm terminal, 9.8 mm club, identical on the RK45 replay, 1.4 body-weights
@@ -115,13 +127,25 @@ pipe through `tr -d '\r'`. Long runs: launch detached with
 | w030s     | 0.30 s | 109   | 34.0 / 25.6 / 52.8                          | 79.2                   | 4-substep implicit-Euler nodes: worse and not converged; abandoned                                                                       |
 | driver_g1 | 0.85 s | 307   | 46.4 / 53.7 / 38.3 (rtol 1e-4 nodes)        | 340 (rtol 1e-6)        | REJECTED, kept at `evidence/matched/driver_g1_crocoddyl_rk45/`; 6,636 s; stages 0.30 (19.7) / 0.45 (21.3) / 0.60 (22.4) / 0.85 (46.4) mm |
 
+| driver_g1_rtol6_trail_b100 | 0.85 s | 307 | 46.8 / 64.3 / 52.6 (rtol 1e-6 nodes, barrier 100, trail bounds raised) | 46.8 (identical) | REJECTED, `evidence/matched/driver_g1_crocoddyl_rk45_b100/`; 0.85 s stage CONVERGED in 99 iterations (9,865 s total); early 25.7, yaw 9.3 deg, penetration 17.2 mm, weight fraction min 0; efforts still hit 300 N m on the hips/spine |
 | driver_g1_rtol6 | 0.85 s | 307 | 123.5 / 233 / 225 (rtol 1e-6 nodes) | 123.5 (identical) | REJECTED, `evidence/matched/driver_g1_crocoddyl_rk45_rtol6/`; 0.60 s stage 22.4 mm healthy; 0.85 s stage not converged, cost = marker 3,077 + range barrier 3,788; tolerance sensitivity closed |
 
 Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
 
 ## Next Steps (In Order)
 
-1. **(done 2026-09-18, rejected) MS-107 same-integrator G1**: rollout == replay at 123.5 mm; the downswing stage is barrier-dominated. Next: inspect the IK reference 0.60-0.85 s for range violations, rerun with barrier weight /10 and raised trail-side effort bounds, then MS-20 contact identification. Original instruction was: rerun the 0.85 s continuation from
+1. **(done 2026-09-19, rejected at 46.8 mm) MS-107 barrier-reduced G1**: the
+   0.85 s stage now converges with `--range-barrier-weight 100` and the raised
+   trail-side bounds (the bounds are now the repo defaults; the barrier weight
+   is the `--range-barrier-weight` flag, default still 1e3). Remaining
+   G1 gap is 46.8 -> 25 mm whole, 25.7 -> 12 early, 64.3 -> 35 terminal,
+   yaw 9.3 -> 3 deg, penetration 17.2 -> 10 mm, weight-fraction floor. Next
+   receipts, one lever each, all from `driver_g1_rtol6_trail_b100/stage_0.85s.npz`
+   via `--warm-start-candidate`: (a) 300 more iterations at the same settings
+   (stage 0.60 s had not converged at 150; cost was still falling); (b)
+   terminal/club marker weight x3 for the last 0.15 s; (c) MS-20 contact
+   identification (penetration 17 mm and weight-fraction 0 say the sole is
+   too soft or the feet lift); (d) pelvis-yaw cost term. Earlier history: same-integrator rerun (rtol 1e-6) gave 123.5 mm, barrier-dominated; original instruction was: rerun the 0.85 s continuation from
    `evidence/matched/driver_g1_crocoddyl_rk45/` stage checkpoints with
    `--rk45-rtol 1e-6` (solve == replay) and 60 iterations per stage; commit the
    receipt whatever the verdict. Then a tolerance study (rtol 1e-4/1e-5/1e-6)
@@ -132,7 +156,7 @@ Warm-start IK over 0.30 s: 32 mm; tracking rollout 43 mm.
    (declared low-gain joint PD on the candidate, gains in the receipt) that is
    the artefact every other engine replays for parity. Without (c) the
    cross-engine parity of a 1.8 s balancing motion is not well posed.
-3. **Downswing.** The 0.60 to 0.85 s stage is where error doubles (22 to 46 mm).
+3. **Downswing.** The 0.60 to 0.85 s stage is where error doubles (22.6 to 46.8 mm, b100 run).
    Candidate levers, each with its own receipt: contact parameter
    identification (MS-20), per-phase marker weights, effort bounds on the
    trail side, and the 7-iron document with its own calibration.
