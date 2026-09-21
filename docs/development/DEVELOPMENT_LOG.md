@@ -337,9 +337,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10605 (epic #10602)
 - **Branch:** fix/issue-10605-co01-club-observation
 - **PR:** #10670 (open)
-- **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json
+- **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (14 passed); python -O public input validation confirmed; ruff check/format clean on touched paths.
+- **Last verified:** 2026-09-21 — divergence inventory regenerated (`--write --no-authorship`); `python -m pytest tests/unit/scripts/test_divergence_inventory.py::test_committed_inventory_is_current_when_vendor_present -q -n 0 --no-cov --timeout=120` passed.
 - **Summary:** Adds `ClubObservation` with measured/derived/unobserved component masks, dual mid-hands/face frames and orientations, native 240 Hz clock, uncertainty/derivation metadata, SO(3) residuals/interpolation, catalog-backed `club_calibration` (fixed tool-to-model SE(3), grip-face rigidity, mid-hands→butt-end only with explicit offset), and legacy `ClubTarget` adapters that refuse invented identity quats.
 - **Next step:** Dispatch CO-02 #10606 after this PR merges.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_observation_contracts.json; tests/unit/motion_matching/test_club_observation_contracts.py.
