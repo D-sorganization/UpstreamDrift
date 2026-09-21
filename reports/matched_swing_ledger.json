@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T19:35:48Z",
+  "generated_at": "2026-09-21T21:18:23Z",
   "rows": [
     {
       "acceptance": null,
@@ -2404,9 +2404,9 @@
         "status": "REJECTED"
       },
       "artefacts": {
-        "gif": null,
+        "gif": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/playback.gif",
         "mot": null,
-        "npz": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/returned-replay.npz"
+        "npz": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/candidate.npz"
       },
       "candidate_sha": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
       "capture": "driver",
