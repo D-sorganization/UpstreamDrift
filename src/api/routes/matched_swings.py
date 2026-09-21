@@ -89,7 +89,7 @@ async def get_matched_swing_receipt(
     run_id: str,
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
-) -> dict[str, Any]:
+) -> dict[str, Any] | JSONResponse:
     """Return the receipt JSON for a single matched-swing run."""
     try:
         summary = service.get_run_summary(run_id)
@@ -120,7 +120,7 @@ async def get_matched_swing_candidate(
     ),
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
-) -> FileResponse | dict[str, Any]:
+) -> FileResponse | dict[str, Any] | JSONResponse:
     """Stream the candidate NPZ or return a JSON preview frame for 3D replay."""
     if preview_frame is not None:
         try:
@@ -161,7 +161,7 @@ async def get_matched_swing_parity(
     run_id: str,
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
-) -> dict[str, Any]:
+) -> dict[str, Any] | JSONResponse:
     """Return the cross-engine parity report JSON for a run."""
     try:
         path = service.resolve_artifact_path(run_id, "parity")
