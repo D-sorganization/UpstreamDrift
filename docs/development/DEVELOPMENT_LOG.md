@@ -113,6 +113,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Shipped in PR #10582.
 - **Evidence:** evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py.
 
+### DL-#10585 · TB-00: Freeze Model Identities, Ownership, and the Two-Capture Coverage Matrix
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10585 (parent #10584, program #10363)
+- **Branch:** feat/tb00-model-identities-10585
+- **PR:** #10598
+- **Paths:** src/shared/python/tour_baselines/models.py; src/shared/python/tour_baselines/registry.py; src/shared/python/tour_baselines/coverage.py; src/shared/python/tour_baselines/reconciliation.py; src/shared/python/tour_baselines/**init**.py; src/shared/python/motion_matching/tour_baselines.py; tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md; docs/plans/tour_baselines/model_identities.md; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/reconciliation.md; docs/development/matched_swing_program/README.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (13/13 unit tests pass in tests/unit/tour_baselines/; ruff check clean; ruff format clean; mypy 0 issues in 5 source files; document title case 0 violations across 4 docs; file size budget clean).
+- **Summary:** Established the canonical Tour Baselines domain model and registry separating kinematic reconstruction models from torque-driven pendulums, upper-body golfer with closed kinematic loop, and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron, non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified Tools pin at a9ed0e7c5c6905b1164082659051d6381068052d and published comprehensive documentation under docs/plans/tour_baselines/.
+- **Next step:** Land PR #10598 with auto-merge enabled.
+- **Evidence:** tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md.
+
 ### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
 
 - **State:** in_progress
