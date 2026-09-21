@@ -22,13 +22,19 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
+## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615)
+
+Branch `fix/issue-10615-nm00-dataset-audit`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
+NM-00 delivers fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`, per-model coverage cells, bounded parquet inspect, and receipts under `docs/plans/neural_motion_matching/evidence/`. Documented 10k corpus and default checkpoints are quarantined when absent; synthetic sweep is software-contract-only; mean-baseline plateau notes stay `NOTE_ONLY`. No training or speed claims.
+Next step: Dispatch NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) on `fix/issue-10605-co01-club-observation` (`ClubObservation` + `club_calibration`; evidence `docs/plans/club_only_matching/evidence/club_observation_contracts.json`).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
-- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md).
-- **State:** CO-01 observation/calibration contracts ready for review. Synthetic fixtures only — not native physical qualification. No trained checkpoint or measured speedup claimed.
-- **Next:** Land CO-01 #10605, then dispatch CO-02 #10606 only.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) on ix/issue-10605-co01-club-observation / PR [#10670](https://github.com/D-sorganization/UpstreamDrift/pull/10670) (ClubObservation + club_calibration; evidence docs/plans/club_only_matching/evidence/club_observation_contracts.json).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
+- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
+- **State:** CO-01 observation/calibration contracts ready for review (synthetic fixtures only). NM-00 fail-closed dataset/checkpoint/claim audit landed; no trained checkpoint or measured speedup claimed.
+- **Next:** Land CO-01 #10605 / #10670, then dispatch CO-02 #10606 and NM-01 #10616.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
