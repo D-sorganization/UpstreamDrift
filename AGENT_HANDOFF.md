@@ -1,17 +1,21 @@
 # Simscape Tour-Average Fit Continuation
 
-## Tour Baselines TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles (#10587)
+## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588)
 
-Branch `feat/tb02-baseline-packages-10587`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
-TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587)) establishes the canonical Baseline Package contract (`tour-baseline-package/1.0.0`) extending portable packaging (#10379, #10334).
+Branch `feat/tb03-trajectory-fitting-10588`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588)) calibrates rigid swing planes, fixed geometry, feasible initial states, and moving hub power tracking.
 
-- Implements `BaselineIdentity` linking capture target, model topology, backend pin, fit mode, horizon, frame/plane conventions, measurement map version, fixed geometry/inertia hashes, q0/v0 hashes, controls hash, solver config, seed, budgets, ancestry, and environment hashes.
-- Formulates `StatusBundle` separating solver convergence, kinematic accuracy, dynamic feasibility, scientific qualification, and product promotion into orthogonal statuses, enforcing that missing native replay forbids scientific qualification.
-- Formulates physical 3D Euclidean marker RMSE, p95, max, per-marker, per-phase, endpoint, and impact errors, distinct from optimizer loss, bound to cryptographic landmark signatures.
-- Froze numeric qualification profiles for authoritative full-body G1/G2/G3 and reduced educational models (planar driven pendulum, upper-body golfer, triple pendulum) with documented attainable-geometry rationale without relaxing full-body thresholds.
-- Provided clean-machine export/import with array checksum validation.
-- All 50 unit tests pass in `tests/unit/tour_baselines/` and 45/45 motion-matching tests pass; ruff check/format clean; mypy passes on all 14 files; architecture budget passes with 0 violations; check_file_size_budget passes; check_lod clean with 0 violations.
-  Next step: Merge TB-02 PR; next dispatch is TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588): Prescribe Inputs and Trajectory Fitting Pipeline).
+- Replaces naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation.
+- Implements `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections.
+- Implements `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic.
+- Implements `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics.
+- Implements `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
+- All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files.
+  Next step: Commit, push, open PR, and auto-merge.
+
+## Tour Baselines TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles (#10587) [MERGED]
+
+Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
@@ -1025,6 +1029,7 @@ unexpected token`, swallowing the finding). Posting now runs
 - Markerless Mocap Program (#9063): Tools #4706 owns capture/contract schemas;
   UpstreamDrift #9069 (folded into #9422) owns app orchestration; makes no physical-lab qualification claim.
   Rig bring-up evidence: `docs/motion_capture/usb_camera_rig_bringup.md` (#9586); consumer slices #9589–#9592.
+  First #9422 consumer slice: rig sessions export through the pinned Tools `MocapSessionManifest` (DL-#9422).
 - Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`; publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
 - Governed companion workflows (#9190) define the 15-record registry, public executor, and CI execution evidence across 10 success and 4 failure fixtures.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes; #9174 remains open.
