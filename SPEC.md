@@ -1,3 +1,18 @@
+## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
+
+Replaces synthetic force adapters with native model-conformant bridges:
+- **Engine Force Adapter Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`)**:
+  - Quarantines `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`.
+  - Enforces fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode.
+  - Extends `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`.
+  - Corrects `MujocoForceAdapter` to compute raw unconstrained dynamics \(M a + \text{bias}\) eliminating `qfrc_inverse` passive/constraint force double counting.
+- **Pinocchio Native Bridge (`src/engines/physics_engines/pinocchio/python/force_adapter.py`, `native_model.py`)**:
+  - Implements `PinocchioForceAdapter` implementing shared protocol with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+- **CLI & Quarantine Governance (`scripts/allocate_swing_torques.py`)**:
+  - Adds Pinocchio engine option and enforces `--allow-synthetic` gate flag.
+- **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
+  - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
+
 ## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
 
 Freezes target audits, marker measurement semantics, native clocks/events, and provenance under the Tour Baselines program:
@@ -6543,6 +6558,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
 | 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |
 | 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
+| 2026-09-11 | #9991 | Record the epic #8557 program status ledger (workstreams A–G, milestones M0–M7, status and blocking gate per row) and the canonical-authority statement superseding #8426 in COMPREHENSIVE_RESEARCH_PROGRAM.md; regenerate the proximal–distal release manifest, checksums, and claim-evidence manifest for the edited document (#8557). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
 | 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |

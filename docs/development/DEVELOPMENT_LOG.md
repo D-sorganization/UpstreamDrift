@@ -43,6 +43,33 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Delivered complete Package C milestones CF-1 through CF-8 test-first for epic #10286. Implemented versioned spatial wrench contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (counterfactual_matrix.py) with state restoration guarantees and zero silent fallbacks. Implemented forward branched ZTCF dynamics rollouts (ForwardZTCFBranch, CutState, RK4 integration, explicit rejection of forward ZVCF rollouts). Added /analysis/counterfactual API route with offline catalog baseline execution. Integrated reaction wrenches into Tour Matching Viewer (TourMatchingViewerWidget with CF badge, 'Reaction Wrenches (CF)' 3D overlay, load_counterfactual_trajectory, and provenance table export). Verified WSCG 2024 two-hand model audit reproduction and byte-deterministic evidence generation.
 - **Next step:** Merge PR on feat/10285-native-saved-replay closing epic #10286. Proceed to next active work package or maintenance issue.
 
+### DL-#8684 · Coupled Grip, Shaft, Ground Rollup
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8684
+- **Branch:** conductor/issue-8684
+- **PR:** not created
+- **Paths:** docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md, MODEL_COMPLETION_FALSIFICATION_MATRIX.md
+- **Started:** 2026-09-11
+- **Last verified:** 2026-09-11 (`SELF`)
+- **Summary:** Parent rollup of child tiers #8685/#8797/#8715/#8723 answering the four #8684 questions; manifests re-pinned.
+- **Next step:** Open the PR with `Closes #8684`; confirm claim-evidence and release-bundle tests pass in CI.
+
+### DL-#10439 · Replace Synthetic Force Adapters With Native Model-Conformant Bridges
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10439 (PF-09, epic #10430, program #10363)
+- **Branch:** feat/issue-10439-pf09-native-force-bridges
+- **PR:** #10507
+- **Paths:** scripts/allocate_swing_torques.py; src/engines/physics_engines/pinocchio/python/force_adapter.py; src/engines/physics_engines/pinocchio/python/native_model.py; src/shared/python/motion_matching/multi_engine_torque_allocator.py; tests/integration/engines/pinocchio/test_force_adapter.py; tests/integration/engines/pinocchio/test_force_mapping.py; tests/unit/motion_matching/test_force_bridges_pf09.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_native_force_equations.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (17 unit tests pass across test_native_force_equations, test_multi_engine_torque_allocator, and test_force_bridges_pf09; Pinocchio integration tests collect/skip cleanly when Pinocchio not installed; ruff clean; black clean; mypy 0 errors across 7 source files).
+- **Summary:** Quarantined `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`, failing closed with `RuntimeError` on unbridged engines (Drake, OpenSim, Simscape). Extended `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`. Corrected `MujocoForceAdapter` to compute raw unconstrained generalized dynamic forces M a + bias eliminating `qfrc_inverse` passive/constraint force double counting, added input validation and state refresh before mutation, and verified exact acceleration parity. Implemented `PinocchioForceAdapter` with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`). Updated `allocate_swing_torques.py` CLI to support Pinocchio and enforce `--allow-synthetic` gate.
+- **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
+- **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
+
 ### DL-#10602 · Club-Only Motion Matching Plan
 
 - **State:** proposed
