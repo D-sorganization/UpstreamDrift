@@ -3020,6 +3020,25 @@ ignored local artifacts are negative evidence, not completion or publication.
 This catalog does not copy or supersede #9064's design-manual authority or
 #9070's typed calculation-manifest authority.
 
+Issue #9193 lands the documentation and capability-evidence authority. The
+manifest's `documentation`, `engines`, `known_gaps`, and
+`publication.blockers` fields are derived from two hashed registries
+(`scripts/config/companion_documentation.v1.json`,
+`scripts/config/companion_capability_evidence.v1.json`) through
+`scripts/companion_evidence.py`. Documentation records are bound to the exact
+source commit, committed blob hash, and an immutable `blob/<commit>/` URL, and
+their freshness is derived from the recorded review and the source commit
+date. Engine capabilities are `qualified` only when they name an exact test
+node or committed artifact, its hash, and the CI workflow that executes it;
+otherwise they are `unqualified` with a reason. Support tier, runtime
+availability, parity, maturity, and scientific qualification stay independent;
+the registry cannot restate or promote any of them. Every program exports
+`documentation_ids` (empty means no governed route), every workflow
+documentation path must be governed, and known gaps need an owning issue.
+`docs/engines/engine_capability_evidence.md` is generated from the registries
+alone and freshness-checked. Publication remains `draft` with derived blockers;
+#9174 stays open behind #9191 and #9192.
+
 Issue #9192 adds the publication boundary without changing that scientific or
 content status. The existing release workflow now runs the same fail-closed
 `python3 -m scripts.companion_publication build` command for protected `main`
@@ -6714,6 +6733,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
+| 2026-09-17 | #9193 | Governed documentation and engine capability evidence for the AffineDrift companion (COMP-B5, parent #9174). Two hashed exporter inputs, `scripts/config/companion_documentation.v1.json` and `scripts/config/companion_capability_evidence.v1.json`, are parsed by `scripts/companion_evidence.py`. Documentation records carry stable IDs, audiences/topics, program/engine routes, owner, review dates, and are bound to the exact source commit, committed blob hash, and an immutable `blob/<commit>/` URL; freshness (`current`/`review_required`/`stale`/`unknown`/`missing`) is derived from the recorded review and the source commit date, never wall-clock time. Engine records add runtime availability, documentation routes, and capabilities that are `qualified` only with exact test-node/artifact evidence, hash, and executing CI workflow; the registry cannot restate names, tiers, or scientific qualification and rejects unknown keys such as tolerances. Every program exports `documentation_ids`; every workflow documentation path must be governed; `known_gaps` carry owning issues (#8853 registry divergence bound to `summary.single_source_program_records`); publication blockers and seven summary counters are derived. `docs/engines/engine_capability_evidence.md` is generated from the registries alone and freshness-checked. Negative tests reject stale review assertions, dangling evidence, unsupported promotion, mutable `main` links, contradictory engine facts, and copied calculation authority. Four MuJoCo capabilities are qualified by real-engine tests in `ci-standard.yml`; Drake, Pinocchio, OpenSim, and MyoSuite remain `unqualified` with reasons. Publication stays `draft`; #9174 remains open. |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |
