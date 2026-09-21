@@ -1,7 +1,8 @@
 """
 Drake backend for Inverse Kinematics.
 
-Part of issue #4566. Wraps Drake's InverseKinematics class.
+Part of issue #4566. Retired per ADR-0051 (MS-12 #10331); use the unified
+MatchingPlant pipeline (MS-10) or 'geometric' / 'pinocchio' backend.
 """
 
 from __future__ import annotations
@@ -112,6 +113,7 @@ class DrakeIKSolver(BaseIKSolver):
         # Drake InverseKinematics problem with per-marker position
         # constraints, and solve with SNOPT/IPOPT. Until that lands we
         # raise loudly rather than returning a silent neutral pose.
-        raise NotImplementedError(  # tracked: #7046
-            "Drake IK backend is not implemented; use the 'geometric' backend (#7046)."
+        raise NotImplementedError(  # tracked: #7046, retired per ADR-0051
+            "Drake IK backend is retired per ADR-0051; use the unified "
+            "MatchingPlant pipeline or the 'geometric' backend."
         )
