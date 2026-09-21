@@ -32,6 +32,8 @@ from src.engines.preflight import (
     PreflightSummary,
 )
 
+pytestmark = pytest.mark.unit
+
 # ===========================================================================
 # Fixtures
 # ===========================================================================
