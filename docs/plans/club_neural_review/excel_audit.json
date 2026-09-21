@@ -1,0 +1,605 @@
+[
+  {
+    "path": "data/Club_Data.xlsx",
+    "sha256": "5d9183e1d01ea7c6f9c162375dd6855c076ee26a96b76c90e59e9cf2679dde25",
+    "sheets": [
+      {
+        "name": "Definitions",
+        "rows": 36,
+        "columns": 5,
+        "definitions": [
+          [null, "Global coordinate system (GCS)", null, null, null],
+          [
+            null,
+            "X-axis",
+            "Target line",
+            "positive direction away from the target",
+            null
+          ],
+          [
+            null,
+            "Y-axis",
+            "normal to X- and Z-axes",
+            "positive direction toward the ball",
+            null
+          ],
+          [null, "Z-axis", "Vertical", "positive direction up", null],
+          [
+            null,
+            "Anatomical coordinate system (ACS) - mid-hands",
+            null,
+            null,
+            "Local coordinate system embedded in the club"
+          ],
+          [
+            null,
+            "O",
+            "midpoint of the hands at the center of the shaft",
+            null,
+            null
+          ],
+          [
+            null,
+            "x-axis",
+            "perpendicular to the score lines",
+            "positive direction away from the target (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "y-axis",
+            "normal to x- and z-axes",
+            "positive direction toward the ball (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "z-axis",
+            "along the length of the shaft",
+            "positive from the club head toward the grip",
+            null
+          ],
+          [
+            null,
+            "Anatomical coordinate system (ACS) - club head",
+            null,
+            null,
+            "Local coordinate system embedded in the club"
+          ],
+          [null, "O", "geometric center of the club face", null, null],
+          [
+            null,
+            "x-axis",
+            "perpendicular to the score lines",
+            "positive direction away from the target (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "y-axis",
+            "normal to x- and z-axes",
+            "positive direction toward the ball (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "z-axis",
+            "along the length of the shaft",
+            "positive from the club head toward the grip",
+            null
+          ],
+          [
+            null,
+            "Xx",
+            "Direction cosines of the x-axis of the ACS (relative to the GCS)",
+            null,
+            null
+          ],
+          [null, "Xy", null, null, null],
+          [null, "Xz", null, null, null],
+          [
+            null,
+            "Yx",
+            "Direction cosines of the y-axis of the ACS (relative to the GCS)",
+            null,
+            null
+          ],
+          [null, "Yy", null, null, null],
+          [null, "Yz", null, null, null],
+          [
+            null,
+            "Zx",
+            "Direction cosines of the z-axis of the ACS (relative to the GCS)",
+            null,
+            null
+          ],
+          [null, "Zy", null, null, null],
+          [null, "Zz", null, null, null],
+          [null, "Units of measurement", null, null, null],
+          [
+            null,
+            "displacements",
+            "all displacements of these data are reported in inches",
+            null,
+            null
+          ],
+          [
+            null,
+            "A",
+            "Address sample",
+            "P1",
+            "1 s (240 samples) of data captured prior to Address sample"
+          ],
+          [
+            null,
+            "T",
+            "Sample at which the pelvis stops rotating in the negative sense (rotation of the lcs moving y-axis toward x-axis)",
+            null,
+            null
+          ],
+          [null, "I", "Impact", "P7", null],
+          [null, "F", "Finish", "P10", null],
+          [null, "CHS", "Club head speed at impact", "mph", null],
+          [null, "Sampling rate", "240 Hz", null, null]
+        ]
+      },
+      {
+        "name": "TW_wiffle",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "Wiffle ball",
+          null,
+          "A=",
+          240,
+          "T=",
+          412,
+          "I=",
+          519,
+          "F=",
+          832,
+          "CHS",
+          114.5
+        ],
+        "samples": 882,
+        "sample_ids": [1.0, 882.0],
+        "time_range_s": [-2.158333333333333, 1.5125],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 882, 882, 882, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 882, 882, 882
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.069337734201296, 1.0693389426913031, 1.0693397382264045
+        ],
+        "peak_face_speed_m_s_assuming_cm": 52.3001948998396,
+        "numeric_content_sha256": "8aeab6f75f928d15eb639ac52686671490f5b1433181093650f248ed407fb323",
+        "grip_xy_axis_max_abs_dot": 9.316372214631177e-7,
+        "face_xy_axis_max_abs_dot": 1.178756612405657e-6
+      },
+      {
+        "name": "TW_ProV1",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          418,
+          "I",
+          525,
+          "F",
+          725,
+          "CHS",
+          114.5
+        ],
+        "samples": 775,
+        "sample_ids": [1.0, 775.0],
+        "time_range_s": [-2.183333333333333, 1.0416666666666667],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 775, 775, 775, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 775, 775, 775
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0693378579793145, 1.0693389396350292, 1.069339873889257
+        ],
+        "peak_face_speed_m_s_assuming_cm": 52.86776044204441,
+        "numeric_content_sha256": "004c8a052e517f82b7e568ba26504988ad9a358b05bfac4d3f8e77c2de23ff2f",
+        "grip_xy_axis_max_abs_dot": 9.00323852554008e-7,
+        "face_xy_axis_max_abs_dot": 1.1625541936040665e-6
+      },
+      {
+        "name": "Filtering Experiments",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          418,
+          "I",
+          525,
+          "F",
+          725,
+          "CHS",
+          114.5
+        ],
+        "samples": 775,
+        "sample_ids": [1.0, 775.0],
+        "time_range_s": [-2.183333333333333, 1.0416666666666667],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 775, 775, 775, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 775, 775, 775
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0693378579793145, 1.0693389396350292, 1.069339873889257
+        ],
+        "peak_face_speed_m_s_assuming_cm": 52.86776044204441,
+        "numeric_content_sha256": "004c8a052e517f82b7e568ba26504988ad9a358b05bfac4d3f8e77c2de23ff2f",
+        "grip_xy_axis_max_abs_dot": 9.00323852554008e-7,
+        "face_xy_axis_max_abs_dot": 1.1625541936040665e-6
+      },
+      {
+        "name": "Sheet1",
+        "rows": 1,
+        "columns": 1
+      },
+      {
+        "name": "GW_wiffle",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          448,
+          "I",
+          517,
+          "F",
+          724,
+          "CHS",
+          104.6
+        ],
+        "samples": 774,
+        "sample_ids": [1.0, 774.0],
+        "time_range_s": [-2.15, 1.0708333333333333],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 774, 774, 774, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 774, 774, 774
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0818527589040903, 1.0818537612634183, 1.0818547500673783
+        ],
+        "peak_face_speed_m_s_assuming_cm": 50.890612445579556,
+        "numeric_content_sha256": "a4042e62bef4f7922fb1a7b4fc7f56a36f1b4fc890f676740f9515c4c814432f",
+        "grip_xy_axis_max_abs_dot": 8.070837750895343e-7,
+        "face_xy_axis_max_abs_dot": 1.1317664162097119e-6
+      },
+      {
+        "name": "GW_ProV11",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          452,
+          "I",
+          521,
+          "F",
+          721,
+          "CHS",
+          115.1
+        ],
+        "samples": 771,
+        "sample_ids": [1.0, 771.0],
+        "time_range_s": [-2.1666666666666665, 1.0416666666666667],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 771, 771, 771, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 771, 771, 771
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0818524915292966, 1.0818537413891443, 1.0818546608545423
+        ],
+        "peak_face_speed_m_s_assuming_cm": 51.78825465889277,
+        "numeric_content_sha256": "8d0ae6e3c6fb9f34dd94fea16cd046a8a57b6cb0c3495e934e7c1e11f6a18309",
+        "grip_xy_axis_max_abs_dot": 8.519287725550218e-7,
+        "face_xy_axis_max_abs_dot": 1.0945856191383468e-6
+      }
+    ]
+  },
+  {
+    "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx",
+    "sha256": "88d3eb31541d886031f6c5ad7c82493b0e3ee4e3f73a8652372277cc14d02234",
+    "sheets": [
+      {
+        "name": "Definitions",
+        "rows": 36,
+        "columns": 5,
+        "definitions": [
+          [null, "Global coordinate system (GCS)", null, null, null],
+          [
+            null,
+            "X-axis",
+            "Target line",
+            "positive direction away from the target",
+            null
+          ],
+          [
+            null,
+            "Y-axis",
+            "normal to X- and Z-axes",
+            "positive direction toward the ball",
+            null
+          ],
+          [null, "Z-axis", "Vertical", "positive direction up", null],
+          [
+            null,
+            "Anatomical coordinate system (ACS) - mid-hands",
+            null,
+            null,
+            "Local coordinate system embedded in the club"
+          ],
+          [
+            null,
+            "O",
+            "midpoint of the hands at the center of the shaft",
+            null,
+            null
+          ],
+          [
+            null,
+            "x-axis",
+            "perpendicular to the score lines",
+            "positive direction away from the target (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "y-axis",
+            "normal to x- and z-axes",
+            "positive direction toward the ball (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "z-axis",
+            "along the length of the shaft",
+            "positive from the club head toward the grip",
+            null
+          ],
+          [
+            null,
+            "Anatomical coordinate system (ACS) - club head",
+            null,
+            null,
+            "Local coordinate system embedded in the club"
+          ],
+          [null, "O", "geometric center of the club face", null, null],
+          [
+            null,
+            "x-axis",
+            "perpendicular to the score lines",
+            "positive direction away from the target (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "y-axis",
+            "normal to x- and z-axes",
+            "positive direction toward the ball (when club face is \"square\" to target line (i.e., at address))",
+            null
+          ],
+          [
+            null,
+            "z-axis",
+            "along the length of the shaft",
+            "positive from the club head toward the grip",
+            null
+          ],
+          [
+            null,
+            "Xx",
+            "Direction cosines of the x-axis of the ACS (relative to the GCS)",
+            null,
+            null
+          ],
+          [null, "Xy", null, null, null],
+          [null, "Xz", null, null, null],
+          [
+            null,
+            "Yx",
+            "Direction cosines of the y-axis of the ACS (relative to the GCS)",
+            null,
+            null
+          ],
+          [null, "Yy", null, null, null],
+          [null, "Yz", null, null, null],
+          [
+            null,
+            "Zx",
+            "Direction cosines of the z-axis of the ACS (relative to the GCS)",
+            null,
+            null
+          ],
+          [null, "Zy", null, null, null],
+          [null, "Zz", null, null, null],
+          [null, "Units of measurement", null, null, null],
+          [
+            null,
+            "displacements",
+            "all displacements of these data are reported in inches",
+            null,
+            null
+          ],
+          [
+            null,
+            "A",
+            "Address sample",
+            "P1",
+            "1 s (240 samples) of data captured prior to Address sample"
+          ],
+          [
+            null,
+            "T",
+            "Sample at which the pelvis stops rotating in the negative sense (rotation of the lcs moving y-axis toward x-axis)",
+            null,
+            null
+          ],
+          [null, "I", "Impact", "P7", null],
+          [null, "F", "Finish", "P10", null],
+          [null, "CHS", "Club head speed at impact", "mph", null],
+          [null, "Sampling rate", "240 Hz", null, null]
+        ]
+      },
+      {
+        "name": "TW_wiffle",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "Wiffle ball",
+          null,
+          "A=",
+          240,
+          "T=",
+          412,
+          "I=",
+          519,
+          "F=",
+          832,
+          "CHS",
+          114.5
+        ],
+        "samples": 882,
+        "sample_ids": [1.0, 882.0],
+        "time_range_s": [-2.158333333333333, 1.5125],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 882, 882, 882, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 882, 882, 882
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.069337734201296, 1.0693389426913031, 1.0693397382264045
+        ],
+        "peak_face_speed_m_s_assuming_cm": 52.3001948998396,
+        "numeric_content_sha256": "8aeab6f75f928d15eb639ac52686671490f5b1433181093650f248ed407fb323",
+        "grip_xy_axis_max_abs_dot": 9.316372214631177e-7,
+        "face_xy_axis_max_abs_dot": 1.178756612405657e-6
+      },
+      {
+        "name": "TW_ProV1",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          418,
+          "I",
+          525,
+          "F",
+          725,
+          "CHS",
+          114.5
+        ],
+        "samples": 775,
+        "sample_ids": [1.0, 775.0],
+        "time_range_s": [-2.183333333333333, 1.0416666666666667],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 775, 775, 775, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 775, 775, 775
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0693378579793145, 1.0693389396350292, 1.069339873889257
+        ],
+        "peak_face_speed_m_s_assuming_cm": 52.86776044204441,
+        "numeric_content_sha256": "004c8a052e517f82b7e568ba26504988ad9a358b05bfac4d3f8e77c2de23ff2f",
+        "grip_xy_axis_max_abs_dot": 9.00323852554008e-7,
+        "face_xy_axis_max_abs_dot": 1.1625541936040665e-6
+      },
+      {
+        "name": "GW_wiffle",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          448,
+          "I",
+          517,
+          "F",
+          724,
+          "CHS",
+          104.6
+        ],
+        "samples": 774,
+        "sample_ids": [1.0, 774.0],
+        "time_range_s": [-2.15, 1.0708333333333333],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 774, 774, 774, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 774, 774, 774
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0818527589040903, 1.0818537612634183, 1.0818547500673783
+        ],
+        "peak_face_speed_m_s_assuming_cm": 50.890612445579556,
+        "numeric_content_sha256": "a4042e62bef4f7922fb1a7b4fc7f56a36f1b4fc890f676740f9515c4c814432f",
+        "grip_xy_axis_max_abs_dot": 8.070837750895343e-7,
+        "face_xy_axis_max_abs_dot": 1.1317664162097119e-6
+      },
+      {
+        "name": "GW_ProV11",
+        "rows": 885,
+        "columns": 26,
+        "events": [
+          "ProV1",
+          null,
+          "A",
+          240,
+          "T",
+          452,
+          "I",
+          521,
+          "F",
+          721,
+          "CHS",
+          115.1
+        ],
+        "samples": 771,
+        "sample_ids": [1.0, 771.0],
+        "time_range_s": [-2.1666666666666665, 1.0416666666666667],
+        "dt_range_s": [0.00416666666666643, 0.004166666666666874],
+        "missing_by_column": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 771, 771, 771, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 771, 771, 771
+        ],
+        "grip_face_distance_m_assuming_cm": [
+          1.0818524915292966, 1.0818537413891443, 1.0818546608545423
+        ],
+        "peak_face_speed_m_s_assuming_cm": 51.78825465889277,
+        "numeric_content_sha256": "8d0ae6e3c6fb9f34dd94fea16cd046a8a57b6cb0c3495e934e7c1e11f6a18309",
+        "grip_xy_axis_max_abs_dot": 8.519287725550218e-7,
+        "face_xy_axis_max_abs_dot": 1.0945856191383468e-6
+      }
+    ]
+  }
+]
