@@ -3,11 +3,11 @@
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61`.
-- Branch: `feat/issue-10348-ms61-simscape-topology`; PR not created. Governing issue #10348 (MS-61, epic #10363).
+- Branch: `feat/issue-10348-ms61-simscape-topology`; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363).
 - Entry DL-#10348. Delivered: fail-closed topology classification (`reduced_27_no_neck`), dual terminal disclosure (`full_marker_terminal.py` + `tour_metrics`), acceptance hooks, run-103 blocked `native_gate.json` + R2025b runtime/parity receipts, runner `-Fit` fail-closed stub.
 - Validation: `python scripts/matlab/materialize_ms61_topology_receipts.py`; `pytest tests/unit/motion_matching/test_simscape_topology_ms61.py tests/unit/motion_matching/test_acceptance.py -q`.
 - Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
-- Next action: open PR Fixes #10348 with squash auto-merge; DeskComputer R2025b Fit when available.
+- Next action: confirm CI green + squash auto-merge of PR #10676.
 
 ## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
 
