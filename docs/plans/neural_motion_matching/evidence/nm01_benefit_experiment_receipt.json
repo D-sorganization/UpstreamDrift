@@ -1,5 +1,5 @@
 {
-  "content_digest": "ea6a8d68c1ea4786bb9cb30a199b5b59d174015da354cdc3f9dcc91928332a65",
+  "content_digest": "46a03f664616303b3f6d1ce21ce401817800929fa5fe78cf1f1188b1ab70fbf2",
   "experiment": {
     "baseline_methods": [
       "cold_classical",
@@ -70,14 +70,18 @@
         "stratum": "c3d_external"
       }
     ],
-    "c3d_derived_tests": ["c3d.club_only.control_a", "c3d.club_only.control_b"],
+    "c3d_derived_tests": [
+      "c3d.club_only.control_a",
+      "c3d.club_only.control_b"
+    ],
     "compute_caps": {
       "max_cpu_core_hours": 48.0,
       "max_gpu_hours": 8.0,
       "max_storage_gib": 64.0,
       "max_wall_time_hours": 24.0,
-      "probe_receipt_id": "probe.nm01.short_timing.v1",
-      "timing_probe_completed": true
+      "probe_receipt_id": null,
+      "provisional": true,
+      "timing_probe_completed": false
     },
     "hardware_profile": "cpu_required; gpu_optional; report cold/warm CPU and available GPU median/p95 separately",
     "latency_phases": [
@@ -90,7 +94,11 @@
       "independent_replay"
     ],
     "min_synthetic_queries_per_stratum": 30,
-    "nested_episode_stages": [100, 500, 2000],
+    "nested_episode_stages": [
+      100,
+      500,
+      2000
+    ],
     "promotion_gates": {
       "accepted_quality_rate_must_not_degrade": true,
       "min_median_speedup": 2.0,
@@ -98,12 +106,25 @@
       "negative_result_retains_research_checkpoint": true,
       "p95_must_not_worsen": true
     },
-    "related_contracts": ["#10587", "#10606", "#10616"],
+    "related_contracts": [
+      "#10587",
+      "#10606",
+      "#10616"
+    ],
     "statistical_limitations": "Tiny empirical set: four workbook trials and two C3D-derived club-only controls do not support population confidence intervals. Synthetic query episodes validate software/stratum contracts only and are not native physical evidence. Report uncertainty and limitations with every speed or quality claim.",
-    "training_seeds": [0, 1, 2],
-    "workbook_trials": ["TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"]
+    "training_seeds": [
+      0,
+      1,
+      2
+    ],
+    "workbook_trials": [
+      "TW_wiffle",
+      "TW_ProV1",
+      "GW_wiffle",
+      "GW_ProV11"
+    ]
   },
-  "gate_digest": "9faf24fd703a765a563059a2fe48c98c1f336c3affa20d66be90fac58b0677e3",
+  "gate_digest": "c575fb4a4545e4a2e22f1f3f154a057fc60c6e6f05a32ed8f73e7b3ee6551c54",
   "schema": "neural-benefit-experiment/1.0.0",
   "split_digest": "f63e79f8eb17a518e31e8f89445af487325760c8aa80e3c3251b78311fe6dfe6"
 }

@@ -125,7 +125,12 @@ class PromotionGates:
 
 @dataclass(frozen=True)
 class ComputeBudgetCaps:
-    """Hard compute/storage/wall-time caps after a completed timing probe."""
+    """Hard compute/storage/wall-time caps, optionally after a timing probe.
+
+    When ``provisional=True``, caps are declared placeholders pending a real
+    timing probe. Later stages must not treat provisional caps as empirically
+    derived limits.
+    """
 
     max_cpu_core_hours: float
     max_gpu_hours: float
@@ -133,6 +138,7 @@ class ComputeBudgetCaps:
     max_wall_time_hours: float
     timing_probe_completed: bool
     probe_receipt_id: str | None
+    provisional: bool = False
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -143,12 +149,20 @@ class ComputeBudgetCaps:
         ):
             if not math.isfinite(value) or value <= 0.0:
                 raise ValueError(f"{name} must be a positive finite value")
-        if not self.timing_probe_completed:
-            raise ValueError(
-                "timing_probe must be completed before freezing compute caps"
-            )
-        if not self.probe_receipt_id:
-            raise ValueError("probe_receipt_id is required after timing_probe")
+        if self.provisional:
+            if self.timing_probe_completed:
+                raise ValueError(
+                    "provisional caps must have timing_probe_completed=False"
+                )
+            if self.probe_receipt_id is not None:
+                raise ValueError("provisional caps must have probe_receipt_id=None")
+        else:
+            if not self.timing_probe_completed:
+                raise ValueError(
+                    "timing_probe must be completed before freezing compute caps"
+                )
+            if not self.probe_receipt_id:
+                raise ValueError("probe_receipt_id is required after timing_probe")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -158,6 +172,7 @@ class ComputeBudgetCaps:
             "max_wall_time_hours": self.max_wall_time_hours,
             "timing_probe_completed": self.timing_probe_completed,
             "probe_receipt_id": self.probe_receipt_id,
+            "provisional": self.provisional,
         }
 
 
@@ -378,8 +393,9 @@ def default_benefit_experiment() -> BenefitExperimentSpec:
             max_gpu_hours=8.0,
             max_storage_gib=64.0,
             max_wall_time_hours=24.0,
-            timing_probe_completed=True,
-            probe_receipt_id="probe.nm01.short_timing.v1",
+            timing_probe_completed=False,
+            probe_receipt_id=None,
+            provisional=True,
         ),
         benchmark_cases=_default_benchmark_cases(),
         statistical_limitations=STATISTICAL_LIMITATIONS,

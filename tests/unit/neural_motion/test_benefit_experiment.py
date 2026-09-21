@@ -93,6 +93,38 @@ def test_compute_caps_require_timing_probe_before_training() -> None:
     assert caps.timing_probe_completed is True
 
 
+def test_provisional_compute_caps_allowed_without_timing_probe() -> None:
+    caps = ComputeBudgetCaps(
+        max_cpu_core_hours=48.0,
+        max_gpu_hours=8.0,
+        max_storage_gib=64.0,
+        max_wall_time_hours=24.0,
+        timing_probe_completed=False,
+        probe_receipt_id=None,
+        provisional=True,
+    )
+    assert caps.provisional is True
+    assert caps.timing_probe_completed is False
+    assert caps.probe_receipt_id is None
+    with pytest.raises(ValueError, match="provisional.*timing_probe"):
+        ComputeBudgetCaps(
+            max_cpu_core_hours=10.0,
+            max_gpu_hours=1.0,
+            max_storage_gib=20.0,
+            max_wall_time_hours=8.0,
+            timing_probe_completed=True,
+            probe_receipt_id="probe.nm01.v1",
+            provisional=True,
+        )
+
+
+def test_default_experiment_uses_provisional_compute_caps() -> None:
+    spec = default_benefit_experiment()
+    assert spec.compute_caps.provisional is True
+    assert spec.compute_caps.timing_probe_completed is False
+    assert spec.compute_caps.probe_receipt_id is None
+
+
 def test_break_even_rejects_nonpositive_savings() -> None:
     assert break_even_queries(offline_cost_s=100.0, per_query_savings_s=0.0) is None
     assert break_even_queries(offline_cost_s=100.0, per_query_savings_s=-1.0) is None
