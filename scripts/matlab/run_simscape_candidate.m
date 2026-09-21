@@ -66,6 +66,8 @@ function report = run_simscape_candidate(repo, run_id, do_replay)
     opts.issue = "#10347";
     opts.host = "DeskComputer";
     opts.machine = "DeskComputer";
+    opts.matlab_release = string(rel);
+    opts.matlab_version = string(version);
     opts.model_sha256 = string(cand.model_sha256);
     opts.candidate_sha256 = string(receipt.returned_sha256);
     opts.replay_npz_sha256 = "";
@@ -90,5 +92,7 @@ function report = run_simscape_candidate(repo, run_id, do_replay)
         'qualified_replay_json', "qualified_candidate_replay.json", ...
         'replay_script', "replay_returned102_r2025b.m");
 
-    report.manifest_path = write_run_manifest(evidence_dir, opts);
+    manifest_path = fullfile(evidence_dir, 'run_manifest.json');
+    write_run_manifest(manifest_path, opts);
+    report.manifest_path = manifest_path;
 end

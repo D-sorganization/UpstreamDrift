@@ -93,6 +93,7 @@ if ($Replay) {
     $sharedMatlab = Join-Path $repo "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared"
     $batch = @"
 addpath(genpath('$($sharedMatlab -replace '\\','/')'));
+addpath('$($evidenceDir -replace '\\','/')');
 repo = '$($repo -replace '\\','/')';
 tic;
 report = replay_returned102_r2025b(repo);
@@ -100,6 +101,7 @@ elapsed = toc;
 assert(strcmpi(string(report.matlab_release), "2025b") || strcmpi(string(report.matlab_release), "R2025b"), ...
     'R2025b required');
 cand = jsondecode(fileread(fullfile(repo, '$($evidenceRel -replace '\\','/')', 'returned-candidate.json')));
+receipt = jsondecode(fileread(fullfile(repo, '$($evidenceRel -replace '\\','/')', 'receipt.json')));
 fields = struct();
 fields.run_id = '$Run';
 fields.matlab_release = char(report.matlab_release);
@@ -107,7 +109,7 @@ fields.matlab_version = char(report.matlab_version);
 fields.host = '$hostName';
 fields.machine = '$hostName';
 fields.model_sha256 = char(cand.model_sha256);
-if isfield(cand, 'source_sha256'); fields.candidate_sha256 = char(cand.source_sha256); else; fields.candidate_sha256 = char(cand.model_sha256); end
+fields.candidate_sha256 = char(receipt.returned_sha256);
 fields.replay_npz_sha256 = lower('$(Get-FileSha256Hex $replayNpz)');
 fields.wall_clock_s = elapsed;
 fields.qualification = char(report.qualification);
