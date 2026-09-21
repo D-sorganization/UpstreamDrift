@@ -222,7 +222,11 @@ class TestMatchedSwingBrowserModel:
         model = MatchedSwingBrowserModel()
         rows = model.load_ledger()
         assert len(rows) >= 40
-        assert len(rows) == 100
+        ledger_path = model.repo_root / "reports" / "matched_swing_ledger.json"
+        expected = int(
+            json.loads(ledger_path.read_text(encoding="utf-8"))["total_receipts"]
+        )
+        assert len(rows) == expected
 
     def test_format_metric(self) -> None:
         model = MatchedSwingBrowserModel()
