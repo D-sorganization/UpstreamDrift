@@ -228,31 +228,13 @@ def _compute_planar_residuals(
     return in_rmse, out_rmse
 
 
-def compute_fit_metrics(
-    predicted: np.ndarray,
-    observed: np.ndarray,
-    valid: np.ndarray,
+def _validate_fit_inputs(
+    pred_arr: np.ndarray,
+    obs_arr: np.ndarray,
+    valid_arr: np.ndarray,
     labels: Sequence[str],
-    *,
-    time_s: np.ndarray | None = None,
-    phase_indices: Mapping[str, tuple[int, int]] | None = None,
-    impact_frame: int | None = None,
-    plane_normal: np.ndarray | None = None,
-    pelvis_yaw_rmse_rad: float | None = None,
-    optimizer_loss: float | None = None,
-) -> PhysicalFitMetrics:
-    """Compute comprehensive physical 3D marker fit metrics.
-
-    Design by Contract:
-    - predicted and observed must have shape (n_frames, n_markers, 3).
-    - valid must have shape (n_frames, n_markers) and bool dtype.
-    - predicted must have finite coordinates where valid is True.
-    - valid must contain at least 1 True observation (reject empty valid sets).
-    """
-    pred_arr = np.asarray(predicted, dtype=np.float64)
-    obs_arr = np.asarray(observed, dtype=np.float64)
-    valid_arr = np.asarray(valid, dtype=bool)
-
+) -> int:
+    """Validate shapes, finite values, and non-empty valid observations."""
     if pred_arr.shape != obs_arr.shape:
         raise ValueError(
             f"Shape mismatch: pred {pred_arr.shape} vs obs {obs_arr.shape}"
@@ -276,12 +258,36 @@ def compute_fit_metrics(
             "Cannot compute fit metrics for empty valid set (N_valid == 0)"
         )
 
-    # Reject non-finite values at valid indices
     valid_pred = pred_arr[valid_arr]
     if not np.all(np.isfinite(valid_pred)):
         raise ValueError(
             "Predicted coordinates contain non-finite (NaN/Inf) values at valid positions"
         )
+    return n_valid
+
+
+def compute_fit_metrics(
+    predicted: np.ndarray,
+    observed: np.ndarray,
+    valid: np.ndarray,
+    labels: Sequence[str],
+    *,
+    time_s: np.ndarray | None = None,
+    phase_indices: Mapping[str, tuple[int, int]] | None = None,
+    impact_frame: int | None = None,
+    **kwargs: Any,
+) -> PhysicalFitMetrics:
+    """Compute comprehensive physical 3D marker fit metrics."""
+    plane_normal: np.ndarray | None = kwargs.get("plane_normal")
+    pelvis_yaw_rmse_rad: float | None = kwargs.get("pelvis_yaw_rmse_rad")
+    optimizer_loss: float | None = kwargs.get("optimizer_loss")
+
+    pred_arr = np.asarray(predicted, dtype=np.float64)
+    obs_arr = np.asarray(observed, dtype=np.float64)
+    valid_arr = np.asarray(valid, dtype=bool)
+
+    n_valid = _validate_fit_inputs(pred_arr, obs_arr, valid_arr, labels)
+    n_frames, n_markers, _ = pred_arr.shape
 
     diff = pred_arr - obs_arr
     dist_sq = np.sum(diff**2, axis=-1)
