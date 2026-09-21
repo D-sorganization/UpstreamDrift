@@ -1,5 +1,17 @@
 # Current Matching Continuation Handoff
 
+## Shadow Tracker #10233 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/UpstreamDrift-10233`.
+- Branch: `fix/shadow-tracker-10233`; HEAD/base:
+  `aa01972aa3b29b2ff4100e2dabe34b63fddd7aa4`; uncommitted; PR not created.
+- Entry DL-#10233: provider implementation and tests complete; renderer and
+  unrelated original-checkout work preserved.
+- Contracts, RED/GREEN commands, compatibility and limitations:
+  [Shadow Tracker turnover](../plans/shadow_tracker/TURNOVER_CURRENT.md).
+- Next action: review and commit the focused diff, then publish against main
+  with `Fixes #10233` and `Refs #10122`; check base ancestry before publication.
+
 Updated 2026-09-18. Governing epic #10430 / #10363; branch `feat/pf-01-freeze-fast-matching-evidence`; commit 5347cba0f.
 PR: not created (ready to submit).
 

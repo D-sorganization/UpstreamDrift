@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10233 · Shadow Tracker Revision Integrity and Persistence
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10233 (ST-04 / epic #10122)
+- **Branch:** fix/shadow-tracker-10233
+- **PR:** not created
+- **Paths:** src/shared/python/shadow_tracker/segmentation.py; tests/unit/shadow_tracker/test_revision_persistence.py; docs/plans/shadow_tracker/
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 on aa01972aa3b29b2ff4100e2dabe34b63fddd7aa4 plus working diff; 306 tests pass; scoped Ruff, file-size and context checks pass.
+- **Summary:** Complete-record idempotence, same-observation parents, current selection and strict atomic provider snapshots with legacy reading. Renderer preserved.
+- **Next step:** Review and commit the focused #10233 diff.
+- **Evidence:** docs/plans/shadow_tracker/TURNOVER_CURRENT.md; tests/unit/shadow_tracker/test_revision_persistence.py.
+
 ### DL-#10431 · PF-01: Freeze Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures
 
 - **State:** in_progress
