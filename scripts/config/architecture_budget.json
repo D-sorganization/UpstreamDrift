@@ -908,6 +908,15 @@
       "issue": 10329,
       "reason": "Issue #10329: _simulate_and_receipt orchestrates trajectory simulation, marker metrics, receipt schema emission, and artifact bundle export.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/dynamics.py",
+      "symbol": "shooting_fit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10591,
+      "reason": "Issue #10591: Bolt optimization added extra lines to replace np.linalg.norm with np.sqrt(np.einsum) causing function line count to marginally exceed 100.",
+      "expires_on": "2027-01-01"
     }
   ]
 }
