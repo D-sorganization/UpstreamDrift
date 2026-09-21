@@ -285,16 +285,47 @@ class FullBodyPinkTasks:
         self._model = model
         self._plant: Any | None = None
         self.pin_model: Any | None = None
+        self.pin_data: Any | None = None
         if model is not None and hasattr(model, "model") and hasattr(model, "_pin"):
             self._plant = model
             self.pin_model = model.model
-        elif _is_pin_model(model):
+            self.pin_data = getattr(model, "data", None)
+        elif _is_pin_model(model) and model is not None:
             self.pin_model = model
+            if hasattr(model, "createData"):
+                self.pin_data = model.createData()
+        elif PINOCCHIO_AVAILABLE and pin is not None and model is None:
+            try:
+                from src.engines.physics_engines.pinocchio.python.native_model import (
+                    FullBodyPinocchioModel,
+                )
+
+                plant = FullBodyPinocchioModel(self.specification)
+                self._plant = plant
+                self.pin_model = plant.model
+                self.pin_data = plant.data
+            except Exception as exc:
+                logger.warning(
+                    "Could not construct canonical FullBodyPinocchioModel: %s", exc
+                )
+                self._plant = None
+                self.pin_model = None
+                self.pin_data = None
 
         self._init_dimensions_and_coordinates(model)
         self._init_bounds(model)
         self._init_spec_structures()
         self._init_closure_and_marker_frames()
+
+    @property
+    def _pin_model(self) -> Any | None:
+        """Compatibility accessor for native Pinocchio model."""
+        return self.pin_model
+
+    @property
+    def _pin_data(self) -> Any | None:
+        """Compatibility accessor for native Pinocchio data."""
+        return self.pin_data
 
     def _init_dimensions_and_coordinates(self, model: Any | None) -> None:
         """Initialize configuration/tangent dimensions and coordinate index mappings."""
@@ -602,15 +633,12 @@ class FullBodyPinkTasks:
             posture_task=posture_task_obj,
         )
 
-    def audit(
+    def _resolve_marker_positions(
         self,
+        q: np.ndarray,
         configuration: ConfigurationState,
-        request: FrameTaskRequest | None = None,
-    ) -> FrameResiduals:
-        """Audit post-solve residuals, bound violations, and weld closure errors."""
-        q = np.asarray(configuration.q, dtype=np.float64)
-
-        # If marker positions were not supplied but we have Pinocchio model
+        request: FrameTaskRequest | None,
+    ) -> Mapping[str, np.ndarray] | None:
         marker_positions = configuration.marker_positions
         if (
             marker_positions is None
@@ -619,34 +647,53 @@ class FullBodyPinkTasks:
             and request is not None
         ):
             try:
-                data = getattr(self._plant, "data", None) or self.pin_model.createData()
+                data = getattr(self._plant, "data", None) or (
+                    self.pin_data
+                    if self.pin_data is not None
+                    else self.pin_model.createData()
+                )
                 pin.forwardKinematics(self.pin_model, data, q)
                 pin.updateFramePlacements(self.pin_model, data)
                 marker_positions = {}
-                for name in request.marker_targets:
-                    if _has_frame(self.pin_model, name):
-                        fid = self.pin_model.getFrameId(name)
-                        marker_positions[name] = data.oMf[fid].translation.copy()
             except Exception:
                 marker_positions = None
 
-        # Marker residuals
-        marker_errors: dict[str, float] = {}
-        if request is not None and marker_positions is not None:
-            for name, valid in request.validity_mask.items():
-                if valid and name in request.marker_targets:
-                    if name in marker_positions:
-                        pred = np.asarray(marker_positions[name], dtype=np.float64)
-                        target = np.asarray(
-                            request.marker_targets[name], dtype=np.float64
+        if marker_positions is None and request is not None:
+            model_target = self._plant if self._plant is not None else self._model
+            if model_target is not None and hasattr(model_target, "frame_poses"):
+                try:
+                    coords = {
+                        name: float(q[self._coordinates[name]])
+                        for name in self.coordinate_order
+                    }
+                    poses = model_target.frame_poses(coords)
+                    marker_positions = {
+                        k: (
+                            np.asarray(v)[:3, 3]
+                            if np.asarray(v).shape == (4, 4)
+                            else np.asarray(v)[:3]
                         )
-                        marker_errors[name] = float(np.linalg.norm(pred - target))
+                        for k, v in poses.items()
+                    }
+                except Exception:
+                    marker_positions = None
+        return marker_positions
 
-        # Weld closure residuals and near-pi check
-        weld_translation_error = 0.0
-        weld_rotation_error = 0.0
+    def _compute_weld_residuals(
+        self,
+        q: np.ndarray,
+        configuration: ConfigurationState,
+        request: FrameTaskRequest | None,
+    ) -> tuple[float, float]:
+        enforce_weld = True
+        if request is not None and request.policy is not None:
+            enforce_weld = request.policy.enforce_weld
+
+        if not enforce_weld:
+            return 0.0, 0.0
+
         weld_error = configuration.weld_pose_error
-        if weld_error is None:
+        if weld_error is None and enforce_weld:
             model_target = self._plant if self._plant is not None else self._model
             if model_target is not None and hasattr(model_target, "closure_residuals"):
                 try:
@@ -660,8 +707,43 @@ class FullBodyPinkTasks:
 
         if weld_error is not None:
             _require_weld_log_chart(weld_error)
-            weld_translation_error = float(np.linalg.norm(weld_error[:3]))
-            weld_rotation_error = float(np.linalg.norm(weld_error[3:]))
+            return float(np.linalg.norm(weld_error[:3])), float(
+                np.linalg.norm(weld_error[3:])
+            )
+        return float("nan"), float("nan")
+
+    def audit(
+        self,
+        configuration: ConfigurationState,
+        request: FrameTaskRequest | None = None,
+    ) -> FrameResiduals:
+        """Audit post-solve residuals, bound violations, and weld closure errors."""
+        q = np.asarray(configuration.q, dtype=np.float64)
+        marker_positions = self._resolve_marker_positions(q, configuration, request)
+
+        # Marker residuals: unevaluated or missing frame must yield NaN, never zero
+        marker_errors: dict[str, float] = {}
+        if request is not None:
+            if marker_positions is not None:
+                for name, valid in request.validity_mask.items():
+                    if valid and name in request.marker_targets:
+                        if name in marker_positions:
+                            pred = np.asarray(marker_positions[name], dtype=np.float64)
+                            target = np.asarray(
+                                request.marker_targets[name], dtype=np.float64
+                            )
+                            marker_errors[name] = float(np.linalg.norm(pred - target))
+                        else:
+                            marker_errors[name] = float("nan")
+            else:
+                for name, valid in request.validity_mask.items():
+                    if valid and name in request.marker_targets:
+                        marker_errors[name] = float("nan")
+
+        # Weld closure residuals: unevaluated must yield NaN, never zero
+        weld_translation_error, weld_rotation_error = self._compute_weld_residuals(
+            q, configuration, request
+        )
 
         # Bound violations
         bound_violations: dict[str, float] = {}

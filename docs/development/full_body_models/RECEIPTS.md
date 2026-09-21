@@ -16,6 +16,8 @@ Summary provenance, hashes, file references, and execution duration written by `
 
 | Field                      | Unit     | Meaning                                                                    | Stage    |
 | :------------------------- | :------- | :------------------------------------------------------------------------- | :------- |
+| `backend`                  | string   | Kinematic backend engine used for tracking (mujoco or pink)                | metadata |
+| `engine`                   | string   | Full-body dynamics and plant engine (mujoco, drake, pinocchio)             | metadata |
 | `base_spec_sha256`         | hash     | SHA256 hash of the initial input model specification document              | metadata |
 | `base_spec_file`           | filename | Filename of the input model specification document                         | metadata |
 | `spec_file`                | filename | Filename of the final scaled and calibrated spec document                  | metadata |
@@ -39,6 +41,7 @@ Summary provenance, hashes, file references, and execution duration written by `
 | `dynamics`                 | compound | Forward dynamics tracking, computed torque, and ZMP diagnostics            | dynamics |
 | `elapsed_s`                | s        | Total wall-clock runtime of ground-support execution                       | metadata |
 | `qualification`            | text     | Qualification note and status claim for the run                            | metadata |
+| `acceptance`               | compound | Physical and kinematic acceptance evaluation verdict (MS-01)               | metadata |
 
 ## Ground Stage (`ground`)
 
@@ -87,6 +90,7 @@ Full-trajectory marker matching, alternating calibration, limb scaling, and rang
 | `range_of_motion_flags`      | compound   | Excursions exceeding anatomical limits across reference      | ik    |
 | `bound_widening`             | multiplier | Safety factor applied to widen joint range limits            | ik    |
 | `leg_angle_ranges_deg`       | deg        | Min and max angles observed per lower limb joint coordinate  | ik    |
+| `constrained_ik`             | compound   | Optional constrained IK execution diagnostics and provenance | ik    |
 
 ## Dynamics Stage (`dynamics`)
 
