@@ -26,7 +26,7 @@ Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https:/
 
 Branch `feat/nm01-freeze-learning-tasks`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisite NM-00 [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668) merged.
 NM-01 freezes typed forward/inverse/masked task contracts, a 20-model roster keyed to TB-00 identities (full-body deferred pending benefit) and benefit-experiment gates (100/500/2000 nested stages, three seeds, five baselines, latency including replay/refinement/failures, 2× median/non-worse p95, break-even undefined when savings ≤ 0). Evidence: `docs/plans/neural_motion_matching/evidence/nm01_*.json`. No training or speed claim.
-Next step: Land PR with `Fixes #10616`, then dispatch NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)).
+PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672) open with squash auto-merge. Next after merge: dispatch NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)).
 
 ## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615) [MERGED]
 

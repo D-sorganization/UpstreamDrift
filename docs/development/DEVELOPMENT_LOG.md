@@ -290,16 +290,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10616 (epic #10603)
 - **Branch:** feat/nm01-freeze-learning-tasks
-- **PR:** not created
+- **PR:** #10672
 - **Paths:** src/shared/python/neural*motion/tasks.py; src/shared/python/neural_motion/roster.py; src/shared/python/neural_motion/experiment.py; src/shared/python/neural_motion/**init**.py; tests/unit/neural_motion/test_learning_tasks.py; tests/unit/neural_motion/test_model_roster.py; tests/unit/neural_motion/test_benefit_experiment.py; tests/unit/neural_motion/test_nm01_dbc_optimize.py; docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01*\*.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T20:50:00Z at SELF (21 focused unit tests GREEN; ruff clean; evidence digests written)
+- **Last verified:** 2026-09-21T21:12:00Z at e2af002bd (21 focused unit tests GREEN; PR #10672 squash auto-merge enabled)
 - **Summary:** Freezes typed forward/inverse/masked learning-task contracts (dimensions from TB-00 identities; inverse non-uniqueness policy required), a 20-model neural roster with full-body deferred pending benefit, and the benefit experiment (nested 100/500/2000 stages, three seeds, five baselines, all-phase latency including failures, 2× median/non-worse p95 gates, break-even None when savings ≤ 0). No training or speed claim.
-- **Next step:** Open ready-for-review PR with Fixes #10616 and enable auto-merge squash.
+- **Next step:** Wait for CI green and squash auto-merge of PR #10672.
 - **Evidence:** docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01_learning_tasks_pilot.json; docs/plans/neural_motion_matching/evidence/nm01_model_roster.json; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment_receipt.json.
 
 ### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
