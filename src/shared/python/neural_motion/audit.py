@@ -136,9 +136,13 @@ def inspect_parquet_bounded(
     num_row_groups = int(parquet_file.num_row_groups)
     take = min(max_rows, num_rows)
     if take > 0:
-        table = parquet_file.read_row_group(0)
-        sampled = table.slice(0, take)
-        sampled_rows = int(sampled.num_rows)
+        # Use iter_batches to avoid loading an entire row group into memory.
+        # Row-group sizes are writer-controlled; a single group can be hundreds
+        # of megabytes. iter_batches streams rows within the batch_size limit.
+        sampled_rows = 0
+        for batch in parquet_file.iter_batches(batch_size=take):
+            sampled_rows = int(batch.num_rows)
+            break
     else:
         sampled_rows = 0
 
@@ -300,13 +304,33 @@ def _audit_present_file(
     content_sha = _sha256_file(path)
     disposition = Disposition.RETAIN
     claim_status = ClaimStatus.REPRODUCED_LOCALLY
-    blockers: tuple[str, ...] = ()
+    blockers: list[str] = []
     if entry.kind == ArtifactKind.CHECKPOINT:
         disposition = Disposition.MIGRATE
         claim_status = ClaimStatus.SOFTWARE_CONTRACT_ONLY
-        blockers = (
+        blockers.append(
             "checkpoint present but not yet schema-qualified under NM-00; "
-            "load only via weights_only helpers before any training claim",
+            "load only via weights_only helpers before any training claim"
+        )
+    elif entry.role == ArtifactRole.COMPACT_CORPUS:
+        # Fail-closed: compact corpus requires parquet inspection and provenance
+        # before any training-adjacent status. Hash alone is not sufficient.
+        disposition = Disposition.MIGRATE
+        claim_status = ClaimStatus.SOFTWARE_CONTRACT_ONLY
+        try:
+            inspect_result = inspect_parquet_bounded(
+                path, expected_sha256=content_sha, max_rows=8
+            )
+            if inspect_result.num_rows == 0:
+                blockers.append("parquet file is empty")
+            if not inspect_result.schema_names:
+                blockers.append("parquet schema has no columns")
+        except (FileNotFoundError, ValueError, Exception) as exc:
+            blockers.append(f"parquet inspection failed: {exc}")
+        blockers.append(
+            "compact corpus present but provenance (model release, seeds, "
+            "geometry, contact settings) not yet established; "
+            "do not cite as training evidence"
         )
     return _identity_from_entry(
         entry,
@@ -317,7 +341,7 @@ def _audit_present_file(
             content_sha256=content_sha,
             disposition=disposition,
             claim_status=claim_status,
-            blockers=blockers,
+            blockers=tuple(blockers),
         ),
     )
 

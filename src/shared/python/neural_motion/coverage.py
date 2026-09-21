@@ -87,7 +87,13 @@ def generate_neural_coverage_matrix(
         dataset_id: str | None = None
         if ten_k is not None and not ten_k.exists:
             blockers.append(f"documented compact corpus absent ({ten_k.path})")
-        if synthetic is not None and synthetic.exists:
+        elif ten_k is not None and ten_k.exists:
+            # Present compact corpus: use it but propagate its blockers
+            dataset_id = ten_k.artifact_id
+            if ten_k.blockers:
+                blockers.extend(ten_k.blockers)
+        if dataset_id is None and synthetic is not None and synthetic.exists:
+            # Fall back to synthetic fixture only when no corpus is available
             dataset_id = synthetic.artifact_id
             blockers.append(
                 "only synthetic sweep fixture available; software contracts only"
