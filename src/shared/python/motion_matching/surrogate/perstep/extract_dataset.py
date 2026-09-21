@@ -58,8 +58,8 @@ def _cast_string_column_to_float32(
     chunks = column.chunks if isinstance(column, pa.ChunkedArray) else [column]
     converted = []
     for chunk in chunks:
-        blank = pc.equal(chunk, "")
-        cleaned = pc.if_else(blank, pa.scalar(None, pa.string()), chunk)
+        blank = pc.equal(chunk, "")  # type: ignore[attr-defined]
+        cleaned = pc.if_else(blank, pa.scalar(None, pa.string()), chunk)  # type: ignore[attr-defined]
         converted.append(pc.cast(cleaned, pa.float32(), safe=False))
     return pa.chunked_array(converted, type=pa.float32())
 
