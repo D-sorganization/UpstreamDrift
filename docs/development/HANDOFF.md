@@ -51,7 +51,7 @@
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10345-local`.
 - Branch: `fix/issue-10345-ms-52-local`; PR #10666. Governing issue #10345 (epic #10363).
 - Delivered: `retarget.py`, `replay.py`, `golfer_scene.py`, `coordinate_map_anthro.json`, `viz/render_replay.py`; unit/native tests; evidence `evidence/matched/driver_g1_myosuite/{candidate.npz,receipt.json,playback.gif}`.
-- Validation: `pytest tests/unit/engines/myosuite/test_retarget.py tests/myosuite/test_replay_native.py -q`; cross-engine registration; ledger/status refresh for 99 receipts.
+- Validation: `pytest tests/unit/engines/myosuite/test_retarget.py tests/myosuite/test_replay_native.py -q`; cross-engine registration; ledger/status refresh for 101 receipts.
 - Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
 - Next action: merge PR #10666 after rebase CI green; teardown worktree.
 
@@ -169,6 +169,13 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
   - `contact_mode_qualifier.py`: Infer heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis; support mode ambiguity metric; COP and 2D convex hull support polygon containment under arbitrary surface normal n_hat; slip speed thresholding and friction cone saturation ratio; constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation; separate linear force (N) and moment (N\*m) residual budgets; unphysical load rejection (> 5000 N, > 300 Nm); and mass/geometry/friction sensitivity reporting.
 - Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
 - Next: Land PR #10499 via CI and proceed to PF-05.
+
+## MS-16 MuJoCo Native IK and MJ_Inverse Tracking (#10366)
+
+- Worktree: `Worktrees/UpstreamDrift-10660-land`, PR branch `fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local`, lease `claim:local` session `local-10660-land-ci`, DL-#10366, PR #10660.
+- Tip: on latest main; finite-bounds gate for `minimize.least_squares`; weld-aware `mj_inverse` audit; `ShootingFitConfig` keeps architecture budget; `_persist_dynamics_artifacts` keeps `_simulate_and_receipt` under function-lines; refreshed `reports/matched_swing_ledger.json` (101 receipts) after PF-06 merge so `test_ledger_freshness` passes.
+- Reproduction: `pytest tests/unit/motion_matching/test_mujoco_ik_minimize.py tests/unit/motion_matching/test_mujoco_mj_inverse.py tests/unit/motion_matching/test_ledger.py::test_ledger_freshness -q`
+- Next: Confirm unit-test-gate / quality-gate green; squash auto-merge lands; close duplicate #10662.
 
 ## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
 
@@ -1198,4 +1205,11 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 [Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.
 
+## Change Log
+
+- 2026-09-21T21:10:00Z — Refresh matched_swing ledger (101 receipts) for #10660 unit-test-gate freshness. Commit SELF.
+- 2026-09-21T20:42:00Z — Fix architecture budget on #10660: ShootingFitConfig and dynamics artifact helper. Commit SELF.
+- 2026-09-21T20:25:00Z — Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
 - 2026-09-21T10:12:34Z — CI remediation for #10663: replace BLE001 noqa catch-alls in preflight capacity checks with concrete exception tuples. Commit SELF.
+- 2026-09-21T10:11:03Z — CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 101 receipts. Commit SELF.
+- 2026-09-21T10:40:00Z — Fix unit-test-gate on #10660: regenerate matched_swing status (99→100) and stop hardcoding receipt count in browser model test. Commit SELF.
