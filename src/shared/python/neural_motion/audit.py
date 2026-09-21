@@ -255,7 +255,7 @@ def _audit_sweep_folder(
     timesteps_meta = inspect_parquet_bounded(timesteps, max_rows=4)
     blockers: list[str] = []
     channel_names = set(timesteps_meta.schema_names)
-    for channel in ("q", "qd", "qdd", "tau"):
+    for channel in entry.required_channels:
         if channel not in channel_names:
             blockers.append(f"missing required channel: {channel}")
 
