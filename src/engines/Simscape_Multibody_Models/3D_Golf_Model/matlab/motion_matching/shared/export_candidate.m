@@ -54,7 +54,7 @@ function report = export_candidate(evidence_dir, opts)
         report.model_sha256 = char(cand.model_sha256);
     end
     if isfield(cand, 'source_sha256')
-        report.candidate_sha256 = char(cand.source_sha256);
+        report.source_sha256 = char(cand.source_sha256);
     end
     report.note = [ ...
         'Python owns MatchedSwingCandidate .npz packaging via ', ...
