@@ -153,6 +153,16 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
 - Next: Land PR #10499 via CI and proceed to PF-05.
 
+## MS-16 MuJoCo Native IK and MJ_Inverse Tracking (#10366)
+
+- Worktree: `agent-worktrees/issue-10366-cursor-composer-local`, branch `fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local`, lease `claim:cursor-composer-local`, DL-#10366.
+- Changes:
+  - `ik_minimize.py`: `MinimizeMarkerKinematics` using `mujoco.minimize.least_squares` with LM warm start and best-of fallback; marker RMS within 0.5 mm of LM on driver frames 0 and 300.
+  - `inverse_dynamics.py`: `tracking_controller_mj_inverse` and `inverse_dynamics_mj_inverse` with plant KKT torques and native `mj_inverse` audit; MS-72 replay/discretization gates.
+  - Pipeline: `--ik-backend mujoco-minimize`, `--tracking mj-inverse`, receipt fields `ik_backend` / `tracking_backend`.
+- Reproduction: `pytest tests/unit/motion_matching/test_mujoco_ik_minimize.py tests/unit/motion_matching/test_mujoco_mj_inverse.py -q`
+- Next: PR via REST, CI Standard, canonical driver receipt at `docs/development/full_body_models/evidence/ground_support/anthro_driver_native_tools/receipt.json`.
+
 ## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
 
 - Branch: `feat/issue-10433-pf03-contact-actuator-root-constraints`, PR #10498 (auto-merge armed), lease `antigravity-ud-10433`, DL-#10433.

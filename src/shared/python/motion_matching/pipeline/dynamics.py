@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from src.shared.python.contracts import postcondition, precondition
+
 if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
@@ -47,6 +49,52 @@ from src.shared.python.motion_matching.tour_capture_contract import MARKER_SEGME
 
 if TYPE_CHECKING:
     from src.shared.python.motion_matching.pipeline.lane import Lane
+
+TRACKING_BACKENDS = frozenset({"kkt", "mj-inverse"})
+
+
+@precondition(lambda name: isinstance(name, str), "tracking_backend must be a string")
+@postcondition(
+    lambda result: result in TRACKING_BACKENDS, "tracking_backend must be supported"
+)
+def validate_tracking_backend(name: str) -> str:
+    """Validate selectable computed-torque tracking backend names."""
+    key = name.strip().lower()
+    if key not in TRACKING_BACKENDS:
+        known = ", ".join(sorted(TRACKING_BACKENDS))
+        raise ValueError(
+            f"Unknown tracking backend {name!r}; expected one of [{known}]"
+        )
+    return key
+
+
+def build_tracking_controller(
+    sim: fs.FullBodySimulator,
+    times: np.ndarray,
+    q_track: np.ndarray,
+    *,
+    tracking_backend: str = "kkt",
+):
+    """Build a computed-torque controller for the selected tracking backend."""
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
+    tracking_backend = validate_tracking_backend(tracking_backend)
+    if tracking_backend == "mj-inverse":
+        from src.engines.physics_engines.mujoco.python.inverse_dynamics import (
+            tracking_controller_mj_inverse,
+        )
+
+        return tracking_controller_mj_inverse(
+            sim,
+            times,
+            q_track,
+            omega_rad_s=OMEGA_RAD_S,
+            zeta=1.0,
+            balance=BALANCE,
+        )
+    return fs.tracking_controller(
+        sim, times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+    )
 
 
 def segment_rms(
@@ -90,6 +138,8 @@ def replay(
     sim: fs.FullBodySimulator,
     lane: Lane,
     q_track: np.ndarray,
+    *,
+    tracking_backend: str = "kkt",
 ) -> tuple[fs.SimulationRecord, np.ndarray]:
     """Track ``q_track`` with computed torque from preloaded feet.
 
@@ -97,16 +147,21 @@ def replay(
         sim: Full-body forward simulator.
         lane: Coordination lane providing times.
         q_track: (N, nq) reference trajectory to track.
+        tracking_backend: ``kkt`` (default plant affine solve) or ``mj-inverse``.
 
     Returns:
         (record, sim_q): simulation record and state resampled on the capture times.
     """
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
+    tracking_backend = validate_tracking_backend(tracking_backend)
     q0 = fs.preload_feet(sim, q_track[0])
     v0 = np.gradient(q_track, lane.times, axis=0)[0]
-    controller = fs.tracking_controller(
-        sim, lane.times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE
+    controller = build_tracking_controller(
+        sim,
+        lane.times,
+        q_track,
+        tracking_backend=tracking_backend,
     )
     record = sim.run(
         q0,
@@ -397,6 +452,7 @@ class DynamicsReportInputs:
     zmp_filter_report: dict[str, Any] | None = None
     shooting_report: dict[str, Any] | None = None
     sim_errors: np.ndarray | None = None
+    tracking_backend: str = "kkt"
 
 
 def _build_reference_zmp_report(
@@ -552,6 +608,7 @@ def build_dynamics_report(
         "dt_s": DT_S,
         "controller": {
             "type": "computed torque tracking, unactuated root",
+            "backend": validate_tracking_backend(inputs.tracking_backend),
             "omega_rad_s": OMEGA_RAD_S,
             "zeta": 1.0,
             "balance": BALANCE,
