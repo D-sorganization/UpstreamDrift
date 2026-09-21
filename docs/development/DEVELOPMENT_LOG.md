@@ -130,6 +130,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land PR via normal squash merge and proceed to TB-05 (#10590).
 - **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json; tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py.
 
+### DL-#10591 · TB-06: Upper-Body Constrained Dynamic Fitter (Partial)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10591 (TB-06, parent #10584, program #10363)
+- **Branch:** feat/tb06-upper-body-fit-10591
+- **PR:** (recorded after opening)
+- **Paths:** src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (SELF; 11/11 unit tests pass in tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; ruff check clean; ruff format clean).
+- **Summary:** Adapts the existing 8-coordinate closed-loop `physics_golfer`/`golfer_constraints`/`constraint_solver` model into the TB-04/TB-05 target/fit/replay contract shape without faking loop closure: `adapters_golfer.py` reuses TB-00's registry entry (rank-3 constraint Jacobian, 5 independent DOFs) for topology recording and wraps `project_to_constraints`/`project_velocity` into an honest `GolferFeasibilityReport` (feasible=False with a Jacobian-rank/non-convergence reason is a first-class outcome, never coerced to success). `torque_optimization_golfer.py` reuses the TB-04/05 degree-6 Bernstein basis convention (7 controls x 7 actuated joints) and integrates through the real Baumgarte-stabilized constrained EOM (`constraint_solver.equations_of_motion`) via RK4 -- constraint residual and reaction (Lagrange multiplier) forces are recorded per frame and kept distinct from applied joint torque, and energy/work balance is tracked. `fit_bounded_golfer` checks feasibility before invoking the optimizer and returns a diagnostic `GolferFitOutcome(feasible=False, ...)` on infeasible/non-convergent initial states instead of a synthetic success. Bounded work items 1-3 (topology recording, fixed calibrated geometry + feasible q0/v0, reused Bernstein optimization with constraint/reaction/energy accounting) are implemented and tested against a manufactured trajectory. Deferred: real driver/iron C3D qualification campaigns, baseline-package/qualification-receipt generation (bounded work item 4's tour-capture fitting), and provider/registry wiring equivalent to TB-04/05's `provider.py`/`qualification.py` -- the model here is planar like TB-04/05 (not the 3D upper torso the coverage matrix aspirationally describes), so plane-projection and C3D-loader reuse from TB-04/05 would carry over directly but was not completed this session. Item 5 (remaining TB-00 reduced-model roster) needs no further action beyond TB-05 (#10590, separate in-flight PR #10644) once it lands.
+- **Next step:** A follow-up session should reuse TB-05's `provider_triple.py`/`qualification_triple.py` pattern (swing-plane projection + C3D loading, already DRY-reusable) to run the actual driver/iron qualification campaign against `docs/plans/tour_baselines/evidence/` and update `coverage_matrix.md`'s `constrained_upper_body_golfer` rows from Unqualified.
+- **Evidence:** tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py.
+
 ### DL-#10433 · Enforce Contact, Actuator and Root Constraints in Force Allocation
 
 - **State:** in_review
