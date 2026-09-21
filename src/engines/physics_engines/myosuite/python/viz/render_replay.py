@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+from typing import TypeAlias
+
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import precondition
@@ -12,7 +14,7 @@ from src.shared.python.motion_matching.cross_engine_replay import (
     render_marker_overlay_animation,
 )
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 @precondition(lambda time_s: len(time_s) > 0, "non-empty timeline")

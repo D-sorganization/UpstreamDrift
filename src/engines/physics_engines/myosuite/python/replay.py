@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -43,7 +43,7 @@ from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
 logger = logging.getLogger(__name__)
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 MARKER_RMS_LIMIT_M = 0.015
 REPO_ROOT = Path(__file__).resolve().parents[5]
 
@@ -93,7 +93,7 @@ def _align_source_q(
 
 def _qpos_from_retarget(q_retarget: Array, rmap: RetargetMap, model_nq: int) -> Array:
     """Embed retargeted coordinates into the placeholder MyoBody free-joint layout."""
-    qpos = np.zeros(model_nq, dtype=np.float64)
+    qpos: Array = np.zeros(model_nq, dtype=np.float64)
     if model_nq >= 7:
         qpos[3] = 1.0  # identity quaternion w
     name_to_value = {
@@ -135,8 +135,8 @@ def _predict_markers(
     frames = len(qpos_traj)
     out = np.full((frames, len(labels), 3), np.nan, dtype=np.float64)
     label_to_idx = {label: idx for idx, label in enumerate(labels)}
-    for frame_idx, qpos in enumerate(qpos_traj):
-        data.qpos[:] = qpos
+    for frame_idx, qpos_row in enumerate(qpos_traj):
+        data.qpos[:] = qpos_row
         mujoco.mj_forward(model, data)
         for label, spec in marker_sites.items():
             if label not in label_to_idx:
@@ -167,10 +167,10 @@ def _apply_static_site_calibration(
     valid: Array,
     *,
     calibration_frame: int = 0,
-) -> tuple[Array, dict[str, list[float]]]:
+) -> tuple[Array, dict[str, Any]]:
     """Apply per-marker static offsets learned from one source frame."""
     calibrated = predicted.copy()
-    offsets: dict[str, list[float]] = {}
+    offsets: dict[str, Any] = {}
     if source.shape[0] == 0:
         return calibrated, offsets
     frame = min(calibration_frame, source.shape[0] - 1)
@@ -279,7 +279,9 @@ def run_kinematic_replay(config: ReplayConfig) -> dict[str, Any]:
     if scene.is_placeholder and source_markers is not None:
         marker_rms_raw = _marker_rms(source_subset, predicted, valid_subset)
         calibrated = source_subset.copy()
-        site_calibration = {"policy": "source_oracle_preserved_pending_ms51"}
+        site_calibration: dict[str, Any] = {
+            "policy": "source_oracle_preserved_pending_ms51"
+        }
         marker_rms = 0.0
     else:
         marker_rms_raw = _marker_rms(source_subset, predicted, valid_subset)

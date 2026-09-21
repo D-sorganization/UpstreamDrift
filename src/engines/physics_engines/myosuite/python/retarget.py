@@ -6,14 +6,14 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 _DEFAULT_MAP = Path(__file__).with_name("coordinate_map_anthro.json")
 
