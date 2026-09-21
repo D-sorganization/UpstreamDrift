@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9544 (epic #9541)
+- **Branch:** conductor/issue-9544
+- **PR:** #10455 (open)
+- **Paths:** src/bunkershot3d/ball/regimes.py; src/bunkershot3d/ball/pipeline.py; src/bunkershot3d/ball/splash.py; src/bunkershot3d/solvers/shot.py; src/bunkershot3d/solvers/mpm/wholeshot.py; src/bunkershot3d/vandv/conservation.py; src/tools/bunker_shot_gui/model.py; tests/bunkershot3d/ball/test_contact_regimes_9544.py; tests/bunkershot3d/solvers/test_rotation_coupling_9544.py; docs/bunkershot3d/contact-regimes.md
+- **Started:** 2026-09-18
+- **Last verified:** 2026-09-18 at SELF (RED shown for both new test files, then GREEN: 15 regime tests and 14 coupling tests pass; tests/bunkershot3d + tests/unit/tools/bunker_shot_gui pass except three pre-existing failures reproduced with the classifier bypassed — pyvista `n_faces` API in test_shot_scene_render_vtk.py and two #9243 budget/band assertions; ruff check/format clean)
+- **Summary:** Four contact regimes (no hit, direct/thin strike, splash, buried no-release) classified from the F0 sole path and divot stations; launch refused for every regime but splash. Prescribed rotation is a named `RotationMode`; an optional `RotationCoupling` boundary receives the sand wrench (about the body origin, world frame) and owns the angular velocity. V&V ledger adds support angular impulse and prescribed-driver work. F1 launch/out-of-plane refusals re-asserted; F2 requirements recorded in docs/bunkershot3d/contact-regimes.md.
+- **Next step:** Open the PR with `Closes #9544` and record the merge SHA plus pinned Tools `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` in the completion comment.
+- **Evidence:** tests/bunkershot3d/ball/test_contact_regimes_9544.py; tests/bunkershot3d/solvers/test_rotation_coupling_9544.py; docs/bunkershot3d/contact-regimes.md.
+
 ### DL-#9543 · Bunker Sand-to-Ball Transfer Calibration and Held-Out Qualification
 
 - **State:** in_review

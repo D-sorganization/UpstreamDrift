@@ -39,6 +39,12 @@ from .pipeline import (
     compute_bunker_launch,
     to_post_impact_state,
 )
+from .regimes import (
+    RegimeClassification,
+    StrikeOutcome,
+    UnsupportedContactRegimeError,
+    classify_contact_regime,
+)
 from .qualification import (
     INTENDED_USE_MATRIX,
     MEASUREMENT_PROTOCOL,
@@ -91,13 +97,17 @@ __all__ = [
     "ObjectiveDisposition",
     "PracticalTolerances",
     "QualificationDataset",
+    "RegimeClassification",
     "RegimeVerdict",
     "RigCapability",
     "SandDelivery",
     "SplashTransferResult",
+    "StrikeOutcome",
     "TransferQualification",
     "TransferQualificationError",
+    "UnsupportedContactRegimeError",
     "UseRegime",
+    "classify_contact_regime",
     "compute_ball_launch_from_splash",
     "compute_bunker_launch",
     "compute_exposed_cap_area",

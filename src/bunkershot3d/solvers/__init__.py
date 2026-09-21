@@ -93,7 +93,14 @@ from .protocol import (
     SolverResult,
     Wrench,
 )
-from .shot import HeadKinematics, ShotResult, ShotSettings, simulate_shot
+from .shot import (
+    HeadKinematics,
+    RotationCoupling,
+    RotationMode,
+    ShotResult,
+    ShotSettings,
+    simulate_shot,
+)
 from .structural import (
     CrossoverSaturatingDepression,
     DepressionInputs,
@@ -134,6 +141,8 @@ __all__ = [
     "MaterialResponse",
     "OutOfEnvelopeError",
     "RefusalPolicy",
+    "RotationCoupling",
+    "RotationMode",
     "ShotResult",
     "ShotSettings",
     "ShotTruncatedError",

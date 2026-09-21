@@ -81,7 +81,7 @@ from ..elements import SurfaceElements
 from ..envelope import GRAVITY_M_S2, ValidityVerdict
 from ..exceptions import ShotTruncatedError, SolverInputError
 from ..protocol import IntrusionState
-from ..shot import ShotResult
+from ..shot import RotationMode, ShotResult
 from .body import RigidSection
 from .grid import PlaneStrainGrid
 from .solver import MPMRun, PlaneStrainMPMSolver, cfl_time_step_s
@@ -407,6 +407,7 @@ def simulate_f1_shot(
         sole_reference=_sole_offset(plan.head),
         exited=exited,
         started_s=started,
+        spin_rad_s=plan.spin_rad_s,
     )
     travel = abs(float(columns.positions_m[-1][0] - columns.positions_m[0][0]))
     result = F1ShotResult(shot, run, contacted, exited, truncated, travel)
@@ -701,6 +702,7 @@ def _to_shot_result(
     sole_reference: NDArray[np.float64],
     exited: bool,
     started_s: float,
+    spin_rad_s: float,
 ) -> ShotResult:
     """Freeze the columns into the protocol's shot trace."""
     return ShotResult(
@@ -723,6 +725,12 @@ def _to_shot_result(
         sole_reference_body_m=np.asarray(sole_reference, dtype=np.float64),
         exited=exited,
         runtime_s=time.perf_counter() - started_s,
+        # The F1 march prescribes a constant spin about +y (issue #9544).
+        angular_velocities_rad_s=np.tile(
+            np.array([0.0, spin_rad_s, 0.0], dtype=np.float64),
+            (len(columns.times_s), 1),
+        ),
+        rotation_mode=RotationMode.PRESCRIBED,
     )
 
 
