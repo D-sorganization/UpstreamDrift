@@ -13,6 +13,7 @@ import argparse
 import json
 from pathlib import Path
 import sys
+from typing import Any
 
 import numpy as np
 
@@ -21,9 +22,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.shared.python.motion_matching.full_marker_terminal import (  # noqa: E402
+    TerminalMarkerBreakdown,
     compute_terminal_marker_breakdown,
 )
 from src.shared.python.motion_matching.simscape_topology import (  # noqa: E402
+    SimscapeTopologyReport,
     classify_simscape_topology,
 )
 
@@ -50,7 +53,7 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def materialize(output_dir: Path = RUN103) -> None:
+def _load_run102() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     candidate = json.loads(
         (RUN102 / "returned-candidate.json").read_text(encoding="utf-8")
     )
@@ -66,11 +69,15 @@ def materialize(output_dir: Path = RUN103) -> None:
             "MS-61 requires R2025b identity from run-102 qualified replay; "
             f"got {qualified.get('matlab_release')!r}"
         )
+    return candidate, qualified, run_manifest
 
+
+def _classify_and_breakdown(
+    candidate: dict[str, Any],
+) -> tuple[SimscapeTopologyReport, TerminalMarkerBreakdown]:
     coords = list(candidate["coordinate_names"])
     labels = list(candidate["marker_labels"])
     bodies = list(candidate["marker_bodies"])
-
     topology = classify_simscape_topology(
         coordinate_names=coords,
         marker_labels=labels,
@@ -84,39 +91,16 @@ def materialize(output_dir: Path = RUN103) -> None:
             marker_labels=labels,
             marker_bodies=bodies,
         )
+    return topology, breakdown
 
-    topology_payload = {
-        "schema_version": "simscape-topology-report/1",
-        "issue": "#10348",
-        "source_run_id": "two_window_fit_9967_102",
-        "model_sha256": candidate["model_sha256"],
-        **topology.as_dict(),
-        "rigidity_floor_ref": (
-            "docs/development/simscape_tour_matching/native_evidence/"
-            "fixed_attachment_rigidity_floor.json"
-        ),
-        "note": (
-            "Software topology classification from the committed 27-DOF candidate. "
-            "R2025b runtime identity is recorded in runtime_license_receipt.json "
-            "(no inferred 1000-block license cap)."
-        ),
-    }
-    terminal_payload = {
-        "schema_version": "simscape-terminal-breakdown/1",
-        "issue": "#10348",
-        "source_run_id": "two_window_fit_9967_102",
-        "acceptance_terminal_source": "full_marker",
-        "g1_terminal_ceiling_m": 0.035,
-        **breakdown.as_dict(),
-        "note": (
-            "Full-marker terminal remains above the G1 35 mm ceiling. "
-            "body_excluding_head_terminal_rms_m is a reduced-model diagnostic only "
-            "and must not be used for full-body acceptance."
-        ),
-    }
-    full_m = float(breakdown.full_marker_terminal_rms_m)
-    parity = qualified.get("cross_engine_parity") or {}
-    native_gate = {
+
+def _native_gate_payload(
+    *,
+    qualified: dict[str, Any],
+    run_manifest: dict[str, Any],
+    full_m: float,
+) -> dict[str, Any]:
+    return {
         "schema_version": "simscape-native-gate/1",
         "issue": "#10348",
         "run_id": "two_window_fit_9967_103",
@@ -137,7 +121,9 @@ def materialize(output_dir: Path = RUN103) -> None:
             "coupling remains the documented rigidity floor (see topology_report).",
         ],
         "follow_up": {
-            "model_work": "MS-104 (#10378) full-body Simscape flagship / neck capability",
+            "model_work": (
+                "MS-104 (#10378) full-body Simscape flagship / neck capability"
+            ),
             "runtime_inventory": (
                 "MS-102 (#10376) soft dependency — does not block software contracts"
             ),
@@ -154,54 +140,103 @@ def materialize(output_dir: Path = RUN103) -> None:
             "source_run102_replay": "../two_window_fit_9967_102/returned-replay.npz",
         },
     }
-    runtime_license = {
-        "schema_version": "simscape-runtime-license/1",
-        "issue": "#10348",
-        "run_id": "two_window_fit_9967_103",
-        "matlab_release": "2025b",
-        "matlab_version": qualified.get("matlab_version"),
-        "host": run_manifest.get("host"),
-        "model_sha256": candidate["model_sha256"],
-        "candidate_sha256": run_manifest.get("candidate_sha256"),
-        "source_run_manifest": (
-            "docs/development/simscape_tour_matching/native_evidence/"
-            "two_window_fit_9967_102/run_manifest.json"
+
+
+def _build_receipts(
+    *,
+    candidate: dict[str, Any],
+    qualified: dict[str, Any],
+    run_manifest: dict[str, Any],
+    topology: SimscapeTopologyReport,
+    breakdown: TerminalMarkerBreakdown,
+) -> dict[str, dict[str, Any]]:
+    full_m = float(breakdown.full_marker_terminal_rms_m)
+    parity = qualified.get("cross_engine_parity") or {}
+    return {
+        "topology_report.json": {
+            "schema_version": "simscape-topology-report/1",
+            "issue": "#10348",
+            "source_run_id": "two_window_fit_9967_102",
+            "model_sha256": candidate["model_sha256"],
+            **topology.as_dict(),
+            "rigidity_floor_ref": (
+                "docs/development/simscape_tour_matching/native_evidence/"
+                "fixed_attachment_rigidity_floor.json"
+            ),
+            "note": (
+                "Software topology classification from the committed 27-DOF candidate. "
+                "R2025b runtime identity is recorded in runtime_license_receipt.json "
+                "(no inferred 1000-block license cap)."
+            ),
+        },
+        "terminal_breakdown.json": {
+            "schema_version": "simscape-terminal-breakdown/1",
+            "issue": "#10348",
+            "source_run_id": "two_window_fit_9967_102",
+            "acceptance_terminal_source": "full_marker",
+            "g1_terminal_ceiling_m": 0.035,
+            **breakdown.as_dict(),
+            "note": (
+                "Full-marker terminal remains above the G1 35 mm ceiling. "
+                "body_excluding_head_terminal_rms_m is a reduced-model diagnostic only "
+                "and must not be used for full-body acceptance."
+            ),
+        },
+        "native_gate.json": _native_gate_payload(
+            qualified=qualified, run_manifest=run_manifest, full_m=full_m
         ),
-        "license_cap_assumed": False,
-        "note": (
-            "R2025b identity reused from committed MS-60 run-102 receipt. "
-            "No inferred 1000-block license cap."
-        ),
-    }
-    parity_receipt = {
-        "schema_version": "simscape-parity-receipt/1",
-        "issue": "#10348",
-        "run_id": "two_window_fit_9967_103",
-        "parent_run_id": "two_window_fit_9967_102",
-        "max_marker_euclidean_discrepancy_m": parity.get(
-            "max_marker_euclidean_discrepancy_m"
-        ),
-        "mean_marker_euclidean_discrepancy_m": parity.get(
-            "mean_marker_euclidean_discrepancy_m"
-        ),
-        "source": (
-            "docs/development/simscape_tour_matching/native_evidence/"
-            "two_window_fit_9967_102/qualified_candidate_replay.json"
-        ),
-        "note": (
-            "Pinocchio↔Simscape parity retained from MS-60 run-102 R2025b cold "
-            "replay; MS-61 does not re-claim native physical success."
-        ),
+        "runtime_license_receipt.json": {
+            "schema_version": "simscape-runtime-license/1",
+            "issue": "#10348",
+            "run_id": "two_window_fit_9967_103",
+            "matlab_release": "2025b",
+            "matlab_version": qualified.get("matlab_version"),
+            "host": run_manifest.get("host"),
+            "model_sha256": candidate["model_sha256"],
+            "candidate_sha256": run_manifest.get("candidate_sha256"),
+            "source_run_manifest": (
+                "docs/development/simscape_tour_matching/native_evidence/"
+                "two_window_fit_9967_102/run_manifest.json"
+            ),
+            "license_cap_assumed": False,
+            "note": (
+                "R2025b identity reused from committed MS-60 run-102 receipt. "
+                "No inferred 1000-block license cap."
+            ),
+        },
+        "parity_receipt.json": {
+            "schema_version": "simscape-parity-receipt/1",
+            "issue": "#10348",
+            "run_id": "two_window_fit_9967_103",
+            "parent_run_id": "two_window_fit_9967_102",
+            "max_marker_euclidean_discrepancy_m": parity.get(
+                "max_marker_euclidean_discrepancy_m"
+            ),
+            "mean_marker_euclidean_discrepancy_m": parity.get(
+                "mean_marker_euclidean_discrepancy_m"
+            ),
+            "source": (
+                "docs/development/simscape_tour_matching/native_evidence/"
+                "two_window_fit_9967_102/qualified_candidate_replay.json"
+            ),
+            "note": (
+                "Pinocchio↔Simscape parity retained from MS-60 run-102 R2025b cold "
+                "replay; MS-61 does not re-claim native physical success."
+            ),
+        },
     }
 
-    _write_json(output_dir / "topology_report.json", topology_payload)
-    _write_json(output_dir / "terminal_breakdown.json", terminal_payload)
-    _write_json(output_dir / "native_gate.json", native_gate)
-    _write_json(output_dir / "runtime_license_receipt.json", runtime_license)
-    _write_json(output_dir / "parity_receipt.json", parity_receipt)
 
-    handoff = output_dir / "HANDOFF.md"
-    handoff.write_text(
+def _write_handoff(
+    output_dir: Path,
+    *,
+    qualified: dict[str, Any],
+    run_manifest: dict[str, Any],
+    breakdown: TerminalMarkerBreakdown,
+    parity: dict[str, Any],
+) -> None:
+    full_m = float(breakdown.full_marker_terminal_rms_m)
+    (output_dir / "HANDOFF.md").write_text(
         "\n".join(
             [
                 "# MS-61 Topology + Full-Marker Terminal Qualification (#10348)",
@@ -256,6 +291,27 @@ def materialize(output_dir: Path = RUN103) -> None:
             ]
         ),
         encoding="utf-8",
+    )
+
+
+def materialize(output_dir: Path = RUN103) -> None:
+    candidate, qualified, run_manifest = _load_run102()
+    topology, breakdown = _classify_and_breakdown(candidate)
+    receipts = _build_receipts(
+        candidate=candidate,
+        qualified=qualified,
+        run_manifest=run_manifest,
+        topology=topology,
+        breakdown=breakdown,
+    )
+    for name, payload in receipts.items():
+        _write_json(output_dir / name, payload)
+    _write_handoff(
+        output_dir,
+        qualified=qualified,
+        run_manifest=run_manifest,
+        breakdown=breakdown,
+        parity=qualified.get("cross_engine_parity") or {},
     )
 
 
