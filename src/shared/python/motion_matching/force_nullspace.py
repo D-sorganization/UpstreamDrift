@@ -837,14 +837,12 @@ def explore_torque_tradeoffs(
         )
         if joint_velocities is not None:
             jv = np.asarray(joint_velocities, dtype=float)
-            if jv.size == per_joint_torque.size:
-                jp = per_joint_torque * jv
-            elif jv.size < per_joint_torque.size:
-                jp = np.zeros_like(per_joint_torque)
-                jp[: jv.size] = per_joint_torque[: jv.size] * jv
-            else:
-                jp = per_joint_torque * jv[: per_joint_torque.size]
-            per_joint_power = _array(jp, 1, "per_joint_power")
+            if jv.size != per_joint_torque.size:
+                raise ValueError(
+                    f"joint_velocities length ({jv.size}) must match the number of "
+                    f"joint indices ({per_joint_torque.size})"
+                )
+            per_joint_power = _array(per_joint_torque * jv, 1, "per_joint_power")
         else:
             per_joint_power = _array(
                 np.zeros_like(per_joint_torque), 1, "per_joint_power"
