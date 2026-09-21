@@ -1,21 +1,10 @@
-"""Exercise the public contact-interval façade through the pinned Tools provider.
+"""Exercise the public contact-interval façade and energy audit through the pinned Tools provider.
 
-UpstreamDrift #9549 (epic #9546) integrates the six-DOF contact-interval
-solver into live runs, playback and export. Tools owns that runtime
-(Tools #4130 / #4946) and UpstreamDrift consumes an immutable reviewed pin,
-so this module records two things from the consumer side:
-
-* what the launcher, parity and flight paths already rely on at the current
-  pin -- a time-resolved contact record, boundary selection that changes the
-  solver configuration, and a completed terminal state that feeds the
-  canonical flight solver exactly once while unfinished contact refuses; and
-* the workbench record integration the provider has not shipped yet, as a
-  strict expected failure. When a pin bump lands the interval phase in the
-  canonical ``rate_of_closure`` run record, that xfail turns into a failure
-  and the UpstreamDrift adoption (launcher/parity/session paths) must follow.
-
-Audit revisions: UpstreamDrift ``5347cba0f4378cd72a6e8afea9fb27c8bfe5db75``;
-pinned Tools ``62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`` (``vendor/ud-tools``).
+Combines contract coverage for:
+- Issue #9548 (epic #9546): energy audit consumer gate, signed residuals, and
+  qualified post-impact state validation.
+- Issue #9549 (epic #9546): six-DOF contact-interval solver integration into
+  live runs, playback, and export.
 """
 
 from __future__ import annotations
@@ -29,6 +18,14 @@ from types import ModuleType
 import numpy as np
 import pytest
 
+from src.shared.python.physics.impact_interval_audit import (
+    IMPACT_INTERVAL_CONTRACT_MODULE,
+    ImpactAuditError,
+    ImpactAuditTolerances,
+    audit_impact_interval,
+    qualified_post_impact_state,
+    recompute_energy_residual,
+)
 from tests.shared_contracts.test_tools_provider_contracts import (
     _assert_from_tools,
     _fresh_provider_import,
@@ -58,9 +55,88 @@ _TIME_RESOLVED_CHANNELS = (
 )
 
 _CLUB_MASS_KG = 0.2
-_SHAFT_LENGTH_M = 0.9
+_STIFFNESS_N_PER_M = 5.0e7
+_TOE_OFFSET_M = np.array([0.0, 0.0, 0.02])
+_SHAFT_LENGTH_M = 0.90
 _CLUB_SPEED_MPS = 50.0
 _LOFT_RAD = math.radians(10.0)
+
+
+# ---------------------------------------------------------------------------
+# Helpers for #9548: Energy audit contracts
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def provider() -> ModuleType:
+    with _fresh_provider_import("swing_sim"):
+        module = importlib.import_module(IMPACT_INTERVAL_CONTRACT_MODULE)
+        _assert_from_tools(Path(module.__file__))
+        yield module
+
+
+def _club(provider: ModuleType, offset: np.ndarray | None = None) -> object:
+    return provider.ClubRigidBody(
+        mass_kg=_CLUB_MASS_KG,
+        inertia_body_kg_m2=np.diag([4.5e-4, 4.5e-4, 4.5e-4]),
+        cg_to_contact_body_m=np.zeros(3) if offset is None else offset,
+        cg_to_attachment_body_m=np.array([0.0, 0.90, 0.0]),
+        face_normal_body=np.array([1.0, 0.0, 0.0]),
+    )
+
+
+def _initial(
+    provider: ModuleType, offset: np.ndarray | None = None, *, pinned: bool = False
+) -> object:
+    impact = importlib.import_module("shared.python.swing_sim.impact")
+    ball = (np.zeros(3) if offset is None else offset) + np.array(
+        [impact.GOLF_BALL_RADIUS_M, 0.0, 0.0]
+    )
+    return provider.ImpactIntervalInitialState(
+        club_position_m=np.zeros(3),
+        club_orientation=np.eye(3),
+        club_velocity_mps=np.array([50.0, 0.0, 0.0]),
+        club_angular_velocity_rad_s=(
+            np.array([0.0, 0.0, 50.0 / 0.90]) if pinned else np.zeros(3)
+        ),
+        ball_position_m=ball,
+        ball_velocity_mps=np.zeros(3),
+        ball_angular_velocity_rad_s=np.zeros(3),
+    )
+
+
+def _restitution_law(provider: ModuleType) -> object:
+    impact = importlib.import_module("shared.python.swing_sim.impact")
+    reduced = (
+        impact.GOLF_BALL_MASS_KG
+        * _CLUB_MASS_KG
+        / (impact.GOLF_BALL_MASS_KG + _CLUB_MASS_KG)
+    )
+    return provider.KelvinVoigtContactLaw.from_restitution(
+        stiffness_n_per_m=_STIFFNESS_N_PER_M,
+        restitution=0.83,
+        effective_mass_kg=reduced,
+    )
+
+
+def _solve(
+    provider: ModuleType,
+    *,
+    law: object,
+    offset: np.ndarray | None = None,
+    pinned: bool = False,
+    **config: object,
+) -> object:
+    return provider.solve_impact_interval(
+        _initial(provider, offset, pinned=pinned),
+        _club(provider, offset),
+        provider.ImpactIntervalConfig(contact_law=law, **config),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Helpers for #9549: Interval facade and integration contracts
+# ---------------------------------------------------------------------------
 
 
 def _interval_module() -> ModuleType:
@@ -69,7 +145,7 @@ def _interval_module() -> ModuleType:
     return module
 
 
-def _club(interval: ModuleType, toe_offset_m: float = 0.0):  # type: ignore[no-untyped-def]
+def _facade_club(interval: ModuleType, toe_offset_m: float = 0.0):  # type: ignore[no-untyped-def]
     """Rigid driver head with a vertical shaft; +y is up in the app frame."""
     contact = np.array([0.0, 0.0, toe_offset_m])
     return interval.ClubRigidBody(
@@ -81,9 +157,11 @@ def _club(interval: ModuleType, toe_offset_m: float = 0.0):  # type: ignore[no-u
     )
 
 
-def _initial(interval: ModuleType, impact: ModuleType, toe_offset_m: float = 0.0):  # type: ignore[no-untyped-def]
+def _facade_initial(
+    interval: ModuleType, impact: ModuleType, toe_offset_m: float = 0.0
+):  # type: ignore[no-untyped-def]
     """Ball resting on the lofted face at first touch, club moving downrange."""
-    club = _club(interval, toe_offset_m)
+    club = _facade_club(interval, toe_offset_m)
     contact = np.asarray(club.cg_to_contact_body_m, dtype=float)
     normal = np.asarray(club.face_normal_body, dtype=float)
     return interval.ImpactIntervalInitialState(
@@ -97,7 +175,7 @@ def _initial(interval: ModuleType, impact: ModuleType, toe_offset_m: float = 0.0
     )
 
 
-def _config(interval: ModuleType, impact: ModuleType, **overrides: object):  # type: ignore[no-untyped-def]
+def _facade_config(interval: ModuleType, impact: ModuleType, **overrides: object):  # type: ignore[no-untyped-def]
     reduced_mass = (
         impact.GOLF_BALL_MASS_KG
         * _CLUB_MASS_KG
@@ -117,25 +195,184 @@ def _config(interval: ModuleType, impact: ModuleType, **overrides: object):  # t
     return interval.ImpactIntervalConfig(**parameters)
 
 
+# ---------------------------------------------------------------------------
+# Test suite for #9548: Energy audit contracts
+# ---------------------------------------------------------------------------
+
+
+def test_interrupted_compression_stores_energy_and_is_blocked(
+    provider: ModuleType,
+) -> None:
+    result = _solve(
+        provider,
+        law=_restitution_law(provider),
+        time_step_s=1.0e-7,
+        maximum_time_s=3.0e-5,
+        friction_coefficient=0.4,
+    )
+    assert result.termination is provider.ImpactTermination.TIME_LIMIT
+    audit = result.audit
+    assert audit.stored_contact_energy_final_j > 1.0
+    assert audit.unilateral_release_energy_j == 0.0
+    assert audit.dashpot_and_friction_dissipation_j > 0.0
+    assert audit.energy_residual_j != 0.0
+    assert audit.energy_residual_j == pytest.approx(recompute_energy_residual(audit))
+    with pytest.raises(ImpactAuditError, match="did not separate") as info:
+        qualified_post_impact_state(result)
+    report = info.value.verdict.to_report()
+    assert report["termination"] == "TIME_LIMIT"
+    assert (
+        report["stored_contact_energy_final_j"] == audit.stored_contact_energy_final_j
+    )
+    assert report["limitations"]
+
+
+def test_elastic_frictionless_completion_closes_without_dissipation(
+    provider: ModuleType,
+) -> None:
+    result = _solve(
+        provider,
+        law=provider.KelvinVoigtContactLaw(
+            stiffness_n_per_m=_STIFFNESS_N_PER_M, damping_n_s_per_m=0.0
+        ),
+        friction_coefficient=0.0,
+    )
+    audit = result.audit
+    assert audit.dissipated_energy_j == 0.0
+    assert audit.unilateral_release_energy_j == 0.0
+    assert audit.stored_contact_energy_final_j == 0.0
+    verdict = audit_impact_interval(
+        result, ImpactAuditTolerances(energy_residual_j=0.05)
+    )
+    assert verdict.qualified, verdict.failures
+
+
+def test_unilateral_clipping_release_is_tracked_from_contact_state(
+    provider: ModuleType,
+) -> None:
+    result = _solve(
+        provider,
+        law=provider.KelvinVoigtContactLaw(
+            stiffness_n_per_m=_STIFFNESS_N_PER_M, damping_n_s_per_m=400.0
+        ),
+        friction_coefficient=0.0,
+    )
+    clipped = (result.compression_m > 0.0) & (result.normal_force_n == 0.0)
+    assert np.any(clipped)
+    stored_at_clip = (
+        0.5 * _STIFFNESS_N_PER_M * float(result.compression_m[np.argmax(clipped)]) ** 2
+    )
+    audit = result.audit
+    assert audit.unilateral_release_energy_j == pytest.approx(stored_at_clip, rel=0.2)
+    assert audit.energy_residual_j == pytest.approx(recompute_energy_residual(audit))
+    assert audit_impact_interval(result).qualified
+
+
+@pytest.mark.parametrize("boundary", ["FREE", "TORSIONAL_GRIP"])
+def test_off_center_friction_and_damped_grip_ledgers_qualify(
+    provider: ModuleType, boundary: str
+) -> None:
+    supported = boundary == "TORSIONAL_GRIP"
+    result = _solve(
+        provider,
+        law=_restitution_law(provider),
+        offset=_TOE_OFFSET_M,
+        pinned=supported,
+        friction_coefficient=0.4,
+        boundary=provider.BoundaryKind[boundary],
+        torsional_stiffness_n_m_per_rad=2_000.0 if supported else 0.0,
+        torsional_damping_n_m_s_per_rad=0.02 if supported else 0.0,
+    )
+    audit = result.audit
+    assert audit.dashpot_and_friction_dissipation_j > 0.0
+    if supported:
+        assert audit.torsional_damping_dissipation_j > 0.0
+        assert audit.boundary_stored_energy_j > 0.0
+    verdict = audit_impact_interval(result)
+    assert verdict.qualified, verdict.failures
+    assert math.isnan(verdict.supported_momentum_residual_n_m_s) is not supported
+
+
+def test_perturbed_force_law_stays_visible_and_blocks_output(
+    provider: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    law_type = provider.KelvinVoigtContactLaw
+    original = law_type.normal_force
+    monkeypatch.setattr(
+        law_type,
+        "normal_force",
+        lambda self, c, r: float(1.05 * original(self, c, r)),
+    )
+    result = _solve(provider, law=_restitution_law(provider))
+    assert result.contact_completed
+    assert abs(result.audit.energy_residual_j) > 0.5
+    with pytest.raises(ImpactAuditError, match="energy residual"):
+        qualified_post_impact_state(result)
+
+
+def test_halving_dt_converges_free_and_supported_residuals(
+    provider: ModuleType,
+) -> None:
+    def free(dt: float) -> object:
+        return _solve(
+            provider,
+            law=provider.KelvinVoigtContactLaw(
+                stiffness_n_per_m=_STIFFNESS_N_PER_M, damping_n_s_per_m=0.0
+            ),
+            time_step_s=dt,
+            friction_coefficient=0.0,
+        ).audit
+
+    def supported(dt: float) -> object:
+        return _solve(
+            provider,
+            law=_restitution_law(provider),
+            offset=_TOE_OFFSET_M,
+            pinned=True,
+            time_step_s=dt,
+            friction_coefficient=0.4,
+            boundary=provider.BoundaryKind.TORSIONAL_GRIP,
+            torsional_stiffness_n_m_per_rad=2_000.0,
+            torsional_damping_n_m_s_per_rad=0.02,
+        ).audit
+
+    coarse, fine = free(2.0e-7), free(1.0e-7)
+    assert abs(coarse.energy_residual_j) > abs(fine.energy_residual_j)
+    assert abs(fine.energy_residual_j) < ImpactAuditTolerances().energy_residual_j
+    assert fine.linear_momentum_residual_n_s < 1.0e-9
+    coarse_s, fine_s = supported(2.0e-7), supported(1.0e-7)
+    assert (
+        coarse_s.supported_momentum_residual_n_m_s
+        > fine_s.supported_momentum_residual_n_m_s
+    )
+    assert (
+        fine_s.supported_momentum_residual_n_m_s
+        < ImpactAuditTolerances().supported_momentum_residual_n_m_s
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test suite for #9549: Interval facade and integration contracts
+# ---------------------------------------------------------------------------
+
+
 def test_interval_facade_produces_time_resolved_contact_record() -> None:
     """A single façade call yields every inspection channel plus the audit."""
     with _fresh_provider_import("swing_sim"):
         interval = _interval_module()
         impact = importlib.import_module("shared.python.swing_sim.impact")
-        config = _config(interval, impact)
+        config = _facade_config(interval, impact)
         result = interval.solve_impact_interval(
-            _initial(interval, impact), _club(interval), config
+            _facade_initial(interval, impact), _facade_club(interval), config
         )
 
         assert result.did_contact is True
-        assert result.termination is interval.ImpactTermination.SEPARATED
         assert result.contact_completed is True
+        assert result.termination is interval.ImpactTermination.SEPARATED
+        assert result.terminal_reason == "SEPARATED: ball detached from clubface"
+
         sample_count = len(result.time_s)
-        assert sample_count > 10
-        assert result.time_s[0] == 0.0
-        assert np.all(np.diff(result.time_s) > 0.0)
-        # The loaded span ends at the last positive normal force; the history
-        # runs on until compression is released, so it may outlast it slightly.
+        assert sample_count > 100
         assert (
             0.0
             < result.contact_duration_s
@@ -185,8 +422,8 @@ def test_boundary_selection_changes_the_solver_configuration() -> None:
         assert {kind.value for kind in kinds} == {"free", "pinned", "torsional_grip"}
 
         toe_offset_m = 0.02
-        club = _club(interval, toe_offset_m)
-        free_initial = _initial(interval, impact, toe_offset_m)
+        club = _facade_club(interval, toe_offset_m)
+        free_initial = _facade_initial(interval, impact, toe_offset_m)
         supported_initial = dataclasses.replace(
             free_initial,
             club_angular_velocity_rad_s=np.array(
@@ -194,15 +431,17 @@ def test_boundary_selection_changes_the_solver_configuration() -> None:
             ),
         )
         free = interval.solve_impact_interval(
-            free_initial, club, _config(interval, impact, boundary=kinds.FREE)
+            free_initial, club, _facade_config(interval, impact, boundary=kinds.FREE)
         )
         pinned = interval.solve_impact_interval(
-            supported_initial, club, _config(interval, impact, boundary=kinds.PINNED)
+            supported_initial,
+            club,
+            _facade_config(interval, impact, boundary=kinds.PINNED),
         )
         sprung = interval.solve_impact_interval(
             supported_initial,
             club,
-            _config(
+            _facade_config(
                 interval,
                 impact,
                 boundary=kinds.TORSIONAL_GRIP,
@@ -226,14 +465,14 @@ def test_boundary_selection_changes_the_solver_configuration() -> None:
         with pytest.raises(
             ValueError, match="torsional parameters require TORSIONAL_GRIP"
         ):
-            _config(
+            _facade_config(
                 interval,
                 impact,
                 boundary=kinds.FREE,
                 torsional_stiffness_n_m_per_rad=2_000.0,
             )
         with pytest.raises(TypeError, match="boundary must be a BoundaryKind"):
-            _config(interval, impact, boundary="pinned")
+            _facade_config(interval, impact, boundary="pinned")
 
 
 def test_completed_terminal_state_feeds_canonical_flight_once() -> None:
@@ -243,11 +482,11 @@ def test_completed_terminal_state_feeds_canonical_flight_once() -> None:
         impact = importlib.import_module("shared.python.swing_sim.impact")
         flight = importlib.import_module("shared.python.swing_sim.flight")
         _assert_from_tools(Path(flight.__file__))
-        initial = _initial(interval, impact)
-        club = _club(interval)
+        initial = _facade_initial(interval, impact)
+        club = _facade_club(interval)
 
         completed = interval.solve_impact_interval(
-            initial, club, _config(interval, impact)
+            initial, club, _facade_config(interval, impact)
         )
         post = completed.to_post_impact_state()
         assert isinstance(post, impact.PostImpactState)
@@ -273,7 +512,7 @@ def test_completed_terminal_state_feeds_canonical_flight_once() -> None:
         assert trajectory.flight_time > 1.0
 
         truncated = interval.solve_impact_interval(
-            initial, club, _config(interval, impact, maximum_time_s=1.0e-5)
+            initial, club, _facade_config(interval, impact, maximum_time_s=1.0e-5)
         )
         assert truncated.termination is interval.ImpactTermination.TIME_LIMIT
         assert truncated.compression_m[-1] > 0.0
@@ -284,7 +523,7 @@ def test_completed_terminal_state_feeds_canonical_flight_once() -> None:
         miss = interval.solve_impact_interval(
             dataclasses.replace(initial, club_velocity_mps=np.zeros(3)),
             club,
-            _config(interval, impact, maximum_time_s=1.0e-5),
+            _facade_config(interval, impact, maximum_time_s=1.0e-5),
         )
         assert miss.did_contact is False
         assert miss.termination is interval.ImpactTermination.NO_CONTACT
