@@ -30,11 +30,11 @@ Next step: Dispatch NM-01 ([#10616](https://github.com/D-sorganization/UpstreamD
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) inventory on `fix/issue-10615-nm00-dataset-audit`.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) on ix/issue-10605-co01-club-observation / PR [#10670](https://github.com/D-sorganization/UpstreamDrift/pull/10670) (ClubObservation + club_calibration; evidence docs/plans/club_only_matching/evidence/club_observation_contracts.json).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** Planning epics remain; NM-00 audit landed without claiming native corpora or checkpoints. Existing #10363/#10378/#10430 owners retain physical matching scope.
-- **Next:** Dispatch NM-01 #10616 using its copyable worker prompt.
+- **State:** CO-01 observation/calibration contracts ready for review (synthetic fixtures only). NM-00 fail-closed dataset/checkpoint/claim audit landed; no trained checkpoint or measured speedup claimed.
+- **Next:** Land CO-01 #10605 / #10670, then dispatch CO-02 #10606 and NM-01 #10616.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 

@@ -325,24 +325,38 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
+- **Last verified:** 2026-09-21 — CO-00 merged (#10667); CO-01 observation contracts in progress on fix/issue-10605-co01-club-observation
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land #10604 (CO-00), then dispatch #10605 (CO-01).
+- **Next step:** Land #10605 (CO-01), then dispatch #10606 (CO-02).
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10604 (epic #10602)
 - **Branch:** fix/issue-10604-co00-workbook-identity
-- **PR:** #10667 (open)
+- **PR:** #10667 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/; src/shared/python/motion_matching/loaders/event_labels.py; src/shared/python/motion_matching/loaders/excel.py; src/engines/physics_engines/pinocchio/python/motion_training/club_trajectory_parser.py; tests/unit/motion_matching/test_club_workbook_identity.py; docs/plans/club_only_matching/evidence/club_workbook_identity.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — focused unit suite GREEN; ruff check/format clean on touched paths; both workbook SHA-256 manifests verified; TW_wiffle `A=` event regression repaired through shared normalization.
+- **Last verified:** 2026-09-21 — merged via #10667 onto main as prerequisite for CO-01
 - **Summary:** Freezes hash-verified workbook manifests, four-trial lineage (Filtering Experiments aliases TW_ProV1), centimetre unit authority with inches declaration retained, native 240 Hz impact-relative events, and orientation derivation policy. Shared event-label normalization and axis-component helper remove silent NaN/zero bugs across Excel and Pinocchio loaders.
-- **Next step:** Pass protected checks on #10667, merge, then dispatch #10605.
+- **Next step:** Continue on #10605 (CO-01) observation contracts.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_workbook_identity.json; tests/unit/motion_matching/test_club_workbook_identity.py.
+
+### DL-#10605 · CO-01 Extend Canonical Club Observation Contracts and Calibration
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10605 (epic #10602)
+- **Branch:** fix/issue-10605-co01-club-observation
+- **PR:** #10670 (open)
+- **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 — divergence inventory regenerated (`--write --no-authorship`); `python -m pytest tests/unit/scripts/test_divergence_inventory.py::test_committed_inventory_is_current_when_vendor_present -q -n 0 --no-cov --timeout=120` passed.
+- **Summary:** Adds `ClubObservation` with measured/derived/unobserved component masks, dual mid-hands/face frames and orientations, native 240 Hz clock, uncertainty/derivation metadata, SO(3) residuals/interpolation, catalog-backed `club_calibration` (fixed tool-to-model SE(3), grip-face rigidity, mid-hands→butt-end only with explicit offset), and legacy `ClubTarget` adapters that refuse invented identity quats.
+- **Next step:** Dispatch CO-02 #10606 after this PR merges.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_observation_contracts.json; tests/unit/motion_matching/test_club_observation_contracts.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

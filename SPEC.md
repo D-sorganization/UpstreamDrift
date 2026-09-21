@@ -25,6 +25,18 @@ Separates kinematic projection from dynamic model reduction for Simscape upper-b
 - **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
   - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
 
+## Canonical Club Observation Contracts and Calibration (CO-01, #10605)
+
+Extends the measured-club surface for epic #10602 without replacing legacy `ClubTarget`:
+- **ClubObservation (`src/shared/python/motion_matching/club_only/observation.py`)**:
+  - Explicit mid-hands and face position/orientation frames with component masks (`measured` / `derived_not_measured` / `unobserved`).
+  - Uncertainty and derivation metadata; native impact-relative 240 Hz clock; resampling recorded as a saved operation.
+  - Missing orientation/twist stays NaN (never identity); SO(3) residuals via geodesic distance; SLERP densification.
+- **Calibration (`src/shared/python/motion_matching/club_calibration.py`)**:
+  - Fixed tool-to-model SE(3), catalog length/type binding via `club_models`, grip-to-face rigidity cross-check, derived-axis qualification.
+  - Mid-hands→butt-end requires an explicit shaft-axis offset (no silent rename).
+- **Legacy Adapters (`club_only/adapters.py`)**: Bidirectional `ClubObservation` ↔ `ClubTarget`; refuse inventing identity quats for unobserved orientation.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_observation_contracts.json` (four-trial synthetic fixtures; not native physical qualification).
 ## MyoSuite Kinematic Replay With Retarget Map and Marker Parity Receipt (MS-52, #10345)
 
 Adds kinematic-only replay of matched candidates in the MyoSuite engine lane with coordinate retargeting, marker parity receipts, cross-engine registration, and viewer support:
@@ -6798,6 +6810,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-21 | #10670 | Extend canonical club observation contracts with component masks, dual mid-hands/face frames, native 240 Hz clock, SO(3) residuals/interpolation, catalog-backed calibration, and legacy ClubTarget adapters (CO-01); synthetic fixtures only. |
 | 2026-09-21 | #10668 | NM-00 fail-closed audit of neural datasets, checkpoints and training claims (`neural-artifact-audit/1.0.0`); absent 10k corpus and note-only plateaus quarantined; no training or speed claims. |
 | 2026-09-21 | #10666 | MyoSuite kinematic replay with coordinate retarget map, marker parity receipt (`stage=replay`, `dynamics.status=not_run`), cross-engine kinematic-only registration, viewer support, and committed evidence for MS-52 (#10345); native 15 mm parity deferred until MS-51 scene. |
 | 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
