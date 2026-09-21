@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
 
@@ -33,7 +33,7 @@ class CaptureValidationReport:
 
     is_valid: bool
     reasons: tuple[str, ...] = ()
-    metadata: Mapping[str, Any] = MappingProxyType({})
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def raise_for_status(self) -> None:
         """Raise ValueError if the capture does not conform to the contract."""
