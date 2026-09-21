@@ -164,14 +164,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## MS-16 MuJoCo Native IK and MJ_Inverse Tracking (#10366)
 
-- Worktree: `Worktrees/UpstreamDrift-10366-ms16` (junction to `UpstreamDrift-10660-ci`), branch `fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local`, lease `claim:local` session `cursor-ms16-ci-20260921`, DL-#10366, preferred PR #10660 (close duplicate #10662).
-- Changes:
-  - `ik_minimize.py`: `MinimizeMarkerKinematics` using `mujoco.minimize.least_squares` with LM warm start and best-of fallback; marker RMS within 0.5 mm of LM on driver frames 0 and 300.
-  - `inverse_dynamics.py`: `tracking_controller_mj_inverse` and `inverse_dynamics_mj_inverse` with plant KKT torques and native `mj_inverse` audit; MS-72 replay/discretization gates.
-  - Pipeline: `--ik-backend mujoco-minimize`, `--tracking mj-inverse`, receipt fields `ik_backend` / `tracking_backend`.
-  - CI unblock: regenerated matched-swing status README for 101 receipts; browser model assert reads `total_receipts` from ledger JSON.
-- Reproduction: `pytest tests/docs/test_matched_swing_status_freshness.py tests/tools/matched_swing_browser/test_model.py::TestMatchedSwingBrowserModel::test_load_production_ledger -q`
-- Next: Push fix, await CI Standard green on #10660, close #10662 as duplicate.
+- Worktree: `Worktrees/UpstreamDrift-10660-land`, PR branch `fix/issue-10366-ms-16-mujoco-native-tools-marker-ik-on-m-cursor-composer-local`, lease `claim:local` session `local-10660-land`, DL-#10366, PR #10660.
+- Tip: on latest main (MS-52); omit infinite bounds for `minimize.least_squares`; keep weld constraints in `mj_inverse` audit; forward `tracking_backend` in `shooting_fit`.
+- Reproduction: `pytest tests/unit/motion_matching/test_mujoco_ik_minimize.py tests/unit/motion_matching/test_mujoco_mj_inverse.py -q`
+- Next: Confirm CI Standard green; squash auto-merge lands; close duplicate #10662.
 
 ## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
 
@@ -1204,5 +1200,6 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-21T20:25:00Z — Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
 - 2026-09-21T10:11:03Z — CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 101 receipts. Commit SELF.
 - 2026-09-21T10:40:00Z — Fix unit-test-gate on #10660: regenerate matched_swing status (99→100) and stop hardcoding receipt count in browser model test. Commit SELF.
