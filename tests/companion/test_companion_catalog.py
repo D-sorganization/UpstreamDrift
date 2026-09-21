@@ -87,7 +87,7 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "current_documentation_records": 4,
         "engine_capability_records": 17,
         "qualified_engine_capability_records": 4,
-        "undocumented_visible_program_records": 61,
+        "undocumented_visible_program_records": 62,
         "known_gap_records": 1,
     }
     assert len({record["id"] for record in catalog["programs"]}) == 76
