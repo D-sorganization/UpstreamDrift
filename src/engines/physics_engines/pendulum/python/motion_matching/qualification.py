@@ -16,6 +16,7 @@ import numpy as np
 
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
     MODEL_ID_ANALYTICAL,
+    create_calibrated_double_pendulum_dynamics,
     forward_kinematics_2d,
 )
 from src.engines.physics_engines.pendulum.python.motion_matching.provider import (
@@ -297,12 +298,7 @@ def generate_baseline_package_for_target(
     )
     q0, v0 = init_st.q0, init_st.v0
 
-    dynamics = DoublePendulumDynamics()
-    dyn_params = dynamics.parameters
-    upper_seg = dyn_params.upper_segment
-    lower_seg = dyn_params.lower_segment
-    upper_seg.length_m = l1
-    lower_seg.length_m = l2
+    dynamics = create_calibrated_double_pendulum_dynamics(l1, l2)
 
     (
         q_rollout,

@@ -282,3 +282,13 @@ def check_dynamics_parity(
         "model_id_analytical": MODEL_ID_ANALYTICAL,
         "model_id_tools": MODEL_ID_TOOLS,
     }
+
+
+def create_calibrated_double_pendulum_dynamics(
+    l1: float, l2: float
+) -> DoublePendulumDynamics:
+    """Instantiate DoublePendulumDynamics configured with calibrated segment lengths."""
+    dynamics = DoublePendulumDynamics()
+    dynamics.parameters.upper_segment.length_m = float(l1)
+    dynamics.parameters.lower_segment.length_m = float(l2)
+    return dynamics

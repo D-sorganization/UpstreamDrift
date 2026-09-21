@@ -250,8 +250,9 @@ def fit_bounded_double_pendulum(
 
     grip_arr = np.asarray(target.grip, dtype=np.float64)[:, :2]
     head_arr = np.asarray(target.head, dtype=np.float64)[:, :2]
-    observed_mask = np.isfinite(grip_arr).all(axis=1) & np.isfinite(head_arr).all(
-        axis=1
+    observed_mask: np.ndarray = np.asarray(
+        np.isfinite(grip_arr).all(axis=1) & np.isfinite(head_arr).all(axis=1),
+        dtype=bool,
     )
     if not np.any(observed_mask):
         raise ValueError("Target contains no valid observations")
