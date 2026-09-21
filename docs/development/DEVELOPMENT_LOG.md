@@ -1332,6 +1332,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.
 - **Next step:** Open PR, monitor CI checks, and merge.
 
+### DL-#9193 · Companion Documentation and Capability Evidence Authority
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9193 (parent #9174)
+- **Branch:** conductor/issue-9193
+- **PR:** not created
+- **Paths:** scripts/companion_evidence.py; scripts/companion_catalog.py; scripts/config/companion_documentation.v1.json; scripts/config/companion_capability_evidence.v1.json; docs/api/contracts/upstreamdrift-companion-v1.schema.json; docs/engines/engine_capability_evidence.md; tests/companion/test_companion_evidence.py
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 (SELF; `tests/companion` 140 passed locally with the workflow-execution test deselected for a pre-existing interpreter/env issue; ruff, ruff-format, mypy clean on changed files; generated page `--check` current)
+- **Summary:** Replace the empty documentation inventory and unqualified engine placeholders with two hashed registries parsed by one module: exact-commit, hash-bound, immutable-URL documentation records with derived freshness; engine capabilities qualified only by exact test/artifact evidence with an executing CI gate; per-program documentation routes; known gaps with owning issues; derived publication blockers; generated, freshness-checked provider page.
+- **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
+
 ## Shipped (Last 90 Days)
 
 ### DL-#8875 · Motion Pipeline Formats Documentation Reconcile
