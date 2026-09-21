@@ -591,6 +591,22 @@
       "id": "tools.launch_monitor_analytics"
     },
     {
+      "feature_id": "tools.matched_swing_browser",
+      "title": "Matched Swing Results Browser",
+      "status": "gap",
+      "pyqt": "src/tools/matched_swing_browser/gui.py",
+      "api": null,
+      "web": null,
+      "issue": 10353,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "matched_swing_browser"
+      ],
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff.",
+      "id": "tools.matched_swing_browser"
+    },
+    {
       "feature_id": "tools.matlab_suite",
       "title": "MATLAB/Simscape model suite",
       "status": "exempt",
@@ -624,18 +640,18 @@
     },
     {
       "feature_id": "tools.motion_matching",
-      "title": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
-      "status": "gap",
+      "title": "Motion Matching tour-average capture matching",
+      "status": "parity",
       "pyqt": "src/tools/motion_matching/gui.py",
       "api": null,
       "web": null,
-      "issue": 10106,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "motion_matching"
       ],
-      "notes": "",
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355).",
       "id": "tools.motion_matching"
     },
     {
@@ -860,11 +876,11 @@
     {
       "id": "golf_simulation_suite",
       "title": "Golf Simulation Suite",
-      "description": "Complete golf simulation with ball flight physics and putting green",
+      "description": "Prototype visualization and demo inspection suite; not a production physics solver",
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "launch_target": "src/tools/golf_simulation_suite/__main__.py",
       "category": "simulation",
-      "status": "ready",
+      "status": "prototype",
       "capabilities": [
         "full_simulation",
         "parameter_sweep",
@@ -904,40 +920,40 @@
     {
       "id": "mujoco_models_shared",
       "title": "MuJoCo Models",
-      "description": "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "MuJoCo_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "drake_models_shared",
       "title": "Drake Models",
-      "description": "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Drake_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "pinocchio_models_shared",
       "title": "Pinocchio Models",
-      "description": "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "Pinocchio_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
     {
       "id": "opensim_models_shared",
       "title": "OpenSim Models",
-      "description": "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "description": "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "OpenSim_Models",
-      "category": "simulation",
+      "category": "tool",
       "status": "experimental",
       "capabilities": []
     },
@@ -1251,6 +1267,21 @@
       "capabilities": []
     },
     {
+      "id": "matched_swing_browser",
+      "title": "Results Browser",
+      "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",
+      "path": "src/tools/matched_swing_browser/__main__.py",
+      "launch_target": "src/tools/matched_swing_browser/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "motion_matching",
+        "results_browser",
+        "physical_acceptance",
+        "ledger"
+      ]
+    },
+    {
       "id": "data_explorer",
       "title": "Data Explorer",
       "description": "Import, filter, and visualise simulation datasets",
@@ -1388,7 +1419,7 @@
     {
       "id": "biomech_gait",
       "title": "Gait Model",
-      "description": "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "description": "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1398,7 +1429,7 @@
     {
       "id": "biomech_sit_to_stand",
       "title": "Sit-to-Stand Model",
-      "description": "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "description": "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "registered launcher action",
       "category": "biomechanics",
@@ -1408,7 +1439,7 @@
     {
       "id": "movement_optimizer",
       "title": "Movement Optimizer",
-      "description": "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)",
+      "description": "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)",
       "path": "src/config/models.yaml",
       "launch_target": "src/movement_optimizer/__main__.py",
       "category": "biomechanics",
@@ -1499,7 +1530,7 @@
     {
       "id": "swing_optimizer",
       "title": "Swing Optimizer",
-      "description": "Trajectory optimization with constraint solving and cost functions",
+      "description": "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16",
       "path": "src/shared/python/optimization/swing_optimizer.py",
       "launch_target": "src/shared/python/optimization/swing_optimizer.py",
       "category": "simulation",
@@ -1513,7 +1544,7 @@
     {
       "id": "injury_analysis",
       "title": "Injury Risk Analysis",
-      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
+      "description": "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17",
       "path": "src/shared/python/injury/injury_risk.py",
       "launch_target": "src/shared/python/injury/injury_risk.py",
       "category": "biomechanics",
@@ -1528,7 +1559,7 @@
     {
       "id": "drake_dashboard",
       "title": "Drake Dashboard",
-      "description": "Interactive Drake simulation dashboard",
+      "description": "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/drake_dashboard.py",
       "launch_target": "src/launchers/drake_dashboard.py",
       "category": "physics_engine",
@@ -1544,7 +1575,7 @@
     {
       "id": "mujoco_dashboard",
       "title": "MuJoCo Dashboard",
-      "description": "Interactive MuJoCo simulation dashboard",
+      "description": "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/mujoco_dashboard.py",
       "launch_target": "src/launchers/mujoco_dashboard.py",
       "category": "physics_engine",
@@ -1560,7 +1591,7 @@
     {
       "id": "pinocchio_dashboard",
       "title": "Pinocchio Dashboard",
-      "description": "Interactive Pinocchio simulation dashboard",
+      "description": "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)",
       "path": "src/launchers/pinocchio_dashboard.py",
       "launch_target": "src/launchers/pinocchio_dashboard.py",
       "category": "physics_engine",
