@@ -11,6 +11,47 @@
 - Reproduction: `pytest tests/unit/motion_matching/test_matching_strategy.py -v`.
 - Next: PR auto-merge, complete lease on #10440, claim next issue.
 
+Updated 2026-09-18. Governing epic #10363; documentation review branch
+`docs/matching-agent-continuation`; commit SELF; PR https://github.com/D-sorganization/UpstreamDrift/pull/10393.
+Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
+Development-log entry: `DL-#10363`.
+
+OpenSim golf-model improvement epic #10394 now has nine children (#10395–#10403).
+Start with [the golf-model assignment](opensim_tour_matching/GOLF_MODEL_AGENT_PROMPT.md)
+and [detailed epic](opensim_tour_matching/EPIC_GOLF_MODEL.md) for the missing club,
+arm scaling, address alignment and muscle/tendon extension work.
+
+The current Pinocchio/OpenSim native jobs were running at the 01:45 UTC
+snapshot. No solver was launched, stopped or accepted by this review. Read
+[the bounded agent prompt](matched_swing_program/AGENT_CONTINUATION_PROMPT.md),
+[Pinocchio turnover](matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md)
+and [OpenSim handoff](opensim_tour_matching/HANDOFF.md). They contain exact
+source identities, live job/output paths, saved checkpoints, recovery evidence,
+failed gates, test results and escalation rules. Pinocchio native source is
+not the merged main scaffold; OpenSim local work contains owner changes.
+Preserve them. Review validation: 14 Pinocchio pure tests and 27 OpenSim ladder
+tests passed; native acceptance was not rerun. Source hashes match deployed
+files after line-ending normalization. Recovery archive is a selected subset.
+
+Next action: inspect the existing native jobs and retrieve newly completed
+receipts using the lane handoff before considering another fit.
+
+The historical Simscape continuation below remains useful for that lane;
+it is not the latest Pinocchio/OpenSim state.
+
+## PF-02 Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (#10432)
+
+- Branch: `feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration`, PR #10497 (auto-merge armed), lease `antigravity-ud-10432`, DL-#10432.
+- Changes:
+  - `marker_kinematics.py`: Added `SolveDiagnostics` with projected gradient norm, cost decrease, active bounds count, and convergence metrics. Added `solve_frame_multi_start` with unconstrained geometric floor estimation. Added `refine_overlapping_window` with triangular window blending and temporal continuity.
+  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility (q_dot ≈ v and v_dot ≈ a), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
+  - Addressed backlog items:
+    - MM-2 (#10104): Physiological wrist range of motion compliance producing 0 violations.
+    - MM-5 (#10107): Left elbow pit up-and-inward address verification (`dot(pit, up) > 0.3` and `dot(pit, inward) > 0.3`).
+    - Separate calibration provenance for driver and 7-iron enforced fail-closed.
+- Reproduction: `pytest tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py`.
+- Next: Land PR #10497 with auto-merge enabled, proceed to PF-03.
+
 ## MS-107 Qualify Crocoddyl Full-Body Fit & Analytic Pelvis Yaw (#10381)
 
 - Branch: `feat/10381-crocoddyl-pelvis-yaw-g1`, PR #10599 (auto-merge armed), DL-#10381.
@@ -537,31 +578,32 @@ Current turnover: `docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODD
 
 ## Current Status
 
-Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.
-The independent R2025b replay passes four of five marker/yaw gates; terminal
-RMS is **40.3115 mm**, above the 35 mm limit. The optimizer hit its iteration
-limit and returned accepted=false / optimizer_converged=false.
+Run102 is the latest committed native fit found in the 2026-09-16 review.
+It is a rejected0–0.85 s prefix: MATLAB terminal RMS40.301 mm exceeds35 mm.
+Overall20.267 mm, early9.995 mm, club8.389 mm and yaw0.610% pass their gates.
+The optimizer exhausted its physical evaluation budget and returned a fallback;
+accepted=false and optimizer_converged=false. No full-swing acceptance exists.
 
-The 2026-09-15 review recomputed raw NPZ/MAT results: maximum Euclidean
-Simscape–Pinocchio marker discrepancy is 0.0604935 mm; overall RMS 20.26494 mm,
-early RMS 9.99517 mm, club RMS 8.42248 mm and yaw error 0.54345%.
-Required MATLAB settings: R2025b Update 5, ode15s, RelTol 1e-6, AbsTol 1e-9,
-MaxStep 1/1440 s. Preserve the corrected seed geometry and world-force convention.
-This is measured prefix agreement, not proof of universal numerical convergence.
+[Current Completion Handoff and Agent Prompt](simscape_tour_matching/COMPLETION_HANDOFF_20260916.md)
+is the authoritative next-work plan. It supersedes RUN101_REVIEW_AND_TURNOVER.md
+for task ordering. Source reviewed:2f0460d25; fetched main:d2aafa43c.
 
-Read [Run101 Review and Completion Turnover](simscape_tour_matching/RUN101_REVIEW_AND_TURNOVER.md)
-for the current evidence, ordered work packages and copy-ready agent prompt.
-It supersedes earlier claims that all fitting gates are certified. Three head
-markers account for 38.61% of terminal squared error and LUArmHigh for 15.40%.
-Next: bounded refinement verification, terminal body/attachment feasibility,
-one justified fitting trial, then progressive full-capture extension.
+Priorities: recover clean-checkout native fitting providers currently available
+only through historical/frozen runtime sources; coordinate finite-weld derivative
+fix issue10260 / PR10263; establish articulated terminal feasibility; run the first
+bounded0.90 s fit; produce reproducible manifests and synchronized motion reports.
+PR10263 is not yet a qualified merged dependency. Do not duplicate its owner.
 
-Branch: feat/9967-native-simscape-pinocchio. Issues: #9967 / #9921.
-Review source checkpoint: ca750f7d7; SELF adds the current turnover review.
-Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
-Remote hosts: DeskComputer (R2025b) and ControlTower (Pinocchio WSL).
-No new numerical jobs were launched during this review; check live processes
-before resuming. Full capture and other-engine qualification remain incomplete.
+Run101 refinement supports4.52 micrometer marker agreement with refined R2025b
+and46.9 nanometer Pinocchio self-refinement change. Run102 marker agreement at
+baseline settings is0.0605 mm maximum. These are prefix-specific measurements,
+not full-horizon rate/effort qualification. Keep geometry seed and force-frame fixes.
+
+Historical evidence lives under simscape_tour_matching/native_evidence. Remote
+hosts are DeskComputer (explicit R2025b) and ControlTower (Pinocchio WSL).
+Remote live jobs were not inspected in this review; check before launching.
+Epic9921 / issue9967 are closed despite the incomplete full goal; reconcile tracking.
+This review launches no simulation or fitting job.
 
 ## Representation Qualification
 
