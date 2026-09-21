@@ -330,7 +330,9 @@ def test_tradeoff_diagnostics_and_segment_reactions() -> None:
         lead_indices=[0],
         trail_indices=[1],
         ground_indices=[2],
-        joint_velocities=np.array([2.5]),  # rad/s for power calculation
+        joint_velocities=np.array(
+            [2.5, 2.5]
+        ),  # rad/s for power calculation (lead + trail)
     )
 
     alt = tradeoff.get_alternative("conservative_default")
