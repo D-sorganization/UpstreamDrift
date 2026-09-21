@@ -31,6 +31,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open the PR referencing #9543 (not `Closes`), then acquire measured strokes under `MEASUREMENT_PROTOCOL` before any qualification is attempted.
 - **Evidence:** tests/bunkershot3d/ball/test_transfer_qualification.py; docs/bunkershot3d/transfer-qualification.md.
 
+### DL-#10359 · Wire Video and Fit-Quality Report Export
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10359 (MS-86, epic #10363)
+- **Branch:** feat/10359-export-video-report
+- **PR:** #10632
+- **Paths:** src/shared/python/motion_matching/export.py; src/shared/python/motion_matching/**main**.py; src/tools/matched_swing_browser/gui.py; src/config/launcher_manifest.json; src/config/models.yaml; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/reports/sample_fit_report.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (11 unit tests in test_export.py pass; 9 GUI tests in test_matched_swing_browser_gui.py pass; ruff clean; black clean; architecture budget passed).
+- **Summary:** Implemented `export_video` and `export_report` with fail-closed DbC contracts, standardized metrics, acceptance gate verdicts, physical constraints, and full cryptographic provenance (#8820 / U3). Added CLI subcommands `export-video` and `export-report` to motion_matching module. Added "Export Video..." and "Export Report..." buttons to Results Browser GUI Actions card with file dialogs. Registered `video_export` and `report_export` capabilities in launcher manifest and models config. Emitted sample Markdown fit report in matched swing program evidence directory.
+- **Next step:** Open PR referencing #10359, await green CI, merge and release lease.
+- **Evidence:** docs/development/matched_swing_program/evidence/reports/sample_fit_report.md; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py.
+
+### DL-#10361 · MS-90: Generic Capture Contract & 44-DOF Identifiability
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10361 (MS-90, epic #10363)
+- **Branch:** feat/10361-generic-capture-contract
+- **PR:** #10633
+- **Paths:** src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/motion_matching/identifiability.py; tests/unit/motion_matching/test_capture_contract_generic.py; tests/unit/motion_matching/test_identifiability.py; evidence/anthropometry/identifiability_driver.json; docs/user_guide/motion_matching/loading_targets.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (12 unit tests pass in test_capture_contract_generic.py and test_identifiability.py covering: frozen tour capture backwards compatibility, CMU locomotion C3D rejection with named diagnostic reasons, custom label mapping and mm->m unit scaling, gap fraction limits, synthetic chain planted null direction detection and resolution via prior/off-axis marker, 44-DOF uncalibrated leg DOF unobservability, calibrated leg observability, and full rank 44/44 recovery via anthropometric prior; check_architecture_budget, ruff check, ruff format, and mypy clean).
+- **Summary:** Implemented `CaptureContract` and `CaptureValidationReport` enabling validation and loading of arbitrary C3D captures without editing codebase source. Retained frozen tour captures as named instances of `CaptureContract`. Implemented `probe_spec_identifiability` and `probe_synthetic_chain_identifiability` performing linearised SVD identifiability analysis, detecting planted null directions and unobservable lower-body DOFs on the 44-DOF model, and demonstrating resolution to full rank via anthropometric prior regularization. Generated and committed `evidence/anthropometry/identifiability_driver.json`.
+- **Next step:** Push branch, open PR with auto-merge, complete lease on #10361.
+- **Evidence:** evidence/anthropometry/identifiability_driver.json; tests/unit/motion_matching/test_capture_contract_generic.py; tests/unit/motion_matching/test_identifiability.py.
+
 ### DL-#9422 · Rig Capture Sessions Through the Tools MocapSession Contract
 
 - **State:** in_review
