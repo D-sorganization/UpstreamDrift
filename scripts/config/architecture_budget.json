@@ -30,6 +30,60 @@
       "expires_on": "2026-11-30"
     },
     {
+      "path": "src/shared/python/motion_matching/contact_force_allocator.py",
+      "symbol": "ContactForceAllocator.allocate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10433,
+      "reason": "Issue #10433: ContactForceAllocator.allocate coordinates RNEA, Jacobians, objectives, bounds, contact masks, and terrain normals without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/smooth_torque_optimizer.py",
+      "symbol": "SmoothTorqueOptimizer.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10435,
+      "reason": "Issue #10435: SmoothTorqueOptimizer.__init__ accepts trajectory dimensions, limits, weights and solver regularisation without lossy packing.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/smooth_torque_optimizer.py",
+      "symbol": "SmoothTorqueOptimizer.optimize_horizon",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10435,
+      "reason": "Issue #10435: SmoothTorqueOptimizer.optimize_horizon coordinates full-horizon quadratic program formulation, solve and diagnostics.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/smooth_torque_optimizer.py",
+      "symbol": "SmoothTorqueOptimizer.optimize_sliding_window",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10435,
+      "reason": "Issue #10435: SmoothTorqueOptimizer.optimize_sliding_window executes overlapping trajectory segments with continuity clamps.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/smooth_torque_optimizer.py",
+      "symbol": "SmoothTorqueOptimizer._build_hessian_and_gradient",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10435,
+      "reason": "Issue #10435: SmoothTorqueOptimizer._build_hessian_and_gradient builds coupled multi-node quadratic objective blocks.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/smooth_torque_optimizer.py",
+      "symbol": "SmoothTorqueOptimizer._build_inequality_constraints",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10435,
+      "reason": "Issue #10435: SmoothTorqueOptimizer._build_inequality_constraints builds friction pyramid and actuator bound inequalities.",
+      "expires_on": "2026-11-30"
+    },
+    {
       "path": "src/shared/python/motion_matching/hip_calibration.py",
       "symbol": "apply_hip_calibration",
       "rule": "function-lines",
