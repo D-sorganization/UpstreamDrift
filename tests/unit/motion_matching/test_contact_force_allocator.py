@@ -17,6 +17,7 @@ from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocation,
     ContactForceAllocator,
+    FeasibilityStatus,
 )
 
 
@@ -423,4 +424,5 @@ def test_allocator_enforces_friction_cone_feasibility() -> None:
 
     res_bad = alloc.allocate(tau_rnea=tau_rnea_bad, j_ground=j_ground, j_grip=j_grip)
     assert alloc.is_friction_feasible(res_bad) is False
-    assert res_bad.max_friction_ratio > 0.6
+    assert res_bad.is_physically_feasible is False
+    assert res_bad.feasibility_status == FeasibilityStatus.INFEASIBLE_FRICTION_CONE
