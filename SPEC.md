@@ -1,3 +1,26 @@
+## Fit and Independently Replay Hub–Arm–Club Triple Pendulum (TB-05, #10590)
+
+Fits bounded continuous joint torques to observed swing data and verifies forward dynamics replay for the 3-DOF planar Hub–Arm–Club triple pendulum under the Tour Baselines program:
+- **Bidirectional Mapping and Dynamics Parity (`src/engines/physics_engines/pendulum/python/motion_matching/adapters_triple.py`)**:
+  - Implements bidirectional parameter conversion between `TriplePendulumParameters` and Tools `physics_triple.py` (`TriplePendulumParams`).
+  - Verifies exact analytical acceleration parity ($< 10^{-12}\text{ rad/s}^2$) and mass matrix parity ($< 10^{-14}$) between `TriplePendulumDynamics` and Tools physics across broad state and forcing grids.
+  - Exposes `check_triple_dynamics_parity` as a reusable qualification gate.
+- **Bounded Smooth 3-Joint Torque Optimization (`src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_triple.py`)**:
+  - Formulates hub, arm, and club joint torque profiles $\tau(t)$ using degree-6 Bernstein polynomials strictly bounded within physical limits $[\tau_{\min}, \tau_{\max}]$ via control point bounds (21 total parameters).
+  - Incorporates combined objective function penalizing Euclidean marker tracking error on grip and clubhead, torque rate curvature, and effort regularizer.
+  - Implements `fit_bounded_triple_pendulum` using bounded non-linear least squares (`scipy.optimize.least_squares` with `method="trf"`).
+- **Motion Matching Provider Integration (`src/engines/physics_engines/pendulum/python/motion_matching/provider_triple.py`)**:
+  - Implements `TriplePendulumFitSwingProvider` adhering to `FitSwingProvider` Protocol (`engine_name = "pendulum_triple"`).
+  - Computes deterministic cryptographic 16-character SHA-256 target hashes.
+  - Supports non-uniform observation timestamps and maps initial observations directly to initial generalized state $(q_0, v_0)$ seeded from calibrated double fit geometry without invalid zero-length reductions.
+- **Authoritative Qualification & Independent Dual Replay (`src/engines/physics_engines/pendulum/python/motion_matching/qualification_triple.py`)**:
+  - Replays fitted continuous torques in an independent forward simulation using 4x tighter integration substeps (`Radau` / `RK45`).
+  - Replays fitted parameters in the shipped Tools simulation engine (`src.shared.python.pendulum_simulator.simulation_triple.run_simulation`) verifying cross-package trajectory parity.
+  - Generates authoritative baseline packages (`tb05_driver_baseline_package.npz`, `tb05_iron_baseline_package.npz`) and qualification receipts (`tb05_driver_qualification_receipt.json`, `tb05_iron_qualification_receipt.json`).
+  - Updates tour baseline coverage matrix (`docs/plans/tour_baselines/coverage_matrix.md`) with transparent comparative reporting against double pendulum.
+- **Verification Suite (`tests/unit/engines/physics_engines/pendulum/test_triple_pendulum_fit.py`)**:
+  - Unit test suite validating 3-DOF known-pose forward kinematics, analytical-to-Tools dynamics parity, target hash determinism, initial frame evaluation at $t_0$, non-uniform time integration, bounded torque guarantee, tighter-step replay, malformed control rejection, constant geometry invariants, and driver/iron qualification receipts.
+
 ## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
 
 Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
