@@ -16,10 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
+
+from src.shared.python.contracts import postcondition, precondition
 
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
@@ -127,6 +129,101 @@ def tracked_labels() -> tuple[str, ...]:
     """Return capture labels with an anatomical or club role, in capture order."""
     excluded = set(MARKER_SEGMENTS["unassigned"])
     return tuple(label for label in TOUR_CAPTURE.labels if label not in excluded)
+
+
+@dataclass(frozen=True)
+class MarkerPolicyEntry:
+    """Validity characteristics and tracking policy for a capture marker label."""
+
+    valid_samples: int
+    missing_samples: int
+    nominal_weight: float = 1.0
+    excluded: bool = False
+
+    def weight(self, is_valid: bool = True) -> float:
+        """Return effective tracking weight: 0.0 if excluded or invalid, nominal_weight otherwise."""
+        if self.excluded or not is_valid:
+            return 0.0
+        return self.nominal_weight
+
+    def __getitem__(self, item: str) -> Any:
+        if item == "valid_samples":
+            return self.valid_samples
+        if item == "missing_samples":
+            return self.missing_samples
+        if item == "nominal_weight":
+            return self.nominal_weight
+        if item == "excluded":
+            return self.excluded
+        raise KeyError(item)
+
+
+class MarkerValidityPolicy(dict[str, MarkerPolicyEntry]):
+    """Frozen mapping of marker validity policies with helper methods."""
+
+    @precondition(
+        lambda self, label, is_valid=True: isinstance(label, str), "label must be str"
+    )
+    @postcondition(lambda r: r >= 0.0, "weight must be non-negative")
+    def weight_for(self, label: str, is_valid: bool = True) -> float:
+        """Return tracking weight for the specified label and validity status."""
+        if label not in self:
+            raise ValueError(f"Unknown capture label: {label}")
+        return self[label].weight(is_valid=is_valid)
+
+
+_RAW_VALIDITY_DATA: dict[str, tuple[int, int]] = {
+    "Marker_0:0:0": (649, 5),
+    "WaistLeft": (654, 0),
+    "WaistRight": (649, 5),
+    "WaistLBack": (654, 0),
+    "WaistRBack": (654, 0),
+    "BackTop": (654, 0),
+    "BackLeft": (654, 0),
+    "BackRight": (654, 0),
+    "HeadTop": (654, 0),
+    "HeadFront": (654, 0),
+    "HeadSide": (654, 0),
+    "LShoulderTop": (654, 0),
+    "LShoulderBack": (654, 0),
+    "LElbowOut": (654, 0),
+    "LUArmHigh": (654, 0),
+    "LWristTop": (654, 0),
+    "RShoulderTop": (128, 526),
+    "RShoulderBack": (654, 0),
+    "RElbowOut": (654, 0),
+    "RUArmHigh": (654, 0),
+    "RWristTop": (654, 0),
+    "LKneeOut": (654, 0),
+    "LToeIn": (654, 0),
+    "LToeOut": (654, 0),
+    "LAnkleOut": (654, 0),
+    "RKneeOut": (654, 0),
+    "RToeIn": (654, 0),
+    "RToeOut": (654, 0),
+    "RAnkleOut": (654, 0),
+    "Marker_2:2:1": (618, 36),
+    "Marker_2:2:2": (618, 36),
+    "Marker_2:2:3": (618, 36),
+    "Marker_3:3:1": (633, 21),
+    "Marker_3:3:2": (633, 21),
+    "Marker_3:3:3": (633, 21),
+    "Uname*36": (649, 5),
+    "Uname*37": (654, 0),
+    "Uname*38": (649, 5),
+}
+
+MARKER_VALIDITY_POLICY: MarkerValidityPolicy = MarkerValidityPolicy(
+    {
+        label: MarkerPolicyEntry(
+            valid_samples=_RAW_VALIDITY_DATA[label][0],
+            missing_samples=_RAW_VALIDITY_DATA[label][1],
+            nominal_weight=0.0 if label in MARKER_SEGMENTS["unassigned"] else 1.0,
+            excluded=label in MARKER_SEGMENTS["unassigned"],
+        )
+        for label in TOUR_CAPTURE.labels
+    }
+)
 
 
 @dataclass(frozen=True)

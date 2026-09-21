@@ -6,12 +6,14 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import imageio
-import mujoco
 import numpy as np
 from scipy.signal import butter, filtfilt
 
+from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
+from src.shared.python.motion_matching.tour_capture_contract import (
+    MARKER_VALIDITY_POLICY,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
     BOUND_WIDENING,
     CALIBRATION_PRIOR_FRAMES,
@@ -27,7 +29,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane
@@ -95,6 +97,13 @@ def marker_errors(
     )
 
 
+@precondition(lambda label, is_valid=True: isinstance(label, str), "label must be str")
+@postcondition(lambda r: r >= 0.0, "weight must be non-negative")
+def marker_weight(label: str, is_valid: bool = True) -> float:
+    """Return marker tracking weight according to the canonical validity policy."""
+    return MARKER_VALIDITY_POLICY.weight_for(label, is_valid=is_valid)
+
+
 def full_capture_ik(
     lane: Lane,
     kin: FullBodyMarkerKinematics,
@@ -122,7 +131,7 @@ def full_capture_ik(
         if all(name in kin.coordinate_order for name in triple)
     ]
     if active_gimbals:
-        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        from src.shared.python.motion_matching.full_body_ik import (
             continuous_branches,
         )
 
@@ -183,29 +192,20 @@ def render_playback(
     show_com: bool = True,
 ) -> None:
     """Render animated GIF of motion from spec and joint trajectory."""
-    from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
-    from src.engines.physics_engines.mujoco.python.visual_layer import add_com_markers
-
-    xml, _ = exporter.export_full_body_mjcf(spec_bytes, visual=True)
-    model = mujoco.MjModel.from_xml_string(xml)
-    data = mujoco.MjData(model)
-    addresses = [model.joint(n).qposadr[0] for n in names]
-    ground_height = float(
-        json.loads(spec_bytes)["contact"].get("ground_height_m") or 0.0
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
+        render_playback as _render,
     )
-    renderer = mujoco.Renderer(model, 240, 320)
-    cam = mujoco.MjvCamera()
-    cam.lookat[:] = lookat
-    cam.distance, cam.azimuth, cam.elevation = 3.2, 135.0, -12.0
-    frames_out = []
-    for k in range(0, q.shape[0], PLAYBACK_STRIDE):
-        data.qpos[addresses] = q[k]
-        mujoco.mj_forward(model, data)
-        renderer.update_scene(data, camera=cam)
-        if show_com:
-            add_com_markers(renderer.scene, model, data, ground_height)
-        frames_out.append(renderer.render().copy())
-    imageio.mimsave(path, frames_out, duration=1000 * PLAYBACK_STRIDE / RATE_HZ, loop=0)
+
+    _render(
+        spec_bytes=spec_bytes,
+        names=names,
+        q=q,
+        lookat=lookat,
+        path=path,
+        show_com=show_com,
+        playback_stride=PLAYBACK_STRIDE,
+        rate_hz=RATE_HZ,
+    )
 
 
 @dataclass(frozen=True)
@@ -231,6 +231,7 @@ class IKReportInputs:
     offsets: Mapping[str, tuple[str, Sequence[float]]] | None = None
     errors: np.ndarray | None = None
     ref_errors: np.ndarray | None = None
+    constrained_ik: dict[str, Any] | None = None
 
 
 def _build_reference_stage_report(
@@ -338,7 +339,7 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
         [min(kin.sphere_heights(q, lane.ground).values()) for q in inputs.q_ref]
     )
 
-    return {
+    report = {
         "frames": lane.frames,
         "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
         "segment_rms_m": segment_rms(inputs.labels, errors, lane.valid),
@@ -375,3 +376,6 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
             for name in kin.coordinate_order[adapter.upper_body_coordinates :]
         },
     }
+    if inputs.constrained_ik is not None:
+        report["constrained_ik"] = inputs.constrained_ik
+    return report

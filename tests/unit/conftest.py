@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+_MOCKED_MODULES: set[str] = set()
+
 
 def pytest_configure(config):
     """Configure pytest plugins and initialize fixtures early.
@@ -20,19 +22,46 @@ def pytest_configure(config):
     persists through collection. Individual test classes use @patch.dict
     to clean up per-test-scope.
     """
-    # Mock Drake dependencies
+    # Mock Drake dependencies if not installed
     if "pydrake" not in sys.modules:
-        sys.modules["pydrake"] = MagicMock()
-    if "pydrake.all" not in sys.modules:
-        sys.modules["pydrake.all"] = sys.modules["pydrake"]
+        try:
+            import pydrake.all  # noqa: F401
 
-    # Mock optimization dependencies
+            if type(sys.modules.get("pydrake.all")).__module__ == "unittest.mock":
+                raise ImportError("Mocked")
+        except (ImportError, RuntimeError, AttributeError):
+            sys.modules["pydrake"] = MagicMock()
+            sys.modules["pydrake.all"] = sys.modules["pydrake"]
+            _MOCKED_MODULES.update({"pydrake", "pydrake.all"})
+
+    # Mock optimization dependencies if not installed
     if "casadi" not in sys.modules:
-        sys.modules["casadi"] = MagicMock()
+        try:
+            import casadi  # noqa: F401
+
+            if type(sys.modules.get("casadi")).__module__ == "unittest.mock":
+                raise ImportError("Mocked")
+        except (ImportError, RuntimeError, AttributeError):
+            sys.modules["casadi"] = MagicMock()
+            _MOCKED_MODULES.add("casadi")
     if "pinocchio" not in sys.modules:
-        sys.modules["pinocchio"] = MagicMock()
+        try:
+            import pinocchio  # noqa: F401
+
+            if type(sys.modules.get("pinocchio")).__module__ == "unittest.mock":
+                raise ImportError("Mocked")
+        except (ImportError, RuntimeError, AttributeError):
+            sys.modules["pinocchio"] = MagicMock()
+            _MOCKED_MODULES.add("pinocchio")
     if "pinocchio.casadi" not in sys.modules:
-        sys.modules["pinocchio.casadi"] = MagicMock()
+        try:
+            import pinocchio.casadi  # noqa: F401
+
+            if type(sys.modules.get("pinocchio.casadi")).__module__ == "unittest.mock":
+                raise ImportError("Mocked")
+        except (ImportError, RuntimeError, AttributeError):
+            sys.modules["pinocchio.casadi"] = MagicMock()
+            _MOCKED_MODULES.add("pinocchio.casadi")
 
 
 @pytest.fixture(autouse=True)
@@ -51,14 +80,8 @@ def _reset_mocks_between_tests():
     detects mocks and reports NOT_INSTALLED, but resetting the cache per test
     keeps that determination from leaking across the mock/unmock boundary.
     """
-    # Reset the mocks to MagicMock() to clear any state
-    for module_name in [
-        "pydrake",
-        "pydrake.all",
-        "casadi",
-        "pinocchio",
-        "pinocchio.casadi",
-    ]:
+    # Reset only the modules that were actually mocked
+    for module_name in _MOCKED_MODULES:
         if module_name in sys.modules:
             sys.modules[module_name] = MagicMock()
 

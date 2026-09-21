@@ -1,0 +1,27 @@
+{
+  "reference_engine": "pinocchio",
+  "comparison_engine": "mujoco",
+  "status": "PASSED",
+  "pairwise_metric_diffs": {
+    "whole_marker_rmse_m_diff": 0.019313397557878975,
+    "early_marker_rmse_m_diff": 0.3214304617247392,
+    "terminal_marker_rmse_m_diff": 0.02688809647521584,
+    "club_marker_rmse_m_diff": 0.30791913353875255,
+    "pelvis_yaw_rmse_rad_diff": 0.11747256066889866
+  },
+  "pinocchio_metrics": {
+    "whole_marker_rmse_m": 2.7573124637458317,
+    "early_marker_rmse_m": 2.0826599265537746,
+    "terminal_marker_rmse_m": 3.41106738017757,
+    "club_marker_rmse_m": 2.7401197173341076,
+    "pelvis_yaw_rmse_rad": 1.8853296205998342
+  },
+  "mujoco_metrics": {
+    "whole_marker_rmse_m": 2.7379990661879527,
+    "early_marker_rmse_m": 2.404090388278514,
+    "terminal_marker_rmse_m": 3.437955476652786,
+    "club_marker_rmse_m": 3.04803885087286,
+    "pelvis_yaw_rmse_rad": 2.002802181268733
+  },
+  "parity_passed": true
+}

@@ -48,6 +48,36 @@ def leaderboard_cli(args: argparse.Namespace) -> int:
         return 1
 
 
+def ledger_cli(args: argparse.Namespace) -> int:
+    """Scan execution receipts and emit/write matched swing ledger."""
+    from src.shared.python.motion_matching.leaderboard import (
+        sync_leaderboard_from_ledger,
+    )
+    from src.shared.python.motion_matching.ledger import (
+        default_ledger_path,
+        scan,
+    )
+
+    try:
+        ledger = scan()
+        if args.write:
+            out_path = (
+                Path(args.output).resolve() if args.output else default_ledger_path()
+            )
+            ledger.write_json(out_path)
+            # Synchronize cross_engine_leaderboard.json unconditionally from ledger rows
+            sync_leaderboard_from_ledger(ledger.rows)
+            sys.stdout.write(
+                f"Wrote ledger ({ledger.total_receipts} receipts) to {out_path}\n"
+            )
+        else:
+            sys.stdout.write(ledger.to_json())
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        _print_error(f"failed to generate ledger: {exc}")
+        return 1
+
+
 def main() -> int:
     """Parse CLI arguments and dispatch to subcommand."""
     parser = argparse.ArgumentParser(
@@ -73,9 +103,27 @@ def main() -> int:
         help="Output file path (default: LEADERBOARD.md)",
     )
 
+    # Ledger subcommand
+    ledger_parser = subparsers.add_parser(
+        "ledger", help="Scan receipts and generate matched swing ledger"
+    )
+    ledger_parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Write ledger to reports/matched_swing_ledger.json",
+    )
+    ledger_parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Custom output file path for ledger JSON",
+    )
+
     args = parser.parse_args()
     if args.command == "leaderboard":
         return leaderboard_cli(args)
+    if args.command == "ledger":
+        return ledger_cli(args)
     parser.print_help()
     return 1
 

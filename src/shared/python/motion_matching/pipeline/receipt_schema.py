@@ -11,6 +11,8 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .receipt_components import (
+    AcceptanceGateReport,
+    AcceptanceReceipt,
     AddressReceipt,
     AttachmentOffset,
     CalibratedAddressReport,
@@ -19,6 +21,7 @@ from .receipt_components import (
     ClavicleLinkDeg,
     ClosureFitReport,
     ClubReceipt,
+    ConstrainedIkReceipt,
     GroundReceipt,
     HipCalibrationReceipt,
     IkReceipt,
@@ -50,11 +53,13 @@ __all__ = [
     "AttachmentOffset",
     "BackswingReceipt",
     "CalibratedAddressReport",
+    "CandidateReplayReceipt",
     "CalibrationReport",
     "CentreOfMassReport",
     "ClavicleLinkDeg",
     "ClosureFitReport",
     "ClubReceipt",
+    "ConstrainedIkReceipt",
     "ContactParametersReceipt",
     "ControllerReceipt",
     "DynamicsReceipt",
@@ -86,11 +91,45 @@ __all__ = [
 # -----------------------------------------------------------------------------
 
 
+class CandidateReplayReceipt(BaseModel):
+    """Same-input native replay evidence, distinct from an IK/fit receipt (#10336)."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    schema_version: str = "matched-swing-replay/1"
+    engine: str
+    engine_version: str
+    candidate_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    document_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    capture_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    attachments_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    configuration: dict[str, Any]
+    parity: dict[str, Any]
+    integration: dict[str, Any]
+    shared_metrics: dict[str, float]
+    g1_metrics: dict[str, float]
+    acceptance: AcceptanceReceipt
+    artifacts: dict[str, Any]
+    elapsed_s: float
+    qualification: str
+
+
 class Receipt(BaseModel):
     """Complete standardized execution receipt for the full-body ground-support pipeline."""
 
     model_config = ConfigDict(extra="ignore")
 
+    backend: str = Field(
+        "mujoco",
+        description="Kinematic backend engine used for tracking (mujoco or pink)",
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
+    engine: str = Field(
+        "mujoco",
+        description="Full-body dynamics and plant engine (mujoco, drake, pinocchio)",
+        json_schema_extra={"unit": "string", "stage": "metadata"},
+    )
     base_spec_sha256: str = Field(
         ...,
         description="SHA256 hash of the initial input model specification document",
@@ -205,6 +244,11 @@ class Receipt(BaseModel):
         ...,
         description="Qualification note and status claim for the run",
         json_schema_extra={"unit": "text", "stage": "metadata"},
+    )
+    acceptance: AcceptanceReceipt | None = Field(
+        None,
+        description="Physical and kinematic acceptance evaluation verdict (MS-01)",
+        json_schema_extra={"unit": "compound", "stage": "metadata"},
     )
 
 

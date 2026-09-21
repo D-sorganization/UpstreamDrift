@@ -1,0 +1,3560 @@
+{
+  "generated_at": "2026-09-20T03:38:25Z",
+  "rows": [
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_receipt.json",
+      "sha256": "79f861661492420f8ec9d6d97fa5072fafc6bd67f937974203bb7d97ee34b21b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/fit_grip_rotation_residual_receipt.json",
+      "sha256": "57d4a84ef552329a758fbb37fe10d78d94854d39e2a78d961dc326d869072115"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/receipt.json",
+      "sha256": "94850a4b1b8ddbadf42b87f66eefa3a74fcaed4dc125ef7df70a48ed3e5f665b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/scan_geometry_receipt.json",
+      "sha256": "9dfc84cd9e26ffdca5548e0f03751a05a0c726771ed336185d2566989dd5ffc0"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "anthropometry",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/anthropometry/scan_grip_roll_receipt.json",
+      "sha256": "40ef331b0b258812fabbe3c3c2524643c103d6af6b24d8956b97ccf1434d804b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/contact_id/receipt.json",
+      "sha256": "9bbe5fc4e2fef05d0160af03f1214cc2768068fe0c6f3c71e9cae11c4a7e9556"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": null,
+      "lane": "fb3_kinematics",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb3_drake/receipt.json",
+      "sha256": "967e4824e00049fcfcf51926ea89c660db4ab5927a478655e3aed301cc2433ec"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "fb3_kinematics",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json",
+      "sha256": "e07d075dd02d110f1ee5df2311ed07618032cd71043652e6ae2b48605e6bd641"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb4_calibration/drake/ik_trajectory.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": null,
+      "lane": "fb4_calibration",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/drake/receipt.json",
+      "sha256": "7aa54f6857d911392159149d234820e59e8029cbcb170466de56da80a61ee3ac"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/historical/ik_trajectory.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "fb4_calibration",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/historical/receipt.json",
+      "sha256": "efb0490fb5c5e1fe8af80ac5492791b7ce55bd2260588071ed6609f40d2f8e7f"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/ik_trajectory.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "fb4_calibration",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/receipt.json",
+      "sha256": "e380321b0002a05aa6873822eb89f261c4ccb6b902e4e4dfb5c6788983c48054"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb4_calibration/pinocchio/ik_trajectory.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "fb4_calibration",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/pinocchio/receipt.json",
+      "sha256": "dae8efc8450097f4980d4d4c6d50e8f7a2fbbf34e74c2a0adc250c854a0299e4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb5_matching/forward_trajectory_mujoco.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "fb5_matching",
+      "metrics": {
+        "club_marker_rmse_m": 2.98477607949087,
+        "early_marker_rmse_m": 2.5524319638104944,
+        "pelvis_yaw_rmse_rad": 1.9154185605956466,
+        "terminal_marker_rmse_m": 2.680892587011775,
+        "whole_marker_rmse_m": 2.843032751363113
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb5_matching/receipt_mujoco.json",
+      "sha256": "551a65e9cbe9ed570c01ebe0bf7c6711e053722bba444288d1d35d24e30f4cca"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb6_parity/forward_trajectory_drake.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": 1.8138888888888889,
+      "lane": "fb6_parity",
+      "metrics": {
+        "club_marker_rmse_m": 2.3954748975395934,
+        "early_marker_rmse_m": 2.055885419989572,
+        "pelvis_yaw_rmse_rad": 1.6255139710127382,
+        "terminal_marker_rmse_m": 3.5210512652727326,
+        "whole_marker_rmse_m": 2.392862692965229
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_drake.json",
+      "sha256": "809c675dd63beb4cd33ffd3b5f99e82628e19bfa233dc3df59e44790da4eb1cc"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb6_parity/forward_trajectory_drake.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "fb6_parity",
+      "metrics": {
+        "club_marker_rmse_m": 3.04803885087286,
+        "early_marker_rmse_m": 2.404090388278514,
+        "pelvis_yaw_rmse_rad": 2.002802181268733,
+        "terminal_marker_rmse_m": 3.437955476652786,
+        "whole_marker_rmse_m": 2.7379990661879527
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_mujoco.json",
+      "sha256": "ef350f1a46291503456d025670357259f75e2fcfd6892188956d6a5bf0545746"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/fb6_parity/forward_trajectory_drake.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": 1.8138888888888889,
+      "lane": "fb6_parity",
+      "metrics": {
+        "club_marker_rmse_m": 2.7401197173341076,
+        "early_marker_rmse_m": 2.0826599265537746,
+        "pelvis_yaw_rmse_rad": 1.8853296205998342,
+        "terminal_marker_rmse_m": 3.41106738017757,
+        "whole_marker_rmse_m": 2.7573124637458317
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_pinocchio.json",
+      "sha256": "f9818382a0d298ff13306d62cdbe4513a9bcbc2f1357b848e9f1fc8d8cf70942"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver/ik_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1533.4,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/mjx_optimisation_receipt.json",
+      "sha256": "f0853ad015a04c8f4538211ce76c38212f780d0fbde60c02431466d0083f1ae6"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.08913317524057322,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 89.13 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.004538863379023777,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 3.46] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver/ik_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08913317524057322
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
+      "sha256": "3f0a0809ba61c2dfa5a17c1c67f905b157c71f7c9a5fa8c880c117d6f2890d1d"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3819772131450465,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 381.98 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.007764955644425228,
+            "name": "max_closure_residual_m",
+            "reason": "closure residual 7.76 mm > 5.00 mm",
+            "status": "failed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 4.24] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/dynamics_record.npz"
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.3819772131450465
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
+      "sha256": "8808e5d9ab5a2b482f1a4465cbf36ae2ee5ea62a71e295c1c891cc8e2e7a694c"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.892551901745324
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_fit/receipt.json",
+      "sha256": "05dd52ffa1516e222e31e478a15170d57757e55b286636bcf3ba00b48a1cbaf5"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.26215802208491734,
+            "name": "whole_marker_rmse_m",
+            "reason": "OpenSim IK whole RMSE 262.16 mm vs MuJoCo canonical 52.27 mm (delta 209.89 mm > 5.00 mm)",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "dynamics_stage",
+            "reason": "not_run: use moco",
+            "status": "not_run",
+            "threshold": 0.0,
+            "unit": "stage"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik_playback.gif",
+        "mot": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik.mot",
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/candidate.npz"
+      },
+      "candidate_sha": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08913317524057322
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json",
+      "sha256": "3f1bb4e335b40ebfa2b90ae59db518b9d28a927fc5076e7e2127926a2d313fc5"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.2199878597167669
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot/receipt.json",
+      "sha256": "2867b90798cfbbe6e88206b8201f35269ab1aec0c34f1f716bb91ede89d6cfe3"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.07458191318642943,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 74.58 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0026820557560035788,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.37557259195444886,
+            "name": "weight_fraction",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.07458191318642943
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json",
+      "sha256": "e7ae60b483ba3436e97a496de5501bf7da6d7129e1ead0ab4a2e683ff52ce3f6"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.0919040678474688,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 91.90 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0026820557560035788,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 3.37] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.0919040678474688
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_zmp/receipt.json",
+      "sha256": "dc351b0b7dd3a319884b298e6a4d4569619df6a3ee9d437d8692c01d3f1d440f"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.11595556126394267,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 115.96 mm > 95.00 mm",
+            "status": "failed",
+            "threshold": 0.095,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0029239881461001695,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2400862233321285,
+            "name": "weight_fraction",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_iron/ik_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": 1.8272980501392757,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.11595556126394267
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
+      "sha256": "0a58d29aaebc654dd83e4cd897704b0dd4d99057a4f32543f81831734ded37e0"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.11595556126394267,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 115.96 mm > 95.00 mm",
+            "status": "failed",
+            "threshold": 0.095,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0029239881461001695,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2400862233321285,
+            "name": "weight_fraction",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": 1.8272980501392757,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.11595556126394267
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_shoot/receipt.json",
+      "sha256": "67e5d1aefeb04c7c4646414a2b48832a1744839cecf79a355724824988b5d7ef"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": 1.8272980501392757,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.14399834356614188
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_zmp/receipt.json",
+      "sha256": "679baee6f97e7af1dec92dd475a6b866bb8da1d4f99b1768316baefcfcaf46e5"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/bisect_receipt.json",
+      "sha256": "85edbea1deff7994285e9e2b9a59b9b524194e16df8639df3664710a0f5966a4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/candidate_anthro/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/candidate_anthro/dynamics_record.npz"
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": null,
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.2977742055509406
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/candidate_anthro/receipt.json",
+      "sha256": "e154c980d6a83f1a20e0cc16689369944e508d5b2777e84984fe4869650bc14c"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": null,
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.17394016240341792
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/receipt.json",
+      "sha256": "7c93addcf2c463f155074f3415510b59c221cad8aa0534ee2339cbb754c2756d"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/replays/drake_returned81.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/replays/drake_returned81_replay.npz"
+      },
+      "candidate_sha": "a9a0fa8eb20aa1b1a4e8a4c885cc13d2d1cfe750755357eee0de25354373ee56",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": null,
+      "lane": "replays",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/replays/drake_receipt.json",
+      "sha256": "54c1f7e0368fd34a762df6617e03e4a230b13c63d4e2cc1ba150e275ea654772"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/replays/drake_returned81.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/replays/drake_returned81_replay.npz"
+      },
+      "candidate_sha": "a9a0fa8eb20aa1b1a4e8a4c885cc13d2d1cfe750755357eee0de25354373ee56",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "replays",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/replays/mujoco_receipt.json",
+      "sha256": "1164208c28d042dedf4b2208c46129c3e2b1025cc4c298e7638f1e60e169ceda"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/replays/drake_returned81.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/replays/drake_returned81_replay.npz"
+      },
+      "candidate_sha": "dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": 1565.9189033969888,
+      "lane": "replays",
+      "metrics": {
+        "club_marker_rmse_m": 0.023535569477815654,
+        "early_marker_rmse_m": 0.01120787654293546,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": 0.05520780716261591,
+        "whole_marker_rmse_m": 0.026796765470681376
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/replays/pinocchio_receipt.json",
+      "sha256": "7594e6d6cc36887ed5d0e6072702190def6f23ea1aabb3c881418eb3b133e935"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/replays/drake_returned81.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/replays/drake_returned81_replay.npz"
+      },
+      "candidate_sha": "dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776",
+      "capture": "driver",
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "replays",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/replays/receipt.json",
+      "sha256": "363f715600f143b65e0ad66964801ccc8396c40d0bce8f8c2ed5ca656d18453e"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "1183f05bd9ea7b5adad7c92a995c8aa340b5dac3a388f4f69c6df89ef8ea3484",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "setup_parity",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/setup_parity/receipt_anthro_driver.json",
+      "sha256": "e10aeb940d1828f7fc96427ebf858e8393c1c9753aa41daa5c47df07887ee53c"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "5d037fb991e827b0846bc8e832089d8459870d7ec3e330c54a36f152413abcb6",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "setup_parity",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/setup_parity/receipt_anthro_iron.json",
+      "sha256": "c2bdf6a87ceaad931579a21b3b0765590310f10d162f8901e1cfa31ea317a9c8"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": "docs/development/full_body_models/evidence/viewer/opensim_os3b_ik.mot",
+        "npz": "docs/development/full_body_models/evidence/viewer/opensim_os3b_candidate.npz"
+      },
+      "candidate_sha": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "viewer",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/viewer/receipt.json",
+      "sha256": "078a1f76bc4c4adac9c06bb3beb888fadeaaf7c47cf5aabcf16c0a9d3c88b7d7"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/visual_layer/returned81_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776",
+      "capture": null,
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "visual_layer",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/visual_layer/address_receipt.json",
+      "sha256": "8a82b02eb83e7e0c3969f37c8f712e7c2b5f59a2b308f2f7c6d2548a104b8e91"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/visual_layer/returned81_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "visual_layer",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/visual_layer/address_receipt_driver.json",
+      "sha256": "33a48e69cd41dae79f1740926fcf42d896642d5d9922074fa29b14515ec56154"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/visual_layer/returned81_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "visual_layer",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/visual_layer/address_receipt_iron.json",
+      "sha256": "e6d681793deab9a5100b4fbb9bc3229a83cdf2d8d3f0b8d801e78369591690f3"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/visual_layer/returned81_playback.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "2927f5f81c9952165df1e7dc038a3d96f0eaca3a39953555233eb76124342abb",
+      "capture": null,
+      "engine": "mujoco",
+      "horizon_s": 0.2833,
+      "lane": "visual_layer",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/visual_layer/receipt.json",
+      "sha256": "a7d2ae2e57deba513a1ba4de38319561020ac8ec4439c704d78ff613049d3e66"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os0_audit_receipt.json",
+      "sha256": "e03501bf9402dff5623192bb17c5eca5c7598e596a533620be43644b274771a0"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 1.8138888888888889,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os1_trc_receipt.json",
+      "sha256": "ad4861def490c533be9ea3c5210ae89b4afb89f7a29bc2888a69c20bf57073ce"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os2_runtime_receipt.json",
+      "sha256": "bf65225139553ce2d8b367f923aac5a73ad89435e4fabbab4716975a098ff5c2"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/opensim_tour_matching/evidence/os3_stride20/calibration.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os3_stride20/receipt.json",
+      "sha256": "58e637b9e374463de8e4fa5f3ebc15cd61c244b17ef91653e89a0243ef812562"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/opensim_tour_matching/evidence/os3_unlocked_stride20/calibration.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os3_unlocked_stride20/receipt.json",
+      "sha256": "300f9079623508df2b3c2fdb113cb748bdb91e68f0d5595ca06fbbc41b96865d"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.07851433583675457,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 78.51 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.04263623753268094,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 42.64 mm > 20.00 mm",
+            "status": "failed",
+            "threshold": 0.02,
+            "unit": "m"
+          },
+          {
+            "measured": 0.17121397017839793,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 171.21 mm > 80.00 mm",
+            "status": "failed",
+            "threshold": 0.08,
+            "unit": "m"
+          },
+          {
+            "measured": 0.020426568465718466,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.1,
+            "unit": "m"
+          },
+          {
+            "measured": 0.18029554317259003,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.1803 rad > 0.1047 rad",
+            "status": "failed",
+            "threshold": 0.10472,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/opensim_tour_matching/evidence/os3b_scale_ik/overlay_7dd1da1764bd.gif",
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 1.8139,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": 0.020426568465718466,
+        "early_marker_rmse_m": 0.04263623753268094,
+        "pelvis_yaw_rmse_rad": 0.18029554317259003,
+        "terminal_marker_rmse_m": 0.17121397017839793,
+        "whole_marker_rmse_m": 0.07851433583675457
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os3b_scale_ik/receipt.json",
+      "sha256": "940c35e527e730a544c8abeddff830b48870b2b962cb2eff851f28bf204250ed"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "7fdf41b32162e9c25064af6e8657d2b7fc6351b9",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os4_moco_tracking/receipt.json",
+      "sha256": "0f70bcd82310347319d2807a3bcd08a5ba90c44a0f1b8f90fbebd400964051a6"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3e2dbab3a",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/receipt.json",
+      "sha256": "9e96585aac4fb4527d50dc50daeb9126a5a4d9785d7006a957e16881f7704d30"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "653c97fe97b01b53ed3455f1b145d0a9f85daa45",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": null,
+      "lane": "tour_matching",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/opensim_tour_matching/evidence/os6_handoff/reproduction_receipt.json",
+      "sha256": "79c2737b1c2ec262918e33f2bcd1dd6e4e7d3b42f621096bc29e412452d01b77"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/actuator_instrumentation_bundle_receipt.json",
+      "sha256": "dafd9d9bc0ee75fcd4f96f3939a336a72877cbfa4e1e97d5cf24bed5ba796ec1"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/attached_pose_test_bundle_receipt.json",
+      "sha256": "685b2d3e1e74ce3dfc3420646dc8df11819de13e35d2b7f651fa7abcf419af32"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/attachment_calibration_02_receipt.json",
+      "sha256": "eab6a414698875b9e044496208f6da9ba1cf96ade317690bc5237c280a472fee"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/calibrated_initial_state_01_receipt.json",
+      "sha256": "224dc7eea53cb4a566061d5ee981cd071ece799ffe73205267d041a9db5f7f5b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/calibrated_prefix_100ms_bundle_receipt.json",
+      "sha256": "a6d765e81cbaabd17d5c292127f58678eafa312239c1ab8241af70802fbad50f"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": 0.15,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/calibration_body_frames_01_receipt.json",
+      "sha256": "a66e3f280b63c6a5f72e857084c9e9cfffe4c7602c21b48d2d6217e0bd854fbb"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/capture_validity_test_bundle_receipt.json",
+      "sha256": "a4740ce594fca8e1a5961116b46d07e09d42d54ea9da7e6dbf731958fbd94c0d"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_calibrated_01_receipt.json",
+      "sha256": "f3e4b2cd2489563016a801deb743a024bccebb20dd5f19abe33399a710caa7a4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_calibrated_suffix_01_receipt.json",
+      "sha256": "dda9216f64d1aff515152674a1c7654dac04f0c790bfcfe83fdacc61662105b3"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_continuation_01_receipt.json",
+      "sha256": "05b46010e40e4954eb2f7960383de61e72a5845fd7735e8518385914ec76633f"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_poses_01_receipt.json",
+      "sha256": "69c7656ef4f307ce67896f2df1602d04e9c4be4cd298ed23b4a972f6bac57da4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_poses_02_receipt.json",
+      "sha256": "c7279356417b0891ef6b282f490af6c0162baedd5356e0cf1ccd4e4adf4b9fb9"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_poses_03_receipt.json",
+      "sha256": "45c306db2dede31f57ea129d66a7d5742c48d4a01512a9638b3f895451a4f92e"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_reseed_01_receipt.json",
+      "sha256": "54e553ddcf6a6cfcd73e9b116799c6b3b3be168f591106cdae666718ef84619e"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/connected_marker_reseed_02_receipt.json",
+      "sha256": "c02e4511b9ae1a259f4a93b26f7653a203305e4429a890e21f52033f3a576530"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "97ebd8b261b58deda873d29ddb099fbcad4ec2ef93c180441305df78dd3635e3",
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/first_prefix_bundle_receipt.json",
+      "sha256": "76eb0f31b9c43f19c67a9b240bbd354e512ab1da1de32d30918d37bf604bdbde"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "ca61cfbe43a0800f04bb53190a2b03da25584213ddf37975141f306172ece64a",
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/geometry_sweep_bundle_receipt.json",
+      "sha256": "cbc2dcad7afc9f6fb6d42877f8445aa342de13f54a340a64ab07f5a3b0a214f8"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/multiframe_geometry_01_receipt.json",
+      "sha256": "44f9c3b870e8365e03322e8de3f45c1bd12924a40d29b061434a9b403af0d181"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_1000ms_sextic_bundle_receipt.json",
+      "sha256": "46c461ece280c60464c83f7eba63a0a75d3b6e8155dcc1c74af84484415a0115"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_100ms_bundle_receipt.json",
+      "sha256": "6fae0837ffb80eef38a3d9de35e4e4b6ee22781ae7004accaab36f170f9f2864"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_1100ms_sextic_bundle_receipt.json",
+      "sha256": "b4a71bd329ad1e651adb67f83ea79b38a5e1993d5afe705e1aefd9b3e660a0b9"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_1200ms_sextic_bundle_receipt.json",
+      "sha256": "249ece24f26ed64cca59d2905756af28a1dc2e5b2692ed8782948498ad069d47"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_200ms_linear_bundle_receipt.json",
+      "sha256": "03599ea14ed04d81fdab5579e4cba75cdd2dc8fe14c5cf6244015cb255cd87a8"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_300ms_linear_bundle_receipt.json",
+      "sha256": "21b660a5ffb3ca06ba8253089fc1054c6d02f851a0ece00b6e2ad136c2f8d5c8"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_300ms_refined_bundle_receipt.json",
+      "sha256": "0f98d9a745cf50f7476d66977bfabbb74818d65b69060c86a78ed80e90cf2669"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_400ms_bundle_receipt.json",
+      "sha256": "14203e0fbc443de8f68041c80ce687d34dfe90ba083d11536c0959c57c5cadc2"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_500ms_bundle_receipt.json",
+      "sha256": "1b6ebdae865efdfdcd9e97ffe8c26540e6fce401479d436994a906d689c78a6e"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_600ms_bundle_receipt.json",
+      "sha256": "4ad73f2b6201622803d17b7adac9944f4dd12aeb15d2797b80fa7d9fd0965662"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_600ms_refined_bundle_receipt.json",
+      "sha256": "dfac369f83e66d07d6ba995c2b5422815bacea4160aa46f4facd94334bf0d538"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_800ms_quartic_bundle_receipt.json",
+      "sha256": "73cd9c143715461fedacfa0a28f94c94ab8f49dcd566b3b8ae579ce7b20b2008"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/prefix_900ms_sextic_bundle_receipt.json",
+      "sha256": "ad6350eab39741152292285026061bfaa1cd6b93bf44d4306769817f656cd311"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/qualified_velocity_bundle_receipt.json",
+      "sha256": "8e6445ead06d89e9c9358c3248946d1271f9e2d7d2406e43a97824e520940e5e"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/reproduction/cold_replay_deliverable1_receipt.json",
+      "sha256": "c96ea225f98e96b608ccc79abbe5918dfc801f4889a973750b79d6f3d035bed5"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": 0.8,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": 0.5229251688778479,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": 0.713199633002574,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/reproduction/deliverable3_080s_receipt.json",
+      "sha256": "71b88fec2fbe37f9e25a2e8c5977f3e57083b0f2cc4bc9122b4b0672f0d8839b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/returned-replay.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/PARITY_DIAGNOSIS_RECEIPT.json",
+      "sha256": "1b50facb36bcd622b52634469d4ef8ef39d6030e0e8569ac74e7844efebf5805"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/returned-replay.npz"
+      },
+      "candidate_sha": "34a500da34b51a8ea110c2199dfee512aa390be68439131c16ba757947fe6126",
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": 6583.167656179008,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": 0.00871531504251686,
+        "early_marker_rmse_m": 0.010085811282029051,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": 0.039201754139887725,
+        "whole_marker_rmse_m": 0.020532843478659774
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/receipt.json",
+      "sha256": "1599c72c15eee045dc716ecdbc8b26517fd56891b89a2e5b73383cb5f6fb409d"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_101/returned-replay.npz"
+      },
+      "candidate_sha": "b505d8b6bd93bd84fb7aad5d5a0e3df257ebb37827a6ce7c7a93333f367bd7db",
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": 4433.757425961001,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": 0.008727543584364457,
+        "early_marker_rmse_m": 0.010014831763024146,
+        "pelvis_yaw_rmse_rad": 0.14955202276364696,
+        "terminal_marker_rmse_m": 0.03920171701461849,
+        "whole_marker_rmse_m": 0.02034232449869241
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_101/receipt.json",
+      "sha256": "8d668f00806628e0428956067dcac538b154bce360a3ac19911b3d9b6281493d"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.020264853256802433,
+            "name": "whole_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.009995135614984909,
+            "name": "early_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.04031367410730996,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 40.31 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.008424186734364101,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.5288764152981652,
+            "name": "pelvis_yaw_error_pct",
+            "reason": "",
+            "status": "passed",
+            "threshold": 5.0,
+            "unit": "%"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 7.347900066179136e-12,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/returned-replay.npz"
+      },
+      "candidate_sha": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": 2357.8735069689974,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": 0.008424186734364101,
+        "early_marker_rmse_m": 0.009995135614984909,
+        "pelvis_yaw_rmse_rad": 0.005040823947322624,
+        "terminal_marker_rmse_m": 0.04031367410730996,
+        "whole_marker_rmse_m": 0.020264853256802433
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/receipt.json",
+      "sha256": "9a2186ab5e7cb981697b3b6a2e7f5071a6b69f84f17fab6ec9ab5674873a118a"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.9401372318864682,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 940.14 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.859119255495535,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 859.12 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.9929206741908517,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 992.92 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.7416455660268633,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 741.65 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 1.7601404429152856,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 1.7601 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 117566.3423473042,
+            "name": "max_normal_force_n",
+            "reason": "max normal force 117566.3 N exceeds 2354.4 N (3x BW)",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.05776917182144573,
+            "name": "max_penetration_m",
+            "reason": "penetration 57.8 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.31233266828500783,
+            "name": "max_closure_residual_m",
+            "reason": "closure residual 312.33 mm > 5.00 mm",
+            "status": "failed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.9401372318864682,
+            "name": "required_whole_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": ""
+          },
+          {
+            "measured": 0.859119255495535,
+            "name": "required_early_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": ""
+          },
+          {
+            "measured": 0.9929206741908517,
+            "name": "required_terminal_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": ""
+          },
+          {
+            "measured": 0.7416455660268633,
+            "name": "required_club_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": ""
+          },
+          {
+            "measured": 1.7601404429152856,
+            "name": "required_pelvis_yaw_rmse_rad",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": ""
+          },
+          {
+            "measured": 117566.3423473042,
+            "name": "required_max_normal_force_n",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": ""
+          },
+          {
+            "measured": 0.05776917182144573,
+            "name": "required_max_penetration_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": ""
+          },
+          {
+            "measured": 0.31233266828500783,
+            "name": "required_max_closure_residual_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.005,
+            "unit": ""
+          },
+          {
+            "measured": 0.05132401568968702,
+            "name": "required_max_closure_residual_rad",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.05,
+            "unit": ""
+          },
+          {
+            "measured": 0.0,
+            "name": "parity",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 1.0,
+            "name": "complete",
+            "reason": "Required replay evidence",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "converged",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "root_history",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 1.0,
+            "name": "coverage",
+            "reason": "Required replay evidence",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "source_dynamics",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Independent uninterrupted replay; missing evidence fails closed",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_full_mujoco_replay/kinematic-playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_full_mujoco_replay/returned-replay.npz"
+      },
+      "candidate_sha": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 349.3019893000019,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 1.5473104591894296,
+        "early_marker_rmse_m": 0.859119255495535,
+        "pelvis_yaw_rmse_rad": 1.8451309708448902,
+        "terminal_marker_rmse_m": 2.4292363856539376,
+        "whole_marker_rmse_m": 1.4446584952684365
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_full_mujoco_replay/receipt.json",
+      "sha256": "9a6ea9c655fa354069a3b369092e8a7a8e53abd1b4cd5a78dd015b8b57157468"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.1335307759224617,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 133.53 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.1176887290548092,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 117.69 mm > 20.00 mm",
+            "status": "failed",
+            "threshold": 0.02,
+            "unit": "m"
+          },
+          {
+            "measured": 0.16718295544070955,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 167.18 mm > 80.00 mm",
+            "status": "failed",
+            "threshold": 0.08,
+            "unit": "m"
+          },
+          {
+            "measured": 0.05020370481288372,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.1,
+            "unit": "m"
+          },
+          {
+            "measured": 0.4793598892399277,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.4794 rad > 0.1047 rad",
+            "status": "failed",
+            "threshold": 0.10472,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Decoupled IK + inverse-dynamics allocation (scripts/match_pinocchio_c3d.py). Kinematic fit only; no forward-replay metrics in the receipt. Evaluated on the kinematic metrics against G3 for the record.",
+        "source": "evidence/matched/driver_full_pinocchio/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_full_pinocchio/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_full_pinocchio/candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_full_pinocchio/receipt.json",
+      "sha256": "b064a0efd2c267ee217e818de4845dd5395b61d68a9676b827e78b3767fb20f5"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3397950645586104,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 339.80 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.08919853196845129,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 89.20 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.7818067788889571,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 781.81 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2526322109612285,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 252.63 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.7624699756771898,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.7625 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 9272.830823015664,
+            "name": "max_normal_force_n",
+            "reason": "max normal force 9272.8 N exceeds 2354.4 N (3x BW)",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.02089842056861036,
+            "name": "max_penetration_m",
+            "reason": "penetration 20.9 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "FDDP G1 continuation (RK45 nodes, rtol 1e-4): in-solver rollout 46.4 mm whole, but the rtol 1e-6 replay diverges to 340 mm. Rejected; kept as diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45/candidate.npz"
+      },
+      "candidate_sha": "652379c3a9ef4a90e540117078bbe4828b699e42352697268a52fccad78a8d59",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45/receipt.json",
+      "sha256": "c129c5fec534c074c5011d35b899b7abf866ebe53781df334011d53c94d19523"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.046837589364288994,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 46.84 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.025663229287031245,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 25.66 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0643072363103632,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 64.31 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.05259998859597353,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.1615901020914645,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.1616 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1139.6409577730308,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964854,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 2.16] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Barrier-reduced same-integrator G1 continuation (RK45 rtol 1e-6 solve and replay, range-barrier weight 100, trail-side effort bounds raised) from driver_g1_rtol6/stage_0.60s.npz: 0.85 s stage CONVERGED (99 iterations, cost 145.3) and rollout == replay at 46.8 mm whole. Still rejected at G1 (whole 46.8 > 25 mm, early 25.7 > 12, terminal 64.3 > 35, yaw 9.3 deg > 3, penetration 17.2 > 10 mm, weight fraction min 0). Best full-G1-horizon dynamic candidate to date; diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45_b100/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_b100/candidate.npz"
+      },
+      "candidate_sha": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100/receipt.json",
+      "sha256": "bc277fcd2b11747efdf44b57951c4ff1e7a159da538f44fe44351419cd6ad721"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3500115189186422,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 350.01 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.03659059275721495,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 36.59 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.9446179073563208,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 944.62 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.46492214197469106,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 464.92 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.9884702853562879,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.9885 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 3868.0431421399603,
+            "name": "max_normal_force_n",
+            "reason": "max normal force 3868.0 N exceeds 2354.4 N (3x BW)",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964938,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 2.478701664524015e-5,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.3500115189186422,
+            "name": "required_whole_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": ""
+          },
+          {
+            "measured": 0.03659059275721495,
+            "name": "required_early_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": ""
+          },
+          {
+            "measured": 0.9446179073563208,
+            "name": "required_terminal_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": ""
+          },
+          {
+            "measured": 0.46492214197469106,
+            "name": "required_club_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": ""
+          },
+          {
+            "measured": 0.9884702853562879,
+            "name": "required_pelvis_yaw_rmse_rad",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": ""
+          },
+          {
+            "measured": 3868.0431421399603,
+            "name": "required_max_normal_force_n",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": ""
+          },
+          {
+            "measured": 0.01719458026964938,
+            "name": "required_max_penetration_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": ""
+          },
+          {
+            "measured": 2.478701664524015e-5,
+            "name": "required_max_closure_residual_m",
+            "reason": "Required finite G1 measurement",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": ""
+          },
+          {
+            "measured": 1.8289190783135055e-5,
+            "name": "required_max_closure_residual_rad",
+            "reason": "Required finite G1 measurement",
+            "status": "passed",
+            "threshold": 0.05,
+            "unit": ""
+          },
+          {
+            "measured": 0.0,
+            "name": "parity",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 1.0,
+            "name": "complete",
+            "reason": "Required replay evidence",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "converged",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "root_history",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 1.0,
+            "name": "coverage",
+            "reason": "Required replay evidence",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "source_dynamics",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Independent uninterrupted replay; missing evidence fails closed",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/kinematic-playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/returned-replay.npz"
+      },
+      "candidate_sha": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 74.41558822401566,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.46492214197469106,
+        "early_marker_rmse_m": 0.03659059275721495,
+        "pelvis_yaw_rmse_rad": 0.9884702853562879,
+        "terminal_marker_rmse_m": 0.9446179073563208,
+        "whole_marker_rmse_m": 0.3500115189186422
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/receipt.json",
+      "sha256": "39b33b37b30ac5bfe72594951d97d60805585c5260ef2b14367a3fa6ed485778"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.1235360188278201,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 123.54 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.04850729028310768,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 48.51 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2331304673300411,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 233.13 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.22530596222439722,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 225.31 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.06353867025331546,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.0635 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1267.8446438406743,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964854,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Same-integrator G1 continuation (RK45 rtol 1e-6 on both solve and replay) from stage_0.60s.npz: rollout == replay at 123.5 mm whole; 0.85 s stage not converged, cost dominated by the human-range barrier. Rejected; diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/candidate.npz"
+      },
+      "candidate_sha": "a7372b787824d902a616d2a77cf5dfaed2b68accf2cc112593bc8419a80e8509",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/receipt.json",
+      "sha256": "166eb43ba7a2a0243720bf838d0b509dfabe9e6a51beccc6431d7b27d47a0826"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.0,
+            "name": "whole_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "early_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "terminal_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1200.0,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0035,
+            "name": "max_penetration_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0001,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": true,
+        "qualification_note": "Physical acceptance criteria passed",
+        "status": "PASSED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_drake/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_drake/candidate.npz"
+      },
+      "candidate_sha": "cc8c79ef79832685cdbc3e079345fd632540a5c3d2b1a6e0eb3fc72c5a4cda82",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.0,
+        "early_marker_rmse_m": 0.0,
+        "pelvis_yaw_rmse_rad": 0.0,
+        "terminal_marker_rmse_m": 0.0,
+        "whole_marker_rmse_m": 0.0
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_drake/receipt.json",
+      "sha256": "1f1f67d26b5b1883f652653186b7f96e14c899119b803a913f9c2638fa5bdce4"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.2452450443233475,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 245.25 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.23014149679046664,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 230.14 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.26151220010975246,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 261.51 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.3900449519505721,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 390.04 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.32399201077582096,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.3240 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 799.2591582275049,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0,
+            "name": "max_penetration_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.5,
+            "name": "weight_fraction",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": 0.8789352925092767,
+            "name": "open_loop_replay",
+            "reason": "open-loop drift 878.9 mm exceeds 25.0 mm threshold",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_opensim/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_opensim/candidate.npz"
+      },
+      "candidate_sha": "d1026b1c154fbb43957dfc6192d05b0d0eadc07733578d89a0185f3889985717",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 0.85,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.3900449519505721,
+        "early_marker_rmse_m": 0.23014149679046664,
+        "pelvis_yaw_rmse_rad": 0.32399201077582096,
+        "terminal_marker_rmse_m": 0.26151220010975246,
+        "whole_marker_rmse_m": 0.2452450443233475
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_opensim/receipt.json",
+      "sha256": "933e00f033dd518df5053c543136a286a32dd25111509e57a5e36ed2b159efc0"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 2.7573124637458317,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 2757.31 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 2.0826599265537746,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 2082.66 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 3.41106738017757,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 3411.07 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 2.7401197173341076,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 2740.12 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 1.8853296205998342,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 1.8853 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "The receipt's own metrics block is the solver-internal fit of the 27-coordinate native run-102 candidate; the forward_rollout block is the physical replay (2.76 m). Only the replay counts. The self-reported accepted=true is void (MS-100).",
+        "source": "evidence/matched/driver_g1_pinocchio/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_pinocchio/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_pinocchio/candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": 1.8138888888888889,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 2.7401197173341076,
+        "early_marker_rmse_m": 2.0826599265537746,
+        "pelvis_yaw_rmse_rad": 1.8853296205998342,
+        "terminal_marker_rmse_m": 3.41106738017757,
+        "whole_marker_rmse_m": 2.7573124637458317
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_pinocchio/receipt.json",
+      "sha256": "9bbca5abbd0eb97bd0a063994934bc69a1708d2d0ee07266c50ed6775a5fa317"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3369243511857251,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 336.92 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.21532722263879503,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 215.33 mm > 20.00 mm",
+            "status": "failed",
+            "threshold": 0.02,
+            "unit": "m"
+          },
+          {
+            "measured": 0.3891311136322293,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 389.13 mm > 80.00 mm",
+            "status": "failed",
+            "threshold": 0.08,
+            "unit": "m"
+          },
+          {
+            "measured": 0.22572158864018038,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 225.72 mm > 100.00 mm",
+            "status": "failed",
+            "threshold": 0.1,
+            "unit": "m"
+          },
+          {
+            "measured": 2.574501828432221,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 2.5745 rad > 0.1047 rad",
+            "status": "failed",
+            "threshold": 0.10472,
+            "unit": "rad"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing dynamics.max_normal_force_n",
+            "status": "missing",
+            "threshold": 2354.4,
+            "unit": "N"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Decoupled IK + inverse-dynamics allocation (scripts/match_pinocchio_c3d.py). Kinematic fit only; no forward-replay metrics in the receipt. Evaluated on the kinematic metrics against G3 for the record.",
+        "source": "evidence/matched/iron_full_pinocchio/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/iron_full_pinocchio/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/iron_full_pinocchio/candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": "iron",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/iron_full_pinocchio/receipt.json",
+      "sha256": "246719a47fd4a593fe62b7c52fc1ac45d0a52e0e49b3bf2fc2402cc608204f5f"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "total_receipts": 98
+}
