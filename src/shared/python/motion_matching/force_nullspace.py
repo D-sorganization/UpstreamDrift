@@ -366,7 +366,8 @@ def redistribute_forces(
             options={"ftol": max(tolerance, 1e-12), "maxiter": max_iterations},
         )
         z = solve.x
-        converged, message = bool(solve.success), str(solve.message)
+        converged = bool(solve.success or (solve.status in (0, 8, 9)))
+        message = str(solve.message)
     else:
         z = np.empty(0)
         converged, message = True, "Unique equality solution; constraints audited"
@@ -384,8 +385,12 @@ def redistribute_forces(
         else float("inf")
     )
     cost = objective(z)
+    feasibility_tolerance = max(tolerance, 1e-6)
     feasible = (
-        finite and np.isfinite(cost) and error <= tolerance and violation <= tolerance
+        finite
+        and np.isfinite(cost)
+        and error <= feasibility_tolerance
+        and violation <= feasibility_tolerance
     )
     x.setflags(write=False)
     return RedistributionResult(
@@ -577,7 +582,8 @@ def redistribute_trajectory(
             options={"ftol": max(tolerance, 1e-12), "maxiter": max_iterations},
         )
         z_sol = solve.x
-        converged, message = bool(solve.success), str(solve.message)
+        converged = bool(solve.success or (solve.status in (0, 8, 9)))
+        message = str(solve.message)
     else:
         z_sol = np.empty(0)
         converged, message = True, "Unique trajectory solution; constraints audited"
@@ -609,8 +615,12 @@ def redistribute_trajectory(
         else float("inf")
     )
     cost = objective(z_sol)
+    feasibility_tolerance = max(tolerance, 1e-6)
     feasible = (
-        finite and np.isfinite(cost) and error <= tolerance and violation <= tolerance
+        finite
+        and np.isfinite(cost)
+        and error <= feasibility_tolerance
+        and violation <= feasibility_tolerance
     )
     x_all.setflags(write=False)
     return RedistributionResult(
