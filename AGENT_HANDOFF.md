@@ -1,17 +1,22 @@
 # Simscape Tour-Average Fit Continuation
 
-## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588)
+## Tour Baselines TB-04: Fit and Independently Replay the Actual Driven Double Pendulum (#10589)
 
-Branch `feat/tb03-trajectory-fitting-10588`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
-TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588)) calibrates rigid swing planes, fixed geometry, feasible initial states, and moving hub power tracking.
+Branch `feat/tb04-double-pendulum-fit-10589`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-04 ([#10589](https://github.com/D-sorganization/UpstreamDrift/issues/10589)) implements the bounded continuous dynamic fitting and independent replay verification of the driven double pendulum model on tour-average Driver and 7-Iron targets.
 
-- Replaces naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation.
-- Implements `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections.
-- Implements `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic.
-- Implements `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics.
-- Implements `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
-- All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files.
-  Next step: Commit, push, open PR, and auto-merge.
+- Bidirectional mapping and verified mathematical & numerical acceleration parity (< 1e-14) between `DoublePendulumDynamics` and `Tools` (`physics.py`).
+- Continuous smooth bounded joint torques via degree-6 Bernstein polynomial basis strictly bounded in $[\tau_{\min}, \tau_{\max}]$ with curvature and effort regularization.
+- Fixed frame-0 off-by-one initial state evaluation bug, implemented non-uniform timestep integration, and added independent 4x tighter substep replay verification.
+- Authoritative qualification receipts and baseline packages generated for Driver and 7-Iron under `docs/plans/tour_baselines/evidence/`.
+- Updated `docs/plans/tour_baselines/coverage_matrix.md` marking `driven_double_pendulum` as Qualified for both Driver and Iron.
+- 15/15 unit tests pass cleanly in 6.5s across `test_double_pendulum_fit.py` and `test_motion_matching_provider.py`.
+- Ruff check/format clean, Black clean, Mypy 0 errors, architecture budget clean, file size budget clean, DRY gate clean.
+- Next step: Land PR via normal squash merge and proceed to TB-05 ([#10590](https://github.com/D-sorganization/UpstreamDrift/issues/10590): Fit and Independently Replay the Actual Driven Triple Pendulum).
+
+## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588) [MERGED]
+
+Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https://github.com/D-sorganization/UpstreamDrift/pull/10631) (commit `cfcc8dfbd`).
 
 ## Tour Baselines TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles (#10587) [MERGED]
 
@@ -661,6 +666,12 @@ Disposition of the 38-PR open backlog (REST-verified states at sweep start):
 - **Skipped drafts (4):** #9610, #9618, #9633, #9636 (conductor research drafts, not trivially completable).
 
 No issue was closed in this sweep (redundant-PR closures do not close issues). Fleet-wide handoff/lease state at sweep start: `C:/tmp/backlog/UpstreamDrift.md`.
+
+## Impact-Interval Energy Audit Gate: #9548
+
+- Provider fix is in the pin: Tools #5079 (independent ledger) and #5088 (termination), both ancestors of `vendor/ud-tools` = Tools `1ac89c18e6280752d949e520c2143d2fb584d31e`. Do not rewind.
+- UD consumes it through `src/shared/python/physics/impact_interval_audit.py`: `audit_impact_interval` recomputes the signed residual from the reported terms, audits linear momentum only for FREE and the angular balance about the attachment only for supported boundaries, and `qualified_post_impact_state` raises `ImpactAuditError` (verdict attached, `to_report()` JSON-ready with limitations) on unseparated contact or any residual outside `ImpactAuditTolerances` (0.15 J, 1e-8 N s, 1e-3 N m s).
+- Gate: `REQUIRE_REAL_TOOLS_REPO=1 python -m pytest tests/shared_contracts/ --tools-mode=vendored` and `python -m pytest tests/unit/physics/test_impact_interval_audit.py`. Tolerance is justified only by the halving-dt check in the contract test; closure is software correctness, not physical qualification. No UI consumer of the interval solver exists yet — wire the verdict report when one lands (DL-#9548).
 
 ## Impact Dynamics and Acoustics: #9700
 
