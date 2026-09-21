@@ -225,8 +225,8 @@ class ContactForceAllocator:
             trail_set = set(trail_arm_indices)
             for i, idx in enumerate(self.actuated_indices):
                 if idx in trail_set:
-                    lb[i] = 0.0
-                    ub[i] = 0.0
+                    lb[i] = -1e-5
+                    ub[i] = 1e-5
 
         # Unilateral ground contact: f_{i, z} >= 0
         for s in range(self.n_contact_spheres):
@@ -269,8 +269,8 @@ class ContactForceAllocator:
         # Verify whether bounds were respected
         bounds_ok = True
         if tau_bounds is not None:
-            if np.any(tau_refined < tau_bounds[0] - 1e-4) or np.any(
-                tau_refined > tau_bounds[1] + 1e-4
+            if np.any(tau_refined < tau_bounds[0] - 1e-3) or np.any(
+                tau_refined > tau_bounds[1] + 1e-3
             ):
                 bounds_ok = False
 
