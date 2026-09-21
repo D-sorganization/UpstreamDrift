@@ -219,47 +219,34 @@ def _convergence(
     )  # ⚡ Bolt: np.sqrt(np.max(np.einsum(...))) is faster than np.max(np.linalg.norm(..., axis=-1))
 
 
-@precondition(lambda files: files.candidate.is_file(), "Source candidate required")
-def generate_replay(
-    files: ReplayFiles, settings: ReplaySettings, *, diagnostic: bool = False
+def _build_receipt(
+    files: ReplayFiles,
+    settings: ReplaySettings,
+    document: dict,
+    source: dict,
+    arrays: dict,
+    capture: TourCapture,
+    failures: list[str],
+    marker_parity: float,
+    q: np.ndarray,
+    v: np.ndarray,
+    markers: np.ndarray,
+    reference: np.ndarray,
+    failure: str | None,
+    g1_count: int,
+    convergence: float | None,
+    start: float,
+    plant: ReplayPlant,
+    kin: FullBodyMarkerKinematics,
 ) -> dict:
-    """Replay all saved intervals; certify G1 only with complete, converged evidence."""
     import mujoco
 
-    start = perf_counter()
-    source, document, arrays, capture, attachments, failures = _prepare(
-        files, settings, diagnostic
-    )
-    plant = ReplayPlant(document, source["ground_height_m"], settings)
-    kin = FullBodyMarkerKinematics(plant.adapter, attachments)
-    reference = np.stack([kin.marker_positions(q) for q in arrays["q"]])
-    diff = reference - arrays["markers_m"]
-    difference = np.sqrt(
-        np.einsum("...i,...i->...", diff, diff)
-    )  # ⚡ Bolt: np.sqrt(np.einsum(...)) is faster than np.linalg.norm(..., axis=-1)
-    marker_parity = float(np.max(difference[arrays["valid"]]))
-    if marker_parity > 1e-8:
-        failures.append("Same-state marker parity exceeds 1e-8 m")
-    if failures and not diagnostic:
-        raise ValueError("Parity failed: " + "; ".join(failures))
-    efforts = np.zeros_like(arrays["q"])
-    if len(arrays["u"]) == len(arrays["q"]):
-        efforts[:, plant.actuated] = arrays["u"]
-    else:
-        efforts[:-1, plant.actuated] = arrays["u"]
-        efforts[-1, plant.actuated] = arrays["u"][-1]
-    q, v, failure = replay_controls(
-        plant, arrays["time_s"], arrays["q"][0], arrays["v"][0], efforts, settings
-    )
-    markers = np.stack([kin.marker_positions(qi) for qi in q])
     full_metrics = _metrics(capture, markers)
-    g1_count = len(window_indices(arrays["time_s"], 0.85))
     complete = len(q) >= g1_count
     count = min(len(q), g1_count)
     g1_metrics = _metrics(capture, markers[:count]) | _audit(
         plant, kin, q[:count], v[:count]
     )
-    convergence = _convergence(plant, kin, arrays, efforts, markers, settings)
     evidence = {
         "parity": not failures,
         "complete": complete,
@@ -322,3 +309,60 @@ def generate_replay(
         json.dumps(receipt, indent=2, allow_nan=False) + "\n"
     )
     return receipt
+
+
+@precondition(lambda files: files.candidate.is_file(), "Source candidate required")
+def generate_replay(
+    files: ReplayFiles, settings: ReplaySettings, *, diagnostic: bool = False
+) -> dict:
+    """Replay all saved intervals; certify G1 only with complete, converged evidence."""
+    import mujoco
+
+    start = perf_counter()
+    source, document, arrays, capture, attachments, failures = _prepare(
+        files, settings, diagnostic
+    )
+    plant = ReplayPlant(document, source["ground_height_m"], settings)
+    kin = FullBodyMarkerKinematics(plant.adapter, attachments)
+    reference = np.stack([kin.marker_positions(q) for q in arrays["q"]])
+    diff = reference - arrays["markers_m"]
+    difference = np.sqrt(
+        np.einsum("...i,...i->...", diff, diff)
+    )  # ⚡ Bolt: np.sqrt(np.einsum(...)) is faster than np.linalg.norm(..., axis=-1)
+    marker_parity = float(np.max(difference[arrays["valid"]]))
+    if marker_parity > 1e-8:
+        failures.append("Same-state marker parity exceeds 1e-8 m")
+    if failures and not diagnostic:
+        raise ValueError("Parity failed: " + "; ".join(failures))
+    efforts = np.zeros_like(arrays["q"])
+    if len(arrays["u"]) == len(arrays["q"]):
+        efforts[:, plant.actuated] = arrays["u"]
+    else:
+        efforts[:-1, plant.actuated] = arrays["u"]
+        efforts[-1, plant.actuated] = arrays["u"][-1]
+    q, v, failure = replay_controls(
+        plant, arrays["time_s"], arrays["q"][0], arrays["v"][0], efforts, settings
+    )
+    markers = np.stack([kin.marker_positions(qi) for qi in q])
+    g1_count = len(window_indices(arrays["time_s"], 0.85))
+    convergence = _convergence(plant, kin, arrays, efforts, markers, settings)
+    return _build_receipt(
+        files,
+        settings,
+        document,
+        source,
+        arrays,
+        capture,
+        failures,
+        marker_parity,
+        q,
+        v,
+        markers,
+        reference,
+        failure,
+        g1_count,
+        convergence,
+        start,
+        plant,
+        kin,
+    )
