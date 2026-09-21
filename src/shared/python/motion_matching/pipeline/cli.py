@@ -251,6 +251,18 @@ class _CalibrateAndScaleResult:
     qualification_note: str
 
 
+def _validate_scaled_spec(
+    args: argparse.Namespace,
+    base_spec: dict[str, Any],
+    scaled_spec: dict[str, Any],
+    upper_base: dict[str, Any],
+) -> None:
+    if not args.anthropometric and "unqualified" not in str(
+        base_spec.get("upper_body_qualification", "")
+    ):
+        validate_full_body_spec(scaled_spec, upper_base)
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -316,10 +328,7 @@ def _calibrate_and_scale(
     scaled_spec, femur_scale, tibia_scale, scale_table = search_segment_scales(
         lane, hip_spec, fixed, offsets, address.q, log=log
     )
-    if not args.anthropometric and "unqualified" not in str(
-        base_spec.get("upper_body_qualification", "")
-    ):
-        validate_full_body_spec(scaled_spec, upper_base)
+    _validate_scaled_spec(args, base_spec, scaled_spec, upper_base)
     scaled_path.write_text(
         json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

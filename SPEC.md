@@ -1672,6 +1672,7 @@ Modularizes the monolithic `run_ground_support.py` script into a tested, cleanly
 - `pipeline.address`: Implements anatomical marker prior scaling (`scaled_offsets`), posture metrics (`posture_summary`), address pose optimization (`best_address`), static trial calibrations (`static_offsets`, `static_trial`), and functional hip calibration integration (`calibrate_legs`).
 - `pipeline.reference`: Implements reference trajectory solver orchestration (`full_capture_ik`), low-pass kinematic trajectory smoothing (`smooth_reference`), marker discrepancy auditing (`marker_errors`), and kinematic loop consistency resolution (`consistency_resolve`).
 - `pipeline.dynamics`: Implements forward dynamic tracking simulation (`replay`), shooting fit optimization (`shooting_fit`), ZMP support polygon filtering (`zmp_filter`), and center-of-mass excursion analysis (`com_report`).
+- `pipeline.cli` / `pipeline.plants.mujoco_plant` (MS-16 #10366): Exposes MuJoCo-native `--ik-backend mujoco-minimize` (marker IK via `mujoco.minimize.least_squares`) and `--tracking mj-inverse` (computed torque with native `mj_inverse` audit on the shared weld/contact plant); receipts record `ik_backend` and `tracking_backend`.
 - `pipeline.receipt`: Assembles and validates the structured ground-support receipt schema (`build_ground_support_receipt`).
 - `FullBodyMarkerKinematics` (`src/engines/physics_engines/mujoco/python/full_body_markers.py`):
   - Adds delegating properties `.nq`, `.sphere_names`, `.closure_sites`, and `.marker_bodies_and_offsets` to eliminate external structural reach-through.
@@ -6769,9 +6770,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
 | 2026-09-21 | #10504 | Add PF-06 force-only null-space exploration (`force_nullspace.py`): scaled SVD/QR basis, feasible redistribution under cone and trail-side constraints, and bounded torque-tradeoff Pareto diagnostics without native replay approval (#10436). |
 | 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
+| 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
