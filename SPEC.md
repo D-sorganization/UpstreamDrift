@@ -1,3 +1,44 @@
+## Tour Baselines Swing Planes, Fixed Geometry, and Feasible Initial States (TB-03, #10588)
+
+Calibrates swing planes, fixed geometry, and feasible initial states under the Tour Baselines program:
+- **Rigid Swing Plane Calibration (`src/shared/python/motion_matching/projection_2d.py`)**:
+  - Implements `CalibratedSwingPlane` with single $SE(3)$ transformation matrix ($T_{w \to p}$ and $T_{p \to w}$), orthonormal right-handed basis ($SO(3)$, $\det = +1$), inclination, azimuth, and geometric projection residual diagnostics.
+  - Implements `estimate_swing_plane` estimating one rigid plane across a declared capture window from valid weighted observations; explicitly handles degeneracy (collinear points, rank $< 2$) and improper reflection.
+  - Forbids per-frame plane re-fitting to prevent masking true dynamic and kinematic mismatch.
+  - Preserves 3D residuals via `GeometricProjectionResidual` reporting physical RMSE and maximum deviation.
+  - Transforms world gravity into the calibrated plane frame, yielding effective in-plane gravity $g \cos(\beta)$.
+  - Implements `project_to_calibrated_plane` and backward-compatible `project_to_2d`.
+- **Fixed Geometry Calibration & Identifiability Ranking (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Calibrates positive bounded link lengths ($L_1 \in [0.4, 0.9]\text{ m}$, $L_2 \in [0.7, 1.3]\text{ m}$) from observed landmark distances.
+  - Constrains non-identifiable mass/inertia parameters ($m_1, m_2, m_{\text{head}}, I_1$) to validated priors (`GolfModelParams`).
+  - Implements `IdentifiabilityDiagnostic` reporting rank, condition number, and unidentifiable parameter flags.
+- **Initial States Mapping & Forward Kinematics Verification (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Maps $t_0$ observations to double pendulum generalized coordinates $q_0 = (\theta_1, \theta_2)$ and velocities $v_0 = (\omega_1, \omega_2)$ with proper angle unwrapping into $(-\pi, \pi]$.
+  - Rejects window gap crossing during velocity estimation with `ValueError`.
+  - Verifies exact forward kinematics agreement: $FK(q_0) = p_{\text{observed}}(t_0)$.
+- **Prescribed Moving-Hub Power Tracking (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Tracks external hub trajectory $\mathbf{r}_{\text{hub}}(t)$, velocity $\dot{\mathbf{r}}_{\text{hub}}(t)$, and power contribution $P_{\text{hub}}(t) = \mathbf{F}_{\text{hub}}(t) \cdot \dot{\mathbf{r}}_{\text{hub}}(t)$.
+  - Evaluates integrated external work $W_{\text{hub}} = \int P_{\text{hub}}(t) dt$ and prevents labeling externally driven base motion as an unforced baseline.
+- **Evidence & Verification**:
+  - Unit test suites in `tests/unit/motion_matching/test_projection_2d.py` and `tests/unit/tour_baselines/test_tour_calibration.py` (10 tests, 60 total in tour baselines / projection suite).
+  - Published comprehensive architectural documentation in `docs/plans/tour_baselines/plane_calibration_and_initial_states.md`.
+
+## Connect Qualified Matching Strategies to Engine Feature Contracts (PF-10, #10440)
+
+Connects qualified matching strategies to engine feature contracts:
+- **Strategy Schema & Qualification Matrix (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Implements versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`).
+  - Stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`).
+  - Preconfigured strategy presets, controller specifications, and contact reaction history containers.
+- **Candidate Strategy Serialization (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - `CandidateStrategyPackage` binds candidate trajectories with strategy metadata, accelerations, and contact reactions.
+  - Fail-closed name-permuted coordinate remapping and lossless `.npz` serialization without pickle.
+- **Strategy Comparison Service (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+- **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
+  - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+
+
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
 Defines versioned baseline packages, fit metrics, and frozen qualification profiles under the Tour Baselines program:
@@ -80,6 +121,33 @@ Freezes model identities, ownership, coordinate conventions, and two-capture cov
   - Reconciles historical issues #9914, #9921, and #10003, tracking Tools submodule commit ownership.
 - **Evidence & Verification**:
   - Added unit test suite in `tests/unit/tour_baselines/`: `test_model_identities.py`, `test_coverage_matrix.py`, `test_reconciliation.py` (13 tests).
+
+## Qualify Contact Modes and Native Pinocchio Force Feasibility (PF-04, #10434)
+
+Qualifies contact modes and native Pinocchio force feasibility:
+- **Contact Mode Qualifier (`src/shared/python/motion_matching/contact_mode_qualifier.py`)**:
+  - Infers multi-sphere heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis.
+  - Computes support mode ambiguity metric, center of pressure (COP), and 2D convex hull support polygon containment under arbitrary surface normal \(\hat{n}\).
+  - Evaluates slip speed thresholding and friction cone saturation ratios.
+  - Performs constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation.
+  - Enforces separate linear force (N) and moment (\(\text{N}\cdot\text{m}\)) residual budgets.
+  - Rejects unphysical loads (> 5000 N, > 300 \(\text{N}\cdot\text{m}\)) and generates mass/geometry/friction sensitivity reporting.
+- **Verification Suite (`tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`)**:
+  - 10 unit test fixtures validating hysteresis, COP containment, slip thresholds, Hunt-Crossley compliance, and unphysical load rejection.
+
+## Enforce Contact, Actuator and Root Constraints in Force Allocation (PF-03, #10433)
+
+Enforces contact, actuator and root constraints in force allocation:
+- **Constrained QP Inverse Dynamics (`src/shared/python/motion_matching/contact_force_allocator.py`)**:
+  - Replaces penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+  - Adds `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+  - Enforces 8-faceted polyhedral friction pyramid and non-negative normal force (\(f_n \ge 0\)) along arbitrary surface normals.
+  - Enforces contact separation mask (\(f_s = 0\) for separated contacts).
+  - Enforces strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+  - Isolates diagnostic root slack \(\Delta \tau_{\text{root}}\) so phantom root forces never produce false physical success.
+  - Adds `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+- **Verification Suite (`tests/unit/motion_matching/test_contact_force_allocator_pf03.py`)**:
+  - 10 acceptance test fixtures covering friction cones, unilateral normal forces, contact separation, actuator saturation, root slack isolation, and rate bounds.
 
 ## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
 
@@ -2677,7 +2745,9 @@ open runtime. The first consumer under #9069 must pin a protected Tools merge,
 reject missing or incompatible schema authority, and adapt existing C3D and
 motion-pipeline paths instead of copying shared code. This M0 slice makes no
 camera, inference, C3D round-trip, commercial, or physical-lab qualification
-claim.
+claim. The first #9422 consumer slice pins Tools `mocap-session/1.0.0` and
+exports rig capture sessions through the Tools `MocapSessionManifest`
+builders; the C3D upload path (#8865) is the next consumer slice.
 
 ## Enforce Declared Measurement Acceptance Conditions & Physical Bounds (#9286)
 
@@ -6540,6 +6610,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
+| 2026-09-19 | #10466 | Rig capture sessions export through the pinned Tools `MocapSessionManifest` (`mocap-session/1.0.0`): the bridge probes the Tools family, pins the schema, and writes `mocap_session.json` via the Tools builders and canonical serializer; retained video without recorded consent is refused, not faked. First M-track consumer slice of #9422. |
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
