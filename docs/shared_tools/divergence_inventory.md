@@ -87,7 +87,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `pendulum_simulator` | 0 | 0 | 0 | 78 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
-| `physics` | 0 | 0 | 0 | 70 | 0 | 0 |
+| `physics` | 0 | 0 | 0 | 71 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `plot_engine` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
