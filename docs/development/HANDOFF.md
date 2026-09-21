@@ -4,7 +4,7 @@
 
 - Workspace: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-issue-8869`.
 - Branch: `fix/8869-realtime-pubsub-decision`; base `origin/main` at
-  `4651b8793`; PR: not yet opened. Governing issue #8869 (folds in #8868,
+  `4651b8793`; PR #10655 (open). Governing issue #8869 (folds in #8868,
   #8942A). Seam #9406 ruling for `realtime`: `split pending` — UD keeps this
   facade, no Tools-vs-UD retirement claimed here.
 - Entry DL-#8869. **Decision: WIRE, not delete.** `ws_pubsub.py` reads dead

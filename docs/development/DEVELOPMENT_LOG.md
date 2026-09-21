@@ -1314,7 +1314,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** claude
 - **Issue:** #8869 (folds in #8868, #8942A; seam #9406 ruling: `realtime` is `split pending`, UD keeps this facade)
 - **Branch:** fix/8869-realtime-pubsub-decision
-- **PR:** not yet opened
+- **PR:** #10655 (open)
 - **Paths:** `src/shared/python/realtime/api.py`; `src/shared/python/realtime/channels.py`; `src/shared/python/realtime/__init__.py`; `tests/unit/realtime/test_facade.py`; `tests/unit/realtime/test_channels.py`; `tests/shared/realtime/test_api.py`; `tests/shared/realtime/test_channels.py`; `docs/config/pydantic-settings-migration.md` (removed `file_pubsub.py` mention)
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 at SELF (125 tests pass in tests/unit/realtime + tests/shared/realtime, incl. new unsupported-transport and ws-routing tests; 3 tests skip cleanly when the optional `upstream_realtime` Rust wheel isn't built locally; ruff check/format clean; seam-drift gate passes with 14 pre-existing notes, no new overlap)
