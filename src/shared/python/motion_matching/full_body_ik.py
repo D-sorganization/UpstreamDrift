@@ -634,57 +634,50 @@ class BaseFullBodyIK:
             axes=self._axis_rows(opts.axis_targets),
         )
 
-    def solve_pose(
+    def _pose_residual_stack(
         self,
-        targets: Array,
-        valid: NDArray[Any],
+        q_k: Array,
+        prep: _PosePrep,
+        targets_arr: Array,
         q_init: Array,
+        ground: GroundPlane,
+        opts: SolvePoseOptions,
+    ) -> tuple[Array, Array]:
+        """Marker, prior, closure, ground, and balance residuals for one pose."""
+        self._set(q_k)
+        positions = self._positions()
+        jac = self._marker_jacobian(positions)
+        rows = [
+            prep.row_scale * (positions[prep.mask] - targets_arr[prep.mask]).reshape(-1)
+        ]
+        jacs = [prep.row_scale[:, None] * jac[prep.mask].reshape(-1, prep.nv)]
+        rows.append(prep.sqrt_prior * (q_k - q_init))
+        jacs.append(prep.sqrt_prior * np.eye(prep.nv))
+        rot_w = (
+            opts.closure_weight
+            if opts.closure_rotation_weight is None
+            else opts.closure_rotation_weight
+        )
+        self._append_closure(rows, jacs, opts.closure_weight, rot_w)
+        self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
+        self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
+        self._append_balance(rows, jacs, ground, opts.balance_weight)
+        self._append_com_target(rows, jacs, ground, prep.com_goal)
+        self._append_axes(rows, jacs, prep.axes)
+        return np.concatenate(rows), np.concatenate(jacs)[:, prep.free]
+
+    def _finalize_pose_fit(
+        self,
+        q: Array,
+        targets_arr: Array,
+        prep: _PosePrep,
         *,
         ground: GroundPlane,
-        options: SolvePoseOptions | None = None,
-        **kwargs: Any,
+        iterations: int,
     ) -> PoseFit:
-        """Least-squares pose for one frame of marker targets."""
-        opts = SolvePoseOptions(**kwargs) if options is None else options
-        targets = np.asarray(targets, dtype=float)
-        prep = self._prepare_pose_fit(targets, valid, q_init, ground, opts)
-
-        def residuals(q_k: Array) -> tuple[Array, Array]:
-            self._set(q_k)
-            positions = self._positions()
-            jac = self._marker_jacobian(positions)
-            rows = [
-                prep.row_scale * (positions[prep.mask] - targets[prep.mask]).reshape(-1)
-            ]
-            jacs = [prep.row_scale[:, None] * jac[prep.mask].reshape(-1, prep.nv)]
-            rows.append(prep.sqrt_prior * (q_k - q_init))
-            jacs.append(prep.sqrt_prior * np.eye(prep.nv))
-            rot_w = (
-                opts.closure_weight
-                if opts.closure_rotation_weight is None
-                else opts.closure_rotation_weight
-            )
-            self._append_closure(rows, jacs, opts.closure_weight, rot_w)
-            self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
-            self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
-            self._append_balance(rows, jacs, ground, opts.balance_weight)
-            self._append_com_target(rows, jacs, ground, prep.com_goal)
-            self._append_axes(rows, jacs, prep.axes)
-            return np.concatenate(rows), np.concatenate(jacs)[:, prep.free]
-
-        q, done = _run_lm_loop(
-            residuals,
-            prep.q,
-            prep.free,
-            prep.low,
-            prep.high,
-            iterations=opts.iterations,
-            damping=opts.damping,
-            tolerance_m=opts.tolerance_m,
-        )
+        """Build a ``PoseFit`` from a solved configuration."""
         self._set(q)
-        positions = self._positions()
-        diff = positions - targets
+        diff = self._positions() - targets_arr
         errors = np.sqrt(np.einsum("ij,ij->i", diff, diff))
         rms = (
             float(np.sqrt(np.mean(errors[prep.mask] ** 2))) if prep.mask.any() else 0.0
@@ -703,8 +696,38 @@ class BaseFullBodyIK:
             closure_error_m=pos_err,
             closure_error_rad=rot_err,
             lowest_sphere_height_m=min(heights.values()),
-            iterations=done,
+            iterations=iterations,
         )
+
+    def solve_pose(
+        self,
+        targets: Array,
+        valid: NDArray[Any],
+        q_init: Array,
+        *,
+        ground: GroundPlane,
+        options: SolvePoseOptions | None = None,
+        **kwargs: Any,
+    ) -> PoseFit:
+        """Least-squares pose for one frame of marker targets."""
+        opts = SolvePoseOptions(**kwargs) if options is None else options
+        targets = np.asarray(targets, dtype=float)
+        prep = self._prepare_pose_fit(targets, valid, q_init, ground, opts)
+
+        def residuals(q_k: Array) -> tuple[Array, Array]:
+            return self._pose_residual_stack(q_k, prep, targets, q_init, ground, opts)
+
+        q, done = _run_lm_loop(
+            residuals,
+            prep.q,
+            prep.free,
+            prep.low,
+            prep.high,
+            iterations=opts.iterations,
+            damping=opts.damping,
+            tolerance_m=opts.tolerance_m,
+        )
+        return self._finalize_pose_fit(q, targets, prep, ground=ground, iterations=done)
 
     def _validate_trajectory_options(
         self,
