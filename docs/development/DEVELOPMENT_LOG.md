@@ -163,9 +163,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10660
 - **Paths:** src/engines/physics_engines/mujoco/python/ik_minimize.py; src/engines/physics_engines/mujoco/python/inverse_dynamics.py; src/shared/python/motion_matching/pipeline/reference.py; src/shared/python/motion_matching/pipeline/dynamics.py; src/shared/python/motion_matching/pipeline/cli.py; src/tools/motion_matching/pipeline.py; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py; docs/development/matched_swing_program/README.md; tests/tools/matched_swing_browser/test_model.py
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 at HEAD (SELF; regenerated matched-swing status for 101 receipts; production ledger assert reads total_receipts from ledger JSON; freshness + browser model tests green)
+- **Last verified:** 2026-09-21 at HEAD (SELF; finite-bounds gate for minimize.least_squares; tip includes main MS-52; focused IK+mj_inverse suite green)
 - **Summary:** Added selectable `--ik-backend mujoco-minimize` (MuJoCo `minimize.least_squares` with LM warm start) and `--tracking mj-inverse` (plant KKT torques with native `mj_inverse` audit). Wired backends through pipeline plant, dynamics replay, CLI, Motion Matching tile, and receipt fields with DbC validation at API boundaries.
-- **Next step:** Merge PR #10660 after CI Standard green; release lease on #10366; close duplicate PR #10662.
+- **Next step:** Confirm CI Standard green on PR #10660 so squash auto-merge can land.
 - **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_native_tools/receipt.json; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py; tests/docs/test_matched_swing_status_freshness.py
 
 ### DL-#9422 · Rig Capture Sessions Through the Tools MocapSession Contract
