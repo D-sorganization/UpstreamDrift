@@ -29,6 +29,14 @@
   duplication gates clean locally.
 - Next: Confirm CI green after force-with-lease push; merge closes #10436.
 
+## MS-60 Simscape Run Management #10347 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10347-ms60`.
+- Branch: `fix/issue-10347-ms60-run-management`; PR #10669 open with auto-merge squash armed. Governing issue #10347 (MS-60, epic #10363).
+- Entry DL-#10347. Delivered: fail-closed R2025b run manifest (`SimscapeRunManifestRequest` + builder), returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
+- Validation: merged `origin/main` (cleared CONFLICTING/DIRTY), regenerated divergence inventory after vendor camera/launch_monitor path removals, refreshed `reports/matched_swing_ledger.json`; inventory + ledger freshness suites pass locally at SELF.
+- Next action: push conflict-clear tip, confirm CI green + squash auto-merge of PR #10669; DeskComputer second-person replay under 30 minutes.
+
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10349-local`.

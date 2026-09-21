@@ -72,7 +72,7 @@ _Objective:_ Contact-aware forward dynamics, ground force equilibrium, and shoot
 
 _Objective:_ Cross-validation across all six engines with step-size convergence and torque parity.
 
-- **MS-60 (#10347):** Six-engine state derivative equivalence suite.
+- **MS-60 (#10347):** Simscape R2025b run management — scripted replay, run manifest, committed run-102 candidate/GIF (owner-authorized contract revision 2026-09-17).
 - **MS-61 (#10348):** Numerical step-size convergence verification.
 - **MS-62 (#10349):** Dynamic torque consistency audit.
 - **MS-70 (#10350):** Dual-club driver and 7-iron capture suite.
