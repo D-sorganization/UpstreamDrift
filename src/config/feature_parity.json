@@ -289,8 +289,9 @@
       "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
       "api": "src/api/local_server.py",
       "web": "ui/src/pages/ImpactExplorer.tsx",
-      "status": "parity",
-      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
+      "status": "gap",
+      "issue": 9546,
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
       "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {
