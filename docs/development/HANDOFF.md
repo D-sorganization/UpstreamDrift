@@ -578,31 +578,32 @@ Current turnover: `docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODD
 
 ## Current Status
 
-Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.
-The independent R2025b replay passes four of five marker/yaw gates; terminal
-RMS is **40.3115 mm**, above the 35 mm limit. The optimizer hit its iteration
-limit and returned accepted=false / optimizer_converged=false.
+Run102 is the latest committed native fit found in the 2026-09-16 review.
+It is a rejected0–0.85 s prefix: MATLAB terminal RMS40.301 mm exceeds35 mm.
+Overall20.267 mm, early9.995 mm, club8.389 mm and yaw0.610% pass their gates.
+The optimizer exhausted its physical evaluation budget and returned a fallback;
+accepted=false and optimizer_converged=false. No full-swing acceptance exists.
 
-The 2026-09-15 review recomputed raw NPZ/MAT results: maximum Euclidean
-Simscape–Pinocchio marker discrepancy is 0.0604935 mm; overall RMS 20.26494 mm,
-early RMS 9.99517 mm, club RMS 8.42248 mm and yaw error 0.54345%.
-Required MATLAB settings: R2025b Update 5, ode15s, RelTol 1e-6, AbsTol 1e-9,
-MaxStep 1/1440 s. Preserve the corrected seed geometry and world-force convention.
-This is measured prefix agreement, not proof of universal numerical convergence.
+[Current Completion Handoff and Agent Prompt](simscape_tour_matching/COMPLETION_HANDOFF_20260916.md)
+is the authoritative next-work plan. It supersedes RUN101_REVIEW_AND_TURNOVER.md
+for task ordering. Source reviewed:2f0460d25; fetched main:d2aafa43c.
 
-Read [Run101 Review and Completion Turnover](simscape_tour_matching/RUN101_REVIEW_AND_TURNOVER.md)
-for the current evidence, ordered work packages and copy-ready agent prompt.
-It supersedes earlier claims that all fitting gates are certified. Three head
-markers account for 38.61% of terminal squared error and LUArmHigh for 15.40%.
-Next: bounded refinement verification, terminal body/attachment feasibility,
-one justified fitting trial, then progressive full-capture extension.
+Priorities: recover clean-checkout native fitting providers currently available
+only through historical/frozen runtime sources; coordinate finite-weld derivative
+fix issue10260 / PR10263; establish articulated terminal feasibility; run the first
+bounded0.90 s fit; produce reproducible manifests and synchronized motion reports.
+PR10263 is not yet a qualified merged dependency. Do not duplicate its owner.
 
-Branch: feat/9967-native-simscape-pinocchio. Issues: #9967 / #9921.
-Review source checkpoint: ca750f7d7; SELF adds the current turnover review.
-Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
-Remote hosts: DeskComputer (R2025b) and ControlTower (Pinocchio WSL).
-No new numerical jobs were launched during this review; check live processes
-before resuming. Full capture and other-engine qualification remain incomplete.
+Run101 refinement supports4.52 micrometer marker agreement with refined R2025b
+and46.9 nanometer Pinocchio self-refinement change. Run102 marker agreement at
+baseline settings is0.0605 mm maximum. These are prefix-specific measurements,
+not full-horizon rate/effort qualification. Keep geometry seed and force-frame fixes.
+
+Historical evidence lives under simscape_tour_matching/native_evidence. Remote
+hosts are DeskComputer (explicit R2025b) and ControlTower (Pinocchio WSL).
+Remote live jobs were not inspected in this review; check before launching.
+Epic9921 / issue9967 are closed despite the incomplete full goal; reconcile tracking.
+This review launches no simulation or fitting job.
 
 ## Representation Qualification
 
