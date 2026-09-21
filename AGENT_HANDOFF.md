@@ -1,17 +1,22 @@
 # Simscape Tour-Average Fit Continuation
 
-## Tour Baselines TB-00: Freeze Model Identities, Ownership, and Coverage (#10585)
+## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
-Branch `feat/tb00-model-identities-10585`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
-Initial dispatch TB-00 ([#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585)) implements canonical model identities, separates kinematic
-reconstruction models (which omit the club) from torque-driven pendulums (with simulated club)
-and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving
-rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron,
-non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified
-Tools pin at `a9ed0e7c5c6905b1164082659051d6381068052d` and published documentation under
-`docs/plans/tour_baselines/`. All 13 unit tests pass, ruff check and format pass, mypy passes.
-Next step: Merge TB-00 PR; next dispatch is TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586): Audit Tour Targets, Marker Semantics,
-Events, and Provenance).
+Branch `feat/tb01-tour-target-audit-10586`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-00 ([#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585)) merged into `main` in PR [#10598](https://github.com/D-sorganization/UpstreamDrift/pull/10598).
+TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586)) delivers:
+
+1. Hash-verified capture identity for Driver (360 Hz, 654 frames, SHA 545405cc...) and 7-Iron (359 Hz, 657 frames, SHA 395deb1f...).
+2. Content duplicate verification across Simscape and Pinocchio directories confirming identical SHA-256.
+3. Independent marker review: 37 shared markers, distinct `Uname*38` (driver) vs `pelvis` (iron).
+4. 4-tier measurement map: observed skin surface, inferred joint center proxies, cluster centroids, and unavailable calibrated face points.
+5. Contiguous missing span tracking with documented heavy occlusions on `RShoulderTop` (>80% missing).
+6. Native-clock swing intervals and labeled inferred impact (driver frame 475 [1.3194 s], iron frame 478 [1.3315 s]) with downswing durations (0.217 s and 0.234 s).
+7. Provenance record separating capture geometry vs subject anatomy and documenting 4 unresolved fields.
+8. Dual canonical target emitters: `emit_reference_draft` (`MotionDraft`) and `emit_dynamics_targets` (`BodyTarget`, `ClubTarget`) with explicit versioned gap interpolation.
+9. Machine-readable receipts `data/tour_baselines/driver_target_audit.json` and `iron_target_audit.json`, and documentation `docs/plans/tour_baselines/target_audit.md`.
+   All 25 tour_baselines unit tests pass.
+   Next step: Land TB-01 PR #10603; next dispatch is TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587): Fast Kinematic & Dynamic Trajectory Baselines).
 
 ## MuJoCo Saved-Control Replay (#10336)
 

@@ -1,0 +1,830 @@
+{
+  "capture_kind": "iron",
+  "sha256": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
+  "rate_hz": 359.0,
+  "frames": 657,
+  "duration_s": 1.8272980501392757,
+  "units": "m",
+  "vertical_axis": "y",
+  "handedness": "right_handed",
+  "labels": [
+    "Marker_0:0:0",
+    "WaistLeft",
+    "WaistRight",
+    "WaistLBack",
+    "WaistRBack",
+    "BackTop",
+    "BackLeft",
+    "BackRight",
+    "HeadTop",
+    "HeadFront",
+    "HeadSide",
+    "LShoulderTop",
+    "LShoulderBack",
+    "LElbowOut",
+    "LUArmHigh",
+    "LWristTop",
+    "RShoulderTop",
+    "RShoulderBack",
+    "RElbowOut",
+    "RUArmHigh",
+    "RWristTop",
+    "LKneeOut",
+    "LToeIn",
+    "LToeOut",
+    "LAnkleOut",
+    "RKneeOut",
+    "RToeIn",
+    "RToeOut",
+    "RAnkleOut",
+    "Marker_2:2:1",
+    "Marker_2:2:2",
+    "Marker_2:2:3",
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3",
+    "Uname*36",
+    "Uname*37",
+    "pelvis"
+  ],
+  "measurement_map": {
+    "version": "1.0",
+    "entries": {
+      "Marker_0:0:0": {
+        "name": "Marker_0:0:0",
+        "category": "observed_surface",
+        "source_markers": ["Marker_0:0:0"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Unassigned / sentinel marker"
+      },
+      "WaistLeft": {
+        "name": "WaistLeft",
+        "category": "observed_surface",
+        "source_markers": ["WaistLeft"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "WaistRight": {
+        "name": "WaistRight",
+        "category": "observed_surface",
+        "source_markers": ["WaistRight"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "WaistLBack": {
+        "name": "WaistLBack",
+        "category": "observed_surface",
+        "source_markers": ["WaistLBack"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "WaistRBack": {
+        "name": "WaistRBack",
+        "category": "observed_surface",
+        "source_markers": ["WaistRBack"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "BackTop": {
+        "name": "BackTop",
+        "category": "observed_surface",
+        "source_markers": ["BackTop"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "BackLeft": {
+        "name": "BackLeft",
+        "category": "observed_surface",
+        "source_markers": ["BackLeft"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "BackRight": {
+        "name": "BackRight",
+        "category": "observed_surface",
+        "source_markers": ["BackRight"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "HeadTop": {
+        "name": "HeadTop",
+        "category": "observed_surface",
+        "source_markers": ["HeadTop"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "HeadFront": {
+        "name": "HeadFront",
+        "category": "observed_surface",
+        "source_markers": ["HeadFront"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "HeadSide": {
+        "name": "HeadSide",
+        "category": "observed_surface",
+        "source_markers": ["HeadSide"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LShoulderTop": {
+        "name": "LShoulderTop",
+        "category": "observed_surface",
+        "source_markers": ["LShoulderTop"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LShoulderBack": {
+        "name": "LShoulderBack",
+        "category": "observed_surface",
+        "source_markers": ["LShoulderBack"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LElbowOut": {
+        "name": "LElbowOut",
+        "category": "observed_surface",
+        "source_markers": ["LElbowOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LUArmHigh": {
+        "name": "LUArmHigh",
+        "category": "observed_surface",
+        "source_markers": ["LUArmHigh"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LWristTop": {
+        "name": "LWristTop",
+        "category": "observed_surface",
+        "source_markers": ["LWristTop"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RShoulderTop": {
+        "name": "RShoulderTop",
+        "category": "observed_surface",
+        "source_markers": ["RShoulderTop"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RShoulderBack": {
+        "name": "RShoulderBack",
+        "category": "observed_surface",
+        "source_markers": ["RShoulderBack"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RElbowOut": {
+        "name": "RElbowOut",
+        "category": "observed_surface",
+        "source_markers": ["RElbowOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RUArmHigh": {
+        "name": "RUArmHigh",
+        "category": "observed_surface",
+        "source_markers": ["RUArmHigh"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RWristTop": {
+        "name": "RWristTop",
+        "category": "observed_surface",
+        "source_markers": ["RWristTop"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LKneeOut": {
+        "name": "LKneeOut",
+        "category": "observed_surface",
+        "source_markers": ["LKneeOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LToeIn": {
+        "name": "LToeIn",
+        "category": "observed_surface",
+        "source_markers": ["LToeIn"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LToeOut": {
+        "name": "LToeOut",
+        "category": "observed_surface",
+        "source_markers": ["LToeOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "LAnkleOut": {
+        "name": "LAnkleOut",
+        "category": "observed_surface",
+        "source_markers": ["LAnkleOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RKneeOut": {
+        "name": "RKneeOut",
+        "category": "observed_surface",
+        "source_markers": ["RKneeOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RToeIn": {
+        "name": "RToeIn",
+        "category": "observed_surface",
+        "source_markers": ["RToeIn"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RToeOut": {
+        "name": "RToeOut",
+        "category": "observed_surface",
+        "source_markers": ["RToeOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "RAnkleOut": {
+        "name": "RAnkleOut",
+        "category": "observed_surface",
+        "source_markers": ["RAnkleOut"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Vicon Plug-in-Gait skin-mounted surface marker"
+      },
+      "Uname*36": {
+        "name": "Uname*36",
+        "category": "observed_surface",
+        "source_markers": ["Uname*36"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Unassigned / sentinel marker"
+      },
+      "Uname*37": {
+        "name": "Uname*37",
+        "category": "observed_surface",
+        "source_markers": ["Uname*37"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Unassigned / sentinel marker"
+      },
+      "pelvis": {
+        "name": "pelvis",
+        "category": "observed_surface",
+        "source_markers": ["pelvis"],
+        "is_inferred": false,
+        "is_available": true,
+        "notes": "Pelvis surface marker present only in iron capture (replaces Uname*38)"
+      },
+      "mid_hip": {
+        "name": "mid_hip",
+        "category": "inferred_joint_center",
+        "source_markers": ["WaistLeft", "WaistRight"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Centroid of left and right waist markers)"
+      },
+      "neck": {
+        "name": "neck",
+        "category": "inferred_joint_center",
+        "source_markers": ["BackTop"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Surface proxy at C7 / thoracic spine top, not anatomical center)"
+      },
+      "nose": {
+        "name": "nose",
+        "category": "inferred_joint_center",
+        "source_markers": ["HeadFront"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Surface proxy at forehead/face front)"
+      },
+      "left_shoulder": {
+        "name": "left_shoulder",
+        "category": "inferred_joint_center",
+        "source_markers": ["LShoulderBack"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Surface proxy avoiding anterior occlusions)"
+      },
+      "right_shoulder": {
+        "name": "right_shoulder",
+        "category": "inferred_joint_center",
+        "source_markers": ["RShoulderBack"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Posterior surface proxy avoiding occluded RShoulderTop)"
+      },
+      "left_elbow": {
+        "name": "left_elbow",
+        "category": "inferred_joint_center",
+        "source_markers": ["LElbowOut"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Lateral epicondyle surface proxy)"
+      },
+      "right_elbow": {
+        "name": "right_elbow",
+        "category": "inferred_joint_center",
+        "source_markers": ["RElbowOut"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Lateral epicondyle surface proxy)"
+      },
+      "left_wrist": {
+        "name": "left_wrist",
+        "category": "inferred_joint_center",
+        "source_markers": ["LWristTop"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Dorsal wrist surface proxy)"
+      },
+      "right_wrist": {
+        "name": "right_wrist",
+        "category": "inferred_joint_center",
+        "source_markers": ["RWristTop"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Dorsal wrist surface proxy)"
+      },
+      "left_hip": {
+        "name": "left_hip",
+        "category": "inferred_joint_center",
+        "source_markers": ["WaistLeft"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (ASIS surface proxy)"
+      },
+      "right_hip": {
+        "name": "right_hip",
+        "category": "inferred_joint_center",
+        "source_markers": ["WaistRight"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (ASIS surface proxy)"
+      },
+      "left_knee": {
+        "name": "left_knee",
+        "category": "inferred_joint_center",
+        "source_markers": ["LKneeOut"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Lateral femoral epicondyle surface proxy)"
+      },
+      "right_knee": {
+        "name": "right_knee",
+        "category": "inferred_joint_center",
+        "source_markers": ["RKneeOut"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Lateral femoral epicondyle surface proxy)"
+      },
+      "left_ankle": {
+        "name": "left_ankle",
+        "category": "inferred_joint_center",
+        "source_markers": ["LAnkleOut"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Lateral malleolus surface proxy)"
+      },
+      "right_ankle": {
+        "name": "right_ankle",
+        "category": "inferred_joint_center",
+        "source_markers": ["RAnkleOut"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Inferred joint center (Lateral malleolus surface proxy)"
+      },
+      "observed_club_head": {
+        "name": "observed_club_head",
+        "category": "cluster_centroid",
+        "source_markers": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Rigid cluster centroid of Marker_2:2:{1,2,3}"
+      },
+      "observed_club_grip": {
+        "name": "observed_club_grip",
+        "category": "cluster_centroid",
+        "source_markers": ["Marker_3:3:1", "Marker_3:3:2", "Marker_3:3:3"],
+        "is_inferred": true,
+        "is_available": true,
+        "notes": "Rigid cluster centroid of Marker_3:3:{1,2,3}"
+      },
+      "clubface_center": {
+        "name": "clubface_center",
+        "category": "calibrated_point",
+        "source_markers": [],
+        "is_inferred": true,
+        "is_available": false,
+        "notes": "Calibrated clubface center is unavailable in raw C3D mocap; must not be guessed"
+      },
+      "ball_contact_point": {
+        "name": "ball_contact_point",
+        "category": "calibrated_point",
+        "source_markers": [],
+        "is_inferred": true,
+        "is_available": false,
+        "notes": "Ball contact point is unavailable in raw C3D mocap; remains unavailable"
+      }
+    }
+  },
+  "missing_spans": {
+    "Marker_0:0:0": {
+      "label": "Marker_0:0:0",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "WaistLeft": {
+      "label": "WaistLeft",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "WaistRight": {
+      "label": "WaistRight",
+      "valid_samples": 649,
+      "missing_samples": 8,
+      "coverage_ratio": 0.9878234398782344,
+      "spans": [
+        [488, 490],
+        [494, 498]
+      ]
+    },
+    "WaistLBack": {
+      "label": "WaistLBack",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "WaistRBack": {
+      "label": "WaistRBack",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "BackTop": {
+      "label": "BackTop",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "BackLeft": {
+      "label": "BackLeft",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "BackRight": {
+      "label": "BackRight",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "HeadTop": {
+      "label": "HeadTop",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "HeadFront": {
+      "label": "HeadFront",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "HeadSide": {
+      "label": "HeadSide",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LShoulderTop": {
+      "label": "LShoulderTop",
+      "valid_samples": 547,
+      "missing_samples": 110,
+      "coverage_ratio": 0.832572298325723,
+      "spans": [[0, 109]]
+    },
+    "LShoulderBack": {
+      "label": "LShoulderBack",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LElbowOut": {
+      "label": "LElbowOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LUArmHigh": {
+      "label": "LUArmHigh",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LWristTop": {
+      "label": "LWristTop",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RShoulderTop": {
+      "label": "RShoulderTop",
+      "valid_samples": 95,
+      "missing_samples": 562,
+      "coverage_ratio": 0.1445966514459665,
+      "spans": [[0, 561]]
+    },
+    "RShoulderBack": {
+      "label": "RShoulderBack",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RElbowOut": {
+      "label": "RElbowOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RUArmHigh": {
+      "label": "RUArmHigh",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RWristTop": {
+      "label": "RWristTop",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LKneeOut": {
+      "label": "LKneeOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LToeIn": {
+      "label": "LToeIn",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LToeOut": {
+      "label": "LToeOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "LAnkleOut": {
+      "label": "LAnkleOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RKneeOut": {
+      "label": "RKneeOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RToeIn": {
+      "label": "RToeIn",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RToeOut": {
+      "label": "RToeOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "RAnkleOut": {
+      "label": "RAnkleOut",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "Marker_2:2:1": {
+      "label": "Marker_2:2:1",
+      "valid_samples": 640,
+      "missing_samples": 17,
+      "coverage_ratio": 0.974124809741248,
+      "spans": [[544, 560]]
+    },
+    "Marker_2:2:2": {
+      "label": "Marker_2:2:2",
+      "valid_samples": 640,
+      "missing_samples": 17,
+      "coverage_ratio": 0.974124809741248,
+      "spans": [[544, 560]]
+    },
+    "Marker_2:2:3": {
+      "label": "Marker_2:2:3",
+      "valid_samples": 640,
+      "missing_samples": 17,
+      "coverage_ratio": 0.974124809741248,
+      "spans": [[544, 560]]
+    },
+    "Marker_3:3:1": {
+      "label": "Marker_3:3:1",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "Marker_3:3:2": {
+      "label": "Marker_3:3:2",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "Marker_3:3:3": {
+      "label": "Marker_3:3:3",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "Uname*36": {
+      "label": "Uname*36",
+      "valid_samples": 657,
+      "missing_samples": 0,
+      "coverage_ratio": 1.0,
+      "spans": []
+    },
+    "Uname*37": {
+      "label": "Uname*37",
+      "valid_samples": 649,
+      "missing_samples": 8,
+      "coverage_ratio": 0.9878234398782344,
+      "spans": [
+        [488, 490],
+        [494, 498]
+      ]
+    },
+    "pelvis": {
+      "label": "pelvis",
+      "valid_samples": 649,
+      "missing_samples": 8,
+      "coverage_ratio": 0.9878234398782344,
+      "spans": [
+        [488, 490],
+        [494, 498]
+      ]
+    }
+  },
+  "events": {
+    "rate_hz": 359.0,
+    "address": {
+      "start_frame": 0,
+      "end_frame": 46,
+      "start_time_s": 0.0,
+      "end_time_s": 0.12813370473537605,
+      "duration_s": 0.12813370473537605
+    },
+    "backswing": {
+      "start_frame": 46,
+      "end_frame": 394,
+      "start_time_s": 0.12813370473537605,
+      "end_time_s": 1.0974930362116992,
+      "duration_s": 0.9693593314763231
+    },
+    "top": {
+      "frame": 394,
+      "time_s": 1.0974930362116992,
+      "is_inferred": true,
+      "detection_method": "clubhead_transition_minimum_speed",
+      "confidence": "high"
+    },
+    "downswing": {
+      "start_frame": 394,
+      "end_frame": 478,
+      "start_time_s": 1.0974930362116992,
+      "end_time_s": 1.3314763231197773,
+      "duration_s": 0.23398328690807801
+    },
+    "impact": {
+      "frame": 478,
+      "time_s": 1.3314763231197773,
+      "is_inferred": true,
+      "detection_method": "inferred_clubhead_speed_peak",
+      "confidence": "high"
+    },
+    "follow_through": {
+      "start_frame": 478,
+      "end_frame": 656,
+      "start_time_s": 1.3314763231197773,
+      "end_time_s": 1.8272980501392757,
+      "duration_s": 0.49582172701949845
+    }
+  },
+  "provenance": {
+    "source_file": "data/C3D_TA_Iron.c3d",
+    "capture_type": "tour_average",
+    "averaging_normalization": "Vicon Plug-in-Gait multi-trial / multi-subject tour average normalization. Native sample rate: 359.0 Hz.",
+    "asserted_subject_anatomy": {
+      "representation": "Tour-average anthropometric surrogate",
+      "height_m": 1.78,
+      "mass_kg": 75.0,
+      "notes": "Shared reference subject model assumptions across driver and iron captures"
+    },
+    "capture_specific_geometry": {
+      "capture_kind": "iron",
+      "clubhead_markers": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"],
+      "grip_markers": ["Marker_3:3:1", "Marker_3:3:2", "Marker_3:3:3"],
+      "marker_count": 38,
+      "pelvis_marker": "pelvis"
+    },
+    "unresolved_provenance": [
+      {
+        "field_name": "capture_date",
+        "description": "Exact calendar date and time of original optical capture session unrecorded in C3D headers",
+        "status": "unresolved"
+      },
+      {
+        "field_name": "subject_demographics",
+        "description": "Exact PGA Tour player demographic roster and cohort identity underlying normalized average",
+        "status": "unresolved"
+      },
+      {
+        "field_name": "optical_calibration_parameters",
+        "description": "Vicon camera system intrinsic/extrinsic calibration residuals and volume bounds not embedded",
+        "status": "unresolved"
+      },
+      {
+        "field_name": "usage_license",
+        "description": "Commercial/IRB research distribution terms unstated in source files",
+        "status": "unresolved"
+      }
+    ]
+  },
+  "duplicate_copies": {
+    "data/C3D_TA_Iron.c3d": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Data/Mocap C3D Files/C3DExport tour average iron.c3d": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
+    "src/engines/physics_engines/pinocchio/data/tour_average_mocap/C3DExport tour average iron.c3d": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845"
+  }
+}

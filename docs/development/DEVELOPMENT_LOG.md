@@ -89,17 +89,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10585 · TB-00: Freeze Model Identities, Ownership, and the Two-Capture Coverage Matrix
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10585 (parent #10584, program #10363)
 - **Branch:** feat/tb00-model-identities-10585
 - **PR:** #10598
 - **Paths:** src/shared/python/tour_baselines/models.py; src/shared/python/tour_baselines/registry.py; src/shared/python/tour_baselines/coverage.py; src/shared/python/tour_baselines/reconciliation.py; src/shared/python/tour_baselines/**init**.py; src/shared/python/motion_matching/tour_baselines.py; tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md; docs/plans/tour_baselines/model_identities.md; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/reconciliation.md; docs/development/matched_swing_program/README.md
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (13/13 unit tests pass in tests/unit/tour_baselines/; ruff check clean; ruff format clean; mypy 0 issues in 5 source files; document title case 0 violations across 4 docs; file size budget clean).
+- **Last verified:** 2026-09-20 at HEAD (13/13 unit tests pass in tests/unit/tour_baselines/; ruff check clean; ruff format clean; mypy 0 issues in 5 source files; document title case 0 violations across 4 docs; file size budget clean; merged via PR #10598).
 - **Summary:** Established the canonical Tour Baselines domain model and registry separating kinematic reconstruction models from torque-driven pendulums, upper-body golfer with closed kinematic loop, and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron, non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified Tools pin at a9ed0e7c5c6905b1164082659051d6381068052d and published comprehensive documentation under docs/plans/tour_baselines/.
-- **Next step:** Land PR #10598 with auto-merge enabled.
+- **Next step:** Landed in main via PR #10598.
 - **Evidence:** tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md.
+
+### DL-#10586 · TB-01: Audit Tour Targets, Marker Semantics, Events and Provenance
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10586 (parent #10584, program #10363)
+- **Branch:** feat/tb01-tour-target-audit-10586
+- **PR:** #10603
+- **Paths:** src/shared/python/tour_baselines/audit.py; src/shared/python/tour_baselines/audit_models.py; src/shared/python/tour_baselines/**init**.py; tests/unit/tour_baselines/test_target_audit.py; data/tour_baselines/driver_target_audit.json; data/tour_baselines/iron_target_audit.json; docs/plans/tour_baselines/target_audit.md; docs/plans/tour_baselines/README.md
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (25 unit tests pass in tests/unit/tour_baselines/ including 12 target audit tests; driver and iron SHA, rates, frames verified; content duplicate verification for Simscape and Pinocchio copies; independent label review: Uname\*38 vs pelvis; 4-tier measurement map; missing spans and occlusion masks; native-clock swing intervals: driver 360 Hz impact frame 475 [1.3194 s], iron 359 Hz impact frame 478 [1.3315 s] with labeled inferred impact; provenance record separating geometry vs anatomy and documenting 4 unresolved fields; dual emitters MotionDraft and BodyTarget/ClubTarget; ruff check, ruff format, and mypy clean).
+- **Summary:** Conducted exhaustive audit of canonical Driver (360.0 Hz, 654 frames, SHA 545405cc...) and 7-Iron (359.0 Hz, 657 frames, SHA 395deb1f...) tour mocap files. Verified duplicate copies across Simscape and Pinocchio directories by content hash. Established versioned 4-tier measurement map distinguishing observed surface markers, inferred joint center proxies, cluster centroids, and unavailable calibrated face/impact points. Computed per-marker valid/missing spans and documented heavy occlusions on RShoulderTop (>80% missing). Derived native swing intervals and labeled inferred impact from clubhead speed peaks without imposing driver rates on iron. Recorded explicit provenance separating subject anatomy from capture geometry with 4 unresolved metadata items. Built canonical target emitters for kinematic reference (MotionDraft) and dynamics fitting (BodyTarget, ClubTarget) with explicit versioned gap interpolation. Published machine-readable receipts and audit documentation.
+- **Next step:** Run CI pre-commit checks, push topic branch, open PR #10603 with auto-merge, and release lease on #10586.
+- **Evidence:** tests/unit/tour_baselines/test_target_audit.py; data/tour_baselines/driver_target_audit.json; data/tour_baselines/iron_target_audit.json; docs/plans/tour_baselines/target_audit.md.
 
 ### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
 
