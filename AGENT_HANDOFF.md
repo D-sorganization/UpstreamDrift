@@ -1,17 +1,19 @@
 # Simscape Tour-Average Fit Continuation
 
-## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588)
+## Tour Baselines TB-04: Fit and Independently Replay the Actual Driven Double Pendulum (#10589)
 
-Branch `feat/tb03-trajectory-fitting-10588`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
-TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588)) calibrates rigid swing planes, fixed geometry, feasible initial states, and moving hub power tracking.
+Branch `feat/tb04-driven-double-pendulum-10589`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-04 ([#10589](https://github.com/D-sorganization/UpstreamDrift/issues/10589)) implements continuous bounded torque fitting, independent tighter-step replay, unforced/passive diagnostics, parameter convention adapters, and cryptographic provenance for the planar driven double pendulum baseline.
 
-- Replaces naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation.
-- Implements `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections.
-- Implements `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic.
-- Implements `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics.
-- Implements `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
-- All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files.
-  Next step: Commit, push, open PR, and auto-merge.
+- Implemented `src/shared/python/tour_baselines/pendulum_adapter.py`: Bidirectional conversion between analytical `DoublePendulumParameters` and Tools `PendulumParams`. Proved exact mathematical equivalence (< 1e-10 residual) under point-mass limits via `compare_dynamics_parity`.
+- Implemented `src/shared/python/tour_baselines/pendulum_fit.py`: First-frame evaluation at t0 directly via forward kinematics prior to stepping (eliminating first-frame off-by-one regression), non-uniform timestamp support, continuous bounded Bernstein torque optimization (degree 6, 7 coeffs per joint) with effort and smoothness regularization, independent tighter-step replay validation (substeps >= 4, zero state resets, verifying feedforward stability), unforced / passive comparison diagnostic, deterministic SHA-256 target hashing, and full integration into `BaselineIdentity` and `StatusBundle`.
+- Upgraded `PendulumFitSwingProvider` (`src/engines/physics_engines/pendulum/python/motion_matching/provider.py`) to consume calibrated swing plane, geometry, initial state, and continuous Bernstein torques.
+- All 72 unit tests pass across tour baselines and pendulum suites (`pytest tests/unit/tour_baselines/ tests/unit/engines/physics_engines/pendulum/`); ruff check and format clean; mypy 0 errors across 23 source files; architecture and file size budgets pass; divergence inventory is synchronized.
+  Next step: Land PR for TB-04, close #10589, and proceed to next task in program #10363.
+
+## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588) [MERGED]
+
+Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https://github.com/D-sorganization/UpstreamDrift/pull/10631).
 
 ## Tour Baselines TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles (#10587) [MERGED]
 

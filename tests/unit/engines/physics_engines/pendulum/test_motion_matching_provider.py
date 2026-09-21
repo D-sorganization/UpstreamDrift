@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-import pytest
+import math
 import numpy as np
+import pytest
 
+from src.engines.physics_engines.pendulum.python.motion_matching.provider import (
+    PendulumFitSwingProvider,
+)
 from src.shared.python.motion_matching.club_target import ClubTarget, SourceProvenance
 from src.shared.python.motion_matching.provider import (
     FitOptions,
@@ -16,20 +20,24 @@ from src.shared.python.motion_matching.provider_registry import (
     get_provider,
     register_provider,
 )
-from src.engines.physics_engines.pendulum.python.motion_matching.provider import (
-    PendulumFitSwingProvider,
-)
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
 def dummy_club_target() -> ClubTarget:
-    """Return a minimal ClubTarget for testing."""
+    """Return a minimal realistic ClubTarget for testing."""
+    times = np.linspace(0.0, 0.2, 5)
+    angles = np.linspace(0.1, 0.5, 5)
+    # 2D arc projected into 3D
+    butt = np.column_stack([0.6 * np.sin(angles), np.zeros(5), -0.6 * np.cos(angles)])
+    head = np.column_stack([1.5 * np.sin(angles), np.zeros(5), -1.5 * np.cos(angles)])
     return ClubTarget(
-        time=np.array([0.0, 0.1]),
-        butt=np.zeros((2, 3)),
-        clubhead=np.zeros((2, 3)),
-        club_quat=np.array([[1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]]),
-        impact_idx=1,
+        time=times,
+        butt=butt,
+        clubhead=head,
+        club_quat=np.tile([1.0, 0.0, 0.0, 0.0], (5, 1)),
+        impact_idx=4,
         source=SourceProvenance("test.c3d", "c3d", "test", "test", "dummy"),
     )
 
@@ -45,16 +53,7 @@ def test_provider_registers() -> None:
 
 
 def test_fit_swing_returns_baseline(dummy_club_target: ClubTarget) -> None:
-    """fit_swing returns a well-formed CanonicalFitResult from the SLSQP fit.
-
-    The pendulum provider drives ``scipy.optimize.minimize(SLSQP)`` over the
-    polynomial-torque coefficients; it does not produce a zero-cost analytic
-    baseline. Assert the real solver contract: a finite non-negative cost, a
-    matching RMSE, the SLSQP method tag, and a populated git-commit stamp
-    (#6935 / #6939 wired the shared provenance probe).
-    """
-    import math
-
+    """fit_swing returns a well-formed CanonicalFitResult from the SLSQP fit."""
     provider = PendulumFitSwingProvider()
     opts = FitOptions(maxiter=10)
 
@@ -66,6 +65,8 @@ def test_fit_swing_returns_baseline(dummy_club_target: ClubTarget) -> None:
     assert result.final_rmse_m == pytest.approx(math.sqrt(result.final_cost))
     assert result.method == "scipy SLSQP"
     assert isinstance(result.git_commit, str) and result.git_commit
+    assert result.target_hash != "dummy"
+    assert len(result.target_hash) == 64
 
 
 def test_extract_club_from_multisource(dummy_club_target: ClubTarget) -> None:

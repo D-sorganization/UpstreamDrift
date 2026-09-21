@@ -45,18 +45,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land PR #10499 via CI and proceed to PF-05.
 - **Evidence:** tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py; src/shared/python/motion_matching/contact_mode_qualifier.py.
 
-### DL-#10588 · Calibrate Swing Planes, Fixed Geometry and Feasible Initial States
+### DL-#10589 · Fit and Independently Replay the Actual Driven Double Pendulum
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10589 (TB-04, parent #10584, program #10363)
+- **Branch:** feat/tb04-driven-double-pendulum-10589
+- **PR:** pending
+- **Paths:** src/shared/python/tour_baselines/pendulum_adapter.py; src/shared/python/tour_baselines/pendulum_fit.py; src/shared/python/tour_baselines/**init**.py; src/engines/physics_engines/pendulum/python/motion_matching/provider.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py; tests/unit/tour_baselines/test_pendulum_adapter.py; tests/unit/tour_baselines/test_pendulum_fit.py; docs/plans/tour_baselines/driven_double_pendulum_fitting.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 (All 72 unit tests pass across tour_baselines and pendulum suites; ruff clean; ruff format clean; mypy 0 errors across 23 source files; check_architecture_budget OK; check_file_size_budget OK; divergence_inventory updated).
+- **Summary:** Implemented convention adapters and parity diagnostics reconciling analytical DoublePendulumDynamics and Tools pendulum_simulator.physics, establishing exact mathematical equivalence under point-mass limits (< 1e-10 error). Upgraded PendulumFitSwingProvider and implemented fit_driven_double_pendulum with first-frame t0 evaluation directly via forward kinematics prior to stepping (eliminating first-frame off-by-one regression), non-uniform timestamp support, continuous bounded Bernstein torque optimization with effort and smoothness regularization, independent tighter-step replay validation (substeps >= 4, zero state resets, verifying feedforward stability), unforced / passive baseline comparison diagnostic, deterministic SHA-256 target hashing, and full integration into BaselineIdentity and StatusBundle.
+- **Next step:** Open PR, arm auto-merge, monitor CI to completion.
+- **Evidence:** tests/unit/tour_baselines/test_pendulum_adapter.py; tests/unit/tour_baselines/test_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py; docs/plans/tour_baselines/driven_double_pendulum_fitting.md.
+
+### DL-#10588 · Calibrate Swing Planes, Fixed Geometry and Feasible Initial States
+
+- **State:** shipped
+- **Owner:** local
 - **Issue:** #10588 (TB-03, parent #10584, program #10363)
 - **Branch:** feat/tb03-trajectory-fitting-10588
-- **PR:** #10631
+- **PR:** #10631 (merged)
 - **Paths:** src/shared/python/motion_matching/projection_2d.py; src/shared/python/tour_baselines/calibration.py; src/shared/python/tour_baselines/**init**.py; tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_tour_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 (All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files).
 - **Summary:** Replaced naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation. Implemented `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections. Implemented `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic. Implemented `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics. Implemented `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
-- **Next step:** Commit changes, push branch, open PR with auto-merge armed, verify CI.
+- **Next step:** Closed and merged.
 - **Evidence:** tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_tour_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md.
 
 ### DL-#10440 · Connect Qualified Matching Strategies to Existing Results and Engine Feature Contracts
