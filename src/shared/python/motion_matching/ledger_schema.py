@@ -64,6 +64,10 @@ class ArtefactPaths(BaseModel):
         default=None,
         description="Path to OpenSim motion file (.mot)",
     )
+    baseline_package: str | None = Field(
+        default=None,
+        description="Path to versioned tour baseline package directory",
+    )
 
 
 class LedgerRow(BaseModel):

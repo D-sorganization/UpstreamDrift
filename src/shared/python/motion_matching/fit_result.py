@@ -41,6 +41,7 @@ class CanonicalFitResult:
     solver_options: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
     receipt_path: Path | str | None = None
+    baseline_package_path: Path | str | None = None
 
     @classmethod
     def from_api_contract(
@@ -200,3 +201,32 @@ class CanonicalFitResult:
             stacklevel=2,
         )
         return self.method
+
+    def to_baseline_status(self) -> dict[str, str]:
+        """Map canonical fit result to unconflated tour baseline status axes."""
+        from src.shared.python.tour_baselines.metrics import (
+            KinematicAccuracyStatus,
+            SolverStatus,
+        )
+
+        st = self.solver_status.lower().strip()
+        if st in ("success", "converged", "optimal"):
+            solver = SolverStatus.CONVERGED.value
+        elif "max_iter" in st or "iterations" in st:
+            solver = SolverStatus.REACHED_MAX_ITER.value
+        elif "timeout" in st:
+            solver = SolverStatus.TIMEOUT.value
+        elif "numerical" in st:
+            solver = SolverStatus.NUMERICAL_FAILURE.value
+        else:
+            solver = SolverStatus.FAILED.value
+
+        kinematic = (
+            KinematicAccuracyStatus.ACCURATE.value
+            if (self.final_rmse_m is not None and self.final_rmse_m <= 0.05)
+            else KinematicAccuracyStatus.INACCURATE.value
+        )
+        return {
+            "solver_status": solver,
+            "kinematic_accuracy": kinematic,
+        }

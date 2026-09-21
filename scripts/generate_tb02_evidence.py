@@ -10,8 +10,6 @@ import numpy as np
 from src.shared.python.tour_baselines.metrics import (
     DynamicFeasibilityStatus,
     KinematicAccuracyStatus,
-    ProductPromotionStatus,
-    ScientificQualificationStatus,
     SolverStatus,
     TourFitMetrics,
 )
@@ -25,16 +23,15 @@ from src.shared.python.tour_baselines.packages import (
 )
 from src.shared.python.tour_baselines.qualification import (
     DoublePendulumPlanarProfile,
+    QualificationVerdict,
     evaluate_qualification,
 )
 
 
-def main() -> None:
-    evidence_dir = Path("docs/plans/tour_baselines/evidence")
-    evidence_dir.mkdir(parents=True, exist_ok=True)
-
-    # 1. Synthetic Valid Package
-    prof = DoublePendulumPlanarProfile()
+def _create_synthetic_valid_package(
+    evidence_dir: Path, prof: DoublePendulumPlanarProfile
+) -> tuple[BaselinePackageManifest, QualificationVerdict]:
+    """Create and export a synthetic valid baseline package."""
     metrics_valid = TourFitMetrics(
         observed_valid_denominator=1000,
         excluded_sample_count=20,
@@ -85,11 +82,7 @@ def main() -> None:
         q0=[0.0, 0.0],
         v0=[0.0, 0.0],
         controls_parameterization={"type": "spline_torques", "knots": 12},
-        solver_config={
-            "optimizer": "scipy_slsqp",
-            "ftol": 1e-6,
-            "max_iter": 500,
-        },
+        solver_config={"optimizer": "scipy_slsqp", "ftol": 1e-6, "max_iter": 500},
         budgets={"max_iterations": 500, "wall_clock_limit_s": 60.0},
         candidate_ancestry=["b" * 64],
         runtime_hashes={"python": "3.12.0"},
@@ -118,8 +111,13 @@ def main() -> None:
     export_baseline_package(
         pkg_valid, evidence_dir / "synthetic_valid_baseline_package"
     )
+    return manifest_valid, verdict_valid
 
-    # 2. Synthetic Invalid Package
+
+def _create_synthetic_invalid_package(
+    evidence_dir: Path, prof: DoublePendulumPlanarProfile
+) -> tuple[BaselinePackageManifest, QualificationVerdict]:
+    """Create and export a synthetic invalid baseline package."""
     metrics_invalid = TourFitMetrics(
         observed_valid_denominator=1000,
         excluded_sample_count=20,
@@ -182,12 +180,26 @@ def main() -> None:
         replay=replay_invalid,
         is_synthetic_test_data=True,
     )
+    t_arr = np.linspace(0.0, 1.814, 200)
     pkg_invalid = BaselinePackage(
         manifest=manifest_invalid,
         trajectories={"time_s": t_arr, "q": np.zeros((200, 2))},
     )
     export_baseline_package(
         pkg_invalid, evidence_dir / "synthetic_invalid_baseline_package"
+    )
+    return manifest_invalid, verdict_invalid
+
+
+def main() -> None:
+    """Generate example baseline packages and write verification receipt."""
+    evidence_dir = Path("docs/plans/tour_baselines/evidence")
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    prof = DoublePendulumPlanarProfile()
+
+    manifest_valid, verdict_valid = _create_synthetic_valid_package(evidence_dir, prof)
+    manifest_invalid, verdict_invalid = _create_synthetic_invalid_package(
+        evidence_dir, prof
     )
 
     receipt = {

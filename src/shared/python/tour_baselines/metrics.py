@@ -162,6 +162,74 @@ def _compute_per_phase_errors(
     return per_phase
 
 
+DEFAULT_CLUBHEAD_LABELS: tuple[str, ...] = (
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3",
+)
+
+
+def _compute_impact_error(
+    predicted_points_m: NDArray[np.float64],
+    observed_points_m: NDArray[np.float64],
+    valid_mask: NDArray[np.bool_],
+    impact_frame: int | None,
+    whole_rmse: float,
+) -> float:
+    """Compute marker RMSE at the designated impact frame."""
+    n_frames = predicted_points_m.shape[0]
+    imp_idx = impact_frame if impact_frame is not None else int(0.73 * n_frames)
+    imp_idx = min(max(0, imp_idx), n_frames - 1)
+    imp_valid = valid_mask[imp_idx]
+    if np.any(imp_valid):
+        imp_diff = (
+            predicted_points_m[imp_idx, imp_valid]
+            - observed_points_m[imp_idx, imp_valid]
+        )
+        return float(np.sqrt(np.mean(np.sum(imp_diff**2, axis=-1))))
+    return whole_rmse
+
+
+def _compute_clubhead_error(
+    predicted_points_m: NDArray[np.float64],
+    observed_points_m: NDArray[np.float64],
+    valid_mask: NDArray[np.bool_],
+    marker_labels: Sequence[str],
+    whole_rmse: float,
+) -> float:
+    """Compute marker RMSE specifically for clubhead markers."""
+    head_indices = [
+        i for i, lbl in enumerate(marker_labels) if lbl in DEFAULT_CLUBHEAD_LABELS
+    ]
+    if not head_indices:
+        return whole_rmse
+    h_mask = valid_mask[:, head_indices]
+    if not np.any(h_mask):
+        return whole_rmse
+    h_diffs = (
+        predicted_points_m[:, head_indices][h_mask]
+        - observed_points_m[:, head_indices][h_mask]
+    )
+    return float(np.sqrt(np.mean(np.sum(h_diffs**2, axis=-1))))
+
+
+def _compute_planar_residuals(
+    diffs: NDArray[np.float64],
+    whole_rmse: float,
+    swing_plane_normal: NDArray[np.float64] | None,
+) -> tuple[float, float]:
+    """Compute in-plane RMSE and out-of-plane residual."""
+    if swing_plane_normal is None:
+        return whole_rmse, 0.0
+    norm_val = float(np.linalg.norm(swing_plane_normal))
+    if norm_val < 1e-12:
+        return whole_rmse, 0.0
+    normal = swing_plane_normal / norm_val
+    out_of_plane = float(np.sqrt(np.mean(np.dot(diffs, normal) ** 2)))
+    in_plane = float(np.sqrt(max(0.0, whole_rmse**2 - out_of_plane**2)))
+    return in_plane, out_of_plane
+
+
 def compute_tour_fit_metrics(
     predicted_points_m: NDArray[np.float64],
     observed_points_m: NDArray[np.float64],
@@ -171,7 +239,6 @@ def compute_tour_fit_metrics(
     optimizer_loss: float = 0.0,
     impact_frame: int | None = None,
     phase_intervals: dict[str, tuple[int, int]] | None = None,
-    clubhead_labels: Sequence[str] = ("Marker_3:3:1", "Marker_3:3:2", "Marker_3:3:3"),
     swing_plane_normal: NDArray[np.float64] | None = None,
 ) -> TourFitMetrics:
     """Compute physical 3D marker tracking errors over valid observations."""
@@ -211,43 +278,15 @@ def compute_tour_fit_metrics(
     per_phase = _compute_per_phase_errors(
         predicted_points_m, observed_points_m, phase_intervals
     )
-
-    # Impact error
-    imp_idx = impact_frame if impact_frame is not None else int(0.73 * n_frames)
-    imp_idx = min(max(0, imp_idx), n_frames - 1)
-    imp_valid = valid_mask[imp_idx]
-    if np.any(imp_valid):
-        imp_diff = (
-            predicted_points_m[imp_idx, imp_valid]
-            - observed_points_m[imp_idx, imp_valid]
-        )
-        impact_err = float(np.sqrt(np.mean(np.sum(imp_diff**2, axis=-1))))
-    else:
-        impact_err = whole_rmse
-
-    # Clubhead error
-    head_indices = [i for i, lbl in enumerate(marker_labels) if lbl in clubhead_labels]
-    if head_indices:
-        h_mask = valid_mask[:, head_indices]
-        if np.any(h_mask):
-            h_diffs = (
-                predicted_points_m[:, head_indices][h_mask]
-                - observed_points_m[:, head_indices][h_mask]
-            )
-            head_rmse = float(np.sqrt(np.mean(np.sum(h_diffs**2, axis=-1))))
-        else:
-            head_rmse = whole_rmse
-    else:
-        head_rmse = whole_rmse
-
-    # Planar projection residuals
-    if swing_plane_normal is not None:
-        normal = swing_plane_normal / np.linalg.norm(swing_plane_normal)
-        out_of_plane = float(np.sqrt(np.mean(np.dot(diffs, normal) ** 2)))
-        in_plane = float(np.sqrt(max(0.0, whole_rmse**2 - out_of_plane**2)))
-    else:
-        out_of_plane = 0.0
-        in_plane = whole_rmse
+    impact_err = _compute_impact_error(
+        predicted_points_m, observed_points_m, valid_mask, impact_frame, whole_rmse
+    )
+    head_rmse = _compute_clubhead_error(
+        predicted_points_m, observed_points_m, valid_mask, marker_labels, whole_rmse
+    )
+    in_plane, out_of_plane = _compute_planar_residuals(
+        diffs, whole_rmse, swing_plane_normal
+    )
 
     return TourFitMetrics(
         observed_valid_denominator=n_valid,

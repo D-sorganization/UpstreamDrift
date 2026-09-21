@@ -95,3 +95,32 @@ def test_success_false_when_status_not_success() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
         assert res.success is False
+
+
+@pytest.mark.unit
+def test_fit_result_to_baseline_status() -> None:
+    res = _make()
+    status = res.to_baseline_status()
+    assert status["solver_status"] == "converged"
+    assert status["kinematic_accuracy"] == "accurate"
+
+    # Inaccurate test
+    res_inacc = CanonicalFitResult(
+        theta_optimal=np.zeros(7, dtype=np.float64),
+        final_cost=10.0,
+        final_rmse_m=0.15,
+        solver_status="reached_max_iter",
+        iterations=100,
+        n_evaluations=200,
+        wall_clock_s=10.0,
+        message="max iter",
+        history=(),
+        method="lbfgs",
+        git_commit="deadbeef",
+        engine_version="0.1",
+        target_hash="abc",
+        timestamp_utc="2024-01-01T00:00:00Z",
+    )
+    status_inacc = res_inacc.to_baseline_status()
+    assert status_inacc["solver_status"] == "reached_max_iter"
+    assert status_inacc["kinematic_accuracy"] == "inaccurate"
