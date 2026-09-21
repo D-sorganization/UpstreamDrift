@@ -252,6 +252,27 @@ def _evaluate_triple_unforced_baseline(
     return unforced_rmse
 
 
+def _build_triple_torque_bounds(
+    opts: TriplePendulumFitOptions,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Build the per-parameter (lo, hi) bound vectors for the 3-joint Bernstein basis."""
+    lo = np.concatenate(
+        [
+            np.full(COEFFS_PER_JOINT, opts.tau1_bounds[0]),
+            np.full(COEFFS_PER_JOINT, opts.tau2_bounds[0]),
+            np.full(COEFFS_PER_JOINT, opts.tau3_bounds[0]),
+        ]
+    )
+    hi = np.concatenate(
+        [
+            np.full(COEFFS_PER_JOINT, opts.tau1_bounds[1]),
+            np.full(COEFFS_PER_JOINT, opts.tau2_bounds[1]),
+            np.full(COEFFS_PER_JOINT, opts.tau3_bounds[1]),
+        ]
+    )
+    return lo, hi
+
+
 def fit_bounded_triple_pendulum(
     target: TriplePendulumFitTarget,
     dynamics: TriplePendulumDynamics,
@@ -274,20 +295,7 @@ def fit_bounded_triple_pendulum(
     if not np.any(observed_mask):
         raise ValueError("Target contains no valid observations")
 
-    lo = np.concatenate(
-        [
-            np.full(COEFFS_PER_JOINT, opts.tau1_bounds[0]),
-            np.full(COEFFS_PER_JOINT, opts.tau2_bounds[0]),
-            np.full(COEFFS_PER_JOINT, opts.tau3_bounds[0]),
-        ]
-    )
-    hi = np.concatenate(
-        [
-            np.full(COEFFS_PER_JOINT, opts.tau1_bounds[1]),
-            np.full(COEFFS_PER_JOINT, opts.tau2_bounds[1]),
-            np.full(COEFFS_PER_JOINT, opts.tau3_bounds[1]),
-        ]
-    )
+    lo, hi = _build_triple_torque_bounds(opts)
 
     unforced_rmse = _evaluate_triple_unforced_baseline(
         dynamics, target, p0, observed_mask, duration
