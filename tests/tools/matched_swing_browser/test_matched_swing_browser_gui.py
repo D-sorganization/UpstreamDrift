@@ -158,6 +158,41 @@ class TestMatchedSwingBrowserWidget:
         assert widget.open_viewer_btn.isEnabled()
         assert widget.open_native_btn.isEnabled()
         assert widget.open_parity_btn.isEnabled()
+        assert widget.export_video_button.isEnabled()
+        assert widget.export_report_button.isEnabled()
+
+    def test_export_buttons_trigger_export_dialogs(
+        self, widget: MatchedSwingBrowserWidget, tmp_path: Path
+    ) -> None:
+        target_row = -1
+        for r in range(widget.table.rowCount()):
+            path_item = widget.table.item(r, 6)
+            if path_item and "driver_g1_drake" in path_item.text():
+                target_row = r
+                break
+        assert target_row >= 0
+        widget.table.selectRow(target_row)
+
+        out_gif = tmp_path / "browser_export.gif"
+        out_md = tmp_path / "browser_report.md"
+
+        with patch(
+            "PyQt6.QtWidgets.QFileDialog.getSaveFileName",
+            return_value=(str(out_gif), "GIF"),
+        ):
+            with patch("PyQt6.QtWidgets.QMessageBox.information") as mock_info:
+                widget.export_video_button.click()
+                assert mock_info.called
+                assert out_gif.is_file()
+
+        with patch(
+            "PyQt6.QtWidgets.QFileDialog.getSaveFileName",
+            return_value=(str(out_md), "Markdown"),
+        ):
+            with patch("PyQt6.QtWidgets.QMessageBox.information") as mock_info:
+                widget.export_report_button.click()
+                assert mock_info.called
+                assert out_md.is_file()
 
 
 class TestJourneyHeadless:

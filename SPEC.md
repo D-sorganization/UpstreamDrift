@@ -12,6 +12,25 @@ Delivers native replay, cataloging, and spatial reaction wrench counterfactual a
   - Implements `SpatialWrench` with Varignon moment transport ($M_B = M_A + (r_A - r_B) \times F$) and action-reaction negation.
   - Implements `NativeConstrainedCounterfactualProvider` with Pinocchio closure reaction wrenches, forward branched ZTCF dynamics rollouts, and authoritative 5-engine capability matrix.
 
+## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
+
+Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
+- **Core Export Module (`src/shared/python/motion_matching/export.py`)**:
+  - `export_video(candidate, engine, path, *, fps=30, stride=5, view="marker_overlay")`: Renders 3D marker overlay trajectories comparing target vs model markers headlessly across all six physics engines into `.gif` (via `imageio`) or `.mp4` (via `cv2.VideoWriter`). Enforces fail-closed `@precondition` and `@postcondition` contracts; rejects missing or corrupted candidate files and marker trajectories without fabricating data.
+  - `export_report(receipt, path, *, candidate=None, include_provenance=True)`: Extracts standardized metrics (Whole, Early, Terminal, Club, and Pelvis Yaw RMSE), quantitative acceptance gates, physical constraints, and qualification notes from execution receipts. Enforces fail-closed `@precondition` and `@postcondition` contracts; faithfully preserves raw ledger/receipt verdicts without cosmetic masking; generates structured Markdown reports and clean, paginated PDF documents via `matplotlib.backends.backend_pdf`.
+  - Cryptographic Provenance Block: Stamps software version, short git commit SHA (`git_commit_short`), physics engine and package version (`engine_package_version`), candidate SHA-256, receipt SHA-256, capture, lane, authoritative verdict, and UTC ISO 8601 timestamp into every export (#8820 / U3).
+- **CLI Subcommand Integration (`src/shared/python/motion_matching/__main__.py`)**:
+  - Adds `export-video` and `export-report` subcommands to `python -m src.shared.python.motion_matching`.
+- **Results Browser Desktop GUI Integration (`src/tools/matched_swing_browser/gui.py`)**:
+  - Adds "Export Video..." and "Export Report..." buttons to the Actions card with automatic enablement based on candidate/receipt artifact availability on disk.
+  - Connects native file save dialogs with error handling and success confirmations.
+- **Launcher Manifest & Model Capability Alignment (`src/config/launcher_manifest.json`, `src/config/models.yaml`)**:
+  - Registers `"video_export"` and `"report_export"` capabilities under `matched_swing_browser`.
+- **Evidence & Verification (`docs/development/matched_swing_program/evidence/reports/sample_fit_report.md`, `tests/unit/motion_matching/test_export.py`, `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py`)**:
+  - 11 unit tests in `test_export.py` covering GIF/MP4 frame generation, fail-closed marker validation, Markdown/PDF report emission, verdict preservation, and CLI subcommands.
+  - GUI test suite covering action button states, file dialog mock triggers, and export generation.
+  - Sample report emitted from canonical ground-support receipt.
+
 ## Generic Capture Contract and 44-DOF Identifiability (MS-90, #10361)
 
 Defines generic C3D capture ingestion contracts and mathematical identifiability probes for the 44-DOF kinematic model:
@@ -69,7 +88,6 @@ Connects qualified matching strategies to engine feature contracts:
   - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
 - **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
   - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
-
 
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
@@ -6663,6 +6681,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
+| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |

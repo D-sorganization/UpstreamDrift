@@ -43,6 +43,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Delivered complete Package C milestones CF-1 through CF-8 test-first for epic #10286. Implemented versioned spatial wrench contracts (SpatialWrench with Varignon moment transport and action-reaction negation, PointwiseCounterfactualSample), NativeConstrainedCounterfactualProvider with Pinocchio closure_reaction_wrench, 3D spatial power/work/impulse integrals, and authoritative 5-engine capability matrix (counterfactual_matrix.py) with state restoration guarantees and zero silent fallbacks. Implemented forward branched ZTCF dynamics rollouts (ForwardZTCFBranch, CutState, RK4 integration, explicit rejection of forward ZVCF rollouts). Added /analysis/counterfactual API route with offline catalog baseline execution. Integrated reaction wrenches into Tour Matching Viewer (TourMatchingViewerWidget with CF badge, 'Reaction Wrenches (CF)' 3D overlay, load_counterfactual_trajectory, and provenance table export). Verified WSCG 2024 two-hand model audit reproduction and byte-deterministic evidence generation.
 - **Next step:** Merge PR on feat/10285-native-saved-replay closing epic #10286. Proceed to next active work package or maintenance issue.
 
+### DL-#9548 · Impact-Interval Energy Audit Consumer Gate
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9548 (parent #9546; provider Tools #4130 / #5079 / #5088)
+- **Branch:** conductor/issue-9548
+- **PR:** #10311
+- **Paths:** src/shared/python/physics/impact_interval_audit.py; tests/unit/physics/test_impact_interval_audit.py; tests/shared_contracts/test_impact_interval_provider.py
+- **Started:** 2026-09-17
+- **Last verified:** 2026-09-17 (SELF; `tests/shared_contracts/` 33 passed, 0 skipped under `--tools-mode=vendored` at pin 1ac89c18e6280752d949e520c2143d2fb584d31e; 7 gate unit tests passed; pre-commit on changed files)
+- **Summary:** The pinned Tools solver already integrates release, dashpot/friction, torsional damping and boundary storage independently of the residual (Tools #5079). UD consumes that pin through a fail-closed gate that recomputes the residual from the ledger identity, audits free vs supported momentum separately, reports evidence plus limitations as a JSON-ready record, and refuses `to_post_impact_state()` on unseparated contact or a failed audit. No UI consumer of the interval solver exists yet; the report record is the surface for one.
+- **Next step:** Open the PR with `Closes #9548`, then wire the verdict report into the first UI/report consumer of the interval solver when one lands.
+- **Evidence:** tests/shared_contracts/test_impact_interval_provider.py (interrupted compression 32.54 J stored / 0 J release / −0.063 J signed residual; clipping release 1.71 J; perturbed law residual > 0.5 J blocked; halving dt lowers both residuals).
+
+### DL-#10359 · Wire Video and Fit-Quality Report Export
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10359 (MS-86, epic #10363)
+- **Branch:** feat/10359-export-video-report
+- **PR:** #10632
+- **Paths:** src/shared/python/motion_matching/export.py; src/shared/python/motion_matching/**main**.py; src/tools/matched_swing_browser/gui.py; src/config/launcher_manifest.json; src/config/models.yaml; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/reports/sample_fit_report.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (11 unit tests in test_export.py pass; 9 GUI tests in test_matched_swing_browser_gui.py pass; ruff clean; black clean; architecture budget passed).
+- **Summary:** Implemented `export_video` and `export_report` with fail-closed DbC contracts, standardized metrics, acceptance gate verdicts, physical constraints, and full cryptographic provenance (#8820 / U3). Added CLI subcommands `export-video` and `export-report` to motion_matching module. Added "Export Video..." and "Export Report..." buttons to Results Browser GUI Actions card with file dialogs. Registered `video_export` and `report_export` capabilities in launcher manifest and models config. Emitted sample Markdown fit report in matched swing program evidence directory.
+- **Next step:** Open PR referencing #10359, await green CI, merge and release lease.
+- **Evidence:** docs/development/matched_swing_program/evidence/reports/sample_fit_report.md; tests/unit/motion_matching/test_export.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py.
+
 ### DL-#10361 · MS-90: Generic Capture Contract & 44-DOF Identifiability
 
 - **State:** in_progress
