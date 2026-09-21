@@ -1,3 +1,18 @@
+## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
+
+Replaces synthetic force adapters with native model-conformant bridges:
+- **Engine Force Adapter Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`)**:
+  - Quarantines `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`.
+  - Enforces fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode.
+  - Extends `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`.
+  - Corrects `MujocoForceAdapter` to compute raw unconstrained dynamics \(M a + \text{bias}\) eliminating `qfrc_inverse` passive/constraint force double counting.
+- **Pinocchio Native Bridge (`src/engines/physics_engines/pinocchio/python/force_adapter.py`, `native_model.py`)**:
+  - Implements `PinocchioForceAdapter` implementing shared protocol with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+- **CLI & Quarantine Governance (`scripts/allocate_swing_torques.py`)**:
+  - Adds Pinocchio engine option and enforces `--allow-synthetic` gate flag.
+- **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
+  - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
+
 ## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
 
 Freezes target audits, marker measurement semantics, native clocks/events, and provenance under the Tour Baselines program:
@@ -19,6 +34,7 @@ Freezes target audits, marker measurement semantics, native clocks/events, and p
   - Provides `CanonicalTourTarget` facade for kinematic reference and dynamic fitting paths, guaranteeing missing club clusters or phases are never scored as zero error.
 - **Evidence & Verification**:
   - Added unit test suite in `tests/unit/tour_baselines/`: `test_measurement_map.py`, `test_tour_events.py`, `test_target_audit.py`, `test_canonical_targets.py` (17 tests, 35 total in tour baselines suite).
+>>>>>>> origin/main
 
 ## Tour Baselines Model Identities and Coverage Matrix (TB-00, #10585)
 
