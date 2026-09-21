@@ -63,6 +63,7 @@ _ENGINE_SDK_MODULE: dict[str, str] = {
     "opensim": "opensim",
     "myosuite": "myosuite",
     "putting_green": "mujoco",  # uses MuJoCo under the hood
+    "jaxsim": "jaxsim",
 }
 
 # ---------------------------------------------------------------------------
@@ -80,7 +81,7 @@ _REMEDIATION: dict[str, dict[str, str]] = {
         "sdk_import": "pip install mujoco>=3.0",
         "runtime_version": "Upgrade to Python 3.11+: https://python.org/downloads/",
         "model_assets": (
-            "Run: git submodule update --init shared/models/opensim/opensim-models"
+            "MuJoCo humanoid models are bundled; no submodule initialization required."
         ),
         "display": "Set MUJOCO_GL=osmesa for headless; or install a virtual display (xvfb-run).",
         "capacity": "Reinstall MuJoCo: pip install --upgrade mujoco",
@@ -127,6 +128,13 @@ _REMEDIATION: dict[str, dict[str, str]] = {
         "model_assets": "No separate model assets required for putting_green.",
         "display": "Set MUJOCO_GL=osmesa for headless.",
         "capacity": "Reinstall MuJoCo: pip install --upgrade mujoco",
+    },
+    "jaxsim": {
+        "sdk_import": "pip install jaxsim",
+        "runtime_version": "Upgrade to Python 3.11+.",
+        "model_assets": "No separate model assets required for jaxsim.",
+        "display": "JaxSim runs headless; no display required.",
+        "capacity": "Reinstall JaxSim: pip install --upgrade jaxsim",
     },
 }
 
@@ -280,7 +288,7 @@ class EnginePreflightChecker:
             return None
         try:
             return importlib.import_module(sdk_name)
-        except (ImportError, ModuleNotFoundError):
+        except (ImportError, ModuleNotFoundError, OSError, RuntimeError):
             return None
 
     # ------------------------------------------------------------------
