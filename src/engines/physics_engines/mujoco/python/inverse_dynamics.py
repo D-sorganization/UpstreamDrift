@@ -53,9 +53,6 @@ def _invoke_mj_inverse(
     mj, model, data = adapter._mj, adapter.model, adapter.data
     adapter.generalized_forces(simulator._map(q), simulator._map(v))
 
-    eq_saved = np.asarray(data.eq_active, dtype=int).copy()
-    data.eq_active[:] = 0
-
     qacc = np.zeros(model.nv, dtype=float)
     qacc[simulator._dof] = acceleration_spec
     qacc_saved = data.qacc.copy()
@@ -65,7 +62,6 @@ def _invoke_mj_inverse(
         tau = data.qfrc_inverse.copy()
     finally:
         data.qacc[:] = qacc_saved
-        data.eq_active[:] = eq_saved
     return tau
 
 

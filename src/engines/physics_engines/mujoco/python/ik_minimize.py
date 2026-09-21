@@ -80,9 +80,7 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
 
         lower = prep.low[prep.free]
         upper = prep.high[prep.free]
-        bounds = None
-        if np.all(np.isfinite(lower)) and np.all(np.isfinite(upper)):
-            bounds = (lower, upper)
+        bounds = (lower, upper)
         x_opt, _trace = minimize.least_squares(
             q_seed[prep.free].reshape(-1, 1),
             residual,
