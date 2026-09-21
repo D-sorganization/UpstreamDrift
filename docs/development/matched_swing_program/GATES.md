@@ -21,6 +21,17 @@ The review does not qualify the evaluator or replace missing physical evidence.
 
 > **Single authority (2026-09-18):** the numerical thresholds in force are the ones coded in `src/shared/python/motion_matching/acceptance.py` (`AcceptanceGates`). Where this document differs, the code wins until MS-100 versions the gates; this document is being aligned.
 
+## MS-61 Full-Marker Terminal Disclosure (#10348)
+
+Simscape (and profiled) receipts that report a terminal metric must also disclose
+`head_cluster_terminal_rms_m` (via `terminal_breakdown` or top-level). The G1
+terminal gate always uses the **full-marker** terminal RMS. A
+`body_excluding_head_terminal_rms_m` diagnostic may appear under an explicit
+reduced-model profile (`reduced_27_no_neck`) but **cannot** flip full-body
+acceptance. Head-marker exclusion and undocumented threshold relaxation fail
+closed. See `full_marker_terminal.py` and run-103 scaffolding under
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/`.
+
 ## 1. Principles of Acceptance
 
 1. **Physical Reality Over Structural Flags:** A run does not pass a gate merely because a solver converged without raising an exception. Physical acceptance requires finite, bounded error against ground-truth optical marker data and ground reaction force laws.

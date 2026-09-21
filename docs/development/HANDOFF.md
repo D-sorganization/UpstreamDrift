@@ -1,5 +1,14 @@
 # Current Matching Continuation Handoff
 
+## MS-61 Simscape Topology + Full-Marker Terminal #10348
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61`.
+- Branch: `feat/issue-10348-ms61-simscape-topology`; PR not created. Governing issue #10348 (MS-61, epic #10363).
+- Entry DL-#10348. Delivered: fail-closed topology classification (`reduced_27_no_neck`), dual terminal disclosure (`full_marker_terminal.py` + `tour_metrics`), acceptance hooks, run-103 blocked `native_gate.json` + R2025b runtime/parity receipts, runner `-Fit` fail-closed stub.
+- Validation: `python scripts/matlab/materialize_ms61_topology_receipts.py`; `pytest tests/unit/motion_matching/test_simscape_topology_ms61.py tests/unit/motion_matching/test_acceptance.py -q`.
+- Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
+- Next action: open PR Fixes #10348 with squash auto-merge; DeskComputer R2025b Fit when available.
+
 ## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
 
 - Worktree: `Worktrees/UpstreamDrift-10504-pf06-rebase`, branch
@@ -32,10 +41,9 @@
 ## MS-60 Simscape Run Management #10347 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10347-ms60`.
-- Branch: `fix/issue-10347-ms60-run-management`; PR #10669 open with auto-merge squash armed. Governing issue #10347 (MS-60, epic #10363).
-- Entry DL-#10347. Delivered: fail-closed R2025b run manifest (`SimscapeRunManifestRequest` + builder), returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
-- Validation: merged `origin/main` (cleared CONFLICTING/DIRTY), regenerated divergence inventory after vendor camera/launch_monitor path removals, refreshed `reports/matched_swing_ledger.json`; inventory + ledger freshness suites pass locally at SELF.
-- Next action: push conflict-clear tip, confirm CI green + squash auto-merge of PR #10669; DeskComputer second-person replay under 30 minutes.
+- Branch: `fix/issue-10347-ms60-run-management`; PR #10669 **merged**. Governing issue #10347 (MS-60, epic #10363).
+- Entry DL-#10347 (shipped). Delivered: fail-closed R2025b run manifest, returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
+- Next action: DeskComputer second-person replay under 30 minutes when MS-61 Fit is scheduled.
 
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
 

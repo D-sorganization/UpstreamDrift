@@ -13,6 +13,10 @@
 .PARAMETER Replay
   Invoke MATLAB R2025b -batch replay_returned102_r2025b for the run.
 
+.PARAMETER Fit
+  Request a licensed R2025b native fit for the run. Fail-closed when MATLAB
+  R2025b is unavailable or the run lacks a native fit entry (MS-61 run-103).
+
 .PARAMETER MatlabExe
   Explicit matlab.exe path. Defaults to R2025b under Program Files.
 
@@ -24,11 +28,15 @@
 
 .EXAMPLE
   powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_102 -Replay
+
+.EXAMPLE
+  powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103 -Fit
 #>
 [CmdletBinding()]
 param(
     [string]$Run = "two_window_fit_9967_102",
     [switch]$Replay,
+    [switch]$Fit,
     [string]$MatlabExe = "",
     [string]$RepoRoot = "",
     [switch]$RefreshPythonCandidate
@@ -78,15 +86,46 @@ if (-not (Test-Path $evidenceDir)) {
 $replayNpz = Join-Path $evidenceDir "returned-replay.npz"
 $candidateJson = Join-Path $evidenceDir "returned-candidate.json"
 $qualifiedJson = Join-Path $evidenceDir "qualified_candidate_replay.json"
+$nativeGateJson = Join-Path $evidenceDir "native_gate.json"
+$topologyJson = Join-Path $evidenceDir "topology_report.json"
+$terminalJson = Join-Path $evidenceDir "terminal_breakdown.json"
+
+$wallClock = 0.0
+$hostName = $env:COMPUTERNAME
+if (-not $hostName) { $hostName = [System.Net.Dns]::GetHostName() }
+
+if ($Fit) {
+    if ($Run -ne "two_window_fit_9967_103") {
+        throw "Fit entry is scaffolded for two_window_fit_9967_103 (MS-61); received -Run $Run"
+    }
+    $matlab = Resolve-MatlabR2025b -Explicit $MatlabExe
+    throw (
+        "Native Fit for $Run is not yet wired to a MATLAB entry script on this branch. " +
+        "R2025b located at $matlab. Keep native_gate.json blocked; do not invent success. " +
+        "Refresh software receipts: python scripts/matlab/materialize_ms61_topology_receipts.py"
+    )
+}
+
+if ($Run -eq "two_window_fit_9967_103" -and -not $Replay -and -not $Fit) {
+    foreach ($required in @($nativeGateJson, $topologyJson, $terminalJson)) {
+        if (-not (Test-Path $required)) {
+            throw "MS-61 receipt missing: $required (run materialize_ms61_topology_receipts.py)"
+        }
+    }
+    $gate = Get-Content -Raw -Path $nativeGateJson | ConvertFrom-Json
+    if ($gate.is_physically_accepted -eq $true) {
+        throw "native_gate.json must not claim physical acceptance without a licensed receipt"
+    }
+    Write-Host "MS-61 software contracts OK for $Run (status=$($gate.status); host=$hostName)."
+    Write-Host "Native G1 remains blocked until DeskComputer R2025b Fit + full-marker terminal <= 35 mm."
+    return
+}
+
 foreach ($required in @($replayNpz, $candidateJson)) {
     if (-not (Test-Path $required)) {
         throw "Required evidence file missing: $required"
     }
 }
-
-$wallClock = 0.0
-$hostName = $env:COMPUTERNAME
-if (-not $hostName) { $hostName = [System.Net.Dns]::GetHostName() }
 
 if ($Replay) {
     if ($Run -ne "two_window_fit_9967_102") {
