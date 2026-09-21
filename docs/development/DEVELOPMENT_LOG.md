@@ -31,6 +31,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** When Tools #4946 lands the live interval run record, bump the pin and mark I1/I2/I3 in the ledger with merge SHAs, tests and acceptance evidence.
 - **Evidence:** tests/config/industrial_readiness/; tests/shared_contracts/test_impact_interval_provider.py; docs/operations/impact-zone-readiness-index.md.
 
+### DL-#10602 · Club-Only Motion Matching Plan
+
+- **State:** proposed
+- **Owner:** codex
+- **Issue:** #10602
+- **Branch:** docs/club-neural-matching-plans-20260920
+- **PR:** #10628
+- **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
+- **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
+- **Next step:** Dispatch #10604 using its copyable worker prompt.
+- **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
+
+### DL-#10603 · Neural Motion Matching Plan
+
+- **State:** proposed
+- **Owner:** codex
+- **Issue:** #10603
+- **Branch:** docs/club-neural-matching-plans-20260920
+- **PR:** #10628
+- **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
+- **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
+- **Next step:** Dispatch #10615 using its copyable worker prompt.
+- **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
+
 ### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification
 
 - **State:** in_review

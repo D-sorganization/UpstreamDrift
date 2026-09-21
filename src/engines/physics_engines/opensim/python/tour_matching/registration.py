@@ -56,7 +56,7 @@ class GolfCameraView:
         require(bool(np.isfinite(pos).all()), "position coordinates must be finite")
         require(bool(np.isfinite(tgt).all()), "target coordinates must be finite")
         require(bool(np.isfinite(up).all()), "up coordinates must be finite")
-        norm_up = float(np.linalg.norm(up))
+        norm_up = float(math.sqrt(np.vdot(up, up)))  # Bolt optimization
         require(norm_up > 1e-6, "up vector cannot be degenerate zero")
         object.__setattr__(self, "position", pos)
         object.__setattr__(self, "target", tgt)
@@ -234,7 +234,9 @@ def align_tour_capture_to_golf_world(
     if w_l is not None and w_r is not None:
         lateral_vec = w_l - w_r
         lateral_vec[1] = 0.0  # project onto horizontal plane
-        norm_lat = float(np.linalg.norm(lateral_vec))
+        norm_lat = float(
+            math.sqrt(np.vdot(lateral_vec, lateral_vec))
+        )  # Bolt optimization
         if norm_lat > 1e-4:
             lateral_dir = lateral_vec / norm_lat
             # For a right-handed golfer at address facing the ball:
