@@ -6,6 +6,8 @@ import math
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.tour_baselines.fit_metrics import (
     MarkerMetricSummary,
     PhaseMetricSummary,
