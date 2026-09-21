@@ -20,7 +20,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from time import perf_counter
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -54,6 +54,9 @@ from src.engines.physics_engines.pinocchio.python.marker_kinematics import (
 from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
+from src.shared.python.motion_matching.pelvis_yaw import (
+    compute_pelvis_yaw_residual_and_derivative,
+)
 from src.shared.python.motion_matching.replay_metrics import compute_replay_five_metrics
 from src.shared.python.motion_matching.tour_capture_contract import (
     TourCapture,
@@ -392,15 +395,10 @@ def _predicted_markers(ctx: _PlantContext, q: Array) -> Array:
 
 def _smooth(q: Array, dt: float, cutoff_hz: float) -> Array:
     try:
-        from src.shared.python.motion_matching.kinematic_smoother import (
-            KinematicSmoother,
-            KinematicSmootherOptions,
-        )
+        from scipy.signal import butter, filtfilt
 
-        smoother = KinematicSmoother(
-            KinematicSmootherOptions(cutoff_hz=cutoff_hz, dt=dt)
-        )
-        return smoother.smooth(q, dt=dt).q
+        b, a = butter(2, cutoff_hz / (0.5 / dt))
+        return filtfilt(b, a, q, axis=0)
     except Exception:  # pragma: no cover - scipy absent
         return q
 
@@ -485,8 +483,6 @@ def run_fit(
     q_ik, ik_rms, ik_closure = solver.solve_trajectory(
         targets.targets, targets.valid, targets.weights, q_seed
     )
-    ik_rms = np.asarray(ik_rms)
-    ik_closure = np.asarray(ik_closure)
     ik_wall = time.perf_counter() - t_ik
     q_smooth = _smooth(q_ik, dt, 12.0)
     v_ik = finite_difference_rates(q_smooth, dt)
@@ -518,16 +514,10 @@ def run_fit(
             effort_bounds,
         )
         warm_start_source = f"candidate:{warm_start_candidate}"
-    q_track = np.asarray(q_track)
-    v_track = np.asarray(v_track)
-    us0 = np.asarray(us0)
-    xs0 = [
-        np.concatenate([cast(Any, q_track)[k], cast(Any, v_track)[k]])
-        for k in range(n_nodes)
-    ]
+    xs0 = [np.concatenate([q_track[k], v_track[k]]) for k in range(n_nodes)]
     ik_summary = {
         "marker_rms_m": float(np.sqrt(np.mean(ik_rms**2))),
-        "marker_rms_first_frame_m": float(cast(Any, ik_rms)[0]),
+        "marker_rms_first_frame_m": float(ik_rms[0]),
         "closure_position_error_max_m": float(np.max(ik_closure)),
         "wall_clock_s": ik_wall,
         "iterations_per_frame": (ik_options or MarkerIkOptions()).iterations,
@@ -561,7 +551,7 @@ def run_fit(
     stage_ends.append(inputs.horizon.t_end_s)
     stages: list[dict[str, Any]] = []
     xs_prev = [x.copy() for x in xs0]
-    us_prev = [u.copy() for u in cast(Any, us0)]
+    us_prev = [u.copy() for u in us0]
     t_solve = time.perf_counter()
     fddp = None
     for stage_index, t_end in enumerate(stage_ends):
@@ -771,7 +761,8 @@ def cost_breakdown(
 ) -> dict[str, float]:
     """Per-term cost of a trajectory, weighted like the Crocoddyl problem (dt on running nodes)."""
     n_nodes = q.shape[0]
-    marker = effort = velocity = barrier = 0.0
+    marker = effort = velocity = barrier = pelvis_yaw = 0.0
+    wl_i, wr_i = targets.waist_indices
     for k in range(n_nodes):
         positions = ctx.markers(q[k])
         rows = np.flatnonzero(targets.valid[k])
@@ -791,12 +782,18 @@ def cost_breakdown(
         velocity += scale * 0.5 * weights.velocity * float(v[k] @ v[k])
         if k < n_nodes - 1:
             effort += dt * 0.5 * weights.effort * float(us[k] @ us[k])
+        if weights.pelvis_yaw > 0.0 and wl_i >= 0 and wr_i >= 0:
+            yaw_res, _, _ = compute_pelvis_yaw_residual_and_derivative(
+                positions, targets.targets[k], wl_i, wr_i, weights.pelvis_yaw
+            )
+            pelvis_yaw += scale * 0.5 * float(np.dot(yaw_res, yaw_res))
     return {
         "marker": marker,
         "effort": effort,
         "velocity": velocity,
         "range_barrier": barrier,
-        "total": marker + effort + velocity + barrier,
+        "pelvis_yaw": pelvis_yaw,
+        "total": marker + effort + velocity + barrier + pelvis_yaw,
     }
 
 
@@ -857,6 +854,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--effort-weight", type=float, default=FitWeights().effort)
     parser.add_argument("--velocity-weight", type=float, default=FitWeights().velocity)
+    parser.add_argument(
+        "--range-barrier-weight", type=float, default=FitWeights().range_barrier
+    )
+    parser.add_argument(
+        "--pelvis-yaw-weight", type=float, default=FitWeights().pelvis_yaw
+    )
     parser.add_argument("--ik-iterations", type=int, default=15)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--quiet", action="store_true")
@@ -867,6 +870,8 @@ def main(argv: list[str] | None = None) -> int:
         terminal_marker=args.terminal_marker_weight,
         effort=args.effort_weight,
         velocity=args.velocity_weight,
+        range_barrier=args.range_barrier_weight,
+        pelvis_yaw=args.pelvis_yaw_weight,
     )
     inputs = load_inputs(
         args.document,

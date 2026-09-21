@@ -9,6 +9,38 @@
 - **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
 - **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
 
+## Tour Baselines TB-00: Freeze Model Identities, Ownership, and Coverage (#10585)
+
+Branch `feat/tb00-model-identities-10585`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+Initial dispatch TB-00 ([#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585)) implements canonical model identities, separates kinematic
+reconstruction models (which omit the club) from torque-driven pendulums (with simulated club)
+and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving
+rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron,
+non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified
+Tools pin at `a9ed0e7c5c6905b1164082659051d6381068052d` and published documentation under
+`docs/plans/tour_baselines/`. All 13 unit tests pass, ruff check and format pass, mypy passes.
+Next step: Merge TB-00 PR; next dispatch is TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586): Audit Tour Targets, Marker Semantics,
+Events, and Provenance).
+
+## MuJoCo Saved-Control Replay (#10336)
+
+Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
+PR #10448 open. See DL-#10336 in `docs/development/DEVELOPMENT_LOG.md`
+and `evidence/matched/driver_full_mujoco_replay/README.md` for reproduction.
+Forty focused tests and scoped Ruff/mypy checks pass. The diagnostic replay
+and playback are preserved, but G1 is rejected and source configuration parity
+is unverified. Merge delivers the replay path, not physical qualification;
+keep #10336 open. Commit/push hooks pass, as do 21 replay tests on pinned
+MuJoCo 3.8.0. The next step is PR CI and review, then protected merge.
+
+## Shadow Tracker Revision Integrity (#10233)
+
+Provider registration and persistence repair is locally validated on
+`fix/shadow-tracker-10233-pr`; [PR #10450](https://github.com/D-sorganization/UpstreamDrift/pull/10450) is in CI. See
+[turnover evidence](docs/plans/shadow_tracker/TURNOVER_CURRENT.md) for contracts,
+13-failure RED receipt, 306-test GREEN receipt and separate ST-11 bundle risks.
+Renderer work and the original checkout are preserved. Review the focused diff.
+
 ## Polynomial Full-Body Dynamics Boundary (#10265)
 
 The integration retains global degree-six Bernstein efforts for every non-root
@@ -103,40 +135,13 @@ coefficient-lift action assembly, objective contracts and independent replay.
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
-## GSPro Integration (#10188) — GS-00 Through GS-11 Complete (Epic Ready for Closure)
+## GSPro Integration (#10188, #10460)
 
-- **Start:** [Plan and Evidence](docs/plans/golf_simulator_integration/README.md),
-  [Worker Instructions](docs/plans/golf_simulator_integration/NEXT_AGENT.md).
-- **State:** All 12 child milestones (GS-00 through GS-11) complete:
-  GS-00 (#10189) profile, GS-01 (#10190) domain contracts, GS-02 (#10191) pure codec,
-  GS-03 (#10192) durable transport, GS-04 (#10193) impact state preservation & qualification,
-  GS-05 (#10194) shared session service and local reference destination,
-  GS-06 (#10195) replay and single-impact submission,
-  GS-07 (#10196) capability-aware desktop and web controls,
-  GS-08 (#10197) Windows deployment and authenticated remote topology,
-  GS-09 (#10198) licensed acceptance and support matrix,
-  GS-10 (#10199) second commercial simulator evaluation and Flight Relay adapter, and
-  GS-11 (#10200) native avatar animation and autonomous course feedback research.
-  PRs #10201, #10208, #10213, #10215, #10217, #10220, #10222, #10225, #10226, and #10227 merged into `main`.
-- **Worktree:** `C:/Users/diete/Repositories/.worktrees/upstream-gspro-10188`;
-  branch `feat/issue-10200-native-avatar-course-feedback`.
-- **Delivered in GS-11:**
-  - Technical Research Document (`docs/plans/golf_simulator_integration/NATIVE_AVATAR_COURSE_FEEDBACK_RESEARCH.md`):
-    Exhaustive investigation into Unity runtime and Course Designer AssetBundle constraints;
-    confirms zero runtime skeletal rigging APIs;
-    characterizes Open Connect v1 unidirectional limits (absent ball landing, lie, surface, wind, elevation, and hazard feedback);
-    prohibits reverse-engineering / memory scraping / DLL injection;
-    provides turnkey vendor inquiry templates;
-    formalizes Synchronized Companion Presentation Architecture using `MonotonicReplayClock`.
-  - Capability Assertion Boundary (`src/shared/python/golf_simulator/contracts.py`):
-    `UnsupportedCapabilityError` and `assert_capability_supported()` raising explicit exceptions on unsupported capabilities.
-  - Honest Declarations: All adapters declare `native_avatar_animation`, `course_state_feedback`, and `aim_control` as `UNSUPPORTED`.
-- **Validation:**
-  - 100 unit tests in `tests/unit/golf_simulator/` pass 100%.
-  - Verified under `python -O` (Design-by-Contract assertions active regardless of optimization flag).
-  - All architecture budget, divergence inventory, and lint checks pass cleanly.
-- **Next:** Open PR for GS-11 (#10200), merge via auto-squash, close parent Epic #10188.
-- **Preserve:** Original checkout's unrelated branch/untracked work.
+- **State:** GS-00 through GS-11 merged. #10460 consumes shared Tools `launch_monitor.gspro_connect` codec (#5228).
+- **Branch:** `feat/10460-consume-tools-gspro-codec`.
+- **Implementation:** `src/shared/python/golf_simulator/adapters/gspro/codec.py` retains canonical SI/radian conversion and profile handling while delegating protocol wire encoding and response decoding to `shared.python.launch_monitor.gspro_connect`.
+- **Validation:** 106 golf simulator unit and integration tests pass cleanly; ruff, black, and mypy pass with 0 errors.
+- **Next:** Open PR referencing `Closes #10460`, arm auto-merge with squash.
 
 ## Active Horizon Execution & Parity Turnover (2026-09-11 Live Continuation)
 
@@ -832,6 +837,39 @@ scripts.shared_tools.divergence_inventory --write` re-records the 16 new
 - Tools force-source frame #4873 merged as
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
+
+## Impact Explorer Acceptance Matrix: #9550
+
+- Branch `conductor/issue-9550`, commit SELF; PR not created. Epic #9546.
+- Audit snapshot UD `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / Tools
+  `3d93bb2c89813e17551814d3be7e895f791e29af`; reconciled 2026-09-18 against UD
+  `5347cba0f4378cd72a6e8afea9fb27c8bfe5db75` and the consumed Tools pin
+  `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (unchanged by this work).
+- `src/config/impact_acceptance.json` is the frozen matrix; its gate
+  `tests/config/impact_acceptance/test_impact_acceptance_matrix.py` probes each
+  capability row against the shipping library and refuses a predictive claim
+  while any item is open. Human packet:
+  `docs/development/impact_acceptance_matrix.md`.
+- `impact-explorer-web-build` now runs Tools' `release/generateReleaseArtifacts.mjs`
+  with `ROC_RELEASE_REVISION=<gitlink>` and
+  `scripts/ci/verify_impact_explorer_bundle.py`, which serves `dist` through the
+  `/impact-explorer-app` mount contract and checks revision-stamped index,
+  manifest SHA-256 for every asset, JavaScript media type, base path and a
+  404 for a missing artifact; receipt artifact
+  `impact-explorer-bundle-receipt-<sha>`. Local run at the pin: 76 assets,
+  5 JS, PASS (Git Bash needs `MSYS_NO_PATHCONV=1` or the base path is mangled).
+- Validation: matrix gate 26 passed; verifier + mount tests 14 passed;
+  feature-parity / industrial-readiness gates 91 passed; ruff check/format,
+  LoD, error-handling ratchet, file-size, TODO, declared-route-producer,
+  workflow-context and SPEC gates pass. Pre-existing local failures outside
+  scope: `test_tools_child_copy_contract.py` (needs a git-backed Tools
+  checkout) and `test_urdf_governance_docs.py` docstring checks.
+- Open (recorded with owner/plan/blockers in the JSON): shared provider goldens
+  and reference datasets (Tools #4251), installed-artifact restart/reload/offline
+  smoke (#9417), rendered screenshot manifest, numerical cross-runtime scenario
+  comparison; `tools.rate_of_closure` parity is a gap under #9546 until then.
+  Do not close #9550 on this PR alone; it delivers the matrix and install
+  evidence, not items 3 and 5.
 
 ## Impact Explorer Web Route Producer: #9484
 

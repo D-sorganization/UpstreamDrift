@@ -57,16 +57,25 @@ def test_make_ik_solver_geometric_returns_real_solver() -> None:
     assert hasattr(solver, "solve_frame")
 
 
-def test_make_ik_solver_returns_protocol_compatible() -> None:
-    """MuJoCo backend instantiates without requiring the mujoco package."""
-    solver = make_ik_solver(IKBackendType.MUJOCO)
+@pytest.mark.unit
+def test_make_ik_solver_retired_backends_raise_with_adr0051() -> None:
+    """MuJoCo, OpenSim, and Drake CIR IK backends are retired per ADR-0051."""
+    for backend in (
+        IKBackendType.MUJOCO,
+        IKBackendType.OPENSIM,
+        IKBackendType.DRAKE,
+        "mujoco",
+    ):
+        with pytest.raises(NotImplementedError, match="ADR-0051"):
+            make_ik_solver(backend)
+
+
+@pytest.mark.unit
+def test_make_ik_solver_pinocchio_returns_protocol_compatible() -> None:
+    """Pinocchio backend instantiates and satisfies the solver protocol."""
+    solver = make_ik_solver(IKBackendType.PINOCCHIO)
     assert hasattr(solver, "solve")
     assert hasattr(solver, "solve_frame")
-
-
-def test_make_ik_solver_accepts_string_alias() -> None:
-    solver = make_ik_solver("mujoco")
-    assert hasattr(solver, "solve")
 
 
 class _StubSolver(BaseIKSolver):

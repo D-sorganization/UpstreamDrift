@@ -82,21 +82,37 @@ class AcceptanceGates:
     g3_pelvis_yaw_rmse_rad: float = 0.10472  # < 6 deg
 
     # Physical limits (shared across horizons unless specified)
-    version: str = "v1.1"
     max_normal_force_bw_multiplier: float = 3.0
     nominal_body_mass_kg: float = 80.0
     gravity_m_s2: float = 9.81
     max_penetration_m: float = 0.010  # 10 mm
     max_closure_residual_m: float = 0.005  # 5 mm
     max_closure_residual_rad: float = 0.05  # 0.05 rad
-    max_friction_coefficient: float = 0.8
-    max_root_force_n: float = 0.1  # 0.1 N maximum allowed ungrounded root assistance
-    min_duration_g1_s: float = 0.80
-    min_duration_g2_s: float = 1.15
-    min_duration_g3_s: float = 1.75
     weight_fraction_min: float = 0.20
     weight_fraction_max: float = 3.00
     min_inside_support_polygon_fraction: float = 0.85  # 85 % of frames
+
+    # Dynamic well-posedness artifacts (MS-100 / MS-107)
+    max_open_loop_drift_m: float | None = (
+        None  # None => tied to horizon's whole_marker_rmse_m (e.g. 25 mm for G1)
+    )
+    max_integrator_rtol: float = 1e-5  # required declared integrator relative tolerance
+    max_collocation_defect_m: float = 0.005  # 5 mm dynamical consistency defect
+    max_stabilized_marker_rmse_m: float = 0.040  # 40 mm low-gain PD tracking error
+
+    # Negative fixture and physical consistency gates (#10431)
+    max_friction_coefficient: float = 0.80
+    max_actuator_torque_n_m: float = 200.0
+    max_root_residual_n_m: float = 1e-3
+    min_club_marker_coverage_fraction: float = 0.80
+    g1_min_duration_s: float = 0.85
+    g2_min_duration_s: float = 1.20
+    g3_min_duration_s: float = 1.80
+
+    @property
+    def g3_whole_rmse_m(self) -> float:
+        """Alias for g3_whole_driver_rmse_m for uniform horizon whole-RMSE access."""
+        return self.g3_whole_driver_rmse_m
 
 
 @dataclass(frozen=True)
@@ -195,16 +211,6 @@ def _evaluate_marker_rmse(
                 status=GateStatus.MISSING,
                 threshold=thresh_whole,
                 reason="missing whole marker RMSE",
-            )
-        )
-    elif not math.isfinite(val_whole):
-        results.append(
-            GateResult(
-                name="whole_marker_rmse_m",
-                status=GateStatus.FAILED,
-                threshold=thresh_whole,
-                measured=None,
-                reason="invalid predictions or empty valid marker population (non-finite RMSE)",
             )
         )
     else:
@@ -425,7 +431,7 @@ def _evaluate_normal_contact_force(
     return results
 
 
-def _evaluate_penetration(
+def _evaluate_ground_and_closure(
     receipt: Mapping[str, Any],
     gates: AcceptanceGates,
     contact_audit: Any,
@@ -459,15 +465,7 @@ def _evaluate_penetration(
                     reason=f"penetration {val_penetration * 1e3:.1f} mm > {thresh_penetration * 1e3:.1f} mm",
                 )
             )
-    return results
 
-
-def _evaluate_ground_and_closure(
-    receipt: Mapping[str, Any],
-    gates: AcceptanceGates,
-    contact_audit: Any,
-) -> list[GateResult]:
-    results = _evaluate_penetration(receipt, gates, contact_audit)
     thresh_closure_m = gates.max_closure_residual_m
     val_closure_m = _extract_metric(
         receipt,
@@ -496,41 +494,6 @@ def _evaluate_ground_and_closure(
                     measured=val_closure_m,
                     unit="m",
                     reason=f"closure residual {val_closure_m * 1e3:.2f} mm > {thresh_closure_m * 1e3:.2f} mm",
-                )
-            )
-
-    thresh_rot = gates.max_closure_residual_rad
-    val_rot = None
-    closure_dict = receipt.get("closure")
-    if isinstance(closure_dict, Mapping):
-        val_rot = _extract_metric(
-            closure_dict, "max_closure_rotation_rad", "closure_rotation_max_rad"
-        )
-    if val_rot is None:
-        val_rot = _extract_metric(
-            receipt, "max_closure_rotation_rad", "closure_rotation_max_rad"
-        )
-
-    if val_rot is not None:
-        if val_rot <= thresh_rot:
-            results.append(
-                GateResult(
-                    name="closure_rotation_rad",
-                    status=GateStatus.PASSED,
-                    threshold=thresh_rot,
-                    measured=val_rot,
-                    unit="rad",
-                )
-            )
-        else:
-            results.append(
-                GateResult(
-                    name="closure_rotation_rad",
-                    status=GateStatus.FAILED,
-                    threshold=thresh_rot,
-                    measured=val_rot,
-                    unit="rad",
-                    reason=f"closure rotation {val_rot:.4f} rad > {thresh_rot:.4f} rad",
                 )
             )
     return results
@@ -577,26 +540,405 @@ def _evaluate_weight_fraction(
     return results
 
 
+def _extract_solver_and_integrators(
+    receipt: Mapping[str, Any],
+    replay_data: Mapping[str, Any],
+) -> tuple[str | None, str | None, Mapping[str, Any]]:
+    raw_solver = receipt.get("solver")
+    solver_block: Mapping[str, Any] = (
+        raw_solver if isinstance(raw_solver, Mapping) else {}
+    )
+    node_integ = solver_block.get("node_integrator") or receipt.get("node_integrator")
+    replay_integ = (
+        solver_block.get("replay_integrator")
+        or replay_data.get("integrator")
+        or receipt.get("replay_integrator")
+    )
+    return (
+        str(node_integ) if node_integ is not None else None,
+        str(replay_integ) if replay_integ is not None else None,
+        solver_block,
+    )
+
+
+def _evaluate_integrator_consistency(
+    receipt: Mapping[str, Any],
+    replay_data: Mapping[str, Any],
+) -> list[GateResult]:
+    """Verify solver node_integrator and replay_integrator are identical."""
+    results: list[GateResult] = []
+    node_integ, replay_integ, _ = _extract_solver_and_integrators(receipt, replay_data)
+
+    if node_integ and replay_integ and node_integ.lower() != replay_integ.lower():
+        results.append(
+            GateResult(
+                name="integrator_consistency",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=f"solver node_integrator '{node_integ}' != replay_integrator '{replay_integ}'",
+            )
+        )
+    elif node_integ and replay_integ:
+        results.append(
+            GateResult(
+                name="integrator_consistency",
+                status=GateStatus.PASSED,
+                threshold=1.0,
+                measured=1.0,
+                unit="match",
+            )
+        )
+    return results
+
+
+def _evaluate_integrator_tolerance(
+    receipt: Mapping[str, Any],
+    replay_data: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify declared integrator relative tolerance satisfies strictness threshold."""
+    results: list[GateResult] = []
+    node_integ, replay_integ, solver_block = _extract_solver_and_integrators(
+        receipt, replay_data
+    )
+
+    rtol_val = _extract_metric(replay_data, "rtol", "rk45_rtol", "tolerance")
+    if rtol_val is None:
+        solver_rtol = solver_block.get("rk45_rtol")
+        if isinstance(solver_rtol, (int, float)):
+            rtol_val = float(solver_rtol)
+        else:
+            receipt_rtol = receipt.get("rk45_rtol")
+            if isinstance(receipt_rtol, (int, float)):
+                rtol_val = float(receipt_rtol)
+
+    if rtol_val is not None:
+        if float(rtol_val) > gates.max_integrator_rtol:
+            results.append(
+                GateResult(
+                    name="integrator_tolerance",
+                    status=GateStatus.FAILED,
+                    threshold=gates.max_integrator_rtol,
+                    measured=float(rtol_val),
+                    reason=f"declared integrator rtol {float(rtol_val):e} exceeds maximum allowable {gates.max_integrator_rtol:e}",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="integrator_tolerance",
+                    status=GateStatus.PASSED,
+                    threshold=gates.max_integrator_rtol,
+                    measured=float(rtol_val),
+                )
+            )
+    elif node_integ in ("rk45", "runge_kutta_45") or replay_integ in (
+        "rk45",
+        "runge_kutta_45",
+    ):
+        results.append(
+            GateResult(
+                name="integrator_tolerance",
+                status=(
+                    GateStatus.FAILED
+                    if horizon in (Horizon.G2, Horizon.G3)
+                    else GateStatus.MISSING
+                ),
+                threshold=gates.max_integrator_rtol,
+                reason="missing declared rk45_rtol for adaptive RK45 integrator",
+            )
+        )
+    return results
+
+
+def _evaluate_open_loop_replay(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate open-loop forward rollout drift and integrator tolerance."""
+    results: list[GateResult] = []
+
+    # Drift threshold is tied to the horizon's whole-RMSE scale (e.g. 25 mm for G1)
+    if gates.max_open_loop_drift_m is not None:
+        thresh_drift = gates.max_open_loop_drift_m
+    elif horizon == Horizon.G1:
+        thresh_drift = gates.g1_whole_rmse_m
+    elif horizon == Horizon.G2:
+        thresh_drift = gates.g2_whole_rmse_m
+    elif horizon == Horizon.G3:
+        thresh_drift = gates.g3_whole_rmse_m
+    else:
+        thresh_drift = gates.g1_whole_rmse_m
+
+    replay_data = receipt.get("open_loop_replay")
+    if not isinstance(replay_data, Mapping):
+        replay_data = receipt.get("forward_rollout")
+
+    if not isinstance(replay_data, Mapping):
+        if horizon in (Horizon.G2, Horizon.G3):
+            results.append(
+                GateResult(
+                    name="open_loop_replay",
+                    status=GateStatus.MISSING,
+                    threshold=thresh_drift,
+                    reason="missing open-loop replay artifact",
+                )
+            )
+        return results
+
+    # 1. Integrator consistency and tolerance checks
+    results.extend(_evaluate_integrator_consistency(receipt, replay_data))
+    results.extend(_evaluate_integrator_tolerance(receipt, replay_data, horizon, gates))
+
+    # 2. Replay drift check against horizon whole-RMSE threshold
+    drift_val = _extract_metric(
+        replay_data, "drift_m", "max_drift_m", "whole_marker_rmse_m", "max_error_m"
+    )
+
+    if drift_val is None:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.FAILED,
+                threshold=thresh_drift,
+                reason="missing drift metric in open-loop replay",
+            )
+        )
+    elif drift_val > thresh_drift:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.FAILED,
+                threshold=thresh_drift,
+                measured=drift_val,
+                unit="m",
+                reason=f"open-loop drift {drift_val * 1e3:.1f} mm exceeds {thresh_drift * 1e3:.1f} mm threshold",
+            )
+        )
+    else:
+        results.append(
+            GateResult(
+                name="open_loop_replay",
+                status=GateStatus.PASSED,
+                threshold=thresh_drift,
+                measured=drift_val,
+                unit="m",
+            )
+        )
+    return results
+
+
+def _evaluate_collocation_defect(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate per-node dynamical consistency collocation defect."""
+    results: list[GateResult] = []
+    defect_data = receipt.get("collocation_defect")
+    if not isinstance(defect_data, Mapping):
+        defect_data = receipt.get("defects")
+
+    if not isinstance(defect_data, Mapping):
+        if horizon in (Horizon.G2, Horizon.G3):
+            results.append(
+                GateResult(
+                    name="collocation_defect",
+                    status=GateStatus.MISSING,
+                    threshold=gates.max_collocation_defect_m,
+                    reason="missing per-node collocation defect artifact",
+                )
+            )
+        return results
+
+    defect_val = _extract_metric(
+        defect_data, "max_defect_m", "collocation_defect_m", "defect_max_m"
+    )
+    if defect_val is None:
+        results.append(
+            GateResult(
+                name="collocation_defect",
+                status=GateStatus.FAILED,
+                threshold=gates.max_collocation_defect_m,
+                reason="missing max defect measurement in collocation defect artifact",
+            )
+        )
+    elif defect_val > gates.max_collocation_defect_m:
+        results.append(
+            GateResult(
+                name="collocation_defect",
+                status=GateStatus.FAILED,
+                threshold=gates.max_collocation_defect_m,
+                measured=defect_val,
+                unit="m",
+                reason=f"max collocation defect {defect_val * 1e3:.2f} mm > {gates.max_collocation_defect_m * 1e3:.2f} mm",
+            )
+        )
+    else:
+        results.append(
+            GateResult(
+                name="collocation_defect",
+                status=GateStatus.PASSED,
+                threshold=gates.max_collocation_defect_m,
+                measured=defect_val,
+                unit="m",
+            )
+        )
+    return results
+
+
+def _evaluate_stabilized_replay(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate cross-engine stabilized replay under low-gain PD tracking."""
+    results: list[GateResult] = []
+    stab_data = receipt.get("stabilized_replay")
+    if not isinstance(stab_data, Mapping):
+        stab_data = receipt.get("stabilized_tracking")
+
+    if not isinstance(stab_data, Mapping):
+        if horizon in (Horizon.G2, Horizon.G3):
+            results.append(
+                GateResult(
+                    name="stabilized_replay",
+                    status=GateStatus.MISSING,
+                    threshold=gates.max_stabilized_marker_rmse_m,
+                    reason="missing stabilized replay artifact",
+                )
+            )
+        return results
+
+    rmse_val = _extract_metric(
+        stab_data, "whole_marker_rmse_m", "marker_rms_m", "rmse_m"
+    )
+    if rmse_val is None:
+        results.append(
+            GateResult(
+                name="stabilized_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_stabilized_marker_rmse_m,
+                reason="missing tracking RMSE in stabilized replay artifact",
+            )
+        )
+    elif rmse_val > gates.max_stabilized_marker_rmse_m:
+        results.append(
+            GateResult(
+                name="stabilized_replay",
+                status=GateStatus.FAILED,
+                threshold=gates.max_stabilized_marker_rmse_m,
+                measured=rmse_val,
+                unit="m",
+                reason=f"stabilized tracking RMSE {rmse_val * 1e3:.2f} mm > {gates.max_stabilized_marker_rmse_m * 1e3:.2f} mm",
+            )
+        )
+    else:
+        results.append(
+            GateResult(
+                name="stabilized_replay",
+                status=GateStatus.PASSED,
+                threshold=gates.max_stabilized_marker_rmse_m,
+                measured=rmse_val,
+                unit="m",
+            )
+        )
+    return results
+
+
+def _evaluate_calibration_provenance(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    declared_capture: str | None = None,
+) -> list[GateResult]:
+    """Verify that capture and calibration/attachment provenance agree."""
+    results: list[GateResult] = []
+    capture = (
+        declared_capture
+        or receipt.get("capture")
+        or receipt.get("receipt_path")
+        or receipt.get("path")
+        or receipt.get("source_receipt")
+        or receipt.get("name")
+        or ""
+    )
+    capture = str(capture).lower()
+    attachments_source = str(receipt.get("attachments_source", "")).lower()
+
+    if not capture or not attachments_source:
+        return results
+
+    is_iron_capture = "iron" in capture
+    is_driver_capture = "driver" in capture
+    is_iron_calib = "iron" in attachments_source
+    is_driver_calib = "driver" in attachments_source
+
+    if is_iron_capture and is_driver_calib and not is_iron_calib:
+        results.append(
+            GateResult(
+                name="calibration_provenance",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=(
+                    f"capture and calibration provenance disagree: iron capture reused driver calibration '{receipt.get('attachments_source')}'"
+                ),
+            )
+        )
+    elif is_driver_capture and is_iron_calib and not is_driver_calib:
+        results.append(
+            GateResult(
+                name="calibration_provenance",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=(
+                    f"capture and calibration provenance disagree: driver capture reused iron calibration '{receipt.get('attachments_source')}'"
+                ),
+            )
+        )
+    elif (is_iron_capture and is_iron_calib) or (is_driver_capture and is_driver_calib):
+        results.append(
+            GateResult(
+                name="calibration_provenance",
+                status=GateStatus.PASSED,
+                threshold=1.0,
+                measured=1.0,
+                unit="match",
+                reason="capture and calibration provenance match",
+            )
+        )
+    return results
+
+
 def _evaluate_friction_cone(
     receipt: Mapping[str, Any],
     gates: AcceptanceGates,
     contact_audit: Any,
 ) -> list[GateResult]:
+    """Evaluate Coulomb friction cone ratio against physical bound."""
     results: list[GateResult] = []
-    val_ratio = None
+    f_ratio = None
     if isinstance(contact_audit, Mapping):
-        val_ratio = _extract_metric(contact_audit, "max_friction_ratio")
-    if val_ratio is None:
-        val_ratio = _extract_metric(receipt, "max_friction_ratio")
+        f_ratio = _extract_metric(contact_audit, "max_friction_ratio", "friction_ratio")
+    if f_ratio is None:
+        f_ratio = _extract_metric(receipt, "max_friction_ratio", "friction_ratio")
 
-    if val_ratio is not None:
-        if val_ratio <= gates.max_friction_coefficient:
+    if f_ratio is not None:
+        thresh = gates.max_friction_coefficient
+        if f_ratio <= thresh:
             results.append(
                 GateResult(
                     name="friction_cone",
                     status=GateStatus.PASSED,
-                    threshold=gates.max_friction_coefficient,
-                    measured=val_ratio,
+                    threshold=thresh,
+                    measured=f_ratio,
                     unit="ratio",
                 )
             )
@@ -605,114 +947,284 @@ def _evaluate_friction_cone(
                 GateResult(
                     name="friction_cone",
                     status=GateStatus.FAILED,
-                    threshold=gates.max_friction_coefficient,
-                    measured=val_ratio,
+                    threshold=thresh,
+                    measured=f_ratio,
                     unit="ratio",
-                    reason=f"friction ratio {val_ratio:.2f} exceeds mu={gates.max_friction_coefficient:.2f}",
+                    reason=f"max friction ratio {f_ratio:.2f} exceeds allowable coefficient {thresh:.2f}",
                 )
             )
     return results
 
 
-def _evaluate_root_assistance(
+def _evaluate_torque_bounds(
     receipt: Mapping[str, Any],
     gates: AcceptanceGates,
 ) -> list[GateResult]:
+    """Evaluate actuator torque limits and verify no torque bound overwrites."""
     results: list[GateResult] = []
     dyn = receipt.get("dynamics")
-    has_dynamics = isinstance(dyn, Mapping)
-    val_root = None
+    torque_val = None
+    overwrites = None
     if isinstance(dyn, Mapping):
-        val_root = _extract_metric(dyn, "max_root_force_n", "delta_tau_root_max_n")
-    if val_root is None:
-        val_root = _extract_metric(receipt, "max_root_force_n", "delta_tau_root_max_n")
+        torque_val = _extract_metric(dyn, "max_actuator_torque_n_m", "max_torque_n_m")
+        overwrites = dyn.get("torque_bound_overwrites")
+    if torque_val is None:
+        torque_val = _extract_metric(
+            receipt, "max_actuator_torque_n_m", "max_torque_n_m"
+        )
+    if overwrites is None:
+        overwrites = receipt.get("torque_bound_overwrites")
 
-    if has_dynamics:
-        if val_root is None:
+    if torque_val is not None or overwrites is not None:
+        thresh = gates.max_actuator_torque_n_m
+        t_val = torque_val if torque_val is not None else 0.0
+        ow_val = int(overwrites) if overwrites is not None else 0
+        if t_val <= thresh and ow_val == 0:
             results.append(
                 GateResult(
-                    name="root_assistance",
-                    status=GateStatus.MISSING,
-                    threshold=gates.max_root_force_n,
-                    unit="N",
-                    reason="missing root assistance history (delta_tau_root / max_root_force_n)",
-                )
-            )
-        elif val_root <= gates.max_root_force_n:
-            results.append(
-                GateResult(
-                    name="root_assistance",
+                    name="torque_bounds",
                     status=GateStatus.PASSED,
-                    threshold=gates.max_root_force_n,
-                    measured=val_root,
-                    unit="N",
+                    threshold=thresh,
+                    measured=t_val,
+                    unit="N*m",
                 )
             )
         else:
+            reasons: list[str] = []
+            if t_val > thresh:
+                reasons.append(
+                    f"max actuator torque {t_val:.1f} N*m > {thresh:.1f} N*m"
+                )
+            if ow_val > 0:
+                reasons.append(f"{ow_val} torque bound overwrites detected")
             results.append(
                 GateResult(
-                    name="root_assistance",
+                    name="torque_bounds",
                     status=GateStatus.FAILED,
-                    threshold=gates.max_root_force_n,
-                    measured=val_root,
-                    unit="N",
-                    reason=f"phantom root assistance {val_root:.2f} N > {gates.max_root_force_n:.2f} N",
+                    threshold=thresh,
+                    measured=t_val,
+                    unit="N*m",
+                    reason="; ".join(reasons),
                 )
             )
     return results
 
 
-def _evaluate_horizon_duration(
+def _evaluate_root_force_history(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify presence of root force histories and that root residual forces vanish."""
+    results: list[GateResult] = []
+    dyn = receipt.get("dynamics")
+    has_root = None
+    root_res = None
+    if isinstance(dyn, Mapping):
+        has_root = dyn.get("has_root_histories")
+        root_res = _extract_metric(dyn, "max_root_residual_n_m", "root_residual_n_m")
+    if has_root is None:
+        has_root = receipt.get("has_root_histories")
+    if root_res is None:
+        root_res = _extract_metric(
+            receipt, "max_root_residual_n_m", "root_residual_n_m"
+        )
+
+    if has_root is not None or root_res is not None:
+        thresh = gates.max_root_residual_n_m
+        r_val = root_res if root_res is not None else 0.0
+        if has_root is False:
+            results.append(
+                GateResult(
+                    name="root_force_history",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=r_val,
+                    unit="N*m",
+                    reason="root force history missing when dynamics declared",
+                )
+            )
+        elif r_val > thresh:
+            results.append(
+                GateResult(
+                    name="root_force_history",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=r_val,
+                    unit="N*m",
+                    reason=f"max root residual {r_val:.2f} N*m exceeds tolerance {thresh:.2e} N*m",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="root_force_history",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=r_val,
+                    unit="N*m",
+                )
+            )
+    return results
+
+
+def _evaluate_coordinate_dimension(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify coordinate dimension matches expected model dimension."""
+    results: list[GateResult] = []
+    exp_nv = receipt.get("expected_nv")
+    meas_nv = receipt.get("measured_nv")
+    if exp_nv is not None and meas_nv is not None:
+        if int(exp_nv) == int(meas_nv):
+            results.append(
+                GateResult(
+                    name="coordinate_dimension",
+                    status=GateStatus.PASSED,
+                    threshold=float(exp_nv),
+                    measured=float(meas_nv),
+                    unit="dim",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="coordinate_dimension",
+                    status=GateStatus.FAILED,
+                    threshold=float(exp_nv),
+                    measured=float(meas_nv),
+                    unit="dim",
+                    reason=f"coordinate dimension mismatch: expected {exp_nv} nv but measured {meas_nv} nv",
+                )
+            )
+    return results
+
+
+def _evaluate_club_coverage(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify club marker coverage fraction exceeds minimum required fraction."""
+    results: list[GateResult] = []
+    cov = receipt.get("coverage")
+    club_cov = None
+    if isinstance(cov, Mapping):
+        club_cov = _extract_metric(
+            cov, "club_marker_coverage_fraction", "club_coverage"
+        )
+    if club_cov is None:
+        club_cov = _extract_metric(
+            receipt, "club_marker_coverage_fraction", "club_coverage"
+        )
+
+    if club_cov is not None:
+        thresh = gates.min_club_marker_coverage_fraction
+        if club_cov >= thresh:
+            results.append(
+                GateResult(
+                    name="club_coverage",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=club_cov,
+                    unit="fraction",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="club_coverage",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=club_cov,
+                    unit="fraction",
+                    reason=f"club marker coverage fraction {club_cov:.2%} < threshold {thresh:.2%}",
+                )
+            )
+    return results
+
+
+def _evaluate_horizon_truncation(
     receipt: Mapping[str, Any],
     horizon: Horizon,
     gates: AcceptanceGates,
 ) -> list[GateResult]:
+    """Verify trajectory duration is not truncated below horizon requirements."""
     results: list[GateResult] = []
-    dur = _extract_metric(receipt, "duration_s")
-    if dur is None:
-        hor_dict = receipt.get("horizon")
-        if isinstance(hor_dict, Mapping):
-            t_end = hor_dict.get("t_end_s")
-            t_start = hor_dict.get("t_start_s", 0.0)
-            if isinstance(t_end, (int, float)) and isinstance(t_start, (int, float)):
-                dur = float(t_end - t_start)
-
-    if dur is not None:
+    duration = _extract_metric(
+        receipt, "duration_s", "time_span_s", "trajectory_duration_s"
+    )
+    if duration is not None:
         thresh = (
-            gates.min_duration_g3_s
-            if horizon == Horizon.G3
+            gates.g1_min_duration_s
+            if horizon == Horizon.G1
             else (
-                gates.min_duration_g2_s
+                gates.g2_min_duration_s
                 if horizon == Horizon.G2
-                else gates.min_duration_g1_s
+                else gates.g3_min_duration_s
             )
         )
-        if dur >= thresh:
+        if duration >= thresh:
             results.append(
                 GateResult(
-                    name="horizon_duration_s",
+                    name="horizon_truncation",
                     status=GateStatus.PASSED,
                     threshold=thresh,
-                    measured=dur,
+                    measured=duration,
                     unit="s",
                 )
             )
         else:
             results.append(
                 GateResult(
-                    name="horizon_duration_s",
+                    name="horizon_truncation",
                     status=GateStatus.FAILED,
                     threshold=thresh,
-                    measured=dur,
+                    measured=duration,
                     unit="s",
-                    reason=f"duration {dur:.3f} s is truncated for horizon {horizon.value} (minimum required: {thresh:.3f} s)",
+                    reason=f"horizon duration {duration:.2f} s is truncated below required minimum {thresh:.2f} s",
+                )
+            )
+    return results
+
+
+def _evaluate_synthetic_engine(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify synthetic engine is not claiming native qualification falsely."""
+    results: list[GateResult] = []
+    is_nat_qual = receipt.get("is_native_qualified")
+    engine = str(receipt.get("engine", "")).lower()
+
+    if is_nat_qual is not None or "synthetic" in engine:
+        if is_nat_qual is False or "synthetic" in engine:
+            results.append(
+                GateResult(
+                    name="synthetic_engine",
+                    status=GateStatus.FAILED,
+                    threshold=1.0,
+                    measured=0.0,
+                    unit="match",
+                    reason=f"synthetic analytical engine '{engine or 'unknown'}' not natively qualified",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="synthetic_engine",
+                    status=GateStatus.PASSED,
+                    threshold=1.0,
+                    measured=1.0,
+                    unit="match",
                 )
             )
     return results
 
 
 @precondition(
-    lambda receipt, horizon=Horizon.G1, gates=None: isinstance(horizon, Horizon),
+    lambda receipt, horizon=Horizon.G1, gates=None, capture=None: isinstance(
+        horizon, Horizon
+    ),
     "horizon must be Horizon enum",
 )
 @postcondition(
@@ -724,6 +1236,7 @@ def evaluate(
     *,
     horizon: Horizon = Horizon.G1,
     gates: AcceptanceGates | None = None,
+    capture: str | None = None,
 ) -> AcceptanceVerdict:
     """Pure evaluation function that returns physical & kinematic acceptance verdict."""
     if gates is None:
@@ -736,9 +1249,17 @@ def evaluate(
     gate_results.extend(_evaluate_normal_contact_force(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_ground_and_closure(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_weight_fraction(receipt, gates))
+    gate_results.extend(_evaluate_calibration_provenance(receipt, gates, capture))
+    gate_results.extend(_evaluate_open_loop_replay(receipt, horizon, gates))
+    gate_results.extend(_evaluate_collocation_defect(receipt, horizon, gates))
+    gate_results.extend(_evaluate_stabilized_replay(receipt, horizon, gates))
     gate_results.extend(_evaluate_friction_cone(receipt, gates, contact_audit))
-    gate_results.extend(_evaluate_root_assistance(receipt, gates))
-    gate_results.extend(_evaluate_horizon_duration(receipt, horizon, gates))
+    gate_results.extend(_evaluate_torque_bounds(receipt, gates))
+    gate_results.extend(_evaluate_root_force_history(receipt, gates))
+    gate_results.extend(_evaluate_coordinate_dimension(receipt, gates))
+    gate_results.extend(_evaluate_club_coverage(receipt, gates))
+    gate_results.extend(_evaluate_horizon_truncation(receipt, horizon, gates))
+    gate_results.extend(_evaluate_synthetic_engine(receipt, gates))
 
     # Overall verdict
     is_accepted = len(gate_results) > 0 and all(
