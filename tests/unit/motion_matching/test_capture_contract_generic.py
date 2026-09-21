@@ -32,11 +32,13 @@ def test_tour_capture_is_an_instance_of_capture_contract() -> None:
     assert TOUR_CAPTURE.frames == 654
 
 
+@pytest.mark.requires_mocap_fixtures
 @pytest.mark.skipif(
     not CANONICAL_DRIVER_C3D.is_file(), reason="canonical C3D not present"
 )
 def test_contract_accepts_tour_capture_unchanged() -> None:
     """TDD Step 1: Contract accepts canonical tour capture unchanged with exact SHA."""
+    pytest.importorskip("ezc3d")
     report = validate_capture_contract(CANONICAL_DRIVER_C3D, contract=TOUR_CAPTURE)
     assert isinstance(report, CaptureValidationReport)
     assert report.is_valid is True
@@ -55,9 +57,11 @@ def test_contract_accepts_tour_capture_unchanged() -> None:
     assert cap_generic.valid_count() == cap_frozen.valid_count()
 
 
+@pytest.mark.requires_mocap_fixtures
 @pytest.mark.skipif(not CMU_MOCAP_C3D.is_file(), reason="CMU C3D not present")
 def test_contract_rejects_cmu_locomotion_c3d_with_named_reasons() -> None:
     """TDD Step 2: Rejects CMU locomotion C3D with explicit named reasons."""
+    pytest.importorskip("ezc3d")
     # Strict contract requiring metres, club segment, and no unmapped labels
     contract = CaptureContract(
         units="m",
@@ -85,9 +89,11 @@ def test_contract_rejects_cmu_locomotion_c3d_with_named_reasons() -> None:
     assert "invalid_units" in str(load_exc.value)
 
 
+@pytest.mark.requires_mocap_fixtures
 @pytest.mark.skipif(not CMU_MOCAP_C3D.is_file(), reason="CMU C3D not present")
 def test_contract_with_label_map_and_unit_conversion() -> None:
     """Generic contract allows custom label maps and unit scaling."""
+    pytest.importorskip("ezc3d")
     label_map = {
         "Subject1:LFHD": "HeadFront",
         "Subject1:RFHD": "HeadSide",
