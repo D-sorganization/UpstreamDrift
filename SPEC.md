@@ -1,3 +1,23 @@
+## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
+
+Freezes versioned baseline packages, fit metrics, and qualification profiles under the Tour Baselines program:
+- **Versioned Baseline Packages (`src/shared/python/tour_baselines/packages.py`)**:
+  - Defines `tour-baseline-package/1.0.0` specification with structured `BaselinePackageManifest` and payload bundles.
+  - Manifest encapsulates schema version, model identifier, target capture metadata, fit mode, coordinate plane, parameter counts, native sample rate, SHA-256 asset checksums, and strict provenance records.
+  - Implements fail-closed export and import functions (`export_baseline_package()`, `import_baseline_package()`) with mandatory SHA-256 digest verification on all payload arrays.
+  - Provides `load_legacy_receipt_as_unverified_package()` maintaining backwards compatibility while explicitly marking unverified status.
+- **Unconflated Fit Metrics (`src/shared/python/tour_baselines/metrics.py`)**:
+  - Enforces five distinct, non-conflated status enums: `SolverStatus`, `KinematicAccuracyStatus`, `DynamicFeasibilityStatus`, `ScientificQualificationStatus`, and `ProductPromotionStatus`.
+  - Implements immutable `TourFitMetrics` dataclass with explicit input range assertions that survive optimization flags (`python -O`).
+  - Implements landmark hashing (`hash_landmark_set()`) and metric evaluation (`compute_tour_fit_metrics()`) strictly auditing marker residuals, closure error, torque violations, and energy conservation.
+- **Fail-Closed Qualification Profiles (`src/shared/python/tour_baselines/qualification.py`)**:
+  - Establishes `QualificationProfile` base class and four frozen profiles: `FullBodyAuthoritativeProfile`, `DoublePendulumPlanarProfile`, `TriplePendulumPlanarProfile`, and `UpperBodyGolferProfile`.
+  - Implements fail-closed `evaluate_qualification()` evaluating G1 (kinematic accuracy), G2 (dynamic feasibility), and G3 (scientific qualification) release gates.
+  - Enforces mandatory native replay evidence verification (rejecting missing replays or unverified source parity) and synthetic test detection guards (preventing mock passes from promoting to release).
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_metrics_calculation.py`, `test_qualification_profiles.py`, `test_baseline_packages.py` (13 tests, 48 total in tour baselines suite).
+  - Emitted synthetic baseline packages and verification receipts under `docs/plans/tour_baselines/evidence/` and documented in `qualification_profiles.md`.
+
 ## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
 
 Freezes target audits, marker measurement semantics, native clocks/events, and provenance under the Tour Baselines program:

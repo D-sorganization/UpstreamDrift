@@ -15,6 +15,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
+class ModelClass(str, Enum):
+    """Declared model class and topology category under TB-00 / TB-02."""
+
+    DOUBLE_PENDULUM_PLANAR = "double_pendulum_planar"
+    TRIPLE_PENDULUM_PLANAR = "triple_pendulum_planar"
+    UPPER_BODY_GOLFER_3D = "upper_body_golfer_3d"
+    FULL_BODY_MECH = "full_body_mech"
+
+
 class ModelTopology(str, Enum):
     """Topological class of the biomechanical or physical mechanism."""
 
@@ -49,7 +58,9 @@ class SourceOwner(str, Enum):
 class FitMode(str, Enum):
     """Nature of the numerical fit or trajectory."""
 
+    KINEMATIC = "kinematic"
     KINEMATIC_POSE = "kinematic_pose"
+    PRESCRIBED_INPUT = "prescribed_input"
     PRESCRIBED_TRAJECTORY = "prescribed_trajectory"
     TORQUE_DRIVEN = "torque_driven"
 
