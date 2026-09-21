@@ -77,9 +77,8 @@ if sys.platform == "win32":
             _job,
             win32job.JobObjectExtendedLimitInformation,
         )
-        _info["BasicLimitInformation"]["LimitFlags"] = (
-            win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-        )
+        limit_flags = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        _info["BasicLimitInformation"]["LimitFlags"] = limit_flags
         win32job.SetInformationJobObject(
             _job,
             win32job.JobObjectExtendedLimitInformation,
@@ -87,14 +86,17 @@ if sys.platform == "win32":
         )
 
         def _assign_to_job(proc: subprocess.Popen[bytes]) -> None:
+            pid = getattr(proc, "pid", None)
+            if not isinstance(pid, int):
+                return
             try:
                 handle = win32api.OpenProcess(
                     win32con.PROCESS_SET_QUOTA | win32con.PROCESS_TERMINATE,
                     False,
-                    proc.pid,
+                    pid,
                 )
                 win32job.AssignProcessToJobObject(_job, handle)
-            except (OSError, RuntimeError, TypeError) as exc:
+            except (OSError, RuntimeError, TypeError, win32api.error) as exc:
                 logger.debug("Failed to assign process to job object: %s", exc)
 
     except ImportError:
@@ -185,6 +187,7 @@ class ProcessManager:
         self._output_threads: dict[str, threading.Thread] = {}
         # Thread-safe guard for running_processes dict (issue #2715)
         self._process_lock = threading.RLock()
+        self.on_process_list_changed: Callable[[], None] | None = None
 
         # Persistent log file for all process output
         self._log_dir = Path.home() / ".golf_modeling_suite"
@@ -442,7 +445,7 @@ class ProcessManager:
     ) -> None:
         with self._process_lock:
             self.running_processes[name] = process
-        if getattr(self, "on_process_list_changed", None):
+        if self.on_process_list_changed is not None:
             with contextlib.suppress(Exception):
                 self.on_process_list_changed()
 
@@ -490,6 +493,109 @@ class ProcessManager:
         return_code = process.wait()
         self._emit_output(name, f"[exited with code {return_code}]")
 
+    def launch_script_with_args(
+        self,
+        name: str,
+        script_path: Path,
+        args: list[str] | tuple[str, ...],
+        cwd: Path,
+        env: dict[str, str] | None = None,
+        extra_python_paths: tuple[Path, ...] = (),
+        keep_terminal_open: bool = False,
+    ) -> subprocess.Popen[bytes] | None:
+        """Launch a Python script with command-line arguments."""
+        return self.launch_script(
+            name=name,
+            script_path=script_path,
+            cwd=cwd,
+            env=env,
+            extra_python_paths=extra_python_paths,
+            keep_terminal_open=keep_terminal_open,
+            args=args,
+        )
+
+    def _ensure_nt_pythonpath(self, process_env: dict[str, str]) -> None:
+        """Add repo root and src to PYTHONPATH on Windows if missing."""
+        if os.name != "nt":
+            return
+        current_pythonpath = process_env.get("PYTHONPATH", "")
+        repo_root_str = str(self.repo_root)
+        src_dir_str = str(self.repo_root / "src")
+
+        current_paths = current_pythonpath.split(";") if current_pythonpath else []
+        paths_to_add = []
+        if repo_root_str not in current_paths:
+            paths_to_add.append(repo_root_str)
+        if src_dir_str not in current_paths:
+            paths_to_add.append(src_dir_str)
+
+        if paths_to_add:
+            process_env["PYTHONPATH"] = (
+                f"{';'.join(paths_to_add)};{current_pythonpath}"
+                if current_pythonpath
+                else ";".join(paths_to_add)
+            )
+
+    def _spawn_and_track_process(
+        self,
+        name: str,
+        cmd_args: list[str],
+        cwd: Path,
+        process_env: dict[str, str],
+        keep_terminal_open: bool,
+    ) -> subprocess.Popen[bytes]:
+        """Spawn subprocess and track it in running processes and job object."""
+        logger.info(
+            "Launching %s: cmd=%s, cwd=%s, PYTHONPATH=%s",
+            name,
+            cmd_args,
+            cwd,
+            process_env.get("PYTHONPATH", "<unset>")[:300],
+        )
+        if self.use_separate_terminals:
+            if os.name == "nt":
+                cmd_str = _build_windows_console_cmd(
+                    cmd_args,
+                    keep_terminal_open=keep_terminal_open,
+                )
+                process = subprocess.Popen(
+                    cmd_str,
+                    cwd=str(cwd),
+                    env=process_env,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                process = secure_popen(
+                    cmd_args,
+                    cwd=cwd,
+                    suite_root=self.repo_root,
+                    env=process_env,
+                    preexec_fn=_preexec_fn,
+                )
+        else:
+            process = secure_popen(
+                cmd_args,
+                cwd=cwd,
+                suite_root=self.repo_root,
+                env=process_env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                preexec_fn=_preexec_fn,
+            )
+            t = threading.Thread(
+                target=self._stream_output,
+                args=(name, process),
+                daemon=True,
+            )
+            t.start()
+            self._output_threads[name] = t
+
+        _assign_to_job(process)
+        self._add_to_running_processes(name, process)
+        logger.info(f"Launched {name} (PID: {process.pid})")
+        return process
+
     def launch_script(
         self,
         name: str,
@@ -498,6 +604,7 @@ class ProcessManager:
         env: dict[str, str] | None = None,
         extra_python_paths: tuple[Path, ...] = (),
         keep_terminal_open: bool = False,
+        args: list[str] | tuple[str, ...] | None = None,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python script as a subprocess.
 
@@ -506,9 +613,11 @@ class ProcessManager:
             script_path: Path to the Python script.
             cwd: Working directory for the process.
             env: Optional environment variables.
+            extra_python_paths: Extra paths to include in PYTHONPATH.
             keep_terminal_open: If True, keep terminal open on script exit/error
                                (uses cmd /k with pause). Default False.
                                Only effective in separate-terminal mode.
+            args: Optional command line arguments to pass to the script.
 
         Returns:
             The process object if successful, None otherwise.
@@ -526,67 +635,13 @@ class ProcessManager:
             # Validate working directory (issue #2715: reject paths outside repo)
             cwd = self._validate_context_path(cwd)
 
-            # Diagnostic: log full launch details for debugging silent failures
-            logger.info(
-                "Launching script %s: cmd=[%s, %s], cwd=%s, PYTHONPATH=%s",
-                name,
-                sys.executable,
-                script_path,
-                cwd,
-                process_env.get("PYTHONPATH", "<unset>")[:300],
+            cmd_args = [sys.executable, str(script_path)]
+            if args:
+                cmd_args.extend(str(a) for a in args)
+
+            return self._spawn_and_track_process(
+                name, cmd_args, cwd, process_env, keep_terminal_open
             )
-
-            if self.use_separate_terminals:
-                # Legacy: each engine gets its own console window.
-                # On Windows we must pass a string to open a new console but
-                # quote both the interpreter and script paths so that spaces
-                # and other shell-significant characters cannot inject commands.
-                if os.name == "nt":
-                    cmd_str = _build_windows_console_cmd(
-                        [sys.executable, str(script_path)],
-                        keep_terminal_open=keep_terminal_open,
-                    )
-                    process = subprocess.Popen(
-                        cmd_str,
-                        cwd=str(cwd),
-                        env=process_env,
-                        creationflags=CREATE_NEW_CONSOLE,
-                    )
-                else:
-                    process = secure_popen(
-                        [sys.executable, str(script_path)],
-                        cwd=cwd,
-                        suite_root=self.repo_root,
-                        env=process_env,
-                        preexec_fn=_preexec_fn,
-                    )
-            else:
-                # Unified console: capture output via pipes
-                process = secure_popen(
-                    [sys.executable, str(script_path)],
-                    cwd=cwd,
-                    suite_root=self.repo_root,
-                    env=process_env,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
-                    preexec_fn=_preexec_fn,
-                )
-                # Stream output in a background thread
-                t = threading.Thread(
-                    target=self._stream_output,
-                    args=(name, process),
-                    daemon=True,
-                )
-                t.start()
-                self._output_threads[name] = t
-
-            _assign_to_job(process)
-
-            # Guard running_processes dict with lock (issue #2715)
-            self._add_to_running_processes(name, process)
-            logger.info(f"Launched {name} (PID: {process.pid})")
-            return process
 
         except (
             FileNotFoundError,
@@ -598,7 +653,7 @@ class ProcessManager:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
-    def launch_module(  # noqa: C901
+    def launch_module(
         self,
         name: str,
         module_name: str,
@@ -614,6 +669,7 @@ class ProcessManager:
             module_name: Python module name (for -m flag).
             cwd: Working directory for the process.
             env: Optional environment variables.
+            extra_python_paths: Extra paths to include in PYTHONPATH.
             keep_terminal_open: If True, keep terminal open on script exit/error
                                (uses cmd /k with pause). Default False.
                                Only effective in separate-terminal mode.
@@ -637,88 +693,12 @@ class ProcessManager:
                     f"Invalid module name (potential injection): {module_name!r}"
                 )
 
-            if os.name == "nt":
-                current_pythonpath = process_env.get("PYTHONPATH", "")
-                repo_root_str = str(self.repo_root)
-                src_dir_str = str(self.repo_root / "src")
+            self._ensure_nt_pythonpath(process_env)
 
-                current_paths = (
-                    current_pythonpath.split(";") if current_pythonpath else []
-                )
-                paths_to_add = []
-                if repo_root_str not in current_paths:
-                    paths_to_add.append(repo_root_str)
-                if src_dir_str not in current_paths:
-                    paths_to_add.append(src_dir_str)
-
-                if paths_to_add:
-                    process_env["PYTHONPATH"] = (
-                        f"{';'.join(paths_to_add)};{current_pythonpath}"
-                        if current_pythonpath
-                        else ";".join(paths_to_add)
-                    )
-
-            # Diagnostic: log full launch details for debugging silent failures
-            logger.info(
-                "Launching module %s: cmd=[%s, -m, %s], cwd=%s, PYTHONPATH=%s",
-                name,
-                sys.executable,
-                module_name,
-                cwd,
-                process_env.get("PYTHONPATH", "<unset>")[:300],
+            module_cmd = [sys.executable, "-m", module_name]
+            return self._spawn_and_track_process(
+                name, module_cmd, cwd, process_env, keep_terminal_open
             )
-
-            if self.use_separate_terminals:
-                # Legacy: each engine gets its own console window.
-                # On Windows we must pass a string to open a new console but
-                # quote the interpreter path so spaces cannot inject commands.
-                # module_name has already been validated against the allowlist
-                # regex so it is safe to pass through.
-                if os.name == "nt":
-                    cmd_str = _build_windows_console_cmd(
-                        [sys.executable, "-m", module_name],
-                        keep_terminal_open=keep_terminal_open,
-                    )
-                    process = subprocess.Popen(
-                        cmd_str,
-                        cwd=str(cwd),
-                        env=process_env,
-                        creationflags=CREATE_NEW_CONSOLE,
-                    )
-                else:
-                    process = secure_popen(
-                        [sys.executable, "-m", module_name],
-                        cwd=cwd,
-                        suite_root=self.repo_root,
-                        env=process_env,
-                        preexec_fn=_preexec_fn,
-                    )
-            else:
-                # Unified console: capture output via pipes
-                process = secure_popen(
-                    [sys.executable, "-m", module_name],
-                    cwd=cwd,
-                    suite_root=self.repo_root,
-                    env=process_env,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
-                    preexec_fn=_preexec_fn,
-                )
-                t = threading.Thread(
-                    target=self._stream_output,
-                    args=(name, process),
-                    daemon=True,
-                )
-                t.start()
-                self._output_threads[name] = t
-
-            _assign_to_job(process)
-
-            # Guard running_processes dict with lock (issue #2715)
-            self._add_to_running_processes(name, process)
-            logger.info(f"Launched module {name} (PID: {process.pid})")
-            return process
 
         except (
             FileNotFoundError,
@@ -915,7 +895,7 @@ class ProcessManager:
                 logger.error(f"Error terminating {name}: {e}")
 
         self.running_processes.clear()
-        if getattr(self, "on_process_list_changed", None):
+        if self.on_process_list_changed is not None:
             with contextlib.suppress(Exception):
                 self.on_process_list_changed()
 

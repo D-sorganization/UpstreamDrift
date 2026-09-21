@@ -369,6 +369,24 @@ Enforces the capability state contract across discovery, validation, and launche
   - Validates capability health check invariants, state transitions, and diagnostic message fidelity.
   - Ensures robust fallback behavior when optional dependencies are absent.
 
+## Compose Terrain, Putting, Scene, Bunker, and Simulator Delivery Modes (ORG-15, #10524)
+
+Composes Terrain, Putting, Scene, Bunker, and Simulator Delivery modes under a unified Shot & Course Lab coordinator:
+- **Shot & Course Lab Coordinator (`src/shared/python/workspace/shot_course_workspace.py`)**:
+  - `ShotCourseWorkspaceCoordinator`: Coordinates view and simulation mode transitions across `TERRAIN`, `PUTTING`, `SCENE`, `BUNKER`, and `SIMULATOR`.
+  - Enforces explicit model assumptions and boundaries:
+    1. Scene view is for visual inspection only, is not physics, and fails closed with `SceneNonPhysicsError` when asked for computed shots.
+    2. Bunker runs preserve multi-fidelity tiers (`BunkerFidelityTier`: `F0_RIGID_SURROGATE`, `F1_RESISTANCE_FORCE`, `F2_COUPLED_CONTINUUM`, `F3_DISCRETE_ELEMENT`) and physical domain parameters on export/import round-trips.
+    3. Putting runs adhere strictly to rolling/ground contracts and USGA Stimp / rolling models.
+    4. Environment/terrain mutation creates an explicit new run/config revision and invalidates dependent runs (`TerrainMutationInvalidationError`) rather than silently changing historical results.
+    5. Simulator delivery checks declared capability descriptors (`CapabilityState.SUPPORTED`), requires destination evidence receipts (`SubmissionReceipt`), and fails closed with `UnsupportedSimulatorDestinationError` for unsupported destinations.
+- **Automated Verification & Integrity Gates (`tests/integration/test_shot_course_workspace.py`)**:
+  - Validates rejection of incompatible flight-to-ground records without 3D landing coordinates.
+  - Validates terrain edit invalidation of dependent runs.
+  - Validates scene-only view cannot report computed shots.
+  - Validates unsupported simulator destination is disabled.
+  - Validates putting fixture save/reopen, bunker fidelity export round-trip, and simulator network failure and cancellation flows.
+
 ## Baseline Capability Inventory and Preserve Entity Identity (ORG-01, #10510)
 
 Establishes the capability inventory baseline across all 104 launcher tiles and model definitions, enforcing immutable entity identity preservation across catalog discovery and migration:
@@ -381,6 +399,29 @@ Establishes the capability inventory baseline across all 104 launcher tiles and 
 - **Automated Verification & Integrity Gates (`tests/config/test_capability_migration_coverage.py`)**:
   - Validates 100% tile coverage across local and external provider roots (`UPSTREAM_DRIFT_PROVIDER_ROOTS`).
   - Strict regression gates ensuring legacy layouts and saved workspace configurations resolve without breakage.
+
+## Connect Swing, Impact, Flight, and Preserved Trajectory Viewers (ORG-14, #10523)
+
+Preserves specialized viewer identities and bridges Swing State Providers, Impact Solvers, and Ball Flight Trajectories across Shot Tracer (Qt), web BallFlight (`ui/src/pages/BallFlight.tsx`), and Impact Explorer (ROC):
+- **Shot Trajectory Handoff Coordinator (`src/shared/python/workspace/trajectory_handoff.py`)**:
+  - `ShotTrajectoryHandoffCoordinator`: Orchestrates swing-state extraction, end-to-end impact/flight simulation, wire format export, artifact registration, viewer interchange, and session rollback semantics.
+  - Implements ADR-0047: Preserves viewer identities across Shot Tracer (Qt), web BallFlight, and Impact Explorer without retiring viewers or merging distinct flight model families (`ud.flight_models` vs `swing_sim.flight`).
+- **Wire Contract & SI Trajectory Interchange (`swing_sim.ball_flight_trajectory/1`)**:
+  - Standardizes trajectory wire format with 6 canonical keys: `format`, `source_id`, `frame_id`, `channels`, `provenance`, and `samples`.
+  - Canonical flight frame: `flight_xfwd_yleft_zup` (`FLIGHT_FRAME_ID`), velocity channel `velocity_mps`, with parameter digest provenance.
+  - Retains immutable sample positions and timestamps across interchange; disk bytes and retained arrays are never mutated.
+  - `pipeline_result_to_trajectory_record` (`src/shared/python/physics/flight_trajectory_export.py`): Bridges `PipelineResult` from `SwingBallFlightPipeline` into the canonical wire contract.
+- **Honest Engine Sourcing & Extraction Refusal**:
+  - Integrates honest swing state sourcing: routes supported `manual` and `mujoco` (via `MuJoCoSwingStateProvider`) engines to `SwingBallFlightPipeline`.
+  - Refuses unsupported engine sourcing (`drake`, `pinocchio`) fail-closed with `UnsupportedEngineSourceError`.
+  - Refuses arbitrary unvalidated full-body runs fail-closed with `ExtractionAdapterError`, prohibiting clubhead impact guessing.
+  - Refuses mismatched frames and corrupted hashes fail-closed with `FrameUnitMismatchError` and `InvalidTrajectoryHashError`.
+- **Results Workspace Action Extension (`src/shared/python/workspace/results_workspace.py`)**:
+  - Adds `WorkspaceActionType.COMPARE_FLIGHT_MODELS` (`"open_in_compare_flight_models"`) and `WorkspaceActionType.OPEN_IN_IMPACT_EXPLORER` (`"open_in_impact_explorer"`).
+  - Diagnostic availability: Enables comparison and playback actions when artifacts match required categories (`ResultCategory.FLIGHT_TRAJECTORY` / `DYNAMIC_RUN`) and files exist on disk, providing actionable rationale when disabled.
+- **Session Context & Transaction Rollback**:
+  - Carries environmental conditions (`EnvironmentalConditions`) and launch parameters across active session context.
+  - Supports atomic staging and rollback (`begin_session_transaction`, `stage_tentative_trajectory`, `cancel_session_transaction`): user cancellation or simulation failure safely retains earlier active trajectory.
 
 ## Results Workspace Handoff and Action Integration (ORG-13, #10521)
 
@@ -401,6 +442,90 @@ Integrates existing `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with 
 - **Provenance Retention & Round-Trip Reimport (`export_result_with_provenance`, `reimport_result_artifact`)**:
   - Revalidates closed #8820 provenance integrity: stamps run ID, engine, model hash, UTC timestamp, units, and source hash into exported CSV headers and JSON metadata.
   - Full round-trip fidelity: `reimport_result_artifact` reconstructs typed result items and provenance metadata without data loss.
+
+## Research Capability Lifecycle and Excluded Workflows (ORG-22, #10530)
+
+Reconciles and documents intentionally excluded packages, manifest-only services, and research capabilities:
+- **Research Capability Lifecycle Manager (`src/config/research_capability_lifecycle.py`)**:
+  - `ResearchCapabilityLifecycleManager`: Enforces classification and lifecycle policies across all packages under `src/tools/`, preventing untiled non-excluded package drift.
+  - Fail-Closed GUI Representation Prevention: Explicitly forbids adapting or claiming CLI-only or headless research tools (`contraction`, `drift_control`, `model_converter`, `sg_optimizer`, etc.) as interactive GUI tiles (`CLINotInteractiveGUIError`).
+  - Retained Research CLI Entry Points: Retains executable command-line interfaces with standard package invocation (`python -m src.tools.contraction`, `python -m src.tools.drift_control`, `python -m src.tools.model_converter`, `python -m src.tools.sg_optimizer`).
+  - Explicit Follow-Up for Incomplete Capabilities: Discloses owner, issue, current useful access, supported inputs/outputs, missing acceptance, and next action (`IncompleteCapabilityRecord`).
+  - Honest SG Optimizer Phase 3 UI Status: Accurately classifies shipped CLI reality while maintaining concrete follow-up for Phase 3 PyQt6 profile editor and conditions panel under issue #6272 without claiming premature GUI availability or abandoning the feature.
+
+## Connect Subject, Club, Model, Pose, Fit, and Dynamics Stages (ORG-12, #10522)
+
+Coordinates subject, club, model selection, initial pose, fitting, and dynamics through session-bound typed handoff:
+- **Model Match Handoff Coordinator (`src/shared/python/workspace/model_match_handoff.py`)**:
+  - `ModelMatchHandoffCoordinator`: Orchestrates subject configuration, club parameters, model geometry selection, initial pose, kinematic fitting, and forward/inverse dynamics.
+  - Route Separation: Enforces strict separation between general-input motion pipelines and tour driver/7-iron matching routes based on provider/artifact capabilities; rejects sending arbitrary video targets to tour-only drivers.
+  - Distinct Execution Stages: Exposes Fit Kinematics and Run Dynamics as decoupled steps with explicit engine backends; kinematic output cannot masquerade as dynamic success.
+  - Diagnostics and Recovery: Provides failed-fit diagnostics, non-destructive job cancellation, and seamless reopen into the Results/Replay seam.
+  - Session Store Registration: Automatically binds subject snapshots, club definitions, model variations, and fit receipts to the active session.
+
+## Move Tour Matching Execution Out of Documentation Without Changing Results (ORG-11, #10520)
+
+Packages tour matching execution into reusable library code outside the documentation tree:
+- **Packaged Execution Modules (`src/shared/python/motion_matching/execution/`)**:
+  - `assets.py`: Reference asset resolution (`get_native_geometry_spec`, `get_opensim_model`, `get_candidate_geometry_spec`, `get_capture_c3d`, `resolve_output_root`) with environment variable overrides and clear actionable `FileNotFoundError` messages.
+  - `spec_builder.py`: Packaged candidate spec builder with self-contained OpenSim parsing, leg extension, and CLI entry point.
+  - `downswing.py`: Packaged downswing tracking experiment runner and CLI entry point.
+  - `mjx_export.py`: Packaged MuJoCo MJX exporter and CLI entry point.
+  - `driver.py`: Packaged ground support driver entry point delegating to `pipeline.cli`.
+- **Legacy Wrapper Compatibility (`docs/development/full_body_models/`)**:
+  - Deprecated wrappers issuing `DeprecationWarning` while delegating directly to packaged entry points, preserving CLI argument schemas and exit codes.
+- **Pipeline Integration (`src/tools/motion_matching/pipeline.py`)**:
+  - Direct delegation to packaged execution scripts writing outputs cleanly outside the documentation directory.
+
+## Global Workspace Utilities (ORG-19, #10528)
+
+Unifies Sidekick, Setup, Help, and Library as global, workspace-agnostic overlays:
+- **Global Utilities Coordinator (`src/shared/python/workspace/global_utilities.py`)**:
+  - `GlobalWorkspaceUtilitiesCoordinator`: Manages assistant, contextual help, onboarding setup, and model/asset library overlays without duplicating state across workspace transitions.
+  - Contextual Assistant Synchronization: Workspace transitions preserve conversation history while cleanly updating active project, run, and workspace metadata snapshots (`AssistantContextSnapshot`).
+  - Canonical Alias Resolution: Preserves backwards compatibility for deprecated/legacy utility IDs (`legacy_assistant`, `setup_wizard`, `library_browser`, `help_center`) resolving them to canonical destinations.
+  - Persistent Onboarding Preferences: Sticky onboarding dismissal survives session reloads, profile switches, and cross-session handoffs (`OnboardingPreferences`).
+  - Keyboard Focus Restoration: Restores prior keyboard focus cleanly to calling widgets upon modal/drawer overlay dismissal.
+  - Fail-Closed Platform Execution: Refuses native desktop controls (local file explorer, native process invocation, direct GPU profiling) when running in browser execution environments (`NativeActionUnavailableError`).
+
+## Optimization and Training Workspace (ORG-16, #10525)
+
+Consolidates optimization and training launchers under shared project workspace and controller authority:
+- **Optimization & Training Workspace Coordinator (`src/shared/python/workspace/optimization_training_workspace.py`)**:
+  - `OptimizationTrainingWorkspaceCoordinator`: Coordinates bounded optimization and training job lifecycles, deduplication, precondition validation, and durable dataset context across project sessions.
+  - Bounded job forms: `OptimizationJobConfig` and `TrainingJobConfig` replace example-script launches with structured parameterization (golfer, club, objectives, constraints, backend, input reference, output destination).
+  - Validation & Preconditions: Validates non-empty objectives, positive weights, well-posed constraints, model compatibility, and dependency existence before job dispatch.
+  - Fail-Closed Backend Availability: Honestly disables unsupported or uninstalled backends (e.g. Crocoddyl, Drake direct collocation) via `IncompatibleBackendError` rather than claiming unsupported capabilities.
+  - Lifecycle State Invariants: State transitions (`QUEUED`, `RUNNING`, `PAUSED`, `CANCELLED`, `COMPLETED`, `FAILED`) ensure that cancelled or paused jobs can never be mislabeled as complete.
+  - Submission Deduplication: Identical active job requests (matched by configuration digest) reuse existing job handles rather than minting duplicate jobs.
+  - Deterministic Optimization Runner: Executes deterministic forward and inverse optimization yielding reproducible output differences for changed inputs, publishing metrics to registered project session artifacts.
+  - Durable Dataset Selection: Connects dataset selection with provenance directly to durable project sessions in `SessionProjectStore`, surviving store save and reopen.
+
+## Guided Workflow Transitions Across Unified Workspaces (ORG-09, #10518)
+
+Coordinates multi-stage end-to-end biomechanical workflows across workspaces with disk-backed verification, cryptographic artifact hashing, and client UI projection parity:
+- **Guided Workflow Pipeline Coordinator (`src/shared/python/workspace/workflow_coordinator.py`)**:
+  - `WorkflowStepId`: Defines the 7 canonical stages (`capture_import`, `inspect_targets`, `configure_model`, `fit`, `dynamics`, `compare`, `export`).
+  - `WorkflowMode`: Tailors required stages by execution mode (`full_body_3d`, `single_view_coaching`, `ball_flight_analysis`). In `single_view_coaching`, 3D physics steps are skipped automatically without blocking downstream steps.
+  - `WorkflowCoordinator`: Manages workflow state transitions with strict preconditions:
+    - Step readiness evaluated dynamically against on-disk artifact files and cryptographic SHA-256 hashes rather than transient UI button state.
+    - Contractual isolation: `DYNAMICS` stage cannot inherit a purely kinematic pass without physics validation.
+    - Pre-existing imported artifacts support entry at downstream stages (`entry_from_artifacts`) without re-running prior stages.
+    - Cancellation diagnostic recording and automatic attempt counter increments on retry.
+- **Client UI State Projections (`WorkflowProjection`, `StepProjection`)**:
+  - Pure data projections serialized via `to_dict()` consumed identically across Qt desktop widgets (`WorkflowStripWidget`) and React/Tauri interfaces (`WorkflowStrip.tsx`).
+
+## Connect Capture Rig, Optical Import, Pose Inspection, and Model Calibration Workspaces (ORG-10, #10519)
+
+Connects Capture Rig as the primary capture and coaching surface to downstream Inspect Targets and Model Calibration workspaces over typed artifact references:
+- **Capture Rig Inspection Handoff (`src/shared/python/workspace/capture_inspection_handoff.py`)**:
+  - `CaptureRigInspectionCoordinator`: Coordinates imported media and video capture passing `ArtifactReference` instances to pose inspection and model calibration workspaces.
+  - Multi-Estimator Isolation: Preserves MediaPipe and OpenPose as explicit estimator choices with separate observation sets, confidence scores, original video clocks, and source pixels.
+  - FreeMoCap Pre-Spawn Validation: Validates working directories and dependencies before process launch; cancellation preserves source files intact; maintains license isolation.
+  - Optical & C3D Data Integrity: Masks missing marker samples as `NaN`; rejects incompatible spatial frames and unit conversions; prevents 2D coordinates from pretending to be metric 3D.
+  - Session Store Registration: Automatically registers target observations and calibration models into `SessionProjectStore` preserving annotations and club parameters.
+- **Capture Rig UI Action Binding (`src/tools/capture_rig/journey_actions.py`, `src/tools/capture_rig/gui.py`)**:
+  - Adds `Open in Inspect Targets` action to Capture Rig GUI and journey actions.
 
 ## OpenSim Dynamic Match G1 Horizon and Candidate Package (MS-42, #10341)
 
@@ -6343,6 +6468,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
+| 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
+| 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
+| 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
 | 2026-09-19 | #10477 | qualify shared URDF bundles and preserve numeric precision (MV-01) |
@@ -6355,6 +6484,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
+| 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
@@ -6553,8 +6683,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 | 2026-09-03 | #9473 | Corrected the `CI Standard` `tests (3.x)` matrix budget from `timeout-minutes: 35` to `150` (RM #1507, program #1505; UD #9431). Measured from run 33779933815 (job 100731026646, commit ee247039, 2026-09-03): the serial core lane collects 40,488 selected tests in 2m36s and then executes them at 5.27 tests/s, so a full pass needs ~135 min. The 35-minute budget was set on 2026-06-11 (6bc73cb93) against an xdist lane and was never re-measured after the lane was serialised to `-n 0` on 2026-06-13 (b4ddf7b30); every `main` run since has been cancelled at exactly 35 minutes, failing the required `quality-gate` without reporting a single assertion. No tests are deleted, skipped or quarantined and the timeout is not removed. This makes the lane's real result observable; it does not by itself make `main` green, because the truncated run already shows ~160 real failures inside its first 24%. |
 | 2026-09-03 | #9462 | Pose Studio Save/Load are real (#8882). Both buttons were shown enabled but only flashed a transient `QToolTip` carrying an internal tracker id; `_EmbedAdapter.is_dirty` returned a hardcoded `False` despite a 64-deep undo stack, and `PoseStudioWindow` had no `closeEvent`, so an hour of joint edits was discarded on close with no prompt and no way to have saved them. Implemented rather than disabled: `pose_io` already covers all five engines and `docs/user_guide/pose_studio/save_formats.md` already asserted Pose Studio routed through it, which was untrue until now. New `pose_files.py` holds the per-engine file filter and suffix; `MainWidget.is_dirty()` is real, cleared by a successful save or load; load and close prompt Save / Discard / Cancel; the embed adapter delegates to the widget's public `is_dirty`. |
 | 2026-09-03 | #9449 | Bumped the release version 2.1.1 -> 2.1.2 across every surface `scripts/check_version_consistency.py` audits (`pyproject.toml`, `src/api/_version.py`, `ui/package.json` + `ui/package-lock.json`, root `Cargo.toml`, `rust_core/upstream-physics/pyproject.toml`, `VERSION`, `ui/src-tauri/tauri.conf.json`, `scripts/config/sbom_baseline.json`) plus this Identity table and SECURITY.md's footer. This is the fix-forward release for #9449: the pushed `v2.1.1` tag's `release.yml` run failed in `build` (`build_hooks.py` requires `ui/dist`, CI set `SKIP_UI_BUILD`) and published no wheel, SBOM, checksums, PyPI distribution, or GitHub release. Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix Forward, Never Move a Tag", `v2.1.1` is retained where it is and superseded by 2.1.2; CHANGELOG entries moved from `[2.1.1]` to `[2.1.2] - 2026-09-03` with a retained-and-superseded note. No tag is created by this change -- tagging is the release operator's signed step. (spec 1.0.718) |
-| 2026-09-03 | #1520 | Migrated the Section 12 change log to rows keyed by pull request (date, `#<pr>`, summary) instead of a serial spec version, and stopped requiring a `Spec Version` bump per pull request. 590 rows rewritten with each original serial preserved inline as `(spec X.Y.Z)`; row count and every row summary unchanged. `scripts/ci/check_spec_changelog_duplicates.py` now enforces the PR-keyed row contract and key uniqueness for rows dated on or after the cutover, delegating to the fleet-shared `shared_scripts/spec_changelog.py`; its duplicate-*body* ratchet is kept unchanged because a copied row is a different defect from a key collision, and its baseline shrank from 3 recorded pairs to 2. The 54 serial-collision allowances are removed, describing a defect that can no longer occur. `SPEC.md` is now in `.prettierignore` so a new row cannot re-pad the whole table. Governed campaign for Repository_Management#1520 (program #1505). |
-| 2026-09-20 | #10569 | Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 1D arrays and `np.sqrt(np.einsum(...))` for N-D arrays in Opensim tour matching pipeline for performance improvement. (spec-exempt: micro-optimization) |
+| 2026-09-03 | #1520 | Migrated the Section 12 change log to rows keyed by pull request (date, `#10488`, summary) instead of a serial spec version, and stopped requiring a `Spec Version` bump per pull request. 590 rows rewritten with each original serial preserved inline as `(spec X.Y.Z)`; row count and every row summary unchanged. `scripts/ci/check_spec_changelog_duplicates.py` now enforces the PR-keyed row contract and key uniqueness for rows dated on or after the cutover, delegating to the fleet-shared `shared_scripts/spec_changelog.py`; its duplicate-*body* ratchet is kept unchanged because a copied row is a different defect from a key collision, and its baseline shrank from 3 recorded pairs to 2. The 54 serial-collision allowances are removed, describing a defect that can no longer occur. `SPEC.md` is now in `.prettierignore` so a new row cannot re-pad the whole table. Governed campaign for Repository_Management#1520 (program #1505). |
 | 2026-09-03 | #9446 | Closed the `EngineSrcPivot` restore asymmetry PR #9446 documented as latent. When a third-party cleanup pops a `src.*` parent package's `sys.modules` key while its child's key stays cached, the pivot's snapshot captures a child-without-parent; exit used to restore the child orphaned-by-key, so the next fresh import of the parent produced a childless parent module that the import system never re-links (the cached child short-circuits `_find_and_load`), and every dotted-string patch target under it (`monkeypatch.setattr("src.x.y.attr", ...)`, `mock.patch("src.x.y.f")`) raised `AttributeError` while the module-object form worked -- the exact CI failure #9446 worked around in the myosuite adapter test. `_relink_to_parent` now re-imports the missing parent and links the restored child onto it, parents-first; the `src.shared` keep-set is exempt because the import-alias machinery deliberately seeds child-only entries there and the pivot never evicts that subtree. Regression-covered in `tests/unit/repo_hygiene/test_no_permanent_src_module_shadow.py` by reproducing the popped-parent state through a full enter/exit cycle and asserting the dotted-string form patches the identical child object. (spec 1.0.717) |
 | 2026-09-03 | n/a | **ADR-0046 Stage 2's launch-monitor module retirement is complete.** Wave 3b retires the last eight -- `strokes_gained_types` and `_scoring_statistics` (P12), `outcome_proxy` (P13), `strokes_gained` (P14), `conformance_bundle` (P17) and the `player_covariation` trio (P18) -- onto the canonical launch-monitor layer vendored from Tools, deleting 2,425 lines. Across the four waves all 28 `port-up`/`merge` modules are gone; `src/tools/launch_monitor_model/` now holds only the re-export facade, the app-local `project`, and `strokes_gained_baseline`. That third file is ADR-0048 step P12's documented exclusion, not a leftover: the canonical layer types its `baseline` argument against runtime-checkable protocols because `rate_of_closure.launch_monitor_strokes_gained_baseline` is already the authority for loading and digest-verifying that artifact, but a protocol validates nothing at a trust boundary and the analytics API parses a baseline off the wire, so the hash-verifying pydantic model stays here and is pinned `isinstance`-compatible with both protocols. Behaviour deltas, each under an owner ruling and re-pinned with old and new values: **G1-D2** makes the session cell the canonical strokes-gained inference unit, so a per-player longitudinal fit reports sample_count 5 rather than 40 and P4's r_squared moves 0.15450437016457175 -> 0.5682576505731145 with p 0.012104880151308768 -> 0.1410798565763777 -- the slope is unchanged to 15 significant figures (0.075881035543697128), so what the decision corrected is a significance claim built on pseudo-replication, not a measurement; UpstreamDrift's shot-level fit survives as the named variant `shot-level-sg-trend/1` and every summary names its estimand. **G1-D3** (exclude-and-audit) was already this module's posture and needed no edit. **D22/D23** adopted UpstreamDrift's postures, so no UpstreamDrift number moves; the P18 union adds `method_description` (D26's field count 19 -> 20, leaving `backing_data` as the only legacy-only field, by design), a typed `interval_withheld_reason`, and the documented `BETWEEN_PLAYER_INTERVAL_MIN_GROUPS` threshold. The drift gates stay at 71 with no unruled pin moved. (spec 1.0.716) |
 | 2026-09-03 | n/a | ADR-0046 Stage 2 wave 3a executed: the launch-monitor contract spine and the longitudinal tier -- `flexible_analysis` (P10), `contract_v2` (P11), `longitudinal_types` + `longitudinal_statistics` (P15), `longitudinal` (P16), `corpus` (P19) and the four `dataset_reference*` modules (P20) -- retire onto the canonical launch-monitor layer vendored from Tools, deleting 2,948 lines of UpstreamDrift implementation. Wave contents are ordered by the **canonical** dependency graph rather than by ADR-0048's port-order number, because canonical `contract_v2` imports canonical `flexible_analysis` and canonical `dataset_reference_contract` imports canonical `corpus`: retiring a consumer while its dependency still resolved to UpstreamDrift would leave two copies of `FlexibleAnalysisResult` and of `AnalysisContextV2` in one process. The wave carries three owner rulings, each re-pinned with old and new values. **D15** removes under-sampled predictors from the Benjamini-Hochberg pool before correction, so the drift gate's adjusted p value moves 0.9217169029997262 -> 0.8646154865187129 and now agrees with `rate_of_closure` at delta 0.0 (the 6.60% inflation was always upward, so the defect could only make a finding read less significant than its evidence). **D17** carries the boolean 0/1 projection label up from `relationships` onto `CorrelationEstimate.is_boolean_projected`; the coefficient is unchanged. **G1-D1** makes the pooled longitudinal estimator a named-method pair: `PooledAssociationV1.method` is required with no default and no back-compat alias, `player_fixed_effects_ols_clustered_by_player` becomes `ud-cluster-robust-fe/1`, and `dl-random-effects/1` reproduces `rate_of_closure`'s random-effects estimate (-0.5282789828979909, CI [-1.0145384362562389, -0.04201952953974292], tau^2 0.1594137105940229, I^2 69.38732305300319%) bit-for-bit, closing measured divergences D10, D11 and D12. The drift gates stay at 71 and their pinned numbers are unchanged; three gates change sides from DIFFER to RESOLVED. (spec 1.0.715) |
@@ -8023,7 +8152,7 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` to optimize multi-dimensional distance calculation. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm(..., axis=1)` and power operations with `np.einsum('ij,ij->i', diff, diff)` in `src/shared/python/motion_matching/multi_shooting_fit.py` and `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm()` with `math.sqrt(np.vdot())` for small 3D vectors in `src/tools/capture_rig/model_frame_source.py` and `src/tools/capture_rig/reference_volumes.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
-| 2024-05-20 | #<pr> | Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
+- Replaced `np.linalg.norm(..., axis=3)` with `np.sqrt(np.einsum('ijkl,ijkl->ijk', diff, diff))` in `src/motion_capture/reconstruct/model/fit2d.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/biomechanics/golf_trajectory.py` to bypass linear algebra overhead for multi-dimensional distance calculations. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm()` with `math.sqrt(np.dot())` for small 1D vectors in `src/engines/physics_engines/pinocchio/python/native_model.py`, `src/engines/physics_engines/drake/python/full_body_model.py`, and `src/shared/python/physics/ground_reaction_forces.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)

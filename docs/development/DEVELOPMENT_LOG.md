@@ -383,7 +383,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10511 · Separate Capability Identity, Maturity, Availability, and Qualification (ORG-02)
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10511 (ORG-02, epic #10508)
 - **Branch:** feat/issue-10511-org02-capability-state-contract
@@ -397,21 +397,21 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10510 · Baseline Every Capability and Preserve Tile, Layout, and Artifact Identity
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10510 (ORG-01, epic #10508)
 - **Branch:** feat/issue-10510-org01-capability-baseline
 - **PR:** #10534
 - **Paths:** src/config/capability_migration.py; src/config/capability_migration.json; scripts/generate_capability_baseline.py; docs/development/ORG01_CAPABILITY_BASELINE.md; tests/config/test_capability_migration_coverage.py; scripts/capability_atlas/render.py; docs/architecture/CAPABILITY_ATLAS.md
 - **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (18 unit tests pass in test_capability_migration_coverage.py covering all RED and GREEN acceptance cases; all 104 observed tiles, 45 parity features, 9 excluded tool packages cataloged with explicit migration metadata; legacy aliases starting_pose_matcher and putting_green_gui resolve acyclically; 15 golden fixtures pass hash checks; ruff/black/mypy clean).
+- **Last verified:** 2026-09-20 at HEAD (18 unit tests pass in test_capability_migration_coverage.py covering all RED and GREEN acceptance cases; all 104 observed tiles, 45 parity features, 9 excluded tool packages cataloged with explicit migration metadata; legacy aliases starting_pose_matcher and putting_green_gui resolve acyclically; 15 golden fixtures pass hash checks; ruff/black/mypy clean).
 - **Summary:** Built the canonical machine-checkable capability baseline inventory (`capability_migration.json`) and schema/validation engine (`capability_migration.py`) for Epic #10508. Enforced explicit contracts: IDs are unique, aliases are acyclic and resolve to retained targets, every capability has exactly one primary workspace domain, provider absence changes availability rather than identity, and preserved test fixtures retain golden byte hashes. Preserved ADR-0047 viewer identity and provider seam rulings. Created `scripts/generate_capability_baseline.py` producing `docs/development/ORG01_CAPABILITY_BASELINE.md` with freshness validation.
 - **Next step:** Push branch, open PR with auto-merge, complete lease on #10510.
 - **Evidence:** tests/config/test_capability_migration_coverage.py; docs/development/ORG01_CAPABILITY_BASELINE.md; src/config/capability_migration.json.
 
 ### DL-#10521 · Integrate Existing Results Browser Work With Replay, Data, and Export
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10521 (ORG-13, epic #10508)
 - **Branch:** feat/issue-10521-org13-results-workspace-handoff
@@ -420,12 +420,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-19
 - **Last verified:** 2026-09-19 at HEAD (5 integration tests pass in test_results_workspace_handoff.py, 13 unit tests pass in test_model.py; ruff clean; mypy clean; line budget clean).
 - **Summary:** Implemented `ResultsWorkspaceCoordinator` integrating canonical `ResultsBrowser` and #10353 `MatchedSwingBrowserModel` with Replay, Data Explorer, Plot, Compare, and Export actions. Enforces selected run context isolation (preventing global state leakage), artifact-type-aware action availability with diagnostic reasons, missing asset and unit mismatch validation (never guessing substitute files or silently comparing disparate units), and complete provenance retention during export and reimport (#8820).
-- **Next step:** Create PR, enable auto-merge, release lease.
+- **Next step:** Merged in PR #10548.
 - **Evidence:** tests/integration/test_results_workspace_handoff.py; tests/tools/matched_swing_browser/test_model.py.
 
 ### DL-#10513 · Validate Every Browser, Tauri, and Native Launch Destination
 
-- **State:** in_progress
+- **State:** completed
 - **Owner:** local
 - **Issue:** #10513 (ORG-04, epic #10508)
 - **Branch:** feat/issue-10513-org04-launch-destinations
@@ -436,6 +436,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Established canonical route table `KNOWN_APP_ROUTES` and `isKnownAppRoute` in React UI; implemented browser and Tauri reachability evaluation and matrix generator (`evaluateTileReachability`, `generateReachabilityMatrix`); hardened `resolveTileLaunchAction` to reject unmapped routes with honest blocked/unavailable states; removed invalid web_route from Movement Optimizer model packs and sanitized in `LauncherManifestLoader` so Movement Optimizer resolves cleanly to `native-window`; expanded `test_route_mode_routes_exist_in_react_router` to inspect all loaded tiles from `LauncherManifest.load()` and added `test_every_tile_destination_resolves_authoritatively`.
 - **Next step:** Commit, push, enable auto-merge, and release lease.
 - **Evidence:** ui/src/api/launcherReachability.test.tsx; tests/config/launcher_manifest/test_parity.py.
+
+### DL-#10516 · Apply the Same Workspace Navigation to React and Tauri
+
+- **State:** completed
+- **Owner:** local
+- **Issue:** #10516 (ORG-06, epic #10508)
+- **Branch:** feat/issue-10516-org06-react-workspace-navigation
+- **PR:** #10540
+- **Paths:** ui/src/types/workspaceNavigation.ts; ui/src/api/capabilityAdapter.ts; ui/src/components/layout/WorkspaceNavigation.tsx; ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/pages/WorkspacePage.tsx; ui/src/components/simulation/LauncherDashboard.tsx; ui/src/App.tsx; ui/src/utils/routeTitles.ts; docs/development/DEVELOPMENT_LOG.md; docs/development/HANDOFF.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (SELF; 13 unit tests pass in WorkspaceNavigation.test.tsx; full 94-file 878-test Vitest suite passes; tsc type-check, eslint, vite build pass; WCAG contrast guard passes; file budget clean)
+- **Summary:** Applied task-oriented workspace navigation across React and Tauri (ORG-06). Reused shared catalog metadata for the five primary workspaces (`Capture & Analyze`, `Model & Match`, `Shot & Course Lab`, `Optimize & Train`, `Results & Compare`) and secondary navigation (`Developer & Research`, `All Tools`, `Favorites`, `History`). Integrated `WorkspaceSidebar` and `WorkspaceBreadcrumb` within `WorkspaceShell` preserving browser history, bookmarkable task URLs (`/workspaces/:slug`), centralized route titles, and keyboard focus recovery. Created shared `resolveWorkspaceToolAction` capability adapter opening native tools under Tauri/desktop while providing actionable explanations and web alternatives for browser-only users.
+- **Next step:** Commit, push, open PR referencing Fixes #10516, enable auto-merge, and release lease.
+- **Evidence:** ui/src/components/layout/WorkspaceNavigation.test.tsx; ui/src/components/layout/WorkspaceNavigation.tsx.
+
+### DL-#10514 · Group Engine Dashboards, Exercise Variants, and Repository Shortcuts
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10514 (ORG-07, epic #10508)
+- **Branch:** feat/issue-10514-org07-model-variant-grouping
+- **PR:** #10541
+- **Paths:** src/config/models.yaml; src/launchers/exercise_dashboard.py; src/launchers/launcher_model_handlers.py; src/shared/python/config/**init**.py; src/shared/python/config/model_pack_manifest.py; src/shared/python/config/model_registry.py; src/shared/python/config/model_variant_grouping.py; tests/config/test_model_variant_grouping.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (6 unit tests pass in test_model_variant_grouping.py, 183 tests pass across adjacent suites; ruff check clean; ruff format clean; line budget check clean).
+- **Summary:** Implemented `ModelVariant`, `LogicalModelIdentity`, `LogicalModelChoice`, and `ModelGroupingProjection` in `src/shared/python/config/model_variant_grouping.py` to project 28 exercise variants across 4 providers (`MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`) into 7 logical choices without dropping any provider assets underneath. Preserved strict DbC on engine selection (never silently substitutes another engine). Added name collision protection across distinct canonical identities. Implemented `resolve_shortcut` mapping `biomech_sit_to_stand` (never falls back to gait) and `biomech_gait` to `biomech_exercise`, engine dashboards (`drake_dashboard`, `mujoco_dashboard`, `pinocchio_dashboard`) to engine advanced modes, and `movement_optimizer` / `tools_movement_optimizer` to unified task with #9406 authority resolution. Updated `SharedRepoHandler` with `get_missing_checkout_diagnostic` to emit actionable diagnostics when sibling repos are missing. Dynamicized exercise names in `exercise_dashboard.py`.
+- **Next step:** Commit with conventional commit, push branch, open PR, and arm auto-merge.
+- **Evidence:** tests/config/test_model_variant_grouping.py; tests/config/test_tile_paths_resolve.py; tests/unit/config/test_model_pack_manifest.py; tests/launchers/test_launcher_model_handlers.py.
 
 ### DL-#10482 · Expose Real Forces, Torques, and Explicit Counterfactual Semantics
 
@@ -823,7 +851,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-15 (SELF; raw run101 MAT/NPZ metrics independently recomputed; seven focused yaw/replay tests passed)
 - **Summary:** Run101 improves yaw and has measured R2025b–Pinocchio prefix agreement of 0.0605 mm maximum. Terminal RMS 40.31 mm fails the 35 mm gate; full 1.814 s capture is incomplete. No optimizer launched by this review.
-- **Next step:** Follow RUN101_REVIEW_AND_TURNOVER.md: bounded refinement check, head/left-arm terminal feasibility, justified bounded fitting trial and horizon extension.
+- **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ### DL-#10204 · Capture Rig Shared Camera Layer
 

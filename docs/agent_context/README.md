@@ -199,8 +199,8 @@ flowchart LR
 
 ## Existing Inventories
 
-- [Launcher Metadata](../../src/config/launcher_manifest.json): 53 records at `tiles`; registry remains authoritative.
-- [Feature Parity](../../src/config/feature_parity.json): 45 records at `features`; registry remains authoritative.
+- [Launcher Metadata](../../src/config/launcher_manifest.json): 54 records at `tiles`; registry remains authoritative.
+- [Feature Parity](../../src/config/feature_parity.json): 46 records at `features`; registry remains authoritative.
 - [Capability Architecture Nodes](../../src/config/capability_connections.json): 26 records at `nodes`; registry remains authoritative.
 
 ## Provenance and Limits

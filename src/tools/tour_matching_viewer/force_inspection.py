@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import math
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
@@ -139,7 +140,9 @@ class ForceInspectionWidget(QtWidgets.QWidget):
         if wrench is not None:
             fn = wrench.force_n
             fz = fn[2]
-            fnet = float(np.linalg.norm(fn))
+            fnet = float(
+                math.sqrt(np.vdot(fn, fn))
+            )  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
             self._fz_label.setText(f"Fz (Vertical): {fz:.1f} N")
             self._fnet_label.setText(f"|F_net|: {fnet:.1f} N")
         else:
