@@ -15,6 +15,7 @@ from src.shared.python.motion_matching.cross_engine_replay import (
 )
 
 Array: TypeAlias = NDArray[np.float64]
+BoolArray: TypeAlias = NDArray[np.bool_]
 
 
 @precondition(lambda time_s: len(time_s) > 0, "non-empty timeline")
@@ -24,7 +25,7 @@ def render_playback_gif(
     model_markers_m: Array,
     output_path: Path | str,
     *,
-    valid_mask: Array | None = None,
+    valid_mask: BoolArray | None = None,
     stride: int = 8,
 ) -> Path:
     """Write a marker overlay GIF comparing source and MyoSuite predictions."""

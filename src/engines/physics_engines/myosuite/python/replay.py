@@ -44,6 +44,7 @@ from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 logger = logging.getLogger(__name__)
 
 Array: TypeAlias = NDArray[np.float64]
+BoolArray: TypeAlias = NDArray[np.bool_]
 MARKER_RMS_LIMIT_M = 0.015
 REPO_ROOT = Path(__file__).resolve().parents[5]
 
@@ -151,7 +152,7 @@ def _predict_markers(
     return out
 
 
-def _marker_rms(source: Array, predicted: Array, valid: Array) -> float:
+def _marker_rms(source: Array, predicted: Array, valid: BoolArray) -> float:
     mask = (
         valid & np.isfinite(source).all(axis=-1) & np.isfinite(predicted).all(axis=-1)
     )
@@ -164,7 +165,7 @@ def _marker_rms(source: Array, predicted: Array, valid: Array) -> float:
 def _apply_static_site_calibration(
     source: Array,
     predicted: Array,
-    valid: Array,
+    valid: BoolArray,
     *,
     calibration_frame: int = 0,
 ) -> tuple[Array, dict[str, Any]]:
@@ -188,7 +189,7 @@ def _apply_static_site_calibration(
 def _pelvis_center_aligned_rms(
     source: Array,
     predicted: Array,
-    valid: Array,
+    valid: BoolArray,
     *,
     left_idx: int,
     right_idx: int,
