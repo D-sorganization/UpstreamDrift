@@ -6686,7 +6686,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-21 | #10591 | TB-06: adapt the closed-loop 8-coordinate upper-body golfer into the TB-04/TB-05 fit/replay contract with real loop-closure enforcement (reused Baumgarte-stabilized constrained EOM), honest infeasible/singular diagnostics, and reused Bernstein torque optimization; driver/iron qualification campaign deferred. |
+| 2026-09-21 | #10645 | TB-06: adapt the closed-loop 8-coordinate upper-body golfer into the TB-04/TB-05 fit/replay contract with real loop-closure enforcement (reused Baumgarte-stabilized constrained EOM), honest infeasible/singular diagnostics, and reused Bernstein torque optimization; driver/iron qualification campaign deferred. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
