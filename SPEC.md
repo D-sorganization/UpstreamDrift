@@ -1,3 +1,21 @@
+## Generic Capture Contract and 44-DOF Identifiability (MS-90, #10361)
+
+Defines generic C3D capture ingestion contracts and mathematical identifiability probes for the 44-DOF kinematic model:
+- **Generic Capture Contract (`src/shared/python/motion_matching/tour_capture_contract.py`)**:
+  - Implements `CaptureContract` and `CaptureValidationReport` enabling validation and ingestion of conforming C3D files with arbitrary marker sets and sampling rates.
+  - Subclasses `TourCaptureSpec` maintaining frozen identity, checksums, and backwards compatibility for `TOUR_CAPTURE` and `TOUR_CAPTURE_IRON`.
+  - Implements `validate_capture_contract` providing structured diagnostic reasons (`invalid_units`, `rate_mismatch`, `insufficient_frames`, `missing_required_labels`, `missing_required_segment`, `excessive_gap_fraction`, `missing_static_calibration`).
+  - Implements `load_capture` to read, scale (e.g. mm to m), and map labels to canonical representations without modifying codebase source.
+- **Identifiability Probe & Synthetic Null Space Analysis (`src/shared/python/motion_matching/identifiability.py`)**:
+  - Implements pure-Python forward kinematics and marker position synthesis for the 44-DOF kinematic chain (`body_poses_from_coordinates`, `compute_spec_marker_positions`).
+  - Implements SVD-based linearised identifiability analysis (`probe_spec_identifiability`, `probe_synthetic_chain_identifiability`).
+  - Detects unobservable kinematic sub-chains: on the uncalibrated 44-DOF model (where 8 lower limb markers have null offsets), reports rank 28 of 44, identifying all 14 leg DOFs as strictly unobservable.
+  - Demonstrates observability with calibrated markers (rank 42 of 44, leaving only coaxial hip/torso yaw singularity).
+  - Demonstrates full-rank recovery (rank 44 of 44) and well-conditioned inversion via anthropometric prior regularization.
+  - Generates reproducible evidence receipt `evidence/anthropometry/identifiability_driver.json`.
+- **Verification Suite**:
+  - Unit tests in `tests/unit/motion_matching/test_capture_contract_generic.py` and `test_identifiability.py` covering backwards compatibility, CMU locomotion rejection, unit scaling/label mapping, gap fraction tolerances, synthetic planted null directions, and 44-DOF uncalibrated/calibrated/regularized rank.
+
 ## Connect Qualified Matching Strategies to Engine Feature Contracts (PF-10, #10440)
 
 Connects qualified matching strategies to engine feature contracts:
