@@ -11,8 +11,8 @@ live with each engine and consume :func:`tracked_labels`.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
 
@@ -28,20 +28,56 @@ BoolArray: TypeAlias = NDArray[np.bool_]
 
 
 @dataclass(frozen=True)
-class TourCaptureSpec:
+class CaptureValidationReport:
+    """Structured result of validating a capture against a CaptureContract."""
+
+    is_valid: bool
+    reasons: tuple[str, ...] = ()
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def raise_for_status(self) -> None:
+        """Raise ValueError if the capture does not conform to the contract."""
+        if not self.is_valid:
+            msg = "; ".join(self.reasons) if self.reasons else "Validation failed"
+            raise ValueError(f"Capture does not conform to contract: {msg}")
+
+
+@dataclass(frozen=True)
+class CaptureContract:
+    """Generic contract for motion captures: expected units, rate, markers, and segments."""
+
+    units: str = "m"
+    vertical_axis: str = "y"
+    rate_hz: float | None = None
+    min_frames: int = 2
+    max_gap_fraction: float = 0.5
+    required_labels: tuple[str, ...] | None = None
+    required_segments: tuple[str, ...] | None = None
+    label_map: Mapping[str, str] | None = None
+    static_calibration_required: bool = False
+    frozen_sha256: str | None = None
+
+
+@dataclass(frozen=True)
+class TourCaptureSpec(CaptureContract):
     """Frozen identity of the canonical capture file."""
 
-    sha256: str
-    rate_hz: float
-    frames: int
-    units: str
-    vertical_axis: str
-    labels: tuple[str, ...]
+    sha256: str = ""
+    rate_hz: float = 0.0
+    frames: int = 0
+    units: str = "m"
+    vertical_axis: str = "y"
+    labels: tuple[str, ...] = ()
     handedness: str = "right"
+    max_gap_fraction: float = 0.9
+
+    def __post_init__(self) -> None:
+        if self.frozen_sha256 is None and self.sha256:
+            object.__setattr__(self, "frozen_sha256", self.sha256)
 
     @property
     def duration_s(self) -> float:
-        return (self.frames - 1) / self.rate_hz
+        return (self.frames - 1) / self.rate_hz if self.rate_hz > 0 else 0.0
 
 
 TOUR_CAPTURE = TourCaptureSpec(  # the driver swing, the original canonical file
@@ -479,3 +515,180 @@ def verify_capture_content(
             f"Expected capture kind {expected_kind}, but file has content for {kind}"
         )
     return kind, spec
+
+
+def _extract_c3d_metadata(path: Path) -> dict[str, Any]:
+    import ezc3d
+
+    raw = Path(path).read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    c3d = ezc3d.c3d(str(path))
+    params = c3d["parameters"]["POINT"]
+    labels = tuple(str(x) for x in params["LABELS"]["value"])
+    rate = float(params["RATE"]["value"][0])
+    units = str(params["UNITS"]["value"][0])
+    points = np.asarray(c3d["data"]["points"], dtype=float)
+    residuals = np.asarray(c3d["data"]["meta_points"]["residuals"][0], dtype=float)
+    return {
+        "digest": digest,
+        "labels": labels,
+        "rate_hz": rate,
+        "units": units,
+        "frames": points.shape[2],
+        "points": points,
+        "residuals": residuals,
+    }
+
+
+def _check_contract_reasons(
+    contract: CaptureContract,
+    meta: Mapping[str, Any],
+    effective_label_map: Mapping[str, str],
+) -> list[str]:
+    reasons: list[str] = []
+    if contract.units and meta["units"].lower() != contract.units.lower():
+        reasons.append(
+            f"invalid_units: expected '{contract.units}', found '{meta['units']}'"
+        )
+    if contract.rate_hz is not None and abs(meta["rate_hz"] - contract.rate_hz) > 1.0:
+        reasons.append(
+            f"rate_mismatch: expected {contract.rate_hz} Hz, found {meta['rate_hz']} Hz"
+        )
+    if meta["frames"] < contract.min_frames:
+        reasons.append(
+            f"insufficient_frames: expected >= {contract.min_frames}, found {meta['frames']}"
+        )
+    if contract.frozen_sha256 and meta["digest"] != contract.frozen_sha256:
+        reasons.append(
+            f"sha256_mismatch: expected '{contract.frozen_sha256}', found '{meta['digest']}'"
+        )
+
+    raw_labels = meta["labels"]
+    mapped_labels = tuple(effective_label_map.get(lbl, lbl) for lbl in raw_labels)
+
+    if contract.required_labels:
+        missing = [
+            r
+            for r in contract.required_labels
+            if r not in mapped_labels and r not in raw_labels
+        ]
+        if missing:
+            reasons.append(f"missing_required_labels: {sorted(missing)}")
+
+    if contract.required_segments:
+        for seg in contract.required_segments:
+            seg_markers = MARKER_SEGMENTS.get(seg, ())
+            has_seg = any(lbl in seg_markers for lbl in mapped_labels) or any(
+                lbl in seg_markers for lbl in raw_labels
+            )
+            if not has_seg:
+                reasons.append(f"missing_required_segment: {seg}")
+
+    xyz = np.transpose(meta["points"][:3], (2, 1, 0))
+    valid_mask = np.isfinite(xyz).all(axis=2) & (meta["residuals"].T >= 0)
+    check_labels = contract.required_labels or mapped_labels
+    frames = meta["frames"]
+    for lbl in check_labels:
+        if lbl in mapped_labels:
+            idx = mapped_labels.index(lbl)
+        elif lbl in raw_labels:
+            idx = raw_labels.index(lbl)
+        else:
+            continue
+        valid_cnt = int(np.count_nonzero(valid_mask[:, idx]))
+        gap_frac = (frames - valid_cnt) / frames if frames > 0 else 1.0
+        if gap_frac > contract.max_gap_fraction:
+            reasons.append(
+                f"excessive_gap_fraction: marker '{lbl}' has {gap_frac:.2%} missing frames (max {contract.max_gap_fraction:.2%})"
+            )
+
+    if contract.static_calibration_required:
+        reasons.append(
+            "missing_static_calibration: static address calibration required"
+        )
+
+    return reasons
+
+
+@precondition(
+    lambda path, contract=None, label_map=None: Path(path).is_file(),
+    "capture file must exist",
+)
+@postcondition(
+    lambda r: isinstance(r, CaptureValidationReport),
+    "must return CaptureValidationReport",
+)
+def validate_capture_contract(
+    path: Path | str,
+    contract: CaptureContract | None = None,
+    label_map: Mapping[str, str] | None = None,
+) -> CaptureValidationReport:
+    """Validate a C3D capture against a CaptureContract, returning a structured report."""
+    p = Path(path)
+    active_contract = contract or CaptureContract()
+    try:
+        meta = _extract_c3d_metadata(p)
+    except Exception as err:
+        return CaptureValidationReport(
+            is_valid=False,
+            reasons=(f"c3d_read_error: {err}",),
+            metadata=MappingProxyType({"path": str(p)}),
+        )
+
+    effective_map = {
+        **dict(active_contract.label_map or {}),
+        **dict(label_map or {}),
+    }
+    reasons = _check_contract_reasons(active_contract, meta, effective_map)
+    metadata: dict[str, Any] = {
+        "digest": meta["digest"],
+        "rate_hz": meta["rate_hz"],
+        "frames": meta["frames"],
+        "units": meta["units"],
+        "labels_count": len(meta["labels"]),
+    }
+    return CaptureValidationReport(
+        is_valid=len(reasons) == 0,
+        reasons=tuple(reasons),
+        metadata=MappingProxyType(metadata),
+    )
+
+
+@precondition(
+    lambda path, contract=None, label_map=None: Path(path).is_file(),
+    "capture file must exist",
+)
+@postcondition(
+    lambda r: isinstance(r, TourCapture),
+    "must return TourCapture",
+)
+def load_capture(
+    path: Path | str,
+    contract: CaptureContract | None = None,
+    label_map: Mapping[str, str] | None = None,
+) -> TourCapture:
+    """Read any conforming C3D according to a CaptureContract with label mapping and scaling."""
+    p = Path(path)
+    active_contract = contract or CaptureContract()
+    report = validate_capture_contract(p, contract=active_contract, label_map=label_map)
+    report.raise_for_status()
+
+    meta = _extract_c3d_metadata(p)
+    effective_map = {
+        **dict(active_contract.label_map or {}),
+        **dict(label_map or {}),
+    }
+    raw_labels = meta["labels"]
+    mapped_labels = tuple(effective_map.get(lbl, lbl) for lbl in raw_labels)
+
+    points = meta["points"]
+    xyz = np.transpose(points[:3], (2, 1, 0)).copy()
+    if meta["units"].lower() in ("mm", "millimeter", "millimeters"):
+        xyz = xyz * 1e-3
+
+    residuals = meta["residuals"]
+    valid = np.isfinite(xyz).all(axis=2) & (residuals.T >= 0)
+    xyz[~valid] = np.nan
+    time = np.arange(meta["frames"]) / meta["rate_hz"]
+
+    return TourCapture(time, mapped_labels, xyz, valid, meta["digest"])
