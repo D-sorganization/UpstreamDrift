@@ -2,7 +2,7 @@
  * Tests for MatchedSwings Results page (MS-85, #10358).
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
@@ -56,35 +56,28 @@ const SAMPLE_LEDGER: MatchedSwingLedgerResponse = {
   ],
 };
 
+const { fetchCandidatePreviewFrameMock } = vi.hoisted(() => ({
+  fetchCandidatePreviewFrameMock: vi.fn(async () => ({
+    id: 'aaa111',
+    frame_index: 0,
+    frame_count: 1,
+    joints: [{ name: 'pelvis', position: [0, 0, 1], confidence: 1, parent: null }],
+  })),
+}));
+
+vi.mock('@/api/matchedSwings', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/api/matchedSwings')>();
+  return {
+    ...actual,
+    fetchMatchedSwingLedger: vi.fn(async () => SAMPLE_LEDGER),
+    fetchCandidatePreviewFrame: fetchCandidatePreviewFrameMock,
+    matchedSwingAnimationUrl: (id: string) => `/api/v1/matched-swings/${id}/animation.gif`,
+  };
+});
+
 describe('MatchedSwingsPage', () => {
   beforeEach(() => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: RequestInfo) => {
-        const url = String(input);
-        if (url.includes('/matched-swings/aaa111/candidate')) {
-          return new Response(
-            JSON.stringify({
-              frame_index: 0,
-              frame_count: 1,
-              joints: [{ name: 'pelvis', position: [0, 0, 1], confidence: 1, parent: null }],
-            }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
-          );
-        }
-        if (url.includes('/matched-swings')) {
-          return new Response(JSON.stringify(SAMPLE_LEDGER), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          });
-        }
-        return new Response('not found', { status: 404 });
-      }),
-    );
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
+    fetchCandidatePreviewFrameMock.mockClear();
   });
 
   it('renders run list with verdict badges', async () => {
@@ -95,9 +88,9 @@ describe('MatchedSwingsPage', () => {
     );
 
     expect(await screen.findByText('Matched Swing Results')).toBeInTheDocument();
-    expect(await screen.findByText('PASSED')).toBeInTheDocument();
-    expect(screen.getByText('REJECTED')).toBeInTheDocument();
-    expect(screen.getByText(/drake/i)).toBeInTheDocument();
+    expect((await screen.findAllByText('PASSED')).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('REJECTED')).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /drake/i }).length).toBeGreaterThan(0);
   });
 
   it('filters runs by engine', async () => {
@@ -108,11 +101,11 @@ describe('MatchedSwingsPage', () => {
       </MemoryRouter>,
     );
 
-    await screen.findByText('opensim');
+    await screen.findByRole('button', { name: /opensim/i });
     const engineSelect = screen.getAllByRole('combobox')[0];
     await user.selectOptions(engineSelect, 'drake');
     await waitFor(() => {
-      expect(screen.queryByText('opensim')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /opensim/i })).not.toBeInTheDocument();
     });
   });
 
@@ -123,6 +116,9 @@ describe('MatchedSwingsPage', () => {
       </MemoryRouter>,
     );
 
+    await waitFor(() => {
+      expect(fetchCandidatePreviewFrameMock).toHaveBeenCalledWith('aaa111', 0);
+    });
     expect(await screen.findByTestId('mocap-3d')).toBeInTheDocument();
   });
 
