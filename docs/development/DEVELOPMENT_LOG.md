@@ -341,7 +341,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-21 — CO-01 merged (#10670); CO-02 plausibility/acceptance in progress on feat/co02-golf-plausibility-priors
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land #10606 (CO-02), then dispatch #10607 (CO-03).
+- **Next step:** Land PR #10675 (CO-02), then dispatch #10607 (CO-03).
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -378,12 +378,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10606 (epic #10602)
 - **Branch:** feat/co02-golf-plausibility-priors
-- **PR:** not created
+- **PR:** #10675
 - **Paths:** src/shared/python/motion_matching/club_only/priors.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/ambiguity.py; src/shared/python/motion_matching/club_only/acceptance.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T22:40:00Z at SELF — `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); python -O DbC ValueError checks green.
+- **Last verified:** 2026-09-21T23:10:00Z at SELF — `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); pre-push ruff/mypy/bandit/pytest-unit green; PR #10675 squash auto-merge armed.
 - **Summary:** Freezes per-roster observation/physical/plausibility profiles, named GolfPlausibilityPriors (not measured truth), ambiguity retention for distinct body hashes on identical club residuals, and club-only acceptance that keeps kinematic preview, torque replay, scientific, and product statuses separate while preserving full-body G3 gates.
-- **Next step:** Open PR with Fixes #10606 and enable auto-merge squash.
+- **Next step:** Wait for PR #10675 CI quality-gate to merge; do not start CO-03.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json; tests/unit/motion_matching/test_club_plausibility_acceptance.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
