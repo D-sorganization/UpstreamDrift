@@ -668,22 +668,12 @@ class StrategyComparisonService:
                 reg = get_registry()
                 is_available = reg.is_available(engine)
             except Exception:
-                # Fallback to direct import checks
-                if engine == "mujoco":
-                    try:
-                        import mujoco  # noqa: F401
+                # Fallback to dynamic spec checks
+                import importlib.util
 
-                        is_available = True
-                    except ImportError:
-                        is_available = False
-                elif engine == "pinocchio":
-                    try:
-                        import pinocchio  # noqa: F401
-
-                        is_available = True
-                    except ImportError:
-                        is_available = False
-                else:
+                try:
+                    is_available = importlib.util.find_spec(engine) is not None
+                except Exception:
                     is_available = False
 
         status = StageState.PASSED.value if is_available else StageState.FAILED.value

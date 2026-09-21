@@ -1,5 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
+## Tour Baselines TB-02: Define Versioned Baseline Packages, Fit Metrics, and Qualification Profiles (#10587)
+
+Branch `feat/tb02-baseline-packages-10587`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587)) establishes the canonical Baseline Package contract (`tour-baseline-package/1.0.0`) extending portable packaging (#10379, #10334).
+
+- Implements `BaselineIdentity` linking capture target, model topology, backend pin, fit mode, horizon, frame/plane conventions, measurement map version, fixed geometry/inertia hashes, q0/v0 hashes, controls hash, solver config, seed, budgets, ancestry, and environment hashes.
+- Formulates `StatusBundle` separating solver convergence, kinematic accuracy, dynamic feasibility, scientific qualification, and product promotion into orthogonal statuses, enforcing that missing native replay forbids scientific qualification.
+- Formulates physical 3D Euclidean marker RMSE, p95, max, per-marker, per-phase, endpoint, and impact errors, distinct from optimizer loss, bound to cryptographic landmark signatures.
+- Froze numeric qualification profiles for authoritative full-body G1/G2/G3 and reduced educational models (planar driven pendulum, upper-body golfer, triple pendulum) with documented attainable-geometry rationale without relaxing full-body thresholds.
+- Provided clean-machine export/import with array checksum validation.
+- All 50 unit tests pass in `tests/unit/tour_baselines/` and 45/45 motion-matching tests pass; ruff check/format clean; mypy passes on all 14 files; architecture budget passes with 0 violations; check_file_size_budget passes; check_lod clean with 0 violations.
+  Next step: Merge TB-02 PR; next dispatch is TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588): Prescribe Inputs and Trajectory Fitting Pipeline).
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
@@ -653,7 +666,11 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 - Historical source-specific receipts remain in [provider turnover](docs/development/impact_provider_import_turnover.md), [renderer review](docs/development/renderer_reference_9783_turnover.md), [claim preservation](docs/development/claim_preservation_9825_turnover.md), [shooting convergence](docs/development/shooting_convergence_9830_turnover.md) and [program design](docs/development/impact_acoustics_program.md). Bioptim/CasADi 3.6.7 qualification does not qualify the unsuccessful 3.8 RK4 case.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
-evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
+evidence. Its per-workstream/milestone status ledger (verified 2026-09-11; A, M0, M1
+complete, all other rows open with their blocking gate) lives in
+`docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md`;
+the release manifest and checksums were regenerated for that edit.
+UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
