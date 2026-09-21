@@ -50,7 +50,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def default_aero_config() -> AerodynamicsConfig:
     """Default aerodynamics configuration with all effects enabled."""
-    return AerodynamicsConfig()
+    return AerodynamicsConfig(lift_enabled=True)
 
 
 @pytest.fixture
