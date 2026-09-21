@@ -1,5 +1,16 @@
 # Simscape Tour-Average Fit Continuation
 
+## Tour Baselines TB-06: Upper-Body Constrained Dynamic Fitter (#10591) [PARTIAL]
+
+Branch `feat/tb06-upper-body-fit-10591`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-06 ([#10591](https://github.com/D-sorganization/UpstreamDrift/issues/10591)) adapts the closed-loop 8-coordinate upper-body golfer (`physics_golfer.py`/`golfer_constraints.py`/`constraint_solver.py`) into the TB-04/TB-05 target/fit/replay contract shape.
+
+- `adapters_golfer.py`: reuses TB-00's registry entry (`constrained_upper_body_golfer`: rank-3 constraint Jacobian, 5 independent DOFs of 8) for topology recording; wraps `project_to_constraints`/`project_velocity` into an honest `GolferFeasibilityReport` -- infeasible/non-convergent initial states are a first-class `feasible=False` diagnostic, never coerced to success.
+- `torque_optimization_golfer.py`: reuses the TB-04/TB-05 degree-6 Bernstein basis (7 controls x 7 actuated joints); integrates through the real Baumgarte-stabilized constrained EOM via RK4 (loop closure enforced by the dynamics, never faked); records per-frame constraint residual and reaction (Lagrange multiplier) forces distinct from applied joint torque, plus energy/work balance. `fit_bounded_golfer` checks feasibility before optimizing and returns a diagnostic outcome on failure, never a synthetic success.
+- 11/11 new unit tests pass (`test_golfer_fit.py`): topology recording, feasible-vs-incompatible initial states, q/v closure through rollout, singular-solve diagnostics, torque/reaction distinction, two-hand geometry, and a bounded fit against a manufactured trajectory. Ruff check/format clean.
+- **Deferred (named, not silently dropped):** the real driver/iron C3D qualification campaign and baseline-package/receipt generation (bounded work item 4) and provider/registry wiring equivalent to TB-04/05's `provider.py`/`qualification.py`. The golfer model is planar like TB-04/05 (not 3D as the coverage matrix aspirationally describes), so TB-05's swing-plane-projection and C3D-loader reuse pattern carries over directly for a follow-up session. TB-00's remaining reduced-model roster (item 5) needs no further action beyond TB-05 (#10590, separate in-flight PR #10644) landing.
+- Next step: a follow-up session reuses `provider_triple.py`/`qualification_triple.py`'s pattern to run the actual driver/iron campaign and promote `constrained_upper_body_golfer` off Unqualified in `coverage_matrix.md`.
+
 ## Tour Baselines TB-04: Fit and Independently Replay the Actual Driven Double Pendulum (#10589)
 
 Branch `feat/tb04-double-pendulum-fit-10589`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
