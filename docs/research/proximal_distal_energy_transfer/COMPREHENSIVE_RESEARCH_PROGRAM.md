@@ -6,8 +6,11 @@ The proximal-to-distal framework becomes the common language for an open,
 engine-neutral program that tests golf-swing and human-motion mechanisms from
 analytical mechanics through governed human evidence. The program is managed
 by [epic #8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557),
-a child of the existing model-completion epic. It is not a promise that the
-current theory will survive. A useful outcome may be support, contradiction,
+the single canonical completion epic. It supersedes the older master framing in
+[#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426) without
+declaring that older scope complete; every still-open scientific child remains
+governed by #8557 until its own acceptance evidence passes. It is not a promise
+that the current theory will survive. A useful outcome may be support, contradiction,
 inconclusive evidence, or discovery that a proposed quantity is not
 identifiable.
 
@@ -249,6 +252,52 @@ Each milestone updates the repository handoff, falsification matrix, evidence
 schema, release qualification, and AffineDrift's pinned review surface. The
 GitHub epic is the scheduling authority; this document defines the durable
 scientific contract.
+
+## Program Status Ledger
+
+Verified 2026-09-11 against this checkout and the epic's dependency-ordered
+issue ledger. Issue state is not completion evidence: a row reads `complete`
+only when merged, reproducible artifacts satisfy its exit gate, and `open`
+rows name the gate that still blocks them. The zero contradicted count in the
+claim authority does not mean every mechanism survived; supported claims may
+accurately report null or adverse model results.
+
+| Workstream or Milestone                        | Status   | Evidence or Blocking Gate                                                                                                                                                                                                                                |
+| ---------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A — Atomic claim census and adversarial audit  | complete | #8724 normalized authority; [`data/claim_audit_registry.json`](data/claim_audit_registry.json), [`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json), [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json) |
+| B — Biomechanics research expansion            | open     | Source register and leads exist above; the model-to-measurement map, identifiability assessment, and preregistered falsifiers are not complete for every promoted claim                                                                                  |
+| C — Nonlinear dynamics and control expansion   | open     | [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md) and local diagnostics are registered; #9027 governs execution and #9092 the analytical local-rank slice; out-of-sample controller and inference evidence is outstanding                         |
+| D — Comprehensive model ladder                 | open     | Tiers 1–3 and the bounded tier-4 prerequisites (#8668, #8680, #8682, #8685) are qualified; calibrated distributed contact, tiers 5–8, and the #8752/#8800 uncertainty campaigns remain open                                                              |
+| E — Data, reproducibility, and public resource | open     | Manifests, checksums, and fail-closed qualification are merged ([`OPEN_RELEASE_QUALIFICATION.md`](OPEN_RELEASE_QUALIFICATION.md)); the archival profile and persistent identifier are not met                                                            |
+| F — NotebookLM research collections            | open     | No network-validated profile on 2026-08-12, 2026-08-14, or 2026-09-06; no notebook identifier is recorded and repository evidence remains the authority                                                                                                  |
+| G — Side-task integration                      | open     | Tools #4430 is complete and pinned; Tools #4142 remains open, so its ensemble authority is not yet consumed here                                                                                                                                         |
+| M0 — Audit infrastructure                      | complete | [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md), [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md), and the reproducible core validation battery below                                                                                                   |
+| M1 — Paper adjudication                        | complete | [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md) and [`data/release_claim_review.json`](data/release_claim_review.json)                                                                                                        |
+| M2 — Research map                              | open     | Collection manifests are blocked by Workstream F; the experiment matrix is partial                                                                                                                                                                       |
+| M3 — Reusable uncertainty authority            | open     | Tools #4142 is not merged                                                                                                                                                                                                                                |
+| M4 — Articulated spatial model                 | open     | Calibrated grip/shaft and whole-body contact are outstanding; the #8752 terminal record is not on remote `main`; #8800 holds 93/830 restart checkpoints                                                                                                  |
+| M5 — Neuromuscular and control models          | open     | Depends on M4 and Workstream C                                                                                                                                                                                                                           |
+| M6 — Human falsification                       | open     | #9004 and #8556 have no qualifying governed participant dataset; motion-only data cannot close the bilateral-wrench gate                                                                                                                                 |
+| M7 — Open release                              | open     | The computational profile passes; the archival profile, external deposit, and stable citation are outstanding                                                                                                                                            |
+
+The epic closes only when every `open` row above reaches `complete` through
+protected merges verified on remote `main`. Until then this ledger, the root
+`AGENT_HANDOFF.md`, and the
+[falsification matrix](MODEL_COMPLETION_FALSIFICATION_MATRIX.md) are the
+durable record; chat history is not.
+
+### Reproducible Core Validation
+
+```bash
+python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate --source-revision "$(git rev-parse HEAD)" --publication-profile computational
+pytest tests/research -q
+```
+
+Passing this common battery does not close a child whose narrower scientific
+acceptance criteria remain unmet.
 
 ## Completed Candidate Census and Ongoing Release Review
 
