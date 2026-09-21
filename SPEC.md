@@ -737,6 +737,7 @@ Source hashes, contact configuration, interpolation and armature must match;
 legacy omissions require explicit diagnostic mode and cannot certify parity.
 The receipt separates same-state marker agreement, uninterrupted dynamics,
 G1 convergence and physical acceptance. Rejected replay and full-source IK
+playback are separately labelled artifacts; neither closes the G1/G2/G3 ladder.
 
 ## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
 
