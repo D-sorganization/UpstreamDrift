@@ -279,6 +279,61 @@ class RedistributionResult:
     message: str
 
 
+def _margin_violation(margins: Array, *, finite: bool) -> float:
+    """Reduce constraint margins to a single non-negative violation scalar.
+
+    Returns 0 when every margin is non-negative, the magnitude of the worst
+    negative margin otherwise, or infinity when the solution (or any margin)
+    is non-finite.
+    """
+    if finite and np.isfinite(margins).all():
+        return max(0.0, float(-np.min(margins)))
+    return float("inf")
+
+
+def _finalize_redistribution(
+    x: Array,
+    *,
+    finite: bool,
+    converged: bool,
+    error: float,
+    violation: float,
+    cost: float,
+    message: str,
+    tolerance: float,
+) -> RedistributionResult:
+    """Assemble the immutable `RedistributionResult` for a solved system."""
+    feasible = _is_solution_feasible(
+        finite=finite,
+        cost=cost,
+        error=error,
+        violation=violation,
+        tolerance=tolerance,
+    )
+    x.setflags(write=False)
+    return RedistributionResult(
+        x, bool(feasible), converged, error, violation, cost, message
+    )
+
+
+def _is_solution_feasible(
+    *,
+    finite: bool,
+    cost: float,
+    error: float,
+    violation: float,
+    tolerance: float,
+) -> bool:
+    """Evaluate solution feasibility against tolerance guards."""
+    feasibility_tolerance = max(tolerance, 1e-6)
+    return bool(
+        finite
+        and np.isfinite(cost)
+        and error <= feasibility_tolerance
+        and violation <= feasibility_tolerance
+    )
+
+
 def redistribute_forces(
     space: ForceNullSpace,
     weights: Array,
@@ -379,22 +434,17 @@ def redistribute_forces(
         else float("inf")
     )
     margins = constraints.margins(x)
-    violation = (
-        max(0.0, float(-np.min(margins)))
-        if finite and np.isfinite(margins).all()
-        else float("inf")
-    )
+    violation = _margin_violation(margins, finite=finite)
     cost = objective(z)
-    feasibility_tolerance = max(tolerance, 1e-6)
-    feasible = (
-        finite
-        and np.isfinite(cost)
-        and error <= feasibility_tolerance
-        and violation <= feasibility_tolerance
-    )
-    x.setflags(write=False)
-    return RedistributionResult(
-        x, bool(feasible), converged, error, violation, cost, message
+    return _finalize_redistribution(
+        x,
+        finite=finite,
+        converged=converged,
+        error=error,
+        violation=violation,
+        cost=cost,
+        message=message,
+        tolerance=tolerance,
     )
 
 
@@ -609,22 +659,17 @@ def redistribute_trajectory(
     all_margins = np.concatenate(
         [constraints[k].margins(x_list[k]) for k in range(t_count)]
     )
-    violation = (
-        max(0.0, float(-np.min(all_margins)))
-        if finite and np.isfinite(all_margins).all()
-        else float("inf")
-    )
+    violation = _margin_violation(all_margins, finite=finite)
     cost = objective(z_sol)
-    feasibility_tolerance = max(tolerance, 1e-6)
-    feasible = (
-        finite
-        and np.isfinite(cost)
-        and error <= feasibility_tolerance
-        and violation <= feasibility_tolerance
-    )
-    x_all.setflags(write=False)
-    return RedistributionResult(
-        x_all, bool(feasible), converged, error, violation, cost, message
+    return _finalize_redistribution(
+        x_all,
+        finite=finite,
+        converged=converged,
+        error=error,
+        violation=violation,
+        cost=cost,
+        message=message,
+        tolerance=tolerance,
     )
 
 
