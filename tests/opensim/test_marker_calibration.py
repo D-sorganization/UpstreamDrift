@@ -188,3 +188,71 @@ def test_static_offsets_recover_body_frame_positions_over_valid_frames() -> None
         module.static_marker_offsets(capture, bodies, poses[:2])
     with pytest.raises(ValueError):
         module.static_marker_offsets(capture, {"A": "arm", "B": "trunk"}, poses)
+
+
+def test_bound_marker_offsets_clamps_radius_and_prior_deviation() -> None:
+    """Verify that bound_marker_offsets restricts offsets within anatomical bounds."""
+    raw_offsets = {
+        "M_Normal": ("torso", (0.1, 0.0, 0.0)),
+        "M_Far": ("torso", (1.0, 0.0, 0.0)),  # Exceeds max radius 0.5m
+        "M_PriorDeviated": ("torso", (0.2, 0.0, 0.0)),
+    }
+    priors = {"M_PriorDeviated": (0.0, 0.0, 0.0)}  # Deviated by 0.2m > 0.08m
+
+    bounded = module.bound_marker_offsets(
+        raw_offsets,
+        max_offset_radius_m=0.50,
+        prior_offsets=priors,
+        max_deviation_from_prior_m=0.08,
+    )
+
+    # Normal remains untouched
+    np.testing.assert_allclose(bounded["M_Normal"][1], (0.1, 0.0, 0.0))
+    # M_Far is clamped to radius 0.50m
+    np.testing.assert_allclose(bounded["M_Far"][1], (0.5, 0.0, 0.0))
+    # M_PriorDeviated is clamped to distance 0.08m from prior
+    np.testing.assert_allclose(bounded["M_PriorDeviated"][1], (0.08, 0.0, 0.0))
+
+
+def test_calibrate_marker_offsets_with_holdout() -> None:
+    """Verify holdout evaluation during marker calibration."""
+    labels = ("M1", "M2", "M3", "M_Holdout")
+    bodies = dict.fromkeys(labels, "body")
+    frames = 4
+
+    def poses(q: np.ndarray) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        return {"body": (np.eye(3), np.array([q[0], 0.0, 0.0]))}
+
+    true_offsets = {
+        "M1": (0.1, 0.0, 0.0),
+        "M2": (0.0, 0.1, 0.0),
+        "M3": (0.0, 0.0, 0.1),
+        "M_Holdout": (0.2, 0.2, 0.0),
+    }
+    points = np.zeros((frames, len(labels), 3))
+    for f in range(frames):
+        for i, lb in enumerate(labels):
+            points[f, i] = np.array(true_offsets[lb]) + np.array([float(f), 0.0, 0.0])
+
+    capture = TourCapture(
+        np.arange(frames) / 360.0, labels, points, np.ones((frames, len(labels)), bool)
+    )
+
+    def ik(offsets: dict, cap: TourCapture) -> np.ndarray:
+        q = np.zeros((cap.frames, 1))
+        for f in range(cap.frames):
+            q[f, 0] = float(f)
+        return q
+
+    result, holdout_rms = module.calibrate_marker_offsets_with_holdout(
+        capture,
+        bodies,
+        poses,
+        ik,
+        initial_q=np.zeros(1),
+        iterations=2,
+        holdout_labels=["M_Holdout"],
+    )
+    assert holdout_rms < 1e-9
+    assert result.rms_per_iteration_m[-1] < 1e-9
+    assert "M_Holdout" not in result.offsets  # Holdout not included in train offsets
