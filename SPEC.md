@@ -20,8 +20,24 @@ Calibrates swing planes, fixed geometry, and feasible initial states under the T
   - Tracks external hub trajectory $\mathbf{r}_{\text{hub}}(t)$, velocity $\dot{\mathbf{r}}_{\text{hub}}(t)$, and power contribution $P_{\text{hub}}(t) = \mathbf{F}_{\text{hub}}(t) \cdot \dot{\mathbf{r}}_{\text{hub}}(t)$.
   - Evaluates integrated external work $W_{\text{hub}} = \int P_{\text{hub}}(t) dt$ and prevents labeling externally driven base motion as an unforced baseline.
 - **Evidence & Verification**:
-  - Unit test suites in `tests/unit/motion_matching/test_projection_2d.py` and `tests/unit/tour_baselines/test_calibration.py` (10 tests, 60 total in tour baselines / projection suite).
+  - Unit test suites in `tests/unit/motion_matching/test_projection_2d.py` and `tests/unit/tour_baselines/test_tour_calibration.py` (10 tests, 60 total in tour baselines / projection suite).
   - Published comprehensive architectural documentation in `docs/plans/tour_baselines/plane_calibration_and_initial_states.md`.
+
+## Connect Qualified Matching Strategies to Engine Feature Contracts (PF-10, #10440)
+
+Connects qualified matching strategies to engine feature contracts:
+- **Strategy Schema & Qualification Matrix (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Implements versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`).
+  - Stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`).
+  - Preconfigured strategy presets, controller specifications, and contact reaction history containers.
+- **Candidate Strategy Serialization (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - `CandidateStrategyPackage` binds candidate trajectories with strategy metadata, accelerations, and contact reactions.
+  - Fail-closed name-permuted coordinate remapping and lossless `.npz` serialization without pickle.
+- **Strategy Comparison Service (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+- **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
+  - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+
 
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
