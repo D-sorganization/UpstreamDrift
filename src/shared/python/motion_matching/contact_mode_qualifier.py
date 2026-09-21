@@ -272,48 +272,41 @@ class ContactModeQualifier:
 
         return is_contact, signed_dist, ambiguity
 
-    def evaluate_support_mode(
+    def _evaluate_all_spheres(
         self,
         sphere_positions: Mapping[str, Array],
         sphere_velocities: Mapping[str, Array],
-        contact_forces: Mapping[str, Array] | None = None,
-        previous_state: SupportModeReport | None = None,
-    ) -> SupportModeReport:
-        """Evaluate full-body and per-foot support modes, COP, and equilibrium."""
-        left_active: list[str] = []
-        right_active: list[str] = []
-        left_ambiguities: list[float] = []
-        right_ambiguities: list[float] = []
-
-        left_slip_speeds: list[float] = []
-        right_slip_speeds: list[float] = []
-        left_fric_ratios: list[float] = []
-        right_fric_ratios: list[float] = []
-
+        contact_forces: Mapping[str, Array] | None,
+        previous_state: SupportModeReport | None,
+    ) -> tuple[dict[str, list[Any]], dict[str, list[Any]], float, np.ndarray]:
+        left_d: dict[str, list[Any]] = {"active": [], "amb": [], "slip": [], "fric": []}
+        right_d: dict[str, list[Any]] = {
+            "active": [],
+            "amb": [],
+            "slip": [],
+            "fric": [],
+        }
         total_fn = 0.0
         cop_weighted = np.zeros(3)
 
         for name in self.sphere_names:
             pos = sphere_positions[name]
             vel = sphere_velocities[name]
-
-            # Determine previous contact state for hysteresis
             prev_contact: bool | None = None
             if previous_state is not None:
-                if "left" in name:
-                    prev_contact = name in previous_state.left_foot.active_spheres
-                else:
-                    prev_contact = name in previous_state.right_foot.active_spheres
+                foot_state = (
+                    previous_state.left_foot
+                    if "left" in name
+                    else previous_state.right_foot
+                )
+                prev_contact = name in foot_state.active_spheres
 
-            is_contact, clearance, amb = self.evaluate_sphere_contact(
+            is_contact, _, amb = self.evaluate_sphere_contact(
                 name, pos, vel, prev_contact
             )
-
-            # Evaluate slip velocity and tangential friction
             v_t = vel - float(self.n_hat @ vel) * self.n_hat
             slip_speed = float(np.linalg.norm(v_t))
 
-            # Forces
             if contact_forces is not None and name in contact_forces:
                 f_s = np.asarray(contact_forces[name], dtype=np.float64)
                 fn_s = max(0.0, float(f_s @ self.n_hat))
@@ -328,156 +321,154 @@ class ContactModeQualifier:
                 fn_s = 0.0
                 fric_ratio = 0.0
 
-            if "left" in name:
-                left_ambiguities.append(amb)
-            else:
-                right_ambiguities.append(amb)
-
+            bucket = left_d if "left" in name else right_d
+            bucket["amb"].append(amb)
             if is_contact:
-                if "left" in name:
-                    left_active.append(name)
-                    left_slip_speeds.append(slip_speed)
-                    left_fric_ratios.append(fric_ratio)
-                else:
-                    right_active.append(name)
-                    right_slip_speeds.append(slip_speed)
-                    right_fric_ratios.append(fric_ratio)
-
+                bucket["active"].append(name)
+                bucket["slip"].append(slip_speed)
+                bucket["fric"].append(fric_ratio)
                 if fn_s > 0.0:
                     total_fn += fn_s
-                    # Contact point on the ground surface
                     c_pt = pos - self.n_hat * self.sphere_radii[name]
                     cop_weighted += fn_s * c_pt
 
-        # Determine individual foot modes
-        def _classify_foot_mode(
-            active: list[str], foot_prefix: str
-        ) -> tuple[ContactMode, tuple[str, ...]]:
-            if not active:
-                return ContactMode.FLIGHT, ()
-            has_heel = any("heel" in s for s in active)
-            has_toe = any("toe" in s for s in active)
-            has_mid = any("mid" in s for s in active)
+        return left_d, right_d, total_fn, cop_weighted
 
-            if has_heel and (has_toe or has_mid):
-                return ContactMode.FLAT, tuple(active)
-            if has_heel and not has_toe and not has_mid:
-                return ContactMode.HEEL_ONLY, tuple(active)
-            if has_toe and not has_heel:
-                return ContactMode.TOE_ONLY, tuple(active)
+    @staticmethod
+    def _classify_foot_mode(active: list[str]) -> tuple[ContactMode, tuple[str, ...]]:
+        if not active:
+            return ContactMode.FLIGHT, ()
+        has_heel = any("heel" in s for s in active)
+        has_toe = any("toe" in s for s in active)
+        has_mid = any("mid" in s for s in active)
+        if has_heel and (has_toe or has_mid):
             return ContactMode.FLAT, tuple(active)
+        if has_heel and not has_toe and not has_mid:
+            return ContactMode.HEEL_ONLY, tuple(active)
+        if has_toe and not has_heel:
+            return ContactMode.TOE_ONLY, tuple(active)
+        return ContactMode.FLAT, tuple(active)
 
-        left_mode, left_spheres = _classify_foot_mode(left_active, "left")
-        right_mode, right_spheres = _classify_foot_mode(right_active, "right")
-
-        # Slip and friction statistics
+    def _build_foot_state(
+        self,
+        foot_name: str,
+        mode: ContactMode,
+        spheres: tuple[str, ...],
+        d: dict[str, list[Any]],
+    ) -> FootContactState:
         v_slip_thresh = self.hysteresis.slip_velocity_threshold_m_s
-        left_slipping = (
-            bool(max(left_slip_speeds) > v_slip_thresh) if left_slip_speeds else False
-        )
-        right_slipping = (
-            bool(max(right_slip_speeds) > v_slip_thresh) if right_slip_speeds else False
-        )
-        left_max_slip = max(left_slip_speeds) if left_slip_speeds else 0.0
-        right_max_slip = max(right_slip_speeds) if right_slip_speeds else 0.0
-        left_max_fric = max(left_fric_ratios) if left_fric_ratios else 0.0
-        right_max_fric = max(right_fric_ratios) if right_fric_ratios else 0.0
-
-        left_foot_state = FootContactState(
-            foot_name="left",
-            mode=left_mode,
-            active_spheres=left_spheres,
-            is_in_contact=bool(left_spheres),
-            is_slipping=left_slipping,
-            slip_speed_m_s=left_max_slip,
-            friction_saturation_ratio=left_max_fric,
-            ambiguity=max(left_ambiguities) if left_ambiguities else 0.0,
+        slipping = bool(max(d["slip"]) > v_slip_thresh) if d["slip"] else False
+        return FootContactState(
+            foot_name=foot_name,
+            mode=mode,
+            active_spheres=spheres,
+            is_in_contact=bool(spheres),
+            is_slipping=slipping,
+            slip_speed_m_s=max(d["slip"]) if d["slip"] else 0.0,
+            friction_saturation_ratio=max(d["fric"]) if d["fric"] else 0.0,
+            ambiguity=max(d["amb"]) if d["amb"] else 0.0,
         )
 
-        right_foot_state = FootContactState(
-            foot_name="right",
-            mode=right_mode,
-            active_spheres=right_spheres,
-            is_in_contact=bool(right_spheres),
-            is_slipping=right_slipping,
-            slip_speed_m_s=right_max_slip,
-            friction_saturation_ratio=right_max_fric,
-            ambiguity=max(right_ambiguities) if right_ambiguities else 0.0,
+    def _compute_cop_polygon(
+        self, total_fn: float, cop_weighted: np.ndarray
+    ) -> tuple[tuple[float, float, float] | None, bool, bool]:
+        if total_fn <= 1e-4:
+            return None, False, False
+        cop = cop_weighted / total_fn
+        cop_tuple: tuple[float, float, float] = (
+            float(cop[0]),
+            float(cop[1]),
+            float(cop[2]),
+        )
+        u, v = _plane_basis(self.n_hat)
+        polygon_arr = np.array(
+            [np.array([p @ u, p @ v]) for p in self.nominal_positions.values()]
+        )
+        inside_polygon = convex_hull_contains(np.array([cop @ u, cop @ v]), polygon_arr)
+        is_weight_balanced = abs(total_fn - self.weight_n) / self.weight_n <= 0.05
+        return cop_tuple, inside_polygon, is_weight_balanced
+
+    @staticmethod
+    def _build_alternatives(
+        left_mode: ContactMode,
+        right_mode: ContactMode,
+        left_amb: float,
+        right_amb: float,
+    ) -> tuple[tuple[ContactMode, ContactMode], ...]:
+        alt_left = [left_mode]
+        if left_amb > 0.05:
+            alt_left.append(
+                ContactMode.FLIGHT
+                if left_mode != ContactMode.FLIGHT
+                else ContactMode.FLAT
+            )
+        alt_right = [right_mode]
+        if right_amb > 0.05:
+            alt_right.append(
+                ContactMode.FLIGHT
+                if right_mode != ContactMode.FLIGHT
+                else ContactMode.FLAT
+            )
+        alts: list[tuple[ContactMode, ContactMode]] = []
+        for lm in alt_left:
+            for rm in alt_right:
+                if (lm, rm) != (left_mode, right_mode):
+                    alts.append((lm, rm))
+        return tuple(alts)
+
+    def evaluate_support_mode(
+        self,
+        sphere_positions: Mapping[str, Array],
+        sphere_velocities: Mapping[str, Array],
+        contact_forces: Mapping[str, Array] | None = None,
+        previous_state: SupportModeReport | None = None,
+    ) -> SupportModeReport:
+        """Evaluate full-body and per-foot support modes, COP, and equilibrium."""
+        left_d, right_d, total_fn, cop_weighted = self._evaluate_all_spheres(
+            sphere_positions, sphere_velocities, contact_forces, previous_state
         )
 
-        # Full-body support state
-        if left_foot_state.is_in_contact and right_foot_state.is_in_contact:
+        left_mode, left_spheres = self._classify_foot_mode(left_d["active"])
+        right_mode, right_spheres = self._classify_foot_mode(right_d["active"])
+
+        left_foot = self._build_foot_state("left", left_mode, left_spheres, left_d)
+        right_foot = self._build_foot_state("right", right_mode, right_spheres, right_d)
+
+        if left_foot.is_in_contact and right_foot.is_in_contact:
             support_state = SupportState.DOUBLE_SUPPORT
-        elif left_foot_state.is_in_contact:
+        elif left_foot.is_in_contact:
             support_state = SupportState.LEAD_ONLY
-        elif right_foot_state.is_in_contact:
+        elif right_foot.is_in_contact:
             support_state = SupportState.TRAIL_ONLY
         else:
             support_state = SupportState.FLIGHT
 
-        is_physically_supported = support_state != SupportState.FLIGHT
-
-        # COP and support polygon
-        u, v = _plane_basis(self.n_hat)
-        polygon_points = [
-            np.array([pos @ u, pos @ v]) for pos in self.nominal_positions.values()
-        ]
-        polygon_arr = np.array(polygon_points)
-
-        if total_fn > 1e-4:
-            cop = cop_weighted / total_fn
-            cop_tuple: tuple[float, float, float] | None = (
-                float(cop[0]),
-                float(cop[1]),
-                float(cop[2]),
-            )
-            inside_polygon = convex_hull_contains(
-                np.array([cop @ u, cop @ v]), polygon_arr
-            )
-            is_weight_balanced = abs(total_fn - self.weight_n) / self.weight_n <= 0.05
-        else:
-            cop_tuple = None
-            inside_polygon = False
-            is_weight_balanced = False
-
-        ambiguity_score = max(left_foot_state.ambiguity, right_foot_state.ambiguity)
+        cop_tuple, inside_polygon, is_weight_balanced = self._compute_cop_polygon(
+            total_fn, cop_weighted
+        )
+        ambiguity_score = max(left_foot.ambiguity, right_foot.ambiguity)
         has_ambiguity = ambiguity_score > 0.05
-
-        # Plausible alternative schedules if ambiguous
-        alternatives: list[tuple[ContactMode, ContactMode]] = []
-        if has_ambiguity:
-            alt_left = [left_mode]
-            if left_foot_state.ambiguity > 0.05:
-                alt_left.append(
-                    ContactMode.FLIGHT
-                    if left_mode != ContactMode.FLIGHT
-                    else ContactMode.FLAT
-                )
-            alt_right = [right_mode]
-            if right_foot_state.ambiguity > 0.05:
-                alt_right.append(
-                    ContactMode.FLIGHT
-                    if right_mode != ContactMode.FLIGHT
-                    else ContactMode.FLAT
-                )
-            for lm in alt_left:
-                for rm in alt_right:
-                    if (lm, rm) != (left_mode, right_mode):
-                        alternatives.append((lm, rm))
+        alternatives = (
+            self._build_alternatives(
+                left_mode, right_mode, left_foot.ambiguity, right_foot.ambiguity
+            )
+            if has_ambiguity
+            else ()
+        )
 
         return SupportModeReport(
             support_state=support_state,
-            left_foot=left_foot_state,
-            right_foot=right_foot_state,
+            left_foot=left_foot,
+            right_foot=right_foot,
             total_normal_force_n=total_fn,
             weight_n=self.weight_n,
             is_weight_balanced=is_weight_balanced,
             inside_support_polygon=inside_polygon,
             cop_m=cop_tuple,
-            is_physically_supported=is_physically_supported,
+            is_physically_supported=support_state != SupportState.FLIGHT,
             ambiguity_score=ambiguity_score,
             has_ambiguity=has_ambiguity,
-            alternative_modes=tuple(alternatives),
+            alternative_modes=alternatives,
         )
 
     def evaluate_residual_budgets(
