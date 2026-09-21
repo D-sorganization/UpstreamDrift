@@ -74,6 +74,22 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
 - Next: Land PR #10499 via CI and proceed to PF-05.
 
+## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
+
+- Branch: `feat/issue-10433-pf03-contact-actuator-root-constraints`, PR #10498 (auto-merge armed), lease `antigravity-ud-10433`, DL-#10433.
+- Changes:
+  - `src/shared/python/motion_matching/contact_force_allocator.py`:
+    - Replaced penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+    - Added `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+    - Enforced 8-faceted polyhedral friction pyramid and non-negative normal force (f_n >= 0) along arbitrary surface normals.
+    - Enforced contact separation mask (f_s = 0 for separated contacts).
+    - Enforced strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+    - Isolated diagnostic root slack delta_tau_root so phantom root forces never produce false physical success.
+    - Added `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+  - `tests/unit/motion_matching/test_contact_force_allocator_pf03.py`: Comprehensive test suite for all 10 acceptance scenarios.
+- Validation: 12 unit tests pass 100% across PF-03 and legacy suites; ruff clean; black clean; mypy strict clean; bandit clean.
+- Next: Land PR #10498 via CI and proceed to PF-04.
+
 ## PF-10 Connect Qualified Matching Strategies to Engine Feature Contracts (#10440)
 
 - Worktree: primary, branch `feat/issue-10440-pf10-matching-strategies-contracts`, lease `antigravity-ud-10440`, DL-#10440.
