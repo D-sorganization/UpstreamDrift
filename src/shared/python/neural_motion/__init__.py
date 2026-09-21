@@ -28,8 +28,10 @@ from .experiment import (
     ComputeBudgetCaps,
     PromotionGates,
     break_even_queries,
+    classical_baseline_latency_s,
     default_benefit_experiment,
     freeze_benefit_experiment,
+    pilot_training_config,
 )
 from .roster import (
     NeuralModelRoster,
@@ -48,6 +50,10 @@ from .tasks import (
     TaskDimensions,
     build_default_learning_tasks,
     dimensions_from_model,
+    labels_from_canonical_fit,
+    provider_engine_name,
+    refinement_fit_options,
+    training_config_for_task,
 )
 from .types import (
     ArtifactIdentity,
@@ -90,11 +96,17 @@ __all__ = [
     "break_even_queries",
     "build_default_learning_tasks",
     "build_neural_model_roster",
+    "classical_baseline_latency_s",
     "classify_training_claim",
     "default_benefit_experiment",
     "dimensions_from_model",
     "freeze_benefit_experiment",
     "generate_neural_coverage_matrix",
     "inspect_parquet_bounded",
+    "labels_from_canonical_fit",
+    "pilot_training_config",
+    "provider_engine_name",
+    "refinement_fit_options",
     "resolve_roster_entry",
+    "training_config_for_task",
 ]
