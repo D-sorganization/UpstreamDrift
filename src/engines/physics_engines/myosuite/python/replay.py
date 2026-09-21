@@ -321,12 +321,13 @@ class _ReplayArtifactsContext:
 
 def _write_replay_outputs(ctx: _ReplayArtifactsContext) -> dict[str, Any]:
     ctx.out_dir.mkdir(parents=True, exist_ok=True)
+    scene_xml = ctx.scene.xml_path
     meta = CandidateMetadata(
         schema_version=CANDIDATE_SCHEMA_VERSION,
         profile=CandidateProfile.KINEMATIC,
         engine="myosuite",
-        model_name=ctx.scene.xml_path.name,
-        model_sha256=_digest(ctx.scene.xml_path),
+        model_name=scene_xml.name,
+        model_sha256=_digest(scene_xml),
         coordinate_names=ctx.rmap.target_names,
         velocity_names=ctx.rmap.target_names,
         marker_names=ctx.site_labels,
@@ -391,6 +392,7 @@ class _ReceiptContext:
 
 
 def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
+    scene_xml = ctx.scene.xml_path
     return {
         "schema_version": "matched-swing-replay/1",
         "engine": "myosuite",
@@ -400,7 +402,7 @@ def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
         "source_engine": ctx.config.source_engine,
         "configuration": {
             "mode": "kinematic_only",
-            "scene_xml": str(ctx.scene.xml_path.relative_to(REPO_ROOT)),
+            "scene_xml": str(scene_xml.relative_to(REPO_ROOT)),
             "retarget_map": "coordinate_map_anthro.json",
             "mapped_coordinates": len(ctx.rmap.source_to_target),
             "omitted_source": list(
