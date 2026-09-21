@@ -57,10 +57,11 @@ def get_current_session_service() -> GolfSessionService | None:
 
 def reset_simulator_state() -> None:
     """Reset service and replay coordinator state (primarily for tests)."""
-    global _CURRENT_SERVICE, _CURRENT_COORDINATOR, _CURRENT_CLOCK
+    global _CURRENT_SERVICE, _CURRENT_COORDINATOR, _CURRENT_CLOCK, _GLOBAL_JOURNAL
     _CURRENT_SERVICE = None
     _CURRENT_COORDINATOR = None
     _CURRENT_CLOCK = None
+    _GLOBAL_JOURNAL = ShotJournal()
 
 
 def _get_or_create_service(

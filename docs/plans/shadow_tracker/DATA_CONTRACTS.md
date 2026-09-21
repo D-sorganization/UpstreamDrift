@@ -93,3 +93,25 @@ round-trip and legacy-fixture tests; do not silently drop fields. Asset paths
 are bundle-relative and resolve within the chosen root; reject traversal and
 checksum mismatches. Large footage, weights and results live outside Git;
 commit only tiny redistributable fixtures and manifests.
+
+## Manual Revision Store Contract (#10233)
+
+Revision IDs are globally unique within a ManualMaskProvider. A repeated ID
+is a no-op only for complete immutable MaskFrame equality; it never changes
+history or selection. A correction requires a registered parent with identical
+complete FrameIdentity and pixel dimensions. Missing parents, cross-observation
+parents, cycles and conflicting IDs fail before mutation. Observation scopes
+include asset, shot, swing, camera and frame IDs.
+
+`select_revision` selects an existing revision without appending history.
+Consumers must key cached results with `get_cache_key`, which follows the
+selected revision and complete observation hash.
+
+Provider JSON schema 1.1.0 contains exactly `schema_version`, `revisions` and
+`current_revision_ids`. Revisions retain registration order, with parents before
+children, and preserve complete masks and identity/provenance. Selection contains
+exactly one existing revision per scope. Schema 1.0.0 is read explicitly with
+last-registered selection. Invalid snapshots never produce a partial provider.
+The existing atomic sibling-file replacement preserves the previous snapshot
+on write/replace failure. These guarantees concern the provider store, separately
+from the ST-11 directory-bundle format.

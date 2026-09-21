@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
+from pathlib import Path
+import time
 from typing import TYPE_CHECKING, Any
 
 import anyio.to_thread
@@ -78,6 +79,7 @@ class SimulationService:
         self._last_recorder: GenericPhysicsRecorder | None = None
         self._last_recording_meta: dict[str, Any] = {}
         self._biomechanics_binding: Any = None
+        self._active_candidate_session: Any = None
 
     @property
     def stats(self) -> SimulationStats:
@@ -656,3 +658,118 @@ class SimulationService:
             logger.warning("Error performing analysis: %s", e)
 
         return results
+
+    def get_candidate_session(
+        self,
+        candidate_path: str | Path,
+        model_path: str | Path | None = None,
+        receipt_path: str | Path | None = None,
+    ) -> Any:
+        """Ingest a saved candidate trajectory into a replayable CandidateSession.
+
+        Preconditions:
+            candidate_path points to an existing candidate file.
+        DbC / Invariants:
+            Preserves simulation boundary; never fabricates a GenericPhysicsRecorder
+            or simulates live physics.
+        """
+        from src.shared.python.motion_matching.candidate_session import (
+            ingest_candidate_session,
+        )
+
+        session = ingest_candidate_session(
+            candidate_path=candidate_path,
+            model_path=model_path,
+            receipt_path=receipt_path,
+        )
+        self._active_candidate_session = session
+        return session
+
+    @property
+    def active_candidate_session(self) -> Any:
+        """Currently loaded candidate session, or None."""
+        return self._active_candidate_session
+
+    def set_active_candidate_session(self, session: Any) -> None:
+        """Set active candidate session for inspection and analysis."""
+        self._active_candidate_session = session
+
+    def get_candidate_forces(self) -> dict[str, Any]:
+        """Return synchronized force/torque, GRF, and CoP telemetry from active candidate session."""
+        session = self._active_candidate_session
+        if session is None:
+            raise ValueError("No active candidate session loaded")
+
+        if not session.supports_forces:
+            return {
+                "session_available": True,
+                "supports_forces": False,
+                "frame_count": session.frame_count,
+                "time_s": session.time_s.tolist(),
+                "coordinate_names": list(session.coordinate_names),
+                "torques": None,
+                "external_forces": None,
+                "center_of_pressure": None,
+            }
+
+        cops = [session.get_center_of_pressure(i) for i in range(session.frame_count)]
+        torques = session.tau.tolist() if session.tau is not None else None
+        ext_forces = (
+            session.external_forces.tolist()
+            if session.external_forces is not None
+            else None
+        )
+        return {
+            "session_available": True,
+            "supports_forces": True,
+            "frame_count": session.frame_count,
+            "time_s": session.time_s.tolist(),
+            "coordinate_names": list(session.coordinate_names),
+            "torques": torques,
+            "external_forces": ext_forces,
+            "center_of_pressure": cops,
+        }
+
+    def run_candidate_counterfactual(
+        self,
+        fork_frame_idx: int,
+        strategy: str = "zero_trail_arm_torque",
+        duration_frames: int | None = None,
+    ) -> dict[str, Any]:
+        """Perform counterfactual fork on active candidate session."""
+        session = self._active_candidate_session
+        if session is None:
+            raise ValueError("No active candidate session loaded")
+        if not session.supports_counterfactuals:
+            raise ValueError(
+                "Active candidate session does not support counterfactual rollouts"
+            )
+
+        from src.shared.python.motion_matching.counterfactual import (
+            CounterfactualStrategy,
+            create_counterfactual_rollout,
+        )
+
+        strat_enum = CounterfactualStrategy(strategy)
+        fork = create_counterfactual_rollout(
+            session=session,
+            fork_frame_idx=fork_frame_idx,
+            strategy=strat_enum,
+            duration_frames=duration_frames,
+        )
+        return {
+            "fork_id": fork.fork_id,
+            "baseline_candidate_sha256": fork.baseline_candidate_sha256,
+            "strategy": fork.strategy.value,
+            "fork_time_s": fork.fork_time_s,
+            "fork_frame_idx": fork.fork_frame_idx,
+            "frame_count": fork.frame_count,
+            "time_s": fork.time_s.tolist(),
+            "q": fork.q.tolist(),
+            "v": fork.v.tolist() if fork.v is not None else None,
+            "a": fork.a.tolist() if fork.a is not None else None,
+            "divergence_rms": fork.divergence_rms,
+            "constraint_status": fork.constraint_status,
+            "is_accepted": fork.is_accepted,
+            "rejection_reasons": list(fork.rejection_reasons),
+        }
