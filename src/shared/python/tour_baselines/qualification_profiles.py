@@ -262,9 +262,11 @@ def _eval_full_body_gates(
             measured=w_meas,
             passed=w_pass,
             unit="m",
-            reason=""
-            if w_pass
-            else f"whole marker RMSE {w_meas * 1e3:.1f} mm > {whole_th * 1e3:.1f} mm",
+            reason=(
+                ""
+                if w_pass
+                else f"whole marker RMSE {w_meas * 1e3:.1f} mm > {whole_th * 1e3:.1f} mm"
+            ),
         )
     )
 
@@ -278,9 +280,11 @@ def _eval_full_body_gates(
             measured=c_meas,
             passed=c_pass,
             unit="m",
-            reason=""
-            if c_pass
-            else f"club marker RMSE {c_meas * 1e3:.1f} mm > {club_th * 1e3:.1f} mm",
+            reason=(
+                ""
+                if c_pass
+                else f"club marker RMSE {c_meas * 1e3:.1f} mm > {club_th * 1e3:.1f} mm"
+            ),
         )
     )
 
@@ -310,9 +314,11 @@ def _eval_planar_pendulum_gates(
             measured=c_meas,
             passed=c_pass,
             unit="m",
-            reason=""
-            if c_pass
-            else f"planar club RMSE {c_meas * 1e3:.1f} mm > {profile.max_club_rmse_m * 1e3:.1f} mm",
+            reason=(
+                ""
+                if c_pass
+                else f"planar club RMSE {c_meas * 1e3:.1f} mm > {profile.max_club_rmse_m * 1e3:.1f} mm"
+            ),
         )
     )
 
@@ -327,9 +333,11 @@ def _eval_planar_pendulum_gates(
                 measured=out_meas,
                 passed=out_pass,
                 unit="m",
-                reason=""
-                if out_pass
-                else f"out-of-plane {out_meas * 1e3:.1f} mm > {profile.max_out_of_plane_residual_m * 1e3:.1f} mm",
+                reason=(
+                    ""
+                    if out_pass
+                    else f"out-of-plane {out_meas * 1e3:.1f} mm > {profile.max_out_of_plane_residual_m * 1e3:.1f} mm"
+                ),
             )
         )
 
@@ -354,9 +362,11 @@ def _eval_upper_body_gates(
             measured=w_meas,
             passed=w_pass,
             unit="m",
-            reason=""
-            if w_pass
-            else f"upper body RMSE {w_meas * 1e3:.1f} mm > {profile.max_whole_marker_rmse_m * 1e3:.1f} mm",
+            reason=(
+                ""
+                if w_pass
+                else f"upper body RMSE {w_meas * 1e3:.1f} mm > {profile.max_whole_marker_rmse_m * 1e3:.1f} mm"
+            ),
         )
     )
 
@@ -384,9 +394,11 @@ def _eval_triple_pendulum_gates(
             measured=c_meas,
             passed=c_pass,
             unit="m",
-            reason=""
-            if c_pass
-            else f"triple pendulum club RMSE {c_meas * 1e3:.1f} mm > {profile.max_club_rmse_m * 1e3:.1f} mm",
+            reason=(
+                ""
+                if c_pass
+                else f"triple pendulum club RMSE {c_meas * 1e3:.1f} mm > {profile.max_club_rmse_m * 1e3:.1f} mm"
+            ),
         )
     )
     return gates
