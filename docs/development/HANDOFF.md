@@ -1,5 +1,66 @@
 # Current Matching Continuation Handoff
 
+## Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) — 2026-09-11
+
+- Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8684.
+- Branch: conductor/issue-8684; checkpoint SELF; PR #9998. Parent #8668.
+- Objective: close parent research issue #8684 by rolling up the executed child tiers (#8685 grip discretization, #8797 friction/events, #8715 shaft, #8723 ground) against its four registered questions. No new solver, atlas, tolerance, or golden file; the required design was delivered by the children.
+- Changed: `COMPREHENSIVE_RESEARCH_PROGRAM.md` (child summaries plus the four-question rollup and promotion boundary), four new tier rows in `MODEL_COMPLETION_FALSIFICATION_MATRIX.md`, DL-#8684, and the re-pinned `release_manifest.json`, `CHECKSUMS.sha256`, `claim_evidence_manifest.json` via `qualify_open_release write`.
+- Validation: `qualify_open_release validate`, `claim_evidence_integrity validate`, `tests/research/test_proximal_distal_release_bundle.py`, `tests/unit/research/test_proximal_distal_claim_evidence_integrity.py`, `test_proximal_distal_terminology_contract.py`, doc size budget, and the development-log validator; outcomes recorded in the PR body.
+- Open: stateful friction, calibrated equipment, unilateral foot contact, uncertainty crossed with shaft/ground, the frozen #9306 smoke; human promotion stays blocked on #8556. Peer handoffs below are preserved.
+
+## PF-09 Replace Synthetic Force Adapters With Native Bridges (#10439)
+
+- Worktree: primary, branch `feat/issue-10439-pf09-native-force-bridges`, lease `antigravity-ud-10439`, DL-#10439.
+- Changes:
+  - `multi_engine_torque_allocator.py`: Extended `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`. Quarantined `_AnalyticalMultibodyBase` as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`. Enforced fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode. Corrected `MujocoForceAdapter` to compute raw unconstrained dynamics M a + bias eliminating `qfrc_inverse` passive/constraint force double counting, added input validation (`_checked_vector`) and state refresh (`_prepare_state`) before mutation, and verified exact acceleration parity.
+  - `force_adapter.py` & `native_model.py` (Pinocchio): Implemented `PinocchioForceAdapter` implementing the shared interface with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+  - `allocate_swing_torques.py`: Extended CLI choices to include `pinocchio` and added `--allow-synthetic` flag to gate quarantined fixtures.
+  - Test suites: Added `test_native_force_equations.py` (MuJoCo raw equation checks), `test_force_adapter.py` & `test_force_mapping.py` (Pinocchio integration), and `test_force_bridges_pf09.py` (quarantine enforcement, protocol conformance, CLI synthetic gate).
+- Reproduction: `pytest tests/unit/motion_matching/test_native_force_equations.py tests/unit/motion_matching/test_multi_engine_torque_allocator.py tests/unit/motion_matching/test_force_bridges_pf09.py -m "requires_mujoco or unit" -v`.
+- Next: PR auto-merge, release lease on #10439, claim next issue in sequence (#10440: PF-10).
+
+## Club-Only and Neural Matching Planning (2026-09-20)
+
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md).
+- **State:** Planning only. Four unique workbook trials audited; source event parsing failure reproduced. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
+- **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
+- **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
+
+## BunkerShot3D Product Acceptance Matrix (Epic #9541)
+
+Working directory:
+`C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9541`.
+Branch: `conductor/issue-9541`. Base HEAD `9af408974f1bb1a738461875edafe5defee2260a`;
+implementation SELF; PR #10459.
+Development-log entry: DL-#9541. Tools pin `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`
+(the worktree's `vendor/ud-tools` was empty and was materialized read-only from
+the main checkout's submodule objects for testing; nothing under `vendor/` is
+edited).
+
+Added `src/config/bunkershot3d_qualification.json`, the epic's product
+acceptance matrix, in the #9539 readiness-ledger schema so
+`src/config/industrial_readiness_loader.py` is reused without change. All
+sixteen checklist children are open with owner, dependency order and a
+narrow RED/GREEN plan; eight acceptance criteria carry their blockers;
+`release_status` is `blocked`. The gate in
+`tests/config/bunkershot3d_qualification/` additionally binds `release_status`
+to the live `shipped_register()` (zero measurements) and
+`credibility_assessment()` (validation 0 of 4), so the matrix cannot be greened
+by editing JSON. `CLAUDE.md` documents the update-on-land rule.
+
+Validation: `py -3.12 -m pytest tests/config/bunkershot3d_qualification tests/config/industrial_readiness -p no:randomly` → 37 passed; `ruff check` and `ruff format --check` clean on the new test.
+Not done and not claimed: no physics, calibration, GUI or API change; no
+measurement, rendered evidence or independent review. The tool remains an
+exploratory simulator.
+
+Next: U1 (#9286) and U2 (#9542) first, per the matrix's dependency order; each
+landing PR records its merge SHA and proving test in its entry.
+
+---
+
 Updated 2026-09-18. Governing epic #10363; documentation review branch
 `docs/matching-agent-continuation`; commit SELF; PR https://github.com/D-sorganization/UpstreamDrift/pull/10393.
 Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
@@ -567,31 +628,32 @@ Current turnover: `docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODD
 
 ## Current Status
 
-Run101 is a **rejected 0–0.85 s prefix**, not a completed full-swing match.
-The independent R2025b replay passes four of five marker/yaw gates; terminal
-RMS is **40.3115 mm**, above the 35 mm limit. The optimizer hit its iteration
-limit and returned accepted=false / optimizer_converged=false.
+Run102 is the latest committed native fit found in the 2026-09-16 review.
+It is a rejected0–0.85 s prefix: MATLAB terminal RMS40.301 mm exceeds35 mm.
+Overall20.267 mm, early9.995 mm, club8.389 mm and yaw0.610% pass their gates.
+The optimizer exhausted its physical evaluation budget and returned a fallback;
+accepted=false and optimizer_converged=false. No full-swing acceptance exists.
 
-The 2026-09-15 review recomputed raw NPZ/MAT results: maximum Euclidean
-Simscape–Pinocchio marker discrepancy is 0.0604935 mm; overall RMS 20.26494 mm,
-early RMS 9.99517 mm, club RMS 8.42248 mm and yaw error 0.54345%.
-Required MATLAB settings: R2025b Update 5, ode15s, RelTol 1e-6, AbsTol 1e-9,
-MaxStep 1/1440 s. Preserve the corrected seed geometry and world-force convention.
-This is measured prefix agreement, not proof of universal numerical convergence.
+[Current Completion Handoff and Agent Prompt](simscape_tour_matching/COMPLETION_HANDOFF_20260916.md)
+is the authoritative next-work plan. It supersedes RUN101_REVIEW_AND_TURNOVER.md
+for task ordering. Source reviewed:2f0460d25; fetched main:d2aafa43c.
 
-Read [Run101 Review and Completion Turnover](simscape_tour_matching/RUN101_REVIEW_AND_TURNOVER.md)
-for the current evidence, ordered work packages and copy-ready agent prompt.
-It supersedes earlier claims that all fitting gates are certified. Three head
-markers account for 38.61% of terminal squared error and LUArmHigh for 15.40%.
-Next: bounded refinement verification, terminal body/attachment feasibility,
-one justified fitting trial, then progressive full-capture extension.
+Priorities: recover clean-checkout native fitting providers currently available
+only through historical/frozen runtime sources; coordinate finite-weld derivative
+fix issue10260 / PR10263; establish articulated terminal feasibility; run the first
+bounded0.90 s fit; produce reproducible manifests and synchronized motion reports.
+PR10263 is not yet a qualified merged dependency. Do not duplicate its owner.
 
-Branch: feat/9967-native-simscape-pinocchio. Issues: #9967 / #9921.
-Review source checkpoint: ca750f7d7; SELF adds the current turnover review.
-Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-pinocchio-native.
-Remote hosts: DeskComputer (R2025b) and ControlTower (Pinocchio WSL).
-No new numerical jobs were launched during this review; check live processes
-before resuming. Full capture and other-engine qualification remain incomplete.
+Run101 refinement supports4.52 micrometer marker agreement with refined R2025b
+and46.9 nanometer Pinocchio self-refinement change. Run102 marker agreement at
+baseline settings is0.0605 mm maximum. These are prefix-specific measurements,
+not full-horizon rate/effort qualification. Keep geometry seed and force-frame fixes.
+
+Historical evidence lives under simscape_tour_matching/native_evidence. Remote
+hosts are DeskComputer (explicit R2025b) and ControlTower (Pinocchio WSL).
+Remote live jobs were not inspected in this review; check before launching.
+Epic9921 / issue9967 are closed despite the incomplete full goal; reconcile tracking.
+This review launches no simulation or fitting job.
 
 ## Representation Qualification
 

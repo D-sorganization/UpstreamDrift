@@ -1,5 +1,33 @@
 # Simscape Tour-Average Fit Continuation
 
+## Club-Only and Neural Matching Planning (2026-09-20)
+
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
+- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md).
+- **State:** Planning only. Four unique workbook trials audited; source event parsing failure reproduced. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
+- **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
+- **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
+
+## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
+
+Branch `feat/tb01-tour-targets-audit-10586`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586)) audits the canonical tour-average captures (`C3D_TA_Driver.c3d` and `C3D_TA_Iron.c3d`), establishes content-based verification by SHA-256 (never path name alone), and versions `tour-measurement-map/1.0.0` distinguishing observed surface markers, inferred joint centers, and rigid cluster centroids while explicitly marking calibrated clubface orientation and contact points as `UNAVAILABLE` in raw data. Defines native swing intervals on independent clocks (360.0 Hz driver vs 359.0 Hz iron) with trajectory-inferred events explicitly labeled `is_inferred = True`. Records full GearsSports provenance (`PLAYER_ID: 967eac5b-2e78-4207-a99f-d57437296d70`), separating shared player anatomy from capture-specific geometry. Emitted reproducible receipts in `docs/plans/tour_baselines/evidence/` and documented in `target_audit.md`. All 35 tests pass, ruff/black/mypy pass, architecture budget passes, divergence inventory is synchronized.
+Next step: Merge TB-01 PR; next dispatch is TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587): Calibrate Common Anthropometrics and Club Geometries).
+
+## Tour Baselines TB-00: Freeze Model Identities, Ownership, and Coverage (#10585)
+
+Branch `feat/tb00-model-identities-10585`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+Initial dispatch TB-00 ([#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585)) implements canonical model identities, separates kinematic
+reconstruction models (which omit the club) from torque-driven pendulums (with simulated club)
+and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving
+rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron,
+non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified
+Tools pin at `a9ed0e7c5c6905b1164082659051d6381068052d` and published documentation under
+`docs/plans/tour_baselines/`. All 13 unit tests pass, ruff check and format pass, mypy passes.
+Next step: Merge TB-00 PR; next dispatch is TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586): Audit Tour Targets, Marker Semantics,
+Events, and Provenance).
+
 ## MuJoCo Saved-Control Replay (#10336)
 
 Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
@@ -815,6 +843,39 @@ scripts.shared_tools.divergence_inventory --write` re-records the 16 new
 - Tools force-source frame #4873 merged as
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
+
+## Impact Explorer Acceptance Matrix: #9550
+
+- Branch `conductor/issue-9550`, commit SELF; PR not created. Epic #9546.
+- Audit snapshot UD `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / Tools
+  `3d93bb2c89813e17551814d3be7e895f791e29af`; reconciled 2026-09-18 against UD
+  `5347cba0f4378cd72a6e8afea9fb27c8bfe5db75` and the consumed Tools pin
+  `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (unchanged by this work).
+- `src/config/impact_acceptance.json` is the frozen matrix; its gate
+  `tests/config/impact_acceptance/test_impact_acceptance_matrix.py` probes each
+  capability row against the shipping library and refuses a predictive claim
+  while any item is open. Human packet:
+  `docs/development/impact_acceptance_matrix.md`.
+- `impact-explorer-web-build` now runs Tools' `release/generateReleaseArtifacts.mjs`
+  with `ROC_RELEASE_REVISION=<gitlink>` and
+  `scripts/ci/verify_impact_explorer_bundle.py`, which serves `dist` through the
+  `/impact-explorer-app` mount contract and checks revision-stamped index,
+  manifest SHA-256 for every asset, JavaScript media type, base path and a
+  404 for a missing artifact; receipt artifact
+  `impact-explorer-bundle-receipt-<sha>`. Local run at the pin: 76 assets,
+  5 JS, PASS (Git Bash needs `MSYS_NO_PATHCONV=1` or the base path is mangled).
+- Validation: matrix gate 26 passed; verifier + mount tests 14 passed;
+  feature-parity / industrial-readiness gates 91 passed; ruff check/format,
+  LoD, error-handling ratchet, file-size, TODO, declared-route-producer,
+  workflow-context and SPEC gates pass. Pre-existing local failures outside
+  scope: `test_tools_child_copy_contract.py` (needs a git-backed Tools
+  checkout) and `test_urdf_governance_docs.py` docstring checks.
+- Open (recorded with owner/plan/blockers in the JSON): shared provider goldens
+  and reference datasets (Tools #4251), installed-artifact restart/reload/offline
+  smoke (#9417), rendered screenshot manifest, numerical cross-runtime scenario
+  comparison; `tools.rate_of_closure` parity is a gap under #9546 until then.
+  Do not close #9550 on this PR alone; it delivers the matrix and install
+  evidence, not items 3 and 5.
 
 ## Impact Explorer Web Route Producer: #9484
 
