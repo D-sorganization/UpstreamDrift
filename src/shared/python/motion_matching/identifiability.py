@@ -214,16 +214,10 @@ def body_poses_from_coordinates(
         child_to_follower = np.asarray(joint["child_to_follower"], dtype=np.float64)
         offsets[child] = np.asarray(np.linalg.inv(child_to_follower), dtype=np.float64)
 
-        parent_offset = offsets[parent]
-        m_rel = parent_offset @ np.asarray(joint["parent_to_base"], dtype=np.float64)
-        b_pos = m_rel[:3, 3]
-        r_b = m_rel[:3, :3]
-
-        p_p = poses[parent][:3, 3]
-        r_p = poses[parent][:3, :3]
-
-        curr_pos = p_p + r_p @ b_pos
-        curr_r = r_p @ r_b
+        parent_to_base = np.asarray(joint["parent_to_base"], dtype=np.float64)
+        t_base = poses[parent] @ offsets[parent] @ parent_to_base
+        curr_pos = t_base[:3, 3].copy()
+        curr_r = t_base[:3, :3].copy()
 
         for prim in joint["primitives"]:
             kind = prim["primitive"]
