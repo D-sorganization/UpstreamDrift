@@ -41,6 +41,7 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import replace
+from typing import Any
 
 import numpy as np
 
@@ -249,6 +250,87 @@ def _precheck(
     return None
 
 
+def _check_identifiability(
+    jacobian: np.ndarray,
+    names: tuple[str, ...],
+    strokes: tuple[MeasuredStroke, ...],
+) -> tuple[FitOutcome | None, float]:
+    scale = np.linalg.norm(jacobian, axis=0)
+    if np.any(scale == 0.0):
+        inert = [n for n, s in zip(names, scale, strict=True) if s == 0.0]
+        return (
+            _failed(
+                FitStatus.UNIDENTIFIABLE,
+                names,
+                strokes,
+                ("the calibration strokes do not respond to " + ", ".join(inert),),
+            ),
+            math.nan,
+        )
+    singular = np.linalg.svd(jacobian / scale, compute_uv=False)
+    condition = float(singular[0] / singular[-1]) if singular[-1] > 0.0 else math.inf
+    if condition > IDENTIFIABILITY_CONDITION_LIMIT:
+        return (
+            _failed(
+                FitStatus.UNIDENTIFIABLE,
+                names,
+                strokes,
+                (
+                    f"scaled Jacobian condition number {condition:.3g} exceeds "
+                    f"{IDENTIFIABILITY_CONDITION_LIMIT:g}; the parameters trade off "
+                    "along a direction the data does not constrain",
+                ),
+            ),
+            condition,
+        )
+    return None, condition
+
+
+def _build_converged_outcome(
+    result: Any,
+    names: tuple[str, ...],
+    strokes: tuple[MeasuredStroke, ...],
+    initial: MomentumTransfer,
+    jacobian: np.ndarray,
+    condition: float,
+) -> FitOutcome:
+    residuals = np.asarray(result.fun, dtype=float)
+    dof = max(1, residuals.size - len(names))
+    chi_squared_reduced = float(residuals @ residuals) / dof
+    covariance = np.linalg.inv(jacobian.T @ jacobian) * max(1.0, chi_squared_reduced)
+    transfer = _transfer_with(initial, names, result.x)
+    sensitivities = np.zeros(len(names))
+    for stroke in strokes:
+        launch = predict_launch(stroke, transfer)
+        gradient = _speed_gradient(stroke, transfer, names)
+        sensitivities += gradient * result.x / max(launch.ball_speed_m_s, 1e-12)
+    sensitivities /= len(strokes)
+    at_bound = [n for n, v in zip(names, result.x, strict=True) if v <= 0.0 or v >= 1.0]
+    reasons = [
+        f"converged on {len(strokes)} stroke(s); reduced chi-squared "
+        f"{chi_squared_reduced:.3g}; condition number {condition:.3g}"
+    ]
+    if at_bound:
+        reasons.append(
+            "at a physical bound: "
+            + ", ".join(at_bound)
+            + "; a bound-limited value is a statement about the model, not the sand"
+        )
+    return FitOutcome(
+        status=FitStatus.CONVERGED,
+        parameters=names,
+        transfer=transfer,
+        standard_errors={
+            n: float(math.sqrt(covariance[i, i])) for i, n in enumerate(names)
+        },
+        sensitivities={n: float(sensitivities[i]) for i, n in enumerate(names)},
+        covariance=tuple(tuple(float(v) for v in row) for row in covariance),
+        residual_rms=float(math.sqrt(residuals @ residuals / residuals.size)),
+        calibration_stroke_ids=tuple(s.stroke_id for s in strokes),
+        reasons=tuple(reasons),
+    )
+
+
 def fit_transfer(
     strokes: Sequence[MeasuredStroke],
     *,
@@ -289,8 +371,12 @@ def fit_transfer(
 
     with_spin = "sand_ball_friction" in names
     x0 = np.array([float(getattr(initial, n)) for n in names])
+
+    def _residual_fun(x: np.ndarray) -> np.ndarray:
+        return _weighted_residuals(strokes, initial, names, x, with_spin=with_spin)
+
     result = least_squares(
-        lambda x: _weighted_residuals(strokes, initial, names, x, with_spin=with_spin),
+        _residual_fun,
         x0,
         bounds=(np.zeros(len(names)), np.ones(len(names))),
         method="trf",
@@ -300,62 +386,11 @@ def fit_transfer(
             FitStatus.NOT_CONVERGED, names, strokes, (f"optimiser: {result.message}",)
         )
     jacobian = np.asarray(result.jac, dtype=float)
-    scale = np.linalg.norm(jacobian, axis=0)
-    if np.any(scale == 0.0):
-        inert = [n for n, s in zip(names, scale, strict=True) if s == 0.0]
-        return _failed(
-            FitStatus.UNIDENTIFIABLE,
-            names,
-            strokes,
-            ("the calibration strokes do not respond to " + ", ".join(inert),),
-        )
-    singular = np.linalg.svd(jacobian / scale, compute_uv=False)
-    condition = float(singular[0] / singular[-1]) if singular[-1] > 0.0 else math.inf
-    if condition > IDENTIFIABILITY_CONDITION_LIMIT:
-        return _failed(
-            FitStatus.UNIDENTIFIABLE,
-            names,
-            strokes,
-            (
-                f"scaled Jacobian condition number {condition:.3g} exceeds "
-                f"{IDENTIFIABILITY_CONDITION_LIMIT:g}; the parameters trade off "
-                "along a direction the data does not constrain",
-            ),
-        )
-    residuals = np.asarray(result.fun, dtype=float)
-    dof = max(1, residuals.size - len(names))
-    chi_squared_reduced = float(residuals @ residuals) / dof
-    covariance = np.linalg.inv(jacobian.T @ jacobian) * max(1.0, chi_squared_reduced)
-    transfer = _transfer_with(initial, names, result.x)
-    sensitivities = np.zeros(len(names))
-    for stroke in strokes:
-        launch = predict_launch(stroke, transfer)
-        gradient = _speed_gradient(stroke, transfer, names)
-        sensitivities += gradient * result.x / max(launch.ball_speed_m_s, 1e-12)
-    sensitivities /= len(strokes)
-    at_bound = [n for n, v in zip(names, result.x, strict=True) if v <= 0.0 or v >= 1.0]
-    reasons = [
-        f"converged on {len(strokes)} stroke(s); reduced chi-squared "
-        f"{chi_squared_reduced:.3g}; condition number {condition:.3g}"
-    ]
-    if at_bound:
-        reasons.append(
-            "at a physical bound: "
-            + ", ".join(at_bound)
-            + "; a bound-limited value is a statement about the model, not the sand"
-        )
-    return FitOutcome(
-        status=FitStatus.CONVERGED,
-        parameters=names,
-        transfer=transfer,
-        standard_errors={
-            n: float(math.sqrt(covariance[i, i])) for i, n in enumerate(names)
-        },
-        sensitivities={n: float(sensitivities[i]) for i, n in enumerate(names)},
-        covariance=tuple(tuple(float(v) for v in row) for row in covariance),
-        residual_rms=float(math.sqrt(residuals @ residuals / residuals.size)),
-        calibration_stroke_ids=tuple(s.stroke_id for s in strokes),
-        reasons=tuple(reasons),
+    failed_ident, condition = _check_identifiability(jacobian, names, strokes)
+    if failed_ident is not None:
+        return failed_ident
+    return _build_converged_outcome(
+        result, names, strokes, initial, jacobian, condition
     )
 
 
