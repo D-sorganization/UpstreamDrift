@@ -274,6 +274,10 @@ _MUJOCO_XML_CONSTANTS: tuple[tuple[str, str], ...] = (
         "src.engines.physics_engines.mujoco._golf_swing_upper_body_xml",
         "UPPER_BODY_GOLF_SWING_XML",
     ),
+    (
+        "src.engines.physics_engines.mujoco._golf_swing_canonical_xml",
+        "CANONICAL_GOLF_HUMANOID_XML",
+    ),
 )
 
 

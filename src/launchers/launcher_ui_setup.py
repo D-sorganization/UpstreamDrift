@@ -426,9 +426,26 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         Tool tabs are background-eligible (#6013): closing one keeps the
         widget running hidden and restorable via the View > Background Tabs
         menu, rather than destroying it.
+
+        Enforces single-instance tool reuse policy (ORG-05, #10515).
         """
         if widget is None:
             raise ValueError("widget must be provided")
+
+        if hasattr(self, "workspace_tabs") and self.workspace_tabs is not None:
+            existing_idx = self.workspace_tabs.indexOf(widget)
+            if existing_idx >= 0:
+                self.workspace_tabs.setCurrentIndex(existing_idx)
+                return
+
+            tool_prop = widget.property("tool_id")
+            if tool_prop:
+                from src.launchers.workspace_navigation import find_existing_tool_tab
+
+                tab_idx = find_existing_tool_tab(self.workspace_tabs, str(tool_prop))
+                if tab_idx is not None:
+                    self.workspace_tabs.setCurrentIndex(tab_idx)
+                    return
 
         index = self.workspace_tabs.add_background_tab(widget, title)
         self.workspace_tabs.setCurrentIndex(index)
@@ -682,9 +699,11 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
     def _setup_search_shortcuts(self) -> None:
         """Setup keyboard shortcuts for search."""
         shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self.launcher)
+        shortcut_search.setObjectName("Search Models")
         shortcut_search.activated.connect(self._focus_search)
 
         shortcut_escape = QShortcut(QKeySequence("Esc"), self.launcher)
+        shortcut_escape.setObjectName("Clear Search")
         shortcut_escape.activated.connect(self._clear_search)
 
     def _focus_search(self) -> None:

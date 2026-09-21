@@ -196,13 +196,14 @@ def _default_fit_swing() -> FitSwingFn:
         from .fit_swing import (
             fit_swing_pinocchio,  # type: ignore[attr-defined]  # noqa: PLC0415
         )
-    except ImportError as exc:  # pragma: no cover - exercised once optimiser exists
+    except ImportError as exc:
         msg = (
-            "fit_swing_pinocchio is not yet implemented (issue PIN-FIT-DRIVER). "
-            "Inject a custom ``fit_swing`` into ``run_recovery_sweep`` to "
-            "exercise the harness against a stub or experimental optimiser."
+            "fit_swing_pinocchio is implemented but requires Pinocchio C++ "
+            "bindings and SDK dependencies. Inject a custom ``fit_swing`` "
+            "into ``run_recovery_sweep`` to exercise the harness against "
+            "a stub or experimental optimiser."
         )
-        raise NotImplementedError(msg) from exc
+        raise ImportError(msg) from exc
     return fit_swing_pinocchio  # type: ignore[return-value]
 
 

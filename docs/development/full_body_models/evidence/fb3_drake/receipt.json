@@ -1,0 +1,59 @@
+{
+  "work_package": "FB-3-D",
+  "issue": "#10067",
+  "epic": "#10062",
+  "timestamp_utc": "2026-09-14T02:48:47.818959+00:00",
+  "status": "PASSED",
+  "environment": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "executable": "/home/dieterolson/drake-native-10022/bin/python",
+    "drake_version": "1.57.0"
+  },
+  "inputs": {
+    "full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "full_body_urdf.py": "c293f5a171180c25c4ca8bedf7996f93a1d5184ff346680b0d1e389b2c7d9114",
+    "full_body_model.py": "d2b12ae7ee0aa3f7b4f342124ef9723d01bb891ded8a3aa3a9e10421227787ac",
+    "contact_law.py": "7c511df195ef7dc9a6fbf6fb2e6d152f1ff75ecc19794543662e1adde51ac966",
+    "full_body_spec.py": "bfcf80bc2781f72ddffebc446cfc131d1bae8935f991080c031fb59821e14a8c"
+  },
+  "gates": {
+    "gate_a_upper_body_slice_parity": {
+      "status": "PASSED",
+      "random_states_tested": 20,
+      "max_fk_diff_m": 0.0,
+      "max_mass_matrix_diff": 0.0,
+      "tolerance": 1e-12
+    },
+    "gate_b_full_body_fk": {
+      "status": "PASSED",
+      "random_states_tested": 20,
+      "max_fk_diff_m": 0.0,
+      "tolerance": 1e-12
+    },
+    "gate_c_contact_force_parity": {
+      "status": "PASSED",
+      "num_contact_spheres": 4,
+      "penetrating_spheres_tested": 4,
+      "max_normal_force_diff_n": 0.0,
+      "max_friction_force_diff_n": 0.0,
+      "max_penetration_diff_m": 0.0,
+      "tolerance": 1e-12
+    },
+    "gate_d_closure_residual_parity": {
+      "status": "PASSED",
+      "random_states_tested": 20,
+      "max_position_residual_diff": 0.0,
+      "max_velocity_residual_diff": 2.220446049250313e-16,
+      "tolerance": 1e-12
+    }
+  },
+  "accelerations": {
+    "status": "PASSED",
+    "num_coordinates": 41,
+    "all_finite": true,
+    "max_closure_pos_error": 3.1415889801834305,
+    "max_closure_vel_error": 0.0
+  }
+}

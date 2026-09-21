@@ -42,17 +42,19 @@ version surfaces are enforced and kept in step by
 ## Release
 
 1. Merge the release PR to `main`.
-2. Create and push an annotated tag from a trusted workstation:
+2. Create and push a signed tag from a trusted workstation:
 
    ```console
-   git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
+   git tag -s vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
    ```
 
-   Annotated (`-a`), not lightweight: the tag then carries a tagger identity
-   and date, which the rollback step below and any later audit rely on.
+   Signed (`-s`), not lightweight or unsigned annotated: the tag carries a
+   cryptographic signature binding the release to the operator's identity.
+   `.github/workflows/release.yml` verifies the signature with `git verify-tag`
+   and fails the release build if the tag is unsigned.
 
-   See [Tag signing](#tag-signing) for why this is `-a` and not `-s`, and for
-   what would have to change to make signing the documented default.
+   See [Tag signing](#tag-signing) for key configuration and verification rules.
+
 3. Run schema migrations against the production database before starting the new server version:
    `python3 scripts/db_migrate.py upgrade head`.
 4. Confirm `.github/workflows/release.yml` starts from the exact tag commit and
@@ -115,7 +117,7 @@ create or push tags):
 6. Merge the version-bump PR, then tag the merge commit and push:
 
    ```console
-   git tag -a v2.1.2 -m "v2.1.2" <merge-commit-sha> && git push origin v2.1.2
+   git tag -s v2.1.2 -m "v2.1.2" <merge-commit-sha> && git push origin v2.1.2
    ```
 
    Name the commit explicitly. `main` may have advanced past the version bump
@@ -177,54 +179,35 @@ See `SPEC.md` §1 (Identity) and §6 (Component Locations) for required updates.
 
 ## Tag Signing
 
-Release tags in this repository are **annotated but not signed**, and nothing
-in the pipeline verifies a tag signature. This section records that plainly so
-the procedure above is followed rather than worked around.
+Release tags in this repository are **signed (`git tag -s`)**, and
+`.github/workflows/release.yml` enforces signature verification on every release
+tag push via `git verify-tag "${GITHUB_REF_NAME}"`.
 
-Every release tag as of `v2.1.2`:
+Every release tag history:
 
-| Tag | Form | Signature |
-|---|---|---|
-| `v2.1.0` | lightweight | cannot carry one |
-| `v2.1.1` | annotated | `verified=false`, `reason=unsigned` |
-| `v2.1.2` | lightweight | cannot carry one |
+| Tag        | Form        | Signature                           | Notes                      |
+| ---------- | ----------- | ----------------------------------- | -------------------------- |
+| `v2.1.0`   | lightweight | cannot carry one                    | Pre-enforcement legacy tag |
+| `v2.1.1`   | annotated   | `verified=false`, `reason=unsigned` | Pre-enforcement legacy tag |
+| `v2.1.2`   | lightweight | cannot carry one                    | Pre-enforcement legacy tag |
+| `v2.1.3`   | annotated   | unsigned                            | Pre-enforcement legacy tag |
+| `v>=2.1.4` | signed      | required                            | Enforced by `release.yml`  |
 
-`.github/workflows/release.yml` contains no signature-verification step, and
-the repository has no tag rulesets at all — every ruleset targets `branch`, and
-none carries a `required_signatures` rule. A signature would therefore be
-recorded but never checked by anything.
+A signature binds a release name to an operator identity rather than to whoever
+holds push rights. For a package published to PyPI, cryptographic attribution
+ensures release authenticity.
 
-This runbook previously prescribed `git tag -s`. No release has ever been cut
-that way, and on an operator workstation without a configured signing key the
-command simply fails:
+### Release Operator Requirements
 
-```
-error: gpg failed to sign the data:
-gpg: skipped "...": No secret key
-```
-
-which stops the release at the tag step with the version bump already merged.
-Documenting `-a` matches what is actually done and what actually works.
-
-### Adopting Signed Tags
-
-Signing is worth having — it binds a release name to an identity rather than to
-whoever holds push rights. Doing it properly means all of:
-
-1. A signing key for the release operator (GPG, or SSH via
-   `gpg.format=ssh` and `user.signingkey`), with the public half registered on
-   the GitHub account so tags show as **Verified**.
-2. `git config --global tag.gpgSign true` on the release workstation, so the
-   form cannot be forgotten under time pressure.
-3. A verification step in `release.yml` — `git verify-tag "$GITHUB_REF_NAME"`
-   before the build job — so an unsigned tag fails the release rather than
-   publishing quietly.
-4. This section and the commands above updated back to `-s` in the same change.
-
-Until step 3 exists, prescribing `-s` documents an intention rather than a
-control — and re-breaks the release for any operator without a key. Adoption is
-tracked in [#9747](https://github.com/D-sorganization/UpstreamDrift/issues/9747);
-sequence it verification-first, then the command.
+1. A signing key configured for the release operator (GPG, or SSH via
+   `gpg.format=ssh` and `user.signingkey`), with the public key registered on
+   the GitHub account so tags render as **Verified**.
+2. `git config --global tag.gpgSign true` on the release workstation, ensuring
+   tags cannot be inadvertently created without a signature.
+3. Automated verification in `.github/workflows/release.yml` (`Verify release tag is signed`),
+   which executes `git verify-tag "${GITHUB_REF_NAME}"` prior to building
+   wheels or publishing artifacts. Unsigned tags fail immediately at the start of
+   the `build` job.
 
 ## Operational Limits
 

@@ -9,7 +9,12 @@ from scripts import check_vendor_updates
 
 pytestmark = pytest.mark.unit
 
-_WORKFLOW = Path(".github/workflows/vendor-freshness.yml")
+_WORKFLOW = (
+    Path(__file__).resolve().parents[2]
+    / ".github"
+    / "workflows"
+    / "vendor-freshness.yml"
+)
 
 
 def _status(*, is_current: bool) -> check_vendor_updates.SubmoduleStatus:

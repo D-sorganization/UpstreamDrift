@@ -863,10 +863,9 @@ async def list_datasets(
     on_disk_names: set[str] = set()
 
     if output_dir.exists():
-        # Cap the scan at offset+limit (bounded by the hard ceiling) so a deep
-        # tree never materializes fully; only the requested page is opened.
-        scan_cap = min(MAX_DATASET_LIST_SCAN, offset + limit)
-        candidates, truncated = _scan_dataset_files(output_dir, scan_cap)
+        # Scan up to the bounded hard ceiling so candidates are sorted stably
+        # across all filesystems before slicing the requested offset/limit page.
+        candidates, truncated = _scan_dataset_files(output_dir, MAX_DATASET_LIST_SCAN)
         page = candidates[offset : offset + limit]
         for filepath in page:
             info = _dataset_info_for_path(filepath, output_dir)

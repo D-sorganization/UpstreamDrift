@@ -87,6 +87,19 @@ def load_openapi_schema() -> dict[str, Any]:
     from src.api.server import app
 
     schema: dict[str, Any] = app.openapi()
+    # Normalize ValidationError to guarantee deterministic cross-platform generation
+    # across FastAPI/Pydantic minor versions (issue #7447).
+    val_err = schema.get("components", {}).get("schemas", {}).get("ValidationError")
+    if isinstance(val_err, dict) and "properties" in val_err:
+        props = val_err["properties"]
+        if "input" not in props:
+            props["input"] = {"title": "Input"}
+        if "ctx" not in props:
+            props["ctx"] = {
+                "title": "Context",
+                "type": "object",
+                "additionalProperties": True,
+            }
     return schema
 
 

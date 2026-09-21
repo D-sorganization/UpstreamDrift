@@ -18,9 +18,6 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
-
 SCRIPT_PATH = (
     Path(__file__).resolve().parent.parent / "scripts" / "setup_biomech_workspace.sh"
 )
@@ -111,7 +108,7 @@ def test_no_siblings_present(tmp_path: Path) -> None:
     result = _run_script(repo_root, stub_bin)
     assert result.returncode == 0, result.stderr
     assert "installed: 0" in result.stdout
-    assert "skipped : 5" in result.stdout
+    assert "skipped  : 5" in result.stdout
     log = tmp_path / "python3_invocations.log"
     assert not log.exists()
 

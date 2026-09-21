@@ -1,8 +1,15 @@
 """Database configuration and session management."""
 
+from __future__ import annotations
+
+import contextlib
+import inspect
 import os
 from collections.abc import Generator
 from pathlib import Path
+from typing import Callable, ContextManager, cast
+
+from fastapi import Request
 
 from alembic.config import Config
 from alembic.script import ScriptDirectory
@@ -134,6 +141,61 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+@contextlib.contextmanager
+def db_session_scope() -> Generator[Session, None, None]:
+    """Provide a transactional / scoped database session.
+
+    Yields:
+        Active SQLAlchemy Session instance that is closed when exiting.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def get_db_factory(
+    request: Request = None,  # type: ignore[assignment]
+) -> Callable[[], ContextManager[Session]]:
+    """Dependency returning a context manager factory for database sessions.
+
+    Allows callers (such as authentication and quota dependencies) to defer
+    database session creation and connection checkout until after verifying
+    preconditions (such as whether authentication is disabled).
+
+    Supports dependency overrides on both ``get_db_factory`` and ``get_db``
+    for seamless testing compatibility.
+    """
+    if request is not None and hasattr(request, "app"):
+        app = getattr(request, "app", None)
+        if app is not None and hasattr(app, "dependency_overrides"):
+            if get_db_factory in app.dependency_overrides:
+                return cast(
+                    Callable[[], ContextManager[Session]],
+                    app.dependency_overrides[get_db_factory],
+                )
+            if get_db in app.dependency_overrides:
+                override = app.dependency_overrides[get_db]
+
+                @contextlib.contextmanager
+                def _overridden_scope() -> Generator[Session, None, None]:
+                    res = override()
+                    if inspect.isgenerator(res):
+                        session = next(res)
+                        try:
+                            yield session
+                        finally:
+                            with contextlib.suppress(StopIteration):
+                                next(res)
+                    else:
+                        yield res
+
+                return _overridden_scope
+
+    return db_session_scope
 
 
 def init_db() -> None:

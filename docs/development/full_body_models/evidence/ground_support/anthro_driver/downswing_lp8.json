@@ -1,0 +1,59 @@
+{
+  "run": "anthro_driver",
+  "name": "lp8",
+  "settings": {
+    "cutoff_hz": 8.0,
+    "omega_rad_s": 30.0,
+    "legs_omega_rad_s": null,
+    "zeta": 1.0,
+    "acceleration_feedforward": 1.0,
+    "balance": [60.0, 15.0],
+    "duration_s": 1.8138888888888889
+  },
+  "reference": {
+    "root_acceleration_max_m_s2": 13.011294600488469,
+    "root_acceleration_downswing_max_m_s2": 13.011294600488469,
+    "joint_acceleration_max_deg_s2": 24697.183594323098,
+    "deviation_from_q_ref_root_max_m": 0.009449098767502558,
+    "deviation_from_q_ref_joints_max_deg": 7.037159894616181
+  },
+  "elapsed_s": 14.8,
+  "root_error_timeline_m": {
+    "0.00": 0.00024089770628295186,
+    "0.50": 0.0013708331300956629,
+    "1.00": 0.008198148285622278,
+    "1.10": 0.014269952421767767,
+    "1.20": 0.0216751183162886,
+    "1.30": 0.009382655163629466,
+    "1.40": 0.051219381721947024,
+    "1.50": 0.09622123543795545,
+    "1.75": 0.150841824197992
+  },
+  "root_error_max_m": 0.1877789594137802,
+  "joint_tracking_rms_deg": 1.1975741253152612,
+  "weight_fraction": {
+    "min": 0.0,
+    "max": 3.075880171099559,
+    "mean": 0.9960354164205214
+  },
+  "inside_support_polygon_fraction": 0.863036303630363,
+  "peak_joint_torque_n_m": 783.2955277071566,
+  "lowest_sphere_height_m": [-0.010225990631289473, 0.0039958230183459315],
+  "marker_rms_m": 0.12721628903295795,
+  "marker_rms_comparable_to_receipt": false,
+  "segment_rms_m": {
+    "head": 0.11923962827802702,
+    "trunk": 0.08141116004209842,
+    "pelvis": 0.09131314829353486,
+    "left_arm": 0.12535370466069704,
+    "right_arm": 0.11663887115119853,
+    "left_leg": 0.08994476827406737,
+    "right_leg": 0.15410144730613265,
+    "club": 0.17415988556340675
+  },
+  "tracking_rms_vs_reference_m": 0.11044851773977085,
+  "backswing_to_1s": {
+    "root_error_max_m": 0.008198148285622278,
+    "marker_rms_m": 0.06412609413238654
+  }
+}

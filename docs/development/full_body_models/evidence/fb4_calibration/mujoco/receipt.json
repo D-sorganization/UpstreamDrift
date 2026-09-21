@@ -1,0 +1,78 @@
+{
+  "work_package": "FB-4",
+  "issue": "#10068",
+  "epic": "#10062",
+  "engine": "mujoco",
+  "status": "PASSED",
+  "timestamp_utc": "2026-09-15T05:25:39.742372+00:00",
+  "environment": {
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "executable": "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "mujoco_version": "3.3.4"
+  },
+  "inputs": {
+    "full_body_spec_v1.json": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
+    "native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "C3D_TA_Driver.c3d": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+    "marker_calibration.py": "5d2db650f32c70b0868e05616e700a83b64d62e7632370f474b37e69d9d167ec",
+    "full_body_ik.py": "a7876404cec3278c27d31cbe1985785d98d0b894d3e332f0b1973b7d38a33d87"
+  },
+  "stride_subsample": {
+    "stride": 20,
+    "num_frames": 33,
+    "iterations": 3,
+    "best_iteration": 3,
+    "total_rms_m": 0.14516707389804354,
+    "per_marker_rms_m": {
+      "WaistLeft": 0.1758586704002716,
+      "WaistRight": 0.19320150207347678,
+      "WaistLBack": 0.12608374708950243,
+      "WaistRBack": 0.1081336092852406,
+      "BackTop": 0.09903707494931832,
+      "BackLeft": 0.22062666601197423,
+      "BackRight": 0.15328154381696862,
+      "HeadTop": 0.17715993903460367,
+      "HeadFront": 0.17879936385750714,
+      "HeadSide": 0.11174533675040293,
+      "LShoulderTop": 0.12253529258293028,
+      "LShoulderBack": 0.1661340997356663,
+      "LElbowOut": 0.14442854915790537,
+      "LUArmHigh": 0.14067954527027718,
+      "LWristTop": 0.1407418787889651,
+      "RShoulderTop": 0.12950454479896065,
+      "RShoulderBack": 0.15782972858536426,
+      "RElbowOut": 0.2009671029673255,
+      "RUArmHigh": 0.18990378058003576,
+      "RWristTop": 0.17749090897558165,
+      "LKneeOut": 0.1383743325363691,
+      "LToeIn": 0.07833018154004227,
+      "LToeOut": 0.0923697547985628,
+      "LAnkleOut": 0.12627476461421347,
+      "RKneeOut": 0.1489651239310967,
+      "RToeIn": 0.08796034479263606,
+      "RToeOut": 0.11469757831761666,
+      "RAnkleOut": 0.21255082904115943,
+      "Marker_2:2:1": 0.10784577509310571,
+      "Marker_2:2:2": 0.11999173113775008,
+      "Marker_2:2:3": 0.12053809725538557,
+      "Marker_3:3:1": 0.0816119831228116,
+      "Marker_3:3:2": 0.09915067764709333,
+      "Marker_3:3:3": 0.0949549294290513
+    }
+  },
+  "full_trajectory": {
+    "stride": 1,
+    "num_frames": 654,
+    "total_rms_m": 0.13809316530788507,
+    "mean_frame_rms_m": 0.13374140527992048,
+    "max_frame_rms_m": 0.22119069382157602,
+    "closure_max_error_m": 0.0166956971796807,
+    "closure_mean_error_m": 0.010238035917046528
+  },
+  "head_marker_limitation": "Three head markers (HeadTop, HeadFront, HeadSide) are attached to the single rigid trunk/head torso segment ('Hub'). Because the skeletal spec models the torso rigidly without a cervical neck joint, head movements relative to the thorax produce higher rigid marker residual on Hub.",
+  "artifacts": {
+    "calibrated_offsets_sha256": "05d2ec360abb172478cd3554968e3930dbb0a74f959b4bcf63443ca7400c8911",
+    "ik_trajectory_sha256": "9ccbd165a02179dc628caf5c3eb8d3b6a089c46e86e531b007632bba642c54db"
+  }
+}

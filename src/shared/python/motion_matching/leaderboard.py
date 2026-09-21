@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 from dataclasses import dataclass, fields
@@ -59,17 +60,35 @@ __all__ = [
     "generate_report",
     "append_row",
     "maybe_append_row",
+    "sync_leaderboard_from_ledger",
+    "rows_from_parity_report",
+    "sync_leaderboard_from_parity_report",
     "JSON_LEADERBOARD_COLUMNS",
     "default_json_path",
+    "valid_engines",
 ]
 
 # --- Schema ------------------------------------------------------------------
 
 _VALID_ENGINES: frozenset[str] = frozenset(
-    {"simscape", "mujoco", "drake", "pinocchio", "opensim"}
+    {
+        "simscape",
+        "mujoco",
+        "drake",
+        "pinocchio",
+        "opensim",
+        "myosuite",
+        "pendulum",
+    }
 )
 _COMMIT_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _ISO8601_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
+
+
+def valid_engines() -> frozenset[str]:
+    """Return the set of recognized engine identifiers for the leaderboard."""
+    return _VALID_ENGINES
+
 
 # Canonical column order for the Markdown table (matches issue #4097 spec).
 _COLUMNS: tuple[str, ...] = (
@@ -116,9 +135,13 @@ def _validate_strings(record: LeaderboardRow) -> None:
 
 
 def _validate_numbers(record: LeaderboardRow) -> None:
-    """Numeric fields must be finite and non-negative."""
+    """Numeric fields must be finite and non-negative (or None if unavailable)."""
+    if record.solver.startswith("unavailable"):
+        return
     for name in _NONNEG_FIELDS:
         value = getattr(record, name)
+        if value is None:
+            continue
         if not isinstance(value, (int, float)) or isinstance(value, bool):
             raise LeaderboardError(f"{name} must be a number, got {value!r}")
         if value < 0:
@@ -161,11 +184,11 @@ class LeaderboardRow:
     trial: str
     engine: str
     solver: str
-    grip_rmse_mm: float
-    clubhead_rmse_mm: float
-    body_marker_rmse_mm: float
-    total_work_J: float
-    wall_clock_s: float
+    grip_rmse_mm: float | None
+    clubhead_rmse_mm: float | None
+    body_marker_rmse_mm: float | None
+    total_work_J: float | None
+    wall_clock_s: float | None
     commit: str
     run_at: str
 
@@ -192,7 +215,14 @@ class LeaderboardRow:
             )
         kwargs = {name: data.get(name) for name in _REQUIRED_FIELDS}
         kwargs["trial"] = trial
-        missing = [name for name, v in kwargs.items() if v is None]
+        is_unavail = str(data.get("solver", "")).startswith("unavailable") or str(
+            data.get("status", "")
+        ).startswith("unavailable")
+        missing = [
+            name
+            for name, v in kwargs.items()
+            if v is None and (not is_unavail or name not in _NONNEG_FIELDS)
+        ]
         if missing:
             raise LeaderboardError(
                 f"missing required field(s) {sorted(missing)} in leaderboard JSON"
@@ -204,7 +234,9 @@ class LeaderboardRow:
         out: dict[str, str] = {}
         for name in _COLUMNS:
             value = getattr(self, name)
-            if isinstance(value, float):
+            if value is None:
+                out[name] = "-"
+            elif isinstance(value, float):
                 out[name] = f"{value:.3f}"
             else:
                 out[name] = str(value)
@@ -306,7 +338,15 @@ def render_markdown(results: dict[str, list[FitResult]]) -> str:
     lines.append("")
 
     for trial in sorted(results.keys()):
-        rows = sorted(results[trial], key=lambda r: r.grip_rmse_mm)
+        rows = sorted(
+            results[trial],
+            key=lambda r: (
+                float("inf")
+                if r.grip_rmse_mm is None
+                or (isinstance(r.grip_rmse_mm, float) and math.isnan(r.grip_rmse_mm))
+                else r.grip_rmse_mm
+            ),
+        )
         lines.append(f"## {trial}")
         lines.append("")
         lines.extend(_format_table([r.as_row() for r in rows], _COLUMNS))
@@ -357,7 +397,11 @@ def default_json_path() -> Path:
         return Path(env)
     here = Path(__file__).resolve()
     for parent in here.parents:
-        if (parent / "pyproject.toml").is_file():
+        if (parent / ".git").exists() or (
+            (parent / "docs").is_dir()
+            and (parent / "src").is_dir()
+            and (parent / "pyproject.toml").is_file()
+        ):
             return parent / "reports" / "cross_engine_leaderboard.json"
     return Path("reports") / "cross_engine_leaderboard.json"
 
@@ -367,7 +411,7 @@ def _short_commit(commit: str | None) -> str:
         return "0000000"
     s = str(commit).strip().lower()
     if not re.match(r"^[0-9a-f]{7,40}$", s):
-        return hashlib.sha1(s.encode("utf-8"), usedforsecurity=False).hexdigest()[:12]
+        return hashlib.sha256(s.encode("utf-8"), usedforsecurity=False).hexdigest()[:12]
     return s
 
 
@@ -449,6 +493,9 @@ def _row_from_fit_result(
         "run_at",
         default=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
+    run_at_str = str(run_at)
+    if run_at_str.endswith("+00:00"):
+        run_at_str = run_at_str[:-6] + "Z"
     solver = _attr("method", "solver", default="unknown")
     iterations = _attr("iterations", "n_iterations", default=0)
 
@@ -463,7 +510,7 @@ def _row_from_fit_result(
         ),
         "wallclock": wallclock,
         "commit_sha": _short_commit(commit),
-        "run_at": str(run_at),
+        "run_at": run_at_str,
         "solver": str(solver),
         "iterations": int(iterations) if iterations is not None else 0,
     }
@@ -549,6 +596,95 @@ def maybe_append_row(
             "leaderboard.append_row failed (engine=%s): %s", engine, exc
         )
         return None
+
+
+def sync_leaderboard_from_ledger(
+    ledger_rows: Any,
+    *,
+    json_path: Path | None = None,
+) -> Path:
+    """Populate cross_engine_leaderboard.json from ledger rows unconditionally."""
+    path = json_path if json_path is not None else default_json_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows_out: list[dict[str, Any]] = []
+    for row in ledger_rows:
+        eng = getattr(row, "engine", None)
+        if eng not in _VALID_ENGINES:
+            continue
+        metrics = getattr(row, "metrics", None)
+        whole_rmse = getattr(metrics, "whole_marker_rmse_m", None) if metrics else None
+        if whole_rmse is None:
+            continue
+        cand_sha = getattr(row, "candidate_sha", None) or "unknown"
+        capture = getattr(row, "capture", None) or "unknown"
+        run_dict = {
+            "engine": eng,
+            "engine_version": "unknown",
+            "target_id": capture,
+            "theta": [],
+            "residual_rms": float(whole_rmse),
+            "body_marker_rms": float(whole_rmse),
+            "wallclock": float(getattr(row, "horizon_s", None) or 0.0),
+            "commit_sha": _short_commit(cand_sha),
+            "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "solver": "unknown",
+            "iterations": 0,
+        }
+        rows_out.append(run_dict)
+    path.write_text(
+        json.dumps(rows_out, indent=2, sort_keys=False) + "\n", encoding="utf-8"
+    )
+    return path.resolve()
+
+
+def rows_from_parity_report(report: Any) -> list[dict[str, Any]]:
+    """Convert UnifiedParityReport engine rows into leaderboard JSON row dictionaries."""
+    rows_out: list[dict[str, Any]] = []
+    cand_id = getattr(report, "candidate_id", "unknown")
+    cand_sha = getattr(report, "candidate_sha256", "unknown")
+    engine_rows = getattr(report, "engine_rows", {})
+    for eng, row in engine_rows.items():
+        if eng not in _VALID_ENGINES:
+            continue
+        status = getattr(row, "status", "")
+        if status == "unavailable":
+            continue
+        metrics = getattr(row, "shared_metrics", None) or {}
+        whole_rmse = metrics.get("whole_marker_rmse_m", 0.0)
+        pt_diffs = getattr(row, "pointwise_differences", {})
+        if not whole_rmse and "marker_diff_m" in pt_diffs:
+            whole_rmse = getattr(pt_diffs["marker_diff_m"], "rms_diff", 0.0)
+        run_dict = {
+            "engine": eng,
+            "engine_version": getattr(row, "model_sha256", "unknown") or "unknown",
+            "target_id": cand_id,
+            "theta": [],
+            "residual_rms": float(whole_rmse),
+            "body_marker_rms": float(whole_rmse),
+            "total_work_J": float(getattr(row, "total_work_J", 0.0) or 0.0),
+            "wallclock": float(getattr(row, "wall_clock_s", 0.0) or 0.0),
+            "commit_sha": _short_commit(cand_sha),
+            "run_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "solver": "matching_plant",
+            "iterations": 0,
+        }
+        rows_out.append(run_dict)
+    return rows_out
+
+
+def sync_leaderboard_from_parity_report(
+    report: Any,
+    *,
+    json_path: Path | None = None,
+) -> Path:
+    """Populate cross_engine_leaderboard.json from a UnifiedParityReport."""
+    path = json_path if json_path is not None else default_json_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows_out = rows_from_parity_report(report)
+    path.write_text(
+        json.dumps(rows_out, indent=2, sort_keys=False) + "\n", encoding="utf-8"
+    )
+    return path.resolve()
 
 
 # --- Module-level metadata ---------------------------------------------------

@@ -152,7 +152,8 @@ def _request(method: str, path: str, token: str, payload: Any = None) -> Any:
         },
     )
     try:
-        with urllib.request.urlopen(request) as response:
+        # B310: _API_BASE is hardcoded constant 'https://api.github.com'
+        with urllib.request.urlopen(request) as response:  # nosec B310
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         detail = error.read().decode("utf-8", errors="replace")[:500]
