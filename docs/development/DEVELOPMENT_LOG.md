@@ -115,18 +115,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Shipped in PR #10582.
 - **Evidence:** evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py.
 
-### DL-#10585 · TB-00: Freeze Model Identities, Ownership, and the Two-Capture Coverage Matrix
+### DL-#10586 · TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #10586 (parent #10584, program #10363)
+- **Branch:** feat/tb01-tour-targets-audit-10586
+- **PR:**
+- **Paths:** src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/tour_baselines/audit.py; src/shared/python/tour_baselines/measurement_map.py; src/shared/python/tour_baselines/events.py; src/shared/python/tour_baselines/provenance.py; src/shared/python/tour_baselines/canonical_targets.py; src/shared/python/tour_baselines/**init**.py; tests/unit/tour_baselines/test_measurement_map.py; tests/unit/tour_baselines/test_tour_events.py; tests/unit/tour_baselines/test_target_audit.py; tests/unit/tour_baselines/test_canonical_targets.py; docs/plans/tour_baselines/target_audit.md; docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json; docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (35/35 unit tests pass in tests/unit/tour_baselines/ and tests/opensim/test_tour_capture_contract.py; ruff check clean; ruff format clean; black clean; mypy 0 issues in 18 source files; check_architecture_budget passes; check_file_size_budget passes; divergence inventory synchronized).
+- **Summary:** Implemented target audit, content-based SHA-256 verification (never path name alone), versioned measurement map (tour-measurement-map/1.0.0) distinguishing surface markers, inferred joint centers, and rigid cluster centroids while explicitly marking calibrated clubface orientation and contact points as UNAVAILABLE in raw C3D. Defined native-clock swing intervals (360.0 Hz driver vs 359.0 Hz iron) with trajectory-inferred events explicitly labeled as inferred. Recorded GearsSports optical provenance, separating shared player anatomy from capture-specific club geometry. Emitted reproducible receipts in docs/plans/tour_baselines/evidence/ and documented in target_audit.md.
+- **Next step:** Push branch, open PR with Fixes #10586, enable auto-merge.
+- **Evidence:** docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json; docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json; tests/unit/tour_baselines/test_target_audit.py; tests/unit/tour_baselines/test_measurement_map.py; tests/unit/tour_baselines/test_tour_events.py; tests/unit/tour_baselines/test_canonical_targets.py.
+
+### DL-#10585 · TB-00: Freeze Model Identities, Ownership, and the Two-Capture Coverage Matrix
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10585 (parent #10584, program #10363)
 - **Branch:** feat/tb00-model-identities-10585
 - **PR:** #10598
 - **Paths:** src/shared/python/tour_baselines/models.py; src/shared/python/tour_baselines/registry.py; src/shared/python/tour_baselines/coverage.py; src/shared/python/tour_baselines/reconciliation.py; src/shared/python/tour_baselines/**init**.py; src/shared/python/motion_matching/tour_baselines.py; tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md; docs/plans/tour_baselines/model_identities.md; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/reconciliation.md; docs/development/matched_swing_program/README.md
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (13/13 unit tests pass in tests/unit/tour_baselines/; ruff check clean; ruff format clean; mypy 0 issues in 5 source files; document title case 0 violations across 4 docs; file size budget clean).
+- **Last verified:** 2026-09-20 at HEAD (13/13 unit tests pass in tests/unit/tour_baselines/; ruff check clean; ruff format clean; mypy 0 issues in 5 source files; document title case 0 violations across 4 docs; file size budget clean; merged into main).
 - **Summary:** Established the canonical Tour Baselines domain model and registry separating kinematic reconstruction models from torque-driven pendulums, upper-body golfer with closed kinematic loop, and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron, non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified Tools pin at a9ed0e7c5c6905b1164082659051d6381068052d and published comprehensive documentation under docs/plans/tour_baselines/.
-- **Next step:** Land PR #10598 with auto-merge enabled.
+- **Next step:** Shipped in PR #10598.
 - **Evidence:** tests/unit/tour_baselines/test_model_identities.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/tour_baselines/test_reconciliation.py; docs/plans/tour_baselines/README.md.
 
 ### DL-#10533 · Reconcile, Audit, and Freeze Feature Preservation Across All Historical Boundaries
