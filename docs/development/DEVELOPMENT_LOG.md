@@ -23,13 +23,25 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10588 (TB-03, parent #10584, program #10363)
 - **Branch:** feat/tb03-trajectory-fitting-10588
-- **PR:** not created
+- **PR:** #10631
 - **Paths:** src/shared/python/motion_matching/projection_2d.py; src/shared/python/tour_baselines/calibration.py; src/shared/python/tour_baselines/**init**.py; tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 (All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files).
 - **Summary:** Replaced naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation. Implemented `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections. Implemented `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic. Implemented `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics. Implemented `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
 - **Next step:** Commit changes, push branch, open PR with auto-merge armed, verify CI.
 - **Evidence:** tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md.
+
+### DL-#9410 · Adversarial Product Review Remediation Epic
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #9410 (program Repository_Management#1505; children #8820–#8943, #8360, #8641, #8843, #8846, #8853, #8861–#8870, #8874–#8876, #8894)
+- **Branch:** conductor/issue-9410
+- **Paths:** docs/development/adversarial_review_remediation_9410.md
+- **Started:** 2026-09-16
+- **Last verified:** 2026-09-16 (SELF; every child re-checked against `db4fe88c4` by first-parent history search plus source reads of each residual)
+- **Summary:** Reconciliation ledger for the 2026-08-21 adversarial review: 34 of 61 children landed on `main` (SHAs recorded), 27 residual. Three residual fixes already exist on unmerged branches (`readiness/p0-9412-one-tile-registry`, `conductor/issue-8865`, `conductor/issue-8866`). Epic acceptance (one registry, one API factory, one C3D reader, one pose type, no GUI-thread simulation) is not met on `main`.
+- **Next step:** Rebase and merge `readiness/p0-9412-one-tile-registry`, then re-verify the Cluster B rows in the ledger.
 
 ### DL-#8684 · Coupled Grip, Shaft, Ground Rollup
 
