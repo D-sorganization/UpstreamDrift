@@ -19,7 +19,7 @@ from functools import lru_cache
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 
 from src.api.services.matched_swings_service import (
     MatchedSwingJobError,
@@ -63,10 +63,10 @@ def get_matched_swings_service() -> MatchedSwingsService:
     return _default_service()
 
 
-def _job_error_response(error: MatchedSwingJobError, status_code: int) -> JSONResponse:
-    return JSONResponse(
+def _raise_job_error(error: MatchedSwingJobError, status_code: int) -> None:
+    raise HTTPException(
         status_code=status_code,
-        content={"detail": error.message, "error": error.to_dict()},
+        detail={"message": error.message, "error": error.to_dict()},
     )
 
 
@@ -89,7 +89,7 @@ async def get_matched_swing_receipt(
     run_id: str,
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
-) -> dict[str, Any] | JSONResponse:
+) -> dict[str, Any]:
     """Return the receipt JSON for a single matched-swing run."""
     try:
         summary = service.get_run_summary(run_id)
@@ -97,7 +97,7 @@ async def get_matched_swing_receipt(
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except (FileNotFoundError, ValueError) as exc:
-        return _job_error_response(
+        _raise_job_error(
             MatchedSwingJobError(code="receipt_unavailable", message=str(exc)),
             status_code=404,
         )
@@ -120,7 +120,7 @@ async def get_matched_swing_candidate(
     ),
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
-) -> FileResponse | dict[str, Any] | JSONResponse:
+) -> FileResponse | dict[str, Any]:
     """Stream the candidate NPZ or return a JSON preview frame for 3D replay."""
     if preview_frame is not None:
         try:
@@ -129,7 +129,7 @@ async def get_matched_swing_candidate(
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except (FileNotFoundError, ValueError, IndexError) as exc:
-            return _job_error_response(
+            _raise_job_error(
                 MatchedSwingJobError(code="candidate_unavailable", message=str(exc)),
                 status_code=404,
             )
@@ -145,7 +145,7 @@ async def get_matched_swing_candidate(
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except FileNotFoundError as exc:
-        return _job_error_response(
+        _raise_job_error(
             MatchedSwingJobError(code="candidate_unavailable", message=str(exc)),
             status_code=404,
         )
@@ -161,25 +161,25 @@ async def get_matched_swing_parity(
     run_id: str,
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
-) -> dict[str, Any] | JSONResponse:
+) -> dict[str, Any]:
     """Return the cross-engine parity report JSON for a run."""
     try:
         path = service.resolve_artifact_path(run_id, "parity")
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except FileNotFoundError as exc:
-        return _job_error_response(
+        _raise_job_error(
             MatchedSwingJobError(code="parity_unavailable", message=str(exc)),
             status_code=404,
         )
     import json
 
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data: object = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise HTTPException(
             status_code=500, detail="Parity report is not a JSON object"
         )
-    return data
+    return dict(data)
 
 
 @router.get("/{run_id}/animation.gif")
