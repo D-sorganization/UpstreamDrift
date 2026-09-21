@@ -1411,7 +1411,7 @@
             "unit": "m"
           },
           {
-            "measured": 2.478701664524015e-05,
+            "measured": 2.478701664524015e-5,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -1475,7 +1475,7 @@
             "unit": ""
           },
           {
-            "measured": 2.478701664524015e-05,
+            "measured": 2.478701664524015e-5,
             "name": "required_max_closure_residual_m",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -1483,7 +1483,7 @@
             "unit": ""
           },
           {
-            "measured": 1.8289190783135055e-05,
+            "measured": 1.8289190783135055e-5,
             "name": "required_max_closure_residual_rad",
             "reason": "Required finite G1 measurement",
             "status": "passed",
