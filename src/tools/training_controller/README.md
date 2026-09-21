@@ -7,23 +7,24 @@ UpstreamDrift. It is the GUI counterpart to the backend that lives in
 
 ## Status
 
-This package currently ships only the **headless** portion of the
-dashboard tab — the MVC controller, realtime subscriber, and read-model
-dataclasses. The PyQt6 widget surface (`gui.py`, `__main__.py`,
-`_embed_adapter.py`, and the `src/config/models.yaml` tile entry) is
-deferred to a follow-up PR, because the environment that authored this
-code has no display and cannot validate Qt widgets.
+This package provides both the headless MVC core and the PyQt6 GUI dashboard
+tab for model training orchestration:
 
-The follow-up PR will bind the read-model defined here onto:
+- Headless architecture: `TrainingDashboardController`, `TrainingJobLiveSubscriber`,
+  and typed read-model dataclasses (`DashboardModel`, `JobRow`, `MetricSeries`).
+- PyQt6 widget surface: `MainWindow`, `MainWidget`, and `SubmitDialog` in `gui.py`,
+  with `_embed_adapter.py` integrating the controller into the launcher tile
+  ecosystem and `models.yaml`.
 
-- a job-list table,
-- a per-job detail pane with live-metric plot + summary card,
-- a Submit / Cancel / Pause / Resume action toolbar that runs the
-  controller's compatibility-check gate before submit,
-- a host-resource strip fed by `training.resource_monitor`,
-- a dataset-library dock.
+The GUI binds the read-model onto:
 
-## Public surface (today)
+- a job-list table with status indicators and selection tracking,
+- a per-job detail pane with live-metric visualization and resource telemetry,
+- a Submit / Cancel / Pause / Resume action toolbar running compatibility gates,
+- host-resource telemetry via `training.resource_monitor`,
+- dataset selection and validation integration.
+
+## Public Surface
 
 ```python
 from training_controller import (
@@ -41,8 +42,8 @@ from training_controller import (
 `TrainingDashboardController.on_model_change(callback)` registers a
 no-arg callback that fires whenever the read-model changes (scheduler
 status update, new metric ingested for the selected job, selection
-change). The follow-up GUI layer subscribes once at construction and
-re-renders from `controller.current_model()`.
+change). The GUI layer subscribes at construction and re-renders from
+`controller.current_model()`.
 
 `TrainingJobLiveSubscriber(job_id, on_metric=..., on_status=...)`
 subscribes to `training/<job_id>/progress` via
@@ -52,23 +53,12 @@ idempotent; `stop()` is idempotent and safe from any thread.
 
 ## Tests
 
-Unit tests live under `tests/tools/training_controller/`:
+Unit and integration tests live under `tests/tools/training_controller/`:
 
 - `test_view_model.py` — Design-by-Contract checks for every dataclass.
-- `test_controller.py` — exercises the controller against a real
-  `Scheduler` (the backend is headless) including submit/cancel/
-  pause/resume, the compatibility-check gate, observer fan-out, and
-  the read-model projection.
-- `test_live_subscriber.py` — patches `src.shared.python.realtime`
-  with a stub transport and verifies callback dispatch on synthesized
-  metric / status payloads.
-
-All three suites run in CI without PyQt6 installed — no
-`pytest.importorskip` guards required.
-
-## Branch naming
-
-This PR was authored on `feat/training-controller-headless` per the
-CLAUDE.md branch-naming rule. The GUI follow-up should use
-`feat/training-controller-gui` or a `claude/training-controller-gui-*`
-branch.
+- `test_controller.py` — exercises the controller against a real `Scheduler`
+  including submit/cancel/pause/resume, compatibility-check gates, observer
+  fan-out, and read-model projection.
+- `test_live_subscriber.py` — patches `src.shared.python.realtime` with a stub
+  transport and verifies callback dispatch on synthesized metric/status payloads.
+- `test_gui.py` — exercises the PyQt6 widget layer and embedded adapter.

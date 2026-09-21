@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T20:15:37Z",
+  "generated_at": "2026-09-20T03:38:25Z",
   "rows": [
     {
       "acceptance": null,
@@ -115,6 +115,29 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/anthropometry/scan_grip_roll_receipt.json",
       "sha256": "40ef331b0b258812fabbe3c3c2524643c103d6af6b24d8956b97ccf1434d804b"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/contact_id/receipt.json",
+      "sha256": "9bbe5fc4e2fef05d0160af03f1214cc2768068fe0c6f3c71e9cae11c4a7e9556"
     },
     {
       "acceptance": null,
@@ -418,7 +441,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 410.9141537999967,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -432,6 +455,92 @@
       "sha256": "3f0a0809ba61c2dfa5a17c1c67f905b157c71f7c9a5fa8c880c117d6f2890d1d"
     },
     {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3819772131450465,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 381.98 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.007764955644425228,
+            "name": "max_closure_residual_m",
+            "reason": "closure residual 7.76 mm > 5.00 mm",
+            "status": "failed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 4.24] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/dynamics_record.npz"
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.3819772131450465
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
+      "sha256": "8808e5d9ab5a2b482f1a4465cbf36ae2ee5ea62a71e295c1c891cc8e2e7a694c"
+    },
+    {
       "acceptance": null,
       "artefacts": {
         "gif": null,
@@ -441,7 +550,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 372.7757910999935,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -455,6 +564,52 @@
       "sha256": "05dd52ffa1516e222e31e478a15170d57757e55b286636bcf3ba00b48a1cbaf5"
     },
     {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.26215802208491734,
+            "name": "whole_marker_rmse_m",
+            "reason": "OpenSim IK whole RMSE 262.16 mm vs MuJoCo canonical 52.27 mm (delta 209.89 mm > 5.00 mm)",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "dynamics_stage",
+            "reason": "not_run: use moco",
+            "status": "not_run",
+            "threshold": 0.0,
+            "unit": "stage"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik_playback.gif",
+        "mot": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik.mot",
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/candidate.npz"
+      },
+      "candidate_sha": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08913317524057322
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json",
+      "sha256": "3f1bb4e335b40ebfa2b90ae59db518b9d28a927fc5076e7e2127926a2d313fc5"
+    },
+    {
       "acceptance": null,
       "artefacts": {
         "gif": null,
@@ -464,7 +619,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 413.54473549997783,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -526,7 +681,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 1611.8685769999865,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -588,7 +743,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 207.65851470001508,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -650,7 +805,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
-      "horizon_s": 479.22056350001367,
+      "horizon_s": 1.8272980501392757,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -712,7 +867,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
-      "horizon_s": 828.5756654999859,
+      "horizon_s": 1.8272980501392757,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -735,7 +890,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": "iron",
       "engine": "mujoco",
-      "horizon_s": 261.8544557999703,
+      "horizon_s": 1.8272980501392757,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -753,7 +908,7 @@
       "artefacts": {
         "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
         "mot": null,
-        "npz": "docs/development/full_body_models/evidence/ground_support/dynamics_record.npz"
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
       },
       "candidate_sha": null,
       "capture": null,
@@ -781,7 +936,7 @@
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": null,
       "engine": "mujoco",
-      "horizon_s": 70.0847889999859,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -799,12 +954,12 @@
       "artefacts": {
         "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
         "mot": null,
-        "npz": "docs/development/full_body_models/evidence/ground_support/dynamics_record.npz"
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
       },
       "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
       "capture": null,
       "engine": "mujoco",
-      "horizon_s": 67.92577600001823,
+      "horizon_s": 1.8138888888888889,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -960,7 +1115,7 @@
       "artefacts": {
         "gif": null,
         "mot": "docs/development/full_body_models/evidence/viewer/opensim_os3b_ik.mot",
-        "npz": "docs/development/full_body_models/evidence/viewer/returned81_replay.npz"
+        "npz": "docs/development/full_body_models/evidence/viewer/opensim_os3b_candidate.npz"
       },
       "candidate_sha": "09cff1393a48b7f44e2ceaac9132473c64a33f9f853823c5e7d7fef80802e6b3",
       "capture": "driver",
@@ -1330,7 +1485,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os6_handoff/reproduction_receipt.json",
-      "sha256": "351f1ce31089c1c1514319a8b5c478a3d91952fbe317f8d646d2e6325dc25d49"
+      "sha256": "79c2737b1c2ec262918e33f2bcd1dd6e4e7d3b42f621096bc29e412452d01b77"
     },
     {
       "acceptance": null,
@@ -2653,6 +2808,598 @@
       "acceptance": {
         "gates": [
           {
+            "measured": 0.046837589364288994,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 46.84 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.025663229287031245,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 25.66 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0643072363103632,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 64.31 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.05259998859597353,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.1615901020914645,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.1616 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1139.6409577730308,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964854,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 2.16] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Barrier-reduced same-integrator G1 continuation (RK45 rtol 1e-6 solve and replay, range-barrier weight 100, trail-side effort bounds raised) from driver_g1_rtol6/stage_0.60s.npz: 0.85 s stage CONVERGED (99 iterations, cost 145.3) and rollout == replay at 46.8 mm whole. Still rejected at G1 (whole 46.8 > 25 mm, early 25.7 > 12, terminal 64.3 > 35, yaw 9.3 deg > 3, penetration 17.2 > 10 mm, weight fraction min 0). Best full-G1-horizon dynamic candidate to date; diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45_b100/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_b100/candidate.npz"
+      },
+      "candidate_sha": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100/receipt.json",
+      "sha256": "bc277fcd2b11747efdf44b57951c4ff1e7a159da538f44fe44351419cd6ad721"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.3500115189186422,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 350.01 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.03659059275721495,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 36.59 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.9446179073563208,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 944.62 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.46492214197469106,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 464.92 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.9884702853562879,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.9885 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 3868.0431421399603,
+            "name": "max_normal_force_n",
+            "reason": "max normal force 3868.0 N exceeds 2354.4 N (3x BW)",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964938,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 2.478701664524015e-5,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.3500115189186422,
+            "name": "required_whole_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": ""
+          },
+          {
+            "measured": 0.03659059275721495,
+            "name": "required_early_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": ""
+          },
+          {
+            "measured": 0.9446179073563208,
+            "name": "required_terminal_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": ""
+          },
+          {
+            "measured": 0.46492214197469106,
+            "name": "required_club_marker_rmse_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": ""
+          },
+          {
+            "measured": 0.9884702853562879,
+            "name": "required_pelvis_yaw_rmse_rad",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": ""
+          },
+          {
+            "measured": 3868.0431421399603,
+            "name": "required_max_normal_force_n",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": ""
+          },
+          {
+            "measured": 0.01719458026964938,
+            "name": "required_max_penetration_m",
+            "reason": "Required finite G1 measurement",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": ""
+          },
+          {
+            "measured": 2.478701664524015e-5,
+            "name": "required_max_closure_residual_m",
+            "reason": "Required finite G1 measurement",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": ""
+          },
+          {
+            "measured": 1.8289190783135055e-5,
+            "name": "required_max_closure_residual_rad",
+            "reason": "Required finite G1 measurement",
+            "status": "passed",
+            "threshold": 0.05,
+            "unit": ""
+          },
+          {
+            "measured": 0.0,
+            "name": "parity",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 1.0,
+            "name": "complete",
+            "reason": "Required replay evidence",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "converged",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "root_history",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 1.0,
+            "name": "coverage",
+            "reason": "Required replay evidence",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "bool"
+          },
+          {
+            "measured": 0.0,
+            "name": "source_dynamics",
+            "reason": "Required replay evidence",
+            "status": "missing",
+            "threshold": 1.0,
+            "unit": "bool"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Independent uninterrupted replay; missing evidence fails closed",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/kinematic-playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/returned-replay.npz"
+      },
+      "candidate_sha": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 74.41558822401566,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.46492214197469106,
+        "early_marker_rmse_m": 0.03659059275721495,
+        "pelvis_yaw_rmse_rad": 0.9884702853562879,
+        "terminal_marker_rmse_m": 0.9446179073563208,
+        "whole_marker_rmse_m": 0.3500115189186422
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/receipt.json",
+      "sha256": "39b33b37b30ac5bfe72594951d97d60805585c5260ef2b14367a3fa6ed485778"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.1235360188278201,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 123.54 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.04850729028310768,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 48.51 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.2331304673300411,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 233.13 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.22530596222439722,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 225.31 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.06353867025331546,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.0635 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1267.8446438406743,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.01719458026964854,
+            "name": "max_penetration_m",
+            "reason": "penetration 17.2 mm > 10.0 mm",
+            "status": "failed",
+            "threshold": 0.01,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Same-integrator G1 continuation (RK45 rtol 1e-6 on both solve and replay) from stage_0.60s.npz: rollout == replay at 123.5 mm whole; 0.85 s stage not converged, cost dominated by the human-range barrier. Rejected; diagnostic evidence for MS-107.",
+        "source": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/reevaluation.json",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/candidate.npz"
+      },
+      "candidate_sha": "a7372b787824d902a616d2a77cf5dfaed2b68accf2cc112593bc8419a80e8509",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/receipt.json",
+      "sha256": "166eb43ba7a2a0243720bf838d0b509dfabe9e6a51beccc6431d7b27d47a0826"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.0,
+            "name": "whole_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "early_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "terminal_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "club_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 1200.0,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0035,
+            "name": "max_penetration_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0001,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": true,
+        "qualification_note": "Physical acceptance criteria passed",
+        "status": "PASSED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_drake/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_drake/candidate.npz"
+      },
+      "candidate_sha": "cc8c79ef79832685cdbc3e079345fd632540a5c3d2b1a6e0eb3fc72c5a4cda82",
+      "capture": "driver",
+      "engine": "drake",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.0,
+        "early_marker_rmse_m": 0.0,
+        "pelvis_yaw_rmse_rad": 0.0,
+        "terminal_marker_rmse_m": 0.0,
+        "whole_marker_rmse_m": 0.0
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_drake/receipt.json",
+      "sha256": "1f1f67d26b5b1883f652653186b7f96e14c899119b803a913f9c2638fa5bdce4"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.2452450443233475,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 245.25 mm > 25.00 mm",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          },
+          {
+            "measured": 0.23014149679046664,
+            "name": "early_marker_rmse_m",
+            "reason": "early RMSE 230.14 mm > 12.00 mm",
+            "status": "failed",
+            "threshold": 0.012,
+            "unit": "m"
+          },
+          {
+            "measured": 0.26151220010975246,
+            "name": "terminal_marker_rmse_m",
+            "reason": "terminal RMSE 261.51 mm > 35.00 mm",
+            "status": "failed",
+            "threshold": 0.035,
+            "unit": "m"
+          },
+          {
+            "measured": 0.3900449519505721,
+            "name": "club_marker_rmse_m",
+            "reason": "club RMSE 390.04 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": 0.32399201077582096,
+            "name": "pelvis_yaw_rmse_rad",
+            "reason": "pelvis yaw RMSE 0.3240 rad > 0.0524 rad",
+            "status": "failed",
+            "threshold": 0.05236,
+            "unit": "rad"
+          },
+          {
+            "measured": 799.2591582275049,
+            "name": "max_normal_force_n",
+            "reason": "",
+            "status": "passed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0,
+            "name": "max_penetration_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.01,
+            "unit": "m"
+          },
+          {
+            "measured": 0.5,
+            "name": "weight_fraction",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": 0.8789352925092767,
+            "name": "open_loop_replay",
+            "reason": "open-loop drift 878.9 mm exceeds 25.0 mm threshold",
+            "status": "failed",
+            "threshold": 0.025,
+            "unit": "m"
+          }
+        ],
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_opensim/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_opensim/candidate.npz"
+      },
+      "candidate_sha": "d1026b1c154fbb43957dfc6192d05b0d0eadc07733578d89a0185f3889985717",
+      "capture": "driver",
+      "engine": "opensim",
+      "horizon_s": 0.85,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.3900449519505721,
+        "early_marker_rmse_m": 0.23014149679046664,
+        "pelvis_yaw_rmse_rad": 0.32399201077582096,
+        "terminal_marker_rmse_m": 0.26151220010975246,
+        "whole_marker_rmse_m": 0.2452450443233475
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_opensim/receipt.json",
+      "sha256": "933e00f033dd518df5053c543136a286a32dd25111509e57a5e36ed2b159efc0"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
             "measured": 2.7573124637458317,
             "name": "whole_marker_rmse_m",
             "reason": "whole RMSE 2757.31 mm > 25.00 mm",
@@ -2809,5 +3556,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 90
+  "total_receipts": 98
 }

@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 from src.config.launcher_manifest_loader import (
@@ -204,7 +205,7 @@ class TestParity:
             tile.id: tile for tile in manifest.tiles if tile.id in native_by_id
         }
 
-        mismatches: dict[str, dict[str, tuple[object, object]]] = {}
+        mismatches: dict[str, dict[str, tuple[Any, Any]]] = {}
         for tile_id, tile in shared_by_id.items():
             native = native_by_id[tile_id]
             native_launcher = native.launcher
@@ -291,14 +292,26 @@ class TestWebReachabilityContract:
         assert APP_TSX.exists(), f"React router file not found: {APP_TSX}"
         router_paths = _react_router_paths()
         assert router_paths, "No route table extracted from App.tsx"
-        bad = [
+        bad_raw = [
             (tile["id"], tile["web"]["route"])
             for tile in _raw_manifest_tiles()
             if tile["web"]["mode"] == "route"
             and tile["web"]["route"] not in router_paths
         ]
-        assert not bad, (
-            f"route-mode tiles whose route is not in the React router: {bad}. "
+        assert not bad_raw, (
+            f"Raw route-mode tiles whose route is not in the React router: {bad_raw}. "
+            f"Known routes: {sorted(router_paths)}"
+        )
+        manifest = LauncherManifest.load()
+        bad_loaded = [
+            (tile.id, tile.web.route)
+            for tile in manifest.tiles
+            if tile.web
+            and tile.web.mode == "route"
+            and tile.web.route not in router_paths
+        ]
+        assert not bad_loaded, (
+            f"Loaded route-mode tiles whose route is not in the React router: {bad_loaded}. "
             f"Known routes: {sorted(router_paths)}"
         )
 
@@ -323,6 +336,32 @@ class TestWebReachabilityContract:
             if web["mode"] == "unavailable":
                 assert isinstance(web.get("reason"), str) and web["reason"].strip(), (
                     f"Tile '{tile['id']}' unavailable mode requires a reason"
+                )
+
+    def test_every_tile_destination_resolves_authoritatively(self) -> None:
+        """Every manifest tile resolves to route, native-window, or unavailable (issue #10513)."""
+        manifest = LauncherManifest.load()
+        router_paths = _react_router_paths()
+
+        for tile in manifest.tiles:
+            assert tile.web is not None, f"Tile '{tile.id}' missing web contract"
+            mode = tile.web.mode
+            assert mode in (
+                "route",
+                "native-window",
+                "unavailable",
+            ), f"Tile '{tile.id}' has invalid launch mode: {mode}"
+            if mode == "route":
+                assert tile.web.route and tile.web.route in router_paths, (
+                    f"Route-mode tile '{tile.id}' route '{tile.web.route}' not in React router"
+                )
+            elif mode == "native-window":
+                assert tile.path and tile.path.strip(), (
+                    f"Native-window tile '{tile.id}' must declare a non-empty executable/script path"
+                )
+            elif mode == "unavailable":
+                assert tile.web.reason and tile.web.reason.strip(), (
+                    f"Unavailable tile '{tile.id}' must declare a human-readable reason"
                 )
 
 
