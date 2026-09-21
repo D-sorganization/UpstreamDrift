@@ -1,3 +1,17 @@
+## C3D Ingestion Stack Convergence and Pipeline Hand-Off (#10046)
+
+Converges GUI-reachable C3D upload onto the shared motion pipeline ingestion stack and adds pipeline hand-off:
+- **Motion Capture Upload Route (`src/api/routes/motion_capture.py`)**:
+  - Converges `POST /tools/motion-capture/upload-c3d` onto the motion pipeline's `C3DAdapter` instead of `C3DDataReader`.
+  - Implements `_frames_from_trajectory` converting canonical `MarkerTrajectory` to playback frames with occluded markers zeroed with confidence 0.
+  - Supports optional query parameters `run_pipeline`, `ik_backend`, `matching_backend`, and `matching_model_urdf` to hand off parsed trajectories directly to `MotionPipeline` without re-parsing.
+  - Preserves recordings and reports failures inline on pipeline solve issues without failing upload.
+  - Probes C3D parser availability across either `upstream_mocap_io` or `ezc3d` backend.
+- **Trajectory Frame Rate Metadata (`src/shared/python/motion_pipeline/sources/c3d_adapter.py`)**:
+  - Adds `fps` to trajectory metadata across both C3D backends.
+- **Verification Suite**:
+  - Route tests in `tests/unit/api/test_routes_motion_capture.py` validating adapter parsing, golden C3D upload compatibility, pipeline hand-off, and inline pipeline failure reporting.
+
 ## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
 
 Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
@@ -6666,7 +6680,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
@@ -6691,6 +6704,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
+| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |
