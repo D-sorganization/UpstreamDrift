@@ -738,7 +738,6 @@ def explore_torque_tradeoffs(
     grip_indices: Sequence[int] | None = None,
     ground_indices: Sequence[int] | None = None,
     joint_velocities: Array | None = None,
-    smoothness_weight: float = 1.0,
     tolerance: float = 1e-8,
 ) -> TorqueDistributionTradeoff:
     """Explore feasible force null spaces and generate torque distribution tradeoffs."""

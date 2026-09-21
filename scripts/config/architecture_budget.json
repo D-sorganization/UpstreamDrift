@@ -3,6 +3,7 @@
   "max_parameters": 8,
   "exceptions": [
     {
+<<<<<<< HEAD
       "path": "scripts/companion_evidence.py",
       "symbol": "_documentation_record",
       "rule": "function-lines",
@@ -18,6 +19,32 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 9193,
       "reason": "Issue #9193: render_evidence_document renders evidence documents, programs, and tables for publication quality.",
+=======
+      "path": "src/shared/python/motion_matching/force_nullspace.py",
+      "symbol": "redistribute_forces",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: redistribute_forces formulates and solves bounded quadratic programming for force redistribution.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/force_nullspace.py",
+      "symbol": "redistribute_trajectory",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: redistribute_trajectory solves multi-collocation-node temporal smoothing trajectory optimization.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/force_nullspace.py",
+      "symbol": "explore_torque_tradeoffs",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: explore_torque_tradeoffs explores feasible force null spaces and generates torque distribution tradeoffs.",
+>>>>>>> dc5e5c815 (fix(motion_matching): fix parameter budget and register inventories for force_nullspace)
       "expires_on": "2026-11-30"
     },
     {
