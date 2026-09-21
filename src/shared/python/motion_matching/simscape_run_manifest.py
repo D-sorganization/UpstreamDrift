@@ -7,6 +7,7 @@ and wall-clock; unlicensed default CI must not pretend a native pass.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Mapping
 
 from src.shared.python.contracts import postcondition, precondition
@@ -31,6 +32,26 @@ _REQUIRED_KEYS = (
 )
 
 
+@dataclass(frozen=True)
+class SimscapeRunManifestRequest:
+    """Typed inputs for a versioned Simscape run-manifest payload."""
+
+    run_id: str
+    matlab_release: str
+    matlab_version: str
+    host: str
+    model_sha256: str
+    candidate_sha256: str
+    replay_npz_sha256: str
+    wall_clock_s: float
+    qualification: str
+    evidence_dir: str
+    artifacts: Mapping[str, str]
+    issue: str = "#10347"
+    machine: str | None = None
+    extra: Mapping[str, Any] | None = None
+
+
 def _is_sha256(value: object) -> bool:
     return (
         isinstance(value, str)
@@ -40,58 +61,42 @@ def _is_sha256(value: object) -> bool:
 
 
 @precondition(
-    lambda **kwargs: bool(str(kwargs.get("run_id", "")).strip()),
+    lambda request: bool(str(request.run_id).strip()),
     "run_id must be non-empty",
 )
 @precondition(
-    lambda **kwargs: bool(str(kwargs.get("host", "")).strip()),
+    lambda request: bool(str(request.host).strip()),
     "host must be non-empty",
 )
 @precondition(
-    lambda **kwargs: float(kwargs.get("wall_clock_s", -1.0)) >= 0.0,
+    lambda request: float(request.wall_clock_s) >= 0.0,
     "wall_clock_s must be non-negative",
 )
 @postcondition(
     lambda r: r.get("schema_version") == RUN_MANIFEST_SCHEMA_VERSION,
     "manifest schema_version must match",
 )
-def build_simscape_run_manifest(
-    *,
-    run_id: str,
-    matlab_release: str,
-    matlab_version: str,
-    host: str,
-    model_sha256: str,
-    candidate_sha256: str,
-    replay_npz_sha256: str,
-    wall_clock_s: float,
-    qualification: str,
-    evidence_dir: str,
-    artifacts: Mapping[str, str],
-    issue: str = "#10347",
-    machine: str | None = None,
-    extra: Mapping[str, Any] | None = None,
-) -> dict[str, Any]:
+def build_simscape_run_manifest(request: SimscapeRunManifestRequest) -> dict[str, Any]:
     """Build a versioned Simscape run manifest payload."""
     payload: dict[str, Any] = {
         "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
-        "issue": issue,
-        "run_id": run_id,
-        "matlab_release": matlab_release,
-        "matlab_version": matlab_version,
-        "host": host,
-        "model_sha256": model_sha256,
-        "candidate_sha256": candidate_sha256,
-        "replay_npz_sha256": replay_npz_sha256,
-        "wall_clock_s": float(wall_clock_s),
-        "qualification": qualification,
-        "evidence_dir": evidence_dir,
-        "artifacts": dict(artifacts),
+        "issue": request.issue,
+        "run_id": request.run_id,
+        "matlab_release": request.matlab_release,
+        "matlab_version": request.matlab_version,
+        "host": request.host,
+        "model_sha256": request.model_sha256,
+        "candidate_sha256": request.candidate_sha256,
+        "replay_npz_sha256": request.replay_npz_sha256,
+        "wall_clock_s": float(request.wall_clock_s),
+        "qualification": request.qualification,
+        "evidence_dir": request.evidence_dir,
+        "artifacts": dict(request.artifacts),
     }
-    if machine:
-        payload["machine"] = machine
-    if extra:
-        payload["extra"] = dict(extra)
+    if request.machine:
+        payload["machine"] = request.machine
+    if request.extra:
+        payload["extra"] = dict(request.extra)
     validate_simscape_run_manifest(payload)
     return payload
 
