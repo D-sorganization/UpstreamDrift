@@ -20,6 +20,7 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
     DoublePendulumParameters,
 )
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
+    create_calibrated_double_pendulum_dynamics,
     forward_kinematics_2d,
 )
 from src.engines.physics_engines.pendulum.python.motion_matching.torque_optimization import (
@@ -251,12 +252,7 @@ class PendulumFitSwingProvider:
             return _build_failure_result(init_err, target_hash, self.engine_version())
 
         # 3. Formulate analytical dynamics and execute bounded optimization
-        dynamics = DoublePendulumDynamics()
-        dyn_params = dynamics.parameters
-        upper_seg = dyn_params.upper_segment
-        lower_seg = dyn_params.lower_segment
-        upper_seg.length_m = l1
-        lower_seg.length_m = l2
+        dynamics = create_calibrated_double_pendulum_dynamics(l1, l2)
         max_nfev = opts.maxiter if opts and opts.maxiter else 100
 
         target_data = DoublePendulumFitTarget(
