@@ -72,6 +72,13 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 Refresh via `bash scripts/ci/run_native_engine_lane.sh --engine opensim --venv /home/dieterolson/opensim-10003`. See [evidence/nightly/README.md](evidence/nightly/README.md).
 
+### MS-62 Simscape 44-to-27 Coordinate Slice (#10349)
+
+| Scope                  | State                                                                 | Evidence                                                                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kinematic slice + map  | JSON map and projection implemented; virtual-work decomposition green | [receipt.json](../../../evidence/matched/driver_g1_simscape_slice/receipt.json), [parity.json](../../../evidence/matched/driver_g1_simscape_slice/parity.json) |
+| Simscape native replay | unqualified — R2025b boundary-load validation pending                 | [run_manifest.json](../../../evidence/matched/driver_g1_simscape_slice/run_manifest.json)                                                                      |
+
 ### MS-21 Native Replay Continuation (#10336)
 
 | Scope                             | State                                                                              | Evidence                                                                                                                                                   |

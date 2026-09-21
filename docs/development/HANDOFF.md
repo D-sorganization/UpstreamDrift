@@ -1,5 +1,14 @@
 # Current Matching Continuation Handoff
 
+## MS-62 Simscape Coordinate Slice #10349 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10349-local`.
+- Branch: `fix/issue-10349-ms-62-local`; PR not created yet. Governing issue #10349 (MS-62, epic #10363).
+- Entry DL-#10349. Delivered: `coordinate_slice.py` (JSON map, kinematic projection, boundary wrenches, CLI), `align_measured_to_model.m` geometry-document workspace overrides, evidence under `evidence/matched/driver_g1_simscape_slice/`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_coordinate_slice.py -q` (9 passed); `python scripts/ci/check_architecture_budget.py` clean; `ruff check` clean on touched Python.
+- Limitations: kinematic slice only; legacy source `u` is 38-DOF actuated so sliced candidate is kinematic profile; Simscape R2025b native replay and boundary-load acceptance unqualified.
+- Next action: open PR with `Fixes #10349`; drive CI green; Simscape replay on DeskComputer.
+
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
