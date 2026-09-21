@@ -37,6 +37,8 @@ from .club_only.adapters import club_target_to_observation, observation_to_club_
 from .club_only.observation import (
     OBSERVATION_SCHEMA,
     ClubObservation,
+    ClubObservationKinematics,
+    ClubObservationProvenance,
     ComponentMask,
     ComponentStatus,
 )
@@ -58,6 +60,8 @@ __all__ = [
     "CLUB_BALL_TARGET_SCHEMA_VERSION",
     "ClubBallTarget",
     "ClubObservation",
+    "ClubObservationKinematics",
+    "ClubObservationProvenance",
     "ClubTarget",
     "ComponentMask",
     "ComponentStatus",

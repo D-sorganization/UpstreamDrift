@@ -139,6 +139,32 @@ class ResampleRecord:
 
 
 @dataclass(frozen=True)
+class ClubObservationKinematics:
+    """Frame arrays used to construct a :class:`ClubObservation`."""
+
+    native_time_s: np.ndarray
+    mid_hands_xyz: np.ndarray
+    face_xyz: np.ndarray
+    mid_hands_rotmats: np.ndarray
+    face_rotmats: np.ndarray
+
+
+@dataclass(frozen=True)
+class ClubObservationProvenance:
+    """Identity, masks, and catalog metadata for a club observation."""
+
+    mask: ComponentMask
+    derivation: DerivationMetadata
+    uncertainty: UncertaintyMetadata
+    events: tuple[ObservationEvent, ...]
+    sample_rate_hz: float
+    club_type: str
+    catalog_length_m: float
+    source: SourceProvenance
+    trial_id: str
+
+
+@dataclass(frozen=True)
 class ClubObservation:
     """Canonical club observation with explicit mid-hands/face frames.
 
@@ -170,42 +196,44 @@ class ClubObservation:
         _validate_observation(self)
 
     @classmethod
+    @precondition(
+        lambda cls, kinematics, provenance: isinstance(
+            kinematics, ClubObservationKinematics
+        ),
+        "kinematics must be ClubObservationKinematics",
+    )
+    @precondition(
+        lambda cls, kinematics, provenance: isinstance(
+            provenance, ClubObservationProvenance
+        ),
+        "provenance must be ClubObservationProvenance",
+    )
+    @postcondition(
+        lambda r: isinstance(r, ClubObservation), "must return ClubObservation"
+    )
     def from_frames(
         cls,
-        *,
-        native_time_s: np.ndarray,
-        mid_hands_xyz: np.ndarray,
-        face_xyz: np.ndarray,
-        mid_hands_rotmats: np.ndarray,
-        face_rotmats: np.ndarray,
-        mask: ComponentMask,
-        derivation: DerivationMetadata,
-        uncertainty: UncertaintyMetadata,
-        events: tuple[ObservationEvent, ...],
-        sample_rate_hz: float,
-        club_type: str,
-        catalog_length_m: float,
-        source: SourceProvenance,
-        trial_id: str,
+        kinematics: ClubObservationKinematics,
+        provenance: ClubObservationProvenance,
     ) -> ClubObservation:
         """Build an observation from rotation matrices with SO(3) validation."""
-        mid_r = _validate_rotation_stack(mid_hands_rotmats, "mid_hands")
-        face_r = _validate_rotation_stack(face_rotmats, "face")
+        mid_r = _validate_rotation_stack(kinematics.mid_hands_rotmats, "mid_hands")
+        face_r = _validate_rotation_stack(kinematics.face_rotmats, "face")
         return cls(
-            native_time_s=native_time_s,
-            mid_hands_xyz=mid_hands_xyz,
-            face_xyz=face_xyz,
+            native_time_s=kinematics.native_time_s,
+            mid_hands_xyz=kinematics.mid_hands_xyz,
+            face_xyz=kinematics.face_xyz,
             mid_hands_quat=rotmat_to_quat(mid_r),
             face_quat=rotmat_to_quat(face_r),
-            mask=mask,
-            derivation=derivation,
-            uncertainty=uncertainty,
-            events=events,
-            sample_rate_hz=sample_rate_hz,
-            club_type=club_type,
-            catalog_length_m=catalog_length_m,
-            source=source,
-            trial_id=trial_id,
+            mask=provenance.mask,
+            derivation=provenance.derivation,
+            uncertainty=provenance.uncertainty,
+            events=provenance.events,
+            sample_rate_hz=provenance.sample_rate_hz,
+            club_type=provenance.club_type,
+            catalog_length_m=provenance.catalog_length_m,
+            source=provenance.source,
+            trial_id=provenance.trial_id,
         )
 
 

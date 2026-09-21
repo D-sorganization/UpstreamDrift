@@ -314,9 +314,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/adapters.py; src/shared/python/motion_matching/club_calibration.py; src/shared/python/motion_matching/target.py; tests/unit/motion_matching/test_club_observation_contracts.py; docs/plans/club_only_matching/evidence/club_observation_contracts.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 — `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (13 passed)
+- **Last verified:** 2026-09-21 — `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (14 passed); python -O public input validation confirmed; ruff check/format clean on touched paths.
 - **Summary:** Adds `ClubObservation` with measured/derived/unobserved component masks, dual mid-hands/face frames and orientations, native 240 Hz clock, uncertainty/derivation metadata, SO(3) residuals/interpolation, catalog-backed `club_calibration` (fixed tool-to-model SE(3), grip-face rigidity, mid-hands→butt-end only with explicit offset), and legacy `ClubTarget` adapters that refuse invented identity quats.
-- **Next step:** Open ready-for-review PR with `Fixes #10605` and arm auto-merge.
+- **Next step:** Dispatch CO-02 #10606 after this PR merges.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_observation_contracts.json; tests/unit/motion_matching/test_club_observation_contracts.py.
 
 ### DL-#10603 · Neural Motion Matching Plan

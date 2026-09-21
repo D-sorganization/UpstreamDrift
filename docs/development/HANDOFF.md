@@ -205,16 +205,16 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10605-co01`.
 - Branch: `fix/issue-10605-co01-club-observation`; PR not created. Governing issue #10605 (CO-01, epic #10602). Prerequisite CO-00 #10604 / PR #10667 merged.
 - Entry DL-#10605. Delivered: `ClubObservation` (masks, dual mid-hands/face frames+quats, native 240 Hz clock, uncertainty/derivation metadata), `club_calibration.py` (SE(3) tool-to-model, catalog length/type checks, grip-face rigidity, explicit mid-hands→butt-end offset), legacy adapters that refuse invented identity quats, versioned four-trial fixture pack.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (13 passed). Synthetic fixtures only — not native physical qualification.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_observation_contracts.py -q -n 0 --no-cov --timeout=60` (14 passed); python -O public validation confirmed. Synthetic fixtures only — not native physical qualification.
 - Limitations: Excel/mat loaders still emit legacy `ClubTarget`; native workbook→`ClubObservation` ingest is deferred; twist remains unobserved in fixtures.
-- Next action: Open PR `Fixes #10605`, run architecture budget + ruff, arm auto-merge.
+- Next action: Dispatch CO-02 #10606 after merge; do not start NM-_ or PF-_.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active child [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md).
-- **State:** CO-00 identity contracts merged; CO-01 observation/calibration contracts in progress. Four unique workbook trials audited. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
+- **State:** CO-00 identity contracts merged; CO-01 observation/calibration contracts ready for review. Four unique workbook trials audited. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
 - **Branch:** `fix/issue-10605-co01-club-observation` (CO-01). Development log entries DL-#10602, DL-#10604, DL-#10605.
 - **Next:** Land CO-01 #10605, then dispatch CO-02 #10606.
 

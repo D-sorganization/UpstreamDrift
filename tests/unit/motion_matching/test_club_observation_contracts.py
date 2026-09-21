@@ -29,6 +29,8 @@ from src.shared.python.motion_matching.club_only.adapters import (
 from src.shared.python.motion_matching.club_only.observation import (
     OBSERVATION_SCHEMA,
     ClubObservation,
+    ClubObservationKinematics,
+    ClubObservationProvenance,
     ComponentMask,
     ComponentStatus,
     DerivationMetadata,
@@ -179,27 +181,30 @@ def test_degenerate_axes_require_flag() -> None:
 def test_invalid_rotation_determinant_rejected() -> None:
     bad = np.eye(3)
     bad[0, 0] = -1.0  # det = -1
+    kinematics = ClubObservationKinematics(
+        native_time_s=np.array([0.0, 1.0 / 240.0]),
+        mid_hands_xyz=np.zeros((2, 3)),
+        face_xyz=np.array([[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]),
+        mid_hands_rotmats=np.stack([np.eye(3), np.eye(3)]),
+        face_rotmats=np.stack([bad, np.eye(3)]),
+    )
+    provenance = ClubObservationProvenance(
+        mask=_full_mask(),
+        derivation=DerivationMetadata(
+            orientation_axis_status="measured",
+            degenerate_axes=False,
+            notes=(),
+        ),
+        uncertainty=UncertaintyMetadata(0.001, 0.01),
+        events=(),
+        sample_rate_hz=NATIVE_SAMPLE_RATE_HZ,
+        club_type=DRIVER.name,
+        catalog_length_m=DRIVER.length_m,
+        source=_make_source(),
+        trial_id="TW_wiffle",
+    )
     with pytest.raises(ValueError, match="determinant|proper rotation|SO\\(3\\)"):
-        ClubObservation.from_frames(
-            native_time_s=np.array([0.0, 1.0 / 240.0]),
-            mid_hands_xyz=np.zeros((2, 3)),
-            face_xyz=np.array([[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]]),
-            mid_hands_rotmats=np.stack([np.eye(3), np.eye(3)]),
-            face_rotmats=np.stack([bad, np.eye(3)]),
-            mask=_full_mask(),
-            derivation=DerivationMetadata(
-                orientation_axis_status="measured",
-                degenerate_axes=False,
-                notes=(),
-            ),
-            uncertainty=UncertaintyMetadata(0.001, 0.01),
-            events=(),
-            sample_rate_hz=NATIVE_SAMPLE_RATE_HZ,
-            club_type=DRIVER.name,
-            catalog_length_m=DRIVER.length_m,
-            source=_make_source(),
-            trial_id="TW_wiffle",
-        )
+        ClubObservation.from_frames(kinematics, provenance)
 
 
 def test_wrong_length_and_club_type_fail_closed() -> None:
