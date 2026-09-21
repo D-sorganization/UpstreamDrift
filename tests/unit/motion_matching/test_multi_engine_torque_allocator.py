@@ -229,6 +229,7 @@ def test_cli_allocate_swing_torques(
             "minimum_effort",
             "--out",
             str(out_file),
+            "--allow-synthetic",
         ]
     )
     assert code == 0
