@@ -161,6 +161,11 @@ class MotionMatchingWidget(QWidget):
         self.backend.addItems(engines)
         self.backend.setCurrentText("mujoco")
 
+        self.ik_backend = QComboBox()
+        self.ik_backend.addItems(list(pipeline.IK_BACKENDS))
+        self.tracking = QComboBox()
+        self.tracking.addItems(list(pipeline.TRACKING_BACKENDS))
+
         self.step_mode = QComboBox()
         self.step_mode.addItems(list(pipeline.STEP_MODES))
 
@@ -172,6 +177,8 @@ class MotionMatchingWidget(QWidget):
 
         form = QFormLayout()
         form.addRow("Backend", self.backend)
+        form.addRow("IK backend", self.ik_backend)
+        form.addRow("Tracking", self.tracking)
         form.addRow("Pink Step Mode", self.step_mode)
         form.addRow("Capture", self.capture)
         form.addRow("Club", self.club)
@@ -462,6 +469,8 @@ class MotionMatchingWidget(QWidget):
             shooting_fit=self.shooting_fit.value(),
             shooting_gain=self.shooting_gain.value(),
             backend=self.backend.currentText().split()[0].strip(),
+            ik_backend=self.ik_backend.currentText(),
+            tracking=self.tracking.currentText(),
             step_mode=self.step_mode.currentText(),
         )
 
