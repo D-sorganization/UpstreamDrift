@@ -651,15 +651,16 @@ def _native_load_step(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
 
 
 def _native_mujoco(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
-    import mujoco  # type: ignore[import-untyped]
+    import importlib
+
+    mujoco = importlib.import_module("mujoco")
 
     if package.model_class is ModelClass.SHARED_DOCUMENT and package.source_spec:
-        from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-            export_full_body_mjcf,
+        mjcf_mod = importlib.import_module(
+            "src.engines.physics_engines.mujoco.python.full_body_mjcf"
         )
-
         model_bytes = (repo_root / package.source_spec).read_bytes()
-        xml, metadata = export_full_body_mjcf(model_bytes)
+        xml, metadata = mjcf_mod.export_full_body_mjcf(model_bytes)
         model = mujoco.MjModel.from_xml_string(xml)
         data = mujoco.MjData(model)
         mujoco.mj_forward(model, data)
@@ -698,12 +699,15 @@ def _native_opensim(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
 
 def _native_urdf_bundle(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
     if package.model_class is ModelClass.SHARED_DOCUMENT and package.source_spec:
-        from src.shared.python.model_generation.export.model_bundle import (
-            export_model_bundle,
-        )
+        # Dynamic import avoids static dual-path resolution of model_generation
+        # when Tools is also on PYTHONPATH (mypy duplicate-module failure).
+        import importlib
 
+        export_mod = importlib.import_module(
+            "src.shared.python.model_generation.export.model_bundle"
+        )
         model_bytes = (repo_root / package.source_spec).read_bytes()
-        bundle = export_model_bundle(model_bytes)
+        bundle = export_mod.export_model_bundle(model_bytes)
         urdf = bundle.urdf_xml
         return {
             "urdf_chars": len(urdf),
