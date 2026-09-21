@@ -6810,8 +6810,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-21 | #10672 | NM-01 freeze learning tasks, TB-00 model roster and benefit experiment (`neural-learning-tasks/1.0.0`, `neural-model-roster/1.0.0`, `neural-benefit-experiment/1.0.0`); no training or speed claims. |
 | 2026-09-21 | #10348 | MS-61 Simscape topology classification and full-marker terminal disclosure (run-103 scaffolding; native G1 blocked without licensed Fit / MS-104). |
+| 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
+| 2026-09-21 | #10672 | NM-01 freeze learning tasks, TB-00 model roster and benefit experiment (`neural-learning-tasks/1.0.0`, `neural-model-roster/1.0.0`, `neural-benefit-experiment/1.0.0`); no training or speed claims. |
 | 2026-09-21 | #10669 | Add Simscape R2025b run management for MS-60 (#10347): fail-closed run manifest schema, returned-replay→MatchedSwingCandidate converter, scripted `run_simscape_candidate.ps1`, and committed run-102 candidate/manifest/playback GIF under native_evidence. |
 | 2026-09-21 | #10670 | Extend canonical club observation contracts with component masks, dual mid-hands/face frames, native 240 Hz clock, SO(3) residuals/interpolation, catalog-backed calibration, and legacy ClubTarget adapters (CO-01); synthetic fixtures only. |
 | 2026-09-21 | #10668 | NM-00 fail-closed audit of neural datasets, checkpoints and training claims (`neural-artifact-audit/1.0.0`); absent 10k corpus and note-only plateaus quarantined; no training or speed claims. |
