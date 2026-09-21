@@ -1,169 +1,81 @@
-# OpenSim Motion-Matching Continuation Handoff
+# OpenSim Matching Handoff
 
-Reviewed 2026-09-18 at 01:45 UTC. Current issue #10341 (MS-42), epic #10363.
-OS-0..6 are historical delivered infrastructure; they are not an accepted
-full-swing match. The OS-6 shared metrics were unverified. The following
-continuation replaces the old restart instructions for completed OS-2b/3b work.
+Updated 2026-09-13 (claude, lease on #10003). Epic
+[#10003](https://github.com/D-sorganization/UpstreamDrift/issues/10003), plan
+[EPIC_10003.md](EPIC_10003.md). Branch `docs/10003-opensim-matching-epic`,
+worktree `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003`,
+PR not created. Sibling full-body epic #10062
+([design](../full_body_models/EPIC_FULL_BODY_CONTACT.md)) shares the capture
+contract and the calibration algorithm from this lane.
 
-## Exact Source and Runtime
+## State in One Paragraph
 
-- Local worktree: `C:/Users/diete/Repositories/_wt_claude_10341`.
-- Local branch: `feat/10341-moco-g1`, commit `6914383f5`.
-- Original source branch was absent on origin and had no PR found by the exact
-  source-branch query. This review published the unchanged commit as
-  `handoff/10341-opensim-20260918`; fetch that recovery ref on a new host.
-  Publication preserves work, but is not integration into main or acceptance.
-- Local uncommitted `docs/development/DEVELOPMENT_LOG.md` and untracked
-  `evidence/os7_moco_g1/rungs/0850ms_diag_1iter/receipt.json` belong to the
-  prior agent; do not reset/stash them or add them wholesale to another PR.
-- SSH `controltower`, WSL `ControlTower-Runner`; runtime Python
-  `/home/dieterolson/opensim-10003/bin/python` (prior probe OpenSim 4.6/Moco).
-- Current deployed tree: `/home/dieterolson/opensim-10341-runtime`, not the
-  older `opensim-10003-runtime`. It is a copied tree with no reported Git HEAD.
-- Deployed moco_tracking.py, moco_g1.py and os7_moco_g1_driver.py match the local
-  commit after line-ending normalization. See the shared
-  [source manifest](../matched_swing_program/evidence/continuation_20260918/matching-source-manifest.json).
-- Model: `/mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim`.
-- IK: `/mnt/c/Users/diete/opensim-10003/ik_states_full.sto`.
-- TRC: `docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc`
-  beneath the deployed tree. Pinned model/IK copies also exist in the local
-  branch's `evidence/os7_moco_g1/inputs/`; verify hashes before substitution.
+OS-0 through OS-6 are complete. The OpenSim tour-average swing matching program
+has delivered an end-to-end repeatable workflow: baseline environment audit (OS-0),
+canonical TRC/marker contract (OS-1), golf coordinate unlocking and club calibration (OS-2b),
+segment scaling and 654-frame IK feasibility baseline (OS-3b), constraint-aware dynamic
+Moco tracking with zero-feedback forward replay (OS-4), global degree-six polynomial
+effort profiles across all 39 actuators with forward simulation replay (OS-5), and
+unified CLI router, headless visualization, and clean-machine reproduction handoff (OS-6).
+OpenSim matching lane (#10003) is fully closed and ready for transition to multi-engine
+contact modeling (#10062).
 
-## Live Job Snapshot
+## What Exists (All Test-First)
 
-PID 3082595 was running at the recorded time. Verify current process identity
-before acting. Log `/home/dieterolson/os7_g1f.log`; output
-`/home/dieterolson/os7_g1f`. No completed receipt existed there at the snapshot.
-Latest sampled iteration 236 showed large primal infeasibility (~4.69e4);
-this is not convergence. Do not terminate or duplicate the owner's job.
+- Shared capture contract `src/shared/python/motion_matching/tour_capture_contract.py`:
+  frozen identity of `data/C3D_TA_Driver.c3d` (SHA256 545405cc…, 360 Hz,
+  654 frames, metres, Y-up), 38 labels grouped by segment (head, trunk,
+  pelvis, arms, legs, club, unassigned), validated loader (invalid = negative
+  residual or nonfinite), `tracked_labels()` = 34 labels. Tests:
+  `tests/opensim/test_tour_capture_contract.py` (5).
+- OpenSim package `src/engines/physics_engines/opensim/python/tour_matching/`:
+  `marker_map.py` (34 labels → golf_humanoid bodies; head markers on `torso`
+  because the model has no head body, knees on femur, ankles on tibia, toes on
+  calcn, club markers on `Club`), `trc.py` (TRC writer/reader; missing markers
+  as explicit `NaN` cells because OpenSim trims trailing empty cells and then
+  rejects the row), `marker_set.py` (safe parse, `attach_marker_set`,
+  `unlock_coordinates`, `locked_coordinates`, `write_model`),
+  `marker_calibration.py` (alternating placement/IK with injected FK and IK,
+  Kabsch reuse). Tests: `test_tour_marker_map.py` (4), `test_trc_export.py`
+  (3), `test_marker_set_authoring.py` (3), `test_marker_calibration.py` (2).
+- Drivers under this directory: `os0_runtime_audit.py` (prior session),
+  `os1_export_trc.py` (local; writes `evidence/tour_average_tracked.trc`,
+  SHA256 eac6c880…, receipt `evidence/os1_trc_receipt.json`),
+  `os2_runtime_qualification.py` and `os3_calibrate_ik.py` (ControlTower).
 
-Observed arguments: `--max-iterations 600 --replay-timeout-s 1800 --rungs 0.85
-1.813888889 --warm-start /home/dieterolson/os7_g1b/rungs/0600ms
---continue-on-failure --ik-smooth-frames 15 --inverse-warm-start`.
+## Measured Results
 
-`os7_g1f` is the inverse-warm-start attempt, not the older raw/smoothed-IK jobs.
-`os7_g1e.log` reports a MocoCasADiSolver success; that alone is not a full G1
-tracking/replay receipt. Do not use it to label the live f run accepted.
+| Run             | Evidence                            | Result                                                                                                                                                  |
+| --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OS-1 TRC export | `evidence/os1_trc_receipt.json`     | 654 frames, 34 labels, 21,534 valid points, roundtrip 5e-7 m; `RShoulderTop` has only 128 valid samples                                                 |
+| OS-2 runtime    | `evidence/os2_runtime_receipt.json` | OpenSim 4.6 (2026-06-22) with Moco, IK, Scale; model loads with 23 bodies, 39 coordinates, 2 constraints, 0 markers; TRC read by OpenSim: 654 rows × 34 |
+| OS-3 locked     | `evidence/os3_stride20/`            | RMS 0.332 → 0.203 → 0.199 m; arm and lumbar coordinates never moved                                                                                     |
+| OS-3 unlocked   | `evidence/os3_unlocked_stride20/`   | RMS 0.198 → 0.065 → 0.087 → 0.078 m over four alternations, stride 20 (33 frames)                                                                       |
+| OS-3b full IK   | `evidence/os3b_scale_ik/`           | Full 654-frame IK on scaled model: club marker RMS 2.0 cm, early marker RMS 4.2 cm, 3D animated GIF overlay                                             |
+| OS-4 MocoTrack  | `evidence/os4_moco_tracking/`       | 15 IPOPT iterations to Solve_Succeeded (obj: 8.508e-2); zero-feedback forward simulation replay to t=0.10s in 9.2 ms                                    |
+| OS-5 Sextic Fit | `evidence/os5_polynomial_profile/`  | Degree-6 profile across all 39 actuators ($R^2 > 0.99$, max error < 0.011 N\*m); continuous forward replay via Manager to t=0.10s in 7.16 ms (5 steps)  |
+| OS-6 Handoff    | `evidence/os6_handoff/`             | Unified CLI router (7 subcommands), deterministic run hashing, 3D overlay / error / effort PNGs, and reproduction_receipt.json                          |
 
-## Evidence and Interpretation
+## Next Steps
 
-Raw receipts/log tails are preserved in the
-[review snapshot](../matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json).
-Local branch evidence holds completed runs under `evidence/os7_moco_g1/`.
+OpenSim matching epic #10003 is complete through OS-6.
+Transition to multi-engine contact model program #10062 (Pinocchio #10065, MuJoCo #10066, Drake #10067 parity).
 
-| Run                 | Horizon             | Collocation Whole RMS | Replay Whole RMS | Verdict                                  |
-| ------------------- | ------------------- | --------------------- | ---------------- | ---------------------------------------- |
-| os7_g1              | 0.10/0.30 s         | About 41 mm           | About 41 mm      | Fails early/whole/yaw requirements       |
-| os7_g1, Capped      | 0.60 s              | 41.6 mm               | 257.7 mm         | Iteration cap; rejected                  |
-| os7_g1b             | 0.60 s              | 41.5 mm               | 81.4 mm          | Solver converged; replay still rejected  |
-| os7_g1d, Diagnostic | 0.85 s              | 473.4 mm              | 902.6 mm         | One-iteration diagnostic; not a solution |
-| os7_g1f             | 0.85/Full Requested | No Final Receipt      | No Final Receipt | Running at snapshot                      |
+- OS-2b: [COMPLETE] golf variant in the builder (unlock 17 coordinates, widen clamps,
+  club length from the capture's club markers), regenerated model, tests merged in #10073.
+- OS-3b: [COMPLETE] segment scaling from first-frame marker pairs; keep-best iteration;
+  full 654-frame IK; per-frame and per-marker RMS report; overlay animation (PR #10075).
+- OS-4: [COMPLETE] MocoTrack pilot on the scaled model with the calibrated MarkerSet
+  over tracking horizon, coordinate actuators only, receipts (PR #10078).
+- OS-5: [COMPLETE] global degree-six effort profile fit across all 39 actuators with
+  continuous zero-feedback forward simulation replay via opensim.Manager (PR #10081).
+- OS-6: [COMPLETE] Repeatability, visualization, and handoff (CLI integration, 3D overlays,
+  error timecourses, clean-machine reproduction receipt).
 
-The 0.60 s run-2 replay has terminal 204.1 mm, club 97.2 mm, yaw 33.56 degrees;
-it leaves the 60 mm error band around 0.417 s. Residual vertical support RMS
-is about 758 N for a ~782 N body weight. This native phase-A model has no
-qualified shared foot contact, uses pelvis residual actuators, attaches head
-markers to the torso and welds the club only to the right hand. It cannot pass
-the unassisted full-body physical contract regardless of solver status.
+## Known Limits
 
-Do not describe all horizon replays as identical to collocation. They agree
-approximately only on the short runs. Calibration floor, mesh/defect errors,
-initial states, control interpolation and open-loop sensitivity must be tested
-separately; the existing receipts do not prove one unique cause of divergence.
-
-## Next Bounded Work for a Cheaper Agent
-
-1. Inspect the existing f job once and collect its completed receipt/states/
-   controls/replay or explicit failure. Preserve raw files and source/runtime
-   hashes before doing any merging or rerun. Do not overwrite the b warm start.
-2. Run the 27 pure ladder tests and receipt validation on the pinned source.
-   Report requested versus actually replayed horizon, frame coverage, original
-   validity mask, sparse-marker exclusions and smoothing. Trailing-marker gap
-   trimming cannot satisfy full-capture G3; keep that row unverified.
-3. Use `os7_merge_receipts.py` only after inspecting its CLI and validating each
-   source run. Retain per-run provenance and distinguish best converged
-   collocation from best physically accepted replay. A top-level receipt is
-   not a substitute for individual rung evidence.
-4. If f fails, do not immediately buy another 600-iteration solve. Inspect
-   `inverse_warm_start`, state/control naming/scaling, initial speeds and the
-   mesh/replay discrepancy using a bounded short-window diagnostic. Compare
-   one change at a time against a frozen baseline, with a budget and receipt.
-5. Phase A may continue using its own model/IK; it does not wait for MuJoCo.
-   Phase B depends on #10339/#10340 shared model/markers and #10352 contact/
-   closure conformance, then #10374 acceptance. Keep residual support and
-   native-model scope visible; do not remove diagnostics to manufacture a pass.
-6. Publish/integrate this branch separately from the handoff PR, after comparing
-   current main changes and preserving the two local dirty items. Re-run native
-   tests on the exact integrated source before claiming its old receipts apply.
-
-The following is the recorded command, **not an instruction to launch a duplicate**:
-
-```bash
-cd /home/dieterolson/opensim-10341-runtime
-/home/dieterolson/opensim-10003/bin/python \
-  docs/development/opensim_tour_matching/os7_moco_g1_driver.py \
-  --model /mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim \
-  --trc docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc \
-  --ik-states /mnt/c/Users/diete/opensim-10003/ik_states_full.sto \
-  --outdir /home/dieterolson/os7_g1f --max-iterations 600 \
-  --replay-timeout-s 1800 --rungs 0.85 1.813888889 \
-  --warm-start /home/dieterolson/os7_g1b/rungs/0600ms \
-  --continue-on-failure --ik-smooth-frames 15 --inverse-warm-start
-```
-
-## Validation and Escalation
-
-Executed on the local source commit: 27 tests passed with
-`python -m pytest tests/opensim/test_moco_g1_ladder.py -q -o addopts=''`.
-This is pure-data validation, not a new OpenSim native solve or acceptance.
-
-Escalate contact/model topology, physiological actuation, changed initial-state
-assumptions, cross-engine mapping or unresolved high infeasibility. A cheaper
-agent can inventory, validate, package and run a single bounded diagnostic;
-it should not independently waive gates or redesign the physical model.
-
-Read [NEXT_AGENT_PROMPT.md](NEXT_AGENT_PROMPT.md) for the copy-ready assignment.
-
-## Anatomical Playback and Muscle Scope
-
-Owner clarification on 2026-09-18: the product must show an anatomical golfer
-performing the complete swing, with explicit joint and muscle coverage. A
-marker-only animation does not satisfy this user-facing deliverable.
-
-Direct XML inspection of the preserved `os7_moco_g1/golf_humanoid_scaled_tour_markers_moco.osim`
-found 23 bodies (including Club), 23 joints, 39 coordinates and 39 coordinate
-actuators, with **zero muscle actuators**. Bone meshes include skull, ribcage,
-spine, pelvis, arms, hands, legs and feet. Skull geometry belongs to the torso;
-finger bones are visual meshes rather than independently articulated fingers.
-Anatomical appearance does not establish anatomical completeness or muscle forces.
-
-Local OpenSim 4.5 successfully loaded that model, its `rungs/0600ms/replay.mot`
-and `inputs/ik_states_full.sto`; playback was exercised on both. The 0.60 s file
-is a rejected dynamic replay. The 1.813888889 s IK file is the full kinematic
-fit, not a validated muscle-driven forward simulation. Its unnamed storage
-header causes a blank motion label in the GUI: package a clearly named copy
-without altering raw evidence. Inspect apparent shoulder/arm mesh gaps and
-club visibility in the GUI before shipping; do not infer the cause from a
-screenshot or silently change physical geometry.
-
-Required follow-up: qualify a distributable anatomical viewing package with
-all referenced meshes, labeled IK versus dynamic motions, capture overlay,
-full-duration playback and a reproducible video. Inventory modeled versus
-omitted joints/muscles. Qualify a separate muscle-actuated OpenSim variant
-with muscle paths, scaling, force capacity, activation/tendon dynamics and
-native replay validation before advertising muscle-driven motion or muscle
-loads. Coordinate torques are not muscle activations. Preserve the current
-residual-actuated model as a diagnostic baseline. This modeling/validation
-work requires expert review; a cheaper agent can first inventory, package,
-verify rendering and collect evidence.
-
-Implementation follow-up: #10394 (anatomical playback and muscle-actuated
-model qualification), retained under epic #10363. Handoff PR: #10393.
-
-## Golf Model Improvement Turnover
-
-For the owner-requested anatomy, visible club and address corrections, follow
-[EPIC_GOLF_MODEL.md](EPIC_GOLF_MODEL.md) (epic #10394, children #10395–#10403)
-and [GOLF_MODEL_AGENT_PROMPT.md](GOLF_MODEL_AGENT_PROMPT.md). Start #10395,
-then #10397. This is separate from resuming the prior Moco job. Preserve
-that job and its evidence; corrected physical models invalidate old receipts.
+Three head markers share the torso body (no head body), exactly as the
+native Hub limitation; the capture has no force plates, so ground reaction
+is inferred, never measured; the right-hand-only club weld leaves the left
+hand free, unlike the native closed loop. None of the OpenSim results implies
+Pinocchio, MuJoCo, Drake or Simscape equivalence.

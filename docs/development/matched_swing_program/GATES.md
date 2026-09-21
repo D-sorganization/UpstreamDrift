@@ -1,17 +1,5 @@
 # Physical Acceptance Gates: The Matched Swing Gate Ladder (G1 / G2 / G3)
 
-## Continuation Review Warning
-
-The 2026-09-18 source review found that this document's `acceptance_contract.py`
-reference does not exist on reviewed main. The implemented evaluator is
-`src/shared/python/motion_matching/acceptance.py`: G1 is the 0–0.85 s dynamic
-horizon (whole 25 mm, early 12 mm, terminal 35 mm), not a 30 mm full-capture IK
-milestone. Historical tables below conflict with that evaluator and epic
-#10363 and MUST NOT be used to accept a run. MS-100 (#10374) must reconcile
-and version the complete contract; do not change thresholds during fitting.
-Read the [continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
-The review does not qualify the evaluator or replace missing physical evidence.
-
 **Author:** Dieter Olson (`agent:local`)  
 **Date:** 2026-09-17  
 **Issue:** MS-01 (#10322), MS-06 (#10327), Epic #10363  

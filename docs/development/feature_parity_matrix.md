@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 21 parity · 12 gap · 13 exempt (12 pending decision in #7460).
+**Summary:** 20 parity · 12 gap · 13 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -48,10 +48,9 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
 | `tools.golf_simulator`<br>Golf Simulator capability-aware controls and replay submission | ✅ parity | `src/tools/golf_simulator/gui.py` | `src/api/routes/golf_simulator.py` | `ui/src/pages/GolfSimulator.tsx` | — |
 | `tools.launch_monitor_analytics`<br>Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends | 🔴 gap | `src/tools/launch_monitor_analytics/gui.py` | `src/api/routes/launch_monitor_analytics.py` | — | #8364 |
-| `tools.matched_swing_browser`<br>Matched Swing Results Browser | 🔴 gap | `src/tools/matched_swing_browser/gui.py` | — | — | #10353 |
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
-| `tools.motion_matching`<br>Motion Matching tour-average capture matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
+| `tools.motion_matching`<br>Motion Matching tool (full-body forward-dynamics matching of the tour captures) | 🔴 gap | `src/tools/motion_matching/gui.py` | — | — | #10106 |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
 | `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | ✅ parity | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent. |
@@ -85,7 +84,6 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `golf_simulator` | `tools.golf_simulator` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
-| `matched_swing_browser` | `tools.matched_swing_browser` |
 | `matlab_suite` | `tools.matlab_suite` |
 | `model_explorer` | `tools.model_explorer` |
 | `motion_capture` | `mocap.breadth` |

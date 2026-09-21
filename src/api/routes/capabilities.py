@@ -30,7 +30,7 @@ explicit registration in ``server.py`` is needed.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -224,24 +224,3 @@ def install_capability(name: str, body: InstallRequest) -> InstallResponse:
         install=_install_to_dict(result),
         post_install_report=post_report,
     )
-
-
-@router.get("/engines/matrix")
-def get_engine_matrix() -> dict[str, Any]:
-    """Get the authoritative engine capability and qualification matrix."""
-    import json
-    from src.config.launcher_manifest_loader import CONFIG_DIR
-
-    matrix_path = CONFIG_DIR / "engine_capability_matrix.json"
-    if not matrix_path.is_file():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Engine capability matrix not found",
-        )
-    try:
-        return cast(dict[str, Any], json.loads(matrix_path.read_text(encoding="utf-8")))
-    except (json.JSONDecodeError, OSError) as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to read engine capability matrix: {exc}",
-        ) from exc

@@ -312,11 +312,6 @@ class CapabilityMigrationInventory:
             saved_layouts=data.get("saved_layouts"),
         )
 
-    @classmethod
-    def load(cls, path: Path | None = None) -> CapabilityMigrationInventory:
-        """Load the canonical capability migration baseline inventory from JSON."""
-        return load_migration_inventory(path)
-
 
 def load_migration_inventory(
     path: Path | None = None,

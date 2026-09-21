@@ -19,7 +19,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, TypeAlias
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -27,8 +27,8 @@ from scipy.optimize import lsq_linear
 
 from src.shared.python.contracts import require
 
-Array: TypeAlias = NDArray[np.float64]
-IntArray: TypeAlias = NDArray[np.int64]
+Array = NDArray[np.float64]
+IntArray = NDArray[np.integer[Any]]
 
 
 class AllocationObjective(str, Enum):
@@ -36,28 +36,7 @@ class AllocationObjective(str, Enum):
 
     MINIMUM_EFFORT = "minimum_effort"
     MINIMUM_TRAIL_ARM = "minimum_trail_arm"
-    HARD_ZERO_TRAIL = "hard_zero_trail"
     BALANCED_LOAD = "balanced_load"
-
-    @classmethod
-    def from_string(cls, val: str | AllocationObjective) -> AllocationObjective:
-        """Resolve string or enum with backwards compatibility for legacy names."""
-        if isinstance(val, cls):
-            return val
-        s = str(val).lower()
-        if s in (
-            "trail_zero",
-            "soft_trail_zero",
-            "minimum_trail",
-            "soft_trail_reduction",
-        ):
-            return cls.MINIMUM_TRAIL_ARM
-        if s in ("hard_zero_trail", "hard_trail_zero", "zero_trail"):
-            return cls.HARD_ZERO_TRAIL
-        for member in cls:
-            if member.value == s:
-                return member
-        raise ValueError(f"Unknown allocation objective: {val}")
 
 
 @dataclass(frozen=True)
@@ -72,7 +51,6 @@ class ContactForceAllocation:
     root_balance_residual: float
     success: bool
     objective: AllocationObjective
-    max_friction_ratio: float = 0.0
 
 
 class ContactForceAllocator:
@@ -140,12 +118,11 @@ class ContactForceAllocator:
         tau_rnea: Array,
         j_ground: Array,
         j_grip: Array,
-        objective: AllocationObjective | str = AllocationObjective.MINIMUM_EFFORT,
+        objective: AllocationObjective = AllocationObjective.MINIMUM_EFFORT,
         trail_arm_indices: Sequence[int] | IntArray | None = None,
         tau_bounds: tuple[Array, Array] | None = None,
     ) -> ContactForceAllocation:
         """Resolve torques and contact forces matching tau_rnea exactly."""
-        obj = AllocationObjective.from_string(objective)
         require(
             tau_rnea.shape == (self.nv,),
             "tau_rnea shape mismatch",
@@ -171,10 +148,12 @@ class ContactForceAllocator:
         # Objective diagonal weights W
         w_diag = np.ones(self.n_vars, dtype=float)
         # Actuator weights
-        trail_set: set[int] = (
-            set(trail_arm_indices) if trail_arm_indices is not None else set()
-        )
-        if obj == AllocationObjective.MINIMUM_TRAIL_ARM and len(trail_set) > 0:
+        if (
+            objective == AllocationObjective.MINIMUM_TRAIL_ARM
+            and trail_arm_indices is not None
+            and len(trail_arm_indices) > 0
+        ):
+            trail_set = set(trail_arm_indices)
             for i, idx in enumerate(self.actuated_indices):
                 if idx in trail_set:
                     w_diag[i] = 1000.0  # heavy penalty on trail arm
@@ -201,14 +180,6 @@ class ContactForceAllocator:
             lb[: self.n_actuated] = tau_bounds[0]
             ub[: self.n_actuated] = tau_bounds[1]
 
-        # In HARD_ZERO_TRAIL, force trail-arm joint efforts strictly to zero
-        if obj == AllocationObjective.HARD_ZERO_TRAIL and len(trail_set) > 0:
-            for i, idx in enumerate(self.actuated_indices):
-                if idx in trail_set:
-                    lb[i] = -1e-10
-                    ub[i] = 1e-10
-                    w_diag[i] = 1e8
-
         # Unilateral ground contact: f_{i, z} >= 0
         for s in range(self.n_contact_spheres):
             z_var_idx = self.n_actuated + s * 3 + 2
@@ -226,7 +197,7 @@ class ContactForceAllocator:
         res = lsq_linear(m_aug, b_aug, bounds=(lb, ub), lsmr_tol="auto", max_iter=200)
 
         x_sol = res.x
-        tau_sol = x_sol[: self.n_actuated].copy()
+        tau_sol = x_sol[: self.n_actuated]
         f_sol = x_sol[self.n_actuated : idx_grip]
         lambda_sol = x_sol[idx_grip:idx_root]
         root_sol = x_sol[idx_root:]
@@ -236,51 +207,18 @@ class ContactForceAllocator:
             tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
         )
         eq_res = float(np.max(np.abs(applied - tau_rnea)))
+
         root_res = float(np.max(np.abs(root_sol)))
 
         # Exact projection refinement: project any minute numerical residual onto actuated coordinates
-        # Do not project onto locked coordinates in HARD_ZERO_TRAIL
         residual_err = tau_rnea - applied
-        tau_sol_refined = tau_sol.copy()
-        if obj == AllocationObjective.HARD_ZERO_TRAIL and len(trail_set) > 0:
-            for i, idx in enumerate(self.actuated_indices):
-                if idx not in trail_set:
-                    tau_sol_refined[i] += residual_err[idx]
-                else:
-                    tau_sol_refined[i] = 0.0
-        else:
-            tau_sol_refined += residual_err[self.actuated_indices]
-
-        # Guarantee tau_bounds are never broken by post-solve projection
-        if tau_bounds is not None:
-            tau_sol_refined = np.clip(tau_sol_refined, tau_bounds[0], tau_bounds[1])
-        tau_sol = tau_sol_refined
-
+        tau_sol = tau_sol + residual_err[self.actuated_indices]
         applied = self._compute_applied(
             tau_sol, j_ground, f_sol, j_grip, lambda_sol, root_sol
         )
         eq_res = float(np.max(np.abs(applied - tau_rnea)))
 
-        # Measure Coulomb friction cone ratio: ||f_xy|| / f_z
-        max_friction_ratio = 0.0
-        for s in range(self.n_contact_spheres):
-            fx = float(f_sol[s * 3])
-            fy = float(f_sol[s * 3 + 1])
-            fz = float(f_sol[s * 3 + 2])
-            f_tan = float(np.hypot(fx, fy))
-            if fz > 1e-4:
-                ratio = f_tan / fz
-                if ratio > max_friction_ratio:
-                    max_friction_ratio = ratio
-
-        bounds_satisfied = True
-        if tau_bounds is not None:
-            bounds_satisfied = bool(
-                np.all(tau_sol >= tau_bounds[0] - 1e-5)
-                and np.all(tau_sol <= tau_bounds[1] + 1e-5)
-            )
-
-        success = bool(res.success and eq_res < 1e-4 and bounds_satisfied)
+        success = bool(res.success and eq_res < 1e-4)
 
         return ContactForceAllocation(
             tau_actuated=tau_sol,
@@ -290,10 +228,5 @@ class ContactForceAllocator:
             equilibrium_residual=eq_res,
             root_balance_residual=root_res,
             success=success,
-            objective=obj,
-            max_friction_ratio=max_friction_ratio,
+            objective=objective,
         )
-
-    def is_friction_feasible(self, allocation: ContactForceAllocation) -> bool:
-        """Check whether resolved ground reaction forces obey Coulomb friction cone."""
-        return bool(allocation.max_friction_ratio <= self.mu_friction + 1e-3)

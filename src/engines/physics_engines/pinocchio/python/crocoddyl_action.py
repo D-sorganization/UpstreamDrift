@@ -38,9 +38,6 @@ from src.engines.physics_engines.pinocchio.python.crocoddyl_problem import (
     range_barrier,
 )
 from src.shared.python.contracts import require
-from src.shared.python.motion_matching.pelvis_yaw import (
-    compute_pelvis_yaw_residual_and_derivative,
-)
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -78,16 +75,12 @@ class _NodeCost:
         weights: FitWeights,
         *,
         marker_weight: float,
-        wl_i: int = -1,
-        wr_i: int = -1,
     ) -> None:
         self.ctx = ctx
         self.target = target
         self.rows = np.flatnonzero(valid)
         self.marker_w = marker_weight * marker_weights[self.rows]
         self.weights = weights
-        self.wl_i = wl_i
-        self.wr_i = wr_i
 
     def value(self, q: Array, v: Array, u: Array | None) -> float:
         positions = self.ctx.markers(q)
@@ -99,11 +92,6 @@ class _NodeCost:
         cost += barrier + 0.5 * self.weights.velocity * float(v @ v)
         if u is not None and u.size:
             cost += 0.5 * self.weights.effort * float(u @ u)
-        if self.weights.pelvis_yaw > 0.0 and self.wl_i >= 0 and self.wr_i >= 0:
-            yaw_res, _, _ = compute_pelvis_yaw_residual_and_derivative(
-                positions, self.target, self.wl_i, self.wr_i, self.weights.pelvis_yaw
-            )
-            cost += 0.5 * float(np.dot(yaw_res, yaw_res))
         return cost
 
     def gradient_hessian(self, q: Array) -> tuple[Array, Array]:
@@ -118,20 +106,8 @@ class _NodeCost:
         grad = np.einsum("mij,mi->j", jac_rows, weighted) + barrier_grad
         hess = np.einsum(
             "mij,mik->jk", jac_rows * self.marker_w[:, None, None], jac_rows
-        ) + np.diag(barrier_hess)
-        if self.weights.pelvis_yaw > 0.0 and self.wl_i >= 0 and self.wr_i >= 0:
-            yaw_res, yaw_jac, _ = compute_pelvis_yaw_residual_and_derivative(
-                positions,
-                self.target,
-                self.wl_i,
-                self.wr_i,
-                self.weights.pelvis_yaw,
-                marker_jac_term=jac,
-            )
-            if yaw_jac is not None:
-                grad += yaw_jac.T @ yaw_res
-                hess += yaw_jac.T @ yaw_jac
-        return grad, hess
+        )
+        return grad, hess + np.diag(barrier_hess)
 
 
 def rk45_node_step(
@@ -188,7 +164,6 @@ def make_action_models(
     nu = int(ctx.actuated.sum())
     require(effort_bounds.shape == (nu,), "one effort bound per actuated coordinate")
     state = crocoddyl.StateVector(2 * ctx.n)
-    wl_i, wr_i = targets.waist_indices
 
     class ImplicitEulerAction(crocoddyl.ActionModelAbstract):  # type: ignore[misc]
         def __init__(self, node: int) -> None:
@@ -201,8 +176,6 @@ def make_action_models(
                 targets.weights,
                 weights,
                 marker_weight=weights.marker,
-                wl_i=wl_i,
-                wr_i=wr_i,
             )
             self.u_lb = -effort_bounds
             self.u_ub = effort_bounds
@@ -301,8 +274,6 @@ def make_action_models(
                 targets.weights,
                 weights,
                 marker_weight=weights.terminal_marker,
-                wl_i=wl_i,
-                wr_i=wr_i,
             )
 
         def calc(self, data: Any, x: Array, u: Array | None = None) -> None:

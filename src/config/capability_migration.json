@@ -1368,15 +1368,15 @@
     },
     "matched_swing_browser": {
       "id": "matched_swing_browser",
-      "name": "Matched Swing Results Browser",
-      "entity_kind": "tile",
+      "name": "Tools Package: matched_swing_browser",
+      "entity_kind": "library",
       "primary_workspace": "analysis",
-      "secondary_links": ["simulation", "capture"],
+      "secondary_links": ["viewer"],
       "provider_authority": "core",
-      "lifecycle": "active_feature",
+      "lifecycle": "intentionally_headless",
       "alias_target": null,
-      "evidence": "src/tools/matched_swing_browser/gui.py",
-      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+      "evidence": "src/tools/matched_swing_browser/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
     },
     "analysis.analysis_tools_api": {
       "id": "analysis.analysis_tools_api",
@@ -1868,18 +1868,6 @@
       "lifecycle": "exempt",
       "alias_target": null,
       "evidence": "src/tools/pose_studio/__main__.py",
-      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
-    },
-    "tools.matched_swing_browser": {
-      "id": "tools.matched_swing_browser",
-      "name": "Matched Swing Results Browser (browse and filter matched swing execution receipts)",
-      "entity_kind": "feature",
-      "primary_workspace": "analysis",
-      "secondary_links": ["simulation", "capture"],
-      "provider_authority": "core",
-      "lifecycle": "active_feature",
-      "alias_target": null,
-      "evidence": "src/tools/matched_swing_browser/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
     "tools.putting_green": {

@@ -76,14 +76,6 @@ class JourneyActions:
             dialog.exec()
             host.refresh_session()
             return
-        if action == "inspect_targets":
-            if host.refresh_session() is None:
-                host.journey.notice(
-                    "Load or record a capture session before inspecting targets."
-                )
-                return
-            host.journey.notice("Capture session prepared for Inspect Targets handoff.")
-            return
         if action == "import" and not host.capture.pending_import:
             host.capture.choose_import_files()
             if not host.capture.pending_import:

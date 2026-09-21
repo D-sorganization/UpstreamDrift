@@ -24,8 +24,6 @@ from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
-    execute_body_fit,
-    has_body_target,
     publish_leaderboard_row,
     register_provider,
     resolve_club_target,
@@ -86,10 +84,6 @@ class MujocoFitSwingProvider:
             TypeError: when ``opts.engine_options`` is supplied but is not
                 a :class:`MujocoFitOptions`.
         """
-        if has_body_target(target):
-            return execute_body_fit(
-                self.engine_name, target, opts, engine_version=self.engine_version()
-            )
         club = self._extract_club(target)
         native = self._build_native_options(opts)
         result = fit_swing_mujoco(club, native)
@@ -98,8 +92,8 @@ class MujocoFitSwingProvider:
         return result
 
     def supports_body_target(self) -> bool:
-        """MuJoCo supports full-body matching via the ground-support pipeline."""
-        return True
+        """MuJoCo's swing fitter consumes only the club trajectory."""
+        return False
 
     def supports_ball_target(self) -> bool:
         """MuJoCo's swing fitter does not consume ball targets."""

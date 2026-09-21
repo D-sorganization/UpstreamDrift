@@ -54,9 +54,6 @@ from src.engines.physics_engines.pinocchio.python.marker_kinematics import (
 from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
-from src.shared.python.motion_matching.pelvis_yaw import (
-    compute_pelvis_yaw_residual_and_derivative,
-)
 from src.shared.python.motion_matching.replay_metrics import compute_replay_five_metrics
 from src.shared.python.motion_matching.tour_capture_contract import (
     TourCapture,
@@ -761,8 +758,7 @@ def cost_breakdown(
 ) -> dict[str, float]:
     """Per-term cost of a trajectory, weighted like the Crocoddyl problem (dt on running nodes)."""
     n_nodes = q.shape[0]
-    marker = effort = velocity = barrier = pelvis_yaw = 0.0
-    wl_i, wr_i = targets.waist_indices
+    marker = effort = velocity = barrier = 0.0
     for k in range(n_nodes):
         positions = ctx.markers(q[k])
         rows = np.flatnonzero(targets.valid[k])
@@ -782,18 +778,12 @@ def cost_breakdown(
         velocity += scale * 0.5 * weights.velocity * float(v[k] @ v[k])
         if k < n_nodes - 1:
             effort += dt * 0.5 * weights.effort * float(us[k] @ us[k])
-        if weights.pelvis_yaw > 0.0 and wl_i >= 0 and wr_i >= 0:
-            yaw_res, _, _ = compute_pelvis_yaw_residual_and_derivative(
-                positions, targets.targets[k], wl_i, wr_i, weights.pelvis_yaw
-            )
-            pelvis_yaw += scale * 0.5 * float(np.dot(yaw_res, yaw_res))
     return {
         "marker": marker,
         "effort": effort,
         "velocity": velocity,
         "range_barrier": barrier,
-        "pelvis_yaw": pelvis_yaw,
-        "total": marker + effort + velocity + barrier + pelvis_yaw,
+        "total": marker + effort + velocity + barrier,
     }
 
 
@@ -857,9 +847,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--range-barrier-weight", type=float, default=FitWeights().range_barrier
     )
-    parser.add_argument(
-        "--pelvis-yaw-weight", type=float, default=FitWeights().pelvis_yaw
-    )
     parser.add_argument("--ik-iterations", type=int, default=15)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--quiet", action="store_true")
@@ -871,7 +858,6 @@ def main(argv: list[str] | None = None) -> int:
         effort=args.effort_weight,
         velocity=args.velocity_weight,
         range_barrier=args.range_barrier_weight,
-        pelvis_yaw=args.pelvis_yaw_weight,
     )
     inputs = load_inputs(
         args.document,

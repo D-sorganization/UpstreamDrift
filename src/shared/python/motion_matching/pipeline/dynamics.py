@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import math
-
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import logging
@@ -177,10 +175,7 @@ def shooting_fit(
         record, sim_q = replay(sim, lane, q_track)
         errors = marker_errors(kin, sim_q, lane.points)
         rms = float(np.sqrt(np.mean(errors[lane.valid] ** 2)))
-        diff = sim_q[:, :3] - q_ref[:, :3]
-        root_err = np.sqrt(
-            np.einsum("ij,ij->i", diff, diff)
-        )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+        root_err = np.linalg.norm(sim_q[:, :3] - q_ref[:, :3], axis=1)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
         history.append(
             {
@@ -311,9 +306,7 @@ def zmp_filter(
         passes.append(
             {
                 "pass": k + 1,
-                "com_shift_max_m": float(
-                    np.sqrt(np.einsum("ij,ij->i", shift, shift)).max()
-                ),  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+                "com_shift_max_m": float(np.linalg.norm(shift, axis=1).max()),
                 "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
                 "closure_error_max_m": float(max(f.closure_error_m for f in fits)),
                 **zmp_summary(zmp, lane.times),
@@ -420,14 +413,8 @@ def _build_reference_zmp_report(
             float(zmp["grf_over_weight"][:, 2].max()),
         ],
         "horizontal_grf_over_weight_max": float(
-            np.sqrt(
-                np.einsum(
-                    "ij,ij->i",
-                    zmp["grf_over_weight"][:, :2],
-                    zmp["grf_over_weight"][:, :2],
-                )
-            ).max()
-        ),  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+            np.linalg.norm(zmp["grf_over_weight"][:, :2], axis=1).max()
+        ),
     }
 
 
@@ -442,12 +429,8 @@ def _build_backswing_metrics(
     limit = min(361, frames)
     return {
         "root_error_max_m": float(
-            np.sqrt(
-                np.einsum(
-                    "ij,ij->i", diff := (sim_q[:limit, :3] - q_ref[:limit, :3]), diff
-                )
-            ).max()
-        ),  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+            np.linalg.norm(sim_q[:limit, :3] - q_ref[:limit, :3], axis=1).max()
+        ),
         "marker_rms_m": float(np.sqrt(np.mean(sim_errors[:limit][valid[:limit]] ** 2))),
         "weight_fraction_min": float(
             record.weight_fraction[record.time_s <= 1.0].min()
@@ -581,16 +564,11 @@ def build_dynamics_report(
         "range_of_motion_flags": rom_flags(sim_q, kin.coordinate_order),
         "root_error_timeline_m": {
             f"{t:.2f}": float(
-                math.sqrt(
-                    np.vdot(
-                        diff := (
-                            sim_q[int(round(t * RATE_HZ)), :3]
-                            - q_ref[int(round(t * RATE_HZ)), :3]
-                        ),
-                        diff,
-                    )
+                np.linalg.norm(
+                    sim_q[int(round(t * RATE_HZ)), :3]
+                    - q_ref[int(round(t * RATE_HZ)), :3]
                 )
-            )  # ⚡ Bolt: math.sqrt(np.vdot) avoids temporary allocations and is faster than np.linalg.norm for small 1D arrays
+            )
             for t in (0.0, 0.25, 0.5, 0.75, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75)
             if int(round(t * RATE_HZ)) < lane.frames
         },
