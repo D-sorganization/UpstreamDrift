@@ -57,5 +57,8 @@ python -m pytest tests/unit/neural_motion/test_artifact_audit.py -q -n 0 --no-co
 
 ## Next Action
 
-Dispatch [#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) (NM-01):
-freeze learning tasks, model roster and benefit experiment gates using this inventory.
+NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616))
+freezes learning tasks, model roster and benefit experiment gates using this
+inventory — see [learning_freeze.md](learning_freeze.md). After NM-01 merges,
+dispatch [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)
+(NM-02).

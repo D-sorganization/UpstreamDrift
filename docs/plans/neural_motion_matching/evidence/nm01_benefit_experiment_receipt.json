@@ -1,0 +1,130 @@
+{
+  "content_digest": "46a03f664616303b3f6d1ce21ce401817800929fa5fe78cf1f1188b1ab70fbf2",
+  "experiment": {
+    "baseline_methods": [
+      "cold_classical",
+      "retrieval_plus_solve",
+      "existing_networks_plus_solve",
+      "forward_surrogate_plus_polish",
+      "inverse_proposal_plus_polish"
+    ],
+    "benchmark_cases": [
+      {
+        "case_id": "bench.replay.continuous",
+        "kind": "replay",
+        "notes": "Independent continuous replay from one initial state",
+        "stratum": "native_replay"
+      },
+      {
+        "case_id": "bench.refinement.polish",
+        "kind": "refinement",
+        "notes": "Native physical refinement after neural proposal",
+        "stratum": "physical_polish"
+      },
+      {
+        "case_id": "bench.failure.feasibility",
+        "kind": "failure",
+        "notes": "Rejected attempts retained with reasons",
+        "stratum": "feasibility_reject"
+      },
+      {
+        "case_id": "bench.synthetic.stratum_min",
+        "kind": "synthetic_query",
+        "notes": ">=30 independent synthetic queries per declared stratum",
+        "stratum": "synthetic_held_out"
+      },
+      {
+        "case_id": "bench.workbook.TW_wiffle",
+        "kind": "workbook_target",
+        "notes": "External workbook target TW_wiffle",
+        "stratum": "workbook_external"
+      },
+      {
+        "case_id": "bench.workbook.TW_ProV1",
+        "kind": "workbook_target",
+        "notes": "External workbook target TW_ProV1",
+        "stratum": "workbook_external"
+      },
+      {
+        "case_id": "bench.workbook.GW_wiffle",
+        "kind": "workbook_target",
+        "notes": "External workbook target GW_wiffle",
+        "stratum": "workbook_external"
+      },
+      {
+        "case_id": "bench.workbook.GW_ProV11",
+        "kind": "workbook_target",
+        "notes": "External workbook target GW_ProV11",
+        "stratum": "workbook_external"
+      },
+      {
+        "case_id": "bench.c3d.club_only.control_a",
+        "kind": "c3d_target",
+        "notes": "C3D-derived club-only control",
+        "stratum": "c3d_external"
+      },
+      {
+        "case_id": "bench.c3d.club_only.control_b",
+        "kind": "c3d_target",
+        "notes": "C3D-derived club-only control",
+        "stratum": "c3d_external"
+      }
+    ],
+    "c3d_derived_tests": [
+      "c3d.club_only.control_a",
+      "c3d.club_only.control_b"
+    ],
+    "compute_caps": {
+      "max_cpu_core_hours": 48.0,
+      "max_gpu_hours": 8.0,
+      "max_storage_gib": 64.0,
+      "max_wall_time_hours": 24.0,
+      "probe_receipt_id": null,
+      "provisional": true,
+      "timing_probe_completed": false
+    },
+    "hardware_profile": "cpu_required; gpu_optional; report cold/warm CPU and available GPU median/p95 separately",
+    "latency_phases": [
+      "startup",
+      "preprocessing",
+      "candidate_generation",
+      "neural_inference",
+      "physical_refinement",
+      "rejected_attempts",
+      "independent_replay"
+    ],
+    "min_synthetic_queries_per_stratum": 30,
+    "nested_episode_stages": [
+      100,
+      500,
+      2000
+    ],
+    "promotion_gates": {
+      "accepted_quality_rate_must_not_degrade": true,
+      "min_median_speedup": 2.0,
+      "negative_result_blocks_product_promotion": true,
+      "negative_result_retains_research_checkpoint": true,
+      "p95_must_not_worsen": true
+    },
+    "related_contracts": [
+      "#10587",
+      "#10606",
+      "#10616"
+    ],
+    "statistical_limitations": "Tiny empirical set: four workbook trials and two C3D-derived club-only controls do not support population confidence intervals. Synthetic query episodes validate software/stratum contracts only and are not native physical evidence. Report uncertainty and limitations with every speed or quality claim.",
+    "training_seeds": [
+      0,
+      1,
+      2
+    ],
+    "workbook_trials": [
+      "TW_wiffle",
+      "TW_ProV1",
+      "GW_wiffle",
+      "GW_ProV11"
+    ]
+  },
+  "gate_digest": "c575fb4a4545e4a2e22f1f3f154a057fc60c6e6f05a32ed8f73e7b3ee6551c54",
+  "schema": "neural-benefit-experiment/1.0.0",
+  "split_digest": "f63e79f8eb17a518e31e8f89445af487325760c8aa80e3c3251b78311fe6dfe6"
+}
