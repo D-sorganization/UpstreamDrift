@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "deliverable": "OS-4",
+  "title": "OpenSim Constraint-Aware Dynamic Marker Tracking Pilot",
+  "timestamp_utc": "2026-09-13T23:00:57.060646+00:00",
+  "git_commit": "7fdf41b32162e9c25064af6e8657d2b7fc6351b9",
+  "inputs": {
+    "model_path": "/mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim",
+    "model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
+    "source_trc_path": "/home/dieterolson/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc",
+    "source_trc_sha256": "95e1714d6e044280650638feaac07894c49da4e2c300ef572de54fe13401f67b",
+    "ik_states_path": "/mnt/c/Users/diete/opensim-10003/ik_states_full.sto",
+    "ik_states_sha256": "325796072973aad8b007c5f975253eaf62057b91924cada85e2dae381cd1c2cc"
+  },
+  "configuration": {
+    "horizon_s": 0.1,
+    "mesh_interval_s": 0.01,
+    "num_mesh_intervals": 10,
+    "max_iterations": 30,
+    "effort_weight": 0.0001,
+    "marker_weight": 10.0,
+    "retained_markers_count": 33,
+    "retained_markers": [
+      "WaistLeft",
+      "WaistRight",
+      "WaistLBack",
+      "WaistRBack",
+      "BackTop",
+      "BackLeft",
+      "BackRight",
+      "HeadTop",
+      "HeadFront",
+      "HeadSide",
+      "LShoulderTop",
+      "LShoulderBack",
+      "LElbowOut",
+      "LUArmHigh",
+      "LWristTop",
+      "RShoulderBack",
+      "RElbowOut",
+      "RUArmHigh",
+      "RWristTop",
+      "LKneeOut",
+      "LToeIn",
+      "LToeOut",
+      "LAnkleOut",
+      "RKneeOut",
+      "RToeIn",
+      "RToeOut",
+      "RAnkleOut",
+      "Marker_2:2:1",
+      "Marker_2:2:2",
+      "Marker_2:2:3",
+      "Marker_3:3:1",
+      "Marker_3:3:2",
+      "Marker_3:3:3"
+    ]
+  },
+  "solution": {
+    "success": true,
+    "status": "Solve_Succeeded",
+    "objective_value": 0.08508366460877662,
+    "objective_terms": {
+      "effort": 1.5571569138273756e-9,
+      "marker_tracking": 0.0850836630516197
+    },
+    "num_iterations": 15,
+    "solve_duration_s": 28.134284257888794,
+    "total_elapsed_s": 44.38591408729553,
+    "replay": {
+      "replay_success": true,
+      "final_time": 0.1
+    }
+  },
+  "artifacts": {
+    "sanitized_trc_sha256": "6a1ac188ecbf1867a808709335a1ed25ef763d9958211b9e68dacf4f6e058255",
+    "tracked_states_sha256": "81e7d18fc77882d02d189fea6de9a931164925680502c05fceb7dd885bd69908",
+    "tracked_controls_sha256": "dab10f6acdf76cf83549955fdf16df8dfac3a249aebe4452e0e715ddb8f01080"
+  }
+}

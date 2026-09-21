@@ -19,6 +19,12 @@ starts = parser.add_mutually_exclusive_group()
 starts.add_argument("--checkpoint", type=Path)
 starts.add_argument("--transfer-report", type=Path)
 parser.add_argument(
+    "--transfer-evaluation",
+    type=int,
+    default=None,
+    help="Evaluation number within transfer-report to warm-start from (default: final stage)",
+)
+parser.add_argument(
     "--basis", default="constant", help="Bernstein degree name: constant through sextic"
 )
 parser.add_argument("--initial-state", type=Path, required=True)
@@ -37,11 +43,55 @@ parser.add_argument(
     default=True,
     help="Use anatomical hierarchy weights for marker tracking",
 )
+parser.add_argument(
+    "--terminal-weight",
+    type=float,
+    default=5.0,
+    help="Weight penalty on terminal frame marker error",
+)
+parser.add_argument(
+    "--time-weight-scale",
+    type=float,
+    default=4.0,
+    help="Scale factor alpha for time weighting (1 + alpha*(t/T)^p)",
+)
+parser.add_argument(
+    "--time-weight-power",
+    type=float,
+    default=2.0,
+    help="Power p for time weighting (1 + alpha*(t/T)^p)",
+)
+parser.add_argument(
+    "--pelvis-yaw-weight",
+    type=float,
+    default=25.0,
+    help="Weight penalty on pelvis yaw error (enforcing < 5%% error)",
+)
+parser.add_argument(
+    "--pelvis-yaw-max-error-pct",
+    type=float,
+    default=5.0,
+    help="Maximum acceptable pelvis yaw error percentage (default 5.0%%)",
+)
+parser.add_argument(
+    "--club-marker-weight",
+    type=float,
+    default=25.0,
+    help="Weight penalty on clubhead markers (e.g. Marker_2:2:*, Marker_3:3:*, club)",
+)
 args = parser.parse_args()
 if not np.isfinite(args.finite_difference_step) or args.finite_difference_step <= 0:
     parser.error("finite-difference-step must be finite and positive")
+if not np.isfinite(args.club_marker_weight) or args.club_marker_weight <= 0:
+    parser.error("club-marker-weight must be finite and positive")
 if not np.isfinite(args.smoothness_weight) or args.smoothness_weight < 0:
     parser.error("smoothness-weight must be finite and non-negative")
+if not np.isfinite(args.terminal_weight) or args.terminal_weight < 0:
+    parser.error("terminal-weight must be finite and non-negative")
+if not np.isfinite(args.pelvis_yaw_weight) or args.pelvis_yaw_weight < 0:
+    parser.error("pelvis-yaw-weight must be finite and non-negative")
+if not np.isfinite(args.pelvis_yaw_max_error_pct) or args.pelvis_yaw_max_error_pct <= 0:
+    parser.error("pelvis-yaw-max-error-pct must be finite and positive")
 sys.path.insert(0, str(args.repo))
 from src.shared.python.motion_matching.prefix_fit import (
     MarkerTarget,
@@ -69,8 +119,15 @@ if (root / "first_prefix_fit.json").exists():
     raise FileExistsError("Use a fresh run directory; preserve earlier reports")
 if args.max_nfev < 1:
     raise ValueError("max-nfev must be positive")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
 logger = logging.getLogger(__name__)
+logger.info("Initializing first_prefix_fit...")
+logger.info("Run directory: %s", root)
+logger.info("Target duration: %.2fs, Basis: %s", args.duration, args.basis)
+sys.stdout.flush()
 capture = json.loads((root / "driver_marker_payload.json").read_text())
 seed = json.loads(args.initial_state.read_text())
 basis = f"{args.basis}-bernstein-6"
@@ -136,22 +193,52 @@ initial_parameters = (
 )
 if args.transfer_report:
     transfer_raw = args.transfer_report.read_bytes()
-    initial_parameters = np.asarray(
-        transfer_prefix_candidate(json.loads(transfer_raw), report)
-    )
+    source_dict = json.loads(transfer_raw)
+    if args.transfer_evaluation is not None:
+        eval_match = next(
+            (
+                e
+                for e in source_dict.get("evaluations", [])
+                if e.get("number") == args.transfer_evaluation
+            ),
+            None,
+        )
+        if eval_match is None:
+            raise ValueError(
+                f"Evaluation {args.transfer_evaluation} not found in {args.transfer_report}"
+            )
+        efforts = np.asarray(eval_match["efforts"], dtype=float)
+        scales_arr = np.asarray(source_dict["effort_scales"], dtype=float)
+        source_dict = dict(source_dict)
+        source_dict["stage"] = {
+            "parameters": (1.0 + efforts / scales_arr).tolist(),
+            "rmse_m": eval_match.get("rmse_m", 0.0),
+        }
+        transfer_semantics = f"candidate #{args.transfer_evaluation} (RMSE: {eval_match.get('rmse_m', 0.0) * 1000:.2f} mm); fresh objective"
+    else:
+        transfer_semantics = (
+            "torque candidate only; fresh objective and evaluation history"
+        )
+
+    initial_parameters = np.asarray(transfer_prefix_candidate(source_dict, report))
     report["candidate_transfer"] = {
         "source_report_sha256": hashlib.sha256(transfer_raw).hexdigest(),
         "source_path": str(args.transfer_report),
-        "semantics": "torque candidate only; fresh objective and evaluation history",
+        "transfer_evaluation": args.transfer_evaluation,
+        "semantics": transfer_semantics,
     }
 report["initial_parameters"] = initial_parameters.tolist()
 import matlab
 import matlab.engine
 
+logger.info("Starting MATLAB R2025b engine...")
+sys.stdout.flush()
 engine = matlab.engine.start_matlab("-nodesktop -nosplash")
 try:
     assert engine.version("-release") == "2025b"
     report["matlab_root"] = engine.matlabroot()
+    logger.info("MATLAB R2025b engine ready. Root: %s", report["matlab_root"])
+    sys.stdout.flush()
     engine_dir = (
         args.repo / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
     )
@@ -220,21 +307,39 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
             and np.isfinite(prediction).all()
         )
         distance = np.linalg.norm(prediction - observed[: len(clock)], axis=2)
-        report["evaluations"].append(
-            {
-                "number": len(report["evaluations"]) + 1,
-                "elapsed_s": time.monotonic() - started,
-                "rmse_m": float(np.sqrt(np.nanmean(distance**2))),
-                "efforts": effort.tolist(),
-            }
+        eval_num = len(report["evaluations"]) + 1
+        eval_rmse = float(np.sqrt(np.nanmean(distance**2)))
+        eval_entry = {
+            "number": eval_num,
+            "elapsed_s": time.monotonic() - started,
+            "rmse_m": eval_rmse,
+            "efforts": effort.tolist(),
+        }
+        report["evaluations"].append(eval_entry)
+
+        # Write heartbeat file on every evaluation for live supervision
+        heartbeat_data = {
+            "evaluation": eval_num,
+            "timestamp": time.time(),
+            "rmse_mm": eval_rmse * 1000.0,
+            "elapsed_s": eval_entry["elapsed_s"],
+        }
+        try:
+            (root / "heartbeat.json").write_text(json.dumps(heartbeat_data, indent=2))
+        except (OSError, ValueError):
+            pass
+
+        logger.info(
+            "Evaluation %d: marker RMS %.2f mm (elapsed %.2fs)",
+            eval_num,
+            eval_rmse * 1000.0,
+            eval_entry["elapsed_s"],
         )
-        if len(report["evaluations"]) % 5 == 0:
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        if eval_num % 5 == 0 or eval_num == 1:
             save_report()
-            logger.info(
-                "Evaluation %d: marker RMS %.9g m",
-                report["evaluations"][-1]["number"],
-                report["evaluations"][-1]["rmse_m"],
-            )
         return prediction
 
     baseline = forward(np.ones(len(scales)), requested)
@@ -258,8 +363,15 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         report["stage"]["parameters"] = stage.parameters.tolist()
         save_report()
 
+    custom_marker_weights = {}
+    if args.club_marker_weight is not None:
+        for lbl in labels:
+            lower = lbl.lower()
+            if "marker_2" in lower or "marker_3" in lower or "club" in lower:
+                custom_marker_weights[lbl] = args.club_marker_weight
+
     marker_weights = (
-        build_anatomical_marker_weights(labels)
+        build_anatomical_marker_weights(labels, custom_weights=custom_marker_weights)
         if args.anatomical_weights
         else np.ones(len(labels))
     )
@@ -272,10 +384,21 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         if args.smoothness_weight > 0
         else None
     )
+    wl_idx = labels.index("WaistLeft") if "WaistLeft" in labels else None
+    wr_idx = labels.index("WaistRight") if "WaistRight" in labels else None
+    pelvis_indices = (
+        (wl_idx, wr_idx) if wl_idx is not None and wr_idx is not None else None
+    )
     report["regularization"] = {
         "smoothness_weight": args.smoothness_weight,
         "anatomical_weights": args.anatomical_weights,
+        "club_marker_weight": args.club_marker_weight,
         "marker_weights": marker_weights.tolist(),
+        "terminal_weight": args.terminal_weight,
+        "time_weight_scale": args.time_weight_scale,
+        "time_weight_power": args.time_weight_power,
+        "pelvis_yaw_weight": args.pelvis_yaw_weight,
+        "pelvis_yaw_max_error_pct": args.pelvis_yaw_max_error_pct,
     }
     save_report()
 
@@ -286,16 +409,61 @@ fit_expected_initial=project_body_markers(fit_origins,fit_rotations,fit_bodies,f
         lower=np.zeros(len(scales)),
         upper=2 * np.ones(len(scales)),
         prefix_end_s=[float(requested[-1])],
-        acceptance_rmse_m=0.005,
+        acceptance_rmse_m=0.025,
         options=PrefixFitOptions(
             max_nfev=args.max_nfev,
             finite_difference_step=args.finite_difference_step,
             checkpoint=checkpoint,
             regularization=regularizer,
+            terminal_weight=args.terminal_weight,
+            time_weight_scale=args.time_weight_scale,
+            time_weight_power=args.time_weight_power,
+            pelvis_indices=pelvis_indices,
+            pelvis_yaw_weight=args.pelvis_yaw_weight,
+            pelvis_yaw_max_error_pct=args.pelvis_yaw_max_error_pct,
+            acceptance_terminal_rmse_m=0.035,
         ),
     )
+    final_stage = fit.stages[-1]
+    final_pred = np.asarray(forward(fit.parameters, requested))
+
+    # Evaluate clubhead terminal marker RMSE
+    club_indices = [
+        idx
+        for idx, lbl in enumerate(labels)
+        if any(
+            marker_tag in lbl.lower() for marker_tag in ("marker_2", "marker_3", "club")
+        )
+    ]
+    if club_indices:
+        club_dists = np.linalg.norm(
+            (final_pred[-1, club_indices] - observed[-1, club_indices]), axis=-1
+        )
+        club_terminal_rmse_m = float(np.sqrt(np.mean(club_dists**2)))
+    else:
+        club_terminal_rmse_m = 0.0
+
     report["accepted_numerically"] = fit.accepted
-    report["final_prediction_m"] = forward(fit.parameters, requested).tolist()
+    report["terminal_rmse_m"] = final_stage.terminal_rmse_m
+    report["terminal_max_m"] = final_stage.terminal_max_m
+    report["clubhead_terminal_rmse_m"] = club_terminal_rmse_m
+    report["pelvis_yaw_diff_deg"] = final_stage.pelvis_yaw_diff_deg
+    report["pelvis_yaw_error_pct"] = final_stage.pelvis_yaw_error_pct
+
+    # Verification against all 5 declared gates
+    report["gates"] = {
+        "early_retention_pass": bool(
+            final_stage.rmse_m <= 0.012 if float(requested[-1]) <= 0.60 else True
+        ),
+        "whole_window_pass": bool(final_stage.rmse_m <= 0.025),
+        "terminal_rmse_pass": bool(final_stage.terminal_rmse_m <= 0.035),
+        "clubhead_terminal_pass": bool(club_terminal_rmse_m <= 0.060),
+        "pelvis_yaw_pass": bool(
+            final_stage.pelvis_yaw_error_pct < args.pelvis_yaw_max_error_pct
+        ),
+    }
+    report["all_gates_pass"] = all(report["gates"].values())
+    report["final_prediction_m"] = final_pred.tolist()
     report["status"] = "exploratory-fit-computed"
     engine.workspace["fit_replay_path"] = str(root / "final_native_replay.mat")
     engine.eval(

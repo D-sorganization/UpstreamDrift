@@ -1,96 +1,111 @@
 """MyoSuite motion-matching provider.
 
-First-pass implementation satisfying the canonical discovery interface.
-The actual optimizer over muscle activations is deferred to a Phase 2
-surrogate model. See AUDIT.md.
+Fail-closed implementation satisfying the canonical discovery interface (MS-50, #10343).
+Muscle activation optimization is deferred to Phase 2 surrogate modeling.
+Never returns fabricated muscle activations or placeholder tensors. See AUDIT.md.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Final
 
+import numpy as np
+
+from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.club_ball_target import ClubBallTarget
 from src.shared.python.motion_matching.club_target import ClubTarget
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.motion_matching.provenance import engine_package_version
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
+    has_body_target,
     register_provider,
 )
 
 if TYPE_CHECKING:
-    from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+    pass
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["MyoSuiteFitSwingProvider"]
+__all__ = ["MyoSuiteFitSwingProvider", "UnsupportedTargetError"]
+
+ENGINE_NAME: Final[str] = "myosuite"
+UNSUPPORTED_REASON: Final[str] = (
+    "MyoSuite muscle activation optimization is unsupported: "
+    "direct polynomial torque matching is not compatible with muscle actuation, "
+    "and Phase 2 inverse surrogate is not yet trained or integrated (see AUDIT.md)."
+)
+
+
+class UnsupportedTargetError(ValueError):
+    """Raised when an unsupported target type is passed to the provider."""
 
 
 class MyoSuiteFitSwingProvider:
-    engine_name: str = "myosuite"
+    engine_name: str = ENGINE_NAME
 
+    @precondition(
+        lambda self, target, opts=None: target is not None, "target must not be None"
+    )
+    @postcondition(
+        lambda r: (
+            r.solver_status == "unsupported" and "muscle_activations" not in r.meta
+        ),
+        "fail-closed: never return fake muscle activations",
+    )
     def fit_swing(
         self,
         target: MultiSourceTarget | ClubTarget | ClubBallTarget,
-        opts: FitOptions,
+        opts: FitOptions | None = None,
     ) -> CanonicalFitResult:
-        """MyoSuite Phase 2: Inverse Surrogate Rollout.
+        """Fail closed for MyoSuite swing fitting (MS-50).
 
-        1. Delegates to Pinocchio (or MuJoCo) for the base kinematic solve.
-        2. Feeds the resulting kinematics through the trained MyoSuite
-           Inverse Surrogate Model to recover muscle activations.
+        MyoSuite control inputs are 290 muscle activations, not joint torques.
+        Until a validated inverse surrogate model is trained (Phase 2),
+        returns a CanonicalFitResult with status 'unsupported' and never
+        synthesizes fake zero-tensor activations.
         """
-        import torch
-        from src.shared.python.motion_matching.provider import get_provider
-        from .inverse_surrogate import MyoSuiteInverseSurrogate, InverseSurrogateConfig
+        if has_body_target(target):
+            raise UnsupportedTargetError(
+                f"{self.engine_name} does not support body targets."
+            )
 
-        # 1. Base Kinematic Solve
-        try:
-            base_provider = get_provider("pinocchio")
-        except KeyError:
-            base_provider = get_provider("mujoco")
-
-        base_result = base_provider.fit_swing(target, opts)  # type: ignore[arg-type]
-
-        # 2. Inverse Surrogate Model (Mock generation of kinematics for now)
-        # In a full rollout, we would evaluate `base_result.theta_optimal`
-        # through the engine to get true joint_q and joint_v over time.
-        n_joints = 22  # Standard full body model
-        n_muscles = 290  # MyoSuite standard musculature
-        seq_len = 300
-
-        cfg = InverseSurrogateConfig(
-            n_joints=n_joints, n_muscles=n_muscles, seq_len=seq_len
+        logger.info(
+            "MyoSuite fit_swing called: failing closed (%s)", UNSUPPORTED_REASON
+        )
+        now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        target_hash = getattr(target, "target_hash", "") or getattr(
+            getattr(target, "source", None), "sha256", ""
         )
 
-        model = MyoSuiteInverseSurrogate(cfg)
-        model.eval()
-
-        # Placeholder tensors (B=1, T=300, J=22)
-        joint_q = torch.zeros((1, seq_len, n_joints))
-        joint_v = torch.zeros((1, seq_len, n_joints))
-
-        with torch.no_grad():
-            muscle_activations = (
-                model(joint_q, joint_v).squeeze(0).numpy()
-            )  # (300, 290)
-
-        # 3. Attach muscle activations to the FitResult
-        meta = dict(base_result.meta) if base_result.meta else {}
-        meta["muscle_activations"] = muscle_activations
-        meta["inverse_surrogate_applied"] = True
-
-        from dataclasses import replace
-
-        return replace(
-            base_result,
-            method=f"{base_result.method}+myosuite_inverse_surrogate",
-            meta=meta,
+        return CanonicalFitResult(
+            theta_optimal=np.empty((0,), dtype=np.float64),
+            final_cost=float("inf"),
+            final_rmse_m=float("inf"),
+            solver_status="unsupported",
+            iterations=0,
+            n_evaluations=0,
+            wall_clock_s=0.0,
+            message=UNSUPPORTED_REASON,
+            history=(),
+            method="unsupported",
+            git_commit="",
+            engine_version=self.engine_version(),
+            target_hash=str(target_hash),
+            timestamp_utc=now_iso,
+            meta={
+                "status": "unsupported",
+                "reason": UNSUPPORTED_REASON,
+                "inverse_surrogate_applied": False,
+            },
         )
 
     def supports_body_target(self) -> bool:
-        """MyoSuite models have full musculature and can target body markers."""
-        return True
+        """Return False until MS-53 (body-target marker IK + muscle inversion)."""
+        return False
 
     def supports_ball_target(self) -> bool:
         """Ball impact constraints not yet implemented for MyoSuite."""
@@ -101,11 +116,8 @@ class MyoSuiteFitSwingProvider:
             import myosuite
         except ImportError:
             return "unknown"
-        from src.shared.python.motion_matching.provenance import (
-            engine_package_version,
-        )
 
         return engine_package_version(myosuite, "myosuite")
 
 
-register_provider(MyoSuiteFitSwingProvider())
+register_provider(MyoSuiteFitSwingProvider())  # type: ignore[arg-type]

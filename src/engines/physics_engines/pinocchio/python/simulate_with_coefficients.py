@@ -1,7 +1,8 @@
 """Compatibility facade and parity driver for the canonical Pinocchio forward simulator.
 
-Matches ``CROSS_ENGINE_GOLF_EQUIVALENCE_SPEC.md`` (§3, §4.2, §5) and
-``PINOCCHIO_PARITY_SPEC.md`` (§2).
+Matches ``CROSS_ENGINE_GOLF_EQUIVALENCE_SPEC.md`` (§3, §4.2, §5),
+``PINOCCHIO_PARITY_SPEC.md`` (§2), and issue #9967 numerical qualification
+(qualified solver convergence parity within 60.5 micrometers vs Simscape R2025b).
 
 Public API:
     SimOptions -- forward-sim options.

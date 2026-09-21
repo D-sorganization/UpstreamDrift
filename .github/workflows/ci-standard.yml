@@ -708,6 +708,31 @@ jobs:
             semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
             exit 0
           else
+            diff_base="HEAD~1"
+            if ! git rev-parse --verify --quiet "${diff_base}^{commit}" >/dev/null; then
+              diff_base=""
+            fi
+            if [ -n "$diff_base" ]; then
+              mapfile -d '' semgrep_targets < <(
+                git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- \
+                  'src/**/*.py' \
+                  'scripts/**/*.py' \
+                  'tests/**/*.py' \
+                  'ui/**/*.js' \
+                  'ui/**/*.jsx' \
+                  'ui/**/*.ts' \
+                  'ui/**/*.tsx' \
+                  'src/**/*.json' \
+                  'src/**/*.xml' \
+                  'scripts/**/*.sh'
+              )
+              if [ "${#semgrep_targets[@]}" -eq 0 ]; then
+                echo "No changed source/application files supported by Semgrep; skipping SAST delta scan."
+                exit 0
+              fi
+              semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
+              exit 0
+            fi
             semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error
             exit 0
           fi
@@ -1921,7 +1946,12 @@ jobs:
             --cov-config=pyproject.toml
             --cov-fail-under=75
           )
-          dependency_light_targets=()
+          dependency_light_targets=(
+            tests/unit/shared_python
+            tests/unit/sidekick
+            tests/unit/robotics
+            tests/unit/scripts/test_check_mypy_exclusion_budget.py
+          )
 
           # Route `git diff` output through a file instead of a process
           # substitution. `mapfile -t x < <(git diff ...)` discards git's exit
@@ -1954,14 +1984,18 @@ jobs:
               echo "NOTE: merge-base unavailable; using direct diff against origin/${{ github.base_ref }}"
             fi
             diff_base="${merge_base:-origin/${{ github.base_ref }}}"
-          elif [ "${{ github.event_name }}" = "push" ] \
-            && [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
-            # Trunk pushes always run the full lane, unscoped. Path-scoping is
-            # a pull-request latency optimisation; on the default branch it is
-            # a correctness hole, because a commit that happens to touch no
-            # Python then carries a green badge for a suite it never ran.
-            echo "::notice::Push to the default branch - running the full core lane, unscoped (#8771)."
+          elif [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
+            # Trunk pushes and scheduled runs on default branch always run the full lane, unscoped (#8771).
+            echo "::notice::Default branch run - running the full core lane, unscoped (#8771)."
             diff_base=""
+            dependency_light_targets=(
+              tests/unit/shared_python
+              tests/unit/sidekick
+              tests/unit/robotics
+              tests/unit/scripts/test_check_mypy_exclusion_budget.py
+            )
+            coverage_args=(--no-cov)
+            coverage_report_args=()
           elif [ "${{ github.event_name }}" = "push" ] \
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
@@ -2179,6 +2213,8 @@ jobs:
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
             --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
+            --ignore=tests/docker \
+            --ignore=tests/examples \
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             "${coverage_args[@]}" \
             "${coverage_report_args[@]}" \
@@ -2603,6 +2639,7 @@ jobs:
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Fetch pinned Tools packages
+        id: tools
         uses: ./.github/actions/fetch-pinned-tools
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -2613,9 +2650,15 @@ jobs:
           cache-dependency-path: vendor/ud-tools/src/rate_of_closure/web/package-lock.json
       - name: Build Impact Explorer bundle
         working-directory: vendor/ud-tools/src/rate_of_closure/web
+        env:
+          # Tools' release contract stamps this revision into index.html, the
+          # runtime descriptor and the SHA-256 asset manifest, so the served
+          # artifact provably comes from the pinned source (#9550 item 4).
+          ROC_RELEASE_REVISION: ${{ steps.tools.outputs.gitlink-sha }}
         run: |
           npm ci
           npm run build -- --base=/impact-explorer-app/
+          node release/generateReleaseArtifacts.mjs
       - name: Verify bundle is built under the mandated base path
         shell: bash
         run: |
@@ -2624,6 +2667,31 @@ jobs:
           grep -q '/impact-explorer-app/' \
             vendor/ud-tools/src/rate_of_closure/web/dist/index.html
           echo "Impact Explorer bundle present and base-pathed to /impact-explorer-app/"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Install served-bundle verifier dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check \
+            fastapi==0.136.3 httpx==0.28.1
+      # Serve the built bundle through the /impact-explorer-app mount contract
+      # and check what a client receives: real JavaScript whose digests match
+      # the provider manifest, a descriptor stamped with the pinned gitlink,
+      # and 404 (not the index fallback) for a missing artifact. HTTP 200 on
+      # index.html alone is not install evidence (#9550 item 4).
+      - name: Verify served bundle matches pinned Tools release artifacts
+        run: |
+          python3 scripts/ci/verify_impact_explorer_bundle.py \
+            --dist vendor/ud-tools/src/rate_of_closure/web/dist \
+            --expected-revision "${{ steps.tools.outputs.gitlink-sha }}" \
+            --receipt "$RUNNER_TEMP/impact-explorer-bundle-receipt.json"
+      - name: Upload served-bundle receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: impact-explorer-bundle-receipt-${{ github.sha }}
+          path: ${{ runner.temp }}/impact-explorer-bundle-receipt.json
+          if-no-files-found: error
+          retention-days: 30
 
   frontend-tests:
     needs: [pick-runner, changed-paths]

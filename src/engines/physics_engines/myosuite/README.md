@@ -259,17 +259,17 @@ MyoSuite models **require MuJoCo** and are not compatible with Drake or Pinocchi
 - Use MuJoCo for muscle-level biomechanics
 - Use Drake/Pinocchio for rigid-body dynamics only
 
-### Why no fit_swing?
+### Motion Matching and Fit_Swing Status (MS-50)
 
-MyoSuite does **not** implement the `fit_swing` motion-matching interface. This is a deliberate design decision based on the fundamental differences between muscle-driven and joint-space control:
+MyoSuite registers `MyoSuiteFitSwingProvider` in the canonical provider registry for cross-engine discovery, but **fails closed**: `fit_swing` returns a `CanonicalFitResult` with `solver_status="unsupported"`. The launcher tile status is marked `experimental`.
 
 **Technical Reasons:**
 
-1. **Control Paradigm**: MyoSuite uses muscle activations as inputs, not joint positions/velocities. The fit_swing interface assumes direct joint-space control.
+1. **Control Paradigm**: MyoSuite uses muscle activations as inputs ($\in [0, 1]$), not joint torques or polynomial coefficients. Standard motion matching optimizes 7 polynomial torque coefficients per joint, which does not directly drive muscle recruitment.
 
-2. **Optimization Problem**: Motion matching in joint space optimizes joint trajectories directly. In MyoSuite, the optimization must solve for muscle activations that produce desired motions—a fundamentally different and more complex problem.
+2. **Optimization Dimensionality**: Solving for 290 time-varying muscle activations via finite-difference numerical optimization is computationally intractable without a trained differentiable neural surrogate or muscle-inversion pipeline (deferred to Phase 2; see `python/motion_matching/AUDIT.md`).
 
-3. **Physiological Constraints**: Muscle force generation depends on force-length-velocity relationships, activation dynamics, and recruitment patterns that don't map cleanly to joint-space tracking objectives.
+3. **No Fabricated Data**: The provider strictly fails closed and never returns placeholder tensors or fabricated muscle activations.
 
 **Recommended Workflow:**
 

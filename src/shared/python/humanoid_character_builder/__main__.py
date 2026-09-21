@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from src.shared.python.humanoid_character_builder.core.builder import CharacterBuilder
+from src.shared.python.humanoid_character_builder.interfaces.api import CharacterBuilder
 from src.shared.python.humanoid_character_builder.presets.loader import load_body_preset
 
 

@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.help_menu import build_help_menu
 from src.shared.python.golf_viz import (
     circle_fan_vertices,
     rect_vertices,
@@ -111,97 +112,92 @@ class EnvironmentRenderer(QWidget):
         # Ground plane (Green)
         # Using a mesh for better coloring
         if isinstance(self._environment, DrivingRange):
-            length = self._environment.length
-            width = self._environment.width
-
-            # Simple green rectangle for the range
-            vertexes = np.array(
-                [
-                    [-10, -width / 2, 0],
-                    [length, -width / 2, 0],
-                    [-10, width / 2, 0],
-                    [-10, width / 2, 0],
-                    [length, -width / 2, 0],
-                    [length, width / 2, 0],
-                ]
-            )
-            colors = np.ones((6, 4))
-            colors[:, 0] = 0.1  # R
-            colors[:, 1] = 0.6  # G
-            colors[:, 2] = 0.2  # B
-            colors[:, 3] = 1.0  # A
-
-            mesh = gl.GLMeshItem(
-                vertexes=vertexes, vertexColors=colors, smooth=False, drawEdges=False
-            )
-            self._gl_view.addItem(mesh)
-
-            # Draw yardage markers
-            for d in self._environment.markers:
-                # Convert yards to meters for positioning if we assume meters
-                d_m = d * 0.9144
-                marker = gl.GLLinePlotItem(
-                    pos=np.array([[d_m, -width / 2, 0.1], [d_m, width / 2, 0.1]]),
-                    color=(1.0, 1.0, 1.0, 0.8),
-                    width=2,
-                    antialias=True,
-                )
-                self._gl_view.addItem(marker)
-
-                # We could add text labels if pyqtgraph supported 3D text easily,
-                # but lines serve as visual markers.
-
+            self._render_driving_range(self._environment)
         elif isinstance(self._environment, CourseHole):
-            hole = self._environment
+            self._render_course_hole(self._environment)
 
-            # Tee box
-            tee_mesh = gl.GLMeshItem(
-                vertexes=self._create_rect(
-                    hole.tee_position[0] - 2, hole.tee_position[1] - 2, 4, 4
-                ),
-                color=(0.3, 0.8, 0.3, 1.0),
-                smooth=False,
-            )
-            self._gl_view.addItem(tee_mesh)
+    def _render_driving_range(self, env: DrivingRange) -> None:
+        if self._gl_view is None:
+            return
+        length = env.length
+        width = env.width
+        vertexes = np.array(
+            [
+                [-10, -width / 2, 0],
+                [length, -width / 2, 0],
+                [-10, width / 2, 0],
+                [-10, width / 2, 0],
+                [length, -width / 2, 0],
+                [length, width / 2, 0],
+            ]
+        )
+        colors = np.ones((6, 4))
+        colors[:, 0] = 0.1
+        colors[:, 1] = 0.6
+        colors[:, 2] = 0.2
+        colors[:, 3] = 1.0
+        mesh = gl.GLMeshItem(
+            vertexes=vertexes, vertexColors=colors, smooth=False, drawEdges=False
+        )
+        self._gl_view.addItem(mesh)
 
-            # Fairway
-            import math
+        for d in env.markers:
+            d_m = d * 0.9144
+            marker = gl.GLLinePlotItem(
+                pos=np.array([[d_m, -width / 2, 0.1], [d_m, width / 2, 0.1]]),
+                color=(1.0, 1.0, 1.0, 0.8),
+                width=2,
+                antialias=True,
+            )
+            self._gl_view.addItem(marker)
 
-            dist = math.hypot(
-                hole.pin_position[0] - hole.tee_position[0],
-                hole.pin_position[1] - hole.tee_position[1],
-                hole.pin_position[2] - hole.tee_position[2],
-            )
-            fw_mesh = gl.GLMeshItem(
-                vertexes=self._create_rect(
-                    0, -hole.fairway_width / 2, float(dist), hole.fairway_width
-                ),
-                color=(0.2, 0.7, 0.2, 1.0),
-                smooth=False,
-            )
-            self._gl_view.addItem(fw_mesh)
+    def _render_course_hole(self, hole: CourseHole) -> None:
+        if self._gl_view is None:
+            return
+        tee_mesh = gl.GLMeshItem(
+            vertexes=self._create_rect(
+                hole.tee_position[0] - 2, hole.tee_position[1] - 2, 4, 4
+            ),
+            color=(0.3, 0.8, 0.3, 1.0),
+            smooth=False,
+        )
+        self._gl_view.addItem(tee_mesh)
 
-            # Green
-            green_pts = self._create_circle(
-                hole.pin_position[0], hole.pin_position[1], hole.green_radius
-            )
-            green_mesh = gl.GLMeshItem(
-                vertexes=green_pts, color=(0.1, 0.9, 0.1, 1.0), smooth=False
-            )
-            self._gl_view.addItem(green_mesh)
+        import math
 
-            # Pin
-            pin = gl.GLLinePlotItem(
-                pos=np.array(
-                    [
-                        hole.pin_position,
-                        [hole.pin_position[0], hole.pin_position[1], 2.0],
-                    ]
-                ),
-                color=(1.0, 1.0, 1.0, 1.0),
-                width=3,
-            )
-            self._gl_view.addItem(pin)
+        dist = math.hypot(
+            hole.pin_position[0] - hole.tee_position[0],
+            hole.pin_position[1] - hole.tee_position[1],
+            hole.pin_position[2] - hole.tee_position[2],
+        )
+        fw_mesh = gl.GLMeshItem(
+            vertexes=self._create_rect(
+                0, -hole.fairway_width / 2, float(dist), hole.fairway_width
+            ),
+            color=(0.2, 0.7, 0.2, 1.0),
+            smooth=False,
+        )
+        self._gl_view.addItem(fw_mesh)
+
+        green_pts = self._create_circle(
+            hole.pin_position[0], hole.pin_position[1], hole.green_radius
+        )
+        green_mesh = gl.GLMeshItem(
+            vertexes=green_pts, color=(0.1, 0.9, 0.1, 1.0), smooth=False
+        )
+        self._gl_view.addItem(green_mesh)
+
+        pin = gl.GLLinePlotItem(
+            pos=np.array(
+                [
+                    hole.pin_position,
+                    [hole.pin_position[0], hole.pin_position[1], 2.0],
+                ]
+            ),
+            color=(1.0, 1.0, 1.0, 1.0),
+            width=3,
+        )
+        self._gl_view.addItem(pin)
 
     def _create_rect(self, x: float, y: float, w: float, h: float) -> np.ndarray:
         # Delegates to the shared golf_viz geometry builder (DRY).
@@ -271,6 +267,17 @@ class EnvironmentWindow(QMainWindow):
         z = 25 * t - 0.5 * 9.80665 * t**2
         mask = z >= 0
         self.renderer.add_trajectory(np.column_stack((x[mask], y[mask], z[mask])))
+
+        menubar = self.menuBar()
+        assert menubar is not None
+        build_help_menu(
+            menubar,
+            self,
+            doc_target=(
+                "Environment & Architecture Map",
+                "docs/architecture/PROJECT_MAP.md",
+            ),
+        )
 
     def _on_env_changed(self, text: str) -> None:
         self.renderer.clear_trajectories()
