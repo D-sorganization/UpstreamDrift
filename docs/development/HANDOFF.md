@@ -28,6 +28,19 @@ receipts using the lane handoff before considering another fit.
 The historical Simscape continuation below remains useful for that lane;
 it is not the latest Pinocchio/OpenSim state.
 
+## PF-02 Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (#10432)
+
+- Branch: `feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration`, PR #10497 (auto-merge armed), lease `antigravity-ud-10432`, DL-#10432.
+- Changes:
+  - `marker_kinematics.py`: Added `SolveDiagnostics` with projected gradient norm, cost decrease, active bounds count, and convergence metrics. Added `solve_frame_multi_start` with unconstrained geometric floor estimation. Added `refine_overlapping_window` with triangular window blending and temporal continuity.
+  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility (q_dot ≈ v and v_dot ≈ a), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
+  - Addressed backlog items:
+    - MM-2 (#10104): Physiological wrist range of motion compliance producing 0 violations.
+    - MM-5 (#10107): Left elbow pit up-and-inward address verification (`dot(pit, up) > 0.3` and `dot(pit, inward) > 0.3`).
+    - Separate calibration provenance for driver and 7-iron enforced fail-closed.
+- Reproduction: `pytest tests/unit/motion_matching/test_pinocchio_kinematics_calibration.py`.
+- Next: Land PR #10497 with auto-merge enabled, proceed to PF-03.
+
 ## MS-107 Qualify Crocoddyl Full-Body Fit & Analytic Pelvis Yaw (#10381)
 
 - Branch: `feat/10381-crocoddyl-pelvis-yaw-g1`, PR #10599 (auto-merge armed), DL-#10381.
