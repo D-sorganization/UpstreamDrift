@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1372,
+    "ud-only": 1378,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 188,
+      "ud-only": 189,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -757,6 +757,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 2,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "tour_baselines": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 5,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12381,7 +12388,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 31884,
+      "ud_bytes": 45330,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14134,6 +14141,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 1730,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/tour_baselines.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 1575,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -32945,6 +32964,66 @@
       "spelling_only": false
     },
     {
+      "path": "tour_baselines/__init__.py",
+      "classification": "ud-only",
+      "package": "tour_baselines",
+      "subpackage": "",
+      "ud_bytes": 1635,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "tour_baselines/coverage.py",
+      "classification": "ud-only",
+      "package": "tour_baselines",
+      "subpackage": "",
+      "ud_bytes": 13247,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "tour_baselines/models.py",
+      "classification": "ud-only",
+      "package": "tour_baselines",
+      "subpackage": "",
+      "ud_bytes": 3521,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "tour_baselines/reconciliation.py",
+      "classification": "ud-only",
+      "package": "tour_baselines",
+      "subpackage": "",
+      "ud_bytes": 7919,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "tour_baselines/registry.py",
+      "classification": "ud-only",
+      "package": "tour_baselines",
+      "subpackage": "",
+      "ud_bytes": 24832,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "training/__init__.py",
       "classification": "ud-only",
       "package": "training",
@@ -35572,9 +35651,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-09-20",
+        "commit": "3ef6f91c33057fb1e6dd4817996e82bc834d8299"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -36054,8 +36133,8 @@
       "path": "model_generation/_lazy_map.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-19",
+        "commit": "6d2aa3ee36698e97f680f6ed5969c3c783fa4f33"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36222,9 +36301,9 @@
     {
       "path": "model_generation/builders/urdf_writer.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "8075878f55f6c9ee2fdd7327bd30affba0482bd8"
+        "author": "Dieter Olson",
+        "date": "2026-09-19",
+        "commit": "6d2aa3ee36698e97f680f6ed5969c3c783fa4f33"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36509,8 +36588,8 @@
       "path": "model_generation/export/__init__.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-19",
+        "commit": "6d2aa3ee36698e97f680f6ed5969c3c783fa4f33"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
