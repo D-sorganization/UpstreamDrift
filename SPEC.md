@@ -1,3 +1,17 @@
+## Native Saved Simulation Library and Counterfactual Analysis (CF-01 Through CF-08, #10285, #10286)
+
+Delivers native replay, cataloging, and spatial reaction wrench counterfactual analysis:
+- **Native Replay & Simulation Store (`src/shared/python/simulation_store`)**:
+  - Implements `SimulationDataStore` replay cataloging, manifest discovery, and cryptographic hash verification.
+  - Guarantees byte-deterministic reproduction of verified Simscape run 102 and offline simulation bundles without re-running physics engines.
+- **Tour Matching Viewer Native Upgrades (`src/tools/tour_matching_viewer`)**:
+  - Upgrades `TourMatchingViewerWidget` with shared catalog selection, source-time monotonic clock speed controls, multi-angle camera presets, and persistent scrubbing.
+  - Adds 3D cylinder rendering, marker error vectors, explicit unavailable torque badge, and interactive inspection dialogs for qualification artifacts.
+  - Adds 'Reaction Wrenches (CF)' 3D overlay with Varignon moment transport and provenance table export.
+- **Spatial Wrench Contracts & Constrained Counterfactuals (`src/shared/python/motion_matching/counterfactual.py`)**:
+  - Implements `SpatialWrench` with Varignon moment transport ($M_B = M_A + (r_A - r_B) \times F$) and action-reaction negation.
+  - Implements `NativeConstrainedCounterfactualProvider` with Pinocchio closure reaction wrenches, forward branched ZTCF dynamics rollouts, and authoritative 5-engine capability matrix.
+
 ## Generic Capture Contract and 44-DOF Identifiability (MS-90, #10361)
 
 Defines generic C3D capture ingestion contracts and mathematical identifiability probes for the 44-DOF kinematic model:
