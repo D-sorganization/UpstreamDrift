@@ -16,6 +16,29 @@ Defines generic C3D capture ingestion contracts and mathematical identifiability
 - **Verification Suite**:
   - Unit tests in `tests/unit/motion_matching/test_capture_contract_generic.py` and `test_identifiability.py` covering backwards compatibility, CMU locomotion rejection, unit scaling/label mapping, gap fraction tolerances, synthetic planted null directions, and 44-DOF uncalibrated/calibrated/regularized rank.
 
+## Fit and Independently Replay Driven Double Pendulum (TB-04, #10589)
+
+Fits bounded continuous joint torques to observed swing data and verifies forward dynamics replay under the Tour Baselines program:
+- **Bidirectional Mapping and Dynamics Parity (`src/engines/physics_engines/pendulum/python/motion_matching/adapters.py`)**:
+  - Implements bidirectional parameter conversion between `DoublePendulumParameters` and Tools `physics.py` (`double_pendulum_equations`).
+  - Verifies exact analytical acceleration parity ($< 10^{-14}\text{ rad/s}^2$) between both dynamics formulations across broad state and forcing grids.
+  - Exposes `check_dynamics_parity` as a reusable qualification gate.
+- **Bounded Smooth Torque Optimization (`src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py`)**:
+  - Formulates joint torque profiles $\tau(t)$ using degree-6 Bernstein polynomials strictly bounded within physical limits $[\tau_{\min}, \tau_{\max}]$ via control point bounds.
+  - Incorporates combined objective function penalizing Euclidean marker tracking error, torque rate curvature, effort regularizer, and terminal impact velocity.
+  - Implements `fit_bounded_double_pendulum` using bounded non-linear least squares (`scipy.optimize.least_squares`) with analytical and numerical fallback modes.
+- **Motion Matching Provider Integration (`src/engines/physics_engines/pendulum/python/motion_matching/provider.py`)**:
+  - Implements `PendulumFitSwingProvider` adhering to `MotionMatchingProvider` interface.
+  - Computes deterministic cryptographic 16-character SHA-256 target hashes.
+  - Supports non-uniform observation timestamps and maps initial observations directly to initial generalized state $(q_0, v_0)$, eliminating frame-0 off-by-one regressions.
+- **Authoritative Qualification & Independent Replay (`src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`)**:
+  - Replays fitted continuous torques in an independent forward simulation using 4x tighter integration substeps (`Radau` / `RK45`).
+  - Verifies replay numerical agreement ($< 10^{-4}\text{ m}$) against optimized rollout trajectory.
+  - Generates authoritative baseline packages (`tb04_driver_baseline_package.npz`, `tb04_iron_baseline_package.npz`) and qualification receipts (`tb04_driver_qualification_receipt.json`, `tb04_iron_qualification_receipt.json`).
+  - Updates tour baseline coverage matrix (`docs/plans/tour_baselines/coverage_matrix.md`).
+- **Verification Suite (`tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py`)**:
+  - Unit test suite validating dynamics parity, target hash determinism, initial state tracking, non-uniform time integration, bounded torque guarantee, tighter-step replay, unfeasible error reporting, and driver/iron qualification receipts.
+
 ## Tour Baselines Swing Planes, Fixed Geometry, and Feasible Initial States (TB-03, #10588)
 
 Calibrates swing planes, fixed geometry, and feasible initial states under the Tour Baselines program:
