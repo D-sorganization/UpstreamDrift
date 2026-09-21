@@ -255,9 +255,8 @@ def check_triple_dynamics_parity(
                         eom_tools = tools_equations_of_motion(
                             state_vec, 0.0, p_tools, _torque_fn
                         )
-                        diff_acc = float(
-                            np.max(np.abs(eom_tools[3:] - np.array(acc_a)))
-                        )
+                        eom_arr = np.asarray(eom_tools, dtype=np.float64)
+                        diff_acc = float(np.max(np.abs(eom_arr[3:] - np.array(acc_a))))
                         if diff_acc > max_acc_diff:
                             max_acc_diff = diff_acc
 
