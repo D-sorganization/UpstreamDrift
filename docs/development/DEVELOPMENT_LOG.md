@@ -31,6 +31,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** PR creation, auto-merge, complete lease on #10440 and report back.
 - **Evidence:** tests/unit/motion_matching/test_matching_strategy.py.
 
+### DL-#9162 · Local Branch Triage
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #9162 (rollout Repository_Management#1460; no-seed bootstrap #9161)
+- **Branch:** conductor/issue-9162
+- **Paths:** docs/development/branch_triage_9162.md
+- **Started:** 2026-09-15
+- **Last verified:** 2026-09-15 (SELF; 386 local heads classified from refs, reflogs, worktree HEADs, origin refs and SPEC rows without mutating git state)
+- **Summary:** Disposition ledger for every local branch in the primary checkout: 3 protected, 27 deferred to the worktree pass, 34 live (merged sweep then DL entry), 178 stale and 144 abandoned scratch branches (bundle snapshot then delete). The runbook in the ledger executes the deletions and the coordination notice for agent-owned branches.
+- **Next step:** Execute the runbook in docs/development/branch_triage_9162.md from the primary checkout and fill in its Outcome section.
+
 ### DL-#9410 · Adversarial Product Review Remediation Epic
 
 - **State:** in_progress
