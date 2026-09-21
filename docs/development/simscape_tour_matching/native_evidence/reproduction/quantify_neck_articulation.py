@@ -10,11 +10,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 from pathlib import Path
 import sys
 import tarfile
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--repo", type=Path, default=Path("."), help="Repository root path")
@@ -49,7 +52,7 @@ cap = json.loads(cap_raw)
 
 labels = cand["marker_labels"]
 orig_offsets = np.array(cand["marker_offsets_m"])
-idx = [cap["labels"].index(l) for l in labels]
+idx = [cap["labels"].index(lbl) for lbl in labels]
 points = np.array(cap["points_world_m"], dtype=float)[:, idx]
 valid = np.array(cap["valid"], dtype=bool)[:, idx]
 points[~valid] = np.nan
@@ -57,8 +60,8 @@ points[~valid] = np.nan
 back_labels = ["BackTop", "BackLeft", "BackRight"]
 head_labels = ["HeadTop", "HeadFront", "HeadSide"]
 
-back_idx = [labels.index(l) for l in back_labels]
-head_idx = [labels.index(l) for l in head_labels]
+back_idx = [labels.index(lbl) for lbl in back_labels]
+head_idx = [labels.index(lbl) for lbl in head_labels]
 
 back_offsets = orig_offsets[back_idx]
 head_offsets = orig_offsets[head_idx]
@@ -89,7 +92,7 @@ for f in range(frames):
     valid_frames.append(f)
 
 N = len(valid_frames)
-assert N == frames  # All 654 frames have valid head and back markers
+assert frames == N  # All 654 frames have valid head and back markers
 
 A = np.zeros((3 * N, 6))
 b = np.zeros(3 * N)
@@ -147,7 +150,7 @@ receipt = {
 
 args.output_receipt.parent.mkdir(parents=True, exist_ok=True)
 args.output_receipt.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
-print(f"Receipt written to {args.output_receipt}")
+logger.info("Receipt written to %s", args.output_receipt)
 
 # Generate separately versioned model proposal
 # Load base geometry spec
@@ -205,4 +208,4 @@ if comrod_body is not None:
 
 args.output_model.parent.mkdir(parents=True, exist_ok=True)
 args.output_model.write_text(json.dumps(v2_spec, indent=2), encoding="utf-8")
-print(f"Separately versioned model proposal written to {args.output_model}")
+logger.info("Separately versioned model proposal written to %s", args.output_model)

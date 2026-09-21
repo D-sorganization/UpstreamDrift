@@ -15,6 +15,21 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from .matching_strategy import (
+        ALL_ENGINES,
+        STRATEGY_SCHEMA_VERSION,
+        CandidateStrategyPackage,
+        ContactReactionHistory,
+        ControllerSpecification,
+        MatchingStrategyContract,
+        QualificationStage,
+        StageQualificationMatrix,
+        StageReport,
+        StageState,
+        StrategyComparisonService,
+        StrategyPreset,
+        create_sample_strategy_package,
+    )
     from .align_to_simulation_grid import (
         AlignedTrajectory,
         align_to_simulation_grid,
@@ -84,10 +99,23 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "ALL_ENGINES",
     "ALLOWED_SHEETS",
     "AlignOptions",
     "AlignedTrajectory",
     "BODY_TARGET_SCHEMA_VERSION",
+    "CandidateStrategyPackage",
+    "ContactReactionHistory",
+    "ControllerSpecification",
+    "create_sample_strategy_package",
+    "MatchingStrategyContract",
+    "QualificationStage",
+    "StageQualificationMatrix",
+    "StageReport",
+    "StageState",
+    "STRATEGY_SCHEMA_VERSION",
+    "StrategyComparisonService",
+    "StrategyPreset",
     "BallImpactState",
     "BodyEvent",
     "BodySegment",
@@ -140,6 +168,19 @@ __all__ = [
 ]
 
 _LAZY_EXPORTS = {
+    "ALL_ENGINES": ".matching_strategy",
+    "STRATEGY_SCHEMA_VERSION": ".matching_strategy",
+    "CandidateStrategyPackage": ".matching_strategy",
+    "ContactReactionHistory": ".matching_strategy",
+    "ControllerSpecification": ".matching_strategy",
+    "create_sample_strategy_package": ".matching_strategy",
+    "MatchingStrategyContract": ".matching_strategy",
+    "QualificationStage": ".matching_strategy",
+    "StageQualificationMatrix": ".matching_strategy",
+    "StageReport": ".matching_strategy",
+    "StageState": ".matching_strategy",
+    "StrategyComparisonService": ".matching_strategy",
+    "StrategyPreset": ".matching_strategy",
     "AlignedTrajectory": ".align_to_simulation_grid",
     "align_to_simulation_grid": ".align_to_simulation_grid",
     "detect_impact_index": ".align_to_simulation_grid",

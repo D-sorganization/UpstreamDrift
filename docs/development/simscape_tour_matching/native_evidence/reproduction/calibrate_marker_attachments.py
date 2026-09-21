@@ -11,12 +11,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 from pathlib import Path
 import sys
 import tarfile
 
 import numpy as np
 from numpy.typing import NDArray
+
+logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--repo", type=Path, default=Path("."), help="Repository root path")
@@ -88,7 +91,7 @@ orig_errors = rigid_attachment_residuals(orig_offsets, points, bodies)
 
 # Alternating calibration on training frames
 fitted_offsets = orig_offsets.copy()
-for iteration in range(10):
+for _iteration in range(10):
     new_offsets = fitted_offsets.copy()
     for b in np.unique(bodies):
         b_idx = np.flatnonzero(bodies == b)
@@ -199,13 +202,19 @@ receipt = {
 
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
-print(f"Calibration receipt successfully written to {args.output}")
-print(
-    f"  Training Aggregate RMS: {receipt['metrics_baseline']['training_aggregate_rms_mm']:.2f} mm -> {receipt['metrics_calibrated']['training_aggregate_rms_mm']:.2f} mm"
+logger.info("Calibration receipt successfully written to %s", args.output)
+logger.info(
+    "  Training Aggregate RMS: %.2f mm -> %.2f mm",
+    receipt["metrics_baseline"]["training_aggregate_rms_mm"],
+    receipt["metrics_calibrated"]["training_aggregate_rms_mm"],
 )
-print(
-    f"  Validation Aggregate RMS: {receipt['metrics_baseline']['validation_aggregate_rms_mm']:.2f} mm -> {receipt['metrics_calibrated']['validation_aggregate_rms_mm']:.2f} mm"
+logger.info(
+    "  Validation Aggregate RMS: %.2f mm -> %.2f mm",
+    receipt["metrics_baseline"]["validation_aggregate_rms_mm"],
+    receipt["metrics_calibrated"]["validation_aggregate_rms_mm"],
 )
-print(
-    f"  Hub Validation RMS: {receipt['metrics_baseline']['validation_body_rms_mm']['Hub']:.2f} mm -> {receipt['metrics_calibrated']['validation_body_rms_mm']['Hub']:.2f} mm"
+logger.info(
+    "  Hub Validation RMS: %.2f mm -> %.2f mm",
+    receipt["metrics_baseline"]["validation_body_rms_mm"]["Hub"],
+    receipt["metrics_calibrated"]["validation_body_rms_mm"]["Hub"],
 )

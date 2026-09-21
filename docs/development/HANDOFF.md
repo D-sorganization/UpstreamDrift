@@ -1,5 +1,82 @@
 # Current Matching Continuation Handoff
 
+## Tools MocapSession Consumer Slice (#9422)
+
+Working directory: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9422`.
+Branch: `conductor/issue-9422`. Commit: SELF. PR: #10466.
+Development-log entry: DL-#9422. Governing issue: #9422 (readiness P6, M-track
+consumer of Tools #4706); objective: route UpstreamDrift capture sessions
+through the one canonical Tools `MocapSession` contract instead of probing it
+as absent.
+
+Completed: `src/motion_capture/rig/tools_bridge.py` probes the pinned Tools
+family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`
+(another version is `incompatible`), and `export_session_manifest` /
+`export_to_bundle` build a `MocapSessionManifest` through the Tools builders
+and `dumps_canonical`. `capture` and `record` write `mocap_session.json` beside
+`session_manifest.json` and record the outcome under `tools_schema.export`;
+`record --consent-recorded` is the recorded-consent term the Tools policy
+requires for retained raw video, otherwise the export is `rejected` as data.
+Docs: `docs/motion_capture/capture_rig.md` (Tools Schema Bridge), SPEC row.
+
+Validation: `python3 tests/fixtures/mocap_session_export/run_checks.py` — 8
+passed (Tools family resolved first, like the capture-rig worker checks);
+`python3 -m pytest tests/motion_capture/rig/test_tools_session_export.py
+tests/motion_capture/rig/test_recorder_bridge_cli.py
+tests/motion_capture/rig/test_bundle_record.py
+tests/unit/repo_hygiene/test_vendored_tools_fallback.py` — 40 passed. Known,
+pre-existing on this workstation: `python3 -I` subprocess checks
+(`test_reference_calibration_worker.py` and the new integration test) fail
+with `No module named 'numpy'` because numpy lives in the user site; CI has
+it in the system site. Pre-existing and unrelated:
+`tests/architecture/test_markerless_mocap_authority.py::test_spec_and_handoff_point_to_the_current_program`
+fails on `AGENT_HANDOFF.md` length (993 > 150).
+
+Constraints: the root test process keeps `sidekick.lab.mocap` unresolvable
+by design (`src/__init__.py`, UD's own Sidekick cached first); the ready path
+is therefore checked in a Tools-first process, not by building a hybrid
+package. D-track (Tools #4707; D3 #4717 open) and prerequisites #8865/#8866/
+#8867 stay open — #9422 is not closed by this slice.
+
+Next steps: (1) open the PR for this branch; (2) route the C3D upload path
+(#8865) through the same pinned contract; (3) surface `tools_schema.export`
+in the capture-rig UI as a disabled-reason, not a hidden failure.
+
+## PF-04 Qualify Contact Modes and Native Pinocchio Force Feasibility (#10434)
+
+- Branch: `feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces`, PR #10499 (auto-merge armed), lease `antigravity-ud-10434`, DL-#10434.
+- Changes:
+  - `contact_mode_qualifier.py`: Infer heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis; support mode ambiguity metric; COP and 2D convex hull support polygon containment under arbitrary surface normal n_hat; slip speed thresholding and friction cone saturation ratio; constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation; separate linear force (N) and moment (N\*m) residual budgets; unphysical load rejection (> 5000 N, > 300 Nm); and mass/geometry/friction sensitivity reporting.
+- Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
+- Next: Land PR #10499 via CI and proceed to PF-05.
+
+## PF-03 Enforce Contact, Actuator and Root Constraints in Force Allocation (#10433)
+
+- Branch: `feat/issue-10433-pf03-contact-actuator-root-constraints`, PR #10498 (auto-merge armed), lease `antigravity-ud-10433`, DL-#10433.
+- Changes:
+  - `src/shared/python/motion_matching/contact_force_allocator.py`:
+    - Replaced penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+    - Added `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+    - Enforced 8-faceted polyhedral friction pyramid and non-negative normal force (f_n >= 0) along arbitrary surface normals.
+    - Enforced contact separation mask (f_s = 0 for separated contacts).
+    - Enforced strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+    - Isolated diagnostic root slack delta_tau_root so phantom root forces never produce false physical success.
+    - Added `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+  - `tests/unit/motion_matching/test_contact_force_allocator_pf03.py`: Comprehensive test suite for all 10 acceptance scenarios.
+- Validation: 12 unit tests pass 100% across PF-03 and legacy suites; ruff clean; black clean; mypy strict clean; bandit clean.
+- Next: Land PR #10498 via CI and proceed to PF-04.
+
+## PF-10 Connect Qualified Matching Strategies to Engine Feature Contracts (#10440)
+
+- Worktree: primary, branch `feat/issue-10440-pf10-matching-strategies-contracts`, lease `antigravity-ud-10440`, DL-#10440.
+- Changes:
+  - `matching_strategy.py`: Implemented versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`), stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`), strategy presets, controller specifications, and contact reaction history containers.
+  - `CandidateStrategyPackage`: Bound candidate trajectories with strategy metadata, accelerations, and contact reactions. Enforced fail-closed name-permuted coordinate remapping and lossless .npz serialization without pickle.
+  - `StrategyComparisonService`: Cross-strategy comparison service reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+  - Test suites: 8 unit tests in `test_matching_strategy.py` verifying stage ordering, acceptance invariants, contract serialization, .npz roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+- Reproduction: `pytest tests/unit/motion_matching/test_matching_strategy.py -v`.
+- Next: PR auto-merge, complete lease on #10440, claim next issue.
+
 ## Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) — 2026-09-11
 
 - Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8684.
@@ -58,6 +135,8 @@ exploratory simulator.
 
 Next: U1 (#9286) and U2 (#9542) first, per the matrix's dependency order; each
 landing PR records its merge SHA and proving test in its entry.
+
+> > > > > > > origin/main
 
 ---
 
