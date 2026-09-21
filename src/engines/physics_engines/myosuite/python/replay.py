@@ -392,6 +392,11 @@ class _ReceiptContext:
     elapsed_s: float
 
 
+def _nan_to_none(value: float) -> float | None:
+    """Convert NaN to None for JSON serialization with allow_nan=False."""
+    return None if not np.isfinite(value) else value
+
+
 def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
     scene_xml = ctx.scene.xml_path
     return {
@@ -418,8 +423,8 @@ def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
         },
         "parity": {
             "comparison": "native_vs_source_predicted_markers",
-            "marker_rms_m": ctx.marker_rms,
-            "marker_rms_raw_m": ctx.marker_rms_raw,
+            "marker_rms_m": _nan_to_none(ctx.marker_rms),
+            "marker_rms_raw_m": _nan_to_none(ctx.marker_rms_raw),
             "alignment": "static_site_calibration_then_pelvis_center",
             "site_calibration_m": ctx.site_calibration,
             "marker_rms_limit_m": MARKER_RMS_LIMIT_M,
