@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1381,
+    "ud-only": 1384,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 183,
+      "ud-only": 186,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12240,6 +12240,30 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/club_only/__init__.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 999,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_only/workbook_identity.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 17933,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/club_target.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -13152,11 +13176,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/loaders/event_labels.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "loaders",
+      "ud_bytes": 2575,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/loaders/excel.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "loaders",
-      "ud_bytes": 8732,
+      "ud_bytes": 7609,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -35700,9 +35736,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-05-26",
+        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -35791,9 +35827,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-29",
+        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36870,9 +36906,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-27",
+        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36883,9 +36919,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-06-09",
+        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -37325,9 +37361,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-07-26",
-        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
+        "author": "Dieter Olson",
+        "date": "2026-05-20",
+        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
       },
       "tools": {
         "author": "Dieter Olson",
