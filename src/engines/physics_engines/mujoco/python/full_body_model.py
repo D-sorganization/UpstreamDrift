@@ -189,7 +189,10 @@ class NativeMujocoFullBodyModel:
         bias, tau_contact, _ = self.generalized_forces(coordinates, rates)
 
         mass = np.zeros((model.nv, model.nv))
-        mj.mj_fullM(model, mass, data.qM)
+        if hasattr(data, "qM"):
+            mj.mj_fullM(model, mass, data.qM)
+        else:
+            mj.mj_fullM(model, data, mass)
 
         jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
         total_effort = effort + tau_contact - bias
@@ -209,3 +212,7 @@ class NativeMujocoFullBodyModel:
         if self._errors is None:
             raise ValueError("Evaluate acceleration before closure errors")
         return self._errors[0].copy(), self._errors[1].copy()
+
+    def evaluate_weld_closure(self) -> tuple[np.ndarray, np.ndarray]:
+        """Evaluate weld closure Jacobian and drift for dual-grip constraint."""
+        return _evaluate_weld_closure(self._mj, self.model, self.data, self._closure)

@@ -1,17 +1,31 @@
-"""Address setup fitting, static trial marker placement, and closure fitting."""
-
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+import json
+import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
 
+from src.shared.python.motion_matching.anthropometric_candidate import (
+    anthropometric_candidate,
+)
+from src.shared.python.motion_matching.full_body_spec import (
+    canonical_sha256,
+    validate_full_body_spec,
+)
+from src.shared.python.motion_matching.hip_calibration import (
+    apply_hip_calibration,
+    functional_hip_calibration,
+    hip_rotation_zero,
+)
 from src.shared.python.motion_matching.marker_calibration import (
     calibrate_marker_offsets,
     static_marker_offsets,
@@ -32,16 +46,25 @@ from src.shared.python.motion_matching.pipeline.constants import (
     ELBOW_PIT_WEIGHT,
     ELBOW_PIT_WEIGHTS_NEUTRAL,
     FORWARD_AXIS,
+    LEG_SEEDS,
     NEUTRAL_BOUNDS_DEG,
     NEUTRAL_LOCKS,
     PRIOR,
     RIGHT_AXIS,
+    SCALE_GRID,
     STATIC_FRAMES,
     TRAIL_WRIST_ADDRESS_DEG,
     UP_AXIS,
 )
-from src.shared.python.motion_matching.pipeline.lane import wrist_bounds
-from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from src.shared.python.motion_matching.pipeline.lane import (
+    add_toe_spheres,
+    wrist_bounds,
+)
+from src.shared.python.motion_matching.segment_scaling import scale_segments
+from src.shared.python.motion_matching.tour_capture_contract import (
+    MARKER_SEGMENTS,
+    TourCapture,
+)
 
 if TYPE_CHECKING:
     from src.shared.python.motion_matching.pipeline.lane import Lane
@@ -70,8 +93,10 @@ def scaled_offsets(
     return out
 
 
-def posture_summary(kin: FullBodyMarkerKinematics, q: np.ndarray) -> dict[str, Any]:
+def posture_summary(kin: Any, q: np.ndarray) -> dict[str, Any]:
     """Spine bend and clavicle-link angles of the model at one pose."""
+    if hasattr(kin, "posture_summary"):
+        return kin.posture_summary(q)
     adapter = kin.adapter
     m, d = adapter.model, adapter.data
     kin.marker_positions(q)
@@ -312,7 +337,14 @@ def calibrate_legs(
             )
             for label in lane.labels
         }
-        state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
+        if lane.plant is not None:
+            state["kin"] = lane.plant.create_ik(attachments)
+        else:
+            from src.engines.physics_engines.mujoco.python.full_body_ik import (
+                FullBodyMarkerKinematics,
+            )
+
+            state["kin"] = FullBodyMarkerKinematics(adapter, attachments)
         return lane.trajectory(state["kin"], q_start, frames=frames)[0]
 
     result = calibrate_marker_offsets(
@@ -333,3 +365,318 @@ def calibrate_legs(
         for label, (body, offset) in result.offsets.items()
     }
     return offsets, result
+
+
+def search_segment_scales(
+    lane: Lane,
+    hip_spec: Mapping[str, Any],
+    fixed: Mapping[str, tuple[str, Sequence[float]]],
+    offsets: Mapping[str, tuple[str, Sequence[float]]],
+    address_q: np.ndarray,
+    grid: Sequence[float] = SCALE_GRID,
+    log: logging.Logger | None = None,
+) -> tuple[dict[str, Any], float, float, list[dict[str, Any]]]:
+    """Grid search over femur and tibia scales minimizing pinned stance RMS.
+
+    Preconditions:
+    - ``grid`` must not be empty and must contain strictly positive scale factors.
+    - ``address_q`` must be a 1D array of generalized coordinates.
+
+    Postconditions:
+    - Returns best scaled specification, femur scale, tibia scale, and table.
+    """
+    if not grid:
+        raise ValueError("grid must not be empty")
+    for s in grid:
+        if s <= 0:
+            raise ValueError(f"grid scale values must be positive, got {s}")
+    if address_q.ndim != 1:
+        raise ValueError(f"address_q must be a 1D array, got shape {address_q.shape}")
+
+    scale_table: list[dict[str, Any]] = []
+    best = (float("inf"), 1.0, 1.0, dict(hip_spec))
+    for femur in grid:
+        for tibia in grid:
+            scales = {f"femur_{s}": femur for s in "rl"} | {
+                f"tibia_{s}": tibia for s in "rl"
+            }
+            doc = scale_segments(hip_spec, scales)
+            doc_bytes = json.dumps(doc, sort_keys=True).encode()
+            rms = lane.pinned_rms(
+                doc_bytes, {**fixed, **scaled_offsets(offsets, femur, tibia)}, address_q
+            )
+            scale_table.append({"femur": femur, "tibia": tibia, "pinned_rms_m": rms})
+            if log:
+                log.info(
+                    "scale femur %.2f tibia %.2f: pinned RMS %.1f mm",
+                    femur,
+                    tibia,
+                    rms * 1e3,
+                )
+            if rms < best[0]:
+                best = (rms, femur, tibia, doc)
+    _, femur_scale, tibia_scale, scaled_spec = best
+    return scaled_spec, femur_scale, tibia_scale, scale_table
+
+
+@dataclass(frozen=True)
+class HipCalibrationOptions:
+    """Options governing functional hip calibration and candidate preparation."""
+
+    skip_hip_calibration: bool = False
+    anthropometric: tuple[float, float] | None = None
+    recalibrate_upper: bool = False
+
+
+def prepare_hip_spec(
+    lane: Lane,
+    base_spec: Mapping[str, Any],
+    upper_base: Mapping[str, Any],
+    labels: tuple[str, ...],
+    upper: Mapping[str, tuple[str, Sequence[float]]],
+    alignment_old: Sequence[float] | None = None,
+    options: HipCalibrationOptions | None = None,
+) -> tuple[
+    dict[str, Any],
+    str,
+    dict[str, Any],
+    dict[str, tuple[str, Sequence[float]]],
+    dict[str, tuple[str, Sequence[float]]],
+]:
+    """Execute functional hip calibration and configure candidate spec.
+
+    Preconditions:
+    - ``base_spec`` must contain valid marker attachments.
+    - ``labels`` must match capture markers.
+
+    Returns:
+    - ``(hip_spec, qualification_note, hip_report, fixed, seeds_all)``
+    """
+    opts = options or HipCalibrationOptions()
+    waist_offsets = {
+        label: base_spec["marker_attachments"][label]["offset_m"]
+        for label in MARKER_SEGMENTS["pelvis"]
+    }
+    hip_cal = functional_hip_calibration(lane.points, lane.valid, labels, waist_offsets)
+    zero_twist = hip_rotation_zero(
+        lane.points, lane.valid, labels, waist_offsets, calibration=hip_cal
+    )
+    if opts.skip_hip_calibration:
+        hip_spec = add_toe_spheres(dict(base_spec))
+    else:
+        if alignment_old is None:
+            raise ValueError(
+                "alignment_old required when skip_hip_calibration is False"
+            )
+        hip_spec = add_toe_spheres(
+            apply_hip_calibration(
+                base_spec, hip_cal, alignment_old, zero_twist_deg=zero_twist
+            )
+        )
+    unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
+    if opts.anthropometric:
+        stature_m, mass_kg = opts.anthropometric
+        hip_spec = anthropometric_candidate(
+            hip_spec, stature_m=stature_m, mass_kg=mass_kg
+        )
+        qualification_note = (
+            f"anthropometric candidate ({stature_m:.3f} m, {mass_kg:.1f} kg), "
+            "unqualified: upper-body lengths, masses and inertias changed"
+        )
+    elif unqualified:
+        qualification_note = str(base_spec.get("upper_body_qualification", ""))
+    else:
+        validate_full_body_spec(hip_spec, upper_base)
+        qualification_note = "qualified upper body with functional hips"
+
+    if opts.recalibrate_upper:
+        seeds_all = {**upper, **LEG_SEEDS}
+        fixed = {}
+    else:
+        seeds_all = dict(LEG_SEEDS)
+        fixed = dict(upper)
+
+    hip_report = {
+        "spec_sha256": canonical_sha256(hip_spec),
+        "centre_r_hip_frame_m": hip_cal.centre_r,
+        "centre_l_hip_frame_m": hip_cal.centre_l,
+        "radius_r_m": hip_cal.radius_r_m,
+        "radius_l_m": hip_cal.radius_l_m,
+        "sphere_sd_r_m": hip_cal.residual_sd_r_m,
+        "sphere_sd_l_m": hip_cal.residual_sd_l_m,
+        "frames": hip_cal.frames,
+        "pelvis_axes_in_hip_frame": hip_cal.pelvis_axes,
+        "waist_fit_max_residual_m": hip_cal.waist_fit_max_residual_m,
+        "hip_zero_twist_deg": zero_twist.to_dict(),
+    }
+    return hip_spec, qualification_note, hip_report, fixed, seeds_all
+
+
+def calibrated_address_summary(
+    sim: Any,
+    kin: FullBodyMarkerKinematics,
+    address: Any,
+    lane: Lane,
+    labels: tuple[str, ...],
+    adapter: Any,
+) -> dict[str, Any]:
+    """Summary of the calibrated address pose, closure, CoM, and angles.
+
+    Preconditions:
+    - ``address.q`` must match the degrees of freedom of ``kin``.
+    """
+    if len(address.q) != len(kin.coordinate_order):
+        raise ValueError(
+            f"address.q size {len(address.q)} does not match {len(kin.coordinate_order)}"
+        )
+    from src.shared.python.motion_matching.pipeline.dynamics import (
+        com_report,
+        segment_rms,
+    )
+    from src.shared.python.motion_matching.pipeline.reference import marker_errors
+
+    return {
+        "marker_rms_m": address.marker_rms_m,
+        "segment_rms_m": segment_rms(
+            labels,
+            marker_errors(kin, address.q[None, :], lane.points[:1]),
+            lane.valid[:1],
+        ),
+        "closure_error_m": address.closure_error_m,
+        "lowest_sphere_height_m": address.lowest_sphere_height_m,
+        "support_offset_m": kin.support_offset(address.q, lane.ground),
+        "centre_of_mass": com_report(sim, kin, address.q, lane.ground),
+        "leg_angles_deg": {
+            name: float(np.degrees(address.q[kin.coordinate_order.index(name)]))
+            for name in kin.coordinate_order[adapter.upper_body_coordinates :]
+        },
+        "posture": posture_summary(kin, address.q),
+    }
+
+
+@dataclass(frozen=True)
+class AddressStageInputs:
+    """Inputs to solve the initial address pose and optional static trial/closure."""
+
+    lane: Lane
+    base_spec: Mapping[str, Any]
+    hip_spec: Mapping[str, Any]
+    hip_bytes: bytes
+    upper: Mapping[str, tuple[str, Sequence[float]]]
+    fixed: Mapping[str, tuple[str, Sequence[float]]]
+    seeds_all: Mapping[str, tuple[str, Sequence[float]]]
+    labels: tuple[str, ...]
+    hipcal_path: Path | None = None
+    static_seeds: bool = False
+    fit_closure: bool = False
+    log: logging.Logger | None = None
+
+
+@dataclass(frozen=True)
+class AddressStageResult:
+    """Result of solving the address pose stage."""
+
+    address: Any
+    address_report: dict[str, Any]
+    adapter: Any
+    kin: FullBodyMarkerKinematics
+    fixed: dict[str, tuple[str, Sequence[float]]]
+    seeds_all: dict[str, tuple[str, Sequence[float]]]
+    hip_spec: dict[str, Any]
+    hip_bytes: bytes
+
+
+def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
+    """Solve the address stage: seed offsets, static trial, and closure fitting.
+
+    Preconditions:
+    - ``fit_closure`` requires ``static_seeds``.
+    """
+    if inputs.fit_closure and not inputs.static_seeds:
+        raise ValueError("--fit-closure needs --static-seeds")
+
+    from src.shared.python.motion_matching.pipeline.dynamics import segment_rms
+    from src.shared.python.motion_matching.pipeline.lane import document_seed
+    from src.shared.python.motion_matching.pipeline.reference import marker_errors
+
+    lane = inputs.lane
+    base_spec = inputs.base_spec
+    hip_spec = dict(inputs.hip_spec)
+    hip_bytes = inputs.hip_bytes
+    fixed = dict(inputs.fixed)
+    seeds_all = dict(inputs.seeds_all)
+    labels = inputs.labels
+    log = inputs.log
+
+    adapter, kin = lane.kinematics(hip_bytes, {**inputs.upper, **LEG_SEEDS})
+    q_seed = document_seed(dict(base_spec), kin)
+    address = lane.best_address(kin, q_seed)
+    address_report: dict[str, Any] = {
+        "seed_offsets": {
+            "marker_rms_m": address.marker_rms_m,
+            "segment_rms_m": segment_rms(
+                labels,
+                marker_errors(kin, address.q[None, :], lane.points[:1]),
+                lane.valid[:1],
+            ),
+        },
+        "stance_spheres": lane.stance[0],
+    }
+
+    if inputs.static_seeds:
+        placed, neutral, kin = lane.static_trial(
+            hip_bytes, {**fixed, **seeds_all}, q_seed
+        )
+        adapter = kin.adapter
+        fixed = {label: placed[label] for label in fixed}
+        seeds_all = {label: placed[label] for label in seeds_all}
+        address = lane.best_address(kin, neutral.q)
+        address_report["static_trial"] = {
+            "frames": STATIC_FRAMES,
+            "neutral_fit_rms_m": neutral.marker_rms_m,
+            "neutral_posture": posture_summary(kin, neutral.q),
+            "marker_rms_m": address.marker_rms_m,
+            "posture": posture_summary(kin, address.q),
+        }
+        if log:
+            log.info(
+                "static trial: neutral fit %.1f mm, address with static seeds %.1f mm",
+                neutral.marker_rms_m * 1e3,
+                address.marker_rms_m * 1e3,
+            )
+
+    if inputs.fit_closure:
+        hip_spec, closure_report = fit_closure_from_address(
+            lane, kin, hip_spec, address.q
+        )
+        if inputs.hipcal_path:
+            inputs.hipcal_path.write_text(
+                json.dumps(hip_spec, indent=2, sort_keys=True) + "\n"
+            )
+            hip_bytes = inputs.hipcal_path.read_bytes()
+        else:
+            hip_bytes = json.dumps(hip_spec, sort_keys=True).encode()
+        lane.bounds |= wrist_bounds()
+        adapter, kin = lane.kinematics(hip_bytes, {**fixed, **seeds_all})
+        address = lane.best_address(kin, address.q)
+        closure_report["address_rms_after_m"] = address.marker_rms_m
+        address_report["closure_fit"] = closure_report
+        if log:
+            log.info(
+                "closure fit: weld turned %.1f deg, moved %.1f mm; address %.1f mm with "
+                "wrists bounded",
+                closure_report["rotation_change_deg"],
+                closure_report["translation_change_m"] * 1e3,
+                address.marker_rms_m * 1e3,
+            )
+
+    return AddressStageResult(
+        address=address,
+        address_report=address_report,
+        adapter=adapter,
+        kin=kin,
+        fixed=fixed,
+        seeds_all=seeds_all,
+        hip_spec=hip_spec,
+        hip_bytes=hip_bytes,
+    )

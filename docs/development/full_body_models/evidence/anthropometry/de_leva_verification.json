@@ -1,0 +1,147 @@
+{
+  "paper": {
+    "citation": "de Leva, P. (1996). Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters. Journal of Biomechanics, 29(9), 1223-1230.",
+    "doi": "10.1016/0021-9290(95)00178-6",
+    "pmid": 8872282,
+    "table": "Table 4: Adjusted segment mass, center of mass position, and radii of gyration for male subjects (sample size = 100)"
+  },
+  "reference_subject": {
+    "stature_m": 1.741,
+    "mass_kg": 73.0
+  },
+  "verification": {
+    "date": "2026-09-16",
+    "agent": "claude",
+    "issue": 10111,
+    "handoff_task": "HO-9",
+    "module": "src/shared/python/motion_matching/anthropometry.py",
+    "test_suite": "tests/unit/motion_matching/test_de_leva_table.py",
+    "total_segments_checked": 11,
+    "corrections_made": 1
+  },
+  "segments": [
+    {
+      "segment": "head",
+      "paper_segment_name": "Head and neck",
+      "endpoints": "vertex to cervicale",
+      "length_m": 0.2429,
+      "mass_fraction": 0.0694,
+      "com_fraction_proximal": 0.5002,
+      "radii": [0.303, 0.315, 0.261],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 male row."
+    },
+    {
+      "segment": "trunk",
+      "paper_segment_name": "Trunk",
+      "endpoints": "cervicale to hip joint centre (midpoint between hip joint centres)",
+      "length_m": 0.5319,
+      "mass_fraction": 0.4346,
+      "com_fraction_proximal": 0.5138,
+      "radii": [0.328, 0.306, 0.169],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 composite trunk row."
+    },
+    {
+      "segment": "upper_trunk",
+      "paper_segment_name": "Thorax",
+      "endpoints": "cervicale to xiphion",
+      "length_m": 0.1707,
+      "mass_fraction": 0.1596,
+      "com_fraction_proximal": 0.2999,
+      "radii": [0.505, 0.465, 0.418],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 thorax row."
+    },
+    {
+      "segment": "middle_trunk",
+      "paper_segment_name": "Abdomen",
+      "endpoints": "xiphion to omphalion",
+      "length_m": 0.2155,
+      "mass_fraction": 0.1633,
+      "com_fraction_proximal": 0.4502,
+      "radii": [0.482, 0.383, 0.468],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 abdomen row."
+    },
+    {
+      "segment": "lower_trunk",
+      "paper_segment_name": "Pelvis",
+      "endpoints": "omphalion to hip joint centre",
+      "length_m": 0.1457,
+      "mass_fraction": 0.1117,
+      "com_fraction_proximal": 0.6115,
+      "radii": [0.615, 0.551, 0.587],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 pelvis row."
+    },
+    {
+      "segment": "upper_arm",
+      "paper_segment_name": "Upper arm",
+      "endpoints": "shoulder joint centre to elbow joint centre",
+      "length_m": 0.2817,
+      "mass_fraction": 0.0271,
+      "com_fraction_proximal": 0.5772,
+      "radii": [0.285, 0.269, 0.158],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 upper arm row."
+    },
+    {
+      "segment": "forearm",
+      "paper_segment_name": "Forearm",
+      "endpoints": "elbow joint centre to wrist joint centre",
+      "length_m": 0.2689,
+      "mass_fraction": 0.0162,
+      "com_fraction_proximal": 0.4574,
+      "radii": [0.276, 0.265, 0.121],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 forearm row."
+    },
+    {
+      "segment": "hand",
+      "paper_segment_name": "Hand",
+      "endpoints": "wrist joint centre to metacarpale III",
+      "length_m": 0.0862,
+      "mass_fraction": 0.0061,
+      "com_fraction_proximal": 0.79,
+      "radii": [0.628, 0.513, 0.401],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 hand row (endpoint defined at metacarpale III)."
+    },
+    {
+      "segment": "thigh",
+      "paper_segment_name": "Thigh",
+      "endpoints": "hip joint centre to knee joint centre",
+      "length_m": 0.4222,
+      "mass_fraction": 0.1416,
+      "com_fraction_proximal": 0.4095,
+      "radii": [0.329, 0.329, 0.149],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 thigh row."
+    },
+    {
+      "segment": "shank",
+      "paper_segment_name": "Shank",
+      "endpoints": "knee joint centre to ankle joint centre",
+      "length_m": 0.434,
+      "mass_fraction": 0.0433,
+      "com_fraction_proximal": 0.4395,
+      "previous_com_fraction": 0.4459,
+      "radii": [0.251, 0.246, 0.102],
+      "previous_radii": [0.255, 0.249, 0.103],
+      "status": "corrected_and_verified",
+      "notes": "Corrected com_fraction from 0.4459 to 0.4395 and radii from (0.255, 0.249, 0.103) to (0.251, 0.246, 0.102). Previous values were unadjusted bony-landmark parameters from Zatsiorsky-Seluyanov (1985) erroneously transcribed instead of de Leva's Table 4 joint-center adjusted values."
+    },
+    {
+      "segment": "foot",
+      "paper_segment_name": "Foot",
+      "endpoints": "heel to tip of longest toe (or toe joint center)",
+      "length_m": 0.2581,
+      "mass_fraction": 0.0137,
+      "com_fraction_proximal": 0.4415,
+      "radii": [0.257, 0.245, 0.124],
+      "status": "verified_exact",
+      "notes": "Exact match to paper Table 4 foot row."
+    }
+  ]
+}

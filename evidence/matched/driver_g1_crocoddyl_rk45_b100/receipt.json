@@ -1,0 +1,240 @@
+{
+  "schema": "matched-swing-fit/pinocchio-crocoddyl-v1",
+  "engine": "pinocchio",
+  "lane": "crocoddyl_native_fit",
+  "document_sha256": "5d1e5eac6813aecabee69752704510860597a64cf45b28798b011e6109d3bdd5",
+  "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+  "attachments_source": "/home/dieterolson/ms31-crocoddyl/docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json",
+  "warm_start_source": "candidate:/home/dieterolson/fits/driver_g1_rtol6/stage_0.60s.npz",
+  "ground_height_m": 0.0002577801048755657,
+  "armature_kg_m2": 0.005,
+  "effort_bounds_n_m": {
+    "SpineInputX": 300.0,
+    "SpineInputY": 300.0,
+    "TorsoInput": 300.0,
+    "LEInput": 80.0,
+    "LFInput": 40.0,
+    "LScapInputX": 80.0,
+    "LScapInputY": 80.0,
+    "LSInputX": 120.0,
+    "LSInputY": 120.0,
+    "LSInputZ": 120.0,
+    "LWInputX": 30.0,
+    "LWInputY": 30.0,
+    "REInput": 180.0,
+    "RFInput": 80.0,
+    "RScapInputX": 160.0,
+    "RScapInputY": 160.0,
+    "RSInputX": 250.0,
+    "RSInputY": 250.0,
+    "RSInputZ": 250.0,
+    "RWInputX": 60.0,
+    "RWInputY": 60.0,
+    "NeckInputX": 30.0,
+    "NeckInputY": 30.0,
+    "NeckInputZ": 30.0,
+    "hip_flexion_r": 300.0,
+    "hip_adduction_r": 300.0,
+    "hip_rotation_r": 300.0,
+    "knee_angle_r": 250.0,
+    "ankle_angle_r": 150.0,
+    "subtalar_angle_r": 40.0,
+    "mtp_angle_r": 10.0,
+    "hip_flexion_l": 300.0,
+    "hip_adduction_l": 300.0,
+    "hip_rotation_l": 300.0,
+    "knee_angle_l": 250.0,
+    "ankle_angle_l": 150.0,
+    "subtalar_angle_l": 40.0,
+    "mtp_angle_l": 10.0
+  },
+  "labels": [
+    "WaistLeft",
+    "WaistRight",
+    "WaistLBack",
+    "WaistRBack",
+    "BackTop",
+    "BackLeft",
+    "BackRight",
+    "HeadTop",
+    "HeadFront",
+    "HeadSide",
+    "LShoulderTop",
+    "LShoulderBack",
+    "LElbowOut",
+    "LUArmHigh",
+    "LWristTop",
+    "RShoulderTop",
+    "RShoulderBack",
+    "RElbowOut",
+    "RUArmHigh",
+    "RWristTop",
+    "LKneeOut",
+    "LToeIn",
+    "LToeOut",
+    "LAnkleOut",
+    "RKneeOut",
+    "RToeIn",
+    "RToeOut",
+    "RAnkleOut",
+    "Marker_2:2:1",
+    "Marker_2:2:2",
+    "Marker_2:2:3",
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3"
+  ],
+  "horizon": {
+    "t_start_s": 0.0,
+    "t_end_s": 0.85,
+    "dt_s": 0.002777777777777778
+  },
+  "nodes": 307,
+  "weights": {
+    "marker": 1000.0,
+    "terminal_marker": 10000.0,
+    "effort": 1e-5,
+    "velocity": 0.001,
+    "range_barrier": 100.0
+  },
+  "warm_start_ik": {
+    "marker_rms_m": 0.02908669278648613,
+    "marker_rms_first_frame_m": 0.016241708886975743,
+    "closure_position_error_max_m": 0.0007871050098761534,
+    "wall_clock_s": 3.2468610699870624,
+    "iterations_per_frame": 15,
+    "tracking_rollout_marker_rms_m": 0.2599146240848133
+  },
+  "solver": {
+    "solver": "crocoddyl.SolverBoxFDDP",
+    "integrator": "linear_implicit_euler",
+    "node_integrator": "rk45",
+    "node_substeps": 1,
+    "rk45_rtol": 1e-6,
+    "replay_integrator": "rk45",
+    "converged": true,
+    "iterations": 99,
+    "cost": 145.33029854123328,
+    "stopping_criterion": 8.21710613276742e-7,
+    "wall_clock_s": 9864.53192586999,
+    "stages": [
+      {
+        "t_end_s": 0.6,
+        "nodes": 217,
+        "iterations": 150,
+        "converged": false,
+        "cost": 52.94810113705844,
+        "stopping_criterion": 6.000568875409666e-5,
+        "wall_clock_s": 5166.413853328966,
+        "marker_rms_m": 0.022613078824686723
+      },
+      {
+        "t_end_s": 0.85,
+        "nodes": 307,
+        "iterations": 99,
+        "converged": true,
+        "cost": 145.33029854123328,
+        "stopping_criterion": 8.21710613276742e-7,
+        "wall_clock_s": 4697.944797976001,
+        "marker_rms_m": 0.046837589364288994
+      }
+    ],
+    "continuation_s": [0.6, 0.85],
+    "tracking_gains": {
+      "kp": 400.0,
+      "kd": 40.0
+    },
+    "max_iterations": 150,
+    "effort_bound_default_n_m": 600.0,
+    "warm_start_ridge": 0.01
+  },
+  "cost_breakdown": {
+    "warm_start": {
+      "marker": 567.1291599246481,
+      "effort": 0.31454491964519893,
+      "velocity": 0.014653478637207288,
+      "range_barrier": 1.5470360622869812e-5,
+      "total": 567.4583737932911
+    },
+    "fddp": {
+      "marker": 136.88368313928763,
+      "effort": 0.34364426462402126,
+      "velocity": 6.536678528136714,
+      "range_barrier": 1.5662926091849323,
+      "total": 145.3302985412333
+    }
+  },
+  "metrics": {
+    "warm_start_ik": {
+      "shared": {
+        "whole_marker_rmse_m": 0.029086692786486134,
+        "early_marker_rmse_m": 0.01969437388259072,
+        "terminal_marker_rmse_m": 0.047774110267037755,
+        "club_marker_rmse_m": 0.029488171059430853,
+        "pelvis_yaw_rmse_rad": 0.09453875570015197
+      },
+      "replay_five": {
+        "whole_rms_m": 0.029086692786486134,
+        "early_rms_m": 0.01969437388259072,
+        "terminal_rms_m": 0.05710673005665394,
+        "club_cluster_rms_m": 0.059732872660796035,
+        "pelvis_yaw_error_pct": 21.02704074403208
+      }
+    },
+    "fddp_rollout": {
+      "shared": {
+        "whole_marker_rmse_m": 0.046837589364288994,
+        "early_marker_rmse_m": 0.025663229287031245,
+        "terminal_marker_rmse_m": 0.0643072363103632,
+        "club_marker_rmse_m": 0.05259998859597353,
+        "pelvis_yaw_rmse_rad": 0.1615901020914645
+      },
+      "replay_five": {
+        "whole_rms_m": 0.046837589364288994,
+        "early_rms_m": 0.025663229287031245,
+        "terminal_rms_m": 0.025351482164887494,
+        "club_cluster_rms_m": 0.019444315916097334,
+        "pelvis_yaw_error_pct": 2.3172189614849357
+      }
+    },
+    "replay": {
+      "shared": {
+        "whole_marker_rmse_m": 0.046837589364288994,
+        "early_marker_rmse_m": 0.025663229287031245,
+        "terminal_marker_rmse_m": 0.0643072363103632,
+        "club_marker_rmse_m": 0.05259998859597353,
+        "pelvis_yaw_rmse_rad": 0.1615901020914645
+      },
+      "replay_five": {
+        "whole_rms_m": 0.046837589364288994,
+        "early_rms_m": 0.025663229287031245,
+        "terminal_rms_m": 0.025351482164887494,
+        "club_cluster_rms_m": 0.019444315916097334,
+        "pelvis_yaw_error_pct": 2.3172189614849357
+      }
+    }
+  },
+  "replay_note": null,
+  "physical_audit": {
+    "max_normal_force_n": 1139.6409577730308,
+    "max_normal_force_body_weights": 1.4898850789934026,
+    "max_penetration_m": 0.01719458026964854,
+    "closure_translation_error_max_m": 3.413742476424706e-5,
+    "weight_fraction": {
+      "min": 0.0,
+      "max": 2.1598254978952274,
+      "mean": 0.9518434966696728
+    },
+    "peak_effort_n_m": 300.0
+  },
+  "candidate_sha256": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+  "runtime": {
+    "python": "3.12.14",
+    "pinocchio": "4.1.0",
+    "crocoddyl": "3.2.1",
+    "numpy": "2.5.3",
+    "scipy": "1.17.1"
+  },
+  "wall_clock_s": 9877.06878666603,
+  "qualification": "milestone of a stated candidate on the qualified Pinocchio plant; acceptance is decided by acceptance.py (MS-01), not by this receipt"
+}

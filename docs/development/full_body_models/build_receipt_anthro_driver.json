@@ -1,6 +1,7 @@
 {
-  "spec_sha256": "a73d9e0623e79c5becd2b304cbc72940d16451097c4da0474a7e17d15fe3717a",
-  "spec_file_sha256": "2a98c82ce863a3d74fd6e35fd97cb135224de549cd1b2d8300f7ddd522c74ac5",
+  "spec_sha256": "174a6cb8dfd7f9347606789c7e6b77f602643e3139590126ac3af94e1f588b42",
+  "spec_file_sha256": "a208f3a2c6108ef1f69dd76e75230fde28f8f71f29afd79a71b35da8f25affd1",
+  "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
   "subject": {
     "stature_m": 1.71,
     "mass_kg": 78.0,
@@ -12,7 +13,8 @@
       "L": [-90.0, 47.0, 0.0],
       "R": [-34.0, 46.0, 62.0]
     },
-    "source": "de Leva 1996 male table"
+    "source": "de Leva 1996 male table",
+    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1"
   },
   "inputs": {
     "docs\\development\\simscape_tour_matching\\native_evidence\\native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
