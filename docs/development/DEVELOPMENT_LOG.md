@@ -115,18 +115,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Shipped in PR #10582.
 - **Evidence:** evidence/matched/driver_g1/parity_report.json; evidence/matched/driver_g1/parity_report.md; tests/unit/motion_matching/test_parity_report.py.
 
-### DL-#10586 · TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance
+### DL-#10587 · TB-02: Define Versioned Baseline Packages, Fit Metrics and Qualification Profiles
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10587 (parent #10584, program #10363)
+- **Branch:** feat/tb02-baseline-packages-metrics-profiles-10587
+- **PR:**
+- **Paths:** src/shared/python/tour_baselines/models.py; src/shared/python/tour_baselines/metrics.py; src/shared/python/tour_baselines/packages.py; src/shared/python/tour_baselines/qualification.py; src/shared/python/tour_baselines/**init**.py; tests/unit/tour_baselines/test_metrics_calculation.py; tests/unit/tour_baselines/test_qualification_profiles.py; tests/unit/tour_baselines/test_baseline_packages.py; scripts/generate_tb02_evidence.py; docs/plans/tour_baselines/qualification_profiles.md; docs/plans/tour_baselines/evidence/baseline_package_receipt.json; docs/plans/tour_baselines/evidence/synthetic_valid_baseline_package/; docs/plans/tour_baselines/evidence/synthetic_invalid_baseline_package/
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 at HEAD (48/48 unit tests pass in tests/unit/tour_baselines/ and tests/opensim/test_tour_capture_contract.py; ruff check clean; ruff format clean; black clean; mypy 0 issues in 21 source files; check_architecture_budget passes; check_file_size_budget passes).
+- **Summary:** Defined versioned baseline package format (tour-baseline-package/1.0.0) with manifest schema, SHA-256 asset checksums, parameter counts, native sample rate, and NPZ trajectory payloads. Formalized TourFitMetrics with five unconflated status enums (SolverStatus, KinematicAccuracyStatus, DynamicFeasibilityStatus, ScientificQualificationStatus, ProductPromotionStatus) and explicit input validation surviving python -O. Implemented four qualification profiles (FullBodyAuthoritativeProfile, DoublePendulumPlanarProfile, TriplePendulumPlanarProfile, UpperBodyGolferProfile) enforcing fail-closed gate evaluation (G1 kinematic accuracy, G2 dynamic feasibility, G3 scientific qualification) with mandatory native replay verification and synthetic test detection guards. Emitted synthetic baseline packages and verification receipts under docs/plans/tour_baselines/evidence/ and documented in qualification_profiles.md.
+- **Next step:** Push branch, open PR with Fixes #10587, enable auto-merge.
+- **Evidence:** docs/plans/tour_baselines/qualification_profiles.md; docs/plans/tour_baselines/evidence/baseline_package_receipt.json; tests/unit/tour_baselines/test_metrics_calculation.py; tests/unit/tour_baselines/test_qualification_profiles.py; tests/unit/tour_baselines/test_baseline_packages.py.
+
+### DL-#10586 · TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance
+
+- **State:** shipped
+- **Owner:** local
 - **Issue:** #10586 (parent #10584, program #10363)
 - **Branch:** feat/tb01-tour-targets-audit-10586
-- **PR:**
+- **PR:** #10601
 - **Paths:** src/shared/python/motion_matching/tour_capture_contract.py; src/shared/python/tour_baselines/audit.py; src/shared/python/tour_baselines/measurement_map.py; src/shared/python/tour_baselines/events.py; src/shared/python/tour_baselines/provenance.py; src/shared/python/tour_baselines/canonical_targets.py; src/shared/python/tour_baselines/**init**.py; tests/unit/tour_baselines/test_measurement_map.py; tests/unit/tour_baselines/test_tour_events.py; tests/unit/tour_baselines/test_target_audit.py; tests/unit/tour_baselines/test_canonical_targets.py; docs/plans/tour_baselines/target_audit.md; docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json; docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at HEAD (35/35 unit tests pass in tests/unit/tour_baselines/ and tests/opensim/test_tour_capture_contract.py; ruff check clean; ruff format clean; black clean; mypy 0 issues in 18 source files; check_architecture_budget passes; check_file_size_budget passes; divergence inventory synchronized).
+- **Last verified:** 2026-09-20 at HEAD (35/35 unit tests pass in tests/unit/tour_baselines/ and tests/opensim/test_tour_capture_contract.py; ruff check clean; ruff format clean; black clean; mypy 0 issues in 18 source files; check_architecture_budget passes; check_file_size_budget passes; divergence inventory synchronized; merged into main).
 - **Summary:** Implemented target audit, content-based SHA-256 verification (never path name alone), versioned measurement map (tour-measurement-map/1.0.0) distinguishing surface markers, inferred joint centers, and rigid cluster centroids while explicitly marking calibrated clubface orientation and contact points as UNAVAILABLE in raw C3D. Defined native-clock swing intervals (360.0 Hz driver vs 359.0 Hz iron) with trajectory-inferred events explicitly labeled as inferred. Recorded GearsSports optical provenance, separating shared player anatomy from capture-specific club geometry. Emitted reproducible receipts in docs/plans/tour_baselines/evidence/ and documented in target_audit.md.
-- **Next step:** Push branch, open PR with Fixes #10586, enable auto-merge.
+- **Next step:** Shipped in PR #10601.
 - **Evidence:** docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json; docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json; tests/unit/tour_baselines/test_target_audit.py; tests/unit/tour_baselines/test_measurement_map.py; tests/unit/tour_baselines/test_tour_events.py; tests/unit/tour_baselines/test_canonical_targets.py.
 
 ### DL-#10585 · TB-00: Freeze Model Identities, Ownership, and the Two-Capture Coverage Matrix

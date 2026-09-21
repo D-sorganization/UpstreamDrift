@@ -24,6 +24,7 @@ The **Tour Baselines Program** provides a single source of truth across all 13 p
 - [Two-Capture Coverage Matrix](coverage_matrix.md) — Exhaustive model $\times$ {Driver, Iron} matrix, existing artifacts, supported observation sets, and explicit non-golf tool exclusions.
 - [Historical Reconciliation and Tools Provenance](reconciliation.md) — Audit of closed issues #9914, #9921, #10003, and submodule pin tracking for `vendor/ud-tools`.
 - [Target Audit, Marker Semantics, Events, and Provenance](target_audit.md) — Cryptographic capture contracts, versioned measurement maps, native clocks, inferred event landmarks, and shared subject anatomy.
+- [Baseline Packages, Fit Metrics, and Qualification Profiles](qualification_profiles.md) — Versioned baseline package schema, 5 unconflated fit metric statuses, model-specific gates (G1/G2/G3), native replay requirements, and synthetic test guards.
 
 ---
 

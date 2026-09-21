@@ -1,0 +1,111 @@
+{
+  "schema_version": "tour-baseline-package/1.0.0",
+  "package_id": "11111111-2222-3333-4444-555555555555",
+  "capture": "driver",
+  "capture_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+  "target_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "model_id": "double_pendulum_planar",
+  "model_class": "double_pendulum_planar",
+  "backend": "mujoco",
+  "backend_version": "3.6.0",
+  "fit_mode": "torque_driven",
+  "horizon": "G3",
+  "coordinate_plane": "two_dimensional_swing_plane",
+  "measurement_map_version": "tour-measurement-map/1.0.0",
+  "fixed_geometry": {
+    "arm_length_m": 0.6,
+    "club_length_m": 1.15
+  },
+  "q0": [0.0, 0.0],
+  "v0": [0.0, 0.0],
+  "controls_parameterization": {
+    "type": "spline_torques"
+  },
+  "solver_config": {
+    "optimizer": "scipy_slsqp"
+  },
+  "budgets": {
+    "max_iterations": 500,
+    "wall_clock_limit_s": 60.0
+  },
+  "candidate_ancestry": [],
+  "runtime_hashes": {
+    "python": "3.12.0"
+  },
+  "statuses": {
+    "solver": "reached_max_iter",
+    "kinematic": "inaccurate",
+    "dynamic": "infeasible",
+    "scientific": "unqualified",
+    "product": "rejected"
+  },
+  "metrics": {
+    "observed_valid_denominator": 1000,
+    "excluded_sample_count": 20,
+    "coverage_fraction": 0.98,
+    "whole_marker_rmse_m": 0.16,
+    "p95_marker_error_m": 0.19,
+    "max_marker_error_m": 0.22,
+    "per_marker_rmse_m": {
+      "ClubHead": 0.175,
+      "Grip": 0.08
+    },
+    "per_phase_rmse_m": {
+      "downswing": 0.16,
+      "impact": 0.175
+    },
+    "impact_marker_error_m": 0.175,
+    "endpoint_clubhead_rmse_m": 0.175,
+    "optimizer_weighted_loss": 0.85,
+    "original_frame_rmse_m": 0.16,
+    "in_plane_rmse_m": 0.14,
+    "out_of_plane_residual_m": 0.035,
+    "landmarks_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "clubhead_speed_error_m_s": null
+  },
+  "qualification_gate_version": "tour-qualification/1.0.0",
+  "qualification_verdict": {
+    "is_qualified": false,
+    "scientific_status": "unqualified",
+    "product_status": "rejected",
+    "gate_version": "tour-qualification/1.0.0",
+    "gates": [
+      {
+        "name": "in_plane_clubhead_rmse",
+        "status": "failed",
+        "threshold": 0.12,
+        "measured": 0.175,
+        "unit": "m",
+        "reason": "Clubhead error 0.1750 m > 0.12 m"
+      },
+      {
+        "name": "whole_marker_rmse",
+        "status": "failed",
+        "threshold": 0.15,
+        "measured": 0.16,
+        "unit": "m",
+        "reason": "Whole error 0.1600 m > 0.15 m"
+      },
+      {
+        "name": "coverage_fraction",
+        "status": "passed",
+        "threshold": 0.9,
+        "measured": 0.98,
+        "unit": "fraction",
+        "reason": ""
+      }
+    ],
+    "reason": "Missing native replay evidence; candidate cannot qualify without verification"
+  },
+  "replay": {
+    "engine": "mujoco",
+    "replay_command": "",
+    "replay_sha256": "",
+    "verified_reproduced": false
+  },
+  "file_hashes": {
+    "trajectories.npz": "356668a84294834c7e8e40b08d3f28675973b5ba9f4b18d78a2cc5a829b3663e"
+  },
+  "seed": null,
+  "is_synthetic_test_data": true
+}

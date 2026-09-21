@@ -1,0 +1,23 @@
+{
+  "schema": "baseline-package-evidence/1.0.0",
+  "example_packages": [
+    {
+      "name": "synthetic_valid_baseline_package",
+      "package_id": "967eac5b-2e78-4207-a99f-d57437296d70",
+      "scientific_status": "qualified",
+      "product_status": "rejected",
+      "is_qualified": true,
+      "is_promoted": false,
+      "rationale": "Synthetic test data cannot be promoted as a tour baseline"
+    },
+    {
+      "name": "synthetic_invalid_baseline_package",
+      "package_id": "11111111-2222-3333-4444-555555555555",
+      "scientific_status": "unqualified",
+      "product_status": "rejected",
+      "is_qualified": false,
+      "is_promoted": false,
+      "rationale": "Missing native replay evidence; candidate cannot qualify without verification"
+    }
+  ]
+}
