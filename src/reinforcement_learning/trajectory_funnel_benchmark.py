@@ -310,12 +310,13 @@ class TrajectoryFunnelBenchmark:
         _reward, states = self.rollout(theta, reference, rng)
         deltas = states[:, np.newaxis, :] - reference[np.newaxis, :, :]
         distances = np.sqrt(np.einsum("ijk,ijk->ij", deltas, deltas))
+        diff = states[-1] - reference[-1]
         return {
             "mean_transverse_error": float(np.mean(np.min(distances, axis=1))),
             "terminal_setpoint_error": float(
                 math.sqrt(
-                    np.vdot(states[-1] - reference[-1], states[-1] - reference[-1])
-                )  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for 1D arrays
+                    diff.dot(diff)
+                )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for 1D arrays
             ),
         }
 
