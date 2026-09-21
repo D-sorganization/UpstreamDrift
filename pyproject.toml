@@ -181,7 +181,7 @@ crocoddyl = ["crocoddyl>=2.0.0,<4.0.0"]
 # `apt-get install python3-tk` because bioptim/gui/plot.py imports tkinter.
 bioptim = [
     "upstream-drift[optimal-control]",
-    "casadi==3.6.7",
+    "casadi==3.8.1",
     "bioptim @ git+https://github.com/pyomeca/bioptim.git@fdafe4d9e50edb3f92a14f1980b08c3f81434545",
     "matplotlib>=3.8",
     "packaging>=23.0",
