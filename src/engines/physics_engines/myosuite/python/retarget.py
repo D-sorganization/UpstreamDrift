@@ -51,7 +51,7 @@ class RetargetMap:
         out = np.zeros(self.n_source, dtype=np.float64)
         for src_name, (tgt_idx, sign) in self.source_to_target.items():
             src_idx = self.source_names.index(src_name)
-            out[src_idx] = sign * float(q[tgt_idx])
+            out[src_idx] = float(q[tgt_idx]) / sign if sign != 0 else 0.0
         return out
 
 

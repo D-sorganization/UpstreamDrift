@@ -7,7 +7,7 @@
   "source_engine": "mujoco",
   "configuration": {
     "mode": "kinematic_only",
-    "scene_xml": "src\\engines\\physics_engines\\mujoco\\myo_sim\\body\\myobody.xml",
+    "scene_xml": "src/engines/physics_engines/mujoco/myo_sim/body/myobody.xml",
     "retarget_map": "coordinate_map_anthro.json",
     "mapped_coordinates": 11,
     "omitted_source": [

@@ -108,6 +108,9 @@ def _qpos_from_retarget(q_retarget: Array, rmap: RetargetMap, model_nq: int) -> 
         qpos[4] = 0.5 * name_to_value.get("pelvis_rx", 0.0)
         qpos[5] = 0.5 * name_to_value.get("pelvis_ry", 0.0)
         qpos[6] = 0.5 * name_to_value.get("pelvis_rz", 0.0)
+        quat_norm = float(np.linalg.norm(qpos[3:7]))
+        if quat_norm > 0:
+            qpos[3:7] /= quat_norm
     joint_start = 7 if model_nq > 7 else 0
     hinge_map = (
         ("spine", "spine"),
@@ -409,7 +412,7 @@ def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
         "source_engine": ctx.config.source_engine,
         "configuration": {
             "mode": "kinematic_only",
-            "scene_xml": str(scene_xml.relative_to(REPO_ROOT)),
+            "scene_xml": scene_xml.relative_to(REPO_ROOT).as_posix(),
             "retarget_map": "coordinate_map_anthro.json",
             "mapped_coordinates": len(ctx.rmap.source_to_target),
             "omitted_source": list(
