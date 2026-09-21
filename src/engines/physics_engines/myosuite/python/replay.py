@@ -390,6 +390,7 @@ class _ReceiptContext:
     site_calibration: dict[str, Any]
     artifacts: dict[str, Any]
     elapsed_s: float
+    duration_s: float
 
 
 def _nan_to_none(value: float) -> float | None:
@@ -439,6 +440,7 @@ def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
         "artifacts": {
             key: ctx.artifacts[key] for key in ("candidate_npz", "playback_gif")
         },
+        "duration_s": ctx.duration_s,
         "elapsed_s": ctx.elapsed_s,
         "qualification": (
             "Kinematic retarget replay only. Native-model topology differs from "
@@ -501,6 +503,7 @@ def run_kinematic_replay(config: ReplayConfig) -> dict[str, Any]:
             site_calibration=site_calibration,
             artifacts=artifacts,
             elapsed_s=perf_counter() - start,
+            duration_s=float(source.time_s[-1] - source.time_s[0]),
         )
     )
     receipt_path = Path(config.output_dir) / "receipt.json"
