@@ -1,5 +1,19 @@
 # Current Matching Continuation Handoff
 
+## MS-102 Engine and Model Inventory #10376 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10376-ms102`.
+- Branch: `feat/ms102-engine-model-inventory`; PR not created. Governing issue #10376
+  (MS-102, epic #10363). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`.
+- Entry DL-#10376. Delivered: `src/config/engine_model_inventory.json` (authority-
+  derived ledger), `src/engines/model_inventory.py` (load/reconcile/qualify), unit
+  tests, structural receipts under `docs/development/matched_swing_program/evidence/ms102/`.
+- Six flagship engines × driver/iron packaged; JaxSim/putting_green reconciled;
+  MyoSuite flagship status `repair` → #10344 (MS-51); Simscape R2025b required.
+- Validation: `python -m pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov --timeout=120` green; `ruff check` clean on touched Python.
+- Next: open PR `Fixes #10376`, arm squash auto-merge; native SDK receipts on
+  supported hosts via MS-103 preflight (not claimed by structural receipts).
+
 ## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
 
 - Worktree: `Worktrees/UpstreamDrift-10504-pf06-rebase`, branch
