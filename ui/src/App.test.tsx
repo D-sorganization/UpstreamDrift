@@ -12,6 +12,18 @@ vi.mock('@/pages/Dashboard', () => ({
   DashboardPage: () => <div data-testid="dashboard-page-mock">DashboardPage Mock</div>,
 }));
 
+vi.mock('@/pages/MatchedSwings', () => ({
+  MatchedSwingsPage: () => (
+    <div data-testid="matched-swings-page-mock">MatchedSwingsPage Mock</div>
+  ),
+}));
+
+vi.mock('@/pages/CrossEngineDashboard', () => ({
+  CrossEngineDashboardPage: () => (
+    <div data-testid="cross-engine-page-mock">CrossEngineDashboardPage Mock</div>
+  ),
+}));
+
 import App from './App';
 
 const createWrapper = () => {
@@ -77,5 +89,17 @@ describe('App', () => {
     // (It may resolve quickly; either the fallback or the page must be present.)
     const dashboard = await screen.findByTestId('dashboard-page-mock');
     expect(dashboard).toBeInTheDocument();
+  });
+
+  it('renders MatchedSwingsPage at /tools/matched-swings (#10358)', async () => {
+    window.history.pushState({}, '', '/tools/matched-swings');
+    render(<App />, { wrapper: createWrapper() });
+    expect(await screen.findByTestId('matched-swings-page-mock')).toBeInTheDocument();
+  });
+
+  it('renders CrossEngineDashboardPage at /tools/cross-engine (#10358)', async () => {
+    window.history.pushState({}, '', '/tools/cross-engine');
+    render(<App />, { wrapper: createWrapper() });
+    expect(await screen.findByTestId('cross-engine-page-mock')).toBeInTheDocument();
   });
 });

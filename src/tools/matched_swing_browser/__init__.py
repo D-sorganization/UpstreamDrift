@@ -4,14 +4,24 @@ from __future__ import annotations
 
 import contextlib
 
-from src.tools.matched_swing_browser.gui import (
-    MatchedSwingBrowserWidget,
-    MatchedSwingBrowserWindow,
-)
 from src.tools.matched_swing_browser.model import (
     MatchedSwingBrowserModel,
     MatchedSwingFilter,
 )
+
+
+def __getattr__(name: str) -> object:
+    """Lazy-load PyQt GUI symbols so API imports avoid libEGL (#10358)."""
+    if name == "MatchedSwingBrowserWidget":
+        from src.tools.matched_swing_browser.gui import MatchedSwingBrowserWidget
+
+        return MatchedSwingBrowserWidget
+    if name == "MatchedSwingBrowserWindow":
+        from src.tools.matched_swing_browser.gui import MatchedSwingBrowserWindow
+
+        return MatchedSwingBrowserWindow
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 with contextlib.suppress(ImportError):
     from src.shared.python.launcher_embed import (
