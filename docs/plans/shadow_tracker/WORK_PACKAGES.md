@@ -192,4 +192,9 @@ See [Ready Tasks](READY_TASKS.md); this is not a waiver of any physics gate.
   agent turnover; R2025b evidence for Simscape if advertised.
 - **Do Not:** Block a first-engine release on unadvertised engines, or imply
   identical contact results across materially different physical models.
-- **Next Slice:** Assemble evidence inventory and expose remaining gaps explicitly.
+- **Delivery:** Delivered in #10135. Implemented `src/shared/python/shadow_tracker/engine_matrix.py`,
+  with full engine conformance checking, fail-closed MATLAB R2025b validation for Simscape,
+  model hash verification, independent replay auditing, performance profiling, complete
+  G0–G7 gate validation across all six core swing phases, scientific calculation registry,
+  and deterministic release evidence inventory generation. Verified by
+  `tests/unit/shadow_tracker/test_engine_matrix.py`.

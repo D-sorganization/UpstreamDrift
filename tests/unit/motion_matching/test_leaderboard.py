@@ -106,7 +106,17 @@ class TestFitResultSchema:
 
     def test_supported_engines_set(self) -> None:
         assert (
-            frozenset({"simscape", "mujoco", "drake", "pinocchio", "opensim"})
+            frozenset(
+                {
+                    "simscape",
+                    "mujoco",
+                    "drake",
+                    "pinocchio",
+                    "opensim",
+                    "myosuite",
+                    "pendulum",
+                }
+            )
             == SUPPORTED_ENGINES
         )
 

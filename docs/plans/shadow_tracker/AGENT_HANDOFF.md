@@ -12,10 +12,11 @@ No Shadow Tracker launcher application or full fitter is implemented.
 ## Immediate Dispatch
 
 Read [Current Turnover](TURNOVER_CURRENT.md) and
-[Continuation Prompt](CONTINUATION_PROMPT.md). Start #10231: authoritative source
+[Continuation Prompt](CONTINUATION_PROMPT.md). Merged #10231 (PR #10253): authoritative source
 PTS, unknown physical time by default, and cancellation during actual decode.
-#10233 revision integrity/persistence is independent evidence work. #10232 needs
-articulated model binding and clipping/projection oracles, not only more disks.
+Landing #10232: articulated model binding and clipping/projection oracles.
+The #10233 provider repair is locally validated; review its focused diff and
+[2026-09-18 turnover evidence](TURNOVER_CURRENT.md) before repeating implementation.
 Do not repeat the repaired false-segmentation-success task or call #10168 active.
 Continue scientific qualification, then all ST-07–ST-12 stages including fitting,
 uncertainty, real/archive validation, UI/export and release. No stage is skipped.

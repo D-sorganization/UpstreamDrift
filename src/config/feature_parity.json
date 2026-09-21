@@ -86,6 +86,25 @@
       "tiles": ["dataset_generator"],
       "notes": "Web-first tool; the desktop launcher opens the web route."
     },
+    "tools.motion_matching": {
+      "title": "Motion Matching tour-average capture matching",
+      "pyqt": "src/tools/motion_matching/gui.py",
+      "api": null,
+      "web": null,
+      "status": "parity",
+      "tiles": ["motion_matching"],
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355)."
+    },
+    "tools.matched_swing_browser": {
+      "title": "Matched Swing Results Browser",
+      "pyqt": "src/tools/matched_swing_browser/gui.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 10353,
+      "tiles": ["matched_swing_browser"],
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff."
+    },
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
       "pyqt": "src/tools/canonical_core/estimation.py",
@@ -149,7 +168,8 @@
         "motion_capture",
         "motion_target_preview",
         "starting_pose_matcher",
-        "motion_pipeline"
+        "motion_pipeline",
+        "shadow_tracker"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406)."
     },
@@ -269,8 +289,9 @@
       "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
       "api": "src/api/local_server.py",
       "web": "ui/src/pages/ImpactExplorer.tsx",
-      "status": "parity",
-      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
+      "status": "gap",
+      "issue": 9546,
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
       "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {
@@ -430,15 +451,6 @@
       "status": "parity",
       "tiles": [],
       "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md."
-    },
-    "tools.motion_matching": {
-      "title": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",
-      "pyqt": "src/tools/motion_matching/gui.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 10106,
-      "tiles": ["motion_matching"]
     }
   }
 }

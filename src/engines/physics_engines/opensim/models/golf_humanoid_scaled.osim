@@ -230,7 +230,7 @@
 					<attached_geometry>
 						<Mesh name="femur_r_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>0.99283900000000003 0.99283900000000003 0.99283900000000003</scale_factors>
+							<scale_factors>0.98511814 0.98511814 0.98511814</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -388,8 +388,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>9.8004040535195198</mass>
-					<mass_center>0 -0.16878299999999999 0</mass_center>
-					<inertia>0.13907 0.0364552 0.146652 0 0 0</inertia>
+					<mass_center>0 -0.16747045 0</mass_center>
+					<inertia>0.13691544 0.035890413 0.14437998 0 0 0</inertia>
 				</Body>
 				<Body name="tibia_r">
 					<FrameGeometry name="frame_geometry">
@@ -399,7 +399,7 @@
 					<attached_geometry>
 						<Mesh name="tibia_r_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1.0264599999999999 1.09636 1.0264599999999999</scale_factors>
+							<scale_factors>0.99294854 1.0605665 0.99294854</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -408,7 +408,7 @@
 						</Mesh>
 						<Mesh name="tibia_r_geom_2">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1.0264599999999999 1.09636 1.0264599999999999</scale_factors>
+							<scale_factors>0.99294854 1.0605665 0.99294854</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -518,8 +518,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>3.9064009749525499</mass>
-					<mass_center>0 -0.20469100000000001 0</mass_center>
-					<inertia>0.063432500000000003 0.0056617000000000004 0.063432500000000003 0 0 0</inertia>
+					<mass_center>0 -0.19800833 0</mass_center>
+					<inertia>0.059358272 0.0052980527 0.059358272 0 0 0</inertia>
 				</Body>
 				<Body name="patella_r">
 					<FrameGeometry name="frame_geometry">
@@ -578,7 +578,7 @@
 					<attached_geometry>
 						<Mesh name="calcn_r_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>0.90637599999999996 1 1.0264599999999999</scale_factors>
+							<scale_factors>0.90712685 1.0008284 1.0273103</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -591,8 +591,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>1.3170603421957301</mass>
-					<mass_center>0.090637599999999999 0.029999999999999999 0</mass_center>
-					<inertia>0.00151413 0.0035269500000000001 0.0035269500000000001 0 0 0</inertia>
+					<mass_center>0.090712685 0.030024852 0</mass_center>
+					<inertia>0.0015166397 0.0035327959 0.0035327959 0 0 0</inertia>
 				</Body>
 				<Body name="toes_r">
 					<FrameGeometry name="frame_geometry">
@@ -626,7 +626,7 @@
 					<attached_geometry>
 						<Mesh name="femur_l_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>0.96382100000000004 0.96382100000000004 0.96382100000000004</scale_factors>
+							<scale_factors>0.98875913 0.98875913 0.98875913</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -784,8 +784,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>9.8004040535195198</mass>
-					<mass_center>0 -0.16385 0</mass_center>
-					<inertia>0.13106000000000001 0.034355499999999997 0.13820499999999999 0 0 0</inertia>
+					<mass_center>0 -0.16808949 0</mass_center>
+					<inertia>0.1379299 0.036156345 0.14544942 0 0 0</inertia>
 				</Body>
 				<Body name="tibia_l">
 					<FrameGeometry name="frame_geometry">
@@ -795,7 +795,7 @@
 					<attached_geometry>
 						<Mesh name="tibia_l_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1.0238100000000001 1.08588 1.0238100000000001</scale_factors>
+							<scale_factors>0.99252925 1.0527028 0.99252925</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -804,7 +804,7 @@
 						</Mesh>
 						<Mesh name="tibia_l_geom_2">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1.0238100000000001 1.08588 1.0238100000000001</scale_factors>
+							<scale_factors>0.99252925 1.0527028 0.99252925</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -914,8 +914,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>3.9064009749525499</mass>
-					<mass_center>0 -0.202735 0</mass_center>
-					<inertia>0.062265300000000003 0.0056325500000000001 0.062265300000000003 0 0 0</inertia>
+					<mass_center>0 -0.19654078 0</mass_center>
+					<inertia>0.058518607 0.0052936223 0.058518607 0 0 0</inertia>
 				</Body>
 				<Body name="patella_l">
 					<FrameGeometry name="frame_geometry">
@@ -974,7 +974,7 @@
 					<attached_geometry>
 						<Mesh name="calcn_l_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>0.89596900000000002 1 1.0238100000000001</scale_factors>
+							<scale_factors>0.94562033 1.0554164 1.0805458</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -987,8 +987,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>1.3170603421957301</mass>
-					<mass_center>0.089596899999999993 0.029999999999999999 0</mass_center>
-					<inertia>0.00151023 0.0034617599999999999 0.0034617599999999999 0 0 0</inertia>
+					<mass_center>0.094562033 0.031662491 0</mass_center>
+					<inertia>0.0016822507 0.0038560672 0.0038560672 0 0 0</inertia>
 				</Body>
 				<Body name="toes_l">
 					<FrameGeometry name="frame_geometry">
@@ -1022,7 +1022,7 @@
 					<attached_geometry>
 						<Mesh name="torso_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1.05115 1.2620499999999999</scale_factors>
+							<scale_factors>1.0418644 1.0951557 1.3148849</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1031,7 +1031,7 @@
 						</Mesh>
 						<Mesh name="torso_geom_2">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1.05115 1.2620499999999999</scale_factors>
+							<scale_factors>1.0418644 1.0951557 1.3148849</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1040,7 +1040,7 @@
 						</Mesh>
 						<Mesh name="torso_geom_3">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1.05115 1.2620499999999999</scale_factors>
+							<scale_factors>1.0418644 1.0951557 1.3148849</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1049,7 +1049,7 @@
 						</Mesh>
 						<Mesh name="torso_geom_4">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1.05115 1.2620499999999999</scale_factors>
+							<scale_factors>1.0418644 1.0951557 1.3148849</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1062,8 +1062,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>28.2658007807585</mass>
-					<mass_center>-0.029999999999999999 0.336366 0</mass_center>
-					<inertia>1.7791300000000001 1.0046299999999999 1.7791300000000001 0 0 0</inertia>
+					<mass_center>-0.031255931 0.35044775 0</mass_center>
+					<inertia>1.9312124 1.0905071 1.9312124 0 0 0</inertia>
 				</Body>
 				<Body name="humerus_r">
 					<FrameGeometry name="frame_geometry">
@@ -1073,7 +1073,7 @@
 					<attached_geometry>
 						<Mesh name="humerus_r_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1 1</scale_factors>
+							<scale_factors>1.3439762 1.3439762 1.3439762</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1086,8 +1086,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>2.1415401164102601</mass>
-					<mass_center>0 -0.16450200000000001 0</mass_center>
-					<inertia>0.0125869 0.0043420799999999999 0.014128399999999999 0 0 0</inertia>
+					<mass_center>0 -0.22108677 0</mass_center>
+					<inertia>0.022735364 0.0078429772 0.025519732 0 0 0</inertia>
 				</Body>
 				<Body name="ulna_r">
 					<FrameGeometry name="frame_geometry">
@@ -1097,7 +1097,7 @@
 					<attached_geometry>
 						<Mesh name="ulna_r_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1 1</scale_factors>
+							<scale_factors>1.1641298 1.1641298 1.1641298</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1110,8 +1110,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>0.64009132630712695</mass>
-					<mass_center>0 -0.12052499999999999 0</mass_center>
-					<inertia>0.0031209100000000002 0.00065115500000000005 0.00338537 0 0 0</inertia>
+					<mass_center>0 -0.14030675 0</mass_center>
+					<inertia>0.0042294519 0.00088244415 0.0045878477 0 0 0</inertia>
 				</Body>
 				<Body name="radius_r">
 					<FrameGeometry name="frame_geometry">
@@ -1121,7 +1121,7 @@
 					<attached_geometry>
 						<Mesh name="radius_r_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1 1</scale_factors>
+							<scale_factors>1.1641298 1.1641298 1.1641298</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1134,8 +1134,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>0.64009132630712695</mass>
-					<mass_center>0 -0.12052499999999999 0</mass_center>
-					<inertia>0.0031209100000000002 0.00065115500000000005 0.00338537 0 0 0</inertia>
+					<mass_center>0 -0.14030675 0</mass_center>
+					<inertia>0.0042294519 0.00088244415 0.0045878477 0 0 0</inertia>
 				</Body>
 				<Body name="hand_r">
 					<FrameGeometry name="frame_geometry">
@@ -1403,7 +1403,7 @@
 					<attached_geometry>
 						<Mesh name="humerus_l_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1 1</scale_factors>
+							<scale_factors>1.2436236 1.2436236 1.2436236</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1416,8 +1416,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>2.1415401164102601</mass>
-					<mass_center>0 -0.16450200000000001 0</mass_center>
-					<inertia>0.0125869 0.0043420799999999999 0.014128399999999999 0 0 0</inertia>
+					<mass_center>0 -0.20457857 0</mass_center>
+					<inertia>0.019466896 0.0067154596 0.021850979 0 0 0</inertia>
 				</Body>
 				<Body name="ulna_l">
 					<FrameGeometry name="frame_geometry">
@@ -1427,7 +1427,7 @@
 					<attached_geometry>
 						<Mesh name="ulna_l_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1 1</scale_factors>
+							<scale_factors>1.1547135 1.1547135 1.1547135</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1440,8 +1440,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>0.64009132630712695</mass>
-					<mass_center>0 -0.12052499999999999 0</mass_center>
-					<inertia>0.0031209100000000002 0.00065115500000000005 0.00338537 0 0 0</inertia>
+					<mass_center>0 -0.13917185 0</mass_center>
+					<inertia>0.0041613069 0.00086822619 0.0045139281 0 0 0</inertia>
 				</Body>
 				<Body name="radius_l">
 					<FrameGeometry name="frame_geometry">
@@ -1451,7 +1451,7 @@
 					<attached_geometry>
 						<Mesh name="radius_l_geom_1">
 							<socket_frame>..</socket_frame>
-							<scale_factors>1 1 1</scale_factors>
+							<scale_factors>1.1547135 1.1547135 1.1547135</scale_factors>
 							<Appearance>
 								<opacity>1</opacity>
 								<color>1 1 1</color>
@@ -1464,8 +1464,8 @@
 						<groups />
 					</WrapObjectSet>
 					<mass>0.64009132630712695</mass>
-					<mass_center>0 -0.12052499999999999 0</mass_center>
-					<inertia>0.0031209100000000002 0.00065115500000000005 0.00338537 0 0 0</inertia>
+					<mass_center>0 -0.13917185 0</mass_center>
+					<inertia>0.0041613069 0.00086822619 0.0045139281 0 0 0</inertia>
 				</Body>
 				<Body name="hand_l">
 					<FrameGeometry name="frame_geometry">
@@ -1730,7 +1730,26 @@
 						<socket_frame>..</socket_frame>
 						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 					</FrameGeometry>
-					<attached_geometry />
+					<attached_geometry>
+						<Mesh name="club_shaft_geom">
+							<socket_frame>..</socket_frame>
+							<scale_factors>1 1.156 1</scale_factors>
+							<Appearance>
+								<opacity>1.0</opacity>
+								<color>0.7 0.7 0.7</color>
+							</Appearance>
+							<mesh_file>golf_club_shaft.vtp</mesh_file>
+						</Mesh>
+						<Mesh name="club_head_geom">
+							<socket_frame>..</socket_frame>
+							<scale_factors>0.12 0.064 0.1</scale_factors>
+							<Appearance>
+								<opacity>1.0</opacity>
+								<color>0.2 0.2 0.2</color>
+							</Appearance>
+							<mesh_file>golf_club_head.vtp</mesh_file>
+						</Mesh>
+					</attached_geometry>
 					<WrapObjectSet name="wrapobjectset">
 						<objects />
 						<groups />
@@ -2001,7 +2020,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/femur_r</socket_parent>
-							<translation>-0.0079696008 -0.40188833 -0.0027090785</translation>
+							<translation>-0.0079695983 -0.4018882 -0.0027090776</translation>
 							<orientation>-1.64157 1.44618 1.5708</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="tibia_r_offset">
@@ -2010,7 +2029,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/tibia_r</socket_parent>
-							<translation>-0.0080324591 -0.0037488924 -0.0014742626</translation>
+							<translation>-0.0080324686 -0.0037488968 -0.0014742644</translation>
 							<orientation>-1.64157 1.44618 1.5708</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
@@ -2100,7 +2119,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/femur_r</socket_parent>
-							<translation>-0.0079696008 -0.40188833 -0.0027090785</translation>
+							<translation>-0.0079695983 -0.4018882 -0.0027090776</translation>
 							<orientation>0 0 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="patella_r_offset">
@@ -2197,7 +2216,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/tibia_r</socket_parent>
-							<translation>-0.0099294736 -0.42422608 0</translation>
+							<translation>-0.0099294854 -0.42422659 0</translation>
 							<orientation>0.175895 -0.105208 0.0186622</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="talus_r_offset">
@@ -2267,7 +2286,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/calcn_r</socket_parent>
-							<translation>0.16219389 -0.0020016524 0.0011094859</translation>
+							<translation>0.16219425 -0.0020016568 0.0011094883</translation>
 							<orientation>-3.1415899999999999 0.61990100000000004 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="toes_r_offset">
@@ -2414,7 +2433,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/femur_l</socket_parent>
-							<translation>-0.0079990646 -0.40337452 0.0027190882</translation>
+							<translation>-0.0079990697 -0.40337478 0.0027190899</translation>
 							<orientation>1.64157 -1.44618 1.5708</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="tibia_l_offset">
@@ -2423,7 +2442,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/tibia_l</socket_parent>
-							<translation>-0.0080291226 -0.0037211191 0.001473648</translation>
+							<translation>-0.0080291129 -0.0037211146 0.0014736463</translation>
 							<orientation>1.64157 -1.44618 1.5708</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
@@ -2513,7 +2532,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/femur_l</socket_parent>
-							<translation>-0.0079990646 -0.40337452 0.0027190882</translation>
+							<translation>-0.0079990697 -0.40337478 0.0027190899</translation>
 							<orientation>0 0 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="patella_l_offset">
@@ -2610,7 +2629,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/tibia_l</socket_parent>
-							<translation>-0.0099253045 -0.42108357 0</translation>
+							<translation>-0.0099252925 -0.42108306 0</translation>
 							<orientation>-0.175895 0.105208 0.0186622</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="talus_l_offset">
@@ -2680,7 +2699,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/calcn_l</socket_parent>
-							<translation>0.16907706 -0.0021108379 -0.0011669979</translation>
+							<translation>0.16907664 -0.0021108327 -0.001166995</translation>
 							<orientation>-3.1415899999999999 -0.61990100000000004 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="toes_l_offset">
@@ -2845,7 +2864,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/torso</socket_parent>
-							<translation>0.0032870839 0.40684826 0.22353004</translation>
+							<translation>0.003287082 0.40684803 0.22352991</translation>
 							<orientation>0 0 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="humerus_r_offset">
@@ -2939,7 +2958,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/humerus_r</socket_parent>
-							<translation>0.019146872 -0.41701403 -0.013977041</translation>
+							<translation>0.017665223 -0.38474409 -0.012895451</translation>
 							<orientation>-0.0228627 0.228018 0.0051688999999999997</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="ulna_r_offset">
@@ -2974,7 +2993,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/ulna_r</socket_parent>
-							<translation>-0.0067270000000000003 -0.013006999999999999 0.026082999999999999</translation>
+							<translation>-0.0078311015 -0.015141837 0.030363999</translation>
 							<orientation>-1.56884 0.056427999999999999 1.5361400000000001</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="radius_r_offset">
@@ -3018,7 +3037,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/radius_r</socket_parent>
-							<translation>-0.010240856 -0.27454969 0.015843816</translation>
+							<translation>-0.01024085 -0.27454955 0.015843807</translation>
 							<orientation>-1.5708 0 -1.5708</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="hand_r_offset">
@@ -3071,7 +3090,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/torso</socket_parent>
-							<translation>0.0032870839 0.40684826 -0.22353004</translation>
+							<translation>0.003287082 0.40684803 -0.22352991</translation>
 							<orientation>0 0 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="humerus_l_offset">
@@ -3165,7 +3184,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/humerus_l</socket_parent>
-							<translation>0.016346183 -0.35601573 0.011932564</translation>
+							<translation>0.016346189 -0.35601586 0.011932569</translation>
 							<orientation>0.0228627 -0.228018 0.0051688999999999997</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="ulna_l_offset">
@@ -3200,7 +3219,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/ulna_l</socket_parent>
-							<translation>-0.0067270000000000003 -0.013006999999999999 -0.026082999999999999</translation>
+							<translation>-0.0077677578 -0.015019359 -0.030118393</translation>
 							<orientation>1.56884 -0.056427999999999999 1.5361400000000001</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="radius_l_offset">
@@ -3244,7 +3263,7 @@
 								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
 							</FrameGeometry>
 							<socket_parent>/bodyset/radius_l</socket_parent>
-							<translation>-0.010158028 -0.27232913 -0.015715671</translation>
+							<translation>-0.010158015 -0.27232879 -0.015715651</translation>
 							<orientation>1.5708 0 1.5708</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="hand_l_offset">
@@ -3613,5 +3632,21 @@
 			<objects />
 			<groups />
 		</ComponentSet>
+		<ScalingMetadata>
+			<policy>fixed_mass</policy>
+			<scale_factors>
+				<femur_r>0.99222345</femur_r>
+				<femur_l>1.0258742</femur_l>
+				<tibia_r>0.96735239</tibia_r>
+				<tibia_l>0.96944673</tibia_l>
+				<calcn_r>1.0008284</calcn_r>
+				<calcn_l>1.0554164</calcn_l>
+				<humerus_r>1.3439762</humerus_r>
+				<humerus_l>1.2436236</humerus_l>
+				<radius_r>1.1641298</radius_r>
+				<radius_l>1.1547135</radius_l>
+				<torso>1.0418644</torso>
+			</scale_factors>
+		</ScalingMetadata>
 	</Model>
 </OpenSimDocument>
