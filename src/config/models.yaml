@@ -3,6 +3,7 @@
 # are superseded by the Matched Swing Program single source of truth.
 # See docs/development/matched_swing_program/README.md for authoritative physical
 # gates, engine qualification status, and run evidence.
+# See docs/plans/tour_baselines/README.md for Tour Baselines model coverage (TB-00 #10585).
 # =============================================================================
 models:
   # =============================================================================
