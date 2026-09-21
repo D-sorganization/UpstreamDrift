@@ -14,7 +14,7 @@
     "identical": 423,
     "diverged": 279,
     "ud-only": 1394,
-    "tools-only": 705,
+    "tools-only": 709,
     "spelling-only": 123
   },
   "packages": {
@@ -150,6 +150,13 @@
       "ud-only": 2,
       "tools-only": 0,
       "spelling-only": 5
+    },
+    "camera": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 4,
+      "spelling-only": 0
     },
     "canonical_core": {
       "identical": 0,
@@ -428,7 +435,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 29,
+      "tools-only": 30,
       "spelling-only": 0
     },
     "launcher_embed": {
@@ -799,7 +806,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 2,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "ux": {
@@ -4831,6 +4838,54 @@
       "ud_bytes": 17895,
       "tools_bytes": 5517,
       "byte_delta": 12378,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "camera/__init__.py",
+      "classification": "tools-only",
+      "package": "camera",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 1830,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "camera/dshow.py",
+      "classification": "tools-only",
+      "package": "camera",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 4567,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "camera/ffmpeg_source.py",
+      "classification": "tools-only",
+      "package": "camera",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 7450,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "camera/video_file_source.py",
+      "classification": "tools-only",
+      "package": "camera",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 4695,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10434,6 +10489,18 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 21602,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "launch_monitor/gspro_connect.py",
+      "classification": "tools-only",
+      "package": "launch_monitor",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 11714,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -33942,18 +34009,6 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 849,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "upstream_drift_tools/process_calculators/psa_package/References/3041-PID-ALL-2025-03-21 H2 Industry Recommendations.pdf",
-      "classification": "tools-only",
-      "package": "upstream_drift_tools",
-      "subpackage": "process_calculators",
-      "ud_bytes": null,
-      "tools_bytes": 12338662,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,

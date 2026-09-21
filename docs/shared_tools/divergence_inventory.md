@@ -33,6 +33,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `biomechanics` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 35 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
+| `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `capabilities.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
@@ -72,7 +73,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `launch_monitor` | 0 | 0 | 0 | 0 | 29 | 0 |
+| `launch_monitor` | 0 | 0 | 0 | 0 | 30 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -125,13 +126,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ui` | 0 | 0 | 0 | 27 | 9 | 0 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `upstream_drift_tools` | 0 | 0 | 0 | 0 | 2 | 0 |
+| `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1394** | **705** | **702** |
+| **Total** | **423** | **279** | **123** | **1394** | **709** | **702** |
 
 ## Diverged Files by Package
 
