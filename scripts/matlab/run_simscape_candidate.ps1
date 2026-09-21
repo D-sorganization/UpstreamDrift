@@ -89,6 +89,9 @@ $hostName = $env:COMPUTERNAME
 if (-not $hostName) { $hostName = [System.Net.Dns]::GetHostName() }
 
 if ($Replay) {
+    if ($Run -ne "two_window_fit_9967_102") {
+        throw "Replay only implemented for two_window_fit_9967_102; received -Run $Run"
+    }
     $matlab = Resolve-MatlabR2025b -Explicit $MatlabExe
     $sharedMatlab = Join-Path $repo "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared"
     $batch = @"
