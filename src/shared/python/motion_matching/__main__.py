@@ -78,15 +78,111 @@ def ledger_cli(args: argparse.Namespace) -> int:
         return 1
 
 
-def main() -> int:
-    """Parse CLI arguments and dispatch to subcommand."""
+def export_report_cli(args: argparse.Namespace) -> int:
+    """Generate fit-quality report from an execution receipt."""
+    from src.shared.python.motion_matching.export import export_report
+
+    try:
+        export_report(
+            receipt=args.receipt,
+            path=args.out,
+            candidate=args.candidate,
+        )
+        sys.stdout.write(f"Wrote fit-quality report to {args.out}\n")
+        return 0
+    except (OSError, ValueError, RuntimeError, KeyError) as exc:
+        _print_error(f"failed to export report: {exc}")
+        return 1
+
+
+def export_video_cli(args: argparse.Namespace) -> int:
+    """Generate 3D marker overlay video animation for a candidate."""
+    from src.shared.python.motion_matching.export import export_video
+
+    try:
+        export_video(
+            candidate=args.candidate,
+            engine=args.engine,
+            path=args.out,
+            fps=args.fps,
+            stride=args.stride,
+        )
+        sys.stdout.write(f"Wrote candidate video to {args.out}\n")
+        return 0
+    except (OSError, ValueError, RuntimeError, KeyError) as exc:
+        _print_error(f"failed to export video: {exc}")
+        return 1
+
+
+def _register_export_subparsers(
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    """Register export-report and export-video subcommands."""
+    report_parser = subparsers.add_parser(
+        "export-report", help="Export fit-quality report from receipt"
+    )
+    report_parser.add_argument(
+        "--receipt",
+        type=str,
+        required=True,
+        help="Path to execution receipt JSON",
+    )
+    report_parser.add_argument(
+        "--out",
+        type=str,
+        required=True,
+        help="Output report path (.md or .pdf)",
+    )
+    report_parser.add_argument(
+        "--candidate",
+        type=str,
+        default=None,
+        help="Optional path to candidate .npz package",
+    )
+
+    video_parser = subparsers.add_parser(
+        "export-video", help="Export marker overlay video for candidate"
+    )
+    video_parser.add_argument(
+        "--candidate",
+        type=str,
+        required=True,
+        help="Path to candidate .npz package",
+    )
+    video_parser.add_argument(
+        "--engine",
+        type=str,
+        required=True,
+        help="Physics engine name",
+    )
+    video_parser.add_argument(
+        "--out",
+        type=str,
+        required=True,
+        help="Output video path (.gif or .mp4)",
+    )
+    video_parser.add_argument(
+        "--fps",
+        type=int,
+        default=30,
+        help="Frames per second (default: 30)",
+    )
+    video_parser.add_argument(
+        "--stride",
+        type=int,
+        default=5,
+        help="Frame subsampling stride (default: 5)",
+    )
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Build top-level CLI argument parser."""
     parser = argparse.ArgumentParser(
         description="Motion matching utilities",
         prog="python3 -m src.shared.python.motion_matching",
     )
     subparsers = parser.add_subparsers(dest="command", help="Subcommand to run")
 
-    # Leaderboard subcommand
     leaderboard_parser = subparsers.add_parser(
         "leaderboard", help="Generate cross-engine leaderboard"
     )
@@ -103,7 +199,6 @@ def main() -> int:
         help="Output file path (default: LEADERBOARD.md)",
     )
 
-    # Ledger subcommand
     ledger_parser = subparsers.add_parser(
         "ledger", help="Scan receipts and generate matched swing ledger"
     )
@@ -119,11 +214,22 @@ def main() -> int:
         help="Custom output file path for ledger JSON",
     )
 
+    _register_export_subparsers(subparsers)
+    return parser
+
+
+def main() -> int:
+    """Parse CLI arguments and dispatch to subcommand."""
+    parser = _build_parser()
     args = parser.parse_args()
     if args.command == "leaderboard":
         return leaderboard_cli(args)
     if args.command == "ledger":
         return ledger_cli(args)
+    if args.command == "export-report":
+        return export_report_cli(args)
+    if args.command == "export-video":
+        return export_video_cli(args)
     parser.print_help()
     return 1
 
