@@ -26,8 +26,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .._geodesic import quaternion_geodesic_angles
+from .._series_interp import interp_xyz_series
 from ..club_target import ClubTarget
-from ..loaders._quaternion import slerp
+from ..loaders._quaternion import slerp_series
 
 # Public unit conversion constants.
 _MPS_TO_MPH = 2.236936292054402
@@ -144,42 +145,6 @@ def _detect_address_idx(
     return int(where[0])
 
 
-def _interp_xyz(
-    sim_t: NDArray[np.float64],
-    raw_t: NDArray[np.float64],
-    raw_xyz: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    out = np.empty((sim_t.shape[0], 3), dtype=np.float64)
-    for k in range(3):
-        out[:, k] = np.interp(sim_t, raw_t, raw_xyz[:, k])
-    return out
-
-
-def _slerp_series(
-    sim_t: NDArray[np.float64],
-    raw_t: NDArray[np.float64],
-    raw_q: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    out = np.empty((sim_t.shape[0], 4), dtype=np.float64)
-    last = raw_t.shape[0] - 1
-    for i, t in enumerate(sim_t):
-        if t <= raw_t[0]:
-            out[i] = raw_q[0]
-            continue
-        if t >= raw_t[last]:
-            out[i] = raw_q[last]
-            continue
-        j = int(np.searchsorted(raw_t, t)) - 1
-        j = max(0, min(j, last - 1))
-        span = raw_t[j + 1] - raw_t[j]
-        alpha = 0.0 if span == 0.0 else float((t - raw_t[j]) / span)
-        out[i] = slerp(raw_q[j], raw_q[j + 1], alpha)
-    # ⚡ Bolt: einsum is ~2x faster than np.linalg.norm(..., axis=1)
-    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
-    norms[norms == 0.0] = 1.0
-    return out / norms
-
-
 def _clubhead_speed_mph(
     time: NDArray[np.float64], clubhead: NDArray[np.float64]
 ) -> NDArray[np.float64]:
@@ -280,12 +245,12 @@ def compare_clubhead_traces(
     )
     common_t = _build_common_timegrid(t_meas, t_sim, o)
 
-    meas_club = _interp_xyz(common_t, t_meas, measured.clubhead)
-    sim_club = _interp_xyz(common_t, t_sim, simulated.clubhead)
-    meas_butt = _interp_xyz(common_t, t_meas, measured.butt)
-    sim_butt = _interp_xyz(common_t, t_sim, simulated.butt)
-    meas_q = _slerp_series(common_t, t_meas, measured.club_quat)
-    sim_q = _slerp_series(common_t, t_sim, simulated.club_quat)
+    meas_club = interp_xyz_series(common_t, t_meas, measured.clubhead)
+    sim_club = interp_xyz_series(common_t, t_sim, simulated.clubhead)
+    meas_butt = interp_xyz_series(common_t, t_meas, measured.butt)
+    sim_butt = interp_xyz_series(common_t, t_sim, simulated.butt)
+    meas_q = slerp_series(common_t, t_meas, measured.club_quat)
+    sim_q = slerp_series(common_t, t_sim, simulated.club_quat)
 
     delta_m = sim_club - meas_club
     delta_mm = delta_m * _M_TO_MM

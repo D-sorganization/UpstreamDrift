@@ -105,3 +105,29 @@ def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
     s0 = np.cos(theta) - dot * sin_theta / sin_theta_0
     s1 = sin_theta / sin_theta_0
     return s0 * a + s1 * b
+
+
+def slerp_series(
+    query_t: np.ndarray, raw_t: np.ndarray, raw_q: np.ndarray
+) -> np.ndarray:
+    """SLERP an ``(N, 4)`` quaternion series onto ``query_t``, clamping endpoints."""
+    query = np.asarray(query_t, dtype=np.float64)
+    source_t = np.asarray(raw_t, dtype=np.float64)
+    source_q = np.asarray(raw_q, dtype=np.float64)
+    out = np.empty((query.shape[0], 4), dtype=np.float64)
+    last = source_t.shape[0] - 1
+    for i, t in enumerate(query):
+        if t <= source_t[0]:
+            out[i] = source_q[0]
+            continue
+        if t >= source_t[last]:
+            out[i] = source_q[last]
+            continue
+        j = int(np.searchsorted(source_t, t)) - 1
+        j = max(0, min(j, last - 1))
+        span = source_t[j + 1] - source_t[j]
+        alpha = 0.0 if span == 0.0 else float((t - source_t[j]) / span)
+        out[i] = slerp(source_q[j], source_q[j + 1], alpha)
+    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
+    norms[norms == 0.0] = 1.0
+    return out / norms
