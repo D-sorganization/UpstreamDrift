@@ -1,5 +1,18 @@
 # Simscape Tour-Average Fit Continuation
 
+## Tour Baselines TB-00: Freeze Model Identities, Ownership, and Coverage (#10585)
+
+Branch `feat/tb00-model-identities-10585`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
+Initial dispatch TB-00 ([#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585)) implements canonical model identities, separates kinematic
+reconstruction models (which omit the club) from torque-driven pendulums (with simulated club)
+and flagship full-body engines. Evaluated upper-body golfer constraint Jacobian SVD proving
+rank 3 (5 independent DOFs). Implemented two-capture coverage matrix across Driver and 7-Iron,
+non-golf tool exclusions, and closed-issue reconciliation (#9914, #9921, #10003). Verified
+Tools pin at `a9ed0e7c5c6905b1164082659051d6381068052d` and published documentation under
+`docs/plans/tour_baselines/`. All 13 unit tests pass, ruff check and format pass, mypy passes.
+Next step: Merge TB-00 PR; next dispatch is TB-01 ([#10586](https://github.com/D-sorganization/UpstreamDrift/issues/10586): Audit Tour Targets, Marker Semantics,
+Events, and Provenance).
+
 ## MuJoCo Saved-Control Replay (#10336)
 
 Branch `feat/10336-mujoco-candidate-replay`; implementation `94ccb1825`;
