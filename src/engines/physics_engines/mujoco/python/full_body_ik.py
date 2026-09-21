@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
     _rotation_error,
+    _skew3,
     _validate_axis_spec,
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
@@ -326,12 +327,30 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             jacs.append(w * (jp_a - jp_b)[:, self._dof])
         if rotation_weight > 0:
             wr = np.sqrt(rotation_weight)
-            rot = _rotation_error(
-                self.data.site_xmat[a].reshape(3, 3),
-                self.data.site_xmat[b].reshape(3, 3),
+            r_mat = (
+                self.data.site_xmat[a].reshape(3, 3)
+                @ self.data.site_xmat[b].reshape(3, 3).T
             )
+            rot = 0.5 * np.array(
+                [
+                    r_mat[2, 1] - r_mat[1, 2],
+                    r_mat[0, 2] - r_mat[2, 0],
+                    r_mat[1, 0] - r_mat[0, 1],
+                ]
+            )
+            ma = np.empty((3, 3))
+            for i in range(3):
+                e = np.zeros(3)
+                e[i] = 1.0
+                a_mat = _skew3(e)
+                m = a_mat @ r_mat + r_mat.T @ a_mat
+                ma[:, i] = 0.25 * np.array(
+                    [m[2, 1] - m[1, 2], m[0, 2] - m[2, 0], m[1, 0] - m[0, 1]]
+                )
+            mb = -ma.T
+            j_rot = ma @ jr_a + mb @ jr_b
             rows.append(wr * rot)
-            jacs.append(wr * (jr_a - jr_b)[:, self._dof])
+            jacs.append(wr * j_rot[:, self._dof])
 
     def _append_ground(
         self,

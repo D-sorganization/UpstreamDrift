@@ -176,6 +176,18 @@ def build_parser() -> argparse.ArgumentParser:
         default="enforce",
         help="joint limit policy for Pink solver",
     )
+    parser.add_argument(
+        "--ik-backend",
+        choices=["scipy", "mujoco-minimize"],
+        default="scipy",
+        help="marker inverse kinematics solver backend (default: scipy)",
+    )
+    parser.add_argument(
+        "--tracking",
+        choices=["computed-torque", "mj-inverse"],
+        default="computed-torque",
+        help="forward dynamics tracking controller (default: computed-torque)",
+    )
     return parser
 
 
@@ -307,6 +319,8 @@ def _calibrate_and_scale(
     spec_bytes = scaled_path.read_bytes()
 
     lane.plant = get_plant(ctx.engine, scaled_spec)
+    if hasattr(lane.plant, "ik_backend"):
+        lane.plant.ik_backend = ctx.args.ik_backend
     offsets, calibration2 = lane.calibrate_legs(
         spec_bytes, fixed, scaled_offsets(offsets, femur_scale, tibia_scale), address.q
     )
@@ -508,7 +522,7 @@ def _simulate_and_receipt(
         q_track, zmp, shooting_report = shooting_fit(
             lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain
         )
-    record, sim_q = replay(sim, lane, q_track)
+    record, sim_q = replay(sim, lane, q_track, tracking_backend=args.tracking)
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -521,6 +535,7 @@ def _simulate_and_receipt(
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
             shooting_report=shooting_report,
+            tracking_backend=args.tracking,
         )
     )
     np.savez(
@@ -548,6 +563,8 @@ def _simulate_and_receipt(
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
+            ik_backend=args.ik_backend,
+            tracking_backend=args.tracking,
             base_spec=base_spec,
             spec_path=Path(args.spec),
             scaled_path=out_dir / "full_body_spec_hipcal_scaled.json",
@@ -593,6 +610,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     labels = tuple({**upper, **LEG_SEEDS})
 
     plant = get_plant(ctx.engine, base_spec)
+    if hasattr(plant, "ik_backend"):
+        plant.ik_backend = args.ik_backend
     lane = Lane(labels, ctx.c3d_path, plant=plant)
     configure_lane(lane, base_spec)
     if args.bound_wrists and args.free_wrists:
@@ -637,6 +656,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             ref_fits=ref_fits,
             ref_errors=ref_errors,
             constrained_ik=constrained_ik_dict,
+            ik_backend=args.ik_backend,
         )
     )
     np.savez(

@@ -36,6 +36,7 @@ class MujocoMatchingPlant:
         self.adapter: NativeMujocoFullBodyModel = NativeMujocoFullBodyModel(
             self._spec_bytes
         )
+        self.ik_backend: str = "scipy"
 
     @property
     def engine_name(self) -> str:
@@ -56,10 +57,6 @@ class MujocoMatchingPlant:
     def create_ik(
         self, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> BaseFullBodyIK:
-        from src.engines.physics_engines.mujoco.python.full_body_ik import (
-            FullBodyMarkerKinematics,
-        )
-
         ordered = {
             label: (
                 attachments[label][0],
@@ -71,6 +68,17 @@ class MujocoMatchingPlant:
             )
             for label in attachments
         }
+        if getattr(self, "ik_backend", "scipy") == "mujoco-minimize":
+            from src.engines.physics_engines.mujoco.python.ik_minimize import (
+                MujocoMinimizeFullBodyIK,
+            )
+
+            return MujocoMinimizeFullBodyIK(self.adapter, ordered)
+
+        from src.engines.physics_engines.mujoco.python.full_body_ik import (
+            FullBodyMarkerKinematics,
+        )
+
         return FullBodyMarkerKinematics(self.adapter, ordered)
 
     def frame_poses(

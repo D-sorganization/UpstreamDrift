@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open the PR with `Closes #9548`, then wire the verdict report into the first UI/report consumer of the interval solver when one lands.
 - **Evidence:** tests/shared_contracts/test_impact_interval_provider.py (interrupted compression 32.54 J stored / 0 J release / −0.063 J signed residual; clipping release 1.71 J; perturbed law residual > 0.5 J blocked; halving dt lowers both residuals).
 
+### DL-#10366 · MS-16: MuJoCo Native Tools — Marker IK on Minimize, Computed Torque on Mj_Inverse
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10366 (MS-16, epic #10363)
+- **Branch:** feat/10366-mujoco-native-tools
+- **PR:** #10662 (auto-merge enabled)
+- **Paths:** src/engines/physics_engines/mujoco/python/ik_minimize.py; src/engines/physics_engines/mujoco/python/inverse_dynamics.py; src/engines/physics_engines/mujoco/python/full_body_ik.py; src/shared/python/motion_matching/pipeline/cli.py; src/shared/python/motion_matching/pipeline/lane.py; src/shared/python/motion_matching/pipeline/dynamics.py; src/shared/python/motion_matching/pipeline/reference.py; src/shared/python/motion_matching/pipeline/receipt.py; src/shared/python/motion_matching/pipeline/receipt_components.py; src/shared/python/motion_matching/pipeline/receipt_dynamics.py; src/shared/python/motion_matching/pipeline/receipt_schema.py; src/shared/python/motion_matching/pipeline/plants/mujoco_plant.py; src/shared/python/motion_matching/pipeline/plants/drake_plant.py; src/shared/python/motion_matching/pipeline/plants/pinocchio_plant.py; tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py; docs/development/full_body_models/evidence/ground_support/anthro_driver_native_tools/
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 (11/11 unit tests pass — 5 IK minimize + 6 mj_inverse; pipeline ran to completion exit 0 with `--engine mujoco --ik-backend mujoco-minimize --tracking mj-inverse --capture driver`; receipt at anthro_driver_native_tools/receipt.json confirms `ik_backend` and `tracking_backend` fields; ruff, black clean; mypy clean pending commit)
+- **Summary:** Implemented `MujocoMinimizeFullBodyIK` using `mujoco.minimize.least_squares` with exact analytical Lie algebra rotation Jacobians. Implemented `MujocoInverseDynamics` using `mujoco.mj_inverse` for computed torque tracking. Wired `--ik-backend mujoco-minimize` and `--tracking mj-inverse` flags through the pipeline CLI, receipt, lane, and plant layers. Fixed `lane.kinematics()` to re-instantiate the plant when spec bytes change (preserving `ik_backend`), resolving `ValueError: Unknown contact spheres: ['toe_l', 'toe_r']`. Added `_spec_bytes` attribute to Drake and Pinocchio plants for spec-change detection.
+- **Next step:** Push branch, open PR with `Closes #10366`, enable auto-merge, await CI green, release lease, delete worktree.
+- **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_native_tools/receipt.json (ik_backend: mujoco-minimize, tracking_backend: mj-inverse); tests/unit/motion_matching/test_mujoco_ik_minimize.py; tests/unit/motion_matching/test_mujoco_mj_inverse.py.
+
 ### DL-#10359 · Wire Video and Fit-Quality Report Export
 
 - **State:** in_review
