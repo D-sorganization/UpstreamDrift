@@ -897,12 +897,31 @@ class FullBodySimulator:
         self.root = np.arange(6)
         self.actuated = np.arange(6, self.nv)
         self.lower_limb = np.arange(adapter.upper_body_coordinates, self.nv)
-        model = adapter.model
-        opt = model.opt
-        self.mass_kg = float(np.sum(model.body_mass))
-        self.gravity = np.array(opt.gravity, dtype=float)
-        # Adapter force vectors follow MuJoCo DOF order; states follow spec order.
-        self._dof = np.array([model.joint(name).dofadr[0] for name in names])
+        if hasattr(adapter, "mass_kg"):
+            self.mass_kg = float(adapter.mass_kg)
+            self.gravity = np.asarray(
+                getattr(adapter, "gravity", [0.0, 0.0, -9.81]), dtype=float
+            )
+            self._dof = np.arange(self.nv)
+        elif hasattr(adapter, "model") and hasattr(adapter.model, "opt"):
+            model = adapter.model
+            opt = model.opt
+            self.mass_kg = float(np.sum(model.body_mass))
+            self.gravity = np.array(opt.gravity, dtype=float)
+            # Adapter force vectors follow MuJoCo DOF order; states follow spec order.
+            self._dof = np.array([model.joint(name).dofadr[0] for name in names])
+        else:
+            spec = getattr(adapter, "specification", {})
+            bodies = spec.get("bodies", {})
+            body_list = bodies.values() if isinstance(bodies, dict) else bodies
+            self.mass_kg = float(
+                sum(b.get("mass_kg", 0.0) for b in body_list)
+                or spec.get("subject", {}).get("mass_kg", 75.0)
+            )
+            self.gravity = np.asarray(
+                spec.get("gravity_m_s2", [0.0, 0.0, -9.81]), dtype=float
+            )
+            self._dof = np.arange(self.nv)
 
     def _map(self, values: Array) -> dict[str, float]:
         return dict(zip(self.names, values.tolist(), strict=True))
@@ -910,6 +929,8 @@ class FullBodySimulator:
     def root_translation_axes(self, q: Array) -> Array:
         """World directions (columns) of the three root slide coordinates at ``q``."""
         adapter = self.adapter
+        if not hasattr(adapter, "model") or not hasattr(adapter.model, "joint"):
+            return np.eye(3)
         adapter.frame_poses(self._map(q))
         model = adapter.model
         return np.column_stack(
@@ -951,6 +972,8 @@ class FullBodySimulator:
     def affine_dynamics(self, q: Array, v: Array) -> tuple[Array, Array]:
         """Return ``(A, b)`` with ``a = A @ tau_actuated + b`` at the state."""
         adapter = self.adapter
+        if hasattr(adapter, "affine_dynamics"):
+            return adapter.affine_dynamics(q, v)
         bias, contact, _ = adapter.generalized_forces(self._map(q), self._map(v))
         mj, model, data = adapter._mj, adapter.model, adapter.data
         mass = np.zeros((model.nv, model.nv))
@@ -997,6 +1020,8 @@ class FullBodySimulator:
     def centre_of_mass(self, q: Array) -> tuple[Array, Array]:
         """Whole-body centre of mass and its Jacobian (spec coordinate order)."""
         adapter = self.adapter
+        if hasattr(adapter, "centre_of_mass"):
+            return adapter.centre_of_mass(q)
         adapter.frame_poses(self._map(q))
         mj, model, data = adapter._mj, adapter.model, adapter.data
         mj.mj_comPos(model, data)
@@ -1012,14 +1037,25 @@ class FullBodySimulator:
         n = n / np.linalg.norm(n)
         points: dict[str, Array] = {}
         lowest = np.inf
-        adapter_spheres = self.adapter._spheres
-        adapter_data = self.adapter.data
-        for name, info in adapter_spheres.items():
-            site_id = info["site_id"]
-            centre = adapter_data.site_xpos[site_id].copy()
-            height = float(centre @ n - plane.height_m)
-            lowest = min(lowest, height - info["radius"])
-            points[name] = centre - (height) * n
+        if hasattr(self.adapter, "get_sphere_kinematics"):
+            zero_rates = dict.fromkeys(self.names, 0.0)
+            coords = self._map(q)
+            for name in self.adapter._spheres:
+                pos, _, radius = self.adapter.get_sphere_kinematics(
+                    name, coords, zero_rates
+                )
+                height = float(pos @ n - plane.height_m)
+                lowest = min(lowest, height - radius)
+                points[name] = pos - height * n
+        else:
+            adapter_spheres = self.adapter._spheres
+            adapter_data = self.adapter.data
+            for name, info in adapter_spheres.items():
+                site_id = info["site_id"]
+                centre = adapter_data.site_xpos[site_id].copy()
+                height = float(centre @ n - plane.height_m)
+                lowest = min(lowest, height - info["radius"])
+                points[name] = centre - (height) * n
         report = support_report(
             samples, points, plane, self.mass_kg, self.gravity.tolist()
         )
@@ -1113,11 +1149,27 @@ def preload_feet(
     plane = adapter.ground_plane
     n = np.asarray(plane.normal, dtype=float)
     n = n / np.linalg.norm(n)
-    adapter.frame_poses(simulator._map(q_out))
-    centres = np.array(
-        [adapter.data.site_xpos[i["site_id"]] for i in adapter._spheres.values()]
-    )
-    radii = np.array([i["radius"] for i in adapter._spheres.values()])
+    if hasattr(adapter, "get_sphere_kinematics"):
+        zero_rates = dict.fromkeys(simulator.names, 0.0)
+        coords = simulator._map(q_out)
+        centres = np.array(
+            [
+                adapter.get_sphere_kinematics(s, coords, zero_rates)[0]
+                for s in adapter._spheres
+            ]
+        )
+        radii = np.array(
+            [
+                adapter.get_sphere_kinematics(s, coords, zero_rates)[2]
+                for s in adapter._spheres
+            ]
+        )
+    else:
+        adapter.frame_poses(simulator._map(q_out))
+        centres = np.array(
+            [adapter.data.site_xpos[i["site_id"]] for i in adapter._spheres.values()]
+        )
+        radii = np.array([i["radius"] for i in adapter._spheres.values()])
     lowest = float(np.min(centres @ n - radii)) - plane.height_m + depth
     q_out[:3] += np.linalg.solve(simulator.root_translation_axes(q_out), -lowest * n)
     return q_out
@@ -1147,6 +1199,12 @@ def joint_natural_frequencies(
 def _planted_coupling(simulator: FullBodySimulator) -> Array:
     """``S`` with ``v_root = S v_legs`` when every contact sphere is held still."""
     adapter = simulator.adapter
+    if hasattr(adapter, "_planted_coupling"):
+        return adapter._planted_coupling(simulator)
+    if hasattr(adapter, "sphere_jacobians"):
+        jac_feet = adapter.sphere_jacobians()
+        legs = simulator.lower_limb
+        return -np.linalg.pinv(jac_feet[:, simulator.root]) @ jac_feet[:, legs]
     mj, model, data = adapter._mj, adapter.model, adapter.data
     rows = []
     for info in adapter._spheres.values():
@@ -1168,9 +1226,10 @@ def _root_regulation_acceleration(
 ) -> Array:
     """Lower-limb acceleration steering the root (pelvis) pose to its reference."""
     adapter = simulator.adapter
-    adapter.frame_poses(simulator._map(q))
-    mj = adapter._mj
-    mj.mj_comPos(adapter.model, adapter.data)
+    if hasattr(adapter, "_mj"):
+        adapter.frame_poses(simulator._map(q))
+        mj = adapter._mj
+        mj.mj_comPos(adapter.model, adapter.data)
     coupling = _planted_coupling(simulator)
     root = simulator.root
     wanted = gains[0] * (q_ref[root] - q[root]) + gains[1] * (v_ref[root] - v[root])
@@ -1343,6 +1402,8 @@ def _compute_frame_momentum(
     adapter: Any, simulator: FullBodySimulator, q: Array, v: Array
 ) -> tuple[Array, Array, Array]:
     """Whole-body CoM position, linear momentum, and angular momentum."""
+    if hasattr(adapter, "_compute_frame_momentum"):
+        return adapter._compute_frame_momentum(simulator, q, v)
     adapter.frame_poses(simulator._map(q))
     adapter.data.qvel[simulator._dof] = v
     adapter._mj.mj_forward(adapter.model, adapter.data)
@@ -1418,14 +1479,30 @@ def reference_zmp(
         reaction = (p1 - p0) / dt - simulator.gravity * mass
         moment = (l1 - l0) / dt
         point = _compute_zmp_point(c0, reaction, moment, ground)
-        adapter.frame_poses(simulator._map(ref[k]))
-        centres = np.array(
-            [
-                adapter.data.site_xpos[adapter._spheres[s]["site_id"]]
-                for s in sphere_names
-            ]
-        )
-        radii = np.array([adapter._spheres[s]["radius"] for s in sphere_names])
+        if hasattr(adapter, "get_sphere_kinematics"):
+            coords = simulator._map(ref[k])
+            zero_rates = dict.fromkeys(simulator.names, 0.0)
+            centres = np.array(
+                [
+                    adapter.get_sphere_kinematics(s, coords, zero_rates)[0]
+                    for s in sphere_names
+                ]
+            )
+            radii = np.array(
+                [
+                    adapter.get_sphere_kinematics(s, coords, zero_rates)[2]
+                    for s in sphere_names
+                ]
+            )
+        else:
+            adapter.frame_poses(simulator._map(ref[k]))
+            centres = np.array(
+                [
+                    adapter.data.site_xpos[adapter._spheres[s]["site_id"]]
+                    for s in sphere_names
+                ]
+            )
+            radii = np.array([adapter._spheres[s]["radius"] for s in sphere_names])
         touching = (centres @ n - radii - ground.height_m) <= contact_tolerance_m
         feet = centres[touching] if touching.sum() >= 3 else centres
         hull = feet[:, :2]
