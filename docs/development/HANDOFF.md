@@ -46,6 +46,15 @@
 - Limitations: kinematic slice only; legacy source `u` is 38-DOF actuated so sliced candidate is kinematic profile; Simscape R2025b native replay and boundary-load acceptance unqualified.
 - Next action: drive PR #10665 CI green; Simscape R2025b native replay on DeskComputer.
 
+## MS-52 MyoSuite Kinematic Replay #10345 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/issue-10345-local`.
+- Branch: `fix/issue-10345-ms-52-local`; PR #10666. Governing issue #10345 (epic #10363).
+- Delivered: `retarget.py`, `replay.py`, `golfer_scene.py`, `coordinate_map_anthro.json`, `viz/render_replay.py`; unit/native tests; evidence `evidence/matched/driver_g1_myosuite/{candidate.npz,receipt.json,playback.gif}`.
+- Validation: `pytest tests/unit/engines/myosuite/test_retarget.py tests/myosuite/test_replay_native.py -q`; cross-engine registration; ledger/status refresh for 99 receipts.
+- Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
+- Next action: merge PR #10666 after rebase CI green; teardown worktree.
+
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
