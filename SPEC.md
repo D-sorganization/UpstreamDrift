@@ -1,3 +1,34 @@
+## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
+
+Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:
+- **Solve Diagnostics & Multi-Start IK (`src/engines/physics_engines/pinocchio/python/marker_kinematics.py`)**:
+  - Implements `SolveDiagnostics` dataclass capturing iterations, final cost, marker RMS, closure error, projected gradient norm, active bounds count, convergence flag, and cost decrease.
+  - Implements `solve_frame_multi_start` evaluating candidate initializations and estimating unconstrained geometric tracking floors with and without weld closure.
+  - Implements `refine_overlapping_window` with bounded window blending and temporal regularization.
+- **Kinematic Smoothing & Acceptance Auditing (`src/shared/python/motion_matching/kinematic_smoothing.py`)**:
+  - Adds zero-phase Butterworth smoothing with verified \(q, v, a\) derivative compatibility (\(\dot{q} \approx v\), \(\dot{v} \approx a\)), boundary spike auditing (`BoundarySpikeAudit`), and cutoff frequency sensitivity analysis.
+  - Enforces physiological human wrist range of motion compliance producing zero violations (MM-2, #10104).
+  - Enforces left elbow pit up-and-inward alignment at address posture (MM-5, #10107).
+  - Enforces strict separation of driver and 7-iron calibration provenance in acceptance gating.
+
+## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
+
+Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
+- **Pelvis-Yaw Formulations & Contract Enforcement (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `FitWeights`: Added validated non-negative weight `pelvis_yaw: float = 0.0`.
+  - `MarkerTargets`: Added `waist_indices` resolving indices of `WaistLeft` and `WaistRight` markers, or `(-1, -1)` if absent.
+- **Node Cost & Dynamics Integration (`src/engines/physics_engines/pinocchio/python/crocoddyl_action.py`)**:
+  - `_NodeCost`: Evaluates 2-component unit vector difference residual $r_{yaw} = w_{yaw} \cdot (\hat{u} - \hat{u}_{tgt})$ via `compute_pelvis_yaw_residual_and_derivative`.
+  - Cost value adds $0.5 \cdot \|r_{yaw}\|^2$.
+  - Analytic gradient contributes $J_{yaw}^T r_{yaw}$ to configuration gradient $L_x[:n]$.
+  - Gauss-Newton Hessian contributes $J_{yaw}^T J_{yaw}$ to configuration Hessian $L_{xx}[:n, :n]$.
+  - Wired waist indices through `ImplicitEulerAction` and `TerminalAction`.
+- **Receipt & CLI Parameterization (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Added CLI argument `--pelvis-yaw-weight` forwarded to `FitWeights`.
+  - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
+- **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
+  - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
+
 ## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
 
 Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
@@ -6421,6 +6452,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
@@ -6436,6 +6468,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
+| 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
