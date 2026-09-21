@@ -17,6 +17,7 @@ state in degrees.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 
 import numpy as np
@@ -27,10 +28,16 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
 )
 from src.tools.pose_studio.core import JOINT_REGION_LAYOUT
 
-# Reasonable default range for a 1-DOF revolute golfer joint.  Engine
-# adapters can report tighter limits via their JointSlot; if so the
-# tighter range overrides this default.
+# Reasonable default range for a 1-DOF revolute golfer joint.  A joint
+# absent from the mapping passed to :meth:`JointPanel.set_limits` keeps
+# this default; the active engine's :class:`LiveKinematicsService` can
+# report a tighter range via ``joint_limits()`` (issue #8887).
 _DEFAULT_DEG_RANGE: tuple[float, float] = (-180.0, 180.0)
+
+# Error-state border, matching the shared "recording/error" red already
+# used for status indication elsewhere in the theme
+# (``Styles.STATUSBAR_RECORDING``, #8885 tracks consolidating these).
+_ERROR_BORDER_STYLE = "border: 2px solid #e74c3c;"
 
 
 class JointPanel(QtWidgets.QScrollArea):
@@ -164,6 +171,57 @@ class JointPanel(QtWidgets.QScrollArea):
                 spin.setSingleStep(0.5)
                 spin.setValue(current_deg)
             del blocker
+
+    def set_limits(self, limits: Mapping[str, tuple[float, float]]) -> None:
+        """Re-range every joint's slider + spinbox to *limits* (degrees).
+
+        A joint absent from *limits* keeps :data:`_DEFAULT_DEG_RANGE`. Qt
+        itself clamps a slider/spinbox's current value into a narrowed
+        ``[minimum, maximum]``, so a value that is no longer valid moves
+        without this method needing to compute or re-emit it.
+
+        Parameters
+        ----------
+        limits
+            Mapping of canonical joint name to ``(lower_deg, upper_deg)``.
+        """
+        if not isinstance(limits, Mapping):
+            raise TypeError(f"limits must be a Mapping, got {type(limits).__name__}")
+        for name in REFERENCE_GOLFER_FIELDS:
+            lower_deg, upper_deg = limits.get(name, _DEFAULT_DEG_RANGE)
+            if not (math.isfinite(lower_deg) and math.isfinite(upper_deg)):
+                raise ValueError(
+                    f"limits[{name!r}] must be finite; got "
+                    f"({lower_deg!r}, {upper_deg!r})"
+                )
+            if lower_deg > upper_deg:
+                raise ValueError(
+                    f"limits[{name!r}] lower must be <= upper; got "
+                    f"({lower_deg!r}, {upper_deg!r})"
+                )
+            self._apply_joint_limit(name, lower_deg, upper_deg)
+
+    def _apply_joint_limit(self, name: str, lower_deg: float, upper_deg: float) -> None:
+        slider = self._sliders[name]
+        spin = self._spinboxes[name]
+        slider.setMinimum(int(lower_deg * 10))
+        slider.setMaximum(int(upper_deg * 10))
+        spin.setMinimum(self._to_display_value(lower_deg))
+        spin.setMaximum(self._to_display_value(upper_deg))
+
+    def set_error(self, name: str, active: bool) -> None:
+        """Show or clear the invalid-edit border on joint *name*'s spinbox.
+
+        Parameters
+        ----------
+        name
+            Canonical joint name; must be a known joint.
+        active
+            ``True`` to red-border the spinbox, ``False`` to clear it.
+        """
+        if name not in self._spinboxes:
+            raise KeyError(f"unknown joint name {name!r}")
+        self._spinboxes[name].setStyleSheet(_ERROR_BORDER_STYLE if active else "")
 
     def joint_widgets(self) -> dict[str, QtWidgets.QWidget]:
         """Return a flat dict of every joint's spinbox + slider, keyed

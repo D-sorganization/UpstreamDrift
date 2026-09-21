@@ -223,6 +223,77 @@ def test_gui_apply_pose_refreshes_stale_status_pill_on_mock_downgrade(
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_engine_selected_reranges_joint_limits(mock_qapp) -> None:
+    """Issue #8887: switching engines must re-apply the new engine's
+    reported joint limits, not leave every slider at the generic default."""
+    win = PoseStudioWindow()
+    win._engine_controller.switch_engine = MagicMock(return_value=EngineStatus.MOCK)
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    win._engine_controller.joint_limits_deg = MagicMock(
+        return_value={joint: (-10.0, 120.0)}
+    )
+
+    win._on_engine_selected("mujoco")
+
+    win._engine_controller.joint_limits_deg.assert_called_once()
+    win.joint_panel._sliders[joint].setMinimum.assert_called_with(-100)
+    win.joint_panel._sliders[joint].setMaximum.assert_called_with(1200)
+    win.joint_panel._spinboxes[joint].setMinimum.assert_called_with(-10.0)
+    win.joint_panel._spinboxes[joint].setMaximum.assert_called_with(120.0)
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited_rejected_gives_visible_feedback(mock_qapp) -> None:
+    """Issue #8887: a rejected edit must name itself in the status label,
+    not just log a warning (the offending joint here has no widget to
+    red-border since it is not a real canonical joint name)."""
+    win = PoseStudioWindow()
+
+    win._on_angle_edited("unknown_joint", 45.0)
+
+    win.status_label.setText.assert_called_once()
+    message = win.status_label.setText.call_args.args[0]
+    assert "unknown_joint" in message
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited_rejected_real_joint_reddens_spinbox(mock_qapp) -> None:
+    """A rejected edit on a real joint must red-border its spinbox."""
+    win = PoseStudioWindow()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+
+    # Force a rejection on a real joint by making CanonicalPose reject it.
+    with patch(
+        "src.tools.pose_studio.gui.CanonicalPose", side_effect=ValueError("boom")
+    ):
+        win._on_angle_edited(joint, 45.0)
+
+    style_call = win.joint_panel._spinboxes[joint].setStyleSheet.call_args
+    assert "border" in style_call.args[0]
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited_success_clears_prior_error(mock_qapp) -> None:
+    win = PoseStudioWindow()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+
+    # First, a rejected edit on this joint leaves a status message and a
+    # red border.
+    with patch(
+        "src.tools.pose_studio.gui.CanonicalPose", side_effect=ValueError("boom")
+    ):
+        win._on_angle_edited(joint, 45.0)
+    reject_style = win.joint_panel._spinboxes[joint].setStyleSheet.call_args.args[0]
+    assert "border" in reject_style
+
+    # A subsequent valid edit must clear the stale status message and
+    # clear any red border on the edited joint's spinbox.
+    win._on_angle_edited(joint, 10.0)
+    win.status_label.setText.assert_called_with("")
+    win.joint_panel._spinboxes[joint].setStyleSheet.assert_called_with("")
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
 def test_gui_main(mock_qapp) -> None:
     # Mock QApplication and its instance method
     mock_app_instance = MagicMock()
