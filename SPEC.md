@@ -1,3 +1,28 @@
+## Tour Baselines Swing Planes, Fixed Geometry, and Feasible Initial States (TB-03, #10588)
+
+Calibrates swing planes, fixed geometry, and feasible initial states under the Tour Baselines program:
+- **Rigid Swing Plane Calibration (`src/shared/python/motion_matching/projection_2d.py`)**:
+  - Implements `CalibratedSwingPlane` with single $SE(3)$ transformation matrix ($T_{w \to p}$ and $T_{p \to w}$), orthonormal right-handed basis ($SO(3)$, $\det = +1$), inclination, azimuth, and geometric projection residual diagnostics.
+  - Implements `estimate_swing_plane` estimating one rigid plane across a declared capture window from valid weighted observations; explicitly handles degeneracy (collinear points, rank $< 2$) and improper reflection.
+  - Forbids per-frame plane re-fitting to prevent masking true dynamic and kinematic mismatch.
+  - Preserves 3D residuals via `GeometricProjectionResidual` reporting physical RMSE and maximum deviation.
+  - Transforms world gravity into the calibrated plane frame, yielding effective in-plane gravity $g \cos(\beta)$.
+  - Implements `project_to_calibrated_plane` and backward-compatible `project_to_2d`.
+- **Fixed Geometry Calibration & Identifiability Ranking (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Calibrates positive bounded link lengths ($L_1 \in [0.4, 0.9]\text{ m}$, $L_2 \in [0.7, 1.3]\text{ m}$) from observed landmark distances.
+  - Constrains non-identifiable mass/inertia parameters ($m_1, m_2, m_{\text{head}}, I_1$) to validated priors (`GolfModelParams`).
+  - Implements `IdentifiabilityDiagnostic` reporting rank, condition number, and unidentifiable parameter flags.
+- **Initial States Mapping & Forward Kinematics Verification (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Maps $t_0$ observations to double pendulum generalized coordinates $q_0 = (\theta_1, \theta_2)$ and velocities $v_0 = (\omega_1, \omega_2)$ with proper angle unwrapping into $(-\pi, \pi]$.
+  - Rejects window gap crossing during velocity estimation with `ValueError`.
+  - Verifies exact forward kinematics agreement: $FK(q_0) = p_{\text{observed}}(t_0)$.
+- **Prescribed Moving-Hub Power Tracking (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Tracks external hub trajectory $\mathbf{r}_{\text{hub}}(t)$, velocity $\dot{\mathbf{r}}_{\text{hub}}(t)$, and power contribution $P_{\text{hub}}(t) = \mathbf{F}_{\text{hub}}(t) \cdot \dot{\mathbf{r}}_{\text{hub}}(t)$.
+  - Evaluates integrated external work $W_{\text{hub}} = \int P_{\text{hub}}(t) dt$ and prevents labeling externally driven base motion as an unforced baseline.
+- **Evidence & Verification**:
+  - Unit test suites in `tests/unit/motion_matching/test_projection_2d.py` and `tests/unit/tour_baselines/test_calibration.py` (10 tests, 60 total in tour baselines / projection suite).
+  - Published comprehensive architectural documentation in `docs/plans/tour_baselines/plane_calibration_and_initial_states.md`.
+
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
 Defines versioned baseline packages, fit metrics, and frozen qualification profiles under the Tour Baselines program:
