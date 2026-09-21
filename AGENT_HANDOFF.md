@@ -10,8 +10,17 @@ TB-02 ([#10587](https://github.com/D-sorganization/UpstreamDrift/issues/10587)) 
 - Formulates physical 3D Euclidean marker RMSE, p95, max, per-marker, per-phase, endpoint, and impact errors, distinct from optimizer loss, bound to cryptographic landmark signatures.
 - Froze numeric qualification profiles for authoritative full-body G1/G2/G3 and reduced educational models (planar driven pendulum, upper-body golfer, triple pendulum) with documented attainable-geometry rationale without relaxing full-body thresholds.
 - Provided clean-machine export/import with array checksum validation.
-- All 49 unit tests pass in `tests/unit/tour_baselines/` and 45/45 motion-matching tests pass; ruff check/format clean; mypy passes on all 14 files; architecture budget passes with 0 violations; check_file_size_budget passes; check_lod clean with 0 violations.
+- All 50 unit tests pass in `tests/unit/tour_baselines/` and 45/45 motion-matching tests pass; ruff check/format clean; mypy passes on all 14 files; architecture budget passes with 0 violations; check_file_size_budget passes; check_lod clean with 0 violations.
   Next step: Merge TB-02 PR; next dispatch is TB-03 ([#10588](https://github.com/D-sorganization/UpstreamDrift/issues/10588): Prescribe Inputs and Trajectory Fitting Pipeline).
+
+## Club-Only and Neural Matching Planning (2026-09-20)
+
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
+- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md).
+- **State:** Planning only. Four unique workbook trials audited; source event parsing failure reproduced. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
+- **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
+- **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
