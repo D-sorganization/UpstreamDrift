@@ -181,19 +181,47 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
     def _post_process_rust(
         self, rust_result: Any, launch: LaunchConditions
     ) -> list[TrajectoryPoint]:
-        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
+        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects.
+
+        Forces are calculated once for the whole trajectory via the
+        vectorized ``(3, N)`` batch path (``_calculate_forces`` dispatches on
+        ``vel.ndim``), rather than once per point through the scalar path.
+        """
         if launch is None:
             raise ValueError("launch must be provided")
-        points = []
-        for p in rust_result.get_points():
-            pos = np.array([p.x, p.y, p.z])
-            vel = np.array([p.vx, p.vy, p.vz])
-            forces = self._calculate_forces(vel, launch)
-            acc = (
-                forces["gravity"] + forces["drag"] + forces["magnus"]
-            ) / self.ball.mass
-            points.append(TrajectoryPoint(p.t, pos, vel, acc, forces))
-        return points
+        rust_points = list(rust_result.get_points())
+        if not rust_points:
+            return []
+
+        times = [p.t for p in rust_points]
+        pos = np.array(
+            [
+                [p.x for p in rust_points],
+                [p.y for p in rust_points],
+                [p.z for p in rust_points],
+            ]
+        )
+        vel = np.array(
+            [
+                [p.vx for p in rust_points],
+                [p.vy for p in rust_points],
+                [p.vz for p in rust_points],
+            ]
+        )
+
+        forces = self._calculate_forces(vel, launch)
+        acc = (forces["gravity"] + forces["drag"] + forces["magnus"]) / self.ball.mass
+
+        return [
+            TrajectoryPoint(
+                times[i],
+                pos[:, i],
+                vel[:, i],
+                acc[:, i],
+                {key: value[:, i] for key, value in forces.items()},
+            )
+            for i in range(len(rust_points))
+        ]
 
     @precondition(
         lambda self, trajectory: trajectory is not None,
