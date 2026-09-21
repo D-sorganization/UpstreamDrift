@@ -66,6 +66,69 @@ def _pelvis_yaw(points: np.ndarray, wl_idx: int, wr_idx: int) -> np.ndarray:
     return np.arctan2(delta[:, 0], delta[:, 2])
 
 
+def _rms_from_mask(dist_sq: np.ndarray, mask: np.ndarray) -> float:
+    errs = dist_sq[mask]
+    return float(np.sqrt(np.mean(errs))) if len(errs) > 0 else 0.0
+
+
+def _terminal_partition_rmse(
+    dist_sq: np.ndarray,
+    valid: np.ndarray,
+    labels: Sequence[str],
+    term_start: int,
+) -> tuple[float, float, float]:
+    """Return (full, head-cluster, body-excluding-head) terminal-window RMSE."""
+    term_mask = np.zeros_like(valid)
+    term_mask[term_start:, :] = valid[term_start:, :]
+    head_set = set(HEAD_MARKER_LABELS)
+    head_indices = [i for i, label in enumerate(labels) if label in head_set]
+    body_indices = [i for i, label in enumerate(labels) if label not in head_set]
+    head_term_mask = np.zeros_like(valid)
+    body_term_mask = np.zeros_like(valid)
+    if head_indices:
+        head_term_mask[term_start:, :][:, head_indices] = valid[term_start:, :][
+            :, head_indices
+        ]
+    if body_indices:
+        body_term_mask[term_start:, :][:, body_indices] = valid[term_start:, :][
+            :, body_indices
+        ]
+    return (
+        _rms_from_mask(dist_sq, term_mask),
+        _rms_from_mask(dist_sq, head_term_mask),
+        _rms_from_mask(dist_sq, body_term_mask),
+    )
+
+
+def _club_rmse(dist_sq: np.ndarray, valid: np.ndarray, labels: Sequence[str]) -> float:
+    club_labels = set(MARKER_SEGMENTS["club"])
+    club_indices = [i for i, label in enumerate(labels) if label in club_labels]
+    if not club_indices:
+        return 0.0
+    club_mask = np.zeros_like(valid)
+    club_mask[:, club_indices] = valid[:, club_indices]
+    return _rms_from_mask(dist_sq, club_mask)
+
+
+def _pelvis_yaw_rmse(
+    obs: np.ndarray,
+    pred: np.ndarray,
+    valid: np.ndarray,
+    labels: Sequence[str],
+) -> float:
+    if "WaistLeft" not in labels or "WaistRight" not in labels:
+        return 0.0
+    wl_idx = labels.index("WaistLeft")
+    wr_idx = labels.index("WaistRight")
+    valid_both = valid[:, wl_idx] & valid[:, wr_idx]
+    if not np.any(valid_both):
+        return 0.0
+    obs_yaw = _pelvis_yaw(obs[valid_both], wl_idx, wr_idx)
+    pred_yaw = _pelvis_yaw(pred[valid_both], wl_idx, wr_idx)
+    angle_diff = np.remainder(pred_yaw - obs_yaw + np.pi, 2 * np.pi) - np.pi
+    return float(np.sqrt(np.mean(angle_diff**2)))
+
+
 def compute_shared_metrics(
     capture: TourCapture,
     predicted_points_m: np.ndarray,
@@ -89,7 +152,6 @@ def compute_shared_metrics(
         raise ValueError(f"Shape mismatch: expected {expected_shape}, got {pred.shape}")
 
     obs = capture.points_m
-    cap_time = capture.time_s
     if tracked_labels is not None:
         tracked_set = set(tracked_labels)
         label_mask = np.array(
@@ -102,81 +164,18 @@ def compute_shared_metrics(
     if not np.isfinite(pred[valid]).all():
         raise ValueError("Predicted points must be finite at all valid capture points")
 
-    diff = pred - obs
-    dist_sq = np.sum(diff**2, axis=-1)
-
-    # 1. Whole marker RMS
-    whole_errs = dist_sq[valid]
-    whole_rmse = float(np.sqrt(np.mean(whole_errs))) if len(whole_errs) > 0 else 0.0
-
-    # 2. Early marker RMS (t <= early_cutoff_s)
-    early_mask = (cap_time <= early_cutoff_s)[:, None] & valid
-    early_errs = dist_sq[early_mask]
-    early_rmse = float(np.sqrt(np.mean(early_errs))) if len(early_errs) > 0 else 0.0
-
-    # 3. Terminal marker RMS (final terminal_ratio portion) — full markers only
+    dist_sq = np.sum((pred - obs) ** 2, axis=-1)
     term_start = int(capture.frames * (1.0 - terminal_ratio))
-    term_mask = np.zeros_like(valid)
-    term_mask[term_start:, :] = valid[term_start:, :]
-    term_errs = dist_sq[term_mask]
-    term_rmse = float(np.sqrt(np.mean(term_errs))) if len(term_errs) > 0 else 0.0
-
-    head_set = set(HEAD_MARKER_LABELS)
-    head_indices = [i for i, label in enumerate(capture.labels) if label in head_set]
-    body_indices = [
-        i for i, label in enumerate(capture.labels) if label not in head_set
-    ]
-    head_term_mask = np.zeros_like(valid)
-    body_term_mask = np.zeros_like(valid)
-    if head_indices:
-        head_term_mask[term_start:, :][:, head_indices] = valid[term_start:, :][
-            :, head_indices
-        ]
-    if body_indices:
-        body_term_mask[term_start:, :][:, body_indices] = valid[term_start:, :][
-            :, body_indices
-        ]
-    head_term_errs = dist_sq[head_term_mask]
-    body_term_errs = dist_sq[body_term_mask]
-    head_term_rmse = (
-        float(np.sqrt(np.mean(head_term_errs))) if len(head_term_errs) > 0 else 0.0
+    term_rmse, head_term_rmse, body_term_rmse = _terminal_partition_rmse(
+        dist_sq, valid, capture.labels, term_start
     )
-    body_term_rmse = (
-        float(np.sqrt(np.mean(body_term_errs))) if len(body_term_errs) > 0 else 0.0
-    )
-
-    # 4. Club marker RMS
-    club_labels = set(MARKER_SEGMENTS["club"])
-    club_indices = [i for i, label in enumerate(capture.labels) if label in club_labels]
-    if club_indices:
-        club_mask = np.zeros_like(valid)
-        club_mask[:, club_indices] = valid[:, club_indices]
-        club_errs = dist_sq[club_mask]
-        club_rmse = float(np.sqrt(np.mean(club_errs))) if len(club_errs) > 0 else 0.0
-    else:
-        club_rmse = 0.0
-
-    # 5. Pelvis yaw RMSE
-    if "WaistLeft" in capture.labels and "WaistRight" in capture.labels:
-        wl_idx = capture.index("WaistLeft")
-        wr_idx = capture.index("WaistRight")
-        valid_both = valid[:, wl_idx] & valid[:, wr_idx]
-        if np.any(valid_both):
-            obs_yaw = _pelvis_yaw(obs[valid_both], wl_idx, wr_idx)
-            pred_yaw = _pelvis_yaw(pred[valid_both], wl_idx, wr_idx)
-            angle_diff = np.remainder(pred_yaw - obs_yaw + np.pi, 2 * np.pi) - np.pi
-            pelvis_yaw_rmse = float(np.sqrt(np.mean(angle_diff**2)))
-        else:
-            pelvis_yaw_rmse = 0.0
-    else:
-        pelvis_yaw_rmse = 0.0
-
+    early_mask = (capture.time_s <= early_cutoff_s)[:, None] & valid
     return SharedMetrics(
-        whole_marker_rmse_m=whole_rmse,
-        early_marker_rmse_m=early_rmse,
+        whole_marker_rmse_m=_rms_from_mask(dist_sq, valid),
+        early_marker_rmse_m=_rms_from_mask(dist_sq, early_mask),
         terminal_marker_rmse_m=term_rmse,
-        club_marker_rmse_m=club_rmse,
-        pelvis_yaw_rmse_rad=pelvis_yaw_rmse,
+        club_marker_rmse_m=_club_rmse(dist_sq, valid, capture.labels),
+        pelvis_yaw_rmse_rad=_pelvis_yaw_rmse(obs, pred, valid, capture.labels),
         terminal_body_excluding_head_rmse_m=body_term_rmse,
         terminal_head_cluster_rmse_m=head_term_rmse,
     )
