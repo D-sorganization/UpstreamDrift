@@ -5,6 +5,7 @@ Supports:
 2. OpenSim motion files (.mot / .sto).
 3. Ground-support IK archives (ik_trajectory.npz).
 4. Ground-support dynamics archives (dynamics_record.npz).
+5. Simscape returned-102 style replay archives (MS-60, #10347).
 
 Preserves uncertainty, validity masks, and records explicit missing-field annotations;
 never invents synthetic dynamics for kinematic artifacts.
@@ -369,4 +370,87 @@ def convert_analytic_matched_npz(
         tau=tau,
         markers=markers,
         auxiliary=auxiliary,
+    )
+
+
+@precondition(
+    lambda npz_path, candidate_doc, engine="simscape": Path(npz_path).is_file(),
+    "Simscape returned-replay NPZ file must exist",
+)
+@precondition(
+    lambda npz_path, candidate_doc, engine="simscape": (
+        isinstance(candidate_doc, Mapping)
+        and "coordinate_names" in candidate_doc
+        and "marker_labels" in candidate_doc
+        and "model_sha256" in candidate_doc
+    ),
+    "candidate_doc must include coordinate_names, marker_labels, and model_sha256",
+)
+@postcondition(
+    lambda r: isinstance(r, MatchedSwingCandidate), "must return MatchedSwingCandidate"
+)
+def convert_simscape_returned_replay(
+    npz_path: Path | str,
+    candidate_doc: Mapping[str, Any],
+    engine: str = "simscape",
+) -> MatchedSwingCandidate:
+    """Convert a Simscape/Pinocchio returned-replay NPZ using the candidate document.
+
+    Reuses the returned81 NPZ layout (time_s, native_state, markers_m, target_m,
+    valid) and attaches authoritative coordinate/marker identity from the
+    returned-candidate.json document. Tau is not present in the replay archive;
+    the profile remains kinematic with explicit missing-field annotations.
+    """
+    if not str(engine).strip():
+        raise ValueError("engine must be non-empty")
+
+    coord_names = tuple(str(x) for x in candidate_doc["coordinate_names"])
+    marker_names = tuple(str(x) for x in candidate_doc["marker_labels"])
+    model_sha = str(candidate_doc["model_sha256"])
+    if len(model_sha) != 64:
+        raise ValueError("candidate_doc.model_sha256 must be a 64-char hex digest")
+
+    spec = {
+        "coordinate_order": list(coord_names),
+        "markers": list(marker_names),
+        "name": str(candidate_doc.get("model_name", "GolfSwing3D_Kinetic")),
+        "sha256": model_sha,
+    }
+    converted = convert_returned81_replay(npz_path, spec=spec, engine=engine)
+
+    extra = dict(converted.metadata.extra)
+    extra.update(
+        {
+            "legacy_format": "simscape_returned_replay_npz",
+            "candidate_schema_version": candidate_doc.get("schema_version"),
+            "source_sha256": candidate_doc.get("source_sha256"),
+            "capture_sha256": candidate_doc.get("capture_sha256"),
+            "duration_s": candidate_doc.get("duration_s"),
+        }
+    )
+    metadata = CandidateMetadata(
+        schema_version=converted.metadata.schema_version,
+        profile=converted.metadata.profile,
+        engine=engine,
+        model_name=converted.metadata.model_name,
+        model_sha256=model_sha,
+        coordinate_names=coord_names,
+        velocity_names=converted.metadata.velocity_names,
+        actuator_names=converted.metadata.actuator_names,
+        marker_names=marker_names,
+        missing_fields=list(converted.metadata.missing_fields),
+        extra=extra,
+    )
+    return MatchedSwingCandidate(
+        metadata=metadata,
+        time_s=converted.time_s,
+        q=converted.q,
+        v=converted.v,
+        tau=converted.tau,
+        markers=CandidateMarkers(
+            model_markers_m=converted.model_markers_m,
+            target_markers_m=converted.target_markers_m,
+            marker_validity=converted.marker_validity,
+        ),
+        auxiliary=converted.auxiliary,
     )

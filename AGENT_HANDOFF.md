@@ -174,6 +174,30 @@ coefficient-lift action assembly, objective contracts and independent replay.
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
+### Run 102 Package (MS-60 / #10347)
+
+Canonical in-tree evidence (no external GIF hunt):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/`
+
+| Artifact              | Path                                  |
+| --------------------- | ------------------------------------- |
+| MatchedSwingCandidate | `.../candidate.npz`                   |
+| R2025b run manifest   | `.../run_manifest.json`               |
+| Playback GIF          | `.../playback.gif`                    |
+| Returned replay NPZ   | `.../returned-replay.npz`             |
+| Qualified R2025b JSON | `.../qualified_candidate_replay.json` |
+
+Replay on a licensed host:
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_102 -Replay
+```
+
+Live resume guide: `docs/development/simscape_tour_matching/CHECKPOINTS.md` (history in `CHECKPOINTS_HISTORY.md`).
+
+Historical DeskComputer GIFs named in older sections below (`simscape_matlab_matching_eval79.gif`, `*_run05.gif`, …) remain on `C:/Users/diete/SimscapeTour9921/` when that host tree is mounted; they are not duplicated here. Use SHA receipts before copying any file > 5 MB.
+
 ## GSPro Integration (#10188, #10460)
 
 - **State:** GS-00 through GS-11 merged. #10460 consumes shared Tools `launch_monitor.gspro_connect` codec (#5228).
