@@ -54,6 +54,8 @@ class GroundSupportReceiptInputs:
     q_ref: np.ndarray
     elapsed_s: float
     backend: str = "mujoco"
+    ik_backend: str = "lm"
+    tracking_backend: str = "kkt"
     validate: bool = True
 
 
@@ -83,6 +85,8 @@ def build_ground_support_receipt(
 
     receipt_dict = {
         "backend": inputs.backend,
+        "ik_backend": inputs.ik_backend,
+        "tracking_backend": inputs.tracking_backend,
         "base_spec_sha256": canonical_sha256(inputs.base_spec),
         "base_spec_file": inputs.spec_path.name,
         "spec_file": inputs.scaled_path.name,

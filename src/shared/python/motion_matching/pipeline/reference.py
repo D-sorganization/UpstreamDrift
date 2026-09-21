@@ -34,6 +34,19 @@ if TYPE_CHECKING:
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane
 
+IK_BACKENDS = frozenset({"lm", "mujoco-minimize"})
+
+
+@precondition(lambda name: isinstance(name, str), "ik_backend must be a string")
+@postcondition(lambda result: result in IK_BACKENDS, "ik_backend must be supported")
+def validate_ik_backend(name: str) -> str:
+    """Validate selectable MuJoCo marker IK backend names."""
+    key = name.strip().lower()
+    if key not in IK_BACKENDS:
+        known = ", ".join(sorted(IK_BACKENDS))
+        raise ValueError(f"Unknown ik_backend {name!r}; expected one of [{known}]")
+    return key
+
 
 def smooth_reference(q: np.ndarray, rate_hz: float, cutoff_hz: float) -> np.ndarray:
     """Zero-phase Butterworth low-pass of every coordinate (edge-padded).

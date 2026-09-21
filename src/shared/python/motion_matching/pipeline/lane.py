@@ -247,6 +247,8 @@ class Lane:
         self,
         spec_bytes: bytes | Mapping[str, Any],
         attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> tuple[Any, Any]:
         """Instantiate the model and marker kinematics via MatchingPlant.
 
@@ -270,7 +272,12 @@ class Lane:
             for label in self.labels
             if label in attachments
         }
-        kin = self.plant.create_ik(ordered)
+        from src.shared.python.motion_matching.pipeline.reference import (
+            validate_ik_backend,
+        )
+
+        ik_backend = validate_ik_backend(ik_backend)
+        kin = self.plant.create_ik(ordered, ik_backend=ik_backend)
         adapter = getattr(
             self.plant, "adapter", getattr(self.plant, "model", self.plant)
         )
