@@ -1,0 +1,88 @@
+{
+  "schema_version": "matched-swing-replay/1",
+  "engine": "myosuite",
+  "engine_version": "unavailable",
+  "stage": "replay",
+  "candidate_sha256": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
+  "source_engine": "mujoco",
+  "configuration": {
+    "mode": "kinematic_only",
+    "scene_xml": "src\\engines\\physics_engines\\mujoco\\myo_sim\\body\\myobody.xml",
+    "retarget_map": "coordinate_map_anthro.json",
+    "mapped_coordinates": 11,
+    "omitted_source": [
+      "SpineInputX",
+      "SpineInputY",
+      "LFInput",
+      "LScapInputX",
+      "LScapInputY",
+      "LSInputX",
+      "LSInputZ",
+      "LWInputX",
+      "LWInputY",
+      "RFInput",
+      "RScapInputX",
+      "RScapInputY",
+      "RSInputX",
+      "RSInputZ",
+      "RWInputX",
+      "RWInputY",
+      "NeckInputX",
+      "NeckInputY",
+      "NeckInputZ",
+      "hip_flexion_r",
+      "hip_adduction_r",
+      "hip_rotation_r",
+      "knee_angle_r",
+      "ankle_angle_r",
+      "subtalar_angle_r",
+      "mtp_angle_r",
+      "hip_flexion_l",
+      "hip_adduction_l",
+      "hip_rotation_l",
+      "knee_angle_l",
+      "ankle_angle_l",
+      "subtalar_angle_l",
+      "mtp_angle_l"
+    ]
+  },
+  "dynamics": {
+    "status": "not_run",
+    "reason": "Kinematic milestone MS-52; excitation-driven replay is MS-53."
+  },
+  "parity": {
+    "comparison": "native_vs_source_predicted_markers",
+    "marker_rms_m": 0.19519270680746284,
+    "marker_rms_raw_m": 0.2439599089056849,
+    "alignment": "static_site_calibration_then_pelvis_center",
+    "site_calibration_m": {
+      "0": [-0.17733588787934074, -0.025049230409046774, 0.12106830346333286],
+      "1": [-0.04614987612723409, 0.08938275625072824, 0.011097307760087216],
+      "2": [-0.1452503979910338, 0.32952860301096354, 0.11812064553505475]
+    },
+    "marker_rms_limit_m": 0.015,
+    "passed": false,
+    "topology_note": "Vendored MyoBody placeholder MJCF until MS-51 pins myo_sim and generates golfer_myobody.xml with club weld and foot contacts.",
+    "mapped_markers": ["WaistLeft", "WaistRight", "BackTop"],
+    "marker_field_policy": "native_site_forward_kinematics"
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 0.2439599089056849,
+    "early_marker_rmse_m": 0.23563645512052564,
+    "terminal_marker_rmse_m": 0.29754784162534953,
+    "club_marker_rmse_m": 0.0,
+    "pelvis_yaw_rmse_rad": 2.296580395059196
+  },
+  "artifacts": {
+    "candidate_npz": {
+      "path": "candidate.npz",
+      "sha256": "a7f1b5b3a308b7435af61aaa35ab1037c36e198fb604be1be4ad34f20e77bebb"
+    },
+    "playback_gif": {
+      "path": "playback.gif",
+      "sha256": "400838fe171410e6b83fc93fd8fb9a5ff976643d8f45c45c8bf4521d7fcead67"
+    }
+  },
+  "elapsed_s": 7.395486599998549,
+  "qualification": "Kinematic retarget replay only. Native-model topology differs from the MuJoCo G1 oracle; marker parity is diagnostic, not equivalence."
+}
