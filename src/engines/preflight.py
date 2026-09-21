@@ -426,12 +426,12 @@ class EnginePreflightChecker:
         """
         check = "display"
 
-        # Pinocchio does not need a display
-        if self._engine_name == "pinocchio":
+        # Pinocchio and JaxSim do not need a display
+        if self._engine_name in ("pinocchio", "jaxsim"):
             return self._make_result(
                 check,
                 CheckOutcome.PASS,
-                "Pinocchio does not require a display backend ✓",
+                f"{self._engine_name.capitalize()} does not require a display backend ✓",
             )
 
         # MuJoCo / MyoSuite: MUJOCO_GL controls the backend
