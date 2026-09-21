@@ -1,3 +1,16 @@
+## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
+
+Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:
+- **Solve Diagnostics & Multi-Start IK (`src/engines/physics_engines/pinocchio/python/marker_kinematics.py`)**:
+  - Implements `SolveDiagnostics` dataclass capturing iterations, final cost, marker RMS, closure error, projected gradient norm, active bounds count, convergence flag, and cost decrease.
+  - Implements `solve_frame_multi_start` evaluating candidate initializations and estimating unconstrained geometric tracking floors with and without weld closure.
+  - Implements `refine_overlapping_window` with bounded window blending and temporal regularization.
+- **Kinematic Smoothing & Acceptance Auditing (`src/shared/python/motion_matching/kinematic_smoothing.py`)**:
+  - Adds zero-phase Butterworth smoothing with verified \(q, v, a\) derivative compatibility (\(\dot{q} \approx v\), \(\dot{v} \approx a\)), boundary spike auditing (`BoundarySpikeAudit`), and cutoff frequency sensitivity analysis.
+  - Enforces physiological human wrist range of motion compliance producing zero violations (MM-2, #10104).
+  - Enforces left elbow pit up-and-inward alignment at address posture (MM-5, #10107).
+  - Enforces strict separation of driver and 7-iron calibration provenance in acceptance gating.
+
 ## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
 
 Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
@@ -42,7 +55,6 @@ Reconciles, audits, and freezes feature preservation across historical boundarie
     - Immutable disposition artifact generation and publication for Epic #10508 closeout.
 - **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
   - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
->>>>>>> origin/main
 
 ## Unified Cross-Engine Parity Report (MS-70, #10350)
 
@@ -6456,6 +6468,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
+| 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
