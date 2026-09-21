@@ -12336,6 +12336,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/contact_mode_qualifier.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 22881,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/control_names.py",
       "classification": "ud-only",
       "package": "motion_matching",
