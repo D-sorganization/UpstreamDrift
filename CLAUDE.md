@@ -198,6 +198,21 @@ An issue closure, a mock-only success, a changed golden file or a raised
 tolerance is not acceptance evidence. The ledger records software correctness
 only — scientific qualification stays in the design-manual governance pathway.
 
+## BunkerShot3D Product Acceptance Matrix (Epic #9541)
+
+`src/config/bunkershot3d_qualification.json` is the product acceptance matrix
+for the BunkerShot3D qualification epic, in the same fail-closed schema as the
+industrial readiness ledger (it reuses `industrial_readiness_loader.py`
+unchanged). It tracks every child on the epic's delivery checklist with its
+dependency order and the acceptance criteria from the epic's prediction
+protocol. **PRs that land or reopen a #9541 child must update the entry.** CI
+enforces it via `tests/config/bunkershot3d_qualification/`: every checklist
+child must be tracked, every dependency must resolve to a tracked child, the
+exact Tools pin must be recorded, and `release_status` cannot read `ready`
+while `bunkershot3d.vandv.shipped_register()` is empty or any assessed
+credibility factor sits below its threshold. Validation levels are derived by
+`credibility_assessment()`, never hand-entered here.
+
 ## Error handling (issue #5911 / ADR-0016)
 
 Three anti-patterns are blocked by `scripts/ci/check_error_handling_ratchet.py` from growing beyond the baseline in `scripts/config/error_handling_baseline.json`. Pre-existing instances are grandfathered with `# noqa: <code>`; **new code must use the helpers**.
