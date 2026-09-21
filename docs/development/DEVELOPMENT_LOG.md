@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9422 · Rig Capture Sessions Through the Tools MocapSession Contract
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9422 (readiness P6; Tools #4706 M-track consumer)
+- **Branch:** conductor/issue-9422
+- **PR:** #10466 (open)
+- **Paths:** src/motion_capture/rig/tools_bridge.py; src/motion_capture/rig/**main**.py; tests/motion_capture/rig/test_tools_session_export.py; tests/fixtures/mocap_session_export/; docs/motion_capture/capture_rig.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (SELF; 8 Tools-first export checks pass under `tests/fixtures/mocap_session_export/run_checks.py`; 40 in-process rig/bridge/bundle/hygiene tests pass; scoped Ruff clean).
+- **Summary:** The bridge now probes the pinned Tools family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`, and projects a rig capture session onto the Tools `MocapSessionManifest` through the Tools builders and canonical serializer; `capture`/`record` write `mocap_session.json` beside the rig manifest and record the export outcome under `tools_schema.export`. Retained raw video without `--consent-recorded` is refused by the Tools policy, not faked. D-track (Tools #4707, D3 open) and the #8865/#8866/#8867 prerequisites remain open; this is the first consumer slice, not closure of the program.
+- **Next step:** Open the PR, then route the C3D upload path (#8865) through the same pinned contract as the next consumer slice.
+- **Evidence:** tests/fixtures/mocap_session_export/export_checks.py; tests/motion_capture/rig/test_tools_session_export.py.
+
 ### DL-#10434 · Qualify Contact Modes and Native Pinocchio Force Feasibility
 
 - **State:** in_review
