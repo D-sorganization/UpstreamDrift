@@ -15,6 +15,23 @@ Separates kinematic projection from dynamic model reduction for Simscape upper-b
 - **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
   - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
 
+## MyoSuite Kinematic Replay With Retarget Map and Marker Parity Receipt (MS-52, #10345)
+
+Adds kinematic-only replay of matched candidates in the MyoSuite engine lane with coordinate retargeting, marker parity receipts, cross-engine registration, and viewer support:
+- **Retarget Map (`src/engines/physics_engines/myosuite/python/retarget.py`, `coordinate_map_anthro.json`)**:
+  - Pure-numpy `RetargetMap` projects anthro coordinate order into a MyoSuite joint vector with chain interpolation and signed source-to-target mapping.
+  - `retarget_frame` / `retarget_trajectory` enforce DbC pre/postconditions for identity round-trip and finite outputs.
+- **Replay CLI (`src/engines/physics_engines/myosuite/python/replay.py`, `golfer_scene.py`, `viz/render_replay.py`)**:
+  - `run_kinematic_replay` retargets source `q`, embeds into placeholder MyoBody MJCF via MuJoCo FK, and writes receipt, candidate NPZ, and playback GIF under `evidence/matched/<driver>/`.
+  - Receipt declares `stage=replay`, `dynamics.status=not_run` (excitation-driven replay is MS-53), and honest marker parity on placeholder topology pending MS-51 golfer scene.
+  - `render_playback_gif` reuses shared cross-engine marker overlay rendering.
+- **Cross-Engine and Viewer Integration (`src/shared/python/motion_matching/cross_engine_replay.py`, `src/tools/tour_matching_viewer/core.py`)**:
+  - Registers `myosuite` in `VALID_ENGINES` and `KINEMATIC_ONLY_ENGINES`; tour matching viewer assigns engine colour `#8c564b`.
+- **Evidence (`evidence/matched/driver_g1_myosuite/receipt.json`, `candidate.npz`, `playback.gif`)**:
+  - Committed from canonical `driver_g1_crocoddyl_rk45_b100/candidate.npz`; native 15 mm marker parity gate deferred until MS-51 scene ships.
+- **Verification (`tests/unit/engines/myosuite/test_retarget.py`, `tests/myosuite/test_replay_native.py`, `tests/unit/engines/myosuite/test_cross_engine_registration.py`)**:
+  - TDD retarget round-trip, cross-engine registration, and native replay artifact emission with placeholder-aware parity gating.
+
 ## Club Workbook Identity, Units, Events, and Trial Lineage (CO-00, #10604)
 
 Freezes content-addressed club Excel workbook identity for epic #10602 without altering source workbooks:
@@ -26,6 +43,7 @@ Freezes content-addressed club Excel workbook identity for epic #10602 without a
   - Records centimetre interpretation with inches declaration retained, native 240 Hz impact-relative clock, T-event meaning, GW_wiffle ball-label conflict, and derived-not-measured orientation policy.
 - **Loader Alignment**: Excel `read_excel_event_markers` and Pinocchio `ClubTrajectoryParser` consume the shared helpers so TW_wiffle `A=` no longer returns NaN.
 - **Evidence**: `docs/plans/club_only_matching/evidence/club_workbook_identity.json` and `tests/unit/motion_matching/test_club_workbook_identity.py`.
+
 
 
 ## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
@@ -6769,10 +6787,11 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-21 | #10504 | Add PF-06 force-only null-space exploration (`force_nullspace.py`): scaled SVD/QR basis, feasible redistribution under cone and trail-side constraints, and bounded torque-tradeoff Pareto diagnostics without native replay approval (#10436). |
 | 2026-09-21 | #10669 | Add Simscape R2025b run management for MS-60 (#10347): fail-closed run manifest schema, returned-replay→MatchedSwingCandidate converter, scripted `run_simscape_candidate.ps1`, and committed run-102 candidate/manifest/playback GIF under native_evidence. |
-| 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
+| 2026-09-21 | #10666 | MyoSuite kinematic replay with coordinate retarget map, marker parity receipt (`stage=replay`, `dynamics.status=not_run`), cross-engine kinematic-only registration, viewer support, and committed evidence for MS-52 (#10345); native 15 mm parity deferred until MS-51 scene. |
 | 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
+| 2026-09-21 | #10504 | Add PF-06 force-only null-space exploration (`force_nullspace.py`): scaled SVD/QR basis, feasible redistribution under cone and trail-side constraints, and bounded torque-tradeoff Pareto diagnostics without native replay approval (#10436). |
+| 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
