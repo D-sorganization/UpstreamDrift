@@ -234,11 +234,11 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-co02-10606`.
-- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) open (squash auto-merge). Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged. Head SELF.
+- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) open (squash auto-merge). Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged. Head SELF (includes main NM-01 `f2e625099`).
 - Entry DL-#10606. Delivered: `GolfPlausibilityPriors` / `PriorAssumption`, per-roster `ClubOnlyProfile` (observation/physical/plausibility + ObjectiveRule), `assess_ambiguity`, `evaluate_club_only_acceptance` with separated `ClubOnlyStatuses`, normalized position/SO(3) orientation errors, evidence JSON for all 20 registered models.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); `python -O` DbC ValueError checks green; pre-push ruff/mypy/bandit/pytest-unit green.
+- Validation: focused CO-02 suite 13 passed earlier; merge conflict with main cleared (HANDOFF + regenerated divergence inventory).
 - Limitations: software contracts and synthetic acceptance cases only; no native physical qualification, retrieval/IK (CO-03), or pendulum matching (CO-04).
-- Next action: wait for PR #10675 CI quality-gate + squash merge; do not start CO-03+.
+- Next action: push merge tip, confirm CI green + squash merge of #10675; do not start CO-03+.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
