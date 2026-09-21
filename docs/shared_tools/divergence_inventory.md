@@ -120,7 +120,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 0 | 0 | 0 | 3 | 23 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `tour_baselines` | 0 | 0 | 0 | 13 | 0 | 0 |
+| `tour_baselines` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 26 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ui` | 0 | 0 | 0 | 27 | 9 | 0 |
