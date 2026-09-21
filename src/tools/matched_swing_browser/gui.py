@@ -115,6 +115,14 @@ class MatchedSwingBrowserWidget(QWidget):
     def open_parity_btn(self) -> QPushButton:
         return self._open_parity_btn
 
+    @property
+    def export_video_button(self) -> QPushButton:
+        return self._export_video_btn
+
+    @property
+    def export_report_button(self) -> QPushButton:
+        return self._export_report_btn
+
     def _init_ui(self) -> None:
         layout = QHBoxLayout(self)
         layout.setContentsMargins(6, 6, 6, 6)
@@ -355,6 +363,16 @@ class MatchedSwingBrowserWidget(QWidget):
         self._view_json_btn.clicked.connect(self._on_view_receipt_json)
         self._view_json_btn.setEnabled(False)
         grid.addWidget(self._view_json_btn, 1, 1)
+
+        self._export_video_btn = QPushButton("Export Video...", card)
+        self._export_video_btn.clicked.connect(self._on_export_video)
+        self._export_video_btn.setEnabled(False)
+        grid.addWidget(self._export_video_btn, 2, 0)
+
+        self._export_report_btn = QPushButton("Export Report...", card)
+        self._export_report_btn.clicked.connect(self._on_export_report)
+        self._export_report_btn.setEnabled(False)
+        grid.addWidget(self._export_report_btn, 2, 1)
         return card
 
     def reload_ledger(self) -> None:
@@ -540,9 +558,11 @@ class MatchedSwingBrowserWidget(QWidget):
         )
 
         receipt_path = self._model.resolve_artifact_path(row, "receipt")
-        self._view_json_btn.setEnabled(
-            receipt_path is not None and receipt_path.is_file()
-        )
+        has_receipt = receipt_path is not None and receipt_path.is_file()
+        self._view_json_btn.setEnabled(has_receipt)
+
+        self._export_video_btn.setEnabled(has_npz)
+        self._export_report_btn.setEnabled(has_receipt)
 
     def _update_badge_style(self, verdict: str) -> None:
         if verdict in ("PASSED", "ACCEPTED"):
@@ -715,6 +735,75 @@ class MatchedSwingBrowserWidget(QWidget):
             return
         text = receipt_path.read_text(encoding="utf-8")
         self._show_text_dialog(f"Receipt JSON: {receipt_path.name}", text)
+
+    def _on_export_video(self) -> None:
+        if not self._selected_row:
+            return
+        npz_path = self._model.resolve_artifact_path(self._selected_row, "npz")
+        if not npz_path or not npz_path.is_file():
+            QMessageBox.warning(
+                self, "Export Video", "No candidate package found for this run."
+            )
+            return
+
+        default_name = (
+            f"{self._selected_row.engine}_{self._selected_row.capture or 'swing'}.gif"
+        )
+        save_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Export Video",
+            default_name,
+            "GIF Files (*.gif);;MP4 Files (*.mp4);;All Files (*)",
+        )
+        if not save_path:
+            return
+
+        from src.shared.python.motion_matching.export import export_video
+
+        try:
+            out = export_video(npz_path, self._selected_row.engine, save_path)
+            QMessageBox.information(
+                self, "Export Video", f"Successfully exported video to:\n{out}"
+            )
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
+            logger.exception("Failed video export: %s", exc)
+            QMessageBox.critical(
+                self, "Export Error", f"Could not export video:\n{exc}"
+            )
+
+    def _on_export_report(self) -> None:
+        if not self._selected_row:
+            return
+        receipt_path = self._model.resolve_artifact_path(self._selected_row, "receipt")
+        if not receipt_path or not receipt_path.is_file():
+            QMessageBox.warning(
+                self, "Export Report", "No receipt file found for this run."
+            )
+            return
+
+        default_name = f"fit_report_{self._selected_row.engine}_{self._selected_row.capture or 'swing'}.md"
+        save_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Export Fit-Quality Report",
+            default_name,
+            "Markdown Files (*.md);;PDF Files (*.pdf);;All Files (*)",
+        )
+        if not save_path:
+            return
+
+        from src.shared.python.motion_matching.export import export_report
+
+        try:
+            npz_path = self._model.resolve_artifact_path(self._selected_row, "npz")
+            out = export_report(receipt_path, save_path, candidate=npz_path)
+            QMessageBox.information(
+                self, "Export Report", f"Successfully exported report to:\n{out}"
+            )
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
+            logger.exception("Failed report export: %s", exc)
+            QMessageBox.critical(
+                self, "Export Error", f"Could not export report:\n{exc}"
+            )
 
     def _show_text_dialog(self, title: str, content: str) -> None:
         dialog = QDialog(self)
