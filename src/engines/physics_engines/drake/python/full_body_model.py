@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from importlib import import_module
 from typing import Any, TypeAlias
 
@@ -21,6 +21,7 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.drake.python.full_body_urdf import (
     export_full_body_urdf,
 )
+from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -72,6 +73,10 @@ class FullBodyDrakeModel:
         self.model_sha256 = self.metadata["model_sha256"]
 
         api: Any = import_module("pydrake.all")
+        if type(api).__module__ == "unittest.mock" or not hasattr(
+            api, "MultibodyPlant"
+        ):
+            raise ImportError("Real pydrake installation required (found mock)")
         self._api = api
         self._wrt_v = api.JacobianWrtVariable.kV
         self.plant = api.MultibodyPlant(time_step=0.0)
@@ -109,6 +114,11 @@ class FullBodyDrakeModel:
         self._q_indices = [self._joints[name].position_start() for name in self.names]
         self._v_indices = [self._joints[name].velocity_start() for name in self.names]
         self._last_closure: tuple[Array, Array] | None = None
+        self.gravity = np.asarray(specification["gravity_m_s2"], dtype=float)
+        self.mass_kg = float(self.plant.CalcTotalMass(self.context))
+        self.upper_body_coordinates: int = int(
+            specification.get("upper_body_counts", {}).get("coordinates", 0)
+        )
 
     def _init_closure_and_frames(self, spec: Mapping[str, Any], api: Any) -> None:
         closure = spec["closure"]
@@ -203,6 +213,57 @@ class FullBodyDrakeModel:
             .copy()
             for name, frame in self._frames.items()
         }
+
+    @precondition(
+        lambda self, coordinates, attachments: (
+            coordinates is not None and attachments is not None
+        ),
+        "coordinates and attachments must be provided",
+    )
+    def marker_positions(
+        self,
+        coordinates: Mapping[str, float] | Array,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+    ) -> Array:
+        """Compute 3D world positions of attached markers.
+
+        Args:
+            coordinates: Joint position values by coordinate name, or array in coordinate_order.
+            attachments: Map of marker label to (body_or_frame_name, (ox, oy, oz)).
+
+        Returns:
+            Array of shape (N, 3) marker positions in world frame.
+        """
+        if isinstance(coordinates, Mapping):
+            q_vec = self._vector(coordinates, self._q_indices)
+        else:
+            q_vec = np.asarray(coordinates, dtype=float)
+            if q_vec.size != len(self.names):
+                raise ValueError(f"Expected {len(self.names)} coordinates")
+        self.plant.SetPositions(self.context, q_vec)
+        world_frame = self.plant.world_frame()
+        positions: list[Array] = []
+        for body_name, offset in attachments.values():
+            offset_arr = np.asarray(offset, dtype=float)
+            if body_name in self._frames:
+                frame = self._frames[body_name]
+                x_wf = self.plant.CalcRelativeTransform(
+                    self.context, world_frame, frame
+                )
+                pos = x_wf.rotation().matrix() @ offset_arr + x_wf.translation()
+            elif body_name in self.metadata["body_links"]:
+                link_name = self.metadata["body_links"][body_name]
+                body_obj = self.plant.GetBodyByName(link_name, self._instance)
+                x_wb = self.plant.EvalBodyPoseInWorld(self.context, body_obj)
+                pos = x_wb.rotation().matrix() @ offset_arr + x_wb.translation()
+            else:
+                raise ValueError(
+                    f"Body or frame '{body_name}' not found in Drake model"
+                )
+            positions.append(pos)
+        if not positions:
+            return np.empty((0, 3), dtype=float)
+        return np.asarray(positions, dtype=float)
 
     def get_sphere_kinematics(
         self,
@@ -308,31 +369,8 @@ class FullBodyDrakeModel:
         self.plant.SetVelocities(self.context, velocity)
 
         samples = self.contact_forces(coordinates, rates)
-        tau_contact = np.zeros(self.plant.num_velocities())
-        for s_name, sample in samples.items():
-            f_contact = sample.normal_force_n + sample.friction_force_n
-            if np.linalg.norm(f_contact) <= 0.0:
-                continue
-            frame = self._spheres[s_name]["frame"]
-            j_trans = self.plant.CalcJacobianTranslationalVelocity(
-                self.context,
-                self._wrt_v,
-                frame,
-                np.zeros(3),
-                self.plant.world_frame(),
-                self.plant.world_frame(),
-            )
-            tau_contact += j_trans.T @ f_contact
-
-        a, b, jacobian = self._closure_jacobian()
-        bias = self.plant.CalcBiasSpatialAcceleration(
-            self.context,
-            self._wrt_v,
-            b,
-            np.zeros(3),
-            a,
-            a,
-        ).get_coeffs()
+        tau_contact = self._accumulate_contact_torques(samples)
+        a, b, jacobian, bias = self._closure_bias_and_jacobian()
 
         force = (
             self._vector(primitive_efforts, self._v_indices)
@@ -358,3 +396,174 @@ class FullBodyDrakeModel:
         if self._last_closure is None:
             raise ValueError("Call accelerations before requesting closure diagnostics")
         return self._last_closure[0].copy(), self._last_closure[1].copy()
+
+    def _coerce_state(
+        self,
+        coordinates: Mapping[str, float] | Array,
+        rates: Mapping[str, float] | Array,
+    ) -> tuple[Array, dict[str, float], Array, dict[str, float]]:
+        if isinstance(coordinates, Mapping):
+            q_vec = self._vector(coordinates, self._q_indices)
+            coords_dict = dict(coordinates)
+        else:
+            q_vec = np.asarray(coordinates, dtype=float)
+            coords_dict = dict(zip(self.names, q_vec, strict=True))
+
+        if isinstance(rates, Mapping):
+            v_vec = self._vector(rates, self._v_indices)
+            rates_dict = dict(rates)
+        else:
+            v_vec = np.asarray(rates, dtype=float)
+            rates_dict = dict(zip(self.names, v_vec, strict=True))
+        return q_vec, coords_dict, v_vec, rates_dict
+
+    def _sphere_jacobian_translational(self, frame: Any) -> Array:
+        return self.plant.CalcJacobianTranslationalVelocity(
+            self.context,
+            self._wrt_v,
+            frame,
+            np.zeros(3),
+            self.plant.world_frame(),
+            self.plant.world_frame(),
+        )
+
+    def _accumulate_contact_torques(
+        self, samples: Mapping[str, ContactSample]
+    ) -> Array:
+        tau_contact = np.zeros(self.plant.num_velocities())
+        for s_name, sample in samples.items():
+            f_contact = sample.normal_force_n + sample.friction_force_n
+            if np.linalg.norm(f_contact) <= 0.0:
+                continue
+            frame = self._spheres[s_name]["frame"]
+            j_trans = self._sphere_jacobian_translational(frame)
+            tau_contact += j_trans.T @ f_contact
+        return tau_contact
+
+    def _closure_bias_and_jacobian(self) -> tuple[Any, Any, Array, Array]:
+        a, b, jacobian = self._closure_jacobian()
+        bias = self.plant.CalcBiasSpatialAcceleration(
+            self.context,
+            self._wrt_v,
+            b,
+            np.zeros(3),
+            a,
+            a,
+        ).get_coeffs()
+        return a, b, jacobian, bias
+
+    @precondition(
+        lambda self, coordinates, rates, primitive_efforts, dt: dt > 0.0,
+        "dt must be positive",
+    )
+    def step(
+        self,
+        coordinates: Mapping[str, float] | Array,
+        rates: Mapping[str, float] | Array,
+        primitive_efforts: Mapping[str, float] | Array,
+        dt: float,
+    ) -> tuple[Array, Array]:
+        """Advance plant state [q, v] by dt using symplectic Euler integration.
+
+        Accelerations account for joint efforts, shared contact forces, and weld closure.
+        """
+        q_vec, coords_dict, v_vec, rates_dict = self._coerce_state(coordinates, rates)
+
+        if isinstance(primitive_efforts, Mapping):
+            efforts_dict = dict(primitive_efforts)
+        else:
+            efforts_dict = dict(
+                zip(self.names, np.asarray(primitive_efforts, dtype=float), strict=True)
+            )
+
+        acc_dict = self.accelerations(coords_dict, rates_dict, efforts_dict)
+        qdd = np.array([acc_dict[c] for c in self.names], dtype=float)
+        next_v = v_vec + qdd * dt
+        next_q = q_vec + next_v * dt
+        return next_q, next_v
+
+    def centre_of_mass(self, q: Array) -> tuple[Array, Array]:
+        """Whole-body centre of mass and its Jacobian (spec coordinate order)."""
+        q_vec = np.asarray(q, dtype=float)
+        q_raw = np.empty(len(self.names))
+        q_raw[self._q_indices] = q_vec
+        self.plant.SetPositions(self.context, q_raw)
+        com = np.asarray(
+            self.plant.CalcCenterOfMassPositionInWorld(self.context), dtype=float
+        )
+        jac_raw = self.plant.CalcJacobianCenterOfMassTranslationalVelocity(
+            self.context,
+            self._wrt_v,
+            self.plant.world_frame(),
+            self.plant.world_frame(),
+        )
+        jac_ordered = jac_raw[:, self._v_indices]
+        return com.copy(), jac_ordered.copy()
+
+    def affine_dynamics(
+        self,
+        coordinates: Mapping[str, float] | Array,
+        rates: Mapping[str, float] | Array,
+    ) -> tuple[Array, Array]:
+        """Return (A, b) with a = A @ tau_actuated + b in canonical coordinate order."""
+        q_vec, coords_dict, v_vec, rates_dict = self._coerce_state(coordinates, rates)
+
+        self.plant.SetPositions(self.context, q_vec)
+        self.plant.SetVelocities(self.context, v_vec)
+
+        samples = self.contact_forces(coords_dict, rates_dict)
+        tau_contact = self._accumulate_contact_torques(samples)
+        _, _, jacobian, bias = self._closure_bias_and_jacobian()
+
+        force = (
+            tau_contact
+            + self.plant.CalcGravityGeneralizedForces(self.context)
+            - self.plant.CalcBiasTerm(self.context)
+        )
+        mass = self.plant.CalcMassMatrix(self.context)
+        k = bias.size
+        matrix = np.block([[mass, -jacobian.T], [jacobian, np.zeros((k, k))]])
+
+        actuated_indices = self._v_indices[6:]
+        actuated_count = len(actuated_indices)
+        rhs = np.zeros((mass.shape[0] + k, 1 + actuated_count))
+        rhs[: mass.shape[0], 0] = force
+        rhs[mass.shape[0] :, 0] = -bias
+        rhs[actuated_indices, 1:] = np.eye(actuated_count)
+
+        sol_raw = np.linalg.solve(matrix, rhs)[: mass.shape[0]]
+        sol_ordered = sol_raw[self._v_indices]
+        return sol_ordered[:, 1:], sol_ordered[:, 0]
+
+    def sphere_jacobians(self) -> Array:
+        """Jacobian rows of all contact sphere centers in canonical coordinate order."""
+        rows = [
+            self._sphere_jacobian_translational(self._spheres[s]["frame"])[
+                :, self._v_indices
+            ]
+            for s in self._spheres
+        ]
+        return np.concatenate(rows, axis=0)
+
+    def _compute_frame_momentum(
+        self, simulator: Any, q: Array, v: Array
+    ) -> tuple[Array, Array, Array]:
+        """Whole-body CoM position, linear momentum, and angular momentum."""
+        q_vec = np.asarray(q, dtype=float)
+        v_vec = np.asarray(v, dtype=float)
+        q_raw = np.empty(len(self.names))
+        q_raw[self._q_indices] = q_vec
+        v_raw = np.empty(len(self.names))
+        v_raw[self._v_indices] = v_vec
+        self.plant.SetPositions(self.context, q_raw)
+        self.plant.SetVelocities(self.context, v_raw)
+
+        com = np.asarray(
+            self.plant.CalcCenterOfMassPositionInWorld(self.context), dtype=float
+        )
+        sm = self.plant.CalcSpatialMomentumInWorldAboutPoint(self.context, com)
+        return (
+            com.copy(),
+            np.asarray(sm.translational(), dtype=float),
+            np.asarray(sm.rotational(), dtype=float),
+        )

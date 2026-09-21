@@ -30,6 +30,7 @@ __all__ = [
     "extract_candidate_sha",
     "extract_horizon_s",
     "extract_metrics",
+    "find_repo_root",
     "scan",
 ]
 
@@ -58,6 +59,9 @@ def _find_repo_root(start: Path | None = None) -> Path:
         ):
             return parent
     return Path.cwd()
+
+
+find_repo_root = _find_repo_root
 
 
 def _compute_sha256(path: Path) -> str:
@@ -143,7 +147,7 @@ def extract_candidate_sha(data: Mapping[str, Any]) -> str | None:
 
 def extract_horizon_s(data: Mapping[str, Any]) -> float | None:
     """Extract evaluation horizon or trajectory duration in seconds."""
-    for key in ("horizon_s", "duration_s", "elapsed_s"):
+    for key in ("horizon_s", "duration_s"):
         val = data.get(key)
         if isinstance(val, (int, float)) and not math.isnan(val):
             return float(val)
@@ -154,6 +158,9 @@ def extract_horizon_s(data: Mapping[str, Any]) -> float | None:
                 v = nested.get(k)
                 if isinstance(v, (int, float)) and not math.isnan(v):
                     return float(v)
+    val = data.get("elapsed_s")
+    if isinstance(val, (int, float)) and not math.isnan(val):
+        return float(val)
     frames = None
     if isinstance(data.get("ik"), Mapping) and "frames" in data["ik"]:
         frames = data["ik"]["frames"]
@@ -335,21 +342,40 @@ def extract_acceptance(
     data: Mapping[str, Any],
     verdicts_map: Mapping[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Resolve acceptance verdict block from receipt or MS-01 verdict registry."""
-    if "acceptance" in data and isinstance(data["acceptance"], Mapping):
-        return dict(data["acceptance"])
+    """Resolve the acceptance block from the MS-01 verdict registry or the receipt.
+
+    Fail-closed (MS-100): only a verdict produced by ``acceptance.evaluate``
+    (recognisable by its non-empty ``gates`` list) can mark a row accepted.
+    A receipt's self-declared ``accepted`` flag, or an ``acceptance`` block
+    without gate results, is reported as ``UNVERIFIED`` and never as PASSED.
+    """
     if verdicts_map and rel_path in verdicts_map:
         return dict(verdicts_map[rel_path])
+    if "acceptance" in data and isinstance(data["acceptance"], Mapping):
+        block = dict(data["acceptance"])
+        if block.get("gates"):
+            return block
+        return _unverified(
+            block.get("horizon", "G1"), "acceptance block carries no gate results"
+        )
     if "receipt" in data and isinstance(data["receipt"], Mapping):
         inner = data["receipt"]
         if "accepted" in inner:
-            return {
-                "horizon": "G1",
-                "is_physically_accepted": bool(inner.get("accepted")),
-                "status": "PASSED" if inner.get("accepted") else "REJECTED",
-                "qualification_note": inner.get("status", ""),
-            }
+            return _unverified(
+                "G1",
+                f"self-reported accepted={bool(inner.get('accepted'))}; "
+                "not evaluated by acceptance.py",
+            )
     return None
+
+
+def _unverified(horizon: Any, note: str) -> dict[str, Any]:
+    return {
+        "horizon": str(horizon),
+        "is_physically_accepted": False,
+        "status": "UNVERIFIED",
+        "qualification_note": note,
+    }
 
 
 @precondition(
