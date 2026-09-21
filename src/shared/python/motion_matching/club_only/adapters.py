@@ -16,6 +16,7 @@ from src.shared.python.motion_matching.club_only.observation import (
     ComponentMask,
     ComponentStatus,
     DerivationMetadata,
+    ObservationEvent,
     UncertaintyMetadata,
 )
 from src.shared.python.motion_matching.club_only.workbook_identity import (
@@ -58,7 +59,12 @@ def observation_to_club_target(
     time = np.asarray(obs.native_time_s, dtype=np.float64).copy()
     # ClubTarget requires time[0] == 0.
     time -= float(time[0])
-    impact_idx = int(detect_impact_index(time, obs.face_xyz)) + 1
+    # Prefer authoritative "I" event from observation; fall back to detection.
+    impact_event = next((e for e in obs.events if e.label == "I"), None)
+    if impact_event is not None:
+        impact_idx = impact_event.sample_index + 1  # convert 0-based to 1-based
+    else:
+        impact_idx = int(detect_impact_index(time, obs.face_xyz)) + 1
     return ClubTarget(
         time=time,
         butt=np.asarray(obs.mid_hands_xyz, dtype=np.float64).copy(),
@@ -98,6 +104,12 @@ def club_target_to_observation(
         float(np.median(np.diff(target.time))) if n > 1 else 1.0 / NATIVE_SAMPLE_RATE_HZ
     )
     rate = (1.0 / dt) if dt > 0 else NATIVE_SAMPLE_RATE_HZ
+    # Preserve impact_idx as an "I" event (convert 1-based to 0-based).
+    impact_sample_idx = int(target.impact_idx) - 1
+    impact_time_s = float(target.time[impact_sample_idx])
+    impact_event = ObservationEvent(
+        label="I", sample_index=impact_sample_idx, time_s=impact_time_s
+    )
     return ClubObservation(
         native_time_s=np.asarray(target.time, dtype=np.float64).copy(),
         mid_hands_xyz=np.asarray(target.butt, dtype=np.float64).copy(),
@@ -123,7 +135,7 @@ def club_target_to_observation(
             position_sigma_m=0.0,
             orientation_sigma_rad=0.0,
         ),
-        events=(),
+        events=(impact_event,),
         sample_rate_hz=float(rate),
         club_type=resolved_type,
         catalog_length_m=length_m,
