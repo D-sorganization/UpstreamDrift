@@ -105,6 +105,20 @@ from .calibration import (
     forward_kinematics_planar_double_pendulum,
     map_initial_state_double_pendulum,
 )
+from .pendulum_adapter import (
+    ParityDiagnosticResult,
+    analytical_to_tools_params,
+    compare_dynamics_parity,
+    golf_model_to_double_pendulum_params,
+    state_to_planar_coordinates,
+    tools_to_analytical_params,
+)
+from .pendulum_fit import (
+    PendulumFitOptions,
+    PendulumFitResult,
+    fit_driven_double_pendulum,
+    simulate_pendulum_rollout,
+)
 from .registry import (
     AmbiguousModelError,
     clear_golf_model_registry,
@@ -148,6 +162,9 @@ __all__ = [
     "MovingHubMotion",
     "PROVENANCE_DRIVER",
     "PROVENANCE_IRON",
+    "ParityDiagnosticResult",
+    "PendulumFitOptions",
+    "PendulumFitResult",
     "PhaseMetricSummary",
     "PhysicalFitMetrics",
     "PlanarDoublePendulumPose",
@@ -171,9 +188,11 @@ __all__ = [
     "TourSwingEvents",
     "TriplePendulumProfile",
     "UpperBodyGolferProfile",
+    "analytical_to_tools_params",
     "audit_tour_target",
     "calibrate_fixed_geometry",
     "clear_golf_model_registry",
+    "compare_dynamics_parity",
     "compute_fit_metrics",
     "compute_landmark_signature",
     "compute_moving_hub_power",
@@ -182,6 +201,7 @@ __all__ = [
     "evaluate_baseline_qualification",
     "evaluate_target_tracking_error",
     "export_baseline_package",
+    "fit_driven_double_pendulum",
     "forward_kinematics_planar_double_pendulum",
     "generate_coverage_matrix",
     "get_golf_model",
@@ -191,6 +211,7 @@ __all__ = [
     "get_qualification_profile",
     "get_tools_revision_status",
     "get_tour_provenance",
+    "golf_model_to_double_pendulum_params",
     "import_baseline_package",
     "init_default_registry",
     "list_excluded_tools",
@@ -201,4 +222,7 @@ __all__ = [
     "render_coverage_markdown",
     "render_reconciliation_markdown",
     "resolve_model_alias",
+    "simulate_pendulum_rollout",
+    "state_to_planar_coordinates",
+    "tools_to_analytical_params",
 ]

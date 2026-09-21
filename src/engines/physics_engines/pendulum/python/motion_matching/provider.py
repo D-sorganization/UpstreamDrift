@@ -1,16 +1,15 @@
 """``PendulumFitSwingProvider`` -- canonical motion-matching adapter for Pendulum.
 
-This provides the analytic Lagrangian baseline for motion-matching.
+This provides the analytic Lagrangian baseline for motion-matching using the
+calibrated driven planar double pendulum infrastructure.
 """
 
 from __future__ import annotations
 
 import logging
-import datetime
 
-import numpy as np
 from src.shared.python.motion_matching.club_target import ClubTarget
-from src.shared.python.motion_matching.provenance import git_commit_short
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
@@ -18,7 +17,10 @@ from src.shared.python.motion_matching.provider import (
     register_provider,
     resolve_club_target,
 )
-from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.tour_baselines.pendulum_fit import (
+    PendulumFitOptions,
+    fit_driven_double_pendulum,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,131 +37,26 @@ class PendulumFitSwingProvider:
         target: MultiSourceTarget | ClubTarget,
         opts: FitOptions,
     ) -> CanonicalFitResult:
+        """Fit continuous double-pendulum torques to match target motion."""
         club = resolve_club_target(target)
-
-        # Map the 3D target to a 2D swing plane
-        from src.shared.python.motion_matching.projection_2d import project_to_2d
-
-        projected_club = project_to_2d(club)
-
-        import time
-        from scipy.optimize import minimize
-        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-            DoublePendulumDynamics,
-            DoublePendulumState,
+        fit_opts = PendulumFitOptions(maxiter=opts.maxiter if opts else 200)
+        fit_result = fit_driven_double_pendulum(club, opts=fit_opts)
+        result = fit_result.to_canonical_fit_result(
+            engine_version=self.engine_version()
         )
-
-        n_eval = 0
-        history: list[float] = []
-
-        # Polynomial forcing functions
-        def make_forcing_func(coefs: np.ndarray):
-            # Evaluate polynomial: c0 + c1*t + c2*t^2 + ...
-            def forcing(t: float, state: DoublePendulumState) -> float:
-                return float(np.polyval(coefs[::-1], t))
-
-            return forcing
-
-        def cost_func(theta: np.ndarray) -> float:
-            nonlocal n_eval
-            n_eval += 1
-
-            # theta is 14 elements (7 for shoulder torque, 7 for wrist torque)
-            shoulder_coefs = theta[:7]
-            wrist_coefs = theta[7:]
-
-            dynamics = DoublePendulumDynamics(
-                forcing_functions=(
-                    make_forcing_func(shoulder_coefs),
-                    make_forcing_func(wrist_coefs),
-                )
-            )
-
-            # Time grid from projected club. ``ClubTarget`` exposes only the
-            # raw ``time`` array; derive dt and frame count locally rather than
-            # rely on accessors that don't exist on the dataclass.
-            n_frames = int(projected_club.time.shape[0])
-            dt = (
-                float(projected_club.time[1] - projected_club.time[0])
-                if n_frames >= 2
-                else 0.0
-            )
-
-            # Initial state
-            # Assuming club target butt is shoulder, clubhead is end of club
-            # For simplicity, we just use 0s for initial state or try to derive it.
-            # In a real model, we would IK the initial frame. Here we use zero for simplicity.
-            state = DoublePendulumState(theta1=0.0, theta2=0.0, omega1=0.0, omega2=0.0)
-
-            total_sq_error = 0.0
-
-            for i in range(n_frames):
-                t = i * dt
-                # Step physics
-                state = dynamics.step(t, state, dt)
-
-                # Compute forward kinematics for clubhead
-                l1 = dynamics.parameters.upper_segment.length_m
-                l2 = dynamics.parameters.lower_segment.length_m
-                x_head = l1 * np.sin(state.theta1) + l2 * np.sin(
-                    state.theta1 + state.theta2
-                )
-                y_head = -l1 * np.cos(state.theta1) - l2 * np.cos(
-                    state.theta1 + state.theta2
-                )
-
-                # Target clubhead
-                target_head = projected_club.clubhead[i]
-
-                # Error (we assume target is translated such that shoulder is at 0,0)
-                sq_err = (x_head - target_head[0]) ** 2 + (y_head - target_head[1]) ** 2
-                total_sq_error += sq_err
-
-            cost = float(total_sq_error / n_frames)
-            history.append(cost)
-            return cost
-
-        t0 = time.perf_counter()
-        theta0 = np.zeros(14)  # 14 polynomial coefficients
-
-        # Scipy minimize loop. scipy-stubs' ``minimize`` overloads do not
-        # cover this (callable, ndarray, method=str, options=dict) form, so
-        # the call is type-ignored rather than restructured.
-        res = minimize(  # type: ignore[call-overload]
-            cost_func,
-            theta0,
-            method="SLSQP",
-            options={"maxiter": opts.maxiter if opts else 200},
-        )
-        elapsed = time.perf_counter() - t0
-
-        result = CanonicalFitResult(
-            theta_optimal=np.asarray(res.x, dtype=np.float64),
-            final_cost=float(res.fun),
-            final_rmse_m=float(np.sqrt(res.fun)),
-            solver_status="success" if res.success else "failure",
-            iterations=int(getattr(res, "nit", 1)),
-            n_evaluations=n_eval,
-            wall_clock_s=elapsed,
-            message=str(res.message),
-            history=tuple(history),
-            method="scipy SLSQP",
-            git_commit=git_commit_short(),
-            engine_version=self.engine_version(),
-            target_hash="dummy",
-            timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        )
-        # Issue #4713 / #6935: opt-in CI publication via the shared helper.
         publish_leaderboard_row(self.engine_name, result, self.engine_version())
         return result
 
     def supports_body_target(self) -> bool:
+        """Pendulum model only supports club kinematic targets."""
         return False
 
     def supports_ball_target(self) -> bool:
+        """Pendulum model does not simulate ball flight."""
         return False
 
     def engine_version(self) -> str:
+        """Engine release version."""
         return "1.0.0"
 
     @staticmethod
