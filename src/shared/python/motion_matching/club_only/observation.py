@@ -8,6 +8,7 @@ the native 240 Hz clock remains available for evaluation.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from enum import Enum
@@ -437,6 +438,16 @@ def interpolate_observation(
         f"slerp|{obs.sample_rate_hz}->{sample_rate_hz}|"
         f"{obs.native_time_s.shape[0]}->{n_out}"
     )
+    remapped_events: list[ObservationEvent] = []
+    for event in obs.events:
+        new_idx = int(np.argmin(np.abs(query_t - event.time_s)))
+        remapped_events.append(
+            ObservationEvent(
+                label=event.label,
+                sample_index=new_idx,
+                time_s=float(query_t[new_idx]),
+            )
+        )
     return ClubObservation(
         native_time_s=query_t,
         mid_hands_xyz=_interp_xyz(query_t, obs.native_time_s, obs.mid_hands_xyz),
@@ -446,7 +457,7 @@ def interpolate_observation(
         mask=obs.mask,
         derivation=obs.derivation,
         uncertainty=obs.uncertainty,
-        events=obs.events,
+        events=tuple(remapped_events),
         sample_rate_hz=float(sample_rate_hz),
         club_type=obs.club_type,
         catalog_length_m=obs.catalog_length_m,
@@ -456,7 +467,7 @@ def interpolate_observation(
             method="slerp_positions_linear",
             source_rate_hz=obs.sample_rate_hz,
             target_rate_hz=float(sample_rate_hz),
-            params_hash=str(abs(hash(params))),
+            params_hash=hashlib.sha256(params.encode()).hexdigest(),
         ),
     )
 
@@ -508,7 +519,7 @@ def build_calibrated_observation_fixture(trial_id: str) -> ClubObservation:
     """Synthetic calibrated fixture for ``trial_id`` (software contract only)."""
     spec = CLUBS["driver"]
     n = min(32, int(EXPECTED_SAMPLE_COUNTS[trial_id]))
-    time, mid, face, quat = _synthetic_series(n, spec.length_m)
+    time, mid, face, quat = _synthetic_series(n, spec.wrist_to_head_m)
     event_samples = EXPECTED_EVENT_SAMPLES[trial_id]
     full_n = float(EXPECTED_SAMPLE_COUNTS[trial_id])
     events: list[ObservationEvent] = []
