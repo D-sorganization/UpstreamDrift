@@ -31,6 +31,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** PR #10503 open with auto-merge armed.
 - **Evidence:** src/shared/python/motion_matching/smooth_torque_optimizer.py; tests/unit/motion_matching/test_smooth_torque_optimizer_pf05.py.
 
+### DL-#9422 · Rig Capture Sessions Through the Tools MocapSession Contract
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9422 (readiness P6; Tools #4706 M-track consumer)
+- **Branch:** conductor/issue-9422
+- **PR:** #10466 (open)
+- **Paths:** src/motion_capture/rig/tools_bridge.py; src/motion_capture/rig/**main**.py; tests/motion_capture/rig/test_tools_session_export.py; tests/fixtures/mocap_session_export/; docs/motion_capture/capture_rig.md
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (SELF; 8 Tools-first export checks pass under `tests/fixtures/mocap_session_export/run_checks.py`; 40 in-process rig/bridge/bundle/hygiene tests pass; scoped Ruff clean).
+- **Summary:** The bridge now probes the pinned Tools family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`, and projects a rig capture session onto the Tools `MocapSessionManifest` through the Tools builders and canonical serializer; `capture`/`record` write `mocap_session.json` beside the rig manifest and record the export outcome under `tools_schema.export`. Retained raw video without `--consent-recorded` is refused by the Tools policy, not faked. D-track (Tools #4707, D3 open) and the #8865/#8866/#8867 prerequisites remain open; this is the first consumer slice, not closure of the program.
+- **Next step:** Open the PR, then route the C3D upload path (#8865) through the same pinned contract as the next consumer slice.
+- **Evidence:** tests/fixtures/mocap_session_export/export_checks.py; tests/motion_capture/rig/test_tools_session_export.py.
+
 ### DL-#10434 · Qualify Contact Modes and Native Pinocchio Force Feasibility
 
 - **State:** in_review
@@ -58,6 +72,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Upgrades ContactForceAllocator with constrained QP inverse dynamics. Enforces 8-faceted polyhedral friction pyramid, non-negative normal ground forces along arbitrary terrain normals, exact contact separation masks, and strict actuator bounds without post-projection. Separates diagnostic root slack so ungrounded reactions never create false physical success. Introduces FeasibilityStatus, HARD_ZERO_TRAIL mode, and verify_torque_and_rate_bounds.
 - **Next step:** PR #10498 open with auto-merge.
 - **Evidence:** tests/unit/motion_matching/test_contact_force_allocator_pf03.py; tests/unit/motion_matching/test_contact_force_allocator.py.
+
+### DL-#10588 · Calibrate Swing Planes, Fixed Geometry and Feasible Initial States
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10588 (TB-03, parent #10584, program #10363)
+- **Branch:** feat/tb03-trajectory-fitting-10588
+- **PR:** #10631
+- **Paths:** src/shared/python/motion_matching/projection_2d.py; src/shared/python/tour_baselines/calibration.py; src/shared/python/tour_baselines/**init**.py; tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_tour_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md
+- **Started:** 2026-09-20
+- **Last verified:** 2026-09-20 (All 60 unit tests pass across tour baselines and projection_2d suites; architecture budget passes; DRY duplication gate passes; suite marker ratchet passes; ruff clean; mypy 0 errors across 15 files).
+- **Summary:** Replaced naive z-drop in `projection_2d.py` with `CalibratedSwingPlane` implementing rigid SE(3) transform, orthonormal right-handed SO(3) basis, inclination, azimuth, and `GeometricProjectionResidual` reporting RMSE and max deviation. Implemented `estimate_swing_plane` fitting one rigid plane per declared capture window, handling degeneracy (collinear points, rank < 2) and reflections. Implemented `calibrate_fixed_geometry` calibrating positive bounded link lengths (L1, L2) with frozen nonidentifiable mass/inertia priors and Fisher sensitivity rank diagnostic. Implemented `map_initial_state_double_pendulum` mapping t0 observations to generalized coordinates (theta1, theta2) and velocities with gap validation and verified forward kinematics. Implemented `compute_moving_hub_power` tracking external trajectory, velocity, power, and integrated work for prescribed moving hubs.
+- **Next step:** Commit changes, push branch, open PR with auto-merge armed, verify CI.
+- **Evidence:** tests/unit/motion_matching/test_projection_2d.py; tests/unit/tour_baselines/test_tour_calibration.py; docs/plans/tour_baselines/plane_calibration_and_initial_states.md.
 
 ### DL-#10440 · Connect Qualified Matching Strategies to Existing Results and Engine Feature Contracts
 
