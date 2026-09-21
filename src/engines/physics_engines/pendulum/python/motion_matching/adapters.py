@@ -289,6 +289,9 @@ def create_calibrated_double_pendulum_dynamics(
 ) -> DoublePendulumDynamics:
     """Instantiate DoublePendulumDynamics configured with calibrated segment lengths."""
     dynamics = DoublePendulumDynamics()
-    dynamics.parameters.upper_segment.length_m = float(l1)
-    dynamics.parameters.lower_segment.length_m = float(l2)
+    dyn_params = dynamics.parameters
+    upper_seg = dyn_params.upper_segment
+    lower_seg = dyn_params.lower_segment
+    upper_seg.length_m = float(l1)
+    lower_seg.length_m = float(l2)
     return dynamics
