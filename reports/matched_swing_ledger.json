@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T17:08:20Z",
+  "generated_at": "2026-09-21T18:08:21Z",
   "rows": [
     {
       "acceptance": null,
@@ -2959,7 +2959,7 @@
             "unit": "m"
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -3023,7 +3023,7 @@
             "unit": ""
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "required_max_closure_residual_m",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -3031,7 +3031,7 @@
             "unit": ""
           },
           {
-            "measured": 1.8289190783135055e-5,
+            "measured": 1.8289190783135055e-05,
             "name": "required_max_closure_residual_rad",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -3293,6 +3293,29 @@
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_drake/receipt.json",
       "sha256": "1f1f67d26b5b1883f652653186b7f96e14c899119b803a913f9c2638fa5bdce4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "evidence/matched/driver_g1_myosuite/playback.gif",
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_myosuite/candidate.npz"
+      },
+      "candidate_sha": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
+      "capture": "driver",
+      "engine": "myosuite",
+      "horizon_s": 7.412800099991728,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": 0.0,
+        "early_marker_rmse_m": 0.06289786174732638,
+        "pelvis_yaw_rmse_rad": 0.9366239177658751,
+        "terminal_marker_rmse_m": 0.29791451101341426,
+        "whole_marker_rmse_m": 0.18569771909574298
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_myosuite/receipt.json",
+      "sha256": "c7bce1577f4218151026403704c807fa53363978493f608246d1d7a3e5e1539c"
     },
     {
       "acceptance": {
@@ -3579,5 +3602,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 99
+  "total_receipts": 100
 }
