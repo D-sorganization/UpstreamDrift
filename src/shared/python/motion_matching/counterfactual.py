@@ -193,9 +193,9 @@ class NativeConstrainedCounterfactualProvider:
                 force_N=force, torque_Nm=torque, point_of_application_m=point
             )
             return accel, wrench
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10285
             "Model does not implement constrained dynamics evaluation"
-        )  # tracked: #10285
+        )
 
     def evaluate_pointwise(
         self,
@@ -655,9 +655,9 @@ def _eval_model_forward_step(
         force, torque, _ = model.closure_reaction_wrench("world")
         w_vec = np.concatenate([force, torque])
     else:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10285
             "Model does not implement dynamics evaluation"
-        )  # tracked: #10285
+        )
     return a_vec, w_vec
 
 
