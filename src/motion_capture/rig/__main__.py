@@ -8,10 +8,14 @@ Commands:
 - ``capture --plan P --duration S --out DIR [--synthetic]``: open every planned
   camera, capture together, write ``session_manifest.json``. Exit 0 for
   ``supported``, 1 for ``degraded``/``blocked``, 2 for ``unavailable``.
-- ``record --plan P --duration S --out DIR [--dry-run]``: stream-copy every
-  planned camera's compressed video to disk and write a session bundle
-  (``plan.json``, ``recordings.json``, ``session_manifest.json``). Same exit
-  codes as ``capture``. ``--dry-run`` records nothing and exercises the bundle.
+- ``record --plan P --duration S --out DIR [--dry-run] [--consent-recorded]``:
+  stream-copy every planned camera's compressed video to disk and write a
+  session bundle (``plan.json``, ``recordings.json``, ``session_manifest.json``).
+  Same exit codes as ``capture``. ``--dry-run`` records nothing and exercises
+  the bundle. Both commands also write ``mocap_session.json``, the session in
+  the canonical Tools ``mocap-session`` contract, when the pinned Tools tree
+  offers that schema and its policy accepts the terms (retained video needs
+  ``--consent-recorded``); the manifest's ``tools_schema.export`` says which.
 - ``session-check --session DIR``: validate a bundle on disk. Exit 0 when sound.
 - ``proxy --session DIR [--encoder E] [--crf N]``: write browser-playable H.264
   ``.mp4`` proxies beside each recording and ``proxies.json``. Exit 0 when
@@ -54,7 +58,7 @@ from src.motion_capture.provenance import write_stamped
 from src.motion_capture.variants import variant_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .bundle import build_index, check_bundle, write_bundle
+from .bundle import MANIFEST_FILE, build_index, check_bundle, write_bundle
 from .plan import CameraControls, RigPlan, check_plan, parse_mode
 from .probe import RecordingProbe, probe_recording
 from .proxy import DEFAULT_CRF, DEFAULT_ENCODER, ENCODERS, make_proxies
@@ -67,9 +71,9 @@ from .recorder import (
     dshow_device_ref,
     record_all,
 )
-from .session import CaptureOutcome, CaptureSession, CaptureTuning
+from .session import CaptureOutcome, CaptureSession, CaptureTuning, SessionManifest
 from .sources import FrameSource, SyntheticFrameSource
-from .tools_bridge import probe_tools_schema
+from .tools_bridge import RecordingTerms, export_to_bundle, probe_tools_schema
 from .topology import (
     CameraLocation,
     attach_capture_indices,
@@ -439,6 +443,12 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="record nothing; write the bundle with NullRecorder results",
     )
+    rec.add_argument(
+        "--consent-recorded",
+        action="store_true",
+        help="the subject's consent to retain raw video is on record (ADR-0041); "
+        "without it the canonical Tools session export is refused, not faked",
+    )
     chk = sub.add_parser("session-check", help="validate a session bundle on disk")
     chk.add_argument("--session", type=Path, required=True)
     prx = sub.add_parser("proxy", help="write H.264 mp4 proxies beside the recordings")
@@ -515,11 +525,8 @@ def cmd_capture(args: argparse.Namespace) -> int:
         settle = args.settle
     tuning = CaptureTuning(settle_s=settle, collect_timing=args.timing)
     session = CaptureSession(plan, sources, duration_s=args.duration, tuning=tuning)
-    manifest = session.run()
-    manifest = manifest.model_copy(
-        update={"tools_schema": probe_tools_schema().to_dict()}
-    )
-    path = manifest.save(args.out / "session_manifest.json")
+    manifest = _with_tools_export(session.run(), plan, args.out, RecordingTerms())
+    path = manifest.save(args.out / MANIFEST_FILE)
     for cam in manifest.cameras:
         logger.info(
             "%s (%s): %.1f fps failed=%d reopens=%d %s%s",
@@ -533,6 +540,15 @@ def cmd_capture(args: argparse.Namespace) -> int:
         )
     logger.info("outcome=%s manifest=%s", manifest.outcome.value, path)
     return _EXIT_BY_OUTCOME[manifest.outcome]
+
+
+def _with_tools_export(
+    manifest: SessionManifest, plan: RigPlan, out: Path, terms: RecordingTerms
+) -> SessionManifest:
+    """Export the canonical Tools session beside the rig manifest; note the outcome."""
+    export = export_to_bundle(out, manifest, plan, terms)
+    tools_schema = {**probe_tools_schema().to_dict(), "export": export}
+    return manifest.model_copy(update={"tools_schema": tools_schema})
 
 
 def _dry_run_probe(path: Path) -> RecordingProbe:
@@ -564,13 +580,12 @@ def cmd_record(args: argparse.Namespace) -> int:
     )
     prober = _dry_run_probe if args.dry_run else probe_recording
     index = build_index(plan, results, args.duration, args.out, prober=prober)
-    manifest = write_bundle(
-        args.out,
-        plan,
-        index,
-        started_utc=started,
-        tools_schema=probe_tools_schema().to_dict(),
+    manifest = write_bundle(args.out, plan, index, started_utc=started)
+    terms = RecordingTerms(
+        consent_recorded=args.consent_recorded, raw_video_retained=not args.dry_run
     )
+    manifest = _with_tools_export(manifest, plan, args.out, terms)
+    manifest.save(args.out / MANIFEST_FILE)
     for entry in index.recordings:
         logger.info(
             "%s (%s): %s %d bytes rc=%s frames=%s duration=%s",

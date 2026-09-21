@@ -19,12 +19,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 from pathlib import Path
 import sys
 import tarfile
 
 import numpy as np
 from numpy.typing import NDArray
+
+logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--repo", type=Path, default=Path("."), help="Repository root path")
@@ -127,7 +130,7 @@ def pelvis_yaw_metrics(
 # 1. Fit marker attachments on training frames (0..306)
 # ==============================================================================
 fitted_offsets = orig_offsets.copy()
-for iteration in range(10):
+for _iteration in range(10):
     new_offsets = fitted_offsets.copy()
     for b in np.unique(bodies):
         b_idx = np.flatnonzero(bodies == b)
@@ -397,10 +400,16 @@ receipt = {
 
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
-print(f"Receipt written successfully to {args.output}")
-print(
-    f"  Nominal:    Training={case_nominal['training']['aggregate_rms_mm']:.2f} mm | Validation={case_nominal['validation']['aggregate_rms_mm']:.2f} mm | Hub Val={case_nominal['validation']['per_body_rms_mm']['Hub']:.2f} mm"
+logger.info("Receipt written successfully to %s", args.output)
+logger.info(
+    "  Nominal:    Training=%.2f mm | Validation=%.2f mm | Hub Val=%.2f mm",
+    case_nominal["training"]["aggregate_rms_mm"],
+    case_nominal["validation"]["aggregate_rms_mm"],
+    case_nominal["validation"]["per_body_rms_mm"]["Hub"],
 )
-print(
-    f"  Calibrated: Training={case_calib_offsets['training']['aggregate_rms_mm']:.2f} mm | Validation={case_calib_offsets['validation']['aggregate_rms_mm']:.2f} mm | Hub Val={case_calib_offsets['validation']['per_body_rms_mm']['Hub']:.2f} mm"
+logger.info(
+    "  Calibrated: Training=%.2f mm | Validation=%.2f mm | Hub Val=%.2f mm",
+    case_calib_offsets["training"]["aggregate_rms_mm"],
+    case_calib_offsets["validation"]["aggregate_rms_mm"],
+    case_calib_offsets["validation"]["per_body_rms_mm"]["Hub"],
 )
