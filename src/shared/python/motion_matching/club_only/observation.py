@@ -19,8 +19,9 @@ import numpy as np
 
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.core.vector_math import row_euclidean_norm
-from src.shared.python.math_utils.quaternion import rotmat_to_quat, slerp
+from src.shared.python.math_utils.quaternion import rotmat_to_quat, slerp_series
 from src.shared.python.motion_matching._geodesic import quaternion_geodesic_angles
+from src.shared.python.motion_matching._series_interp import interp_xyz_series
 from src.shared.python.motion_matching.club_models import CLUBS
 from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
@@ -380,37 +381,6 @@ def scored_component_subset(obs: ClubObservation) -> frozenset[str]:
     return frozenset(scored)
 
 
-def _slerp_series(
-    query_t: np.ndarray, raw_t: np.ndarray, raw_q: np.ndarray
-) -> np.ndarray:
-    out = np.empty((query_t.shape[0], 4), dtype=np.float64)
-    last = raw_t.shape[0] - 1
-    for i, t in enumerate(query_t):
-        if t <= raw_t[0]:
-            out[i] = raw_q[0]
-            continue
-        if t >= raw_t[last]:
-            out[i] = raw_q[last]
-            continue
-        j = int(np.searchsorted(raw_t, t)) - 1
-        j = max(0, min(j, last - 1))
-        span = raw_t[j + 1] - raw_t[j]
-        alpha = 0.0 if span == 0.0 else (t - raw_t[j]) / span
-        out[i] = slerp(raw_q[j], raw_q[j + 1], float(alpha))
-    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
-    norms[norms == 0.0] = 1.0
-    return out / norms
-
-
-def _interp_xyz(
-    query_t: np.ndarray, raw_t: np.ndarray, raw_xyz: np.ndarray
-) -> np.ndarray:
-    out = np.empty((query_t.shape[0], 3), dtype=np.float64)
-    for k in range(3):
-        out[:, k] = np.interp(query_t, raw_t, raw_xyz[:, k])
-    return out
-
-
 @precondition(
     lambda obs, sample_rate_hz: sample_rate_hz > 0,
     "sample_rate_hz must be > 0",
@@ -432,8 +402,8 @@ def interpolate_observation(
     n_out = int(round((t1 - t0) * sample_rate_hz)) + 1
     query_t = t0 + np.arange(n_out, dtype=np.float64) / float(sample_rate_hz)
     query_t[-1] = t1
-    mid_q = _slerp_series(query_t, obs.native_time_s, obs.mid_hands_quat)
-    face_q = _slerp_series(query_t, obs.native_time_s, obs.face_quat)
+    mid_q = slerp_series(query_t, obs.native_time_s, obs.mid_hands_quat)
+    face_q = slerp_series(query_t, obs.native_time_s, obs.face_quat)
     params = (
         f"slerp|{obs.sample_rate_hz}->{sample_rate_hz}|"
         f"{obs.native_time_s.shape[0]}->{n_out}"
@@ -450,8 +420,8 @@ def interpolate_observation(
         )
     return ClubObservation(
         native_time_s=query_t,
-        mid_hands_xyz=_interp_xyz(query_t, obs.native_time_s, obs.mid_hands_xyz),
-        face_xyz=_interp_xyz(query_t, obs.native_time_s, obs.face_xyz),
+        mid_hands_xyz=interp_xyz_series(query_t, obs.native_time_s, obs.mid_hands_xyz),
+        face_xyz=interp_xyz_series(query_t, obs.native_time_s, obs.face_xyz),
         mid_hands_quat=mid_q,
         face_quat=face_q,
         mask=obs.mask,
