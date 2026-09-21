@@ -411,3 +411,35 @@ def test_dbc_rejects_nonfinite_and_survives_python_dash_o() -> None:
             np.zeros((2, 3)),
             sigma_m=-0.1,
         )
+
+    # Public ValueError checks must not rely on assert/__debug__ alone.
+    import subprocess
+    import sys
+
+    script = (
+        "from src.shared.python.motion_matching.club_only.acceptance "
+        "import ClubOnlyResidualReport\n"
+        "try:\n"
+        "    ClubOnlyResidualReport(\n"
+        "        grip_position_rmse_m=float('nan'),\n"
+        "        face_position_rmse_m=0.01,\n"
+        "        grip_orientation_rmse_rad=None,\n"
+        "        face_orientation_rmse_rad=None,\n"
+        "        native_coverage_fraction=0.9,\n"
+        "        speed_error_m_s=None,\n"
+        "        phase_error_s=None,\n"
+        "        unweighted_physical={},\n"
+        "    )\n"
+        "except ValueError as exc:\n"
+        "    assert 'finite' in str(exc).lower()\n"
+        "else:\n"
+        "    raise SystemExit('expected ValueError under python -O')\n"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-O", "-c", script],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=str(REPO_ROOT),
+    )
+    assert completed.returncode == 0, completed.stderr
