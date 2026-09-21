@@ -60,13 +60,13 @@ class ClubOnlyResidualReport:
                 raise ValueError(f"{name} must be >= 0")
         if not 0.0 <= self.native_coverage_fraction <= 1.0:
             raise ValueError("coverage fraction must be in [0, 1]")
-        for name, value in (
+        for name, optional in (
             ("grip_orientation_rmse_rad", self.grip_orientation_rmse_rad),
             ("face_orientation_rmse_rad", self.face_orientation_rmse_rad),
             ("speed_error_m_s", self.speed_error_m_s),
             ("phase_error_s", self.phase_error_s),
         ):
-            if value is not None and (not math.isfinite(value) or value < 0.0):
+            if optional is not None and (not math.isfinite(optional) or optional < 0.0):
                 raise ValueError(f"{name} must be finite and >= 0 when set")
         for key, value in self.unweighted_physical.items():
             if not math.isfinite(value):

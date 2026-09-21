@@ -48,13 +48,13 @@ class ObservationProfile:
                 raise ValueError(f"{name} must be finite and >= 0")
         if not 0.0 <= self.min_native_coverage_fraction <= 1.0:
             raise ValueError("min_native_coverage_fraction must be in [0, 1]")
-        for name, value in (
+        for name, optional in (
             ("max_grip_orientation_rmse_rad", self.max_grip_orientation_rmse_rad),
             ("max_face_orientation_rmse_rad", self.max_face_orientation_rmse_rad),
             ("max_speed_error_m_s", self.max_speed_error_m_s),
             ("max_phase_error_s", self.max_phase_error_s),
         ):
-            if value is not None and (value != value or value < 0.0):
+            if optional is not None and (optional != optional or optional < 0.0):
                 raise ValueError(f"{name} must be finite and >= 0 when set")
         if "face_orientation" in self.unsupported_components:
             if self.max_face_orientation_rmse_rad is not None:
