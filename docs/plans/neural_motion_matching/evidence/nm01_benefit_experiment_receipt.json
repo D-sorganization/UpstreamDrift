@@ -70,10 +70,7 @@
         "stratum": "c3d_external"
       }
     ],
-    "c3d_derived_tests": [
-      "c3d.club_only.control_a",
-      "c3d.club_only.control_b"
-    ],
+    "c3d_derived_tests": ["c3d.club_only.control_a", "c3d.club_only.control_b"],
     "compute_caps": {
       "max_cpu_core_hours": 48.0,
       "max_gpu_hours": 8.0,
@@ -94,11 +91,7 @@
       "independent_replay"
     ],
     "min_synthetic_queries_per_stratum": 30,
-    "nested_episode_stages": [
-      100,
-      500,
-      2000
-    ],
+    "nested_episode_stages": [100, 500, 2000],
     "promotion_gates": {
       "accepted_quality_rate_must_not_degrade": true,
       "min_median_speedup": 2.0,
@@ -106,23 +99,10 @@
       "negative_result_retains_research_checkpoint": true,
       "p95_must_not_worsen": true
     },
-    "related_contracts": [
-      "#10587",
-      "#10606",
-      "#10616"
-    ],
+    "related_contracts": ["#10587", "#10606", "#10616"],
     "statistical_limitations": "Tiny empirical set: four workbook trials and two C3D-derived club-only controls do not support population confidence intervals. Synthetic query episodes validate software/stratum contracts only and are not native physical evidence. Report uncertainty and limitations with every speed or quality claim.",
-    "training_seeds": [
-      0,
-      1,
-      2
-    ],
-    "workbook_trials": [
-      "TW_wiffle",
-      "TW_ProV1",
-      "GW_wiffle",
-      "GW_ProV11"
-    ]
+    "training_seeds": [0, 1, 2],
+    "workbook_trials": ["TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"]
   },
   "gate_digest": "c575fb4a4545e4a2e22f1f3f154a057fc60c6e6f05a32ed8f73e7b3ee6551c54",
   "schema": "neural-benefit-experiment/1.0.0",
