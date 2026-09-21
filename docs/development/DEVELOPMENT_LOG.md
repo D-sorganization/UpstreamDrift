@@ -132,13 +132,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10348 (MS-61, epic #10363)
 - **Branch:** feat/issue-10348-ms61-simscape-topology
-- **PR:** not created
+- **PR:** #10676
 - **Paths:** src/shared/python/motion_matching/{simscape_topology.py,full_marker_terminal.py,tour_metrics.py,acceptance.py}; scripts/matlab/{materialize_ms61_topology_receipts.py,run_simscape_candidate.ps1}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/; docs/development/matched_swing_program/{GATES.md,README.md,WAVES.md}; docs/development/simscape_tour_matching/CHECKPOINTS.md
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 (MS-61 unit suite + acceptance run-102 gate; materialize emits blocked native_gate + R2025b runtime/parity receipts; no invented native Fit success)
+- **Last verified:** 2026-09-21 (PR #10676 open with squash auto-merge armed; local MS-61 + acceptance suites green; native gate blocked)
 - **Summary:** Fail-closed 27-DOF topology classification (no independent neck), dual terminal disclosure (full + head cluster; body-excluding-head diagnostic only), acceptance/tour_metrics dual-terminal contracts, and run-103 scaffolding derived from run-102 without inventing native G1 success; repair linked to MS-104 (#10378).
-- **Next step:** Open PR with Fixes #10348 and arm squash auto-merge; DeskComputer R2025b Fit when model work allows.
-- **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.
+- **Next step:** Confirm CI green and squash auto-merge of PR #10676.- **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.
 
 ### DL-#10347 · Simscape R2025b Run Management (Run-102 Package)
 
