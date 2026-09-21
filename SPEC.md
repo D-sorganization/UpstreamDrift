@@ -6569,6 +6569,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-17 | #10315 | Expose Pink constrained IK solver across motion pipeline, CLI/GUI controls, and versioned receipts (#10278). |
 | 2026-09-16 | #10248 | Replaced `np.linalg.norm(span_mm)` with `math.sqrt(np.vdot(span_mm, span_mm))` for small 3D vectors in `src/tools/bunker_shot_gui/render3d_vtk.py` avoiding np.linalg.norm overhead. (spec-exempt: micro-optimization) |
 | 2026-09-16 | #10244 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
+| 2026-09-16 | #10245 | Reconcile the 2026-08-21 adversarial product review epic against main: ledger at docs/development/adversarial_review_remediation_9410.md records 34 landed and 27 residual children with SHAs, unmerged fix branches and ordered next waves; no runtime change (#9410). |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
