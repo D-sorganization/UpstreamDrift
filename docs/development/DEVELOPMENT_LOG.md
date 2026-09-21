@@ -31,6 +31,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR `Closes #8883`, push, and drive CI to green.
 - **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
 
+### DL-#8930 · Vectorize Rust Trajectory Post-Processing
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8930
+- **Branch:** fix/8930-ball-flight-vectorized-rk4
+- **PR:** #10648 (open)
+- **Paths:** src/shared/python/physics/ball_simulator.py; tests/unit/physics/test_ball_simulator_post_process_vectorized_8930.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 (`98abb965f1`) — RED shown for the batching regression test (25 calls before the fix), then GREEN; numerical-equivalence and empty-trajectory tests pass; `tests/unit/physics/` shows no new failures versus unmodified main (three pre-existing rust-engine/tolerance failures reproduced identically via `git stash`); ruff check/format clean.
+- **Summary:** `BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.
+
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
 - **State:** in_review
