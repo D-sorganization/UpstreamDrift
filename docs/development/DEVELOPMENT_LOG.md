@@ -136,7 +136,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
 - **Branch:** feat/tb06-upper-body-fit-10591
-- **PR:** (recorded after opening)
+- **PR:** #10645 (open, not a Closes-PR -- driver/iron qualification campaign deferred)
 - **Paths:** src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 at HEAD (SELF; 11/11 unit tests pass in tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; ruff check clean; ruff format clean).
