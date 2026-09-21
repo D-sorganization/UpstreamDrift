@@ -19,6 +19,8 @@ from typing import Any, Mapping
 from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
 )
+from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.training.config import TrainingConfig
 
 __all__ = [
     "BASELINE_METHODS",
@@ -32,8 +34,10 @@ __all__ = [
     "ComputeBudgetCaps",
     "PromotionGates",
     "break_even_queries",
+    "classical_baseline_latency_s",
     "default_benefit_experiment",
     "freeze_benefit_experiment",
+    "pilot_training_config",
 ]
 
 EXPERIMENT_SCHEMA = "neural-benefit-experiment/1.0.0"
@@ -327,6 +331,25 @@ def break_even_queries(
     if per_query_savings_s <= 0.0:
         return None
     return offline_cost_s / per_query_savings_s
+
+
+def classical_baseline_latency_s(result: CanonicalFitResult) -> float:
+    """Map a classical CanonicalFitResult into latency accounting."""
+    return result.latency_wall_clock_s()
+
+
+def pilot_training_config(
+    *,
+    output_dir: Path,
+    model_id: str,
+    seed: int,
+) -> TrainingConfig:
+    """Build a shared TrainingConfig for an NM-01 pilot stage."""
+    return TrainingConfig.for_neural_motion_pilot(
+        output_dir=output_dir,
+        model_id=model_id,
+        seed=seed,
+    )
 
 
 def _default_benchmark_cases() -> tuple[BenchmarkCase, ...]:
