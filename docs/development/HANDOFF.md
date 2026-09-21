@@ -1,5 +1,33 @@
 # Current Matching Continuation Handoff
 
+Updated 2026-09-18. Governing epic #10363; documentation review branch
+`docs/matching-agent-continuation`; commit SELF; PR https://github.com/D-sorganization/UpstreamDrift/pull/10393.
+Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
+Development-log entry: `DL-#10363`.
+
+OpenSim golf-model improvement epic #10394 now has nine children (#10395–#10403).
+Start with [the golf-model assignment](opensim_tour_matching/GOLF_MODEL_AGENT_PROMPT.md)
+and [detailed epic](opensim_tour_matching/EPIC_GOLF_MODEL.md) for the missing club,
+arm scaling, address alignment and muscle/tendon extension work.
+
+The current Pinocchio/OpenSim native jobs were running at the 01:45 UTC
+snapshot. No solver was launched, stopped or accepted by this review. Read
+[the bounded agent prompt](matched_swing_program/AGENT_CONTINUATION_PROMPT.md),
+[Pinocchio turnover](matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md)
+and [OpenSim handoff](opensim_tour_matching/HANDOFF.md). They contain exact
+source identities, live job/output paths, saved checkpoints, recovery evidence,
+failed gates, test results and escalation rules. Pinocchio native source is
+not the merged main scaffold; OpenSim local work contains owner changes.
+Preserve them. Review validation: 14 Pinocchio pure tests and 27 OpenSim ladder
+tests passed; native acceptance was not rerun. Source hashes match deployed
+files after line-ending normalization. Recovery archive is a selected subset.
+
+Next action: inspect the existing native jobs and retrieve newly completed
+receipts using the lane handoff before considering another fit.
+
+The historical Simscape continuation below remains useful for that lane;
+it is not the latest Pinocchio/OpenSim state.
+
 ## PF-02 Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (#10432)
 
 - Branch: `feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration`, PR #10497 (auto-merge armed), lease `antigravity-ud-10432`, DL-#10432.
