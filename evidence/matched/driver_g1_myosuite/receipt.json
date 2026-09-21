@@ -3,7 +3,7 @@
   "engine": "myosuite",
   "engine_version": "unavailable",
   "stage": "replay",
-  "candidate_sha256": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
+  "candidate_sha256": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
   "source_engine": "mujoco",
   "configuration": {
     "mode": "kinematic_only",
@@ -52,35 +52,37 @@
   },
   "parity": {
     "comparison": "native_vs_source_predicted_markers",
-    "marker_rms_m": 0.0,
-    "marker_rms_raw_m": 0.2980264548648437,
+    "marker_rms_m": 0.19519270680746284,
+    "marker_rms_raw_m": 0.2439599089056849,
     "alignment": "static_site_calibration_then_pelvis_center",
     "site_calibration_m": {
-      "policy": "source_oracle_preserved_pending_ms51"
+      "0": [-0.17733588787934074, -0.025049230409046774, 0.12106830346333286],
+      "1": [-0.04614987612723409, 0.08938275625072824, 0.011097307760087216],
+      "2": [-0.1452503979910338, 0.32952860301096354, 0.11812064553505475]
     },
     "marker_rms_limit_m": 0.015,
-    "passed": true,
+    "passed": false,
     "topology_note": "Vendored MyoBody placeholder MJCF until MS-51 pins myo_sim and generates golfer_myobody.xml with club weld and foot contacts.",
     "mapped_markers": ["WaistLeft", "WaistRight", "BackTop"],
-    "marker_field_policy": "source_oracle_preserved_on_placeholder"
+    "marker_field_policy": "native_site_forward_kinematics"
   },
   "shared_metrics": {
-    "whole_marker_rmse_m": 0.0,
-    "early_marker_rmse_m": 0.0,
-    "terminal_marker_rmse_m": 0.0,
+    "whole_marker_rmse_m": 0.18569771909574298,
+    "early_marker_rmse_m": 0.06289786174732638,
+    "terminal_marker_rmse_m": 0.29791451101341426,
     "club_marker_rmse_m": 0.0,
-    "pelvis_yaw_rmse_rad": 0.0
+    "pelvis_yaw_rmse_rad": 0.9366239177658751
   },
   "artifacts": {
     "candidate_npz": {
       "path": "candidate.npz",
-      "sha256": "fbae7023965f91a17ce8a09b551e2c557da4555afb816e3276cd72b1f8461383"
+      "sha256": "8318177eca3e0b279f715dcdafcfecc987aded872d7adc85ce682f5e8c1ef6dd"
     },
     "playback_gif": {
       "path": "playback.gif",
-      "sha256": "5765ae6cdd03322285ecdd3c5530ee3a9e11c40a78f75eb6d462b5cb25154818"
+      "sha256": "91cbe635ac1ff88aa0e5fc1496621c2ce379328871818825fffef034338d0384"
     }
   },
-  "elapsed_s": 4.470223800017266,
+  "elapsed_s": 7.412800099991728,
   "qualification": "Kinematic retarget replay only. Native-model topology differs from the MuJoCo G1 oracle; marker parity is diagnostic, not equivalence."
 }

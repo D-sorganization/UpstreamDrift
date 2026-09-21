@@ -207,175 +207,202 @@ def _pelvis_center_aligned_rms(
     return _marker_rms(source, aligned, valid)
 
 
-@postcondition(
-    lambda receipt: receipt.get("stage") == "replay",
-    "replay stage stamped",
-)
-def run_kinematic_replay(config: ReplayConfig) -> dict[str, Any]:
-    """Retarget, replay kinematically, predict markers, and write receipt artifacts."""
-    start = perf_counter()
-    rmap = config.retarget_map or default_retarget_map()
-    scene = resolve_golfer_scene(rmap.marker_sites)
-    candidate_path = Path(config.candidate)
-    candidate_sha256 = _digest(candidate_path)
+@dataclass(frozen=True)
+class _ReplaySource:
+    candidate_sha256: str
+    coordinate_order: tuple[str, ...]
+    time_s: Array
+    q: Array
+    source_markers: Array | None
+    marker_validity: BoolArray | None
+    labels: tuple[str, ...]
 
+
+def _load_replay_source(candidate_path: Path) -> _ReplaySource:
+    candidate_sha256 = _digest(candidate_path)
     try:
         candidate = load_candidate(candidate_path)
-        coordinate_order = candidate.metadata.coordinate_names
-        time_s = np.asarray(candidate.time_s, dtype=np.float64)
-        q = np.asarray(candidate.q, dtype=np.float64)
-        source_markers = (
-            np.asarray(candidate.model_markers_m, dtype=np.float64)
-            if candidate.model_markers_m is not None
-            else None
+        return _ReplaySource(
+            candidate_sha256=candidate_sha256,
+            coordinate_order=candidate.metadata.coordinate_names,
+            time_s=np.asarray(candidate.time_s, dtype=np.float64),
+            q=np.asarray(candidate.q, dtype=np.float64),
+            source_markers=(
+                np.asarray(candidate.model_markers_m, dtype=np.float64)
+                if candidate.model_markers_m is not None
+                else None
+            ),
+            marker_validity=(
+                np.asarray(candidate.marker_validity, dtype=bool)
+                if candidate.marker_validity is not None
+                else None
+            ),
+            labels=tuple(candidate.metadata.marker_names),
         )
-        marker_validity = (
-            np.asarray(candidate.marker_validity, dtype=bool)
-            if candidate.marker_validity is not None
-            else None
-        )
-        labels = tuple(candidate.metadata.marker_names)
-    except (ValueError, OSError, KeyError):
+    except (ValueError, OSError, KeyError, TypeError):
         arrays = _load_legacy_arrays(candidate_path)
-        coordinate_order = tuple(str(x) for x in arrays["coordinate_order"])
-        time_s = np.asarray(arrays["time_s"], dtype=np.float64)
-        q = np.asarray(arrays["q"], dtype=np.float64)
-        source_markers = np.asarray(arrays["markers_m"], dtype=np.float64)
-        marker_validity = np.asarray(arrays["valid"], dtype=bool)
-        labels = tuple(str(x) for x in arrays["labels"])
+        return _ReplaySource(
+            candidate_sha256=candidate_sha256,
+            coordinate_order=tuple(str(x) for x in arrays["coordinate_order"]),
+            time_s=np.asarray(arrays["time_s"], dtype=np.float64),
+            q=np.asarray(arrays["q"], dtype=np.float64),
+            source_markers=np.asarray(arrays["markers_m"], dtype=np.float64),
+            marker_validity=np.asarray(arrays["valid"], dtype=bool),
+            labels=tuple(str(x) for x in arrays["labels"]),
+        )
 
-    if not coordinate_order:
-        raise ValueError("Candidate coordinate_order is empty")
-    q_aligned = _align_source_q(q, coordinate_order, rmap)
-    q_myosuite = retarget_trajectory(q_aligned, rmap)
 
-    import mujoco  # noqa: PLC0415
-
-    model = mujoco.MjModel.from_xml_path(str(scene.xml_path))
-    data = mujoco.MjData(model)
-    qpos_traj = np.stack(
-        [_qpos_from_retarget(row, rmap, model.nq) for row in q_myosuite], axis=0
-    )
-
-    site_labels = tuple(
+def _site_labels(
+    labels: tuple[str, ...], rmap: RetargetMap, scene: Any
+) -> tuple[str, ...]:
+    mapped = tuple(
         label for label in labels if label in (rmap.marker_sites or scene.marker_sites)
     )
-    if not site_labels:
-        site_labels = tuple(scene.marker_sites.keys())
-    predicted = _predict_markers(
-        model, data, qpos_traj, scene.marker_sites, site_labels
-    )
-    if source_markers is not None:
-        label_indices = [labels.index(name) for name in site_labels if name in labels]
-        source_subset = source_markers[:, label_indices, :]
+    return mapped or tuple(scene.marker_sites.keys())
+
+
+def _marker_subsets(
+    source: _ReplaySource,
+    site_labels: tuple[str, ...],
+    predicted: Array,
+) -> tuple[Array, Array, BoolArray]:
+    if source.source_markers is not None:
+        label_indices = [
+            source.labels.index(name) for name in site_labels if name in source.labels
+        ]
+        source_subset = source.source_markers[:, label_indices, :]
         valid_subset = (
-            marker_validity[:, label_indices]
-            if marker_validity is not None
-            else np.ones((len(time_s), len(site_labels)), dtype=bool)
+            source.marker_validity[:, label_indices]
+            if source.marker_validity is not None
+            else np.ones((len(source.time_s), len(site_labels)), dtype=bool)
         )
-    else:
-        source_subset = predicted
-        valid_subset = np.ones((len(time_s), len(site_labels)), dtype=bool)
+        return source_subset, predicted, valid_subset
+    valid = np.ones((len(source.time_s), len(site_labels)), dtype=bool)
+    return predicted, predicted, valid
 
-    if scene.is_placeholder and source_markers is not None:
-        marker_rms_raw = _marker_rms(source_subset, predicted, valid_subset)
-        calibrated = source_subset.copy()
-        site_calibration: dict[str, Any] = {
-            "policy": "source_oracle_preserved_pending_ms51"
-        }
-        marker_rms = 0.0
-    else:
-        marker_rms_raw = _marker_rms(source_subset, predicted, valid_subset)
-        calibrated, site_calibration = _apply_static_site_calibration(
-            source_subset, predicted, valid_subset
-        )
-        left_idx = site_labels.index("WaistLeft") if "WaistLeft" in site_labels else 0
-        right_idx = (
-            site_labels.index("WaistRight") if "WaistRight" in site_labels else left_idx
-        )
-        marker_rms = _pelvis_center_aligned_rms(
-            source_subset,
-            calibrated,
-            valid_subset,
-            left_idx=left_idx,
-            right_idx=right_idx,
-        )
 
-    out_dir = Path(config.output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
+def _parity_metrics(
+    source_subset: Array,
+    predicted: Array,
+    valid_subset: BoolArray,
+    site_labels: tuple[str, ...],
+) -> tuple[float, float, Array, dict[str, Any]]:
+    marker_rms_raw = _marker_rms(source_subset, predicted, valid_subset)
+    calibrated, site_calibration = _apply_static_site_calibration(
+        source_subset, predicted, valid_subset
+    )
+    left_idx = site_labels.index("WaistLeft") if "WaistLeft" in site_labels else 0
+    right_idx = (
+        site_labels.index("WaistRight") if "WaistRight" in site_labels else left_idx
+    )
+    marker_rms = _pelvis_center_aligned_rms(
+        source_subset,
+        calibrated,
+        valid_subset,
+        left_idx=left_idx,
+        right_idx=right_idx,
+    )
+    return marker_rms, marker_rms_raw, calibrated, site_calibration
 
+
+@dataclass(frozen=True)
+class _ReplayArtifactsContext:
+    out_dir: Path
+    source: _ReplaySource
+    q_myosuite: Array
+    site_labels: tuple[str, ...]
+    source_subset: Array
+    calibrated: Array
+    valid_subset: BoolArray
+    rmap: RetargetMap
+    scene: Any
+    config: ReplayConfig
+
+
+def _write_replay_outputs(ctx: _ReplayArtifactsContext) -> dict[str, Any]:
+    ctx.out_dir.mkdir(parents=True, exist_ok=True)
     meta = CandidateMetadata(
         schema_version=CANDIDATE_SCHEMA_VERSION,
         profile=CandidateProfile.KINEMATIC,
         engine="myosuite",
-        model_name=scene.xml_path.name,
-        model_sha256=_digest(scene.xml_path),
-        coordinate_names=rmap.target_names,
-        velocity_names=rmap.target_names,
-        marker_names=site_labels,
+        model_name=ctx.scene.xml_path.name,
+        model_sha256=_digest(ctx.scene.xml_path),
+        coordinate_names=ctx.rmap.target_names,
+        velocity_names=ctx.rmap.target_names,
+        marker_names=ctx.site_labels,
         extra={
-            "source_candidate_sha256": candidate_sha256,
-            "source_engine": config.source_engine,
+            "source_candidate_sha256": ctx.source.candidate_sha256,
+            "source_engine": ctx.config.source_engine,
             "retarget_map": str(Path(__file__).with_name("coordinate_map_anthro.json")),
-            "topology_note": scene.topology_note,
+            "topology_note": ctx.scene.topology_note,
         },
     )
-    out_candidate = MatchedSwingCandidate(
-        metadata=meta,
-        time_s=time_s,
-        q=q_myosuite,
-        markers=CandidateMarkers(
-            model_markers_m=calibrated,
-            target_markers_m=source_subset,
-            marker_validity=valid_subset,
+    cand_path = ctx.out_dir / "candidate.npz"
+    save_candidate(
+        MatchedSwingCandidate(
+            metadata=meta,
+            time_s=ctx.source.time_s,
+            q=ctx.q_myosuite,
+            markers=CandidateMarkers(
+                model_markers_m=ctx.calibrated,
+                target_markers_m=ctx.source_subset,
+                marker_validity=ctx.valid_subset,
+            ),
         ),
+        cand_path,
     )
-    cand_path = out_dir / "candidate.npz"
-    save_candidate(out_candidate, cand_path)
-
-    gif_path = out_dir / "playback.gif"
+    gif_path = ctx.out_dir / "playback.gif"
     render_playback_gif(
-        time_s,
-        source_subset,
-        calibrated,
+        ctx.source.time_s,
+        ctx.source_subset,
+        ctx.calibrated,
         gif_path,
-        valid_mask=valid_subset,
+        valid_mask=ctx.valid_subset,
     )
-
-    capture = TourCapture(
-        time_s,
-        site_labels,
-        source_subset,
-        valid_subset,
-        candidate_sha256,
-    )
-    shared = compute_shared_metrics(
-        capture, calibrated, tracked_labels=site_labels
-    ).as_dict()
-
-    artifacts = {
-        "candidate_npz": {
-            "path": cand_path.name,
-            "sha256": _digest(cand_path),
-        },
-        "playback_gif": {
-            "path": gif_path.name,
-            "sha256": _digest(gif_path),
-        },
+    return {
+        "candidate_npz": {"path": cand_path.name, "sha256": _digest(cand_path)},
+        "playback_gif": {"path": gif_path.name, "sha256": _digest(gif_path)},
+        "shared_metrics": compute_shared_metrics(
+            TourCapture(
+                ctx.source.time_s,
+                ctx.site_labels,
+                ctx.source_subset,
+                ctx.valid_subset,
+                ctx.source.candidate_sha256,
+            ),
+            ctx.calibrated,
+            tracked_labels=ctx.site_labels,
+        ).as_dict(),
     }
 
-    receipt: dict[str, Any] = {
+
+@dataclass(frozen=True)
+class _ReceiptContext:
+    config: ReplayConfig
+    source: _ReplaySource
+    scene: Any
+    rmap: RetargetMap
+    site_labels: tuple[str, ...]
+    marker_rms: float
+    marker_rms_raw: float
+    site_calibration: dict[str, Any]
+    artifacts: dict[str, Any]
+    elapsed_s: float
+
+
+def _build_receipt(ctx: _ReceiptContext) -> dict[str, Any]:
+    return {
         "schema_version": "matched-swing-replay/1",
         "engine": "myosuite",
         "engine_version": _engine_version(),
         "stage": "replay",
-        "candidate_sha256": candidate_sha256,
-        "source_engine": config.source_engine,
+        "candidate_sha256": ctx.source.candidate_sha256,
+        "source_engine": ctx.config.source_engine,
         "configuration": {
             "mode": "kinematic_only",
-            "scene_xml": str(scene.xml_path.relative_to(REPO_ROOT)),
+            "scene_xml": str(ctx.scene.xml_path.relative_to(REPO_ROOT)),
             "retarget_map": "coordinate_map_anthro.json",
-            "mapped_coordinates": len(rmap.source_to_target),
+            "mapped_coordinates": len(ctx.rmap.source_to_target),
             "omitted_source": list(
                 json.loads(
                     Path(__file__).with_name("coordinate_map_anthro.json").read_text()
@@ -388,31 +415,87 @@ def run_kinematic_replay(config: ReplayConfig) -> dict[str, Any]:
         },
         "parity": {
             "comparison": "native_vs_source_predicted_markers",
-            "marker_rms_m": marker_rms,
-            "marker_rms_raw_m": marker_rms_raw,
+            "marker_rms_m": ctx.marker_rms,
+            "marker_rms_raw_m": ctx.marker_rms_raw,
             "alignment": "static_site_calibration_then_pelvis_center",
-            "site_calibration_m": site_calibration,
+            "site_calibration_m": ctx.site_calibration,
             "marker_rms_limit_m": MARKER_RMS_LIMIT_M,
             "passed": bool(
-                np.isfinite(marker_rms) and marker_rms <= MARKER_RMS_LIMIT_M
+                np.isfinite(ctx.marker_rms) and ctx.marker_rms <= MARKER_RMS_LIMIT_M
             ),
-            "topology_note": scene.topology_note,
-            "mapped_markers": list(site_labels),
-            "marker_field_policy": (
-                "source_oracle_preserved_on_placeholder"
-                if scene.is_placeholder
-                else "native_site_forward_kinematics"
-            ),
+            "topology_note": ctx.scene.topology_note,
+            "mapped_markers": list(ctx.site_labels),
+            "marker_field_policy": "native_site_forward_kinematics",
         },
-        "shared_metrics": shared,
-        "artifacts": artifacts,
-        "elapsed_s": perf_counter() - start,
+        "shared_metrics": ctx.artifacts["shared_metrics"],
+        "artifacts": {
+            key: ctx.artifacts[key] for key in ("candidate_npz", "playback_gif")
+        },
+        "elapsed_s": ctx.elapsed_s,
         "qualification": (
             "Kinematic retarget replay only. Native-model topology differs from "
             "the MuJoCo G1 oracle; marker parity is diagnostic, not equivalence."
         ),
     }
-    receipt_path = out_dir / "receipt.json"
+
+
+@postcondition(
+    lambda receipt: receipt.get("stage") == "replay",
+    "replay stage stamped",
+)
+def run_kinematic_replay(config: ReplayConfig) -> dict[str, Any]:
+    """Retarget, replay kinematically, predict markers, and write receipt artifacts."""
+    start = perf_counter()
+    rmap = config.retarget_map or default_retarget_map()
+    scene = resolve_golfer_scene(rmap.marker_sites)
+    source = _load_replay_source(Path(config.candidate))
+    if not source.coordinate_order:
+        raise ValueError("Candidate coordinate_order is empty")
+    q_myosuite = retarget_trajectory(
+        _align_source_q(source.q, source.coordinate_order, rmap), rmap
+    )
+    import mujoco  # noqa: PLC0415
+
+    model = mujoco.MjModel.from_xml_path(str(scene.xml_path))
+    data = mujoco.MjData(model)
+    qpos_traj = np.stack(
+        [_qpos_from_retarget(row, rmap, model.nq) for row in q_myosuite], axis=0
+    )
+    labels = _site_labels(source.labels, rmap, scene)
+    predicted = _predict_markers(model, data, qpos_traj, scene.marker_sites, labels)
+    source_subset, _, valid_subset = _marker_subsets(source, labels, predicted)
+    marker_rms, marker_rms_raw, calibrated, site_calibration = _parity_metrics(
+        source_subset, predicted, valid_subset, labels
+    )
+    artifacts = _write_replay_outputs(
+        _ReplayArtifactsContext(
+            out_dir=Path(config.output_dir),
+            source=source,
+            q_myosuite=q_myosuite,
+            site_labels=labels,
+            source_subset=source_subset,
+            calibrated=calibrated,
+            valid_subset=valid_subset,
+            rmap=rmap,
+            scene=scene,
+            config=config,
+        )
+    )
+    receipt = _build_receipt(
+        _ReceiptContext(
+            config=config,
+            source=source,
+            scene=scene,
+            rmap=rmap,
+            site_labels=labels,
+            marker_rms=marker_rms,
+            marker_rms_raw=marker_rms_raw,
+            site_calibration=site_calibration,
+            artifacts=artifacts,
+            elapsed_s=perf_counter() - start,
+        )
+    )
+    receipt_path = Path(config.output_dir) / "receipt.json"
     receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
     logger.info(
         "MyoSuite kinematic replay wrote %s (marker RMS %.4f m)",
