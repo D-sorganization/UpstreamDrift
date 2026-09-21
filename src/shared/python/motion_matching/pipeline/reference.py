@@ -1,26 +1,35 @@
-"""Reference trajectory, smoothing, and consistency re-solve for full-body pipeline."""
-
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import imageio
-import mujoco
 import numpy as np
 from scipy.signal import butter, filtfilt
 
+from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.motion_matching.full_body_spec import canonical_sha256
+from src.shared.python.motion_matching.tour_capture_contract import (
+    MARKER_VALIDITY_POLICY,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
+    BOUND_WIDENING,
+    CALIBRATION_PRIOR_FRAMES,
+    CALIBRATION_STRIDE,
     CONSISTENCY_PRIOR,
+    LEG_SEEDS,
+    LOWER_LIMB_RANGES_DEG,
     PLAYBACK_STRIDE,
     RATE_HZ,
+    REFERENCE_CUTOFF_HZ,
+    SCALE_GRID,
     SHOULDER_GIMBALS,
 )
 
 if TYPE_CHECKING:
-    from src.engines.physics_engines.mujoco.python.full_body_markers import (
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
     from src.shared.python.motion_matching.pipeline.lane import Lane
@@ -88,6 +97,13 @@ def marker_errors(
     )
 
 
+@precondition(lambda label, is_valid=True: isinstance(label, str), "label must be str")
+@postcondition(lambda r: r >= 0.0, "weight must be non-negative")
+def marker_weight(label: str, is_valid: bool = True) -> float:
+    """Return marker tracking weight according to the canonical validity policy."""
+    return MARKER_VALIDITY_POLICY.weight_for(label, is_valid=is_valid)
+
+
 def full_capture_ik(
     lane: Lane,
     kin: FullBodyMarkerKinematics,
@@ -115,7 +131,7 @@ def full_capture_ik(
         if all(name in kin.coordinate_order for name in triple)
     ]
     if active_gimbals:
-        from src.engines.physics_engines.mujoco.python.full_body_markers import (
+        from src.shared.python.motion_matching.full_body_ik import (
             continuous_branches,
         )
 
@@ -176,26 +192,190 @@ def render_playback(
     show_com: bool = True,
 ) -> None:
     """Render animated GIF of motion from spec and joint trajectory."""
-    from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
-    from src.engines.physics_engines.mujoco.python.visual_layer import add_com_markers
-
-    xml, _ = exporter.export_full_body_mjcf(spec_bytes, visual=True)
-    model = mujoco.MjModel.from_xml_string(xml)
-    data = mujoco.MjData(model)
-    addresses = [model.joint(n).qposadr[0] for n in names]
-    ground_height = float(
-        json.loads(spec_bytes)["contact"].get("ground_height_m") or 0.0
+    from src.engines.physics_engines.mujoco.python.visual_layer import (
+        render_playback as _render,
     )
-    renderer = mujoco.Renderer(model, 240, 320)
-    cam = mujoco.MjvCamera()
-    cam.lookat[:] = lookat
-    cam.distance, cam.azimuth, cam.elevation = 3.2, 135.0, -12.0
-    frames_out = []
-    for k in range(0, q.shape[0], PLAYBACK_STRIDE):
-        data.qpos[addresses] = q[k]
-        mujoco.mj_forward(model, data)
-        renderer.update_scene(data, camera=cam)
-        if show_com:
-            add_com_markers(renderer.scene, model, data, ground_height)
-        frames_out.append(renderer.render().copy())
-    imageio.mimsave(path, frames_out, duration=1000 * PLAYBACK_STRIDE / RATE_HZ, loop=0)
+
+    _render(
+        spec_bytes=spec_bytes,
+        names=names,
+        q=q,
+        lookat=lookat,
+        path=path,
+        show_com=show_com,
+        playback_stride=PLAYBACK_STRIDE,
+        rate_hz=RATE_HZ,
+    )
+
+
+@dataclass(frozen=True)
+class IKReportInputs:
+    """Inputs required to construct the full IK pipeline report."""
+
+    lane: Lane
+    kin: FullBodyMarkerKinematics
+    adapter: Any
+    q_ik: np.ndarray
+    fits: list[Any]
+    q_smooth: np.ndarray
+    q_ref: np.ndarray
+    ref_fits: list[Any]
+    labels: tuple[str, ...]
+    attachments: Mapping[str, tuple[str, Sequence[float]]]
+    calibration: Any
+    calibration2: Any
+    femur_scale: float
+    tibia_scale: float
+    scale_table: list[dict[str, Any]]
+    scaled_spec: dict[str, Any]
+    offsets: Mapping[str, tuple[str, Sequence[float]]] | None = None
+    errors: np.ndarray | None = None
+    ref_errors: np.ndarray | None = None
+    constrained_ik: dict[str, Any] | None = None
+
+
+def _build_reference_stage_report(
+    inputs: IKReportInputs,
+    kin: FullBodyMarkerKinematics,
+    lane: Lane,
+    ref_errors: np.ndarray,
+    ref_heights: np.ndarray,
+) -> dict[str, Any]:
+    from src.shared.python.motion_matching.pipeline.dynamics import segment_rms
+
+    return {
+        "cutoff_hz": REFERENCE_CUTOFF_HZ,
+        "consistency_prior": CONSISTENCY_PRIOR,
+        "marker_rms_m": float(np.sqrt(np.mean(ref_errors[lane.valid] ** 2))),
+        "segment_rms_m": segment_rms(inputs.labels, ref_errors, lane.valid),
+        "closure_error_max_m": float(max(f.closure_error_m for f in inputs.ref_fits)),
+        "lowest_sphere_height_min_m": float(ref_heights.min()),
+        "lowest_sphere_height_max_m": float(ref_heights.max()),
+        "max_deviation_from_smoothed_rad": float(
+            np.abs(inputs.q_ref[:, 6:] - inputs.q_smooth[:, 6:]).max()
+        ),
+        "max_joint_speed_rad_s": float(
+            np.abs(np.gradient(inputs.q_ref[:, 6:], lane.times, axis=0)).max()
+        ),
+        "stance_sphere_drift_max_m": float(
+            max(
+                [
+                    float(
+                        np.linalg.norm(
+                            kin.sphere_ground_points(inputs.q_ref[k], lane.ground)[name]
+                            - kin.sphere_ground_points(inputs.q_ref[0], lane.ground)[
+                                name
+                            ]
+                        )
+                    )
+                    for k in range(lane.frames)
+                    for name in lane.stance[k]
+                    if all(name in lane.stance[j] for j in range(k + 1))
+                ]
+            )
+        ),
+    }
+
+
+def _build_calibration_stage_report(
+    inputs: IKReportInputs,
+    lane: Lane,
+) -> dict[str, Any]:
+    custom_offsets = inputs.offsets
+    cal2 = inputs.calibration2
+    cal2_offsets = getattr(cal2, "offsets", None)
+    if custom_offsets is not None:
+        source_offsets = custom_offsets
+    elif cal2_offsets is not None:
+        source_offsets = cal2_offsets
+    else:
+        source_offsets = inputs.attachments
+
+    return {
+        "stride": CALIBRATION_STRIDE,
+        "frames": len(lane.calibration_frames),
+        "prior_frames": CALIBRATION_PRIOR_FRAMES,
+        "prior_offsets_m": {k: list(v[1]) for k, v in LEG_SEEDS.items()},
+        "rms_per_iteration_m": list(inputs.calibration.rms_per_iteration_m),
+        "rms_per_iteration_after_scaling_m": list(cal2.rms_per_iteration_m),
+        "per_marker_rms_m": cal2.per_marker_rms_m,
+        "offsets_m": {
+            k: {"body": b, "offset_m": list(o)} for k, (b, o) in source_offsets.items()
+        },
+    }
+
+
+def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
+    """Build the structured IK and reference trajectory report dictionary.
+
+    Preconditions:
+    - ``inputs.q_ik`` and ``inputs.q_ref`` must be 2D arrays with frame count matching ``inputs.lane``.
+
+    Postconditions:
+    - Returns dictionary matching the full-body IK receipt specification.
+    """
+    from src.shared.python.motion_matching.pipeline.dynamics import (
+        rom_flags,
+        segment_rms,
+    )
+
+    lane = inputs.lane
+    kin = inputs.kin
+    adapter = inputs.adapter
+    errors = (
+        inputs.errors
+        if inputs.errors is not None
+        else marker_errors(kin, inputs.q_ik, lane.points)
+    )
+    ref_errors = (
+        inputs.ref_errors
+        if inputs.ref_errors is not None
+        else marker_errors(kin, inputs.q_ref, lane.points)
+    )
+    heights = np.array(
+        [min(kin.sphere_heights(q, lane.ground).values()) for q in inputs.q_ik]
+    )
+    ref_heights = np.array(
+        [min(kin.sphere_heights(q, lane.ground).values()) for q in inputs.q_ref]
+    )
+
+    report = {
+        "frames": lane.frames,
+        "marker_rms_m": float(np.sqrt(np.mean(errors[lane.valid] ** 2))),
+        "segment_rms_m": segment_rms(inputs.labels, errors, lane.valid),
+        "closure_error_max_m": float(max(f.closure_error_m for f in inputs.fits)),
+        "lowest_sphere_height_min_m": float(heights.min()),
+        "lowest_sphere_height_max_m": float(heights.max()),
+        "attachments_m": {
+            label: {"body": body, "offset_m": [float(v) for v in offset]}
+            for label, (body, offset) in inputs.attachments.items()
+        },
+        "reference": _build_reference_stage_report(
+            inputs, kin, lane, ref_errors, ref_heights
+        ),
+        "calibration": _build_calibration_stage_report(inputs, lane),
+        "segment_scaling": {
+            "grid": SCALE_GRID,
+            "table": inputs.scale_table,
+            "femur_scale": inputs.femur_scale,
+            "tibia_scale": inputs.tibia_scale,
+            "spec_sha256": canonical_sha256(inputs.scaled_spec),
+        },
+        "joint_ranges_deg": LOWER_LIMB_RANGES_DEG,
+        "range_of_motion_flags": rom_flags(inputs.q_ref, kin.coordinate_order),
+        "bound_widening": BOUND_WIDENING,
+        "leg_angle_ranges_deg": {
+            name: [
+                float(
+                    np.degrees(inputs.q_ref[:, kin.coordinate_order.index(name)].min())
+                ),
+                float(
+                    np.degrees(inputs.q_ref[:, kin.coordinate_order.index(name)].max())
+                ),
+            ]
+            for name in kin.coordinate_order[adapter.upper_body_coordinates :]
+        },
+    }
+    if inputs.constrained_ik is not None:
+        report["constrained_ik"] = inputs.constrained_ik
+    return report

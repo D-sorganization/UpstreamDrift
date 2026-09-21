@@ -18,21 +18,99 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.motion_matching.execution import (
+    assets,
+    downswing as _downswing,
+    driver as _driver,
+    mjx_export as _mjx_export,
+    spec_builder as _spec_builder,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 FULL_BODY = REPO_ROOT / "docs/development/full_body_models"
-BUILDER = FULL_BODY / "build_anthropometric_spec.py"
-DRIVER_SCRIPT = FULL_BODY / "evidence/ground_support/run_ground_support.py"
-DOWNSWING_SCRIPT = FULL_BODY / "evidence/ground_support/downswing_experiment.py"
-EXPORT_MJX_SCRIPT = FULL_BODY / "evidence/ground_support/export_mjx_package.py"
-NATIVE = (
-    REPO_ROOT
-    / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
-)
-OSIM = REPO_ROOT / "src/engines/physics_engines/opensim/models/golf_humanoid.osim"
-CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
+
+BUILDER = Path(_spec_builder.__file__).resolve()
+DRIVER_SCRIPT = Path(_driver.__file__).resolve()
+DOWNSWING_SCRIPT = Path(_downswing.__file__).resolve()
+EXPORT_MJX_SCRIPT = Path(_mjx_export.__file__).resolve()
+
+
+def resolve_native_spec() -> Path:
+    return assets.get_native_geometry_spec()
+
+
+def resolve_osim_model() -> Path:
+    return assets.get_opensim_model()
+
+
+def resolve_candidate_spec() -> Path:
+    return assets.get_candidate_geometry_spec()
+
+
+try:
+    NATIVE = assets.get_native_geometry_spec()
+except FileNotFoundError:
+    NATIVE = (
+        REPO_ROOT
+        / "docs/development/simscape_tour_matching/native_evidence/native_geometry_spec_9967.json"
+    )
+
+try:
+    OSIM = assets.get_opensim_model()
+except FileNotFoundError:
+    OSIM = REPO_ROOT / "src/engines/physics_engines/opensim/models/golf_humanoid.osim"
+
+try:
+    CANDIDATE = assets.get_candidate_geometry_spec()
+except FileNotFoundError:
+    CANDIDATE = FULL_BODY / "evidence/native_candidates/returned81_candidate.json"
+
 CAPTURES = ("driver", "iron")
 CLUBS = ("driver", "iron7")
 CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
+BACKENDS = ("mujoco", "drake", "pinocchio", "opensim", "pink")
+STEP_MODES = ("physical", "projection")
+SOLVERS = ("quadprog",)
+
+
+def available_engines() -> list[str]:
+    """Registered physics engines available to the motion-matching plant."""
+    try:
+        from src.shared.python.motion_matching.pipeline.plant import (
+            available_engines as _avail,
+        )
+
+        return _avail()
+    except (ImportError, RuntimeError, TypeError, AttributeError, KeyError):
+        return ["mujoco", "drake", "pinocchio"]
+
+
+def extract_five_metrics_and_acceptance(
+    summary: dict[str, Any],
+) -> tuple[dict[str, Any], str]:
+    """Extract standard five kinematic metrics and determine acceptance verdict.
+
+    Returns:
+        tuple of (metrics_dict, acceptance_verdict)
+    """
+    metrics = {
+        "full_capture_ik_rms_mm": summary.get("full_capture_ik_rms_mm"),
+        "address_marker_rms_mm": summary.get("address_marker_rms_mm"),
+        "backswing_root_error_max_mm": summary.get("backswing_root_error_max_mm"),
+        "whole_run_root_rms_mm": summary.get("whole_run_root_rms_mm"),
+        "inside_support_polygon_fraction": summary.get(
+            "inside_support_polygon_fraction"
+        ),
+    }
+    is_qual = summary.get("is_qualified")
+    converged = summary.get("all_frames_converged")
+    if is_qual is True and (converged is True or converged is None):
+        verdict = "PASSED"
+    elif is_qual is False or converged is False:
+        verdict = "REJECTED"
+    else:
+        verdict = "UNCLASSIFIED"
+    return metrics, verdict
 
 
 @dataclass(frozen=True)
@@ -54,12 +132,25 @@ class MatchRequest:
     shooting_fit: int = 0
     shooting_gain: float = 0.7
     cutoff_hz: float | None = None
+    backend: str = "mujoco"
+    step_mode: str = "physical"
+    solver: str = "quadprog"
+    output_root: Path | str | None = None
+    native_path: Path | str | None = None
+    osim_path: Path | str | None = None
+    candidate_path: Path | str | None = None
 
     def __post_init__(self) -> None:
         if self.capture not in CAPTURES:
             raise ValueError(f"Capture must be one of {CAPTURES}")
         if self.club not in CLUBS:
             raise ValueError(f"Club must be one of {CLUBS}")
+        if self.backend not in BACKENDS:
+            raise ValueError(f"backend must be one of {BACKENDS}")
+        if self.step_mode not in STEP_MODES:
+            raise ValueError(f"step_mode must be one of {STEP_MODES}")
+        if self.solver not in SOLVERS:
+            raise ValueError(f"solver must be one of {SOLVERS}")
         for value in (
             self.stature_m,
             self.mass_kg,
@@ -87,12 +178,21 @@ class MatchRequest:
         return self.output_name or f"anthro_{self.capture}"
 
     @property
+    def document_output_dir(self) -> Path:
+        return assets.resolve_output_root(self.output_root)
+
+    @property
     def document_path(self) -> Path:
-        return FULL_BODY / f"{self.document_name}.json"
+        return self.document_output_dir / f"{self.document_name}.json"
 
     @property
     def output_dir(self) -> Path:
-        return FULL_BODY / "evidence/ground_support" / self.run_name
+        root = self.document_output_dir
+        if self.output_root is not None:
+            return root / self.run_name
+        if root.joinpath("evidence/ground_support").is_dir() or root == FULL_BODY:
+            return root / "evidence/ground_support" / self.run_name
+        return root / self.run_name
 
 
 @dataclass(frozen=True)
@@ -145,15 +245,18 @@ class ExperimentRequest:
 
 def build_command(request: MatchRequest) -> list[str]:
     """Command line that writes the anthropometric document for ``request``."""
+    native = request.native_path or resolve_native_spec()
+    osim = request.osim_path or resolve_osim_model()
+    candidate = request.candidate_path or resolve_candidate_spec()
     return [
         sys.executable,
         str(BUILDER),
         "--native",
-        str(NATIVE),
+        str(native),
         "--osim",
-        str(OSIM),
+        str(osim),
         "--native-candidate",
-        str(CANDIDATE),
+        str(candidate),
         "--stature",
         str(request.stature_m),
         "--mass",
@@ -167,7 +270,7 @@ def build_command(request: MatchRequest) -> list[str]:
         "--club",
         request.club,
         "--output",
-        str(FULL_BODY),
+        str(request.document_output_dir),
     ]
 
 
@@ -185,6 +288,12 @@ def match_command(request: MatchRequest) -> list[str]:
         "--out",
         str(request.output_dir),
     ]
+    if request.backend != "mujoco":
+        cmd.extend(["--backend", request.backend])
+    if request.step_mode != "physical":
+        cmd.extend(["--pink-step-mode", request.step_mode])
+    if request.solver != "quadprog":
+        cmd.extend(["--pink-solver", request.solver])
     if request.free_wrists:
         cmd.append("--free-wrists")
     if request.bound_wrists:
@@ -306,11 +415,18 @@ def summarise_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
     for key in ("address", "ik", "dynamics"):
         if key not in receipt:
             raise ValueError(f"Receipt lacks the {key} block")
+    backend = receipt.get("backend", "mujoco")
+    constrained = receipt["ik"].get("constrained_ik") or {}
+    all_frames_converged = constrained.get("all_frames_converged", True)
+    is_qualified = constrained.get("is_qualified", True)
     address = receipt["address"].get("calibrated", {})
     com = address.get("centre_of_mass", {})
     dynamics = receipt["dynamics"]
     backswing = dynamics.get("backswing_to_1s", {})
-    return {
+    summary: dict[str, Any] = {
+        "backend": backend,
+        "is_qualified": is_qualified,
+        "all_frames_converged": all_frames_converged,
         "capture": receipt.get("capture"),
         "club": (receipt.get("club") or {}).get("name"),
         "address_marker_rms_mm": _mm(address.get("marker_rms_m")),
@@ -328,6 +444,14 @@ def summarise_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
             (dynamics.get("range_of_motion_flags") or {}).keys()
         ),
     }
+    if "step_mode" in constrained:
+        summary["step_mode"] = constrained["step_mode"]
+    if (
+        "first_failed_frame" in constrained
+        and constrained["first_failed_frame"] is not None
+    ):
+        summary["first_failed_frame"] = constrained["first_failed_frame"]
+    return summary
 
 
 def _mm(value: Any) -> float | None:
@@ -349,3 +473,18 @@ def artefacts(output_dir: Path) -> Sequence[Path]:
         for p in (output_dir / "ik_playback.gif", output_dir / "tracking_playback.gif")
         if p.exists()
     )
+
+
+def list_runs(ledger_path: Path | None = None) -> Sequence[Any]:
+    """Return all classified runs from the matched-swing run ledger."""
+    from src.shared.python.motion_matching.ledger import default_ledger_path, scan
+    from src.shared.python.motion_matching.ledger_schema import Ledger
+
+    path = ledger_path or default_ledger_path()
+    if path.is_file():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return Ledger.model_validate(data).rows
+        except (json.JSONDecodeError, OSError, ValueError):
+            pass
+    return scan().rows

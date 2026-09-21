@@ -1,5 +1,15 @@
 # Lower-Cost Agent Dispatch Queue
 
+## Restart Queue — 2026-09-16
+
+Read [Current Turnover](TURNOVER_CURRENT.md) first. #10231 is merged through
+#10253; do not repeat its completed work. Renderer #10232 has an existing,
+conflicted PR #10264 with a known import collection failure; its owner resumes
+that PR. The next independent small-agent task is #10233 revision integrity and
+persistence. #10273 tracks native PTS and stored timing authority. Then deliver
+#10134's real manual-evidence launcher journey. Older queues below are historical
+where their ordering conflicts with this section.
+
 ## Ready to Assign
 
 Planning PR #10136 is merged. The image-only contract decisions and measured
@@ -19,9 +29,9 @@ ST-01 scientific qualification has passed.
 ## Current Dispatch
 
 [Current Turnover](TURNOVER_CURRENT.md) supersedes older pickup instructions.
-#10231: source timestamps, physical-time provenance and genuinely bounded decode.
+#10231: source timestamps, physical-time provenance and genuinely bounded decode (implemented in PR #10253).
+#10232: articulated geometry/state binding, clipping and calibrated filled masks (implemented; landing in PR).
 #10233: revision collision/parent integrity and persistence; independent of physics.
-#10232: articulated geometry/state binding, clipping and calibrated filled masks.
 Use [Continuation Prompt](CONTINUATION_PROMPT.md), then all ST-07–ST-12 gates.
 Merged #10205/#10212/#10214 establish partial progress, not whole-stage acceptance.
 

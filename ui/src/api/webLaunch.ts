@@ -9,6 +9,7 @@
  * on a remote server.
  */
 
+import { isKnownAppRoute } from '../routes';
 import { isTauri } from './backend';
 import type { LauncherTile } from './useLauncherManifest';
 
@@ -63,13 +64,21 @@ export function resolveTileLaunchAction(
     }
     switch (web.mode) {
         case 'route':
-            return web.route
-                ? { kind: 'navigate', route: web.route }
-                : {
-                      kind: 'blocked',
-                      badge: 'Unavailable',
-                      reason: 'Tile declares route mode without a route',
-                  };
+            if (!web.route) {
+                return {
+                    kind: 'blocked',
+                    badge: 'Unavailable',
+                    reason: 'Tile declares route mode without a route',
+                };
+            }
+            if (!isKnownAppRoute(web.route)) {
+                return {
+                    kind: 'blocked',
+                    badge: 'Unavailable',
+                    reason: `No web route exists for ${web.route}`,
+                };
+            }
+            return { kind: 'navigate', route: web.route };
         case 'native-window':
             return nativeWindowAllowed
                 ? { kind: 'native-window' }

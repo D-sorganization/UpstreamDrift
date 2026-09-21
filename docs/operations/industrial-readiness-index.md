@@ -15,13 +15,13 @@ governance pathway.
 - **Release status:** 🔴 blocked
 - **Reconciled against:** `10caddd219ce213a914fa295661929e4fbf1b686` on 2026-09-09
 - **Audit snapshot:** `1f69a51fce997932f04a6ad1dd95bf4d065ba971` (context, not current branch identity)
-- **Queue:** 2 merged · 2 open
+- **Queue:** 3 merged · 1 open
 
 ## Priority Implementation Queue
 
 - **U1** · [#9477](https://github.com/D-sorganization/UpstreamDrift/issues/9477) · P1 · ✅ merged
 - **U2** · [#9407](https://github.com/D-sorganization/UpstreamDrift/issues/9407) · P0 · ✅ merged
-- **U3** · [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820) · P1 · 🔴 open · owner unassigned, depends on [#8822](https://github.com/D-sorganization/UpstreamDrift/issues/8822), [#8821](https://github.com/D-sorganization/UpstreamDrift/issues/8821)
+- **U3** · [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820) · P1 · ✅ merged
 - **U4** · [#9417](https://github.com/D-sorganization/UpstreamDrift/issues/9417) · P3 · 🔴 open · owner unassigned, depends on [#9416](https://github.com/D-sorganization/UpstreamDrift/issues/9416)
 
 ### U1 — Pinocchio Ran Free-Fall Only and Cross-Engine 'Total Energy' Had No Mass Term
@@ -46,14 +46,13 @@ governance pathway.
 
 ### U3 — Engine Dashboard Exports Carry No Engine, Model Path, Run ID, or Timestamp
 
-🔴 open · P1 · [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820)
+✅ merged · P1 · [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820)
 
-- **Owner:** unassigned
-- **Depends on:** [#8822](https://github.com/D-sorganization/UpstreamDrift/issues/8822), [#8821](https://github.com/D-sorganization/UpstreamDrift/issues/8821)
-- **Source:** `src/shared/python/dashboard/window.py` · `src/shared/python/dashboard/_recorder_playback.py` · `src/shared/python/data_io/provenance.py` · `src/shared/python/data_io/export.py`
-- **Existing tests:** `tests/unit/data_io/test_provenance.py`
+- **Merge SHA:** `8ef1bec803de292e44724cdf1f96d3ebf52bf2f2`
+- **Implementation:** `src/shared/python/dashboard/window.py` · `src/shared/python/dashboard/_recorder_playback.py` · `src/shared/python/data_io/provenance.py` · `src/shared/python/data_io/export.py`
+- **Tests:** `tests/unit/test_dashboard_export_provenance.py` · `tests/unit/test_shared_export.py`
 
-**Narrow PR plan.** Confirmed still open against the reconciliation SHA. `UnifiedDashboardWindow.export_data` saves under the default name `swing_data` and dumps `recorder.get_data_dict()`, which stamps only `model_name` and `num_frames`; `_flatten_dict_for_csv` then keeps only per-frame arrays, so the CSV carries no identifying column at all and MuJoCo, Drake and Pinocchio exports are byte-level indistinguishable. Narrow PR order: (1) add the engine field to `ProvenanceInfo` and make `model_path` mandatory at the dashboard call site (#8822); (2) emit a sidecar plus header rows for JSON and CSV using the already-present, currently unused `add_provenance_to_csv` (#8821); (3) stamp engine, model path and hash, timestamp and run ID into the dashboard export dict and assert the round trip from each of the three engine dashboards (#8820). Do not widen the export schema without a reimport test.
+**Acceptance evidence.** Unified engine dashboard exports now stamp engine, run ID, UTC creation time, application/provider SHA, model content hash, and format-appropriate provenance sidecars/headers via src/shared/python/data_io/export.py and provenance.py (#8820, PR #9995).
 
 ### U4 — Ship Installable Artifacts: Wheel, Image, Desktop Bundles, SBOM
 

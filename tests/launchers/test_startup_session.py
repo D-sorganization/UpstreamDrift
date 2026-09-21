@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import QApplication, QWidget
 
 from src.launchers.startup import (
     PHASE_DOCKER,
+    PHASE_EMBEDDABLE_TOOLS,
     PHASE_ENGINES,
     PHASE_REGISTRY,
     PHASE_TOOLS_PROVIDER,
@@ -396,7 +397,13 @@ def test_worker_records_every_named_phase_in_order(worker) -> None:
         _probe_tools_provider=lambda: probe,
     )
     names = [record.name for record in worker.results.phases]
-    assert names == [PHASE_REGISTRY, PHASE_ENGINES, PHASE_DOCKER, PHASE_TOOLS_PROVIDER]
+    assert names == [
+        PHASE_REGISTRY,
+        PHASE_ENGINES,
+        PHASE_DOCKER,
+        PHASE_TOOLS_PROVIDER,
+        PHASE_EMBEDDABLE_TOOLS,
+    ]
     assert all(r.outcome == OUTCOME_OK for r in worker.results.phases)
     assert worker.results.tools_provider is probe
     assert worker.results.docker_available is False
@@ -423,8 +430,7 @@ def test_worker_degrades_when_provider_probe_never_completes(worker) -> None:
         gate.set()
     worker.finished_signal.emit.assert_called_once()
     worker.error_signal.emit.assert_not_called()
-    provider = worker.results.phases[-1]
-    assert provider.name == PHASE_TOOLS_PROVIDER
+    provider = next(p for p in worker.results.phases if p.name == PHASE_TOOLS_PROVIDER)
     assert provider.outcome == OUTCOME_TIMEOUT
     assert provider.category == CATEGORY_TIMEOUT
     assert worker.results.tools_provider is None
@@ -447,8 +453,9 @@ def test_worker_degrades_when_provider_probe_raises(worker) -> None:
         _probe_tools_provider=broken,
     )
     worker.finished_signal.emit.assert_called_once()
-    assert worker.results.phases[-1].category == "import_failure"
-    assert "rate_of_closure is broken" in worker.results.phases[-1].detail
+    provider = next(p for p in worker.results.phases if p.name == PHASE_TOOLS_PROVIDER)
+    assert provider.category == "import_failure"
+    assert "rate_of_closure is broken" in provider.detail
 
 
 def test_worker_reports_missing_provider_as_degraded_not_error(worker) -> None:
@@ -462,8 +469,9 @@ def test_worker_reports_missing_provider_as_degraded_not_error(worker) -> None:
     )
     worker.finished_signal.emit.assert_called_once()
     worker.error_signal.emit.assert_not_called()
-    assert worker.results.phases[-1].outcome == OUTCOME_DEGRADED
-    assert worker.results.phases[-1].category == CATEGORY_MISSING_CHECKOUT
+    provider = next(p for p in worker.results.phases if p.name == PHASE_TOOLS_PROVIDER)
+    assert provider.outcome == OUTCOME_DEGRADED
+    assert provider.category == CATEGORY_MISSING_CHECKOUT
 
 
 def test_worker_registry_timeout_is_a_hard_failure_with_phase_name(worker) -> None:
@@ -607,6 +615,29 @@ def test_loading_mode_does_not_load_registry_on_gui_thread(qapp) -> None:
             engine_loader.assert_not_called()
             assert launcher.loading is True
             assert launcher.registry is None
+        finally:
+            launcher.close()
+            launcher.deleteLater()
+            _spin(1)
+
+
+def test_loading_mode_does_not_bootstrap_embeddable_tools_on_gui_thread(qapp) -> None:
+    """``UpstreamDriftLauncher(loading=True)`` must not bootstrap tools on the GUI thread."""
+    from src.launchers.upstream_drift_launcher import UpstreamDriftLauncher
+
+    with (
+        patch("src.launchers.upstream_drift_launcher.DockerCheckThread"),
+        patch(
+            "src.launchers.launcher_sidekick_sidebar.SidekickSidebarManager._install_sidekick_import_paths"
+        ),
+        patch(
+            "src.launchers.upstream_drift_launcher.bootstrap_embeddable_tools"
+        ) as mock_bootstrap,
+        patch("src.launchers.upstream_drift_launcher.QTimer"),
+    ):
+        launcher = UpstreamDriftLauncher(loading=True)
+        try:
+            mock_bootstrap.assert_not_called()
         finally:
             launcher.close()
             launcher.deleteLater()

@@ -1,0 +1,107 @@
+{
+  "overall_rmse_mm": 133.53077592246171,
+  "coverage_fraction": 0.9684295736643281,
+  "segments": {
+    "club": {
+      "name": "club",
+      "marker_count": 6,
+      "rmse_mm": 50.20370481288372,
+      "max_error_mm": 367.98236604767277,
+      "coverage_fraction": 0.9564220183486238
+    },
+    "feet": {
+      "name": "feet",
+      "marker_count": 6,
+      "rmse_mm": 37.88683338447766,
+      "max_error_mm": 163.95027908052407,
+      "coverage_fraction": 1.0
+    },
+    "wrists_hands": {
+      "name": "wrists_hands",
+      "marker_count": 2,
+      "rmse_mm": 60.77191644905076,
+      "max_error_mm": 199.8748949692229,
+      "coverage_fraction": 1.0
+    },
+    "arms": {
+      "name": "arms",
+      "marker_count": 8,
+      "rmse_mm": 191.63577939671055,
+      "max_error_mm": 599.9755087913896,
+      "coverage_fraction": 0.8994648318042814
+    },
+    "pelvis": {
+      "name": "pelvis",
+      "marker_count": 4,
+      "rmse_mm": 161.59779402786444,
+      "max_error_mm": 350.6133954602792,
+      "coverage_fraction": 0.9980886850152905
+    },
+    "torso_head": {
+      "name": "torso_head",
+      "marker_count": 10,
+      "rmse_mm": 180.73119083011463,
+      "max_error_mm": 599.9755087913896,
+      "coverage_fraction": 1.0
+    }
+  },
+  "phases": {
+    "address": {
+      "phase": "address",
+      "start_time_s": 0.0,
+      "end_time_s": 0.3,
+      "frame_count": 109,
+      "overall_rmse_mm": 124.61919255974357,
+      "club_rmse_mm": 10.38052586241948,
+      "feet_rmse_mm": 21.075678189355106
+    },
+    "backswing": {
+      "phase": "backswing",
+      "start_time_s": 0.3,
+      "end_time_s": 1.0883333333333334,
+      "frame_count": 284,
+      "overall_rmse_mm": 118.19500829625488,
+      "club_rmse_mm": 23.023046948760722,
+      "feet_rmse_mm": 18.82132431358472
+    },
+    "downswing": {
+      "phase": "downswing",
+      "start_time_s": 1.0883333333333334,
+      "end_time_s": 1.306,
+      "frame_count": 79,
+      "overall_rmse_mm": 81.50496298216748,
+      "club_rmse_mm": 17.064366999415263,
+      "feet_rmse_mm": 17.621635094625432
+    },
+    "impact": {
+      "phase": "impact",
+      "start_time_s": 1.306,
+      "end_time_s": 1.4148333333333334,
+      "frame_count": 39,
+      "overall_rmse_mm": 235.2385449925569,
+      "club_rmse_mm": 125.2351918216135,
+      "feet_rmse_mm": 96.02827372357197
+    },
+    "follow_through": {
+      "phase": "follow_through",
+      "start_time_s": 1.4148333333333334,
+      "end_time_s": 1.8138888888888889,
+      "frame_count": 144,
+      "overall_rmse_mm": 152.1614867907554,
+      "club_rmse_mm": 81.98786450672611,
+      "feet_rmse_mm": 53.08784694014829
+    }
+  },
+  "ground_penetration": {
+    "max_penetration_mm": 10.106925952491636,
+    "mean_penetration_mm": 0.07701831962249465,
+    "penetration_frames": 141,
+    "worst_frame": 551,
+    "worst_sphere_index": 2
+  },
+  "closure": {
+    "max_closure_mm": 27.52508071018179,
+    "mean_closure_mm": 2.1182118994474357,
+    "worst_frame": 550
+  }
+}

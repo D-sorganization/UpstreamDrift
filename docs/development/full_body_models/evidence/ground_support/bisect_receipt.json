@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0.0",
+  "task": "MS-03",
+  "issue": 10324,
+  "epic": 10363,
+  "date": "2026-09-17",
+  "author": "Dieter Olson <agent:local>",
+  "target": "Reconcile headline numbers with primary receipts on main (5.1/27.3/74.6 vs 42.2/52.3/89.1 mm)",
+  "executive_finding": "The headline 27.3 mm IK and 5.1 mm address metrics were produced by static-trial marker placement (--static-seeds), surviving in anthro_driver_shoot_g025. In HO-8 (d05edafb0), regeneration of anthro_driver omitted --static-seeds, causing nominal marker offsets (65 mm head error, 62 mm left arm error at address) to push IK RMS to 52.3 mm, compounded by unwidened leg bounds (BOUND_WIDENING 2.0 -> 1.0) and hip zero twist. In addition, HO-8 branched before HO-11 and overwrote de_leva_table_sha256 and base_spec_sha256.",
+  "primary_shift_driver": {
+    "step_name": "address_static_trial_marker_calibration",
+    "flag": "--static-seeds",
+    "description": "Omission of --static-seeds in HO-8 run_ground_support execution for anthro_driver",
+    "isolated_delta_ik_rms_mm": 24.9,
+    "isolated_delta_address_rms_mm": 37.1
+  },
+  "permutations": [
+    {
+      "id": "pre_ho8_calibrated_driver",
+      "capture": "driver",
+      "receipt": "docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json",
+      "commit_origin": "69a626010 / 81ea27bfb",
+      "static_seeds": true,
+      "recalibrate_upper": false,
+      "hip_zero_twist": false,
+      "bound_widening": 2.0,
+      "address_calibrated_marker_rms_m": 0.0050740594392169065,
+      "ik_marker_rms_m": 0.027294669328521346,
+      "dynamics_marker_rms_m": 0.07458191318642943,
+      "leg_rom_flags_count": 10,
+      "role": "canonical_calibrated_reference"
+    },
+    {
+      "id": "ho8_baseline_driver",
+      "capture": "driver",
+      "receipt": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
+      "commit_origin": "d05edafb0",
+      "static_seeds": false,
+      "recalibrate_upper": false,
+      "hip_zero_twist": true,
+      "bound_widening": 1.0,
+      "address_calibrated_marker_rms_m": 0.042195333692177234,
+      "ik_marker_rms_m": 0.05226955057053351,
+      "dynamics_marker_rms_m": 0.08913317524057322,
+      "leg_rom_flags_count": 0,
+      "role": "primary_uncalibrated_baseline"
+    },
+    {
+      "id": "pre_ho8_calibrated_iron",
+      "capture": "iron",
+      "receipt": "docs/development/full_body_models/evidence/ground_support/anthro_iron_zmp/receipt.json",
+      "commit_origin": "69a626010 / 81ea27bfb",
+      "static_seeds": true,
+      "recalibrate_upper": false,
+      "hip_zero_twist": false,
+      "bound_widening": 2.0,
+      "address_calibrated_marker_rms_m": 0.0044268404465466,
+      "ik_marker_rms_m": 0.028578099846773154,
+      "dynamics_marker_rms_m": 0.14399834356614188,
+      "leg_rom_flags_count": 11,
+      "role": "canonical_calibrated_reference"
+    },
+    {
+      "id": "ho8_baseline_iron",
+      "capture": "iron",
+      "receipt": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
+      "commit_origin": "d05edafb0",
+      "static_seeds": false,
+      "recalibrate_upper": false,
+      "hip_zero_twist": true,
+      "bound_widening": 1.0,
+      "address_calibrated_marker_rms_m": 0.07021008064893925,
+      "ik_marker_rms_m": 0.07198124578912344,
+      "dynamics_marker_rms_m": 0.11595556126394267,
+      "leg_rom_flags_count": 0,
+      "role": "primary_uncalibrated_baseline"
+    }
+  ],
+  "factor_attribution": {
+    "static_seeds": {
+      "impact": "Reduces address marker RMS from 42.2 mm to 5.1 mm (driver) and 70.2 mm to 4.4 mm (iron) by solving neutral static trial marker placement.",
+      "delta_ik_rms_mm": -24.9
+    },
+    "bound_widening": {
+      "impact": "Reducing bound widening from 2.0 to 1.0 enforces human anatomical limits, eliminating all 10 (driver) and 11 (iron) leg range-of-motion flags on the IK reference trajectory at cost of ~0.5 mm residual.",
+      "delta_ik_rms_mm": 0.5
+    },
+    "hip_zero_twist": {
+      "impact": "Rotates coordinate frame zero by Rz(theta) so 0 deg neutral equals functional zero twist, preventing non-physiological internal/external twist offsets.",
+      "delta_ik_rms_mm": 0.2
+    }
+  },
+  "provenance_hash_chain_audit_10271": {
+    "de_leva_table_sha256": {
+      "expected": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+      "status_in_ho8_receipt": "omitted_in_ho8_rebuild"
+    },
+    "driver_base_spec_sha256": {
+      "committed_base_document": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+      "expected_canonical_sha256": "174a6cb8dfd7f9347606789c7e6b77f602643e3139590126ac3af94e1f588b42",
+      "ho8_receipt_sha256": "a73d9e0623e79c5becd2b304cbc72940d16451097c4da0474a7e17d15fe3717a",
+      "reason": "HO-8 branched prior to HO-11 merge, retaining pre-HO-11 base spec hash"
+    },
+    "iron_base_spec_sha256": {
+      "committed_base_document": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+      "expected_canonical_sha256": "aba8196843e66c897770795e04cc0d2fca7c9ee4ba2472b2aa380d62a817ff31",
+      "ho8_receipt_sha256": "f0100b39d25133b91e9a8252277d09b0e5284c992589697d28ba84870804d56d",
+      "reason": "HO-8 branched prior to HO-11 merge, retaining pre-HO-11 base spec hash"
+    }
+  }
+}
