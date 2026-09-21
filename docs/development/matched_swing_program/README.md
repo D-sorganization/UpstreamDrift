@@ -72,13 +72,6 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 Refresh via `bash scripts/ci/run_native_engine_lane.sh --engine opensim --venv /home/dieterolson/opensim-10003`. See [evidence/nightly/README.md](evidence/nightly/README.md).
 
-### MS-62 Simscape 44-to-27 Coordinate Slice (#10349)
-
-| Scope                  | State                                                                 | Evidence                                                                                                                                                       |
-| ---------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kinematic slice + map  | JSON map and projection implemented; virtual-work decomposition green | [receipt.json](../../../evidence/matched/driver_g1_simscape_slice/receipt.json), [parity.json](../../../evidence/matched/driver_g1_simscape_slice/parity.json) |
-| Simscape native replay | unqualified — R2025b boundary-load validation pending                 | [run_manifest.json](../../../evidence/matched/driver_g1_simscape_slice/run_manifest.json)                                                                      |
-
 ### MS-21 Native Replay Continuation (#10336)
 
 | Scope                             | State                                                                              | Evidence                                                                                                                                                   |
@@ -103,7 +96,7 @@ python scripts/generate_matched_swing_status.py --write
 | MuJoCo    | none accepted (tracking 74.6 mm variant, 89 mm primary)                                                                          | 27 mm canonical IK                         | replay path for Pinocchio candidates exists (PR #10448) and rejects the decoupled controls at 0.94 m                                                                                                                        |
 | Drake     | none; setup parity 6e-6 m                                                                                                        | 176 mm (FB-4)                              | needs the shared fitter on its plant (MS-13/MS-30) and native IK (MS-17)                                                                                                                                                    |
 | OpenSim   | Moco rungs 0.10/0.30 s at the 41 to 42 mm calibration floor; 0.60 s converged but open-loop replay 81 mm whole / 204 mm terminal | 67.8 mm (OS-3b)                            | OG-01..09 model work merged (#10414); no accepted G1; MS-40 shared-document model is the lever                                                                                                                              |
-| MyoSuite  | none                                                                                                                             | none                                       | fail-closed provider (MS-50); scene + retarget not started (MS-51/52)                                                                                                                                                       |
+| MyoSuite  | none                                                                                                                             | kinematic replay receipt (MS-52)           | fail-closed provider (MS-50); kinematic retarget + replay landed (MS-52) on placeholder MJCF — 195 mm aligned marker RMS vs 15 mm budget; MS-51 golfer scene required for parity pass                                       |
 | Simscape  | run-102, 0 to 0.85 s, 20.3 mm whole but terminal 40.3 > 35 mm; Pinocchio parity 60 um                                            | n/a                                        | cross-validation lane; not a showpiece model                                                                                                                                                                                |
 
 Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gates`); self-declared `accepted` flags are UNVERIFIED. Every `evidence/matched/*` receipt on main is REJECTED (see each `reevaluation.json`). The fast decoupled pipeline (`scripts/match_pinocchio_c3d.py`) is an analysis product until a replay passes.
@@ -112,7 +105,7 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 99 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 100 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
@@ -121,7 +114,7 @@ Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 9
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
 | **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |
 | **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
-| **Myosuite**  | —                                                                                                                              | —                  | —           | —            | 0        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
+| **Myosuite**  | matched                                                                                                                        | driver             | —           | —            | 1        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 
