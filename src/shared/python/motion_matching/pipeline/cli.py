@@ -536,7 +536,8 @@ def _simulate_and_receipt(
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
-            lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain
+            lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain,
+            tracking_backend=getattr(args, "tracking", "kkt"),
         )
     record, sim_q = replay(
         sim, lane, q_track, tracking_backend=getattr(args, "tracking", "kkt")
