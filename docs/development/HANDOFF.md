@@ -18,7 +18,6 @@
 - Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
 - Next action: merge PR #10666 after rebase CI green; teardown worktree.
 
-
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
