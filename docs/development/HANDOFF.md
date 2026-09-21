@@ -1,5 +1,24 @@
 # Current Matching Continuation Handoff
 
+## PF-04 Qualify Contact Modes and Native Pinocchio Force Feasibility (#10434)
+
+- Branch: `feat/issue-10434-pf04-qualify-contact-modes-pinocchio-forces`, PR #10499 (auto-merge armed), lease `antigravity-ud-10434`, DL-#10434.
+- Changes:
+  - `contact_mode_qualifier.py`: Infer heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis; support mode ambiguity metric; COP and 2D convex hull support polygon containment under arbitrary surface normal n_hat; slip speed thresholding and friction cone saturation ratio; constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation; separate linear force (N) and moment (N\*m) residual budgets; unphysical load rejection (> 5000 N, > 300 Nm); and mass/geometry/friction sensitivity reporting.
+- Reproduction: `pytest tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`.
+- Next: Land PR #10499 via CI and proceed to PF-05.
+
+## PF-10 Connect Qualified Matching Strategies to Engine Feature Contracts (#10440)
+
+- Worktree: primary, branch `feat/issue-10440-pf10-matching-strategies-contracts`, lease `antigravity-ud-10440`, DL-#10440.
+- Changes:
+  - `matching_strategy.py`: Implemented versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`), stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`), strategy presets, controller specifications, and contact reaction history containers.
+  - `CandidateStrategyPackage`: Bound candidate trajectories with strategy metadata, accelerations, and contact reactions. Enforced fail-closed name-permuted coordinate remapping and lossless .npz serialization without pickle.
+  - `StrategyComparisonService`: Cross-strategy comparison service reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+  - Test suites: 8 unit tests in `test_matching_strategy.py` verifying stage ordering, acceptance invariants, contract serialization, .npz roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+- Reproduction: `pytest tests/unit/motion_matching/test_matching_strategy.py -v`.
+- Next: PR auto-merge, complete lease on #10440, claim next issue.
+
 ## Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) — 2026-09-11
 
 - Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8684.
