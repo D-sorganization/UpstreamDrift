@@ -382,6 +382,28 @@ Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/match
   - Automated tests: `tests/tools/matched_swing_browser/test_model.py` and `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py` (21 tests including headless journey test).
   - Headless screenshot evidence: `docs/development/matched_swing_program/evidence/browser/screenshot.png`.
 
+## Web Matched-Swing Results API and Results Page (MS-85, #10358)
+
+Exposes read-only, local-only matched-swing ledger routes for the web/Tauri shell and mounts the Results and Cross-Engine dashboard pages:
+- **API Service & Routes (`src/api/services/matched_swings_service.py`, `src/api/routes/matched_swings.py`)**:
+  - `GET /api/v1/matched-swings`: Public ledger index keyed by receipt SHA-256 (no absolute filesystem paths).
+  - `GET /api/v1/matched-swings/{id}`: Receipt JSON with summary, candidate hash, and explicit capability flags.
+  - `GET /api/v1/matched-swings/{id}/candidate`: NPZ stream or `preview_frame` JSON marker joints for 3D replay.
+  - `GET /api/v1/matched-swings/{id}/parity`: Cross-engine parity report JSON when present adjacent to the receipt.
+  - `GET /api/v1/matched-swings/{id}/animation.gif`: GIF animation stream when indexed in the ledger.
+  - Local-only guard rejects remote clients; typed job errors use structured HTTP 404 bodies.
+  - Reuses MS-02 ledger indexing and MS-80 browser artefact resolution (`MatchedSwingBrowserModel`).
+- **Web Results Page (`ui/src/pages/MatchedSwings.tsx`, `ui/src/api/matchedSwings.ts`)**:
+  - Route `/tools/matched-swings`: Filterable run list with verdict badges, five standardized metrics, GIF playback, and lazy `MocapSkeleton3D` marker preview.
+  - Links to `/tools/cross-engine` for parity/robustness review.
+- **Routing & Launcher Parity**:
+  - `ui/src/App.tsx`: Mounts `MatchedSwingsPage` and previously unmounted `CrossEngineDashboardPage`.
+  - `src/config/launcher_manifest.json`: `matched_swing_browser` and `cross_engine_dashboard` tiles use `web.mode: route`.
+  - `src/api/route_registry.py`: Registers `matched_swings` router as public (local-only evidence guard remains in handlers).
+- **Evidence & Verification**:
+  - API tests: `tests/api/test_matched_swings.py` (ledger, receipt, candidate NPZ/preview, parity, GIF, remote 403).
+  - UI tests: `ui/src/pages/MatchedSwings.test.tsx` (list badges, engine filter, 3D preview hook, cross-engine link).
+
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
 Consumes provider ownership decisions and enforces immutable runtime import authority and provenance verification across repository, installed, and packaged execution environments:

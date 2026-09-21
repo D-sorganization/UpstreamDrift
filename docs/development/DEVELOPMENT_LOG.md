@@ -571,6 +571,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Update PR #10543, enable auto-merge, monitor remote CI to green merge.
 - **Evidence:** tests/tools/matched_swing_browser/test_model.py; tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py; docs/development/matched_swing_program/evidence/browser/screenshot.png.
 
+### DL-#10358 · Web Matched-Swing Results API and Results Page
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10358 (MS-85, epic #10363)
+- **Branch:** fix/issue-10358-ms-85-local
+- **Paths:** src/api/routes/matched_swings.py; src/api/services/matched_swings_service.py; tests/api/test_matched_swings.py; ui/src/pages/MatchedSwings.tsx; ui/src/api/matchedSwings.ts; ui/src/App.tsx; src/config/launcher_manifest.json; src/api/route_registry.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (8 API tests pass; 4 MatchedSwings vitest tests pass; ruff and architecture budget clean).
+- **Summary:** Added local-only read-only `/api/matched-swings` routes (ledger, receipt, candidate NPZ/preview, parity, GIF) keyed by receipt SHA-256 without leaking absolute paths. Web Results page at `/tools/matched-swings` lists runs with verdict badges, GIF playback, and MocapSkeleton3D marker preview; mounted CrossEngineDashboard at `/tools/cross-engine` with launcher manifest web routes for both tiles.
+- **Next step:** Open PR, drive CI green, merge, release lease.
+- **Evidence:** tests/api/test_matched_swings.py; ui/src/pages/MatchedSwings.test.tsx.
+
 ### DL-#10529 · Consume Provider Ownership Decisions and Verify Runtime Import Authority
 
 - **State:** in_progress
