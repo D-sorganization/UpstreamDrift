@@ -16,7 +16,7 @@ Routes
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Any
+from typing import Any, NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import FileResponse
@@ -63,7 +63,7 @@ def get_matched_swings_service() -> MatchedSwingsService:
     return _default_service()
 
 
-def _raise_job_error(error: MatchedSwingJobError, status_code: int) -> None:
+def _raise_job_error(error: MatchedSwingJobError, status_code: int) -> NoReturn:
     raise HTTPException(
         status_code=status_code,
         detail={"message": error.message, "error": error.to_dict()},
