@@ -1,5 +1,53 @@
 # Current Matching Continuation Handoff
 
+## Realtime Pub/Sub Wiring #8869 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-issue-8869`.
+- Branch: `fix/8869-realtime-pubsub-decision`; base `origin/main` at
+  `4651b8793`; PR: not yet opened. Governing issue #8869 (folds in #8868,
+  #8942A). Seam #9406 ruling for `realtime`: `split pending` — UD keeps this
+  facade, no Tools-vs-UD retirement claimed here.
+- Entry DL-#8869. **Decision: WIRE, not delete.** `ws_pubsub.py` reads dead
+  from `src/shared/python/realtime/api.py`'s point of view (nothing in
+  `src/`/`apps/` called into it), but it is a mature, independently
+  soak-tested feature: `.github/workflows/realtime-soak.yml` runs it nightly
+  against latency/leak acceptance criteria from issue #5214/#5235, backed by
+  the `upstream-realtime` Rust/Tokio crate (`rust_core/upstream-realtime/`).
+  Deleting it would have discarded real, maintained infrastructure — the
+  opposite of the #8866 precedent this task was pointed at, where the deleted
+  code was genuinely never-validated.
+- Delivered: `api.py.publish()`/`subscribe()` now accept `transport="ws"` /
+  `REALTIME_TRANSPORT=ws` and route to `WSPubSub`; any other transport value
+  raises `ValueError` immediately instead of silently falling back to file
+  (the literal "silent no-op" defect in #8869's title). `Subscription` was
+  refactored to a single generic `_unsubscribe_fn` so callers never reach
+  into file- vs ws-transport internals (LoD/DRY). `channels.py`'s colliding
+  `register_channel` renamed to `register_channel_hint` (the naming
+  collision #8869 flagged). Deleted `file_pubsub.py` — genuinely dead,
+  superseded entirely by `transport_file.py`, imported by nothing but its
+  own two test files (also deleted).
+- Deliberately NOT done: `channels.get_channel_transport()`'s automatic
+  frequency-based routing is not wired into the default path — constructing
+  `WSPubSub` autostarts a background server, so making that automatic for
+  existing unaware callers (e.g. Pose Studio's 30 Hz `pose/canonical`
+  publishes) would be a much bigger, riskier behavior change than this issue
+  asked for. `ws` stays strictly opt-in. #8868 (training-progress
+  publisher/subscriber default wiring — `RealtimeChannelProgressSink` exists
+  in `training/runtime/progress_sinks.py` but `scheduler.py` defaults to
+  `NullProgressSink`) is left for separate follow-up. #8942A (file-transport
+  per-message syscalls) already appears fixed on main — `transport_file.py`
+  tracks a read offset and does not re-parse whole files — so no action was
+  needed there.
+- Validation: `python3 -m pytest tests/unit/realtime tests/shared/realtime`
+  (125 passed, 3 skipped cleanly — optional `upstream_realtime` Rust wheel
+  not built locally); `ruff check` / `ruff format --check` clean on changed
+  files; `scripts/shared_tools/check_seam_drift.py` passes (realtime stays
+  "split pending", no new overlap).
+- Next action: open PR with `Refs #8869` (partial — core defect + dead
+  `file_pubsub.py` resolved; #8868 and channel-hint auto-routing remain open
+  follow-ups), add the SPEC.md Section 12 row once the PR number is known,
+  push, monitor CI, merge, tear down the worktree.
+
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
