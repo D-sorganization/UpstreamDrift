@@ -1,3 +1,13 @@
+## Engine Preflight Checker (MS-103, #10377)
+
+Adds `src/engines/preflight.py` with `EnginePreflightChecker`, `PreflightRunner`, and `PreflightSummary` for platform-aware engine readiness checks with DbC contracts:
+
+- **Five checks per engine**: `runtime_version`, `sdk_import`, `model_assets`, `display`, `capacity` — each returning a frozen `EnginePreflightResult` with outcome, message, and optional remediation string.
+- **Tier-aware degradation**: experimental engines (`opensim`, `myosuite`) that fail `sdk_import` return `SKIP` rather than `FAIL`; core/extended engines fail closed.
+- **DbC contracts**: `require()` / `ensure()` precondition/postcondition guards on all public API entry points; `@precondition` decorator on `EnginePreflightChecker.__init__`.
+- **Single source of truth**: `KNOWN_ENGINES` derived from `src/engines/tiers.py:ENGINE_TIERS` — no duplication of engine name registry.
+- **TDD test suite**: 62 tests in `tests/unit/engines/test_preflight.py` covering all check methods, tier degradation, `PreflightSummary` aggregation, and JSON serialization.
+
 ## Simscape 44-to-27 Coordinate Slice and Boundary-Load Validation (MS-62, #10349)
 
 Separates kinematic projection from dynamic model reduction for Simscape upper-body replay:
@@ -45,10 +55,10 @@ Freezes content-addressed club Excel workbook identity for epic #10602 without a
 - **Evidence**: `docs/plans/club_only_matching/evidence/club_workbook_identity.json` and `tests/unit/motion_matching/test_club_workbook_identity.py`.
 
 
-
 ## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
 
 Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
+
 - **Lane Runner (`scripts/ci/run_native_engine_lane.sh`, `scripts/ci/run_native_engine_lane.py`)**:
   - Executes `pytest -m requires_opensim` or `requires_myosuite` and writes JSON receipts under `docs/development/matched_swing_program/evidence/nightly/`.
   - Records contract SHA-256 digests for the runner scripts and `pyproject.toml`, repository revision, engine module hash, and nonzero executed test counts when the lane passes.
