@@ -220,12 +220,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active child [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md).
-- **State:** CO-00 identity contracts merged; CO-01 observation/calibration contracts ready for review. Four unique workbook trials audited. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
-- **Branch:** `fix/issue-10605-co01-club-observation` (CO-01). Development log entries DL-#10602, DL-#10604, DL-#10605.
-- **Next:** Land CO-01 #10605, then dispatch CO-02 #10606.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 shipped (#10667); active child [CO-01 #10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) on PR [#10670](https://github.com/D-sorganization/UpstreamDrift/pull/10670).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md).
+- **NM-00 state:** Fail-closed dataset/checkpoint/claim audit in src/shared/python/neural_motion/; surrogate path constants shared; absent/quarantined default checkpoints; data/sweep_synthetic software-contract-only; CVAE/regressor mean-baseline plateaus NOTE_ONLY. Receipts under docs/plans/neural_motion_matching/evidence/.
+- **CO-01 state:** Observation/calibration contracts ready for review (synthetic fixtures only). Branch ix/issue-10605-co01-club-observation. DL-#10602, DL-#10604, DL-#10605.
+- **Next:** Land CO-01 #10605 / #10670, then dispatch CO-02 #10606 and NM-01 #10616. No new physical match, trained checkpoint, or measured speedup claimed.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
