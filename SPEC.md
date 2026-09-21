@@ -715,53 +715,6 @@ Source hashes, contact configuration, interpolation and armature must match;
 legacy omissions require explicit diagnostic mode and cannot certify parity.
 The receipt separates same-state marker agreement, uninterrupted dynamics,
 G1 convergence and physical acceptance. Rejected replay and full-source IK
-playback are separately labelled artifacts; neither closes the G1/G2/G3 ladder.
-
-## Qualify Contact Modes and Native Pinocchio Force Feasibility (PF-04, #10434)
-
-Qualifies contact support modes with hysteresis, resolves contact geometry/support polygons, and audits Pinocchio floating-base force feasibility with physiological capacity bounds:
-- **Contact Mode Inference with Hysteresis (`src/shared/python/motion_matching/contact_modes.py`)**:
-  - `ContactState`: Discrete contact sphere state (`OPEN`, `STICKING`, `SLIPPING`).
-  - `FootSupportMode`: Single-foot support mode (`FLIGHT`, `HEEL_ONLY`, `TOE_ONLY` / pivot, `FULL_FOOT`, `SLIPPING`).
-  - `GlobalSupportMode`: Bipedal support mode (`DOUBLE_SUPPORT`, `LEFT_SUPPORT`, `RIGHT_SUPPORT`, `LEFT_HEEL_PIVOT`, `RIGHT_HEEL_PIVOT`, `FLIGHT`, `AMBIGUOUS`).
-  - `ContactHysteresisSettings`: Decoupled engage height ($h_{\text{engage}} = 0.005$ m) and release height ($h_{\text{release}} = 0.015$ m), with velocity gates ($v_{\text{engage}} = -0.05$ m/s, $v_{\text{release}} = 0.05$ m/s) and slip velocity hysteresis ($v_{\text{slip}} = 0.02$ m/s). Prevents high-frequency mode chattering during foot lift-off, landing, and heel pivots.
-  - `infer_contact_modes()`: Maps sphere trajectories over time to support modes, flags ambiguous frames, and produces `ContactModeSequence` with primary and alternative candidate schedules.
-  - `evaluate_support_geometry()`: Computes instantaneous Center of Pressure (COP), validates containment within the convex support polygon formed by active contact points, measures COP boundary margin, and verifies Coulomb friction cone compliance ($|f_{i, t}| \le \mu f_{i, n}$).
-- **Pinocchio Force Feasibility & Constitutive Gating (`src/shared/python/motion_matching/contact_force_feasibility.py`)**:
-  - Independent Residual Budgets: Enforces separate floating-base force residual ($\le 5.0$ N) and torque residual ($\le 1.0$ N·m) budgets, preventing small torque values from masking force balance violations.
-  - Physiological Capacity Limits: Enforces human biomechanical bounds ($F_{\text{GRF}} \le 3.5 \times BW$, $\tau_{\text{ankle}} \le 350$ N·m, maximum joint torque $\le 800$ N·m, documented from Rajagopal 2016 / Ball & Best 2007 / Winter 2009). Strictly rejects unphysical meganewton (MN) loads and kilonewton-metre (kN·m) ankle torque spikes.
-  - Compliant Physics Constitutive Comparison: Verifies that inferred contact forces from inverse dynamics / force allocation match constitutive Hunt-Crossley / regularized Coulomb models at $(q, v)$, strictly rejecting arbitrary supported forces when feet are in flight.
-  - Parameter Sensitivity Reporting: `compute_contact_sensitivity()` evaluates parameter sensitivity of ground forces with respect to body mass ($\pm 5\%$), marker offsets ($\pm 5$ mm), ground height ($\pm 5$ mm), and friction coefficient $\mu$ ($\pm 0.1$).
-- **Integration**:
-  - Extended `ContactForceAllocation` in `contact_force_allocator.py` with `.audit_feasibility()` method connecting directly to the feasibility qualification engine.
-  - Unit and acceptance test suite in `tests/unit/motion_matching/test_contact_modes_and_pinocchio_feasibility.py` covering static weight balance, lift-off/landing, heel pivot, slipping foot, double support, flight rejection, independent residual budgets, capacity limits, constitutive comparison, and sensitivity reporting.
-
-## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
-
-Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility, bounded overlapping-window refinement, joint $q/v/a$ derivative consistency, and separate driver/iron calibration validation:
-- **Strict Club Calibration Separation & Validation (`src/shared/python/motion_matching/club_calibration.py`)**:
-  - `ClubCalibrationSpec`: Rigid club calibration specification encapsulating physical parameters (`ClubSpec`), marker attachment geometry, shaft length bounds, lie angle, and loft angle.
-  - `validate_club_compatibility()`: Enforces strict compatibility guards against cross-contamination (e.g. applying driver calibration to 7-iron geometry, or vice versa, or mismatched shaft lengths), raising typed `ClubCompatibilityError`.
-  - `diagnose_club_marker_residuals()`: Performs rigid frame registration auditing and returns marker-by-marker residuals, RMS error, and geometric compatibility status.
-- **Kinematic Smoothing & Derivative Consistency (`src/shared/python/motion_matching/kinematic_smoother.py`)**:
-  - `KinematicSmoother`: Jointly smooths coordinate trajectories $q(t)$ and evaluates mathematically exact derivatives $v(t) = \dot{q}(t)$ and $a(t) = \ddot{q}(t)$ using Quintic B-splines over boundary-padded horizons.
-  - Boundary Reflection Padding: Reflects coordinates antisymmetrically across $t=0$ and $t=T$ prior to filtering and spline fitting, eliminating boundary acceleration and jerk spikes ($|a_0 - a_1|$ and $|a_{T} - a_{T-1}|$).
-  - Weld Closure Manifold Projection: Damped least-squares projection pass ($J_{\text{closure}} \Delta q = -e_{\text{closure}}$) restoring dual-grip loop closure ($e_{\text{closure}} \le 10^{-3}\text{ m}$) while projecting velocity into the constraint nullspace ($\dot{e}_{\text{closure}} \le 10^{-2}\text{ m/s}$).
-  - Coordinate Box Bounds: Projects coordinates onto configured joint limits ($\text{lower} \le q(t) \le \text{upper}$).
-  - `audit_smoothing_quality()`: Evaluates maximum acceleration step, boundary spike ratios, maximum jerk, RMS position difference, and verifies no dropped frames ($N_{\text{out}} = N_{\text{in}}$).
-- **Bounded Overlapping-Window IK Refinement (`src/shared/python/motion_matching/windowed_ik_refinement.py`)**:
-  - `WindowedIkRefiner`: Overlapping-window temporal optimizer initialized from per-frame `MarkerIkSolver` warm starts. Minimizes marker tracking residuals, closure violations, temporal acceleration penalty, and unilateral foot contact ground non-penetration barrier ($z_{\text{foot}} \ge h_{\text{ground}}$).
-  - Robust to marker dropout (up to 30% dropout) and target noise without numerical instability.
-  - `diagnose_difficult_frames()`: Compares multi-start fits on worst frames with closure enabled vs disabled to determine geometric floors and quantify calibration misfit vs loop closure tradeoff.
-
-## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
-
-Freezes fast-matching evidence archives, schemas, and negative acceptance fixtures across driver and 7-iron candidates:
-- **Candidate Packaging & Verification (`src/shared/python/motion_matching/candidate_package.py`, `acceptance.py`)**:
-  - `export_candidate_package()`: Serializes standardized full-swing candidate archives containing `candidate.npz`, `manifest.json`, `solver_log.json`, and kinematics/dynamics metrics.
-  - Verification gates enforcing finite data, exact coordinate lengths, timestamp monotonic progression, and weld closure error tolerances.
-- **Evidence Audit & Migration CLI (`scripts/recompute_fast_matching_evidence.py`)**:
-  - Validates and packages matching evidence with SHA-256 manifest hashing.
 
 ## Multi-Engine Torque Allocation and Cross-Platform 3D Simulation Viewers (#10415)
 
