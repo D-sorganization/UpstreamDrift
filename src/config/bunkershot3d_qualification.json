@@ -1,0 +1,380 @@
+{
+  "version": "1.0.0",
+  "epic": 9541,
+  "audit_snapshot": "920e7979e11c88f41cd6bb2e3d13b58991959a3d",
+  "tools_pin": "62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1",
+  "reconciled_against": "9af408974f1bb1a738461875edafe5defee2260a",
+  "reconciled_on": "2026-09-18",
+  "release_status": "blocked",
+  "queue": [
+    {
+      "key": "U1",
+      "issue": 9286,
+      "priority": "P0",
+      "title": "Evidence Admission: an Unmatched Measurement Must Not Promote the Validation Score",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/vandv/ledger.py",
+        "src/bunkershot3d/vandv/measurement_intake.py"
+      ],
+      "tests": ["tests/bunkershot3d/vandv/test_validation_ledger.py"],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9541],
+      "plan": "Reopened after PR #9576: an instrument record whose conditions do not match the offered spec (the 89-degree repose probe) still raises validation from 0 to 1. First in the epic sequence; waits only on the epic lease. RED: a test that offers a record matching the spec key but not its declared conditions and asserts `ValidationLedger.satisfied_spec_keys` stays empty and `credibility_assessment()` validation stays 0. GREEN: admission compares the record against the spec's conditions and acceptance criterion, not the key alone, and refuses on mismatch. No level, threshold or tolerance may change."
+    },
+    {
+      "key": "U2",
+      "issue": 9542,
+      "priority": "P0",
+      "title": "Reject Reflected Poses and Preserve Actual Exit State and Launch Provenance",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/solvers/shot.py",
+        "src/bunkershot3d/ball/pipeline.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/solvers/test_shot.py",
+        "tests/bunkershot3d/ball/test_pipeline_handoff.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9541],
+      "plan": "Partial PR #9574 landed the det(+1) rejection in `HeadKinematics` and the provenance-stamped handoff envelope in `ball/pipeline.py`; reopened for the remaining provenance, frame and immutability requirements. First in the epic sequence alongside U1. RED: tests that mutate a handoff envelope after construction, omit a frame label, or pass a modelled exit vector without its provenance tag, each expected to raise. GREEN: freeze the envelope, require frame and provenance on every exit vector, and carry the actual solver exit state through unchanged."
+    },
+    {
+      "key": "U3",
+      "issue": 9239,
+      "priority": "P1",
+      "title": "Playability Window Is Degenerate After the Divot-Mass Correction: Decide, Do Not Re-Tune",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/metrics/playability.py",
+        "src/bunkershot3d/ball/splash.py"
+      ],
+      "tests": ["tests/bunkershot3d/metrics/test_playability.py"],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9543],
+      "plan": "The corrected divot mass makes the nominal window 0.0 everywhere. Plausible carry must not be restored by retuning the borrowed splash coefficients. Until U13 calibrates the transfer, the playability objective is unqualified: RED, a test that ranking or comparison on the playability objective raises rather than returning an ordering; GREEN, mark the objective inadmissible in the study/ranking layer and surface that verdict in the workbench."
+    },
+    {
+      "key": "U4",
+      "issue": 9688,
+      "priority": "P1",
+      "title": "Decide and Benchmark a Genuine 3D Sand-Motion Tier",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "docs/adr/0033-bunkershot3d-sand-field-tier.md",
+        "src/bunkershot3d/backends"
+      ],
+      "tests": ["tests/bunkershot3d/test_backends.py"],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9541],
+      "plan": "Tier and compute decision, gated by the epic: benchmark the candidate 3D sand backends on the declared problem size and record wall-clock, memory, licence (the Kratos BSD-4-Clause clause is flagged in `docs/bunkershot3d/upgrade/STATE.md`) and verification coverage. Output is an ADR amendment naming the selected tier; a higher-fidelity result is a model comparison, never measured truth."
+    },
+    {
+      "key": "U5",
+      "issue": 9689,
+      "priority": "P1",
+      "title": "Implement and Verify the Selected 3D Sand Whole-Shot Backend",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/solvers/mpm/wholeshot.py",
+        "src/bunkershot3d/backends"
+      ],
+      "tests": ["tests/bunkershot3d/solvers/mpm/test_whole_shot.py"],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9688],
+      "plan": "Owns the real sand backend selected by U4. RED: whole-shot march tests for conservation residuals, observed order of accuracy under refinement and the plastic-limit cases in `vandv/cases.py`, run against the 3D backend rather than the plane-strain F1 solver. GREEN: the backend passes them and every result carries its fidelity tier and validity verdict."
+    },
+    {
+      "key": "U6",
+      "issue": 9690,
+      "priority": "P1",
+      "title": "Add Verified Club Rotation and Shaft-Support Coupling",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/kinematics/coupling.py",
+        "src/bunkershot3d/solvers/structural.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/test_coupling.py",
+        "tests/bunkershot3d/solvers/test_structural.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9542],
+      "plan": "F0 prescribes rotation today. The analytic mechanics can start once U2 fixes the pose interface: RED, closed-form rigid-body tests (free rotation under a known sand moment, shaft-supported head under a known grip stiffness) with tolerances from the numerical error budget; GREEN, coupled rotation solved from the sand wrench rather than prescribed, with the prescribed path kept as an explicit lower tier."
+    },
+    {
+      "key": "U7",
+      "issue": 9691,
+      "priority": "P1",
+      "title": "Resolve Ball Contact, Spin and Release From Coupled Dynamics",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/solvers/mpm/ball.py",
+        "src/bunkershot3d/solvers/mpm/ballreach.py",
+        "src/bunkershot3d/ball/pipeline.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/solvers/mpm/test_ball.py",
+        "tests/bunkershot3d/solvers/mpm/test_ball_reach.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9689, 9690],
+      "plan": "Integrates a spherical ball body with contact and release into the U5 backend under the U6 club motion. RED: tests that ball speed, launch direction and spin come from the coupled contact history, that release is detected from separation rather than a fixed time, and that the F1 envelope still refuses absolute ball launch until this lands. GREEN: `solvers/mpm/envelope.py` admits ball launch only from this path. Direct thin/bladed contact stays out of scope and is recorded as such."
+    },
+    {
+      "key": "U8",
+      "issue": 8733,
+      "priority": "P2",
+      "title": "F1 MPM: Reconcile the Remaining Tier Criteria (Ball Body, Whole-Shot March, Plastic-Limit Verification, F2 Calibration)",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/solvers/mpm/ball.py",
+        "src/bunkershot3d/solvers/mpm/wholeshot.py",
+        "src/bunkershot3d/solvers/mpm/limit_states.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/solvers/mpm/test_whole_shot.py",
+        "tests/bunkershot3d/solvers/mpm/test_ball.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9689],
+      "plan": "The named files now exist; reconcile the remaining criteria, not the historical prose. Enumerate which of the ball-body, whole-shot march, plastic-limit verification and F2 calibration criteria are already met by the existing tests, close those in the issue with the proving test named, and leave only the F2 calibration and any un-verified march criterion open against U5."
+    },
+    {
+      "key": "U9",
+      "issue": 9544,
+      "priority": "P2",
+      "title": "Qualify Coupled Club Rotation and Contact Regimes Across Fidelity Tiers",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/tools/bunker_shot_gui/crosstier.py",
+        "src/bunkershot3d/solvers/envelope.py"
+      ],
+      "tests": [
+        "tests/tools/bunker_shot_gui/test_crosstier.py",
+        "tests/bunkershot3d/solvers/test_envelope.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9690, 9691, 8733],
+      "plan": "Cross-tier comparison of the F0 prescribed-rotation path, the U6 coupled path and the U5/U7 backend over the declared delivery envelope, reported as tier-to-tier discrepancy with the numerical error budget. RED: a test that a contact regime outside the declared envelope (thin, bladed, buried) is refused with a verdict rather than compared. GREEN: regimes and their verdicts are data on the result, not filename conventions."
+    },
+    {
+      "key": "U10",
+      "issue": 9692,
+      "priority": "P2",
+      "title": "Persist Versioned 3D Particle Trajectories and Contact Events",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/io/schema.py",
+        "src/bunkershot3d/provenance/manifest.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/test_result_schema_v2.py",
+        "tests/bunkershot3d/test_schema.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9689],
+      "plan": "Schema work can start against the agreed interface before U5 lands. RED: schema tests for a versioned particle-trajectory and contact-event group with units, frames, time base and a SHA-256 digest over provenance and arrays together, plus a reload test that refuses a digest mismatch. GREEN: the U5 backend writes that group and the loader reads validity out of the file, never out of its name."
+    },
+    {
+      "key": "U11",
+      "issue": 9693,
+      "priority": "P2",
+      "title": "Render Actual 3D Sand Particles With Synchronized Ball and Club Playback",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/tools/bunker_shot_gui/render3d_sand.py",
+        "src/tools/bunker_shot_gui/shot3d.py"
+      ],
+      "tests": [
+        "tests/unit/tools/bunker_shot_gui/test_sand_volume_render.py",
+        "tests/tools/bunker_shot_gui/test_linked_scrub.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9692],
+      "plan": "Consumes the U10 artifact. RED: headless render tests that the particle, ball and club frames drawn at a scrub time share one time base and that the fidelity tier and validity verdict are stamped on the frame. GREEN: playback reads the persisted group; no synthetic particle field may stand in for a real one in a released artifact. Rendered desktop evidence is required in the completion comment."
+    },
+    {
+      "key": "U12",
+      "issue": 9694,
+      "priority": "P1",
+      "title": "Build the Measurement-to-Calibration and Held-Out Qualification Pipeline",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/vandv/measurement_intake.py",
+        "src/bunkershot3d/vandv/roadmap.py",
+        "src/bunkershot3d/calibration/calibrate_all.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/vandv/test_validation_ledger.py",
+        "tests/bunkershot3d/test_calibration.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9286],
+      "plan": "Software only; it qualifies nothing by itself. Builds on the U1 admission fix. RED: tests that a measurement document declares sand batch and shot session, that calibration and holdout partitions never share a batch or session, that the operating ranges, outputs, error budget and tolerances are digest-bound before any holdout record is read, and that coverage and bias are reported per regime. GREEN: `calibrate_all` consumes only the calibration partition and the holdout comparison is a separate, later step."
+    },
+    {
+      "key": "U13",
+      "issue": 9543,
+      "priority": "P1",
+      "title": "Calibrate Sand-to-Ball Transfer and Qualify Prediction on Held-Out Measurements",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/bunkershot3d/ball/splash.py",
+        "src/bunkershot3d/vandv/validation.py"
+      ],
+      "tests": [
+        "tests/bunkershot3d/ball/test_splash_transfer.py",
+        "tests/bunkershot3d/vandv/test_validation.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9694],
+      "plan": "Stays open until real, attributable measurements pass through the U12 pipeline. The seven predeclared specs in `vandv/roadmap.py` name the instrument class, sample count and expanded uncertainty each must clear; `shipped_register()` is empty and must stay empty until a real document is supplied. A simulated target, a synthetic fixture or a retuned coefficient is not evidence and cannot close this entry."
+    },
+    {
+      "key": "U14",
+      "issue": 8880,
+      "priority": "P2",
+      "title": "Simulations Run on the GUI Thread: No Worker, No Progress, No Cancel",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/tools/async_action.py",
+        "src/tools/bunker_shot_gui/gui.py"
+      ],
+      "tests": [
+        "tests/tools/test_async_action.py",
+        "tests/tools/bunker_shot_gui/test_gui.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9541],
+      "plan": "Existing owner: #8880 with the shared action-bar work in #9470 and PR #9472 provides the fleet-wide worker, progress and cancel infrastructure in `src/tools/async_action.py`. The bunker slice is to route the workbench solve through it: RED, a test that a long solve leaves the event loop responsive and that cancel returns within the declared bound; GREEN, the workbench uses the shared action bar and no bunker-specific thread code is added."
+    },
+    {
+      "key": "U15",
+      "issue": 9545,
+      "priority": "P3",
+      "title": "Deliver a Responsive, Reproducible Workbench With API and Web Parity",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/tools/bunker_shot_gui/gui.py",
+        "src/tools/bunker_shot_gui/model.py",
+        "src/config/feature_parity.json"
+      ],
+      "tests": [
+        "tests/config/feature_parity/test_registry.py",
+        "tests/unit/tools/bunker_shot_gui/test_workbench_model.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [8880, 9693],
+      "plan": "`src/config/feature_parity.json` records `tools.bunkershot3d_workbench` as a gap with no API route or web page. After U14 and U11: RED, an installed-product journey test that selects measured inputs, runs and cancels, inspects synchronized traces and playback, compares cases only on admissible objectives, saves and reloads a digest-bound run and exports a report carrying units, frames, parameter sources, limitations and verdicts; GREEN, the API route and web page consume `model.py` and the registry entry moves from gap to parity with rendered evidence."
+    },
+    {
+      "key": "U16",
+      "issue": 9695,
+      "priority": "P3",
+      "title": "Add Product Qualification Gates for Physics, Packaging and 3D Playback",
+      "status": "open",
+      "merge_shas": [],
+      "implementation": [
+        "src/config/bunkershot3d_qualification.json",
+        "docs/bunkershot3d/credibility.md"
+      ],
+      "tests": [
+        "tests/config/bunkershot3d_qualification/test_bunkershot3d_qualification_ledger.py"
+      ],
+      "acceptance_evidence": null,
+      "owner": "unassigned",
+      "depends_on": [9543, 9544, 9545],
+      "plan": "The installed-product and physical release gate. This ledger is its software half: `release_status` cannot read `ready` while any entry is open, any criterion is unmet, `shipped_register()` is empty or any assessed credibility factor sits below its threshold. The remaining half is an installed-product run on a clean supported machine and an independent review of the held-out comparison, neither of which can pass on mock or synthetic evidence."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "integrity-blockers-cleared",
+      "criterion": "Evidence Admission and Pose/Flight-Boundary Integrity Are Repaired Before Any Calibration Is Attempted.",
+      "status": "unmet",
+      "evidence": "`HeadKinematics` rejects reflected orientation matrices and the flight handoff carries an exit-vector provenance envelope (PR #9574), but #9542 is reopened for the remaining provenance, frame and immutability requirements and #9286 is reopened because an unmatched measurement still promotes the validation score after PR #9576.",
+      "blockers": [9286, 9542]
+    },
+    {
+      "id": "protocol-predeclared",
+      "criterion": "Operating Ranges, Outputs, Numerical Error Budget and Application-Driven Tolerances Are Declared Before Any Holdout Outcome Is Viewed.",
+      "status": "partial",
+      "evidence": "`bunkershot3d/vandv/roadmap.py` predeclares seven measurement specs with instrument class, sample count and expanded-uncertainty acceptance, and `vandv/budget.py` holds the numerical uncertainty budget. No declaration yet binds the delivery, wedge-geometry, sand-state and lie ranges to the ball-side outputs and their decision-driven tolerances, and nothing digest-binds that declaration ahead of a holdout read. No tolerance is asserted as achieved.",
+      "blockers": [9694, 9543]
+    },
+    {
+      "id": "calibration-holdout-separation",
+      "criterion": "Calibration and Validation Are Separated by Sand Batch and Shot Session, With Repeatability, Uncertainty Propagation and Per-Regime Coverage and Bias.",
+      "status": "unmet",
+      "evidence": "`shipped_register()` holds zero measurements and `credibility_assessment()` derives validation 0 of 4 from it. A synthetic fixture is structurally forbidden from carrying a value, so nothing in the tree can be mistaken for a measurement, but no calibration or holdout partition exists either.",
+      "blockers": [9694, 9543]
+    },
+    {
+      "id": "unqualified-outputs-explicit",
+      "criterion": "Bad Data or Out-of-Envelope Requests Never Become a Plausible Ranked Recommendation; Unqualified Outputs Are Explicit.",
+      "status": "partial",
+      "evidence": "`solvers/mpm/envelope.py` refuses F1 ball launch, absolute club force and out-of-plane results, and the launch handoff stamps ball launch as `MODELED_CONVENTION`. The playability objective still ranks designs from an uncalibrated transfer whose corrected divot mass leaves the nominal window degenerate (#9239), and the contact regimes have no cross-tier verdict (#9544).",
+      "blockers": [9239, 9544]
+    },
+    {
+      "id": "coupled-physics-tiers",
+      "criterion": "Club Rotation, Sand Motion and Ball Contact Are Solved From Coupled Dynamics in a Selected 3D Tier, With Higher-Fidelity Results Treated as Model Comparisons.",
+      "status": "unmet",
+      "evidence": "F0 prescribes club rotation, F1 is plane-strain, and no genuine 3D sand-motion tier has been decided or benchmarked. The named F1 remainder files (`ball.py`, `wholeshot.py`, `limit_states.py`) exist but #8733's remaining criteria are not reconciled.",
+      "blockers": [9688, 9689, 9690, 9691, 8733, 9544]
+    },
+    {
+      "id": "workbench-journey",
+      "criterion": "A Clean Supported Install Lets an Operator Select Measured Inputs, Run and Cancel, Inspect Synchronized Traces and Playback, Compare Only Admissible Objectives, Save and Reload a Digest-Bound Run and Export a Report With Units, Frames, Sources, Limitations and Verdicts.",
+      "status": "unmet",
+      "evidence": "The PyQt6 workbench exists and `feature_parity.json` records it as a gap with no API route or web page. Solves still run on the GUI thread pending the shared worker infrastructure, no versioned particle-trajectory artifact exists to play back, and no installed-product journey test exists.",
+      "blockers": [8880, 9692, 9693, 9545]
+    },
+    {
+      "id": "release-gate-and-review",
+      "criterion": "The Product Acceptance Matrix and an Independent Review Pass Before the Epic Closes.",
+      "status": "unmet",
+      "evidence": "This ledger is the software half of the matrix and reads `blocked`. The installed-product run and the independent review of a held-out comparison have not happened and cannot pass on mock or synthetic evidence.",
+      "blockers": [9695]
+    },
+    {
+      "id": "separate-authorities",
+      "criterion": "Software Correctness, Numerical/Scientific Credibility and Human Qualification Remain Separately Recorded.",
+      "status": "met",
+      "evidence": "This ledger records software correctness only. Scientific credibility is derived, never hand-entered, by `bunkershot3d.vandv.credibility_assessment()` from the roadmap ledger and the shipped measurement register, and the design-manual governance pathway holds scientific approval. A passing entry here is not a validation level, and no registered measurement may be fabricated or rerun to satisfy it.",
+      "blockers": []
+    }
+  ]
+}
