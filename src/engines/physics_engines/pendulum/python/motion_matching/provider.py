@@ -24,6 +24,9 @@ from src.engines.physics_engines.pendulum.python.motion_matching.adapters import
 )
 from src.engines.physics_engines.pendulum.python.motion_matching.torque_optimization import (
     COEFFS_PER_JOINT,
+    DoublePendulumFitOptions,
+    DoublePendulumFitTarget,
+    FitTrajectoryResult,
     fit_bounded_double_pendulum,
     integrate_double_pendulum_rollout,
 )
@@ -169,6 +172,45 @@ def _resolve_geometry_and_q0(
     return l1, l2, q0, v0, None
 
 
+def _build_canonical_result(
+    fit_res: FitTrajectoryResult,
+    elapsed: float,
+    target_hash: str,
+    engine_version: str,
+) -> CanonicalFitResult:
+    """Assemble CanonicalFitResult from double pendulum optimization rollout."""
+    all_coeffs = np.concatenate(
+        [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
+    )
+    final_rmse = fit_res.final_rmse_m
+    final_cost = float(final_rmse**2)
+    max_club_rmse = 0.150
+    is_success = bool(fit_res.converged and final_rmse <= max_club_rmse)
+
+    msg = (
+        f"t0_evaluated_before_step=True; "
+        f"unforced_rmse_m={fit_res.unforced_rmse_m:.4f}; "
+        f"converged={fit_res.converged}; {fit_res.message}"
+    )
+
+    return CanonicalFitResult(
+        theta_optimal=np.asarray(all_coeffs, dtype=np.float64),
+        final_cost=final_cost,
+        final_rmse_m=final_rmse,
+        solver_status="success" if is_success else "failure",
+        iterations=fit_res.iterations,
+        n_evaluations=fit_res.evaluations,
+        wall_clock_s=elapsed,
+        message=msg,
+        history=(final_cost,),
+        method="scipy SLSQP",
+        git_commit=git_commit_short(),
+        engine_version=engine_version,
+        target_hash=target_hash,
+        timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+
+
 class PendulumFitSwingProvider:
     """Canonical-API adapter providing a physically sound driven double pendulum fit."""
 
@@ -210,22 +252,32 @@ class PendulumFitSwingProvider:
 
         # 3. Formulate analytical dynamics and execute bounded optimization
         dynamics = DoublePendulumDynamics()
-        dynamics.parameters.upper_segment.length_m = l1
-        dynamics.parameters.lower_segment.length_m = l2
+        dyn_params = dynamics.parameters
+        upper_seg = dyn_params.upper_segment
+        lower_seg = dyn_params.lower_segment
+        upper_seg.length_m = l1
+        lower_seg.length_m = l2
         max_nfev = opts.maxiter if opts and opts.maxiter else 100
+
+        target_data = DoublePendulumFitTarget(
+            times=projected_club.time,
+            grip=projected_club.butt,
+            head=projected_club.clubhead,
+            l1=l1,
+            l2=l2,
+            q0=q0,
+            v0=v0,
+        )
+        fit_options = DoublePendulumFitOptions(
+            pivot=pivot[:2],
+            max_nfev=max_nfev,
+        )
 
         try:
             fit_res = fit_bounded_double_pendulum(
-                target_times=projected_club.time,
-                target_grip=projected_club.butt,
-                target_head=projected_club.clubhead,
+                target=target_data,
                 dynamics=dynamics,
-                l1=l1,
-                l2=l2,
-                q0=q0,
-                v0=v0,
-                pivot=pivot[:2],
-                max_nfev=max_nfev,
+                options=fit_options,
             )
         except (ValueError, RuntimeError, np.linalg.LinAlgError) as exc:
             return _build_failure_result(
@@ -238,39 +290,9 @@ class PendulumFitSwingProvider:
         )
 
         elapsed = time.perf_counter() - t_start
-        all_coeffs = np.concatenate(
-            [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
+        result = _build_canonical_result(
+            fit_res, elapsed, target_hash, self.engine_version()
         )
-
-        final_rmse = fit_res.final_rmse_m
-        final_cost = float(final_rmse**2)
-        # Bounded educational baseline profile check (TB-02 PlanarDrivenPendulumProfile: 0.150m)
-        max_club_rmse = 0.150
-        is_success = bool(fit_res.converged and final_rmse <= max_club_rmse)
-
-        msg = (
-            f"t0_evaluated_before_step=True; "
-            f"unforced_rmse_m={fit_res.unforced_rmse_m:.4f}; "
-            f"converged={fit_res.converged}; {fit_res.message}"
-        )
-
-        result = CanonicalFitResult(
-            theta_optimal=np.asarray(all_coeffs, dtype=np.float64),
-            final_cost=final_cost,
-            final_rmse_m=final_rmse,
-            solver_status="success" if is_success else "failure",
-            iterations=fit_res.iterations,
-            n_evaluations=fit_res.evaluations,
-            wall_clock_s=elapsed,
-            message=msg,
-            history=(final_cost,),
-            method="scipy SLSQP",
-            git_commit=git_commit_short(),
-            engine_version=self.engine_version(),
-            target_hash=target_hash,
-            timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        )
-
         publish_leaderboard_row(self.engine_name, result, self.engine_version())
         return result
 

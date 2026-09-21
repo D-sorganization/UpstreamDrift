@@ -179,6 +179,22 @@ class DoublePendulumAdapter:
         return forward_kinematics_2d(theta1, theta2, l1, l2, pivot)
 
 
+def _make_forcing_fn(val: float) -> Callable[[float, DoublePendulumState], float]:
+    def _forcing(_t: float, _s: DoublePendulumState) -> float:
+        return val
+
+    return _forcing
+
+
+def _make_tools_torque_fn(
+    t1: float, t2: float
+) -> Callable[[float], tuple[float, float]]:
+    def _torque(_t: float) -> tuple[float, float]:
+        return (t1, t2)
+
+    return _torque
+
+
 def check_dynamics_parity(
     params_tools: PendulumParams | None = None,
 ) -> dict[str, Any]:
@@ -202,20 +218,6 @@ def check_dynamics_parity(
     omega1_vals = [-5.0, 0.0, 8.0]
     omega2_vals = [-8.0, 0.0, 15.0]
     tau_vals = [(-100.0, -30.0), (0.0, 0.0), (120.0, 45.0)]
-
-    def _make_forcing_fn(val: float) -> Callable[[float, DoublePendulumState], float]:
-        def _forcing(_t: float, _s: DoublePendulumState) -> float:
-            return val
-
-        return _forcing
-
-    def _make_tools_torque_fn(
-        t1: float, t2: float
-    ) -> Callable[[float], tuple[float, float]]:
-        def _torque(_t: float) -> tuple[float, float]:
-            return (t1, t2)
-
-        return _torque
 
     max_mass_diff = 0.0
     max_acc_diff = 0.0
