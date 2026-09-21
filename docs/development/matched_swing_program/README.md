@@ -1,7 +1,20 @@
 # Matched Swing Program — Single Source of Truth
 
+## Continuation Review Warning
+
+The 2026-09-18 source review found that this document's `acceptance_contract.py`
+reference does not exist on reviewed main. The implemented evaluator is
+`src/shared/python/motion_matching/acceptance.py`: G1 is the 0–0.85 s dynamic
+horizon (whole 25 mm, early 12 mm, terminal 35 mm), not a 30 mm full-capture IK
+milestone. Historical tables below conflict with that evaluator and epic
+#10363 and MUST NOT be used to accept a run. MS-100 (#10374) must reconcile
+and version the complete contract; do not change thresholds during fitting.
+Read the [continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
+The review does not qualify the evaluator or replace missing physical evidence.
+
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
+**Tour Baselines Epic:** [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) ([Tour Baselines Inventory](../../plans/tour_baselines/README.md))  
 **Specification:** `SPEC.md` § Motion Matching Program  
 **Acceptance Contract:** [`GATES.md`](GATES.md) (`src/shared/python/motion_matching/acceptance.py`)  
 **Wave Structure:** [`WAVES.md`](WAVES.md)  

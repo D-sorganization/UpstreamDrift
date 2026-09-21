@@ -1,3 +1,184 @@
+## Connect Qualified Matching Strategies to Engine Feature Contracts (PF-10, #10440)
+
+Connects qualified matching strategies to engine feature contracts:
+- **Strategy Schema & Qualification Matrix (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Implements versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`).
+  - Stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`).
+  - Preconfigured strategy presets, controller specifications, and contact reaction history containers.
+- **Candidate Strategy Serialization (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - `CandidateStrategyPackage` binds candidate trajectories with strategy metadata, accelerations, and contact reactions.
+  - Fail-closed name-permuted coordinate remapping and lossless `.npz` serialization without pickle.
+- **Strategy Comparison Service (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+- **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
+  - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+
+## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
+
+Defines versioned baseline packages, fit metrics, and frozen qualification profiles under the Tour Baselines program:
+- **Baseline Identity & Manifest (`src/shared/python/tour_baselines/baseline_package.py`)**:
+  - Implements `BaselineIdentity` linking capture target, model topology, numerical backend, provider pin, fit mode, horizon, coordinate/plane conventions, measurement map version, fixed geometry/inertia hashes, initial state hashes, solver configuration, random seed, computational budgets, candidate ancestry, and runtime/file environment hashes.
+  - Implements `StatusBundle` strictly separating five orthogonal dimensions: `solver_convergence`, `kinematic_accuracy`, `dynamic_feasibility`, `scientific_qualification`, and `product_promotion`.
+  - Enforces fail-closed native replay rule: a manifest lacking native simulation replay evidence cannot qualify scientifically (`scientific_qualification != qualified`).
+  - Guards synthetic test data with `is_synthetic = True`, permanently barring synthetic packages from product promotion.
+  - Provides `export_baseline_package` and `import_baseline_package` using self-contained `.npz` storage with array-level SHA-256 checksums (`allow_pickle = False`).
+- **Physical Fit Metrics Formulation (`src/shared/python/tour_baselines/fit_metrics.py`)**:
+  - Computes physical 3D Euclidean marker tracking error $\text{RMSE} = \sqrt{\frac{1}{N_{\text{valid}}} \sum_{(t,m) \in \mathcal{V}} \|\mathbf{p}^{\text{pred}}_{t,m} - \mathbf{p}^{\text{obs}}_{t,m}\|_2^2}$, p95, and max error over valid observations.
+  - Rejects empty valid sets ($N_{\text{valid}} = 0$) and non-finite coordinates ($\text{NaN}, \infty$) at valid indices with `ValueError`.
+  - Provides per-marker and per-phase breakdown (address, backswing, downswing, impact, follow-through) using audited swing events.
+  - Decomposes errors into in-plane tracking error and out-of-plane residual relative to swing or frontal planes.
+  - Reports optimizer weighted loss separately from physical Euclidean error.
+  - Binds evaluations to cryptographic `landmark_set_signature` (SHA-256) to ensure disparate marker sets cannot be ranked as equivalent.
+- **Frozen Qualification Profiles (`src/shared/python/tour_baselines/qualification_profiles.py`)**:
+  - Defines "best" as best feasible candidate within a declared model class, objective, observation set, horizon, and computation budget.
+  - Preserves authoritative full-body G1/G2/G3 clinical acceptance gates (`AcceptanceGates` in `acceptance.py`).
+  - Freezes distinct numeric qualification profiles for reduced educational baselines based on attainable fixed-geometry residuals over observable subsets:
+    - `PlanarDrivenPendulumProfile`: 2-DOF planar driven pendulum (club RMSE $\le 150$ mm, out-of-plane residual $\le 50$ mm).
+    - `UpperBodyGolferProfile`: 5-DOF constrained upper body (whole marker RMSE $\le 55$ mm, weld closure residual $\le 5$ mm).
+    - `TriplePendulumProfile`: 3-DOF kinematic reconstruction (club RMSE $\le 120$ mm).
+  - Implements `evaluate_baseline_qualification` enforcing fail-closed verdicts.
+- **Integration & Acceptance Facades (`src/shared/python/motion_matching/acceptance.py`, `tour_baselines.py`)**:
+  - Implements `evaluate_baseline_package_acceptance` connecting baseline packages to the physical acceptance engine.
+  - Re-exports TB-02 models, metrics, and profiles under `src.shared.python.tour_baselines` and `src.shared.python.motion_matching.tour_baselines`.
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_fit_metrics.py`, `test_baseline_packages.py`, `test_qualification_profiles.py` (20 tests, 50 total in tour baselines suite).
+  - Emitted synthetic example fixtures in `docs/plans/tour_baselines/evidence/`: `synthetic_valid_baseline_package.json`, `synthetic_invalid_baseline_package.json`.
+  - Published comprehensive documentation in `docs/plans/tour_baselines/`: `baseline_packages.md`, `qualification_profiles.md`.
+
+## Replace Synthetic Force Adapters With Native Model-Conformant Bridges (PF-09, #10439)
+
+Replaces synthetic force adapters with native model-conformant bridges:
+- **Engine Force Adapter Architecture (`src/shared/python/motion_matching/multi_engine_torque_allocator.py`)**:
+  - Quarantines `_AnalyticalMultibodyBase` production routes as `SyntheticMultibodyFixture` requiring explicit `allow_synthetic=True`.
+  - Enforces fail-closed `RuntimeError` in `create_engine_force_adapter` for unbridged native engines (Drake, OpenSim, Simscape) in production mode.
+  - Extends `BaseEngineForceAdapter` protocol with `model_hash`, `coordinate_order`, `contact_names`, and `compute_mass_and_bias`.
+  - Corrects `MujocoForceAdapter` to compute raw unconstrained dynamics \(M a + \text{bias}\) eliminating `qfrc_inverse` passive/constraint force double counting.
+- **Pinocchio Native Bridge (`src/engines/physics_engines/pinocchio/python/force_adapter.py`, `native_model.py`)**:
+  - Implements `PinocchioForceAdapter` implementing shared protocol with fresh constraint kinematics refresh (`_refresh_constraint_data` and `closure_force_jacobian`).
+- **CLI & Quarantine Governance (`scripts/allocate_swing_torques.py`)**:
+  - Adds Pinocchio engine option and enforces `--allow-synthetic` gate flag.
+- **Verification Suite (`tests/unit/motion_matching/test_force_bridges_pf09.py`, `test_native_force_equations.py`, `test_multi_engine_torque_allocator.py`)**:
+  - 17 unit test fixtures validating quarantine enforcement, protocol conformance, CLI synthetic gate, and MuJoCo raw equation checks.
+
+## Tour Baselines Target Audit, Marker Semantics, Events, and Provenance (TB-01, #10586)
+
+Freezes target audits, marker measurement semantics, native clocks/events, and provenance under the Tour Baselines program:
+- **Target Audit & Content Verification (`src/shared/python/tour_baselines/audit.py`, `src/shared/python/motion_matching/tour_capture_contract.py`)**:
+  - Verifies canonical capture files (`C3D_TA_Driver.c3d`, `C3D_TA_Iron.c3d`) by content SHA-256 (never path name alone).
+  - Audits per-marker valid and missing sample counts, contiguous missing frame spans, and observed coverage ratios (Driver: 24,135/24,852 valid, 97.11%; Iron: 24,219/24,966 valid, 97.01%).
+  - Emits reproducible JSON audit receipts (`docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json`, `iron_target_audit_receipt.json`).
+- **Measurement Maps (`src/shared/python/tour_baselines/measurement_map.py`)**:
+  - Classifies channels under `tour-measurement-map/1.0.0`: `observed_surface`, `inferred_joint_center`, `observed_cluster_centroid`, `calibrated_club_point`, and `unassigned_or_sentinel`.
+  - Classifies calibrated clubface normal, groove coordinates, and ball impact contact as `UNAVAILABLE` in raw C3D without synthetic fabrication.
+  - Accounts for channel 38 divergence: `Uname*38` in Driver vs `pelvis` in Iron.
+- **Native Clocks & Biomechanical Events (`src/shared/python/tour_baselines/events.py`)**:
+  - Strictly isolates Driver (360.0 Hz) and 7-Iron (359.0 Hz) native clocks; driver sample rate and event timing are never imposed on iron.
+  - Defines swing intervals (`address`, `backswing`, `downswing`, `impact`, `follow_through`, `full_swing`).
+  - Explicitly labels trajectory-inferred impact as `is_inferred = True`.
+- **Provenance & Canonical Targets (`src/shared/python/tour_baselines/provenance.py`, `canonical_targets.py`)**:
+  - Records GearsSports optical metadata (`PLAYER_ID: 967eac5b-2e78-4207-a99f-d57437296d70`), separating shared player anatomy from capture-specific club geometry.
+  - Documents unresolved averaging and usage rights as explicit fields without fabricated citations.
+  - Provides `CanonicalTourTarget` facade for kinematic reference and dynamic fitting paths, guaranteeing missing club clusters or phases are never scored as zero error.
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_measurement_map.py`, `test_tour_events.py`, `test_target_audit.py`, `test_canonical_targets.py` (17 tests, 35 total in tour baselines suite).
+
+## Tour Baselines Model Identities and Coverage Matrix (TB-00, #10585)
+
+Freezes model identities, ownership, coordinate conventions, and two-capture coverage matrix under the Tour Baselines program:
+- **Model Identity & Registry (`src/shared/python/tour_baselines/models.py`, `src/shared/python/tour_baselines/registry.py`)**:
+  - Defines strict enums: `ModelTopology`, `BackendType`, `SourceOwner`, `FitMode`, and `EvidenceStatus`.
+  - Distinguishes kinematic reconstruction pendulums (`reconstruction_double_pendulum`, `reconstruction_triple_pendulum`) tracking body landmarks from dynamic torque-driven pendulums (`driven_double_pendulum`, `driven_triple_pendulum`) simulating the true club.
+  - Documents Upper-Body Golfer (5 DOF independent via rank-3 loop closure constraints on 8 generalized coordinates).
+  - Establishes canonical registry with provider mismatch detection and alias resolution.
+- **Coverage & Reconciliation (`src/shared/python/tour_baselines/coverage.py`, `src/shared/python/tour_baselines/reconciliation.py`)**:
+  - Generates Model x {Driver (360 Hz), 7-Iron (359 Hz)} coverage matrix, explicitly excluding 12 non-golf tools.
+  - Reconciles historical issues #9914, #9921, and #10003, tracking Tools submodule commit ownership.
+- **Evidence & Verification**:
+  - Added unit test suite in `tests/unit/tour_baselines/`: `test_model_identities.py`, `test_coverage_matrix.py`, `test_reconciliation.py` (13 tests).
+
+## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
+
+Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibility:
+- **Solve Diagnostics & Multi-Start IK (`src/engines/physics_engines/pinocchio/python/marker_kinematics.py`)**:
+  - Implements `SolveDiagnostics` dataclass capturing iterations, final cost, marker RMS, closure error, projected gradient norm, active bounds count, convergence flag, and cost decrease.
+  - Implements `solve_frame_multi_start` evaluating candidate initializations and estimating unconstrained geometric tracking floors with and without weld closure.
+  - Implements `refine_overlapping_window` with bounded window blending and temporal regularization.
+- **Kinematic Smoothing & Acceptance Auditing (`src/shared/python/motion_matching/kinematic_smoothing.py`)**:
+  - Adds zero-phase Butterworth smoothing with verified \(q, v, a\) derivative compatibility (\(\dot{q} \approx v\), \(\dot{v} \approx a\)), boundary spike auditing (`BoundarySpikeAudit`), and cutoff frequency sensitivity analysis.
+  - Enforces physiological human wrist range of motion compliance producing zero violations (MM-2, #10104).
+  - Enforces left elbow pit up-and-inward alignment at address posture (MM-5, #10107).
+  - Enforces strict separation of driver and 7-iron calibration provenance in acceptance gating.
+
+
+## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
+
+Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
+- **Pelvis-Yaw Formulations & Contract Enforcement (`src/engines/physics_engines/pinocchio/python/crocoddyl_problem.py`)**:
+  - `FitWeights`: Added validated non-negative weight `pelvis_yaw: float = 0.0`.
+  - `MarkerTargets`: Added `waist_indices` resolving indices of `WaistLeft` and `WaistRight` markers, or `(-1, -1)` if absent.
+- **Node Cost & Dynamics Integration (`src/engines/physics_engines/pinocchio/python/crocoddyl_action.py`)**:
+  - `_NodeCost`: Evaluates 2-component unit vector difference residual $r_{yaw} = w_{yaw} \cdot (\hat{u} - \hat{u}_{tgt})$ via `compute_pelvis_yaw_residual_and_derivative`.
+  - Cost value adds $0.5 \cdot \|r_{yaw}\|^2$.
+  - Analytic gradient contributes $J_{yaw}^T r_{yaw}$ to configuration gradient $L_x[:n]$.
+  - Gauss-Newton Hessian contributes $J_{yaw}^T J_{yaw}$ to configuration Hessian $L_{xx}[:n, :n]$.
+  - Wired waist indices through `ImplicitEulerAction` and `TerminalAction`.
+- **Receipt & CLI Parameterization (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Added CLI argument `--pelvis-yaw-weight` forwarded to `FitWeights`.
+  - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
+- **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
+  - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
+
+
+## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
+
+Freezes fast-matching evidence, schemas, and negative acceptance fixtures across the motion-matching pipeline:
+- **Extended Schema & Conversion (`src/shared/python/motion_matching/candidate.py`, `candidate_convert.py`)**:
+  - `MatchedSwingCandidate` schema extended with `CandidateAuxiliary` (`root_forces`, `contact_modes`, `grip_wrench`), `CandidateMetadata` (`solver_status`, `handedness`, `name_maps`), checksum calculation, and NPZ conversion logic in `candidate_convert.py`.
+  - Truthfully renamed `AllocationObjective.MINIMUM_TRAIL_ARM` with backwards-compatible `trail_zero` parsing, added `HARD_ZERO_TRAIL` mode enforcing exact zero trail arm torques, enforced actuator bounds clipping post-solve, and evaluated Coulomb friction cone ratios in `ContactForceAllocator`.
+  - Updated `SwingEvaluator` to avoid fabricating impact phases without declared `t_events`, audit closure translation and rotation separately (`ClosureAudit`), and return `NaN` RMSE for empty marker populations.
+- **Negative Acceptance Fixtures (`tests/unit/motion_matching/test_acceptance.py`, `src/shared/python/motion_matching/acceptance.py`)**:
+  - Added 7 negative acceptance fixtures in `test_acceptance.py` and corresponding evaluators in `acceptance.py`: (1) friction cone violation, (2) torque bound overwrite, (3) missing root histories, (4) 44 vs 41 coordinate dimension mismatch, (5) missing club coverage / empty population, (6) truncated horizon duration, and (7) synthetic engine false qualification.
+
+## Reconcile, Audit, and Freeze Feature Preservation Across Historical Boundaries (ORG-24, #10533)
+
+Reconciles, audits, and freezes feature preservation across historical boundaries to guarantee no silent loss or broken historical interfaces across the UpstreamDrift workspace:
+- **Comprehensive Audit Engine (`src/shared/python/workspace/feature_preservation_audit.py`)**:
+  - `AuditStatus` and `AuditFailureError`: Typed pass/failed/warning status outcomes and fail-closed integrity assertion exceptions.
+  - `AuditCounts`: Immutable metric encapsulation capturing total capabilities, active capabilities, deprecated aliases, planned capabilities, headless tools, exempt capabilities, and verified golden fixtures while strictly conforming to the 8-parameter architectural budget limit.
+  - `AuditSectionResult` & `AuditReport`: Detailed structured section reports and full disposition records generating formatted JSON and Markdown summaries.
+  - `run_feature_preservation_audit`: Comprehensive evaluation running all 6 core audit sections:
+    - Baseline capability reconciliation against `src/config/capability_migration.json` ensuring 100% accounting of all historical capabilities.
+    - Deprecated alias acyclic and transitive path resolution verifying reachable canonical targets.
+    - Golden fixture byte-exact SHA-256 and byte-length integrity verification.
+    - Five core workspace task journey contracts across simulation, analysis, capture, putting, and training surfaces.
+    - External runtime dependency and engine qualification isolation checks preventing silent unhandled host crashes.
+    - Immutable disposition artifact generation and publication for Epic #10508 closeout.
+- **Verification & Evidence Suite (`tests/integration/test_feature_preservation_audit.py`)**:
+  - Comprehensive unit test coverage validating audit metrics, parameter budgets, schema conformance, golden fixture checks, and error handling.
+
+## Unified Cross-Engine Parity Report (MS-70, #10350)
+
+Generates unified cross-engine parity evaluation comparing motion-matching candidate trajectories across all available physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite):
+- **Parity Schema & Comparison Classes (`src/shared/python/motion_matching/parity_schema.py`)**:
+  - `ComparisonClass`: Defines three explicit comparison tiers:
+    - `same_model_numerical`: Identical kinematic tree and dynamics model across engines.
+    - `native_model_observable`: Distinct engine-native coordinate definitions and segment representations, comparing observable task-space markers.
+    - `experimental_accuracy`: Comparison against optical capture ground truth.
+  - `PointwiseDifference`: Pointwise max error, RMS error, p95 error, relative percent error, and unit.
+  - `EngineParityRow`: Per-engine execution metrics including verification status (`verified`, `unverified`, `unavailable`), comparison class, pointwise trajectory difference, pointwise joint torque difference, total mechanical work in Joules, contact force agreement, and wall-clock execution time.
+  - `UnifiedParityReport`: Machine-readable JSON artifact and human-readable Markdown table generator summarizing multi-engine parity.
+- **Pointwise Comparison & Evaluation Engine (`src/shared/python/motion_matching/parity_report.py`)**:
+  - `evaluate_pointwise_trajectory_parity`: Computes pointwise Euclidean distance per marker and frame over time; aggregate-only matchers cannot mask pointwise trajectory deviations.
+  - `evaluate_pointwise_torque_parity`: Computes pointwise torque discrepancies with a 1.0 N·m absolute noise floor on relative percentage differences.
+  - `build_parity_report`: Runs candidates through native models and plant simulation, stamping unverified coordinate mismatches or missing platform SDKs with explicit diagnostic reasons.
+  - `run_parity_report_cli`: CLI command for batch report generation.
+- **Cross-Engine Replay & Leaderboard Integration**:
+  - `CrossEngineReplay.to_parity_report`: Produces a `UnifiedParityReport` from recorded multi-engine replays.
+  - `leaderboard.rows_from_parity_report` and `sync_leaderboard_from_parity_report`: Ingests parity rows into the matched swing leaderboard with `total_work_J` and `wall_clock_s`.
+- **Evidence & Parity Specification Sync**:
+  - `src/engines/CROSS_ENGINE_PARITY_SPEC.md`: Section 3 updated with generated Markdown parity comparison matrix.
+  - `evidence/matched/driver_g1/parity_report.json` and `evidence/matched/driver_g1/parity_report.md`: Committed multi-engine parity evidence.
+
 ## Unified Motion-Matching Abstraction Stack and Provider Delegation (MS-12, #10331)
 
 Adopts and documents the single motion-matching abstraction stack (`MatchingPlant` + receipts), resolves engine provider delegation contracts, retires legacy duplicate CIR IK and matching solvers with actionable ADR-0051 diagnostic errors, and bridges CIR `SkeletonRig`/`JointTrajectory` with `CanonicalPose`:
@@ -6371,8 +6552,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
+| 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
+| 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
+| 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
+| 2026-09-20 | #10569 | Replace `np.linalg.norm` with `math.sqrt(np.vdot)` and `np.einsum` in opensim tour matching pipeline (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10467 | Replaced `np.linalg.norm(v)` with `math.sqrt(v.dot(v))` and `np.linalg.norm(diff)` with `math.sqrt(diff.dot(diff))` in `src/shared/python/motion_matching/contact_law.py` for significant speedups. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10491 | Barrier-reduced same-integrator G1 continuation converged at 46.8 mm (rollout == replay) and is committed as rejected evidence; `--range-barrier-weight` CLI flag and raised trail-side effort bounds; ledger, README, turnover updated |
 | 2026-09-19 | #10478 | add anatomical visual assets and skin toggling without changing physics (MV-02) |
@@ -6384,8 +6570,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10448 | Add fail-closed MuJoCo replay of saved Pinocchio controls, G1 regressions, and diagnostic playback receipts. |
 | 2026-09-18 | #10381 | Matched-swing ledger fail-closed (self-declared acceptance is UNVERIFIED); G1 Crocoddyl continuation committed as rejected evidence; matched receipts re-evaluated; program docs truth reset |
 | 2026-09-18 | #10233 | Validate complete manual-mask observation lineage and persist explicit current revision selection atomically. |
+| 2026-09-18 | #9550 | Froze the Impact Explorer acceptance matrix (epic #9546) in `src/config/impact_acceptance.json` with a library-probed model-capability matrix (rigid_body instantaneous with capped friction spin; spring_damper finite-duration normal-only with spin explicitly unavailable and uncalibrated defaults; finite_time a relabelled rigid result), SI golden invariants (no-hit, off-center, constant COR at 20/60 m/s, spin sign, momentum, passivity, dt convergence), the bounded `code_verified_only` claim and per-item open state; `impact-explorer-web-build` now stamps Tools release artifacts with the pinned gitlink and `scripts/ci/verify_impact_explorer_bundle.py` proves `/impact-explorer-app/` serves that revision's real JavaScript with manifest digests (76 assets, 5 JS at `62e8cdbf`) and 404s missing artifacts; `tools.rate_of_closure` parity is recorded as an evidence-based gap (#9546) until saved scenarios are compared numerically across runtimes. |
 | 2026-09-18 | #10411 | Decoupled full-swing C3D matching and trail-side zero torque allocation for Pinocchio 44-DoF model across Driver and 7-Iron captures (MS-31 #10338). |
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
+| 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
@@ -6393,6 +6581,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-17 | #10315 | Expose Pink constrained IK solver across motion pipeline, CLI/GUI controls, and versioned receipts (#10278). |
 | 2026-09-16 | #10248 | Replaced `np.linalg.norm(span_mm)` with `math.sqrt(np.vdot(span_mm, span_mm))` for small 3D vectors in `src/tools/bunker_shot_gui/render3d_vtk.py` avoiding np.linalg.norm overhead. (spec-exempt: micro-optimization) |
 | 2026-09-16 | #10244 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum(...))` in `src/engines/physics_engines/mujoco/python/full_body_markers.py` to optimize execution time while avoiding intermediate allocations. (spec-exempt: micro-optimization) |
+| 2026-09-16 | #10245 | Reconcile the 2026-08-21 adversarial product review epic against main: ledger at docs/development/adversarial_review_remediation_9410.md records 34 landed and 27 residual children with SHAs, unmerged fix branches and ordered next waves; no runtime change (#9410). |
+| 2026-09-15 | #10239 | Add the local branch triage ledger (docs/development/branch_triage_9162.md) classifying all 386 local heads as protected, defer-worktree, live, stale or abandoned, with a bundle-first deletion runbook and agent coordination steps; DL-#9162 records the triage (#9162). |
 | 2026-09-16 | #10235 | Consolidate 17 review sections into 14 authoritative full-body showpiece design decisions with schema validation and test suite (HO-7 #10161). |
 | 2026-09-16 | #10234 | Refresh Shadow Tracker turnover after timing, geometry and revision review; track corrective tasks #10231–#10233. |
 | 2026-09-15 | #10225 | Package Windows integration and authenticated remote application bridge with loopback restriction, single-producer session lock, secret redaction, durable journal recovery, and licensing enforcement (GS-08, #10197). |
@@ -6418,6 +6608,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-12 | #10010 | Burn down 43 quarantined packaging and governance tests in scripts/config/unit_gate_quarantine.json under the packaging_ci_and_repository_governance cluster, anchor test working directories in test_check_gitignore_dotenv.py and test_check_vendor_updates.py, and sync monolith refactor register (#8766). |
 | 2026-09-12 | #10005 | Tightened the DRY duplication quarantine ledger: deleted 72 fingerprints whose occurrence count had fallen below 2 across all supported scanner runtimes (Python 3.11, 3.12, 3.13, 3.14), reducing quarantined debt from 666 to 594. No entry was raised or added; the baseline was not regenerated (#8695). |
 | 2026-09-12 | #10008 | Enforce cryptographic signature verification on release tags in release.yml, update release runbook commands and requirements, and add automated regression tests (#9747). |
+| 2026-09-11 | #9991 | Record the epic #8557 program status ledger (workstreams A–G, milestones M0–M7, status and blocking gate per row) and the canonical-authority statement superseding #8426 in COMPREHENSIVE_RESEARCH_PROGRAM.md; regenerate the proximal–distal release manifest, checksums, and claim-evidence manifest for the edited document (#8557). |
 | 2026-09-11 | #9965 | Synchronize canonical biomechanical specification with Simscape reference geometry and implement unified URDF and MJCF model exporters with schema validation and drift gate (#9965). |
 | 2026-09-10 | #8360 | Bound the launcher splash: every async startup phase (registry, engines, Docker, optional Tools/Rate provider) runs under an explicit timeout with timestamped structured diagnostics; optional-provider failure degrades the shell instead of blocking it; a StartupSession watchdog plus Retry / Continue without provider / Copy diagnostics / Close dialog replaces the quit-on-error path; loading-mode construction no longer loads the registry on the GUI thread. |
 | 2026-09-09 | #9941 | Add calibrated cross-model joint convention conversion, gap-safe golf metrics including event-defined X-Factor stretch and shaft twist velocity, explicit COM/missing-data contracts, model link adapters, and configurable desktop/web plots and API surfaces (#9934). |

@@ -100,6 +100,15 @@ class AcceptanceGates:
     max_collocation_defect_m: float = 0.005  # 5 mm dynamical consistency defect
     max_stabilized_marker_rmse_m: float = 0.040  # 40 mm low-gain PD tracking error
 
+    # Negative fixture and physical consistency gates (#10431)
+    max_friction_coefficient: float = 0.80
+    max_actuator_torque_n_m: float = 200.0
+    max_root_residual_n_m: float = 1e-3
+    min_club_marker_coverage_fraction: float = 0.80
+    g1_min_duration_s: float = 0.85
+    g2_min_duration_s: float = 1.20
+    g3_min_duration_s: float = 1.80
+
     @property
     def g3_whole_rmse_m(self) -> float:
         """Alias for g3_whole_driver_rmse_m for uniform horizon whole-RMSE access."""
@@ -908,6 +917,310 @@ def _evaluate_calibration_provenance(
     return results
 
 
+def _evaluate_friction_cone(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+    contact_audit: Any,
+) -> list[GateResult]:
+    """Evaluate Coulomb friction cone ratio against physical bound."""
+    results: list[GateResult] = []
+    f_ratio = None
+    if isinstance(contact_audit, Mapping):
+        f_ratio = _extract_metric(contact_audit, "max_friction_ratio", "friction_ratio")
+    if f_ratio is None:
+        f_ratio = _extract_metric(receipt, "max_friction_ratio", "friction_ratio")
+
+    if f_ratio is not None:
+        thresh = gates.max_friction_coefficient
+        if f_ratio <= thresh:
+            results.append(
+                GateResult(
+                    name="friction_cone",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=f_ratio,
+                    unit="ratio",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="friction_cone",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=f_ratio,
+                    unit="ratio",
+                    reason=f"max friction ratio {f_ratio:.2f} exceeds allowable coefficient {thresh:.2f}",
+                )
+            )
+    return results
+
+
+def _evaluate_torque_bounds(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Evaluate actuator torque limits and verify no torque bound overwrites."""
+    results: list[GateResult] = []
+    dyn = receipt.get("dynamics")
+    torque_val = None
+    overwrites = None
+    if isinstance(dyn, Mapping):
+        torque_val = _extract_metric(dyn, "max_actuator_torque_n_m", "max_torque_n_m")
+        overwrites = dyn.get("torque_bound_overwrites")
+    if torque_val is None:
+        torque_val = _extract_metric(
+            receipt, "max_actuator_torque_n_m", "max_torque_n_m"
+        )
+    if overwrites is None:
+        overwrites = receipt.get("torque_bound_overwrites")
+
+    if torque_val is not None or overwrites is not None:
+        thresh = gates.max_actuator_torque_n_m
+        t_val = torque_val if torque_val is not None else 0.0
+        ow_val = int(overwrites) if overwrites is not None else 0
+        if t_val <= thresh and ow_val == 0:
+            results.append(
+                GateResult(
+                    name="torque_bounds",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=t_val,
+                    unit="N*m",
+                )
+            )
+        else:
+            reasons: list[str] = []
+            if t_val > thresh:
+                reasons.append(
+                    f"max actuator torque {t_val:.1f} N*m > {thresh:.1f} N*m"
+                )
+            if ow_val > 0:
+                reasons.append(f"{ow_val} torque bound overwrites detected")
+            results.append(
+                GateResult(
+                    name="torque_bounds",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=t_val,
+                    unit="N*m",
+                    reason="; ".join(reasons),
+                )
+            )
+    return results
+
+
+def _evaluate_root_force_history(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify presence of root force histories and that root residual forces vanish."""
+    results: list[GateResult] = []
+    dyn = receipt.get("dynamics")
+    has_root = None
+    root_res = None
+    if isinstance(dyn, Mapping):
+        has_root = dyn.get("has_root_histories")
+        root_res = _extract_metric(dyn, "max_root_residual_n_m", "root_residual_n_m")
+    if has_root is None:
+        has_root = receipt.get("has_root_histories")
+    if root_res is None:
+        root_res = _extract_metric(
+            receipt, "max_root_residual_n_m", "root_residual_n_m"
+        )
+
+    if has_root is not None or root_res is not None:
+        thresh = gates.max_root_residual_n_m
+        r_val = root_res if root_res is not None else 0.0
+        if has_root is False:
+            results.append(
+                GateResult(
+                    name="root_force_history",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=r_val,
+                    unit="N*m",
+                    reason="root force history missing when dynamics declared",
+                )
+            )
+        elif r_val > thresh:
+            results.append(
+                GateResult(
+                    name="root_force_history",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=r_val,
+                    unit="N*m",
+                    reason=f"max root residual {r_val:.2f} N*m exceeds tolerance {thresh:.2e} N*m",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="root_force_history",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=r_val,
+                    unit="N*m",
+                )
+            )
+    return results
+
+
+def _evaluate_coordinate_dimension(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify coordinate dimension matches expected model dimension."""
+    results: list[GateResult] = []
+    exp_nv = receipt.get("expected_nv")
+    meas_nv = receipt.get("measured_nv")
+    if exp_nv is not None and meas_nv is not None:
+        if int(exp_nv) == int(meas_nv):
+            results.append(
+                GateResult(
+                    name="coordinate_dimension",
+                    status=GateStatus.PASSED,
+                    threshold=float(exp_nv),
+                    measured=float(meas_nv),
+                    unit="dim",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="coordinate_dimension",
+                    status=GateStatus.FAILED,
+                    threshold=float(exp_nv),
+                    measured=float(meas_nv),
+                    unit="dim",
+                    reason=f"coordinate dimension mismatch: expected {exp_nv} nv but measured {meas_nv} nv",
+                )
+            )
+    return results
+
+
+def _evaluate_club_coverage(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify club marker coverage fraction exceeds minimum required fraction."""
+    results: list[GateResult] = []
+    cov = receipt.get("coverage")
+    club_cov = None
+    if isinstance(cov, Mapping):
+        club_cov = _extract_metric(
+            cov, "club_marker_coverage_fraction", "club_coverage"
+        )
+    if club_cov is None:
+        club_cov = _extract_metric(
+            receipt, "club_marker_coverage_fraction", "club_coverage"
+        )
+
+    if club_cov is not None:
+        thresh = gates.min_club_marker_coverage_fraction
+        if club_cov >= thresh:
+            results.append(
+                GateResult(
+                    name="club_coverage",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=club_cov,
+                    unit="fraction",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="club_coverage",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=club_cov,
+                    unit="fraction",
+                    reason=f"club marker coverage fraction {club_cov:.2%} < threshold {thresh:.2%}",
+                )
+            )
+    return results
+
+
+def _evaluate_horizon_truncation(
+    receipt: Mapping[str, Any],
+    horizon: Horizon,
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify trajectory duration is not truncated below horizon requirements."""
+    results: list[GateResult] = []
+    duration = _extract_metric(
+        receipt, "duration_s", "time_span_s", "trajectory_duration_s"
+    )
+    if duration is not None:
+        thresh = (
+            gates.g1_min_duration_s
+            if horizon == Horizon.G1
+            else (
+                gates.g2_min_duration_s
+                if horizon == Horizon.G2
+                else gates.g3_min_duration_s
+            )
+        )
+        if duration >= thresh:
+            results.append(
+                GateResult(
+                    name="horizon_truncation",
+                    status=GateStatus.PASSED,
+                    threshold=thresh,
+                    measured=duration,
+                    unit="s",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="horizon_truncation",
+                    status=GateStatus.FAILED,
+                    threshold=thresh,
+                    measured=duration,
+                    unit="s",
+                    reason=f"horizon duration {duration:.2f} s is truncated below required minimum {thresh:.2f} s",
+                )
+            )
+    return results
+
+
+def _evaluate_synthetic_engine(
+    receipt: Mapping[str, Any],
+    gates: AcceptanceGates,
+) -> list[GateResult]:
+    """Verify synthetic engine is not claiming native qualification falsely."""
+    results: list[GateResult] = []
+    is_nat_qual = receipt.get("is_native_qualified")
+    engine = str(receipt.get("engine", "")).lower()
+
+    if is_nat_qual is not None or "synthetic" in engine:
+        if is_nat_qual is False or "synthetic" in engine:
+            results.append(
+                GateResult(
+                    name="synthetic_engine",
+                    status=GateStatus.FAILED,
+                    threshold=1.0,
+                    measured=0.0,
+                    unit="match",
+                    reason=f"synthetic analytical engine '{engine or 'unknown'}' not natively qualified",
+                )
+            )
+        else:
+            results.append(
+                GateResult(
+                    name="synthetic_engine",
+                    status=GateStatus.PASSED,
+                    threshold=1.0,
+                    measured=1.0,
+                    unit="match",
+                )
+            )
+    return results
+
+
 @precondition(
     lambda receipt, horizon=Horizon.G1, gates=None, capture=None: isinstance(
         horizon, Horizon
@@ -940,6 +1253,13 @@ def evaluate(
     gate_results.extend(_evaluate_open_loop_replay(receipt, horizon, gates))
     gate_results.extend(_evaluate_collocation_defect(receipt, horizon, gates))
     gate_results.extend(_evaluate_stabilized_replay(receipt, horizon, gates))
+    gate_results.extend(_evaluate_friction_cone(receipt, gates, contact_audit))
+    gate_results.extend(_evaluate_torque_bounds(receipt, gates))
+    gate_results.extend(_evaluate_root_force_history(receipt, gates))
+    gate_results.extend(_evaluate_coordinate_dimension(receipt, gates))
+    gate_results.extend(_evaluate_club_coverage(receipt, gates))
+    gate_results.extend(_evaluate_horizon_truncation(receipt, horizon, gates))
+    gate_results.extend(_evaluate_synthetic_engine(receipt, gates))
 
     # Overall verdict
     is_accepted = len(gate_results) > 0 and all(
@@ -958,3 +1278,24 @@ def evaluate(
             else "Physical or kinematic thresholds violated"
         ),
     )
+
+
+def evaluate_baseline_package_acceptance(
+    package: Any,
+    *,
+    horizon: Horizon | None = None,
+    gates: AcceptanceGates | None = None,
+) -> AcceptanceVerdict:
+    """Evaluate acceptance for a baseline package or manifest under the Matched Swing Program (TB-02 #10587)."""
+    if hasattr(package, "to_dict"):
+        pkg_dict = package.to_dict()
+    elif isinstance(package, Mapping):
+        pkg_dict = dict(package)
+    else:
+        raise TypeError("package must be BaselinePackage or Mapping")
+
+    ident = pkg_dict.get("identity")
+    ident_dict = ident if isinstance(ident, Mapping) else {}
+    raw_h = ident_dict.get("horizon", "G1") if ident_dict else "G1"
+    h = horizon if horizon is not None else Horizon(raw_h)
+    return evaluate(pkg_dict, horizon=h, gates=gates)

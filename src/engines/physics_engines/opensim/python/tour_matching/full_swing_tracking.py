@@ -405,7 +405,9 @@ def detect_swing_events(capture: TourCapture) -> SwingEvents:
         col_indices = [capture.index(lbl) for lbl in club_labels]
         club_pts = capture.points_m[:, col_indices, :]
         v_diff = np.diff(club_pts, axis=0) / dt
-        speed = np.mean(np.linalg.norm(v_diff, axis=-1), axis=1)  # (frames - 1,)
+        speed = np.mean(
+            np.sqrt(np.einsum("...i,...i->...", v_diff, v_diff)), axis=1
+        )  # Bolt optimization  # (frames - 1,)
 
         # Takeaway: where club speed first exceeds 0.5 m/s
         takeaway_frames = np.where(speed > 0.5)[0]

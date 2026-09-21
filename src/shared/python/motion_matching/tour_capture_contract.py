@@ -68,6 +68,7 @@ class TourCaptureSpec(CaptureContract):
     units: str = "m"
     vertical_axis: str = "y"
     labels: tuple[str, ...] = ()
+    handedness: str = "right"
     max_gap_fraction: float = 0.9
 
     def __post_init__(self) -> None:
@@ -307,6 +308,16 @@ class TourCapture:
     def frames(self) -> int:
         return int(self.time_s.size)
 
+    @property
+    def rate_hz(self) -> float:
+        if self.time_s.size < 2:
+            return 0.0
+        return float(1.0 / (self.time_s[1] - self.time_s[0]))
+
+    @property
+    def duration_s(self) -> float:
+        return float(self.time_s[-1] - self.time_s[0])
+
     def index(self, label: str) -> int:
         """Return the column of a label; unknown labels raise ValueError."""
         if label not in self.labels:
@@ -315,6 +326,27 @@ class TourCapture:
 
     def valid_count(self) -> int:
         return int(np.count_nonzero(self.valid))
+
+    def missing_count(self) -> int:
+        return int(self.valid.size - self.valid_count())
+
+    def coverage_fraction(self, label: str | None = None) -> float:
+        """Return observed coverage fraction for a specific label or overall."""
+        if label is None:
+            return float(self.valid_count() / self.valid.size)
+        col = self.index(label)
+        return float(np.count_nonzero(self.valid[:, col]) / self.frames)
+
+    def missing_spans(self, label: str) -> tuple[tuple[int, int], ...]:
+        """Return 0-indexed inclusive [start, end] frame intervals where marker is missing."""
+        col = self.index(label)
+        col_valid = self.valid[:, col]
+        missing_idxs = np.where(~col_valid)[0]
+        if len(missing_idxs) == 0:
+            return ()
+        splits = np.where(np.diff(missing_idxs) > 1)[0] + 1
+        groups = np.split(missing_idxs, splits)
+        return tuple((int(g[0]), int(g[-1])) for g in groups)
 
     def subset(self, labels: Sequence[str]) -> TourCapture:
         """Return the same clock restricted to the given labels, in that order."""
@@ -382,6 +414,109 @@ def load_tour_capture(path: Path) -> TourCapture:
     return TourCapture(time, labels, xyz, valid, digest)
 
 
+_RAW_VALIDITY_DATA_IRON: dict[str, tuple[int, int]] = {
+    "Marker_0:0:0": (657, 0),
+    "WaistLeft": (657, 0),
+    "WaistRight": (649, 8),
+    "WaistLBack": (657, 0),
+    "WaistRBack": (657, 0),
+    "BackTop": (657, 0),
+    "BackLeft": (657, 0),
+    "BackRight": (657, 0),
+    "HeadTop": (657, 0),
+    "HeadFront": (657, 0),
+    "HeadSide": (657, 0),
+    "LShoulderTop": (547, 110),
+    "LShoulderBack": (657, 0),
+    "LElbowOut": (657, 0),
+    "LUArmHigh": (657, 0),
+    "LWristTop": (657, 0),
+    "RShoulderTop": (95, 562),
+    "RShoulderBack": (657, 0),
+    "RElbowOut": (657, 0),
+    "RUArmHigh": (657, 0),
+    "RWristTop": (657, 0),
+    "LKneeOut": (657, 0),
+    "LToeIn": (657, 0),
+    "LToeOut": (657, 0),
+    "LAnkleOut": (657, 0),
+    "RKneeOut": (657, 0),
+    "RToeIn": (657, 0),
+    "RToeOut": (657, 0),
+    "RAnkleOut": (657, 0),
+    "Marker_2:2:1": (640, 17),
+    "Marker_2:2:2": (640, 17),
+    "Marker_2:2:3": (640, 17),
+    "Marker_3:3:1": (657, 0),
+    "Marker_3:3:2": (657, 0),
+    "Marker_3:3:3": (657, 0),
+    "Uname*36": (657, 0),
+    "Uname*37": (649, 8),
+    "pelvis": (649, 8),
+}
+
+MARKER_SEGMENTS_IRON: MappingProxyType[str, tuple[str, ...]] = MappingProxyType(
+    {
+        **{k: v for k, v in MARKER_SEGMENTS.items() if k != "unassigned"},
+        "unassigned": ("Marker_0:0:0", "Uname*36", "Uname*37", "pelvis"),
+    }
+)
+
+MARKER_VALIDITY_POLICY_IRON: MarkerValidityPolicy = MarkerValidityPolicy(
+    {
+        label: MarkerPolicyEntry(
+            valid_samples=_RAW_VALIDITY_DATA_IRON[label][0],
+            missing_samples=_RAW_VALIDITY_DATA_IRON[label][1],
+            nominal_weight=0.0 if label in MARKER_SEGMENTS_IRON["unassigned"] else 1.0,
+            excluded=label in MARKER_SEGMENTS_IRON["unassigned"],
+        )
+        for label in TOUR_CAPTURE_IRON.labels
+    }
+)
+
+MARKER_VALIDITY_POLICIES: dict[str, MarkerValidityPolicy] = {
+    "driver": MARKER_VALIDITY_POLICY,
+    "iron": MARKER_VALIDITY_POLICY_IRON,
+}
+
+
+def get_marker_validity_policy(capture_name: str) -> MarkerValidityPolicy:
+    """Return the frozen marker validity policy for a capture ('driver' or 'iron')."""
+    if capture_name not in MARKER_VALIDITY_POLICIES:
+        raise ValueError(
+            f"Unknown capture kind: {capture_name!r}; "
+            f"expected one of {sorted(MARKER_VALIDITY_POLICIES)}"
+        )
+    return MARKER_VALIDITY_POLICIES[capture_name]
+
+
+def verify_capture_content(
+    path_or_bytes: Path | bytes | str,
+    expected_kind: str | None = None,
+) -> tuple[str, TourCaptureSpec]:
+    """Verify capture content by SHA-256 (never path name alone).
+
+    Returns (kind, spec). Raises ValueError if hash doesn't match canonical
+    tour capture or if expected_kind does not match.
+    """
+    if isinstance(path_or_bytes, (bytes, bytearray)):
+        raw = bytes(path_or_bytes)
+    else:
+        path = Path(path_or_bytes)
+        if not path.is_file():
+            raise FileNotFoundError(f"Capture file not found: {path}")
+        raw = path.read_bytes()
+
+    digest = hashlib.sha256(raw).hexdigest()
+    kind = capture_kind(digest)
+    spec = TOUR_CAPTURES[kind]
+    if expected_kind is not None and kind != expected_kind:
+        raise ValueError(
+            f"Expected capture kind {expected_kind}, but file has content for {kind}"
+        )
+    return kind, spec
+
+
 def _extract_c3d_metadata(path: Path) -> dict[str, Any]:
     import ezc3d
 
@@ -425,11 +560,12 @@ def _check_contract_reasons(
         )
     if contract.frozen_sha256 and meta["digest"] != contract.frozen_sha256:
         reasons.append(
-            f"sha256_mismatch: expected {contract.frozen_sha256}, found {meta['digest']}"
+            f"sha256_mismatch: expected '{contract.frozen_sha256}', found '{meta['digest']}'"
         )
 
     raw_labels = meta["labels"]
     mapped_labels = tuple(effective_label_map.get(lbl, lbl) for lbl in raw_labels)
+
     if contract.required_labels:
         missing = [
             r
