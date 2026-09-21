@@ -114,6 +114,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** R2025b Simscape native replay of `candidate27.npz` with boundary-load validation.
 - **Evidence:** evidence/matched/driver_g1_simscape_slice/{slice_map.json,receipt.json,parity.json,run_manifest.json,candidate27.npz}; tests/unit/motion_matching/test_coordinate_slice.py.
 
+### DL-#10347 · Simscape R2025b Run Management (Run-102 Package)
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10347 (MS-60, epic #10363)
+- **Branch:** fix/issue-10347-ms60-run-management
+- **PR:** pending
+- **Paths:** scripts/matlab/run_simscape_candidate.ps1; src/shared/python/motion_matching/simscape_run_manifest.py; src/shared/python/motion_matching/candidate_convert.py; src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/{write_run_manifest.m,export_candidate.m}; docs/development/simscape_tour_matching/{CHECKPOINTS.md,CHECKPOINTS_HISTORY.md}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif}
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 (converter + manifest unit tests green; committed run-102 candidate/manifest/GIF; native MATLAB replay remains licensed-host only)
+- **Summary:** Documented one R2025b-only scripted replay path with fail-closed run manifest (host, release, model/candidate/replay SHAs, wall-clock), converted returned-replay NPZ into MatchedSwingCandidate via DRY reuse of returned81 layout, and committed run-102 playback GIF in-tree.
+- **Next step:** Land PR; second person replay on DeskComputer under 30 minutes using CHECKPOINTS.md.
+- **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif,qualified_candidate_replay.json}; tests/unit/motion_matching/test_simscape_candidate_convert.py.
+
 ### DL-#10342 · OpenSim/MyoSuite Native Nightly Lane Receipts
 
 - **State:** in_review
