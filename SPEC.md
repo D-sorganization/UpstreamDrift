@@ -1,3 +1,80 @@
+## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
+
+Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
+- **Core Export Module (`src/shared/python/motion_matching/export.py`)**:
+  - `export_video(candidate, engine, path, *, fps=30, stride=5, view="marker_overlay")`: Renders 3D marker overlay trajectories comparing target vs model markers headlessly across all six physics engines into `.gif` (via `imageio`) or `.mp4` (via `cv2.VideoWriter`). Enforces fail-closed `@precondition` and `@postcondition` contracts; rejects missing or corrupted candidate files and marker trajectories without fabricating data.
+  - `export_report(receipt, path, *, candidate=None, include_provenance=True)`: Extracts standardized metrics (Whole, Early, Terminal, Club, and Pelvis Yaw RMSE), quantitative acceptance gates, physical constraints, and qualification notes from execution receipts. Enforces fail-closed `@precondition` and `@postcondition` contracts; faithfully preserves raw ledger/receipt verdicts without cosmetic masking; generates structured Markdown reports and clean, paginated PDF documents via `matplotlib.backends.backend_pdf`.
+  - Cryptographic Provenance Block: Stamps software version, short git commit SHA (`git_commit_short`), physics engine and package version (`engine_package_version`), candidate SHA-256, receipt SHA-256, capture, lane, authoritative verdict, and UTC ISO 8601 timestamp into every export (#8820 / U3).
+- **CLI Subcommand Integration (`src/shared/python/motion_matching/__main__.py`)**:
+  - Adds `export-video` and `export-report` subcommands to `python -m src.shared.python.motion_matching`.
+- **Results Browser Desktop GUI Integration (`src/tools/matched_swing_browser/gui.py`)**:
+  - Adds "Export Video..." and "Export Report..." buttons to the Actions card with automatic enablement based on candidate/receipt artifact availability on disk.
+  - Connects native file save dialogs with error handling and success confirmations.
+- **Launcher Manifest & Model Capability Alignment (`src/config/launcher_manifest.json`, `src/config/models.yaml`)**:
+  - Registers `"video_export"` and `"report_export"` capabilities under `matched_swing_browser`.
+- **Evidence & Verification (`docs/development/matched_swing_program/evidence/reports/sample_fit_report.md`, `tests/unit/motion_matching/test_export.py`, `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py`)**:
+  - 11 unit tests in `test_export.py` covering GIF/MP4 frame generation, fail-closed marker validation, Markdown/PDF report emission, verdict preservation, and CLI subcommands.
+  - GUI test suite covering action button states, file dialog mock triggers, and export generation.
+  - Sample report emitted from canonical ground-support receipt.
+
+## Generic Capture Contract and 44-DOF Identifiability (MS-90, #10361)
+
+Defines generic C3D capture ingestion contracts and mathematical identifiability probes for the 44-DOF kinematic model:
+- **Generic Capture Contract (`src/shared/python/motion_matching/tour_capture_contract.py`)**:
+  - Implements `CaptureContract` and `CaptureValidationReport` enabling validation and ingestion of conforming C3D files with arbitrary marker sets and sampling rates.
+  - Subclasses `TourCaptureSpec` maintaining frozen identity, checksums, and backwards compatibility for `TOUR_CAPTURE` and `TOUR_CAPTURE_IRON`.
+  - Implements `validate_capture_contract` providing structured diagnostic reasons (`invalid_units`, `rate_mismatch`, `insufficient_frames`, `missing_required_labels`, `missing_required_segment`, `excessive_gap_fraction`, `missing_static_calibration`).
+  - Implements `load_capture` to read, scale (e.g. mm to m), and map labels to canonical representations without modifying codebase source.
+- **Identifiability Probe & Synthetic Null Space Analysis (`src/shared/python/motion_matching/identifiability.py`)**:
+  - Implements pure-Python forward kinematics and marker position synthesis for the 44-DOF kinematic chain (`body_poses_from_coordinates`, `compute_spec_marker_positions`).
+  - Implements SVD-based linearised identifiability analysis (`probe_spec_identifiability`, `probe_synthetic_chain_identifiability`).
+  - Detects unobservable kinematic sub-chains: on the uncalibrated 44-DOF model (where 8 lower limb markers have null offsets), reports rank 28 of 44, identifying all 14 leg DOFs as strictly unobservable.
+  - Demonstrates observability with calibrated markers (rank 42 of 44, leaving only coaxial hip/torso yaw singularity).
+  - Demonstrates full-rank recovery (rank 44 of 44) and well-conditioned inversion via anthropometric prior regularization.
+  - Generates reproducible evidence receipt `evidence/anthropometry/identifiability_driver.json`.
+- **Verification Suite**:
+  - Unit tests in `tests/unit/motion_matching/test_capture_contract_generic.py` and `test_identifiability.py` covering backwards compatibility, CMU locomotion rejection, unit scaling/label mapping, gap fraction tolerances, synthetic planted null directions, and 44-DOF uncalibrated/calibrated/regularized rank.
+
+## Tour Baselines Swing Planes, Fixed Geometry, and Feasible Initial States (TB-03, #10588)
+
+Calibrates swing planes, fixed geometry, and feasible initial states under the Tour Baselines program:
+- **Rigid Swing Plane Calibration (`src/shared/python/motion_matching/projection_2d.py`)**:
+  - Implements `CalibratedSwingPlane` with single $SE(3)$ transformation matrix ($T_{w \to p}$ and $T_{p \to w}$), orthonormal right-handed basis ($SO(3)$, $\det = +1$), inclination, azimuth, and geometric projection residual diagnostics.
+  - Implements `estimate_swing_plane` estimating one rigid plane across a declared capture window from valid weighted observations; explicitly handles degeneracy (collinear points, rank $< 2$) and improper reflection.
+  - Forbids per-frame plane re-fitting to prevent masking true dynamic and kinematic mismatch.
+  - Preserves 3D residuals via `GeometricProjectionResidual` reporting physical RMSE and maximum deviation.
+  - Transforms world gravity into the calibrated plane frame, yielding effective in-plane gravity $g \cos(\beta)$.
+  - Implements `project_to_calibrated_plane` and backward-compatible `project_to_2d`.
+- **Fixed Geometry Calibration & Identifiability Ranking (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Calibrates positive bounded link lengths ($L_1 \in [0.4, 0.9]\text{ m}$, $L_2 \in [0.7, 1.3]\text{ m}$) from observed landmark distances.
+  - Constrains non-identifiable mass/inertia parameters ($m_1, m_2, m_{\text{head}}, I_1$) to validated priors (`GolfModelParams`).
+  - Implements `IdentifiabilityDiagnostic` reporting rank, condition number, and unidentifiable parameter flags.
+- **Initial States Mapping & Forward Kinematics Verification (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Maps $t_0$ observations to double pendulum generalized coordinates $q_0 = (\theta_1, \theta_2)$ and velocities $v_0 = (\omega_1, \omega_2)$ with proper angle unwrapping into $(-\pi, \pi]$.
+  - Rejects window gap crossing during velocity estimation with `ValueError`.
+  - Verifies exact forward kinematics agreement: $FK(q_0) = p_{\text{observed}}(t_0)$.
+- **Prescribed Moving-Hub Power Tracking (`src/shared/python/tour_baselines/calibration.py`)**:
+  - Tracks external hub trajectory $\mathbf{r}_{\text{hub}}(t)$, velocity $\dot{\mathbf{r}}_{\text{hub}}(t)$, and power contribution $P_{\text{hub}}(t) = \mathbf{F}_{\text{hub}}(t) \cdot \dot{\mathbf{r}}_{\text{hub}}(t)$.
+  - Evaluates integrated external work $W_{\text{hub}} = \int P_{\text{hub}}(t) dt$ and prevents labeling externally driven base motion as an unforced baseline.
+- **Evidence & Verification**:
+  - Unit test suites in `tests/unit/motion_matching/test_projection_2d.py` and `tests/unit/tour_baselines/test_tour_calibration.py` (10 tests, 60 total in tour baselines / projection suite).
+  - Published comprehensive architectural documentation in `docs/plans/tour_baselines/plane_calibration_and_initial_states.md`.
+
+## Connect Qualified Matching Strategies to Engine Feature Contracts (PF-10, #10440)
+
+Connects qualified matching strategies to engine feature contracts:
+- **Strategy Schema & Qualification Matrix (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Implements versioned strategy schema (`STRATEGY_SCHEMA_VERSION = "matched-strategy-v1"`).
+  - Stage-separated qualification matrix tracking all 6 stages (`model_available`, `kinematic_fit`, `force_feasible`, `replay_accepted`, `runtime_budget_met`, `muscle_qualified`).
+  - Preconfigured strategy presets, controller specifications, and contact reaction history containers.
+- **Candidate Strategy Serialization (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - `CandidateStrategyPackage` binds candidate trajectories with strategy metadata, accelerations, and contact reactions.
+  - Fail-closed name-permuted coordinate remapping and lossless `.npz` serialization without pickle.
+- **Strategy Comparison Service (`src/shared/python/motion_matching/matching_strategy.py`)**:
+  - Exposes cross-strategy comparison reporting torque profiles, kinematics/closure errors, and capability auditing invalidating supported status on missing SDKs.
+- **Verification Suite (`tests/unit/motion_matching/test_matching_strategy.py`)**:
+  - 8 unit test fixtures validating stage ordering, acceptance invariants, contract serialization, `.npz` roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
+
 ## Tour Baselines Versioned Packages, Fit Metrics, and Qualification Profiles (TB-02, #10587)
 
 Defines versioned baseline packages, fit metrics, and frozen qualification profiles under the Tour Baselines program:
@@ -80,6 +157,33 @@ Freezes model identities, ownership, coordinate conventions, and two-capture cov
   - Reconciles historical issues #9914, #9921, and #10003, tracking Tools submodule commit ownership.
 - **Evidence & Verification**:
   - Added unit test suite in `tests/unit/tour_baselines/`: `test_model_identities.py`, `test_coverage_matrix.py`, `test_reconciliation.py` (13 tests).
+
+## Qualify Contact Modes and Native Pinocchio Force Feasibility (PF-04, #10434)
+
+Qualifies contact modes and native Pinocchio force feasibility:
+- **Contact Mode Qualifier (`src/shared/python/motion_matching/contact_mode_qualifier.py`)**:
+  - Infers multi-sphere heel/toe support modes (`FLAT`, `HEEL_ONLY`, `TOE_ONLY`, `FLIGHT`) and whole-body support states with clearance and velocity hysteresis.
+  - Computes support mode ambiguity metric, center of pressure (COP), and 2D convex hull support polygon containment under arbitrary surface normal \(\hat{n}\).
+  - Evaluates slip speed thresholding and friction cone saturation ratios.
+  - Performs constitutive Hunt-Crossley compliance comparison (`sphere_ground_contact`) vs inverse dynamics force allocation.
+  - Enforces separate linear force (N) and moment (\(\text{N}\cdot\text{m}\)) residual budgets.
+  - Rejects unphysical loads (> 5000 N, > 300 \(\text{N}\cdot\text{m}\)) and generates mass/geometry/friction sensitivity reporting.
+- **Verification Suite (`tests/unit/motion_matching/test_contact_mode_qualifier_pf04.py`)**:
+  - 10 unit test fixtures validating hysteresis, COP containment, slip thresholds, Hunt-Crossley compliance, and unphysical load rejection.
+
+## Enforce Contact, Actuator and Root Constraints in Force Allocation (PF-03, #10433)
+
+Enforces contact, actuator and root constraints in force allocation:
+- **Constrained QP Inverse Dynamics (`src/shared/python/motion_matching/contact_force_allocator.py`)**:
+  - Replaces penalty-augmented least squares and unconstrained post-projection with constrained QP inverse dynamics.
+  - Adds `FeasibilityStatus` enum and `AllocationObjective.HARD_ZERO_TRAIL`.
+  - Enforces 8-faceted polyhedral friction pyramid and non-negative normal force (\(f_n \ge 0\)) along arbitrary surface normals.
+  - Enforces contact separation mask (\(f_s = 0\) for separated contacts).
+  - Enforces strict actuator bounds without post-projection, using isolated actuator slack to detect and report violations without bounds breaching.
+  - Isolates diagnostic root slack \(\Delta \tau_{\text{root}}\) so phantom root forces never produce false physical success.
+  - Adds `verify_torque_and_rate_bounds` for discrete trajectory limits and rate verification.
+- **Verification Suite (`tests/unit/motion_matching/test_contact_force_allocator_pf03.py`)**:
+  - 10 acceptance test fixtures covering friction cones, unilateral normal forces, contact separation, actuator saturation, root slack isolation, and rate bounds.
 
 ## Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility (PF-02, #10432)
 
@@ -2677,7 +2781,9 @@ open runtime. The first consumer under #9069 must pin a protected Tools merge,
 reject missing or incompatible schema authority, and adapt existing C3D and
 motion-pipeline paths instead of copying shared code. This M0 slice makes no
 camera, inference, C3D round-trip, commercial, or physical-lab qualification
-claim.
+claim. The first #9422 consumer slice pins Tools `mocap-session/1.0.0` and
+exports rig capture sessions through the Tools `MocapSessionManifest`
+builders; the C3D upload path (#8865) is the next consumer slice.
 
 ## Enforce Declared Measurement Acceptance Conditions & Physical Bounds (#9286)
 
@@ -6540,6 +6646,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
 | 2026-09-20 | #10628 | Plan club-only matching and model-specific neural acceleration with audited workbook evidence, linked issues and worker turnover; no runtime behavior changed. |
 | 2026-09-18 | #10459 | Add the fail-closed BunkerShot3D product acceptance matrix (`src/config/bunkershot3d_qualification.json`) tracking every epic child, dependency order and prediction-acceptance criteria; `release_status` is bound to the live V&V register and reads `blocked`. |
+| 2026-09-19 | #10466 | Rig capture sessions export through the pinned Tools `MocapSessionManifest` (`mocap-session/1.0.0`): the bridge probes the Tools family, pins the schema, and writes `mocap_session.json` via the Tools builders and canonical serializer; retained video without recorded consent is refused, not faked. First M-track consumer slice of #9422. |
 | 2026-09-19 | #10469 | Replaced np.linalg.norm(..., axis=1) with np.sqrt(np.einsum) in motion_matching dynamics pipeline to avoid temporary allocations, significantly improving performance. (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10471 | Optimize `np.sum(diff**2, axis=-1)` to `np.einsum` to avoid temporary allocations (spec-exempt: micro-optimization) |
 | 2026-09-19 | #10468 | Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/motion_matching/prefix_fit.py` to optimize array magnitude calculations. (spec-exempt: micro-optimization) |
@@ -6560,6 +6667,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-18 | #10406 | Engine-independent pipeline plant interface, protocol adapters, and CLI runner across physics engines (MS-10 #10329). |
 | 2026-09-18 | #10363 | Preserve native matching checkpoints and source identities; publish bounded Pinocchio/OpenSim continuation handoffs and flag conflicting gate documentation. Expand OpenSim epic #10394 into anatomical scaling, visible club, address/trajectory matching and extensible muscle/tendon contracts. |
 | 2026-09-17 | #10392 | Consolidate IK and forward dynamics into shared modules, retiring full_body_markers.py and full_body_simulation.py duplicates (MS-11 #10330). |
+| 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-17 | #10307 | Replaced `float(np.linalg.norm(x))` and `np.linalg.norm(x)` with `math.sqrt(np.vdot(x, x))` in bunkershot3d small 1D array contexts for a ~2.2x performance speedup. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10309 | Replaced np.sum(np.sqrt(...)) with np.hypot(...).sum() in power_work_metrics.py to speed up path length calculation. (spec-exempt: micro-optimization) |
 | 2026-09-17 | #10316 | Optimized np.linalg.norm with math.sqrt(dot) in mujoco_swing_source.py. (spec-exempt: micro-optimization) |
