@@ -1,0 +1,18 @@
+# Portable version manifest for the optional numerical motion runtime.
+# For reproducible Linux x86_64 deployments, consume linux-64.explicit.txt.
+name: upstream-motion-runtime
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - crocoddyl=3.2.1
+  - pinocchio=4.1.0
+  - pink=4.4.0
+  - qpsolvers=4.13.0
+  - quadprog=0.1.13
+  - numpy=2.5.3
+  - scipy=1.18.1
+  - pydantic=2.13.5
+  - pytest=9.1.1
+  - pytest-timeout=2.4.0
+  - defusedxml=0.7.1

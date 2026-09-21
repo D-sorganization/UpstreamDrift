@@ -82,3 +82,32 @@ The new tests live at `tests/opensim/test_muscle_cmc.py`.
 - `build_rajagopal2015_muscle_model` and `run_cmc_smoke` are pure
   additions; importing `muscle_analysis` does not import `opensim` at
   module load.
+
+## OpenSim Golf Model Muscle Qualification (OG-08, #10402)
+
+Under OpenSim epic #10394 / #10363, muscle and tendon extensions are qualified
+without replacing the certified joint-torque baseline:
+
+1. **Explicit Anatomy Scope:**
+   - A lower-extremity model (e.g. Rajagopal2015 80-muscle) is **not** a full golf
+     muscle model. Claiming `full_body_golf` with lower limbs alone raises
+     `UnsupportedAnatomyClaimError`.
+   - Full golf coverage requires explicit lower extremity, torso/spine,
+     shoulder/scapula, arm/forearm, and wrist/hand musculature, with declared
+     omissions (e.g. rigidly affixed head/neck per #10394) verified by
+     `audit_anatomy_coverage`.
+2. **Strength Scaling Disclaimer:**
+   - The standard OpenSim scale tool scales segment lengths and MTU geometries,
+     but does **not** qualify or scale maximum isometric force ($F_{\text{max}}$).
+     PCSA or body mass scaling laws must be applied explicitly with parameter provenance.
+3. **Moment Arm Qualification:**
+   - Muscle moment arms are audited against the virtual work finite-difference
+     path-length derivative: $r_{\text{FD}} = -\frac{l_{MT}(q + \Delta q) - l_{MT}(q - \Delta q)}{2 \Delta q}$.
+     Deviations exceeding tolerance raise `MomentArmDerivativeMismatchError`.
+4. **Activation Dynamics & Static Equilibrium:**
+   - Initial muscle-tendon states must satisfy static equilibrium ($F_{\text{fiber}}\cos\alpha = F_{\text{tendon}}$)
+     before forward simulation or replay; non-equilibrated states raise `UninitializedTendonStateError`.
+5. **Acceptance & Validation Governance:**
+   - Receipts report reserve actuator torques and pelvic residuals ($F_x, F_y, F_z, M_x, M_y, M_z$).
+   - Muscle-complete status remains `IN_PROGRESS_QUALIFICATION` and independent
+     scientific validation remains `PENDING_10375` until clinical force validation completes.

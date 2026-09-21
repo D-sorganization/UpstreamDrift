@@ -137,3 +137,25 @@ def test_build_ground_support_receipt_calls_validate(tmp_path: Path) -> None:
             )
         )
         mock_validate.assert_called_once()
+
+
+@pytest.mark.unit
+def test_log_pipeline_summary() -> None:
+    from src.shared.python.motion_matching.pipeline.receipt import log_pipeline_summary
+
+    log = MagicMock()
+    receipt = {"address": {"marker_rms_m": 0.01}, "dynamics": {"marker_rms_m": 0.02}}
+    ik_report = {
+        "marker_rms_m": 0.015,
+        "segment_rms_m": {},
+        "reference": {},
+        "segment_scaling": {},
+        "leg_angle_ranges_deg": {},
+    }
+    cal1 = MagicMock()
+    cal1.rms_per_iteration_m = [0.03, 0.02]
+    cal2 = MagicMock()
+    cal2.rms_per_iteration_m = [0.02, 0.015]
+
+    log_pipeline_summary(log, receipt, ik_report, cal1, cal2)
+    assert log.info.call_count == 3

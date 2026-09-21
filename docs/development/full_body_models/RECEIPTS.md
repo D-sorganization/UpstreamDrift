@@ -14,30 +14,34 @@ python -m src.shared.python.motion_matching.pipeline.receipt_schema --markdown
 
 Summary provenance, hashes, file references, and execution duration written by `pipeline.receipt.build_ground_support_receipt`.
 
-| Field                      | Unit     | Meaning                                                         | Stage    |
-| :------------------------- | :------- | :-------------------------------------------------------------- | :------- |
-| `base_spec_sha256`         | hash     | SHA256 hash of the initial input model specification document   | metadata |
-| `base_spec_file`           | filename | Filename of the input model specification document              | metadata |
-| `spec_file`                | filename | Filename of the final scaled and calibrated spec document       | metadata |
-| `hipcal_spec_file`         | filename | Filename of the intermediate hip-calibrated spec document       | metadata |
-| `recalibrate_upper`        | bool     | Whether upper-body marker placements were recalibrated          | metadata |
-| `anthropometric`           | m, kg    | Subject stature (m) and mass (kg) if anthropometric geometry    | metadata |
-| `posture_top_of_backswing` | compound | Upper body posture metrics at top of backswing (~0.83 s)        | metadata |
-| `spec_sha256`              | hash     | SHA256 hash of the final scaled model specification             | metadata |
-| `hip_calibration`          | compound | Functional hip calibration metrics and alignment                | metadata |
-| `candidate_sha256`         | hash     | SHA256 hash of candidate artifact byte stream                   | metadata |
-| `capture`                  | text     | Optical motion capture trial name (driver or iron)              | metadata |
-| `capture_sha256`           | hash     | SHA256 hash of raw C3D optical motion capture file              | metadata |
-| `club`                     | compound | Club inertial properties, dimensions, and grip offset           | metadata |
-| `grip_rotation_deg`        | deg      | Fitted constant grip roll rotations for lead and trail hands    | metadata |
-| `wrists_bounded`           | bool     | Whether wrist and forearm joints were bounded to human ranges   | metadata |
-| `labels`                   | names    | List of tracked optical marker labels in kinematic model        | metadata |
-| `ground`                   | compound | Ground height, toe spheres, and stance detection results        | ground   |
-| `address`                  | compound | Address pose fit, static trial, and initial stance posture      | address  |
-| `ik`                       | compound | Full-trajectory kinematic matching and marker calibration       | ik       |
-| `dynamics`                 | compound | Forward dynamics tracking, computed torque, and ZMP diagnostics | dynamics |
-| `elapsed_s`                | s        | Total wall-clock runtime of ground-support execution            | metadata |
-| `qualification`            | text     | Qualification note and status claim for the run                 | metadata |
+| Field                      | Unit     | Meaning                                                                    | Stage    |
+| :------------------------- | :------- | :------------------------------------------------------------------------- | :------- |
+| `backend`                  | string   | Kinematic backend engine used for tracking (mujoco or pink)                | metadata |
+| `engine`                   | string   | Full-body dynamics and plant engine (mujoco, drake, pinocchio)             | metadata |
+| `base_spec_sha256`         | hash     | SHA256 hash of the initial input model specification document              | metadata |
+| `base_spec_file`           | filename | Filename of the input model specification document                         | metadata |
+| `spec_file`                | filename | Filename of the final scaled and calibrated spec document                  | metadata |
+| `hipcal_spec_file`         | filename | Filename of the intermediate hip-calibrated spec document                  | metadata |
+| `recalibrate_upper`        | bool     | Whether upper-body marker placements were recalibrated                     | metadata |
+| `anthropometric`           | m, kg    | Subject stature (m) and mass (kg) if anthropometric geometry               | metadata |
+| `de_leva_table_sha256`     | hash     | SHA256 hash of the de Leva anthropometric table if anthropometric geometry | metadata |
+| `posture_top_of_backswing` | compound | Upper body posture metrics at top of backswing (~0.83 s)                   | metadata |
+| `spec_sha256`              | hash     | SHA256 hash of the final scaled model specification                        | metadata |
+| `hip_calibration`          | compound | Functional hip calibration metrics and alignment                           | metadata |
+| `candidate_sha256`         | hash     | SHA256 hash of candidate artifact byte stream                              | metadata |
+| `capture`                  | text     | Optical motion capture trial name (driver or iron)                         | metadata |
+| `capture_sha256`           | hash     | SHA256 hash of raw C3D optical motion capture file                         | metadata |
+| `club`                     | compound | Club inertial properties, dimensions, and grip offset                      | metadata |
+| `grip_rotation_deg`        | deg      | Fitted constant grip roll rotations for lead and trail hands               | metadata |
+| `wrists_bounded`           | bool     | Whether wrist and forearm joints were bounded to human ranges              | metadata |
+| `labels`                   | names    | List of tracked optical marker labels in kinematic model                   | metadata |
+| `ground`                   | compound | Ground height, toe spheres, and stance detection results                   | ground   |
+| `address`                  | compound | Address pose fit, static trial, and initial stance posture                 | address  |
+| `ik`                       | compound | Full-trajectory kinematic matching and marker calibration                  | ik       |
+| `dynamics`                 | compound | Forward dynamics tracking, computed torque, and ZMP diagnostics            | dynamics |
+| `elapsed_s`                | s        | Total wall-clock runtime of ground-support execution                       | metadata |
+| `qualification`            | text     | Qualification note and status claim for the run                            | metadata |
+| `acceptance`               | compound | Physical and kinematic acceptance evaluation verdict (MS-01)               | metadata |
 
 ## Ground Stage (`ground`)
 
@@ -86,6 +90,7 @@ Full-trajectory marker matching, alternating calibration, limb scaling, and rang
 | `range_of_motion_flags`      | compound   | Excursions exceeding anatomical limits across reference      | ik    |
 | `bound_widening`             | multiplier | Safety factor applied to widen joint range limits            | ik    |
 | `leg_angle_ranges_deg`       | deg        | Min and max angles observed per lower limb joint coordinate  | ik    |
+| `constrained_ik`             | compound   | Optional constrained IK execution diagnostics and provenance | ik    |
 
 ## Dynamics Stage (`dynamics`)
 

@@ -1,0 +1,42 @@
+[
+  {
+    "t_end_s": 0.3,
+    "nodes": 109,
+    "iterations": 12,
+    "converged": false,
+    "cost": 31.778732873981497,
+    "stopping_criterion": 1.2563472382621374e-9,
+    "wall_clock_s": 362.69481960099074,
+    "marker_rms_m": 0.019725543422612946
+  },
+  {
+    "t_end_s": 0.45,
+    "nodes": 163,
+    "iterations": 30,
+    "converged": false,
+    "cost": 38.97002417061738,
+    "stopping_criterion": 0.03296530662491599,
+    "wall_clock_s": 711.3464571840013,
+    "marker_rms_m": 0.02127936039460553
+  },
+  {
+    "t_end_s": 0.6,
+    "nodes": 217,
+    "iterations": 30,
+    "converged": false,
+    "cost": 55.15458687297916,
+    "stopping_criterion": 0.07395461580613413,
+    "wall_clock_s": 929.9984207309899,
+    "marker_rms_m": 0.02243398285694109
+  },
+  {
+    "t_end_s": 0.85,
+    "nodes": 307,
+    "iterations": 120,
+    "converged": false,
+    "cost": 155.64029028006962,
+    "stopping_criterion": 7.061959702748077e-5,
+    "wall_clock_s": 4632.373841385997,
+    "marker_rms_m": 0.04635423846319656
+  }
+]

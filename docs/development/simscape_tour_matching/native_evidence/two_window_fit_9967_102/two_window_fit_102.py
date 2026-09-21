@@ -57,6 +57,10 @@ from src.shared.python.motion_matching.multi_shooting_fit import (
     MultipleShootingOptions,
     fit_multiple_shooting,
 )
+from src.shared.python.motion_matching.two_window_fit import (
+    check_acceptance as check_physical_acceptance,
+    compute_marker_metrics,
+)
 from src.shared.python.motion_matching.native_candidate import (
     NativeReplayCandidate,
     increment_native_bernstein,
@@ -337,39 +341,27 @@ def main() -> None:
         wl, wr = (doc["marker_labels"].index(k) for k in ("WaistLeft", "WaistRight"))
 
         def metrics(pred: np.ndarray) -> dict:
-            error = np.sum((pred - points) ** 2, axis=2)
-            yaw_m = compute_pelvis_yaw_metrics(pred[-1], points[-1], wl, wr)
-            score = float(
-                np.sum(error[valid])
-                + (args.terminal_weight**2) * np.sum(error[-1, valid[-1]])
-            )
-            if args.pelvis_yaw_weight > 0:
-                yaw_res, _, _ = compute_pelvis_yaw_residual_and_derivative(
-                    pred[-1], points[-1], wl, wr, args.pelvis_yaw_weight
-                )
-                score += float(yaw_res @ yaw_res)
-
-            return {
-                "whole_rms_m": float(np.sqrt(np.mean(error[valid]))),
-                "early_rms_m": float(np.sqrt(np.mean(error[early]))),
-                "terminal_rms_m": float(np.sqrt(np.mean(error[-1, valid[-1]]))),
-                "club_cluster_rms_m": float(
-                    np.sqrt(np.mean(error[-1, club & valid[-1]]))
-                ),
-                "pelvis_yaw_error_pct": float(yaw_m.pelvis_yaw_error_pct),
-                "pelvis_yaw_diff_deg": float(yaw_m.yaw_diff_deg),
-                "score": score,
-            }
+            return compute_marker_metrics(
+                pred,
+                points,
+                valid,
+                clock,
+                doc["marker_labels"],
+                terminal_weight=args.terminal_weight,
+                pelvis_yaw_weight=args.pelvis_yaw_weight,
+            ).to_dict()
 
         def accepted(pred: np.ndarray) -> bool:
-            m = metrics(pred)
-            return (
-                m["whole_rms_m"] <= 0.025
-                and m["early_rms_m"] <= 0.012
-                and m["terminal_rms_m"] <= 0.035
-                and m["club_cluster_rms_m"] <= 0.060
-                and m["pelvis_yaw_error_pct"] <= 5
+            res = compute_marker_metrics(
+                pred,
+                points,
+                valid,
+                clock,
+                doc["marker_labels"],
+                terminal_weight=args.terminal_weight,
+                pelvis_yaw_weight=args.pelvis_yaw_weight,
             )
+            return check_physical_acceptance(res)
 
         costs: list[dict] = []
         model: dict = {}

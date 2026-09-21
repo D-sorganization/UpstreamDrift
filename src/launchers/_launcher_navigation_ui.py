@@ -181,31 +181,70 @@ class LauncherNavigationUIMixin:
         return sidebar, layout, colors
 
     def _build_sidebar_filter_buttons(self) -> list[tuple[QToolButton, int]]:
-        """Build category buttons in their stable routing order."""
-        specs = (
-            ("Home", "home", None),
-            ("Engines", "computer", None),
+        """Build category and task workspace buttons in their stable routing order."""
+        specs: tuple[tuple[str, str, str | None, int], ...] = (
+            ("Home", "home", None, 0),
+            ("Engines", "computer", None, 1),
             (
                 "Biomechanics",
                 "accessibility",
                 "Filter tiles to show biomechanics and motion analysis tools",
+                2,
             ),
-            ("Simulation", "sports_golf", None),
-            ("Tools", "build", None),
+            ("Simulation", "sports_golf", None, 3),
+            ("Tools", "build", None, 4),
             (
                 "Documentation",
                 "book",
                 "Filter tiles to show documentation and library tools",
+                5,
             ),
-            ("Favorites", "star", "Filter tiles to show your favorites"),
+            ("Favorites", "star", "Filter tiles to show your favorites", 6),
             (
                 "History",
                 "history",
                 "Filter tiles to show recently and frequently used tools",
+                7,
+            ),
+            (
+                "Capture & Analyze",
+                "camera",
+                "Filter tiles to Capture & Analyze workspace",
+                10,
+            ),
+            (
+                "Model & Match",
+                "computer",
+                "Filter tiles to Model & Match workspace",
+                11,
+            ),
+            (
+                "Shot & Course Lab",
+                "sports_golf",
+                "Filter tiles to Shot & Course Lab workspace",
+                12,
+            ),
+            (
+                "Optimize & Train",
+                "build",
+                "Filter tiles to Optimize & Train workspace",
+                13,
+            ),
+            (
+                "Results & Compare",
+                "assessment",
+                "Filter tiles to Results & Compare workspace",
+                14,
+            ),
+            (
+                "Developer & Research",
+                "code",
+                "Filter tiles to Developer & Research secondary tools",
+                15,
             ),
         )
         buttons: list[tuple[QToolButton, int]] = []
-        for button_id, (label, icon_name, description) in enumerate(specs):
+        for label, icon_name, description, button_id in specs:
             button = self._build_sidebar_button(label, icon_name, checkable=True)
             if description is not None:
                 button.setAccessibleDescription(description)
@@ -330,6 +369,12 @@ class LauncherNavigationUIMixin:
             6: "Favorites",
             7: "History",
             8: "Documentation",
+            10: "workspace:capture_analyze",
+            11: "workspace:model_match",
+            12: "workspace:shot_course_lab",
+            13: "workspace:optimize_train",
+            14: "workspace:results_compare",
+            15: "workspace:dev_research",
         }
         self.layout_manager.current_category_filter = _CATEGORY_MAP.get(
             button_id, "All"
@@ -337,6 +382,56 @@ class LauncherNavigationUIMixin:
 
         self._rebuild_grid()
 
+        if getattr(self, "workspace_tabs", None):
+            self.workspace_tabs.setCurrentIndex(0)
+
+    def navigate_to_workspace(self, destination: str) -> None:
+        """Navigate to a task workspace destination (ORG-05, #10515).
+
+        Accepts workspace IDs ('capture_analyze', 'model_match', etc.) or titles.
+        """
+        from src.launchers.workspace_navigation import (
+            PRIMARY_WORKSPACES,
+            SECONDARY_WORKSPACES,
+        )
+
+        canonical_id = destination.lower().replace(" ", "_").replace("&", "").strip("_")
+        all_ws = {**PRIMARY_WORKSPACES, **SECONDARY_WORKSPACES}
+        target_ws_id: str | None = None
+        if destination in all_ws:
+            target_ws_id = destination
+        else:
+            for ws_id, ws_info in all_ws.items():
+                if (
+                    ws_info.title.lower() == destination.lower()
+                    or ws_id == canonical_id
+                ):
+                    target_ws_id = ws_id
+                    break
+
+        if target_ws_id is None:
+            self.layout_manager.current_category_filter = "All"
+        else:
+            self.layout_manager.current_category_filter = f"workspace:{target_ws_id}"
+
+        _WS_TO_BUTTON_ID = {
+            "capture_analyze": 10,
+            "model_match": 11,
+            "shot_course_lab": 12,
+            "optimize_train": 13,
+            "results_compare": 14,
+            "dev_research": 15,
+            "all_tools": 0,
+            "favorites": 6,
+            "history": 7,
+        }
+        btn_id = _WS_TO_BUTTON_ID.get(target_ws_id or "")
+        if btn_id is not None and hasattr(self, "sidebar_group"):
+            btn = self.sidebar_group.button(btn_id)
+            if btn:
+                btn.setChecked(True)
+
+        self._rebuild_grid()
         if getattr(self, "workspace_tabs", None):
             self.workspace_tabs.setCurrentIndex(0)
 

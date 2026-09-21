@@ -12,14 +12,15 @@ Key design decisions:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-from src.shared.python.pose_interchange.canonical import CanonicalPose
-from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+if TYPE_CHECKING:
+    from src.shared.python.pose_interchange.canonical import CanonicalPose
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
 
 # =============================================================================
 # Session-scoped C3D data fixtures (Issue #5104 - State & Data Management)
@@ -105,30 +106,45 @@ def mock_drake_kinematics() -> MockKinematicsService:
     Use this in unit tests to avoid requiring real Drake installation.
     The mock satisfies the LiveKinematicsService Protocol.
     """
+    pytest.importorskip("src.shared.python.pose_interchange.services._mock")
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+
     return MockKinematicsService(engine_name="drake")
 
 
 @pytest.fixture
 def mock_mujoco_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating MuJoCo."""
+    pytest.importorskip("src.shared.python.pose_interchange.services._mock")
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+
     return MockKinematicsService(engine_name="mujoco")
 
 
 @pytest.fixture
 def mock_pinocchio_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating Pinocchio."""
+    pytest.importorskip("src.shared.python.pose_interchange.services._mock")
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+
     return MockKinematicsService(engine_name="pinocchio")
 
 
 @pytest.fixture
 def mock_opensim_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating OpenSim."""
+    pytest.importorskip("src.shared.python.pose_interchange.services._mock")
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+
     return MockKinematicsService(engine_name="opensim")
 
 
 @pytest.fixture
 def mock_simscape_kinematics() -> MockKinematicsService:
     """Return a MockKinematicsService impersonating Simscape."""
+    pytest.importorskip("src.shared.python.pose_interchange.services._mock")
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+
     return MockKinematicsService(engine_name="simscape")
 
 
@@ -144,6 +160,9 @@ def any_mock_kinematics(
         @pytest.mark.parametrize("any_mock_kinematics", ["drake", "mujoco"], indirect=True)
         def test_something(any_mock_kinematics): ...
     """
+    pytest.importorskip("src.shared.python.pose_interchange.services._mock")
+    from src.shared.python.pose_interchange.services._mock import MockKinematicsService
+
     engine_name = getattr(request, "param", "drake")
     return MockKinematicsService(engine_name=engine_name)
 
@@ -159,7 +178,8 @@ def zero_canonical_pose() -> CanonicalPose:
 
     This is useful for testing forward kinematics at the neutral pose.
     """
-    import numpy as np
+    pytest.importorskip("src.shared.python.pose_interchange.canonical")
+    from src.shared.python.pose_interchange.canonical import CanonicalPose
 
     return CanonicalPose(
         pelvis_translation_m=np.zeros(3, dtype=np.float64),
@@ -174,7 +194,8 @@ def canonical_pose_deg() -> CanonicalPose:
 
     This represents a mid-swing pose for testing.
     """
-    import numpy as np
+    pytest.importorskip("src.shared.python.pose_interchange.canonical")
+    from src.shared.python.pose_interchange.canonical import CanonicalPose
 
     # Use the actual REFERENCE_GOLFER_FIELDS names
     return CanonicalPose(
@@ -201,7 +222,8 @@ def canonical_pose_rad() -> CanonicalPose:
     Note: CanonicalPose internally stores angles in degrees, so this
     fixture converts from radians for testing purposes.
     """
-    import numpy as np
+    pytest.importorskip("src.shared.python.pose_interchange.canonical")
+    from src.shared.python.pose_interchange.canonical import CanonicalPose
 
     return CanonicalPose(
         pelvis_translation_m=np.array([0.0, 0.0, 1.0], dtype=np.float64),
