@@ -16,7 +16,7 @@ import json
 import logging
 import math
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -73,91 +73,21 @@ def _render_video_frames(
     stride: int,
 ) -> list[np.ndarray]:
     """Render 3D marker overlay frames comparing target vs model markers."""
-    import matplotlib
+    from src.shared.python.motion_matching.cross_engine_replay import (
+        render_replay_frames,
+    )
 
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
+    assert candidate.target_markers_m is not None
+    assert candidate.model_markers_m is not None
 
-    target_markers_m = candidate.target_markers_m
-    model_markers_m = candidate.model_markers_m
-    valid_mask = candidate.marker_validity
-    time_s = candidate.time_s
-
-    assert target_markers_m is not None
-    assert model_markers_m is not None
-
-    n_frames = len(time_s)
-    frames: list[np.ndarray] = []
-    color_map = {
-        "mujoco": "#d62728",
-        "pinocchio": "#1f77b4",
-        "drake": "#2ca02c",
-        "opensim": "#9467bd",
-        "myosuite": "#8c564b",
-        "matlab": "#17becf",
-    }
-    m_color = color_map.get(engine.lower(), "#ff7f0e")
-
-    fig = plt.figure(figsize=(6, 6), dpi=80)
-    ax: Any = fig.add_subplot(111, projection="3d")
-    t0 = target_markers_m[0]
-    center = np.nanmean(t0, axis=0) if np.isnan(t0).any() else np.mean(t0, axis=0)
-    box_half = 1.0
-
-    for k in range(0, n_frames, stride):
-        ax.clear()
-        t_k = target_markers_m[k]
-        m_k = model_markers_m[k]
-        mask_k = (
-            valid_mask[k] if valid_mask is not None else np.ones(len(t_k), dtype=bool)
-        )
-
-        t_valid = t_k[mask_k]
-        ax.scatter(
-            t_valid[:, 0],
-            t_valid[:, 2],
-            zs=t_valid[:, 1],
-            c="black",
-            s=20,
-            alpha=0.7,
-            label="Capture (C3D)",
-        )
-        m_valid = m_k[mask_k]
-        ax.scatter(
-            m_valid[:, 0],
-            m_valid[:, 2],
-            zs=m_valid[:, 1],
-            c=m_color,
-            s=25,
-            alpha=0.9,
-            label=f"Model ({engine})",
-        )
-
-        diff = m_valid - t_valid
-        err = (
-            float(np.sqrt(np.mean(np.einsum("...i,...i->...", diff, diff))))
-            if len(t_valid) > 0
-            else 0.0
-        )
-
-        ax.set_xlim(center[0] - box_half, center[0] + box_half)
-        ax.set_ylim(center[2] - box_half, center[2] + box_half)
-        ax.set_zlim(center[1] - box_half, center[1] + box_half)
-        ax.set_xlabel("X (m)")
-        ax.set_ylabel("Z (m)")
-        ax.set_zlabel("Y (m)")
-        ax.set_title(
-            f"{engine.upper()} | t={time_s[k]:.3f}s | RMSE={err * 1000.0:.1f} mm"
-        )
-        ax.legend(loc="upper right", fontsize=8)
-
-        canvas: Any = fig.canvas
-        canvas.draw()
-        rgba = np.asarray(canvas.buffer_rgba())
-        frames.append(rgba[:, :, :3].copy())
-
-    plt.close(fig)
-    return frames
+    return render_replay_frames(
+        time_s=candidate.time_s,
+        target_markers_m=candidate.target_markers_m,
+        model_markers_m=candidate.model_markers_m,
+        engine_name=engine,
+        stride=stride,
+        valid_mask=candidate.marker_validity,
+    )
 
 
 def _write_gif(
@@ -171,7 +101,7 @@ def _write_gif(
 
     path.parent.mkdir(parents=True, exist_ok=True)
     d_ms = duration_ms if duration_ms is not None else (1000.0 / max(1, fps))
-    imageio.mimsave(str(path), frames, duration=d_ms, loop=0)
+    imageio.mimsave(str(path), cast(Any, frames), duration=d_ms, loop=0)
     logger.info("Saved GIF animation to %s (%d frames)", path, len(frames))
     return path
 
@@ -185,7 +115,7 @@ def _write_mp4(frames: list[np.ndarray], path: Path, fps: int) -> Path:
         raise ValueError("Cannot write empty frames list to MP4")
 
     h, w = frames[0].shape[:2]
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # type: ignore[attr-defined]
     writer = cv2.VideoWriter(str(path), fourcc, float(fps), (w, h))
     if not writer.isOpened():
         raise RuntimeError(f"Failed to open OpenCV VideoWriter for {path}")

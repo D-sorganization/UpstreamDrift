@@ -33,6 +33,8 @@ from src.shared.python.motion_matching.export import (
     export_video,
 )
 
+pytestmark = [pytest.mark.unit]
+
 
 @pytest.fixture
 def mock_candidate() -> MatchedSwingCandidate:
@@ -152,7 +154,7 @@ class TestExportVideo:
     def test_export_video_gif_from_candidate_obj(
         self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
     ) -> None:
-        import imageio.v2 as imageio
+        imageio = pytest.importorskip("imageio.v2")
 
         out_gif = tmp_path / "output.gif"
         res = export_video(mock_candidate, "mujoco", out_gif, stride=2, fps=10)
@@ -166,7 +168,7 @@ class TestExportVideo:
     def test_export_video_gif_from_path(
         self, tmp_path: Path, candidate_path: Path
     ) -> None:
-        import imageio.v2 as imageio
+        imageio = pytest.importorskip("imageio.v2")
 
         out_gif = tmp_path / "output_from_path.gif"
         res = export_video(candidate_path, "mujoco", out_gif, stride=2)
@@ -304,6 +306,7 @@ class TestExportCLI:
         assert "REJECTED" in content
 
     def test_cli_export_video(self, tmp_path: Path, candidate_path: Path) -> None:
+        pytest.importorskip("imageio.v2")
         from src.shared.python.motion_matching.__main__ import main
 
         out_gif = tmp_path / "cli_video.gif"
