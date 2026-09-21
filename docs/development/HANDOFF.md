@@ -1,5 +1,15 @@
 # Current Matching Continuation Handoff
 
+## Launcher Tile Consolidation #9479 / #9480 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10653-local`.
+- Branch: `fix/9479-9480-launcher-tiles`; PR [#10653](https://github.com/D-sorganization/UpstreamDrift/pull/10653).
+  Governing issues #9479 and #9480 (parent #9412, cluster #9410 Cluster B).
+- Entry DL-#9479. Delivered: manifest/models.yaml tile consolidation, workspace
+  navigation updates, agent-context/capability-atlas regen, MODEL_IMAGES keys for
+  renamed display names, and focused launcher tests with unit suite markers.
+- Next action: confirm CI green and squash merge PR #10653.
+
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
 - Merged to main via PR [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687)
