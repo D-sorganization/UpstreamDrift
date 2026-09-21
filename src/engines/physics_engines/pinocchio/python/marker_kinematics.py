@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Literal, TypeAlias, overload
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,20 +19,6 @@ from numpy.typing import NDArray
 from src.shared.python.contracts import ensure, require
 
 Array: TypeAlias = NDArray[np.float64]
-
-
-@dataclass(frozen=True)
-class SolveDiagnostics:
-    """Convergence and optimality diagnostics from a marker IK frame solve."""
-
-    iterations: int
-    final_cost: float
-    marker_rms: float
-    closure_error_m: float
-    projected_gradient_norm: float
-    active_bounds_count: int
-    converged: bool
-    cost_decrease: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -229,12 +215,6 @@ class MarkerIkSolver:
         )
         rf_type = pin.ReferenceFrame
         self._ref_frame = rf_type.LOCAL_WORLD_ALIGNED
-        self._last_diagnostics: SolveDiagnostics | None = None
-
-    @property
-    def last_diagnostics(self) -> SolveDiagnostics | None:
-        """Diagnostics from the most recent solve_frame call."""
-        return self._last_diagnostics
 
     @property
     def coordinate_map(self) -> CoordinateMap:
@@ -318,7 +298,6 @@ class MarkerIkSolver:
         jacobian = np.vstack([marker_jac, closure_jac, g_jac, reg_jac])
         return residual, jacobian
 
-    @overload
     def solve_frame(
         self,
         target: Array,
@@ -329,40 +308,8 @@ class MarkerIkSolver:
         q_prior: Array | None = None,
         iterations: int | None = None,
         closure_weight: float | None = None,
-        return_diagnostics: Literal[False] = False,
-    ) -> tuple[Array, float, float]: ...
-
-    @overload
-    def solve_frame(
-        self,
-        target: Array,
-        valid: NDArray[np.bool_],
-        weights: Array,
-        q_init: Array,
-        *,
-        q_prior: Array | None = None,
-        iterations: int | None = None,
-        closure_weight: float | None = None,
-        return_diagnostics: Literal[True],
-    ) -> tuple[Array, float, float, SolveDiagnostics]: ...
-
-    def solve_frame(
-        self,
-        target: Array,
-        valid: NDArray[np.bool_],
-        weights: Array,
-        q_init: Array,
-        *,
-        q_prior: Array | None = None,
-        iterations: int | None = None,
-        closure_weight: float | None = None,
-        return_diagnostics: bool = False,
-    ) -> tuple[Array, float, float] | tuple[Array, float, float, SolveDiagnostics]:
-        """Return (q, marker RMS over valid markers, closure position error norm).
-
-        If return_diagnostics is True, returns (q, rms, closure, diagnostics).
-        In all cases, diagnostics are also stored in self.last_diagnostics.
-        """
+    ) -> tuple[Array, float, float]:
+        """Return (q, marker RMS over valid markers, closure position error norm)."""
         opts = self._options
         q = np.clip(np.asarray(q_init, dtype=float), self._lower, self._upper)
         prior = q.copy() if q_prior is None else np.asarray(q_prior, dtype=float)
@@ -370,14 +317,8 @@ class MarkerIkSolver:
         residual, jacobian = self._residual_and_jacobian(
             q, target, valid, weights, prior, closure_weight
         )
-        cost_initial = float(residual @ residual)
-        cost = cost_initial
-        converged = False
-        actual_iters = 0
-        max_iters = iterations or opts.iterations
-
-        for it in range(max_iters):
-            actual_iters = it + 1
+        cost = float(residual @ residual)
+        for _ in range(iterations or opts.iterations):
             normal = jacobian.T @ jacobian
             step = -np.linalg.solve(
                 normal + damping * np.eye(self._map.n), jacobian.T @ residual
@@ -401,210 +342,18 @@ class MarkerIkSolver:
             else:
                 damping *= 10.0
             if norm < opts.convergence_tol:
-                converged = True
                 break
-
-        # Compute projected gradient norm: proj_step = q - clip(q - grad, lower, upper)
-        grad = jacobian.T @ residual
-        proj_step = q - np.clip(q - grad, self._lower, self._upper)
-        projected_gradient_norm = float(np.max(np.abs(proj_step)))
-        active_bounds_count = int(
-            np.sum((q <= self._lower + 1e-4) | (q >= self._upper - 1e-4))
-        )
-        if projected_gradient_norm < opts.convergence_tol:
-            converged = True
-
         positions = self.markers(q)
         rows = np.flatnonzero(valid)
-        diff = positions[rows] - target[rows]
         rms = (
             float(
-                np.sqrt(
-                    np.mean(np.einsum("...i,...i->...", diff, diff))
-                )  # ⚡ Bolt: np.einsum is ~2x faster than np.sum(diff ** 2, axis=1)
+                np.sqrt(np.mean(np.sum((positions[rows] - target[rows]) ** 2, axis=1)))
             )
             if rows.size
             else float("nan")
         )
         closure = self._plant.closure_position_linearization(self._map.as_dict(q))
-        closure_error_m = float(np.linalg.norm(closure.position))
-
-        diag = SolveDiagnostics(
-            iterations=actual_iters,
-            final_cost=cost,
-            marker_rms=rms,
-            closure_error_m=closure_error_m,
-            projected_gradient_norm=projected_gradient_norm,
-            active_bounds_count=active_bounds_count,
-            converged=converged,
-            cost_decrease=float(cost_initial - cost),
-        )
-        self._last_diagnostics = diag
-
-        if return_diagnostics:
-            return q, rms, closure_error_m, diag
-        return q, rms, closure_error_m
-
-    def solve_frame_multi_start(
-        self,
-        target: Array,
-        valid: NDArray[np.bool_],
-        weights: Array,
-        seeds: Sequence[Array],
-        *,
-        closure_weight: float | None = None,
-        iterations: int | None = None,
-        estimate_geometric_floor: bool = True,
-    ) -> tuple[Array, float, float, SolveDiagnostics, float]:
-        """Solve frame from multiple seeds, evaluating geometric floor with and without closure.
-
-        Returns (best_q, best_rms, best_closure, best_diagnostics, geometric_floor_rms).
-        """
-        require(len(seeds) > 0, "at least one seed must be provided")
-
-        best_q: Array | None = None
-        best_rms = float("inf")
-        best_closure = float("inf")
-        best_diag: SolveDiagnostics | None = None
-        best_cost = float("inf")
-        geometric_floor_rms = float("inf")
-
-        for seed in seeds:
-            # Constrained solve
-            q_cand, rms_cand, clos_cand, diag_cand = self.solve_frame(
-                target,
-                valid,
-                weights,
-                seed,
-                closure_weight=closure_weight,
-                iterations=iterations,
-                return_diagnostics=True,
-            )
-            if diag_cand.final_cost < best_cost:
-                best_cost = diag_cand.final_cost
-                best_q = q_cand
-                best_rms = rms_cand
-                best_closure = clos_cand
-                best_diag = diag_cand
-
-            # Geometric floor estimation without closure
-            if estimate_geometric_floor:
-                _, unconstrained_rms, _ = self.solve_frame(
-                    target,
-                    valid,
-                    weights,
-                    seed,
-                    closure_weight=0.0,
-                    iterations=iterations,
-                )
-                if unconstrained_rms < geometric_floor_rms:
-                    geometric_floor_rms = unconstrained_rms
-
-        ensure(
-            best_q is not None and best_diag is not None,
-            "multi-start solve must yield a solution",
-        )
-        assert best_q is not None and best_diag is not None
-        if not estimate_geometric_floor:
-            geometric_floor_rms = best_rms
-        return best_q, best_rms, best_closure, best_diag, geometric_floor_rms
-
-    def refine_overlapping_window(
-        self,
-        targets: Array,
-        valid: NDArray[np.bool_],
-        weights: Array,
-        q_traj: Array,
-        *,
-        window_size: int = 5,
-        overlap: int = 2,
-        temporal_regularisation: float = 1e-2,
-    ) -> tuple[Array, Array, Array]:
-        """Refine trajectory using overlapping bounded windows with temporal continuity.
-
-        Returns (q_refined, rms, closure).
-        """
-        n_nodes = targets.shape[0]
-        require(q_traj.shape[0] == n_nodes, "q_traj length must match targets")
-        require(window_size >= 3, "window_size must be at least 3")
-        require(
-            0 < overlap < window_size,
-            "overlap must be strictly between 0 and window_size",
-        )
-
-        step = window_size - overlap
-        q_accum = np.zeros_like(q_traj, dtype=np.float64)
-        weight_accum = np.zeros((n_nodes, 1), dtype=np.float64)
-
-        start = 0
-        while start < n_nodes:
-            end = min(start + window_size, n_nodes)
-            w_len = end - start
-            if w_len < 2:
-                q_accum[start:end] += q_traj[start:end]
-                weight_accum[start:end] += 1.0
-                break
-
-            blend = np.ones(w_len)
-            if start > 0:
-                ramp_up = min(overlap, w_len)
-                blend[:ramp_up] = np.linspace(1.0 / (ramp_up + 1), 1.0, ramp_up)
-            if end < n_nodes:
-                ramp_down = min(overlap, w_len)
-                blend[-ramp_down:] = np.linspace(1.0, 1.0 / (ramp_down + 1), ramp_down)
-
-            q_win = q_traj[start:end].copy()
-            for k in range(w_len):
-                global_idx = start + k
-                if global_idx == 0:
-                    prior = q_win[0]
-                elif global_idx == 1:
-                    prior = q_accum[0] / max(weight_accum[0, 0], 1.0)
-                else:
-                    prev1 = q_accum[global_idx - 1] / max(
-                        weight_accum[global_idx - 1, 0], 1.0
-                    )
-                    prev2 = q_accum[global_idx - 2] / max(
-                        weight_accum[global_idx - 2, 0], 1.0
-                    )
-                    prior = 2.0 * prev1 - prev2
-
-                q_sol, _, _ = self.solve_frame(
-                    targets[global_idx],
-                    valid[global_idx],
-                    weights,
-                    q_win[k],
-                    q_prior=prior,
-                )
-                q_win[k] = q_sol
-                q_accum[global_idx] += blend[k] * q_sol
-                weight_accum[global_idx] += blend[k]
-
-            start += step
-
-        q_refined = q_accum / np.maximum(weight_accum, 1e-12)
-        q_refined = np.clip(q_refined, self._lower, self._upper)
-
-        rms = np.empty(n_nodes)
-        closure = np.empty(n_nodes)
-        for i in range(n_nodes):
-            pos = self.markers(q_refined[i])
-            rows = np.flatnonzero(valid[i])
-            rms[i] = (
-                float(
-                    np.sqrt(
-                        np.mean(np.sum((pos[rows] - targets[i, rows]) ** 2, axis=1))
-                    )
-                )
-                if rows.size
-                else float("nan")
-            )
-            c = self._plant.closure_position_linearization(
-                self._map.as_dict(q_refined[i])
-            )
-            closure[i] = float(np.linalg.norm(c.position))
-
-        return q_refined, rms, closure
+        return q, rms, float(np.linalg.norm(closure.position))
 
     def solve_address(
         self,

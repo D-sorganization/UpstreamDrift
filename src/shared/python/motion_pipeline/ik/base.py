@@ -240,11 +240,20 @@ def make_ik_solver(
     if isinstance(backend, str):
         backend = IKBackendType(backend.lower())
 
-    if backend in (IKBackendType.MUJOCO, IKBackendType.OPENSIM, IKBackendType.DRAKE):
-        raise NotImplementedError(  # tracked: #10331
-            f"IK backend '{backend.value}' is retired per ADR-0051; "
-            "use the MatchingPlant pipeline (MS-10) or 'geometric' / 'pinocchio' backend."
-        )
+    if backend == IKBackendType.MUJOCO:
+        from .mujoco_backend import MuJoCoIKSolver
+
+        return MuJoCoIKSolver(config)
+
+    if backend == IKBackendType.OPENSIM:
+        from .opensim_backend import OpenSimIKSolver
+
+        return OpenSimIKSolver(config)
+
+    if backend == IKBackendType.DRAKE:
+        from .drake_backend import DrakeIKSolver
+
+        return DrakeIKSolver(config)
 
     if backend == IKBackendType.PINOCCHIO:
         from .pinocchio_backend import PinocchioIKSolver

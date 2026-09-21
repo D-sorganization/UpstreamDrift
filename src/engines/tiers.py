@@ -13,11 +13,6 @@ ENGINE_TIERS: dict[str, str] = {
     "opensim": "experimental",
     "myosuite": "experimental",
     "putting_green": "core",
-    "jaxsim": "experimental",
-}
-
-ENGINE_TIER_ALIASES: dict[str, str] = {
-    "myosim": "myosuite",
 }
 
 
@@ -34,7 +29,6 @@ def get_engine_tier(engine_name: str) -> str:
         raise TypeError("engine_name must be a string")
 
     normalized_name = engine_name.strip().lower()
-    normalized_name = ENGINE_TIER_ALIASES.get(normalized_name, normalized_name)
     if not normalized_name:
         raise ValueError("engine_name must not be empty")
 

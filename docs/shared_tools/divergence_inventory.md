@@ -42,7 +42,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `club_data` | 0 | 0 | 0 | 11 | 0 | 0 |
 | `codemap` | 0 | 0 | 0 | 0 | 15 | 0 |
 | `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `config` | 0 | 2 | 0 | 14 | 0 | 2 |
+| `config` | 0 | 2 | 0 | 13 | 0 | 2 |
 | `contracts.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `control_features_registry.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 26 | 53 | 15 | 18 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 177 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 168 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
@@ -96,7 +96,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plotting` | 0 | 3 | 0 | 25 | 0 | 3 |
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `pose_estimation` | 0 | 0 | 0 | 18 | 0 | 0 |
-| `pose_interchange` | 0 | 0 | 0 | 26 | 0 | 0 |
+| `pose_interchange` | 0 | 0 | 0 | 25 | 0 | 0 |
 | `programmatic_pid` | 0 | 0 | 0 | 0 | 24 | 0 |
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -129,8 +129,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1360** | **709** | **702** |
+| `workspace` | 0 | 0 | 0 | 5 | 0 | 0 |
+| **Total** | **423** | **279** | **123** | **1338** | **709** | **702** |
 
 ## Diverged Files by Package
 
@@ -261,7 +261,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `config/__init__.py` | +5391 |  | Dieter Olson 2026-09-20 | codex-scheduled-tasks[bot] 2026-05-20 |
+| `config/__init__.py` | +4998 |  | d-sorgclaudeagent[bot] 2026-07-26 | codex-scheduled-tasks[bot] 2026-05-20 |
 | `config/environment.py` | +13621 |  | d-sorgclaudeagent[bot] 2026-07-26 | codex-scheduled-tasks[bot] 2026-05-20 |
 
 ### Package `contracts.py` (1 Diverged Files)

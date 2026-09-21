@@ -75,8 +75,6 @@ class WorkspaceActionType(str, Enum):
     PLOT = "open_in_plot"
     COMPARE = "compare"
     EXPORT = "export"
-    COMPARE_FLIGHT_MODELS = "open_in_compare_flight_models"
-    OPEN_IN_IMPACT_EXPLORER = "open_in_impact_explorer"
 
 
 class MissingAssetDiagnosticError(ValueError):
@@ -360,23 +358,6 @@ class ResultsWorkspaceCoordinator:
                     action=action,
                     enabled=False,
                     reason="Plot requires numerical dynamic run, measurements, or trajectory data",
-                )
-        elif action == WorkspaceActionType.COMPARE_FLIGHT_MODELS:
-            if item.category != ResultCategory.FLIGHT_TRAJECTORY:
-                return ActionAvailability(
-                    action=action,
-                    enabled=False,
-                    reason=f"Action '{action.value}' requires a flight trajectory artifact, got {item.category.value}",
-                )
-        elif action == WorkspaceActionType.OPEN_IN_IMPACT_EXPLORER:
-            if item.category not in (
-                ResultCategory.FLIGHT_TRAJECTORY,
-                ResultCategory.DYNAMIC_RUN,
-            ):
-                return ActionAvailability(
-                    action=action,
-                    enabled=False,
-                    reason=f"Action '{action.value}' requires a flight trajectory or dynamic run artifact, got {item.category.value}",
                 )
 
         if not target_path.exists():

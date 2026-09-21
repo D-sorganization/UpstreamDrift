@@ -122,9 +122,8 @@ class TestProviderRegistration:
         assert isinstance(provider, PinocchioFitSwingProvider)
         assert provider.engine_name == "pinocchio"
 
-    @pytest.mark.unit
-    def test_supports_body_target_returns_true(self) -> None:
-        assert PinocchioFitSwingProvider().supports_body_target() is True
+    def test_supports_body_target_returns_false(self) -> None:
+        assert PinocchioFitSwingProvider().supports_body_target() is False
 
     def test_supports_ball_target_returns_false(self) -> None:
         assert PinocchioFitSwingProvider().supports_ball_target() is False
