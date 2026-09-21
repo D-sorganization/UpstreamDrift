@@ -263,14 +263,14 @@ def qualify_derived_orientation_axes(
             "degenerate orientation axes require degeneracy flag "
             f"(policy requires {ORIENTATION_AXIS_POLICY.degeneracy_flag_required})"
         )
-    notes: tuple[str, ...] = ()
+    notes: list[str] = []
     if (not is_degenerate) and degenerate:
         # Caller may mark conservatively; still accept with note.
-        notes = ("degeneracy flag set without geometric degeneracy",)
+        notes.append("degeneracy flag set without geometric degeneracy")
     return DerivationMetadata(
         orientation_axis_status=ORIENTATION_AXIS_POLICY.status_when_derived,
         degenerate_axes=bool(degenerate or is_degenerate),
-        notes=notes,
+        notes=tuple(notes),
     )
 
 
