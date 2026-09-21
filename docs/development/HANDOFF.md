@@ -234,7 +234,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-co02-10606`.
-- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) open (squash auto-merge). Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged. Head `61a07e27beb9b56fba2c38419bcabc963ea7e68a`.
+- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) open (squash auto-merge). Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged. Head SELF.
 - Entry DL-#10606. Delivered: `GolfPlausibilityPriors` / `PriorAssumption`, per-roster `ClubOnlyProfile` (observation/physical/plausibility + ObjectiveRule), `assess_ambiguity`, `evaluate_club_only_acceptance` with separated `ClubOnlyStatuses`, normalized position/SO(3) orientation errors, evidence JSON for all 20 registered models.
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_plausibility_acceptance.py -q -n 0 --no-cov --timeout=60` (13 passed); `python -O` DbC ValueError checks green; pre-push ruff/mypy/bandit/pytest-unit green.
 - Limitations: software contracts and synthetic acceptance cases only; no native physical qualification, retrieval/IK (CO-03), or pendulum matching (CO-04).
