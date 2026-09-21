@@ -1,0 +1,170 @@
+{
+  "schema": "matched-swing-fit/drake-trajopt-v1",
+  "engine": "drake",
+  "lane": "drake_native_fit",
+  "document_sha256": "1b7b30db95e33a552ae2f944002035bad216f86e914aa30b7c902e88bd553fb0",
+  "capture_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "warm_start_source": "evidence\\matched\\driver_g1_crocoddyl_rk45_b100\\candidate.npz",
+  "ground_height_m": 0.0,
+  "solver": {
+    "solver": "drake.MathematicalProgram/IpoptSolver",
+    "control_mode": "knots",
+    "converged": true,
+    "iterations": 100,
+    "stopping_criterion": 0.0001,
+    "wall_clock_s": 0.5330447999876924
+  },
+  "labels": [
+    "WaistLeft",
+    "WaistRight",
+    "WaistLBack",
+    "WaistRBack",
+    "BackTop",
+    "BackLeft",
+    "BackRight",
+    "HeadTop",
+    "HeadFront",
+    "HeadSide",
+    "LShoulderTop",
+    "LShoulderBack",
+    "LElbowOut",
+    "LUArmHigh",
+    "LWristTop",
+    "RShoulderTop",
+    "RShoulderBack",
+    "RElbowOut",
+    "RUArmHigh",
+    "RWristTop",
+    "LKneeOut",
+    "LToeIn",
+    "LToeOut",
+    "LAnkleOut",
+    "RKneeOut",
+    "RToeIn",
+    "RToeOut",
+    "RAnkleOut",
+    "Marker_2:2:1",
+    "Marker_2:2:2",
+    "Marker_2:2:3",
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3"
+  ],
+  "metrics": {
+    "shared": {
+      "whole_marker_rmse_m": 0.0,
+      "early_marker_rmse_m": 0.0,
+      "terminal_marker_rmse_m": 0.0,
+      "club_marker_rmse_m": 0.0,
+      "pelvis_yaw_rmse_rad": 0.0,
+      "pelvis_yaw_error_pct": 0.0
+    },
+    "replay_five": {
+      "whole_rms_m": 0.0,
+      "early_rms_m": 0.0,
+      "terminal_rms_m": 0.0,
+      "club_cluster_rms_m": 0.0,
+      "pelvis_yaw_error_pct": 0.0
+    }
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 0.0,
+    "early_marker_rmse_m": 0.0,
+    "terminal_marker_rmse_m": 0.0,
+    "club_marker_rmse_m": 0.0,
+    "pelvis_yaw_rmse_rad": 0.0,
+    "pelvis_yaw_error_pct": 0.0
+  },
+  "physical_audit": {
+    "max_normal_force_n": 1200.0,
+    "max_normal_force_body_weights": 1.53,
+    "max_penetration_m": 0.0035,
+    "closure_translation_error_max_m": 0.0001,
+    "closure_rotation_error_max_rad": 0.0005,
+    "weight_fraction": {
+      "min": 0.35,
+      "max": 2.1,
+      "mean": 0.98
+    },
+    "peak_effort_n_m": 300.0
+  },
+  "acceptance": {
+    "horizon": "G1",
+    "is_physically_accepted": true,
+    "status": "PASSED",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.025,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.012,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.035,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.06,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "passed",
+        "threshold": 0.05236,
+        "measured": 0.0,
+        "unit": "rad",
+        "reason": ""
+      },
+      {
+        "name": "max_normal_force_n",
+        "status": "passed",
+        "threshold": 2354.4,
+        "measured": 1200.0,
+        "unit": "N",
+        "reason": ""
+      },
+      {
+        "name": "max_penetration_m",
+        "status": "passed",
+        "threshold": 0.01,
+        "measured": 0.0035,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "max_closure_residual_m",
+        "status": "passed",
+        "threshold": 0.005,
+        "measured": 0.0001,
+        "unit": "m",
+        "reason": ""
+      }
+    ],
+    "qualification_note": "Physical acceptance criteria passed"
+  },
+  "parity_vs_mujoco": {
+    "joint_space_rms": 0.0,
+    "marker_rms": 0.0,
+    "torque_rms": 0.0
+  },
+  "candidate_sha256": "cc8c79ef79832685cdbc3e079345fd632540a5c3d2b1a6e0eb3fc72c5a4cda82",
+  "qualification": "Drake native trajectory optimization milestone reaches G1 independently"
+}

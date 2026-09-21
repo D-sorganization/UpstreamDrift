@@ -10,10 +10,6 @@ import numpy as np
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
-from src.shared.python.motion_matching.pipeline.plant import (
-    compute_attachment_marker_positions,
-    integrate_euler_step,
-)
 
 if TYPE_CHECKING:
     from src.engines.physics_engines.drake.python.full_body_ik import DrakeFullBodyIK
@@ -35,6 +31,11 @@ class DrakeMatchingPlant:
         else:
             self.spec_dict = dict(spec)
         self.model: FullBodyDrakeModel = FullBodyDrakeModel(self.spec_dict)
+        self.adapter = self.model
+        self.upper_body_coordinates: int = int(
+            self.spec_dict.get("upper_body_counts", {}).get("coordinates", 0)
+        )
+        self.model.upper_body_coordinates = self.upper_body_coordinates
 
     @property
     def engine_name(self) -> str:
@@ -59,14 +60,7 @@ class DrakeMatchingPlant:
             DrakeFullBodyIK,
         )
 
-        spec_copy = dict(self.spec_dict)
-        spec_copy["marker_attachments"] = {
-            label: {"body": body, "offset": list(offset)}
-            for label, (body, offset) in attachments.items()
-        }
-        ik = DrakeFullBodyIK(spec_copy)
-        ik.labels = tuple(attachments.keys())
-        return ik
+        return DrakeFullBodyIK(self.spec_dict, attachments=attachments)
 
     def frame_poses(
         self, mapping: Mapping[str, tuple[str, Sequence[float]]], q: np.ndarray
@@ -78,8 +72,7 @@ class DrakeMatchingPlant:
     def marker_positions(
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> np.ndarray:
-        ik = self.create_ik(attachments)
-        return compute_attachment_marker_positions(ik.pose_fn(q), attachments)
+        return self.model.marker_positions(q, attachments)
 
     def accelerations(
         self,
@@ -117,6 +110,12 @@ class DrakeMatchingPlant:
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
     ) -> tuple[np.ndarray, np.ndarray]:
-        return integrate_euler_step(
-            self.accelerations, self.coordinate_order, q, v, tau, dt
+        return self.model.step(q, v, tau, dt)
+
+    def fit(self, *args: Any, **kwargs: Any) -> Any:
+        """Execute Drake native full-body trajectory fitting (MS-30)."""
+        from src.engines.physics_engines.drake.python.full_body_fit import (
+            fit_full_body_drake,
         )
+
+        return fit_full_body_drake(self.spec_dict, *args, **kwargs)
