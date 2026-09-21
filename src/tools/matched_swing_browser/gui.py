@@ -765,7 +765,7 @@ class MatchedSwingBrowserWidget(QWidget):
             QMessageBox.information(
                 self, "Export Video", f"Successfully exported video to:\n{out}"
             )
-        except Exception as exc:  # noqa: BLE001
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
             logger.exception("Failed video export: %s", exc)
             QMessageBox.critical(
                 self, "Export Error", f"Could not export video:\n{exc}"
@@ -799,7 +799,7 @@ class MatchedSwingBrowserWidget(QWidget):
             QMessageBox.information(
                 self, "Export Report", f"Successfully exported report to:\n{out}"
             )
-        except Exception as exc:  # noqa: BLE001
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
             logger.exception("Failed report export: %s", exc)
             QMessageBox.critical(
                 self, "Export Error", f"Could not export report:\n{exc}"

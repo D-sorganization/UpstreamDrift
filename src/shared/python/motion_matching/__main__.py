@@ -90,7 +90,7 @@ def export_report_cli(args: argparse.Namespace) -> int:
         )
         sys.stdout.write(f"Wrote fit-quality report to {args.out}\n")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except (OSError, ValueError, RuntimeError, KeyError) as exc:
         _print_error(f"failed to export report: {exc}")
         return 1
 
@@ -109,7 +109,7 @@ def export_video_cli(args: argparse.Namespace) -> int:
         )
         sys.stdout.write(f"Wrote candidate video to {args.out}\n")
         return 0
-    except Exception as exc:  # noqa: BLE001
+    except (OSError, ValueError, RuntimeError, KeyError) as exc:
         _print_error(f"failed to export video: {exc}")
         return 1
 
