@@ -51,13 +51,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10589 (TB-04, parent #10584, program #10363)
 - **Branch:** feat/tb04-double-pendulum-fit-10589
-- **PR:** #10636
+- **PR:** #10638
 - **Paths:** src/engines/physics_engines/pendulum/python/motion_matching/adapters.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/provider.py; src/engines/physics_engines/pendulum/python/motion_matching/qualification.py; src/engines/physics_engines/pendulum/python/motion_matching/**init**.py; tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py; docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz; docs/plans/tour_baselines/evidence/tb04_iron_baseline_package.npz; docs/plans/tour_baselines/coverage_matrix.md
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 (15/15 unit tests pass in 6.5s across test_double_pendulum_fit.py and test_motion_matching_provider.py; ruff check clean; ruff format clean; black clean; mypy 0 errors across 4 source and 2 test files; check_architecture_budget passes; check_file_size_budget passes; check_dry_duplication_gate passes).
 - **Summary:** Built bidirectional mapping and verified mathematical & numerical acceleration parity (< 1e-14) between DoublePendulumDynamics and Tools physics.py. Formulated continuous smooth bounded joint torques via degree-6 Bernstein polynomials strictly bounded in [tau_min, tau_max] with curvature and effort regularization. Fixed frame-0 off-by-one initial state evaluation bug, implemented non-uniform timestep integration, and added independent 4x tighter substep replay verification. Produced authoritative qualification receipts and baseline packages for Driver and 7-Iron.
 - **Next step:** Land PR via normal squash merge and proceed to TB-05 (#10590).
 - **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json; tests/unit/engines/physics_engines/pendulum/test_double_pendulum_fit.py; tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py.
+
+### DL-#10433 · Enforce Contact, Actuator and Root Constraints in Force Allocation
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10433 (PF-03, epic #10430)
+- **Branch:** feat/issue-10433-pf03-contact-actuator-root-constraints
+- **PR:** #10498 (auto-merge enabled)
+- **Paths:** src/shared/python/motion_matching/contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator.py; tests/unit/motion_matching/test_contact_force_allocator_pf03.py
+- **Started:** 2026-09-19
+- **Last verified:** 2026-09-19 at HEAD (12 unit tests pass across contact_force_allocator and test_contact_force_allocator_pf03; ruff clean; black clean; mypy strict clean; bandit clean).
+- **Summary:** Upgrades ContactForceAllocator with constrained QP inverse dynamics. Enforces 8-faceted polyhedral friction pyramid, non-negative normal ground forces along arbitrary terrain normals, exact contact separation masks, and strict actuator bounds without post-projection. Separates diagnostic root slack so ungrounded reactions never create false physical success. Introduces FeasibilityStatus, HARD_ZERO_TRAIL mode, and verify_torque_and_rate_bounds.
+- **Next step:** Land PR #10498 via CI and proceed to PF-04.
+- **Evidence:** tests/unit/motion_matching/test_contact_force_allocator_pf03.py; tests/unit/motion_matching/test_contact_force_allocator.py.
 
 ### DL-#10588 · Calibrate Swing Planes, Fixed Geometry and Feasible Initial States
 
