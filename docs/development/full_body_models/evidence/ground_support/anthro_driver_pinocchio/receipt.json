@@ -8,6 +8,6 @@
   "closure_residual_m": null,
   "reason": "pinocchio/pink SDK unavailable on this Windows host; ControlTower micromamba env required for native constraintDynamics and Pink ConstrainedIkReceipt",
   "host": "windows-local",
-  "repository_revision": "pending-commit",
+  "repository_revision": "84e2c5a45373b3864a7479b4e5f52cbb6376425d",
   "scope": "MS-14 Pinocchio MatchingPlant full lane; blocked until Pinocchio constraintDynamics + shared contact law run on a qualified host"
 }
