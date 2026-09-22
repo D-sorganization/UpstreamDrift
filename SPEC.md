@@ -6687,6 +6687,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10700 | Optimize fast club-only matching and expose candidate diversity (CO-07): bounded presets, immutable cache/checkpoint, cold/retrieval/reduced-to-full starts, feasibility-first Pareto pruning, optional neural slot without weights; software-contract only. |
+| 2026-09-22 | #10656 | Migrate `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline` off the GUI thread onto `src/tools/async_action.py`; add lower-only GUI-thread-blocking ratchet (`check_gui_thread_blocking_ratchet.py`); wire primary run buttons through shared theme helper (#8880, refs not closes). |
 | 2026-09-22 | #10653 | Consolidate launcher engine meta-tiles (#9479): hide duplicate per-engine dashboards with documented reasons, reclassify three specialized tools to `simulation`, clarify confusable data/video tile names, and move non-golf utilities to Developer & Research (#9480); no capability removed. |
 | 2026-09-21 | #10657 | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization). |
 | 2026-09-22 | #10684 | MS-14 Pinocchio MatchingPlant full-lane contracts: constraintDynamics/contact derivatives, Pink ConstrainedIkReceipt closure budget, fitter MatchingPlant bridge, fail-closed blocked evidence (no invented native G1). |
