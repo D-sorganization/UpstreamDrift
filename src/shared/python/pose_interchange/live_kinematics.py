@@ -24,6 +24,7 @@ Design by contract:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol, runtime_checkable
@@ -116,6 +117,17 @@ class LiveKinematicsService(Protocol):
 
     def capabilities(self) -> ServiceCapabilities:
         """Return the static :class:`ServiceCapabilities` descriptor."""
+
+    def joint_limits(self) -> Mapping[str, tuple[float, float]]:
+        """Return per-joint anatomical limits this engine knows, in degrees.
+
+        Keys are canonical joint names (members of
+        ``REFERENCE_GOLFER_FIELDS``); values are ``(lower_deg, upper_deg)``.
+        A joint absent from the returned mapping has no engine-reported
+        limit; callers (Pose Studio's ``JointPanel``) fall back to a
+        generic default range for it. Engines with no anatomical
+        joint-limit data return an empty mapping rather than guessing.
+        """
 
 
 __all__ = [
