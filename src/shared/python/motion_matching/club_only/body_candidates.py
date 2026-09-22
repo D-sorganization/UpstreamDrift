@@ -584,6 +584,8 @@ def generate_plausible_body_candidates(
             )
 
     accepted_ids = tuple(c.candidate_id for c in candidates if c.accepted)
+    status: str
+    blocker: str | None
     if accepted_ids:
         status = "generated"
         blocker = None
