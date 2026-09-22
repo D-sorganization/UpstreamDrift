@@ -25,6 +25,7 @@ __all__ = [
     "Dataset",
     "DatasetRegistry",
     "register_neural_episode_corpus",
+    "register_teacher_episode_corpus",
 ]
 
 
@@ -74,6 +75,63 @@ def register_neural_episode_corpus(
     notes = description.strip() or (
         f"NM-03 episode corpus ({EPISODE_STORE_SCHEMA}); "
         "load via EpisodeStore / family splits, not row-level shuffles."
+    )
+    dataset = Dataset(
+        dataset_id=dataset_id,
+        name=name,
+        path=root,
+        format="hdf5",
+        size_bytes=0,
+        schema_version=1,
+        description=notes,
+    )
+    registry.register(dataset)
+    return dataset
+
+
+def register_teacher_episode_corpus(
+    registry: DatasetRegistry,
+    *,
+    dataset_id: str,
+    name: str,
+    root: Path,
+    description: str = "",
+) -> Dataset:
+    """Register an NM-04 teacher episode-store root as a training :class:`Dataset`.
+
+    Design by Contract:
+    - ``root`` must be a :class:`Path` for an :class:`EpisodeStore` that
+      :class:`~src.shared.python.neural_motion.teachers.NestedTeacherCorpus`
+      writes into (may be empty yet).
+    - Format is always ``hdf5``; description cites ``neural-teacher-episodes/1.0.0``.
+    - Arrays are never materialised into RAM at registration time.
+
+    Companion to :func:`register_neural_episode_corpus` (#10618) and the
+    scheduler admission seam :func:`~src.shared.python.training.scheduler.neural_teacher_corpus_budget`
+    (#10619).
+    """
+
+    if not isinstance(registry, DatasetRegistry):
+        raise TypeError(
+            f"registry must be DatasetRegistry (got {type(registry).__name__})"
+        )
+    if not isinstance(root, Path):
+        raise TrainingConfigError(
+            f"root must be a pathlib.Path (got {type(root).__name__})"
+        )
+
+    from src.shared.python.neural_motion.episodes import (
+        EPISODE_STORE_SCHEMA,
+        EpisodeStore,
+    )
+    from src.shared.python.neural_motion.teachers import TEACHER_SCHEMA
+
+    store = EpisodeStore(root)
+    # Touch the store layout without loading episode arrays (no all-RAM path).
+    _ = store.iter_episode_ids()
+    notes = description.strip() or (
+        f"NM-04 teacher corpus ({TEACHER_SCHEMA} via {EPISODE_STORE_SCHEMA}); "
+        "load via NestedTeacherCorpus / EpisodeStore, not row-level shuffles."
     )
     dataset = Dataset(
         dataset_id=dataset_id,
