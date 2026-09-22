@@ -19,7 +19,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9700-Planning · Deferred External Validation Plans
 
-- **State:** shipped
+- **State:** in_review
 - **Owner:** codex (session `codex-validation-planning-20260922-ud`)
 - **Issue:** #9700; #10375; #10382; #9619; #9613; #9546
 - **Branch:** `docs/deferred-validation-planning`
@@ -45,7 +45,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
 - **Branch:** feat/10591-upper-body-capture (merged)
