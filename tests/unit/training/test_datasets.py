@@ -168,3 +168,40 @@ class TestDatasetRegistry:
         registry = DatasetRegistry(initial=(a, b))
         assert len(registry) == 2
         assert set(registry) == {a, b}
+
+
+class TestEpisodeCorpusRegistrationHelpers:
+    """Shared-helper contracts for NM-03/NM-04 corpus registration (#10698 DRY)."""
+
+    @pytest.mark.parametrize(
+        "register_fn_name",
+        ("register_neural_episode_corpus", "register_teacher_episode_corpus"),
+    )
+    def test_rejects_non_registry(self, register_fn_name: str, tmp_path: Path) -> None:
+        from training import datasets as datasets_mod
+
+        register_fn = getattr(datasets_mod, register_fn_name)
+        with pytest.raises(TypeError, match="DatasetRegistry"):
+            register_fn(
+                object(),  # type: ignore[arg-type]
+                dataset_id="bad",
+                name="bad",
+                root=tmp_path,
+            )
+
+    @pytest.mark.parametrize(
+        "register_fn_name",
+        ("register_neural_episode_corpus", "register_teacher_episode_corpus"),
+    )
+    def test_rejects_non_path_root(self, register_fn_name: str) -> None:
+        from training import datasets as datasets_mod
+
+        register_fn = getattr(datasets_mod, register_fn_name)
+        registry = DatasetRegistry()
+        with pytest.raises(TrainingConfigError, match="pathlib.Path"):
+            register_fn(
+                registry,
+                dataset_id="bad",
+                name="bad",
+                root="/not/a/path",  # type: ignore[arg-type]
+            )

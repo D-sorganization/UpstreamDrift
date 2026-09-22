@@ -21,6 +21,9 @@ from src.shared.python.motion_matching.inverse import (  # noqa: E402
     DEFAULT_COEFFICIENT_DIM,
     InverseRegressor,
     RegressorConfig,
+)
+from src.shared.python.motion_matching.inverse.regressor_training import (  # noqa: E402
+    TrainingConfig,
     train_inverse_regressor,
 )
 
@@ -117,14 +120,16 @@ def test_inverse_regressor_training_three_epoch_run_reduces_val_loss(
     cfg = RegressorConfig(embed_dim=32, mlp_hidden=64, n_blocks=2, dropout=0.0)
     result = train_inverse_regressor(
         tmp_path,
-        epochs=8,
-        batch_size=4,
-        lr=5e-3,
-        seed=42,
-        device="cpu",
-        patience=20,
-        output_root=tmp_path / "out",
-        config=cfg,
+        TrainingConfig(
+            epochs=8,
+            batch_size=4,
+            lr=5e-3,
+            seed=42,
+            device="cpu",
+            patience=20,
+            output_root=tmp_path / "out",
+            regressor=cfg,
+        ),
         dataset_loader=_loader_factory(),
     )
 
@@ -148,13 +153,15 @@ def test_inverse_regressor_training_checkpoint_round_trip(tmp_path: Path) -> Non
     cfg = RegressorConfig(embed_dim=32, mlp_hidden=64, n_blocks=2)
     result = train_inverse_regressor(
         tmp_path,
-        epochs=1,
-        batch_size=4,
-        lr=1e-3,
-        seed=0,
-        device="cpu",
-        output_root=tmp_path / "out",
-        config=cfg,
+        TrainingConfig(
+            epochs=1,
+            batch_size=4,
+            lr=1e-3,
+            seed=0,
+            device="cpu",
+            output_root=tmp_path / "out",
+            regressor=cfg,
+        ),
         dataset_loader=_loader_factory(),
     )
     restored = InverseRegressor.from_checkpoint(result.checkpoint_path)
@@ -175,9 +182,7 @@ def test_inverse_regressor_training_invalid_epochs_rejected(tmp_path: Path) -> N
     with pytest.raises(ValueError, match="epochs"):
         train_inverse_regressor(
             tmp_path,
-            epochs=0,
-            device="cpu",
-            output_root=tmp_path / "out",
+            TrainingConfig(epochs=0, device="cpu", output_root=tmp_path / "out"),
             dataset_loader=_loader_factory(),
         )
 
@@ -188,10 +193,12 @@ def test_inverse_regressor_training_invalid_val_fraction_rejected(
     with pytest.raises(ValueError, match="val_fraction"):
         train_inverse_regressor(
             tmp_path,
-            epochs=1,
-            val_fraction=1.5,
-            device="cpu",
-            output_root=tmp_path / "out",
+            TrainingConfig(
+                epochs=1,
+                val_fraction=1.5,
+                device="cpu",
+                output_root=tmp_path / "out",
+            ),
             dataset_loader=_loader_factory(),
         )
 
@@ -200,10 +207,12 @@ def test_invalid_batch_size_rejected(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="batch_size"):
         train_inverse_regressor(
             tmp_path,
-            epochs=1,
-            batch_size=0,
-            device="cpu",
-            output_root=tmp_path / "out",
+            TrainingConfig(
+                epochs=1,
+                batch_size=0,
+                device="cpu",
+                output_root=tmp_path / "out",
+            ),
             dataset_loader=_loader_factory(),
         )
 
@@ -212,9 +221,8 @@ def test_invalid_lr_rejected(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="lr"):
         train_inverse_regressor(
             tmp_path,
-            epochs=1,
-            lr=0.0,
-            device="cpu",
-            output_root=tmp_path / "out",
+            TrainingConfig(
+                epochs=1, lr=0.0, device="cpu", output_root=tmp_path / "out"
+            ),
             dataset_loader=_loader_factory(),
         )
