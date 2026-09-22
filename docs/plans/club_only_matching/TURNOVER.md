@@ -6,17 +6,19 @@ Governing epic: [#10602](https://github.com/D-sorganization/UpstreamDrift/issues
 Companion epic: [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
 **CO-00 (#10604)** shipped via PR #10667. **CO-01 (#10605)** shipped via PR #10670.
 **CO-02 (#10606)** shipped via PR #10675. **CO-03 (#10607)** shipped via PR #10678.
-**CO-05 (#10609)** is in progress on `feat/issue-10609-co05-plausible-body-candidates`:
-explicit reduced→body topology maps, local grip-Jacobian null-space proposals with
-closure reprojection, and a roster × trial body-candidate matrix with separated
-observation-fit / plausibility / contact-effort / runtime lanes. Evidence:
+**CO-04 (#10608)** is in progress on `feat/issue-10608-co04-pendulum-club-match`
+(PR #10680): driven double/triple club-only fits, distinct fixed-pivot vs
+prescribed moving-hub IDs with external-work accounting, separate in-plane/3D
+errors, cold vs retrieval best-feasible retention, and replay packages with
+named native blockers. **CO-05 (#10609)** shipped via PR #10681 (topology maps,
+null-space proposals, roster × trial body-candidate matrix). Evidence:
 [club_workbook_identity.json](evidence/club_workbook_identity.json),
 [club_observation_contracts.json](evidence/club_observation_contracts.json),
 [club_plausibility_acceptance.json](evidence/club_plausibility_acceptance.json),
 [club_starting_guesses.json](evidence/club_starting_guesses.json),
+[club_pendulum_match.json](evidence/club_pendulum_match.json),
 [club_body_candidates.json](evidence/club_body_candidates.json).
-**CO-04 (#10608)** is a sibling on a separate worktree (pendulum fit paths — do not
-overlap). Existing reference epic
+Existing reference epic
 [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) and
 native program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)
 remain authoritative for their model and physical contracts. Read the companion
@@ -51,15 +53,15 @@ unique workbook trials and the
 CO-00 -> CO-01 -> CO-02 -> CO-03 -> CO-04/CO-05 -> CO-06 -> CO-07 -> CO-08. CO-09
 follows the stable service contract; CO-10 is final acceptance.
 
-The immediate parallel tasks are
-**[#10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608) (CO-04)**
-and **[#10609](https://github.com/D-sorganization/UpstreamDrift/issues/10609) (CO-05)**.
-This is a dispatch-ready plan, not authorization to run every expensive
+The immediate task is
+**[#10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608) (CO-04)
+only** (CO-05 already shipped via #10681). This is a dispatch-ready plan, not
+authorization to run every expensive
 experiment at once. Lower-cost agents handle bounded schema, adapter, fixture, CLI and
 UI work. An experienced reviewer checks model/observation semantics, force
 identifiability, contact, physical feasibility and scientific promotion. Dependencies
 are real contract gates: require merged implementation plus relevant tests/receipts, not
-merely a closed issue.
+merely a closed issue. Do not start CO-06 until CO-04 lands.
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model
