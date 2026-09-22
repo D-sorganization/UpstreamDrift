@@ -31,7 +31,7 @@
 ## Succession — Motion Matching (2026-09-22)
 
 - **Goal:** Finish Antigravity-started motion matching (club-only CO + neural NM)
-  with TDD/DbC/LoD/DRY + cargo rules; professional long-term quality. Software
+  with TDD/DbC/LoD/DRY + fleet rules; professional long-term quality. Software
   contracts ≠ native Fit/G1/G3 success; do not close epics on docs/GUI alone.
 - **Session:** `b27ccab3-1128-492c-a0fb-001367ea3aa8` · **agent:** `local`
 - **Durable copy:**
