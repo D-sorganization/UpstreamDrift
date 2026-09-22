@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10684
 - **Paths:** src/shared/python/motion*matching/pipeline/plants/pinocchio_plant.py; pinocchio_lane_receipts.py; receipt_components.py; cli.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/pipeline/test_pinocchio_plant.py; docs/development/full_body_models/evidence/ground_support/anthro_driver*{pinocchio,pink}/
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after MS-51 #10685 merge; regenerated matched_swing status README for unit-test-gate freshness.
+- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after CO-06 #10687 merge (`f191dd09d`); regenerated matched_swing status README + divergence inventory; blocked native G1 receipts unchanged.
 - **Summary:** Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until ControlTower native run.
 - **Next step:** Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower native pink receipts when scheduled (MS-107 owns G1).
 - **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/; docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/
@@ -500,16 +500,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10608 · CO-04 Match Club-Only Motion With Double and Triple Pendulums
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10608 (epic #10602)
 - **Branch:** feat/issue-10608-co04-pendulum-club-match
-- **PR:** #10680
+- **PR:** #10680 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,replay_package}.py; src/engines/physics_engines/pendulum/python/motion_matching/{club_pendulum_match,club_match_matrix}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — restored vendor pin a9ed0e7c5; re-wrote divergence inventory to include tools-only launch_monitor/gspro_connect.py (unit-test-gate failure on tip 34b447211).
+- **Last verified:** 2026-09-22 — merged via #10680 onto main as prerequisite for CO-06
 - **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
-- **Next step:** Confirm quality-gate green on PR #10680 and squash auto-merge; then dispatch CO-06 #10610.
+- **Next step:** Continue on #10610 (CO-06).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
 
 ### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
@@ -523,8 +523,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 — merged via #10681 onto main as prerequisite for CO-06
 - **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
-- **Next step:** Continue on #10610 (CO-06) after CO-04 lands.
+- **Next step:** Continue on #10610 (CO-06).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
+
+### DL-#10610 · CO-06 Recover Feasible Controls and Independently Replay Candidates
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10610 (epic #10602)
+- **Branch:** feat/10610-co06-controls-replay
+- **PR:** #10687
+- **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at f191dd09d — squash-merged to main via PR #10687; native G1 remains blocked on software-contract fixtures only.
+- **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
+- **Next step:** Dispatch CO-07+ per club-only epic dependency order; do not invent native G1 pass.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

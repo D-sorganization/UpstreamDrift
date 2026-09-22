@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1435,
+    "ud-only": 1437,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 213,
+      "ud-only": 215,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12335,7 +12335,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 8374,
+      "ud_bytes": 9256,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12403,6 +12403,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/club_only/control_replay.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 34313,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/club_only/hand_geometry.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -12432,6 +12444,18 @@
       "package": "motion_matching",
       "subpackage": "club_only",
       "ud_bytes": 2783,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_only/native_g1_gates.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 843,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12503,7 +12527,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 3553,
+      "ud_bytes": 3448,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
