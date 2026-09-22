@@ -123,6 +123,22 @@ def read_episode_by_trial(store: EpisodeStore, trial_id: str) -> EpisodeRecord:
     raise KeyError(f"trial_id {trial_id!r} not found in EpisodeStore")
 
 
+def _state_control_features(
+    q: np.ndarray,
+    v: object,
+    u: object,
+    active_dofs: tuple[int, ...],
+) -> tuple[list[np.ndarray], tuple[str, ...]]:
+    """Assemble ``(q, v, u)`` active-DOF feature columns for forward tasks."""
+    feat_parts = [
+        q[:, active_dofs],
+        np.asarray(v)[:, active_dofs],
+        np.asarray(u)[:, active_dofs],
+    ]
+    feature_names = tuple(f"{ch}[{i}]" for ch in ("q", "v", "u") for i in active_dofs)
+    return feat_parts, feature_names
+
+
 def _episode_arrays(
     episode: EpisodeRecord,
     *,
@@ -160,27 +176,13 @@ def _episode_arrays(
     elif task is DynamicsTaskKind.FORWARD_ACCELERATION:
         if v is None or u is None or a_native is None:
             raise ValueError("forward_acceleration requires v, u and a_native")
-        feat_parts = [
-            q[:, active_dofs],
-            np.asarray(v)[:, active_dofs],
-            np.asarray(u)[:, active_dofs],
-        ]
-        feature_names = tuple(
-            f"{ch}[{i}]" for ch in ("q", "v", "u") for i in active_dofs
-        )
+        feat_parts, feature_names = _state_control_features(q, v, u, active_dofs)
         targ = np.asarray(a_native, dtype=np.float64)[:, active_dofs]
         target_names = tuple(f"a_native[{i}]" for i in active_dofs)
     else:
         if v is None or u is None or q_next is None:
             raise ValueError("forward_next_state requires v, u and q_next")
-        feat_parts = [
-            q[:, active_dofs],
-            np.asarray(v)[:, active_dofs],
-            np.asarray(u)[:, active_dofs],
-        ]
-        feature_names = tuple(
-            f"{ch}[{i}]" for ch in ("q", "v", "u") for i in active_dofs
-        )
+        feat_parts, feature_names = _state_control_features(q, v, u, active_dofs)
         targ = np.asarray(q_next, dtype=np.float64)[:, active_dofs]
         target_names = tuple(f"q_next[{i}]" for i in active_dofs)
 
