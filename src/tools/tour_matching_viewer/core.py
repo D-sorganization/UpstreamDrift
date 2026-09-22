@@ -38,6 +38,7 @@ ENGINE_COLORS: dict[str, str] = {
     "pinocchio": "#d62728",  # Red
     "drake": "#2ca02c",  # Green
     "opensim": "#9467bd",  # Purple
+    "myosuite": "#8c564b",  # Brown
     "simscape": "#ff7f0e",  # Orange
     "default": "#ff7f0e",  # Orange
 }
@@ -113,6 +114,99 @@ class ViewerFrame:
     model_markers: NDArray[np.float64] | None
     valid_mask: NDArray[np.bool_] | None
     rms_error: float
+
+
+@dataclass(frozen=True)
+class ClubOnlyCompareView:
+    """Observed club frames vs inferred body candidates for CO-09 UI (#10613)."""
+
+    trial_id: str
+    trial_clock_hz: float
+    native_time_s: NDArray[np.float64]
+    observed_mid_hands_m: NDArray[np.float64]
+    observed_face_m: NDArray[np.float64]
+    predicted_mid_hands_m: NDArray[np.float64] | None
+    predicted_face_m: NDArray[np.float64] | None
+    predicted_unavailable_reason: str | None
+    body_candidate_ids: tuple[str, ...]
+    error_time_tradeoffs: tuple[Mapping[str, float], ...]
+    infeasible_models: tuple[Mapping[str, str], ...]
+    legend: tuple[Mapping[str, str], ...]
+    body_motion_disclaimer: str
+    display_status: str
+    native_g1_pass: bool
+
+    def __post_init__(self) -> None:
+        n = int(self.native_time_s.shape[0])
+        if n < 2:
+            raise ValueError("native_time_s must have at least 2 samples")
+        for name, arr in (
+            ("observed_mid_hands_m", self.observed_mid_hands_m),
+            ("observed_face_m", self.observed_face_m),
+        ):
+            if arr.shape != (n, 3) or not np.all(np.isfinite(arr)):
+                raise ValueError(f"{name} must be finite shape ({n}, 3)")
+        if self.predicted_mid_hands_m is None or self.predicted_face_m is None:
+            if not self.predicted_unavailable_reason:
+                raise ValueError("predicted_unavailable_reason required")
+        if not self.native_g1_pass and self.display_status == "native_verified":
+            raise ValueError("unqualified compare view cannot appear native_verified")
+        if "not measured" not in self.body_motion_disclaimer.lower():
+            raise ValueError("body_motion_disclaimer must deny measured body motion")
+
+
+def club_only_compare_from_ui_result(
+    result: Any,
+    *,
+    predicted_mid_hands_m: NDArray[np.float64] | None = None,
+    predicted_face_m: NDArray[np.float64] | None = None,
+) -> ClubOnlyCompareView:
+    """Build a viewer compare payload from a club-only UI match result."""
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        ClubOnlyUiResult,
+        build_club_only_result_view,
+        build_observed_inferred_legend,
+    )
+
+    if not isinstance(result, ClubOnlyUiResult):
+        raise TypeError("result must be ClubOnlyUiResult")
+    view = build_club_only_result_view(result)
+    legend = tuple(entry.as_dict() for entry in build_observed_inferred_legend(view))
+    obs = result.observation
+    predicted_reason = None
+    pred_mid = predicted_mid_hands_m
+    pred_face = predicted_face_m
+    if pred_mid is None or pred_face is None:
+        predicted_reason = (
+            "predicted club frame series unavailable: fast-match scored "
+            "observation residuals without emitting a continuous predicted "
+            "club trajectory package"
+        )
+        pred_mid = None
+        pred_face = None
+    return ClubOnlyCompareView(
+        trial_id=view.trial_id,
+        trial_clock_hz=float(view.trial_clock_hz),
+        native_time_s=np.asarray(obs.native_time_s, dtype=np.float64).copy(),
+        observed_mid_hands_m=np.asarray(obs.mid_hands_xyz, dtype=np.float64).copy(),
+        observed_face_m=np.asarray(obs.face_xyz, dtype=np.float64).copy(),
+        predicted_mid_hands_m=(
+            None if pred_mid is None else np.asarray(pred_mid, dtype=np.float64).copy()
+        ),
+        predicted_face_m=(
+            None
+            if pred_face is None
+            else np.asarray(pred_face, dtype=np.float64).copy()
+        ),
+        predicted_unavailable_reason=predicted_reason,
+        body_candidate_ids=tuple(view.candidate_ids),
+        error_time_tradeoffs=tuple(dict(x) for x in view.error_time_tradeoffs),
+        infeasible_models=tuple(dict(x) for x in view.infeasible_models),
+        legend=legend,
+        body_motion_disclaimer=view.body_motion_disclaimer,
+        display_status=view.display_status.value,
+        native_g1_pass=bool(view.native_g1_pass),
+    )
 
 
 def load_replay(

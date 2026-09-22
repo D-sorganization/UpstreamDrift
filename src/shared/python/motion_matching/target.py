@@ -7,6 +7,7 @@ import path is preserved.
 
 Public API:
     ClubTarget       -- frozen dataclass for a measured club swing.
+    ClubObservation  -- CO-01 observation with masks, dual frames, native clock.
     AlignOptions     -- resampling and impact-alignment options.
     SourceProvenance -- file-level provenance metadata.
     BallImpactState  -- ball boundary condition at impact.
@@ -32,6 +33,15 @@ from .club_ball_target import (
     ClubBallTarget,
     extract_ball_impact_from_clubtarget,
 )
+from .club_only.adapters import club_target_to_observation, observation_to_club_target
+from .club_only.observation import (
+    OBSERVATION_SCHEMA,
+    ClubObservation,
+    ClubObservationKinematics,
+    ClubObservationProvenance,
+    ComponentMask,
+    ComponentStatus,
+)
 from .club_target import (
     QUAT_NORM_TOL,
     TIME_EPS,
@@ -49,15 +59,23 @@ __all__ = [
     "BodyTarget",
     "CLUB_BALL_TARGET_SCHEMA_VERSION",
     "ClubBallTarget",
+    "ClubObservation",
+    "ClubObservationKinematics",
+    "ClubObservationProvenance",
     "ClubTarget",
+    "ComponentMask",
+    "ComponentStatus",
     "DEFAULT_ELASTICITY_FACTOR",
     "LAUNCH_DIR_NORM_TOL",
     "MAX_BODY_POSITION_NORM_M",
     "MAX_LAUNCH_SPEED_MPS",
     "MAX_SPIN_RPM",
+    "OBSERVATION_SCHEMA",
     "QUAT_NORM_TOL",
     "SourceProvenance",
     "TIME_EPS",
     "ValidAlignment",
+    "club_target_to_observation",
     "extract_ball_impact_from_clubtarget",
+    "observation_to_club_target",
 ]

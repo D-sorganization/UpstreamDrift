@@ -5,11 +5,18 @@ from typing import Any
 import numpy as np
 
 from .config import GeneratorConfig
+from .labels import (
+    AccelerationKind,
+    ActuationKind,
+    ChannelEvidence,
+    ModelDoFLayout,
+    SampleProvenance,
+)
 
 
 @dataclass
 class SimulationSample:
-    """A single simulation run's recorded data.
+    """A single simulation run's recorded data with label evidence.
 
     Attributes:
         sample_id: Unique sample identifier.
@@ -17,8 +24,10 @@ class SimulationSample:
         times: Time array (n_steps,).
         positions: Joint positions (n_steps, n_q).
         velocities: Joint velocities (n_steps, n_v).
-        accelerations: Joint accelerations (n_steps, n_v).
-        torques: Applied joint torques (n_steps, n_v).
+        accelerations: Compatibility alias for interval finite-difference
+            accelerations (n_steps, n_v). Prefer ``interval_accelerations`` /
+            ``native_accelerations`` with ``acceleration_kind``.
+        torques: Applied controls (n_steps, n_u) after saturation.
         mass_matrices: Mass matrices per step (n_steps, n_v, n_v) or None.
         bias_forces: Bias forces per step (n_steps, n_v) or None.
         gravity_forces: Gravity forces per step (n_steps, n_v) or None.
@@ -26,6 +35,16 @@ class SimulationSample:
         drift_accelerations: Drift accelerations (n_steps, n_v) or None.
         control_accelerations: Control accelerations (n_steps, n_v) or None.
         energies: Energy data dict.
+        dimensions: Separate n_q / n_v / n_u / n_force layout.
+        channel_evidence: Per-channel availability and semantics.
+        acceleration_kind: Semantic label for ``accelerations``.
+        actuation_kind: Whether torques are requested or applied.
+        requested_controls: Commanded controls before saturation.
+        applied_controls: Applied controls after saturation (same as torques).
+        native_accelerations: Instantaneous native accelerations.
+        interval_accelerations: Post-step finite-difference accelerations.
+        contact_labels: Contact channel names when contacts are available.
+        provenance: Model/runtime/settings hashes.
     """
 
     sample_id: int
@@ -42,6 +61,16 @@ class SimulationSample:
     drift_accelerations: np.ndarray | None = None
     control_accelerations: np.ndarray | None = None
     energies: dict[str, np.ndarray] = field(default_factory=dict)
+    dimensions: ModelDoFLayout | None = None
+    channel_evidence: dict[str, ChannelEvidence] = field(default_factory=dict)
+    acceleration_kind: AccelerationKind = AccelerationKind.INTERVAL_FINITE_DIFFERENCE
+    actuation_kind: ActuationKind = ActuationKind.APPLIED
+    requested_controls: np.ndarray | None = None
+    applied_controls: np.ndarray | None = None
+    native_accelerations: np.ndarray | None = None
+    interval_accelerations: np.ndarray | None = None
+    contact_labels: list[str] | None = None
+    provenance: SampleProvenance | None = None
 
 
 @dataclass
