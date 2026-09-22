@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T22:10:10Z",
+  "generated_at": "2026-09-22T23:16:01Z",
   "rows": [
     {
       "acceptance": null,
@@ -2761,7 +2761,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json",
-      "sha256": "85de76d35c545d4a3f4d386c381eace09c87ccbd4e5eada8bdc56ace9c0bacf9"
+      "sha256": "25631e3856948d7ae98029675b594c34223814c940f46aacf9d6230dd36c70cb"
     },
     {
       "acceptance": {
@@ -2789,7 +2789,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb06_iron_planarity_receipt.json",
-      "sha256": "a4ff0633bb927e29c63b50a843ef828fa2e289f82d116ae1521357fab3e3114a"
+      "sha256": "9fddb6328f043fbff5fbf52f17a83116aaba4f4fd63890a1bd819d6325391891"
     },
     {
       "acceptance": {
