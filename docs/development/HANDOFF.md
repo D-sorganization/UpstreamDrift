@@ -9,13 +9,15 @@
   the #10585 roster; freezes CO-02 gates and publishes failures; withheld-body
   experiment keeps body markers out of fitting; visual attractiveness cannot
   override physical failure; fail-closed tamper/leakage/phase/orientation/reset/
-  geometry/native checks. Schema `club-matrix-qualification/1.0.0`; evidence
+  geometry/native checks. Path anchors: `fit_metrics.py`, `acceptance.py`,
+  `plot_fit_quality_card.py`. Schema `club-matrix-qualification/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_matrix_qualification.py -q -n 0 --no-cov`
   GREEN (13 passed).
 - Limitations: software-contract scoring only; no native Fit/G1 claim; full-body
   and missing-runtime cells remain unqualified with named blockers.
-- Next: Open ready-for-review PR with `Fixes #10612` and confirm CI green.
+- Next: Open ready-for-review PR with `Fixes #10612`, label `agent:local`, arm
+  squash auto-merge; then dispatch CO-09.
 
 ## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611) [MERGED]
 

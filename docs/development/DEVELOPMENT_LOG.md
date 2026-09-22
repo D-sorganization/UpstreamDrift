@@ -589,11 +589,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10612 (epic #10602)
 - **Branch:** feat/issue-10612-co08-matrix
 - **PR:** not created
-- **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json
+- **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/fit_metrics.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/plot_fit_quality_card.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 13 unit tests GREEN; evidence receipt written; native_g1_pass false
+- **Last verified:** 2026-09-22 at SELF — 13 unit tests GREEN; path anchors wired; evidence receipt written; native_g1_pass false
 - **Summary:** Independent matrix qualification over native observation times for four workbook trials × #10585 roster with frozen CO-02 gates, published failures, withheld-body experiment semantics, common-observable comparison across complexities, and fail-closed checks for tamper/leakage/phase/orientation/reset/geometry/false-native claims.
-- **Next step:** Open ready-for-review PR with Fixes #10612 and confirm CI green.
+- **Next step:** Open ready-for-review PR with Fixes #10612, label agent:local, and arm squash auto-merge.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_matrix_qualification.json; tests/unit/motion_matching/test_club_matrix_qualification.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
