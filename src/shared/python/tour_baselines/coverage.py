@@ -115,6 +115,17 @@ _EXCLUDED_TOOLS: tuple[ToolExclusion, ...] = (
 )
 
 
+_DRIVEN_DOUBLE_RECEIPTS: dict[str, str] = {
+    "driver": "docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json",
+    "iron": "docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json",
+}
+
+_DRIVEN_DOUBLE_REJECTION = (
+    "TB-04 receipt is DISQUALIFIED: solver reached max iterations and marker "
+    "accuracy exceeds its declared threshold."
+)
+
+
 def list_excluded_tools() -> list[ToolExclusion]:
     """Return all non-golf launcher tools with explicit exclusion rationales."""
     return list(_EXCLUDED_TOOLS)
@@ -146,6 +157,19 @@ def _cell_reconstruction(m: GolfModelIdentity, capture: str) -> CoverageCell:
 
 
 def _cell_driven(m: GolfModelIdentity, capture: str) -> CoverageCell:
+    if m.model_id == "driven_double_pendulum":
+        return CoverageCell(
+            model_id=m.model_id,
+            capture=capture,
+            supported=True,
+            observation_set="Projected 2D swing plane (shoulder pivot + clubhead/grip)",
+            existing_artifact=(f"{_DRIVEN_DOUBLE_RECEIPTS[capture]} (DISQUALIFIED)"),
+            ownership="Tools",
+            missing_adapter=None,
+            blocked_reason=_DRIVEN_DOUBLE_REJECTION,
+            governing_issue="#10589",
+            evidence_status=EvidenceStatus.REJECTED,
+        )
     return CoverageCell(
         model_id=m.model_id,
         capture=capture,
