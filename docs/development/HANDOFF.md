@@ -28,8 +28,10 @@
   prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Push tip past inventory fix; confirm quality-gate green + squash
-  auto-merge of PR #10680. Do not start CO-05+.
+- Merged origin/main again (NM-02 #10679 / 4bb10daa); regenerated divergence
+  inventory after handoff/inventory merge conflicts.
+- Next: Push tip; confirm quality-gate green + squash auto-merge of PR #10680.
+  Do not start CO-05+.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
@@ -309,13 +311,24 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Dataset Labels NM-02 #10617 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree).
+- Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) **merged** (squash 4bb10daa). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
+- Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
+- CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helpers `_first_step_native_residual`, `_residual_norm`, `_single_sample_dynamics_config` (fingerprint `2430854b10cc`); SPEC §12 row keyed `#10679`; regenerate divergence inventory for `channel_finalize` / `sim_buffers` / `sim_recording` after core.py split.
+- Main sync (SELF): after CI Standard green on `4f8de75bf`, PR went DIRTY; merged `origin/main` and kept NM-02 inventory totals (`ud-only` 1415) plus the three generator-split modules.
+- Validation: adapters.py DRY scan clean for `2430854b10cc`; NM-02 unit tests green locally; `test_committed_inventory_is_current_when_vendor_present` green after inventory refresh; prior tip CI Standard SUCCESS.
+- Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
+- Next action: superseded; CO-04 #10608 / PR #10680 is the active merge drive. Do not start NM-03+.
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678 shipped; active child [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-01 [#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) merged (#10672).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md).
-- **CO-04 state:** Double/triple pendulum club-only match matrix implemented (synthetic tests + evidence); DL-#10602, DL-#10604..DL-#10608.
-- **Next:** Land [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608); then dispatch [CO-05 #10609](https://github.com/D-sorganization/UpstreamDrift/issues/10609).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, and NM-02/#10679 shipped; next child NM-03 not started here.
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md).
+- **CO-04 state:** Double/triple pendulum club-only match matrix on PR #10680; DL-#10608.
+- **Next:** Confirm quality-gate green + squash auto-merge of PR #10680. Do not start CO-05+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
