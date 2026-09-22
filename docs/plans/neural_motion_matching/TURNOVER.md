@@ -42,13 +42,15 @@ NM-00 -> NM-01 -> NM-02 -> NM-03 -> NM-04 -> NM-05 -> NM-06 -> NM-07 -> NM-08 ->
 -> NM-10. NM-11 follows stable service contracts; NM-12 is final acceptance.
 
 NM-00 ([#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615)),
-NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)) and
+NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)),
 NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) /
-[#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679)) are merged.
+[#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679)) and
+NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618) /
+[#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686)) are merged.
 The immediate task is
-**[#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618) (NM-03)
-only** (versioned episode storage, family splits and dataset views). Do not start
-NM-04+. This is a dispatch-ready plan, not authorization to run every expensive
+**[#10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619) (NM-04)
+only** (feasible teacher episodes and active-learning candidates). Do not start
+NM-05+. This is a dispatch-ready plan, not authorization to run every expensive
 experiment at once. Lower-cost agents handle bounded schema, adapter, fixture,
 CLI and UI work. An experienced reviewer checks model/observation semantics, force
 identifiability, contact, physical feasibility and scientific promotion. Dependencies
