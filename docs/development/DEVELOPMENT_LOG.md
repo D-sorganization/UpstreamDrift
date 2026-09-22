@@ -149,7 +149,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10676
 - **Paths:** src/shared/python/motion_matching/{simscape_topology.py,full_marker_terminal.py,tour_metrics.py,acceptance.py}; scripts/matlab/{materialize_ms61_topology_receipts.py,run_simscape_candidate.ps1}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/; docs/development/matched_swing_program/{GATES.md,README.md,WAVES.md}; docs/development/simscape_tour_matching/CHECKPOINTS.md
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main (MS-102); HANDOFF + monolith register conflicts resolved; fail-closed blocked native_gate + reduced_27_no_neck retained; test_simscape_topology_ms61.py 10 passed.
+- **Last verified:** 2026-09-22 at SELF — regenerated matched_swing_program README status from ledger (103 receipts); freshness test GREEN; fail-closed blocked native_gate + reduced_27_no_neck retained.
 - **Summary:** Fail-closed 27-DOF topology classification (no independent neck), dual terminal disclosure (full + head cluster; body-excluding-head diagnostic only), acceptance/tour_metrics dual-terminal contracts, and run-103 scaffolding derived from run-102 without inventing native G1 success; repair linked to MS-104 (#10378).
 - **Next step:** Confirm CI green and squash auto-merge of PR #10676.
 - **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.

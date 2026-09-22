@@ -130,7 +130,7 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 101 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 103 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
@@ -138,7 +138,7 @@ Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 1
 | **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 10       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
 | **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |
-| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
+| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 40       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
 | **Myosuite**  | matched                                                                                                                        | driver             | —           | —            | 1        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
