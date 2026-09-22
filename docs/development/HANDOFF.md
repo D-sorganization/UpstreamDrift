@@ -12,11 +12,13 @@
   `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`; evidence
   `docs/plans/club_only_matching/evidence/club_reproduction_turnover.json`;
   schema `club-only-reproduction/1.0.0`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=90` (12 passed).
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=90` (12 passed);
+  architecture-budget helpers split for `build_saved_job_commands` /
+  `render_reproduction_guide_markdown` after main merge.
 - Limitations: software-contract turnover only; `native_g1_pass` false;
   `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
-- Next: Drive CI green on PR #10718 (squash auto-merge enabled); schedule
-  desk-native Fit/G1 for unresolved matrix cells.
+- Next: Confirm CI green on PR #10718 tip after main sync (squash auto-merge
+  enabled); schedule desk-native Fit/G1 for unresolved matrix cells.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
