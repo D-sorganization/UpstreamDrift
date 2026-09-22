@@ -653,16 +653,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
 - **Branch:** feat/co10-club-only-turnover-10614
-- **PR:** not created
+- **PR:** #10718
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — reproduction guide + evidence receipt generated; contract tests pending GREEN confirmation
+- **Last verified:** 2026-09-22 at SELF — 12 unit tests GREEN; PR #10718 opened with squash auto-merge
 - **Summary:** Publishes operator/reproduction turnover with exact saved-job commands, trial/model roster, raw-source provenance, assumptions, candidate selection, clean-environment portable replay, and evidence-linked matrix reconciliation. Epic #10602 stays open; software-contract tests are not native evidence.
-- **Next step:** Open ready-for-review PR with Fixes #10614, enable squash auto-merge, and drive CI green.
+- **Next step:** Drive CI green on PR #10718 until squash auto-merge lands.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
