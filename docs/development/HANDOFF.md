@@ -1,67 +1,40 @@
 # Current Matching Continuation Handoff
 
-## GUI Thread-Blocking Migration #8880 Handoff
+## Realtime Pub/Sub Wiring #8869 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10656-local`.
-- Branch: `fix/8880-gui-thread-blocking-sims`; PR [#10656](https://github.com/D-sorganization/UpstreamDrift/pull/10656).
-  Governing issue #8880. Entry DL-#8880.
-- Delivered: migrated `bunker_shot_gui` (`run_design_a`/`run_comparison`/
-  `run_cross_tier` gained `_async` siblings wired to the buttons, sync core
-  unchanged for tests), `ball_flight_gui` (`_run_simulation` split into
-  `_compute_trajectory`/`_render_trajectory`, `_run_simulation_async` added),
-  and `swing_flight_pipeline` (`_run_pipeline` split into
-  `_read_provider_and_config`/`_compute_pipeline_result`/
-  `_render_pipeline_result`, `_run_pipeline_async` added) onto
-  `src/tools/async_action.py`. Added `scripts/ci/check_gui_thread_blocking_ratchet.py`
-  (lower-only ratchet, baseline 12 un-migrated `src/tools/*/gui*.py` files),
-  wired into `ci-standard.yml`. Annotated `motion_matching/gui.py` with
-  `# noqa: gui-thread/ok` (already QProcess-backed, never blocked).
-- Compatibility constraint discovered mid-migration: in
-  `swing_flight_pipeline/gui.py`, the pre-existing inline handler imported
-  `SwingBallFlightPipeline` _before_ building the swing state, so a broken
-  pipeline module reported itself in the error message. Splitting the sync
-  core naively (build swing state, then import) reordered this and broke
-  `test_run_pipeline_handles_import_error` by surfacing an unrelated
-  `SwingState` ImportError from the provider's own lazy import instead.
-  Fixed by keeping the import-before-build order inside
-  `_compute_pipeline_result`.
-- Validation: targeted suites for all four touched tools pass, except three
-  pre-existing `bunker_shot_gui` failures (`test_shot_scene_render_vtk.py`,
-  `test_uncertainty_propagation_9243.py` x2) and one pre-existing
-  `swing_flight_pipeline` failure (`test_run_pipeline_passes_ui_parameters_to_swing_state`,
-  a clubhead-orientation numeric mismatch) — all four reproduced unmodified
-  against `origin/main` before this branch touched anything.
-  `ruff check` / `ruff format --check` clean on every changed file.
-- Limitations (declared): ~9 of ~25 `src/tools/*/gui*.py` files remain
-  genuinely un-migrated (not the false positives the ratchet's coarse
-  heuristic also flags, like `starting_pose_matcher`'s existing direct-QThread
-  mixins) — see the PR body's Deferred section for the list. The ratchet only
-  catches new growth in that count; it does not itself migrate anything.
-- CI repair (goal-wave5): merged `origin/main` (SPEC/HANDOFF/DEVELOPMENT_LOG +
-  `#10654` primary button styles); DRY gate fixes via `_read_comparison_designs`,
-  `_CROSS_TIER_BUSY_BANNER`, and `wire_primary_action_button`.
-- Next action: confirm CI green, enable squash auto-merge for PR #10656, tear
-  down this worktree after merge (`Refs #8880`, not `Closes`).
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10655-local`.
+- Branch: `fix/8869-realtime-pubsub-decision`; PR [#10655](https://github.com/D-sorganization/UpstreamDrift/pull/10655) (open). Governing
+  issue #8869 (folds in #8868, #8942A). Seam #9406: `realtime` is `split
+pending` — UD keeps this facade.
+- Entry DL-#8869. **Decision: WIRE, not delete.** Explicit `transport="ws"` /
+  `REALTIME_TRANSPORT=ws` routes to `WSPubSub`; other transports raise
+  `ValueError` instead of silent file fallback. Renamed colliding
+  `register_channel` → `register_channel_hint`; deleted dead `file_pubsub.py`.
+- Next action: green CI after post-#10703 merge, squash merge, teardown worktree.
 
-## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
+## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612) [MERGED]
 
-- Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
-  `feat/10611-co07-fast-matching`, DL-#10611, PR
-  [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700) open.
+- Merged via PR [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) on `main` (`17a0ee033`).
+
+## GUI Thread-Blocking Migration #8880 [MERGED]
+
+- Merged to main via PR [#10656](https://github.com/D-sorganization/UpstreamDrift/pull/10656).
+- Migrated `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline`
+  onto `src/tools/async_action.py`; added GUI thread-blocking ratchet.
+- Next: N/A — merged; remaining un-migrated tools tracked by the ratchet.
+
+## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611) [MERGED]
+
+- Merged to main via PR [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700)
+  (SHA `f9ece7f6a` on this worktree base).
 - Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
   budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
   cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
   bounded Pareto diversity, optional empty neural proposal slot, and stage
   profiling including verification time. Schema `club-fast-matching/1.0.0`;
   evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
-- Param-budget fix: collapse `run_fast_club_match` knobs onto `FastMatchOptions`
-  and private `_ScoreLoopCtx` / `_AssembleCtx` (repo-structure-gates).
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
-  GREEN (12 passed); `python scripts/ci/check_architecture_budget.py` OK.
-- Limitations: software-contract scoring only; no native Fit/G1 claim; no
-  unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
-  saved in the software-contract evidence for CO-08 (not native timing).
-- Next: Confirm CI green on PR #10700 after main merge through MS-14; squash auto-merge remains armed.
+- Limitations: software-contract scoring only; no native Fit/G1 claim.
+- Next: N/A — merged; continue CO-08/CO-09 on main.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
@@ -433,17 +406,21 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Dynamics Baselines NM-05 #10620 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10620-nm05`.
+- Branch: `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701) open with squash auto-merge armed. Governing issue #10620 (NM-05, epic #10603). Entry DL-#10620.
+- Delivered: `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`); `DynamicsBaselineTrainerConfig` + modular pilot helpers; `FamilySplitPlan.ids_for`; classical then optional MLP; trial splits / inverse conditioning / identity-leakage guards; dynamics_baselines.md + receipt; training seams `neural_dynamics_baseline_budget` / `register_dynamics_baseline_corpus`.
+- CI unblock (SELF): LoD via `ids_for`; architecture budget via `DynamicsBaselineTrainerConfig` + pilot helpers; keep `inverse_timestep/` byte-identical to `origin/main` so grandfathered oversizes stay out of the changed-file architecture scan.
+- Validation: `pytest tests/unit/neural_motion/test_dynamics_baselines_nm05.py -q -n 2 --no-cov --timeout=120` (10 passed under xdist); architecture budget scoped to NM-05 baselines only; DRY helper \_state_control_features; software-contract fixtures only.
+- CI unblock (SELF): unit-test-gate — patch `torch_is_available` on the imported `baselines.neural` module object; assert `mlp_skipped_reason == "torch_unavailable"`. String-path monkeypatch fails under xdist on the `src.shared.python` namespace package. quality-gate was cascade of that failure only.
+- Next action: confirm unit-test-gate + quality-gate green on PR #10701; do not start NM-06+.
+
 ## Neural Teacher Episodes NM-04 #10619 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10619`.
-- Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
-- Base: merged `origin/main` (merge commit on branch tip `SELF`).
-- Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt; training reuse seams `neural_teacher_corpus_budget` (`training/scheduler.py`) and `register_teacher_episode_corpus` (`training/datasets.py`) for phantom-guard Rule 3.
-- DRY unblock (SELF): extracted `_require_episode_corpus_args`, `_probe_episode_store_layout`, `_register_hdf5_episode_dataset` so NM-03/NM-04 register helpers no longer trip fingerprints `506c08597d83` / `7153fb978f65` / `c8b715837b45` (baseline max 1).
-- Inventory unblock (SELF): regenerated `docs/shared_tools/divergence_inventory.v1.json` for `neural_motion/teachers/*` (ud-only).
-- Validation: unit tests for datasets + corpus registration + inventory freshness green; scoped DRY scan clears the three failing hashes; architecture budget clean.
-- Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
-- Next action: confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
+- PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) **merged**. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619 shipped.
+- Delivered: `src/shared/python/neural_motion/teachers/`; schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`.
+- Next action: superseded by NM-05 dispatch.
 
 ## Neural Episode Storage NM-03 #10618 Handoff
 
@@ -467,12 +444,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679, NM-03/#10686 shipped; active child [NM-04 #10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00–NM-04 shipped; active child [NM-05 #10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md); [NM-05 Dynamics Baselines](../plans/neural_motion_matching/dynamics_baselines.md).
 - **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
-- **NM-03 state:** MERGED via PR #10686 (`800703cb`); DL-#10618.
-- **NM-04 state:** in_review on PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698); DL-#10619.
-- **Next:** Confirm CI green + squash auto-merge of #10698; do not start NM-05+.
+- **NM-04 state:** MERGED via PR #10698; DL-#10619.
+- **NM-05 state:** in_review on PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); DL-#10620.
+- **Next:** Confirm lod/repo-structure gates green + squash auto-merge of #10701; do not start NM-06+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
