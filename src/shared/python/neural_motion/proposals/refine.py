@@ -9,6 +9,10 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.motion_matching.inverse.proposal_shared import (
+    parse_native_polish_outcome,
+)
+
 __all__ = [
     "ProposalPolishResult",
     "RefinePolishFn",
@@ -46,29 +50,16 @@ def refine_proposal_hybrid(
 
     t0 = _time.perf_counter()
     polish_out = polish_fn(target, warm)
-    if not isinstance(polish_out, dict) or "coefficients" not in polish_out:
-        raise ValueError(
-            "polish_fn must return a mapping with at least 'coefficients'; "
-            f"got {type(polish_out).__name__}"
-        )
-    polished = np.asarray(polish_out["coefficients"], dtype=np.float64).reshape(-1)
-    if polished.shape != warm.shape or not bool(np.all(np.isfinite(polished))):
-        raise ValueError("polished coefficients must be finite and match warm shape")
-
-    independent = bool(polish_out.get("independent_replay", False))
-    if require_independent_replay and not independent:
-        raise ValueError(
-            "native refinement requires independent_replay=True; "
-            "refusing to accept polish without replay evidence"
-        )
-    cost = float(polish_out.get("projection_cost", float("nan")))
-    if not np.isfinite(cost) or cost < 0.0:
-        raise ValueError("projection_cost must be a finite non-negative float")
+    polished, cost, independent, polish_map = parse_native_polish_outcome(
+        polish_out,
+        warm=warm,
+        require_independent_replay=require_independent_replay,
+    )
 
     return ProposalPolishResult(
         controls=polished,
         projection_cost=cost,
         independent_replay=independent,
-        polish_phase=polish_out,
+        polish_phase=polish_map,
         duration_s=_time.perf_counter() - t0,
     )

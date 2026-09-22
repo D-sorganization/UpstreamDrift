@@ -56,6 +56,7 @@ from .cvae import (
     build_coefficient_bound_vector,
     parameter_count,
 )
+from .proposal_shared import require_positive_int
 
 __all__ = [
     "COEFFICIENT_LETTER_BOUNDS",
@@ -126,19 +127,10 @@ class RegressorConfig:
         self._validate_aggregation()
 
     def _validate_dims(self) -> None:
-        if self.n_joints <= 0:
-            raise ValueError(f"n_joints must be positive, got {self.n_joints}")
-        if self.coefficients_per_joint <= 0:
-            raise ValueError(
-                "coefficients_per_joint must be positive, "
-                f"got {self.coefficients_per_joint}"
-            )
-        if self.trajectory_channels <= 0:
-            raise ValueError(
-                f"trajectory_channels must be positive, got {self.trajectory_channels}"
-            )
-        if self.seq_len <= 0:
-            raise ValueError(f"seq_len must be positive, got {self.seq_len}")
+        require_positive_int("n_joints", self.n_joints)
+        require_positive_int("coefficients_per_joint", self.coefficients_per_joint)
+        require_positive_int("trajectory_channels", self.trajectory_channels)
+        require_positive_int("seq_len", self.seq_len)
 
     def _validate_arch(self) -> None:
         if self.embed_dim <= 0:

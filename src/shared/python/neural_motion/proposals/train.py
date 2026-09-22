@@ -8,6 +8,10 @@ from typing import Sequence
 
 import numpy as np
 
+from src.shared.python.motion_matching.inverse.proposal_shared import (
+    coerce_training_output_dir,
+    require_positive_training_hparams,
+)
 from src.shared.python.neural_motion.tasks import ConditioningSpec, MaskedTrajectoryTask
 
 from .checkpoint import save_proposal_checkpoint
@@ -35,15 +39,15 @@ class MaskedProposalTrainConfig:
     aux_diversity_weight: float = 1e-2
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "output_dir", Path(self.output_dir))
-        if self.epochs < 1:
-            raise ValueError("epochs must be >= 1")
-        if self.batch_size < 1:
-            raise ValueError("batch_size must be >= 1")
-        if self.lr <= 0.0:
-            raise ValueError("lr must be positive")
-        if self.control_regularization < 0.0:
-            raise ValueError("control_regularization must be >= 0")
+        require_positive_training_hparams(
+            epochs=int(self.epochs),
+            batch_size=int(self.batch_size),
+            lr=float(self.lr),
+            control_regularization=float(self.control_regularization),
+        )
+        object.__setattr__(
+            self, "output_dir", coerce_training_output_dir(self.output_dir)
+        )
         if self.observation_rollout_weight < 0.0:
             raise ValueError("observation_rollout_weight must be >= 0")
         if self.aux_diversity_weight < 0.0:

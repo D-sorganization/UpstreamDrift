@@ -40,6 +40,10 @@ import numpy as np
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.club_target import ClubTarget
+from src.shared.python.motion_matching.inverse.proposal_shared import (
+    coefficients_from_polish_mapping,
+    parse_native_polish_outcome,
+)
 
 from .surrogate import FitResult, InvertOptions, SwingSurrogate, fit_swing_via_surrogate
 
@@ -249,13 +253,9 @@ def fit_swing_hybrid(
             "options.polish_solver == 'fmincon'"
         )
     polish_out = polish_fn(target, theta_warm)
-    if not isinstance(polish_out, dict) or "coefficients" not in polish_out:
-        raise ValueError(
-            "polish_fn must return a mapping with at least 'coefficients'; "
-            f"got {type(polish_out).__name__}"
-        )
-    polished = np.asarray(polish_out["coefficients"], dtype=np.float64).reshape(-1)
-    final_rmse = float(polish_out.get("final_rmse_m", float("nan")))
+    polished = coefficients_from_polish_mapping(polish_out)
+    polish_map = polish_out if isinstance(polish_out, dict) else {}
+    final_rmse = float(polish_map.get("final_rmse_m", float("nan")))
     final_loss = (
         final_rmse if np.isfinite(final_rmse) else float(surrogate_phase.final_loss)
     )
@@ -271,7 +271,7 @@ def fit_swing_hybrid(
         final_loss=final_loss,
         solver="surrogate+fmincon",
         surrogate_phase=surrogate_phase,
-        polish_phase=polish_out,
+        polish_phase=polish_map,
         duration_s=_time.perf_counter() - t_start,
     )
 
@@ -410,29 +410,16 @@ def refine_control_proposal(
 
     t0 = _time.perf_counter()
     polish_out = polish_fn(observation, warm)
-    if not isinstance(polish_out, dict) or "coefficients" not in polish_out:
-        raise ValueError(
-            "polish_fn must return a mapping with at least 'coefficients'; "
-            f"got {type(polish_out).__name__}"
-        )
-    polished = np.asarray(polish_out["coefficients"], dtype=np.float64).reshape(-1)
-    if polished.shape != warm.shape or not bool(np.all(np.isfinite(polished))):
-        raise ValueError("polished coefficients must be finite and match warm shape")
-
-    independent = bool(polish_out.get("independent_replay", False))
-    if require_independent_replay and not independent:
-        raise ValueError(
-            "native refinement requires independent_replay=True; "
-            "refusing to accept polish without replay evidence"
-        )
-    cost = float(polish_out.get("projection_cost", float("nan")))
-    if not np.isfinite(cost) or cost < 0.0:
-        raise ValueError("projection_cost must be a finite non-negative float")
+    polished, cost, independent, polish_map = parse_native_polish_outcome(
+        polish_out,
+        warm=warm,
+        require_independent_replay=require_independent_replay,
+    )
 
     return ProposalRefinementResult(
         controls=polished,
         projection_cost=cost,
         independent_replay=independent,
-        polish_phase=polish_out,
+        polish_phase=polish_map,
         duration_s=_time.perf_counter() - t0,
     )

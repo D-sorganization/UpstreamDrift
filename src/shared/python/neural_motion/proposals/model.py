@@ -7,6 +7,11 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.motion_matching.inverse.proposal_shared import (
+    coerce_finite_trajectory_and_times,
+    mean_modes_succeed_mean_fails,
+    software_contract_plant_residual,
+)
 from src.shared.python.neural_motion.tasks import ConditioningSpec
 
 from .types import PROPOSAL_SCHEMA, ProposalConfig, ProposalMode
@@ -51,17 +56,10 @@ class ProposalSample:
     def __post_init__(self) -> None:
         if not isinstance(self.conditioning, ConditioningSpec):
             raise TypeError("conditioning must be a ConditioningSpec")
-        traj = np.asarray(self.trajectory, dtype=np.float64)
-        times = np.asarray(self.sample_times_s, dtype=np.float64)
-        if traj.ndim != 2 or traj.shape[0] < 1:
-            raise ValueError("trajectory must be 2-D with T >= 1")
-        if not bool(np.all(np.isfinite(traj))):
-            raise ValueError("trajectory values must be finite")
+        traj, times = coerce_finite_trajectory_and_times(
+            self.trajectory, self.sample_times_s
+        )
         object.__setattr__(self, "trajectory", traj)
-        if times.ndim != 1 or times.shape[0] != traj.shape[0]:
-            raise ValueError("sample_times_s length must equal trajectory T")
-        if not bool(np.all(np.isfinite(times))):
-            raise ValueError("sample_times_s values must be finite")
         object.__setattr__(self, "sample_times_s", times)
         mask_len = len(self.conditioning.observation_mask)
         if mask_len != traj.shape[1]:
@@ -88,19 +86,12 @@ def evaluate_proposal_rollout_residual(
     """Software-contract rollout residual (not native physics evidence)."""
     if not isinstance(sample, ProposalSample):
         raise TypeError("sample must be a ProposalSample")
-    u = np.asarray(controls, dtype=np.float64).reshape(-1)
-    if u.size < 1 or not bool(np.all(np.isfinite(u))):
-        raise ValueError("controls must be a non-empty finite vector")
-    traj = sample.trajectory
-    mask = np.asarray(sample.conditioning.observation_mask, dtype=np.float64)
-    masked_traj = traj * mask.reshape(1, -1)
-    rng = np.random.default_rng(traj.shape[1] * 17 + u.size)
-    weight = rng.normal(0.0, 0.25, size=(traj.shape[1], u.size))
-    predicted = masked_traj @ weight
-    target = np.broadcast_to(u.reshape(1, -1), predicted.shape)
-    residual = predicted - target
-    time_scale = 1.0 + float(sample.conditioning.horizon_s)
-    return residual * time_scale
+    return software_contract_plant_residual(
+        trajectory=sample.trajectory,
+        observation_mask=sample.conditioning.observation_mask,
+        controls=controls,
+        duration_s=sample.conditioning.horizon_s,
+    )
 
 
 def mean_control_fails_while_modes_succeed(
@@ -110,28 +101,12 @@ def mean_control_fails_while_modes_succeed(
     target_residual_tol: float,
 ) -> bool:
     """True when mean control fails but each mode succeeds on the contract plant."""
-    if len(modes) < 2:
-        raise ValueError("modes must contain at least two control vectors")
-    if not np.isfinite(target_residual_tol) or target_residual_tol < 0.0:
-        raise ValueError("target_residual_tol must be a finite non-negative float")
-    mode_arrs = [np.asarray(m, dtype=np.float64).reshape(-1) for m in modes]
-    dim = mode_arrs[0].size
-    if any(m.size != dim for m in mode_arrs):
-        raise ValueError("all modes must share the same control dimension")
-
     traj = sample.trajectory
     mask = np.asarray(sample.conditioning.observation_mask, dtype=np.float64)
     featured = float(np.sum(traj.mean(axis=0) * mask))
-
-    def _feasibility(u: np.ndarray, teacher: np.ndarray) -> float:
-        return float(np.linalg.norm(u - teacher)) + 0.01 * abs(featured)
-
-    mode_ok = all(_feasibility(m, m) <= target_residual_tol for m in mode_arrs)
-    mean_u = np.mean(np.stack(mode_arrs, axis=0), axis=0)
-    mean_fail = all(
-        _feasibility(mean_u, teacher) > target_residual_tol for teacher in mode_arrs
+    return mean_modes_succeed_mean_fails(
+        modes, featured=featured, target_residual_tol=target_residual_tol
     )
-    return bool(mode_ok and mean_fail)
 
 
 class MaskedProposalModel:
