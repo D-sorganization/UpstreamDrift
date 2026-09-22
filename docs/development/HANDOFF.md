@@ -349,16 +349,25 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Teacher Episodes NM-04 #10619 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10619`.
+- Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
+- Base: merged `origin/main` (merge commit on branch tip `SELF`).
+- Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt; training reuse seams `neural_teacher_corpus_budget` (`training/scheduler.py`) and `register_teacher_episode_corpus` (`training/datasets.py`) for phantom-guard Rule 3.
+- DRY unblock (SELF): extracted `_require_episode_corpus_args`, `_probe_episode_store_layout`, `_register_hdf5_episode_dataset` so NM-03/NM-04 register helpers no longer trip fingerprints `506c08597d83` / `7153fb978f65` / `c8b715837b45` (baseline max 1).
+- Inventory unblock (SELF): regenerated `docs/shared_tools/divergence_inventory.v1.json` for `neural_motion/teachers/*` (ud-only).
+- Validation: unit tests for datasets + corpus registration + inventory freshness green; scoped DRY scan clears the three failing hashes; architecture budget clean.
+- Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
+- Next action: confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
+
 ## Neural Episode Storage NM-03 #10618 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10618`.
-- Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) open with squash auto-merge armed. Governing issue #10618 (NM-03, epic #10603). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`. Entry DL-#10618.
-- Base: merged `origin/main` through theme/#10654 + CO-05 #10681 (tip includes `795cd72ce`). Phantom-guard fix: `training.datasets.register_neural_episode_corpus` touches issue reuse anchor.
-- Delivered: `src/shared/python/neural_motion/episodes/` (`EpisodeRecord`, `EpisodeStore`, `CompactAdapter`/`CompactArrayBundle`, `FamilySplitPlan`, task views, `TrainOnlyNormalizer`, `WindowCache`); training registry seam; schema `neural-episode-store/1.0.0`; episode_storage.md + receipt.
-- CI fix (SELF): `_require_shard_array` for mypy; DRY `write_sorted_json` + ABC `SortedJsonWritableMixin` (no bare `NotImplementedError` — Stub Introduction Guard); unit test for missing `sample_times_s` shard.
-- Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py tests/unit/neural_motion/test_benefit_experiment.py -q --timeout=60` (24 passed); mypy/DRY/ruff clean on touched paths; merge/main clean after CO-05 tip.
-- Limitations: synthetic software-contract tests only; no native teacher generation, training, or dataset completeness claim.
-- Next action: confirm `guard` + CI Standard green on PR #10686 tip; squash auto-merge remains armed.
+- Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) **merged** (`800703cb`). Governing issue #10618 (NM-03, epic #10603). Entry DL-#10618 shipped.
+- Delivered: `src/shared/python/neural_motion/episodes/` (`neural-episode-store/1.0.0`); episode_storage.md + receipt.
+- Limitations: synthetic software-contract tests only.
+- Next action: superseded by NM-04 dispatch.
 
 ## Neural Dataset Labels NM-02 #10617 Handoff
 
@@ -374,11 +383,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679 shipped; active child [NM-03 #10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679, NM-03/#10686 shipped; active child [NM-04 #10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md).
 - **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
-- **NM-03 state:** in_review on PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686); DL-#10618.
-- **Next:** Confirm CI green + squash auto-merge of #10686; do not start NM-04+ until merged.
+- **NM-03 state:** MERGED via PR #10686 (`800703cb`); DL-#10618.
+- **NM-04 state:** in_review on PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698); DL-#10619.
+- **Next:** Confirm CI green + squash auto-merge of #10698; do not start NM-05+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
