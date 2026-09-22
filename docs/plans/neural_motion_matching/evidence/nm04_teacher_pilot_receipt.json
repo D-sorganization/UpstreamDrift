@@ -1,0 +1,21 @@
+{
+  "schema": "neural-teacher-campaign-receipt/1.0.0",
+  "governing_issue": 10619,
+  "parent_epic": 10603,
+  "pilot_model_id": "driven_double_pendulum",
+  "teacher_campaign_schema": "neural-teacher-campaign/1.0.0",
+  "episode_store_schema": "neural-episode-store/1.0.0",
+  "nested_stages": [100, 500, 2000],
+  "validation": {
+    "command": "python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "test_count": 9,
+    "recorded_at": "2026-09-22"
+  },
+  "limitations": [
+    "MockTeacherRolloutBackend is software-contract only, not native evidence",
+    "No training run or surrogate speed claim",
+    "First-model pilot corpus layout is specified; full 100/500/2000 native generation deferred to budgeted ops"
+  ],
+  "next_action_issue": 10620
+}

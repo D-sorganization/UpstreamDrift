@@ -1,5 +1,20 @@
 # Current Matching Continuation Handoff
 
+## NM-04 Teacher Episodes and Active Learning (#10619)
+
+- Worktree: `Worktrees/UpstreamDrift-10619-nm04`, branch
+  `feat/10619-nm04-teacher-episodes`, DL-#10619, PR not created.
+- Delivered: `src/shared/python/neural_motion/teacher/` campaign on NM-03
+  `EpisodeStore` (feasible vs rejected ledgers, teacher objective/replay ledger,
+  resumable attempt keys, active-learning selection excluding test/eval splits,
+  pilot spec for `driven_double_pendulum`). Evidence:
+  `docs/plans/neural_motion_matching/evidence/nm04_teacher_pilot_receipt.json`.
+- Validation: `python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60` GREEN; `ruff check` / `ruff format --check` on teacher module GREEN.
+- Limitations: `MockTeacherRolloutBackend` software contracts only; no native
+  teacher generation, training, or speed claim.
+- Next: Push branch, open PR `Fixes #10619` with label `agent:local`, squash
+  auto-merge after quality-gate; then NM-05 (#10620).
+
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
 - Worktree: Worktrees/UpstreamDrift-10608-co04, branch
