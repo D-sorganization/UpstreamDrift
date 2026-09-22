@@ -20,6 +20,8 @@
   GREEN (28 passed); ruff clean on touched files.
 - Named blockers: native long-run DeskComputer recovery receipt; software
   contract is not native timing evidence; no universal solve-time guarantee.
+- CI repair: dedupe atomic promote helper (DRY gate); regenerate
+  `docs/shared_tools/divergence_inventory.v1.json` for `motion_matching/jobs/*`.
 - Next: Confirm CI green on #10704; do not start MS-106+.
 
 ## GUI Thread-Blocking Migration #8880 Handoff

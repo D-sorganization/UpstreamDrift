@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import json
 import os
 import tempfile
@@ -14,8 +13,18 @@ from .contracts import JOBS_SCHEMA, RunManifest
 __all__ = ["atomic_write_bytes", "atomic_write_json", "write_run_manifest"]
 
 
+def _promote_temp(temp_path: Path, destination: Path) -> None:
+    """Move a staged tempfile onto ``destination``, deleting the stage on failure."""
+    try:
+        temp_path.replace(destination)
+    except OSError:
+        if temp_path.exists():
+            temp_path.unlink(missing_ok=True)
+        raise
+
+
 def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> Path:
-    """Write JSON atomically via tempfile + ``os.replace``."""
+    """Write JSON atomically via tempfile + promote."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -26,22 +35,17 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> Path:
         suffix=".tmp",
         delete=False,
     ) as handle:
-        temp_path = Path(handle.name)
+        staged = Path(handle.name)
         json.dump(dict(payload), handle, indent=2, sort_keys=True)
         handle.write("\n")
         handle.flush()
         os.fsync(handle.fileno())
-    try:
-        os.replace(temp_path, path)
-    except OSError:
-        with contextlib.suppress(OSError):
-            temp_path.unlink()
-        raise
+    _promote_temp(staged, path)
     return path
 
 
 def atomic_write_bytes(path: Path, data: bytes) -> Path:
-    """Write bytes atomically via tempfile + ``os.replace``."""
+    """Write bytes atomically via tempfile + promote."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -51,16 +55,11 @@ def atomic_write_bytes(path: Path, data: bytes) -> Path:
         suffix=".tmp",
         delete=False,
     ) as handle:
-        temp_path = Path(handle.name)
+        staged = Path(handle.name)
         handle.write(data)
         handle.flush()
         os.fsync(handle.fileno())
-    try:
-        os.replace(temp_path, path)
-    except OSError:
-        with contextlib.suppress(OSError):
-            temp_path.unlink()
-        raise
+    _promote_temp(staged, path)
     return path
 
 
