@@ -326,12 +326,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10618`.
 - Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) open with squash auto-merge armed. Governing issue #10618 (NM-03, epic #10603). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`. Entry DL-#10618.
-- Base: merged `origin/main` (NM-02 #10679, CO-05 #10681). Phantom-guard fix: `training.datasets.register_neural_episode_corpus` touches issue reuse anchor.
+- Base: merged `origin/main` through theme/#10654 + CO-05 #10681 (tip includes `795cd72ce`). Phantom-guard fix: `training.datasets.register_neural_episode_corpus` touches issue reuse anchor.
 - Delivered: `src/shared/python/neural_motion/episodes/` (`EpisodeRecord`, `EpisodeStore`, `CompactAdapter`/`CompactArrayBundle`, `FamilySplitPlan`, task views, `TrainOnlyNormalizer`, `WindowCache`); training registry seam; schema `neural-episode-store/1.0.0`; episode_storage.md + receipt.
-- CI fix (SELF): `_require_shard_array` narrows required HDF5 channels before `EpisodeRecord` construction (mypy); `SortedJsonWritableMixin` in `neural_motion/json_io.py` dedupes split/receipt `write_json` (DRY gate fingerprint `2174558997bf`); unit test for missing `sample_times_s` shard.
-- Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py tests/unit/neural_motion/test_benefit_experiment.py -q --timeout=60` (24 passed); `python -m mypy` on touched neural_motion paths clean; `python -m scripts.ci.check_dry_duplication_gate` clean; ruff clean on touched paths.
+- CI fix (SELF): `_require_shard_array` for mypy; DRY `write_sorted_json` + ABC `SortedJsonWritableMixin` (no bare `NotImplementedError` — Stub Introduction Guard); unit test for missing `sample_times_s` shard.
+- Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py tests/unit/neural_motion/test_benefit_experiment.py -q --timeout=60` (24 passed); mypy/DRY/ruff clean on touched paths; merge/main clean after CO-05 tip.
 - Limitations: synthetic software-contract tests only; no native teacher generation, training, or dataset completeness claim.
-- Next action: confirm CI Standard green on PR #10686 after mypy/DRY + main merge; squash auto-merge remains armed.
+- Next action: confirm `guard` + CI Standard green on PR #10686 tip; squash auto-merge remains armed.
 
 ## Neural Dataset Labels NM-02 #10617 Handoff
 

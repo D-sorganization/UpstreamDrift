@@ -353,9 +353,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10686
 - **Paths:** src/shared/python/neural_motion/episodes/; src/shared/python/neural_motion/json_io.py; src/shared/python/neural_motion/experiment.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main (CO-04 #10680); mypy shard required-array narrowing; DRY mixin for sorted JSON exports; divergence inventory regenerated; no training claim
+- **Last verified:** 2026-09-22 at SELF — merged origin/main (theme/#10654 + CO-05); Stub Introduction Guard via ABC mixin (no bare NotImplementedError); mypy/DRY retained; no training claim
 - **Summary:** Versioned `neural-episode-store/1.0.0` HDF5 shards with content hashes; family-level splits with held-out strata and real-data eval bucket; compact-1.0 adapter via `CompactArrayBundle` preserves 27/189 layout; thin task views and transform-keyed window cache; training registry registers corpus paths without all-RAM load.
-- **Next step:** Confirm CI Standard green on PR #10686 after mypy/DRY + main merge.
+- **Next step:** Confirm guard + CI Standard green on PR #10686; squash auto-merge.
 - **Evidence:** docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json.
 
 ### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
