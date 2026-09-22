@@ -346,16 +346,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10619 (epic #10603)
 - **Branch:** local/nm-04-teacher-episodes
-- **PR:** not created
+- **PR:** #10698
 - **Paths:** src/shared/python/neural_motion/teachers/; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 12/12 unit tests green; ruff clean; software-contract only
+- **Last verified:** 2026-09-22 at SELF — PR #10698 open; squash auto-merge armed; 12/12 unit tests green; software-contract only
 - **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes.
-- **Next step:** Open PR Fixes #10619 with squash auto-merge; do not start NM-05+.
+- **Next step:** Confirm CI green on PR #10698; squash auto-merge remains armed.
 - **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
 
 ### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
