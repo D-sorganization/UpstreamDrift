@@ -184,3 +184,27 @@ def test_activate_failure_on_import_error() -> None:
     with patch.dict(ec_mod.KINEMATICS_SERVICE_REGISTRY, {_ENGINE: _boom}):
         ctrl = EngineController(_ENGINE)
     assert ctrl.status is EngineStatus.ERROR
+
+
+# ---------------------------------------------------------------------------
+# joint_limits_deg (#8887)
+# ---------------------------------------------------------------------------
+
+
+def test_joint_limits_deg_delegates_to_service() -> None:
+    ctrl = _make_ctrl_with_mock_service()
+    limits = {"l_elbow": (-10.0, 120.0)}
+    with patch.object(ctrl._service, "joint_limits", return_value=limits):
+        assert ctrl.joint_limits_deg() == limits
+
+
+def test_joint_limits_deg_empty_when_no_service() -> None:
+    ctrl = _make_ctrl_with_mock_service()
+    ctrl._service = None
+    assert ctrl.joint_limits_deg() == {}
+
+
+def test_joint_limits_deg_empty_for_mock_service_by_default() -> None:
+    """MockKinematicsService has no anatomical model; default is empty."""
+    ctrl = _make_ctrl_with_mock_service()
+    assert ctrl.joint_limits_deg() == {}

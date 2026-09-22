@@ -255,6 +255,11 @@ class MuJoCoKinematicsService:
     def capabilities(self) -> ServiceCapabilities:
         return _MUJOCO_CAPABILITIES
 
+    def joint_limits(self) -> Mapping[str, tuple[float, float]]:
+        """Return an empty mapping: no anatomical joint-limit data is
+        wired for this engine yet (issue #8887)."""
+        return {}
+
 
 def create_mujoco_service() -> LiveKinematicsService:
     """Return a MuJoCo service if :mod:`mujoco` is installed, else mock."""
