@@ -11,6 +11,7 @@ import pytest
 from src.shared.python.motion_matching.club_only.body_candidates import (
     CANDIDATE_SCHEMA,
     BodyCandidate,
+    BodyCandidateOptions,
     BodyCandidateReport,
     RejectionReason,
     body_candidate_evidence_payload,
@@ -146,7 +147,7 @@ def test_incompatible_grip_contact_and_self_collision_rejected() -> None:
             seeds=(seed,),
             priors=priors,
             prior_strength=1.0,
-            force_reject=reason,
+            options=BodyCandidateOptions(force_reject=reason),
         )
         assert result.candidates
         assert all(not c.accepted for c in result.candidates)
@@ -173,7 +174,7 @@ def test_nonunique_club_to_body_example_preserves_distinct_hashes() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=1.0,
-        n_nullspace_proposals=3,
+        options=BodyCandidateOptions(n_nullspace_proposals=3),
     )
     accepted = [c for c in result.candidates if c.accepted]
     assert len(accepted) >= 2
@@ -222,7 +223,7 @@ def test_native_closure_and_finite_qva() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=0.5,
-        n_nullspace_proposals=2,
+        options=BodyCandidateOptions(n_nullspace_proposals=2),
     )
     accepted = [c for c in result.candidates if c.accepted]
     assert accepted
@@ -331,8 +332,10 @@ def test_missing_runtime_remains_unqualified() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=1.0,
-        runtime_available=False,
-        runtime_blocker="OpenSim runtime not installed on this host",
+        options=BodyCandidateOptions(
+            runtime_available=False,
+            runtime_blocker="OpenSim runtime not installed on this host",
+        ),
     )
     assert result.candidates == ()
     assert result.cells
@@ -363,7 +366,7 @@ def test_prior_strength_sensitivity_is_reported() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=0.25,
-        n_nullspace_proposals=2,
+        options=BodyCandidateOptions(n_nullspace_proposals=2),
     )
     strong = generate_plausible_body_candidates(
         observation=obs,
@@ -371,7 +374,7 @@ def test_prior_strength_sensitivity_is_reported() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=2.0,
-        n_nullspace_proposals=2,
+        options=BodyCandidateOptions(n_nullspace_proposals=2),
     )
     weak_acc = [c for c in weak.candidates if c.accepted]
     strong_acc = [c for c in strong.candidates if c.accepted]

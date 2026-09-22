@@ -20,6 +20,7 @@ from .ambiguity import (
 from .body_candidates import (
     CANDIDATE_SCHEMA,
     BodyCandidate,
+    BodyCandidateOptions,
     BodyCandidateReport,
     BodyCandidateResult,
     ModelTrialCell,
@@ -128,6 +129,7 @@ __all__ = [
     "AmbiguityStatus",
     "AmbiguityVerdict",
     "BodyCandidate",
+    "BodyCandidateOptions",
     "BodyCandidateReport",
     "BodyCandidateResult",
     "CANONICAL_TRIAL_SHEETS",
