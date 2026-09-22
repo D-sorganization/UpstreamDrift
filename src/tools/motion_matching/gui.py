@@ -490,9 +490,7 @@ class MotionMatchingWidget(QWidget):
             self._club_session = session
             result = run_club_only_ui_match(
                 session,
-                observation=build_calibrated_observation_fixture(
-                    session.trial_id, n_samples=8
-                ),
+                observation=build_calibrated_observation_fixture(session.trial_id),
             )
             view = build_club_only_result_view(result)
             summary = pipeline.summarize_club_only_result(view)
