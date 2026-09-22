@@ -301,8 +301,8 @@ class TestNewTiles:
             "Assertion failed: response.status_code == 200"
         )
         tile = response.json()
-        assert tile["name"] == "Video Analyzer", (
-            "Assertion failed: tile[name] == Video Analyzer"
+        assert tile["name"] == "Video Analyzer (Pose & Motion Tracking)", (
+            "Assertion failed: tile[name] == Video Analyzer (Pose & Motion Tracking)"
         )
         assert tile["category"] in {
             "tool",
@@ -336,8 +336,8 @@ class TestNewTiles:
             "Assertion failed: response.status_code == 200"
         )
         tile = response.json()
-        assert tile["name"] == "Data Explorer", (
-            "Assertion failed: tile[name] == Data Explorer"
+        assert tile["name"] == "Data Explorer (Import & Visualize)", (
+            "Assertion failed: tile[name] == Data Explorer (Import & Visualize)"
         )
         assert tile["category"] == "tool", "Assertion failed: tile[category] == tool"
         assert "data_import" in tile["capabilities"], (
