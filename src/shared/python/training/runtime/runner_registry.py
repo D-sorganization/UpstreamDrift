@@ -10,6 +10,11 @@ Registering is explicit and idempotent (re-registering an adapter for
 the same framework replaces it). Lookup raises :class:`KeyError` when
 no adapter matches — the scheduler converts that into a clear
 ``FAILED`` status with a domain error message.
+
+NM-05 (#10620) classical / small-MLP dynamics pilots admit via
+:func:`~src.shared.python.training.scheduler.neural_dynamics_baseline_budget`
+and run through ``DynamicsBaselineTrainer`` — they are intentionally
+outside this framework-adapter registry (reuse anchor retained here).
 """
 
 from __future__ import annotations
@@ -20,7 +25,15 @@ from ..config import TrainingConfig, TrainingFramework
 from ..contracts import TrainingJobRunner
 from ..errors import TrainingError
 
-__all__ = ["NoRunnerAvailableError", "RunnerRegistry"]
+__all__ = [
+    "NM05_DYNAMICS_BASELINE_SCHEMA",
+    "NoRunnerAvailableError",
+    "RunnerRegistry",
+]
+
+# Wire id for NM-05 pilot receipts; mirrors neural_motion.baselines.BASELINE_SCHEMA
+# without importing the neural package at registry import time.
+NM05_DYNAMICS_BASELINE_SCHEMA = "neural-dynamics-baselines/1.0.0"
 
 
 class NoRunnerAvailableError(TrainingError, LookupError):

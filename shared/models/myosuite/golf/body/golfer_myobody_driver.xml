@@ -1,0 +1,46 @@
+<mujoco model="golfer_myobody_driver">
+  <include file="../../myo_sim/scene/myosuite_scene.xml"/>
+  <include file="../../myo_sim/body/assets/myoupperbody_assets.xml"/>
+  <include file="../../myo_sim/leg/assets/myolegs_assets.xml"/>
+  <include file="../../myo_sim/leg/assets/myolegs_tendon.xml"/>
+  <include file="../../myo_sim/leg/assets/myolegs_muscle.xml"/>
+  <compiler angle="radian" meshdir="../../myo_sim" texturedir="../../myo_sim"/>
+  <worldbody>
+    <body name="root" pos="0 0 1" euler="0 0 -1.57">
+      <include file="assets/myoupperbody_chain_grip.xml"/>
+      <include file="../../myo_sim/leg/assets/myolegs_chain.xml"/>
+      <freejoint/>
+    </body>
+    <body name="golf_club" pos="0.3 0 1.0">
+      <freejoint name="club_free"/>
+      <geom name="club_shaft" type="capsule" fromto="0 -0.578 0 0 0 0" size="0.0065" mass="0.115" rgba="0.75 0.75 0.8 1"/>
+      <geom name="club_head" type="ellipsoid" size="0.06 0.032 0.05" pos="0 0 0" mass="0.198" rgba="0.1 0.1 0.15 1"/>
+      <site name="grip_site_club_r" pos="0 -0.95 0" size="0.006"/>
+      <site name="grip_site_club_l" pos="0 -0.88 0" size="0.006"/>
+    </body>
+    <body name="ud_contact_heel_r">
+      <freejoint/>
+      <geom name="contact_heel_r" type="sphere" size="0.035" mass="0.001" rgba="0.2 0.8 0.3 0.35" contype="0" conaffinity="0" solref="2e-05 2" friction="0.9 0.8 0"/>
+    </body>
+    <body name="ud_contact_forefoot_r">
+      <freejoint/>
+      <geom name="contact_forefoot_r" type="sphere" size="0.03" mass="0.001" rgba="0.2 0.8 0.3 0.35" contype="0" conaffinity="0" solref="2e-05 2" friction="0.9 0.8 0"/>
+    </body>
+    <body name="ud_contact_heel_l">
+      <freejoint/>
+      <geom name="contact_heel_l" type="sphere" size="0.035" mass="0.001" rgba="0.2 0.8 0.3 0.35" contype="0" conaffinity="0" solref="2e-05 2" friction="0.9 0.8 0"/>
+    </body>
+    <body name="ud_contact_forefoot_l">
+      <freejoint/>
+      <geom name="contact_forefoot_l" type="sphere" size="0.03" mass="0.001" rgba="0.2 0.8 0.3 0.35" contype="0" conaffinity="0" solref="2e-05 2" friction="0.9 0.8 0"/>
+    </body>
+  </worldbody>
+  <equality>
+    <weld name="grip_weld_r" site1="grip_site_hand_r" site2="grip_site_club_r"/>
+    <weld name="grip_weld_l" site1="grip_site_hand_l" site2="grip_site_club_l"/>
+    <weld name="contact_weld_heel_r" body1="calcn_r" body2="ud_contact_heel_r" relpose="0.01 -0.005 0 1 0 0 0"/>
+    <weld name="contact_weld_forefoot_r" body1="calcn_r" body2="ud_contact_forefoot_r" relpose="0.16 -0.005 0 1 0 0 0"/>
+    <weld name="contact_weld_heel_l" body1="calcn_l" body2="ud_contact_heel_l" relpose="0.01 -0.005 0 1 0 0 0"/>
+    <weld name="contact_weld_forefoot_l" body1="calcn_l" body2="ud_contact_forefoot_l" relpose="0.16 -0.005 0 1 0 0 0"/>
+  </equality>
+</mujoco>

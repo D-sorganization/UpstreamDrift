@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 import numpy as np
 
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
+
 from src.tools.pose_studio.widgets.joint_panel import JointPanel
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,

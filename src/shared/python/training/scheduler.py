@@ -37,9 +37,13 @@ from .runtime.runner_registry import RunnerRegistry
 from .status import TrainingStatus
 
 __all__ = [
+    "DynamicsBaselineBudget",
     "Scheduler",
     "SchedulerError",
     "StatusChangeEvent",
+    "TeacherCorpusBudget",
+    "neural_dynamics_baseline_budget",
+    "neural_teacher_corpus_budget",
 ]
 
 
@@ -64,6 +68,110 @@ class StatusChangeEvent:
     previous_status: TrainingStatus
     new_status: TrainingStatus
     timestamp: float
+
+
+@dataclass(frozen=True, slots=True)
+class TeacherCorpusBudget:
+    """Admission budget for NM-04 nested teacher-corpus jobs (#10619).
+
+    Attributes:
+        stages: Nested episode caps from NM-01 ``NESTED_EPISODE_STAGES``.
+        teacher_schema: Wire id for teacher episode records.
+        acquisition_schema: Wire id for active-learning acquisition logs.
+    """
+
+    stages: tuple[int, ...]
+    teacher_schema: str
+    acquisition_schema: str
+
+    def __post_init__(self) -> None:
+        if not self.stages:
+            raise ValueError("stages must be non-empty")
+        if any(size < 1 for size in self.stages):
+            raise ValueError("each stage size must be >= 1")
+        if not self.teacher_schema.strip():
+            raise ValueError("teacher_schema must be non-empty")
+        if not self.acquisition_schema.strip():
+            raise ValueError("acquisition_schema must be non-empty")
+
+
+def neural_teacher_corpus_budget() -> TeacherCorpusBudget:
+    """Return frozen NM-01 stage sizes + NM-04 schema ids for job admission.
+
+    Design by Contract:
+    - Stage sizes come from ``NESTED_EPISODE_STAGES`` (NM-01), never invented
+      in the training package.
+    - Schema strings match ``neural_motion.teachers`` public constants.
+    - Lazy imports keep the scheduler importable without neural extras.
+
+    This is the training-scheduler reuse seam for #10619: teacher-generation
+    jobs admit against the same nested caps as the benefit experiment.
+    """
+
+    from src.shared.python.neural_motion.experiment import NESTED_EPISODE_STAGES
+    from src.shared.python.neural_motion.teachers import (
+        ACQUISITION_SCHEMA,
+        TEACHER_SCHEMA,
+    )
+
+    return TeacherCorpusBudget(
+        stages=NESTED_EPISODE_STAGES,
+        teacher_schema=TEACHER_SCHEMA,
+        acquisition_schema=ACQUISITION_SCHEMA,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class DynamicsBaselineBudget:
+    """Admission budget for NM-05 classical/neural dynamics pilots (#10620).
+
+    Attributes:
+        schema: Wire id for dynamics-baseline receipts.
+        seeds: Frozen three-seed schedule from NM-01 benefit experiment.
+        tasks: Forward acceleration, next-state and inverse-control tasks.
+    """
+
+    schema: str
+    seeds: tuple[int, ...]
+    tasks: tuple[object, ...]
+
+    def __post_init__(self) -> None:
+        if not self.schema.strip():
+            raise ValueError("schema must be non-empty")
+        if len(self.seeds) != 3:
+            raise ValueError("seeds must be the frozen three-seed schedule")
+        if not self.tasks:
+            raise ValueError("tasks must be non-empty")
+
+
+def neural_dynamics_baseline_budget() -> DynamicsBaselineBudget:
+    """Return frozen NM-05 schema, seeds and task kinds for job admission.
+
+    Design by Contract:
+    - Seeds come from NM-01 ``DEFAULT_TRAINING_SEEDS`` via the benefit
+      experiment freeze (three seeds); never invented here.
+    - Schema and task enums come from ``neural_motion.baselines``.
+    - Lazy imports keep the scheduler importable without neural extras.
+
+    This is the training-scheduler reuse seam for #10620. Framework runners
+    remain in :mod:`runtime.runner_registry`; the pilot trainer is separate.
+    """
+
+    from src.shared.python.neural_motion.baselines import (
+        BASELINE_SCHEMA,
+        DynamicsTaskKind,
+    )
+    from src.shared.python.neural_motion.experiment import DEFAULT_TRAINING_SEEDS
+
+    return DynamicsBaselineBudget(
+        schema=BASELINE_SCHEMA,
+        seeds=DEFAULT_TRAINING_SEEDS,
+        tasks=(
+            DynamicsTaskKind.FORWARD_ACCELERATION,
+            DynamicsTaskKind.FORWARD_NEXT_STATE,
+            DynamicsTaskKind.INVERSE_CONTROL,
+        ),
+    )
 
 
 StatusObserver = Callable[[StatusChangeEvent], None]
