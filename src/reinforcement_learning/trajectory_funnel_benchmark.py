@@ -1,6 +1,7 @@
 """Benchmark comparing trajectory-funnel RL policies across solver configurations."""
 
 from __future__ import annotations
+import math
 
 import logging
 
@@ -309,11 +310,10 @@ class TrajectoryFunnelBenchmark:
         _reward, states = self.rollout(theta, reference, rng)
         deltas = states[:, np.newaxis, :] - reference[np.newaxis, :, :]
         distances = np.sqrt(np.einsum("ijk,ijk->ij", deltas, deltas))
+        term_diff = states[-1] - reference[-1]
         return {
             "mean_transverse_error": float(np.mean(np.min(distances, axis=1))),
-            "terminal_setpoint_error": float(
-                np.linalg.norm(states[-1] - reference[-1])
-            ),
+            "terminal_setpoint_error": float(math.sqrt(np.vdot(term_diff, term_diff))),
         }
 
     def train_agent(

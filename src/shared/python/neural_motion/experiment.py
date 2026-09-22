@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
 )
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+from src.shared.python.neural_motion.json_io import SortedJsonWritableMixin
 from src.shared.python.training.config import TrainingConfig
 
 __all__ = [
@@ -283,7 +284,7 @@ class BenefitExperimentSpec:
 
 
 @dataclass(frozen=True)
-class BenefitExperimentReceipt:
+class BenefitExperimentReceipt(SortedJsonWritableMixin):
     """Content-addressed freeze receipt for splits and gates."""
 
     schema: str
@@ -300,14 +301,6 @@ class BenefitExperimentReceipt:
             "content_digest": self.content_digest,
             "experiment": dict(self.experiment),
         }
-
-    def write_json(self, path: str | Path) -> None:
-        target = Path(path)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(
-            json.dumps(self.as_dict(), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
 
 
 def _sha256_payload(payload: Mapping[str, Any]) -> str:

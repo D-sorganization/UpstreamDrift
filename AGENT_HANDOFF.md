@@ -22,11 +22,19 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616)
+## Neural Motion Matching NM-03: Episode Storage, Splits and Views (#10618)
 
-Branch `feat/nm01-freeze-learning-tasks`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisite NM-00 [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668) merged.
-NM-01 freezes typed forward/inverse/masked task contracts, a 20-model roster keyed to TB-00 identities (full-body deferred pending benefit) and benefit-experiment gates (100/500/2000 nested stages, three seeds, five baselines, latency including replay/refinement/failures, 2× median/non-worse p95, break-even undefined when savings ≤ 0). Evidence: `docs/plans/neural_motion_matching/evidence/nm01_*.json`. No training or speed claim.
-PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672) open with squash auto-merge. Next after merge: dispatch NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)).
+Branch `feat/10618-nm03-episode-storage`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-01/#10672 and NM-02/#10679 merged on main.
+NM-03 adds `src/shared/python/neural_motion/episodes/` (`neural-episode-store/1.0.0`): HDF5 shards with content hashes, family-level splits, compact-1.0 adapter (27/189 preserved), task views, train-only normalizer, window cache. Evidence: `docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json`. Software-contract tests only; no training claim.
+Next after merge: dispatch NM-04 ([#10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619)).
+
+## Neural Motion Matching NM-02: Native Dataset Labels (#10617) [MERGED]
+
+Branch `fix/10617-nm02-native-dataset-labels` merged in PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) (`4bb10daa0`).
+
+## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616) [MERGED]
+
+Branch `feat/nm01-freeze-learning-tasks` merged to main in PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672).
 
 ## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615) [MERGED]
 
@@ -36,11 +44,11 @@ Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/Ups
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped; active [CO-03 #10607](https://github.com/D-sorganization/UpstreamDrift/issues/10607) via PR [#10678](https://github.com/D-sorganization/UpstreamDrift/pull/10678) (squash auto-merge).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-05/#10681 shipped; active [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608) on `feat/issue-10608-co04-pendulum-club-match` (PR #10680).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-03 retrieval + constrained-IK starting guesses in review on #10678 (synthetic fixtures + workbook smoke); kinematic preview only. NM-00 fail-closed audit remains authoritative.
-- **Next:** Land CO-03/#10678 CI + squash merge; then dispatch CO-04 #10608.
+- **State:** CO-04 double/triple pendulum club-only match matrix implemented (synthetic fixtures; native G1 blockers explicit). CO-05 body-candidate contracts merged via #10681. NM-00 fail-closed audit remains authoritative.
+- **Next:** Land CO-04 PR #10680 after main-merge + quality-gate green; then dispatch CO-06 #10610.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 

@@ -1,0 +1,5 @@
+{
+  "_comment": "Baseline count for hardcoded hex-color literals in setStyleSheet-bearing files under src/tools. Captured 2026-09-21 as part of issue #8885. The ratchet check in scripts/ci/check_hardcoded_style_ratchet.py fails if this count grows.",
+  "_policy": "The count may DECREASE freely as more src/tools GUIs migrate to src.shared.python.theme.tool_stylesheet. It may NOT increase. A PR that legitimately needs to add a hardcoded literal must lower the count elsewhere by an equal or greater amount in the same PR, or edit this file with a justification and the approver's GH handle in the same PR.",
+  "count": 165
+}
