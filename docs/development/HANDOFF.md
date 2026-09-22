@@ -13,6 +13,26 @@
   (unpatched main: 1 failed, reproduced).
 - **Next:** none after merge.
 
+## Analysis Statistics Server Side (#8941, DL-#8941) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_8941` · branch
+  `fix/8941-analysis-stats-server` · commit `SELF` · PR not created at commit
+  time (see PR list for `fix/8941-analysis-stats-server`). Agent `claude`,
+  session `fleet-remediation-f`.
+- **Done:** `src/api/routes/analysis_tools.py` — history is
+  `deque(maxlen=500)` plus monotonic `_metric_sample_total`; one aggregation
+  helper `_compute_statistics` runs in `anyio.to_thread.run_sync` over a tuple
+  snapshot taken on the loop; `GET /analysis/statistics?since=&limit=`
+  (`since>=0`, `1<=limit<=500`, else 422) trims only `time_series`; summaries
+  and the default body are unchanged; cursor returned in the
+  `X-Analysis-Next-Since` header so the Pydantic model and generated UI types
+  are untouched. JSON export now serialises `list(history)`.
+- **Validation:** `python -m pytest tests/unit/api/test_analysis_statistics_window.py tests/unit/api/test_routes_analysis_tools.py tests/api/test_generated_ui_api_types.py tests/api/test_phase3_api.py -q --no-cov` (87 passed).
+- **Next:** client-side #8941 items — merge metrics+statistics calls, use
+  `since`, delete the 200 ms / 500 ms polling loops, publish frames on
+  `/ws/simulate`. Do not touch `ui/` from this branch.
+
 ## Succession — Motion Matching (2026-09-22)
 
 - **Goal:** Finish Antigravity-started motion matching (club-only CO + neural NM)

@@ -30,6 +30,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
 - **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
 
+### DL-#8941 · Analysis Statistics Endpoint Off the Event Loop With Incremental Fetch
+
+- **Issue:** #8941 (server-side part; client-side items remain)
+- **Branch:** fix/8941-analysis-stats-server
+- **PR:** #10736 (open)
+- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py
+- **Last verified:** 2026-09-22 — bounded deque history, single-pass aggregation in `anyio.to_thread.run_sync`, `since`/`limit` cursor params; 87 focused API tests, scoped Ruff/mypy, architecture budget and error-handling ratchet pass.
+- **Summary:** Server-side fix for #8941: stop copying the 500-snapshot history per metrics call, stop walking it twice per metric on the event loop, and let clients fetch only new time-series points. Client polling-loop removal, endpoint merge in the UI and WS frames are out of scope here.
+- **Next step:** Switch `AnalysisPanel.tsx` to pass `since` from the `X-Analysis-Next-Since` header instead of refetching the whole window every 500 ms.
+
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
 - **State:** in_progress
