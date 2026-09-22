@@ -4,6 +4,10 @@ polynomial-coefficient posteriors (Option 3, GH issue #4076).
 This module defines the *model* only. Training is in ``training.py`` and
 inference is in ``predict.py``.
 
+NM-06 (#10621) preserves the cVAE plateau evidence and requires mode-collapse
+diagnostics for any mixture / multi-proposal ablation. See
+:mod:`.collapse` (``CVAE_PLATEAU_EVIDENCE``, ``diagnose_mode_collapse``).
+
 Architecture
 ------------
 * **Conditioning input ``c``**: ``(batch, T, 12)`` float32 trajectory with

@@ -22,11 +22,15 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-05: Dynamics Baselines (#10620)
+## Neural Motion Matching NM-06: Masked Proposals (#10621)
 
-Branch `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/#10686 and NM-04/#10698 merged on main.
-NM-05 adds `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`): trial-level matrices from `EpisodeStore`, analytical/ridge/nearest-neighbor baselines, optional small MLP, three-seed validation checkpointing with test untouched, inverse `InverseLabelConditioning`, identity-leakage and unavailable-torque guards. Reuses per-step and inverse-timestep training patterns; scheduler lookup unchanged via `runner_registry`. Evidence: `docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json`. Software-contract tests only; no native training success claim.
-Next after merge: dispatch NM-06 ([#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621)).
+Branch `feat/10621-nm06-masked-proposals`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/04/05 merged on main.
+NM-06 generalizes temporal inverse to masked trajectory-to-control proposals with variable control dims, selected-teacher + mixture heads, observation-after-rollout training loss, collapse diagnostics (cVAE plateau evidence retained), A..G time-domain conversion, and hybrid fail-closed native refinement. Evidence: `docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json`. Software-contract tests only; no native training success claim.
+Tip clears DRY via `proposal_shared`, regenerates divergence inventory for NM-06 ud-only paths, and merges main through CO-09. Next: confirm CI green on PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); do not start NM-07 (#10622) in this slice.
+
+## Neural Motion Matching NM-05: Dynamics Baselines (#10620) [MERGED]
+
+Branch `feat/issue-10620-nm05-baselines` merged via PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701).
 
 ## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619) [MERGED]
 

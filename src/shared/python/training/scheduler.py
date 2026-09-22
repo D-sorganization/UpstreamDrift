@@ -38,6 +38,8 @@ from .status import TrainingStatus
 
 __all__ = [
     "DynamicsBaselineBudget",
+    "MaskedProposalBudget",
+    "neural_masked_proposal_budget",
     "Scheduler",
     "SchedulerError",
     "StatusChangeEvent",
@@ -171,6 +173,50 @@ def neural_dynamics_baseline_budget() -> DynamicsBaselineBudget:
             DynamicsTaskKind.FORWARD_NEXT_STATE,
             DynamicsTaskKind.INVERSE_CONTROL,
         ),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class MaskedProposalBudget:
+    """Frozen NM-06 admission budget for masked proposal pilots.
+
+    Attributes:
+        schema: ``neural-masked-proposals/1.0.0``.
+        seeds: Frozen three-seed schedule from NM-01.
+        modes: Selected-teacher plus mixture ablation labels.
+    """
+
+    schema: str
+    seeds: tuple[int, ...]
+    modes: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not self.schema.strip():
+            raise ValueError("schema must be non-empty")
+        if len(self.seeds) != 3:
+            raise ValueError("seeds must be the frozen three-seed schedule")
+        if not self.modes:
+            raise ValueError("modes must be non-empty")
+
+
+def neural_masked_proposal_budget() -> MaskedProposalBudget:
+    """Return frozen NM-06 schema, seeds and mode labels for job admission.
+
+    Design by Contract:
+    - Seeds come from NM-01 ``DEFAULT_TRAINING_SEEDS`` (three seeds).
+    - Schema matches proposal checkpoint / training payload version.
+    - Lazy imports keep the scheduler importable without torch.
+
+    Training-scheduler reuse seam for #10621. Does not invent native
+    training success or acceleration claims.
+    """
+
+    from src.shared.python.neural_motion.experiment import DEFAULT_TRAINING_SEEDS
+
+    return MaskedProposalBudget(
+        schema="neural-masked-proposals/1.0.0",
+        seeds=DEFAULT_TRAINING_SEEDS,
+        modes=("selected", "mixture"),
     )
 
 
