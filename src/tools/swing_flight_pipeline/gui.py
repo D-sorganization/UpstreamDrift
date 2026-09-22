@@ -6,6 +6,13 @@ the user configure swing parameters, run the full pipeline
 
 Implements the GUI tile for the swing-to-flight pipeline registered
 in ``models.yaml`` under the ``simulation`` category.
+
+The pipeline run itself goes off the GUI thread through
+:mod:`src.tools.async_action` (issue #8880): the button click reads the
+swing inputs on the GUI thread, hands ``pipeline.run(swing)`` to a worker,
+and renders the result back on the GUI thread in ``on_finished``.
+``_run_pipeline`` stays the synchronous core other callers and tests use
+directly; ``_run_pipeline_async`` is what the button now triggers.
 """
 
 from __future__ import annotations
@@ -41,11 +48,11 @@ from src.shared.python.physics.swing_state_providers import (
     available_swing_state_providers,
 )
 from src.launchers.help_menu import build_help_menu
-from src.shared.python.theme.tool_stylesheet import primary_button_style
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
 from src.shared.python.ui.provenance_value import ProvenanceValueLabel
 from src.shared.python.ux.provenance import ProvenanceRecord, ProvenanceValue
+from src.tools.async_action import WorkerContext, add_primary_async_run_control
 
 logger = logging.getLogger(__name__)
 
@@ -108,11 +115,9 @@ class SwingFlightWidget(QWidget):
         left_layout.addWidget(self._build_engine_group())
         left_layout.addWidget(self._build_preset_group())
 
-        # Run button
-        self._run_btn = QPushButton("Run Full Pipeline")
-        self._run_btn.setStyleSheet(primary_button_style())
-        self._run_btn.clicked.connect(self._run_pipeline)
-        left_layout.addWidget(self._run_btn)
+        self._run_btn, self.action_bar = add_primary_async_run_control(
+            left_layout, "Run Full Pipeline", self._run_pipeline_async
+        )
 
         left_layout.addStretch()
         return left
@@ -236,84 +241,146 @@ class SwingFlightWidget(QWidget):
         self._speed_spin.setValue(speed)
         self._loft_spin.setValue(loft)
 
+    def _read_provider_and_config(self) -> tuple[SwingStateProvider, SwingStateConfig]:
+        """Read the swing widgets. GUI-thread only, no lazy imports.
+
+        Routes through the selected provider so the stamped ``engine_name``
+        reflects the actual source of the swing state (issue #8819). Kept
+        separate from :meth:`_compute_pipeline_result` so nothing here can
+        raise ``ImportError`` -- that must come from the pipeline import
+        below, in the same order as before the #8880 split, so a broken
+        pipeline module is reported as itself rather than as whatever lazy
+        import a provider happens to reach first.
+        """
+        provider = self._providers[self._engine_combo.currentText()]
+        config = SwingStateConfig(
+            clubhead_speed_ms=self._speed_spin.value(),
+            loft_deg=self._loft_spin.value(),
+            clubhead_mass_kg=self._mass_spin.value(),
+        )
+        return provider, config
+
+    @staticmethod
+    def _compute_pipeline_result(
+        provider: SwingStateProvider, config: SwingStateConfig
+    ) -> Any:
+        """Build the swing state and run the pipeline.
+
+        Pure compute -- safe off the GUI thread (#8880). Imports
+        ``SwingBallFlightPipeline`` before building the swing state, exactly
+        the order the pre-#8880 inline handler used, since ``provider``'s own
+        lazy import can raise a different, less informative ``ImportError``.
+        """
+        from src.shared.python.physics.swing_ball_flight_pipeline import (
+            SwingBallFlightPipeline,
+        )
+
+        swing = provider.get_swing_state(config)
+        pipeline = SwingBallFlightPipeline()
+        return pipeline.run(swing)
+
+    def _render_pipeline_result(self, result: Any) -> None:
+        """Render a completed pipeline result. GUI-thread only (#8880)."""
+        self._result = result
+        self._update_provenance_labels(result)
+
+        self._results_text.setPlainText(
+            f"Pipeline Complete\n"
+            f"{'=' * 40}\n"
+            f"Engine: {result.swing_state.engine_name}\n\n"
+            f"Impact Results:\n"
+            f"  Ball speed: {math.hypot(*result.impact_state.ball_velocity):.1f} m/s\n"  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small slices
+            f"  Ball spin:  {math.hypot(*result.impact_state.ball_angular_velocity):.0f} rad/s\n\n"  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small slices
+            f"Launch Conditions:\n"
+            f"  Speed:      {result.launch_conditions.velocity:.1f} m/s\n"
+            f"  Angle:      {result.launch_conditions.launch_angle:.1f}°\n"
+            f"  Spin Rate:  {result.launch_conditions.spin_rate:.0f} rad/s\n\n"
+            f"Flight Results:\n"
+            f"  Carry:      {result.carry_m:.1f} m ({result.carry_m * 1.09361:.1f} yd)\n"
+            f"  Max Height: {result.max_height_m:.1f} m\n"
+            f"  Flight Time:{result.flight_time_s:.2f} s\n"
+            f"  Landing:    {result.landing_angle_deg:.1f}°\n\n"
+            f"Trajectory: {len(result.trajectory)} points\n"
+        )
+
+        # Update 3D Visualization
+        if getattr(self, "_gl_view", None) is not None and result.trajectory:
+            import pyqtgraph as pg  # noqa: F401
+            import pyqtgraph.opengl as gl
+
+            pts = np.array([p.position for p in result.trajectory])
+
+            if self._plot_item is not None:
+                self._gl_view.removeItem(self._plot_item)
+
+            # Shade the flight line by height (apex hot, ground cool) using
+            # the shared golf_viz palette (DRY across the golf viewers).
+            from src.shared.python.golf_viz import speed_colors
+
+            flight_colors = speed_colors(pts[:, 2])
+            self._plot_item = gl.GLLinePlotItem(
+                pos=pts, color=flight_colors, width=3, antialias=True
+            )
+            self._gl_view.addItem(self._plot_item)
+
+            # Auto-center camera
+            if len(pts) > 0:
+                from pyqtgraph import Vector
+
+                mid_x = max(pts[:, 0]) / 2.0
+                self._gl_view.opts["center"] = Vector(mid_x, 0, 0)
+
     def _run_pipeline(self) -> None:
-        """Execute the swing-to-flight pipeline."""
+        """Execute the swing-to-flight pipeline synchronously.
+
+        Kept as the testable, directly-callable core; the button now goes
+        through :meth:`_run_pipeline_async` instead (issue #8880).
+        """
+        provider, config = self._read_provider_and_config()
         try:
-            from src.shared.python.physics.swing_ball_flight_pipeline import (
-                SwingBallFlightPipeline,
-            )
-
-            # Route through the selected provider so the stamped engine_name
-            # reflects the actual source of the swing state (issue #8819).
-            provider = self._providers[self._engine_combo.currentText()]
-            swing = provider.get_swing_state(
-                SwingStateConfig(
-                    clubhead_speed_ms=self._speed_spin.value(),
-                    loft_deg=self._loft_spin.value(),
-                    clubhead_mass_kg=self._mass_spin.value(),
-                )
-            )
-
-            pipeline = SwingBallFlightPipeline()
-            result = pipeline.run(swing)
-            self._result = result
-            self._update_provenance_labels(result)
-
-            self._results_text.setPlainText(
-                f"Pipeline Complete\n"
-                f"{'=' * 40}\n"
-                f"Engine: {result.swing_state.engine_name}\n\n"
-                f"Impact Results:\n"
-                f"  Ball speed: {math.hypot(*result.impact_state.ball_velocity):.1f} m/s\n"  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small slices
-                f"  Ball spin:  {math.hypot(*result.impact_state.ball_angular_velocity):.0f} rad/s\n\n"  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small slices
-                f"Launch Conditions:\n"
-                f"  Speed:      {result.launch_conditions.velocity:.1f} m/s\n"
-                f"  Angle:      {result.launch_conditions.launch_angle:.1f}°\n"
-                f"  Spin Rate:  {result.launch_conditions.spin_rate:.0f} rad/s\n\n"
-                f"Flight Results:\n"
-                f"  Carry:      {result.carry_m:.1f} m ({result.carry_m * 1.09361:.1f} yd)\n"
-                f"  Max Height: {result.max_height_m:.1f} m\n"
-                f"  Flight Time:{result.flight_time_s:.2f} s\n"
-                f"  Landing:    {result.landing_angle_deg:.1f}°\n\n"
-                f"Trajectory: {len(result.trajectory)} points\n"
-            )
-
-            # Update 3D Visualization
-            if getattr(self, "_gl_view", None) is not None and result.trajectory:
-                import pyqtgraph as pg  # noqa: F401
-                import pyqtgraph.opengl as gl
-
-                pts = np.array([p.position for p in result.trajectory])
-
-                if self._plot_item is not None:
-                    self._gl_view.removeItem(self._plot_item)
-
-                # Shade the flight line by height (apex hot, ground cool) using
-                # the shared golf_viz palette (DRY across the golf viewers).
-                from src.shared.python.golf_viz import speed_colors
-
-                flight_colors = speed_colors(pts[:, 2])
-                self._plot_item = gl.GLLinePlotItem(
-                    pos=pts, color=flight_colors, width=3, antialias=True
-                )
-                self._gl_view.addItem(self._plot_item)
-
-                # Auto-center camera
-                if len(pts) > 0:
-                    from pyqtgraph import Vector
-
-                    mid_x = max(pts[:, 0]) / 2.0
-                    self._gl_view.opts["center"] = Vector(mid_x, 0, 0)
-
+            result = self._compute_pipeline_result(provider, config)
         except ImportError as e:
-            self._results_text.setPlainText(
-                f"Pipeline not available: {e}\n\n"
-                "A required dependency for the swing-to-flight pipeline "
-                "failed to import. Check the log for details."
-            )
+            self._report_import_error(e)
+            return
         except Exception as e:
             logger.exception("Pipeline execution failed")
             self._results_text.setPlainText(f"Pipeline error: {e}")
+            return
+        self._render_pipeline_result(result)
+
+    def _run_pipeline_async(self) -> None:
+        """Run the pipeline off the GUI thread, with progress and cancel.
+
+        The (cheap) swing inputs are read here, on the GUI thread; the
+        pipeline run itself happens in the worker and must not touch any Qt
+        widget (issue #8880).
+        """
+        provider, config = self._read_provider_and_config()
+
+        def _work(ctx: WorkerContext) -> Any:
+            ctx.report(None, "running swing -> impact -> flight pipeline")
+            return self._compute_pipeline_result(provider, config)
+
+        def _present(result: Any) -> None:
+            self._render_pipeline_result(result)
+
+        def _failed(message: str) -> None:
+            if message.startswith("ImportError:"):
+                self._report_import_error(message.removeprefix("ImportError: "))
+                return
+            self._results_text.setPlainText(f"Pipeline error: {message}")
+
+        self.action_bar.start(
+            "Run Full Pipeline", _work, on_finished=_present, on_failed=_failed
+        )
+
+    def _report_import_error(self, error: object) -> None:
+        """Report a missing pipeline dependency. GUI-thread only."""
+        self._results_text.setPlainText(
+            f"Pipeline not available: {error}\n\n"
+            "A required dependency for the swing-to-flight pipeline "
+            "failed to import. Check the log for details."
+        )
 
     def _update_provenance_labels(self, result: Any) -> None:
         """Rebuild the headline ProvenanceValueLabels for the latest run.
@@ -406,6 +473,7 @@ class SwingFlightWidget(QWidget):
 
     def cleanup(self) -> None:
         """Release resources."""
+        self.action_bar.shutdown()
         logger.debug("SwingFlightWidget cleanup")
 
 
