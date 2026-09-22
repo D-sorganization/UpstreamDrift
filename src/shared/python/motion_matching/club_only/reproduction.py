@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shlex
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
@@ -73,6 +74,11 @@ def _sha256_payload(payload: Mapping[str, Any]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _argv_to_shell(argv: tuple[str, ...]) -> str:
+    """Copyable shell command with safe quoting for ``python -c`` payloads."""
+    return " ".join(shlex.quote(part) for part in argv)
+
+
 @dataclass(frozen=True)
 class SavedJobCommand:
     """Exact, copyable command for one operator workflow step."""
@@ -98,7 +104,7 @@ class SavedJobCommand:
             "purpose": self.purpose,
             "argv": list(self.argv),
             "cwd_relative": self.cwd_relative,
-            "shell": " ".join(self.argv),
+            "shell": _argv_to_shell(self.argv),
         }
 
 
@@ -271,16 +277,18 @@ def build_saved_job_commands() -> tuple[SavedJobCommand, ...]:
             "Run a software-contract FAST_PREVIEW club-only match for TW_wiffle.",
             (
                 "from src.shared.python.motion_matching.club_only.ui_integration "
-                "import create_club_only_session, run_club_only_ui_match; "
+                "import create_club_only_session, run_club_only_ui_match, "
+                "build_club_only_result_view; "
                 "from src.shared.python.motion_matching.club_only.fast_matching "
                 "import MatchPreset; "
                 "s=create_club_only_session(trial_id='TW_wiffle',"
                 " model_id='driven_double_pendulum',"
                 " preset=MatchPreset.FAST_PREVIEW); "
                 "r=run_club_only_ui_match(s); "
-                "assert r.display_status.value!='verified' or "
-                "r.match.native_g1_pass is False; "
-                "print(r.display_status, r.match.qualification_blockers)"
+                "v=build_club_only_result_view(r); "
+                "assert v.display_status.value!='native_verified' or "
+                "v.native_g1_pass; "
+                "print(v.display_status, v.qualification_blockers)"
             ),
         ),
         _python_c_saved_job(
@@ -314,7 +322,8 @@ def build_clean_environment_replay() -> CleanEnvironmentReplay:
             'python -c "from pathlib import Path; '
             "from src.shared.python.motion_matching.jobs import "
             "export_portable_package; "
-            "export_portable_package(Path('runs/<run_id>'), Path('packages/<run_id>'))\""
+            "export_portable_package(Path('runs/<run_id>'), Path('packages/<run_id>'), "
+            "asset_paths={'result': Path('runs/<run_id>/result.json')})\""
         ),
         import_command=(
             'python -c "from pathlib import Path; '
@@ -651,7 +660,7 @@ def _render_guide_commands_and_replay(built: ReproductionGuide) -> list[str]:
                 cmd.purpose,
                 "",
                 "```bash",
-                " ".join(cmd.argv),
+                _argv_to_shell(cmd.argv),
                 "```",
                 "",
             ]
