@@ -3,7 +3,8 @@
 ## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614)
 
 - Worktree: `Worktrees/UpstreamDrift-local-10614`, branch
-  `feat/co10-club-only-turnover-10614`, DL-#10614, PR not created yet.
+  `feat/co10-club-only-turnover-10614`, DL-#10614, PR
+  [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718).
 - Delivered: `club_only/reproduction.py` freezes exact saved-job commands,
   trial/model roster, raw-source provenance, assumptions, candidate selection,
   clean-environment portable replay (MS-105 jobs), and evidence-linked matrix
@@ -11,11 +12,11 @@
   `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`; evidence
   `docs/plans/club_only_matching/evidence/club_reproduction_turnover.json`;
   schema `club-only-reproduction/1.0.0`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=90` (12 passed).
 - Limitations: software-contract turnover only; `native_g1_pass` false;
   `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
-- Next: Open ready-for-review PR with `Fixes #10614`, enable squash auto-merge,
-  drive CI green; schedule desk-native Fit/G1 for unresolved matrix cells.
+- Next: Drive CI green on PR #10718 (squash auto-merge enabled); schedule
+  desk-native Fit/G1 for unresolved matrix cells.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
