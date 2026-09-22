@@ -519,9 +519,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10610 (epic #10602)
 - **Branch:** feat/10610-co06-controls-replay
 - **PR:** #10687
-- **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; SPEC.md
+- **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — DRY gate: shared native_g1_gates helper; check_dry_duplication_gate OK; pytest test_club_control_replay.py GREEN (12); native_g1_pass false
+- **Last verified:** 2026-09-22 at SELF — merged origin/main (MS-51); DRY native_g1_gates helper; monolith+divergence inventory regenerated; native_g1_pass false
 - **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
 - **Next step:** Confirm CI green and squash merge of PR #10687; do not start CO-07+.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
