@@ -1383,71 +1383,17 @@ def evaluate_baseline_package_acceptance(
     return evaluate(pkg_dict, horizon=h, gates=gates)
 
 
-def reject_visual_override_of_physical_failure(
-    *,
-    physical_failed: bool,
-    visual_attractiveness: float,
-) -> None:
+def reject_visual_override_of_physical_failure(package: Any) -> bool:
     """CO-08 path-anchor: visual attractiveness cannot override physical failure.
 
-    Delegates to club-only matrix qualification so tour-matching acceptance and
-    the club matrix share one fail-closed rule.
+    Delegates to club-only matrix qualification so tour acceptance and the club
+    matrix share one fail-closed rule.
     """
     from src.shared.python.motion_matching.club_only.matrix_qualification import (
         ExportedCandidatePackage,
-        OrientationClaim,
-        PhaseCoverage,
         physical_overrides_visual,
     )
-    from src.shared.python.motion_matching.club_only.observation import ComponentStatus
 
-    # Minimal package shaped only for the visual-vs-physical gate.
-    probe = ExportedCandidatePackage(
-        candidate_id="acceptance:visual-override-probe",
-        trial_id="TW_wiffle",
-        model_id="driven_double_pendulum",
-        geometry_hash="0" * 64,
-        profile_hash="0" * 64,
-        timestamps_s=__import__("numpy").asarray([0.0, 0.01], dtype=float),
-        q0=__import__("numpy").zeros(2, dtype=float),
-        v0=__import__("numpy").zeros(2, dtype=float),
-        grip_position_rmse_m=0.0,
-        face_position_rmse_m=0.0,
-        original_3d_rmse_m=0.0,
-        in_plane_rmse_m=0.0,
-        out_of_plane_rmse_m=0.0,
-        grip_orientation_rmse_rad=None,
-        face_orientation_rmse_rad=None,
-        native_coverage_fraction=1.0,
-        phase_error_s=None,
-        closure_residual_m=0.0,
-        contact_feasible=True,
-        used_measured_state_reset=False,
-        body_labels_hidden=False,
-        body_marker_status="withheld",
-        orientation_claims=(
-            OrientationClaim(
-                component="mid_hands_orientation",
-                declared_status=ComponentStatus.MEASURED,
-                scored_as_measured=True,
-            ),
-        ),
-        phases=PhaseCoverage(
-            address_present=True,
-            top_present=True,
-            impact_present=True,
-            finish_present=True,
-            phase_labels=("A", "T", "I", "F"),
-        ),
-        fitting_prior_trial_ids=(),
-        unsupported_components=frozenset(),
-        supported_observables=frozenset({"grip_position"}),
-        native_g1_pass=False,
-        claims_native_qualification=False,
-        qualification_blockers=(
-            "native_g1_qualification_requires_desk_native_receipt",
-        ),
-        visual_attractiveness=visual_attractiveness,
-        physical_failed=physical_failed,
-    )
-    physical_overrides_visual(probe)
+    if not isinstance(package, ExportedCandidatePackage):
+        raise TypeError("package must be ExportedCandidatePackage")
+    return physical_overrides_visual(package)
