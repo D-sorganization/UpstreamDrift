@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T00:43:23Z",
+  "generated_at": "2026-09-22T03:48:08Z",
   "rows": [
     {
       "acceptance": null,
@@ -702,6 +702,75 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json",
       "sha256": "3f1bb4e335b40ebfa2b90ae59db518b9d28a927fc5076e7e2127926a2d313fc5"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/constrained_ik_receipt.json",
+      "sha256": "36bedcfc7d6698f004faf1943a42736b418dccb0e57fd11118ab856eab23c124"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/receipt.json",
+      "sha256": "bbbd073b78322221fcc41c4116f3b14341d8f066fb7096c64f0ddf59a4e02b29"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/runtime_receipt.json",
+      "sha256": "7e3fcce68b67fdd2973109c491f6fc27a2f2618a0f8bccda1abc5a3d9504dbf9"
     },
     {
       "acceptance": null,
@@ -3742,5 +3811,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 103
+  "total_receipts": 106
 }
