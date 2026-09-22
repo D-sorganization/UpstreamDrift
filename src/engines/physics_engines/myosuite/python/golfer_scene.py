@@ -95,7 +95,7 @@ class GolferScene:
 
     @property
     def is_placeholder(self) -> bool:
-        name = self.xml_path.name.lower()
+        name = _path_basename_lower(self.xml_path)
         return name in {"myobody.xml", "myoupperbody.xml"} or "placeholder" in name
 
 
@@ -320,59 +320,21 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-@precondition(lambda: True, "generate_golfer_scene entry")
-@postcondition(
-    lambda result: result.driver.is_file() and result.iron.is_file(),
-    "driver and iron scenes must exist after generation",
-)
-def generate_golfer_scene(
+def _path_basename_lower(path: Path) -> str:
+    """Return the lowercased final path component (Law of Demeter helper)."""
+    return path.name.lower()
+
+
+def _golfer_scene_receipt_payload(
     *,
-    repo_root: Path | None = None,
-    output_root: Path | None = None,
-    contact: ContactParameters | None = None,
-) -> GolferScenePaths:
-    """Generate driver/iron golfer MJCF scenes and a receipt JSON."""
-    root = _repo_root(repo_root)
-    myo_sim = _require_myo_sim(root)
-    if output_root is not None:
-        out_dir = Path(output_root)
-    else:
-        out_dir = root / "shared" / "models" / "myosuite" / "golf" / "body"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    assets_dir = out_dir / "assets"
-    right_arm, left_arm = _write_arm_chains_with_grip_sites(myo_sim, assets_dir)
-    upper_chain = _write_upper_chain_with_local_arms(
-        myo_sim, assets_dir, right_arm, left_arm
-    )
-    params = contact or _DEFAULT_CONTACT
-    driver_path = out_dir / "golfer_myobody_driver.xml"
-    iron_path = out_dir / "golfer_myobody_iron.xml"
-    driver_path.write_text(
-        _build_scene_xml(
-            myo_sim=myo_sim,
-            out_dir=out_dir,
-            upper_chain=upper_chain,
-            club=_club_spec(ClubKind.DRIVER),
-            model_name="golfer_myobody_driver",
-            contact=params,
-        ),
-        encoding="utf-8",
-    )
-    iron_path.write_text(
-        _build_scene_xml(
-            myo_sim=myo_sim,
-            out_dir=out_dir,
-            upper_chain=upper_chain,
-            club=_club_spec(ClubKind.IRON),
-            model_name="golfer_myobody_iron",
-            contact=params,
-        ),
-        encoding="utf-8",
-    )
-    receipt_path = out_dir / "golfer_myobody_receipt.json"
-    driver_club = _club_spec(ClubKind.DRIVER)
-    iron_club = _club_spec(ClubKind.IRON)
-    receipt = {
+    params: ContactParameters,
+    driver_path: Path,
+    iron_path: Path,
+    driver_club: ClubSpec,
+    iron_club: ClubSpec,
+) -> dict[str, Any]:
+    """Build the MS-51 golfer scene receipt document (pure data)."""
+    return {
         "schema_version": "myosuite-golfer-scene/1",
         "issue": 10344,
         "ms": "MS-51",
@@ -426,6 +388,67 @@ def generate_golfer_scene(
             ),
         },
     }
+
+
+@precondition(lambda: True, "generate_golfer_scene entry")
+@postcondition(
+    lambda result: result.driver.is_file() and result.iron.is_file(),
+    "driver and iron scenes must exist after generation",
+)
+def generate_golfer_scene(
+    *,
+    repo_root: Path | None = None,
+    output_root: Path | None = None,
+    contact: ContactParameters | None = None,
+) -> GolferScenePaths:
+    """Generate driver/iron golfer MJCF scenes and a receipt JSON."""
+    root = _repo_root(repo_root)
+    myo_sim = _require_myo_sim(root)
+    if output_root is not None:
+        out_dir = Path(output_root)
+    else:
+        out_dir = root / "shared" / "models" / "myosuite" / "golf" / "body"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    assets_dir = out_dir / "assets"
+    right_arm, left_arm = _write_arm_chains_with_grip_sites(myo_sim, assets_dir)
+    upper_chain = _write_upper_chain_with_local_arms(
+        myo_sim, assets_dir, right_arm, left_arm
+    )
+    params = contact or _DEFAULT_CONTACT
+    driver_path = out_dir / "golfer_myobody_driver.xml"
+    iron_path = out_dir / "golfer_myobody_iron.xml"
+    driver_path.write_text(
+        _build_scene_xml(
+            myo_sim=myo_sim,
+            out_dir=out_dir,
+            upper_chain=upper_chain,
+            club=_club_spec(ClubKind.DRIVER),
+            model_name="golfer_myobody_driver",
+            contact=params,
+        ),
+        encoding="utf-8",
+    )
+    iron_path.write_text(
+        _build_scene_xml(
+            myo_sim=myo_sim,
+            out_dir=out_dir,
+            upper_chain=upper_chain,
+            club=_club_spec(ClubKind.IRON),
+            model_name="golfer_myobody_iron",
+            contact=params,
+        ),
+        encoding="utf-8",
+    )
+    receipt_path = out_dir / "golfer_myobody_receipt.json"
+    driver_club = _club_spec(ClubKind.DRIVER)
+    iron_club = _club_spec(ClubKind.IRON)
+    receipt = _golfer_scene_receipt_payload(
+        params=params,
+        driver_path=driver_path,
+        iron_path=iron_path,
+        driver_club=driver_club,
+        iron_club=iron_club,
+    )
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     logger.info(
         "Generated MyoSuite golfer scenes at %s (pin %s)", out_dir, MYO_SIM_PIN_SHA

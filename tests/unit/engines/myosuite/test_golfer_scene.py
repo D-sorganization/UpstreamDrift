@@ -7,8 +7,9 @@ import is required. Native load/step coverage lives under ``tests/myosuite/``.
 from __future__ import annotations
 
 import json
-import xml.etree.ElementTree as ET
 from pathlib import Path
+
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
 import pytest
 
