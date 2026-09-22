@@ -14,11 +14,11 @@
   reprojection, roster×trial matrix with separated score lanes; schema
   `club-body-candidates/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_body_candidates.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_body_candidates.py -q -n 0 --no-cov --timeout=60` (12 passed); ruff check/format clean on touched files. Follow-up: LoD/DRY CI fixes + main merge, register/inventory refresh.
+- Validation: focused CO-05 suite 12 passed; register/inventory unit tests green after `--write`; DRY gate clean locally (shared `require_strictly_increasing_timestamps`); merged `origin/main` (not DIRTY).
 - Limitations: synthetic fixtures for software contracts only; no native G1
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
-- Next: Confirm CI green on PR #10681 after merge + register/inventory/DRY fixes; squash auto-merge armed.
+- Next: Push CI-fix commit; confirm quality-gate / unit-test-gate / repo-structure-gates green on PR #10681; squash auto-merge armed.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
