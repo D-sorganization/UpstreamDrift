@@ -442,7 +442,7 @@ def test_inverse_requires_conditioning(tmp_path: Path) -> None:
         for i in range(4)
     ]
     store, plan = _store_with_splits(tmp_path, episodes)
-    with pytest.raises(ValueError, match="conditioning"):
+    with pytest.raises(ValueError, match=r"InverseLabelConditioning|ambiguous"):
         build_trial_matrices(
             store,
             plan,
