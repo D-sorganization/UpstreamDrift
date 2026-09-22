@@ -7,12 +7,15 @@ import pytest
 
 from src.shared.python.pendulum_simulator.physics_golfer import GolferParams, N_DOF
 from src.shared.python.pendulum_simulator.upper_body_replay import (
+    UpperBodyBernsteinTorqueProfile,
+    UpperBodyBernsteinReplayTarget,
     UpperBodyCaptureFrame,
     UpperBodyMarkerAttachment,
     UpperBodyReplayTarget,
     evaluate_replay_against_body_target,
     project_replay_markers,
     replay_upper_body_target,
+    replay_upper_body_bernstein_target,
 )
 from src.shared.python.motion_matching.body_target import BodyTarget
 from src.shared.python.motion_matching.club_target import SourceProvenance
@@ -88,6 +91,72 @@ def test_replay_rejects_clock_not_normalized_to_its_capture_start() -> None:
             torques=np.zeros((3, 7)),
             params=_params(),
         )
+
+
+def test_bernstein_torque_profile_preserves_endpoints_and_bounds() -> None:
+    control_points = np.array(
+        [
+            np.linspace(-2.0 - actuator, 3.0 + actuator, 7)
+            for actuator in range(N_DOF - 1)
+        ]
+    )
+    profile = UpperBodyBernsteinTorqueProfile(
+        control_points=control_points,
+        duration_s=0.04,
+    )
+
+    assert np.allclose(profile.torque_at(0.0), control_points[:, 0])
+    assert np.allclose(profile.torque_at(0.04), control_points[:, -1])
+    for time_s in (-0.01, 0.01, 0.02, 0.03, 0.05):
+        torque = np.asarray(profile.torque_at(time_s))
+        assert np.all(torque >= control_points.min(axis=1))
+        assert np.all(torque <= control_points.max(axis=1))
+
+
+def test_bernstein_torque_profile_rejects_wrong_actuator_shape() -> None:
+    with pytest.raises(ValueError, match=r"shape \(7, 7\)"):
+        UpperBodyBernsteinTorqueProfile(
+            control_points=np.zeros((N_DOF - 2, 7)),
+            duration_s=0.04,
+        )
+
+
+def test_bernstein_replay_rejects_profile_with_wrong_horizon() -> None:
+    profile = UpperBodyBernsteinTorqueProfile(
+        control_points=np.zeros((N_DOF - 1, 7)),
+        duration_s=0.03,
+    )
+
+    with pytest.raises(ValueError, match="duration_s must match"):
+        UpperBodyBernsteinReplayTarget(
+            times=np.array([0.0, 0.02, 0.04]),
+            initial_state=np.zeros(2 * N_DOF),
+            torque_profile=profile,
+            params=_params(),
+        )
+
+
+def test_bernstein_replay_uses_continuous_bounded_control_profile() -> None:
+    control_points = np.array(
+        [np.linspace(0.0, 0.02 * (actuator + 1), 7) for actuator in range(N_DOF - 1)]
+    )
+    target = UpperBodyBernsteinReplayTarget(
+        times=np.array([0.0, 0.02, 0.04]),
+        initial_state=np.zeros(2 * N_DOF),
+        torque_profile=UpperBodyBernsteinTorqueProfile(
+            control_points=control_points,
+            duration_s=0.04,
+        ),
+        params=_params(),
+    )
+
+    replay = replay_upper_body_bernstein_target(target)
+
+    assert np.allclose(replay.actuator_torques[0], control_points[:, 0])
+    assert np.allclose(replay.actuator_torques[-1], control_points[:, -1])
+    assert np.all(replay.actuator_torques >= control_points.min(axis=1))
+    assert np.all(replay.actuator_torques <= control_points.max(axis=1))
+    assert replay.reaction_forces.shape[1] == 4
 
 
 def test_marker_projection_requires_explicit_attachments_and_capture_frame() -> None:
