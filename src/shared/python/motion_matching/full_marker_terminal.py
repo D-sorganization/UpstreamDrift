@@ -159,7 +159,14 @@ def _head_cluster_value(receipt: Mapping[str, Any]) -> float | None:
 
 
 def _requires_full_marker_disclosure(receipt: Mapping[str, Any]) -> bool:
-    """Disclosure is mandatory for Simscape / profiled / dual-metric receipts."""
+    """Disclosure is mandatory for Simscape / profiled / dual-metric receipts.
+
+    Presence of the ordinary G1 field ``terminal_marker_rmse_m`` (or
+    ``terminal_rms_m``) alone must not force head-cluster disclosure — every
+    engine's flat metric dict includes those keys. Opt in via profile, engine,
+    terminal breakdown, acceptance-terminal source, or an explicit dual-metric
+    flag (MS-61 / #10348).
+    """
     if isinstance(receipt.get("terminal_breakdown"), Mapping):
         return True
     if receipt.get("acceptance_terminal_source") is not None:
@@ -168,7 +175,7 @@ def _requires_full_marker_disclosure(receipt: Mapping[str, Any]) -> bool:
         return True
     if str(receipt.get("engine", "")).strip().lower() == "simscape":
         return True
-    return "terminal_rms_m" in receipt or "terminal_marker_rmse_m" in receipt
+    return bool(receipt.get("require_dual_terminal_metrics"))
 
 
 def evaluate_full_marker_terminal_disclosure(

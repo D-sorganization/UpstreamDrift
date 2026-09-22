@@ -180,6 +180,25 @@ def test_body_only_terminal_cannot_satisfy_full_body_acceptance() -> None:
         )
 
 
+def test_plain_g1_metrics_do_not_require_head_cluster_disclosure() -> None:
+    """Ordinary flat G1 metric dicts must not trip MS-61 head-cluster disclosure."""
+    metrics = {
+        "whole_marker_rmse_m": 0.01,
+        "early_marker_rmse_m": 0.005,
+        "terminal_marker_rmse_m": 0.01,
+        "club_marker_rmse_m": 0.01,
+        "pelvis_yaw_rmse_rad": 0.01,
+        "max_normal_force_n": 800.0,
+        "max_penetration_m": 0.001,
+        "max_closure_residual_m": 0.001,
+        "max_closure_residual_rad": 0.001,
+    }
+    disclosure = evaluate_full_marker_terminal_disclosure(metrics)
+    assert disclosure == []
+    verdict = evaluate(metrics, horizon=Horizon.G1)
+    assert "head_cluster_terminal_rms_m" not in {g.name for g in verdict.gates}
+
+
 def test_evaluate_rejects_missing_head_cluster_disclosure() -> None:
     """Full-body G1 receipts that omit head-cluster terminal fail closed (MS-61)."""
     receipt = {
