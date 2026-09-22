@@ -197,7 +197,9 @@ class ModalShaftModel(ShaftModel):
 
             # Modal force = physical force projected onto mode
             # (simplified: only using first component of force)
-            modal_force = phi_at_load * math.sqrt(np.vdot(force, force))  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead for 1D arrays
+            modal_force = (
+                phi_at_load * math.sqrt(np.vdot(force, force))
+            )  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead for 1D arrays
             # Scale factor needs proper modal mass derivation (see issue #2166).
             # Current 1e-6 is an ad-hoc value that produces plausible
             # deflections but lacks rigorous justification.
