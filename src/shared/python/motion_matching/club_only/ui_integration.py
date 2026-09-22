@@ -12,6 +12,7 @@ import hashlib
 import json
 import uuid
 from dataclasses import dataclass, replace
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -46,14 +47,17 @@ from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
     CLUB_DATA_RELATIVE,
     CLUB_DATA_SHA256,
+    EXPECTED_SAMPLE_COUNTS,
     IDENTITY_SCHEMA,
     NATIVE_SAMPLE_RATE_HZ,
     UNIT_AUTHORITY,
     build_club_workbook_identity,
     verify_workbook_hash,
 )
+from src.shared.python.motion_matching.ledger import default_ledger_path
 from src.shared.python.motion_matching.ledger_schema import (
     ArtefactPaths,
+    Ledger,
     LedgerRow,
     SharedMetrics,
 )
@@ -388,11 +392,12 @@ def load_club_only_workbook_observation(
     from src.shared.python.motion_matching.club_target import AlignOptions
     from src.shared.python.motion_matching.loaders.excel import load_club_target_excel
 
+    sample_count = int(EXPECTED_SAMPLE_COUNTS[trial_id])
+    duration_s = (sample_count - 1) / float(NATIVE_SAMPLE_RATE_HZ)
     opts = AlignOptions(
         sample_rate_hz=float(NATIVE_SAMPLE_RATE_HZ),
-        simulation_time_s=1.0,
-        time_alignment="impact",
-        impact_target_t_s=0.25,
+        simulation_time_s=duration_s,
+        time_alignment="none",
     )
     target = load_club_target_excel(workbook, trial_id, opts)
     return club_target_to_observation(target, trial_id=trial_id)
@@ -614,10 +619,39 @@ def assert_unqualified_cannot_appear_verified(view: Any) -> None:
         )
 
 
+def _receipt_path_relative_to_repo(path: Path, repo_root: Path) -> str:
+    resolved = path.resolve()
+    root = repo_root.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return resolved.as_posix().replace("\\", "/")
+
+
+def _append_row_to_matched_swing_ledger(repo_root: Path, row: LedgerRow) -> None:
+    ledger_path = default_ledger_path(repo_root)
+    if ledger_path.is_file():
+        payload = json.loads(ledger_path.read_text(encoding="utf-8"))
+        ledger = Ledger.model_validate(payload)
+        rows = [existing for existing in ledger.rows if existing.sha256 != row.sha256]
+    else:
+        rows = []
+    rows.append(row)
+    rows.sort(key=lambda item: item.receipt_path)
+    updated = Ledger(
+        schema_version="1.0.0",
+        generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        total_receipts=len(rows),
+        rows=rows,
+    )
+    updated.write_json(ledger_path)
+
+
 def publish_club_only_ledger_row(
     view: ResultViewModel,
     *,
     receipt_path: str | Path,
+    repo_root: Path | str | None = None,
 ) -> LedgerRow:
     """Publish a ledger row whose sha256 matches the receipt file bytes."""
     if not isinstance(view, ResultViewModel):
@@ -631,8 +665,12 @@ def publish_club_only_ledger_row(
         )
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     reason = "; ".join(view.qualification_blockers) or "software_contract_only"
-    return LedgerRow(
-        receipt_path=path.as_posix().replace("\\", "/"),
+    if repo_root is not None:
+        rel_path = _receipt_path_relative_to_repo(path, Path(repo_root))
+    else:
+        rel_path = path.as_posix().replace("\\", "/")
+    row = LedgerRow(
+        receipt_path=rel_path,
         sha256=digest,
         engine=view.model_id,
         lane="club_only",
@@ -647,6 +685,9 @@ def publish_club_only_ledger_row(
         artefacts=ArtefactPaths(),
         reason=reason,
     )
+    if repo_root is not None:
+        _append_row_to_matched_swing_ledger(Path(repo_root), row)
+    return row
 
 
 def write_club_only_result_package(

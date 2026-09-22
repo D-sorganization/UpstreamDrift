@@ -20,6 +20,9 @@
   frame series remains unavailable until a continuous trajectory package is
   emitted (reason via `tour_matching_viewer.core.club_only_compare_from_ui_result`).
 - Next: Confirm CI green on PR #10711 and squash-merge; do not start CO-10 until merge.
+- 2026-09-22 — Review-gap autofix: full native workbook clock on load; cooperative
+  cancel saves checkpoint for resume with frozen session preset; ledger rows
+  append to `reports/matched_swing_ledger.json` with repo-relative receipt paths.
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 
