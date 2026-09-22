@@ -413,7 +413,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Neural Masked Proposals NM-06 #10621 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10621-nm06`.
-- Branch: `feat/10621-nm06-masked-proposals`; PR not created yet. Governing issue
+- Branch: `feat/10621-nm06-masked-proposals`; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue
   #10621 (NM-06, epic #10603). Entry DL-#10621.
 - Delivered: variable-dim masked proposals
   (`motion_matching/inverse/{masked_proposal,proposal_training,collapse,basis_time}`),
@@ -421,7 +421,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
   checkpoint/refine fail-closed seams; `masked_proposals.md` + receipt;
   software-contract tests only.
 - Validation: `pytest tests/unit/motion_matching/test_masked_proposals_nm06.py -q -n 0 --no-cov --timeout=60` (9 passed).
-- Next action: open ready PR `Fixes #10621`, arm squash auto-merge; do not start NM-07+.
+- Next action: confirm CI green on PR #10709; do not start NM-07+.
 
 ## Neural Dynamics Baselines NM-05 #10620 Handoff
 
@@ -463,8 +463,8 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
 - **NM-04 state:** MERGED via PR #10698; DL-#10619.
 - **NM-05 state:** MERGED via PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); DL-#10620.
-- **NM-06 state:** in progress on `feat/10621-nm06-masked-proposals`; DL-#10621.
-- **Next:** Open NM-06 PR with Fixes #10621 and squash auto-merge; do not start NM-07+.
+- **NM-06 state:** in review via PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); DL-#10621.
+- **Next:** Confirm CI green on PR #10709; do not start NM-07+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 

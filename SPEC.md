@@ -6820,7 +6820,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10703 | Qualify club-only matrix and plausibility tradeoffs (CO-08): independent trial×roster evaluation with frozen CO-02 gates, published failures, withheld-body experiment, common-observable comparison; software-contract only. |
-| 2026-09-22 | #10621 | NM-06 masked trajectory-to-control proposals with selected/mixture heads, observation-rollout training loss, collapse diagnostics, coefficient time-domain conversion, and fail-closed native refinement; software-contract tests only. |
+| 2026-09-22 | #10709 | NM-06 masked trajectory-to-control proposals with selected/mixture heads, observation-rollout training loss, collapse diagnostics, coefficient time-domain conversion, and fail-closed native refinement; software-contract tests only. |
 | 2026-09-22 | #10701 | NM-05 classical and small neural dynamics baselines over episode store with analytical ridge NN optional MLP three-seed validation and test untouched software-contract tests only. |
 | 2026-09-22 | #10656 | Migrate `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline` off the GUI thread onto `src/tools/async_action.py`; add lower-only GUI-thread-blocking ratchet (`check_gui_thread_blocking_ratchet.py`); wire primary run buttons through shared theme helper (#8880, refs not closes). |
 | 2026-09-22 | #10700 | Optimize fast club-only matching and expose candidate diversity (CO-07): bounded presets, immutable cache/checkpoint, cold/retrieval/reduced-to-full starts, feasibility-first Pareto pruning, optional neural slot without weights; software-contract only. |
