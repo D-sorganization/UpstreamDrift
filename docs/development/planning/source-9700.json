@@ -1,0 +1,43 @@
+{
+  "number": 9700,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/9700",
+  "title": "Epic: Swing-to-Impact Dynamics and Acoustic Sweetness Research",
+  "body": "## Status as of 2026-09-19\n\nStatus as of 2026-09-19\n- Done: U1 #9701 (PR #9706); interim Tools shaft-provider consumer (PR #9916); handoff docs (PR #9962).\n- Open: U2 #9703 full engine-facing adapter acceptance at the reviewed Tools provider pin + installed-wheel tests.\n- U3 (#9704) and U4 (#9705) not started; folded into this epic as checklist lines - U4 is a prospective physical study needing equipment/participants/approvals.\n- Blocked on Tools#5069/#5072/#5073/#5075 and Tools#5141 consolidation.\n\n---\n\n## Objective\nConnect reproducible swing and articulated-system states to the shared Tools impact models and determine which changes affect launch, club vibration and sound. Preserve the protected proximal–distal research record and exact provider pins.\n\n## Native Sub-Issues\n- [x] #9701 (IA-U1): Source/test inventory, ownership and integration/validation design; merged in PR #9706 at dbc6727aa4f0d422b7adaf6957e658e8997f7f29.\n- [ ] #9703 (IA-U2): Typed swing, wrench and elastic-state adapters; depends on qualified Tools contracts (#5069, #5072, #5073 and #5075 in D-sorganization/Tools).\n- [ ] #9704 (IA-U3): Registered matched-state and matched-input counterfactual studies; depends on U2 and verified contact/structural models.\n- [ ] #9705 (IA-U4): Synchronized impact/acoustic measurements and blinded sweetness tests; planning can proceed in parallel, effect claims require calibrated data and appropriate approvals.\n\n## Companions and Acceptance\nTheory: D-sorganization/AffineDrift#4253. Shared provider: D-sorganization/Tools#5068. Governing integration design: docs/development/impact_acoustics_program.md on main via the U1 PR #9706.\n\nExport explicit frames, units, geometry, rigid motion, internal elastic state, prestress, wrenches, grip boundary conditions and provenance. Vary face position, shaft state, angular motion, tension and grip impedance without silently changing the estimand. Separate differences caused during delivery from differences during collision. Record launch/spin, head rotation, contact histories, vibration and qualified observer pressure; keep perception as a distinct blinded outcome.\n\nUse TDD/DbC/LoD/DRY, immutable registrations, numerical convergence and work/energy checks, held-out calibration/validation, uncertainty and identifiability analysis. Reuse existing research manifests and orchestration; never edit vendor copies or relabel manufactured examples as physical validation. Update turnover documents with each implementation commit.\n\nU1 is documentation, not execution of a new experiment. This epic remains open until modeling and empirical acceptance gates are met.\n\n\n## Provider progress and remaining integration (2026-09-10)\n\nTools#5073 now organizes separate numerical reviews for instantaneous coupling (#5146), temporal normal contact (#5149), adaptive normal events (#5152) and prescribed shaft force/couple histories (review issue#5153). The latest archived provider source passes406 Windows/Linux controls; this is synthetic numerical verification, not a completed U3/U4 experiment. U2 still needs its full engine-facing adapter acceptance and an exact reviewed provider/consumer/installed-wheel qualification. Provider consolidation is coordinated through Tools#5141; the merged UpstreamDrift#9916 consumer remains an interim compatibility result.\n\nFor U3, retain identical initial states and explicitly account for changing external/anchor work when comparing loads or grip conditions. For U4, measured force/spin, radiation and blinded preference remain required; no event solver, small energy residual or synthetic sonification completes these gates.\n\n## Folded in from backlog triage 2026-09-19\n\n- [ ] U3: registered matched-input and matched-rigid-delivery counterfactual studies (impact position, prestress, grip impedance) with immutable registration, convergence/energy audits and held-out validation - after U2 and Tools#5071-#5073 (from #9704)\n- [ ] U4: synchronized impact + acoustic measurement campaign and blinded sweetness tests (protocol, sensors inventory, predeclared estimands) - planning only until governance approval (from #9705)\n\n## Tracked issues (2026-09-19 triage)\n\n- [ ] #9703 IA-U2: Export Compatible Swing, Wrench and Elastic States to Tools Impact Kernels\n",
+  "updated_at": "2026-09-19T17:44:39Z",
+  "labels": [
+    {
+      "id": 10765063750,
+      "node_id": "LA_kwDOQqJAi88AAAACgaXWRg",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/epic",
+      "name": "epic",
+      "color": "ededed",
+      "default": false,
+      "description": null,
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10796034821,
+      "node_id": "LA_kwDOQqJAi88AAAACg35rBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/P2",
+      "name": "P2",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Medium priority",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12266883256,
+      "node_id": "LA_kwDOQqJAi88AAAAC2ynIuA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/triaged-2026-09",
+      "name": "triaged-2026-09",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Reviewed in the 2026-09-19 backlog triage",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "open"
+}

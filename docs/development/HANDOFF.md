@@ -1,3 +1,29 @@
+# Deferred External Validation Planning — 2026-09-22
+
+- Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-validation-planning`.
+  Branch `docs/deferred-validation-planning`; implementation `cb127ad02`; PR #10741 is open.
+  Central Repository_Management #1687; governing impact epic #9700.
+- Six repo-owned plans preserve unavailable impact/acoustic/perceptual studies,
+  cohort/generalization validation, observable-accuracy reference measurements,
+  everyday-reference calibration, three-camera hardware soak and Impact Explorer
+  predictive-accuracy evidence. Catalog entries retain original issue snapshots,
+  missing resources, acceptance boundaries and Board/reactivation gates.
+- #9700/#10375/#10382/#9619/#9613 stay open for executable software and available
+  data. #9546 was already closed through #10446 at 66527df069df; this migration
+  preserves that state and makes no new completion claim. No engine, public
+  physics API, scientific evidence, calibration or provider pin changes here.
+- #10363/#10380 should reference DV-10375/DV-10382; use the same experiment
+  records rather than duplicate cohorts. Existing industrial/product/experiment
+  governance remains authoritative; a deferred requirement still blocks its
+  original physical, perceptual or release claim.
+- Validation: unchanged source bodies verified against the staged snapshot;
+  strict six-plan catalog, manual governance, SPEC and normal commit/push hooks
+  pass. Hosted checks are pending. The
+  checkout is sparse to conserve C: capacity; no full local suite is claimed.
+- Next: pass normal hooks and hosted checks, merge, compare published plan bytes,
+  then post immutable scope links and audit receipts. Preserve the existing
+  closed state of #9546 and keep the five open mixed sources open.
+
 # Current Matching Continuation Handoff
 
 ## Tools Session Bridge CameraCapabilities (#9604, DL-#9422) — 2026-09-22
