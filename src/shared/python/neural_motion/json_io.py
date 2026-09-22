@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import json
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Mapping
 
 __all__ = ["SortedJsonWritableMixin", "write_sorted_json"]
 
 
-class SortedJsonWritableMixin:
+class SortedJsonWritableMixin(ABC):
     """Persist ``as_dict()`` payloads as sorted JSON files."""
 
+    @abstractmethod
     def as_dict(self) -> dict[str, Any]:
-        raise NotImplementedError
+        """Return a JSON-serialisable mapping for this record."""
 
     def write_json(self, path: str | Path) -> None:
         write_sorted_json(path, self.as_dict())
