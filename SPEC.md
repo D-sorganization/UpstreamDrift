@@ -6820,6 +6820,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-21 | #8886 | Fix Pose Studio's slider/spinbox tooltips lying about the display unit after `set_show_radians` toggles them, unify the Putting Green Simulator's `PuttConfig` to SI (`cup_distance_m` replaces the mixed-unit `cup_distance_ft`), and make the ball-flight and putting-green result panes use one consistent primary/secondary unit pair per line instead of an ad hoc mix. |
+| 2026-09-22 | #10733 | Extract contract-validated bounded Bernstein controls shared by the double and triple pendulum matchers, preserving endpoint, convex-bound, curvature, and effort semantics for the pending constrained upper-body optimizer; no capture fit or qualification claim. |
 | 2026-09-22 | #10732 | Add fail-closed constrained upper-body replay contracts: exact source-clock terminal frames, separate actuator and constraint-reaction traces, declared marker attachments and capture embedding, and same-clock physical marker metrics; no fitting or qualification claim. |
 | 2026-09-22 | #10730 | Reconcile TB-04 Driver and Iron tour-baseline evidence: committed qualification receipts are disqualified, so the coverage matrix and unified motion-matching ledger preserve and reject them; regressions prevent unsupported promotion. |
 | 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |
