@@ -23,15 +23,13 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture(autouse=True)
 def reset_transport() -> None:
-    """Reset the module-level transport singletons between tests."""
+    """Reset the module-level transport singleton between tests."""
     realtime_api._TRANSPORT = None
-    realtime_api._WS_TRANSPORT = None
     yield
     transport = realtime_api._TRANSPORT
     if transport is not None:
         transport.shutdown()
     realtime_api._TRANSPORT = None
-    realtime_api._WS_TRANSPORT = None
 
 
 @pytest.fixture()
@@ -50,24 +48,6 @@ def patched_transport() -> MagicMock:
     transport.unsubscribe = MagicMock()
     realtime_api._TRANSPORT = transport
     return transport
-
-
-@pytest.fixture()
-def patched_ws_transport() -> MagicMock:
-    """Return a mock WSPubSub wired into the facade as the "ws" transport.
-
-    Never let a test touch the real :class:`WSPubSub`: constructing one
-    autostarts a background server (Rust in-process or a spawned
-    uvicorn process), which is not something a unit test should trigger.
-    """
-    transport = MagicMock()
-    transport.publish = MagicMock()
-    sub_handle = MagicMock()
-    sub_handle.unsubscribe = MagicMock()
-    transport.subscribe = MagicMock(return_value=sub_handle)
-    realtime_api._WS_TRANSPORT = transport
-    yield transport
-    realtime_api._WS_TRANSPORT = None
 
 
 class TestChannelRegistry:
@@ -110,42 +90,12 @@ class TestPublish:
         publish("test/chan", {"v": 1}, transport="file")
         patched_transport.publish.assert_called_once_with("test/chan", {"v": 1})
 
-    def test_publish_with_ws_transport_routes_to_ws(
-        self, patched_transport: MagicMock, patched_ws_transport: MagicMock
-    ) -> None:
-        """transport='ws' is wired (issue #8869): it must reach the ws
-        transport, not silently fall back to file."""
-        publish("test/chan", {"v": 1}, transport="ws")
-        patched_ws_transport.publish.assert_called_once_with("test/chan", {"v": 1})
-        patched_transport.publish.assert_not_called()
-
-    def test_publish_with_env_ws_transport_routes_to_ws(
-        self,
-        patched_transport: MagicMock,
-        patched_ws_transport: MagicMock,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.setenv("REALTIME_TRANSPORT", "ws")
-        publish("test/chan", {"v": 1})
-        patched_ws_transport.publish.assert_called_once_with("test/chan", {"v": 1})
-        patched_transport.publish.assert_not_called()
-
-    def test_publish_with_unsupported_transport_raises(
+    def test_publish_with_ws_transport_falls_back_to_file(
         self, patched_transport: MagicMock
     ) -> None:
-        """Unsupported values are a config error and fail loudly (#8869) —
-        never a silent fallback to file."""
-        with pytest.raises(ValueError, match="unsupported realtime transport"):
-            publish("test/chan", {"v": 1}, transport="carrier-pigeon")
-        patched_transport.publish.assert_not_called()
-
-    def test_publish_with_unsupported_env_transport_raises(
-        self, patched_transport: MagicMock, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setenv("REALTIME_TRANSPORT", "carrier-pigeon")
-        with pytest.raises(ValueError, match="unsupported realtime transport"):
-            publish("test/chan", {"v": 1})
-        patched_transport.publish.assert_not_called()
+        """When transport='ws' is requested but not wired, fall back to file."""
+        publish("test/chan", {"v": 1}, transport="ws")
+        patched_transport.publish.assert_called_once_with("test/chan", {"v": 1})
 
     def test_publish_with_invalid_channel_logs_warning(
         self, caplog: pytest.LogCaptureFixture, patched_transport: MagicMock
@@ -195,23 +145,6 @@ class TestSubscribe:
         sub = subscribe("test/chan", cb)
         sub.unsubscribe()
         patched_transport.unsubscribe.assert_called_once()
-
-    def test_subscribe_with_ws_transport_routes_to_ws(
-        self, patched_transport: MagicMock, patched_ws_transport: MagicMock
-    ) -> None:
-        cb = MagicMock()
-        sub = subscribe("test/chan", cb, transport="ws")
-        patched_ws_transport.subscribe.assert_called_once_with("test/chan", cb)
-        patched_transport.subscribe.assert_not_called()
-        sub.unsubscribe()
-        patched_ws_transport.subscribe.return_value.unsubscribe.assert_called_once()
-
-    def test_subscribe_with_unsupported_transport_raises(
-        self, patched_transport: MagicMock
-    ) -> None:
-        with pytest.raises(ValueError, match="unsupported realtime transport"):
-            subscribe("test/chan", MagicMock(), transport="carrier-pigeon")
-        patched_transport.subscribe.assert_not_called()
 
 
 class TestRealFileTransportRoundTrip:

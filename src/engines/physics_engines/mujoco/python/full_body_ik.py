@@ -29,15 +29,6 @@ Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
 
 
-def _unit_ground_normal(ground: GroundPlane) -> Array:
-    """Return ``ground.normal`` normalized with a scalar 3-vector norm.
-
-    ``math.hypot`` is ~6x faster than ``np.linalg.norm`` for small 3D vectors.
-    """
-    n = np.asarray(ground.normal, dtype=float)
-    return n / math.hypot(n[0], n[1], n[2])
-
-
 class MujocoFullBodyIK(BaseFullBodyIK):
     """Full-body MuJoCo inverse kinematics adapter consuming a full-body spec."""
 
@@ -217,6 +208,13 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             jac[k] = buffer[:, self._dof]
         return jac
 
+
+    def _normalized_ground_normal(self, ground: GroundPlane) -> Array:
+        n = np.asarray(ground.normal, dtype=float)
+        return n / math.hypot(
+            n[0], n[1], n[2]
+        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+
     def body_poses(
         self, q: Array, bodies: Sequence[str]
     ) -> dict[str, tuple[Array, Array]]:
@@ -255,7 +253,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         return self._sphere_heights(ground)
 
     def _sphere_heights(self, ground: GroundPlane) -> dict[str, float]:
-        n = _unit_ground_normal(ground)
+        n = self._normalized_ground_normal(ground)
         return {
             name: float(self.data.site_xpos[site] @ n - ground.height_m - radius)
             for name, (site, radius) in self._spheres.items()
@@ -357,7 +355,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
     ) -> None:
         if weight <= 0:
             return
-        n = _unit_ground_normal(ground)
+        n = self._normalized_ground_normal(ground)
         nv = self.model.nv
         w = np.sqrt(weight)
         for name, (site, radius) in self._spheres.items():
@@ -392,7 +390,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
     ) -> None:
         if weight <= 0:
             return
-        n = _unit_ground_normal(ground)
+        n = self._normalized_ground_normal(ground)
         basis = np.linalg.svd(np.eye(3) - np.outer(n, n))[0][:, :2].T
         nv = self.model.nv
         self._mj.mj_comPos(self.model, self.data)
@@ -434,10 +432,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
     def sphere_ground_points(self, q: Array, ground: GroundPlane) -> dict[str, Array]:
         """Projection of each contact sphere centre onto the ground plane at ``q``."""
         self._set(q)
-        n = np.asarray(ground.normal, dtype=float)
-        n = n / math.hypot(
-            n[0], n[1], n[2]
-        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        n = self._normalized_ground_normal(ground)
         out = {}
         for name, (site, _) in self._spheres.items():
             c = self.data.site_xpos[site].copy()
@@ -454,10 +449,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         """Distance in ground plane from CoM to sphere centroid at ``q``."""
         self._set(q)
         self._mj.mj_comPos(self.model, self.data)
-        n = np.asarray(ground.normal, dtype=float)
-        n = n / math.hypot(
-            n[0], n[1], n[2]
-        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        n = self._normalized_ground_normal(ground)
         centres = np.mean(
             [self.data.site_xpos[site] for site, _ in self._spheres.values()], axis=0
         )

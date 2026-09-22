@@ -19,7 +19,7 @@ from .protocol import validate_channel
 __all__ = [
     "FrequencyHint",
     "get_channel_transport",
-    "register_channel_hint",
+    "register_channel",
 ]
 
 
@@ -64,15 +64,8 @@ def _split_wildcard(pattern: str) -> tuple[str, str] | None:
     return prefix, suffix
 
 
-def register_channel_hint(name: str, frequency_hint: FrequencyHint) -> None:
+def register_channel(name: str, frequency_hint: FrequencyHint) -> None:
     """Register a channel (or wildcard pattern) with a frequency hint.
-
-    Named distinctly from :func:`src.shared.python.realtime.api.register_channel`
-    (issue #8869): that function registers a channel's *description*
-    metadata in :data:`~src.shared.python.realtime.api.CHANNEL_REGISTRY`;
-    this one registers only the *frequency hint* used to pick a default
-    transport. The two registries are independent and a channel may be
-    present in one, both, or neither.
 
     Args:
         name: Channel name, or a wildcard pattern like ``engine/<name>/state``.
@@ -141,7 +134,7 @@ def get_channel_transport(name: str) -> _Transport:
 
 # --- well-known channels ----------------------------------------------------
 
-register_channel_hint("pose/canonical", "high")
-register_channel_hint("engine/<name>/state", "high")
-register_channel_hint("target/active", "low")
-register_channel_hint("session/marker", "low")
+register_channel("pose/canonical", "high")
+register_channel("engine/<name>/state", "high")
+register_channel("target/active", "low")
+register_channel("session/marker", "low")

@@ -32,8 +32,8 @@ from src.shared.python.motion_matching.club_only.observation import (
 from src.shared.python.motion_matching.club_only.priors import GolfPlausibilityPriors
 from src.shared.python.motion_matching.club_only.profiles import (
     ClubOnlyProfile,
-    profile_from_roster,
-    resolve_roster_matrix_scope,
+    build_roster_profiles,
+    get_club_only_profile,
 )
 from src.shared.python.motion_matching.club_only.seeds import (
     CandidateSeed,
@@ -45,10 +45,14 @@ from src.shared.python.motion_matching.club_only.topology_mapping import (
     get_topology_mapping,
     map_reduced_seed_to_body,
 )
+from src.shared.python.motion_matching.club_only.workbook_identity import (
+    CANONICAL_TRIAL_SHEETS,
+)
 from src.shared.python.tour_baselines.models import ModelTopology
 from src.shared.python.tour_baselines.registry import (
     get_golf_model,
     init_default_registry,
+    list_golf_models,
 )
 
 CANDIDATE_SCHEMA = "club-body-candidates/1.0.0"
@@ -732,9 +736,14 @@ def build_body_candidate_report(
     """Build the roster × trial body-candidate matrix for evidence."""
     if not np.isfinite(prior_strength) or prior_strength <= 0.0:
         raise ValueError("prior_strength must be finite and > 0")
-    roster, models, trials = resolve_roster_matrix_scope(
-        model_ids=model_ids, trial_ids=trial_ids
+    init_default_registry()
+    roster = build_roster_profiles()
+    models = (
+        list(model_ids)
+        if model_ids is not None
+        else [m.model_id for m in list_golf_models()]
     )
+    trials = list(trial_ids) if trial_ids is not None else list(CANONICAL_TRIAL_SHEETS)
 
     all_candidates: list[BodyCandidate] = []
     all_cells: list[ModelTrialCell] = []
@@ -746,7 +755,9 @@ def build_body_candidate_report(
     seen_maps: set[tuple[str, str]] = set()
 
     for model_id in models:
-        profile = profile_from_roster(roster, model_id)
+        profile = (
+            roster[model_id] if model_id in roster else get_club_only_profile(model_id)
+        )
         blocked = _cell_blocker_for(model_id, profile.topology)
         for trial_id in trials:
             if blocked is not None:

@@ -30,10 +30,6 @@ from src.shared.python.motion_matching.club_only.profiles import (
     ObjectiveRule,
     build_roster_profiles,
     get_club_only_profile,
-    resolve_roster_matrix_scope,
-)
-from src.shared.python.motion_matching.club_only.workbook_identity import (
-    CANONICAL_TRIAL_SHEETS,
 )
 from src.shared.python.tour_baselines.registry import (
     init_default_registry,
@@ -72,33 +68,6 @@ def _candidate(
         contact_feasible=contact_feasible,
         claims_force_measurement=synthetic_force_claim,
     )
-
-
-def test_resolve_roster_matrix_scope_defaults_to_full_roster_and_canonical_trials() -> (
-    None
-):
-    roster, models, trials = resolve_roster_matrix_scope()
-    registered = {m.model_id for m in list_golf_models()}
-    assert set(roster) == registered
-    assert models == [m.model_id for m in list_golf_models()]
-    assert trials == list(CANONICAL_TRIAL_SHEETS)
-
-
-def test_resolve_roster_matrix_scope_honors_explicit_model_and_trial_ids() -> None:
-    roster, models, trials = resolve_roster_matrix_scope(
-        model_ids=("driven_double_pendulum",),
-        trial_ids=("TW_wiffle",),
-    )
-    assert "driven_double_pendulum" in roster
-    assert models == ["driven_double_pendulum"]
-    assert trials == ["TW_wiffle"]
-
-
-def test_resolve_roster_matrix_scope_rejects_bare_string_selectors() -> None:
-    with pytest.raises(TypeError, match="model_ids"):
-        resolve_roster_matrix_scope(model_ids="driven_double_pendulum")  # type: ignore[arg-type]
-    with pytest.raises(TypeError, match="trial_ids"):
-        resolve_roster_matrix_scope(trial_ids="TW_wiffle")  # type: ignore[arg-type]
 
 
 def test_roster_profiles_cover_every_registered_model() -> None:

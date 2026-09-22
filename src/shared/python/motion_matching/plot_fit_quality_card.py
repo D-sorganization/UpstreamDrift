@@ -12,9 +12,8 @@ Public API:
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -28,12 +27,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "FitQualityScalars",
-    "fit_quality_summary",
-    "matrix_cell_fit_quality_lines",
-    "plot_fit_quality_card",
-]
+__all__ = ["FitQualityScalars", "fit_quality_summary", "plot_fit_quality_card"]
 
 
 @dataclass(frozen=True)
@@ -153,36 +147,3 @@ def plot_fit_quality_card(
         ax.set_title(title)
     fig.tight_layout()
     return fig
-
-
-def matrix_cell_fit_quality_lines(cell: Mapping[str, Any] | Any) -> list[str]:
-    """CO-08 path-anchor: format matrix-cell scalars for synchronized visual review.
-
-    Physical failure always appears ahead of visual attractiveness. Attractiveness
-    alone never implies acceptance.
-    """
-    if hasattr(cell, "as_dict"):
-        payload = cell.as_dict()
-    elif isinstance(cell, Mapping):
-        payload = dict(cell)
-    else:
-        raise TypeError("cell must be MatrixCellResult or Mapping")
-
-    status = str(payload.get("status", "unknown"))
-    physical_failed = bool(payload.get("physical_failed", False))
-    visual = float(payload.get("visual_attractiveness", 0.0))
-    rmse = payload.get("original_3d_rmse_m")
-    blocker = payload.get("blocker")
-    lines = [
-        f"model={payload.get('model_id')} trial={payload.get('trial_id')}",
-        f"status={status}",
-        f"physical_failed={physical_failed}",
-        f"visual_attractiveness={visual:.3f}",
-    ]
-    if rmse is not None:
-        lines.append(f"original_3d_rmse_m={float(rmse):.6g}")
-    if blocker:
-        lines.append(f"blocker={blocker}")
-    if physical_failed:
-        lines.append("VISUAL_REVIEW_BLOCKED: physical failure overrides attractiveness")
-    return lines

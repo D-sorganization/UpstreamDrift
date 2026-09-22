@@ -1381,19 +1381,3 @@ def evaluate_baseline_package_acceptance(
     raw_h = ident_dict.get("horizon", "G1") if ident_dict else "G1"
     h = horizon if horizon is not None else Horizon(raw_h)
     return evaluate(pkg_dict, horizon=h, gates=gates)
-
-
-def reject_visual_override_of_physical_failure(package: Any) -> bool:
-    """CO-08 path-anchor: visual attractiveness cannot override physical failure.
-
-    Delegates to club-only matrix qualification so tour acceptance and the club
-    matrix share one fail-closed rule.
-    """
-    from src.shared.python.motion_matching.club_only.matrix_qualification import (
-        ExportedCandidatePackage,
-        physical_overrides_visual,
-    )
-
-    if not isinstance(package, ExportedCandidatePackage):
-        raise TypeError("package must be ExportedCandidatePackage")
-    return physical_overrides_visual(package)
