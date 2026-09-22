@@ -21,6 +21,9 @@
   blocked (`native_g1_qualification_requires_desk_native_receipt`,
   `software_contract_replay_is_not_native_evidence`). No invented native pass.
 - Validation addendum: split allocate/replay helpers under function-line budget; wrap require() preds in bool() for mypy.
+- CI fix: `native_g1_gates.validate_native_g1_claim_contract` shared by
+  `control_replay.py` and `replay_package.py` (DRY fingerprint d169d28ac9c7).
+- Branch is clean on `origin/main` (800703cb4, NM-03 #10686); no remerge needed.
 - Next: Confirm CI green + squash merge of #10687. Do not start CO-07+.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
