@@ -408,3 +408,38 @@ def test_rejection_ledger_aggregates_cost() -> None:
     ledger = ledger.append(seed=2, reason="replay_mismatch", cost=2.5)
     assert ledger.total_rejected_cost == pytest.approx(4.0)
     assert len(ledger.entries) == 2
+
+
+def test_training_scheduler_admits_teacher_budget_from_nm01_stages() -> None:
+    """Reuse anchor: training.scheduler admits NM-04 budgets from NM-01 stages."""
+    from src.shared.python.training.scheduler import neural_teacher_corpus_budget
+
+    budget = neural_teacher_corpus_budget()
+    assert budget.stages == NESTED_EPISODE_STAGES
+    assert budget.teacher_schema == TEACHER_SCHEMA
+    assert budget.acquisition_schema == ACQUISITION_SCHEMA
+
+
+def test_training_registry_registers_teacher_corpus_without_all_ram(
+    tmp_path: Path,
+) -> None:
+    """Reuse anchor: training.datasets registers teacher corpus paths, not rows."""
+    from src.shared.python.training.datasets import (
+        DatasetRegistry,
+        register_teacher_episode_corpus,
+    )
+
+    root = tmp_path / "teacher_corp"
+    store = EpisodeStore(root)
+    store.write_episode(_baseline_episode(trial_id="t0", family_id="tf0", seed=1))
+    registry = DatasetRegistry()
+    handle = register_teacher_episode_corpus(
+        registry,
+        dataset_id="nm04_teachers",
+        name="NM-04 Teacher Corpus",
+        root=root,
+    )
+    assert handle.format == "hdf5"
+    assert handle.path == root
+    assert TEACHER_SCHEMA in handle.description
+    assert registry.get("nm04_teachers").path == root
