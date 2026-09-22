@@ -19,11 +19,19 @@
 - Validation: `python -m pytest tests/unit/motion_matching/test_full_swing_qualification.py -q -n 0 --no-cov`
   GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
   `docs/shared_tools/divergence_inventory.v1.json` for
-  `motion_matching/full_swing_qualification.py` (ud-only).
+  `motion_matching/full_swing_qualification.py` (ud-only). Merged
+  `origin/main` after MS-105 #10704 so
+  `tests/unit/motion_matching/jobs/test_matching_jobs.py` is retained.
 - Named blockers: no invented six-engine native pass; every incomplete cell
   names its owner issue; software-contract fixtures only.
-- Next: Confirm CI green on #10707 after inventory fix; do not start
-  MS-105/106 or CO/NM siblings from this worktree.
+- Next: Confirm CI green on #10707 after MS-105 merge retention; do not start
+  MS-106 or CO/NM siblings from this worktree.
+
+## MS-105 Reliable Matching Jobs [MERGED]
+
+- Merged via PR [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704)
+  on `main` (`901b2de5e`). Jobs package and
+  `tests/unit/motion_matching/jobs/test_matching_jobs.py` live on main.
 
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
