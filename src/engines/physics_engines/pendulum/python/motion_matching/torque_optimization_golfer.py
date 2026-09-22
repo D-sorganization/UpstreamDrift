@@ -32,6 +32,7 @@ from src.shared.python.pendulum_simulator.constraint_solver import (
 from src.shared.python.pendulum_simulator.physics_golfer import N_DOF, GolferParams
 from src.shared.python.pendulum_simulator.golfer_dynamics import total_energy
 from src.shared.python.motion_matching.bernstein_controls import (
+    assemble_bernstein_fit_residual,
     bernstein_curvature_penalty,
     bernstein_effort_penalty,
     evaluate_bernstein_controls,
@@ -320,9 +321,13 @@ def _run_bernstein_least_squares(
         tracking_res, _ = _tracking_errors(
             rollout.q_traj, params, target_clubhead, target_grip_right
         )
-        curv_res = prof.curvature_penalty(opts.curvature_weight)
-        eff_res = prof.effort_penalty(opts.effort_weight)
-        return np.concatenate([tracking_res, curv_res, eff_res])
+        return assemble_bernstein_fit_residual(
+            tracking_res,
+            prof.controls,
+            curvature_weight=opts.curvature_weight,
+            effort_weight=opts.effort_weight,
+            effort_scale=100.0,
+        )
 
     x0 = np.zeros(n_params, dtype=np.float64)
     opt_res = least_squares(
