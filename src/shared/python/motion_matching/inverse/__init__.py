@@ -38,11 +38,28 @@ from .cvae import (
     kl_divergence_per_dim,
     parameter_count,
 )
+from .collapse import (
+    CVAE_PLATEAU_EVIDENCE,
+    ModeCollapseDiagnostic,
+    diagnose_mode_collapse,
+)
+from .masked_proposal import (
+    MaskedControlProposal,
+    MaskedObservation,
+    MaskedProposalConfig,
+    ProposalMode,
+    ProposalOutput,
+)
 from .predict import (
     CoefficientPredictions,
     load_inverse_cvae,
     predict_coefficients,
     predict_coefficients_from_checkpoint,
+)
+from .proposal_training import (
+    ProposalTrainingConfig,
+    ProposalTrainingResult,
+    train_masked_control_proposals,
 )
 from .regressor import (
     InverseRegressor,
@@ -70,6 +87,7 @@ from .training import (
 __all__ = [
     "COEFFICIENT_LETTER_BOUNDS",
     "CVAEConfig",
+    "CVAE_PLATEAU_EVIDENCE",
     "CoefficientPredictions",
     "DEFAULT_COEFFICIENT_DIM",
     "DEFAULT_LATENT_DIM",
@@ -78,6 +96,14 @@ __all__ = [
     "EncoderOutput",
     "EpochMetrics",
     "InverseRegressor",
+    "MaskedControlProposal",
+    "MaskedObservation",
+    "MaskedProposalConfig",
+    "ModeCollapseDiagnostic",
+    "ProposalMode",
+    "ProposalOutput",
+    "ProposalTrainingConfig",
+    "ProposalTrainingResult",
     "RegressorConfig",
     "RegressorEpochMetrics",
     "RegressorTrainingResult",
@@ -85,6 +111,7 @@ __all__ = [
     "TrainingConfig",
     "TrainingResult",
     "build_coefficient_bound_vector",
+    "diagnose_mode_collapse",
     "kl_divergence",
     "kl_divergence_per_dim",
     "load_inverse_cvae",
@@ -96,4 +123,5 @@ __all__ = [
     "predict_coefficients_regressor_from_checkpoint",
     "train_inverse_cvae",
     "train_inverse_regressor",
+    "train_masked_control_proposals",
 ]

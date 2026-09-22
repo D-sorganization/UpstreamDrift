@@ -10,6 +10,11 @@ flat feature to the 189-dim coefficient vector. Output is hard-clamped
 to per-letter physical bounds via ``tanh(x) * bound`` (identical to the
 cVAE decoder).
 
+NM-06 (#10621) generalizes the temporal stem to masked, variable-dimension
+control proposals via :mod:`.masked_proposal`. The legacy 189-dim head
+remains the compact-dataset production path; new model/basis contracts
+must not assume a single undifferentiated 189-vector.
+
 Architecture (~1-3 M params at the documented defaults):
 
 * **Conv stem.** Two 1-D convolutions over the time axis with GELU +

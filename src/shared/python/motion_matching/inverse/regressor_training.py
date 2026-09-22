@@ -4,6 +4,11 @@ Parallel surface to :func:`.training.train_inverse_cvae` but for the
 deterministic regressor: no KL term, no beta annealing, no free-bits —
 just MSE on standardised coefficients (target/coefficient_bounds in
 [-1, 1]) with AdamW + early-stopping.
+
+NM-06 (#10621) adds :func:`train_masked_control_proposals` (re-exported
+from :mod:`.proposal_training`) which trains on observation residual after
+differentiable surrogate rollout plus control regularization — not
+coefficient MSE alone as the selection criterion.
 """
 
 from __future__ import annotations
@@ -20,6 +25,11 @@ import torch
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset
 
+from .proposal_training import (
+    ProposalTrainingConfig,
+    ProposalTrainingResult,
+    train_masked_control_proposals,
+)
 from .regressor import (
     InverseRegressor,
     RegressorConfig,
@@ -27,6 +37,13 @@ from .regressor import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Re-export NM-06 proposal training surface beside the legacy regressor loop.
+__all_proposal__ = (
+    "ProposalTrainingConfig",
+    "ProposalTrainingResult",
+    "train_masked_control_proposals",
+)
 
 
 DEFAULT_OUTPUT_ROOT = Path("output/inverse_regressor")
