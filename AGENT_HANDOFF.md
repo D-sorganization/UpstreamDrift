@@ -6,9 +6,9 @@ Branch `feat/10592-reconcile-motion-results`; parent epic [#10584](https://githu
 
 The TB-04 Driver and Iron receipts remain preserved, but both record `scientific_qualification=disqualified`, `kinematic_accuracy=exceeds_threshold`, and `solver_convergence=max_iterations`. The coverage matrix now reports them as rejected rather than qualified. Their close refined-replay agreement verifies numerical replay consistency; it does not establish measured-motion accuracy or product promotion.
 
-- The reconciliation rule lives in `src/shared/python/tour_baselines/coverage.py` with a regression test in `tests/unit/tour_baselines/test_coverage_matrix.py`.
+- The reconciliation rule lives in `src/shared/python/tour_baselines/coverage.py`; the unified ledger now indexes the two receipts as `tools` / `tour_baselines` / `REJECTED`, with regressions in `tests/unit/tour_baselines/test_coverage_matrix.py` and `tests/unit/motion_matching/test_ledger.py`.
 - Focused tour-baselines tests, Ruff, architecture/file-size budgets, and the LoD gate are clean in the current-main worktree.
-- PR [#10730](https://github.com/D-sorganization/UpstreamDrift/pull/10730) is open from `e82007706` and awaits required checks.
+- PR [#10730](https://github.com/D-sorganization/UpstreamDrift/pull/10730) is open and awaits required checks after the ledger reconciliation update.
 - Next step: merge #10730 after its checks pass. Continue TB-05 only after reviewing the rejected double-pendulum evidence as an initialization source rather than a qualified baseline.
 
 ## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588) [MERGED]

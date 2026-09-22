@@ -24,10 +24,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10592 (TB-07, parent #10584, program #10363)
 - **Branch:** feat/10592-reconcile-motion-results
 - **PR:** #10730 (open)
-- **Paths:** src/shared/python/tour_baselines/coverage.py; tests/unit/tour_baselines/test_coverage_matrix.py; docs/plans/tour_baselines/coverage_matrix.md; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Paths:** src/shared/python/tour_baselines/coverage.py; src/shared/python/motion_matching/ledger.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/motion_matching/test_ledger.py; docs/plans/tour_baselines/coverage_matrix.md; docs/development/matched_swing_program/README.md; reports/matched_swing_ledger.json; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at e82007706 — red regression confirmed the stale `UNQUALIFIED` status failed the receipt verdict; focused tests passed (8 tests), as did Ruff, architecture/file-size budgets, the LoD gate, and the repository pre-push hooks (Ruff, MyPy, Bandit, configured unit gate).
-- **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix must preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence must remain distinct from full-body G1/G2/G3 qualification.
+- **Last verified:** 2026-09-22 at HEAD — red ledger regression confirmed TB-04 receipts were absent from unified discovery; regenerated ledger/status after indexing both as `tools`/`tour_baselines` with `REJECTED` acceptance, then 24 focused tests passed along with Ruff and architecture/file-size budgets.
+- **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix and unified run ledger preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence remains distinct from full-body G1/G2/G3 qualification.
 - **Next step:** Merge PR #10730 after required checks pass.
 - **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json.
 
