@@ -1,0 +1,65 @@
+{
+  "package_id": "mujoco/legacy-golfer",
+  "engine": "mujoco",
+  "host": "windows",
+  "overall": "pass",
+  "steps": [
+    {
+      "step": "resolve_assets",
+      "outcome": "pass",
+      "message": "all declared assets resolve under the repository root",
+      "remediation": null
+    },
+    {
+      "step": "hash_check",
+      "outcome": "pass",
+      "message": "identity hash d69b9276a779ae65ea09d68957993ee788571ed3965e1c5997fedebaaae025f1",
+      "remediation": null
+    },
+    {
+      "step": "load_compile",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "initialize",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "fk_mass",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "dynamics_smoke",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "viewer",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "save_reload",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    }
+  ],
+  "model_hash": "d69b9276a779ae65ea09d68957993ee788571ed3965e1c5997fedebaaae025f1",
+  "source_hash": null,
+  "runtime": {
+    "python": "3.13.5",
+    "platform": "win32",
+    "host": "windows",
+    "allow_native": false
+  },
+  "contract_sha256": "646f5c43a3837f47a050967b0491a3a318487debeff578f0920c467a8b47cf6a"
+}
