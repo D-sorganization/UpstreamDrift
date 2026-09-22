@@ -17,11 +17,13 @@
 - Evidence: `docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json`
   (`release_status=blocked`, `incomplete_required_count=36`).
 - Validation: `python -m pytest tests/unit/motion_matching/test_full_swing_qualification.py -q -n 0 --no-cov`
-  GREEN (15 passed); ruff clean on touched files.
+  GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
+  `docs/shared_tools/divergence_inventory.v1.json` for
+  `motion_matching/full_swing_qualification.py` (ud-only).
 - Named blockers: no invented six-engine native pass; every incomplete cell
   names its owner issue; software-contract fixtures only.
-- Next: Confirm CI green on #10707; do not start MS-105/106 or CO/NM
-  siblings from this worktree.
+- Next: Confirm CI green on #10707 after inventory fix; do not start
+  MS-105/106 or CO/NM siblings from this worktree.
 
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612)
 
