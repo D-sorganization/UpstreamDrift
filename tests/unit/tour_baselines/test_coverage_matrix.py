@@ -131,3 +131,19 @@ def test_disqualified_driven_double_receipts_are_not_promoted() -> None:
         assert receipt_name in cell.existing_artifact
         assert "DISQUALIFIED" in cell.existing_artifact
         assert cell.blocked_reason is not None
+
+
+def test_upper_body_planarity_receipts_reject_both_captures() -> None:
+    """TB-06 preserves actual planar infeasibility instead of a pending status."""
+    upper_cells = [
+        cell
+        for cell in generate_coverage_matrix()
+        if cell.model_id == "constrained_upper_body_golfer"
+    ]
+    assert {cell.capture for cell in upper_cells} == {"driver", "iron"}
+    for cell in upper_cells:
+        assert cell.evidence_status is EvidenceStatus.REJECTED
+        assert cell.existing_artifact is not None
+        assert f"tb06_{cell.capture}_planarity_receipt.json" in cell.existing_artifact
+        assert cell.blocked_reason is not None
+        assert "cannot attain" in cell.blocked_reason
