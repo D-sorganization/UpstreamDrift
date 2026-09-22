@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10733 | Extract contract-validated bounded Bernstein controls shared by the double and triple pendulum matchers, preserving endpoint, convex-bound, curvature, and effort semantics for the pending constrained upper-body optimizer; no capture fit or qualification claim. |
 | 2026-09-22 | #10732 | Add fail-closed constrained upper-body replay contracts: exact source-clock terminal frames, separate actuator and constraint-reaction traces, declared marker attachments and capture embedding, and same-clock physical marker metrics; no fitting or qualification claim. |
 | 2026-09-22 | #10730 | Reconcile TB-04 Driver and Iron tour-baseline evidence: committed qualification receipts are disqualified, so the coverage matrix and unified motion-matching ledger preserve and reject them; regressions prevent unsupported promotion. |
 | 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |

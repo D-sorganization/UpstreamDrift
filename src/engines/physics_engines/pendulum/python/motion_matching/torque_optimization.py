@@ -22,17 +22,17 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
     forward_kinematics_2d,
 )
+from src.shared.python.motion_matching.bernstein_controls import (
+    bernstein_curvature_penalty,
+    bernstein_effort_penalty,
+    evaluate_bernstein_controls,
+)
 
 logger = logging.getLogger(__name__)
 
 # Degree 6 Bernstein basis (7 control points per joint)
 COEFFS_PER_JOINT: int = 7
 POLY_DEGREE: int = 6
-
-# Precomputed binomial coefficients for degree 6: comb(6, k) for k = 0..6
-_BINOMIAL_6: np.ndarray = np.array(
-    [1.0, 6.0, 15.0, 20.0, 15.0, 6.0, 1.0], dtype=np.float64
-)
 
 
 @dataclass(frozen=True)
@@ -56,33 +56,29 @@ class BernsteinTorqueProfile:
 
         Strictly bounded: min(c) <= tau(t) <= max(c) for all t in [0, duration_s].
         """
-        s = float(np.clip(t / self.duration_s, 0.0, 1.0))
-        s_powers = s ** np.arange(COEFFS_PER_JOINT)
-        om_s_powers = (1.0 - s) ** np.arange(COEFFS_PER_JOINT - 1, -1, -1)
-        basis = _BINOMIAL_6 * s_powers * om_s_powers
-
-        tau1 = float(np.dot(self.shoulder_controls, basis))
-        tau2 = float(np.dot(self.wrist_controls, basis))
-        return tau1, tau2
+        values = evaluate_bernstein_controls(
+            np.vstack((self.shoulder_controls, self.wrist_controls)),
+            t / self.duration_s,
+        )
+        return float(values[0]), float(values[1])
 
     def curvature_penalty(self, weight: float = 0.05) -> np.ndarray:
         """Penalize second differences Delta^2 c_k = c_{k+2} - 2*c_{k+1} + c_k (torque jerk)."""
         if weight <= 0.0:
             return np.zeros(0, dtype=np.float64)
-        rw = math.sqrt(weight)
-        c1 = self.shoulder_controls
-        c2 = self.wrist_controls
-        curv1 = c1[2:] - 2.0 * c1[1:-1] + c1[:-2]
-        curv2 = c2[2:] - 2.0 * c2[1:-1] + c2[:-2]
-        return rw * np.concatenate([curv1, curv2])
+        return bernstein_curvature_penalty(
+            np.vstack((self.shoulder_controls, self.wrist_controls)), weight=weight
+        )
 
     def effort_penalty(self, weight: float = 0.001) -> np.ndarray:
         """Penalize L2 magnitude of control points."""
         if weight <= 0.0:
             return np.zeros(0, dtype=np.float64)
-        rw = math.sqrt(weight)
-        all_ctrl = np.concatenate([self.shoulder_controls, self.wrist_controls])
-        return rw * (all_ctrl / 100.0)
+        return bernstein_effort_penalty(
+            np.vstack((self.shoulder_controls, self.wrist_controls)),
+            weight=weight,
+            scale=100.0,
+        )
 
 
 @dataclass(frozen=True)
