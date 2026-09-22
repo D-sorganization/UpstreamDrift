@@ -49,6 +49,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
+    ShootingFitConfig,
     build_dynamics_report,
     com_report,
     replay,
@@ -104,6 +105,7 @@ __all__ = [
     "REFERENCE_CUTOFF_HZ",
     "SHOOTING_RELAXATION",
     "SPEC",
+    "ShootingFitConfig",
     "TRACKING_CUTOFF_HZ",
     "UPPER_SPEC",
     "add_toe_spheres",

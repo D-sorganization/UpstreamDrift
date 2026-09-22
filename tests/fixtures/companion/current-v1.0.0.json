@@ -38,6 +38,7 @@
   "documentation": [],
   "workflows": [],
   "screenshots": [],
+  "known_gaps": [],
   "summary": {
     "raw_launcher_records": 0,
     "local_model_records": 0,
@@ -45,6 +46,13 @@
     "feature_records": 0,
     "feature_surface_paths": 0,
     "workflow_records": 0,
-    "executable_workflow_records": 0
+    "executable_workflow_records": 0,
+    "single_source_program_records": 0,
+    "documentation_records": 0,
+    "current_documentation_records": 0,
+    "engine_capability_records": 0,
+    "qualified_engine_capability_records": 0,
+    "undocumented_visible_program_records": 0,
+    "known_gap_records": 0
   }
 }

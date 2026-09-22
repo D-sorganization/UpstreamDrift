@@ -69,8 +69,12 @@ class FakePlant:
         return self._coords
 
     def create_ik(
-        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
+        del ik_backend  # FakePlant ignores backend selection
         return FakeFullBodyIK(self._coords, attachments)
 
     def frame_poses(

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import os
 import time
+from collections.abc import Mapping
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.pose_interchange.adapters import ADAPTER_REGISTRY
@@ -111,6 +112,18 @@ class EngineController:
     def pose(self) -> CanonicalPose:
         """The most-recently-applied :class:`CanonicalPose`."""
         return self._pose
+
+    def joint_limits_deg(self) -> Mapping[str, tuple[float, float]]:
+        """Return the active engine's per-joint limits, in degrees.
+
+        Delegates to :meth:`LiveKinematicsService.joint_limits`. Returns
+        an empty mapping (no engine-reported limits, callers use their
+        own defaults) when the controller has no live service, e.g.
+        :attr:`EngineStatus.ERROR`.
+        """
+        if self._service is None:
+            return {}
+        return self._service.joint_limits()
 
     def switch_engine(self, engine_name: str) -> EngineStatus:
         """Switch to a different engine.

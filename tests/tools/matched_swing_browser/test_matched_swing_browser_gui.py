@@ -62,7 +62,7 @@ class TestMatchedSwingBrowserWidget:
         self, widget: MatchedSwingBrowserWidget
     ) -> None:
         assert widget.table is not None
-        # Must list at least 40 rows per acceptance criteria (production has 98)
+        # Must list at least 40 rows per acceptance criteria (production ledger)
         assert widget.table.rowCount() >= 40
         assert widget.total_runs_count >= 40
 

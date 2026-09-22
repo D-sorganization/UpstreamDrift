@@ -1,0 +1,12 @@
+{
+  "schema_version": "simscape-terminal-breakdown/1",
+  "issue": "#10348",
+  "source_run_id": "two_window_fit_9967_102",
+  "acceptance_terminal_source": "full_marker",
+  "g1_terminal_ceiling_m": 0.035,
+  "full_marker_terminal_rms_m": 0.04030335259128564,
+  "head_cluster_terminal_rms_m": 0.0722581217129838,
+  "body_excluding_head_terminal_rms_m": 0.033673092368166846,
+  "hub_cluster_terminal_rms_m": 0.05714545366906724,
+  "note": "Full-marker terminal remains above the G1 35 mm ceiling. body_excluding_head_terminal_rms_m is a reduced-model diagnostic only and must not be used for full-body acceptance."
+}

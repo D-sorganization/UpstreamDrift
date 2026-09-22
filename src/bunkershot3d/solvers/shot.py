@@ -13,7 +13,22 @@ Idealisation, stated up front
   delivered value.  A free rigid-body rotation would be *less* honest,
   not more: the head is on a shaft held by a golfer, so neither free
   precession nor a fixed attitude is right, and prescribing the delivered
-  rotation is the assumption that can actually be stated.
+  rotation is the assumption that can actually be stated.  Since issue
+  #9544 that assumption is a *named mode*, :attr:`RotationMode.PRESCRIBED`,
+  and the alternative is an explicit :attr:`RotationMode.COUPLED` march in
+  which a caller-supplied :class:`RotationCoupling` -- a shaft, a grip, a
+  double pendulum -- is handed the sand wrench every step and answers
+  with the angular velocity to carry into the next.  Nothing about the
+  translation changes in either mode.
+* **The sand wrench is referred to the body-frame origin, in the world
+  frame.**  ``forces_n[k]`` is the resultant force and ``torques_n_m[k]``
+  the moment about ``positions_m[k]``, both in world axes; shift it with
+  :meth:`~bunkershot3d.solvers.protocol.Wrench.about` before comparing
+  with a moment taken about the grip or the centre of mass.  In the
+  prescribed mode whatever holds the head must react the whole sand
+  moment, and :func:`bunkershot3d.vandv.conservation.support_angular_impulse`
+  and :func:`~bunkershot3d.vandv.conservation.prescribed_driver_work`
+  put that on the ledger rather than leaving it implied.
 * **The bed is a flat half space.**  There is no divot memory, no crater,
   and no free-surface evolution -- three of the standing caveats that
   travel with every verdict.
@@ -26,6 +41,8 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass, field
+from enum import StrEnum
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -41,9 +58,68 @@ from .protocol import (
     Wrench,
 )
 
-__all__ = ["HeadKinematics", "ShotResult", "ShotSettings", "simulate_shot"]
+__all__ = [
+    "HeadKinematics",
+    "RotationCoupling",
+    "RotationMode",
+    "ShotResult",
+    "ShotSettings",
+    "simulate_shot",
+]
 
 _MIN_SPEED_M_S = 1e-6
+
+
+class RotationMode(StrEnum):
+    """How the head's rotation is decided during the march (issue #9544).
+
+    Translation is free in both modes; the difference is who owns the
+    angular velocity.
+    """
+
+    PRESCRIBED = "prescribed"
+    """Held at the delivered value for the whole strike. The default, and
+    the idealisation the module docstring states: the support -- shaft,
+    grip, golfer -- is taken to react the entire sand moment."""
+
+    COUPLED = "coupled"
+    """Handed to a :class:`RotationCoupling` each step. The coupling
+    receives the sand wrench and returns the angular velocity for the
+    next step; what it does with the moment is its own model."""
+
+
+@runtime_checkable
+class RotationCoupling(Protocol):
+    """The optional club/shaft/grip boundary of a coupled march.
+
+    Conventions, stated once so a coupling and the march agree:
+
+    * ``wrench.force_n`` is the sand force on the head, world frame.
+    * ``wrench.torque_n_m`` is the sand moment about
+      ``wrench.reference_point_m``, which is the body-frame origin at
+      this sample (``ShotResult.positions_m[k]``), world frame. Use
+      :meth:`~bunkershot3d.solvers.protocol.Wrench.about` to refer it to
+      the grip or the centre of mass.
+    * ``orientation`` is the ``(3, 3)`` body-to-world rotation and
+      ``angular_velocity_rad_s`` the world-frame angular velocity the
+      sample was solved with.
+    * The value returned is the world-frame angular velocity to carry
+      into the next step. It is applied with the same explicit ordering
+      as the translation: the orientation is advanced by the *returned*
+      velocity, exactly as the position is advanced by the updated one.
+    """
+
+    def angular_velocity_after(
+        self,
+        *,
+        time_s: float,
+        time_step_s: float,
+        wrench: Wrench,
+        orientation: NDArray[np.float64],
+        angular_velocity_rad_s: NDArray[np.float64],
+    ) -> ArrayLike:
+        """Return the world-frame angular velocity for the next step."""
+        ...
 
 
 def _vector(name: str, value: ArrayLike) -> NDArray[np.float64]:
@@ -155,6 +231,9 @@ class ShotSettings:
             deliberate fixed window -- a conservation identity over a
             stated number of steps, or a body that is not a clubhead and
             never comes out.
+        rotation_mode: Who owns the head's rotation. ``PRESCRIBED`` by
+            default; ``COUPLED`` requires a :class:`RotationCoupling` to
+            be passed to :func:`simulate_shot` (issue #9544).
     """
 
     time_step_s: float = 2.5e-4
@@ -165,8 +244,13 @@ class ShotSettings:
     start_at_first_contact: bool = True
     free_flight_lead_steps: float = 3.5
     require_exit: bool = True
+    rotation_mode: RotationMode = RotationMode.PRESCRIBED
 
     def __post_init__(self) -> None:
+        if not isinstance(self.rotation_mode, RotationMode):
+            raise SolverInputError(
+                f"rotation_mode must be a RotationMode, got {self.rotation_mode!r}"
+            )
         for name, value in (
             ("time_step_s", self.time_step_s),
             ("max_time_s", self.max_time_s),
@@ -218,9 +302,10 @@ class ShotResult:
             the entry when the head was placed by the solver.
         positions_m: ``(n, 3)`` body-origin positions.
         velocities_m_s: ``(n, 3)`` velocities.
-        orientations: ``(n, 3, 3)`` body-to-world rotations, prescribed.
-        forces_n: ``(n, 3)`` sand force on the head.
-        torques_n_m: ``(n, 3)`` sand torque about the body origin.
+        orientations: ``(n, 3, 3)`` body-to-world rotations.
+        forces_n: ``(n, 3)`` sand force on the head, world frame.
+        torques_n_m: ``(n, 3)`` sand torque about the body origin
+            ``positions_m[k]``, world frame.
         engaged_depths_m: ``(n,)`` deepest **engaged element**, positive
             downward; a diagnostic of the contact set, not a sole depth.
         sole_depths_m: ``(n,)`` depth of ``sole_reference_body_m`` below
@@ -234,6 +319,11 @@ class ShotResult:
             False for a deliberately windowed march, and for a body that
             never comes out.
         runtime_s: Wall-clock time the integration took.
+        angular_velocities_rad_s: ``(n, 3)`` world-frame angular velocity
+            each sample was solved with: the delivered value throughout
+            in the prescribed mode, the coupling's answers otherwise.
+        rotation_mode: Which :class:`RotationMode` produced the
+            orientations.
     """
 
     fidelity_tier: FidelityTier
@@ -251,6 +341,8 @@ class ShotResult:
     sole_reference_body_m: NDArray[np.float64]
     exited: bool
     runtime_s: float
+    angular_velocities_rad_s: NDArray[np.float64]
+    rotation_mode: RotationMode
 
     @property
     def n_steps(self) -> int:
@@ -307,7 +399,11 @@ class ShotResult:
 
     @property
     def exit_angular_velocity_rad_s(self) -> NDArray[np.float64]:
-        """Prescribed angular velocity at exit, world frame, ``(3,)``."""
+        """Angular velocity at exit read off the last two orientations, ``(3,)``.
+
+        World frame. Equal to ``angular_velocities_rad_s[-1]`` to the
+        precision of the exponential map, in either rotation mode.
+        """
         if not self.n_steps or self.n_steps < 2:
             return np.zeros(3, dtype=np.float64)
         dt = float(self.times_s[-1] - self.times_s[-2])
@@ -471,6 +567,7 @@ class _Trace:
     positions_m: list[NDArray[np.float64]] = field(default_factory=list)
     velocities_m_s: list[NDArray[np.float64]] = field(default_factory=list)
     orientations: list[NDArray[np.float64]] = field(default_factory=list)
+    angular_velocities_rad_s: list[NDArray[np.float64]] = field(default_factory=list)
     forces_n: list[NDArray[np.float64]] = field(default_factory=list)
     torques_n_m: list[NDArray[np.float64]] = field(default_factory=list)
     engaged_depths_m: list[float] = field(default_factory=list)
@@ -485,6 +582,7 @@ class _Trace:
         position_m: NDArray[np.float64],
         velocity_m_s: NDArray[np.float64],
         orientation: NDArray[np.float64],
+        angular_velocity_rad_s: NDArray[np.float64],
         sole_depth_m: float,
         result: SolverResult,
     ) -> None:
@@ -494,6 +592,7 @@ class _Trace:
         self.positions_m.append(position_m.copy())
         self.velocities_m_s.append(velocity_m_s.copy())
         self.orientations.append(orientation.copy())
+        self.angular_velocities_rad_s.append(angular_velocity_rad_s.copy())
         self.forces_n.append(result.wrench.force_n.copy())
         self.torques_n_m.append(result.wrench.torque_n_m.copy())
         self.engaged_depths_m.append(result.max_depth_m)
@@ -508,6 +607,7 @@ class _Trace:
         sole_reference_body_m: NDArray[np.float64],
         exited: bool,
         started_s: float,
+        rotation_mode: RotationMode,
     ) -> ShotResult:
         """Freeze the columns into a :class:`ShotResult`.
 
@@ -518,6 +618,7 @@ class _Trace:
             exited: Whether the record ends with the sole above the sand.
             started_s: ``time.perf_counter()`` reading taken before the
                 march, against which the runtime is measured.
+            rotation_mode: Which mode decided the orientations.
 
         Returns:
             The immutable trace, carrying the worst verdict over it.
@@ -542,6 +643,10 @@ class _Trace:
             sole_reference_body_m=np.asarray(sole_reference_body_m, dtype=np.float64),
             exited=exited,
             runtime_s=time.perf_counter() - started_s,
+            angular_velocities_rad_s=np.asarray(
+                self.angular_velocities_rad_s, dtype=np.float64
+            ).reshape(-1, 3),
+            rotation_mode=rotation_mode,
         )
 
 
@@ -550,6 +655,7 @@ def _validated_shot_inputs(
     kinematics: HeadKinematics,
     head_mass_kg: float,
     settings: ShotSettings | None,
+    coupling: RotationCoupling | None,
 ) -> tuple[float, ShotSettings]:
     """Check the arguments of one shot and resolve the default settings.
 
@@ -557,7 +663,8 @@ def _validated_shot_inputs(
         ``(mass_kg, settings)``.
 
     Raises:
-        SolverInputError: If an argument is malformed.
+        SolverInputError: If an argument is malformed, or if the rotation
+            mode and the coupling disagree about who owns the rotation.
     """
     if not isinstance(elements_body, SurfaceElements):
         raise SolverInputError(
@@ -576,6 +683,22 @@ def _validated_shot_inputs(
         raise SolverInputError(
             f"settings must be a ShotSettings, got {type(config).__name__}"
         )
+    if config.rotation_mode is RotationMode.COUPLED and coupling is None:
+        raise SolverInputError(
+            "rotation_mode is COUPLED but no coupling was supplied; pass a "
+            "RotationCoupling, or use RotationMode.PRESCRIBED to hold the "
+            "delivered rotation (issue #9544)"
+        )
+    if config.rotation_mode is RotationMode.PRESCRIBED and coupling is not None:
+        raise SolverInputError(
+            "a coupling was supplied but rotation_mode is prescribed, so it "
+            "would never be consulted; set ShotSettings(rotation_mode="
+            "RotationMode.COUPLED) to hand the rotation to it (issue #9544)"
+        )
+    if coupling is not None and not isinstance(coupling, RotationCoupling):
+        raise SolverInputError(
+            f"coupling must implement RotationCoupling, got {type(coupling).__name__}"
+        )
     return mass, config
 
 
@@ -587,6 +710,7 @@ def _march(
     kinematics: HeadKinematics,
     config: ShotSettings,
     sole_reference_body_m: NDArray[np.float64],
+    coupling: RotationCoupling | None,
 ) -> tuple[_Trace, bool]:
     """Step the head from free flight until its sole clears the sand or halts.
 
@@ -597,6 +721,8 @@ def _march(
         kinematics: Entry pose and velocity.
         config: Integration settings.
         sole_reference_body_m: Body-frame point whose depth bounds the strike.
+        coupling: The rotation boundary of a coupled march, ``None`` when
+            the rotation is prescribed.
 
     Returns:
         ``(trace, exited)``; ``exited`` is True when sole clears free surface.
@@ -611,12 +737,8 @@ def _march(
         else kinematics.position_m.copy()
     )
     velocity = kinematics.velocity_m_s.copy()
-    rotating = bool(kinematics.angular_velocity_rad_s.any())
-    increment = (
-        _rotation_increment(kinematics.angular_velocity_rad_s, config.time_step_s)
-        if rotating
-        else None
-    )
+    angular_velocity = kinematics.angular_velocity_rad_s
+    increment = _rotation_increment_or_none(angular_velocity, config.time_step_s)
     # A non-rotating head is oriented once; only the translation changes
     # per step, and translation cannot invalidate a normal or an area.
     oriented = elements_body.transformed(rotation=orientation)
@@ -625,11 +747,12 @@ def _march(
     trace = _Trace()
     contacted = False
     for step in range(config.max_steps + 1):
+        time_s = step * config.time_step_s
         world = oriented.translated(position)
         state = IntrusionState(
             world,
             velocity,
-            angular_velocity_rad_s=kinematics.angular_velocity_rad_s,
+            angular_velocity_rad_s=angular_velocity,
             reference_point_m=position,
             free_surface_height_m=config.free_surface_height_m,
         )
@@ -638,10 +761,11 @@ def _march(
             position[2] + orientation[2] @ sole_reference_body_m
         )
         trace.record(
-            step * config.time_step_s,
+            time_s,
             position,
             velocity,
             orientation,
+            angular_velocity,
             sole_depth_m,
             result,
         )
@@ -657,11 +781,40 @@ def _march(
         total = result.wrench.force_n + (weight if config.include_gravity else 0.0)
         velocity = velocity + (config.time_step_s / mass_kg) * total
         position = position + config.time_step_s * velocity
+        if coupling is not None:
+            # Same explicit ordering as the translation: the coupling sees
+            # this sample's wrench and its answer moves the orientation.
+            angular_velocity = _vector(
+                "coupling angular velocity",
+                coupling.angular_velocity_after(
+                    time_s=time_s,
+                    time_step_s=config.time_step_s,
+                    wrench=result.wrench,
+                    orientation=orientation,
+                    angular_velocity_rad_s=angular_velocity,
+                ),
+            )
+            increment = _rotation_increment_or_none(
+                angular_velocity, config.time_step_s
+            )
         if increment is not None:
             orientation = increment @ orientation
             oriented = elements_body.transformed(rotation=orientation)
 
     return (trace, False)
+
+
+def _rotation_increment_or_none(
+    angular_velocity_rad_s: NDArray[np.float64], time_step_s: float
+) -> NDArray[np.float64] | None:
+    """The per-step rotation, or ``None`` for a head that is not rotating.
+
+    ``None`` rather than the identity so the march can skip re-orienting
+    the elements on the common, non-rotating path.
+    """
+    if not angular_velocity_rad_s.any():
+        return None
+    return _rotation_increment(angular_velocity_rad_s, time_step_s)
 
 
 def simulate_shot(
@@ -672,6 +825,7 @@ def simulate_shot(
     kinematics: HeadKinematics,
     settings: ShotSettings | None = None,
     sole_reference_body_m: ArrayLike | None = None,
+    coupling: RotationCoupling | None = None,
 ) -> ShotResult:
     """March a rigid head through the bed and return the whole strike.
 
@@ -697,12 +851,17 @@ def simulate_shot(
             onto. Pass the head's own sole reference when the metrics
             will be measured on a different point, so the march and the
             metrics agree on where the divot starts and ends.
+        coupling: The club/shaft/grip boundary of a coupled march. Required
+            when ``settings.rotation_mode`` is ``COUPLED`` and refused when
+            it is ``PRESCRIBED``, so the mode on the result always says
+            what actually decided the rotation (issue #9544).
 
     Returns:
         The trace, its fidelity tier and the worst verdict over it.
 
     Raises:
-        SolverInputError: If an argument is malformed.
+        SolverInputError: If an argument is malformed, or the rotation mode
+            and the coupling disagree.
         OutOfEnvelopeError: If the solver refuses any step under a strict
             refusal policy.
         ShotTruncatedError: If the step budget runs out before the sole
@@ -710,7 +869,7 @@ def simulate_shot(
             partial trace is carried on the exception.
     """
     mass, config = _validated_shot_inputs(
-        elements_body, kinematics, head_mass_kg, settings
+        elements_body, kinematics, head_mass_kg, settings, coupling
     )
     reference = (
         _default_sole_reference_body_m(elements_body, kinematics.orientation)
@@ -726,12 +885,14 @@ def simulate_shot(
         kinematics=kinematics,
         config=config,
         sole_reference_body_m=reference,
+        coupling=coupling,
     )
     result = trace.to_result(
         fidelity_tier=solver.fidelity_tier,
         sole_reference_body_m=reference,
         exited=exited,
         started_s=started,
+        rotation_mode=config.rotation_mode,
     )
     if config.require_exit and not exited:
         raise ShotTruncatedError(

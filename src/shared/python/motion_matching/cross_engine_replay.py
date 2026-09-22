@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
 
-VALID_ENGINES = frozenset({"mujoco", "pinocchio", "drake"})
+VALID_ENGINES = frozenset({"mujoco", "pinocchio", "drake", "myosuite"})
+KINEMATIC_ONLY_ENGINES = frozenset({"myosuite"})
 
 
 @dataclass(frozen=True)
@@ -56,6 +57,12 @@ class CrossEngineReplayConfig:
         invalid = set(self.engines) - VALID_ENGINES
         if invalid:
             raise ValueError(f"Unsupported engine(s): {sorted(invalid)}")
+        dynamic_only = set(self.engines) & KINEMATIC_ONLY_ENGINES
+        if len(self.engines) > 1 and dynamic_only:
+            raise ValueError(
+                "Kinematic-only engines cannot join multi-engine forward replay: "
+                f"{sorted(dynamic_only)}"
+            )
         if self.substeps_nominal < 1 or self.substeps_refined <= self.substeps_nominal:
             raise ValueError(
                 "substeps_refined must be strictly greater than substeps_nominal >= 1"
