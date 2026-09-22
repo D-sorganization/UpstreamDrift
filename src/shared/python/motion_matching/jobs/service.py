@@ -18,6 +18,9 @@ from .checkpoint import load_checkpoint
 from .contracts import (
     JOBS_SCHEMA,
     AcceptanceState,
+    CheckpointCompatibilityError,
+    CorruptPackageError,
+    DiskFullError,
     EngineUnavailableError,
     FaultKind,
     JobCancelledError,
@@ -27,6 +30,7 @@ from .contracts import (
     MatchingJobSpec,
     PartialOutputRejectedError,
     RunManifest,
+    UnsupportedHostError,
 )
 from .io_atomic import atomic_write_json, write_run_manifest
 from .process_guard import ProcessGuard
@@ -39,6 +43,25 @@ WorkCallable = Callable[
     Any,
 ]
 EngineProbe = Callable[[str], bool]
+
+# Named worker/trust-boundary faults — never bare ``except Exception``.
+_JOB_WORK_ERRORS: tuple[type[BaseException], ...] = (
+    DiskFullError,
+    UnsupportedHostError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    KeyError,
+)
+_CHECKPOINT_LOAD_ERRORS: tuple[type[BaseException], ...] = (
+    CorruptPackageError,
+    CheckpointCompatibilityError,
+    OSError,
+    ValueError,
+    TypeError,
+    KeyError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -210,7 +233,7 @@ class MatchingJobService:
             )
         except EngineUnavailableError as exc:
             result = self._fail_engine_absent(spec, last_progress, message=str(exc))
-        except Exception as exc:  # noqa: BLE001 - trust boundary; map to JobResult
+        except _JOB_WORK_ERRORS as exc:
             fault = classify_fault(exc)
             diagnostics = self._write_diagnostics(run_root, exc, fault)
             result = JobResult(
@@ -295,7 +318,7 @@ class MatchingJobService:
             )
         try:
             record = load_checkpoint(ckpt_path, expected_hashes=spec.hashes)
-        except Exception:  # noqa: BLE001 - incompatible → fresh restart
+        except _CHECKPOINT_LOAD_ERRORS:
             return ResumeOutcome(
                 provenance="restarted",
                 acceptance=AcceptanceState.INTERRUPTED,
