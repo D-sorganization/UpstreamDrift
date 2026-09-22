@@ -35,6 +35,7 @@ from src.shared.python.neural_motion.baselines import (
     identity_channel_leakage_score,
     optional_torch_available,
 )
+from src.shared.python.neural_motion.baselines import neural as neural_mod
 from src.shared.python.neural_motion.episodes import (
     EPISODE_STORE_SCHEMA,
     EpisodeRecord,
@@ -395,16 +396,19 @@ def test_rollout_vs_onestep_reported(tmp_path: Path) -> None:
 def test_optional_torch_absence_is_graceful(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Torch absence must skip MLP without AttributeError under xdist.
+
+    Patch the imported ``neural_mod`` object. A dotted-path
+    ``monkeypatch.setattr`` string fails on the ``src.shared.python``
+    namespace package (``neural_motion`` is not bound as an attribute).
+    """
     episodes = [
         _pendulum_1dof(trial_id=f"torch{i}", family_id=f"ft{i}", seed=500 + i)
         for i in range(4)
     ]
     store, plan = _store_with_splits(tmp_path, episodes)
-    monkeypatch.setattr(
-        "src.shared.python.neural_motion.baselines.neural.torch_is_available",
-        lambda: False,
-    )
-    assert optional_torch_available() in (True, False)
+    monkeypatch.setattr(neural_mod, "torch_is_available", lambda: False)
+    assert optional_torch_available() is False
     trainer = DynamicsBaselineTrainer(
         DynamicsBaselineTrainerConfig(
             store=store,
@@ -417,7 +421,8 @@ def test_optional_torch_absence_is_graceful(
         )
     )
     card = trainer.run_pilot()
-    assert "small_mlp" not in card.val_mse_by_method or card.mlp_skipped_reason
+    assert card.mlp_skipped_reason == "torch_unavailable"
+    assert "small_mlp" not in card.val_mse_by_method
     assert ClassicalMethod.RIDGE.value in card.val_mse_by_method
 
 
