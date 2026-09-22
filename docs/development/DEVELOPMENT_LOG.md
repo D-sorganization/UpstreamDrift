@@ -23,10 +23,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10333 (MS-14, epic #10363)
 - **Branch:** feat/10333-pinocchio-matching-plant
-- **PR:** not created
+- **PR:** #10684
 - **Paths:** src/shared/python/motion*matching/pipeline/plants/pinocchio_plant.py; pinocchio_lane_receipts.py; receipt_components.py; cli.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/pipeline/test_pinocchio_plant.py; docs/development/full_body_models/evidence/ground_support/anthro_driver*{pinocchio,pink}/
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at 84e2c5a45373b3864a7479b4e5f52cbb6376425d — TDD contracts/fail-closed probes green; native Pinocchio/Pink absent on Windows host so lane/Pink/runtime/parity receipts committed as `status=blocked` (`accepted=false`, `native_claims=false`); no G1 claim.
+- **Last verified:** 2026-09-22 at ac3a14cd7c3ea807ecc47f59f6ebe326784021ae — TDD contracts/fail-closed probes green; native Pinocchio/Pink absent on Windows host so lane/Pink/runtime/parity receipts committed as `status=blocked` (`accepted=false`, `native_claims=false`); no G1 claim.
 - **Summary:** Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until ControlTower native run.
 - **Next step:** On ControlTower micromamba motion runtime, run `check_motion_runtime` + pink/pipeline lane and replace blocked receipts with real closure ≤ 1e-4 m (still not G1).
 - **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/; docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/

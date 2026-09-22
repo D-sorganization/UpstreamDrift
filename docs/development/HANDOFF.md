@@ -46,11 +46,7 @@
 ## MS-14 Pinocchio MatchingPlant Full Lane #10333 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10333-ms14`.
-<<<<<<< HEAD
-- Branch: `feat/10333-pinocchio-matching-plant`; PR [#10684](https://github.com/D-sorganization/UpstreamDrift/pull/10684). Governing issue #10333
-=======
-- Branch: `feat/10333-pinocchio-matching-plant`; PR pending push. Governing issue #10333
->>>>>>> ac3a14cd7 (docs(motion_matching): stamp MS-14 blocked receipt revision SHA)
+- Branch: `feat/10333-pinocchio-matching-plant`; PR [#10684](https://github.com/D-sorganization/UpstreamDrift/pull/10684) open with squash auto-merge armed. Governing issue #10333
   (MS-14, epic #10363). Session `cursor-10333-ms14`.
 - Entry DL-#10333. Delivered: PinocchioMatchingPlant derivatives +
   `create_constrained_ik` (Pink), fitter `resolve_fit_native_plant` bridge,
