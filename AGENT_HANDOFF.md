@@ -4,6 +4,10 @@ Deferred external validation: six Board plans live in `docs/development/planning
 Software remains active; no physical evidence is supplied. See the current
 `docs/development/HANDOFF.md` for scope, prior #9546 closure and publication gates.
 
+## Main Red Fix: Docs-Consistency Cross-Repo Paths (#10743)
+
+Branch `fix/10743-docs-consistency-cross-repo` teaches `scripts/check_agent_docs_consistency.py` that a backticked path directly after a sibling repo name (`_SIBLING_REPOS`) is cross-repo. Durable upstream fix (full URL in the synced block) belongs to Repository_Management #1689.
+
 ## Tour Baselines TB-06: Constrained Upper-Body Golfer (#10591)
 
 Branch `feat/10591-upper-body-capture`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363). Lease holder: `codex` (session `01a0ca1f-c09b-78a1-8878-37402a7d4eec`).

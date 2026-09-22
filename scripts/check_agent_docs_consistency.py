@@ -29,6 +29,16 @@ _MANAGED_NOTICE = (
 )
 
 
+# Sibling fleet repos whose paths CLAUDE.md may cite. A backticked path
+# immediately preceded by one of these names (possessive or not), e.g.
+# "Repository_Management `docs/x.md`" or "Repository_Management's `docs/x.md`",
+# lives in that repo and must not be checked against this checkout (#10743).
+_SIBLING_REPOS = ("Repository_Management",)
+_SIBLING_REPO_QUALIFIER = re.compile(
+    r"\b(?:" + "|".join(map(re.escape, _SIBLING_REPOS)) + r")(?:['’]s)?\s*$"
+)
+
+
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
@@ -102,7 +112,7 @@ def _iter_repo_relative_paths(text: str) -> list[str]:
         suffix = text[candidate.end() : line_end if line_end >= 0 else len(text)]
         if re.search(r"\b(?:When|If)\s*$", prefix) and re.match(r"\s+exists\b", suffix):
             continue
-        if re.search(r"Repository_Management(?:['’]s)?\s*$", prefix) or re.search(
+        if _SIBLING_REPO_QUALIFIER.search(prefix) or re.search(
             r"^(?:`[^`]+`|[^.!?\n`])*\bwhen present\b", suffix
         ):
             continue
