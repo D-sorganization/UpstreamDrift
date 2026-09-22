@@ -491,6 +491,8 @@ class MotionMatchingWidget(QWidget):
             user_edits=getattr(self, "_club_user_edits", {"notes": ""}),
         )
         resume_checkpoint = self._club_checkpoint if resume else None
+        if resume and self._club_session is not None:
+            preset = self._club_session.preset.value
         for btn in self._club_run_buttons:
             btn.setEnabled(False)
 
@@ -513,7 +515,11 @@ class MotionMatchingWidget(QWidget):
             def _cancel() -> bool:
                 return bool(ctx.is_cancelled)
 
-            session = req.to_session()
+            session = (
+                self._club_session
+                if resume and self._club_session is not None
+                else req.to_session()
+            )
             observation = load_club_only_workbook_observation(
                 pipeline.REPO_ROOT, session.trial_id
             )
@@ -526,14 +532,27 @@ class MotionMatchingWidget(QWidget):
                 )
             except MatchCancelledError as exc:
                 raise WorkerCancelled from exc
+            if result.match.cancelled and ctx.is_cancelled:
+                return {
+                    "session": session,
+                    "checkpoint": result.checkpoint,
+                    "summary": {
+                        "cancelled": True,
+                        "evaluations_used": result.match.evaluations_used,
+                    },
+                }
             view = build_club_only_result_view(result)
             compare = club_only_compare_from_ui_result(result)
             results_dir = pipeline.REPO_ROOT / "artifacts" / "club_only_ui"
             receipt = results_dir / f"{session.session_id}.json"
             write_club_only_result_package(view, receipt)
-            row = publish_club_only_ledger_row(view, receipt_path=receipt)
+            row = publish_club_only_ledger_row(
+                view,
+                receipt_path=receipt,
+                repo_root=pipeline.REPO_ROOT,
+            )
             summary = pipeline.summarize_club_only_result(view)
-            summary["receipt_path"] = receipt.as_posix()
+            summary["receipt_path"] = row.receipt_path
             summary["ledger_sha256"] = row.sha256
             summary["compare"] = {
                 "predicted_unavailable_reason": compare.predicted_unavailable_reason,
@@ -561,7 +580,10 @@ class MotionMatchingWidget(QWidget):
         if self._club_checkpoint is None:
             self.club_log.appendPlainText("No checkpoint to resume.")
             return
-        preset = self.club_preset.currentText() or "fast_preview"
+        if self._club_session is not None:
+            preset = self._club_session.preset.value
+        else:
+            preset = self.club_preset.currentText() or "fast_preview"
         self._run_club_only_match(preset=preset, resume=True)
 
     def _cancel_club_only_match(self) -> None:
@@ -581,7 +603,12 @@ class MotionMatchingWidget(QWidget):
         self._club_session = payload.get("session")
         self._club_checkpoint = payload.get("checkpoint")
         summary = payload.get("summary", {})
-        self.club_log.appendPlainText(json.dumps(summary, indent=2, default=str))
+        if summary.get("cancelled"):
+            self.club_log.appendPlainText(
+                "Club-only match cancelled; checkpoint saved for resume."
+            )
+        else:
+            self.club_log.appendPlainText(json.dumps(summary, indent=2, default=str))
 
     def _on_club_only_failed(self, message: str) -> None:
         for btn in self._club_run_buttons:
