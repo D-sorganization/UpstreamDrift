@@ -19,6 +19,8 @@ import pytest
 
 from src.config.launcher_manifest_loader import LauncherManifest
 
+pytestmark = pytest.mark.unit
+
 CANONICAL_ENGINE_TILE_IDS = frozenset(
     {
         "mujoco_unified",
