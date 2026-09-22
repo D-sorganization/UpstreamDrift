@@ -1,6 +1,27 @@
 # Current Matching Continuation Handoff
 
-## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613)
+## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614)
+
+- Worktree: `Worktrees/UpstreamDrift-10614-co10`, branch
+  `feat/issue-10614-co10-turnover`, DL-#10614, PR not created.
+- Delivered: `club_only/reproduction.py` freezes operator reproduction contracts
+  (`club-only-reproduction/1.0.0`): exact saved-job commands, four-trial × #10585
+  roster, workbook SHA-256 provenance, assumptions, Pareto candidate selection,
+  MS-105 clean-environment portable replay, and evidence-linked matrix
+  reconciliation with executable next-step prompts for every unresolved cell.
+  Operator guide: `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`; evidence:
+  `docs/plans/club_only_matching/evidence/club_reproduction_turnover.json`.
+  Fail-closed: `epic_closure_allowed=false`, `native_g1_pass=false`; docs/GUI alone
+  cannot promote or close #10602. Matrix snapshot: 12 scored / 68 unresolved
+  (12 unqualified, 20 missing_runtime, 36 unsupported).
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60`.
+- Limitations: software-contract closeout only; desk-native Fit/G1 receipts required
+  before scientific promotion. Full-body G3 (#10363) and neural (#10603) remain
+  separate programs.
+- Next: Open PR Fixes #10614 with squash auto-merge; after merge, schedule
+  DeskComputer native G1 for unresolved unqualified cells.
+
+## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
 - Worktree: `Worktrees/UpstreamDrift-local-10613`, branch
   `feat/co09-club-only-ui-10613`, DL-#10613, PR
@@ -17,7 +38,7 @@
 - Limitations: software-contract UI only; `native_g1_pass` false; blockers
   `native_g1_qualification_requires_desk_native_receipt`,
   `software_contract_ui_integration_is_not_native_evidence`.
-- Next: Confirm CI green on PR #10711 and squash-merge; do not start CO-10 until merge.
+- Next: N/A — merged; continue CO-10 (#10614).
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 
