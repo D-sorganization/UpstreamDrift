@@ -78,6 +78,9 @@ class _SignalTransformTab(QtWidgets.QWidget):
     in ``_add_extra_controls`` and implement ``update_plot``.
     """
 
+    # Provided by every concrete subclass; redraws the selected transform.
+    update_plot: Callable[[], None]
+
     def __init__(
         self,
         recorder: RecorderInterface,
@@ -134,10 +137,6 @@ class _SignalTransformTab(QtWidgets.QWidget):
     def _on_metric_changed(self, label: str) -> None:
         self.current_key = self.metric_options[label]
         self.update_plot()
-
-    def update_plot(self) -> None:
-        """Redraw the transform for the selected metric and dimension."""
-        raise NotImplementedError
 
     def _begin_plot(self) -> tuple[Any, np.ndarray | None]:
         """Clear the axes and load the selected metric.
