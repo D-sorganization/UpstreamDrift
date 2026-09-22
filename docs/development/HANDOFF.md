@@ -1,4 +1,66 @@
+# Deferred External Validation Planning — 2026-09-22
+
+- Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-validation-planning`.
+  Branch `docs/deferred-validation-planning`; implementation `cb127ad02`; PR #10741 is open.
+  Central Repository_Management #1687; governing impact epic #9700.
+- Six repo-owned plans preserve unavailable impact/acoustic/perceptual studies,
+  cohort/generalization validation, observable-accuracy reference measurements,
+  everyday-reference calibration, three-camera hardware soak and Impact Explorer
+  predictive-accuracy evidence. Catalog entries retain original issue snapshots,
+  missing resources, acceptance boundaries and Board/reactivation gates.
+- #9700/#10375/#10382/#9619/#9613 stay open for executable software and available
+  data. #9546 was already closed through #10446 at 66527df069df; this migration
+  preserves that state and makes no new completion claim. No engine, public
+  physics API, scientific evidence, calibration or provider pin changes here.
+- #10363/#10380 should reference DV-10375/DV-10382; use the same experiment
+  records rather than duplicate cohorts. Existing industrial/product/experiment
+  governance remains authoritative; a deferred requirement still blocks its
+  original physical, perceptual or release claim.
+- Validation: unchanged source bodies verified against the staged snapshot;
+  strict six-plan catalog, manual governance, SPEC and normal commit/push hooks
+  pass. Hosted checks are pending. The
+  checkout is sparse to conserve C: capacity; no full local suite is claimed.
+- Next: pass normal hooks and hosted checks, merge, compare published plan bytes,
+  then post immutable scope links and audit receipts. Preserve the existing
+  closed state of #9546 and keep the five open mixed sources open.
+
 # Current Matching Continuation Handoff
+
+## Tools Session Bridge CameraCapabilities (#9604, DL-#9422) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_9604` · branch
+  `fix/9604-camera-capabilities` · commit `SELF` · PR not created at commit
+  time (see PR list for the branch). Agent `claude`, session
+  `fleet-remediation-i`.
+- **Done:** `src/motion_capture/rig/tools_bridge.py` gains `CameraRecord` and
+  `map_camera_records(manifest, plan)`: per-camera Tools `CameraIdentity` +
+  `CameraCapabilities` (vendor pin `a9ed0e7c`). The export reuses the same
+  identity builder, `_ready_tools()` probe guard and `_clock_kind()` lookup.
+- **Validation:** `python -I tests/fixtures/mocap_session_export/run_checks.py`
+  (14 passed); `python -m pytest tests/motion_capture/rig/test_tools_session_export.py -q --no-cov`.
+- **Next:** once merged, #9604 acceptance is complete; the C3D upload consumer
+  (#8865) is the next slice on DL-#9422.
+
+## Analysis Statistics Server Side (#8941, DL-#8941) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_8941` · branch
+  `fix/8941-analysis-stats-server` · commit `SELF` · PR not created at commit
+  time (see PR list for `fix/8941-analysis-stats-server`). Agent `claude`,
+  session `fleet-remediation-f`.
+- **Done:** `src/api/routes/analysis_tools.py` — history is
+  `deque(maxlen=500)` plus monotonic `_metric_sample_total`; one aggregation
+  helper `_compute_statistics` runs in `anyio.to_thread.run_sync` over a tuple
+  snapshot taken on the loop; `GET /analysis/statistics?since=&limit=`
+  (`since>=0`, `1<=limit<=500`, else 422) trims only `time_series`; summaries
+  and the default body are unchanged; cursor returned in the
+  `X-Analysis-Next-Since` header so the Pydantic model and generated UI types
+  are untouched. JSON export now serialises `list(history)`.
+- **Validation:** `python -m pytest tests/unit/api/test_analysis_statistics_window.py tests/unit/api/test_routes_analysis_tools.py tests/api/test_generated_ui_api_types.py tests/api/test_phase3_api.py -q --no-cov` (87 passed).
+- **Next:** client-side #8941 items — merge metrics+statistics calls, use
+  `since`, delete the 200 ms / 500 ms polling loops, publish frames on
+  `/ws/simulate`. Do not touch `ui/` from this branch.
 
 ## Succession — Motion Matching (2026-09-22)
 
@@ -625,6 +687,31 @@ Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matchin
 Development-log entry: `DL-#10363`.
 
 OpenSim golf-model improvement epic #10394 now has nine children (#10395â€“#10403).
+
+## Impact Zone Epic #9546: Readiness Index (2026-09-18)
+
+Branch `conductor/issue-9546`, commit SELF, PR #10446. Worktree
+`_issue_worktrees/UpstreamDrift-conductor-issue-9546`; `vendor/ud-tools`
+materialised read-only from the main checkout at pin `62e8cdbf9`.
+
+- `src/config/impact_zone_readiness.json` + `docs/operations/impact-zone-readiness-index.md`
+  reconcile I1-I4, #9484 and #9349 against `5347cba0f` under the existing
+  loader contract (`I<n>`/`R<n>` keys admitted; generator renders one index
+  per ledger). `release_status: blocked`.
+- `tests/shared_contracts/test_impact_interval_provider.py` consumes Tools
+  #5088/#5079 (I1/I2) through the vendored solver on the audit probe. RED at
+  the audit pin `3d93bb2c` (names absent, `ceil` budget and
+  `unilateral_release = max(0, residual)` present); GREEN at `62e8cdbf9`.
+- Validation: `pytest tests/config/industrial_readiness tests/scripts/test_declared_route_producers.py`
+  45 passed; `pytest tests/shared_contracts/test_impact_interval_provider.py --tools-mode=vendored`
+  3 passed (Windows, Python 3.13); `generate_industrial_readiness_index --check` OK;
+  `check_spec_changelog_duplicates` OK; development-log validator OK.
+- Open: I3 (#9549) needs the Tools #4946 run-record seam before anything
+  else moves; I4 (#9550) waits on I3; Tools half of #9349 (Impact Explorer
+  tab) is not re-pointed. Next: bump the pin when #4946 lands and mark
+  I1/I2/I3 in the ledger with merge SHAs, tests and acceptance evidence.
+
+OpenSim golf-model improvement epic #10394 now has nine children (#10395–#10403).
 Start with [the golf-model assignment](opensim_tour_matching/GOLF_MODEL_AGENT_PROMPT.md)
 and [detailed epic](opensim_tour_matching/EPIC_GOLF_MODEL.md) for the missing club,
 arm scaling, address alignment and muscle/tendon extension work.

@@ -40,7 +40,7 @@ separated from current guidance.
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 161 pages
+- [`development/`](development/README.md) - 170 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 15 pages
 - [`estimation/`](estimation/) - 2 pages
@@ -51,7 +51,7 @@ separated from current guidance.
 - [`legal/`](legal/licenses.md) - 1 page
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
-- [`operations/`](operations/) - 18 pages
+- [`operations/`](operations/) - 19 pages
 - [`physics/`](physics/) - 3 pages
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page
@@ -80,7 +80,7 @@ separated from current guidance.
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
 - [`motion_capture/`](motion_capture/) - 21 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
-- [`plans/`](plans/README.md) - 44 pages
+- [`plans/`](plans/README.md) - 46 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
 - [`research/`](research/) - 33 pages
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
