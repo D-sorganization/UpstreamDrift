@@ -36,6 +36,11 @@ from .receipt_components import (
     ToeSphereReceipt,
 )
 from .receipt_docs import render_receipts_markdown
+from .receipt_provenance import (
+    CHAIN_CONTRACT_VERSION as CHAIN_CONTRACT_VERSION,
+    ProvenanceChainInputs as ProvenanceChainInputs,
+    validate_receipt_provenance_chain,
+)
 from .receipt_dynamics import (
     BackswingReceipt,
     ContactParametersReceipt,
@@ -83,6 +88,7 @@ __all__ = [
     "ZmpFilterReport",
     "render_receipts_markdown",
     "validate_receipt",
+    "validate_receipt_provenance_chain",
 ]
 
 
@@ -172,8 +178,20 @@ class Receipt(BaseModel):
     )
     spec_sha256: str = Field(
         ...,
-        description="SHA256 hash of the final scaled model specification",
+        description=(
+            "Raw-file SHA256 of the final scaled specification bytes "
+            "(receipt-provenance-chain/1)"
+        ),
         json_schema_extra={"unit": "hash", "stage": "metadata"},
+    )
+    spec_canonical_sha256: str | None = Field(
+        None,
+        description=(
+            "Canonical JSON SHA256 of the final scaled specification "
+            "(receipt-provenance-chain/1 semantic identity)"
+        ),
+        json_schema_extra={"unit": "hash", "stage": "metadata"},
+        pattern=r"^[0-9a-f]{64}$",
     )
     hip_calibration: HipCalibrationReceipt | None = Field(
         None,

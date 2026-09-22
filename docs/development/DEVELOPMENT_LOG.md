@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10271 · Restore End-to-End Provenance for Hip-Calibrated Motion Evidence
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10271 (child of #10254; blocks #10162 physical acceptance provenance)
+- **Branch:** fix/10271-hipcal-provenance
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/pipeline/receipt_provenance.py; src/shared/python/motion_matching/pipeline/receipt.py; src/shared/python/motion_matching/pipeline/receipt_schema.py; tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py; docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json; docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json; docs/development/full_body_models/RECEIPTS.md; docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — RED then GREEN on provenance chain suite; `python -O` DbC path OK; disk ~2 GB blocked full native MuJoCo re-run.
+- **Summary:** Shared `validate_receipt_provenance_chain` (`receipt-provenance-chain/1`) fail-closes missing/stale de Leva, base canonical, and final raw/canonical digests; CI gates `anthro_driver`/`anthro_iron`; producer emits `spec_canonical_sha256`; receipts re-anchored to committed bases/scaled specs that already embed the current table; intermediate hipcal docs not fabricated; physical RMS unchanged/unqualified.
+- **Next step:** Open ready-for-review PR with Fixes #10271 after local pytest + ruff; schedule native regen when disk recovers.
+
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
 - **State:** in_review

@@ -1,5 +1,27 @@
 # Current Matching Continuation Handoff
 
+## Hip-Calibrated Receipt Provenance (#10271) — 2026-09-22
+
+- **Goal:** Restore end-to-end provenance for `anthro_driver` / `anthro_iron`
+  ground-support receipts (child of #10254).
+- **Branch / worktree:** `fix/10271-hipcal-provenance` at
+  `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10271-provenance`
+- **Lease:** `cursor-10271-202609220928` (agent `local`)
+- **Done:** `receipt_provenance.py` chain validator (`receipt-provenance-chain/1`);
+  TDD suite; producer emits `spec_canonical_sha256`; CI gate on both baselines;
+  receipts re-anchored to current base + scaled digests after verifying scaled
+  docs already carry current de Leva/shank; intermediate hipcal not fabricated;
+  physical metrics unchanged.
+- **Disk blocker:** C: ≈ 1.5–2 GB free — full native MuJoCo re-execution deferred;
+  provenance re-anchor is software-contract only (not a new physical run).
+- **Validate:**
+  ```powershell
+  $env:QT_QPA_PLATFORM='offscreen'; $env:MPLBACKEND='Agg'; $env:PYTHONPATH='.'
+  python -m pytest tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py -q -n 0 --no-cov --timeout=60
+  python -O -c "from src.shared.python.motion_matching.pipeline.receipt_provenance import *"
+  ```
+- **Next:** Open ready-for-review PR (`Fixes #10271`); after merge, regen natively when disk recovers.
+
 ## Succession — Motion Matching (2026-09-22)
 
 - **Goal:** Finish Antigravity-started motion matching (club-only CO + neural NM)

@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10271 | Restore hip-calibrated ground-support receipt provenance chain (`receipt-provenance-chain/1`): shared validator, CI baselines, dual raw/canonical spec digests; no fabricated hipcal intermediates; physical metrics unchanged. |
 | 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
 | 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
 | 2026-09-22 | #10718 | Publish club-only reproduction guide and final turnover (CO-10): saved-job commands, provenance, assumptions, matrix reconciliation; software-contract only; epic #10602 stays open. |
