@@ -3,7 +3,9 @@
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610)
 
 - Worktree: `Worktrees/UpstreamDrift-local-10610`, branch
-  `feat/10610-co06-controls-replay`, DL-#10610, PR not created yet.
+  `feat/10610-co06-controls-replay`, DL-#10610, PR
+  [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687) open
+  (squash auto-merge when CI green).
 - Delivered: `club_only/control_replay.py` recovers minimum-effort controls
   (reuses `ContactForceAllocator` for floating-base plants; reduced software
   plants copy RNEA onto actuated channels), separates net torque / actuated /
@@ -18,7 +20,7 @@
 - Limitations: software-contract / unit-inertia plant only; native G1 remains
   blocked (`native_g1_qualification_requires_desk_native_receipt`,
   `software_contract_replay_is_not_native_evidence`). No invented native pass.
-- Next: Open PR Fixes #10610 with squash auto-merge. Do not start CO-07+.
+- Next: Merge PR #10687 when quality-gate is green; do not start CO-07+.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
 
