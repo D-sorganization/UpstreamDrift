@@ -1,5 +1,31 @@
 # Current Matching Continuation Handoff
 
+## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379)
+
+- Worktree: `agent-worktrees/issue-10379-local`, branch
+  `feat/10379-ms105-jobs-recovery`, DL-#10379, PR
+  [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704)
+  (squash auto-merge armed). Tip SHA: SELF.
+- Delivered: `src/shared/python/motion_matching/jobs/` reuses `#8880` /
+  `async_action` cancel-progress contracts and `managed_popen` terminate→kill
+  escalation — **no second scheduler**. Atomic run manifests/checkpoints with
+  data/model/runtime/controller/solver hash gates; resumed numerical vs
+  interrupted provenance; fault classification (cancel, crash, disk-full,
+  engine absence, host unavailable); portable packages with relative assets,
+  checksums, pickle rejection, input-capture overwrite protection, path
+  escape rejection; both-shell progress/failure DTOs; PF-08 (#10438)
+  time-to-accepted-swing service budgets with `guarantee=false`.
+- Evidence: `docs/plans/matched_swing/evidence/ms105_jobs_recovery.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/jobs/test_matching_jobs.py -q -n 0 --no-cov`
+  GREEN (28 passed); ruff clean on touched files.
+- Named blockers: native long-run DeskComputer recovery receipt; software
+  contract is not native timing evidence; no universal solve-time guarantee.
+- CI repair: DRY promote helper + divergence inventory; replace two
+  `# noqa: BLE001` catches in `jobs/service.py` with named exception tuples
+  (error-handling ratchet); rematched onto origin/main after NM-05 #10701
+  and regenerated divergence inventory.
+- Next: Confirm CI green on #10704; do not start MS-106+.
+
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10655-local`.
