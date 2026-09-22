@@ -48,7 +48,7 @@ def test_get_tool_colors_falls_back_when_theme_lookup_raises(
         raise ImportError("theme package unavailable")
 
     monkeypatch.setattr(
-        "src.launchers.startup._get_theme_colors",
+        "src.shared.python.theme.palette.get_current_colors",
         _boom,
     )
     colors = ts.get_tool_colors()
@@ -66,7 +66,7 @@ def test_get_tool_colors_uses_live_theme_when_available(
         "text_secondary": "#000005",
     }
     monkeypatch.setattr(
-        "src.launchers.startup._get_theme_colors",
+        "src.shared.python.theme.palette.get_current_colors",
         lambda: live,
     )
     assert ts.get_tool_colors() == live

@@ -1,0 +1,307 @@
+{
+  "schema": "neural-coverage-matrix/1.0.0",
+  "governing_issue": "#10615",
+  "source_revision": "c24afe02e",
+  "cells": [
+    {
+      "model_id": "constrained_upper_body_golfer",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "driven_double_pendulum",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "driven_triple_pendulum",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "full_body_drake",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "full_body_mujoco",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "full_body_myosuite",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "full_body_opensim",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "full_body_pinocchio",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "full_body_simscape",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "myosuite_body",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "opensim_golfer",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reconstruction_double_pendulum",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reconstruction_golfer",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reconstruction_triple_pendulum",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reference_drake_urdf",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reference_human_subject",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reference_mujoco_humanoid",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reference_pinocchio_urdf",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reference_pinocchio_urdf_ik",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    },
+    {
+      "model_id": "reference_simple_humanoid",
+      "dataset_id": "fixture.sweep_synthetic",
+      "checkpoint_id": "checkpoint.surrogate_production_default",
+      "disposition": "quarantine",
+      "claim_status": "unsupported",
+      "evidence_status": "unavailable",
+      "governing_issue": "#10615",
+      "blockers": [
+        "no model-specific native neural corpus qualified under NM-00",
+        "documented compact corpus absent (C:\\Users\\diete\\Repositories\\data\\TenThousandFiles.parquet)",
+        "only synthetic sweep fixture available; software contracts only",
+        "no surrogate checkpoint present at default paths"
+      ]
+    }
+  ]
+}

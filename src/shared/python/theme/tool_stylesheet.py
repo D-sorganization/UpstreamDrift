@@ -52,15 +52,23 @@ def _resolve_color(attr: str, fallback: str) -> str:
     """Resolve one theme colour by attribute name, falling back safely.
 
     Isolates every caller from *how* the live theme is fetched (Law of
-    Demeter): callers never import ``src.launchers.startup`` or
-    ``src.shared.python.theme.palette`` themselves.
+    Demeter): callers never import ``src.shared.python.theme.palette``
+    themselves.
     """
     try:
-        from src.launchers.startup import _get_theme_colors
+        from src.shared.python.theme.palette import get_current_colors
+    except ImportError:
+        try:
+            from src.shared.python.theme.palette import DARK_THEME
 
-        colors: Any = _get_theme_colors()
-    except Exception:  # noqa: BLE001 - live theme lookup is best-effort
-        return fallback
+            colors: Any = DARK_THEME
+        except ImportError:
+            return fallback
+    else:
+        try:
+            colors = get_current_colors()
+        except (AttributeError, ImportError, RuntimeError, TypeError, ValueError):
+            return fallback
     if isinstance(colors, dict):
         return str(colors.get(attr, fallback))
     return str(getattr(colors, attr, fallback))

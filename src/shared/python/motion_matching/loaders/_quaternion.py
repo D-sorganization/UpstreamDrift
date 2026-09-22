@@ -7,6 +7,13 @@ from src.shared.python.math_utils.quaternion import (
     quat_inverse_distance,
     rotmat_to_quat,
     slerp,
+    slerp_series,
 )
 
-__all__ = ["_canonicalize_sign", "quat_inverse_distance", "rotmat_to_quat", "slerp"]
+__all__ = [
+    "_canonicalize_sign",
+    "quat_inverse_distance",
+    "rotmat_to_quat",
+    "slerp",
+    "slerp_series",
+]

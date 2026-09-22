@@ -21,6 +21,7 @@ from src.shared.python.core.contracts import postcondition, precondition
 from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 from ._align import detect_impact_index, resample_target
 from ._quaternion import rotmat_to_quat
+from .event_labels import parse_event_marker_cells
 
 logger = logging.getLogger(__name__)
 
@@ -109,93 +110,44 @@ def _frame_to_quat(df_row: pd.Series) -> np.ndarray:
     )
 
 
+def _markers_from_parsed(parsed: dict[str, float]) -> ExcelEventMarkers:
+    """Map shared event-label parse results onto ExcelEventMarkers."""
+    return ExcelEventMarkers(
+        A_sample=parsed.get("A", float("nan")),
+        T_sample=parsed.get("T", float("nan")),
+        I_sample=parsed.get("I", float("nan")),
+        F_sample=parsed.get("F", float("nan")),
+        CHS_mph=parsed.get("CHS", float("nan")),
+    )
+
+
 def _extract_event_markers(df: pd.DataFrame) -> ExcelEventMarkers:
     """Extract event markers from row-1 of the Excel sheet.
 
     The Wiffle/ProV1 format uses row-1 to store event markers in the pattern:
-    A=<n> T=<n> I=<n> F=<n> CHS=<mph>
-
-    Args:
-        df: DataFrame from process_excel_sheet (includes row-0 as header)
-
-    Returns:
-        ExcelEventMarkers with parsed sample numbers and CHS
+    ``A=<n>`` / ``A <n>`` … ``CHS=<mph>``. Labels are normalized through the
+    shared event-label helper so bare and equals-suffixed forms agree.
     """
-    ev = ExcelEventMarkers()
-    # Row 0 is the event marker row (before the column headers in row 1)
-    # The DataFrame from process_excel_sheet has the event row as index -1
-    # or we need to read it separately
-    label_to_field = {
-        "A": "A_sample",
-        "T": "T_sample",
-        "I": "I_sample",
-        "F": "F_sample",
-        "CHS": "CHS_mph",
-    }
-    # Check if we have event data in the first row
-    for c in range(len(df.columns) - 1):
-        cell = df.iloc[0, c] if len(df) > 0 else float("nan")
-        if pd.isna(cell):
-            continue
-        label = str(cell).strip()
-        if label not in label_to_field:
-            continue
-        val = df.iloc[0, c + 1] if len(df) > 0 else float("nan")
-        if pd.isna(val):
-            continue
-        try:
-            # pandas cell value has a wide union type; coercion is
-            # guarded by the surrounding try/except.
-            setattr(ev, label_to_field[label], float(val))  # type: ignore[arg-type]
-        except (ValueError, TypeError):
-            continue
-    return ev
+    if len(df) == 0:
+        return ExcelEventMarkers()
+    row = [df.iloc[0, c] for c in range(len(df.columns))]
+    return _markers_from_parsed(parse_event_marker_cells(row))
 
 
 def read_excel_event_markers(path: Path | str, sheet: str) -> ExcelEventMarkers:
     """Read only the event markers from row-1 of a Wiffle Excel sheet.
 
     This is a lightweight function for tools that need event markers
-    without loading the full trajectory data.
-
-    Args:
-        path: Path to Excel file
-        sheet: Sheet name
-
-    Returns:
-        ExcelEventMarkers with parsed event data
+    without loading the full trajectory data. Accepts both ``A=`` and ``A``.
     """
     path = Path(path)
-    # Read just the first row to get event markers
     try:
         row1 = pd.read_excel(path, sheet_name=sheet, header=None, nrows=1)
     except Exception as exc:  # noqa: BLE001
         logger.warning("Could not read event header: %s", exc)
         return ExcelEventMarkers()
-
-    ev = ExcelEventMarkers()
-    label_to_field = {
-        "A": "A_sample",
-        "T": "T_sample",
-        "I": "I_sample",
-        "F": "F_sample",
-        "CHS": "CHS_mph",
-    }
-    for c in range(row1.shape[1] - 1):
-        cell = row1.iat[0, c]
-        if pd.isna(cell):
-            continue
-        label = str(cell).strip()
-        if label not in label_to_field:
-            continue
-        val = row1.iat[0, c + 1]
-        if pd.isna(val):
-            continue
-        try:
-            setattr(ev, label_to_field[label], float(val))
-        except (ValueError, TypeError):
-            continue
-    return ev
+    row = [row1.iat[0, c] for c in range(row1.shape[1])]
+    return _markers_from_parsed(parse_event_marker_cells(row))
 
 
 @precondition(

@@ -22,14 +22,29 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
+## Neural Motion Matching NM-02: Native Dataset Labels (#10617)
+
+Branch `fix/10617-nm02-native-dataset-labels`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-00/#10668 and NM-01/#10672 merged.
+NM-02 repairs `DatasetGenerator` label evidence (`native-dataset-labels/1.0.0`): no zero-as-measurement optional channels, native vs interval accelerations, requested/applied controls, DoF layout, restore `StateError`, first-wave Mock + ODE residual receipts. Evidence: `docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json`. No training or speed claim.
+Next after merge: dispatch NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618)).
+
+## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616) [MERGED]
+
+Branch `feat/nm01-freeze-learning-tasks` merged to main in PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672).
+
+## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615) [MERGED]
+
+Branch `fix/issue-10615-nm00-dataset-audit` merged to main in PR [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668).
+NM-00 delivered fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`. No training or speed claims.
+Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
+
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; first dispatch [NM-00 #10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615).
-- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md).
-- **State:** Planning only. Four unique workbook trials audited; source event parsing failure reproduced. No new physical match, trained checkpoint or measured speedup is claimed. Existing #10363/#10378/#10430 owners retain implementation scope.
-- **Branch:** `docs/club-neural-matching-plans-20260920`; reviewed source `c3111a9177885af945018d730ec40de308cd9971`. Development log entries DL-#10602 and DL-#10603 record the two proposed programs.
-- **Next:** Hand CO-00 #10604 to one worker using its numbered prompt.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678 shipped; active [CO-05 #10609](https://github.com/D-sorganization/UpstreamDrift/issues/10609) on `feat/issue-10609-co05-plausible-body-candidates` (sibling CO-04 #10608 on separate worktree — pendulum paths only).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
+- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
+- **State:** CO-05 body-candidate contracts (topology map, null-space proposals, roster matrix) validated with synthetic fixtures; kinematic preview only. NM-00 fail-closed audit remains authoritative.
+- **Next:** Land CO-05 PR #10681 (Fixes #10609) after main-merge + register/inventory/DRY CI green; keep CO-04 pendulum work non-overlapping.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
@@ -162,6 +177,62 @@ coefficient-lift action assembly, objective contracts and independent replay.
     - **Club Cluster RMS**: **`8.422 mm`** ($\le 60.0\text{ mm}$ Gate $\to$ **PASS**).
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
+
+### Run 103 Scaffolding (MS-61 / #10348)
+
+Software topology + full-marker terminal disclosure (no invented G1 pass):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/`
+
+| Artifact           | Path                             |
+| ------------------ | -------------------------------- |
+| Topology report    | `.../topology_report.json`       |
+| Terminal breakdown | `.../terminal_breakdown.json`    |
+| Native gate        | `.../native_gate.json` (blocked) |
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103
+```
+
+### Run 103 Scaffolding (MS-61 / #10348)
+
+Software topology + full-marker terminal disclosure (no invented G1 pass):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/`
+
+| Artifact           | Path                             |
+| ------------------ | -------------------------------- |
+| Topology report    | `.../topology_report.json`       |
+| Terminal breakdown | `.../terminal_breakdown.json`    |
+| Native gate        | `.../native_gate.json` (blocked) |
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103
+```
+
+### Run 102 Package (MS-60 / #10347)
+
+Canonical in-tree evidence (no external GIF hunt):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/`
+
+| Artifact              | Path                                  |
+| --------------------- | ------------------------------------- |
+| MatchedSwingCandidate | `.../candidate.npz`                   |
+| R2025b run manifest   | `.../run_manifest.json`               |
+| Playback GIF          | `.../playback.gif`                    |
+| Returned replay NPZ   | `.../returned-replay.npz`             |
+| Qualified R2025b JSON | `.../qualified_candidate_replay.json` |
+
+Replay on a licensed host:
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_102 -Replay
+```
+
+Live resume guide: `docs/development/simscape_tour_matching/CHECKPOINTS.md` (history in `CHECKPOINTS_HISTORY.md`).
+
+Historical DeskComputer GIFs named in older sections below (`simscape_matlab_matching_eval79.gif`, `*_run05.gif`, …) remain on `C:/Users/diete/SimscapeTour9921/` when that host tree is mounted; they are not duplicated here. Use SHA receipts before copying any file > 5 MB.
 
 ## GSPro Integration (#10188, #10460)
 

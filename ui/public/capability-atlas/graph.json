@@ -2869,7 +2869,7 @@
   },
   "inputs": {
     "src/config/models.yaml": "ab36e654c25c5fc100547c7c6eb6cfd35c56a33381c230b852d5f65b2366b834",
-    "src/config/launcher_manifest.json": "c004401e04468a49905a27b3c079183ab010b8742e93a5f7d4d9580e35ba85a4",
+    "src/config/launcher_manifest.json": "c5f1804fcb15d58bd2831ebddbf7f39802bc1aafc27a5f3663e51de4bcd05661",
     "src/config/feature_parity.json": "e9c8d791d426991c8a516552eecb89b7f0443c6e1a40320f3fefe0eefa46a009",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
