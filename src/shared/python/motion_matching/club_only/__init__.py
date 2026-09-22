@@ -80,6 +80,16 @@ from .seeds import (
     profile_content_hash,
 )
 from .seeds import evidence_payload as starting_guess_evidence_payload
+from .pendulum_match import (
+    MATCH_SCHEMA,
+    MODEL_ID_DOUBLE,
+    MODEL_ID_TRIPLE,
+    PendulumMatchMatrix,
+    PendulumMatchOutcome,
+    build_pendulum_match_matrix,
+    evidence_payload as pendulum_match_evidence_payload,
+    match_club_only_pendulum,
+)
 from .workbook_identity import (
     ALIAS_SHEETS,
     CANONICAL_TRIAL_SHEETS,
@@ -161,6 +171,7 @@ __all__ = [
     "build_observable_descriptor",
     "build_roster_profiles",
     "build_starting_guess_report",
+    "build_pendulum_match_matrix",
     "capabilities_for",
     "club_target_to_observation",
     "count_numeric_samples",
@@ -171,10 +182,12 @@ __all__ = [
     "get_club_only_profile",
     "interpolate_observation",
     "load_observation_fixture_pack",
+    "match_club_only_pendulum",
     "normalized_orientation_error",
     "normalized_position_error",
     "observation_to_club_target",
     "orientation_residual_so3",
+    "pendulum_match_evidence_payload",
     "profile_content_hash",
     "read_sheet_event_samples",
     "resolve_hand_frame_offsets",
@@ -183,4 +196,9 @@ __all__ = [
     "scored_component_subset",
     "starting_guess_evidence_payload",
     "verify_workbook_hash",
+    "MATCH_SCHEMA",
+    "MODEL_ID_DOUBLE",
+    "MODEL_ID_TRIPLE",
+    "PendulumMatchMatrix",
+    "PendulumMatchOutcome",
 ]
