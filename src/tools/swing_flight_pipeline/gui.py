@@ -41,6 +41,7 @@ from src.shared.python.physics.swing_state_providers import (
     available_swing_state_providers,
 )
 from src.launchers.help_menu import build_help_menu
+from src.shared.python.theme.tool_stylesheet import primary_button_style
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
 from src.shared.python.ui.provenance_value import ProvenanceValueLabel
@@ -109,9 +110,7 @@ class SwingFlightWidget(QWidget):
 
         # Run button
         self._run_btn = QPushButton("Run Full Pipeline")
-        self._run_btn.setStyleSheet(
-            "background-color: #4CAF50; color: white; font-weight: bold; padding: 12px;"
-        )
+        self._run_btn.setStyleSheet(primary_button_style())
         self._run_btn.clicked.connect(self._run_pipeline)
         left_layout.addWidget(self._run_btn)
 

@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.help_menu import attach_tool_help_menu, build_help_menu
+from src.shared.python.theme.tool_stylesheet import primary_button_style
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
 
@@ -113,9 +114,7 @@ class BallFlightWidget(QWidget):
 
         # Run
         self._run_btn = QPushButton("Simulate Flight")
-        self._run_btn.setStyleSheet(
-            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
-        )
+        self._run_btn.setStyleSheet(primary_button_style())
         self._run_btn.clicked.connect(self._run_simulation)
         left_layout.addWidget(self._run_btn)
 
