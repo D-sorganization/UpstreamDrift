@@ -140,18 +140,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** R2025b Simscape native replay of `candidate27.npz` with boundary-load validation.
 - **Evidence:** evidence/matched/driver_g1_simscape_slice/{slice_map.json,receipt.json,parity.json,run_manifest.json,candidate27.npz}; tests/unit/motion_matching/test_coordinate_slice.py.
 
-### DL-#10347 · Simscape R2025b Run Management (Run-102 Package)
+### DL-#10348 · Simscape Topology + Full-Marker Terminal (MS-61)
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #10348 (MS-61, epic #10363)
+- **Branch:** feat/issue-10348-ms61-simscape-topology
+- **PR:** #10676
+- **Paths:** src/shared/python/motion_matching/{simscape_topology.py,full_marker_terminal.py,tour_metrics.py,acceptance.py}; scripts/matlab/{materialize_ms61_topology_receipts.py,run_simscape_candidate.ps1}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/; docs/development/matched_swing_program/{GATES.md,README.md,WAVES.md}; docs/development/simscape_tour_matching/CHECKPOINTS.md
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF — regenerated matched_swing_program README status from ledger (103 receipts); freshness test GREEN; fail-closed blocked native_gate + reduced_27_no_neck retained.
+- **Summary:** Fail-closed 27-DOF topology classification (no independent neck), dual terminal disclosure (full + head cluster; body-excluding-head diagnostic only), acceptance/tour_metrics dual-terminal contracts, and run-103 scaffolding derived from run-102 without inventing native G1 success; repair linked to MS-104 (#10378).
+- **Next step:** Confirm CI green and squash auto-merge of PR #10676.
+- **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.
+
+### DL-#10347 · Simscape R2025b Run Management (Run-102 Package)
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10347 (MS-60, epic #10363)
 - **Branch:** fix/issue-10347-ms60-run-management
 - **PR:** #10669
 - **Paths:** scripts/matlab/run_simscape_candidate.ps1; src/shared/python/motion_matching/simscape_run_manifest.py; src/shared/python/motion_matching/candidate_convert.py; src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/{write_run_manifest.m,export_candidate.m}; docs/development/simscape_tour_matching/{CHECKPOINTS.md,CHECKPOINTS_HISTORY.md}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif}
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 (merged origin/main to clear CONFLICTING/DIRTY; divergence inventory + matched-swing ledger regenerated; inventory/ledger freshness tests pass; PR #10669 squash auto-merge armed)
+- **Last verified:** 2026-09-21 (merged to main as #10669)
 - **Summary:** Documented one R2025b-only scripted replay path with fail-closed run manifest (host, release, model/candidate/replay SHAs, wall-clock), converted returned-replay NPZ into MatchedSwingCandidate via DRY reuse of returned81 layout, and committed run-102 playback GIF in-tree.
-- **Next step:** Confirm PR #10669 merges after conflict-clear push and CI green; then second-person DeskComputer replay under 30 minutes using CHECKPOINTS.md.
+- **Next step:** DeskComputer second-person replay under 30 minutes when MS-61 Fit is scheduled.
 - **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/{candidate.npz,run_manifest.json,playback.gif,qualified_candidate_replay.json}; tests/unit/motion_matching/test_simscape_candidate_convert.py; docs/shared_tools/divergence_inventory.v1.json.
 
 ### DL-#10342 · OpenSim/MyoSuite Native Nightly Lane Receipts
