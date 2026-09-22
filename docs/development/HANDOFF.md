@@ -1,37 +1,36 @@
 # Current Matching Continuation Handoff
 
-## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
+## CO-06 Recover Feasible Controls and Independently Replay (#10610)
 
-- Worktree: Worktrees/UpstreamDrift-10608-co04, branch
-  feat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680.
+- Worktree: `Worktrees/UpstreamDrift-local-10610`, branch
+  `feat/10610-co06-controls-replay`, DL-#10610, PR not created yet.
+- Delivered: `club_only/control_replay.py` recovers minimum-effort controls
+  (reuses `ContactForceAllocator` for floating-base plants; reduced software
+  plants copy RNEA onto actuated channels), separates net torque / actuated /
+  passive / ground / grip / root slack, saves continuous control packages, and
+  independently open-loop replays from q0/v0 with no measured-state resets.
+  Root slack, infeasible contact, unknown impact, and measured resets reject
+  with actionable reasons; kinematic preview stays separate from torque replay.
+  Schema `club-control-replay/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_control_replay.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_control_replay.py -q`
+  GREEN (12 passed).
+- Limitations: software-contract / unit-inertia plant only; native G1 remains
+  blocked (`native_g1_qualification_requires_desk_native_receipt`,
+  `software_contract_replay_is_not_native_evidence`). No invented native pass.
+- Next: Open PR Fixes #10610 with squash auto-merge. Do not start CO-07+.
+
+## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
+
+- Merged to main via PR [#10680](https://github.com/D-sorganization/UpstreamDrift/pull/10680).
 - Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
   original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
   retention; first-frame-before-integrate scoring; eight-cell double/triple ×
   four-trial matrix with replay packages and named native blockers (no invented
   G1 pass). Evidence:
   docs/plans/club_only_matching/evidence/club_pendulum_match.json.
-- Dependency fix (CI check_dependency_direction): moved fit orchestration and
-  matrix builder to
-  src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py
-  and club_match_matrix.py; shared keeps pure contracts in
-  club_only/pendulum_match.py (engines → shared only). Architecture-budget
-  split: \_fit_triple / match_club_pendulum helpers keep each function ≤100 lines.
-  Mypy: prescribed-hub track fills hub_pos[:, :] in-place so (n, 2) dtype stays.
-- Merged origin/main (MS-61 #10676, MS-102 #10677, NM-02 #10679, CO-05 #10681);
-  conflicts in handoff, turnover, club_only **init** exports, and divergence
-  inventory — kept both CO-04 and CO-05 exports; architecture splits and
-  engine-layer orchestration preserved (no shared→engines top-level imports).
-- CI fix: regenerated docs/shared_tools/divergence_inventory.{v1.json,md} after
-  club_only/match_matrix.py move and after CO-05 main merge. Unit-test-gate then
-  failed on missing tools-only `launch_monitor/gspro_connect.py` — local vendor
-  checkout lacked the pin file; restored vendor to `a9ed0e7c5` and re-wrote
-  inventory so gspro_connect is recorded.
-- Validation: python -m scripts.shared_tools.divergence_inventory --check OK;
-  prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Confirm quality-gate green + squash auto-merge of PR #10680. Next
-  dispatch after land is CO-06 #10610.
 
 ## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609) [MERGED]
 
