@@ -31,6 +31,44 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Confirm `quality-gate` green on the PR and allow squash auto-merge to land.
 - **Evidence:** MATLAB R2025b `-batch` verification transcript in the PR body; `git ls-files` shows one `GolfSwingVisualizer.m`.
 
+### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10591 (TB-06, parent #10584, program #10363)
+- **Branch:** feat/10591-upper-body-baseline
+- **PR:** #10732 (open)
+- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at `0d620ecf9` — replay contracts preserve every source-clock frame, record actuator torques separately from constraint reactions, require explicit marker attachments and capture-frame embedding, and evaluate physical marker metrics only on an identical body-target clock; 31 focused tests and scoped Ruff pass. PR #10732 is in CI.
+- **Summary:** Build the fail-closed constrained upper-body golfer adapter for Driver and Iron. The current replay foundation is native dynamics evidence only; it does not claim torque fitting, capture-specific calibration, or qualification.
+- **Next step:** Implement bounded torque fitting and capture-specific calibration over the explicit TB-06 replay and marker contracts.
+
+### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #10592 (TB-07, parent #10584, program #10363)
+- **PR:** #10730 (merged)
+- **Paths:** src/shared/python/tour_baselines/coverage.py; src/shared/python/motion_matching/ledger.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/motion_matching/test_ledger.py; docs/plans/tour_baselines/coverage_matrix.md; docs/development/matched_swing_program/README.md; reports/matched_swing_ledger.json; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3` — merged after focused tests, Ruff, architecture/file-size budgets, and required PR checks passed.
+- **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix and unified run ledger preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence remains distinct from full-body G1/G2/G3 qualification.
+- **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json.
+
+### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8887
+- **Branch:** fix/8887-pose-studio-joint-limits
+- **PR:** #10650 (open)
+- **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF — merged origin/main; fixed unit-test-gate Pose Studio GUI assertions for real PyQt6 CI; suite markers on `test_joint_panel.py`; submodule init.
+- **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
+- **Next step:** Merge PR #10650 after CI green.
+
 ### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
 
 - **State:** in_review
@@ -427,18 +465,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10621 (epic #10603)
+- **Branch:** feat/10621-nm06-masked-proposals
+- **PR:** #10709
+- **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{**init**,masked_proposal,proposal_shared,proposal_training,regressor_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_inverse_regressor_training.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — merged via PR #10709 (`08bcec302`; tip `05f712281`)
+- **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse proposal_shared consolidates duplicated contract logic; proposal_training and regressor_training stay under function-line/parameter budgets; inverse package lazily loads torch-backed cVAE/regressor exports for unit-lane collection.
+- **Next step:** N/A — shipped; check NM-07 #10622 claim before any start (do not steal claim:antigravity).
+- **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
+
 ### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10620 (epic #10603)
 - **Branch:** feat/issue-10620-nm05-baselines
 - **PR:** #10701
 - **Paths:** src/shared/python/neural_motion/baselines/; src/shared/python/neural_motion/episodes/splits.py; tests/unit/neural_motion/test_dynamics_baselines_nm05.py; docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 10 NM-05 tests green under xdist (-n 2); module-object torch absence patch asserts torch_unavailable; software-contract only
+- **Last verified:** 2026-09-22 — merged via PR #10701
 - **Summary:** Pilot dynamics baselines over NM-03 episode store: `DynamicsBaselineTrainerConfig`, split helpers, `FamilySplitPlan.ids_for`; analytical 1/2-DOF fixture map, ridge, nearest neighbor, optional small MLP; trial-level splits, train-only normalizer digest, inverse conditioning, identity-leakage and unavailable-torque guards; validation checkpointing with test untouched; honest analytical-vs-MLP comparison on fixtures.
-- **Next step:** Confirm unit-test-gate and quality-gate green on PR #10701; squash auto-merge remains armed.
+- **Next step:** Continue NM-06 (#10621) under frozen baselines and episode-store contracts.
 - **Evidence:** docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
 
 ### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
@@ -653,17 +705,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10613 · CO-09 Integrate Club-Only Matching Into Existing UI and Results
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10613 (epic #10602)
 - **Branch:** feat/co09-club-only-ui-10613
 - **PR:** #10711
-- **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/tools/tour_matching_viewer/core.py; src/tools/tour_matching_viewer/**init**.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; tests/unit/tools/test_tour_matching_viewer_core.py; tests/unit/workspace/test_results_browser.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — regenerated monolith register + divergence inventory for `club_only/ui_integration.py`; GUI tab count assertion expects Club-Only; three prior unit-test-gate failures GREEN locally
-- **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser surfaces without parallel frameworks. Preview vs verified statuses stay honest; observed/inferred legend and trial clock required; cancel/resume reuse CO-07; ledger lane=club_only with named native blockers.
-- **Next step:** Confirm CI green on PR #10711 and squash-merge Fixes #10613; do not start CO-10 until merge.
+- **Last verified:** 2026-09-22 at SELF — rematched onto post-CO-10 main; LOD fix via `ClubOnlyUiSession.preset_name()`; review-gap harden GREEN; native_g1_pass false
+- **Summary:** Baseline UI integration shipped via #10711. Follow-up #10717 hardens workbook trial load, receipt-hashed ledger append/dedup, default JSON ResultsBrowser index, cancel/resume off-thread, and tour_matching_viewer observed/inferred compare without parallel frameworks.
+- **Next step:** Confirm CI green on PR #10717 and squash-merge; then check NM-07 #10622 claim (do not steal).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
+
+### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10614 (epic #10602)
+- **Branch:** feat/10614-co10-reproduction-turnover
+- **PR:** #10720 (survivor follow-up; baseline shipped via #10718)
+- **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/matched_swing_program/README.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — merged via PR #10720 (`abd35e66b`); baseline #10718; duplicate #10719 stays closed
+- **Summary:** Baseline operator/reproduction turnover landed via #10718. Survivor #10720 rematched runnable `fast_preview_match`/`asset_paths` saved-job commands, architecture-budget helper split, and succession docs. Epic #10602 stays open; software-contract tests are not native evidence.
+- **Next step:** N/A — shipped; finish CO-09 review-gap PR #10717; schedule desk-native Fit/G1 for unresolved matrix cells.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
