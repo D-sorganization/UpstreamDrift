@@ -33,18 +33,20 @@ import time as _time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.club_target import ClubTarget
-from src.shared.python.motion_matching.inverse.masked_proposal import (
-    MaskedObservation,
-)
 
 from .surrogate import FitResult, InvertOptions, SwingSurrogate, fit_swing_via_surrogate
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.inverse.masked_proposal import (
+        MaskedObservation,
+    )
 
 __all__ = [
     "HybridFitResult",
@@ -394,7 +396,11 @@ def refine_control_proposal(
     the polish mapping must report ``independent_replay=True`` — synthetic
     or missing replay evidence is rejected.
     """
-    if not isinstance(observation, MaskedObservation):
+    from src.shared.python.motion_matching.inverse.masked_proposal import (
+        MaskedObservation as _MaskedObservation,
+    )
+
+    if not isinstance(observation, _MaskedObservation):
         raise TypeError("observation must be a MaskedObservation")
     warm = np.asarray(proposal_controls, dtype=np.float64).reshape(-1)
     if warm.size < 1 or not bool(np.all(np.isfinite(warm))):

@@ -17,6 +17,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+# Unit lane has no torch: skip this module cleanly (same pattern as test_hybrid.py).
+pytest.importorskip("torch")
+
 from src.shared.python.motion_matching.hybrid import (
     ProposalCheckpointContract,
     assert_proposal_checkpoint_compatible,
