@@ -155,6 +155,10 @@ class EpisodeStore:
             arrays = {
                 name: _read_array(handle, name, lazy=lazy) for name in _ARRAY_KEYS
             }
+        sample_times_s = _require_shard_array(
+            "sample_times_s", arrays["sample_times_s"]
+        )
+        q = _require_shard_array("q", arrays["q"])
         record = EpisodeRecord(
             trial_id=str(attrs["trial_id"]),
             family_id=str(attrs["family_id"]),
@@ -164,8 +168,8 @@ class EpisodeStore:
             joint_names=tuple(attrs["joint_names"]),
             coefficient_letters=tuple(attrs["coefficient_letters"]),
             schema_version=str(attrs.get("schema_version", EPISODE_STORE_SCHEMA)),
-            sample_times_s=arrays["sample_times_s"],
-            q=arrays["q"],
+            sample_times_s=sample_times_s,
+            q=q,
             v=arrays["v"],
             u=arrays["u"],
             a_native=arrays["a_native"],
@@ -187,6 +191,12 @@ class EpisodeStore:
                 f"stored={expected} computed={computed}"
             )
         return record
+
+
+def _require_shard_array(name: str, value: np.ndarray | None) -> np.ndarray:
+    if value is None:
+        raise ValueError(f"episode shard missing required array {name!r}")
+    return value
 
 
 def _read_array(handle: h5py.File, name: str, *, lazy: bool) -> np.ndarray | None:

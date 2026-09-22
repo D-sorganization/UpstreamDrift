@@ -6,8 +6,9 @@ import hashlib
 import json
 from collections import defaultdict
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Mapping, Sequence
+
+from src.shared.python.neural_motion.json_io import SortedJsonWritableMixin
 
 from .record import EPISODE_STORE_SCHEMA, EpisodeRecord
 
@@ -19,7 +20,7 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class FamilySplitPlan:
+class FamilySplitPlan(SortedJsonWritableMixin):
     """Deterministic split assignment keyed by generation family."""
 
     schema: str
@@ -47,14 +48,6 @@ class FamilySplitPlan:
                 for key, values in sorted(self.held_out_strata.items())
             },
         }
-
-    def write_json(self, path: str | Path) -> None:
-        target = Path(path)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(
-            json.dumps(self.as_dict(), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
 
 
 def detect_source_aliases(
