@@ -44,6 +44,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open PR `Closes #8883`, push, and drive CI to green.
 - **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
 
+### DL-#9700-Planning · Deferred External Validation Plans
+
+- **State:** in_review
+- **Owner:** codex (session `codex-validation-planning-20260922-ud`)
+- **Issue:** #9700; #10375; #10382; #9619; #9613; #9546
+- **Branch:** `docs/deferred-validation-planning`
+- **PR:** #10741
+- **Paths:** `docs/development/planning/`, `docs/development/HANDOFF.md`, `AGENT_HANDOFF.md`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 (source bodies unchanged; #9546 already closed by #10446 before migration)
+- **Summary:** Preserve external evidence requirements for Board consideration. Keep executable work distinct; no experimental results, actor approvals or provider changes.
+- **Next step:** Validate and publish six plans; verify exact artifacts before source comments. Keep five open sources open and preserve the existing #9546 disposition.
+
 ### DL-#8941 · Analysis Statistics Endpoint Off the Event Loop With Incremental Fetch
 
 - **State:** in_review
@@ -377,8 +390,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10466 (open)
 - **Paths:** src/motion_capture/rig/tools_bridge.py; src/motion_capture/rig/**main**.py; tests/motion_capture/rig/test_tools_session_export.py; tests/fixtures/mocap_session_export/; docs/motion_capture/capture_rig.md
 - **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (SELF; 8 Tools-first export checks pass under `tests/fixtures/mocap_session_export/run_checks.py`; 40 in-process rig/bridge/bundle/hygiene tests pass; scoped Ruff clean).
-- **Summary:** The bridge now probes the pinned Tools family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`, and projects a rig capture session onto the Tools `MocapSessionManifest` through the Tools builders and canonical serializer; `capture`/`record` write `mocap_session.json` beside the rig manifest and record the export outcome under `tools_schema.export`. Retained raw video without `--consent-recorded` is refused by the Tools policy, not faked. D-track (Tools #4707, D3 open) and the #8865/#8866/#8867 prerequisites remain open; this is the first consumer slice, not closure of the program.
+- **Last verified:** 2026-09-22 at HEAD (SELF; #9604 `CameraCapabilities` mapping: 14 Tools-first export checks pass under `tests/fixtures/mocap_session_export/run_checks.py`; in-process bridge tests pass; scoped Ruff + mypy clean).
+- **Summary:** The bridge now probes the pinned Tools family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`, and projects a rig capture session onto the Tools `MocapSessionManifest` through the Tools builders and canonical serializer; `capture`/`record` write `mocap_session.json` beside the rig manifest and record the export outcome under `tools_schema.export`. Retained raw video without `--consent-recorded` is refused by the Tools policy, not faked. #9604 adds `map_camera_records`: one Tools `CameraIdentity` + `CameraCapabilities` per rig camera. D-track (Tools #4707, D3 open) and the #8865/#8866/#8867 prerequisites remain open; this is the first consumer slice, not closure of the program.
 - **Next step:** Open the PR, then route the C3D upload path (#8865) through the same pinned contract as the next consumer slice.
 - **Evidence:** tests/fixtures/mocap_session_export/export_checks.py; tests/motion_capture/rig/test_tools_session_export.py.
 
@@ -2556,4 +2569,4 @@ Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 | `Parked`        | When `parked`              | Date plus reason                                               |
 
 Never place credentials, tokens, or customer data in a development log.
-No material development-log change — ledger-freshness fix keeps TB-04 receipt test output in tmp_path; no new DL feature entry.
+No material development-log change — #10663 CI remediates preflight BLE001 only; no new DL feature entry.
