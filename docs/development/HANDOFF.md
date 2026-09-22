@@ -19,14 +19,22 @@
 - Validation: `python -m pytest tests/unit/motion_matching/test_full_swing_qualification.py -q -n 0 --no-cov`
   GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
   `docs/shared_tools/divergence_inventory.v1.json` against pinned
-  `vendor/ud-tools` (includes tools-only `launch_monitor/gspro_connect.py`
-  from NM-06/#10709 main). Merged `origin/main` after #10709 (NM-06);
+  `vendor/ud-tools` (includes tools-only `launch_monitor/gspro_connect.py`).
+  Merged `origin/main` through #10709 (NM-06) and #10718 (CO-10);
   `tests/unit/motion_matching/jobs/test_matching_jobs.py` retained; SPEC
-  keeps both #10707 and #10709 rows.
+  keeps #10707, #10709, and #10718 rows.
 - Named blockers: no invented six-engine native pass; every incomplete cell
   names its owner issue; software-contract fixtures only.
-- Next: Confirm CI green on #10707 after #10709 merge; do not start MS-106 or
-  CO/NM siblings from this worktree.
+- Next: Confirm CI green on #10707 after CO-10/#10718 merge; do not start
+  MS-106 or CO/NM siblings from this worktree.
+
+## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614) [MERGED]
+
+- Merged via PR [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718)
+  on `main` (`2f6e119ef`). `club_only/reproduction.py` freezes saved-job
+  commands, provenance, assumptions, and matrix reconciliation; operator
+  guide `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`.
+- Next: N/A — merged; continue MS-104 #10707 on this worktree.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 

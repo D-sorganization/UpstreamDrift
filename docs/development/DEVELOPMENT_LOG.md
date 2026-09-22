@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main after #10709 (NM-06); regenerated divergence inventory for `launch_monitor/gspro_connect.py`; jobs unit tests retained; SPEC keeps #10707 and #10709; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709 (NM-06) and #10718 (CO-10); regenerated divergence inventory for `launch_monitor/gspro_connect.py`; jobs unit tests retained; SPEC keeps #10707/#10709/#10718; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 after #10709 merge and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after #10718 merge and allow squash auto-merge to land.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
@@ -690,6 +690,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser surfaces without parallel frameworks. Preview vs verified statuses stay honest; observed/inferred legend and trial clock required; cancel/resume reuse CO-07; ledger lane=club_only with named native blockers.
 - **Next step:** N/A — shipped via #10711; continue MS-104 #10707.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
+
+### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10614 (epic #10602)
+- **Branch:** feat/co10-club-only-turnover-10614
+- **PR:** #10718 (merged)
+- **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at 2f6e119ef — squash-merged to main via PR #10718.
+- **Summary:** Publishes operator/reproduction turnover with exact saved-job commands, trial/model roster, raw-source provenance, assumptions, candidate selection, clean-environment portable replay, and evidence-linked matrix reconciliation. Epic #10602 stays open; software-contract tests are not native evidence.
+- **Next step:** N/A — shipped via #10718; continue MS-104 #10707.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
