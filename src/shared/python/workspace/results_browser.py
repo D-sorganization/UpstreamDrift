@@ -48,7 +48,7 @@ class ResultFilter:
     backend: str | None = None
     text: str | None = None
     has_provenance: bool | None = None
-    extensions: tuple[str, ...] = (".h5", ".hdf5")
+    extensions: tuple[str, ...] = (".h5", ".hdf5", ".json")
 
 
 class ResultsBrowser:
