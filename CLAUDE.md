@@ -187,6 +187,13 @@ editing the JSON, regenerate the index:
 python3 -m scripts.generate_industrial_readiness_index
 ```
 
+`src/config/impact_zone_readiness.json` is the sibling ledger for the Impact
+Zone and Impact Explorer epic (#9546, children #9547–#9550 plus reused #9484
+and #9349); it is held to the same contract, validated by the same tests and
+rendered to `docs/operations/impact-zone-readiness-index.md` by the same
+command. Tools owns the impact/flight runtime, so a child there is `merged`
+only once the reviewed pin is consumed and a UpstreamDrift test exercises it.
+
 An issue closure, a mock-only success, a changed golden file or a raised
 tolerance is not acceptance evidence. The ledger records software correctness
 only — scientific qualification stays in the design-manual governance pathway.
