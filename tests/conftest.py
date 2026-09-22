@@ -403,6 +403,7 @@ _FAKE_PYQT6_GUI_TESTS = (
     "tests/unit/launcher",
     "tests/unit/launchers",
     "tests/unit/shared_python/test_advanced_analysis_features.py",
+    "tests/unit/shared_python/test_analysis_tab_refresh.py",
     "tests/unit/shared_python/test_dashboard_advanced_analysis.py",
     "tests/unit/shared_python/test_launcher_integration.py",
     "tests/unit/shared_python/test_openpose_gui_coverage.py",
