@@ -10,7 +10,11 @@ pending` — UD keeps this facade.
   `REALTIME_TRANSPORT=ws` routes to `WSPubSub`; other transports raise
   `ValueError` instead of silent file fallback. Renamed colliding
   `register_channel` → `register_channel_hint`; deleted dead `file_pubsub.py`.
-- Next action: green CI after post-#10703 merge, squash merge, teardown worktree.
+- Next action: green CI after post-#10704 merge, squash merge, teardown worktree.
+
+## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
+
+- Merged via PR [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704) on `main` (`901b2de5e`).
 
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612) [MERGED]
 
