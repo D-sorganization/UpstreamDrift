@@ -1,0 +1,65 @@
+{
+  "package_id": "pinocchio/legacy-golfer",
+  "engine": "pinocchio",
+  "host": "windows",
+  "overall": "pass",
+  "steps": [
+    {
+      "step": "resolve_assets",
+      "outcome": "pass",
+      "message": "all declared assets resolve under the repository root",
+      "remediation": null
+    },
+    {
+      "step": "hash_check",
+      "outcome": "pass",
+      "message": "identity hash 1a91720cd7539fb009b2ab42b62526213152d78cf7af5bb1865913c2d6e9f824",
+      "remediation": null
+    },
+    {
+      "step": "load_compile",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "initialize",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "fk_mass",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "dynamics_smoke",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "viewer",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "save_reload",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    }
+  ],
+  "model_hash": "1a91720cd7539fb009b2ab42b62526213152d78cf7af5bb1865913c2d6e9f824",
+  "source_hash": "279db2189d3f580f6a11e4c9e8f6e1d3f4706c91b1dec9ebba8c08d0cc8035de",
+  "runtime": {
+    "python": "3.13.5",
+    "platform": "win32",
+    "host": "windows",
+    "allow_native": false
+  },
+  "contract_sha256": "260fbfa32b6e9969c79652e22e8811b758fd045f70f7aec39b60041e6b498934"
+}

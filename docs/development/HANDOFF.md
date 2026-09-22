@@ -2,13 +2,29 @@
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61`.
-- Branch: `feat/issue-10348-ms61-simscape-topology`; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`.
-- Entry DL-#10348. Delivered: fail-closed topology classification (`reduced_27_no_neck`), dual terminal disclosure (`full_marker_terminal.py` + `tour_metrics`), acceptance hooks, run-103 blocked `native_gate.json` + R2025b runtime/parity receipts, runner `-Fit` fail-closed stub.
-- CI repair: narrowed `_requires_full_marker_disclosure` so ordinary G1 `terminal_marker_rmse_m` metrics no longer force head-cluster disclosure; regenerated ledger to 103 receipts (includes run-103).
-- Validation: focused RED→GREEN on mujoco G1 / OpenSim ladder / ledger freshness + `test_simscape_topology_ms61.py`.
+- Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61.
+- Branch: eat/issue-10348-ms61-simscape-topology; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363). Session 27ccab3-1128-492c-a0fb-001367ea3aa8.
+- Entry DL-#10348. Delivered: fail-closed topology classification (
+  educed_27_no_neck), dual terminal disclosure (ull_marker_terminal.py + it_metrics), acceptance hooks, run-103 blocked
+  ative_gate.json + R2025b runtime/parity receipts, runner -Fit fail-closed stub.
+- Rebased: merged origin/main (includes MS-102 #10677); kept fail-closed topology + blocked native_gate — no invented G1 pass.
+- Validation: focused RED→GREEN on mujoco G1 / OpenSim ladder / ledger freshness + est_simscape_topology_ms61.py.
 - Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
-- Next action: push repair; confirm CI green + squash auto-merge of PR #10676.
+- Next action: confirm CI green + squash auto-merge of PR #10676.
+
+## MS-102 Engine and Model Inventory #10376 Handoff
+
+- Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10376-ms102.
+- Branch: eat/ms102-engine-model-inventory; PR #10677 **merged** to main. Governing issue #10376
+  (MS-102, epic #10363).
+- Entry DL-#10376. Delivered: src/config/engine_model_inventory.json (authority-
+  derived ledger), src/engines/model_inventory.py (load/reconcile/qualify), unit
+  tests, structural receipts under docs/development/matched_swing_program/evidence/ms102/.
+- Six flagship engines × driver/iron packaged; JaxSim/putting_green reconciled;
+  MyoSuite flagship status
+  epair → #10344 (MS-51); Simscape R2025b required.
+- Next: native SDK receipts on supported hosts via MS-103 preflight (not claimed by
+  structural receipts).
 
 ## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
 
