@@ -18,7 +18,7 @@
 - Limitations: synthetic fixtures for software contracts only; no native G1
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
-- Next: Push CI-fix commit; confirm quality-gate / unit-test-gate / repo-structure-gates green on PR #10681; squash auto-merge armed.
+- Next: Confirm CI green after NM-02 main rematch; squash auto-merge armed on PR #10681.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
