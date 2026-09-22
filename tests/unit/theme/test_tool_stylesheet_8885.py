@@ -14,6 +14,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # NOTE: ``from src.shared.python.theme import tool_stylesheet`` (submodule via
 # fromlist) resolves the canonical module's OWN ``__name__``
 # (``shared.python.theme``) when retrying the fromlist import, bypassing the
