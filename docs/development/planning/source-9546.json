@@ -1,0 +1,65 @@
+{
+  "number": 9546,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/9546",
+  "title": "Epic: Deliver and Qualify the Impact Zone and Impact Explorer Product",
+  "body": "## Status as of 2026-09-19\n\nStatus as of 2026-09-19\n- I1 (#9547) and I2 (#9548): fixed in Tools (#5079 audit, #5088 termination/refuse-export) and inside the current vendor pin; UD contract tests in open PRs #10444/#10311 - closed by this triage.\n- I3 (#9549): Tools-owned rate_of_closure UI seam; blocked on Tools #4946 owner ruling.\n- I4 (#9550): frozen acceptance matrix + 26 gate tests in open PR #10441; release_claim=code_verified_only.\n- #9349 consumer migration: complete per ADR-0048 (closed by this triage). #9484 web bundle delivery still open.\n\n---\n\n## Outcome and Interpretation\r\n\r\nMake the UpstreamDrift **Rate of Closure Impact Explorer** a polished, installable, scientifically bounded swing → impact → flight product, including inspectable club motion through contact. “Impact zone” here includes the finite contact interval and the existing impact/flight workbench; it does not mean rebuilding bunker sand contact.\r\n\r\n## Current Readiness\r\n\r\nClosest of the three programs to a functional product: substantial Tools-owned impact/flight simulation, visualization and desktop/web surfaces already exist. However, software availability and scientific qualification are distinct:\r\n- #9484: UD does not build/package the nested web app automatically. The provider already has `.github/workflows/rate-of-closure-web-distribution.yml`; consume or extend that producer rather than inventing a duplicate release authority.\r\n- #9349: consumer migration to the canonical layer is incomplete.\r\n- Tools #4946: contact-interval library exists but the workbench `SimulationRun`/model-selection/UI seam is missing. Existing imported 3-D playback (#9353) is not evidence of a selectable live interval solver.\r\n- Tools #4251 records approximation/qualification gaps (gear-effect ramp, COR(v), spring-damper spin capability, tensor defaults and D-plane/energy presentation). Recheck each item at implementation head rather than assume all remain.\r\n- New reproduced interval defects: an unfinished compressive contact exports as post-impact, and an energy deficit is automatically relabeled unilateral-release dissipation.\r\n\r\n## Work and Dependencies\r\n\r\n1. **I1 / I2:** fix interval completion and independent energy accounting in **Tools** first; consume their reviewed immutable pin here.\r\n2. **I3:** implement the live interval selection, run record and presenter seam coordinated with Tools #4130/#4946; retain a migration-compatible default for existing models.\r\n3. Existing **#9484** owns clean-install web bundle delivery, **#9349** owns consumer migration, and Tools #4251 owns listed impact-physics approximations.\r\n4. **I4:** qualify end-to-end product behavior and physical accuracy, including interactive and saved playback.\r\n5. Reconcile provider Tools #4921 checklist against actual merged artifacts. Historical stacked PRs and closed feature tickets do not establish delivered behavior.\r\n\r\n## Definition of Done\r\n\r\nA clean documented install opens the real app. The user can choose a supported impact model, define club/ball and delivery inputs, inspect force/pose/twist throughout completed contact, hand off the measured/modelled terminal state to flight, scrub all views against one clock, compare scenarios and export/reload a traceable report. No-hit, unfinished contact and unavailable models are distinct states.\r\n\r\nRelease requires dimensional/sign/frame, energy/momentum and timestep-limit tests; desktop/web golden contract parity; calibration and independent physical validation for advertised accuracy; actual rendered usability/accessibility inspection; clean install/package evidence; protected merge and post-merge verification. Approximation modes remain labeled and cannot imply validated prediction.\r\n\r\n## Review Evidence and Limits\r\n\r\nAudited a detached checkout of current UpstreamDrift main at `1f69a51fce997932f04a6ad1dd95bf4d065ba971` and the exact vendored Tools commit `3d93bb2c89813e17551814d3be7e895f791e29af`, independently of the user's occupied checkout. Bounded checks ran on Windows/Python 3.13 with NumPy 2.5.1, external pytest plugins disabled and repository-wide conftest excluded: **93 bunker ledger/credibility tests and 16 Tools impact-interval tests passed**. These are scoped regression results, not the supported Python 3.11/3.12 release matrix or full application qualification. Adversarial probes below exposed behavior those tests do not cover. No hardware capture, rendered GUI inspection, full-suite run, or physical predictive-accuracy validation was performed in this audit.\r\n\r\n## Canonical Sources\r\n\r\n- [Interval solver at the consumed pin](https://github.com/D-sorganization/Tools/blob/3d93bb2c89813e17551814d3be7e895f791e29af/src/shared/python/swing_sim/impact_interval/solver.py)\r\n- [Interval result types](https://github.com/D-sorganization/Tools/blob/3d93bb2c89813e17551814d3be7e895f791e29af/src/shared/python/swing_sim/impact_interval/types.py)\r\n- [UpstreamDrift embedded route](https://github.com/D-sorganization/UpstreamDrift/blob/1f69a51fce997932f04a6ad1dd95bf4d065ba971/ui/src/pages/ImpactExplorer.tsx)\r\n- `vendor/ud-tools/src/rate_of_closure/{simulation,application,ui,web}` and ADR-0046 ownership rulings.\r\n\r\n\r\n## Agent Execution Contract\r\n\r\nAudit baseline: UpstreamDrift `1f69a51fce997932f04a6ad1dd95bf4d065ba971`; pinned Tools `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04 Pacific). Re-fetch and record both exact revisions before implementation; this is an audit snapshot, not a floating-main guarantee.\r\n\r\nRead `AGENTS.md`, `CLAUDE.md`, relevant ADRs, public `__init__.py` façades, `SPEC.md`, and `AGENT_HANDOFF.md`. Check the fleet issue lease before starting; use an isolated worktree and preserve occupied work. Search shared infrastructure before adding a module. Apply TDD (show the failure), DbC for units/frames/time/provenance/resource bounds, DRY, and LoD. Tools owns shared impact/flight and mocap runtime; upstream provider changes there, then consume an immutable reviewed pin here. Never edit `vendor/ud-tools` to implement a fix.\r\n\r\nA completion comment must contain: implementation PRs and merged SHAs; exact provider pin; test command/environment/results including skips; numerical/physical evidence where applicable; rendered desktop/web evidence for changed UI; remaining limitations; SPEC/manual/feature-parity/handoff updates. Follow current protected CI and fleet scheduling rules; no bypasses or issue closure on planning, mocks, or skipped hardware tests. Publish only sanitized capture fixtures; no uploading personal video without authorization.\r\n\r\n\r\n## Delivery Checklist\r\n\r\n- [ ] #9547 — Impact: Reject Unfinished Contact Before Exporting a Post-Impact State\r\n- [ ] #9548 — Impact: Compute Contact Energy Loss Independently Instead of Zeroing the Audit Residual\r\n- [ ] #9549 — Impact: Integrate the Contact-Interval Solver Into Live Runs, Playback and Export\r\n- [ ] #9550 — Impact: Qualify the Installed Product, Physics Claims and Desktop/Web Experience\r\n\r\nExisting Issues Reused (No Duplicate Implementation Tickets):\r\n\r\n- [ ] #9484 — The Impact Explorer web route has no build step in CI — a clean checkout serves the fallback, not the app\r\n- [ ] #9349 — ADR-0046 G2: re-point the two workbenches at the canonical layer, module by module\n\n## Tracked issues (2026-09-19 triage)\n\n- [ ] #9549 Impact: Integrate the Contact-Interval Solver Into Live Runs, Playback and Export\n- [ ] #9550 Impact: Qualify the Installed Product, Physics Claims and Desktop/Web Experience\n",
+  "updated_at": "2026-09-19T17:44:33Z",
+  "labels": [
+    {
+      "id": 9842881843,
+      "node_id": "LA_kwDOQqJAi88AAAACSq51Mw",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10172510055,
+      "node_id": "LA_kwDOQqJAi88AAAACXlQvZw",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/tracking",
+      "name": "tracking",
+      "color": "FBCA04",
+      "default": false,
+      "description": "Meta/tracking issue",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10765063750,
+      "node_id": "LA_kwDOQqJAi88AAAACgaXWRg",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/epic",
+      "name": "epic",
+      "color": "ededed",
+      "default": false,
+      "description": null,
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10796034821,
+      "node_id": "LA_kwDOQqJAi88AAAACg35rBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/P2",
+      "name": "P2",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Medium priority",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12266883256,
+      "node_id": "LA_kwDOQqJAi88AAAAC2ynIuA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/triaged-2026-09",
+      "name": "triaged-2026-09",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Reviewed in the 2026-09-19 backlog triage",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "open"
+}
