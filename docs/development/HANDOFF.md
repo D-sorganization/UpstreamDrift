@@ -20,20 +20,50 @@
   GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
   `docs/shared_tools/divergence_inventory.v1.json` against pinned
   `vendor/ud-tools` (includes tools-only `launch_monitor/gspro_connect.py`).
-  Merged `origin/main` through #10709 (NM-06) and #10718 (CO-10);
-  `tests/unit/motion_matching/jobs/test_matching_jobs.py` retained; SPEC
-  keeps #10707, #10709, and #10718 rows.
+  Merged `origin/main` through #10709 (NM-06), #10718 (CO-10), and #10721
+  (succession handoff); `tests/unit/motion_matching/jobs/test_matching_jobs.py`
+  retained; SPEC keeps #10707, #10709, #10718, and #10721 rows.
 - Named blockers: no invented six-engine native pass; every incomplete cell
   names its owner issue; software-contract fixtures only.
-- Next: Confirm CI green on #10707 after CO-10/#10718 merge; do not start
-  MS-106 or CO/NM siblings from this worktree.
+- Next: Confirm CI green on #10707 after #10721 merge; do not start MS-106 or
+  steal NM-07 #10622 from this worktree.
+
+## Succession — Motion Matching (2026-09-22)
+
+- **Goal:** Finish Antigravity-started motion matching (club-only CO + neural NM)
+  with TDD/DbC/LoD/DRY + cargo rules; professional long-term quality. Software
+  contracts ≠ native Fit/G1/G3 success; do not close epics on docs/GUI alone.
+- **Session:** `b27ccab3-1128-492c-a0fb-001367ea3aa8` · **agent:** `local`
+- **Durable copy:**
+  `C:\Users\diete\AppData\Local\Cursor\AgentStores\cursor_agent_stores\b27ccab3-1128-492c-a0fb-001367ea3aa8\files\MOTION_MATCHING_HANDOFF.md`
+- **Landed:** CO-00..CO-10 · NM-00..NM-06
+  - CO: #10667, #10670, #10675, #10678, #10680, #10681, #10687, #10700, #10703,
+    #10711, **#10718** (CO-10 merged `2f6e119ef`)
+  - NM: #10668, #10672, #10679, #10686, #10698, #10701, **#10709** (merged
+    `08bcec302`, tip `05f712281`)
+- **Duplicates closed:** #10719 / #10720 (superseded by #10718)
+- **Do NOT steal** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622)
+  (`claim:antigravity`). Check claim before any start.
+- **Remaining:** NM-08..NM-12 (#10623–#10627). Epics
+  [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) /
+  [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) stay
+  open until physical gaps (desk-native receipts) close.
+- **Ordered next:** (1) land MS-104 #10707 (2) check NM-07 #10622 claim before
+  starting (3) renew leases via Repository_Management `post_agent_lease`
+  (4) if continuing club-only: DeskComputer native Fit/G1 for unresolved
+  matrix cells under `docs/plans/club_only_matching/evidence/`
+- **Active MS-104 worktree:** `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10378-ms104`
+  (`feat/ms104-full-swing-qualification`, PR #10707)
+- **Risks:** prior session shell flaky; push ref-lock races; SPEC §12 keep-both
+  rows on rebase; never edit `vendor/ud-tools`.
 
 ## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614) [MERGED]
 
 - Merged via PR [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718)
-  on `main` (`2f6e119ef`). `club_only/reproduction.py` freezes saved-job
-  commands, provenance, assumptions, and matrix reconciliation; operator
-  guide `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`.
+  on `main` (`2f6e119ef`). DL-#10614 shipped. Issue #10614 closed.
+- `club_only/reproduction.py` freezes saved-job commands, provenance,
+  assumptions, and matrix reconciliation; operator guide
+  `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`.
 - Next: N/A — merged; continue MS-104 #10707 on this worktree.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
@@ -462,14 +492,16 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
-## Neural Masked Proposals NM-06 #10621 Handoff
+## Neural Masked Proposals NM-06 #10621 Handoff [MERGED]
 
 - Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10621-nm06.
-- Branch: feat/10621-nm06-masked-proposals; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue #10621 (NM-06, epic #10603). Entry DL-#10621.
+- Branch: feat/10621-nm06-masked-proposals; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709)
+  **merged** (`08bcec302`; tip `05f712281`). Governing issue #10621 (NM-06,
+  epic #10603). Entry DL-#10621 shipped.
 - Delivered: `src/shared/python/neural_motion/proposals/` (`neural-masked-proposals/1.0.0`) binding TaskDimensions.u_dim / MaskedTrajectoryTask, masked conditioning, selection + mixture ablation, observation/regularization training (not coeff MSE alone), hybrid fail-closed polish_fn refine, strict checkpoint mismatch rejection. Inverse reuse: masked_proposal.py, proposal_shared.py, proposal_training.py, collapse.py, basis_time.py; regressor_training stays on TrainingConfig + epoch helpers (not flat kwargs).
-- Gate repairs (SELF): merge origin/main (CO-09 #10711); extract `motion_matching.inverse.proposal_shared` for DRY; regenerate divergence inventory with `--repo-root .` for NM-06 ud-only paths; keep architecture budgets + optional-torch unit-lane path; do not raise DRY baseline max.
-- Validation: NM-06 pytest green with torch; local DRY gate OK; inventory `--check` current; software-contract fixtures only. Articulated-authority lockfile miss on CI is unrelated (file present on tip and main).
-- Next action: confirm unit-test-gate + repo-structure-gates green on PR #10709 tip; do not start NM-07+ until merge.
+- Gate repairs: merge origin/main (CO-09 #10711); extract `motion_matching.inverse.proposal_shared` for DRY; regenerate divergence inventory with `--repo-root .` for NM-06 ud-only paths; keep architecture budgets + optional-torch unit-lane path; do not raise DRY baseline max.
+- Validation: NM-06 pytest green with torch; software-contract fixtures only.
+- Next action: N/A — merged. Check NM-07 #10622 `claim:antigravity` before any start; do not steal.
 
 ## Neural Dynamics Baselines NM-05 #10620 Handoff
 
@@ -505,14 +537,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00–NM-05 shipped; active child [NM-06 #10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00..CO-10 shipped (#10667–#10718). Software-contract complete; epic stays open for native Fit/G1 evidence.
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00..NM-06 shipped (#10668–#10709); next candidate NM-07 #10622 only after claim check (`claim:antigravity` — do not steal). Remaining NM-08..NM-12 (#10623–#10627).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md); [NM-05 Dynamics Baselines](../plans/neural_motion_matching/dynamics_baselines.md); [NM-06 Masked Proposals](../plans/neural_motion_matching/masked_proposals.md).
-- **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
-- **NM-04 state:** MERGED via PR #10698; DL-#10619.
-- **NM-05 state:** MERGED via PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); DL-#10620.
-- **NM-06 state:** in review via PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); DL-#10621.
-- **Next:** Confirm CI green on PR #10709; do not start NM-07+.
+- **CO-10 state:** MERGED via PR [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718) (`2f6e119ef`); DL-#10614. Duplicates #10719/#10720 closed.
+- **NM-06 state:** MERGED via PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) (`08bcec302`); DL-#10621.
+- **Next:** Check NM-07 #10622 claim before any neural work; renew leases.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
@@ -1487,6 +1517,7 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-22T16:15:00Z — Succession handoff PR #10721: CO-10 #10718 and NM-06 #10709 merged; duplicates #10719/#10720 closed; do not steal NM-07 #10622. Commit SELF.
 - 2026-09-22T15:00:00Z — NM-06 #10709: rematch onto origin/main after CO-09/#10650 landed; keep proposal_shared DRY helpers. Commit SELF.
 - 2026-09-22T14:35:07Z — CI remediation for #10650: joint_panel unit tests now
   construct a module-scoped offscreen QApplication (autouse qapp fixture,

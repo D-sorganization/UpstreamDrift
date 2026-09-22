@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709 (NM-06) and #10718 (CO-10); regenerated divergence inventory for `launch_monitor/gspro_connect.py`; jobs unit tests retained; SPEC keeps #10707/#10709/#10718; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709/#10718/#10721; regenerated divergence inventory for `launch_monitor/gspro_connect.py`; jobs unit tests retained; SPEC keeps #10707/#10709/#10718/#10721; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 after #10718 merge and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after #10721 merge and allow squash auto-merge to land.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
@@ -441,16 +441,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10621 (epic #10603)
 - **Branch:** feat/10621-nm06-masked-proposals
 - **PR:** #10709
 - **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{**init**,masked_proposal,proposal_shared,proposal_training,regressor_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_inverse_regressor_training.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main (CO-09); DRY cleared via proposal_shared; divergence inventory regenerated for NM-06 ud-only paths
+- **Last verified:** 2026-09-22 — merged via PR #10709 (`08bcec302`; tip `05f712281`)
 - **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse proposal_shared consolidates duplicated contract logic; proposal_training and regressor_training stay under function-line/parameter budgets; inverse package lazily loads torch-backed cVAE/regressor exports for unit-lane collection.
-- **Next step:** Confirm unit-test-gate and repo-structure-gates green on PR #10709 tip after push.
+- **Next step:** N/A — shipped; check NM-07 #10622 claim before any start (do not steal claim:antigravity).
 - **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 
 ### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
@@ -700,7 +700,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10718 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at 2f6e119ef — squash-merged to main via PR #10718.
+- **Last verified:** 2026-09-22 at 2f6e119ef — squash-merged to main via PR #10718; duplicates #10719/#10720 closed.
 - **Summary:** Publishes operator/reproduction turnover with exact saved-job commands, trial/model roster, raw-source provenance, assumptions, candidate selection, clean-environment portable replay, and evidence-linked matrix reconciliation. Epic #10602 stays open; software-contract tests are not native evidence.
 - **Next step:** N/A — shipped via #10718; continue MS-104 #10707.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
