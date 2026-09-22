@@ -111,23 +111,34 @@ def _first_step_native_residual(sample: SimulationSample) -> np.ndarray | None:
     )
 
 
-def qualify_mock_adapter() -> NativeLabelReceipt:
-    """Software-contract qualification via MockPhysicsEngine."""
-    engine = MockPhysicsEngine(num_joints=2)
-    engine.load_from_string("<mock/>")
-    gen = DatasetGenerator(cast(PhysicsEngine, engine))
-    config = GeneratorConfig(
+def _residual_norm(sample: SimulationSample) -> float | None:
+    """L2 residual of M·a + h − u on step 0, or None when channels are missing."""
+    residual = _first_step_native_residual(sample)
+    if residual is None:
+        return None
+    return float(np.linalg.norm(residual))
+
+
+def _single_sample_dynamics_config(
+    *,
+    duration: float,
+    timestep: float,
+    seed: int,
+    magnitude: float,
+) -> GeneratorConfig:
+    """Shared GeneratorConfig for first-wave native dynamics qualification."""
+    return GeneratorConfig(
         num_samples=1,
-        duration=0.04,
-        timestep=0.01,
-        seed=11,
+        duration=duration,
+        timestep=timestep,
+        seed=seed,
         vary_initial_positions=False,
         vary_initial_velocities=False,
         control_profiles=[
             ControlProfile(
                 name="const",
                 profile_type="constant",
-                parameters={"magnitude": 0.5},
+                parameters={"magnitude": magnitude},
             )
         ],
         record_mass_matrix=True,
@@ -136,16 +147,25 @@ def qualify_mock_adapter() -> NativeLabelReceipt:
         record_contact_forces=False,
         record_drift_control=False,
     )
+
+
+def qualify_mock_adapter() -> NativeLabelReceipt:
+    """Software-contract qualification via MockPhysicsEngine."""
+    engine = MockPhysicsEngine(num_joints=2)
+    engine.load_from_string("<mock/>")
+    gen = DatasetGenerator(cast(PhysicsEngine, engine))
+    config = _single_sample_dynamics_config(
+        duration=0.04, timestep=0.01, seed=11, magnitude=0.5
+    )
     sample = gen.generate(config).samples[0]
-    residual_norm: float | None = None
-    qualified = False
     limitations: list[str] = [
         "MockPhysicsEngine is a software-contract fixture, not native evidence",
     ]
-    residual = _first_step_native_residual(sample)
-    if residual is not None:
-        residual_norm = float(np.linalg.norm(residual))
-        qualified = residual_norm < 1e-8 and all(
+    residual_norm = _residual_norm(sample)
+    qualified = (
+        residual_norm is not None
+        and residual_norm < 1e-8
+        and all(
             sample.channel_evidence[name].availability is ChannelAvailability.AVAILABLE
             for name in (
                 "positions",
@@ -156,6 +176,7 @@ def qualify_mock_adapter() -> NativeLabelReceipt:
                 "bias_forces",
             )
         )
+    )
     payload = {
         "schema": LABEL_SCHEMA,
         "model_id": "mock_software_contract",
@@ -265,43 +286,23 @@ def qualify_ode_double_pendulum_adapter() -> NativeLabelReceipt:
     resolve_roster_entry(build_neural_model_roster(), "driven_double_pendulum")
     engine = _ODEPhysicsEngineAdapter()
     gen = DatasetGenerator(cast(PhysicsEngine, engine))
-    config = GeneratorConfig(
-        num_samples=1,
-        duration=0.05,
-        timestep=0.01,
-        seed=3,
-        vary_initial_positions=False,
-        vary_initial_velocities=False,
-        control_profiles=[
-            ControlProfile(
-                name="const",
-                profile_type="constant",
-                parameters={"magnitude": 0.25},
-            )
-        ],
-        record_mass_matrix=True,
-        record_bias_forces=True,
-        record_gravity=False,
-        record_contact_forces=False,
-        record_drift_control=False,
+    config = _single_sample_dynamics_config(
+        duration=0.05, timestep=0.01, seed=3, magnitude=0.25
     )
     sample = gen.generate(config).samples[0]
     limitations = [
         "Contact/gravity channels intentionally unavailable on planar ODE model",
         "Triple-pendulum and upper-body adapters deferred to NM-09 ownership",
     ]
-    residual_norm: float | None = None
-    qualified = False
-    residual = _first_step_native_residual(sample)
-    if residual is not None:
-        residual_norm = float(np.linalg.norm(residual))
-        qualified = (
-            residual_norm < 1e-6
-            and sample.channel_evidence["native_accelerations"].availability
-            is ChannelAvailability.AVAILABLE
-            and sample.channel_evidence["contact_forces"].availability
-            is ChannelAvailability.NOT_REQUESTED
-        )
+    residual_norm = _residual_norm(sample)
+    qualified = (
+        residual_norm is not None
+        and residual_norm < 1e-6
+        and sample.channel_evidence["native_accelerations"].availability
+        is ChannelAvailability.AVAILABLE
+        and sample.channel_evidence["contact_forces"].availability
+        is ChannelAvailability.NOT_REQUESTED
+    )
     payload = {
         "schema": LABEL_SCHEMA,
         "model_id": "driven_double_pendulum",
