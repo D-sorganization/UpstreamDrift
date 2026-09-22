@@ -54,8 +54,15 @@ class DrakeMatchingPlant:
         return self.model.ground_plane
 
     def create_ik(
-        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
+        if ik_backend != "lm":
+            raise ValueError(
+                f"IK backend {ik_backend!r} is only supported on the MuJoCo plant"
+            )
         from src.engines.physics_engines.drake.python.full_body_ik import (
             DrakeFullBodyIK,
         )

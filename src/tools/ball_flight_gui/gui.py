@@ -39,7 +39,7 @@ from PyQt6.QtWidgets import (
 from src.launchers.help_menu import attach_tool_help_menu, build_help_menu
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
-from src.tools.async_action import AsyncActionBar, WorkerContext
+from src.tools.async_action import WorkerContext, add_primary_async_run_control
 
 logger = logging.getLogger(__name__)
 
@@ -120,17 +120,9 @@ class BallFlightWidget(QWidget):
         left_layout.addWidget(self._build_aero_group())
         left_layout.addWidget(self._build_preset_group())
 
-        # Run
-        self._run_btn = QPushButton("Simulate Flight")
-        self._run_btn.setStyleSheet(
-            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
+        self._run_btn, self.action_bar = add_primary_async_run_control(
+            left_layout, "Simulate Flight", self._run_simulation_async
         )
-        self._run_btn.clicked.connect(self._run_simulation_async)
-        left_layout.addWidget(self._run_btn)
-
-        self.action_bar = AsyncActionBar()
-        self.action_bar.set_trigger_buttons(self._run_btn)
-        left_layout.addWidget(self.action_bar)
 
         left_layout.addStretch()
         return left

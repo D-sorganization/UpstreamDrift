@@ -21,12 +21,145 @@ from .errors import (
     TrainingConfigError,
 )
 
-__all__ = ["Dataset", "DatasetRegistry"]
+__all__ = [
+    "Dataset",
+    "DatasetRegistry",
+    "register_neural_episode_corpus",
+    "register_teacher_episode_corpus",
+]
 
 
 _VALID_FORMATS: frozenset[str] = frozenset(
     {"c3d", "csv", "parquet", "json", "pt", "npz", "hdf5", "tfrecord", "custom"}
 )
+
+
+def _require_episode_corpus_args(registry: object, root: object) -> None:
+    """Validate shared registration preconditions for episode corpora.
+
+    Design by Contract:
+    - ``registry`` must be a :class:`DatasetRegistry`.
+    - ``root`` must be a :class:`Path` (existence is probed later).
+    """
+
+    if not isinstance(registry, DatasetRegistry):
+        raise TypeError(
+            f"registry must be DatasetRegistry (got {type(registry).__name__})"
+        )
+    if not isinstance(root, Path):
+        raise TrainingConfigError(
+            f"root must be a pathlib.Path (got {type(root).__name__})"
+        )
+
+
+def _probe_episode_store_layout(root: Path) -> None:
+    """Touch an :class:`EpisodeStore` layout without loading episode arrays."""
+
+    # Lazy import keeps the training registry importable without HDF5 extras.
+    from src.shared.python.neural_motion.episodes import EpisodeStore
+
+    store = EpisodeStore(root)
+    _ = store.iter_episode_ids()
+
+
+def _register_hdf5_episode_dataset(
+    registry: DatasetRegistry,
+    *,
+    dataset_id: str,
+    name: str,
+    root: Path,
+    description: str,
+) -> Dataset:
+    """Build and register an hdf5 episode-corpus :class:`Dataset` handle."""
+
+    dataset = Dataset(
+        dataset_id=dataset_id,
+        name=name,
+        path=root,
+        format="hdf5",
+        size_bytes=0,
+        schema_version=1,
+        description=description,
+    )
+    registry.register(dataset)
+    return dataset
+
+
+def register_neural_episode_corpus(
+    registry: DatasetRegistry,
+    *,
+    dataset_id: str,
+    name: str,
+    root: Path,
+    description: str = "",
+) -> Dataset:
+    """Register an NM-03 episode-store root as a training :class:`Dataset` handle.
+
+    Design by Contract:
+    - ``root`` must be a :class:`Path` pointing at an episode corpus directory
+      (manifest may be empty yet). Arrays are never materialised into RAM.
+    - Format is always ``hdf5``; schema notes cite ``neural-episode-store/1.0.0``.
+
+    This is the training-subsystem reuse seam for #10618: family splits and
+    thin views live under ``neural_motion.episodes``; the registry only stores
+    the corpus path so jobs cannot invent alternate loaders.
+    """
+
+    _require_episode_corpus_args(registry, root)
+    from src.shared.python.neural_motion.episodes import EPISODE_STORE_SCHEMA
+
+    _probe_episode_store_layout(root)
+    notes = description.strip() or (
+        f"NM-03 episode corpus ({EPISODE_STORE_SCHEMA}); "
+        "load via EpisodeStore / family splits, not row-level shuffles."
+    )
+    return _register_hdf5_episode_dataset(
+        registry,
+        dataset_id=dataset_id,
+        name=name,
+        root=root,
+        description=notes,
+    )
+
+
+def register_teacher_episode_corpus(
+    registry: DatasetRegistry,
+    *,
+    dataset_id: str,
+    name: str,
+    root: Path,
+    description: str = "",
+) -> Dataset:
+    """Register an NM-04 teacher episode-store root as a training :class:`Dataset`.
+
+    Design by Contract:
+    - ``root`` must be a :class:`Path` for an :class:`EpisodeStore` that
+      :class:`~src.shared.python.neural_motion.teachers.NestedTeacherCorpus`
+      writes into (may be empty yet).
+    - Format is always ``hdf5``; description cites ``neural-teacher-episodes/1.0.0``.
+    - Arrays are never materialised into RAM at registration time.
+
+    Companion to :func:`register_neural_episode_corpus` (#10618) and the
+    scheduler admission seam :func:`~src.shared.python.training.scheduler.neural_teacher_corpus_budget`
+    (#10619).
+    """
+
+    _require_episode_corpus_args(registry, root)
+    from src.shared.python.neural_motion.episodes import EPISODE_STORE_SCHEMA
+    from src.shared.python.neural_motion.teachers import TEACHER_SCHEMA
+
+    _probe_episode_store_layout(root)
+    notes = description.strip() or (
+        f"NM-04 teacher corpus ({TEACHER_SCHEMA} via {EPISODE_STORE_SCHEMA}); "
+        "load via NestedTeacherCorpus / EpisodeStore, not row-level shuffles."
+    )
+    return _register_hdf5_episode_dataset(
+        registry,
+        dataset_id=dataset_id,
+        name=name,
+        root=root,
+        description=notes,
+    )
 
 
 @dataclass(frozen=True, slots=True)

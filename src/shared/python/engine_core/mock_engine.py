@@ -30,43 +30,45 @@ logger = get_logger(__name__)
 class MockPhysicsEngine:
     """Mock physics engine implementing PhysicsEngine protocol.
 
-    Provides deterministic, predictable behavior for:
-    - Unit tests without heavy dependencies
-    - UI development without physics engines
-    - CI environments with limited resources
+    ``num_q`` / ``num_v`` / ``num_u`` default to ``num_joints`` but may differ
+    (quaternion layouts, under-actuation). Optional ``control_limits`` saturate
+    applied controls while preserving the requested command.
     """
 
-    # Configuration
     num_joints: int = 7
+    num_q: int | None = None
+    num_v: int | None = None
+    num_u: int | None = None
+    control_limits: tuple[float, float] | None = None
     timestep: float = 0.001
     model_name: str = "mock_golfer"
+    damping: float = 0.1
 
-    # State
     _time: float = field(default=0.0, init=False)
     _positions: np.ndarray = field(default_factory=lambda: np.array([]))
     _velocities: np.ndarray = field(default_factory=lambda: np.array([]))
     _accelerations: np.ndarray = field(default_factory=lambda: np.array([]))
     _torques: np.ndarray = field(default_factory=lambda: np.array([]))
+    _requested_torques: np.ndarray = field(default_factory=lambda: np.array([]))
     _is_loaded: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
-        """Initialize state arrays."""
-        self._positions = np.zeros(self.num_joints)
-        self._velocities = np.zeros(self.num_joints)
-        self._accelerations = np.zeros(self.num_joints)
-        self._torques = np.zeros(self.num_joints)
-        logger.info("MockPhysicsEngine initialized with %d joints", self.num_joints)
-
-    # =========================================================================
-    # PhysicsEngine Protocol Implementation
-    # =========================================================================
+        n_q = self.num_joints if self.num_q is None else int(self.num_q)
+        n_v = self.num_joints if self.num_v is None else int(self.num_v)
+        n_u = self.num_joints if self.num_u is None else int(self.num_u)
+        if n_q <= 0 or n_v <= 0 or n_u <= 0:
+            raise ValueError("num_q, num_v and num_u must be > 0")
+        object.__setattr__(self, "num_q", n_q)
+        object.__setattr__(self, "num_v", n_v)
+        object.__setattr__(self, "num_u", n_u)
+        self._positions = np.zeros(n_q)
+        self._velocities = np.zeros(n_v)
+        self._accelerations = np.zeros(n_v)
+        self._torques = np.zeros(n_u)
+        self._requested_torques = np.zeros(n_u)
+        logger.info("MockPhysicsEngine initialized n_q=%d n_v=%d n_u=%d", n_q, n_v, n_u)
 
     def load_model(self, model_path: str) -> None:
-        """Load a model (mock implementation accepts any path).
-
-        Args:
-            model_path: Path to model file (ignored in mock)
-        """
         if model_path is None:
             raise ValueError("model_path must be provided")
         logger.info("MockPhysicsEngine: Loading model from %s", model_path)
@@ -74,51 +76,24 @@ class MockPhysicsEngine:
         self.model_name = model_path
 
     def load_from_path(self, path: str) -> None:
-        """Alias for load_model for compatibility.
-
-        Args:
-            path: Path to model file
-        """
         self.load_model(path)
 
     def step(self, dt: float | None = None) -> None:
-        """Advance simulation by dt seconds.
-
-        Uses simple Euler integration for mock physics.
-
-        Args:
-            dt: Timestep (uses default if not provided)
-        """
         if dt is None:
             dt = self.timestep
-
-        # Simple physics: F=ma with damping
-        damping = 0.1
-        mass = 1.0
-
-        # Compute acceleration from torques
-        self._accelerations = (self._torques - damping * self._velocities) / mass
-
-        # Euler integration
+        self.forward()
         self._velocities = self._velocities + self._accelerations * dt
-        self._positions = self._positions + self._velocities * dt
-
+        if self._positions.shape[0] == self._velocities.shape[0]:
+            self._positions = self._positions + self._velocities * dt
+        else:
+            n = min(self._positions.shape[0], self._velocities.shape[0])
+            self._positions[:n] = self._positions[:n] + self._velocities[:n] * dt
         self._time += dt
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
-        """Get current simulation state as (positions, velocities) tuple.
-
-        Returns:
-            Tuple of (positions, velocities) numpy arrays.
-        """
         return self._positions.copy(), self._velocities.copy()
 
     def get_state_dict(self) -> dict[str, Any]:
-        """Get current simulation state as a dictionary (legacy).
-
-        Returns:
-            Dictionary containing positions, velocities, time, etc.
-        """
         return {
             "time": self._time,
             "positions": self._positions.copy(),
@@ -129,321 +104,174 @@ class MockPhysicsEngine:
         }
 
     def set_state(self, positions: np.ndarray, velocities: np.ndarray) -> None:
-        """Set simulation state.
-
-        Args:
-            positions: Joint positions array
-            velocities: Joint velocities array
-        """
         if positions is None:
             raise ValueError("positions must be provided")
-        self._positions = np.array(positions)
-        self._velocities = np.array(velocities)
-        logger.debug("State set: pos=%s, vel=%s", positions, velocities)
+        self._positions = np.array(positions, dtype=float)
+        self._velocities = np.array(velocities, dtype=float)
 
     def set_joint_positions(self, positions: np.ndarray) -> None:
-        """Set joint positions.
-
-        Args:
-            positions: Joint positions array
-        """
-        self._positions = np.array(positions)
+        self._positions = np.array(positions, dtype=float)
 
     def set_joint_velocities(self, velocities: np.ndarray) -> None:
-        """Set joint velocities.
-
-        Args:
-            velocities: Joint velocities array
-        """
-        self._velocities = np.array(velocities)
+        self._velocities = np.array(velocities, dtype=float)
 
     def apply_torque(self, joint_name: str, torque: float) -> None:
-        """Apply torque to a joint.
-
-        Args:
-            joint_name: Name of joint (maps to index)
-            torque: Torque value
-        """
-        # Map joint name to index (simple numeric mapping for mock)
         try:
             if joint_name.startswith("joint_"):
                 idx = int(joint_name.split("_")[1])
             else:
-                idx = hash(joint_name) % self.num_joints
+                idx = hash(joint_name) % int(self.num_u or self.num_joints)
             self._torques[idx] = torque
+            self._requested_torques[idx] = torque
         except (ValueError, IndexError) as e:
             logger.warning("Failed to apply torque to %s: %s", joint_name, e)
 
     def set_control(self, torques: list[float] | np.ndarray) -> None:
-        """Set control torques for all joints.
-
-        Args:
-            torques: Array of torque values
-        """
         if torques is None:
             raise ValueError("torques must be provided")
-        self._torques = np.array(torques)[: self.num_joints]
-        # Pad with zeros if not enough values
-        if len(self._torques) < self.num_joints:
-            self._torques = np.pad(
-                self._torques,
-                (0, self.num_joints - len(self._torques)),
-                mode="constant",
+        n_u = int(self.num_u) if self.num_u is not None else self.num_joints
+        requested: np.ndarray = np.asarray(torques, dtype=float).reshape(-1)
+        if requested.size < n_u:
+            requested = np.asarray(
+                np.pad(requested, (0, n_u - requested.size), mode="constant"),
+                dtype=float,
             )
+        requested = np.asarray(requested[:n_u], dtype=float).copy()
+        self._requested_torques = requested
+        applied: np.ndarray = requested.copy()
+        if self.control_limits is not None:
+            lo, hi = self.control_limits
+            applied = np.asarray(np.clip(applied, lo, hi), dtype=float)
+        self._torques = applied
+
+    def get_applied_control(self) -> np.ndarray:
+        return self._torques.copy()
+
+    def get_requested_control(self) -> np.ndarray:
+        return self._requested_torques.copy()
+
+    def get_control_dim(self) -> int:
+        return int(self.num_u) if self.num_u is not None else self.num_joints
 
     def reset(self) -> None:
-        """Reset simulation to initial state."""
+        n_q = int(self.num_q) if self.num_q is not None else self.num_joints
+        n_v = int(self.num_v) if self.num_v is not None else self.num_joints
+        n_u = int(self.num_u) if self.num_u is not None else self.num_joints
         self._time = 0.0
-        self._positions = np.zeros(self.num_joints)
-        self._velocities = np.zeros(self.num_joints)
-        self._accelerations = np.zeros(self.num_joints)
-        self._torques = np.zeros(self.num_joints)
+        self._positions = np.zeros(n_q)
+        self._velocities = np.zeros(n_v)
+        self._accelerations = np.zeros(n_v)
+        self._torques = np.zeros(n_u)
+        self._requested_torques = np.zeros(n_u)
         logger.info("MockPhysicsEngine reset")
 
-    # =========================================================================
-    # Additional Methods for Compatibility
-    # =========================================================================
-
     def get_joint_names(self) -> list[str]:
-        """Get list of joint names.
-
-        Returns:
-            List of joint name strings
-        """
-        return [f"joint_{i}" for i in range(self.num_joints)]
+        n_q = int(self.num_q) if self.num_q is not None else self.num_joints
+        return [f"joint_{i}" for i in range(n_q)]
 
     def get_joint_positions(self) -> np.ndarray:
-        """Get current joint positions.
-
-        Returns:
-            Array of joint positions
-        """
         return self._positions.copy()
 
     def get_joint_velocities(self) -> np.ndarray:
-        """Get current joint velocities.
-
-        Returns:
-            Array of joint velocities
-        """
         return self._velocities.copy()
 
     def get_joint_accelerations(self) -> np.ndarray:
-        """Get current joint accelerations.
-
-        Returns:
-            Array of joint accelerations
-        """
         return self._accelerations.copy()
 
     def get_simulation_time(self) -> float:
-        """Get current simulation time.
-
-        Returns:
-            Current time in seconds
-        """
         return self._time
 
     def get_timestep(self) -> float:
-        """Get simulation timestep.
-
-        Returns:
-            Timestep in seconds
-        """
         return self.timestep
 
-    # =========================================================================
-    # Biomechanics Methods (Stubs for Protocol Compliance)
-    # =========================================================================
-
     def get_time(self) -> float:
-        """Get current simulation time.
-
-        Returns:
-            Current time in seconds.
-        """
         return self._time
 
-    def get_full_state(self) -> dict[str, Any]:
-        """Get complete state in a single batched call.
+    def set_time(self, time: float) -> None:
+        if time is None or not np.isfinite(time):
+            raise ValueError(f"time must be finite; got {time!r}")
+        self._time = float(time)
 
-        Returns:
-            Dictionary with q, v, t, M keys.
-        """
+    def get_full_state(self) -> dict[str, Any]:
+        n_v = int(self.num_v) if self.num_v is not None else self.num_joints
         return {
             "q": self._positions.copy(),
             "v": self._velocities.copy(),
             "t": self._time,
-            "M": np.eye(self.num_joints),
+            "M": np.eye(n_v),
         }
 
     def forward(self) -> None:
-        """Compute forward kinematics/dynamics without advancing time."""
-        damping = 0.1
-        mass = 1.0
-        self._accelerations = (self._torques - damping * self._velocities) / mass
+        n_v = int(self.num_v) if self.num_v is not None else self.num_joints
+        n_u = int(self.num_u) if self.num_u is not None else self.num_joints
+        tau = np.zeros(n_v)
+        tau[: min(n_u, n_v)] = self._torques[: min(n_u, n_v)]
+        bias = self.compute_bias_forces()
+        self._accelerations = tau - bias
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
-        """Load a model from string content (mock accepts any content).
-
-        Args:
-            content: Model definition string.
-            extension: Optional format hint.
-        """
         if content is None:
             raise ValueError("content must be provided")
         self._is_loaded = True
         self.model_name = "mock_model"
 
     def compute_mass_matrix(self) -> np.ndarray:
-        """Compute mass matrix (returns identity for mock).
-
-        Returns:
-            Mass matrix (n x n)
-        """
-        return np.eye(self.num_joints)
+        n_v = int(self.num_v) if self.num_v is not None else self.num_joints
+        return np.eye(n_v)
 
     def compute_bias_forces(self) -> np.ndarray:
-        """Compute bias forces (returns zeros for mock).
-
-        Returns:
-            Bias force vector (n,)
-        """
-        return np.zeros(self.num_joints)
+        return self.damping * self._velocities
 
     def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces (returns small downward for mock).
-
-        Returns:
-            Gravity force vector (n,)
-        """
-        g = np.zeros(self.num_joints)
-        g[0] = -GRAVITY  # First joint feels gravity
+        n_v = int(self.num_v) if self.num_v is not None else self.num_joints
+        g = np.zeros(n_v)
+        g[0] = -GRAVITY
         return g
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-        """Compute inverse dynamics tau = M*qacc + bias.
-
-        Args:
-            qacc: Desired acceleration vector.
-
-        Returns:
-            Required torques.
-        """
         if qacc is None:
             raise ValueError("qacc must be provided")
-        M = self.compute_mass_matrix()
-        bias = self.compute_bias_forces()
-        return M @ qacc + bias
+        return self.compute_mass_matrix() @ qacc + self.compute_bias_forces()
 
     def compute_drift_acceleration(self) -> np.ndarray:
-        """Compute drift acceleration (passive dynamics, zero control).
-
-        Returns:
-            Drift acceleration vector.
-        """
-        M = self.compute_mass_matrix()
-        bias = self.compute_bias_forces()
-        gravity = self.compute_gravity_forces()
-        # drift = M^-1 * (bias + gravity)
-        return np.linalg.solve(M, bias + gravity)
+        m = self.compute_mass_matrix()
+        return np.linalg.solve(m, -self.compute_bias_forces())
 
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
-        """Compute control-attributed acceleration.
-
-        Args:
-            tau: Applied torques.
-
-        Returns:
-            Control acceleration vector.
-        """
         if tau is None:
             raise ValueError("tau must be provided")
-        M = self.compute_mass_matrix()
-        return np.linalg.solve(M, tau)
+        m = self.compute_mass_matrix()
+        n_v = m.shape[0]
+        mapped = np.zeros(n_v)
+        n = min(n_v, np.asarray(tau).size)
+        mapped[:n] = np.asarray(tau, dtype=float).reshape(-1)[:n]
+        return np.linalg.solve(m, mapped)
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual.
-
-        Args:
-            q: Joint positions.
-            v: Joint velocities.
-
-        Returns:
-            Acceleration under zero torque.
-        """
         return self.compute_drift_acceleration()
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual.
-
-        Args:
-            q: Joint positions.
-
-        Returns:
-            Acceleration with zero velocity.
-        """
         if q is None:
             raise ValueError("q must be provided")
-        M = self.compute_mass_matrix()
-        gravity = self.compute_gravity_forces()
-        return np.linalg.solve(M, gravity)
+        return np.zeros(self.compute_mass_matrix().shape[0])
 
     def compute_contact_forces(self) -> np.ndarray:
-        """Compute contact forces (returns zeros for mock).
-
-        Returns:
-            Contact force vector (3,).
-        """
         return np.zeros(3)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
-        """Compute Jacobian for a body (returns zeros for mock).
-
-        Args:
-            body_name: Name of body
-
-        Returns:
-            Dict with 'linear' and 'angular' Jacobians.
-        """
+        n_v = int(self.num_v) if self.num_v is not None else self.num_joints
         return {
-            "linear": np.zeros((3, self.num_joints)),
-            "angular": np.zeros((3, self.num_joints)),
+            "linear": np.zeros((3, n_v)),
+            "angular": np.zeros((3, n_v)),
         }
 
     def get_body_position(self, body_name: str) -> np.ndarray:
-        """Get position of a body.
-
-        Args:
-            body_name: Name of body
-
-        Returns:
-            Position vector (3,)
-        """
-        # Return a position based on simple kinematics
         return np.array([0.0, 0.0, 1.0])
 
     def get_body_velocity(self, body_name: str) -> np.ndarray:
-        """Get velocity of a body.
-
-        Args:
-            body_name: Name of body
-
-        Returns:
-            Velocity vector (6,) - linear and angular
-        """
         return np.zeros(6)
 
 
 def get_mock_engine() -> MockPhysicsEngine:
-    """Factory function to create a mock engine.
-
-    Returns:
-        Configured MockPhysicsEngine instance
-    """
+    """Factory function to create a mock engine."""
     return MockPhysicsEngine()
-
-
-# Note: MockPhysicsEngine is a partial implementation of PhysicsEngine protocol.
-# It implements the core methods needed for testing but not all biomechanics methods.
-# For full protocol compliance, see the real engine implementations in engines/.

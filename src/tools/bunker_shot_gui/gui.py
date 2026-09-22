@@ -99,6 +99,12 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
+_CROSS_TIER_BUSY_BANNER = (
+    "Running the F1 continuum beside F0 on design A. This is minutes, "
+    "not milliseconds: F1 has no shot history yet, so every probe is "
+    "a separate march to one recorded pose."
+)
+
 _IDLE_TEXT = (
     "BunkerShot3D designer workbench\n"
     "===============================\n\n"
@@ -419,6 +425,30 @@ class BunkerShotWidget(QWidget):
             self._show_input_error(error)
             return None
 
+    def _read_comparison_designs(
+        self,
+    ) -> tuple[SolverSetup, SandCondition, SwingSetup, WedgeDesign, WedgeDesign] | None:
+        """Read shared controls plus designs A and B for a comparison run."""
+        inputs = self._read_inputs()
+        if inputs is None:
+            return None
+        settings, sand, swing = inputs
+        try:
+            left = self._design_a.design()
+            right = self._design_b.design()
+        except WorkbenchInputError as error:
+            self._show_input_error(error)
+            return None
+        if left.name == right.name:
+            self._show_input_error(
+                WorkbenchInputError(
+                    "designs A and B need different names so the ranking can "
+                    f"report them; both are {left.name!r}"
+                )
+            )
+            return None
+        return settings, sand, swing, left, right
+
     def run_design_a(self) -> None:
         """Evaluate design A and display the result."""
         read = self._design_a_inputs()
@@ -435,24 +465,10 @@ class BunkerShotWidget(QWidget):
 
     def run_comparison(self) -> None:
         """Evaluate both designs and rank them, with uncertainty attached."""
-        inputs = self._read_inputs()
-        if inputs is None:
+        read = self._read_comparison_designs()
+        if read is None:
             return
-        settings, sand, swing = inputs
-        try:
-            left = self._design_a.design()
-            right = self._design_b.design()
-        except WorkbenchInputError as error:
-            self._show_input_error(error)
-            return
-        if left.name == right.name:
-            self._show_input_error(
-                WorkbenchInputError(
-                    "designs A and B need different names so the ranking can "
-                    f"report them; both are {left.name!r}"
-                )
-            )
-            return
+        settings, sand, swing, left, right = read
         self._banner.show_busy("Running the F0 solver over both designs...")
         result = self._guarded(
             lambda: self._model_factory(settings).compare(left, right, sand, swing)
@@ -473,11 +489,7 @@ class BunkerShotWidget(QWidget):
         if read is None:
             return
         settings, sand, swing, design = read
-        self._banner.show_busy(
-            "Running the F1 continuum beside F0 on design A. This is minutes, "
-            "not milliseconds: F1 has no shot history yet, so every probe is "
-            "a separate march to one recorded pose."
-        )
+        self._banner.show_busy(_CROSS_TIER_BUSY_BANNER)
         result = self._guarded(
             lambda: cross_tier_check(self._model_factory(settings), design, sand, swing)
         )
@@ -514,24 +526,10 @@ class BunkerShotWidget(QWidget):
 
     def run_comparison_async(self) -> None:
         """Evaluate both designs off the GUI thread, with progress and cancel."""
-        inputs = self._read_inputs()
-        if inputs is None:
+        read = self._read_comparison_designs()
+        if read is None:
             return
-        settings, sand, swing = inputs
-        try:
-            left = self._design_a.design()
-            right = self._design_b.design()
-        except WorkbenchInputError as error:
-            self._show_input_error(error)
-            return
-        if left.name == right.name:
-            self._show_input_error(
-                WorkbenchInputError(
-                    "designs A and B need different names so the ranking can "
-                    f"report them; both are {left.name!r}"
-                )
-            )
-            return
+        settings, sand, swing, left, right = read
         self._banner.show_busy("Running the F0 solver over both designs...")
 
         def _work(ctx: WorkerContext) -> WorkbenchComparison:
@@ -553,11 +551,7 @@ class BunkerShotWidget(QWidget):
         if read is None:
             return
         settings, sand, swing, design = read
-        self._banner.show_busy(
-            "Running the F1 continuum beside F0 on design A. This is minutes, "
-            "not milliseconds: F1 has no shot history yet, so every probe is "
-            "a separate march to one recorded pose."
-        )
+        self._banner.show_busy(_CROSS_TIER_BUSY_BANNER)
 
         def _work(ctx: WorkerContext) -> CrossTierComparison:
             return cross_tier_check(self._model_factory(settings), design, sand, swing)

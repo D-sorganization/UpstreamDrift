@@ -3,8 +3,8 @@
 - Status: Accepted
 - Date: 2026-08-28
 - Decision Makers: UpstreamDrift maintainers and AffineDrift companion owners
-- Related Issues/PRs: UpstreamDrift #9174, #9190, #9192, #9064, #9070;
-  AffineDrift #4010, #4030
+- Related Issues/PRs: UpstreamDrift #9174, #9190, #9192, #9193, #9064, #9070;
+  AffineDrift #4010, #4023, #4026, #4027, #4030
 
 ## Context
 
@@ -45,18 +45,20 @@ the schema does not use current counts as `const`, `minItems`, or `maxItems`.
 
 ### Source Ownership
 
-| Fact                               | Editable Authority                           | Companion Treatment                                   |
-| ---------------------------------- | -------------------------------------------- | ----------------------------------------------------- |
-| Native model and launch metadata   | `src/config/models.yaml`                     | Local-only normalized program record                  |
-| Web launcher metadata              | `src/config/launcher_manifest.json`          | Merged by stable program ID, with source provenance   |
-| Shell parity, gaps, and exemptions | `src/config/feature_parity.json`             | Feature record with parity kept separate              |
-| Package and Python compatibility   | `pyproject.toml` plus supported CI matrix    | Exact package version/specifier and tested minors     |
-| Engine support tier                | UpstreamDrift support policy                 | `supported`, `extended`, or `experimental` only       |
-| Tools provider revision            | `vendor/ud-tools` Git gitlink                | Exact immutable 40-character commit                   |
-| Equations/calculations/uncertainty | #9070 calculation manifest                   | Link later; never copy or redefine                    |
-| Design-manual content/approval     | #9064 governed QMD authority                 | Link later; never infer approval                      |
-| Scientific qualification           | Qualification evidence authority             | Conservative explicit state; inclusion grants none    |
-| Governed workflow declarations     | `scripts/config/companion_workflows.v1.json` | Hashed records executed only by the provider boundary |
+| Fact                                | Editable Authority                                     | Companion Treatment                                                |
+| ----------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------ |
+| Native model and launch metadata    | `src/config/models.yaml`                               | Local-only normalized program record                               |
+| Web launcher metadata               | `src/config/launcher_manifest.json`                    | Merged by stable program ID, with source provenance                |
+| Shell parity, gaps, and exemptions  | `src/config/feature_parity.json`                       | Feature record with parity kept separate                           |
+| Package and Python compatibility    | `pyproject.toml` plus supported CI matrix              | Exact package version/specifier and tested minors                  |
+| Engine support tier                 | UpstreamDrift support policy                           | `supported`, `extended`, or `experimental` only                    |
+| Tools provider revision             | `vendor/ud-tools` Git gitlink                          | Exact immutable 40-character commit                                |
+| Equations/calculations/uncertainty  | #9070 calculation manifest                             | Link later; never copy or redefine                                 |
+| Design-manual content/approval      | #9064 governed QMD authority                           | Link later; never infer approval                                   |
+| Scientific qualification            | Qualification evidence authority                       | Conservative explicit state; inclusion grants none                 |
+| Governed workflow declarations      | `scripts/config/companion_workflows.v1.json`           | Hashed records executed only by the provider boundary              |
+| Documentation records and reviews   | `scripts/config/companion_documentation.v1.json`       | Hashed records bound to exact commit, blob hash, and immutable URL |
+| Engine capability evidence and gaps | `scripts/config/companion_capability_evidence.v1.json` | Hashed records; `qualified` only with exact test/artifact evidence |
 
 The export keeps these independent dimensions:
 
@@ -220,6 +222,34 @@ a committed validating fixture for every version as soon as a second supported
 version is declared, and require future/incompatible fixtures to remain
 rejected. Rollback retains the previous immutable release and consumer pin
 until a replacement is reviewed and promoted atomically.
+
+### Documentation and Capability Evidence Authority
+
+Issue #9193 replaces the empty documentation inventory and the unqualified
+engine placeholders with two hashed exporter inputs:
+`scripts/config/companion_documentation.v1.json` and
+`scripts/config/companion_capability_evidence.v1.json`, parsed only by
+`scripts/companion_evidence.py`. Documentation records carry a stable ID,
+audiences, topics, program/engine routes, owner, and review dates; the
+exporter binds each to the exact source commit, committed blob hash, and an
+immutable `blob/<commit>/` URL, and derives freshness (`current`,
+`review_required`, `stale`, `unknown`, `missing`) from those facts and the
+source commit date only — wall-clock time is not an input. A review due date
+that precedes the review, a review later than the source commit, a mutable
+link, a duplicate route, or a workflow documentation path with no governed
+record fails closed.
+
+Engine capabilities are `qualified` only when they name an exact test node or
+committed artifact, its committed hash, and the CI workflow that executes it;
+absent evidence they remain `unqualified` with a reason. The registry cannot
+restate names, support tiers, or scientific qualification, cannot promote a
+capability without evidence, and rejects unknown keys such as tolerances or
+calculations. Support tier, runtime availability, parity, maturity, and
+scientific qualification stay independent dimensions. Known gaps carry an
+owning issue and, where measurable, the summary metric that must stay non-zero
+for the gap to remain declared. Publication blockers are derived from these
+records; `docs/engines/engine_capability_evidence.md` is generated from the
+same registries and freshness-checked, and never embeds its own commit.
 
 ## Migration and Acceptance Gates
 

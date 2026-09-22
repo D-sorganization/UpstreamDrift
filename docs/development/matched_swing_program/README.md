@@ -15,6 +15,7 @@ The review does not qualify the evaluator or replace missing physical evidence.
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
 **Tour Baselines Epic:** [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) ([Tour Baselines Inventory](../../plans/tour_baselines/README.md))  
+**Club-Only Matching Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) — shared observation contracts land in CO-01 [#10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) (`ClubObservation` + `club_calibration`; evidence under `docs/plans/club_only_matching/evidence/`). Club-only profiles do not satisfy G3.  
 **Specification:** `SPEC.md` § Motion Matching Program  
 **Acceptance Contract:** [`GATES.md`](GATES.md) (`src/shared/python/motion_matching/acceptance.py`)  
 **Wave Structure:** [`WAVES.md`](WAVES.md)  
@@ -63,6 +64,39 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 ## 3. Automated Program Status & Ledger Matrix
 
+### MS-43 Native Engine Nightly Lane (#10342)
+
+| Engine   | Receipt                                                         | Lane status                         | Freshness gate                          |
+| -------- | --------------------------------------------------------------- | ----------------------------------- | --------------------------------------- |
+| OpenSim  | [opensim_receipt.json](evidence/nightly/opensim_receipt.json)   | bootstrap — refresh on ControlTower | warn &gt; 7 d, fail &gt; 30 d on `main` |
+| MyoSuite | [myosuite_receipt.json](evidence/nightly/myosuite_receipt.json) | bootstrap — refresh on ControlTower | warn &gt; 7 d, fail &gt; 30 d on `main` |
+
+Refresh via `bash scripts/ci/run_native_engine_lane.sh --engine opensim --venv /home/dieterolson/opensim-10003`. See [evidence/nightly/README.md](evidence/nightly/README.md).
+
+### MS-62 Simscape 44-to-27 Coordinate Slice (#10349)
+
+| Scope                  | State                                                                 | Evidence                                                                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kinematic slice + map  | JSON map and projection implemented; virtual-work decomposition green | [receipt.json](../../../evidence/matched/driver_g1_simscape_slice/receipt.json), [parity.json](../../../evidence/matched/driver_g1_simscape_slice/parity.json) |
+| Simscape native replay | unqualified — R2025b boundary-load validation pending                 | [run_manifest.json](../../../evidence/matched/driver_g1_simscape_slice/run_manifest.json)                                                                      |
+
+### MS-60 Simscape R2025b Run Management (#10347)
+
+| Scope                               | State                                                              | Evidence                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runner recipe + run manifest schema | Implemented (R2025b fail-closed)                                   | scripts/matlab/run_simscape_candidate.ps1, simscape_run_manifest.py                                                                                                                                                                                                                                        |
+| Run-102 candidate + GIF in tree     | Committed                                                          | [candidate.npz](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/candidate.npz), [playback.gif](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/playback.gif), [run_manifest.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/run_manifest.json) |
+| Native licensed replay              | DeskComputer R2025b Update 5 recorded; local unlicensed hosts skip | [qualified_candidate_replay.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/qualified_candidate_replay.json)                                                                                                                                                                       |
+
+### MS-61 Simscape Topology + Full-Marker Terminal (#10348)
+
+| Scope                                     | State                                                                                        | Evidence                                                                                                                                                                                                                                     |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Topology classification (27-DOF, no neck) | Implemented fail-closed                                                                      | `simscape_topology.py`; [topology_report.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/topology_report.json)                                                                                                       |
+| Dual terminal disclosure                  | Full + head cluster required; body-excluding-head diagnostic only                            | `full_marker_terminal.py`; [terminal_breakdown.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/terminal_breakdown.json)                                                                                              |
+| R2025b runtime/license + Pinocchio parity | Receipts reuse run-102 identity (no license-cap inference)                                   | [runtime_license_receipt.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/runtime_license_receipt.json), [parity_receipt.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/parity_receipt.json) |
+| Native run-103 Fit / G1 full-marker pass  | **Blocked** — no invented success; DeskComputer R2025b Fit + MS-104 neck/full-body if needed | [native_gate.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/native_gate.json) (status=`blocked`; full-marker terminal still > 35 mm from run-102 source)                                                            |
+
 ### MS-21 Native Replay Continuation (#10336)
 
 | Scope                             | State                                                                              | Evidence                                                                                                                                                   |
@@ -87,7 +121,7 @@ python scripts/generate_matched_swing_status.py --write
 | MuJoCo    | none accepted (tracking 74.6 mm variant, 89 mm primary)                                                                          | 27 mm canonical IK                         | replay path for Pinocchio candidates exists (PR #10448) and rejects the decoupled controls at 0.94 m                                                                                                                        |
 | Drake     | none; setup parity 6e-6 m                                                                                                        | 176 mm (FB-4)                              | needs the shared fitter on its plant (MS-13/MS-30) and native IK (MS-17)                                                                                                                                                    |
 | OpenSim   | Moco rungs 0.10/0.30 s at the 41 to 42 mm calibration floor; 0.60 s converged but open-loop replay 81 mm whole / 204 mm terminal | 67.8 mm (OS-3b)                            | OG-01..09 model work merged (#10414); no accepted G1; MS-40 shared-document model is the lever                                                                                                                              |
-| MyoSuite  | none                                                                                                                             | none                                       | fail-closed provider (MS-50); scene + retarget not started (MS-51/52)                                                                                                                                                       |
+| MyoSuite  | none                                                                                                                             | kinematic replay receipt (MS-52)           | fail-closed provider (MS-50); MS-51 pinned myo_sim + dual-grip golfer scenes ready for smoke (`parity_budget_qualified=false`); 15 mm parity and G1 dynamics still open                                                     |
 | Simscape  | run-102, 0 to 0.85 s, 20.3 mm whole but terminal 40.3 > 35 mm; Pinocchio parity 60 um                                            | n/a                                        | cross-validation lane; not a showpiece model                                                                                                                                                                                |
 
 Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gates`); self-declared `accepted` flags are UNVERIFIED. Every `evidence/matched/*` receipt on main is REJECTED (see each `reevaluation.json`). The fast decoupled pipeline (`scripts/match_pinocchio_c3d.py`) is an analysis product until a replay passes.
@@ -96,16 +130,16 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 98 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 106 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
-| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 31       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
-| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 10       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
+| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 34       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
+| **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver, iron       | —           | —            | 11       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
 | **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |
-| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
-| **Myosuite**  | —                                                                                                                              | —                  | —           | —            | 0        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
+| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 40       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
+| **Myosuite**  | matched                                                                                                                        | driver             | —           | —            | 1        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 

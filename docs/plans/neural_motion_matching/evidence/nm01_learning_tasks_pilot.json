@@ -1,0 +1,80 @@
+{
+  "pilot_model_id": "driven_double_pendulum",
+  "schema": "neural-learning-tasks/1.0.0",
+  "tasks": [
+    {
+      "conditioning": {
+        "constraint_profile": "model_native.v1",
+        "contact_profile": "model_native.v1",
+        "geometry_id": "geom.driven_double_pendulum.pilot.v1",
+        "horizon_s": 0.85,
+        "observation_mask": [true, true],
+        "q0": [0.0, 0.0],
+        "time_step_s": 0.01,
+        "v0": [0.0, 0.0]
+      },
+      "dimensions": {
+        "a_dim": 2,
+        "backend": "scipy_ode",
+        "model_id": "driven_double_pendulum",
+        "q_dim": 2,
+        "reaction_dim": 0,
+        "u_dim": 2,
+        "v_dim": 2
+      },
+      "kind": "forward_dynamics",
+      "output_kind": "acceleration",
+      "task_id": "fwd.driven_double_pendulum"
+    },
+    {
+      "claims_physical_uniqueness": false,
+      "conditioning": {
+        "constraint_profile": "model_native.v1",
+        "contact_profile": "model_native.v1",
+        "geometry_id": "geom.driven_double_pendulum.pilot.v1",
+        "horizon_s": 0.85,
+        "observation_mask": [true, true],
+        "q0": [0.0, 0.0],
+        "time_step_s": 0.01,
+        "v0": [0.0, 0.0]
+      },
+      "dimensions": {
+        "a_dim": 2,
+        "backend": "scipy_ode",
+        "model_id": "driven_double_pendulum",
+        "q_dim": 2,
+        "reaction_dim": 0,
+        "u_dim": 2,
+        "v_dim": 2
+      },
+      "kind": "inverse_dynamics",
+      "label_policy": "selection_objective",
+      "selection_objective": "min_effort_with_contact_regularization",
+      "task_id": "inv.driven_double_pendulum"
+    },
+    {
+      "conditioning": {
+        "constraint_profile": "model_native.v1",
+        "contact_profile": "model_native.v1",
+        "geometry_id": "geom.driven_double_pendulum.pilot.v1",
+        "horizon_s": 0.85,
+        "observation_mask": [true, true],
+        "q0": [0.0, 0.0],
+        "time_step_s": 0.01,
+        "v0": [0.0, 0.0]
+      },
+      "dimensions": {
+        "a_dim": 2,
+        "backend": "scipy_ode",
+        "model_id": "driven_double_pendulum",
+        "q_dim": 2,
+        "reaction_dim": 0,
+        "u_dim": 2,
+        "v_dim": 2
+      },
+      "kind": "masked_trajectory_to_controls",
+      "proposal_space": "continuous_coefficients",
+      "task_id": "mask.driven_double_pendulum"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": "matched-swing-slice-parity/1",
+  "issue": "#10349",
+  "comparison_class": "kinematic_projection_only",
+  "dynamic_equivalence": "kinematic_projection_only",
+  "virtual_work_max_residual": 0.0,
+  "boundary_load_required": true,
+  "workspace_overrides": {
+    "UpperArmLength": 11.090551181102363,
+    "LeftUpperArmLength": 11.090551181102363,
+    "RightUpperArmLength": 11.090551181102363,
+    "LowerArmLength": 10.586614173228346,
+    "UpperTorsoLength": 9.423425196850394
+  },
+  "qualified": false,
+  "reason": "Kinematic 44-to-27 slice only; Simscape R2025b native replay and boundary-load validation pending"
+}
