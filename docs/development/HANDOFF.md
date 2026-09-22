@@ -14,12 +14,14 @@
   Fail-closed: `epic_closure_allowed=false`, `native_g1_pass=false`; docs/GUI alone
   cannot promote or close #10602. Matrix snapshot: 12 scored / 68 unresolved
   (12 unqualified, 20 missing_runtime, 36 unsupported).
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60`; `python -m scripts.ci.check_architecture_budget` GREEN after splitting oversized saved-job/guide render helpers.
 - Limitations: software-contract closeout only; desk-native Fit/G1 receipts required
   before scientific promotion. Full-body G3 (#10363) and neural (#10603) remain
   separate programs.
 - Next: Confirm CI green on PR #10719 and squash-merge; after merge, schedule
   DeskComputer native G1 for unresolved unqualified cells.
+- CI repair (SELF): architecture budget — split `build_saved_job_commands` /
+  `render_reproduction_guide_markdown` into helpers (function-lines ≤100).
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
