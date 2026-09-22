@@ -155,3 +155,9 @@
 **Vulnerability:** The AI Agent's isolated shell (`ShellTool` in `src/shared/python/ai/tools/cli_tools.py`) was vulnerable to command injection. While it properly whitelisted commands like `find`, it failed to inspect tool-specific arguments, allowing an attacker to pass `-exec rm -rf / +` and execute arbitrary dangerous code.
 **Learning:** Checking the base command and generic shell operators (`&&`, `;`, `|`) is insufficient for a secure sandbox. Whitelisted commands often contain flags that spawn sub-processes (like `find -exec`, `xargs`, `awk '{system(...)}'`). These native flags bypass intermediate shell checks completely.
 **Prevention:** Always maintain a denylist of dangerous parameter flags for whitelisted tools (e.g. `-exec`, `--exec`, `-execdir`, `-ok`, `-okdir`, `-delete`) and explicitly validate all arguments against it, checking for both exact matches and assignment variations (`--exec=...`).
+
+## 2024-10-27 - [Fix Insecure XML Parsing in Model Generation API]
+
+**Vulnerability:** The API endpoint for model generation (`src/shared/python/model_generation/api/rest_api_generation.py`) used the standard library `xml.etree.ElementTree` to parse untrusted XML data. This leaves the API vulnerable to XML External Entity (XXE) and XML Bomb (Billion Laughs) attacks.
+**Learning:** Standard Python XML parsers are not secure against maliciously constructed data. Always use secure alternatives like `defusedxml` when processing external input. Additionally, when switching to a safe module like `defusedxml.ElementTree`, there is no need to add `# noqa: S314` as the secure import inherently resolves the security warning.
+**Prevention:** Standardize all XML parsing across the repository to use `defusedxml.ElementTree` instead of `xml.etree.ElementTree`.

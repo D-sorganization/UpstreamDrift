@@ -43,6 +43,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
 )
 from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
+    ShootingFitConfig,
     build_dynamics_report,
     replay,
     shooting_fit,
@@ -176,6 +177,18 @@ def build_parser() -> argparse.ArgumentParser:
         default="enforce",
         help="joint limit policy for Pink solver",
     )
+    parser.add_argument(
+        "--ik-backend",
+        choices=["lm", "mujoco-minimize"],
+        default="lm",
+        help="MuJoCo marker IK backend (lm or mujoco-minimize)",
+    )
+    parser.add_argument(
+        "--tracking",
+        choices=["kkt", "mj-inverse"],
+        default="kkt",
+        help="computed-torque tracking backend (kkt or mj-inverse)",
+    )
     return parser
 
 
@@ -203,6 +216,12 @@ def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
             raise RuntimeError(
                 f"Pink backend requested but not available: {diag['reason']}"
             )
+    if args.backend == "pink" and getattr(args, "ik_backend", "lm") != "lm":
+        raise RuntimeError(
+            "Pink backend cannot be combined with --ik-backend mujoco-minimize"
+        )
+    if args.backend == "pink" and getattr(args, "tracking", "kkt") != "kkt":
+        raise RuntimeError("Pink backend cannot be combined with --tracking mj-inverse")
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -231,6 +250,18 @@ class _CalibrateAndScaleResult:
     calibration2: Any
     hip_report: dict[str, Any]
     qualification_note: str
+
+
+def _validate_scaled_spec(
+    args: argparse.Namespace,
+    base_spec: dict[str, Any],
+    scaled_spec: dict[str, Any],
+    upper_base: dict[str, Any],
+) -> None:
+    if not args.anthropometric and "unqualified" not in str(
+        base_spec.get("upper_body_qualification", "")
+    ):
+        validate_full_body_spec(scaled_spec, upper_base)
 
 
 def _calibrate_and_scale(
@@ -271,6 +302,7 @@ def _calibrate_and_scale(
         json.dumps(hip_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     hip_bytes = hipcal_path.read_bytes()
+    lane.plant = get_plant(ctx.engine, hip_spec)
 
     stage2 = solve_address_stage(
         AddressStageInputs(
@@ -298,39 +330,38 @@ def _calibrate_and_scale(
     scaled_spec, femur_scale, tibia_scale, scale_table = search_segment_scales(
         lane, hip_spec, fixed, offsets, address.q, log=log
     )
-    unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
-    if not args.anthropometric and not unqualified:
-        validate_full_body_spec(scaled_spec, upper_base)
+    _validate_scaled_spec(args, base_spec, scaled_spec, upper_base)
     scaled_path.write_text(
         json.dumps(scaled_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     spec_bytes = scaled_path.read_bytes()
-
     lane.plant = get_plant(ctx.engine, scaled_spec)
     offsets, calibration2 = lane.calibrate_legs(
         spec_bytes, fixed, scaled_offsets(offsets, femur_scale, tibia_scale), address.q
     )
     attachments = {**fixed, **offsets}
-    adapter, kin = lane.kinematics(spec_bytes, attachments)
+    adapter, kin = lane.kinematics(
+        spec_bytes, attachments, ik_backend=getattr(args, "ik_backend", "lm")
+    )
     sim = fs.FullBodySimulator(adapter)
     address2 = lane.best_address(kin, address.q)
     address_report["calibrated"] = calibrated_address_summary(
         sim, kin, address2, lane, labels, adapter
     )
     return _CalibrateAndScaleResult(
-        scaled_spec=scaled_spec,
-        spec_bytes=spec_bytes,
-        address_report=address_report,
-        adapter=adapter,
-        kin=kin,
-        sim=sim,
-        address2=address2,
-        attachments=attachments,
-        offsets=offsets,
-        calibration=calibration,
-        calibration2=calibration2,
-        hip_report=hip_report,
-        qualification_note=qualification_note,
+        scaled_spec,
+        spec_bytes,
+        address_report,
+        adapter,
+        kin,
+        sim,
+        address2,
+        attachments,
+        offsets,
+        calibration,
+        calibration2,
+        hip_report,
+        qualification_note,
     )
 
 
@@ -482,6 +513,39 @@ def _solve_trajectory_ik(
     return q_ik, q_ref, fits, ref_fits, errors, ref_errors, None
 
 
+def _persist_dynamics_artifacts(
+    out_dir: Path,
+    record: Any,
+    sim_errors: np.ndarray,
+    cal_res: _CalibrateAndScaleResult,
+    kin: Any,
+    q_ref: np.ndarray,
+    sim_q: np.ndarray,
+    lookat: np.ndarray,
+) -> None:
+    """Write dynamics NPZ and render IK / tracking playback GIFs."""
+    np.savez(
+        out_dir / "dynamics_record.npz",
+        time_s=record.time_s,
+        q=record.q,
+        v=record.v,
+        tau=record.tau,
+        normal_force_n=record.normal_force_n,
+        weight_fraction=record.weight_fraction,
+        cop_m=record.centre_of_pressure_m,
+        inside=record.inside_support_polygon,
+        lowest_sphere_height_m=record.lowest_sphere_height_m,
+        sim_errors_m=sim_errors,
+    )
+    names = tuple(kin.coordinate_order)
+    render_playback(
+        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
+    )
+    render_playback(
+        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -498,6 +562,7 @@ def _simulate_and_receipt(
     args = ctx.args
     out_dir = ctx.out_dir
     log = ctx.log
+    tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
     zmp_filter_report: dict[str, Any] | None = None
@@ -506,9 +571,19 @@ def _simulate_and_receipt(
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
-            lane, kin, sim, q_track, q_ref, args.shooting_fit, log, args.shooting_gain
+            lane,
+            kin,
+            sim,
+            q_track,
+            q_ref,
+            log,
+            ShootingFitConfig(
+                iterations=args.shooting_fit,
+                gain=args.shooting_gain,
+                tracking_backend=tracking,
+            ),
         )
-    record, sim_q = replay(sim, lane, q_track)
+    record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -521,33 +596,18 @@ def _simulate_and_receipt(
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
             shooting_report=shooting_report,
+            tracking_backend=tracking,
         )
     )
-    np.savez(
-        out_dir / "dynamics_record.npz",
-        time_s=record.time_s,
-        q=record.q,
-        v=record.v,
-        tau=record.tau,
-        normal_force_n=record.normal_force_n,
-        weight_fraction=record.weight_fraction,
-        cop_m=record.centre_of_pressure_m,
-        inside=record.inside_support_polygon,
-        lowest_sphere_height_m=record.lowest_sphere_height_m,
-        sim_errors_m=sim_errors,
-    )
     lookat = np.nanmean(lane.points[0], axis=0)
-    names = tuple(kin.coordinate_order)
-    render_playback(
-        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
+    _persist_dynamics_artifacts(
+        out_dir, record, sim_errors, cal_res, kin, q_ref, sim_q, lookat
     )
-    render_playback(
-        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
-    )
-
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,
+            ik_backend=getattr(args, "ik_backend", "lm"),
+            tracking_backend=tracking,
             base_spec=base_spec,
             spec_path=Path(args.spec),
             scaled_path=out_dir / "full_body_spec_hipcal_scaled.json",

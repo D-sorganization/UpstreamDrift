@@ -1,0 +1,763 @@
+{
+  "schema": "club-starting-guesses/1.0.0",
+  "governing_issue": 10607,
+  "model_id": "full_body_pinocchio",
+  "handedness": "right",
+  "trials": {
+    "TW_wiffle": {
+      "trial_id": "TW_wiffle",
+      "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+      "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+      "hand_offsets": {
+        "model_id": "full_body_pinocchio",
+        "handedness": "right",
+        "lead_frame_name": "hand_left_tip",
+        "trail_frame_name": "hand_right_tip",
+        "lead_hand_offset_m": 0.04,
+        "trail_hand_offset_m": -0.04,
+        "geometry_hash": "72c4edd623234e4a1979f52d8c78bdedf00bd100979516dcccbfac991cf55f77"
+      },
+      "claims_torque": false,
+      "claims_physiological_inference": false,
+      "baselines": {
+        "retrieval": {
+          "seed_ids": [
+            "retrieval:tour-prior-TW_wiffle-0",
+            "retrieval:tour-prior-TW_wiffle-1",
+            "retrieval:tour-prior-TW_wiffle-2"
+          ],
+          "is_kinematic_preview": true,
+          "seeds": [
+            {
+              "seed_id": "retrieval:tour-prior-TW_wiffle-0",
+              "trial_id": "TW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "7da2b0d06d7fad87a5bc45bd4c6ed0ea135298ea4b73e87dbcdcdb0ddc065bb8",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-TW_wiffle-1",
+              "trial_id": "TW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "cbae69ea0ec9c100759023b2da03a89f881a6d8c34395914d007deeb43d30245",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-TW_wiffle-2",
+              "trial_id": "TW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "1b0a1a89f959498e446afde37f7d544fbc05d598cc634900e7743c259a7f7587",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        },
+        "constrained_ik": {
+          "seed_ids": [
+            "constrained_ik:TW_wiffle:pink_native:0",
+            "constrained_ik:TW_wiffle:pink_native:1",
+            "constrained_ik:TW_wiffle:pink_native:2"
+          ],
+          "is_kinematic_preview": true,
+          "backend": "pink_native",
+          "seeds": [
+            {
+              "seed_id": "constrained_ik:TW_wiffle:pink_native:0",
+              "trial_id": "TW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "933126b852a3f386f8abc989b874e30576226c86484c062c3853aea881abf0a5",
+              "observed_residual_m": 0.011239999999999998,
+              "prior_score": 0.8,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:TW_wiffle:pink_native:1",
+              "trial_id": "TW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "2faf2eeb49ab4cde03872e15ba4cbc33949eebcaa35809187415500503f77fa6",
+              "observed_residual_m": 0.012239999999999997,
+              "prior_score": 0.75,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:TW_wiffle:pink_native:2",
+              "trial_id": "TW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "484d1c8f9a24447dcbfb8b5d3d55d47a67ff56f7e7b314c79756e626253564ac",
+              "observed_residual_m": 0.013239999999999998,
+              "prior_score": 0.7000000000000001,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        }
+      }
+    },
+    "TW_ProV1": {
+      "trial_id": "TW_ProV1",
+      "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+      "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+      "hand_offsets": {
+        "model_id": "full_body_pinocchio",
+        "handedness": "right",
+        "lead_frame_name": "hand_left_tip",
+        "trail_frame_name": "hand_right_tip",
+        "lead_hand_offset_m": 0.04,
+        "trail_hand_offset_m": -0.04,
+        "geometry_hash": "72c4edd623234e4a1979f52d8c78bdedf00bd100979516dcccbfac991cf55f77"
+      },
+      "claims_torque": false,
+      "claims_physiological_inference": false,
+      "baselines": {
+        "retrieval": {
+          "seed_ids": [
+            "retrieval:tour-prior-TW_ProV1-0",
+            "retrieval:tour-prior-TW_ProV1-1",
+            "retrieval:tour-prior-TW_ProV1-2"
+          ],
+          "is_kinematic_preview": true,
+          "seeds": [
+            {
+              "seed_id": "retrieval:tour-prior-TW_ProV1-0",
+              "trial_id": "TW_ProV1",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "7da2b0d06d7fad87a5bc45bd4c6ed0ea135298ea4b73e87dbcdcdb0ddc065bb8",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-TW_ProV1-1",
+              "trial_id": "TW_ProV1",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "cbae69ea0ec9c100759023b2da03a89f881a6d8c34395914d007deeb43d30245",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-TW_ProV1-2",
+              "trial_id": "TW_ProV1",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "1b0a1a89f959498e446afde37f7d544fbc05d598cc634900e7743c259a7f7587",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        },
+        "constrained_ik": {
+          "seed_ids": [
+            "constrained_ik:TW_ProV1:pink_native:0",
+            "constrained_ik:TW_ProV1:pink_native:1",
+            "constrained_ik:TW_ProV1:pink_native:2"
+          ],
+          "is_kinematic_preview": true,
+          "backend": "pink_native",
+          "seeds": [
+            {
+              "seed_id": "constrained_ik:TW_ProV1:pink_native:0",
+              "trial_id": "TW_ProV1",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "6870a72b940c32cd38e8bb358076f62c46ba7f422e54a79273c35566697773d0",
+              "observed_residual_m": 0.011239999999999998,
+              "prior_score": 0.8,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:TW_ProV1:pink_native:1",
+              "trial_id": "TW_ProV1",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "79f90991d21ccca1fd9eb9ea13c13180693a0203553baaf88788a27f1a4bd819",
+              "observed_residual_m": 0.012239999999999997,
+              "prior_score": 0.75,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:TW_ProV1:pink_native:2",
+              "trial_id": "TW_ProV1",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "72f1d63e7ac04aed0b44b16984256d516eb9872dbce1746c9804cc235d9590a2",
+              "observed_residual_m": 0.013239999999999998,
+              "prior_score": 0.7000000000000001,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        }
+      }
+    },
+    "GW_wiffle": {
+      "trial_id": "GW_wiffle",
+      "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+      "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+      "hand_offsets": {
+        "model_id": "full_body_pinocchio",
+        "handedness": "right",
+        "lead_frame_name": "hand_left_tip",
+        "trail_frame_name": "hand_right_tip",
+        "lead_hand_offset_m": 0.04,
+        "trail_hand_offset_m": -0.04,
+        "geometry_hash": "72c4edd623234e4a1979f52d8c78bdedf00bd100979516dcccbfac991cf55f77"
+      },
+      "claims_torque": false,
+      "claims_physiological_inference": false,
+      "baselines": {
+        "retrieval": {
+          "seed_ids": [
+            "retrieval:tour-prior-GW_wiffle-0",
+            "retrieval:tour-prior-GW_wiffle-1",
+            "retrieval:tour-prior-GW_wiffle-2"
+          ],
+          "is_kinematic_preview": true,
+          "seeds": [
+            {
+              "seed_id": "retrieval:tour-prior-GW_wiffle-0",
+              "trial_id": "GW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "7da2b0d06d7fad87a5bc45bd4c6ed0ea135298ea4b73e87dbcdcdb0ddc065bb8",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-GW_wiffle-1",
+              "trial_id": "GW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "cbae69ea0ec9c100759023b2da03a89f881a6d8c34395914d007deeb43d30245",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-GW_wiffle-2",
+              "trial_id": "GW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "1b0a1a89f959498e446afde37f7d544fbc05d598cc634900e7743c259a7f7587",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        },
+        "constrained_ik": {
+          "seed_ids": [
+            "constrained_ik:GW_wiffle:pink_native:0",
+            "constrained_ik:GW_wiffle:pink_native:1",
+            "constrained_ik:GW_wiffle:pink_native:2"
+          ],
+          "is_kinematic_preview": true,
+          "backend": "pink_native",
+          "seeds": [
+            {
+              "seed_id": "constrained_ik:GW_wiffle:pink_native:0",
+              "trial_id": "GW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "6870a72b940c32cd38e8bb358076f62c46ba7f422e54a79273c35566697773d0",
+              "observed_residual_m": 0.011239999999999998,
+              "prior_score": 0.8,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:GW_wiffle:pink_native:1",
+              "trial_id": "GW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "79f90991d21ccca1fd9eb9ea13c13180693a0203553baaf88788a27f1a4bd819",
+              "observed_residual_m": 0.012239999999999997,
+              "prior_score": 0.75,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:GW_wiffle:pink_native:2",
+              "trial_id": "GW_wiffle",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "72f1d63e7ac04aed0b44b16984256d516eb9872dbce1746c9804cc235d9590a2",
+              "observed_residual_m": 0.013239999999999998,
+              "prior_score": 0.7000000000000001,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        }
+      }
+    },
+    "GW_ProV11": {
+      "trial_id": "GW_ProV11",
+      "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+      "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+      "hand_offsets": {
+        "model_id": "full_body_pinocchio",
+        "handedness": "right",
+        "lead_frame_name": "hand_left_tip",
+        "trail_frame_name": "hand_right_tip",
+        "lead_hand_offset_m": 0.04,
+        "trail_hand_offset_m": -0.04,
+        "geometry_hash": "72c4edd623234e4a1979f52d8c78bdedf00bd100979516dcccbfac991cf55f77"
+      },
+      "claims_torque": false,
+      "claims_physiological_inference": false,
+      "baselines": {
+        "retrieval": {
+          "seed_ids": [
+            "retrieval:tour-prior-GW_ProV11-0",
+            "retrieval:tour-prior-GW_ProV11-1",
+            "retrieval:tour-prior-GW_ProV11-2"
+          ],
+          "is_kinematic_preview": true,
+          "seeds": [
+            {
+              "seed_id": "retrieval:tour-prior-GW_ProV11-0",
+              "trial_id": "GW_ProV11",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "7da2b0d06d7fad87a5bc45bd4c6ed0ea135298ea4b73e87dbcdcdb0ddc065bb8",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-GW_ProV11-1",
+              "trial_id": "GW_ProV11",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "cbae69ea0ec9c100759023b2da03a89f881a6d8c34395914d007deeb43d30245",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "retrieval:tour-prior-GW_ProV11-2",
+              "trial_id": "GW_ProV11",
+              "model_id": "full_body_pinocchio",
+              "source": "retrieval",
+              "body_configuration_hash": "1b0a1a89f959498e446afde37f7d544fbc05d598cc634900e7743c259a7f7587",
+              "observed_residual_m": 0.0,
+              "prior_score": 0.6,
+              "feasibility_reasons": [
+                "single_rigid_placement",
+                "event_aware_descriptor_match",
+                "body_motion_is_prior"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        },
+        "constrained_ik": {
+          "seed_ids": [
+            "constrained_ik:GW_ProV11:pink_native:0",
+            "constrained_ik:GW_ProV11:pink_native:1",
+            "constrained_ik:GW_ProV11:pink_native:2"
+          ],
+          "is_kinematic_preview": true,
+          "backend": "pink_native",
+          "seeds": [
+            {
+              "seed_id": "constrained_ik:GW_ProV11:pink_native:0",
+              "trial_id": "GW_ProV11",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "6870a72b940c32cd38e8bb358076f62c46ba7f422e54a79273c35566697773d0",
+              "observed_residual_m": 0.011239999999999998,
+              "prior_score": 0.8,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:GW_ProV11:pink_native:1",
+              "trial_id": "GW_ProV11",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "79f90991d21ccca1fd9eb9ea13c13180693a0203553baaf88788a27f1a4bd819",
+              "observed_residual_m": 0.012239999999999997,
+              "prior_score": 0.75,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            },
+            {
+              "seed_id": "constrained_ik:GW_ProV11:pink_native:2",
+              "trial_id": "GW_ProV11",
+              "model_id": "full_body_pinocchio",
+              "source": "constrained_ik",
+              "body_configuration_hash": "72f1d63e7ac04aed0b44b16984256d516eb9872dbce1746c9804cc235d9590a2",
+              "observed_residual_m": 0.013239999999999998,
+              "prior_score": 0.7000000000000001,
+              "feasibility_reasons": [
+                "hard_grip",
+                "stance",
+                "orientation_task",
+                "backend:pink_native",
+                "lead:hand_left_tip",
+                "trail:hand_right_tip"
+              ],
+              "geometry_hash": "070984005dc7f67845e2b15df6dd5ae4007db0307b660c65df1217d8367fc8b2",
+              "profile_hash": "4aca711f5cf13f665442220724f076737a53904744a8fc6944fb9d2e6ae03feb",
+              "body_is_prior": true,
+              "claims_torque": false,
+              "claims_physiological_inference": false,
+              "is_kinematic_preview": true,
+              "backend_kind": null,
+              "q_dim": 4,
+              "n_timestamps": 32
+            }
+          ]
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Seeds are kinematic previews only; scientific acceptance awaits CO-06.",
+    "Retrieved body configurations remain priors, not measured labels.",
+    "No torque or physiological inference is claimed.",
+    "Pink vs DLS capabilities are distinct; unsupported constraints fail closed."
+  ],
+  "notes": [
+    "Retrieval applies one rigid placement and preserves the native clock.",
+    "Constrained IK seeds use reviewed hand-frame offsets and hard constraints.",
+    "Kinematic preview is not physical acceptance."
+  ]
+}

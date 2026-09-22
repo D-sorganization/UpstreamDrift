@@ -38,6 +38,7 @@ ENGINE_COLORS: dict[str, str] = {
     "pinocchio": "#d62728",  # Red
     "drake": "#2ca02c",  # Green
     "opensim": "#9467bd",  # Purple
+    "myosuite": "#8c564b",  # Brown
     "simscape": "#ff7f0e",  # Orange
     "default": "#ff7f0e",  # Orange
 }

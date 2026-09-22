@@ -1,0 +1,30 @@
+{
+  "schema_version": "simscape-native-gate/1",
+  "issue": "#10348",
+  "run_id": "two_window_fit_9967_103",
+  "status": "blocked",
+  "is_physically_accepted": false,
+  "g1_full_marker_terminal_passed": false,
+  "full_marker_terminal_rms_m": 0.04030335259128564,
+  "g1_terminal_ceiling_m": 0.035,
+  "matlab_release_required": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "host": "DeskComputer",
+  "blocked_reasons": [
+    "Native two_window_fit_9967_103 Fit has not been executed on a licensed R2025b host in this worktree.",
+    "Source run-102 full-marker terminal (40.303 mm) exceeds G1 ceiling (35 mm).",
+    "Reduced 27-DOF topology lacks an independent neck; Hub head/back coupling remains the documented rigidity floor (see topology_report)."
+  ],
+  "follow_up": {
+    "model_work": "MS-104 (#10378) full-body Simscape flagship / neck capability",
+    "runtime_inventory": "MS-102 (#10376) soft dependency \u2014 does not block software contracts",
+    "native_command": "powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103 -Fit"
+  },
+  "artifacts": {
+    "topology_report": "topology_report.json",
+    "terminal_breakdown": "terminal_breakdown.json",
+    "runtime_license_receipt": "runtime_license_receipt.json",
+    "parity_receipt": "parity_receipt.json",
+    "source_run102_replay": "../two_window_fit_9967_102/returned-replay.npz"
+  }
+}

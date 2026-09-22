@@ -1,0 +1,50 @@
+{
+  "schema_version": "simscape-run-manifest/1",
+  "issue": "#10347",
+  "run_id": "two_window_fit_9967_102",
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "host": "DeskComputer",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
+  "replay_npz_sha256": "efec8a6ecf9479c1bf0f5604d21add5224373423f1441c6250c1c3cd484e25b5",
+  "wall_clock_s": 23.2797995,
+  "qualification": "qualified_r2025b_cold_replay_returned102",
+  "evidence_dir": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102",
+  "artifacts": {
+    "candidate_npz": "candidate.npz",
+    "playback_gif": "playback.gif",
+    "returned_replay_npz": "returned-replay.npz",
+    "returned_candidate_json": "returned-candidate.json",
+    "qualified_replay_json": "qualified_candidate_replay.json",
+    "qualified_replay_mat": "qualified_candidate_replay.mat",
+    "replay_script": "replay_returned102_r2025b.m"
+  },
+  "machine": "DeskComputer",
+  "extra": {
+    "metrics_mm": {
+      "whole_rms_mm": 20.26736307665005,
+      "early_rms_mm": 9.995388829893704,
+      "terminal_rms_mm": 40.301350604327084,
+      "club_cluster_rms_mm": 8.38852820969127,
+      "pelvis_yaw_error_pct": 0.6099819870175595
+    },
+    "cross_engine_parity_mm": {
+      "max_euclidean_mm": 0.060521363274898085
+    },
+    "gates": {
+      "gate1_whole_rms_25mm": true,
+      "gate2_early_rms_12mm": true,
+      "gate3_terminal_rms_35mm": false,
+      "gate4_clubhead_60mm": true,
+      "gate5_pelvis_yaw_5pct": true
+    },
+    "solver_configuration": {
+      "solver": "ode15s",
+      "reltol": "1e-6",
+      "abstol": "1e-9",
+      "maxstep": "1/1440"
+    },
+    "note": "Native R2025b qualification was recorded on DeskComputer; candidate.npz/playback.gif derived from committed returned-replay.npz for CI-reproducible MatchedSwingCandidate packaging (MS-60)."
+  }
+}
