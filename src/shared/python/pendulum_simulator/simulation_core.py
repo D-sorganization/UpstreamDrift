@@ -78,6 +78,8 @@ def integrate_ode(
         raise ValueError(f"dt must be in (0, t_end), got {dt}")
 
     t_eval = np.arange(0.0, t_end, dt)
+    if t_eval.size == 0 or not np.isclose(t_eval[-1], t_end):
+        t_eval = np.append(t_eval, t_end)
 
     kwargs: dict = {
         "t_span": (0.0, t_end),
