@@ -21,6 +21,7 @@ from src.shared.python.data_io.dataset_generator.config import (
     GeneratorConfig,
 )
 from src.shared.python.data_io.dataset_generator.core import DatasetGenerator
+from src.shared.python.data_io.dataset_generator.models import SimulationSample
 from src.shared.python.data_io.dataset_generator.labels import (
     LABEL_SCHEMA,
     ChannelAvailability,
@@ -93,6 +94,23 @@ def _channel_summary(sample: Any) -> dict[str, str]:
     }
 
 
+def _first_step_native_residual(sample: SimulationSample) -> np.ndarray | None:
+    """M·a + h − u on step 0 when all native dynamics channels are present."""
+    if (
+        sample.mass_matrices is None
+        or sample.bias_forces is None
+        or sample.native_accelerations is None
+        or sample.applied_controls is None
+    ):
+        return None
+    return dynamics_residual(
+        mass=sample.mass_matrices[0],
+        acceleration=sample.native_accelerations[0],
+        bias=sample.bias_forces[0],
+        applied=sample.applied_controls[0],
+    )
+
+
 def qualify_mock_adapter() -> NativeLabelReceipt:
     """Software-contract qualification via MockPhysicsEngine."""
     engine = MockPhysicsEngine(num_joints=2)
@@ -124,18 +142,8 @@ def qualify_mock_adapter() -> NativeLabelReceipt:
     limitations: list[str] = [
         "MockPhysicsEngine is a software-contract fixture, not native evidence",
     ]
-    if (
-        sample.mass_matrices is not None
-        and sample.bias_forces is not None
-        and sample.native_accelerations is not None
-        and sample.applied_controls is not None
-    ):
-        residual = dynamics_residual(
-            mass=sample.mass_matrices[0],
-            acceleration=sample.native_accelerations[0],
-            bias=sample.bias_forces[0],
-            applied=sample.applied_controls[0],
-        )
+    residual = _first_step_native_residual(sample)
+    if residual is not None:
         residual_norm = float(np.linalg.norm(residual))
         qualified = residual_norm < 1e-8 and all(
             sample.channel_evidence[name].availability is ChannelAvailability.AVAILABLE
@@ -284,18 +292,8 @@ def qualify_ode_double_pendulum_adapter() -> NativeLabelReceipt:
     ]
     residual_norm: float | None = None
     qualified = False
-    if (
-        sample.mass_matrices is not None
-        and sample.bias_forces is not None
-        and sample.native_accelerations is not None
-        and sample.applied_controls is not None
-    ):
-        residual = dynamics_residual(
-            mass=sample.mass_matrices[0],
-            acceleration=sample.native_accelerations[0],
-            bias=sample.bias_forces[0],
-            applied=sample.applied_controls[0],
-        )
+    residual = _first_step_native_residual(sample)
+    if residual is not None:
         residual_norm = float(np.linalg.norm(residual))
         qualified = (
             residual_norm < 1e-6

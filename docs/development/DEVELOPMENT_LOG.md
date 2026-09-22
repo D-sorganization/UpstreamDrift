@@ -325,7 +325,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10679
 - **Paths:** src/shared/python/data_io/dataset_generator/{core,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — CI unblock: split `_finalize_channels`, mock `set_control` mypy, SPEC `#10679`
+- **Last verified:** 2026-09-22 at SELF — DRY gate: shared `_first_step_native_residual` in adapters
 - **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
 - **Next step:** Confirm CI green on PR #10679 and squash auto-merge.
 - **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
