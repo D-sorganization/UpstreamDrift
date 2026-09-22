@@ -4,12 +4,18 @@
 
 Governing epic: [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602).
 Companion epic: [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
-**CO-00 (#10604)** implementation is in progress on
-`fix/issue-10604-co00-workbook-identity`: shared event-label normalization,
-hash-verified workbook manifests, and the four-trial lineage table. Evidence:
-[club_workbook_identity.json](evidence/club_workbook_identity.json). Existing
-reference epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584)
-and native program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)
+**CO-00 (#10604)** shipped via PR #10667. **CO-01 (#10605)** shipped via PR #10670.
+**CO-02 (#10606)** shipped via PR #10675. **CO-03 (#10607)** is in progress on
+`feat/10607-co03-retrieval-constrained-ik`: handedness-aware hand-frame offsets,
+library retrieval with one rigid placement, constrained-IK seeds with distinct
+Pink/DLS capabilities, and a geometry/profile-keyed seed cache. Evidence:
+[club_workbook_identity.json](evidence/club_workbook_identity.json),
+[club_observation_contracts.json](evidence/club_observation_contracts.json),
+[club_plausibility_acceptance.json](evidence/club_plausibility_acceptance.json),
+[club_starting_guesses.json](evidence/club_starting_guesses.json).
+Existing reference epic
+[#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) and
+native program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)
 remain authoritative for their model and physical contracts. Read the companion
 [Review](../club_neural_review/REVIEW.md) and [Workbook
 Audit](../club_neural_review/excel_audit.json).
@@ -43,7 +49,7 @@ CO-00 -> CO-01 -> CO-02 -> CO-03 -> CO-04/CO-05 -> CO-06 -> CO-07 -> CO-08. CO-0
 follows the stable service contract; CO-10 is final acceptance.
 
 The immediate task is
-**[#10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604) (CO-00)
+**[#10607](https://github.com/D-sorganization/UpstreamDrift/issues/10607) (CO-03)
 only**. This is a dispatch-ready plan, not authorization to run every expensive
 experiment at once. Lower-cost agents handle bounded schema, adapter, fixture, CLI and
 UI work. An experienced reviewer checks model/observation semantics, force

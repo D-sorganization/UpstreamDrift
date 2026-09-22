@@ -15,6 +15,7 @@ The review does not qualify the evaluator or replace missing physical evidence.
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
 **Tour Baselines Epic:** [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) ([Tour Baselines Inventory](../../plans/tour_baselines/README.md))  
+**Club-Only Matching Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) — shared observation contracts land in CO-01 [#10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) (`ClubObservation` + `club_calibration`; evidence under `docs/plans/club_only_matching/evidence/`). Club-only profiles do not satisfy G3.  
 **Specification:** `SPEC.md` § Motion Matching Program  
 **Acceptance Contract:** [`GATES.md`](GATES.md) (`src/shared/python/motion_matching/acceptance.py`)  
 **Wave Structure:** [`WAVES.md`](WAVES.md)  
@@ -72,6 +73,21 @@ For detailed factor attribution on the 27.3 mm vs 52.3 mm IK baseline shift, see
 
 Refresh via `bash scripts/ci/run_native_engine_lane.sh --engine opensim --venv /home/dieterolson/opensim-10003`. See [evidence/nightly/README.md](evidence/nightly/README.md).
 
+### MS-62 Simscape 44-to-27 Coordinate Slice (#10349)
+
+| Scope                  | State                                                                 | Evidence                                                                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kinematic slice + map  | JSON map and projection implemented; virtual-work decomposition green | [receipt.json](../../../evidence/matched/driver_g1_simscape_slice/receipt.json), [parity.json](../../../evidence/matched/driver_g1_simscape_slice/parity.json) |
+| Simscape native replay | unqualified — R2025b boundary-load validation pending                 | [run_manifest.json](../../../evidence/matched/driver_g1_simscape_slice/run_manifest.json)                                                                      |
+
+### MS-60 Simscape R2025b Run Management (#10347)
+
+| Scope                               | State                                                              | Evidence                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runner recipe + run manifest schema | Implemented (R2025b fail-closed)                                   | scripts/matlab/run_simscape_candidate.ps1, simscape_run_manifest.py                                                                                                                                                                                                                                        |
+| Run-102 candidate + GIF in tree     | Committed                                                          | [candidate.npz](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/candidate.npz), [playback.gif](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/playback.gif), [run_manifest.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/run_manifest.json) |
+| Native licensed replay              | DeskComputer R2025b Update 5 recorded; local unlicensed hosts skip | [qualified_candidate_replay.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/qualified_candidate_replay.json)                                                                                                                                                                       |
+
 ### MS-21 Native Replay Continuation (#10336)
 
 | Scope                             | State                                                                              | Evidence                                                                                                                                                   |
@@ -105,11 +121,11 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 100 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 101 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
-| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 31       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
+| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, viewer, visual_layer | driver, iron       | —           | —            | 32       | ⚙️ Engineering Milestone (G1 IK pass; unqualified until Simscape parity) |
 | **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 10       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
 | **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |

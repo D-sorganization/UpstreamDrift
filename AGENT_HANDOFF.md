@@ -22,19 +22,25 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615)
+## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616)
 
-Branch `fix/issue-10615-nm00-dataset-audit`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603).
-NM-00 delivers fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`, per-model coverage cells, bounded parquet inspect, and receipts under `docs/plans/neural_motion_matching/evidence/`. Documented 10k corpus and default checkpoints are quarantined when absent; synthetic sweep is software-contract-only; mean-baseline plateau notes stay `NOTE_ONLY`. No training or speed claims.
-Next step: Dispatch NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
+Branch `feat/nm01-freeze-learning-tasks`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisite NM-00 [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668) merged.
+NM-01 freezes typed forward/inverse/masked task contracts, a 20-model roster keyed to TB-00 identities (full-body deferred pending benefit) and benefit-experiment gates (100/500/2000 nested stages, three seeds, five baselines, latency including replay/refinement/failures, 2× median/non-worse p95, break-even undefined when savings ≤ 0). Evidence: `docs/plans/neural_motion_matching/evidence/nm01_*.json`. No training or speed claim.
+PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672) open with squash auto-merge. Next after merge: dispatch NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)).
+
+## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615) [MERGED]
+
+Branch `fix/issue-10615-nm00-dataset-audit` merged to main in PR [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668).
+NM-00 delivered fail-closed inventory in `src/shared/python/neural_motion/` with schema `neural-artifact-audit/1.0.0`. No training or speed claims.
+Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)).
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602), 11 bounded children; first dispatch [CO-00 #10604](https://github.com/D-sorganization/UpstreamDrift/issues/10604).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) inventory on `fix/issue-10615-nm00-dataset-audit`.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped; active [CO-03 #10607](https://github.com/D-sorganization/UpstreamDrift/issues/10607) via PR [#10678](https://github.com/D-sorganization/UpstreamDrift/pull/10678) (squash auto-merge).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** Planning epics remain; NM-00 audit landed without claiming native corpora or checkpoints. Existing #10363/#10378/#10430 owners retain physical matching scope.
-- **Next:** Dispatch NM-01 #10616 using its copyable worker prompt.
+- **State:** CO-03 retrieval + constrained-IK starting guesses in review on #10678 (synthetic fixtures + workbook smoke); kinematic preview only. NM-00 fail-closed audit remains authoritative.
+- **Next:** Land CO-03/#10678 CI + squash merge; then dispatch CO-04 #10608.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
@@ -167,6 +173,30 @@ coefficient-lift action assembly, objective contracts and independent replay.
     - **Club Cluster RMS**: **`8.422 mm`** ($\le 60.0\text{ mm}$ Gate $\to$ **PASS**).
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
+
+### Run 102 Package (MS-60 / #10347)
+
+Canonical in-tree evidence (no external GIF hunt):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/`
+
+| Artifact              | Path                                  |
+| --------------------- | ------------------------------------- |
+| MatchedSwingCandidate | `.../candidate.npz`                   |
+| R2025b run manifest   | `.../run_manifest.json`               |
+| Playback GIF          | `.../playback.gif`                    |
+| Returned replay NPZ   | `.../returned-replay.npz`             |
+| Qualified R2025b JSON | `.../qualified_candidate_replay.json` |
+
+Replay on a licensed host:
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_102 -Replay
+```
+
+Live resume guide: `docs/development/simscape_tour_matching/CHECKPOINTS.md` (history in `CHECKPOINTS_HISTORY.md`).
+
+Historical DeskComputer GIFs named in older sections below (`simscape_matlab_matching_eval79.gif`, `*_run05.gif`, …) remain on `C:/Users/diete/SimscapeTour9921/` when that host tree is mounted; they are not duplicated here. Use SHA receipts before copying any file > 5 MB.
 
 ## GSPro Integration (#10188, #10460)
 

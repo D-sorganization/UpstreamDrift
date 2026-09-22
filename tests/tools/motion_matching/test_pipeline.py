@@ -68,6 +68,18 @@ def test_receipt_summary_reads_the_headline_numbers(tmp_path: Path) -> None:
     assert module.artefacts(tmp_path) == ()
 
 
+def test_match_command_passes_native_mujoco_backend_flags() -> None:
+    request = module.MatchRequest(
+        capture="driver",
+        club="driver",
+        ik_backend="mujoco-minimize",
+        tracking="mj-inverse",
+    )
+    match = module.match_command(request)
+    assert match[match.index("--ik-backend") + 1] == "mujoco-minimize"
+    assert match[match.index("--tracking") + 1] == "mj-inverse"
+
+
 def test_match_request_extended_options_and_validation() -> None:
     req = module.MatchRequest(
         capture="driver",
