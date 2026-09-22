@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
 - **Branch:** feat/10591-upper-body-calibration
-- **PR:** pending
+- **PR:** #10733 (open)
 - **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at `234b8dc14` — PR #10732 merged after standard CI, including 18,367 passing Green-Suite unit tests. The calibration branch adds a shared bounded Bernstein-control contract, exercised by double and triple fitters plus replay regressions; 59 focused tests and scoped Ruff pass.
