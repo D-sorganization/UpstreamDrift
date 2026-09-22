@@ -28,7 +28,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native ControlTower desk claim.
 - **Summary:** Software contracts for Pinocchio driver/iron G2/G3 continuation schedules, same-integrator solve/replay parity (reject integrator-specific solutions), armature propagation to equivalent-model independent replay packages (save/reopen), failed-continuation evidence preservation, open-loop q0/v0 control feed (no per-frame poses), and PF-07 robustness roster. Fitter exposes `--ms111-schedule` and fail-closed integrator parity. Native G2/G3 qualification remains blocked on MS-107 accepted G1 + MS-100 receipts.
-- **Next step:** Confirm CI green on PR #10723 and allow squash auto-merge to land.- **Evidence:** docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json; tests/unit/motion_matching/test_pinocchio_g2_g3.py.
+- **Next step:** Confirm CI green on PR #10723 and allow squash auto-merge to land.
+- **Evidence:** docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json; tests/unit/motion_matching/test_pinocchio_g2_g3.py.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
