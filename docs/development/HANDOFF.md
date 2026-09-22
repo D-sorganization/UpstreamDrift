@@ -14,11 +14,11 @@
   reprojection, roster×trial matrix with separated score lanes; schema
   `club-body-candidates/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_body_candidates.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_body_candidates.py -q -n 0 --no-cov --timeout=60` (12 passed); ruff check/format clean on touched files.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_body_candidates.py -q -n 0 --no-cov --timeout=60` (12 passed); ruff check/format clean on touched files. Follow-up: LoD facade on `ClubOnlyProfile.max_closure_residual_m()` / `golf_priors()`; shared `require_strictly_increasing_timestamps` (DRY with CO-03 seeds).
 - Limitations: synthetic fixtures for software contracts only; no native G1
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
-- Next: Confirm CI green on PR #10681; squash auto-merge armed.
+- Next: Confirm CI green on PR #10681 after LoD/DRY CI fixes; squash auto-merge armed.
 
 ## MS-102 Engine and Model Inventory #10376 Handoff
 

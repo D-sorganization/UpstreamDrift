@@ -27,6 +27,7 @@ from src.shared.python.motion_matching.club_only.nullspace_proposals import (
 from src.shared.python.motion_matching.club_only.observation import (
     ClubObservation,
     build_calibrated_observation_fixture,
+    require_strictly_increasing_timestamps,
 )
 from src.shared.python.motion_matching.club_only.priors import GolfPlausibilityPriors
 from src.shared.python.motion_matching.club_only.profiles import (
@@ -145,12 +146,7 @@ class BodyCandidate:
             np.all(np.isfinite(q)) and np.all(np.isfinite(v)) and np.all(np.isfinite(a))
         ):
             raise ValueError("q, v, a must be finite")
-        if times.ndim != 1 or times.size < 2:
-            raise ValueError("timestamps_s must have >= 2 samples")
-        if not np.all(np.isfinite(times)):
-            raise ValueError("timestamps_s must be finite")
-        if not np.all(np.diff(times) > 0.0):
-            raise ValueError("timestamps_s must be strictly increasing")
+        times = require_strictly_increasing_timestamps(times)
         for name, value in (
             ("observation_fit_m", self.observation_fit_m),
             ("plausibility_score", self.plausibility_score),
@@ -410,7 +406,7 @@ def _rejected_candidate(
         runtime_s=runtime_s,
         prior_strength=prior_strength,
         body_configuration_hash=_body_hash(q),
-        closure_q_m=float(profile.physical.max_closure_residual_m * 2.0),
+        closure_q_m=float(profile.max_closure_residual_m() * 2.0),
         closure_v_m_s=0.0,
         closure_a_m_s2=0.0,
         accepted=False,
@@ -512,7 +508,7 @@ def _build_accepted_proposal(
     q_proj = reproject_onto_closure(
         q_prop,
         closure_residual_m=closure_q,
-        tol_m=ctx.profile.physical.max_closure_residual_m,
+        tol_m=ctx.profile.max_closure_residual_m(),
     )
     closure_q, closure_v, closure_a = _closure_triplet(
         q_proj, grip_tol_m=ctx.priors.grip_closure_tol_m
@@ -792,7 +788,7 @@ def build_body_candidate_report(
                 observation=obs,
                 profile=profile,
                 seeds=(seed,),
-                priors=profile.plausibility.priors,
+                priors=profile.golf_priors(),
                 prior_strength=prior_strength,
                 options=BodyCandidateOptions(
                     n_nullspace_proposals=n_nullspace_proposals,
