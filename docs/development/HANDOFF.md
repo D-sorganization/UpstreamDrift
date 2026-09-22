@@ -1,5 +1,21 @@
 # Current Matching Continuation Handoff
 
+## Tools Session Bridge CameraCapabilities (#9604, DL-#9422) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_9604` · branch
+  `fix/9604-camera-capabilities` · commit `SELF` · PR not created at commit
+  time (see PR list for the branch). Agent `claude`, session
+  `fleet-remediation-i`.
+- **Done:** `src/motion_capture/rig/tools_bridge.py` gains `CameraRecord` and
+  `map_camera_records(manifest, plan)`: per-camera Tools `CameraIdentity` +
+  `CameraCapabilities` (vendor pin `a9ed0e7c`). The export reuses the same
+  identity builder, `_ready_tools()` probe guard and `_clock_kind()` lookup.
+- **Validation:** `python -I tests/fixtures/mocap_session_export/run_checks.py`
+  (14 passed); `python -m pytest tests/motion_capture/rig/test_tools_session_export.py -q --no-cov`.
+- **Next:** once merged, #9604 acceptance is complete; the C3D upload consumer
+  (#8865) is the next slice on DL-#9422.
+
 ## Analysis Statistics Server Side (#8941, DL-#8941) — 2026-09-22
 
 - **Repo / worktree:** D-sorganization/UpstreamDrift ·
