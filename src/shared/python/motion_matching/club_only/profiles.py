@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Sequence
 
 from src.shared.python.motion_matching.acceptance import AcceptanceGates
 from src.shared.python.motion_matching.club_only.priors import GolfPlausibilityPriors
+from src.shared.python.motion_matching.club_only.workbook_identity import (
+    CANONICAL_TRIAL_SHEETS,
+)
 from src.shared.python.tour_baselines.models import ModelTopology
 from src.shared.python.tour_baselines.registry import (
     init_default_registry,
@@ -366,6 +369,47 @@ def build_roster_profiles() -> dict[str, ClubOnlyProfile]:
         model.model_id: _profile_for_model(model.model_id, model.topology)
         for model in list_golf_models()
     }
+
+
+def resolve_roster_matrix_scope(
+    *,
+    model_ids: Sequence[str] | None = None,
+    trial_ids: Sequence[str] | None = None,
+) -> tuple[dict[str, ClubOnlyProfile], list[str], list[str]]:
+    """Build the roster and resolve model/trial ids for matrix reports.
+
+    Preconditions:
+        ``model_ids`` / ``trial_ids``, when provided, must be non-string sequences
+        of strings (empty sequences are allowed and preserved).
+
+    Returns:
+        ``(roster, models, trials)`` where omitted selectors default to the full
+        registered golf-model roster and ``CANONICAL_TRIAL_SHEETS``.
+    """
+    if isinstance(model_ids, (str, bytes)):
+        raise TypeError("model_ids must be a sequence of strings, not a bare string")
+    if isinstance(trial_ids, (str, bytes)):
+        raise TypeError("trial_ids must be a sequence of strings, not a bare string")
+    init_default_registry()
+    roster = build_roster_profiles()
+    models = (
+        list(model_ids)
+        if model_ids is not None
+        else [m.model_id for m in list_golf_models()]
+    )
+    trials = list(trial_ids) if trial_ids is not None else list(CANONICAL_TRIAL_SHEETS)
+    return roster, models, trials
+
+
+def profile_from_roster(
+    roster: dict[str, ClubOnlyProfile], model_id: str
+) -> ClubOnlyProfile:
+    """Resolve a profile from a prebuilt roster, falling back to registry lookup."""
+    if not model_id:
+        raise ValueError("model_id must be non-empty")
+    if model_id in roster:
+        return roster[model_id]
+    return get_club_only_profile(model_id)
 
 
 def get_club_only_profile(model_id: str) -> ClubOnlyProfile:
