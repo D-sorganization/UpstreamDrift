@@ -344,18 +344,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
-### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
+### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
 
 - **State:** in_review
+- **Owner:** local
+- **Issue:** #10618 (epic #10603)
+- **Branch:** feat/10618-nm03-episode-storage
+- **PR:** not created
+- **Paths:** src/shared/python/neural_motion/episodes/; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — NM-03 episode store, family splits, compact adapter, views, train-only normalizer and window cache with 15 unit tests green; no training claim
+- **Summary:** Versioned `neural-episode-store/1.0.0` HDF5 shards with content hashes; family-level splits with held-out strata and real-data eval bucket; compact-1.0 adapter preserves 27/189 layout; thin task views and transform-keyed window cache without duplicating corpora.
+- **Next step:** Open ready-for-review PR with Fixes #10618 and confirm CI green.
+- **Evidence:** docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json.
+
+### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10617 (epic #10603)
 - **Branch:** fix/10617-nm02-native-dataset-labels
 - **PR:** #10679
 - **Paths:** src/shared/python/data_io/dataset_generator/{core,channel_finalize,sim_buffers,sim_recording,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main after DIRTY; kept inventory `ud-only` 1415 for channel_finalize/sim_buffers/sim_recording; awaiting CI re-run on PR #10679
+- **Last verified:** 2026-09-22 — merged to main via #10679 (`4bb10daa0`)
 - **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
-- **Next step:** Confirm CI green on PR #10679 and squash auto-merge.
+- **Next step:** Continue NM-03 (#10618) under frozen learning contracts.
 - **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
 
 ### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
