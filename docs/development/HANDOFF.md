@@ -3,7 +3,7 @@
 ## CO-06 Recover Feasible Controls and Independently Replay Candidates (#10610)
 
 - Worktree: Worktrees/UpstreamDrift-10610-co06, branch
-  feat/issue-10610-co06-control-replay, DL-#10610, PR not created.
+  feat/issue-10610-co06-control-replay, DL-#10610, PR #10697.
 - Session: b27ccab3-1128-492c-a0fb-001367ea3aa8 (agent local).
 - Delivered: `club_only/control_replay.py` recovers min-effort constrained ID
   allocations (net/actuator/passive/reactions separated; not unique measured
@@ -20,7 +20,7 @@
 - Limitations: synthetic software contracts only; no native G1 pass; open-loop
   plant for contract replay is a double-integrator stand-in, not engine-native
   forward dynamics.
-- Next: Open ready-for-review PR Fixes #10610 with squash auto-merge; then
+- Next: Confirm quality-gate green + squash auto-merge of PR #10697; then
   dispatch CO-07 #10611.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
