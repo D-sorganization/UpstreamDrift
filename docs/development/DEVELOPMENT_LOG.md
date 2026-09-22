@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main after MS-105 #10704 so jobs unit tests are retained; 15 MS-104 unit tests green; divergence inventory regenerated; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — merged origin/main after CO-09 #10711 and MS-105 #10704; jobs unit tests retained; 15 MS-104 unit tests green; SPEC changelog keeps both #10707 and #10711 rows; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 after retaining MS-105 jobs tests and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after CO-09 merge and allow squash auto-merge to land.
 
 ### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
 
@@ -638,17 +638,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10612 · CO-08 Qualify the Club-Only Matrix and Plausibility Tradeoffs
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10612 (epic #10602)
 - **Branch:** feat/issue-10612-co08-matrix
-- **PR:** #10703
+- **PR:** #10703 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/fit_metrics.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/plot_fit_quality_card.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — DRY fingerprints extracted to resolve_roster_matrix_scope; local DRY gate + scoped unit tests GREEN; native_g1_pass false
+- **Last verified:** 2026-09-22 at 17a0ee033 — squash-merged to main via PR #10703; native_g1_pass false on software-contract fixtures.
 - **Summary:** Independent matrix qualification over native observation times for four workbook trials × #10585 roster with frozen CO-02 gates, published failures, withheld-body experiment semantics, common-observable comparison across complexities, and fail-closed checks for tamper/leakage/phase/orientation/reset/geometry/false-native claims. Shared roster/matrix scope helpers live in club_only/profiles.py.
-- **Next step:** Confirm CI green on PR #10703 and squash-merge Fixes #10612; do not start CO-09+ until merge.
+- **Next step:** N/A — shipped; continue CO-09 (#10613).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_matrix_qualification.json; tests/unit/motion_matching/test_club_matrix_qualification.py.
+
+### DL-#10613 · CO-09 Integrate Club-Only Matching Into Existing UI and Results
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10613 (epic #10602)
+- **Branch:** feat/co09-club-only-ui-10613
+- **PR:** #10711 (merged)
+- **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at 718271844 — squash-merged to main via PR #10711.
+- **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser surfaces without parallel frameworks. Preview vs verified statuses stay honest; observed/inferred legend and trial clock required; cancel/resume reuse CO-07; ledger lane=club_only with named native blockers.
+- **Next step:** N/A — shipped via #10711; continue MS-104 #10707.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

@@ -20,18 +20,28 @@
   GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
   `docs/shared_tools/divergence_inventory.v1.json` for
   `motion_matching/full_swing_qualification.py` (ud-only). Merged
-  `origin/main` after MS-105 #10704 so
+  `origin/main` after MS-105 #10704 and CO-09 #10711 so
   `tests/unit/motion_matching/jobs/test_matching_jobs.py` is retained.
 - Named blockers: no invented six-engine native pass; every incomplete cell
   names its owner issue; software-contract fixtures only.
-- Next: Confirm CI green on #10707 after MS-105 merge retention; do not start
-  MS-106 or CO/NM siblings from this worktree.
+- Next: Confirm CI green on #10707 after CO-09 merge; do not start MS-106 or
+  CO/NM siblings from this worktree.
 
-## MS-105 Reliable Matching Jobs [MERGED]
+## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
+
+- Merged via PR [#10711](https://github.com/D-sorganization/UpstreamDrift/pull/10711)
+  on `main` (`718271844`). `club_only/ui_integration.py` binds workbook
+  identity + fast matching into FitSwingProvider/pipeline/ledger/ResultsBrowser
+  without a parallel solver.
+- Next: N/A — merged; continue MS-104 #10707 on this worktree.
+
+## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 
 - Merged via PR [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704)
   on `main` (`901b2de5e`). Jobs package and
   `tests/unit/motion_matching/jobs/test_matching_jobs.py` live on main.
+- Evidence: `docs/plans/matched_swing/evidence/ms105_jobs_recovery.json`.
+- Next: N/A — merged.
 
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
@@ -48,6 +58,10 @@ pending` — UD keeps this facade.
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612) [MERGED]
 
 - Merged via PR [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) on `main` (`17a0ee033`).
+- Schema `club-matrix-qualification/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
+- Limitations: software-contract scoring only; no native Fit/G1 claim.
+- Next: N/A — merged; continue CO-09 on main.
 
 ## GUI Thread-Blocking Migration #8880 [MERGED]
 

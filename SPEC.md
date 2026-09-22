@@ -6821,6 +6821,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-09-22 | #10707 | MS-104 full-swing qualification matrix: 36 flagship engine×club×gate rows, fail-closed release_status, software-contract fixtures with named native blockers (no invented six-engine pass). |
 | 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
+| 2026-09-22 | #10711 | Integrate club-only matching into existing UI/results (CO-09): FitSwingProvider/pipeline/ledger/ResultsBrowser/GUI without parallel frameworks; software-contract only. |
 | 2026-09-22 | #10704 | MS-105 reliable matching jobs: atomic manifests/checkpoints, compatible resume, fault recovery, portable packages, both-shell progress, PF-08 service budgets without solve-time guarantees; reuses #8880 worker cancel (no second scheduler). |
 | 2026-09-22 | #10703 | Qualify club-only matrix and plausibility tradeoffs (CO-08): independent trial×roster evaluation with frozen CO-02 gates, published failures, withheld-body experiment, common-observable comparison; software-contract only. |
 | 2026-09-22 | #10701 | NM-05 classical and small neural dynamics baselines over episode store with analytical ridge NN optional MLP three-seed validation and test untouched software-contract tests only. |
