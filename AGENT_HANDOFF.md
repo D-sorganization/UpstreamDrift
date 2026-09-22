@@ -174,6 +174,38 @@ coefficient-lift action assembly, objective contracts and independent replay.
     - **Cross-Engine Parity in Simscape Multibody R2025b Update 5**: Maximum Euclidean discrepancy is **$60.5\text{ }\mu\text{m}$**, mean coordinate discrepancy is **$554\text{ nm}$**, and compact MAT is **$423\text{ KB}$**.
     - Continuous forward dynamics: zero target-state resets (Defect Norm = $0.000000\text{ m}$).
 
+### Run 103 Scaffolding (MS-61 / #10348)
+
+Software topology + full-marker terminal disclosure (no invented G1 pass):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/`
+
+| Artifact           | Path                             |
+| ------------------ | -------------------------------- |
+| Topology report    | `.../topology_report.json`       |
+| Terminal breakdown | `.../terminal_breakdown.json`    |
+| Native gate        | `.../native_gate.json` (blocked) |
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103
+```
+
+### Run 103 Scaffolding (MS-61 / #10348)
+
+Software topology + full-marker terminal disclosure (no invented G1 pass):
+
+`docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/`
+
+| Artifact           | Path                             |
+| ------------------ | -------------------------------- |
+| Topology report    | `.../topology_report.json`       |
+| Terminal breakdown | `.../terminal_breakdown.json`    |
+| Native gate        | `.../native_gate.json` (blocked) |
+
+```powershell
+powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103
+```
+
 ### Run 102 Package (MS-60 / #10347)
 
 Canonical in-tree evidence (no external GIF hunt):

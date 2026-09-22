@@ -88,6 +88,15 @@ Refresh via `bash scripts/ci/run_native_engine_lane.sh --engine opensim --venv /
 | Run-102 candidate + GIF in tree     | Committed                                                          | [candidate.npz](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/candidate.npz), [playback.gif](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/playback.gif), [run_manifest.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/run_manifest.json) |
 | Native licensed replay              | DeskComputer R2025b Update 5 recorded; local unlicensed hosts skip | [qualified_candidate_replay.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_102/qualified_candidate_replay.json)                                                                                                                                                                       |
 
+### MS-61 Simscape Topology + Full-Marker Terminal (#10348)
+
+| Scope                                     | State                                                                                        | Evidence                                                                                                                                                                                                                                     |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Topology classification (27-DOF, no neck) | Implemented fail-closed                                                                      | `simscape_topology.py`; [topology_report.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/topology_report.json)                                                                                                       |
+| Dual terminal disclosure                  | Full + head cluster required; body-excluding-head diagnostic only                            | `full_marker_terminal.py`; [terminal_breakdown.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/terminal_breakdown.json)                                                                                              |
+| R2025b runtime/license + Pinocchio parity | Receipts reuse run-102 identity (no license-cap inference)                                   | [runtime_license_receipt.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/runtime_license_receipt.json), [parity_receipt.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/parity_receipt.json) |
+| Native run-103 Fit / G1 full-marker pass  | **Blocked** — no invented success; DeskComputer R2025b Fit + MS-104 neck/full-body if needed | [native_gate.json](../simscape_tour_matching/native_evidence/two_window_fit_9967_103/native_gate.json) (status=`blocked`; full-marker terminal still > 35 mm from run-102 source)                                                            |
+
 ### MS-21 Native Replay Continuation (#10336)
 
 | Scope                             | State                                                                              | Evidence                                                                                                                                                   |
@@ -121,7 +130,7 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 101 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 103 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |
@@ -129,7 +138,7 @@ Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 1
 | **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, matched, replays                                                                  | driver, iron       | —           | —            | 10       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress)      |
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                  | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                                   |
 | **Opensim**   | ground_support, matched, tour_matching                                                                                         | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                              |
-| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 38       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
+| **Simscape**  | native                                                                                                                         | driver             | —           | —            | 40       | 🏛️ Historical Tour Authority (Simscape lane baseline)                    |
 | **Myosuite**  | matched                                                                                                                        | driver             | —           | —            | 1        | 🔬 Experimental (Fail-closed; MS-50 corrective landed)                   |
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
