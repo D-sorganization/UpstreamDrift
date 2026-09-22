@@ -48,13 +48,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
-- **Branch:** feat/10591-upper-body-controls
-- **PR:** #10735 (open)
+- **Branch:** feat/10591-upper-body-capture
+- **PR:** capture campaign pending
 - **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at `cbf171f2d` — #10735 rebased onto merged #10733 (`91fff0cc5`) and supersedes stale/conflicted #10645 with its native closed-loop topology, feasibility, bounded-fitting, reaction, and work diagnostics. Its CI DRY gate prompted a shared residual-assembly helper; 31 focused tests, scoped Ruff/format, and the local DRY gate pass.
+- **Last verified:** 2026-09-22 at `930e1edcb` — #10735 merged after green CI. The capture branch adds a source-clock and rigid-plane calibration record; Driver/ Iron six-marker plane residuals are 110.4/112.7 mm, so no planar qualification is claimed.
 - **Summary:** Build the fail-closed constrained upper-body golfer adapter for Driver and Iron. The current native replay and manufactured fitter establish software contracts only; no real capture has been calibrated or qualified.
-- **Next step:** Merge #10735; calibrate fixed geometry/q0/v0/attachments/frame against both native Driver and Iron clocks, preserve diagnostic receipts, and leave any infeasible campaign unqualified.
+- **Next step:** Calibrate fixed geometry/q0/v0/attachments against both native Driver and Iron clocks, preserve diagnostic receipts, and leave any infeasible campaign unqualified.
 
 ### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
 
