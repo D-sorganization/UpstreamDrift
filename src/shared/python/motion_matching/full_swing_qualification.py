@@ -427,11 +427,13 @@ def _evaluate_one(
 
     if accepted and links.is_complete() and key not in reduced_keys:
         status = "qualified"
-        blockers = ()
+        blockers_final: tuple[NamedBlocker, ...] = ()
     elif accepted:
         status = "incomplete"
+        blockers_final = tuple(blockers)
     else:
         status = "blocked"
+        blockers_final = tuple(blockers)
 
     return QualificationRow(
         engine=spec.engine,
@@ -441,7 +443,7 @@ def _evaluate_one(
         platform=spec.platform,
         status=status,
         evidence=links,
-        blockers=tuple(blockers),
+        blockers=blockers_final,
         is_required=spec.is_required,
         ledger_receipt_path=match.receipt_path if match else None,
     )
