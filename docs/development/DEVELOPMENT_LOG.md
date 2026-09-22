@@ -26,10 +26,24 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10684
 - **Paths:** src/shared/python/motion*matching/pipeline/plants/pinocchio_plant.py; pinocchio_lane_receipts.py; receipt_components.py; cli.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/pipeline/test_pinocchio_plant.py; docs/development/full_body_models/evidence/ground_support/anthro_driver*{pinocchio,pink}/
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — unit-test-gate fixes: refreshed divergence inventory for `pinocchio_lane_receipts.py`, regenerated matched-swing ledger (106 receipts), ground-support receipt scan skips MS-14 blocked lane schema; three previously failing unit tests green locally.
+- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after MS-51 #10685 merge; regenerated matched_swing status README for unit-test-gate freshness.
 - **Summary:** Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until ControlTower native run.
-- **Next step:** On ControlTower micromamba motion runtime, run `check_motion_runtime` + pink/pipeline lane and replace blocked receipts with real closure ≤ 1e-4 m (still not G1).
+- **Next step:** Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower native pink receipts when scheduled (MS-107 owns G1).
 - **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/; docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/
+
+### DL-#10344 · MyoSuite Golfer Scene: Pinned MyoSim Submodule + Dual-Grip Club Contacts (MS-51)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10344 (MS-51, epic #10363)
+- **Branch:** fix/10344-ms51-myosuite-repair
+- **PR:** #10685
+- **Paths:** src/engines/physics_engines/myosuite/python/golfer_scene.py; coordinate_map_anthro.json; shared/models/myosuite/golf/body/; scripts/setup_myosuite_models.{ps1,sh}; src/engines/model_inventory.py; src/config/engine_model_inventory.json; docs/engines/myosuite.md; tests/unit/engines/myosuite/test_golfer_scene.py; tests/myosuite/test_golfer_scene_native.py
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-21 at SELF — CI gate fixes: LoD basename helper, generate_golfer_scene under function-line budget, defusedxml in unit XML tests; scoped pytest green locally.
+- **Summary:** Pinned myo_sim gitlink documented; bootstrap scripts; generated driver/iron golfer MJCF on myobody_simpleupper with dual-grip site welds and four foot contact markers; diagnostic 40-of-44 coordinate map; MS-102 inventory left repair after real probes.
+- **Next step:** Push CI repair commit and confirm #10685 quality-gate green before squash merge.
+- **Evidence:** shared/models/myosuite/golf/body/golfer*myobody_receipt.json; docs/development/matched_swing_program/evidence/ms102/myosuite*\*\_structural_receipt.json
 
 ### DL-#10376 · Complete Engine and Model Inventory With Runnable Model Packages (MS-102)
 
@@ -54,9 +68,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10666
 - **Paths:** src/engines/physics_engines/myosuite/python/{retarget,replay,golfer_scene,coordinate_map_anthro.json,viz/render_replay.py}; tests/unit/engines/myosuite/test_retarget.py; tests/myosuite/test_replay_native.py; evidence/matched/driver_g1_myosuite/
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 at SELF — TDD RED→GREEN on `tests/unit/engines/myosuite/test_retarget.py`; native replay writes receipt/candidate/GIF with honest `parity.passed=false` on placeholder MJCF (195 mm aligned RMS vs 15 mm budget until MS-51 scene); `dynamics.status=not_run`.
+- **Last verified:** 2026-09-22 at SELF — TDD RED→GREEN on `tests/unit/engines/myosuite/test_retarget.py`; native replay writes receipt/candidate/GIF; MS-51 golfer scene landed with `parity_budget_qualified=false` so 15 mm gate remains deferred.
 - **Summary:** Added pure-numpy retarget map, kinematic replay CLI, marker parity receipt (`stage=replay`), MyoSuite registration in `cross_engine_replay.VALID_ENGINES` as kinematic-only, and viewer colour. Evidence committed under `evidence/matched/driver_g1_myosuite/`.
-- **Next step:** Merge PR after CI green; MS-51 golfer scene required before 15 mm parity gate can pass.
+- **Next step:** Merge PR after CI green; drive 15 mm parity on the MS-51 golfer scene (still unqualified).
 
 ### DL-#10436 · Explore Feasible Force Null Spaces and Publish Torque-Distribution Tradeoffs
 
