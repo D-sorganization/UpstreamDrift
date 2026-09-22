@@ -400,18 +400,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10621 (epic #10603)
+- **Branch:** feat/10621-nm06-masked-proposals
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/inverse/{masked_proposal,proposal_training,basis_time,collapse,regressor,regressor_training,cvae}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — 9 NM-06 unit tests green (`test_masked_proposals_nm06.py -n 0`); software-contract fixtures only; no native qualification claimed
+- **Summary:** Variable-dimension masked trajectory-to-control proposals with selected-teacher and mixture heads, observation-after-rollout training loss, mode-collapse diagnostics retaining cVAE plateau evidence, coefficient letter-order/time-domain conversion, and hybrid fail-closed checkpoint/refine+replay seams.
+- **Next step:** Open ready-for-review PR with `Fixes #10621` and arm squash auto-merge.
+- **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
+
 ### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10620 (epic #10603)
 - **Branch:** feat/issue-10620-nm05-baselines
 - **PR:** #10701
 - **Paths:** src/shared/python/neural_motion/baselines/; src/shared/python/neural_motion/episodes/splits.py; tests/unit/neural_motion/test_dynamics_baselines_nm05.py; docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 10 NM-05 tests green under xdist (-n 2); module-object torch absence patch asserts torch_unavailable; software-contract only
+- **Last verified:** 2026-09-22 — merged via PR #10701
 - **Summary:** Pilot dynamics baselines over NM-03 episode store: `DynamicsBaselineTrainerConfig`, split helpers, `FamilySplitPlan.ids_for`; analytical 1/2-DOF fixture map, ridge, nearest neighbor, optional small MLP; trial-level splits, train-only normalizer digest, inverse conditioning, identity-leakage and unavailable-torque guards; validation checkpointing with test untouched; honest analytical-vs-MLP comparison on fixtures.
-- **Next step:** Confirm unit-test-gate and quality-gate green on PR #10701; squash auto-merge remains armed.
+- **Next step:** Continue NM-06 (#10621) under frozen baselines and episode-store contracts.
 - **Evidence:** docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
 
 ### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates

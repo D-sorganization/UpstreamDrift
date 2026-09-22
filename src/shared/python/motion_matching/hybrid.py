@@ -6,6 +6,12 @@ vector, then hand that warm start to a polish solver - in the canonical
 production path that polish solver is MATLAB's ``fit_swing_fmincon``
 (issue #024) called via the matlab_bridge (#4006/4007).
 
+NM-06 (#10621) extends this boundary for masked control proposals:
+``refine_control_proposal`` applies constrained native polish with
+independent-replay accounting, and
+``assert_proposal_checkpoint_compatible`` fails closed on incompatible
+weights / model contracts.
+
 Because the MATLAB bridge is a separate concern and not always available
 in unit-test environments, the polish step is dependency-injected: the
 caller passes any callable that accepts ``(target, theta_warm)`` and
@@ -16,13 +22,17 @@ Public API:
     HybridOptions    -- frozen dataclass of hybrid hyperparameters.
     HybridFitResult  -- return bundle with both phases recorded.
     fit_swing_hybrid -- main entry point.
+    ProposalCheckpointContract / assert_proposal_checkpoint_compatible /
+    refine_control_proposal / ProposalRefinementResult -- NM-06 native path.
 """
 
 from __future__ import annotations
 
+import json
 import time as _time
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
@@ -30,6 +40,9 @@ import numpy as np
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.club_target import ClubTarget
+from src.shared.python.motion_matching.inverse.masked_proposal import (
+    MaskedObservation,
+)
 
 from .surrogate import FitResult, InvertOptions, SwingSurrogate, fit_swing_via_surrogate
 
@@ -37,7 +50,11 @@ __all__ = [
     "HybridFitResult",
     "HybridOptions",
     "PolishCallable",
+    "ProposalCheckpointContract",
+    "ProposalRefinementResult",
+    "assert_proposal_checkpoint_compatible",
     "fit_swing_hybrid",
+    "refine_control_proposal",
 ]
 
 logger = get_logger(__name__)
@@ -254,4 +271,162 @@ def fit_swing_hybrid(
         surrogate_phase=surrogate_phase,
         polish_phase=polish_out,
         duration_s=_time.perf_counter() - t_start,
+    )
+
+
+# ---------------------------------------------------------------------------
+# NM-06: masked proposal native refinement (fail-closed)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class ProposalCheckpointContract:
+    """Versioned identity for a masked-proposal checkpoint.
+
+    Design by Contract: all fields non-empty; control_dim > 0.
+    """
+
+    model_id: str
+    control_dim: int
+    control_basis: str
+    schema_version: str
+    weight_digest: str
+
+    def __post_init__(self) -> None:
+        if self.control_dim <= 0:
+            raise ValueError("control_dim must be positive")
+        for name, value in (
+            ("model_id", self.model_id),
+            ("control_basis", self.control_basis),
+            ("schema_version", self.schema_version),
+            ("weight_digest", self.weight_digest),
+        ):
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{name} must be a non-empty string")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "model_id": self.model_id,
+            "control_dim": self.control_dim,
+            "control_basis": self.control_basis,
+            "schema_version": self.schema_version,
+            "weight_digest": self.weight_digest,
+        }
+
+    def write_json(self, path: str | Path) -> None:
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            json.dumps(self.as_dict(), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    @classmethod
+    def read_json(cls, path: str | Path) -> ProposalCheckpointContract:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        return cls(
+            model_id=str(payload["model_id"]),
+            control_dim=int(payload["control_dim"]),
+            control_basis=str(payload["control_basis"]),
+            schema_version=str(payload["schema_version"]),
+            weight_digest=str(payload["weight_digest"]),
+        )
+
+
+def assert_proposal_checkpoint_compatible(
+    *,
+    expected: ProposalCheckpointContract,
+    loaded: ProposalCheckpointContract,
+) -> None:
+    """Fail closed when checkpoint contract does not match the expected model."""
+    if expected.model_id != loaded.model_id:
+        raise ValueError(
+            "incompatible proposal checkpoint model_id: "
+            f"expected {expected.model_id!r}, got {loaded.model_id!r}"
+        )
+    if expected.control_dim != loaded.control_dim:
+        raise ValueError(
+            "incompatible proposal checkpoint control_dim: "
+            f"expected {expected.control_dim}, got {loaded.control_dim}"
+        )
+    if expected.control_basis != loaded.control_basis:
+        raise ValueError(
+            "incompatible proposal checkpoint control_basis: "
+            f"expected {expected.control_basis!r}, got {loaded.control_basis!r}"
+        )
+    if expected.schema_version != loaded.schema_version:
+        raise ValueError(
+            "incompatible proposal checkpoint schema_version: "
+            f"expected {expected.schema_version!r}, got {loaded.schema_version!r}"
+        )
+    if expected.weight_digest != loaded.weight_digest:
+        raise ValueError(
+            "incompatible proposal checkpoint weight_digest: "
+            f"expected {expected.weight_digest!r}, got {loaded.weight_digest!r}"
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ProposalRefinementResult:
+    """Native polish outcome for a masked control proposal."""
+
+    controls: np.ndarray
+    projection_cost: float
+    independent_replay: bool
+    polish_phase: dict[str, Any]
+    duration_s: float
+
+
+ProposalPolishCallable = Callable[[object, np.ndarray], dict[str, Any]]
+
+
+def refine_control_proposal(
+    *,
+    observation: MaskedObservation,
+    proposal_controls: np.ndarray,
+    polish_fn: ProposalPolishCallable,
+    require_independent_replay: bool = True,
+) -> ProposalRefinementResult:
+    """Constrained native polish of a proposal with fail-closed replay gates.
+
+    The polish callable is dependency-injected (same hybrid boundary as
+    :func:`fit_swing_hybrid`). When ``require_independent_replay`` is True,
+    the polish mapping must report ``independent_replay=True`` — synthetic
+    or missing replay evidence is rejected.
+    """
+    if not isinstance(observation, MaskedObservation):
+        raise TypeError("observation must be a MaskedObservation")
+    warm = np.asarray(proposal_controls, dtype=np.float64).reshape(-1)
+    if warm.size < 1 or not bool(np.all(np.isfinite(warm))):
+        raise ValueError("proposal_controls must be a non-empty finite vector")
+    if warm.size != len(observation.q0):
+        raise ValueError("proposal_controls length must match observation.q0")
+
+    t0 = _time.perf_counter()
+    polish_out = polish_fn(observation, warm)
+    if not isinstance(polish_out, dict) or "coefficients" not in polish_out:
+        raise ValueError(
+            "polish_fn must return a mapping with at least 'coefficients'; "
+            f"got {type(polish_out).__name__}"
+        )
+    polished = np.asarray(polish_out["coefficients"], dtype=np.float64).reshape(-1)
+    if polished.shape != warm.shape or not bool(np.all(np.isfinite(polished))):
+        raise ValueError("polished coefficients must be finite and match warm shape")
+
+    independent = bool(polish_out.get("independent_replay", False))
+    if require_independent_replay and not independent:
+        raise ValueError(
+            "native refinement requires independent_replay=True; "
+            "refusing to accept polish without replay evidence"
+        )
+    cost = float(polish_out.get("projection_cost", float("nan")))
+    if not np.isfinite(cost) or cost < 0.0:
+        raise ValueError("projection_cost must be a finite non-negative float")
+
+    return ProposalRefinementResult(
+        controls=polished,
+        projection_cost=cost,
+        independent_replay=independent,
+        polish_phase=polish_out,
+        duration_s=_time.perf_counter() - t0,
     )
