@@ -977,8 +977,8 @@
       "symbol": "ThreePhaseElectricalModelEnhanced.calculate_system_state",
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 10592,
-      "reason": "Issue #10592: Electrical model optimization marginally increased parameter limit check due to unmodified signature.",
+      "issue": 10591,
+      "reason": "Issue #10591: Electrical model optimization marginally increased parameter limit check due to unmodified signature.",
       "expires_on": "2027-01-01"
     }
   ]
