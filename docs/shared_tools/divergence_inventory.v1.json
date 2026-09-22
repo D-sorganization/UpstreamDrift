@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1433,
+    "ud-only": 1439,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -497,7 +497,7 @@
     "neural_motion": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 18,
+      "ud-only": 23,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -756,7 +756,7 @@
     "theme": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 3,
+      "ud-only": 4,
       "tools-only": 23,
       "spelling-only": 0
     },
@@ -17471,7 +17471,7 @@
       "classification": "ud-only",
       "package": "neural_motion",
       "subpackage": "",
-      "ud_bytes": 1098,
+      "ud_bytes": 1191,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17496,6 +17496,66 @@
       "package": "neural_motion",
       "subpackage": "",
       "ud_bytes": 13873,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/teachers/__init__.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "teachers",
+      "ud_bytes": 1074,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/teachers/acquisition.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "teachers",
+      "ud_bytes": 4636,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/teachers/corpus.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "teachers",
+      "ud_bytes": 8077,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/teachers/generation.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "teachers",
+      "ud_bytes": 10190,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "neural_motion/teachers/types.py",
+      "classification": "ud-only",
+      "package": "neural_motion",
+      "subpackage": "teachers",
+      "ud_bytes": 6934,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33367,18 +33427,6 @@
       "spelling_only": false
     },
     {
-      "path": "theme/tool_stylesheet.py",
-      "classification": "ud-only",
-      "package": "theme",
-      "subpackage": "",
-      "ud_bytes": 4635,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "theme/matplotlib_style.py",
       "classification": "tools-only",
       "package": "theme",
@@ -33469,6 +33517,18 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 20093,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "theme/tool_stylesheet.py",
+      "classification": "ud-only",
+      "package": "theme",
+      "subpackage": "",
+      "ud_bytes": 4851,
+      "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -33755,7 +33815,7 @@
       "classification": "ud-only",
       "package": "training",
       "subpackage": "",
-      "ud_bytes": 9570,
+      "ud_bytes": 11923,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -33995,7 +34055,7 @@
       "classification": "ud-only",
       "package": "training",
       "subpackage": "",
-      "ud_bytes": 15961,
+      "ud_bytes": 17870,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

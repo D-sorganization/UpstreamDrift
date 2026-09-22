@@ -367,9 +367,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10698
 - **Paths:** src/shared/python/neural_motion/teachers/; src/shared/python/training/scheduler.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — DRY helpers extracted in `training/datasets.py` (clears `506c08597d83`/`7153fb978f65`/`c8b715837b45`); squash auto-merge armed; software-contract only
+- **Last verified:** 2026-09-22 at SELF — DRY helpers + divergence inventory for `neural_motion/teachers/*`; squash auto-merge armed; software-contract only
 - **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes; training scheduler admits teacher budgets via `neural_teacher_corpus_budget` and datasets register teacher corpus paths without all-RAM load.
-- **Next step:** Confirm repo-structure-gates green on PR #10698; squash auto-merge remains armed.
+- **Next step:** Confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed.
 - **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
 
 ### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
