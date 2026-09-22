@@ -231,28 +231,40 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10605 shipped. Delivered: `ClubObservation`, `club_calibration.py`, legacy adapters, four-trial fixture pack.
 - Next action: superseded by CO-02 #10606.
 
+## Club-Only Starting Guesses CO-03 #10607 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10607-co03`.
+- Branch: `feat/10607-co03-retrieval-constrained-ik`; PR [#10678](https://github.com/D-sorganization/UpstreamDrift/pull/10678) open (squash auto-merge). Governing issue #10607 (CO-03, epic #10602). Prerequisites CO-01 #10670 and CO-02 #10675 merged on main. Head SELF.
+- Entry DL-#10607. Delivered: `hand_geometry` (handedness-aware lead/trail frame offsets), `retrieval` (descriptor index + single rigid placement, native clock), `constrained_ik` (Pink vs DLS capability records, fail-closed unsupported constraints, posture branches), `seeds`/`SeedCache` (geometry/profile invalidation), four-trial evidence `club_starting_guesses.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_starting_guesses.py -q -n 0 --no-cov --timeout=60` (9 passed); `ruff check` clean on touched Python; divergence inventory regenerated.
+- Limitations: kinematic preview only (pending CO-06 replay); synthetic fixtures for software contracts; workbook smoke uses legacy Excel→observation path; no torque/physiological claim.
+- Next action: confirm CI green + squash merge of #10678; then dispatch CO-04 #10608.
+
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
-- Merged to main via [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) at `262152c8f`. Governing issue #10606 (CO-02, epic #10602). Entry DL-#10606 shipped.
-- Delivered: golf plausibility priors, per-roster profiles, ambiguity, club-only acceptance with separated statuses.
-- Next action: do not start CO-03 until explicitly dispatched.
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-co02-10606`.
+- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) merged. Governing issue #10606 (CO-02, epic #10602).
+- Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
+- Next action: superseded by CO-03 #10607.
 
 ## Neural Dataset Labels NM-02 #10617 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree; `UpstreamDrift-nm02-10617` removed).
-- Branch: `fix/10617-nm02-native-dataset-labels`; base `origin/main` tip `262152c8f`. Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree).
+- Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) (squash auto-merge armed). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
 - Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
-- Validation: `pytest tests/unit/data_io/test_dataset_labels_nm02.py tests/unit/data_io/test_nm02_adapters.py -q -n 0 --no-cov` green; `ruff check` clean on touched paths.
+- CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy ndarray assignment; SPEC §12 row keyed `#10679`.
+- Validation: architecture budget OK; mypy clean on touched paths; NM-02 unit tests green locally.
 - Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
-- Next action: open/update PR with Fixes #10617, squash auto-merge; do not start NM-03+.
+- Next action: push merge + CI fixes, confirm CI green on PR #10679 and squash auto-merge; do not start NM-03+.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped. Do not start CO-03 until dispatched.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped; active child [CO-03 #10607](https://github.com/D-sorganization/UpstreamDrift/issues/10607).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668 and NM-01/#10672 shipped; active child [NM-02 #10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md).
-- **NM-02 state:** DatasetGenerator label semantics + first-wave receipts in progress on `fix/10617-nm02-native-dataset-labels`. DL-#10617.
-- **Next:** Land NM-02/#10617 PR + squash merge. Do not start NM-03+.
+- **CO-03 state:** Retrieval + constrained-IK starting guesses on PR #10678; DL-#10607.
+- **NM-02 state:** PR #10679 CI unblock in flight; DL-#10617.
+- **Next:** Confirm CI green on PR #10679 and squash merge. Do not start NM-03+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
@@ -283,8 +295,6 @@ exploratory simulator.
 
 Next: U1 (#9286) and U2 (#9542) first, per the matrix's dependency order; each
 landing PR records its merge SHA and proving test in its entry.
-
-> > > > > > > origin/main
 
 ---
 
