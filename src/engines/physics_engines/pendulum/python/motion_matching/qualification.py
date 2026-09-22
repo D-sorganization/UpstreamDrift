@@ -327,12 +327,20 @@ def generate_baseline_package_for_target(
 
 def save_qualification_receipts(
     repo_root: Path | str,
+    evidence_dir: Path | str | None = None,
 ) -> dict[str, str]:
-    """Generate and save Driver and Iron qualification receipts."""
+    """Generate and save Driver and Iron qualification receipts.
+
+    ``evidence_dir`` defaults to the committed evidence directory under
+    ``repo_root``; tests pass a temporary directory so they never rewrite
+    committed receipts that the matched-swing ledger fingerprints.
+    """
     root = Path(repo_root)
     driver_c3d = root / "data" / "C3D_TA_Driver.c3d"
     iron_c3d = root / "data" / "C3D_TA_Iron.c3d"
-    evidence_dir = root / "docs" / "plans" / "tour_baselines" / "evidence"
+    if evidence_dir is None:
+        evidence_dir = root / "docs" / "plans" / "tour_baselines" / "evidence"
+    evidence_dir = Path(evidence_dir)
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
     driver_pkg, driver_verdict = generate_baseline_package_for_target(
