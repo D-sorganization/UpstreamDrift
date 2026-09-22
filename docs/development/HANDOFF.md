@@ -269,8 +269,8 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree).
 - Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) (squash auto-merge armed). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
 - Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
-- CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helpers `_first_step_native_residual`, `_residual_norm`, `_single_sample_dynamics_config` (fingerprint `2430854b10cc`); SPEC §12 row keyed `#10679`.
-- Validation: adapters.py DRY scan clean for `2430854b10cc`; NM-02 unit tests green locally (`tests/unit/data_io/test_nm02_adapters.py`).
+- CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helpers `_first_step_native_residual`, `_residual_norm`, `_single_sample_dynamics_config` (fingerprint `2430854b10cc`); SPEC §12 row keyed `#10679`; regenerate divergence inventory for `channel_finalize` / `sim_buffers` / `sim_recording` after core.py split.
+- Validation: adapters.py DRY scan clean for `2430854b10cc`; NM-02 unit tests green locally; `test_committed_inventory_is_current_when_vendor_present` green after inventory refresh.
 - Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
 - Next action: confirm CI green on PR #10679 and squash auto-merge; do not start NM-03+.
 
@@ -280,7 +280,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668 and NM-01/#10672 shipped; active child [NM-02 #10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md).
 - **CO-03 state:** Retrieval + constrained-IK starting guesses on PR #10678; DL-#10607.
-- **NM-02 state:** PR #10679 CI unblock in flight; DL-#10617.
+- **NM-02 state:** PR #10679 inventory refresh pushed after unit-test-gate miss; DL-#10617.
 - **Next:** Confirm CI green on PR #10679 and squash merge. Do not start NM-03+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)

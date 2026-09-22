@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1412,
+    "ud-only": 1415,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -266,7 +266,7 @@
     "data_io": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 26,
+      "ud-only": 29,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -6803,7 +6803,19 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "dataset_generator",
-      "ud_bytes": 11100,
+      "ud_bytes": 10988,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "data_io/dataset_generator/channel_finalize.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "dataset_generator",
+      "ud_bytes": 7773,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6827,7 +6839,7 @@
       "classification": "ud-only",
       "package": "data_io",
       "subpackage": "dataset_generator",
-      "ud_bytes": 32989,
+      "ud_bytes": 16460,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6852,6 +6864,30 @@
       "package": "data_io",
       "subpackage": "dataset_generator",
       "ud_bytes": 4054,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "data_io/dataset_generator/sim_buffers.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "dataset_generator",
+      "ud_bytes": 2149,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "data_io/dataset_generator/sim_recording.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "dataset_generator",
+      "ud_bytes": 7411,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10979,9 +11015,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 9226,
+      "ud_bytes": 9160,
       "tools_bytes": 8854,
-      "byte_delta": 372,
+      "byte_delta": 306,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -36639,8 +36675,8 @@
       "path": "model_generation/api/rest_api_generation.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-09-20",
-        "commit": "5d73e45545c9498e1904eab8d7355cce7ef353c3"
+        "date": "2026-09-21",
+        "commit": "42ae7fbf3dc451c97bef1b6a8a6b3956bdb65ed0"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",

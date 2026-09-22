@@ -49,7 +49,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `core` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 13 | 0 | 0 |
-| `data_io` | 0 | 0 | 0 | 26 | 0 | 0 |
+| `data_io` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `data_processing` | 3 | 1 | 0 | 1 | 0 | 4 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `data_processor_io` | 2 | 1 | 0 | 0 | 0 | 3 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1412** | **709** | **702** |
+| **Total** | **423** | **279** | **123** | **1415** | **709** | **702** |
 
 ## Diverged Files by Package
 
@@ -342,7 +342,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/api/rest_api_core.py` | +4240 |  | Dieter Olson 2026-09-20 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api_fastapi.py` | -27 |  | Dieter Olson 2026-09-20 | Dieter Olson 2026-08-20 |
 | `model_generation/api/rest_api_flask.py` | -72 |  | Dieter Olson 2026-09-20 | Dieter Olson 2026-09-06 |
-| `model_generation/api/rest_api_generation.py` | +372 |  | Dieter Olson 2026-09-20 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/api/rest_api_generation.py` | +306 |  | Dieter Olson 2026-09-21 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/api/rest_api_support.py` | +457 |  | Dieter Olson 2026-09-20 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/builders/__init__.py` | +25 |  | Dieter Olson 2026-09-20 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/builders/base_builder.py` | +2060 |  | Dieter Olson 2026-09-20 | d-sorgcodexagent[bot] 2026-06-16 |
