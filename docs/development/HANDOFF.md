@@ -323,24 +323,36 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Episode Storage NM-03 #10618 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10618`.
+- Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) open with squash auto-merge armed. Governing issue #10618 (NM-03, epic #10603). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`. Entry DL-#10618.
+- Base: merged `origin/main` through theme/#10654 + CO-05 #10681 (tip includes `795cd72ce`). Phantom-guard fix: `training.datasets.register_neural_episode_corpus` touches issue reuse anchor.
+- Delivered: `src/shared/python/neural_motion/episodes/` (`EpisodeRecord`, `EpisodeStore`, `CompactAdapter`/`CompactArrayBundle`, `FamilySplitPlan`, task views, `TrainOnlyNormalizer`, `WindowCache`); training registry seam; schema `neural-episode-store/1.0.0`; episode_storage.md + receipt.
+- CI fix (SELF): `_require_shard_array` for mypy; DRY `write_sorted_json` + ABC `SortedJsonWritableMixin` (no bare `NotImplementedError` — Stub Introduction Guard); unit test for missing `sample_times_s` shard.
+- Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py tests/unit/neural_motion/test_benefit_experiment.py -q --timeout=60` (24 passed); mypy/DRY/ruff clean on touched paths; merge/main clean after CO-05 tip.
+- Limitations: synthetic software-contract tests only; no native teacher generation, training, or dataset completeness claim.
+- Next action: confirm `guard` + CI Standard green on PR #10686 tip; squash auto-merge remains armed.
+
 ## Neural Dataset Labels NM-02 #10617 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree).
-- Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) **merged** (squash 4bb10daa). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
+- Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) **merged** (`4bb10daa0`). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617 shipped.
 - Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
 - CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helpers `_first_step_native_residual`, `_residual_norm`, `_single_sample_dynamics_config` (fingerprint `2430854b10cc`); SPEC §12 row keyed `#10679`; regenerate divergence inventory for `channel_finalize` / `sim_buffers` / `sim_recording` after core.py split.
 - Main sync (SELF): after CI Standard green on `4f8de75bf`, PR went DIRTY; merged `origin/main` and kept NM-02 inventory totals (`ud-only` 1415) plus the three generator-split modules.
 - Validation: adapters.py DRY scan clean for `2430854b10cc`; NM-02 unit tests green locally; `test_committed_inventory_is_current_when_vendor_present` green after inventory refresh; prior tip CI Standard SUCCESS.
 - Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
-- Next action: superseded; CO-04 #10608 / PR #10680 is the active merge drive. Do not start NM-03+.
+- Next action: superseded by NM-03 dispatch.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678 shipped; active child [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, and NM-02/#10679 shipped; next child NM-03 not started here.
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md).
-- **CO-04 state:** Double/triple pendulum club-only match matrix on PR #10680; DL-#10608.
-- **Next:** Confirm quality-gate green + squash auto-merge of PR #10680. Do not start CO-05+.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679 shipped; active child [NM-03 #10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md).
+- **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
+- **NM-03 state:** in_review on PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686); DL-#10618.
+- **Next:** Confirm CI green + squash auto-merge of #10686; do not start NM-04+ until merged.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
