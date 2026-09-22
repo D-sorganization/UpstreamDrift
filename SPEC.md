@@ -25,6 +25,15 @@ Separates kinematic projection from dynamic model reduction for Simscape upper-b
 - **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
   - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
 
+## Club-Only Control Recovery and Independent Replay (CO-06, #10610)
+
+Recovers feasible controls for club-only candidates and independently replays them under epic #10602:
+- **Control Recovery (`club_only/control_replay.py`)**: Constrained inverse-dynamics allocation via `ContactForceAllocator` with declared `MINIMUM_EFFORT` objective; separates net generalized torque, actuator input, passive effects and reactions; refuses unique-measured-torque claims.
+- **Continuous Policy**: Bernstein time-basis fit with saved q0/v0, prescribed base inputs and solver settings; native refinement re-expresses via `prefix_fit.bernstein_to_simscape`.
+- **Independent Replay**: Full-horizon open-loop rollout from one initial state with measured-state reset detection; tighter-step sensitivity and interval timing checks; ball impact modeled/unknown/outside-model with CHS/ball type refused as force observations.
+- **Acceptance**: Rejected dynamics retain kinematic preview with a separate torque-replay status; promotes only through existing club-only and shared acceptance services. Schema `club-control-replay/1.0.0`.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_control_replay.json` (synthetic fixtures; not native physical qualification).
+
 ## Club-Only Pendulum Matching (CO-04, #10608)
 
 Fits driven double and triple pendulum models to club-only observations for epic #10602:
@@ -6820,6 +6829,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10686 | NM-03 versioned episode HDF5 store, family splits, compact-1.0 adapter, task views, train-only normalizer and window cache; software-contract tests only. |
+| 2026-09-22 | #10610 | Recover feasible controls and independently replay club-only candidates (CO-06): min-effort constrained ID with separated net/actuator/passive/reactions, continuous Bernstein policies, no-reset horizon replay, root-slack fail-closed, retained kinematic preview on rejected dynamics; synthetic fixtures only. |
 | 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
 | 2026-09-21 | #10654 | Add `src/shared/python/theme/tool_stylesheet.py` as the UD-owned home for a canonical primary-action color token; fix the light-mode panel hardcoded inside the dark `model_explorer` visualization widget; unify the four mismatched "run" button colors across `putting_green_gui`/`ball_flight_gui`/`swing_flight_pipeline`/`training_controller`; add a hardcoded-style ratchet hygiene check (issue #8885). |
 | 2026-09-22 | #10680 | Match club-only motion with driven double/triple pendulums (CO-04): fixed-pivot vs prescribed moving-hub IDs with external-work accounting, separate in-plane/3D errors, cold vs retrieval warm-start retention, first-frame scoring before integration, eight-cell software-contract matrix with explicit native G1 blockers; reconstruction scores rejected. |

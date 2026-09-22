@@ -470,6 +470,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Continue on #10608 (CO-04) and #10609 (CO-05) in parallel on non-overlapping paths.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
 
+### DL-#10610 · CO-06 Recover Feasible Controls and Independently Replay Candidates
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10610 (epic #10602)
+- **Branch:** feat/issue-10610-co06-control-replay
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — RED→GREEN on tests/unit/motion_matching/test_club_control_replay.py (11 passed); ruff check/format clean on touched files
+- **Summary:** Constrained min-effort ID recovers separated net/actuator/passive/reaction efforts (not unique measured torques), fits continuous Bernstein policies with prescribed base and solver settings, and independently replays the full horizon from one q0/v0 with no measured-state resets. Root slack cannot qualify; rejected dynamics retain kinematic preview with a separate status; CHS/ball type are not force observations. Synthetic software contracts only.
+- **Next step:** Open ready-for-review PR Fixes #10610 with squash auto-merge.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
+
 ### DL-#10608 · CO-04 Match Club-Only Motion With Double and Triple Pendulums
 
 - **State:** in_review
@@ -481,7 +495,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — restored vendor pin a9ed0e7c5; re-wrote divergence inventory to include tools-only launch_monitor/gspro_connect.py (unit-test-gate failure on tip 34b447211).
 - **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
-- **Next step:** Confirm quality-gate green on PR #10680 and squash auto-merge; then dispatch CO-06 #10610.
+- **Next step:** Continue under CO-06 #10610 / CO-07 #10611 — CO-04 shipped via #10680.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
 
 ### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
@@ -495,7 +509,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 — merged via #10681 onto main as prerequisite for CO-06
 - **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
-- **Next step:** Continue on #10610 (CO-06) after CO-04 lands.
+- **Next step:** Continue under CO-06 #10610 — CO-05 shipped via #10681.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
