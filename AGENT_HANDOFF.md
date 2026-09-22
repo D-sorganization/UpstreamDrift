@@ -56,11 +56,11 @@ Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/Ups
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-09 shipped on main; active [CO-10 #10614](https://github.com/D-sorganization/UpstreamDrift/issues/10614) on `feat/10614-co10-reproduction-turnover` (reproduction guide / final turnover).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-10 baseline shipped via [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718); survivor follow-up [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) on `feat/10614-co10-reproduction-turnover` (runnable saved-job commands + architecture split).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679); NM-06 [#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621) merged (#10709).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Reproduction Guide](docs/plans/club_only_matching/REPRODUCTION_GUIDE.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-10 publishes operator/reproduction turnover (saved jobs, provenance, matrix next-steps); epic #10602 stays open until mandatory native fits land. Software contracts are not native G1/G3.
-- **Next:** Drive CI green on PR [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720); schedule desk-native Fit/G1 for unresolved matrix cells.
+- **State:** CO-10 software-contract turnover is on main via #10718; #10720 rematches unique runnable-command/architecture fixes. Epic #10602 stays open until mandatory native fits land. Software contracts are not native G1/G3.
+- **Next:** Drive CI green on rematched PR [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720); do not reopen #10719; schedule desk-native Fit/G1 for unresolved matrix cells.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
