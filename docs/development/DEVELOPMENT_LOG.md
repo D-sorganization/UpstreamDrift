@@ -402,16 +402,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10607 · CO-03 Build Retrieval and Constrained IK Starting Guesses
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10607 (epic #10602)
 - **Branch:** feat/10607-co03-retrieval-constrained-ik
-- **PR:** not created
+- **PR:** #10678
 - **Paths:** src/shared/python/motion_matching/club_only/hand_geometry.py; src/shared/python/motion_matching/club_only/retrieval.py; src/shared/python/motion_matching/club_only/constrained_ik.py; src/shared/python/motion_matching/club_only/seeds.py; tests/unit/motion_matching/test_club_starting_guesses.py; docs/plans/club_only_matching/evidence/club_starting_guesses.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — focused CO-03 suite 9 passed; ruff clean; divergence inventory regenerated for new club_only paths.
+- **Last verified:** 2026-09-22 — PR #10678 opened with squash auto-merge; focused CO-03 suite 9 passed; ruff clean; divergence inventory regenerated.
 - **Summary:** Adds handedness-aware model hand-frame offsets, library retrieval with one rigid placement and native-clock preservation, constrained-IK seeds with distinct Pink/DLS capability records (unsupported constraints fail closed), and a geometry/profile-keyed seed cache. Four-trial retrieval-only and constrained-IK baselines are kinematic previews only.
-- **Next step:** Open ready-for-review PR with `Fixes #10607` and arm squash auto-merge.
+- **Next step:** Confirm CI green on PR #10678 and squash merge; then dispatch #10608 (CO-04).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
 
 ### DL-#10603 · Neural Motion Matching Plan

@@ -234,11 +234,11 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only Starting Guesses CO-03 #10607 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10607-co03`.
-- Branch: `feat/10607-co03-retrieval-constrained-ik`; PR not created. Governing issue #10607 (CO-03, epic #10602). Prerequisites CO-01 #10670 and CO-02 #10675 merged on main. Head SELF.
+- Branch: `feat/10607-co03-retrieval-constrained-ik`; PR [#10678](https://github.com/D-sorganization/UpstreamDrift/pull/10678) open (squash auto-merge). Governing issue #10607 (CO-03, epic #10602). Prerequisites CO-01 #10670 and CO-02 #10675 merged on main. Head SELF.
 - Entry DL-#10607. Delivered: `hand_geometry` (handedness-aware lead/trail frame offsets), `retrieval` (descriptor index + single rigid placement, native clock), `constrained_ik` (Pink vs DLS capability records, fail-closed unsupported constraints, posture branches), `seeds`/`SeedCache` (geometry/profile invalidation), four-trial evidence `club_starting_guesses.json`.
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_starting_guesses.py -q -n 0 --no-cov --timeout=60` (9 passed); `ruff check` clean on touched Python; divergence inventory regenerated.
 - Limitations: kinematic preview only (pending CO-06 replay); synthetic fixtures for software contracts; workbook smoke uses legacy Excel→observation path; no torque/physiological claim.
-- Next action: open ready-for-review PR `Fixes #10607` with squash auto-merge; then dispatch CO-04 #10608.
+- Next action: confirm CI green + squash merge of #10678; then dispatch CO-04 #10608.
 
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
