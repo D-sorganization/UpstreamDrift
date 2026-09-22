@@ -353,9 +353,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-21 — CO-01 merged (#10670); CO-02 plausibility/acceptance in progress on feat/co02-golf-plausibility-priors
+- **Last verified:** 2026-09-22 — CO-02 merged (#10675); CO-03 retrieval/IK starting guesses in progress on feat/10607-co03-retrieval-constrained-ik
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land PR #10675 (CO-02), then dispatch #10607 (CO-03).
+- **Next step:** Land PR for #10607 (CO-03), then dispatch #10608 (CO-04).
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -388,17 +388,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10606 · CO-02 Define Golf Plausibility Priors, Ambiguity and Acceptance
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10606 (epic #10602)
 - **Branch:** feat/co02-golf-plausibility-priors
-- **PR:** #10675
+- **PR:** #10675 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/priors.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/ambiguity.py; src/shared/python/motion_matching/club_only/acceptance.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T23:30:00Z at SELF — merged `origin/main` (NM-01 `f2e625099`); regenerated divergence inventory; HANDOFF conflict resolved; PR #10675 squash auto-merge armed.
+- **Last verified:** 2026-09-21 — merged via #10675 onto main as prerequisite for CO-03
 - **Summary:** Freezes per-roster observation/physical/plausibility profiles, named GolfPlausibilityPriors (not measured truth), ambiguity retention for distinct body hashes on identical club residuals, and club-only acceptance that keeps kinematic preview, torque replay, scientific, and product statuses separate while preserving full-body G3 gates.
-- **Next step:** Drive PR #10675 CI green after main merge; do not start CO-03.
+- **Next step:** Continue on #10607 (CO-03) retrieval and constrained IK starting guesses.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json; tests/unit/motion_matching/test_club_plausibility_acceptance.py.
+
+### DL-#10607 · CO-03 Build Retrieval and Constrained IK Starting Guesses
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10607 (epic #10602)
+- **Branch:** feat/10607-co03-retrieval-constrained-ik
+- **PR:** #10678
+- **Paths:** src/shared/python/motion_matching/club_only/hand_geometry.py; src/shared/python/motion_matching/club_only/retrieval.py; src/shared/python/motion_matching/club_only/constrained_ik.py; src/shared/python/motion_matching/club_only/seeds.py; tests/unit/motion_matching/test_club_starting_guesses.py; docs/plans/club_only_matching/evidence/club_starting_guesses.json; docs/shared_tools/divergence_inventory.v1.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — PR #10678 opened with squash auto-merge; focused CO-03 suite 9 passed; ruff clean; divergence inventory regenerated.
+- **Summary:** Adds handedness-aware model hand-frame offsets, library retrieval with one rigid placement and native-clock preservation, constrained-IK seeds with distinct Pink/DLS capability records (unsupported constraints fail closed), and a geometry/profile-keyed seed cache. Four-trial retrieval-only and constrained-IK baselines are kinematic previews only.
+- **Next step:** Confirm CI green on PR #10678 and squash merge; then dispatch #10608 (CO-04).
+- **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
