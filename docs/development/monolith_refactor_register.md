@@ -75,6 +75,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 |  988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py`       |
 |  981 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py`                                                                                              |
+|  975 | `src/engines/model_inventory.py`                                                                                                                                              |
 |  973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py`              |
 |  973 | `src/tools/bunker_shot_gui/viewport_widgets.py`                                                                                                                               |
 |  965 | `src/launchers/launcher_process_manager.py`                                                                                                                                   |
