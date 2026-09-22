@@ -1,0 +1,54 @@
+{
+  "number": 10375,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/10375",
+  "title": "MS-101: Independent Scientific Validation, Identifiability and Uncertainty",
+  "body": "## Objective\nEstablish what the motion-matching product can claim scientifically, separately from engines agreeing with each other.\n\n## Scope and Deliverables\n- Move the identifiability assessment from MS-90 to the beginning of model calibration. Audit the tour-average capture's provenance, compositing, temporal registration, segment rigidity, external-force availability and physically feasible interpretation. Do not assume averaged marker motion represents a realizable individual trial.\n- Predeclare calibration versus held-out validation datasets, supported subject/club/motion domain, marker protocols and known limitations. Require multiple independent subjects/trials representative of the release domain; fix the validation cohort and thresholds before tuning, with a biomechanical reviewer-approved rationale for sample coverage. Driver and iron examples alone are not generalization evidence.\n- Assess parameter and state identifiability (scaled Jacobian singular values/null directions per phase, synthetic recovery, sensitivity to marker noise/gaps/offsets, anthropometry, filtering and contact assumptions). Report uncertainty for outputs; do not call an unidentifiable contact optimum a measured parameter.\n- Validate forces/loads against synchronized measured ground-reaction forces, center of pressure and independent outputs where those claims are offered. Validate muscle-related claims with appropriate independent evidence; fitting kinematics alone is insufficient. Missing experimental data blocks the affected claim and remains an explicit acquisition task with owner, dataset requirements and provenance/usage rights.\n- Reuse design-manual calculation governance and industrial-readiness registry. Produce a validation protocol, held-out results, reviewer decision and explicit supported/unsupported claims; no new approval registry.\n\n## Acceptance Tests\nHeld-out results are generated without parameter retuning or capture-specific code edits; uncertainty coverage and domain failures are reported. Synthetic unobservable parameters are detected. Physiologically unsupported outputs cannot be labeled validated in UI/export. Review rationale links evidence to every shipped scientific claim.\n\n## Dependencies and Ownership\nProtocol/data audit starts immediately with MS-90 phase A; consumes MS-100 metric definitions. Final results consume MS-104 qualified fits and MS-108 observable golf metrics. Accountable role: scientific/biomechanics lead with independent reviewer; coordinator owns missing-data acquisition plan. Blocks professional release scientific claims.\n\n## Execution and Evidence Contract\nPart of epic #10363; owner-authorized contract revision 2026-09-17. This issue is planning, not evidence of implementation or qualification.\nBefore implementation, check/post the existing issue lease and register presence through Repository_Management; preserve existing owners and worktrees. Use the established source modules, candidate/receipt schemas, feature-parity and industrial-readiness registries. No parallel metrics or acceptance authority.\nUse focused topic PRs with issue references, repo-standard validation, relevant native-engine tests, and negative-path tests. Mocks or skipped native tests cannot qualify a native engine. Update the canonical handoff and the existing governing-issue development-log row in place. Store content-addressed evidence with source/model/data/runtime/contract hashes; keep historical evidence immutable and mark superseded verdicts explicitly. Workflow changes follow the Repository_Management fleet campaign process.\nThe program coordinator allocates a lease holder before implementation; the accountable role below is not a claim that an agent has accepted the task. Release remains blocked until the linked evidence passes the revised contracts.\n\n## Program Qualification Dependencies\n- MS-100 (#10374): Fail-Closed Metrics and Versioned Physical Acceptance Qualification\n- MS-104 (#10378): Full-Swing Qualification for All Six Engines and Flagship Models\n- MS-108 (#10382): Observable Golf Outputs, Impact Semantics and Accuracy Budgets\n",
+  "updated_at": "2026-09-19T17:42:29Z",
+  "labels": [
+    {
+      "id": 10796034821,
+      "node_id": "LA_kwDOQqJAi88AAAACg35rBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/P2",
+      "name": "P2",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Medium priority",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10875053685,
+      "node_id": "LA_kwDOQqJAi88AAAACiDQmdQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/motion-matching",
+      "name": "motion-matching",
+      "color": "5319E7",
+      "default": false,
+      "description": "Simscape forward-dynamics motion matching effort",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12242097669,
+      "node_id": "LA_kwDOQqJAi88AAAAC2a-WBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/matched-swing-program",
+      "name": "matched-swing-program",
+      "color": "0E8A16",
+      "default": false,
+      "description": "Program: matched forward-dynamics swing in every engine, parity, launcher access (epic)",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12266883256,
+      "node_id": "LA_kwDOQqJAi88AAAAC2ynIuA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/triaged-2026-09",
+      "name": "triaged-2026-09",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Reviewed in the 2026-09-19 backlog triage",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "open"
+}
