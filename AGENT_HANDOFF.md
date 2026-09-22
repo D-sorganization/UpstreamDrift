@@ -115,7 +115,9 @@ coefficient-lift action assembly, objective contracts and independent replay.
   and [Pink Packets](docs/plans/qualified_motion_integration/PINK_TURNOVER.md).
   Post-storage runtime probes pass; full-body actions are in progress. Pink
   production wiring still requires task translation, trajectory timing and
-  product integration. #10250/#10251 are closed; #10271 tracks receipt integrity.
+  product integration. #10250/#10251 are closed; #10271 restores receipt
+  provenance chain (`receipt-provenance-chain/1`) on `anthro_driver`/`anthro_iron`
+  (software-contract; native regen deferred on low disk).
 
 - **Read First:** [Integration Boundaries and Delegation Plan](docs/plans/qualified_motion_integration/README.md).
 - **First Numerical Boundary (#10255):** Full-body Pinocchio derivatives now

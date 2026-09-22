@@ -93,7 +93,26 @@ HO-8 (`d05edafb0`) branched from an earlier commit prior to the merge of HO-11 (
 - `full_body_spec_anthro_driver.json` canonical SHA-256: `174a6cb8dfd7f9347606789c7e6b77f602643e3139590126ac3af94e1f588b42`
 - `full_body_spec_anthro_iron7.json` canonical SHA-256: `aba8196843e66c897770795e04cc0d2fca7c9ee4ba2472b2aa380d62a817ff31`
 
----
+### Resolution (Software Contract):
+
+Shared validator `pipeline.receipt_provenance.validate_receipt_provenance_chain`
+(`receipt-provenance-chain/1`) is wired through unit/CI tests on the two
+designated baselines. Contract:
+
+- `base_spec_sha256` = canonical document digest
+- `spec_sha256` = raw file bytes of the final scaled specification
+- `spec_canonical_sha256` = canonical digest of that final document (formatting-only
+  raw drift may pass when this field matches; numeric edits fail closed)
+- `de_leva_table_sha256` required and must match table, base, and final docs
+
+Intermediate `full_body_spec_hipcal.json` files are **not** fabricated; retention
+policy is final-scaled only (`require_hipcal_document=False`).
+
+Baseline receipts were re-anchored to the committed current bases and scaled
+specs after verifying scaled anthropometry already embeds the current de Leva
+table (including shank). Physical RMS numbers were not altered and remain
+kinematic milestone evidence, not physical acceptance. Full native MuJoCo
+re-execution was deferred on this workstation due to ~2 GB free disk.
 
 ## 5. Summary Policy for Program Documentation
 
