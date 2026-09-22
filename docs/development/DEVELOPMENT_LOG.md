@@ -17,6 +17,48 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9479 · Consolidate Engine Meta-Tiles and Clarify Confusable Launcher Tile Names
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9479, #9480 (parent #9412; cluster #9410 Cluster B)
+- **Branch:** fix/9479-9480-launcher-tiles
+- **PR:** #10653
+- **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/workspace_navigation.py; scripts/check_launcher_logo_families.py; tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF — rebased onto origin/main; agent-context/capability atlas/MODEL_IMAGES fixes; suite markers on new tests.
+- **Summary:** Hide duplicate per-engine dashboards with documented reasons; reclassify three specialized tools from `physics_engine` to `simulation`; clarify confusable data/video tile pairs; move non-golf utilities to `dev_research`.
+- **Next step:** Squash merge PR #10653 after CI green.
+- **Evidence:** tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py::TestWorkspaceMembership::test_non_golf_utilities_moved_out_of_primary_workflow.
+
+### DL-#10333 · Pinocchio MatchingPlant Full Lane (MS-14)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10333 (MS-14, epic #10363)
+- **Branch:** feat/10333-pinocchio-matching-plant
+- **PR:** #10684
+- **Paths:** src/shared/python/motion*matching/pipeline/plants/pinocchio_plant.py; pinocchio_lane_receipts.py; receipt_components.py; cli.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/pipeline/test_pinocchio_plant.py; docs/development/full_body_models/evidence/ground_support/anthro_driver*{pinocchio,pink}/
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after CO-06 #10687 merge (`f191dd09d`); regenerated matched_swing status README + divergence inventory; blocked native G1 receipts unchanged.
+- **Summary:** Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until ControlTower native run.
+- **Next step:** Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower native pink receipts when scheduled (MS-107 owns G1).
+- **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/; docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/
+
+### DL-#10344 · MyoSuite Golfer Scene: Pinned MyoSim Submodule + Dual-Grip Club Contacts (MS-51)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10344 (MS-51, epic #10363)
+- **Branch:** fix/10344-ms51-myosuite-repair
+- **PR:** #10685
+- **Paths:** src/engines/physics_engines/myosuite/python/golfer_scene.py; coordinate_map_anthro.json; shared/models/myosuite/golf/body/; scripts/setup_myosuite_models.{ps1,sh}; src/engines/model_inventory.py; src/config/engine_model_inventory.json; docs/engines/myosuite.md; tests/unit/engines/myosuite/test_golfer_scene.py; tests/myosuite/test_golfer_scene_native.py
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-21 at SELF — CI gate fixes: LoD basename helper, generate_golfer_scene under function-line budget, defusedxml in unit XML tests; scoped pytest green locally.
+- **Summary:** Pinned myo_sim gitlink documented; bootstrap scripts; generated driver/iron golfer MJCF on myobody_simpleupper with dual-grip site welds and four foot contact markers; diagnostic 40-of-44 coordinate map; MS-102 inventory left repair after real probes.
+- **Next step:** Push CI repair commit and confirm #10685 quality-gate green before squash merge.
+- **Evidence:** shared/models/myosuite/golf/body/golfer*myobody_receipt.json; docs/development/matched_swing_program/evidence/ms102/myosuite*\*\_structural_receipt.json
+
 ### DL-#10376 · Complete Engine and Model Inventory With Runnable Model Packages (MS-102)
 
 - **State:** in_review
@@ -26,7 +68,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10677
 - **Paths:** src/engines/model_inventory.py; src/config/engine_model_inventory.json; tests/unit/engines/test_model_inventory.py; docs/development/matched_swing_program/evidence/ms102/
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — retargeted onto origin/main; `_run_native_pipeline` split under architecture budget; real vendor pin a9ed0e7c5; `pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov` green; agent-context check clean.
+- **Last verified:** 2026-09-22 at 84e2c5a45373b3864a7479b4e5f52cbb6376425d — retargeted onto origin/main; `_run_native_pipeline` split under architecture budget; real vendor pin a9ed0e7c5; `pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov` green; agent-context check clean.
 - **Summary:** Authority-derived engine/model inventory (models.yaml + capability matrix + ENGINE_TIERS) with dual-club flagship packages, immutable hashes, qualification harness (resolve/hash/load/FK/dynamics/viewer/save), and named repair blockers. Not a competing catalog. Simscape entries require MATLAB R2025b.
 - **Next step:** Confirm CI green and squash merge of PR #10677.
 - **Evidence:** docs/development/matched_swing_program/evidence/ms102/
@@ -40,9 +82,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10666
 - **Paths:** src/engines/physics_engines/myosuite/python/{retarget,replay,golfer_scene,coordinate_map_anthro.json,viz/render_replay.py}; tests/unit/engines/myosuite/test_retarget.py; tests/myosuite/test_replay_native.py; evidence/matched/driver_g1_myosuite/
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 at SELF — TDD RED→GREEN on `tests/unit/engines/myosuite/test_retarget.py`; native replay writes receipt/candidate/GIF with honest `parity.passed=false` on placeholder MJCF (195 mm aligned RMS vs 15 mm budget until MS-51 scene); `dynamics.status=not_run`.
+- **Last verified:** 2026-09-22 at SELF — TDD RED→GREEN on `tests/unit/engines/myosuite/test_retarget.py`; native replay writes receipt/candidate/GIF; MS-51 golfer scene landed with `parity_budget_qualified=false` so 15 mm gate remains deferred.
 - **Summary:** Added pure-numpy retarget map, kinematic replay CLI, marker parity receipt (`stage=replay`), MyoSuite registration in `cross_engine_replay.VALID_ENGINES` as kinematic-only, and viewer colour. Evidence committed under `evidence/matched/driver_g1_myosuite/`.
-- **Next step:** Merge PR after CI green; MS-51 golfer scene required before 15 mm parity gate can pass.
+- **Next step:** Merge PR after CI green; drive 15 mm parity on the MS-51 golfer scene (still unqualified).
 
 ### DL-#10436 · Explore Feasible Force Null Spaces and Publish Torque-Distribution Tradeoffs
 
@@ -149,7 +191,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10676
 - **Paths:** src/shared/python/motion_matching/{simscape_topology.py,full_marker_terminal.py,tour_metrics.py,acceptance.py}; scripts/matlab/{materialize_ms61_topology_receipts.py,run_simscape_candidate.ps1}; docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/; docs/development/matched_swing_program/{GATES.md,README.md,WAVES.md}; docs/development/simscape_tour_matching/CHECKPOINTS.md
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — regenerated matched_swing_program README status from ledger (103 receipts); freshness test GREEN; fail-closed blocked native_gate + reduced_27_no_neck retained.
+- **Last verified:** 2026-09-22 at 84e2c5a45373b3864a7479b4e5f52cbb6376425d — regenerated matched_swing_program README status from ledger (103 receipts); freshness test GREEN; fail-closed blocked native_gate + reduced_27_no_neck retained.
 - **Summary:** Fail-closed 27-DOF topology classification (no independent neck), dual terminal disclosure (full + head cluster; body-excluding-head diagnostic only), acceptance/tour_metrics dual-terminal contracts, and run-103 scaffolding derived from run-102 without inventing native G1 success; repair linked to MS-104 (#10378).
 - **Next step:** Confirm CI green and squash auto-merge of PR #10676.
 - **Evidence:** docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/{topology_report.json,terminal_breakdown.json,native_gate.json,runtime_license_receipt.json,parity_receipt.json,HANDOFF.md}; tests/unit/motion_matching/test_simscape_topology_ms61.py.
@@ -344,18 +386,46 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
-### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
+### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
 
 - **State:** in_review
+- **Owner:** local
+- **Issue:** #10619 (epic #10603)
+- **Branch:** local/nm-04-teacher-episodes
+- **PR:** #10698
+- **Paths:** src/shared/python/neural_motion/teachers/; src/shared/python/training/scheduler.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — DRY helpers + divergence inventory for `neural_motion/teachers/*`; squash auto-merge armed; software-contract only
+- **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes; training scheduler admits teacher budgets via `neural_teacher_corpus_budget` and datasets register teacher corpus paths without all-RAM load.
+- **Next step:** Confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed.
+- **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
+
+### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10618 (epic #10603)
+- **Branch:** feat/10618-nm03-episode-storage
+- **PR:** #10686
+- **Paths:** src/shared/python/neural_motion/episodes/; src/shared/python/neural_motion/json_io.py; src/shared/python/neural_motion/experiment.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — merged to main via #10686 (`800703cb`)
+- **Summary:** Versioned `neural-episode-store/1.0.0` HDF5 shards with content hashes; family-level splits with held-out strata and real-data eval bucket; compact-1.0 adapter via `CompactArrayBundle` preserves 27/189 layout; thin task views and transform-keyed window cache; training registry registers corpus paths without all-RAM load.
+- **Next step:** Continue NM-04 (#10619) under frozen episode-store contracts.
+- **Evidence:** docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json.
+
+### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10617 (epic #10603)
 - **Branch:** fix/10617-nm02-native-dataset-labels
 - **PR:** #10679
 - **Paths:** src/shared/python/data_io/dataset_generator/{core,channel_finalize,sim_buffers,sim_recording,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main after DIRTY; kept inventory `ud-only` 1415 for channel_finalize/sim_buffers/sim_recording; awaiting CI re-run on PR #10679
+- **Last verified:** 2026-09-22 — merged to main via #10679 (`4bb10daa0`)
 - **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
-- **Next step:** Confirm CI green on PR #10679 and squash auto-merge.
+- **Next step:** Continue NM-03 (#10618) under frozen learning contracts.
 - **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
 
 ### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
@@ -458,16 +528,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10608 · CO-04 Match Club-Only Motion With Double and Triple Pendulums
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10608 (epic #10602)
 - **Branch:** feat/issue-10608-co04-pendulum-club-match
-- **PR:** #10680
+- **PR:** #10680 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,replay_package}.py; src/engines/physics_engines/pendulum/python/motion_matching/{club_pendulum_match,club_match_matrix}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — restored vendor pin a9ed0e7c5; re-wrote divergence inventory to include tools-only launch_monitor/gspro_connect.py (unit-test-gate failure on tip 34b447211).
+- **Last verified:** 2026-09-22 — merged via #10680 onto main as prerequisite for CO-06
 - **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
-- **Next step:** Confirm quality-gate green on PR #10680 and squash auto-merge; then dispatch CO-06 #10610.
+- **Next step:** Continue on #10610 (CO-06).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
 
 ### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
@@ -481,8 +551,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 — merged via #10681 onto main as prerequisite for CO-06
 - **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
-- **Next step:** Continue on #10610 (CO-06) after CO-04 lands.
+- **Next step:** Continue on #10610 (CO-06).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
+
+### DL-#10610 · CO-06 Recover Feasible Controls and Independently Replay Candidates
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10610 (epic #10602)
+- **Branch:** feat/10610-co06-controls-replay
+- **PR:** #10687
+- **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at f191dd09d — squash-merged to main via PR #10687; native G1 remains blocked on software-contract fixtures only.
+- **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
+- **Next step:** Dispatch CO-07+ per club-only epic dependency order; do not invent native G1 pass.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

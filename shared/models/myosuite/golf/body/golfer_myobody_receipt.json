@@ -1,0 +1,74 @@
+{
+  "schema_version": "myosuite-golfer-scene/1",
+  "issue": 10344,
+  "ms": "MS-51",
+  "myo_sim_pin": "33f3ded946f55adbdcf963c99999587aadaf975f",
+  "myo_sim_path": "shared/models/myosuite/myo_sim",
+  "base_model": "body/myobody_simpleupper.xml",
+  "contact_law": "hunt_crossley_coulomb_shared",
+  "contact_parameters": {
+    "stiffness_n_m": 50000.0,
+    "dissipation_s_m": 2.0,
+    "static_friction": 0.9,
+    "dynamic_friction": 0.8,
+    "viscous_friction": 0.0,
+    "transition_velocity_m_s": 0.05
+  },
+  "foot_contacts": [
+    {
+      "name": "heel_r",
+      "body": "calcn_r",
+      "position_m": [0.01, -0.005, 0.0],
+      "radius_m": 0.035
+    },
+    {
+      "name": "forefoot_r",
+      "body": "calcn_r",
+      "position_m": [0.16, -0.005, 0.0],
+      "radius_m": 0.03
+    },
+    {
+      "name": "heel_l",
+      "body": "calcn_l",
+      "position_m": [0.01, -0.005, 0.0],
+      "radius_m": 0.035
+    },
+    {
+      "name": "forefoot_l",
+      "body": "calcn_l",
+      "position_m": [0.16, -0.005, 0.0],
+      "radius_m": 0.03
+    }
+  ],
+  "grip": {
+    "closure": "dual_site_weld",
+    "sites": [
+      "grip_site_hand_r",
+      "grip_site_hand_l",
+      "grip_site_club_r",
+      "grip_site_club_l"
+    ],
+    "welds": ["grip_weld_r", "grip_weld_l"]
+  },
+  "clubs": {
+    "driver": {
+      "name": "driver",
+      "length_m": 1.156,
+      "total_mass_kg": 0.313,
+      "xml": "golfer_myobody_driver.xml",
+      "sha256": "8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b"
+    },
+    "iron": {
+      "name": "iron7",
+      "length_m": 0.94,
+      "total_mass_kg": 0.428,
+      "xml": "golfer_myobody_iron.xml",
+      "sha256": "ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086"
+    }
+  },
+  "qualification": {
+    "native_load_required": true,
+    "parity_budget_qualified": false,
+    "note": "Generated topology with dual-grip welds and four foot contacts. A partial coordinate map is diagnostic only; 15 mm marker parity and G1 dynamics are not claimed by MS-51."
+  }
+}

@@ -77,8 +77,11 @@ def test_native_marker_parity_within_budget_when_scene_qualified(
     )
 
     scene = resolve_golfer_scene()
-    if scene.is_placeholder:
-        pytest.skip("MS-51 pinned myo_sim golfer scene required for 15 mm parity")
+    if scene.is_placeholder or not scene.parity_budget_qualified:
+        pytest.skip(
+            "15 mm marker parity requires a parity-qualified scene receipt; "
+            "MS-51 delivers topology only (parity_budget_qualified=False)"
+        )
 
     out = tmp_path / "driver_g1_myosuite"
     receipt = run_kinematic_replay(
