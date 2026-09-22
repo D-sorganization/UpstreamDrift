@@ -7,8 +7,9 @@ python -c "from pathlib import Path; import json; from src.engines.model_invento
 ```
 
 Native load/step/view receipts require the engine SDK on a supported host
-(MS-103 preflight). MyoSuite flagship packages remain `repair` until MS-51
-(#10344). Simscape native dynamics use MATLAB R2025b via MS-60 run management.
+(MS-103 preflight). MyoSuite flagship packages are `ready` for structural smoke
+after MS-51 (#10344) golfer scenes; G1 dynamics and 15 mm parity remain open.
+Simscape native dynamics use MATLAB R2025b via MS-60 run management.
 
 `inventory_summary.json` is the machine-readable rollup. Per-package
 `*_structural_receipt.json` files record resolve/hash outcomes without claiming
