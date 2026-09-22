@@ -13,7 +13,7 @@
   blockers. Motion Matching GUI adds a Club-Only tab; ResultsBrowser indexes
   `club_only_ui_result` JSON. Schema `club-only-ui-integration/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_ui_integration.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py -q -n 0 --no-cov --timeout=90` (14 passed); pre-push mypy/bandit GREEN.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py -q -n 0 --no-cov --timeout=90` (14 passed); pre-push mypy/bandit GREEN. CI repair: `python -m scripts.gen_monolith_register --write`; `python -m scripts.shared_tools.divergence_inventory --write`; GUI tab test expects 4 tabs including Club-Only (three prior unit-test-gate failures GREEN locally).
 - Limitations: software-contract UI only; `native_g1_pass` false; blockers
   `native_g1_qualification_requires_desk_native_receipt`,
   `software_contract_ui_integration_is_not_native_evidence`.
