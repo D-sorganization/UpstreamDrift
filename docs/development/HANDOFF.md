@@ -16,7 +16,7 @@
 - Limitations: software-contract scoring only; no native Fit/G1 claim; no
   unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
   saved in the software-contract evidence for CO-08 (not native timing).
-- Next: Open PR `Fixes #10611`, confirm CI green, squash auto-merge.
+- Next: Confirm CI green on PR #10700; squash auto-merge remains armed.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
