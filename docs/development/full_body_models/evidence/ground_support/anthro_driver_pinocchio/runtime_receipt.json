@@ -3,7 +3,7 @@
   "status": "blocked",
   "accepted": false,
   "missing_components": ["crocoddyl", "pink", "pinocchio"],
-  "repository_revision": "pending-commit",
+  "repository_revision": "84e2c5a45373b3864a7479b4e5f52cbb6376425d",
   "probes": {},
   "scope": "MS-14 motion runtime probe; no Pinocchio/Pink native success"
 }
