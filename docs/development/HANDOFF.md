@@ -10,10 +10,10 @@
   pilot spec for `driven_double_pendulum`). Evidence:
   `docs/plans/neural_motion_matching/evidence/nm04_teacher_pilot_receipt.json`.
 - Validation: `python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60` GREEN; `ruff check` / `ruff format --check` on teacher module GREEN.
+- CI fix (unit-test-gate): regenerated `docs/shared_tools/divergence_inventory.{v1.json,md}` for seven `neural_motion/teacher/*` ud-only paths; `test_committed_inventory_is_current_when_vendor_present` GREEN locally.
 - Limitations: `MockTeacherRolloutBackend` software contracts only; no native
   teacher generation, training, or speed claim.
-- Next: Push branch, open PR `Fixes #10619` with label `agent:local`, squash
-  auto-merge after quality-gate; then NM-05 (#10620).
+- Next: Push inventory fix to PR #10699 (`Fixes #10619`, label `agent:local`), squash auto-merge after quality-gate; then NM-05 (#10620).
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
