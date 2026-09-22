@@ -2,7 +2,8 @@
 
 ## GolfSwingVisualizer MATLAB Consolidation (#9225)
 
-Branch `bot/issue-9225-golfviz-consolidation` off `origin/main` @ `901b2de5e`;
+PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715) (open; implementation commit `f33b40c9c`); branch
+`bot/issue-9225-golfviz-consolidation` off `origin/main` @ `901b2de5e`;
 worktree `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`;
 governing issue [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
 (source:assessment P2, DRY PP1); DL-#9225.

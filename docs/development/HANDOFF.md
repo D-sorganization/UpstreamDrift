@@ -2,6 +2,8 @@
 
 ## GolfSwingVisualizer MATLAB Consolidation (#9225)
 
+- PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715)
+  (open); implementation commit `f33b40c9c`.
 - Worktree: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`,
   branch `bot/issue-9225-golfviz-consolidation` (off `origin/main` @ `901b2de5e`),
   DL-#9225. Governing issue
@@ -1476,6 +1478,11 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 [Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.
 
 ## Change Log
+
+- 2026-09-22T15:20:00Z — Consolidated the four drifted `GolfSwingVisualizer.m`
+  copies into one fleet-shared `+golfviz` package class; both launchers wire the
+  shared path; PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715)
+  open (DL-#9225, issue #9225). Commit f33b40c9c.
 
 - 2026-09-22T12:40:00Z — Rematch #10684 onto origin/main after CO-06 #10687 merge (`f191dd09d`); kept MS-14 + CO-06 HANDOFF/DL rows; regenerated matched_swing README + divergence inventory; blocked G1 honesty preserved. Commit SELF.
 - 2026-09-22T07:15:00Z — Rematch #10684 onto origin/main after MS-51 #10685 merge; kept MS-14 + MS-51 DL/HANDOFF rows; regenerated matched_swing status README. Commit SELF.
