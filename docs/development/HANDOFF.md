@@ -454,15 +454,21 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Masked Proposals NM-06 #10621 Handoff
+
+- Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10621-nm06.
+- Branch: feat/10621-nm06-masked-proposals; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue #10621 (NM-06, epic #10603). Entry DL-#10621.
+- Delivered: `src/shared/python/neural_motion/proposals/` (`neural-masked-proposals/1.0.0`) binding TaskDimensions.u_dim / MaskedTrajectoryTask, masked conditioning, selection + mixture ablation, observation/regularization training (not coeff MSE alone), hybrid fail-closed polish_fn refine, strict checkpoint mismatch rejection. Inverse reuse: masked_proposal.py, proposal_shared.py, proposal_training.py, collapse.py, basis_time.py; regressor_training stays on TrainingConfig + epoch helpers (not flat kwargs).
+- Gate repairs (SELF): merge origin/main (CO-09 #10711); extract `motion_matching.inverse.proposal_shared` for DRY; regenerate divergence inventory with `--repo-root .` for NM-06 ud-only paths; keep architecture budgets + optional-torch unit-lane path; do not raise DRY baseline max.
+- Validation: NM-06 pytest green with torch; local DRY gate OK; inventory `--check` current; software-contract fixtures only. Articulated-authority lockfile miss on CI is unrelated (file present on tip and main).
+- Next action: confirm unit-test-gate + repo-structure-gates green on PR #10709 tip; do not start NM-07+ until merge.
+
 ## Neural Dynamics Baselines NM-05 #10620 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10620-nm05`.
-- Branch: `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701) open with squash auto-merge armed. Governing issue #10620 (NM-05, epic #10603). Entry DL-#10620.
-- Delivered: `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`); `DynamicsBaselineTrainerConfig` + modular pilot helpers; `FamilySplitPlan.ids_for`; classical then optional MLP; trial splits / inverse conditioning / identity-leakage guards; dynamics_baselines.md + receipt; training seams `neural_dynamics_baseline_budget` / `register_dynamics_baseline_corpus`.
-- CI unblock (SELF): LoD via `ids_for`; architecture budget via `DynamicsBaselineTrainerConfig` + pilot helpers; keep `inverse_timestep/` byte-identical to `origin/main` so grandfathered oversizes stay out of the changed-file architecture scan.
-- Validation: `pytest tests/unit/neural_motion/test_dynamics_baselines_nm05.py -q -n 2 --no-cov --timeout=120` (10 passed under xdist); architecture budget scoped to NM-05 baselines only; DRY helper \_state_control_features; software-contract fixtures only.
-- CI unblock (SELF): unit-test-gate — patch `torch_is_available` on the imported `baselines.neural` module object; assert `mlp_skipped_reason == "torch_unavailable"`. String-path monkeypatch fails under xdist on the `src.shared.python` namespace package. quality-gate was cascade of that failure only.
-- Next action: confirm unit-test-gate + quality-gate green on PR #10701; do not start NM-06+.
+- PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701) **merged**.
+  Governing issue #10620 (NM-05, epic #10603). Entry DL-#10620 shipped.
+- Delivered: `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`).
+- Next action: superseded by NM-06 dispatch.
 
 ## Neural Teacher Episodes NM-04 #10619 Handoff
 
@@ -492,12 +498,13 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00–NM-04 shipped; active child [NM-05 #10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md); [NM-05 Dynamics Baselines](../plans/neural_motion_matching/dynamics_baselines.md).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00–NM-05 shipped; active child [NM-06 #10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md); [NM-05 Dynamics Baselines](../plans/neural_motion_matching/dynamics_baselines.md); [NM-06 Masked Proposals](../plans/neural_motion_matching/masked_proposals.md).
 - **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
 - **NM-04 state:** MERGED via PR #10698; DL-#10619.
-- **NM-05 state:** in_review on PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); DL-#10620.
-- **Next:** Confirm lod/repo-structure gates green + squash auto-merge of #10701; do not start NM-06+.
+- **NM-05 state:** MERGED via PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); DL-#10620.
+- **NM-06 state:** in review via PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); DL-#10621.
+- **Next:** Confirm CI green on PR #10709; do not start NM-07+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
@@ -1472,6 +1479,18 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-22T15:00:00Z — NM-06 #10709: rematch onto origin/main after CO-09/#10650 landed; keep proposal_shared DRY helpers. Commit SELF.
+- 2026-09-22T14:35:07Z — CI remediation for #10650: joint_panel unit tests now
+  construct a module-scoped offscreen QApplication (autouse qapp fixture,
+  mirroring starting_pose_matcher/test_joint_slider_panel.py) - constructing
+  JointPanel without a QApplication aborts the process (Qt qFatal,
+  Windows exit 9 / 0xC0000409), so the rewritten real-Qt assertions never ran.
+  Focused check: QT_QPA_PLATFORM=offscreen python -m pytest
+  tests/unit/tools/pose_studio/test_joint_panel.py -q (13 passed). Commit SELF.
+- 2026-09-22T15:20:00Z — NM-06 #10709: regenerate divergence inventory for NM-06 paths on rematched tip; keep proposal_shared DRY. Commit SELF.
+- 2026-09-22T14:20:00Z — NM-06 #10709: extract proposal_shared helpers to clear DRY duplication gate (no baseline raise). Commit SELF.
+- 2026-09-22T14:00:00Z — NM-06 #10709: restore regressor TrainingConfig + epoch helpers under architecture budgets (prefer LoD split over net-zero gate bypass). Commit SELF.
+- 2026-09-22T13:45:00Z — NM-06 #10709: rematch main; lazy torch inverse exports; architecture + unit-gate fixes. Commit SELF.
 - 2026-09-22T12:40:00Z — Rematch #10684 onto origin/main after CO-06 #10687 merge (`f191dd09d`); kept MS-14 + CO-06 HANDOFF/DL rows; regenerated matched_swing README + divergence inventory; blocked G1 honesty preserved. Commit SELF.
 - 2026-09-22T07:15:00Z — Rematch #10684 onto origin/main after MS-51 #10685 merge; kept MS-14 + MS-51 DL/HANDOFF rows; regenerated matched_swing status README. Commit SELF.
 - 2026-09-22T03:50:00Z — Fix unit-test-gate on #10684: divergence inventory, ledger (103→106 receipts), MS-14 lane receipt excluded from ground-support schema scan. Commit SELF.
