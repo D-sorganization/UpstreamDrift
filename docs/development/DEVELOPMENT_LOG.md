@@ -532,7 +532,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10611 (epic #10602)
 - **Branch:** feat/10611-co07-fast-matching
-- **PR:** not created
+- **PR:** #10700
 - **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — 12 unit tests GREEN; ruff/mypy clean; monolith+divergence inventories regenerated; native_g1_pass false
