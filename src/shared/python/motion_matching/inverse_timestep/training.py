@@ -1,6 +1,10 @@
 """Training loop for :class:`TimestepInverseDynamics` on the realistic-speed
 filtered subset of the compact dataset.
 
+NM-05 (#10620) dynamics baselines mirror the trial-level split and masked-tau
+patterns here for episode-store pilots; native timestep training remains owned
+by this module.
+
 Pipeline:
     1. Load compact dataset (eager pandas DataFrames).
     2. Split *by trial_id* (90/10) so val timesteps come from unseen trials.
