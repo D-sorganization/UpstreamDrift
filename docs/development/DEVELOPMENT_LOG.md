@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709/#10718/#10721; regenerated divergence inventory for `launch_monitor/gspro_connect.py`; jobs unit tests retained; SPEC keeps #10707/#10709/#10718/#10721; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709/#10718/#10720/#10721; regenerated divergence inventory; removed duplicate SPEC #10721 key; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 after #10721 merge and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after SPEC duplicate-key repair and allow squash auto-merge to land.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
