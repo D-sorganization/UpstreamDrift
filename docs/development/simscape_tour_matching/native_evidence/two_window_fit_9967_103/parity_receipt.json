@@ -1,0 +1,10 @@
+{
+  "schema_version": "simscape-parity-receipt/1",
+  "issue": "#10348",
+  "run_id": "two_window_fit_9967_103",
+  "parent_run_id": "two_window_fit_9967_102",
+  "max_marker_euclidean_discrepancy_m": 6.0521363274898084e-5,
+  "mean_marker_euclidean_discrepancy_m": 1.100649469043581e-6,
+  "source": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/qualified_candidate_replay.json",
+  "note": "Pinocchio\u2194Simscape parity retained from MS-60 run-102 R2025b cold replay; MS-61 does not re-claim native physical success."
+}
