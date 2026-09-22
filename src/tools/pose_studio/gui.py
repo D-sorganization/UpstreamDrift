@@ -88,6 +88,10 @@ class MainWidget(QtWidgets.QWidget):
         self._build_layout()
         self._wire_signals()
 
+        # Re-range sliders/spinboxes to the initial engine's reported
+        # joint limits (falls back to the panel's default range; #8887).
+        self.joint_panel.set_limits(self._engine_controller.joint_limits_deg())
+
         # Push the initial pose through the engine and refresh the view.
         self._apply_pose(canonical_zero_pose(), record_history=False)
 
@@ -112,6 +116,11 @@ class MainWidget(QtWidgets.QWidget):
         self.btn_load = QtWidgets.QPushButton("Load Pose...")
         self.btn_load.setToolTip(_LOAD_TOOLTIP)
         self.btn_load.clicked.connect(self._on_load_clicked)
+
+        self.status_label = QtWidgets.QLabel("")
+        self.status_label.setToolTip(
+            "Explains the most recent rejected joint edit, if any."
+        )
 
         self.btn_undo = QtWidgets.QPushButton("Undo")
         self.btn_undo.setToolTip("Undo the last edit (Ctrl+Z).")
@@ -162,11 +171,12 @@ class MainWidget(QtWidgets.QWidget):
         splitter.setStretchFactor(1, 2)
         outer.addWidget(splitter, stretch=1)
 
-        # Footer: undo/redo, save/load.
+        # Footer: undo/redo, save/load, and a status line for rejected edits.
         footer = QtWidgets.QHBoxLayout()
         footer.addWidget(self.btn_undo)
         footer.addWidget(self.btn_redo)
         footer.addWidget(self.btn_references)
+        footer.addWidget(self.status_label)
         footer.addStretch(1)
         footer.addWidget(self.btn_load)
         footer.addWidget(self.btn_save)
@@ -190,6 +200,7 @@ class MainWidget(QtWidgets.QWidget):
         status = self._engine_controller.switch_engine(engine_name)
         self.engine_picker.set_status(status)
         self.units_badge.set_engine(engine_name)
+        self.joint_panel.set_limits(self._engine_controller.joint_limits_deg())
         self.view_3d.update_pose(self._engine_controller.pose)
 
     def _on_angle_edited(self, name: str, value_deg: float) -> None:
@@ -208,7 +219,23 @@ class MainWidget(QtWidgets.QWidget):
             )
         except (ValueError, TypeError) as exc:
             logger.warning("Pose edit rejected: %s", exc)
+            try:
+                self.joint_panel.set_error(name, True)
+            except KeyError:
+                # `name` did not come from a real joint widget (e.g. a
+                # malformed programmatic edit); there is no spinbox to
+                # border, but the status message below still helps.
+                pass
+            lower_deg, upper_deg = self._engine_controller.joint_limits_deg().get(
+                name, (float("-inf"), float("inf"))
+            )
+            self.status_label.setText(
+                f"{name}: rejected ({exc}); "
+                f"valid range [{lower_deg:.1f}, {upper_deg:.1f}] deg"
+            )
             return
+        self.joint_panel.set_error(name, False)
+        self.status_label.setText("")
         self._apply_pose(new_pose, record_history=True)
 
     def _on_undo(self) -> None:

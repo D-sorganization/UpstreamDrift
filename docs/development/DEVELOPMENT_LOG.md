@@ -26,9 +26,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main after CO-09 #10711 and MS-105 #10704; jobs unit tests retained; 15 MS-104 unit tests green; SPEC changelog keeps both #10707 and #10711 rows; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — merged origin/main after #10650 (#8887); jobs unit tests retained; SPEC changelog keeps #10707 and sibling rows; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 after CO-09 merge and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after #10650 merge and allow squash auto-merge to land.
+
+### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #8887
+- **Branch:** fix/8887-pose-studio-joint-limits
+- **PR:** #10650
+- **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at c3773d62c — merged to main via PR #10650.
+- **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
+- **Next step:** N/A — shipped via #10650.
 
 ### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
 
