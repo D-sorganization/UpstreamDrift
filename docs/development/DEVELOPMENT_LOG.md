@@ -26,9 +26,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 15 unit tests green; divergence inventory regenerated for `full_swing_qualification.py` (ud-only); empty-ledger evidence snapshot `release_status=blocked` with 36 incomplete required rows; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — merged origin/main after MS-105 #10704 so jobs unit tests are retained; 15 MS-104 unit tests green; divergence inventory regenerated; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 after inventory fix and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after retaining MS-105 jobs tests and allow squash auto-merge to land.
+
+### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
+
+- **State:** shipped
+- **Owner:** local
+- **Issue:** #10379 (MS-105, epic #10363; folded PF-08 #10438)
+- **Branch:** feat/10379-ms105-jobs-recovery
+- **PR:** #10704
+- **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at 901b2de5e — merged to main via PR #10704.
+- **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
+- **Next step:** N/A — shipped via #10704.
 
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
