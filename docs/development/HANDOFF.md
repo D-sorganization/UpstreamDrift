@@ -1,5 +1,28 @@
 # Current Matching Continuation Handoff
 
+## MS-104 Full-Swing Qualification Matrix (#10378)
+
+- Worktree: `Worktrees/UpstreamDrift-10378-ms104`, branch
+  `feat/ms104-full-swing-qualification`, DL-#10378, PR
+  [#10707](https://github.com/D-sorganization/UpstreamDrift/pull/10707)
+  (squash auto-merge armed). Tip SHA: SELF.
+- Delivered: `src/shared/python/motion_matching/full_swing_qualification.py`
+  evaluates 36 required full-body flagship cells (6 engines × driver/iron ×
+  G1/G2/G3) against the matched-swing ledger plus explicit evidence links
+  (MS-100 acceptance, MS-72 conformance, native replay, numerical
+  convergence, provenance hashes). Fail-closed `release_status`; reduced
+  27-DOF Simscape oracle is partial only and cannot fill a flagship cell.
+  Named per-engine owner blockers retained (MS-21/30/42/53/107/111; folded
+  MS-109/110/112 → #10378).
+- Evidence: `docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json`
+  (`release_status=blocked`, `incomplete_required_count=36`).
+- Validation: `python -m pytest tests/unit/motion_matching/test_full_swing_qualification.py -q -n 0 --no-cov`
+  GREEN (15 passed); ruff clean on touched files.
+- Named blockers: no invented six-engine native pass; every incomplete cell
+  names its owner issue; software-contract fixtures only.
+- Next: Confirm CI green on #10707; do not start MS-105/106 or CO/NM
+  siblings from this worktree.
+
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612)
 
 - Worktree: `Worktrees/UpstreamDrift-10612-co08`, branch
