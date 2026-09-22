@@ -433,17 +433,21 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Dynamics Baselines NM-05 #10620 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10620-nm05`.
+- Branch: `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701) open with squash auto-merge armed. Governing issue #10620 (NM-05, epic #10603). Entry DL-#10620.
+- Delivered: `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`); `DynamicsBaselineTrainerConfig` + modular pilot helpers; `FamilySplitPlan.ids_for`; classical then optional MLP; trial splits / inverse conditioning / identity-leakage guards; dynamics_baselines.md + receipt; training seams `neural_dynamics_baseline_budget` / `register_dynamics_baseline_corpus`.
+- CI unblock (SELF): LoD via `ids_for`; architecture budget via `DynamicsBaselineTrainerConfig` + pilot helpers; keep `inverse_timestep/` byte-identical to `origin/main` so grandfathered oversizes stay out of the changed-file architecture scan.
+- Validation: `pytest tests/unit/neural_motion/test_dynamics_baselines_nm05.py -q -n 2 --no-cov --timeout=120` (10 passed under xdist); architecture budget scoped to NM-05 baselines only; DRY helper \_state_control_features; software-contract fixtures only.
+- CI unblock (SELF): unit-test-gate — patch `torch_is_available` on the imported `baselines.neural` module object; assert `mlp_skipped_reason == "torch_unavailable"`. String-path monkeypatch fails under xdist on the `src.shared.python` namespace package. quality-gate was cascade of that failure only.
+- Next action: confirm unit-test-gate + quality-gate green on PR #10701; do not start NM-06+.
+
 ## Neural Teacher Episodes NM-04 #10619 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10619`.
-- Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
-- Base: merged `origin/main` (merge commit on branch tip `SELF`).
-- Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt; training reuse seams `neural_teacher_corpus_budget` (`training/scheduler.py`) and `register_teacher_episode_corpus` (`training/datasets.py`) for phantom-guard Rule 3.
-- DRY unblock (SELF): extracted `_require_episode_corpus_args`, `_probe_episode_store_layout`, `_register_hdf5_episode_dataset` so NM-03/NM-04 register helpers no longer trip fingerprints `506c08597d83` / `7153fb978f65` / `c8b715837b45` (baseline max 1).
-- Inventory unblock (SELF): regenerated `docs/shared_tools/divergence_inventory.v1.json` for `neural_motion/teachers/*` (ud-only).
-- Validation: unit tests for datasets + corpus registration + inventory freshness green; scoped DRY scan clears the three failing hashes; architecture budget clean.
-- Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
-- Next action: confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
+- PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) **merged**. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619 shipped.
+- Delivered: `src/shared/python/neural_motion/teachers/`; schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`.
+- Next action: superseded by NM-05 dispatch.
 
 ## Neural Episode Storage NM-03 #10618 Handoff
 
@@ -467,12 +471,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
 - **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679, NM-03/#10686 shipped; active child [NM-04 #10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00–NM-04 shipped; active child [NM-05 #10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md); [NM-05 Dynamics Baselines](../plans/neural_motion_matching/dynamics_baselines.md).
 - **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
-- **NM-03 state:** MERGED via PR #10686 (`800703cb`); DL-#10618.
-- **NM-04 state:** in_review on PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698); DL-#10619.
-- **Next:** Confirm CI green + squash auto-merge of #10698; do not start NM-05+.
+- **NM-04 state:** MERGED via PR #10698; DL-#10619.
+- **NM-05 state:** in_review on PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); DL-#10620.
+- **Next:** Confirm lod/repo-structure gates green + squash auto-merge of #10701; do not start NM-06+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
