@@ -55,6 +55,9 @@
   `docs/development/full_body_models/evidence/ground_support/anthro_driver_{pinocchio,pink}/`.
 - Validation: `pytest tests/unit/motion_matching/pipeline/test_pinocchio_plant.py -q -n 0 --no-cov`
   (contracts green; native tests skip without real Pinocchio); ruff + architecture budget clean.
+  CI hygiene (PR #10684): `python -m scripts.shared_tools.divergence_inventory --write`;
+  `python -m src.shared.python.motion_matching ledger --write`; unit tests for divergence
+  inventory, ledger freshness, and ground-support receipt scan (MS-14 lane schema excluded).
 - Limitation: Windows host has no Pinocchio/Pink; receipts are `blocked` /
   `accepted=false` / `native_claims=false`. Do not treat as G1 or green weld closure.
 - Next: Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower
@@ -1342,6 +1345,7 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-22T03:50:00Z — Fix unit-test-gate on #10684: divergence inventory, ledger (103→106 receipts), MS-14 lane receipt excluded from ground-support schema scan. Commit SELF.
 - 2026-09-21T21:10:00Z — Refresh matched_swing ledger (101 receipts) for #10660 unit-test-gate freshness. Commit SELF.
 - 2026-09-21T20:42:00Z — Fix architecture budget on #10660: ShootingFitConfig and dynamics artifact helper. Commit SELF.
 - 2026-09-21T20:25:00Z — Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
