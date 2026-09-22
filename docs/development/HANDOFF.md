@@ -434,11 +434,13 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Neural Masked Proposals NM-06 #10621 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10621-nm06`.
-- Branch: `feat/10621-nm06-masked-proposals`; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue #10621 (NM-06, epic #10603). Entry DL-#10621.
-- Delivered: `src/shared/python/neural_motion/proposals/` (`neural-masked-proposals/1.0.0`) binding TaskDimensions.u_dim / MaskedTrajectoryTask, masked conditioning, selection + mixture ablation, observation/regularization training (not coeff MSE alone), hybrid fail-closed polish_fn refine, strict checkpoint mismatch rejection. Also retains inverse-path modules under motion_matching/inverse/ for stem/collapse/basis-time reuse.
-- Architecture budget (SELF): split `train_masked_control_proposals` / `train_masked_proposals` into helpers; pack `train_inverse_regressor` into `TrainingConfig` + `_prepare_regressor_run` / `_fit_regressor_epochs`; pack `ProposalConfig.from_task` overrides into `ProposalFromTaskSpec`.
-- Validation: `python scripts/ci/check_architecture_budget.py` OK; `pytest tests/unit/neural_motion/test_masked_proposals_nm06.py tests/unit/motion_matching/test_masked_proposals_nm06.py tests/unit/motion_matching/test_inverse_regressor_training.py -q -n 0 --no-cov --timeout=120` (25 passed). Software-contract fixtures only.
+- Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10621-nm06.
+- Branch: eat/10621-nm06-masked-proposals; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue #10621 (NM-06, epic #10603). Entry DL-#10621.
+- Delivered: src/shared/python/neural_motion/proposals/ (
+  eural-masked-proposals/1.0.0) binding TaskDimensions.u_dim / MaskedTrajectoryTask, masked conditioning, selection + mixture ablation, observation/regularization training (not coeff MSE alone), hybrid fail-closed polish_fn refine, strict checkpoint mismatch rejection. Inverse reuse anchors: masked_proposal.py, proposal_training.py, collapse.py, asis_time.py — **not** a rewrite of
+  egressor_training.py.
+- Gate repairs (SELF): rematch onto origin/main (keep SPEC #10709 + #10704 rows); split proposal trainers under architecture budgets; lazy-load torch symbols in motion_matching.inverse + module-level pytest.importorskip("torch") so unit-test-gate collects without torch.
+- Validation: python scripts/ci/check_architecture_budget.py OK; NM-06 pytest green with torch; without torch the motion_matching module skips cleanly. Software-contract fixtures only.
 - Next action: confirm quality-gate + unit-test-gate green on PR #10709; do not start NM-07+ until merge.
 
 ## Neural Dynamics Baselines NM-05 #10620 Handoff
@@ -1457,7 +1459,7 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
-- 2026-09-22T13:20:00Z — NM-06 #10709 architecture-budget fix: split proposal/regressor trainers and ProposalFromTaskSpec; 25 unit tests green. Commit SELF.
+- 2026-09-22T13:45:00Z — NM-06 #10709: rematch main; drop regressor_training rewrite; lazy torch inverse exports; architecture + unit-gate fixes. Commit SELF.
 - 2026-09-22T12:40:00Z — Rematch #10684 onto origin/main after CO-06 #10687 merge (`f191dd09d`); kept MS-14 + CO-06 HANDOFF/DL rows; regenerated matched_swing README + divergence inventory; blocked G1 honesty preserved. Commit SELF.
 - 2026-09-22T07:15:00Z — Rematch #10684 onto origin/main after MS-51 #10685 merge; kept MS-14 + MS-51 DL/HANDOFF rows; regenerated matched_swing status README. Commit SELF.
 - 2026-09-22T03:50:00Z — Fix unit-test-gate on #10684: divergence inventory, ledger (103→106 receipts), MS-14 lane receipt excluded from ground-support schema scan. Commit SELF.

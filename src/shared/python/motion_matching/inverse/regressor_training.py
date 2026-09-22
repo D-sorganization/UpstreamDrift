@@ -4,11 +4,6 @@ Parallel surface to :func:`.training.train_inverse_cvae` but for the
 deterministic regressor: no KL term, no beta annealing, no free-bits —
 just MSE on standardised coefficients (target/coefficient_bounds in
 [-1, 1]) with AdamW + early-stopping.
-
-NM-06 (#10621) adds :func:`train_masked_control_proposals` (re-exported
-from :mod:`.proposal_training`) which trains on observation residual after
-differentiable surrogate rollout plus control regularization — not
-coefficient MSE alone as the selection criterion.
 """
 
 from __future__ import annotations
@@ -25,11 +20,6 @@ import torch
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset
 
-from .proposal_training import (
-    ProposalTrainingConfig,
-    ProposalTrainingResult,
-    train_masked_control_proposals,
-)
 from .regressor import (
     InverseRegressor,
     RegressorConfig,
@@ -37,13 +27,6 @@ from .regressor import (
 )
 
 logger = logging.getLogger(__name__)
-
-# Re-export NM-06 proposal training surface beside the legacy regressor loop.
-__all_proposal__ = (
-    "ProposalTrainingConfig",
-    "ProposalTrainingResult",
-    "train_masked_control_proposals",
-)
 
 
 DEFAULT_OUTPUT_ROOT = Path("output/inverse_regressor")
@@ -156,11 +139,7 @@ def _stack_trajectory_channels(
 
 @dataclass(frozen=True)
 class TrainingConfig:
-    """Hyperparameters for :func:`train_inverse_regressor`.
-
-    Bundles the former long keyword list so the public entry stays within
-    architecture parameter budgets while preserving typed call sites.
-    """
+    """Hyperparameters for :func:`train_inverse_regressor`."""
 
     epochs: int = 80
     batch_size: int = 64
@@ -170,13 +149,8 @@ class TrainingConfig:
     val_fraction: float = 0.1
     seed: int = 0xC0FFEE
     grad_clip: float = 1.0
-    device: str | torch.device = "auto"
-    output_root: Path = field(default_factory=lambda: Path(DEFAULT_OUTPUT_ROOT))
+    device: str = "auto"
     regressor: RegressorConfig = field(default_factory=RegressorConfig)
-
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "output_root", Path(self.output_root))
-        _validate_training_config(self)
 
 
 # ---------------------------------------------------------------------------
@@ -186,8 +160,18 @@ class TrainingConfig:
 
 def train_inverse_regressor(
     dataset_path: str | Path,
-    training: TrainingConfig | None = None,
     *,
+    epochs: int = TrainingConfig.epochs,
+    batch_size: int = TrainingConfig.batch_size,
+    lr: float = TrainingConfig.lr,
+    device: str | torch.device = "auto",
+    seed: int = TrainingConfig.seed,
+    patience: int = DEFAULT_PATIENCE,
+    val_fraction: float = TrainingConfig.val_fraction,
+    output_root: str | Path = DEFAULT_OUTPUT_ROOT,
+    weight_decay: float = TrainingConfig.weight_decay,
+    grad_clip: float = TrainingConfig.grad_clip,
+    config: RegressorConfig | None = None,
     dataset_loader=None,
 ) -> RegressorTrainingResult:
     """Train an :class:`InverseRegressor` end-to-end.
@@ -197,9 +181,24 @@ def train_inverse_regressor(
     dataset_path
         Folder containing ``trials.parquet`` and ``timesteps.parquet``
         per ``COMPACT_DATASET_SCHEMA.md``.
-    training
-        Optional :class:`TrainingConfig`. Defaults yield a standard AdamW
-        schedule with early stopping.
+    epochs
+        Maximum number of training epochs (must be > 0).
+    batch_size
+        DataLoader batch size (must be > 0).
+    lr
+        AdamW learning rate (must be > 0).
+    device
+        Torch device specifier. ``"auto"`` selects CUDA if available.
+    seed
+        Random seed for split + torch RNG.
+    patience
+        Early-stop after ``patience`` epochs without val_loss improvement.
+    val_fraction
+        Fraction of trials assigned to the validation split (0 < f < 1).
+    output_root
+        Root directory under which a timestamped output folder is created.
+    config
+        Optional :class:`RegressorConfig` — defaults yield ~1.5 M params.
     dataset_loader
         Optional callable ``(path) -> CompactSwingDataset`` for testing.
 
@@ -211,147 +210,83 @@ def train_inverse_regressor(
     Raises
     ------
     ValueError
-        If hyperparameters are invalid or the dataset has fewer than 2 trials.
+        If ``epochs <= 0``, ``val_fraction`` outside (0, 1), or the
+        dataset has fewer than 2 trials.
     """
-    cfg = training or TrainingConfig()
-    prepared = _prepare_regressor_run(
-        Path(dataset_path), cfg, dataset_loader=dataset_loader
-    )
-    history, best_epoch, best_val_loss = _fit_regressor_epochs(prepared, cfg)
-    result = RegressorTrainingResult(
-        history=tuple(history),
-        best_epoch=best_epoch,
-        best_val_loss=best_val_loss,
-        final_epoch=history[-1].epoch,
-        checkpoint_path=prepared.best_path,
-        output_dir=prepared.output_dir,
-        n_train_trials=len(prepared.train_samples),
-        n_val_trials=len(prepared.val_samples),
-        parameter_count=parameter_count(prepared.model),
-        config=prepared.regressor_cfg,
-    )
-    (prepared.output_dir / "metrics.json").write_text(
-        json.dumps(result.to_summary(), indent=2)
-    )
-    return result
+    if epochs <= 0:
+        raise ValueError(f"epochs must be positive, got {epochs}")
+    if batch_size <= 0:
+        raise ValueError(f"batch_size must be positive, got {batch_size}")
+    if lr <= 0:
+        raise ValueError(f"lr must be positive, got {lr}")
+    if not 0.0 < val_fraction < 1.0:
+        raise ValueError(f"val_fraction must be in (0, 1), got {val_fraction}")
+    if patience < 1:
+        raise ValueError(f"patience must be >= 1, got {patience}")
 
-
-@dataclass
-class _PreparedRegressorRun:
-    """Mutable training handles assembled once before the epoch loop."""
-
-    model: InverseRegressor
-    opt: AdamW
-    coeff_scale: torch.Tensor
-    train_loader: DataLoader
-    val_loader: DataLoader
-    selected_device: torch.device
-    output_dir: Path
-    best_path: Path
-    train_samples: list[_PreparedSample]
-    val_samples: list[_PreparedSample]
-    regressor_cfg: RegressorConfig
-
-
-def _validate_training_config(cfg: TrainingConfig) -> None:
-    """DbC: reject non-positive schedule fields and out-of-range fractions."""
-    if cfg.epochs <= 0:
-        raise ValueError(f"epochs must be positive, got {cfg.epochs}")
-    if cfg.batch_size <= 0:
-        raise ValueError(f"batch_size must be positive, got {cfg.batch_size}")
-    if cfg.lr <= 0:
-        raise ValueError(f"lr must be positive, got {cfg.lr}")
-    if not 0.0 < cfg.val_fraction < 1.0:
-        raise ValueError(f"val_fraction must be in (0, 1), got {cfg.val_fraction}")
-    if cfg.patience < 1:
-        raise ValueError(f"patience must be >= 1, got {cfg.patience}")
-
-
-def _prepare_regressor_run(
-    dataset_path: Path,
-    cfg: TrainingConfig,
-    *,
-    dataset_loader,
-) -> _PreparedRegressorRun:
-    """Load data, split trials, and construct model + loaders."""
     loader_fn = dataset_loader or _default_compact_loader
-    samples = _materialise_samples(loader_fn(dataset_path))
+    dataset = loader_fn(Path(dataset_path))
+    samples = _materialise_samples(dataset)
     if len(samples) < 2:
         raise ValueError(f"need at least 2 trials to train+val, got {len(samples)}")
 
-    rng = np.random.default_rng(cfg.seed)
-    train_samples, val_samples = _split_by_trial(samples, cfg.val_fraction, rng)
-    torch.manual_seed(cfg.seed)
-    selected_device = _resolve_device(cfg.device)
-    regressor_cfg = cfg.regressor
-    model = InverseRegressor(regressor_cfg).to(selected_device)
-    opt = AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    rng = np.random.default_rng(seed)
+    train_samples, val_samples = _split_by_trial(samples, val_fraction, rng)
+
+    torch.manual_seed(seed)
+    selected_device = _resolve_device(device)
+    cfg = config or RegressorConfig()
+    model = InverseRegressor(cfg).to(selected_device)
+    opt = AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     # Use the model's coefficient_scale (per-letter bound * scale factor) as
     # the loss-standardisation divisor so val_loss is unitless and comparable
     # across runs even if the empirical coefficient range exceeds the nominal
     # per-letter bounds.
     coeff_scale: torch.Tensor = model.coefficient_scale.to(selected_device)  # type: ignore[assignment, attr-defined]
+
     train_loader = DataLoader(
         _TrialTensorDataset(train_samples),
-        batch_size=cfg.batch_size,
+        batch_size=batch_size,
         shuffle=True,
         collate_fn=_collate,
         drop_last=False,
     )
     val_loader = DataLoader(
         _TrialTensorDataset(val_samples),
-        batch_size=cfg.batch_size,
+        batch_size=batch_size,
         shuffle=False,
         collate_fn=_collate,
     )
-    output_dir = _make_output_dir(Path(cfg.output_root))
-    return _PreparedRegressorRun(
-        model=model,
-        opt=opt,
-        coeff_scale=coeff_scale,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        selected_device=selected_device,
-        output_dir=output_dir,
-        best_path=output_dir / "checkpoint_best.pt",
-        train_samples=train_samples,
-        val_samples=val_samples,
-        regressor_cfg=regressor_cfg,
-    )
 
-
-def _fit_regressor_epochs(
-    prepared: _PreparedRegressorRun,
-    cfg: TrainingConfig,
-) -> tuple[list[EpochMetrics], int, float]:
-    """Run AdamW epochs with early stopping; return history and best stats."""
+    output_dir = _make_output_dir(Path(output_root))
     history: list[EpochMetrics] = []
     best_val_loss = float("inf")
     best_epoch = 0
+    best_path = output_dir / "checkpoint_best.pt"
     plateau = 0
-    for epoch in range(cfg.epochs):
+
+    for epoch in range(epochs):
         t0 = time.time()
         train_loss = _run_epoch(
-            prepared.model,
-            prepared.train_loader,
-            prepared.selected_device,
-            prepared.opt,
-            prepared.coeff_scale,
+            model,
+            train_loader,
+            selected_device,
+            opt,
+            coeff_scale,
             train=True,
-            grad_clip=cfg.grad_clip,
+            grad_clip=grad_clip,
         )
         val_loss, val_mse_physical = _eval_epoch(
-            prepared.model,
-            prepared.val_loader,
-            prepared.selected_device,
-            prepared.coeff_scale,
+            model, val_loader, selected_device, coeff_scale
         )
+        duration = time.time() - t0
+
         metrics = EpochMetrics(
             epoch=epoch,
             train_loss=train_loss,
             val_loss=val_loss,
             val_mse_physical=val_mse_physical,
-            duration_s=time.time() - t0,
+            duration_s=duration,
         )
         history.append(metrics)
         logger.info(
@@ -360,23 +295,39 @@ def _fit_regressor_epochs(
             train_loss,
             val_loss,
             val_mse_physical,
-            metrics.duration_s,
+            duration,
         )
-        torch.save(
-            prepared.model.state_payload(),
-            prepared.output_dir / f"checkpoint_epoch_{epoch}.pt",
-        )
+
+        ckpt_path = output_dir / f"checkpoint_epoch_{epoch}.pt"
+        torch.save(model.state_payload(), ckpt_path)
+
         if val_loss < best_val_loss - 1e-6:
             best_val_loss = val_loss
             best_epoch = epoch
             plateau = 0
-            torch.save(prepared.model.state_payload(), prepared.best_path)
-            continue
-        plateau += 1
-        if plateau >= cfg.patience:
-            logger.info("early stop: val_loss plateau at epoch %d", epoch)
-            break
-    return history, best_epoch, best_val_loss
+            torch.save(model.state_payload(), best_path)
+        else:
+            plateau += 1
+            if plateau >= patience:
+                logger.info("early stop: val_loss plateau at epoch %d", epoch)
+                break
+
+    summary_path = output_dir / "metrics.json"
+    final_epoch = history[-1].epoch
+    result = RegressorTrainingResult(
+        history=tuple(history),
+        best_epoch=best_epoch,
+        best_val_loss=best_val_loss,
+        final_epoch=final_epoch,
+        checkpoint_path=best_path,
+        output_dir=output_dir,
+        n_train_trials=len(train_samples),
+        n_val_trials=len(val_samples),
+        parameter_count=parameter_count(model),
+        config=cfg,
+    )
+    summary_path.write_text(json.dumps(result.to_summary(), indent=2))
+    return result
 
 
 # ---------------------------------------------------------------------------
