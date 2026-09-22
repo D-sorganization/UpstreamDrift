@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Callable
 
 import numpy as np
 
 from src.shared.python.motion_matching.body_target import BodyTarget
+from src.shared.python.motion_matching.bernstein_controls import (
+    evaluate_bernstein_controls,
+)
 from src.shared.python.tour_baselines.fit_metrics import (
     PhysicalFitMetrics,
     compute_fit_metrics,
@@ -14,6 +18,57 @@ from src.shared.python.tour_baselines.fit_metrics import (
 
 from .physics_golfer import N_DOF, GolferParams
 from .simulation_golfer import run_simulation
+
+
+_ACTUATOR_COUNT = N_DOF - 1
+_BERNSTEIN_CONTROL_POINT_COUNT = 7
+
+
+def _validate_replay_inputs(times: np.ndarray, initial_state: np.ndarray) -> None:
+    """Validate the common normalized-clock replay preconditions."""
+    if times.ndim != 1 or len(times) < 2 or not np.isfinite(times).all():
+        raise ValueError("times must be a finite vector with at least two frames")
+    if not np.isclose(times[0], 0.0, atol=1e-12):
+        raise ValueError("times must start at zero on the normalized capture clock")
+    if np.any(np.diff(times) <= 0.0):
+        raise ValueError("times must be strictly increasing")
+    if not np.allclose(np.diff(times), np.diff(times)[0], rtol=1e-9, atol=1e-12):
+        raise ValueError("times must be uniformly sampled for exact constrained replay")
+    if initial_state.shape != (2 * N_DOF,) or not np.isfinite(initial_state).all():
+        raise ValueError(f"initial_state must be finite with shape ({2 * N_DOF},)")
+
+
+@dataclass(frozen=True)
+class UpperBodyBernsteinTorqueProfile:
+    """A continuous bounded seven-actuator torque law on one replay horizon."""
+
+    control_points: np.ndarray
+    duration_s: float
+
+    def __post_init__(self) -> None:
+        control_points = np.asarray(self.control_points, dtype=np.float64)
+        if (
+            control_points.shape
+            != (
+                _ACTUATOR_COUNT,
+                _BERNSTEIN_CONTROL_POINT_COUNT,
+            )
+            or not np.isfinite(control_points).all()
+        ):
+            raise ValueError(
+                "control_points must be finite with shape "
+                f"({_ACTUATOR_COUNT}, {_BERNSTEIN_CONTROL_POINT_COUNT})"
+            )
+        if not np.isfinite(self.duration_s) or self.duration_s <= 0.0:
+            raise ValueError("duration_s must be finite and positive")
+
+    def torque_at(
+        self, time_s: float
+    ) -> tuple[float, float, float, float, float, float, float]:
+        """Evaluate the bounded continuous control law at replay time ``time_s``."""
+        normalized_time = time_s / self.duration_s
+        torques = evaluate_bernstein_controls(self.control_points, normalized_time)
+        return tuple(float(value) for value in torques)  # type: ignore[return-value]
 
 
 @dataclass(frozen=True)
@@ -29,22 +84,31 @@ class UpperBodyReplayTarget:
         times = np.asarray(self.times, dtype=np.float64)
         state = np.asarray(self.initial_state, dtype=np.float64)
         torques = np.asarray(self.torques, dtype=np.float64)
-        if times.ndim != 1 or len(times) < 2 or not np.isfinite(times).all():
-            raise ValueError("times must be a finite vector with at least two frames")
-        if not np.isclose(times[0], 0.0, atol=1e-12):
-            raise ValueError("times must start at zero on the normalized capture clock")
-        if np.any(np.diff(times) <= 0.0):
-            raise ValueError("times must be strictly increasing")
-        if not np.allclose(np.diff(times), np.diff(times)[0], rtol=1e-9, atol=1e-12):
+        _validate_replay_inputs(times, state)
+        if (
+            torques.shape != (len(times), _ACTUATOR_COUNT)
+            or not np.isfinite(torques).all()
+        ):
             raise ValueError(
-                "times must be uniformly sampled for exact constrained replay"
+                f"torques must be finite with shape ({len(times)}, {_ACTUATOR_COUNT})"
             )
-        if state.shape != (2 * N_DOF,) or not np.isfinite(state).all():
-            raise ValueError(f"initial_state must be finite with shape ({2 * N_DOF},)")
-        if torques.shape != (len(times), N_DOF - 1) or not np.isfinite(torques).all():
-            raise ValueError(
-                f"torques must be finite with shape ({len(times)}, {N_DOF - 1})"
-            )
+
+
+@dataclass(frozen=True)
+class UpperBodyBernsteinReplayTarget:
+    """A constrained replay request driven by one continuous torque profile."""
+
+    times: np.ndarray
+    initial_state: np.ndarray
+    torque_profile: UpperBodyBernsteinTorqueProfile
+    params: GolferParams
+
+    def __post_init__(self) -> None:
+        times = np.asarray(self.times, dtype=np.float64)
+        state = np.asarray(self.initial_state, dtype=np.float64)
+        _validate_replay_inputs(times, state)
+        if not np.isclose(self.torque_profile.duration_s, times[-1], atol=1e-12):
+            raise ValueError("torque_profile duration_s must match the replay horizon")
 
 
 @dataclass(frozen=True)
@@ -174,18 +238,20 @@ def evaluate_replay_against_body_target(
     )
 
 
-def replay_upper_body_target(target: UpperBodyReplayTarget) -> UpperBodyReplay:
-    """Replay supplied torques through the constrained dynamics without interpolation."""
-    elapsed = target.times - target.times[0]
-
-    def torque_at(t: float) -> tuple[float, float, float, float, float, float, float]:
-        index = int(np.searchsorted(elapsed, t, side="right") - 1)
-        index = int(np.clip(index, 0, len(elapsed) - 1))
-        return tuple(float(value) for value in target.torques[index])  # type: ignore[return-value]
-
+def _replay_upper_body(
+    *,
+    times: np.ndarray,
+    initial_state: np.ndarray,
+    params: GolferParams,
+    torque_at: Callable[
+        [float], tuple[float, float, float, float, float, float, float]
+    ],
+) -> UpperBodyReplay:
+    """Integrate one validated torque law and collect comparable diagnostics."""
+    elapsed = times - times[0]
     result = run_simulation(
-        target.params,
-        np.asarray(target.initial_state, dtype=np.float64),
+        params,
+        np.asarray(initial_state, dtype=np.float64),
         float(elapsed[-1]),
         torque_at,
         dt=float(np.min(np.diff(elapsed))),
@@ -213,4 +279,33 @@ def replay_upper_body_target(target: UpperBodyReplayTarget) -> UpperBodyReplay:
         reaction_forces=reactions,
         kinematic_points=kinematic_points,
         constraint_residual_m=float(residual),
+    )
+
+
+def replay_upper_body_target(target: UpperBodyReplayTarget) -> UpperBodyReplay:
+    """Replay supplied sample-and-hold torques through constrained dynamics."""
+    elapsed = target.times - target.times[0]
+
+    def torque_at(t: float) -> tuple[float, float, float, float, float, float, float]:
+        index = int(np.searchsorted(elapsed, t, side="right") - 1)
+        index = int(np.clip(index, 0, len(elapsed) - 1))
+        return tuple(float(value) for value in target.torques[index])  # type: ignore[return-value]
+
+    return _replay_upper_body(
+        times=np.asarray(target.times, dtype=np.float64),
+        initial_state=np.asarray(target.initial_state, dtype=np.float64),
+        params=target.params,
+        torque_at=torque_at,
+    )
+
+
+def replay_upper_body_bernstein_target(
+    target: UpperBodyBernsteinReplayTarget,
+) -> UpperBodyReplay:
+    """Replay a continuous bounded Bernstein torque profile on the target clock."""
+    return _replay_upper_body(
+        times=np.asarray(target.times, dtype=np.float64),
+        initial_state=np.asarray(target.initial_state, dtype=np.float64),
+        params=target.params,
+        torque_at=target.torque_profile.torque_at,
     )

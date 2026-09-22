@@ -8,8 +8,11 @@ control remains within the row's control-point bounds.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
+from dataclasses import dataclass
 
 import numpy as np
+from scipy.optimize import OptimizeResult, least_squares
 
 
 def _validated_controls(control_points: np.ndarray) -> np.ndarray:
@@ -83,3 +86,66 @@ def bernstein_effort_penalty(
     if weight == 0.0:
         return np.zeros(0, dtype=np.float64)
     return math.sqrt(weight) * controls.reshape(-1) / scale
+
+
+@dataclass(frozen=True)
+class BernsteinFitResidualPolicy:
+    """Shared weights and assembly convention for a bounded control fit."""
+
+    curvature_weight: float
+    effort_weight: float
+    effort_scale: float
+
+    def assemble(
+        self,
+        tracking_residual: np.ndarray,
+        control_points: np.ndarray,
+    ) -> np.ndarray:
+        """Combine tracking and regularization residuals for one control vector.
+
+        The tracking vector is supplied by model-specific forward kinematics;
+        Bernstein smoothness and effort retain one numerical convention.
+        """
+        tracking = np.asarray(tracking_residual, dtype=np.float64)
+        if tracking.ndim != 1 or not np.isfinite(tracking).all():
+            raise ValueError("tracking_residual must be a finite one-dimensional array")
+        curvature = bernstein_curvature_penalty(
+            control_points, weight=self.curvature_weight
+        )
+        effort = bernstein_effort_penalty(
+            control_points, weight=self.effort_weight, scale=self.effort_scale
+        )
+        return np.concatenate((tracking, curvature, effort))
+
+
+def solve_bounded_bernstein_least_squares(
+    residual_function: Callable[[np.ndarray], np.ndarray],
+    initial_parameters: np.ndarray,
+    lower_bounds: np.ndarray,
+    upper_bounds: np.ndarray,
+    *,
+    max_evaluations: int,
+) -> OptimizeResult:
+    """Solve one bounded Bernstein fit with the program's shared tolerances."""
+    initial = np.asarray(initial_parameters, dtype=np.float64)
+    lower = np.asarray(lower_bounds, dtype=np.float64)
+    upper = np.asarray(upper_bounds, dtype=np.float64)
+    if initial.ndim != 1 or not np.isfinite(initial).all():
+        raise ValueError("initial_parameters must be a finite one-dimensional array")
+    if lower.shape != initial.shape or upper.shape != initial.shape:
+        raise ValueError("bounds must match initial_parameters")
+    if not np.isfinite(lower).all() or not np.isfinite(upper).all():
+        raise ValueError("bounds must be finite")
+    if np.any(lower >= upper):
+        raise ValueError("each lower bound must be less than its upper bound")
+    if max_evaluations < 1:
+        raise ValueError("max_evaluations must be positive")
+    return least_squares(
+        residual_function,
+        initial,
+        bounds=(lower, upper),
+        max_nfev=max(max_evaluations, 5),
+        ftol=1e-5,
+        xtol=1e-5,
+        gtol=1e-5,
+    )
