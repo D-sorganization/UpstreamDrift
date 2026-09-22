@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10730 | Correct TB-04 Driver and Iron tour-baseline coverage: committed qualification receipts are disqualified, so the matrix now rejects them and a regression test prevents unsupported promotion. |
 | 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |
 | 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
 | 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |

@@ -8,7 +8,8 @@ The TB-04 Driver and Iron receipts remain preserved, but both record `scientific
 
 - The reconciliation rule lives in `src/shared/python/tour_baselines/coverage.py` with a regression test in `tests/unit/tour_baselines/test_coverage_matrix.py`.
 - Focused tour-baselines tests, Ruff, architecture/file-size budgets, and the LoD gate are clean in the current-main worktree.
-- Next step: commit and open the focused PR for #10592. Continue TB-05 only after reviewing the rejected double-pendulum evidence as an initialization source rather than a qualified baseline.
+- PR [#10730](https://github.com/D-sorganization/UpstreamDrift/pull/10730) is open from `e82007706` and awaits required checks.
+- Next step: merge #10730 after its checks pass. Continue TB-05 only after reviewing the rejected double-pendulum evidence as an initialization source rather than a qualified baseline.
 
 ## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588) [MERGED]
 
