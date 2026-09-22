@@ -13,7 +13,7 @@
     {
       "step": "hash_check",
       "outcome": "pass",
-      "message": "identity hash b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
+      "message": "identity hash ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086",
       "remediation": null
     },
     {
@@ -53,7 +53,7 @@
       "remediation": null
     }
   ],
-  "model_hash": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
+  "model_hash": "ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086",
   "source_hash": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
   "runtime": {
     "python": "3.13.5",
@@ -61,5 +61,5 @@
     "host": "windows",
     "allow_native": false
   },
-  "contract_sha256": "fd3b0db3ffc578bb58893c747036ab3a54caa52ebc2d64d216fca75ba7833de3"
+  "contract_sha256": "a32cffb2535c5318aa4ffe0732ca4004015f299ead8be69909744b8f378c361e"
 }
