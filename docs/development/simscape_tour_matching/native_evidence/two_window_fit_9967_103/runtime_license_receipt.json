@@ -1,0 +1,13 @@
+{
+  "schema_version": "simscape-runtime-license/1",
+  "issue": "#10348",
+  "run_id": "two_window_fit_9967_103",
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "host": "DeskComputer",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "candidate_sha256": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
+  "source_run_manifest": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/run_manifest.json",
+  "license_cap_assumed": false,
+  "note": "R2025b identity reused from committed MS-60 run-102 receipt. No inferred 1000-block license cap."
+}
