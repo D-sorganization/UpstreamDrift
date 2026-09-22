@@ -460,7 +460,7 @@ def generate_plausible_body_candidates(
     )
 
     if not runtime_available:
-        blocker = runtime_blocker or (
+        missing_blocker = runtime_blocker or (
             f"native runtime unavailable for model={profile.model_id!r}; "
             "cell remains unqualified"
         )
@@ -468,7 +468,7 @@ def generate_plausible_body_candidates(
             model_id=profile.model_id,
             trial_id=observation.trial_id,
             status="missing_runtime",
-            blocker=blocker,
+            blocker=missing_blocker,
             candidate_ids=(),
         )
         return BodyCandidateResult(
@@ -584,19 +584,19 @@ def generate_plausible_body_candidates(
             )
 
     accepted_ids = tuple(c.candidate_id for c in candidates if c.accepted)
-    status: str
-    blocker: str | None
+    cell_status: str
+    cell_blocker: str | None
     if accepted_ids:
-        status = "generated"
-        blocker = None
+        cell_status = "generated"
+        cell_blocker = None
     else:
-        status = "rejected"
-        blocker = "all proposals rejected (grip/contact/collision/singular)"
+        cell_status = "rejected"
+        cell_blocker = "all proposals rejected (grip/contact/collision/singular)"
     cell = ModelTrialCell(
         model_id=profile.model_id,
         trial_id=observation.trial_id,
-        status=status,
-        blocker=blocker,
+        status=cell_status,
+        blocker=cell_blocker,
         candidate_ids=accepted_ids,
     )
     return BodyCandidateResult(
