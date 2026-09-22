@@ -79,14 +79,14 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 26 | 53 | 15 | 18 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 215 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 234 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
-| `neural_motion` | 0 | 0 | 0 | 30 | 0 | 0 |
+| `neural_motion` | 0 | 0 | 0 | 36 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `optimization` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `pendulum_simulator` | 0 | 0 | 0 | 78 | 0 | 0 |
+| `pendulum_simulator` | 0 | 0 | 0 | 79 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `physics` | 0 | 0 | 0 | 71 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -102,7 +102,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `realtime` | 0 | 2 | 0 | 5 | 0 | 2 |
+| `realtime` | 0 | 2 | 0 | 4 | 0 | 2 |
 | `reporting` | 0 | 2 | 0 | 5 | 0 | 2 |
 | `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1449** | **709** | **702** |
+| **Total** | **423** | **279** | **123** | **1474** | **709** | **702** |
 
 ## Diverged Files by Package
 

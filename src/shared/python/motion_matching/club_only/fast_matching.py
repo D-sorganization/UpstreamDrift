@@ -657,7 +657,8 @@ def _score_branches_under_budget(
     t_dyn = time.perf_counter()
     for branch_id, strategy, q in branch_specs[ctx.start_index :]:
         if ctx.cancel_check is not None and ctx.cancel_check():
-            raise MatchCancelledError("cancelled during branch scoring")
+            cancelled = True
+            break
         if used >= ctx.budget.max_evaluations:
             cancelled = True
             break

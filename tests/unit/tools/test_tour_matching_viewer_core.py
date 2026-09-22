@@ -190,3 +190,36 @@ def test_viewer_frame_computes_world_segments_and_markers(tmp_path: Path) -> Non
     assert frame_data.model_markers.shape == (n_markers, 3)
     assert frame_data.valid_mask.shape == (n_markers,)
     assert frame_data.rms_error >= 0.0
+
+
+def test_club_only_compare_view_separates_observed_and_inferred() -> None:
+    from src.shared.python.motion_matching.club_only.fast_matching import MatchPreset
+    from src.shared.python.motion_matching.club_only.observation import (
+        build_calibrated_observation_fixture,
+    )
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        ObservationRole,
+        create_club_only_session,
+        run_club_only_ui_match,
+    )
+    from src.tools.tour_matching_viewer.core import club_only_compare_from_ui_result
+
+    observation = build_calibrated_observation_fixture("TW_wiffle")
+    result = run_club_only_ui_match(
+        create_club_only_session(
+            trial_id=observation.trial_id,
+            model_id="double_pendulum",
+            preset=MatchPreset.FAST_PREVIEW,
+        ),
+        observation=observation,
+    )
+    compare = club_only_compare_from_ui_result(result)
+    assert compare.trial_clock_hz == pytest.approx(240.0)
+    assert compare.observed_face_m.shape[0] == observation.face_xyz.shape[0]
+    assert compare.predicted_unavailable_reason
+    assert "not measured" in compare.body_motion_disclaimer.lower()
+    roles = {entry["role"] for entry in compare.legend}
+    assert ObservationRole.OBSERVED.value in roles
+    assert ObservationRole.INFERRED.value in roles
+    assert compare.native_g1_pass is False
+    assert compare.display_status != "native_verified"
