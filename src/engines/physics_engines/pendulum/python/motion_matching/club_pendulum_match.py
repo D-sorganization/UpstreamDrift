@@ -13,6 +13,10 @@ from typing import Any
 import numpy as np
 from scipy.optimize import least_squares
 
+from src.shared.python.motion_matching.bernstein_controls import (
+    evaluate_bernstein_controls,
+)
+
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
     create_calibrated_double_pendulum_dynamics,
     forward_kinematics_2d,
@@ -179,14 +183,9 @@ class _TripleBernstein:
             raise ValueError("duration_s must be finite and > 0")
         self.controls = c
         self.duration_s = float(duration_s)
-        self._binom = np.array([1.0, 6.0, 15.0, 20.0, 15.0, 6.0, 1.0], dtype=np.float64)
 
     def evaluate(self, t: float) -> tuple[float, float, float]:
-        s = float(np.clip(t / self.duration_s, 0.0, 1.0))
-        s_powers = s ** np.arange(COEFFS_PER_JOINT)
-        om = (1.0 - s) ** np.arange(COEFFS_PER_JOINT - 1, -1, -1)
-        basis = self._binom * s_powers * om
-        taus = self.controls @ basis
+        taus = evaluate_bernstein_controls(self.controls, t / self.duration_s)
         return float(taus[0]), float(taus[1]), float(taus[2])
 
 
