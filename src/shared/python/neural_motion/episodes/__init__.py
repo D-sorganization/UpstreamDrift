@@ -9,7 +9,7 @@ contract without silent reinterpretation.
 
 from __future__ import annotations
 
-from .adapters import CompactAdapter
+from .adapters import CompactAdapter, CompactArrayBundle
 from .cache import WindowCache
 from .normalize import TrainOnlyNormalizer
 from .record import EPISODE_STORE_SCHEMA, EpisodeRecord
@@ -25,6 +25,7 @@ from .views import (
 __all__ = [
     "EPISODE_STORE_SCHEMA",
     "CompactAdapter",
+    "CompactArrayBundle",
     "EpisodeManifest",
     "EpisodeRecord",
     "EpisodeStore",
