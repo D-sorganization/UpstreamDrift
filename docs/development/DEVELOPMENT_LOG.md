@@ -377,7 +377,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** local
 - **Issue:** #10620 (epic #10603)
-- **Branch:** feat/10620-nm05-dynamics-baselines
+- **Branch:** feat/issue-10620-nm05-baselines
 - **PR:** not created
 - **Paths:** src/shared/python/neural_motion/baselines/; tests/unit/neural_motion/test_dynamics_baselines_nm05.py; docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
 - **Started:** 2026-09-22
