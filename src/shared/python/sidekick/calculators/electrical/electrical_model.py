@@ -304,14 +304,18 @@ class ThreePhaseElectricalModelEnhanced:
         # Section widths: distance from wall to tip at each segment
         # Shape: (num_segments,)
         diff_wall_tip = tip_positions - wall_positions
-        section_widths = np.sqrt(np.einsum('ij,ij->i', diff_wall_tip, diff_wall_tip))  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+        section_widths = np.sqrt(
+            np.einsum("ij,ij->i", diff_wall_tip, diff_wall_tip)
+        )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
 
         # Cross-sectional areas in m²
         cross_section_areas_m2 = section_widths * effective_height * 0.00064516
 
         # Segment distances (uniform for trapezoidal approximation)
         # All interior segments use the same distance
-        base_segment_distance = math.sqrt(wall_diff.dot(wall_diff)) / num_segments  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
+        base_segment_distance = (
+            math.sqrt(wall_diff.dot(wall_diff)) / num_segments
+        )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
         segment_distance_m = base_segment_distance * 0.0254  # Convert to m
 
         # Calculate resistances for all segments at once
@@ -363,9 +367,13 @@ class ThreePhaseElectricalModelEnhanced:
 
         # Get electrode dimensions within glass bath
         diff_e1 = electrode1_pos["tip"] - e1_wall
-        e1_length = float(math.sqrt(diff_e1.dot(diff_e1)))  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
+        e1_length = float(
+            math.sqrt(diff_e1.dot(diff_e1))
+        )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
         diff_e2 = electrode2_pos["tip"] - e2_wall
-        e2_length = float(math.sqrt(diff_e2.dot(diff_e2)))  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
+        e2_length = float(
+            math.sqrt(diff_e2.dot(diff_e2))
+        )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
 
         # Apply horizontal spreading factor for vertical segments
         effective_width = 2 * electrode_radius * self.config.horizontal_spreading_factor
@@ -440,7 +448,9 @@ class ThreePhaseElectricalModelEnhanced:
         center1 = (electrode1_pos["tip"] + e1_wall) / 2
         center2 = (electrode2_pos["tip"] + e2_wall) / 2
         diff_center = center2[:2] - center1[:2]
-        horizontal_distance = math.sqrt(diff_center.dot(diff_center))  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
+        horizontal_distance = math.sqrt(
+            diff_center.dot(diff_center)
+        )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for small 1D arrays
         distance_m = horizontal_distance * 0.0254
 
         avg_electrode_length = (e1_length + e2_length) / 2
