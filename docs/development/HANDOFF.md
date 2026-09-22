@@ -20,7 +20,8 @@
 - Limitations: software-contract / unit-inertia plant only; native G1 remains
   blocked (`native_g1_qualification_requires_desk_native_receipt`,
   `software_contract_replay_is_not_native_evidence`). No invented native pass.
-- Next: Merge PR #10687 when quality-gate is green; do not start CO-07+.
+- Validation addendum: split allocate/replay helpers under function-line budget; wrap require() preds in bool() for mypy.
+- Next: Confirm CI green + squash merge of #10687. Do not start CO-07+.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
 
