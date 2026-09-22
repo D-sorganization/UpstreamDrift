@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T18:33:37Z",
+  "generated_at": "2026-09-22T22:10:10Z",
   "rows": [
     {
       "acceptance": null,
@@ -2737,6 +2737,62 @@
     },
     {
       "acceptance": {
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "receipt declares scientific_qualification=disqualified; the ledger preserves it as rejected evidence",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "tools",
+      "horizon_s": null,
+      "lane": "tour_baselines",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json",
+      "sha256": "85de76d35c545d4a3f4d386c381eace09c87ccbd4e5eada8bdc56ace9c0bacf9"
+    },
+    {
+      "acceptance": {
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "receipt declares scientific_qualification=disqualified; the ledger preserves it as rejected evidence",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
+      },
+      "candidate_sha": null,
+      "capture": "iron",
+      "engine": "tools",
+      "horizon_s": null,
+      "lane": "tour_baselines",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/plans/tour_baselines/evidence/tb06_iron_planarity_receipt.json",
+      "sha256": "a4ff0633bb927e29c63b50a843ef828fa2e289f82d116ae1521357fab3e3114a"
+    },
+    {
+      "acceptance": {
         "gates": [
           {
             "measured": 0.9401372318864682,
@@ -3913,5 +3969,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 110
+  "total_receipts": 112
 }
