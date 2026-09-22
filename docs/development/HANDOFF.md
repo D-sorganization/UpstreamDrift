@@ -16,6 +16,7 @@
   and `club_match_matrix.py`; shared keeps pure contracts in
   `club_only/pendulum_match.py` (engines → shared only). Architecture-budget
   split: `_fit_triple` / `match_club_pendulum` helpers keep each function ≤100 lines.
+  Mypy: prescribed-hub track fills `hub_pos[:, :]` in-place so `(n, 2)` dtype stays.
 - Validation: `python scripts/check_dependency_direction.py` OK;
   `python scripts/ci/check_architecture_budget.py` OK;
   `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60`
@@ -277,8 +278,8 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10608-co04`.
 - Branch: `feat/issue-10608-co04-pendulum-club-match`; PR [#10680](https://github.com/D-sorganization/UpstreamDrift/pull/10680) open (squash auto-merge). Governing issue #10608 (CO-04, epic #10602). Prerequisites CO-02 #10675 and CO-03 #10678 merged on main. Head SELF.
-- Entry DL-#10608. Delivered: `hub_accounting` (fixed-pivot vs prescribed moving-hub IDs + external work), `match_errors` (separate in-plane/3D RMSE), `pendulum_match` (double/triple fit, first-frame before step, cold vs retrieval retention, reconstruction reject), `match_matrix`/`replay_package` (eight-cell software matrix with named native blockers), evidence `club_pendulum_match.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=120` (10 passed); `ruff check` clean on touched Python.
+- Entry DL-#10608. Delivered: `hub_accounting` (fixed-pivot vs prescribed moving-hub IDs + external work), `match_errors` (separate in-plane/3D RMSE), `pendulum_match` (double/triple fit, first-frame before step, cold vs retrieval retention, reconstruction reject), `match_matrix`/`replay_package` (eight-cell software matrix with named native blockers), evidence `club_pendulum_match.json`. Fit lives under pendulum engines package; helpers split for architecture budget; hub track assignment typed for mypy.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=120` (10 passed); `ruff check` clean on touched Python; architecture budget + dependency direction OK.
 - Limitations: software-contract fits on synthetic CO-01 fixtures only; native G1 remains blocked with named gates; not CO-08 scientific qualification.
 - Next action: confirm CI green + squash merge of #10680; then dispatch CO-05 #10609 (do not start in this PR).
 

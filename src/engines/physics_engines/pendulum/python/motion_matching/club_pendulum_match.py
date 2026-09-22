@@ -373,8 +373,9 @@ def _triple_external_work(
     hub_pos = np.zeros((n, 2), dtype=np.float64)
     forces = np.zeros_like(hub_pos)
     if hub_mode is HubMode.PRESCRIBED_MOVING_HUB:
-        centroid = grip[:, :2] - grip[0, :2]
-        hub_pos = 0.05 * centroid
+        # In-place fill keeps hub_pos typed as (n, 2) for mypy.
+        centroid = np.asarray(grip[:, :2] - grip[0, :2], dtype=np.float64)
+        hub_pos[:, :] = 0.05 * centroid
         forces[:, 0] = 5.0
     work = account_external_hub_work(
         times=times,
