@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10677
 - **Paths:** src/engines/model_inventory.py; src/config/engine_model_inventory.json; tests/unit/engines/test_model_inventory.py; docs/development/matched_swing_program/evidence/ms102/
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21 at SELF — `pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov` green; ruff/mypy/bandit pre-push green; PR #10677 opened with squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — retargeted onto origin/main; `_run_native_pipeline` split under architecture budget; real vendor pin a9ed0e7c5; `pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov` green; agent-context check clean.
 - **Summary:** Authority-derived engine/model inventory (models.yaml + capability matrix + ENGINE_TIERS) with dual-club flagship packages, immutable hashes, qualification harness (resolve/hash/load/FK/dynamics/viewer/save), and named repair blockers. Not a competing catalog. Simscape entries require MATLAB R2025b.
 - **Next step:** Confirm CI green and squash merge of PR #10677.
 - **Evidence:** docs/development/matched_swing_program/evidence/ms102/
