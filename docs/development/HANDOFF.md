@@ -53,11 +53,15 @@
   grip welds + four foot contact markers); coordinate map with explicit omissions;
   inventory `myosuite/driver`+`iron` status `ready` with generated hashes; native
   MuJoCo load/step tests; docs/engines/myosuite.md.
-- Validation: `pytest tests/unit/engines/myosuite/test_golfer_scene.py tests/myosuite/test_golfer_scene_native.py tests/unit/engines/myosuite/test_retarget.py -q -n 0 --no-cov`; inventory hash_errors=[]; repairs=[].
+- Validation: `pytest tests/unit/engines/myosuite/test_golfer_scene.py -q -n 0 --no-cov`;
+  `python scripts/ci/check_lod.py src/engines/physics_engines/myosuite/python/golfer_scene.py`;
+  architecture budget clean on `golfer_scene.py` (generate_golfer_scene ≤100 lines).
+- CI repair (SELF): LoD helper for path basename lowercasing; receipt payload
+  extracted from generate_golfer_scene; unit tests use defusedxml.ElementTree.
 - Honest limits: no G1 success; `parity_budget_qualified=false`; partial map is
   diagnostic only; muscle params are upstream myo_sim (not golf-calibrated);
   contact spheres are contype=0 markers for the shared law.
-- Next: confirm quality-gate green + squash auto-merge of PR #10685.
+- Next: confirm quality-gate green on PR #10685 after push; merge via squash auto-merge.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348 [MERGED]
 
