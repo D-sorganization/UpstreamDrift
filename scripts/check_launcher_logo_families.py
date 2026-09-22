@@ -124,8 +124,10 @@ DECLARED_SHARED_LOGOS: dict[str, SharedLogoDeclaration] = {
         "Cross-engine comparison tiles (dashboard, backend comparison).",
     ),
     "pendulum.svg": SharedLogoDeclaration(
-        "category:physics_engine",
-        "Double-pendulum golfer dynamics companions share the pendulum icon.",
+        "category:simulation",
+        "Double-pendulum golfer dynamics companions share the pendulum icon. "
+        "Recategorized from physics_engine to simulation (#9479): these are "
+        "specialized golf tools, not engine-picker tiles.",
     ),
 }
 

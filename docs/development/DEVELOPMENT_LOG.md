@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9479 · Consolidate Engine Meta-Tiles and Clarify Confusable Launcher Tile Names
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9479, #9480 (parent #9412; cluster #9410 Cluster B)
+- **Branch:** fix/9479-9480-launcher-tiles
+- **PR:** #10653
+- **Paths:** src/config/launcher_manifest.json; src/config/models.yaml; src/launchers/workspace_navigation.py; scripts/check_launcher_logo_families.py; tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF — rebased onto origin/main; agent-context/capability atlas/MODEL_IMAGES fixes; suite markers on new tests.
+- **Summary:** Hide duplicate per-engine dashboards with documented reasons; reclassify three specialized tools from `physics_engine` to `simulation`; clarify confusable data/video tile pairs; move non-golf utilities to `dev_research`.
+- **Next step:** Squash merge PR #10653 after CI green.
+- **Evidence:** tests/config/launcher_manifest/test_engine_hub_consolidation_9479.py; tests/config/launcher_manifest/test_tile_name_clarity_9480.py; tests/launchers/test_workspace_navigation.py::TestWorkspaceMembership::test_non_golf_utilities_moved_out_of_primary_workflow.
+
 ### DL-#10333 · Pinocchio MatchingPlant Full Lane (MS-14)
 
 - **State:** in_review
