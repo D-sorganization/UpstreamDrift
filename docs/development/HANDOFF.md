@@ -252,10 +252,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree).
 - Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) (squash auto-merge armed). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
 - Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
-- CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helper `_first_step_native_residual`; SPEC §12 row keyed `#10679`.
-- Validation: architecture budget OK; mypy clean on touched paths; NM-02 unit tests green locally.
+- CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helpers `_first_step_native_residual`, `_residual_norm`, `_single_sample_dynamics_config` (fingerprint `2430854b10cc`); SPEC §12 row keyed `#10679`.
+- Validation: adapters.py DRY scan clean for `2430854b10cc`; NM-02 unit tests green locally (`tests/unit/data_io/test_nm02_adapters.py`).
 - Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
-- Next action: push merge + CI fixes, confirm CI green on PR #10679 and squash auto-merge; do not start NM-03+.
+- Next action: confirm CI green on PR #10679 and squash auto-merge; do not start NM-03+.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
