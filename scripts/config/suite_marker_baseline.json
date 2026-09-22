@@ -2039,7 +2039,7 @@
     "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_ensure_tools_on_path_returns_bool",
     "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_external_tools_registry",
     "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_find_tools_repo_returns_path_or_none",
-    "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_get_video_analyzer_dockable_ui_fallback",
+    "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_get_video_analyzer_dockable_ui_is_self_contained",
     "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_has_all_adapter_functions",
     "tests/launchers/test_simulation_guis.py::TestExternalToolsAdapter::test_module_importable",
     "tests/launchers/test_simulation_guis.py::TestPuttingGreenGUI::test_has_get_dockable_ui",

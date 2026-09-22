@@ -42,6 +42,7 @@ from src.shared.python.simulation_backends import (
 from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 from src.shared.python.simulation_backends.trace_io import write_trace
 from src.tools.async_action import AsyncActionBar, WorkerContext
+from src.tools.window_theme import apply_theme_best_effort
 
 if TYPE_CHECKING:
     from src.shared.python.simulation_backends.protocol import Trace
@@ -101,7 +102,7 @@ class MainWidget(QtWidgets.QWidget):
         self._build_widgets()
         self._build_layout()
         self._wire_signals()
-        self._apply_theme_best_effort()
+        apply_theme_best_effort(self)
 
         self._refresh_capabilities_label()
         self.status_label.setText("Ready. Pick a backend and run a rollout.")
@@ -327,17 +328,6 @@ class MainWidget(QtWidgets.QWidget):
         self.sweep_button.clicked.connect(self.run_sweep_async)
         self.crossval_button.clicked.connect(self.run_cross_validation_async)
         self.export_button.clicked.connect(self._on_export_clicked)
-
-    def _apply_theme_best_effort(self) -> None:
-        """Apply the app theme if available; never fatal when absent."""
-        try:
-            from src.shared.python.sidekick.theme import apply_theme_to_window
-        except ImportError:
-            return
-        try:
-            apply_theme_to_window(self)
-        except (RuntimeError, AttributeError, TypeError, ValueError) as exc:
-            logger.debug("Theme application skipped: %s", exc)
 
     def _init_axes(self) -> None:
         """Reset the plot axes to the empty trajectory state."""

@@ -354,6 +354,80 @@ pending` — UD keeps this facade.
 - Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
 - Next action: merge PR #10666 after rebase CI green; teardown worktree.
 
+## Video Analyzer Real GUI #8883 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-issue-8883`.
+- Branch: `fix/8883-video-analyzer-gui`; base `origin/main` @ `4651b8793`;
+  implementation SELF; PR #10651. Governing issue #8883
+  ("Video Analyzer tile opens a bare 'GUI placeholder' label ... the
+  sibling-repo fallback is a dead end"); related #8854 (closed — confirms
+  the sibling `src/video_analyzer/` path never exists in this checkout)
+  and #10512 (prior "provider required" diagnostic framing, now
+  superseded for this tile).
+- Entry DL-#8883. Delivered a real, minimal GUI instead of the stopgap
+  status-honesty fix:
+  - `src/tools/video_analyzer/analyzer.py`: added `_pose_frames_from_video`
+    (lazy MediaPipe pose estimation via the
+    `src.shared.python.pose_estimation` registry, converted to
+    `PoseFrame`/`Landmark`) and `SwingAnalyzer.analyze_video(video_path)`,
+    which wires the already-tested head-stability math to a real video
+    file. Raises `FileNotFoundError`/`RuntimeError` (with the registry's
+    install hint) rather than failing silently.
+  - `src/tools/video_analyzer/gui.py`: replaced the static
+    `QLabel("Video Analyzer (GUI placeholder)")` with `MainWidget`
+    (choose-video button, Analyze button, report pane, status line),
+    following the `simulation_backends_launcher` convention — synchronous
+    testable core (`set_video_path`, `run_analysis`) plus an async
+    entry point (`run_analysis_async`) via `src.tools.async_action` so
+    MediaPipe decoding a whole video does not freeze the GUI thread. A
+    failed analysis renders an honest error in the status/report panes.
+  - `src/launchers/external_tools_adapter.py`: `get_video_analyzer_dockable_ui`
+    no longer tries importing `video_analyzer.launch_pyqt6` from the
+    (nonexistent) sibling repo; it returns the real window from
+    `src.tools.video_analyzer.gui` directly. `_import_video_analyzer` and
+    its `_wrap_external_widget`/Tools-repo dependency are gone for this
+    tile.
+  - `src/launchers/task_launch_truthfulness.py`: `video_analyzer`'s audit
+    entry changed from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` — it no
+    longer needs an external Tools provider; MediaPipe is an optional
+    runtime dependency handled by an in-UI error, not a launch blocker.
+  - `src/config/models.yaml`: `video_analyzer`'s `status: "ready"` left
+    unchanged — it is now honestly ready (real GUI wired to tested math).
+  - Tests updated/added: `tests/unit/test_video_analyzer_pipeline.py`
+    (new — `analyze_video` success/error paths, MediaPipe mocked),
+    `tests/ui/tools/video_analyzer/` (new — headless `MainWidget` tests,
+    conftest mirrors `simulation_backends`'), `tests/launchers/test_simulation_guis.py`
+    and `tests/launchers/test_task_launch_truthfulness.py` (rewrote the
+    two tests that asserted the old provider-required/placeholder
+    contract for this tile), `scripts/config/suite_marker_baseline.json`
+    (renamed nodeid).
+  - SPEC.md Section 12 row added for `#8883`.
+- Validation: `ruff check`/`ruff format --check` clean on all changed
+  files; `mypy` on the four changed `src/` files reports 0 new errors
+  (12 pre-existing errors surface transitively from unrelated imported
+  modules — `document_reader.py`, `keypoint_offsets.py`,
+  `_shot_tracer_gui.py`, `rtmpose_onnx_estimator.py` — none in the diff);
+  `pytest -q tests/unit/test_video_analyzer_pipeline.py
+tests/unit/test_video_analyzer_math.py tests/ui/tools/video_analyzer
+tests/launchers/test_simulation_guis.py
+tests/launchers/test_task_launch_truthfulness.py
+tests/config/feature_parity` → all passing (required
+  `git submodule update --init vendor/ud-tools` first; it was
+  uninitialized in the fresh worktree).
+- Limitations (declared, not hidden): MediaPipe itself is not exercised
+  end-to-end by these tests (mocked at the registry seam) — no CI runner
+  here is asserted to have MediaPipe installed, so a real video was never
+  decoded during this work; the head-stability score is the only metric
+  wired up (spine tilt / hip turn / shoulder turn on `PostureMetrics`
+  stay at their defaults, matching the issue's scope).
+- 2026-09-22 remediation (merge of `origin/main`): the DRY gate flagged
+  `_apply_theme_best_effort` duplicated between this GUI and
+  `simulation_backends_launcher/gui.py` (fingerprint `bec8b6584288`); both
+  now call the shared `src/tools/window_theme.apply_theme_best_effort`
+  (tests: `tests/tools/test_window_theme.py`).
+- Next action: open PR `Closes #8883`, push, poll CI, merge with
+  `--auto --squash` once green, then tear down this worktree/branch.
+
 ## Bunker Contact Regimes #9544 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_issue_worktrees/UpstreamDrift-conductor-issue-9544`.
@@ -1048,7 +1122,7 @@ it is not the latest Pinocchio/OpenSim state.
 - Changes:
   - `src/launchers/task_launch_truthfulness.py`: Authoritative launch disposition audit table (`LaunchDisposition`) covering production solvers, prototype demos, library-only algorithms, parametric CLIs, provider-required tools, and service previews. Implemented pre-flight parameter validation contract for FreeMoCap sidecar runner (`launch_freemocap_with_validation`), rejecting zero-arg headless launches and dialog cancellations without spawning subprocesses.
   - `src/launchers/launcher_model_handlers.py`: Guarded `SpecialAppHandler` to reject direct launches of library-only components (`swing_optimizer`, `injury_analysis`) and parametric CLIs (`motion_capture`), exposing actionable `status_message()` with tracking issue references and remediation. Marked `GolfSimulationSuiteHandler` as prototype demo with truthful status disclosure.
-  - `src/launchers/external_tools_adapter.py`: Removed blank placeholder `VideoAnalyzerWindow` fallback from `_import_video_analyzer()`, allowing missing provider / import errors to surface through the shared `_UnavailableToolWindow` diagnostic.
+  - `src/launchers/external_tools_adapter.py`: Removed blank placeholder `VideoAnalyzerWindow` fallback from `_import_video_analyzer()`, allowing missing provider / import errors to surface through the shared `_UnavailableToolWindow` diagnostic. Superseded for `video_analyzer` by #8883 (2026-09-21): the "provider required" framing no longer applies since the tile is now self-contained — see the `#8883` section below.
   - `src/launchers/launcher_process_manager.py`: Added `launch_script_with_args()` and safe argument forwarding in `launch_script()`. Hardened `_assign_to_job()` on Windows to safely handle non-integer or mock process PIDs without crashing.
   - `src/config/launcher_manifest.json` & `src/config/models.yaml`: Updated metadata and status chips for `golf_simulation_suite` (`prototype`), `swing_optimizer` (`experimental`/library), `injury_analysis` (`experimental`/library), removing qualified engine claims.
   - `ui/public/capability-atlas/`: Regenerated `graph.json` and `index.html` via `python -m scripts.generate_capability_atlas`.

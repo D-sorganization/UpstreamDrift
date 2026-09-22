@@ -40,6 +40,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Server-side fix for #8941: stop copying the 500-snapshot history per metrics call, stop walking it twice per metric on the event loop, and let clients fetch only new time-series points. Client polling-loop removal, endpoint merge in the UI and WS frames are out of scope here.
 - **Next step:** Switch `AnalysisPanel.tsx` to pass `since` from the `X-Analysis-Next-Since` header instead of refetching the whole window every 500 ms.
 
+### DL-#8883 · Video Analyzer Real GUI Replacing the Placeholder Label
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #8883 (related #8854, #10512)
+- **Branch:** fix/8883-video-analyzer-gui
+- **PR:** #10651
+- **Paths:** src/tools/video_analyzer/analyzer.py; src/tools/video_analyzer/gui.py; src/launchers/external_tools_adapter.py; src/launchers/task_launch_truthfulness.py; tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (ruff check/format clean; mypy clean on the four changed src files; pytest green on tests/unit/test_video_analyzer_pipeline.py, tests/unit/test_video_analyzer_math.py, tests/ui/tools/video_analyzer, tests/launchers/test_simulation_guis.py, tests/launchers/test_task_launch_truthfulness.py, tests/config/feature_parity).
+- **Summary:** Replaced the static `QLabel("Video Analyzer (GUI placeholder)")` with a real `MainWidget` (choose video, Analyze, report pane) wired to a new `SwingAnalyzer.analyze_video()` that runs MediaPipe pose estimation (via the existing `pose_estimation` registry) and feeds the already-tested head-stability math. Removed the launcher's dead sibling-repo import fallback (`video_analyzer.launch_pyqt6`, confirmed nonexistent by #8854) so the tile no longer depends on an external Tools provider; updated `task_launch_truthfulness`'s audit entry from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` accordingly.
+- **Next step:** Open PR `Closes #8883`, push, and drive CI to green.
+- **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
+
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
 - **State:** in_progress
