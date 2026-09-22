@@ -1,11 +1,26 @@
 # Current Matching Continuation Handoff
 
-## CO-06 Recover Feasible Controls and Independently Replay (#10610)
+## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
 
+- Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
+  `feat/10611-co07-fast-matching`, DL-#10611, PR not created yet.
+- Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
+  budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
+  cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
+  bounded Pareto diversity, optional empty neural proposal slot, and stage
+  profiling including verification time. Schema `club-fast-matching/1.0.0`;
+  evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
+  GREEN (12 passed); scoped ruff check/format on touched files.
+- Limitations: software-contract scoring only; no native Fit/G1 claim; quality
+  vs time curves for CO-08 remain measured on desk/native paths.
+- Next: Open PR `Fixes #10611`, confirm CI green, squash auto-merge.
+
+## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
+
+- Merged to main via PR [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687).
 - Worktree: `Worktrees/UpstreamDrift-local-10610`, branch
-  `feat/10610-co06-controls-replay`, DL-#10610, PR
-  [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687) open
-  (squash auto-merge when CI green).
+  `feat/10610-co06-controls-replay`, DL-#10610.
 - Delivered: `club_only/control_replay.py` recovers minimum-effort controls
   (reuses `ContactForceAllocator` for floating-base plants; reduced software
   plants copy RNEA onto actuated channels), separates net torque / actuated /
@@ -26,7 +41,7 @@
   `control_replay.py` and `replay_package.py` (DRY fingerprint d169d28ac9c7);
   regenerate monolith register + divergence inventory for new club_only modules.
 - Merged `origin/main` through MS-51 MyoSuite golfer scene landings.
-- Next: Confirm CI green + squash merge of #10687. Do not start CO-07+.
+- Next: N/A — merged; continue CO-07/CO-08 on main.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
 
