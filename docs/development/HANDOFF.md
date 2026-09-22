@@ -22,13 +22,16 @@
   inventory — kept both CO-04 and CO-05 exports; architecture splits and
   engine-layer orchestration preserved (no shared→engines top-level imports).
 - CI fix: regenerated docs/shared_tools/divergence_inventory.{v1.json,md} after
-  club_only/match_matrix.py move and after CO-05 main merge.
+  club_only/match_matrix.py move and after CO-05 main merge. Unit-test-gate then
+  failed on missing tools-only `launch_monitor/gspro_connect.py` — local vendor
+  checkout lacked the pin file; restored vendor to `a9ed0e7c5` and re-wrote
+  inventory so gspro_connect is recorded.
 - Validation: python -m scripts.shared_tools.divergence_inventory --check OK;
   prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Push tip; confirm quality-gate green + squash auto-merge of PR #10680.
-  Next dispatch after land is CO-06 #10610.
+- Next: Confirm quality-gate green + squash auto-merge of PR #10680. Next
+  dispatch after land is CO-06 #10610.
 
 ## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609) [MERGED]
 

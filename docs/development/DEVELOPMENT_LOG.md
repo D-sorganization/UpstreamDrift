@@ -465,7 +465,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10680
 - **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,replay_package}.py; src/engines/physics_engines/pendulum/python/motion_matching/{club_pendulum_match,club_match_matrix}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main (MS-61 #10676, NM-02 #10679, CO-05 #10681); kept both CO-04/CO-05 club_only exports; regenerated divergence inventory after merge conflicts.
+- **Last verified:** 2026-09-22 at SELF — restored vendor pin a9ed0e7c5; re-wrote divergence inventory to include tools-only launch_monitor/gspro_connect.py (unit-test-gate failure on tip 34b447211).
 - **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
 - **Next step:** Confirm quality-gate green on PR #10680 and squash auto-merge; then dispatch CO-06 #10610.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
