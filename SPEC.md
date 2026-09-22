@@ -6820,6 +6820,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10680 | Match club-only motion with driven double/triple pendulums (CO-04): fixed-pivot vs prescribed moving-hub IDs with external-work accounting, separate in-plane/3D errors, cold vs retrieval warm-start retention, first-frame scoring before integration, eight-cell software-contract matrix with explicit native G1 blockers; reconstruction scores rejected. |
+| 2026-09-21 | #10348 | MS-61 Simscape topology classification and full-marker terminal disclosure (run-103 scaffolding; native G1 blocked without licensed Fit / MS-104). |
 | 2026-09-22 | #10607 | Build retrieval and constrained-IK starting guesses for club-only matching (CO-03): handedness-aware hand-frame offsets, single-rigid library retrieval, Pink/DLS capability records with fail-closed unsupported constraints, seed cache invalidated by geometry/profile hashes; kinematic preview only. |
 | 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
 | 2026-09-21 | #10677 | Add MS-102 engine/model inventory ledger and smoke qualification harness (#10376): dual-club flagship packages from models.yaml/capability matrix/ENGINE_TIERS, immutable hashes, named MyoSuite repair #10344, Simscape R2025b metadata, structural receipts. |
