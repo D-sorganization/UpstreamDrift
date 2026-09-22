@@ -17,8 +17,9 @@
   `render_reproduction_guide_markdown` after main merge.
 - Limitations: software-contract turnover only; `native_g1_pass` false;
   `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
-- Next: Confirm CI green on PR #10718 tip after main sync (squash auto-merge
-  enabled); schedule desk-native Fit/G1 for unresolved matrix cells.
+- Next: Confirm CI green on PR #10718 tip after main sync through NM-06
+  (#10709; squash auto-merge); schedule desk-native Fit/G1 for unresolved
+  matrix cells.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
