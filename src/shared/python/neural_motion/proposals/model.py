@@ -141,7 +141,7 @@ class MaskedProposalModel:
         if not isinstance(config, ProposalConfig):
             raise TypeError("config must be a ProposalConfig")
         self.config = config
-        self._torch = None
+        self._torch: Any = None
         self._scale = float(CONTROL_SCALE)
         self._build()
 
