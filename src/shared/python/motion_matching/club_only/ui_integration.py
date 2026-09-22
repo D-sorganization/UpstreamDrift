@@ -44,11 +44,13 @@ from src.shared.python.motion_matching.club_only.seeds import (
 )
 from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
+    CLUB_DATA_RELATIVE,
     CLUB_DATA_SHA256,
     IDENTITY_SCHEMA,
     NATIVE_SAMPLE_RATE_HZ,
     UNIT_AUTHORITY,
     build_club_workbook_identity,
+    verify_workbook_hash,
 )
 from src.shared.python.motion_matching.ledger_schema import (
     ArtefactPaths,
@@ -91,10 +93,12 @@ __all__ = [
     "import_club_only_workbook_catalog",
     "keyboard_action_map",
     "list_motion_matching_source_kinds",
+    "load_club_only_workbook_observation",
     "publish_club_only_ledger_row",
     "resolve_club_only_model_id",
     "run_club_only_ui_match",
     "ui_integration_evidence_payload",
+    "write_club_only_result_package",
 ]
 
 
@@ -362,6 +366,38 @@ def import_club_only_workbook_catalog(repo_root: Path | str) -> ClubOnlyWorkbook
     return catalog
 
 
+def load_club_only_workbook_observation(
+    repo_root: Path | str,
+    trial_id: str,
+) -> ClubObservation:
+    """Load a selected Club-Only Excel trial via the existing workbook importer.
+
+    Uses ``load_club_target_excel`` + ``club_target_to_observation`` so the GUI
+    fits the workbook sheet the user selected — fixtures remain test-only.
+    """
+    if trial_id not in CANONICAL_TRIAL_SHEETS:
+        raise ValueError(f"unknown trial_id={trial_id!r}")
+    root = Path(repo_root)
+    workbook = root / CLUB_DATA_RELATIVE
+    if not workbook.is_file():
+        raise FileNotFoundError(f"club workbook missing: {workbook}")
+    verify_workbook_hash(workbook, CLUB_DATA_SHA256)
+    from src.shared.python.motion_matching.club_only.adapters import (
+        club_target_to_observation,
+    )
+    from src.shared.python.motion_matching.club_target import AlignOptions
+    from src.shared.python.motion_matching.loaders.excel import load_club_target_excel
+
+    opts = AlignOptions(
+        sample_rate_hz=float(NATIVE_SAMPLE_RATE_HZ),
+        simulation_time_s=1.0,
+        time_alignment="impact",
+        impact_target_t_s=0.25,
+    )
+    target = load_club_target_excel(workbook, trial_id, opts)
+    return club_target_to_observation(target, trial_id=trial_id)
+
+
 def create_club_only_session(
     *,
     trial_id: str,
@@ -581,22 +617,22 @@ def assert_unqualified_cannot_appear_verified(view: Any) -> None:
 def publish_club_only_ledger_row(
     view: ResultViewModel,
     *,
-    receipt_path: str,
+    receipt_path: str | Path,
 ) -> LedgerRow:
-    """Publish a ledger row on the existing matched-swing ledger schema."""
+    """Publish a ledger row whose sha256 matches the receipt file bytes."""
     if not isinstance(view, ResultViewModel):
         raise TypeError("view must be ResultViewModel")
-    if not receipt_path:
+    path = Path(receipt_path)
+    if not str(path):
         raise ValueError("receipt_path must be non-empty")
-    payload = view.as_dict()
-    digest = hashlib.sha256(
-        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode(
-            "utf-8"
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"receipt_path must exist before ledger publish: {path}"
         )
-    ).hexdigest()
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
     reason = "; ".join(view.qualification_blockers) or "software_contract_only"
     return LedgerRow(
-        receipt_path=receipt_path.replace("\\", "/"),
+        receipt_path=path.as_posix().replace("\\", "/"),
         sha256=digest,
         engine=view.model_id,
         lane="club_only",
@@ -611,6 +647,21 @@ def publish_club_only_ledger_row(
         artefacts=ArtefactPaths(),
         reason=reason,
     )
+
+
+def write_club_only_result_package(
+    view: ResultViewModel,
+    receipt_path: str | Path,
+) -> str:
+    """Write ``view.as_dict()`` JSON and return sha256 of the exact file bytes."""
+    if not isinstance(view, ResultViewModel):
+        raise TypeError("view must be ResultViewModel")
+    path = Path(receipt_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = view.as_dict()
+    text = json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n"
+    path.write_text(text, encoding="utf-8")
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def ui_integration_evidence_payload(repo_root: Path | str) -> dict[str, Any]:

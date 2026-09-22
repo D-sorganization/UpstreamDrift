@@ -128,10 +128,12 @@ from .ui_integration import (
     import_club_only_workbook_catalog,
     keyboard_action_map,
     list_motion_matching_source_kinds,
+    load_club_only_workbook_observation,
     publish_club_only_ledger_row,
     resolve_club_only_model_id,
     run_club_only_ui_match,
     ui_integration_evidence_payload,
+    write_club_only_result_package,
 )
 from .hub_accounting import HubMode, account_external_hub_work, hub_variant_id
 from .match_errors import ClubMatchErrorReport, separate_plane_and_3d_errors
@@ -392,6 +394,7 @@ __all__ = [
     "interpolate_observation",
     "keyboard_action_map",
     "list_motion_matching_source_kinds",
+    "load_club_only_workbook_observation",
     "load_observation_fixture_pack",
     "map_reduced_seed_to_body",
     "map_seed_to_pendulum_q0",
@@ -425,6 +428,7 @@ __all__ = [
     "target_content_hash",
     "synthetic_grip_jacobian",
     "ui_integration_evidence_payload",
+    "write_club_only_result_package",
     "validate_package_integrity",
     "verify_workbook_hash",
 ]
