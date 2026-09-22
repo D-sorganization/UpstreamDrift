@@ -15,13 +15,17 @@ from pathlib import Path
 import pytest
 from shared.python.sidekick.lab.mocap import (
     MOCAP_SESSION_SCHEMA_VERSION,
+    CameraCapabilities,
+    CameraIdentity,
     SessionState,
+    ShutterKind,
+    SupportLevel,
     load_session_manifest,
 )
 
 from src.motion_capture.rig import __main__ as cli
 from src.motion_capture.rig.bundle import MANIFEST_FILE
-from src.motion_capture.rig.plan import CameraBinding, RigPlan
+from src.motion_capture.rig.plan import CameraBinding, CaptureMode, RigPlan
 from src.motion_capture.rig.session import (
     CameraStats,
     CaptureOutcome,
@@ -36,6 +40,7 @@ from src.motion_capture.rig.tools_bridge import (
     RecordingTerms,
     export_session_manifest,
     export_to_bundle,
+    map_camera_records,
     probe_tools_schema,
 )
 
@@ -171,3 +176,111 @@ def test_cli_record_dry_run_needs_no_consent_but_a_real_take_does(
     assert session.recording_policy.raw_video_retained is False
     assert session.warnings[0].startswith("face")  # the classify reasons travel
     assert cli.main(["session-check", "--session", str(out)]) == 0
+
+
+# --- #9604: per-camera CameraCapabilities records --------------------------
+
+_FAST = CaptureMode(width=1280, height=720, fps=120, fourcc="yuy2")
+
+
+def _stats_manifest(*cameras: CameraStats) -> SessionManifest:
+    return SessionManifest(
+        plan_name="bench",
+        started_utc="2026-09-22T12:00:00Z",
+        duration_s=1.0,
+        cameras=cameras,
+        outcome=CaptureOutcome.SUPPORTED,
+    )
+
+
+def test_camera_records_map_every_camera_to_tools_capabilities() -> None:
+    plan = _plan()
+    manifest = _stats_manifest(
+        CameraStats(
+            view="face",
+            identity="SN-1",
+            requested_mode=CaptureMode(),
+            effective_mode=_FAST,
+            state="ok",
+        ),
+        CameraStats(
+            view="down",
+            identity="1-2.3",
+            requested_mode=CaptureMode(),
+            effective_mode=CaptureMode(),
+            state="ok",
+        ),
+    )
+    records = map_camera_records(manifest, plan)
+
+    assert [r.view for r in records] == ["face", "down"]  # one per camera, in order
+    assert [r.identity.device_id for r in records] == ["SN-1", "1-2.3"]
+    assert [r.identity.serial_number for r in records] == ["SN-1", None]
+    assert all(isinstance(r.identity, CameraIdentity) for r in records)
+    assert all(isinstance(r.capabilities, CameraCapabilities) for r in records)
+
+    face, down = (r.capabilities for r in records)
+    # The negotiated (effective) mode is what the camera advertises.
+    assert face.resolutions_px == ((1280, 720),)
+    assert face.frame_rates_hz == (120.0,)
+    assert face.pixel_formats == ("YUY2",)
+    assert face.supports_mode((1280, 720), 120.0, "YUY2")
+    assert down.resolutions_px == ((1920, 1200),) and down.frame_rates_hz == (60.0,)
+    for caps in (face, down):
+        # UVC rig cameras declare neither shutter nor trigger nor device clocks.
+        assert caps.shutter is ShutterKind.UNKNOWN
+        assert caps.hardware_trigger.level is SupportLevel.UNSUPPORTED
+        assert caps.hardware_trigger.reason
+        assert caps.device_timestamps.level is SupportLevel.UNSUPPORTED
+        assert "host" in str(caps.device_timestamps.reason)
+        assert caps.exposure_us is None
+
+
+def test_camera_records_fall_back_to_the_requested_mode_when_none_negotiated() -> None:
+    plan = _plan()
+    manifest = _stats_manifest(
+        CameraStats(
+            view="down",
+            identity="1-2.3",
+            requested_mode=_FAST,
+            state="open_failed",
+            reason="device busy",
+        ),
+    )
+    (record,) = map_camera_records(manifest, plan)
+    assert record.view == "down" and record.identity.device_id == "1-2.3"
+    assert record.identity.serial_number is None
+    assert record.capabilities.resolutions_px == ((1280, 720),)
+    assert record.capabilities.frame_rates_hz == (120.0,)
+    assert record.capabilities.pixel_formats == ("YUY2",)
+
+
+def test_camera_records_agree_with_the_exported_session_identities() -> None:
+    plan = _plan()
+    manifest = _captured(plan)
+    session = load_session_manifest(export_session_manifest(manifest, plan))
+    records = map_camera_records(manifest, plan)
+    assert tuple(r.identity for r in records) == session.cameras
+
+
+def test_camera_records_reject_a_camera_the_plan_does_not_bind() -> None:
+    stray = CameraStats(view="ghost", identity="X", requested_mode=CaptureMode())
+    with pytest.raises(ValueError, match="ghost"):
+        map_camera_records(_stats_manifest(stray), _plan())
+
+
+def test_camera_records_reject_duplicate_views() -> None:
+    face = CameraStats(view="face", identity="SN-1", requested_mode=CaptureMode())
+    with pytest.raises(ValueError, match="unique"):
+        map_camera_records(_stats_manifest(face, face), _plan())
+
+
+def test_camera_records_reject_a_clock_domain_without_a_tools_kind() -> None:
+    odd = CameraStats(
+        view="face",
+        identity="SN-1",
+        requested_mode=CaptureMode(),
+        clock_domain="ptp_ns",
+    )
+    with pytest.raises(ValueError, match="ptp_ns"):
+        map_camera_records(_stats_manifest(odd), _plan())
