@@ -601,13 +601,14 @@ class MotionMatchingWidget(QWidget):
             )
             return
         self._club_session = payload.get("session")
-        self._club_checkpoint = payload.get("checkpoint")
         summary = payload.get("summary", {})
         if summary.get("cancelled"):
+            self._club_checkpoint = payload.get("checkpoint")
             self.club_log.appendPlainText(
                 "Club-only match cancelled; checkpoint saved for resume."
             )
         else:
+            self._club_checkpoint = None
             self.club_log.appendPlainText(json.dumps(summary, indent=2, default=str))
 
     def _on_club_only_failed(self, message: str) -> None:
