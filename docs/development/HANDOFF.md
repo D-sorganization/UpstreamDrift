@@ -10,11 +10,31 @@ pending` — UD keeps this facade.
   `REALTIME_TRANSPORT=ws` routes to `WSPubSub`; other transports raise
   `ValueError` instead of silent file fallback. Renamed colliding
   `register_channel` → `register_channel_hint`; deleted dead `file_pubsub.py`.
-- Next action: green CI on post-#10653 merge, squash merge, teardown worktree.
+- Next action: green CI after post-#10656 merge, squash merge, teardown worktree.
 
-## Launcher Tile Consolidation #9479 / #9480 Handoff [MERGED]
+## GUI Thread-Blocking Migration #8880 Handoff [MERGED]
 
-- Merged via PR [#10653](https://github.com/D-sorganization/UpstreamDrift/pull/10653) on `main` (`c70555a5e`).
+- Merged via PR [#10656](https://github.com/D-sorganization/UpstreamDrift/pull/10656) on `main` (`6230f85e1`); `Refs #8880`.
+
+## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
+
+- Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
+  `feat/10611-co07-fast-matching`, DL-#10611, PR
+  [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700) open.
+- Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
+  budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
+  cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
+  bounded Pareto diversity, optional empty neural proposal slot, and stage
+  profiling including verification time. Schema `club-fast-matching/1.0.0`;
+  evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
+- Param-budget fix: collapse `run_fast_club_match` knobs onto `FastMatchOptions`
+  and private `_ScoreLoopCtx` / `_AssembleCtx` (repo-structure-gates).
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
+  GREEN (12 passed); `python scripts/ci/check_architecture_budget.py` OK.
+- Limitations: software-contract scoring only; no native Fit/G1 claim; no
+  unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
+  saved in the software-contract evidence for CO-08 (not native timing).
+- Next: Confirm CI green on PR #10700 after main merge through MS-14; squash auto-merge remains armed.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
@@ -40,6 +60,7 @@ pending` — UD keeps this facade.
   `control_replay.py` and `replay_package.py` (DRY fingerprint d169d28ac9c7);
   regenerate monolith register + divergence inventory for new club_only modules.
 - Merged `origin/main` through MS-51 MyoSuite golfer scene landings and CO-06 #10687.
+- Next: N/A — merged; continue CO-07/CO-08 on main.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
 

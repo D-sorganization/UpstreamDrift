@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #8880
+- **Branch:** fix/8880-gui-thread-blocking-sims
+- **PR:** #10656
+- **Paths:** src/tools/bunker_shot_gui/gui.py; src/tools/ball_flight_gui/gui.py; src/tools/swing_flight_pipeline/gui.py; src/tools/motion_matching/gui.py; src/shared/python/theme/tool_stylesheet.py; scripts/ci/check_gui_thread_blocking_ratchet.py; scripts/config/gui_thread_blocking_baseline.json; tests/tools/bunker_shot_gui/test_async_actions.py; tests/tools/ball_flight_gui/test_async_actions.py; tests/tools/swing_flight_pipeline/test_async_actions.py; tests/unit/scripts/test_gui_thread_blocking_ratchet.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF — merged origin/main; DRY duplication gate clean after shared comparison/banner helpers and `wire_primary_action_button`; ruff clean on touched files.
+- **Summary:** Migrated `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline` onto `src/tools/async_action.py`; added lower-only GUI-thread-blocking ratchet (baseline 12); primary run buttons use shared theme wiring (#10654). ~9 tools remain un-migrated (see PR #10656 Deferred).
+- **Next step:** Merge PR #10656 after CI green; follow-up PRs for remaining inline tools.
+
 ### DL-#9479 · Consolidate Engine Meta-Tiles and Clarify Confusable Launcher Tile Names
 
 - **State:** in_review
@@ -111,6 +124,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 (`98abb965f1`) — RED shown for the batching regression test (25 calls before the fix), then GREEN; numerical-equivalence and empty-trajectory tests pass; `tests/unit/physics/` shows no new failures versus unmodified main (three pre-existing rust-engine/tolerance failures reproduced identically via `git stash`); ruff check/format clean.
 - **Summary:** `BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.
+- **Next step:** Land the vectorization PR (#10648) if not already merged.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
@@ -560,13 +574,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10610 (epic #10602)
 - **Branch:** feat/10610-co06-controls-replay
-- **PR:** #10687
+- **PR:** #10687 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at f191dd09d — squash-merged to main via PR #10687; native G1 remains blocked on software-contract fixtures only.
 - **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
 - **Next step:** Dispatch CO-07+ per club-only epic dependency order; do not invent native G1 pass.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
+
+### DL-#10611 · CO-07 Optimize Fast Matching and Expose Candidate Diversity
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10611 (epic #10602)
+- **Branch:** feat/10611-co07-fast-matching
+- **PR:** #10700
+- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — architecture param-budget fix via FastMatchOptions/\_ScoreLoopCtx/\_AssembleCtx; merged origin/main (MS-14); 12 unit tests GREEN; check_architecture_budget OK; native_g1_pass false
+- **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time. Public knobs collapse onto FastMatchOptions for architecture parameter budgets.
+- **Next step:** Confirm CI green and squash merge of PR Fixes #10611; do not start CO-08+.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

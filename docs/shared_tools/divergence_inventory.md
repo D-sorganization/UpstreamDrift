@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 26 | 53 | 15 | 18 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 215 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 216 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `neural_motion` | 0 | 0 | 0 | 23 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1441** | **709** | **702** |
+| **Total** | **423** | **279** | **123** | **1442** | **709** | **702** |
 
 ## Diverged Files by Package
 
@@ -399,7 +399,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `realtime/__init__.py` | +1579 |  | Dieter Olson 2026-09-21 | Dieter Olson 2026-09-07 |
+| `realtime/__init__.py` | +1579 |  | Dieter Olson 2026-09-22 | Dieter Olson 2026-09-07 |
 | `realtime/transport_file.py` | -2971 |  | d-sorgclaudeagent[bot] 2026-07-26 | d-sorgcodexagent[bot] 2026-09-08 |
 
 ### Package `reporting` (2 Diverged Files)
