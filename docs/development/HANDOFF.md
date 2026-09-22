@@ -14,8 +14,8 @@
   (10 passed); ruff check/format clean on touched files.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Open/merge PR with `Fixes #10608`; then dispatch CO-05 (#10609) or await
-  TB-05 (#10590) for native triple receipts.
+- Next: Confirm CI green + squash auto-merge of PR #10680; then dispatch CO-05 (#10609)
+  or await TB-05 (#10590) for native triple receipts.
 
 ## MS-102 Engine and Model Inventory #10376 Handoff
 
