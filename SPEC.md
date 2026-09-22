@@ -6820,6 +6820,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10686 | NM-03 versioned episode HDF5 store, family splits, compact-1.0 adapter, task views, train-only normalizer and window cache; software-contract tests only. |
+| 2026-09-22 | #10344 | MS-51 MyoSuite repair: pin myo_sim, generate dual-grip driver/iron golfer scenes with four foot contact markers, diagnostic coordinate map, inventory flagship packages leave repair after native MuJoCo load (no G1/parity claim). |
 | 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
 | 2026-09-21 | #10654 | Add `src/shared/python/theme/tool_stylesheet.py` as the UD-owned home for a canonical primary-action color token; fix the light-mode panel hardcoded inside the dark `model_explorer` visualization widget; unify the four mismatched "run" button colors across `putting_green_gui`/`ball_flight_gui`/`swing_flight_pipeline`/`training_controller`; add a hardcoded-style ratchet hygiene check (issue #8885). |
 | 2026-09-22 | #10680 | Match club-only motion with driven double/triple pendulums (CO-04): fixed-pivot vs prescribed moving-hub IDs with external-work accounting, separate in-plane/3D errors, cold vs retrieval warm-start retention, first-frame scoring before integration, eight-cell software-contract matrix with explicit native G1 blockers; reconstruction scores rejected. |

@@ -444,38 +444,51 @@
       "model_family": "full_body_anthro",
       "model_class": "shared_document",
       "intended_use": "matched_swing_smoke",
-      "status": "repair",
+      "status": "ready",
       "supported_hosts": ["linux", "windows", "darwin"],
       "source_spec": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
       "source_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
-      "generated_model": null,
-      "generated_sha256": null,
-      "generator": null,
-      "generator_version": null,
+      "generated_model": "shared/models/myosuite/golf/body/golfer_myobody_driver.xml",
+      "generated_sha256": "8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b",
+      "generator": "src.engines.physics_engines.myosuite.python.golfer_scene:generate_golfer_scene",
+      "generator_version": "ms51-golfer-scene-v1",
       "units": "SI",
-      "frames": "MyoBody / myo_sim (pending)",
+      "frames": "myo_sim myobody_simpleupper @ 33f3ded946f5 + dual-grip club",
       "joints": { "count": 44, "order_authority": "spec.coordinate_order" },
       "marker_map": "src/engines/physics_engines/myosuite/python/coordinate_map_anthro.json",
       "club_config": { "club": "driver", "from_spec": true },
-      "grip_config": { "closure": "pending_ms51" },
-      "contact_config": { "law": "pending_ms51" },
+      "grip_config": {
+        "closure": "dual_site_weld",
+        "sites": [
+          "grip_site_hand_r",
+          "grip_site_hand_l",
+          "grip_site_club_r",
+          "grip_site_club_l"
+        ]
+      },
+      "contact_config": {
+        "law": "hunt_crossley_coulomb_shared",
+        "spheres": "four_foot_markers_contype0",
+        "note": "Spheres are non-colliding markers for the shared contact law; stock MuJoCo contact is not claimed equivalent."
+      },
       "actuation": { "type": "muscle_activation" },
       "required_assets": [
         "shared/models/myosuite/myo_sim",
+        "shared/models/myosuite/golf/body/golfer_myobody_driver.xml",
         "src/engines/physics_engines/myosuite/python/coordinate_map_anthro.json"
       ],
-      "license_terms": "MyoHub myo_sim upstream licence once pinned by MS-51; coordinate map is repository-local.",
+      "license_terms": "MyoHub myo_sim (Apache-2.0) pin 33f3ded946f55adbdcf963c99999587aadaf975f; golf scene and coordinate map are repository-local.",
       "launcher_tile_ids": ["myosim_suite"],
       "matlab_release": null,
-      "repair_task": {
-        "issue": 10344,
-        "title": "MS-51: Pin myo_sim and generate golfer scene with club weld and foot contacts"
-      },
+      "repair_task": null,
       "muscle_tendon": {
-        "status": "required",
-        "note": "Muscle/tendon parameters land with MS-51 golfer scene; placeholder MyoBody lacks golf club topology."
+        "status": "upstream_myo_sim",
+        "note": "Muscle/tendon parameters come from pinned myo_sim myobody_simpleupper; golf-specific MTU calibration and 15 mm parity are not claimed by MS-51."
       },
-      "workspace_init": null
+      "workspace_init": {
+        "bootstrap": "scripts/setup_myosuite_models.ps1",
+        "myo_sim_pin": "33f3ded946f55adbdcf963c99999587aadaf975f"
+      }
     },
     {
       "id": "myosuite/iron",
@@ -485,38 +498,51 @@
       "model_family": "full_body_anthro",
       "model_class": "shared_document",
       "intended_use": "matched_swing_smoke",
-      "status": "repair",
+      "status": "ready",
       "supported_hosts": ["linux", "windows", "darwin"],
       "source_spec": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
       "source_sha256": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
-      "generated_model": null,
-      "generated_sha256": null,
-      "generator": null,
-      "generator_version": null,
+      "generated_model": "shared/models/myosuite/golf/body/golfer_myobody_iron.xml",
+      "generated_sha256": "ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086",
+      "generator": "src.engines.physics_engines.myosuite.python.golfer_scene:generate_golfer_scene",
+      "generator_version": "ms51-golfer-scene-v1",
       "units": "SI",
-      "frames": "MyoBody / myo_sim (pending)",
+      "frames": "myo_sim myobody_simpleupper @ 33f3ded946f5 + dual-grip club",
       "joints": { "count": 44, "order_authority": "spec.coordinate_order" },
       "marker_map": "src/engines/physics_engines/myosuite/python/coordinate_map_anthro.json",
       "club_config": { "club": "iron7", "from_spec": true },
-      "grip_config": { "closure": "pending_ms51" },
-      "contact_config": { "law": "pending_ms51" },
+      "grip_config": {
+        "closure": "dual_site_weld",
+        "sites": [
+          "grip_site_hand_r",
+          "grip_site_hand_l",
+          "grip_site_club_r",
+          "grip_site_club_l"
+        ]
+      },
+      "contact_config": {
+        "law": "hunt_crossley_coulomb_shared",
+        "spheres": "four_foot_markers_contype0",
+        "note": "Spheres are non-colliding markers for the shared contact law; stock MuJoCo contact is not claimed equivalent."
+      },
       "actuation": { "type": "muscle_activation" },
       "required_assets": [
         "shared/models/myosuite/myo_sim",
+        "shared/models/myosuite/golf/body/golfer_myobody_iron.xml",
         "src/engines/physics_engines/myosuite/python/coordinate_map_anthro.json"
       ],
-      "license_terms": "MyoHub myo_sim upstream licence once pinned by MS-51; coordinate map is repository-local.",
+      "license_terms": "MyoHub myo_sim (Apache-2.0) pin 33f3ded946f55adbdcf963c99999587aadaf975f; golf scene and coordinate map are repository-local.",
       "launcher_tile_ids": ["myosim_suite"],
       "matlab_release": null,
-      "repair_task": {
-        "issue": 10344,
-        "title": "MS-51: Pin myo_sim and generate golfer scene with club weld and foot contacts"
-      },
+      "repair_task": null,
       "muscle_tendon": {
-        "status": "required",
-        "note": "Muscle/tendon parameters land with MS-51 golfer scene; placeholder MyoBody lacks golf club topology."
+        "status": "upstream_myo_sim",
+        "note": "Muscle/tendon parameters come from pinned myo_sim myobody_simpleupper; golf-specific MTU calibration and 15 mm parity are not claimed by MS-51."
       },
-      "workspace_init": null
+      "workspace_init": {
+        "bootstrap": "scripts/setup_myosuite_models.ps1",
+        "myo_sim_pin": "33f3ded946f55adbdcf963c99999587aadaf975f"
+      }
     },
     {
       "id": "simscape/driver",
