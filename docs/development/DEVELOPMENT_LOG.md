@@ -639,16 +639,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10613 · CO-09 Integrate Club-Only Matching Into Existing UI and Results
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10613 (epic #10602)
 - **Branch:** feat/co09-club-only-ui-10613
-- **PR:** not created
+- **PR:** #10711
 - **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — scoped UI integration unit tests GREEN; native_g1_pass false
+- **Last verified:** 2026-09-22 at SELF — scoped UI integration unit tests GREEN (14); pre-push mypy/bandit GREEN; native_g1_pass false
 - **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser surfaces without parallel frameworks. Preview vs verified statuses stay honest; observed/inferred legend and trial clock required; cancel/resume reuse CO-07; ledger lane=club_only with named native blockers.
-- **Next step:** Open PR Fixes #10613 with squash auto-merge; do not start CO-10 until merge.
+- **Next step:** Confirm CI green on PR #10711 and squash-merge Fixes #10613; do not start CO-10 until merge.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
