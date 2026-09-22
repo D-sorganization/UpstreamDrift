@@ -353,7 +353,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10686
 - **Paths:** src/shared/python/neural_motion/episodes/; src/shared/python/neural_motion/json_io.py; src/shared/python/neural_motion/experiment.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — mypy shard required-array narrowing; DRY mixin for sorted JSON exports; 16 NM-03 unit tests plus benefit-experiment tests green; no training claim
+- **Last verified:** 2026-09-22 at SELF — merged origin/main (CO-04 #10680); mypy shard required-array narrowing; DRY mixin for sorted JSON exports; divergence inventory regenerated; no training claim
 - **Summary:** Versioned `neural-episode-store/1.0.0` HDF5 shards with content hashes; family-level splits with held-out strata and real-data eval bucket; compact-1.0 adapter via `CompactArrayBundle` preserves 27/189 layout; thin task views and transform-keyed window cache; training registry registers corpus paths without all-RAM load.
 - **Next step:** Confirm CI green on PR #10686 and squash auto-merge.
 - **Evidence:** docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json.
@@ -409,9 +409,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-22 — CO-03 merged (#10678); CO-05 body candidates in progress on feat/issue-10609-co05-plausible-body-candidates; CO-04 sibling on separate worktree
+- **Last verified:** 2026-09-22 — CO-03/#10678, CO-05/#10681, NM-02/#10679, MS-61/#10676 shipped; CO-04 pendulum club match in review on feat/issue-10608-co04-pendulum-club-match (PR #10680)
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land PR for #10609 (CO-05), keep CO-04 (#10608) on non-overlapping pendulum paths.
+- **Next step:** Land PR #10680 for #10608 (CO-04), then dispatch #10610 (CO-06) per dependency order.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -470,18 +470,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Continue on #10608 (CO-04) and #10609 (CO-05) in parallel on non-overlapping paths.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
 
-### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
+### DL-#10608 · CO-04 Match Club-Only Motion With Double and Triple Pendulums
 
 - **State:** in_review
 - **Owner:** local
+- **Issue:** #10608 (epic #10602)
+- **Branch:** feat/issue-10608-co04-pendulum-club-match
+- **PR:** #10680
+- **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,replay_package}.py; src/engines/physics_engines/pendulum/python/motion_matching/{club_pendulum_match,club_match_matrix}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json; docs/shared_tools/divergence_inventory.v1.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — restored vendor pin a9ed0e7c5; re-wrote divergence inventory to include tools-only launch_monitor/gspro_connect.py (unit-test-gate failure on tip 34b447211).
+- **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
+- **Next step:** Confirm quality-gate green on PR #10680 and squash auto-merge; then dispatch CO-06 #10610.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
+
+### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
+
+- **State:** shipped
+- **Owner:** local
 - **Issue:** #10609 (epic #10602)
 - **Branch:** feat/issue-10609-co05-plausible-body-candidates
-- **PR:** #10681 (squash auto-merge)
+- **PR:** #10681 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/club_only/topology_mapping.py; src/shared/python/motion_matching/club_only/nullspace_proposals.py; src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/seeds.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_body_candidates.py; docs/plans/club_only_matching/evidence/club_body_candidates.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged origin/main; regenerated monolith register + divergence inventory (body_candidates ud-only); DRY helper already landed; register/inventory unit tests green
+- **Last verified:** 2026-09-22 — merged via #10681 onto main as prerequisite for CO-06
 - **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
-- **Next step:** Confirm CI green on PR #10681 and squash merge.
+- **Next step:** Continue on #10610 (CO-06) after CO-04 lands.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
