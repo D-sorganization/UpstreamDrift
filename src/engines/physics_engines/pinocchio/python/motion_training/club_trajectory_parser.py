@@ -29,6 +29,11 @@ try:
 except ImportError:
     OPENPYXL_AVAILABLE = False
 
+from src.shared.python.motion_matching.loaders.event_labels import (
+    axis_component,
+    parse_event_marker_cells,
+)
+
 
 @dataclass
 class SwingEventMarkers:
@@ -293,24 +298,17 @@ class ClubTrajectoryParser:
         return self._parse_events_list(row.tolist())
 
     def _parse_events_list(self, row: list) -> SwingEventMarkers:
-        """Parse event markers from list."""
+        """Parse event markers from list via shared label normalization."""
         if row is None:
             raise ValueError("row must be provided")
-        events = SwingEventMarkers()
-
-        for i, val in enumerate(row):
-            if val == "A=" and i + 1 < len(row):
-                events.address = int(row[i + 1]) if row[i + 1] else 0
-            elif val == "T=" and i + 1 < len(row):
-                events.top = int(row[i + 1]) if row[i + 1] else 0
-            elif val == "I=" and i + 1 < len(row):
-                events.impact = int(row[i + 1]) if row[i + 1] else 0
-            elif val == "F=" and i + 1 < len(row):
-                events.finish = int(row[i + 1]) if row[i + 1] else 0
-            elif val == "CHS" and i + 1 < len(row):
-                events.club_head_speed = float(row[i + 1]) if row[i + 1] else 0.0
-
-        return events
+        parsed = parse_event_marker_cells(row)
+        return SwingEventMarkers(
+            address=int(parsed["A"]) if "A" in parsed else 0,
+            top=int(parsed["T"]) if "T" in parsed else 0,
+            impact=int(parsed["I"]) if "I" in parsed else 0,
+            finish=int(parsed["F"]) if "F" in parsed else 0,
+            club_head_speed=float(parsed["CHS"]) if "CHS" in parsed else 0.0,
+        )
 
     @staticmethod
     def _make_row_accessor(row: Any) -> object:
@@ -355,16 +353,16 @@ class ClubTrajectoryParser:
 
         grip_x = np.array(
             [
-                float(get(self.GRIP_XX_COL) or 1.0),
-                float(get(self.GRIP_XY_COL) or 0.0),
-                float(get(self.GRIP_XZ_COL) or 0.0),
+                axis_component(get(self.GRIP_XX_COL), default=1.0),
+                axis_component(get(self.GRIP_XY_COL), default=0.0),
+                axis_component(get(self.GRIP_XZ_COL), default=0.0),
             ]
         )
         grip_y = np.array(
             [
-                float(get(self.GRIP_YX_COL) or 0.0),
-                float(get(self.GRIP_YY_COL) or 1.0),
-                float(get(self.GRIP_YZ_COL) or 0.0),
+                axis_component(get(self.GRIP_YX_COL), default=0.0),
+                axis_component(get(self.GRIP_YY_COL), default=1.0),
+                axis_component(get(self.GRIP_YZ_COL), default=0.0),
             ]
         )
         grip_rot = self._orthogonalize_axes(grip_x, grip_y)
@@ -394,16 +392,16 @@ class ClubTrajectoryParser:
 
         face_x_axis = np.array(
             [
-                float(get(self.FACE_XX_COL) or 1.0),
-                float(get(self.FACE_XY_COL) or 0.0),
-                float(get(self.FACE_XZ_COL) or 0.0),
+                axis_component(get(self.FACE_XX_COL), default=1.0),
+                axis_component(get(self.FACE_XY_COL), default=0.0),
+                axis_component(get(self.FACE_XZ_COL), default=0.0),
             ]
         )
         face_y_axis = np.array(
             [
-                float(get(self.FACE_YX_COL) or 0.0),
-                float(get(self.FACE_YY_COL) or 1.0),
-                float(get(self.FACE_YZ_COL) or 0.0),
+                axis_component(get(self.FACE_YX_COL), default=0.0),
+                axis_component(get(self.FACE_YY_COL), default=1.0),
+                axis_component(get(self.FACE_YZ_COL), default=0.0),
             ]
         )
         face_rot = self._orthogonalize_axes(face_x_axis, face_y_axis)

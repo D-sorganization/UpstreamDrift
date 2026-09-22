@@ -18,7 +18,11 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
 
-DEFAULT_SOURCE = Path(r"C:\Users\diete\Repositories\data\TenThousandFiles.parquet")
+from src.shared.python.motion_matching.surrogate.artifact_paths import (
+    DOCUMENTED_TEN_THOUSAND_FILES,
+)
+
+DEFAULT_SOURCE = DOCUMENTED_TEN_THOUSAND_FILES
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_MANIFEST = SCRIPT_DIR / "column_manifest_inverse_ready.json"
 DEFAULT_OUTPUT = SCRIPT_DIR / "data" / "processed" / "golf_dynamics_slim.parquet"
@@ -54,8 +58,8 @@ def _cast_string_column_to_float32(
     chunks = column.chunks if isinstance(column, pa.ChunkedArray) else [column]
     converted = []
     for chunk in chunks:
-        blank = pc.equal(chunk, "")
-        cleaned = pc.if_else(blank, pa.scalar(None, pa.string()), chunk)
+        blank = pc.equal(chunk, "")  # type: ignore[attr-defined]
+        cleaned = pc.if_else(blank, pa.scalar(None, pa.string()), chunk)  # type: ignore[attr-defined]
         converted.append(pc.cast(cleaned, pa.float32(), safe=False))
     return pa.chunked_array(converted, type=pa.float32())
 

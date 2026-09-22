@@ -47,6 +47,20 @@ force is unchanged.  Two residuals here look for exactly that:
 
 Both refuse to run on a configuration whose torque is too nearly
 axis-aligned to detect a swap, so neither can pass vacuously.
+
+The support is on the ledger too (issue #9544)
+----------------------------------------------
+
+A prescribed-rotation march holds the head's angular velocity fixed
+while the sand applies a moment to it, so *something* -- the shaft, the
+grip, the golfer -- is reacting that moment and doing work against it.
+Leaving it implied is how an energy budget quietly fails to close.
+:func:`support_angular_impulse` states the angular impulse the support
+supplied (``-(integral of tau dt)``, about the moving body origin, world frame) and
+:func:`prescribed_driver_work` the work the driver did holding the
+delivered rotation (``-(integral of tau . omega dt)``).  Both are identities of
+the prescribed scheme and both **refuse a coupled trace**: there the
+coupling owns the head's inertia and the ledger is its to keep.
 """
 
 from __future__ import annotations
@@ -61,17 +75,21 @@ from numpy.typing import ArrayLike, NDArray
 
 from src.shared.python.core.contracts import require
 
-from ..solvers import DRFTSolver, IntrusionState, ShotResult
+from ..solvers import DRFTSolver, IntrusionState, RotationMode, ShotResult
 from .exceptions import ConservationClassError, VerificationError
 
 __all__ = [
     "ROUND_OFF_TOLERANCE",
     "ConservationClass",
     "ConservationResidual",
+    "PrescribedDriverWork",
+    "SupportAngularImpulse",
     "element_moment_residual",
     "energy_work_residual",
     "linear_impulse_residual",
     "moment_transfer_residual",
+    "prescribed_driver_work",
+    "support_angular_impulse",
 ]
 
 ROUND_OFF_TOLERANCE = 1e-12
@@ -461,6 +479,120 @@ def energy_work_residual(
         ),
         step_size_s=step,
     )
+
+
+def _require_prescribed(trace: ShotResult, ledger: str) -> None:
+    """Refuse a coupled trace, whose rotational ledger the coupling keeps.
+
+    Raises:
+        VerificationError: If the trace was not marched with prescribed
+            rotation, or is too short to integrate.
+    """
+    if trace.rotation_mode is not RotationMode.PRESCRIBED:
+        raise VerificationError(
+            f"{ledger} is an identity of the prescribed-rotation march, but "
+            f"this trace was produced in {trace.rotation_mode.value} mode; a "
+            "coupled head's angular momentum lives in the coupling's own "
+            "inertia model, which this ledger does not have (issue #9544)"
+        )
+    if trace.n_steps < 2:
+        raise VerificationError(
+            f"{ledger} needs at least two samples to integrate, got {trace.n_steps}"
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class SupportAngularImpulse:
+    """What the support supplied to hold a prescribed rotation.
+
+    Both vectors are taken about the body-frame origin -- the point
+    ``ShotResult.positions_m[k]``, which moves with the head -- in the
+    world frame, the same reference every ``torques_n_m[k]`` uses.
+
+    The gyroscopic term ``omega x I omega`` of a non-spherical head is
+    **not** included: the F0 march carries no inertia tensor, so the
+    ledger states only the part the sand moment fixes.  For a constant
+    ``omega`` that term is a constant the sand does not touch.
+
+    Attributes:
+        sand_n_m_s: ``integral of tau dt``, trapezoidal, the angular impulse the
+            sand put into the head.
+        support_n_m_s: ``-sand_n_m_s``, the angular impulse the support
+            had to supply so the angular velocity did not change.
+        residual: ``|sand + support|``, identically zero: this is a
+            round-off-class statement and it is reported as one so the
+            ledger cannot be mistaken for a measurement.
+        conservation_class: Always ``ROUND_OFF``.
+    """
+
+    sand_n_m_s: NDArray[np.float64]
+    support_n_m_s: NDArray[np.float64]
+    residual: float
+    conservation_class: ConservationClass = ConservationClass.ROUND_OFF
+
+
+def support_angular_impulse(trace: ShotResult) -> SupportAngularImpulse:
+    """The angular impulse a prescribed march's support must have supplied.
+
+    Translation is free, so the support's *linear* impulse is zero by the
+    same idealisation; only the angular side needs stating.
+
+    Args:
+        trace: A prescribed-rotation shot trace.
+
+    Returns:
+        The sand and support angular impulses about the moving body origin.
+
+    Raises:
+        VerificationError: If the trace is coupled or too short.
+    """
+    _require_prescribed(trace, "the support angular-impulse ledger")
+    sand = np.asarray(
+        np.trapezoid(trace.torques_n_m, x=trace.times_s, axis=0), dtype=np.float64
+    )
+    support = -sand
+    return SupportAngularImpulse(
+        sand_n_m_s=sand,
+        support_n_m_s=support,
+        residual=float(np.abs(sand + support).max()),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class PrescribedDriverWork:
+    """The energy the driver spent holding the delivered rotation.
+
+    With ``omega`` fixed the head's rotational kinetic energy cannot
+    change, so the sand's torque work and the driver's work sum to zero
+    identically: ``0 = W_sand_torque + W_driver``.  The translational
+    side, ``dKE = W_force``, is :func:`energy_work_residual`'s.
+
+    Attributes:
+        sand_torque_work_j: ``integral of tau . omega dt``, trapezoidal.
+        driver_work_j: ``-sand_torque_work_j``: positive when the driver
+            had to push the head round against the sand.
+    """
+
+    sand_torque_work_j: float
+    driver_work_j: float
+
+
+def prescribed_driver_work(trace: ShotResult) -> PrescribedDriverWork:
+    """The work done holding a prescribed rotation against the sand moment.
+
+    Args:
+        trace: A prescribed-rotation shot trace.
+
+    Returns:
+        The sand's torque work and the driver's equal-and-opposite work.
+
+    Raises:
+        VerificationError: If the trace is coupled or too short.
+    """
+    _require_prescribed(trace, "the prescribed-driver work ledger")
+    power = np.einsum("ij,ij->i", trace.torques_n_m, trace.angular_velocities_rad_s)
+    work = float(np.trapezoid(power, x=trace.times_s))
+    return PrescribedDriverWork(sand_torque_work_j=work, driver_work_j=-work)
 
 
 def inertial_power_is_dissipative(

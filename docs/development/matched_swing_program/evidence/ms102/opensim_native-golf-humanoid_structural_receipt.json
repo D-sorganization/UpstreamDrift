@@ -1,0 +1,65 @@
+{
+  "package_id": "opensim/native-golf-humanoid",
+  "engine": "opensim",
+  "host": "windows",
+  "overall": "pass",
+  "steps": [
+    {
+      "step": "resolve_assets",
+      "outcome": "pass",
+      "message": "all declared assets resolve under the repository root",
+      "remediation": null
+    },
+    {
+      "step": "hash_check",
+      "outcome": "pass",
+      "message": "identity hash 344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+      "remediation": null
+    },
+    {
+      "step": "load_compile",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "initialize",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "fk_mass",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "dynamics_smoke",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "viewer",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "save_reload",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    }
+  ],
+  "model_hash": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+  "source_hash": null,
+  "runtime": {
+    "python": "3.13.5",
+    "platform": "win32",
+    "host": "windows",
+    "allow_native": false
+  },
+  "contract_sha256": "e6dd1a36df621374412a42d96793932724ebb7e981698418d088d7f4f5c04d6e"
+}

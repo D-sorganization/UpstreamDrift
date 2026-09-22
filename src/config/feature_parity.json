@@ -87,13 +87,13 @@
       "notes": "Web-first tool; the desktop launcher opens the web route."
     },
     "tools.motion_matching": {
-      "title": "Motion Matching tour-average capture matching",
+      "title": "Motion Matching tour-average and club-only Excel matching",
       "pyqt": "src/tools/motion_matching/gui.py",
       "api": null,
       "web": null,
       "status": "parity",
       "tiles": ["motion_matching"],
-      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355)."
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, MJX export/validation (MS-82 #10355), and Club-Only Excel matching UI (CO-09 #10613) reusing workbook identity, fast matching, ledger lane=club_only, and ResultsBrowser JSON packages. Native G1 remains blocked."
     },
     "tools.matched_swing_browser": {
       "title": "Matched Swing Results Browser",

@@ -1,0 +1,31 @@
+{
+  "schema": "neural-masked-proposals-receipt/1.0.0",
+  "governing_issue": 10621,
+  "parent_epic": 10603,
+  "proposal_schema": "neural-masked-proposals/1.0.0",
+  "source_hashes": {
+    "basis_time.py": "5bf92d5aa2b278978027fdd8c4f898c3ca3f97d837e9a188c83b18df5f72be75",
+    "collapse.py": "f6c9553a07fe4caa3fc458b8a60156d994aeaf08dcec32bd4e6cba466f5f01d0",
+    "hybrid.py": "264447435c93ab8deb682cbf34a96fbd22f429d345b261700638ad769c09f8d7",
+    "inverse_init.py": "521d1e510f7c45f7e4d200796b9befb66d5441d219cc5f74315918a16d7dffea",
+    "masked_proposal.py": "2392559d4929e35c1ae081c32a0515e9b5579dc559c5bcc18d1915af93e6d117",
+    "proposal_training.py": "ce3d309bd2cebc0b37cf4461df59d774cbb99cdedfd4aa06b53456648ca09b92"
+  },
+  "reuse_anchors_unchanged": [
+    "motion_matching/inverse/regressor_training.py (main; not rewritten for NM-06)",
+    "motion_matching/inverse/regressor.py (docstring reuse note only)"
+  ],
+  "validation": {
+    "command": "python -m pytest tests/unit/motion_matching/test_masked_proposals_nm06.py tests/unit/neural_motion/test_masked_proposals_nm06.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "torch_optional_collection": "pytest.importorskip(torch) + lazy inverse exports",
+    "recorded_at": "2026-09-22"
+  },
+  "limitations": [
+    "Synthetic fixtures and software contracts only",
+    "No native training success or acceleration claim",
+    "Independent replay required for native refinement; missing replay fails closed",
+    "Mixture diversity requires collapse diagnostics; cVAE plateau evidence retained as non-success"
+  ],
+  "next_action_issue": 10622
+}
