@@ -49,7 +49,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
 - **Branch:** feat/10591-upper-body-capture
-- **PR:** capture campaign pending
+- **PR:** #10740 (open)
 - **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at `930e1edcb` — #10735 merged after green CI. The capture branch adds a source-clock and rigid-plane calibration record; Driver/ Iron six-marker plane residuals are 110.4/112.7 mm, so no planar qualification is claimed.
