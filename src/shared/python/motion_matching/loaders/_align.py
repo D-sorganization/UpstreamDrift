@@ -93,5 +93,9 @@ def resample_target(
     butt = interp_xyz_series(sim_time, raw_time, raw_butt)
     clubhead = interp_xyz_series(sim_time, raw_time, raw_clubhead)
     quat = slerp_series(sim_time, raw_time, raw_quat)
-    impact_idx_out = int(np.argmin(np.abs(sim_time - opts.impact_target_t_s))) + 1
+    if opts.time_alignment == "impact":
+        impact_idx_out = int(np.argmin(np.abs(sim_time - opts.impact_target_t_s))) + 1
+    else:
+        impact_t = float(raw_time[impact_idx_raw])
+        impact_idx_out = int(np.argmin(np.abs(sim_time - impact_t))) + 1
     return sim_time, butt, clubhead, quat, impact_idx_out
