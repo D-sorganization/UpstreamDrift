@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #8941 | Analysis statistics server side: metric history is a `deque(maxlen=500)` with a monotonic sample cursor, `/analysis/statistics` aggregates in one pass off the event loop, and optional `since`/`limit` query params (422 when out of range) trim `time_series` with the next cursor in `X-Analysis-Next-Since`; default response unchanged. |
 | 2026-09-22 | #10733 | Extract contract-validated bounded Bernstein controls shared by the double and triple pendulum matchers, preserving endpoint, convex-bound, curvature, and effort semantics for the pending constrained upper-body optimizer; no capture fit or qualification claim. |
 | 2026-09-22 | #10732 | Add fail-closed constrained upper-body replay contracts: exact source-clock terminal frames, separate actuator and constraint-reaction traces, declared marker attachments and capture embedding, and same-clock physical marker metrics; no fitting or qualification claim. |
 | 2026-09-22 | #10730 | Reconcile TB-04 Driver and Iron tour-baseline evidence: committed qualification receipts are disqualified, so the coverage matrix and unified motion-matching ledger preserve and reject them; regressions prevent unsupported promotion. |
