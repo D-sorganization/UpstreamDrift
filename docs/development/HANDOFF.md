@@ -3,7 +3,7 @@
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
 - Worktree: Worktrees/UpstreamDrift-10608-co04, branch
-  eat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680.
+  feat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680.
 - Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
   original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
   retention; first-frame-before-integrate scoring; eight-cell double/triple ×
@@ -17,32 +17,40 @@
   club_only/pendulum_match.py (engines → shared only). Architecture-budget
   split: \_fit_triple / match_club_pendulum helpers keep each function ≤100 lines.
   Mypy: prescribed-hub track fills hub_pos[:, :] in-place so (n, 2) dtype stays.
-- Merged origin/main (includes MS-61 #10676 / MS-102 #10677); conflicts only in
-  handoff + divergence inventory — architecture splits and engine-layer
-  orchestration preserved (no shared→engines top-level imports).
+- Merged origin/main (MS-61 #10676, MS-102 #10677, NM-02 #10679, CO-05 #10681);
+  conflicts in handoff, turnover, club_only **init** exports, and divergence
+  inventory — kept both CO-04 and CO-05 exports; architecture splits and
+  engine-layer orchestration preserved (no shared→engines top-level imports).
 - CI fix: regenerated docs/shared_tools/divergence_inventory.{v1.json,md} after
-  club_only/match_matrix.py move (unit-test-gate / quality-gate blocker).
-  Non-required self-hosted failures (leaderboard publish, equivalence checkout
-  missing fetch-pinned-tools) left alone — do not invent native G1/TB-05 success.
+  club_only/match_matrix.py move and after CO-05 main merge.
 - Validation: python -m scripts.shared_tools.divergence_inventory --check OK;
   prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Merged origin/main again (NM-02 #10679 / 4bb10daa); regenerated divergence
-  inventory after handoff/inventory merge conflicts.
 - Next: Push tip; confirm quality-gate green + squash auto-merge of PR #10680.
-  Do not start CO-05+.
+  Next dispatch after land is CO-06 #10610.
 
-## MS-61 Simscape Topology + Full-Marker Terminal #10348
+## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609) [MERGED]
+
+- Merged to main via PR [#10681](https://github.com/D-sorganization/UpstreamDrift/pull/10681).
+- Delivered: explicit topology maps, local null-space proposals + closure
+  reprojection, roster×trial matrix with separated score lanes; schema
+  `club-body-candidates/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_body_candidates.json`.
+- Limitations: synthetic fixtures for software contracts only; no native G1
+  acceptance; missing-runtime cells remain unqualified; kinematic preview
+  pending CO-06 replay.
+
+## MS-61 Simscape Topology + Full-Marker Terminal #10348 [MERGED]
 
 - Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61.
-- Branch: feat/issue-10348-ms61-simscape-topology; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363).
-- Entry DL-#10348. Delivered: fail-closed topology classification (reduced_27_no_neck), dual terminal disclosure (full_marker_terminal.py + fit_metrics), acceptance hooks, run-103 blocked native_gate.json + R2025b runtime/parity receipts, runner -Fit fail-closed stub.
+- Branch: feat/issue-10348-ms61-simscape-topology; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) **merged** to main. Governing issue #10348 (MS-61, epic #10363). Session b27ccab3-1128-492c-a0fb-001367ea3aa8.
+- Entry DL-#10348. Delivered: fail-closed topology classification (reduced_27_no_neck), dual terminal disclosure (full_marker_terminal.py + fit_metrics), acceptance hooks, run-103 blocked native_gate.json + R2025b runtime/parity receipts, runner Fit fail-closed stub.
 - Rebased: merged origin/main (includes MS-102 #10677); kept fail-closed topology + blocked native_gate — no invented G1 pass.
 - CI fix: regenerated docs/development/matched_swing_program/README.md via python scripts/generate_matched_swing_status.py --write after ledger grew to 103 receipts (Simscape 40).
 - Validation: pytest tests/docs/test_matched_swing_status_freshness.py::test_matched_swing_status_section_is_fresh GREEN; prior focused topology suite still authoritative for MS-61 behavior.
 - Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
-- Next action: confirm CI green + squash auto-merge of PR #10676.
+- Next action: Continue under MS-104 (#10378) / next matched-swing dispatch — do not invent native G1 pass.
 
 ## MS-102 Engine and Model Inventory #10376 Handoff
 

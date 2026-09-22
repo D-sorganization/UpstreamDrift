@@ -259,6 +259,20 @@ def _validate_rotation_stack(rotmats: np.ndarray, name: str) -> np.ndarray:
     return arr
 
 
+def require_strictly_increasing_timestamps(
+    times: np.ndarray, *, field_name: str = "timestamps_s"
+) -> np.ndarray:
+    """Validate a finite, strictly increasing 1-D clock (DbC, shared by CO-03/05)."""
+    arr = np.asarray(times, dtype=np.float64)
+    if arr.ndim != 1 or arr.size < 2:
+        raise ValueError(f"{field_name} must have >= 2 samples")
+    if not np.all(np.isfinite(arr)):
+        raise ValueError(f"{field_name} must be finite")
+    if not np.all(np.diff(arr) > 0.0):
+        raise ValueError(f"{field_name} must be strictly increasing")
+    return arr
+
+
 def _validate_time(time: np.ndarray) -> int:
     if not isinstance(time, np.ndarray) or time.ndim != 1:
         raise ValueError("native_time_s must be a 1-D ndarray")

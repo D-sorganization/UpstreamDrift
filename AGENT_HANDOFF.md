@@ -40,11 +40,11 @@ Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/Ups
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678 shipped; active [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608) on `feat/issue-10608-co04-pendulum-club-match`.
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-05/#10681 shipped; active [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608) on `feat/issue-10608-co04-pendulum-club-match` (PR #10680).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-04 double/triple pendulum club-only match matrix implemented (synthetic fixtures; native G1 blockers explicit). NM-00 fail-closed audit remains authoritative.
-- **Next:** Land CO-03/#10678 CI + squash merge; then dispatch CO-04 #10608.
+- **State:** CO-04 double/triple pendulum club-only match matrix implemented (synthetic fixtures; native G1 blockers explicit). CO-05 body-candidate contracts merged via #10681. NM-00 fail-closed audit remains authoritative.
+- **Next:** Land CO-04 PR #10680 after main-merge + quality-gate green; then dispatch CO-06 #10610.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
