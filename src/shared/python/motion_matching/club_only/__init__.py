@@ -46,6 +46,8 @@ from .hand_geometry import (
     ModelHandFrameOffsets,
     resolve_hand_frame_offsets,
 )
+from .hub_accounting import HubMode, account_external_hub_work, hub_variant_id
+from .match_errors import ClubMatchErrorReport, separate_plane_and_3d_errors
 from .nullspace_proposals import (
     NullSpaceAnalysis,
     analyze_grip_jacobian_nullspace,
@@ -70,6 +72,12 @@ from .observation import (
     orientation_residual_so3,
     scored_component_subset,
 )
+from .pendulum_match import (
+    PendulumMatchRequest,
+    PendulumMatchResult,
+    map_seed_to_pendulum_q0,
+    reject_reconstruction_as_club_evidence,
+)
 from .priors import PRIOR_SCHEMA, GolfPlausibilityPriors, PriorAssumption
 from .profiles import (
     PROFILE_SCHEMA,
@@ -81,6 +89,11 @@ from .profiles import (
     build_roster_profiles,
     evidence_payload,
     get_club_only_profile,
+)
+from .replay_package import (
+    REPLAY_SCHEMA,
+    ClubPendulumReplayPackage,
+    build_replay_package,
 )
 from .retrieval import (
     LibraryEntry,
@@ -137,6 +150,7 @@ __all__ = [
     "CLUB_DATA_SHA256",
     "CandidateScore",
     "CandidateSeed",
+    "ClubMatchErrorReport",
     "ClubOnlyAcceptanceVerdict",
     "ClubOnlyProfile",
     "ClubOnlyResidualReport",
@@ -144,6 +158,7 @@ __all__ = [
     "ClubObservation",
     "ClubObservationKinematics",
     "ClubObservationProvenance",
+    "ClubPendulumReplayPackage",
     "ClubWorkbookIdentity",
     "ComponentMask",
     "ComponentStatus",
@@ -154,11 +169,14 @@ __all__ = [
     "FRAME_AUTHORITY",
     "GolferHandedness",
     "GolfPlausibilityPriors",
+    "HubMode",
     "IDENTITY_SCHEMA",
     "IkBackendCapabilities",
     "IkFailureReason",
     "IkSolverKind",
     "LibraryEntry",
+    "MATCH_SCHEMA",
+    "MatchMatrixOutcome",
     "ModelHandFrameOffsets",
     "ModelTrialCell",
     "NATIVE_SAMPLE_RATE_HZ",
@@ -169,11 +187,16 @@ __all__ = [
     "ObservableClubDescriptor",
     "ObservationEvent",
     "ObservationProfile",
+    "PENDULUM_MATCH_MODELS",
     "PRIOR_SCHEMA",
     "PROFILE_SCHEMA",
+    "PendulumMatchMatrix",
+    "PendulumMatchRequest",
+    "PendulumMatchResult",
     "PhysicalProfile",
     "PlausibilityProfile",
     "PriorAssumption",
+    "REPLAY_SCHEMA",
     "RejectionReason",
     "ResampleRecord",
     "RigidPlacement",
@@ -187,6 +210,7 @@ __all__ = [
     "UnsupportedConstraintError",
     "WIFFLE_PROV1_SHA256",
     "WorkbookManifest",
+    "account_external_hub_work",
     "analyze_grip_jacobian_nullspace",
     "assert_backend_supports",
     "assess_ambiguity",
@@ -195,6 +219,8 @@ __all__ = [
     "build_calibrated_observation_fixture",
     "build_club_workbook_identity",
     "build_observable_descriptor",
+    "build_pendulum_match_matrix",
+    "build_replay_package",
     "build_roster_profiles",
     "build_starting_guess_report",
     "capabilities_for",
@@ -207,22 +233,70 @@ __all__ = [
     "geometry_content_hash",
     "get_club_only_profile",
     "get_topology_mapping",
+    "hub_variant_id",
     "interpolate_observation",
     "load_observation_fixture_pack",
     "map_reduced_seed_to_body",
+    "map_seed_to_pendulum_q0",
+    "match_club_pendulum",
     "normalized_orientation_error",
     "normalized_position_error",
     "observation_to_club_target",
     "orientation_residual_so3",
+    "pendulum_match_evidence_payload",
     "profile_content_hash",
     "propose_nullspace_offsets",
     "read_sheet_event_samples",
+    "reject_reconstruction_as_club_evidence",
     "reproject_onto_closure",
     "resolve_hand_frame_offsets",
     "retrieve_starting_seeds",
     "run_constrained_ik_seeds",
     "scored_component_subset",
+    "separate_plane_and_3d_errors",
     "starting_guess_evidence_payload",
     "synthetic_grip_jacobian",
     "verify_workbook_hash",
 ]
+
+_ENGINE_EXPORTS = {
+    "MATCH_SCHEMA": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "MATCH_SCHEMA",
+    ),
+    "PENDULUM_MATCH_MODELS": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "PENDULUM_MATCH_MODELS",
+    ),
+    "MatchMatrixOutcome": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "MatchMatrixOutcome",
+    ),
+    "PendulumMatchMatrix": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "PendulumMatchMatrix",
+    ),
+    "build_pendulum_match_matrix": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "build_pendulum_match_matrix",
+    ),
+    "pendulum_match_evidence_payload": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "evidence_payload",
+    ),
+    "match_club_pendulum": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_pendulum_match",
+        "match_club_pendulum",
+    ),
+}
+
+
+def __getattr__(name: str):
+    """Lazily resolve engine-backed exports without shared→engines top-level imports."""
+    target = _ENGINE_EXPORTS.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_path, attr = target
+    from importlib import import_module
+
+    return getattr(import_module(module_path), attr)
