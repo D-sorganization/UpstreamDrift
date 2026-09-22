@@ -337,9 +337,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10617 (epic #10603)
 - **Branch:** fix/10617-nm02-native-dataset-labels
 - **PR:** #10679
-- **Paths:** src/shared/python/data_io/dataset_generator/{core,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json
+- **Paths:** src/shared/python/data_io/dataset_generator/{core,channel_finalize,sim_buffers,sim_recording,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — DRY helpers `_residual_norm` + `_single_sample_dynamics_config` clear fingerprint `2430854b10cc`; NM-02 adapter tests green
+- **Last verified:** 2026-09-22 at SELF — regenerated divergence inventory for split modules; inventory freshness test green; awaiting CI re-run on PR #10679
 - **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
 - **Next step:** Confirm CI green on PR #10679 and squash auto-merge.
 - **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
