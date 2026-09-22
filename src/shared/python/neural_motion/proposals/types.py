@@ -14,6 +14,7 @@ from src.shared.python.neural_motion.tasks import (
 __all__ = [
     "PROPOSAL_SCHEMA",
     "ProposalConfig",
+    "ProposalFromTaskSpec",
     "ProposalMode",
 ]
 
@@ -27,6 +28,34 @@ class ProposalMode(str, Enum):
 
     SELECTION_OBJECTIVE = "selection_objective"
     MIXTURE_ABLATION = "mixture_ablation"
+
+
+@dataclass(frozen=True, slots=True)
+class ProposalFromTaskSpec:
+    """Optional architecture overrides for :meth:`ProposalConfig.from_task`."""
+
+    n_proposals: int = 1
+    mode: ProposalMode = ProposalMode.SELECTION_OBJECTIVE
+    include_solver_hints: bool = False
+    seed: int = 0
+    embed_dim: int = 32
+    mlp_hidden: int = 64
+    n_blocks: int = 2
+    selection_objective: str = "min_effort"
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.mode, ProposalMode):
+            raise TypeError("mode must be a ProposalMode")
+        for name, value in (
+            ("n_proposals", self.n_proposals),
+            ("embed_dim", self.embed_dim),
+            ("mlp_hidden", self.mlp_hidden),
+            ("n_blocks", self.n_blocks),
+        ):
+            if int(value) <= 0:
+                raise ValueError(f"{name} must be > 0, got {value}")
+        if not self.selection_objective.strip():
+            raise ValueError("selection_objective must be non-empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,17 +118,16 @@ class ProposalConfig:
         *,
         control_basis: str,
         seq_len: int,
-        n_proposals: int = 1,
-        mode: ProposalMode = ProposalMode.SELECTION_OBJECTIVE,
-        include_solver_hints: bool = False,
-        seed: int = 0,
-        embed_dim: int = 32,
-        mlp_hidden: int = 64,
-        n_blocks: int = 2,
-        selection_objective: str = "min_effort",
+        overrides: ProposalFromTaskSpec | None = None,
     ) -> ProposalConfig:
+        """Build a config from a task plus required wire fields.
+
+        Optional architecture knobs travel through :class:`ProposalFromTaskSpec`
+        so this constructor stays within the parameter-count budget.
+        """
         if not isinstance(task, MaskedTrajectoryTask):
             raise TypeError("task must be a MaskedTrajectoryTask")
+        spec = overrides or ProposalFromTaskSpec()
         dims = task.dimensions
         return cls(
             model_id=dims.model_id,
@@ -108,14 +136,14 @@ class ProposalConfig:
             seq_len=int(seq_len),
             obs_channels=dims.q_dim,
             q_dim=dims.q_dim,
-            embed_dim=embed_dim,
-            mlp_hidden=mlp_hidden,
-            n_blocks=n_blocks,
-            n_proposals=n_proposals,
-            mode=mode,
-            selection_objective=selection_objective,
-            include_solver_hints=include_solver_hints,
-            seed=int(seed),
+            embed_dim=spec.embed_dim,
+            mlp_hidden=spec.mlp_hidden,
+            n_blocks=spec.n_blocks,
+            n_proposals=spec.n_proposals,
+            mode=spec.mode,
+            selection_objective=spec.selection_objective,
+            include_solver_hints=spec.include_solver_hints,
+            seed=int(spec.seed),
         )
 
     def as_dict(self) -> dict[str, Any]:

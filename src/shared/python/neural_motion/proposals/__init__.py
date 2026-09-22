@@ -13,7 +13,12 @@ from .train import (
     MaskedProposalTrainResult,
     train_masked_proposals,
 )
-from .types import PROPOSAL_SCHEMA, ProposalConfig, ProposalMode
+from .types import (
+    PROPOSAL_SCHEMA,
+    ProposalConfig,
+    ProposalFromTaskSpec,
+    ProposalMode,
+)
 
 __all__ = [
     "PROPOSAL_SCHEMA",
@@ -22,6 +27,7 @@ __all__ = [
     "MaskedProposalTrainResult",
     "ProposalBundle",
     "ProposalConfig",
+    "ProposalFromTaskSpec",
     "ProposalMode",
     "ProposalPolishResult",
     "ProposalSample",

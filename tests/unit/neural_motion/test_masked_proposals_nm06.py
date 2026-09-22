@@ -12,6 +12,7 @@ from src.shared.python.neural_motion.proposals import (
     MaskedProposalModel,
     MaskedProposalTrainConfig,
     ProposalConfig,
+    ProposalFromTaskSpec,
     ProposalMode,
     ProposalSample,
     load_proposal_checkpoint,
@@ -58,16 +59,23 @@ def _task(*, mask: tuple[bool, ...] = (True, True)) -> MaskedTrajectoryTask:
 
 def _config(**kwargs: object) -> ProposalConfig:
     task = _task()
-    defaults: dict[str, object] = {
-        "control_basis": "joint_torque",
-        "seq_len": _T,
-        "n_proposals": 1,
-        "mode": ProposalMode.SELECTION_OBJECTIVE,
-        "include_solver_hints": False,
-        "seed": 11,
-    }
-    defaults.update(kwargs)
-    return ProposalConfig.from_task(task, **defaults)  # type: ignore[arg-type]
+    control_basis = str(kwargs.pop("control_basis", "joint_torque"))
+    seq_len = int(kwargs.pop("seq_len", _T))
+    overrides = ProposalFromTaskSpec(
+        n_proposals=int(kwargs.pop("n_proposals", 1)),
+        mode=kwargs.pop("mode", ProposalMode.SELECTION_OBJECTIVE),  # type: ignore[arg-type]
+        include_solver_hints=bool(kwargs.pop("include_solver_hints", False)),
+        seed=int(kwargs.pop("seed", 11)),
+        embed_dim=int(kwargs.pop("embed_dim", 32)),
+        mlp_hidden=int(kwargs.pop("mlp_hidden", 64)),
+        n_blocks=int(kwargs.pop("n_blocks", 2)),
+        selection_objective=str(kwargs.pop("selection_objective", "min_effort")),
+    )
+    if kwargs:
+        raise TypeError(f"unexpected ProposalConfig overrides: {sorted(kwargs)}")
+    return ProposalConfig.from_task(
+        task, control_basis=control_basis, seq_len=seq_len, overrides=overrides
+    )
 
 
 def _trajectory(*, seed: int = 0) -> np.ndarray:
