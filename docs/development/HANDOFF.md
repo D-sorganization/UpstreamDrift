@@ -1,5 +1,32 @@
 # Current Matching Continuation Handoff
 
+## GolfSwingVisualizer MATLAB Consolidation (#9225)
+
+- Worktree: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`,
+  branch `bot/issue-9225-golfviz-consolidation` (off `origin/main` @ `901b2de5e`),
+  DL-#9225. Governing issue
+  [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
+  (source:assessment P2, DRY PP1).
+- Delivered: the four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines
+  each) deleted; one fleet-shared package class at
+  `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m`
+  (2D-variant superset: the reproducible-ground-texture `rng(1)` seeding the 3D
+  copies had silently lost). Both `launch_gui.m` launchers add the shared
+  directory to the MATLAB path and fail loudly if it is missing; all four call
+  sites use `golfviz.GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ)`.
+- Validation: MATLAB R2025b `-batch` headless — package resolves from a bare
+  `addpath`, class parses (75 methods), constructor DbC precondition
+  `GolfSwingVisualizer:InvalidInput` fires, and both launchers' relative path
+  setups resolve the shared package with no shadow copy. Full GUI launch/render
+  is not exercised (headless GUI rule); the diff is behaviour-preserving except
+  for the restored `rng` seeding on the 3D trees.
+- Honest gaps: the `check_dry_duplication_gate.py` ratchet is Python-scoped
+  (`src/**/*.py`) and does not fingerprint `.m` files, so no ratchet baseline
+  drops; extending it to MATLAB is a follow-up. `quality-gate` is expected
+  green (no Python/CI surface changed).
+- Next: confirm `quality-gate` green on the PR; squash auto-merge lands; release
+  the lease.
+
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379)
 
 - Worktree: `agent-worktrees/issue-10379-local`, branch
