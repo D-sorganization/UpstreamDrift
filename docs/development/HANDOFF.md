@@ -18,6 +18,15 @@
   `software_contract_ui_integration_is_not_native_evidence`.
 - Next: Open PR Fixes #10613 with squash auto-merge; do not start CO-10 until merge.
 
+## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
+
+- Merged via PR [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704).
+- Delivered: `src/shared/python/motion_matching/jobs/` — atomic run
+  manifests/checkpoints, fault classification, portable packages, both-shell
+  progress DTOs; PF-08 budgets with `guarantee=false`.
+- Evidence: `docs/plans/matched_swing/evidence/ms105_jobs_recovery.json`.
+- Next: N/A — merged; continue CO-09 on main.
+
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10655-local`.
