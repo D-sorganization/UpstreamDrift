@@ -52,11 +52,11 @@ Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/Ups
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-06 shipped on main; active [CO-07 #10611](https://github.com/D-sorganization/UpstreamDrift/issues/10611) on `feat/10611-co07-fast-matching` (fast matching + Pareto diversity).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-07 shipped on main; active [CO-08 #10612](https://github.com/D-sorganization/UpstreamDrift/issues/10612) on `feat/issue-10612-co08-matrix` (matrix qualification + plausibility tradeoffs).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-07 adds bounded fast-preview/verified-fit orchestration with cache, checkpoint, and Pareto diversity (software contracts; no native G1). NM-00 fail-closed audit remains authoritative.
-- **Next:** Land CO-07 PR for #10611; then CO-08 qualification matrix.
+- **State:** CO-08 independently qualifies the trial×roster matrix with frozen CO-02 gates, withheld-body semantics, and visual-cannot-override-physical (software contracts; no native G1). NM-00 fail-closed audit remains authoritative.
+- **Next:** Land CO-08 PR for #10612; then CO-09 UI integration.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
