@@ -19,7 +19,6 @@ from typing import Any, Callable, Mapping, Sequence
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.club_only.fast_matching import (
     FAST_MATCH_SCHEMA,
     EmptyNeuralProposalProvider,
@@ -356,14 +355,10 @@ def import_club_only_workbook_catalog(repo_root: Path | str) -> ClubOnlyWorkbook
         unique_trials=trials_sorted,
         conflicts=conflicts,
     )
-    precondition(
-        len(catalog.unique_trials) == 4,
-        "club-only catalog must list exactly four unique trials",
-    )
-    postcondition(
-        {t.trial_id for t in catalog.unique_trials} == set(CANONICAL_TRIAL_SHEETS),
-        "catalog trial ids must match CANONICAL_TRIAL_SHEETS",
-    )
+    if len(catalog.unique_trials) != 4:
+        raise ValueError("club-only catalog must list exactly four unique trials")
+    if {t.trial_id for t in catalog.unique_trials} != set(CANONICAL_TRIAL_SHEETS):
+        raise ValueError("catalog trial ids must match CANONICAL_TRIAL_SHEETS")
     return catalog
 
 
