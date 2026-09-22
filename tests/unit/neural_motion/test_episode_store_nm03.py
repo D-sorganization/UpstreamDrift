@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import h5py
 import numpy as np
 import pytest
 
@@ -241,6 +242,16 @@ def test_corrupt_shard_and_missing_channel_fail_closed(tmp_path: Path) -> None:
     assert loaded.v is None
     assert loaded.a_native is None
     np.testing.assert_allclose(loaded.q, partial_q)
+
+    # Required channels missing from an otherwise valid shard fail closed.
+    store3 = EpisodeStore(tmp_path / "episodes3")
+    required = _make_episode(trial_id="trial_d", family_id="fam_d")
+    written3 = store3.write_episode(required)
+    shard3 = store3.shard_path(written3.episode_id)
+    with h5py.File(shard3, "a") as handle:
+        del handle["sample_times_s"]
+    with pytest.raises(ValueError, match="corrupt|required"):
+        store3.read_episode(written3.episode_id)
 
 
 # ---------------------------------------------------------------------------

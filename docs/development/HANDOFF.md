@@ -299,9 +299,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) open with squash auto-merge armed. Governing issue #10618 (NM-03, epic #10603). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`. Entry DL-#10618.
 - Base: merged `origin/main` (NM-02 #10679, CO-05 #10681). Phantom-guard fix: `training.datasets.register_neural_episode_corpus` touches issue reuse anchor.
 - Delivered: `src/shared/python/neural_motion/episodes/` (`EpisodeRecord`, `EpisodeStore`, `CompactAdapter`/`CompactArrayBundle`, `FamilySplitPlan`, task views, `TrainOnlyNormalizer`, `WindowCache`); training registry seam; schema `neural-episode-store/1.0.0`; episode_storage.md + receipt.
-- Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py -q -n 0 --no-cov --timeout=60` (15 passed); `python scripts/ci/check_architecture_budget.py` clean; ruff clean on touched paths.
+- CI fix (SELF): `_require_shard_array` narrows required HDF5 channels before `EpisodeRecord` construction (mypy); `SortedJsonWritableMixin` in `neural_motion/json_io.py` dedupes split/receipt `write_json` (DRY gate fingerprint `2174558997bf`); unit test for missing `sample_times_s` shard.
+- Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py tests/unit/neural_motion/test_benefit_experiment.py -q --timeout=60` (24 passed); `python -m mypy` on touched neural_motion paths clean; `python -m scripts.ci.check_dry_duplication_gate` clean; ruff clean on touched paths.
 - Limitations: synthetic software-contract tests only; no native teacher generation, training, or dataset completeness claim.
-- Next action: confirm CI green on PR #10686 after CompactArrayBundle + training reuse push; squash auto-merge remains armed.
+- Next action: push CI fix commit and confirm CI Standard green on PR #10686; squash auto-merge remains armed.
 
 ## Neural Dataset Labels NM-02 #10617 Handoff
 
@@ -316,10 +317,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped; active child [CO-03 #10607](https://github.com/D-sorganization/UpstreamDrift/issues/10607).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679 shipped; active child [NM-03 #10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md).
-- **CO-03 state:** Retrieval + constrained-IK starting guesses on PR #10678; DL-#10607.
+- **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
 - **NM-03 state:** in_review on PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686); DL-#10618.
 - **Next:** Confirm CI green + squash auto-merge of #10686; do not start NM-04+ until merged.
 
