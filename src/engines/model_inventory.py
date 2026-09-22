@@ -643,11 +643,36 @@ def _native_load_step(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
             "use the MS-60 run-management scripts for dynamics evidence."
         )
     if package.engine == "myosuite":
-        raise RuntimeError(
-            "MyoSuite flagship packages are in repair (MS-51 #10344); "
-            "placeholder MyoBody is not a dual-club package."
-        )
+        return _native_myosuite(package, repo_root)
     raise RuntimeError(f"no native loader registered for engine {package.engine!r}")
+
+
+def _native_myosuite(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
+    """Load the MS-51 generated golfer MJCF via MuJoCo (MyoSuite backend)."""
+    import importlib
+
+    mujoco = importlib.import_module("mujoco")
+    if not package.generated_model:
+        raise RuntimeError(
+            f"myosuite package {package.id} lacks generated_model; "
+            "run scripts/setup_myosuite_models to generate golfer scenes."
+        )
+    path = repo_root / package.generated_model
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"myosuite generated model missing: {path}. "
+            "Run scripts/setup_myosuite_models.ps1 (or .sh)."
+        )
+    model = mujoco.MjModel.from_xml_path(str(path))
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    return {
+        "nq": int(model.nq),
+        "nv": int(model.nv),
+        "nu": int(model.nu),
+        "mass_kg": float(sum(model.body_mass)),
+        "generated_model": package.generated_model,
+    }
 
 
 def _native_mujoco(package: ModelPackage, repo_root: Path) -> dict[str, Any]:
