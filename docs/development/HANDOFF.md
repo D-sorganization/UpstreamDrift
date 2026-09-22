@@ -1,11 +1,29 @@
 # Current Matching Continuation Handoff
 
-## CO-06 Recover Feasible Controls and Independently Replay (#10610)
+## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
 
-- Worktree: `Worktrees/UpstreamDrift-local-10610`, branch
-  `feat/10610-co06-controls-replay`, DL-#10610, PR
-  [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687) open
-  (squash auto-merge when CI green).
+- Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
+  `feat/10611-co07-fast-matching`, DL-#10611, PR
+  [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700) open.
+- Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
+  budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
+  cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
+  bounded Pareto diversity, optional empty neural proposal slot, and stage
+  profiling including verification time. Schema `club-fast-matching/1.0.0`;
+  evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
+- Param-budget fix: collapse `run_fast_club_match` knobs onto `FastMatchOptions`
+  and private `_ScoreLoopCtx` / `_AssembleCtx` (repo-structure-gates).
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
+  GREEN (12 passed); `python scripts/ci/check_architecture_budget.py` OK.
+- Limitations: software-contract scoring only; no native Fit/G1 claim; no
+  unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
+  saved in the software-contract evidence for CO-08 (not native timing).
+- Next: Confirm CI green on PR #10700 after main merge through MS-14; squash auto-merge remains armed.
+
+## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
+
+- Merged to main via PR [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687)
+  (squash merge SHA `f191dd09d`).
 - Delivered: `club_only/control_replay.py` recovers minimum-effort controls
   (reuses `ContactForceAllocator` for floating-base plants; reduced software
   plants copy RNEA onto actuated channels), separates net torque / actuated /
@@ -25,8 +43,8 @@
 - CI fix: `native_g1_gates.validate_native_g1_claim_contract` shared by
   `control_replay.py` and `replay_package.py` (DRY fingerprint d169d28ac9c7);
   regenerate monolith register + divergence inventory for new club_only modules.
-- Merged `origin/main` through MS-51 MyoSuite golfer scene landings.
-- Next: Confirm CI green + squash merge of #10687. Do not start CO-07+.
+- Merged `origin/main` through MS-51 MyoSuite golfer scene landings and CO-06 #10687.
+- Next: N/A — merged; continue CO-07/CO-08 on main.
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
 
@@ -51,10 +69,33 @@
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
 
+## MS-14 Pinocchio MatchingPlant Full Lane #10333 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10333-ms14`.
+- Branch: `feat/10333-pinocchio-matching-plant`; PR [#10684](https://github.com/D-sorganization/UpstreamDrift/pull/10684) open with squash auto-merge armed. Governing issue #10333
+  (MS-14, epic #10363). Session `cursor-10333-ms14`.
+- Entry DL-#10333. Delivered: PinocchioMatchingPlant derivatives +
+  `create_constrained_ik` (Pink), fitter `resolve_fit_native_plant` bridge,
+  ConstrainedIkReceipt `closure_residual_m` budget, unit contracts in
+  `test_pinocchio_plant.py`, honest blocked receipts under
+  `docs/development/full_body_models/evidence/ground_support/anthro_driver_{pinocchio,pink}/`.
+- Validation: `pytest tests/unit/motion_matching/pipeline/test_pinocchio_plant.py -q -n 0 --no-cov`
+  (contracts green; native tests skip without real Pinocchio); ruff + architecture budget clean.
+  CI hygiene (PR #10684): `python -m scripts.shared_tools.divergence_inventory --write`;
+  `python -m src.shared.python.motion_matching ledger --write`; unit tests for divergence
+  inventory, ledger freshness, and ground-support receipt scan (MS-14 lane schema excluded).
+- Limitation: Windows host has no Pinocchio/Pink; receipts are `blocked` /
+  `accepted=false` / `native_claims=false`. Do not treat as G1 or green weld closure.
+- Rebased: merged origin/main through CO-06 #10687 (`f191dd09d`); kept MS-14 +
+  CO-06 HANDOFF/DL rows; regenerated matched_swing status README + divergence
+  inventory; blocked native G1 receipts unchanged.
+- Next: Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower
+  `upstream-motion-runtime` for native pink receipts when scheduled (MS-107 owns G1).
+
 ## MS-51 MyoSuite Golfer Scene #10344 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10344-ms51`.
-- Branch: `fix/10344-ms51-myosuite-repair`; PR [#10685](https://github.com/D-sorganization/UpstreamDrift/pull/10685) open with squash auto-merge armed. Governing issue #10344
+- Branch: `fix/10344-ms51-myosuite-repair`; PR [#10685](https://github.com/D-sorganization/UpstreamDrift/pull/10685) **merged** to main. Governing issue #10344
   (MS-51, epic #10363). Soft dep: merged MS-102 #10376 / PR #10677.
 - Entry DL-#10344. Delivered: pinned myo_sim documentation + bootstrap scripts;
   `golfer_scene.generate_golfer_scene` (myobody_simpleupper + club_models + dual
@@ -69,7 +110,7 @@
 - Honest limits: no G1 success; `parity_budget_qualified=false`; partial map is
   diagnostic only; muscle params are upstream myo_sim (not golf-calibrated);
   contact spheres are contype=0 markers for the shared law.
-- Next: confirm quality-gate green on PR #10685 after push; merge via squash auto-merge.
+- Next: not applicable — landed on main via #10685; MS-14 rematch only.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348 [MERGED]
 
@@ -1363,9 +1404,12 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
-- 2026-09-21T21:10:00Z â€” Refresh matched_swing ledger (101 receipts) for #10660 unit-test-gate freshness. Commit SELF.
-- 2026-09-21T20:42:00Z â€” Fix architecture budget on #10660: ShootingFitConfig and dynamics artifact helper. Commit SELF.
-- 2026-09-21T20:25:00Z â€” Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
-- 2026-09-21T10:12:34Z â€” CI remediation for #10663: replace BLE001 noqa catch-alls in preflight capacity checks with concrete exception tuples. Commit SELF.
-- 2026-09-21T10:11:03Z â€” CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 101 receipts. Commit SELF.
-- 2026-09-21T10:40:00Z â€” Fix unit-test-gate on #10660: regenerate matched_swing status (99â†’100) and stop hardcoding receipt count in browser model test. Commit SELF.
+- 2026-09-22T12:40:00Z — Rematch #10684 onto origin/main after CO-06 #10687 merge (`f191dd09d`); kept MS-14 + CO-06 HANDOFF/DL rows; regenerated matched_swing README + divergence inventory; blocked G1 honesty preserved. Commit SELF.
+- 2026-09-22T07:15:00Z — Rematch #10684 onto origin/main after MS-51 #10685 merge; kept MS-14 + MS-51 DL/HANDOFF rows; regenerated matched_swing status README. Commit SELF.
+- 2026-09-22T03:50:00Z — Fix unit-test-gate on #10684: divergence inventory, ledger (103→106 receipts), MS-14 lane receipt excluded from ground-support schema scan. Commit SELF.
+- 2026-09-21T21:10:00Z — Refresh matched_swing ledger (101 receipts) for #10660 unit-test-gate freshness. Commit SELF.
+- 2026-09-21T20:42:00Z — Fix architecture budget on #10660: ShootingFitConfig and dynamics artifact helper. Commit SELF.
+- 2026-09-21T20:25:00Z — Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
+- 2026-09-21T10:12:34Z — CI remediation for #10663: replace BLE001 noqa catch-alls in preflight capacity checks with concrete exception tuples. Commit SELF.
+- 2026-09-21T10:11:03Z — CI remediation for #10660: FakePlant accepts `ik_backend`; refreshed `reports/matched_swing_ledger.json` to 101 receipts. Commit SELF.
+- 2026-09-21T10:40:00Z — Fix unit-test-gate on #10660: regenerate matched_swing status (99→100) and stop hardcoding receipt count in browser model test. Commit SELF.

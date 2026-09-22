@@ -1,4 +1,9 @@
-"""Pinocchio MatchingPlant implementation."""
+"""Pinocchio MatchingPlant implementation (MS-10 / MS-14).
+
+Wraps ``FullBodyPinocchioModel`` (``constraintDynamics`` weld closure + shared
+contact law). Pink is exposed as a ConstrainedIKBackend via
+``create_constrained_ik``; ``pinocchio`` / ``pink`` imports stay lazy (LoD).
+"""
 
 from __future__ import annotations
 
@@ -23,6 +28,9 @@ if TYPE_CHECKING:
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
     )
+    from src.shared.python.motion_matching.constrained_ik import ConstrainedIKBackend
+
+_SUPPORTED_IK_BACKENDS = frozenset({"lm", "pink"})
 
 
 class PinocchioMatchingPlant:
@@ -62,9 +70,15 @@ class PinocchioMatchingPlant:
         *,
         ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
-        if ik_backend != "lm":
+        if ik_backend not in _SUPPORTED_IK_BACKENDS:
             raise ValueError(
-                f"IK backend {ik_backend!r} is only supported on the MuJoCo plant"
+                f"Unknown Pinocchio IK backend {ik_backend!r}; "
+                f"expected one of {sorted(_SUPPORTED_IK_BACKENDS)}"
+            )
+        if ik_backend == "pink":
+            raise ValueError(
+                "Pink is a trajectory ConstrainedIKBackend; call "
+                "create_constrained_ik() or run the pipeline with --backend pink"
             )
         from src.engines.physics_engines.pinocchio.python.full_body_ik import (
             PinocchioFullBodyIK,
@@ -78,6 +92,17 @@ class PinocchioMatchingPlant:
         ik = PinocchioFullBodyIK(spec_copy)
         ik.labels = tuple(attachments.keys())
         return ik
+
+    def create_constrained_ik(self) -> ConstrainedIKBackend:
+        """Return the Pink ConstrainedIKBackend bound to this plant's document.
+
+        Fails closed when Pink or Pinocchio cannot be imported.
+        """
+        from src.engines.physics_engines.pinocchio.python.pink_trajectory import (
+            PinkTrajectoryService,
+        )
+
+        return PinkTrajectoryService(self.spec_dict, model=self.model)
 
     def frame_poses(
         self, mapping: Mapping[str, tuple[str, Sequence[float]]], q: np.ndarray
@@ -106,12 +131,14 @@ class PinocchioMatchingPlant:
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
     ) -> Any:
-        return None
+        return self.model.acceleration_derivatives(
+            coordinates, rates, primitive_efforts
+        )
 
     def contact_effort_derivatives(
         self, coordinates: Mapping[str, float], rates: Mapping[str, float]
     ) -> Any:
-        return None
+        return self.model.contact_effort_derivatives(coordinates, rates)
 
     def contact_forces(
         self, coordinates: Mapping[str, float], rates: Mapping[str, float]
@@ -119,8 +146,11 @@ class PinocchioMatchingPlant:
         return self.model.contact_forces(coordinates, rates)
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
-        ik = self.create_ik({})
-        return np.asarray(ik.closure_residuals(q), dtype=float)
+        coords = self.coordinate_order
+        q_dict = {c: float(q[i]) for i, c in enumerate(coords)}
+        zero_rates = dict.fromkeys(coords, 0.0)
+        pos_res, _ = self.model.closure_residuals(q_dict, zero_rates)
+        return np.asarray(pos_res[:3], dtype=float)
 
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float

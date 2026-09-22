@@ -1,0 +1,98 @@
+{
+  "schema": "club-fast-matching/1.0.0",
+  "governing_issue": 10611,
+  "preset": "fast_preview",
+  "evaluations_used": 9,
+  "failed_attempts": 0,
+  "cancelled": false,
+  "neural_proposals_used": 0,
+  "claims_native_qualification": false,
+  "native_g1_pass": false,
+  "qualification_blockers": [
+    "native_g1_qualification_requires_desk_native_receipt",
+    "software_contract_fast_match_is_not_native_evidence"
+  ],
+  "profiling": {
+    "load_s": 0.00018840000848285854,
+    "calibration_s": 6.999995093792677e-6,
+    "ik_s": 0.0009572000126354396,
+    "dynamics_s": 0.0005512000061571598,
+    "replay_s": 3.0199997127056122e-5,
+    "verification_s": 4.00003045797348e-7,
+    "total_s": 0.0017344000225421041
+  },
+  "quality_vs_time": [
+    {
+      "evaluations": 1,
+      "wall_s": 0.001362899987725541,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 2,
+      "wall_s": 0.0014264999772422016,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 3,
+      "wall_s": 0.0014663999900221825,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 4,
+      "wall_s": 0.0015014999953564256,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 5,
+      "wall_s": 0.00154079997446388,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 6,
+      "wall_s": 0.0015762999828439206,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 7,
+      "wall_s": 0.001610899984370917,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 8,
+      "wall_s": 0.001674599974649027,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 9,
+      "wall_s": 0.0017139999836217612,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    }
+  ],
+  "pareto": [
+    {
+      "branch_id": "cold:0",
+      "start_strategy": "cold",
+      "observation_fit_m": 0.02,
+      "effort": 0.0,
+      "closure_m": 0.0001,
+      "configuration_hash": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+    }
+  ],
+  "rejected_count": 0,
+  "limitations": [
+    "Fast matching uses software-contract scoring only; no native Fit/G1 claim.",
+    "Pareto set exposes diverse feasible branches, not averaged body motion.",
+    "Neural proposal slot is optional; classical completion needs no weights.",
+    "Native replay cost and failed attempts count toward latency budgets for CO-08."
+  ],
+  "checkpoint_identity": "5ad3669d2bc77e609cda085669b95053353b8c5432b84de1bfd715a5c9fdf8ed"
+}

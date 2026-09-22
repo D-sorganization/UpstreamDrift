@@ -136,6 +136,25 @@ class TestWorkspaceMembership:
                 "dev_research",
             ), f"Secondary tool {tool_id} should not be in primary workspace {ws}"
 
+    def test_non_golf_utilities_moved_out_of_primary_workflow(self) -> None:
+        """Issue #9480: P&ID Generator and the Tools Calculator Suite are not
+
+        golf/biomechanics tools. They must not compete for attention in a
+        primary task workspace and must instead resolve to the secondary
+        Developer & Research grouping, while remaining launchable.
+        """
+        for tool_id in ("pid_generator", "tools_calculator_hub"):
+            ws = get_workspace_for_tool(tool_id)
+            assert ws == "dev_research", (
+                f"{tool_id!r} must be grouped under 'dev_research' (Utilities), "
+                f"not {ws!r}"
+            )
+            for primary_ws in PRIMARY_WORKSPACES.values():
+                assert tool_id not in primary_ws.member_tool_ids, (
+                    f"{tool_id!r} must not sit in the primary workspace "
+                    f"{primary_ws.id!r}"
+                )
+
 
 @pytest.mark.unit
 class TestAliasMigrationAndCustomization:
