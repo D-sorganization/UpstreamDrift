@@ -276,7 +276,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Neural Episode Storage NM-03 #10618 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10618`.
-- Branch: `feat/10618-nm03-episode-storage`; PR not created. Governing issue #10618 (NM-03, epic #10603). Session `nm03-cursor-202609212055`. Entry DL-#10618.
+- Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) (squash auto-merge armed). Governing issue #10618 (NM-03, epic #10603). Session `nm03-cursor-202609212055`. Entry DL-#10618.
 - Base: `origin/main` at `4bb10daa0` (includes merged NM-02 #10679).
 - Delivered: `src/shared/python/neural_motion/episodes/` (`EpisodeRecord`, `EpisodeStore`, `CompactAdapter`, `FamilySplitPlan`, task views, `TrainOnlyNormalizer`, `WindowCache`); schema `neural-episode-store/1.0.0`; docs/plans/neural_motion_matching/episode_storage.md and evidence receipt.
 - Validation: `python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py -q -n 0 --no-cov --timeout=60` (15 passed); `python -m ruff check` / `ruff format --check` on touched paths clean.
