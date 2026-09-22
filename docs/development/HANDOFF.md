@@ -347,9 +347,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
 - Base: merged `origin/main` (merge commit on branch tip `SELF`).
 - Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt; training reuse seams `neural_teacher_corpus_budget` (`training/scheduler.py`) and `register_teacher_episode_corpus` (`training/datasets.py`) for phantom-guard Rule 3.
-- Validation: `python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60`; ruff clean on touched paths.
+- DRY unblock (SELF): extracted `_require_episode_corpus_args`, `_probe_episode_store_layout`, `_register_hdf5_episode_dataset` so NM-03/NM-04 register helpers no longer trip fingerprints `506c08597d83` / `7153fb978f65` / `c8b715837b45` (baseline max 1).
+- Validation: unit tests for datasets + corpus registration green; scoped DRY scan clears the three failing hashes; ruff clean on touched paths.
 - Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
-- Next action: confirm phantom-guard + CI green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
+- Next action: confirm repo-structure-gates green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
 
 ## Neural Episode Storage NM-03 #10618 Handoff
 
