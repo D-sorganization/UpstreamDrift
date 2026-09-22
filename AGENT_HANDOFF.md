@@ -18,4 +18,5 @@ PR [#10730](https://github.com/D-sorganization/UpstreamDrift/pull/10730) merged 
 
 - Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
 - Keep #10591 open until a merged PR demonstrably meets its acceptance criteria. A replay foundation or a rejected candidate is not qualification.
+- Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
