@@ -13,10 +13,12 @@
   blockers. Motion Matching GUI adds a Club-Only tab; ResultsBrowser indexes
   `club_only_ui_result` JSON. Schema `club-only-ui-integration/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_ui_integration.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py -q -n 0 --no-cov --timeout=90` (14 passed); pre-push mypy/bandit GREEN. CI repair: `python -m scripts.gen_monolith_register --write`; `python -m scripts.shared_tools.divergence_inventory --write`; GUI tab test expects 4 tabs including Club-Only (three prior unit-test-gate failures GREEN locally).
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py tests/unit/tools/test_tour_matching_viewer_core.py::test_club_only_compare_view_separates_observed_and_inferred tests/unit/workspace/test_results_browser.py -q -n 0 --no-cov --timeout=120` GREEN after review-gap harden (workbook loader, receipt-hashed ledger, default JSON index, viewer compare). CI repair: `python -m scripts.gen_monolith_register --write`; `python -m scripts.shared_tools.divergence_inventory --write`; GUI tab test expects 4 tabs including Club-Only.
 - Limitations: software-contract UI only; `native_g1_pass` false; blockers
   `native_g1_qualification_requires_desk_native_receipt`,
-  `software_contract_ui_integration_is_not_native_evidence`.
+  `software_contract_ui_integration_is_not_native_evidence`. Predicted club
+  frame series remains unavailable until a continuous trajectory package is
+  emitted (reason via `tour_matching_viewer.core.club_only_compare_from_ui_result`).
 - Next: Confirm CI green on PR #10711 and squash-merge; do not start CO-10 until merge.
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
