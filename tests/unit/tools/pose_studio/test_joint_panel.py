@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 import numpy as np
 
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
+
 from src.tools.pose_studio.widgets.joint_panel import JointPanel
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
@@ -127,8 +129,6 @@ def test_joint_panel_set_limits_does_not_read_or_emit() -> None:
     assert seen == []
 
 
-@pytest.mark.unit
-@pytest.mark.ui
 def test_joint_panel_set_error_applies_and_clears_border() -> None:
     panel = JointPanel()
     joint = REFERENCE_GOLFER_FIELDS[0]
@@ -140,8 +140,6 @@ def test_joint_panel_set_error_applies_and_clears_border() -> None:
     assert panel._spinboxes[joint].styleSheet() == ""
 
 
-@pytest.mark.unit
-@pytest.mark.ui
 def test_joint_panel_set_error_rejects_unknown_joint() -> None:
     panel = JointPanel()
     with pytest.raises(KeyError):
