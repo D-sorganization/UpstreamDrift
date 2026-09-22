@@ -49,7 +49,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `core` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 13 | 0 | 0 |
-| `data_io` | 0 | 0 | 0 | 24 | 0 | 0 |
+| `data_io` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `data_processing` | 3 | 1 | 0 | 1 | 0 | 4 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `data_processor_io` | 2 | 1 | 0 | 0 | 0 | 3 |

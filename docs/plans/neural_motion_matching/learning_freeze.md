@@ -53,6 +53,7 @@ not a population sample.
 
 ## Next Action
 
-Dispatch [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)
-(NM-02): make native dataset labels complete and semantically correct under
-these frozen task and roster contracts.
+NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617))
+landed native label completeness under these frozen contracts. Do not start
+[#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618) (NM-03)
+until explicitly dispatched.
