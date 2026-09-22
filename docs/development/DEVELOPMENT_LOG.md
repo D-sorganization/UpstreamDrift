@@ -574,13 +574,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10610 (epic #10602)
 - **Branch:** feat/10610-co06-controls-replay
-- **PR:** #10687
+- **PR:** #10687 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/native_g1_gates.py; src/shared/python/motion_matching/club_only/replay_package.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at f191dd09d — squash-merged to main via PR #10687; native G1 remains blocked on software-contract fixtures only.
 - **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
 - **Next step:** Dispatch CO-07+ per club-only epic dependency order; do not invent native G1 pass.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
+
+### DL-#10611 · CO-07 Optimize Fast Matching and Expose Candidate Diversity
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10611 (epic #10602)
+- **Branch:** feat/10611-co07-fast-matching
+- **PR:** #10700
+- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — architecture param-budget fix via FastMatchOptions/\_ScoreLoopCtx/\_AssembleCtx; merged origin/main (MS-14); 12 unit tests GREEN; check_architecture_budget OK; native_g1_pass false
+- **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time. Public knobs collapse onto FastMatchOptions for architecture parameter budgets.
+- **Next step:** Confirm CI green and squash merge of PR Fixes #10611; do not start CO-08+.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

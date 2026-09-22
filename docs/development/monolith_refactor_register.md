@@ -107,6 +107,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  916 | `src/engines/physics_engines/opensim/python/muscle_analysis.py`                                                                                                               |
 |  907 | `src/unreal_integration/mesh_loader.py`                                                                                                                                       |
 |  902 | `src/tools/capture_rig/reference_comparison.py`                                                                                                                               |
+|  900 | `src/shared/python/motion_matching/club_only/fast_matching.py`                                                                                                                |
 |  899 | `src/shared/python/estimation/map_estimator.py`                                                                                                                               |
 |  897 | `src/shared/python/motion_matching/surrogate/compact/training.py`                                                                                                             |
 |  896 | `src/bunkershot3d/solvers/mpm/ballreach.py`                                                                                                                                   |
