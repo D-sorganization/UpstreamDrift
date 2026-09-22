@@ -629,12 +629,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10613 (epic #10602)
 - **Branch:** feat/issue-10613-co09-ui
-- **PR:** not created
+- **PR:** #10716
 - **Paths:** src/tools/motion_matching/club_only_ui.py; src/tools/motion_matching/club_only_panel.py; src/tools/motion_matching/gui.py; src/tools/tour_matching_viewer/gui.py; src/tools/matched_swing_browser/model.py; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/tools/motion_matching/test_club_only_ui.py; tests/tools/motion_matching/test_motion_matching_gui.py; tests/unit/tools/test_tour_matching_viewer_club_only_legend.py; tests/tools/matched_swing_browser/test_model.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — scoped CO-09 pytest GREEN; matrix verified gate + legend + import/dedup
 - **Summary:** Integrate club-only Excel source selection into Motion Matching UI and results: four canonical trials with alias conflict/coverage display, preview/verified-fit gating on CO-08 matrix status==scored only, observed-versus-inferred viewer legend, and club_only lane metadata on the existing matched-swing ledger without a parallel store.
-- **Next step:** Open ready-for-review PR Fixes #10613 with squash auto-merge.
+- **Next step:** Confirm CI green on PR #10716 and squash-merge Fixes #10613; then CO-10 (#10614).
 - **Evidence:** tests/tools/motion_matching/test_club_only_ui.py; tests/tools/motion_matching/test_motion_matching_gui.py.
 
 ### DL-#10612 · CO-08 Qualify the Club-Only Matrix and Plausibility Tradeoffs

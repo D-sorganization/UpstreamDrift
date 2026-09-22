@@ -3,7 +3,7 @@
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613)
 
 - Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10613-co09`,
-  branch `feat/issue-10613-co09-ui`, DL-#10613, PR not created (opening).
+  branch `feat/issue-10613-co09-ui`, DL-#10613, PR #10716 (opening; squash auto-merge).
   Tip SHA: SELF.
 - Delivered: thin `club_only_ui` facade + `ClubOnlySourcePanel` on Motion
   Matching source selection (Club-Only Excel, four canonical trials, alias
