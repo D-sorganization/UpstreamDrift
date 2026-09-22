@@ -24,6 +24,9 @@ from src.shared.python.contracts import require
 from src.shared.python.motion_matching.club_only.observation import (
     require_strictly_increasing_timestamps,
 )
+from src.shared.python.motion_matching.club_only.native_g1_gates import (
+    validate_native_g1_claim_contract,
+)
 from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocator,
@@ -309,12 +312,11 @@ class ControlRecoveryResult:
     def __post_init__(self) -> None:
         if self.schema != CONTROL_REPLAY_SCHEMA:
             raise ValueError(f"schema must be {CONTROL_REPLAY_SCHEMA!r}")
-        if self.native_g1_pass and not self.claims_native_qualification:
-            raise ValueError("native_g1_pass requires claims_native_qualification")
-        if self.native_g1_pass and self.qualification_blockers:
-            raise ValueError("native_g1_pass cannot retain qualification blockers")
-        if not self.native_g1_pass and not self.qualification_blockers:
-            raise ValueError("unmet native gates must name at least one blocker")
+        validate_native_g1_claim_contract(
+            native_g1_pass=self.native_g1_pass,
+            claims_native_qualification=self.claims_native_qualification,
+            qualification_blockers=self.qualification_blockers,
+        )
         if self.torque_replay_status not in {
             "passed",
             "rejected",
