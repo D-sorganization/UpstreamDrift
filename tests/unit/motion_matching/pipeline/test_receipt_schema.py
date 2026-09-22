@@ -8,10 +8,17 @@ from typing import Any
 
 import pytest
 
+from src.shared.python.motion_matching.pipeline.plants.pinocchio_lane_receipts import (
+    LANE_RECEIPT_SCHEMA,
+)
 from src.shared.python.motion_matching.pipeline.receipt_schema import (
     Receipt,
     validate_receipt,
 )
+
+# MS-14 blocked lane receipts may live under ground_support evidence but are not
+# HO-2 ground-support execution receipts.
+_NON_GROUND_SUPPORT_SCHEMAS = frozenset({LANE_RECEIPT_SCHEMA})
 
 pytestmark = pytest.mark.unit
 
@@ -52,6 +59,8 @@ def test_all_committed_receipts_validate() -> None:
 
     for receipt_path in receipt_files:
         doc = load_json(receipt_path)
+        if doc.get("schema_version") in _NON_GROUND_SUPPORT_SCHEMAS:
+            continue
         receipt = validate_receipt(doc)
         assert isinstance(receipt, Receipt), f"Failed to validate {receipt_path}"
         assert receipt.capture is None or isinstance(receipt.capture, str)

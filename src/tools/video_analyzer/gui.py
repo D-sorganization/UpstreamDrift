@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
 
 from src.launchers.help_menu import build_help_menu
 from src.tools.async_action import AsyncActionBar, WorkerContext
+from src.tools.window_theme import apply_theme_best_effort
 from src.tools.video_analyzer.analyzer import SwingAnalyzer
 from src.tools.video_analyzer.types import PostureMetrics
 
@@ -57,7 +58,7 @@ class MainWidget(QWidget):
         self._build_widgets()
         self._build_layout()
         self._wire_signals()
-        self._apply_theme_best_effort()
+        apply_theme_best_effort(self)
 
         self.status_label.setText("Choose a video to analyze.")
 
@@ -104,17 +105,6 @@ class MainWidget(QWidget):
     def _wire_signals(self) -> None:
         self.choose_button.clicked.connect(self._on_choose_clicked)
         self.analyze_button.clicked.connect(self.run_analysis_async)
-
-    def _apply_theme_best_effort(self) -> None:
-        """Apply the app theme if available; never fatal when absent."""
-        try:
-            from src.shared.python.sidekick.theme import apply_theme_to_window
-        except ImportError:
-            return
-        try:
-            apply_theme_to_window(self)
-        except (RuntimeError, AttributeError, TypeError, ValueError) as exc:
-            logger.debug("Theme application skipped: %s", exc)
 
     # ---- testable core -----------------------------------------------
 

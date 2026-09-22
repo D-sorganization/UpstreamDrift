@@ -12,6 +12,9 @@ Engine-specific options (cost weights, integrator settings, minimizer
 flags) live alongside each engine's ``fit_swing.py`` and are passed
 through ``FitOptions.engine_options``.
 
+Neural motion matching (NM-01 #10616) treats FitSwingProvider as the
+native refinement boundary for masked trajectory-to-control proposals.
+
 Public API:
     FitSwingProvider  -- Protocol every engine implements.
     FitOptions        -- canonical carrier for fit knobs + engine extras.
@@ -43,6 +46,7 @@ __all__ = [
     "FitSwingProvider",
     "MultiSourceTarget",
     "available_engines",
+    "classical_baseline_fit_options",
     "execute_body_fit",
     "get_provider",
     "has_body_target",
@@ -74,6 +78,20 @@ class FitOptions:
     maxiter: int = 200
     rng_seed: int = 0
     engine_options: Any = None
+
+
+def classical_baseline_fit_options(
+    *,
+    maxiter: int = 200,
+    rng_seed: int = 0,
+    engine_options: Any = None,
+) -> FitOptions:
+    """Build FitOptions for NM-01 cold-classical / polish baselines."""
+    if isinstance(maxiter, bool) or not isinstance(maxiter, int) or maxiter < 1:
+        raise ValueError(f"maxiter must be a positive int, got {maxiter!r}")
+    if isinstance(rng_seed, bool) or not isinstance(rng_seed, int) or rng_seed < 0:
+        raise ValueError(f"rng_seed must be a non-negative int, got {rng_seed!r}")
+    return FitOptions(maxiter=maxiter, rng_seed=rng_seed, engine_options=engine_options)
 
 
 @dataclass(frozen=True)

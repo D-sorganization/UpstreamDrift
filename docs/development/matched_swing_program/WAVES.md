@@ -45,7 +45,7 @@ _Objective:_ Common C3D marker interface, canonical tour capture normalization, 
 - **MS-11 (#10330):** Tour-average marker coordinate normalization.
 - **MS-12 (#10331):** Anthropometric segment table validator.
 - **MS-13 (#10332):** Dual-hand grip closure constraint protocol.
-- **MS-14 (#10333):** Functional hip zero-twist coordinate alignment across engines.
+- **MS-14 (#10333):** Pinocchio `MatchingPlant` full lane (`constraintDynamics` weld, shared contact law, Pink ConstrainedIkReceipt). Contracts + fail-closed blocked receipts landed; native ControlTower run still required for green closure ≤ 1e-4 m.
 - **MS-15 (#10334):** Stance detection and contact sphere standoff consistency.
 - **MS-20 (#10335):** Pinocchio Pink kinematics trajectory adapter.
 - **MS-21 (#10336):** Drake inverse kinematics baseline reference.
@@ -72,8 +72,8 @@ _Objective:_ Contact-aware forward dynamics, ground force equilibrium, and shoot
 
 _Objective:_ Cross-validation across all six engines with step-size convergence and torque parity.
 
-- **MS-60 (#10347):** Six-engine state derivative equivalence suite.
-- **MS-61 (#10348):** Numerical step-size convergence verification.
+- **MS-60 (#10347):** Simscape R2025b run management — scripted replay, run manifest, committed run-102 candidate/GIF (owner-authorized contract revision 2026-09-17).
+- **MS-61 (#10348):** Qualify Simscape R2025b topology + full-marker terminal disclosure (run-103 scaffolding; native Fit blocked without licensed host / neck model via MS-104).
 - **MS-62 (#10349):** Dynamic torque consistency audit.
 - **MS-70 (#10350):** Dual-club driver and 7-iron capture suite.
 - **MS-71 (#10351):** Full-body mass and inertia matrix parity verification.

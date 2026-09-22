@@ -92,12 +92,16 @@ def test_sources_report_honest_availability(client: TestClient) -> None:
     sources = {s["id"]: s for s in response.json()}
     assert set(sources) == {"mediapipe", "openpose", "c3d"}
 
-    for source_id, module_name in (
-        ("mediapipe", "mediapipe"),
-        ("openpose", "openpose"),
-        ("c3d", "ezc3d"),
+    for source_id, module_names in (
+        ("mediapipe", ("mediapipe",)),
+        ("openpose", ("openpose",)),
+        # C3D goes through the motion-pipeline adapter, which accepts either
+        # backend (#8865).
+        ("c3d", ("upstream_mocap_io", "ezc3d")),
     ):
-        expected = importlib.util.find_spec(module_name) is not None
+        expected = any(
+            importlib.util.find_spec(name) is not None for name in module_names
+        )
         source = sources[source_id]
         assert source["available"] is expected, source_id
         if expected:
@@ -130,12 +134,7 @@ def test_c3d_skeleton_template_is_empty(client: TestClient) -> None:
 
 @pytest.fixture
 def mm_c3d_file(tmp_path: Path) -> Path:
-    """Generate a tiny C3D with mm units and known marker coordinates.
-
-    Note: the repo's golden ``sample.c3d`` omits POINT:UNITS, which the
-    canonical ``C3DDataReader`` cannot read (vendored bug), so the fixture
-    is generated here with explicit units.
-    """
+    """Generate a tiny C3D with mm units and known marker coordinates."""
     import ezc3d
     import numpy as np
 
@@ -205,6 +204,134 @@ def test_c3d_upload_rejects_non_c3d_extension(client: TestClient) -> None:
         files={"file": ("notes.txt", b"hello", "text/plain")},
     )
     assert response.status_code == 400
+
+
+@pytest.mark.skipif(not _HAS_EZC3D, reason="ezc3d not installed")
+def test_c3d_upload_uses_motion_pipeline_adapter(
+    client: TestClient, mm_c3d_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The GUI upload path parses through the pipeline's C3DAdapter (#8865).
+
+    One canonical C3D reader serves both the playback recording and the
+    tracked-motion pipeline, so format quirks are handled in one place.
+    """
+    from src.shared.python.motion_pipeline.sources import c3d_adapter
+
+    calls: list[Path] = []
+    original_load = c3d_adapter.C3DAdapter.load
+
+    def spy_load(self, path, calibration=None):  # type: ignore[no-untyped-def]
+        calls.append(Path(path))
+        return original_load(self, path, calibration)
+
+    monkeypatch.setattr(c3d_adapter.C3DAdapter, "load", spy_load)
+    with mm_c3d_file.open("rb") as fh:
+        response = client.post(
+            "/tools/motion-capture/upload-c3d",
+            files={"file": ("swing.c3d", fh, "application/octet-stream")},
+        )
+    assert response.status_code == 200, response.text
+    assert len(calls) == 1 and calls[0].suffix == ".c3d"
+    # No hand-off requested: the pipeline field stays empty.
+    assert response.json()["pipeline"] is None
+
+
+@pytest.mark.skipif(not _HAS_EZC3D, reason="ezc3d not installed")
+def test_c3d_upload_reads_golden_sample_without_point_units(
+    client: TestClient,
+) -> None:
+    """The golden sample omits POINT:UNITS; the pipeline reader defaults to mm.
+
+    Regression for #8865: the previous GUI-only reader could not open it.
+    """
+    golden = _REPO_ROOT / "tests" / "data" / "motion_pipeline" / "golden" / "sample.c3d"
+    with golden.open("rb") as fh:
+        response = client.post(
+            "/tools/motion-capture/upload-c3d",
+            files={"file": ("sample.c3d", fh, "application/octet-stream")},
+        )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["total_frames"] > 0
+    assert data["native_units"] == ""
+    assert data["converted_units"] == "m"
+
+
+@pytest.mark.skipif(not _HAS_EZC3D, reason="ezc3d not installed")
+def test_c3d_upload_hands_off_to_motion_pipeline(
+    client: TestClient, mm_c3d_file: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``run_pipeline=true`` feeds the parsed trajectory to MotionPipeline (#8865).
+
+    The same ``MarkerTrajectory`` the recording was built from is handed to
+    the orchestrator (no re-parse), and the tracked-motion result comes
+    back alongside the playback recording.
+    """
+    from src.shared.python.motion_pipeline import orchestrator
+    from src.shared.python.motion_pipeline.contracts import (
+        MarkerTrajectory,
+        MotionMatchingResult,
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_run(self, source):  # type: ignore[no-untyped-def]
+        captured["source"] = source
+        captured["config"] = self.config
+        return MotionMatchingResult(
+            request_id="req-test",
+            success=True,
+            error_metrics={"rmse": 0.01},
+            message="ok",
+        )
+
+    monkeypatch.setattr(orchestrator.MotionPipeline, "run", fake_run)
+    with mm_c3d_file.open("rb") as fh:
+        response = client.post(
+            "/tools/motion-capture/upload-c3d",
+            params={"run_pipeline": "true", "ik_backend": "geometric"},
+            files={"file": ("swing.c3d", fh, "application/octet-stream")},
+        )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    # Playback half is unchanged by the hand-off.
+    assert data["marker_names"] == ["HEAD", "BUTT"]
+    assert data["total_frames"] == 12
+    # Pipeline half received the canonical trajectory, not the raw file.
+    source = captured["source"]
+    assert isinstance(source, MarkerTrajectory)
+    assert source.num_frames == 12
+    assert captured["config"].adapter.format == "c3d"
+    assert captured["config"].ik_backend == "geometric"
+    pipeline = data["pipeline"]
+    assert pipeline["success"] is True
+    assert pipeline["request_id"] == "req-test"
+    assert pipeline["result"]["error_metrics"] == {"rmse": 0.01}
+
+
+@pytest.mark.skipif(not _HAS_EZC3D, reason="ezc3d not installed")
+def test_c3d_upload_pipeline_failure_is_reported_inline(
+    client: TestClient, mm_c3d_file: Path
+) -> None:
+    """A failed hand-off keeps the recording and reports the error (#8865).
+
+    The stock orchestrator has no default skeleton for marker input, so the
+    solve fails; the upload must still register a playable recording and
+    surface the pipeline error rather than 4xx/5xx the whole request.
+    """
+    with mm_c3d_file.open("rb") as fh:
+        response = client.post(
+            "/tools/motion-capture/upload-c3d",
+            params={"run_pipeline": "true"},
+            files={"file": ("swing.c3d", fh, "application/octet-stream")},
+        )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["recording_name"] in _recordings
+    pipeline = data["pipeline"]
+    assert pipeline["success"] is False
+    assert pipeline["result"] is None
+    assert isinstance(pipeline["error"], str) and pipeline["error"]
 
 
 def test_source_list_matches_desktop_launcher_capabilities(
