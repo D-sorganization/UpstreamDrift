@@ -21,12 +21,71 @@ from .errors import (
     TrainingConfigError,
 )
 
-__all__ = ["Dataset", "DatasetRegistry"]
+__all__ = [
+    "Dataset",
+    "DatasetRegistry",
+    "register_neural_episode_corpus",
+]
 
 
 _VALID_FORMATS: frozenset[str] = frozenset(
     {"c3d", "csv", "parquet", "json", "pt", "npz", "hdf5", "tfrecord", "custom"}
 )
+
+
+def register_neural_episode_corpus(
+    registry: DatasetRegistry,
+    *,
+    dataset_id: str,
+    name: str,
+    root: Path,
+    description: str = "",
+) -> Dataset:
+    """Register an NM-03 episode-store root as a training :class:`Dataset` handle.
+
+    Design by Contract:
+    - ``root`` must be a :class:`Path` pointing at an episode corpus directory
+      (manifest may be empty yet). Arrays are never materialised into RAM.
+    - Format is always ``hdf5``; schema notes cite ``neural-episode-store/1.0.0``.
+
+    This is the training-subsystem reuse seam for #10618: family splits and
+    thin views live under ``neural_motion.episodes``; the registry only stores
+    the corpus path so jobs cannot invent alternate loaders.
+    """
+
+    if not isinstance(registry, DatasetRegistry):
+        raise TypeError(
+            f"registry must be DatasetRegistry (got {type(registry).__name__})"
+        )
+    if not isinstance(root, Path):
+        raise TrainingConfigError(
+            f"root must be a pathlib.Path (got {type(root).__name__})"
+        )
+
+    # Lazy import keeps the training registry importable without HDF5 extras.
+    from src.shared.python.neural_motion.episodes import (
+        EPISODE_STORE_SCHEMA,
+        EpisodeStore,
+    )
+
+    store = EpisodeStore(root)
+    # Touch the store layout without loading episode arrays (no all-RAM path).
+    _ = store.iter_episode_ids()
+    notes = description.strip() or (
+        f"NM-03 episode corpus ({EPISODE_STORE_SCHEMA}); "
+        "load via EpisodeStore / family splits, not row-level shuffles."
+    )
+    dataset = Dataset(
+        dataset_id=dataset_id,
+        name=name,
+        path=root,
+        format="hdf5",
+        size_bytes=0,
+        schema_version=1,
+        description=notes,
+    )
+    registry.register(dataset)
+    return dataset
 
 
 @dataclass(frozen=True, slots=True)
