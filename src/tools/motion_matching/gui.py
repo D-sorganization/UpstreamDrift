@@ -141,6 +141,10 @@ class MotionMatchingWidget(QWidget):
         mjx_widget = self._create_mjx_tab()
         self.tabs.addTab(mjx_widget, "MJX")
 
+        # Tab 4: Club-Only Excel (CO-09 #10613)
+        club_widget = self._create_club_only_tab()
+        self.tabs.addTab(club_widget, "Club-Only")
+
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)
 
@@ -376,6 +380,140 @@ class MotionMatchingWidget(QWidget):
         layout.addWidget(self.exp_log, stretch=1)
         layout.addWidget(self.exp_results)
         return widget
+
+    # -------------------------------------------------------------------------
+    # Club-Only Tab (CO-09 #10613)
+    # -------------------------------------------------------------------------
+    def _create_club_only_tab(self) -> QWidget:
+        """Thin UI over club_only.ui_integration — no parallel solver."""
+        from src.shared.python.motion_matching.club_only.ui_integration import (
+            ClubOnlySourceKind,
+            import_club_only_workbook_catalog,
+            keyboard_action_map,
+            list_motion_matching_source_kinds,
+        )
+
+        widget = QWidget()
+        form = QFormLayout()
+        self.club_source = QComboBox()
+        for kind in list_motion_matching_source_kinds():
+            self.club_source.addItem(kind.value, kind)
+        self.club_source.setCurrentText(ClubOnlySourceKind.CLUB_ONLY_EXCEL.value)
+
+        self.club_trial = QComboBox()
+        self.club_model = QComboBox()
+        self.club_model.addItems(
+            ["driven_double_pendulum", "driven_triple_pendulum", "double_pendulum"]
+        )
+        self.club_preset = QComboBox()
+        self.club_preset.addItems(["fast_preview", "verified_fit"])
+        self.club_disclaimer = QLabel(
+            "Body motion is a plausible inferred candidate — not measured "
+            "in the Club-Only Excel source."
+        )
+        self.club_disclaimer.setWordWrap(True)
+        self.club_conflicts = QPlainTextEdit()
+        self.club_conflicts.setReadOnly(True)
+        self.club_conflicts.setMaximumBlockCount(40)
+
+        try:
+            catalog = import_club_only_workbook_catalog(pipeline.REPO_ROOT)
+            for trial in catalog.unique_trials:
+                label = trial.trial_id
+                if trial.alias_sheets:
+                    label = f"{trial.trial_id} (+{len(trial.alias_sheets)} alias)"
+                self.club_trial.addItem(label, trial.trial_id)
+            self.club_conflicts.setPlainText("\n".join(catalog.conflicts))
+        except (OSError, ValueError, ImportError) as exc:
+            self.club_conflicts.setPlainText(f"Catalog unavailable: {exc}")
+
+        keys = keyboard_action_map()
+        shortcuts = QLabel(" | ".join(f"{name}={key}" for name, key in keys.items()))
+        shortcuts.setWordWrap(True)
+
+        form.addRow("Source", self.club_source)
+        form.addRow("Trial", self.club_trial)
+        form.addRow("Model", self.club_model)
+        form.addRow("Preset", self.club_preset)
+        form.addRow("Disclaimer", self.club_disclaimer)
+        form.addRow("Conflicts / coverage", self.club_conflicts)
+        form.addRow("Keyboard", shortcuts)
+
+        preview_btn = QPushButton("Run preview (P)")
+        preview_btn.clicked.connect(
+            lambda: self._run_club_only_match(preset="fast_preview")
+        )
+        verified_btn = QPushButton("Run verified fit (V)")
+        verified_btn.clicked.connect(
+            lambda: self._run_club_only_match(preset="verified_fit")
+        )
+        clone_btn = QPushButton("Clone session (L)")
+        clone_btn.clicked.connect(self._clone_club_only_session)
+
+        row = QHBoxLayout()
+        row.addWidget(preview_btn)
+        row.addWidget(verified_btn)
+        row.addWidget(clone_btn)
+
+        self.club_log = QPlainTextEdit()
+        self.club_log.setReadOnly(True)
+        self._club_session = None
+
+        layout = QVBoxLayout(widget)
+        layout.addLayout(form)
+        layout.addLayout(row)
+        layout.addWidget(self.club_log)
+        return widget
+
+    def _run_club_only_match(self, *, preset: str) -> None:
+        """Run club-only match via pipeline facade; log summary only."""
+        trial_id = self.club_trial.currentData() or self.club_trial.currentText()
+        model_id = self.club_model.currentText()
+        req = pipeline.ClubOnlyMatchRequest(
+            trial_id=str(trial_id),
+            model_id=model_id,
+            preset=preset,
+            prior_choices={"pose_prior": "address_plausible"},
+            geometry_choices={"handedness": "right"},
+            user_edits=getattr(self, "_club_user_edits", {"notes": ""}),
+        )
+        try:
+            from src.shared.python.motion_matching.club_only.observation import (
+                build_calibrated_observation_fixture,
+            )
+            from src.shared.python.motion_matching.club_only.ui_integration import (
+                build_club_only_result_view,
+                run_club_only_ui_match,
+            )
+
+            session = req.to_session()
+            self._club_session = session
+            result = run_club_only_ui_match(
+                session,
+                observation=build_calibrated_observation_fixture(
+                    session.trial_id, n_samples=8
+                ),
+            )
+            view = build_club_only_result_view(result)
+            summary = pipeline.summarize_club_only_result(view)
+            self.club_log.appendPlainText(json.dumps(summary, indent=2))
+        except (ValueError, TypeError, OSError, ImportError, RuntimeError) as exc:
+            self.club_log.appendPlainText(f"Club-only match failed: {exc}")
+
+    def _clone_club_only_session(self) -> None:
+        if self._club_session is None:
+            self.club_log.appendPlainText("No session to clone — run a match first.")
+            return
+        from src.shared.python.motion_matching.club_only.ui_integration import (
+            clone_club_only_session,
+        )
+
+        cloned = clone_club_only_session(self._club_session)
+        self._club_session = cloned
+        self._club_user_edits = dict(cloned.user_edits)
+        self.club_log.appendPlainText(
+            f"Cloned session {cloned.session_id} (edits preserved: {cloned.user_edits})"
+        )
 
     # -------------------------------------------------------------------------
     # MJX Tab
