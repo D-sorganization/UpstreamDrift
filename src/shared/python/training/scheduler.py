@@ -40,6 +40,8 @@ __all__ = [
     "Scheduler",
     "SchedulerError",
     "StatusChangeEvent",
+    "TeacherCorpusBudget",
+    "neural_teacher_corpus_budget",
 ]
 
 
@@ -64,6 +66,57 @@ class StatusChangeEvent:
     previous_status: TrainingStatus
     new_status: TrainingStatus
     timestamp: float
+
+
+@dataclass(frozen=True, slots=True)
+class TeacherCorpusBudget:
+    """Admission budget for NM-04 nested teacher-corpus jobs (#10619).
+
+    Attributes:
+        stages: Nested episode caps from NM-01 ``NESTED_EPISODE_STAGES``.
+        teacher_schema: Wire id for teacher episode records.
+        acquisition_schema: Wire id for active-learning acquisition logs.
+    """
+
+    stages: tuple[int, ...]
+    teacher_schema: str
+    acquisition_schema: str
+
+    def __post_init__(self) -> None:
+        if not self.stages:
+            raise ValueError("stages must be non-empty")
+        if any(size < 1 for size in self.stages):
+            raise ValueError("each stage size must be >= 1")
+        if not self.teacher_schema.strip():
+            raise ValueError("teacher_schema must be non-empty")
+        if not self.acquisition_schema.strip():
+            raise ValueError("acquisition_schema must be non-empty")
+
+
+def neural_teacher_corpus_budget() -> TeacherCorpusBudget:
+    """Return frozen NM-01 stage sizes + NM-04 schema ids for job admission.
+
+    Design by Contract:
+    - Stage sizes come from ``NESTED_EPISODE_STAGES`` (NM-01), never invented
+      in the training package.
+    - Schema strings match ``neural_motion.teachers`` public constants.
+    - Lazy imports keep the scheduler importable without neural extras.
+
+    This is the training-scheduler reuse seam for #10619: teacher-generation
+    jobs admit against the same nested caps as the benefit experiment.
+    """
+
+    from src.shared.python.neural_motion.experiment import NESTED_EPISODE_STAGES
+    from src.shared.python.neural_motion.teachers import (
+        ACQUISITION_SCHEMA,
+        TEACHER_SCHEMA,
+    )
+
+    return TeacherCorpusBudget(
+        stages=NESTED_EPISODE_STAGES,
+        teacher_schema=TEACHER_SCHEMA,
+        acquisition_schema=ACQUISITION_SCHEMA,
+    )
 
 
 StatusObserver = Callable[[StatusChangeEvent], None]
