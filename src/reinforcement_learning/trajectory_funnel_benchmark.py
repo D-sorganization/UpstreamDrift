@@ -315,8 +315,8 @@ class TrajectoryFunnelBenchmark:
             "mean_transverse_error": float(np.mean(np.min(distances, axis=1))),
             "terminal_setpoint_error": float(
                 math.sqrt(
-                    diff.dot(diff)
-                )  # ⚡ Bolt: math.sqrt(dot) is faster than np.linalg.norm for 1D arrays
+                    np.vdot(diff, diff)
+                )  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for 1D arrays
             ),
         }
 
