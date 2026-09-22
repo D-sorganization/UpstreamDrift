@@ -38,6 +38,7 @@ DEFAULT_ROOTS: tuple[Path, ...] = (
     Path("docs/development/full_body_models/evidence"),
     Path("docs/development/simscape_tour_matching/native_evidence"),
     Path("docs/development/opensim_tour_matching/evidence"),
+    Path("docs/plans/tour_baselines/evidence"),
     Path("evidence"),
 )
 
@@ -185,7 +186,10 @@ def classify_receipt(
     capture: str | None = None
     reason: str | None = None
 
-    if "simscape_tour_matching" in p:
+    if "tour_baselines/evidence" in p:
+        engine, lane = "tools", "tour_baselines"
+        capture = "driver" if "driver" in p else ("iron" if "iron" in p else None)
+    elif "simscape_tour_matching" in p:
         engine, lane, capture = "simscape", "native", "driver"
     elif "opensim_tour_matching" in p:
         engine, lane, capture = "opensim", "tour_matching", "driver"
@@ -346,11 +350,26 @@ def extract_acceptance(
 
     Fail-closed (MS-100): only a verdict produced by ``acceptance.evaluate``
     (recognisable by its non-empty ``gates`` list) can mark a row accepted.
-    A receipt's self-declared ``accepted`` flag, or an ``acceptance`` block
+    An explicit scientific disqualification is preserved as ``REJECTED``;
+    a receipt's self-declared ``accepted`` flag, or an ``acceptance`` block
     without gate results, is reported as ``UNVERIFIED`` and never as PASSED.
     """
     if verdicts_map and rel_path in verdicts_map:
         return dict(verdicts_map[rel_path])
+    statuses = data.get("statuses")
+    if (
+        isinstance(statuses, Mapping)
+        and statuses.get("scientific_qualification") == "disqualified"
+    ):
+        return {
+            "horizon": "G1",
+            "is_physically_accepted": False,
+            "status": "REJECTED",
+            "qualification_note": (
+                "receipt declares scientific_qualification=disqualified; "
+                "the ledger preserves it as rejected evidence"
+            ),
+        }
     if "acceptance" in data and isinstance(data["acceptance"], Mapping):
         block = dict(data["acceptance"])
         if block.get("gates"):

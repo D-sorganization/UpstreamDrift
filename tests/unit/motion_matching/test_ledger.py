@@ -97,6 +97,24 @@ def test_row_classification():
 
 
 @pytest.mark.unit
+def test_disqualified_tour_baseline_receipts_are_indexed_as_rejected() -> None:
+    """TB-04 evidence remains discoverable but cannot become an accepted fit."""
+    ledger = scan()
+    rows = [
+        row
+        for row in ledger.rows
+        if "docs/plans/tour_baselines/evidence/tb04_" in row.receipt_path
+    ]
+
+    assert {row.capture for row in rows} == {"driver", "iron"}
+    assert all(row.engine == "tools" for row in rows)
+    assert all(row.lane == "tour_baselines" for row in rows)
+    assert all(row.acceptance is not None for row in rows)
+    assert all(row.acceptance["status"] == "REJECTED" for row in rows)
+    assert all(row.acceptance["is_physically_accepted"] is False for row in rows)
+
+
+@pytest.mark.unit
 def test_ledger_is_deterministic():
     """Two successive scans produce byte-identical rows and totals."""
     ledger1 = scan()

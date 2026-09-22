@@ -7,29 +7,29 @@ import pytest
 from src.shared.python.realtime import channels as ch_mod
 from src.shared.python.realtime.channels import (
     get_channel_transport,
-    register_channel,
+    register_channel_hint,
 )
 
 
 class TestRegisterChannel:
     def test_invalid_hint_raises(self) -> None:
         with pytest.raises(ValueError, match="frequency_hint"):
-            register_channel("scope/topic", "medium")  # type: ignore[arg-type]
+            register_channel_hint("scope/topic", "medium")  # type: ignore[arg-type]
 
     def test_invalid_literal_name_raises(self) -> None:
         with pytest.raises(ValueError):
-            register_channel("BAD-NAME", "low")
+            register_channel_hint("BAD-NAME", "low")
 
     def test_register_literal_low(self) -> None:
-        register_channel("tests_chan/low_only", "low")
+        register_channel_hint("tests_chan/low_only", "low")
         assert get_channel_transport("tests_chan/low_only") == "file"
 
     def test_register_literal_high(self) -> None:
-        register_channel("tests_chan/high_only", "high")
+        register_channel_hint("tests_chan/high_only", "high")
         assert get_channel_transport("tests_chan/high_only") == "ws"
 
     def test_register_wildcard_high(self) -> None:
-        register_channel("tests_wild/<name>/state", "high")
+        register_channel_hint("tests_wild/<name>/state", "high")
         assert get_channel_transport("tests_wild/foo/state") == "ws"
         # Non-matching: missing suffix
         assert get_channel_transport("tests_wild/foo/other") == "file"
@@ -37,14 +37,14 @@ class TestRegisterChannel:
         assert get_channel_transport("tests_wild/foo/bar/state") == "file"
 
     def test_register_wildcard_no_suffix(self) -> None:
-        register_channel("tests_wild2/<name>", "high")
+        register_channel_hint("tests_wild2/<name>", "high")
         assert get_channel_transport("tests_wild2/foo") == "ws"
         # Wildcard captures exactly one segment, not zero or many
         assert get_channel_transport("tests_wild2/foo/bar") == "file"
 
     def test_multiple_wildcards_rejected(self) -> None:
         with pytest.raises(ValueError, match="multiple wildcards"):
-            register_channel("a/<x>/b/<y>", "high")
+            register_channel_hint("a/<x>/b/<y>", "high")
 
 
 class TestGetChannelTransport:
