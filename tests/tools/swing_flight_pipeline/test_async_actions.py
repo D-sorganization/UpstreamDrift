@@ -30,6 +30,8 @@ from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 from src.tools.swing_flight_pipeline.gui import SwingFlightWidget  # noqa: E402
 
+pytestmark = pytest.mark.unit
+
 _APP: QApplication | None = None
 
 
