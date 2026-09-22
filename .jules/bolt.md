@@ -144,6 +144,6 @@
 **Learning:** In reinforcement learning reward and metric calculations (e.g. `src/reinforcement_learning/trajectory_funnel_benchmark.py`), calculating the distance between the final state and the reference state using `np.linalg.norm(states[-1] - reference[-1])` incurs overhead. Replacing it with `math.sqrt(np.vdot(diff, diff))` avoids intermediate array allocations and NumPy dispatch overhead for small 1D state arrays.
 **Action:** Replace `np.linalg.norm(states[-1] - reference[-1])` with pre-calculated differences and `math.sqrt(np.vdot(diff, diff))` for terminal state error calculations.
 
-## 2026-09-22 - Optimize np.linalg.norm in physics engines
+## 2026-09-22 - Optimize `np.linalg.norm` in Physics Engines
 **Learning:** `np.max(np.linalg.norm(..., axis=-1))` and `np.linalg.norm(..., axis=-1)` on large multi-dimensional arrays (like differences in markers) are surprisingly slow because of NumPy's temporary allocations and internal type dispatching. Replacing them with `np.sqrt(np.max(np.einsum("...i,...i->...", diff, diff)))` provides a ~2.7x speedup for calculating max distances, and similarly replacing `np.linalg.norm(..., axis=-1)` with `np.sqrt(np.einsum("...i,...i->...", diff, diff))` gives the same performance boost for returning distance arrays.
 **Action:** When finding bottlenecks in physics engine or marker evaluation code, check for uses of `np.linalg.norm` with axis parameters. Swap them to `np.einsum` to avoid the overhead, especially in code executed iteratively or over many frames (like `replay_evidence.py`).
