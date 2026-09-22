@@ -2504,4 +2504,4 @@ Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 | `Parked`        | When `parked`              | Date plus reason                                               |
 
 Never place credentials, tokens, or customer data in a development log.
-No material development-log change — #10663 CI remediates preflight BLE001 only; no new DL feature entry.
+No material development-log change — ledger-freshness fix keeps TB-04 receipt test output in tmp_path; no new DL feature entry.
