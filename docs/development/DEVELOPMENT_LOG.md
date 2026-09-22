@@ -652,17 +652,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10613 · CO-09 Integrate Club-Only Matching Into Existing UI and Results
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10613 (epic #10602)
 - **Branch:** feat/co09-club-only-ui-10613
-- **PR:** #10711
+- **PR:** #10711 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — regenerated monolith register + divergence inventory for `club_only/ui_integration.py`; GUI tab count assertion expects Club-Only; three prior unit-test-gate failures GREEN locally
+- **Last verified:** 2026-09-22 at 718271844 — squash-merged to main via PR #10711; native_g1_pass false on software-contract UI.
 - **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser surfaces without parallel frameworks. Preview vs verified statuses stay honest; observed/inferred legend and trial clock required; cancel/resume reuse CO-07; ledger lane=club_only with named native blockers.
-- **Next step:** Confirm CI green on PR #10711 and squash-merge Fixes #10613; do not start CO-10 until merge.
+- **Next step:** N/A — shipped; continue CO-10 (#10614).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
+
+### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10614 (epic #10602)
+- **Branch:** feat/issue-10614-co10-turnover
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/development/matched_swing_program/README.md; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — RED/GREEN on reproduction turnover tests; evidence regenerates from module; epic_closure_allowed false; 68 unresolved matrix cells retain owners and next-step prompts
+- **Summary:** Publishes operator reproduction guide with exact saved-job commands, trial/model roster, workbook provenance, assumptions, candidate selection, MS-105 clean-environment portable replay, and fail-closed promotion guards. Docs/GUI alone cannot close #10602 or claim native G1 / G3 / neural success.
+- **Next step:** Open ready-for-review PR Fixes #10614 with squash auto-merge; regenerate monolith/divergence inventories if CI requires.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
