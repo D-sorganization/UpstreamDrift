@@ -23,6 +23,7 @@ from src.engines.physics_engines.pendulum.python.motion_matching.adapters import
     forward_kinematics_2d,
 )
 from src.shared.python.motion_matching.bernstein_controls import (
+    assemble_bernstein_fit_residual,
     bernstein_curvature_penalty,
     bernstein_effort_penalty,
     evaluate_bernstein_controls,
@@ -286,9 +287,13 @@ def fit_bounded_double_pendulum(
         tracking_res, _ = _compute_tracking_errors(
             q_rollout, target.l1, target.l2, p0, grip_arr, head_arr, observed_mask
         )
-        curv_res = prof.curvature_penalty(opts.curvature_weight)
-        eff_res = prof.effort_penalty(opts.effort_weight)
-        return np.concatenate([tracking_res, curv_res, eff_res])
+        return assemble_bernstein_fit_residual(
+            tracking_res,
+            np.vstack((prof.shoulder_controls, prof.wrist_controls)),
+            curvature_weight=opts.curvature_weight,
+            effort_weight=opts.effort_weight,
+            effort_scale=100.0,
+        )
 
     x0: np.ndarray = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
     opt_res = least_squares(
