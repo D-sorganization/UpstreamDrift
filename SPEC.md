@@ -6811,6 +6811,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10679 | NM-02 complete/semantically correct native dataset labels: channel evidence, native vs interval acceleration, requested/applied controls, DoF layout, restore StateError, first-wave mock+ODE receipts; no training claims. |
+| 2026-09-21 | #10658 | Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` in Model Generation API to mitigate XXE vulnerabilities. |
 | 2026-09-22 | #10607 | Build retrieval and constrained-IK starting guesses for club-only matching (CO-03): handedness-aware hand-frame offsets, single-rigid library retrieval, Pink/DLS capability records with fail-closed unsupported constraints, seed cache invalidated by geometry/profile hashes; kinematic preview only. |
 | 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
 | 2026-09-21 | #10672 | NM-01 freeze learning tasks, TB-00 model roster and benefit experiment (`neural-learning-tasks/1.0.0`, `neural-model-roster/1.0.0`, `neural-benefit-experiment/1.0.0`); no training or speed claims. |
