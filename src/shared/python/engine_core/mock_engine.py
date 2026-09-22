@@ -130,15 +130,18 @@ class MockPhysicsEngine:
         if torques is None:
             raise ValueError("torques must be provided")
         n_u = int(self.num_u) if self.num_u is not None else self.num_joints
-        requested = np.asarray(torques, dtype=float).reshape(-1)
+        requested: np.ndarray = np.asarray(torques, dtype=float).reshape(-1)
         if requested.size < n_u:
-            requested = np.pad(requested, (0, n_u - requested.size), mode="constant")
-        requested = requested[:n_u].copy()
+            requested = np.asarray(
+                np.pad(requested, (0, n_u - requested.size), mode="constant"),
+                dtype=float,
+            )
+        requested = np.asarray(requested[:n_u], dtype=float).copy()
         self._requested_torques = requested
-        applied = requested.copy()
+        applied: np.ndarray = requested.copy()
         if self.control_limits is not None:
             lo, hi = self.control_limits
-            applied = np.clip(applied, lo, hi)
+            applied = np.asarray(np.clip(applied, lo, hi), dtype=float)
         self._torques = applied
 
     def get_applied_control(self) -> np.ndarray:
