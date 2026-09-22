@@ -125,6 +125,16 @@ _DRIVEN_DOUBLE_REJECTION = (
     "accuracy exceeds its declared threshold."
 )
 
+_UPPER_BODY_PLANARITY_RECEIPTS: dict[str, str] = {
+    capture: f"docs/plans/tour_baselines/evidence/tb06_{capture}_planarity_receipt.json"
+    for capture in ("driver", "iron")
+}
+
+_UPPER_BODY_PLANARITY_REJECTION = (
+    "TB-06 planarity preflight is DISQUALIFIED: a rigid planar replay cannot "
+    "attain the 55 mm declared 3D marker RMSE ceiling."
+)
+
 
 def list_excluded_tools() -> list[ToolExclusion]:
     """Return all non-golf launcher tools with explicit exclusion rationales."""
@@ -189,13 +199,13 @@ def _cell_upper_body(m: GolfModelIdentity, capture: str) -> CoverageCell:
         model_id=m.model_id,
         capture=capture,
         supported=True,
-        observation_set="3D upper torso, bilateral arms, and clubhead trajectory",
-        existing_artifact=None,
+        observation_set="Six observed shoulder, elbow, and wrist surface markers",
+        existing_artifact=(f"{_UPPER_BODY_PLANARITY_RECEIPTS[capture]} (DISQUALIFIED)"),
         ownership="Tools",
-        missing_adapter="Pending TB-06 upper-body constrained dynamic fitter",
-        blocked_reason=None,
+        missing_adapter=None,
+        blocked_reason=_UPPER_BODY_PLANARITY_REJECTION,
         governing_issue="#10591",
-        evidence_status=EvidenceStatus.UNQUALIFIED,
+        evidence_status=EvidenceStatus.REJECTED,
     )
 
 
