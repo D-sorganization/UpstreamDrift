@@ -344,18 +344,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10619 (epic #10603)
+- **Branch:** local/nm-04-teacher-episodes
+- **PR:** not created
+- **Paths:** src/shared/python/neural_motion/teachers/; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — 12/12 unit tests green; ruff clean; software-contract only
+- **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes.
+- **Next step:** Open PR Fixes #10619 with squash auto-merge; do not start NM-05+.
+- **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
+
 ### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10618 (epic #10603)
 - **Branch:** feat/10618-nm03-episode-storage
 - **PR:** #10686
 - **Paths:** src/shared/python/neural_motion/episodes/; src/shared/python/neural_motion/json_io.py; src/shared/python/neural_motion/experiment.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main (theme/#10654 + CO-05); Stub Introduction Guard via ABC mixin (no bare NotImplementedError); mypy/DRY retained; no training claim
+- **Last verified:** 2026-09-22 — merged to main via #10686 (`800703cb`)
 - **Summary:** Versioned `neural-episode-store/1.0.0` HDF5 shards with content hashes; family-level splits with held-out strata and real-data eval bucket; compact-1.0 adapter via `CompactArrayBundle` preserves 27/189 layout; thin task views and transform-keyed window cache; training registry registers corpus paths without all-RAM load.
-- **Next step:** Confirm guard + CI Standard green on PR #10686; squash auto-merge.
+- **Next step:** Continue NM-04 (#10619) under frozen episode-store contracts.
 - **Evidence:** docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json.
 
 ### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
