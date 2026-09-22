@@ -21,7 +21,9 @@ MODEL_IMAGES: dict[str, str] = {
     "Model Explorer": "urdf_icon.png",
     "Putting Green": "putting_green_modern.png",
     "Video Analyzer": "video_analyzer_modern.png",
+    "Video Analyzer (Pose & Motion Tracking)": "video_analyzer_modern.png",
     "Data Explorer": "data_explorer_modern.png",
+    "Data Explorer (Import & Visualize)": "data_explorer_modern.png",
     "OpenPose": "openpose.png",
     "MediaPipe": "mediapipe.png",
     "Project Map": "project_map.png",
@@ -61,5 +63,7 @@ MODEL_IMAGES: dict[str, str] = {
     "Motion-Match Preview": "motion_target_preview.svg",
     "Starting-Pose Matcher (legacy)": "motion_target_preview.svg",
     "Data Processor": "data_explorer_modern.png",
+    "Data Processor (Signal & Time-Series)": "data_explorer_modern.png",
     "Video Processor": "video_analyzer_modern.png",
+    "Video Processor (Convert & Extract Frames)": "video_analyzer_modern.png",
 }

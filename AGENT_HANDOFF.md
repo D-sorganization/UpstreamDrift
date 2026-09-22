@@ -22,11 +22,19 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-02: Native Dataset Labels (#10617)
+## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619)
 
-Branch `fix/10617-nm02-native-dataset-labels`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-00/#10668 and NM-01/#10672 merged.
-NM-02 repairs `DatasetGenerator` label evidence (`native-dataset-labels/1.0.0`): no zero-as-measurement optional channels, native vs interval accelerations, requested/applied controls, DoF layout, restore `StateError`, first-wave Mock + ODE residual receipts. Evidence: `docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json`. No training or speed claim.
-Next after merge: dispatch NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618)).
+Branch `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) (squash auto-merge armed); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-02/#10679 and NM-03/#10686 merged on main.
+NM-04 adds `src/shared/python/neural_motion/teachers/` (`neural-teacher-episodes/1.0.0`, `neural-acquisition-log/1.0.0`): structured teacher generation, nested corpus with resume/duplicate-seed avoidance, rejection/quarantine ledger, active acquisition that cannot consume test labels. Evidence: `docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json`. Software-contract tests only; no training claim.
+Next after merge: dispatch NM-05 ([#10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620)).
+
+## Neural Motion Matching NM-03: Episode Storage, Splits and Views (#10618) [MERGED]
+
+Branch `feat/10618-nm03-episode-storage` merged in PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) (`800703cb`).
+
+## Neural Motion Matching NM-02: Native Dataset Labels (#10617) [MERGED]
+
+Branch `fix/10617-nm02-native-dataset-labels` merged in PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) (`4bb10daa0`).
 
 ## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616) [MERGED]
 

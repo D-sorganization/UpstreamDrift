@@ -433,8 +433,8 @@ models:
       default_launch: "tab"
 
   - id: "video_analyzer"
-    name: "Video Analyzer"
-    description: "Video-based motion analysis with pose tracking"
+    name: "Video Analyzer (Pose & Motion Tracking)"
+    description: "Video-based motion analysis with pose estimation and tracking: extract poses and joint tracks from swing video. Not for converting or trimming video files -- see Video Processor for that."
     type: "special_app"
     path: "tools://src/video_analyzer/launch_video_analyzer.py"
     provider: "tools"
@@ -449,8 +449,8 @@ models:
     embed_adapter: "src/launchers/external_tools_adapter.py::get_video_analyzer_dockable_ui"
 
   - id: "video_processor"
-    name: "Video Processor"
-    description: "Shared media processor for video conversion, frame extraction, and analysis"
+    name: "Video Processor (Convert & Extract Frames)"
+    description: "Shared Tools media processor for video conversion, frame extraction, and analysis: format-convert clips and pull individual frames. Not for pose or motion tracking -- see Video Analyzer for that."
     type: "special_app"
     path: "tools://src/media_processing/video_processor/apps/web/launch_platform.py"
     working_dir: "src/media_processing/video_processor/apps/web"
@@ -558,8 +558,8 @@ models:
       default_launch: "tab"
 
   - id: "data_explorer"
-    name: "Data Explorer"
-    description: "Import, filter, and visualise simulation datasets"
+    name: "Data Explorer (Import & Visualize)"
+    description: "Import, filter, and visualize simulation datasets interactively. Not for signal processing or calculators -- see Data Processor for that."
     type: "special_app"
     path: "tools://src/data_explorer/data_explorer_app.py"
     working_dir: "."
@@ -575,8 +575,8 @@ models:
       default_launch: "tab"
 
   - id: "data_processor"
-    name: "Data Processor"
-    description: "Shared signal processing and time-series data analysis tool"
+    name: "Data Processor (Signal & Time-Series)"
+    description: "Shared Tools signal processing and time-series data analysis tool: filter, transform, and compute statistics over recorded signals. Not for open-ended dataset browsing -- see Data Explorer for that."
     type: "special_app"
     path: "tools://src/data_processing/data_processor/launch_pyqt6.py"
     working_dir: "."

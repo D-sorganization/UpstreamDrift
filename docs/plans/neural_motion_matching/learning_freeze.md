@@ -53,7 +53,7 @@ not a population sample.
 
 ## Next Action
 
-NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617))
-landed native label completeness under these frozen contracts. Do not start
-[#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618) (NM-03)
-until explicitly dispatched.
+NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618))
+lands versioned episode storage, family splits and dataset views under these
+frozen contracts. Continue with NM-04 ([#10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619))
+only after NM-03 merges with tests and receipt evidence.

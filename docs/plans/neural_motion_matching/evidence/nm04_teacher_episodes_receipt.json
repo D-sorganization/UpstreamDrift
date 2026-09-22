@@ -1,0 +1,27 @@
+{
+  "schema": "neural-teacher-episodes-receipt/1.0.0",
+  "governing_issue": 10619,
+  "parent_epic": 10603,
+  "teacher_schema": "neural-teacher-episodes/1.0.0",
+  "acquisition_schema": "neural-acquisition-log/1.0.0",
+  "episode_store_schema": "neural-episode-store/1.0.0",
+  "source_hashes": {
+    "__init__.py": "d3f392e4838dd8345c2519e527f2c5ce19963f1923c58356d907531d7d534bdc",
+    "acquisition.py": "116acc0d14dc51d162fc9d92204809a638d277fb0d176a561132689224c05a82",
+    "corpus.py": "54c72afa5cc17e2fba6ba88f7d535d5922181f4c70374bcd2b87c81db47431e1",
+    "generation.py": "772986ebfe107d617abf3f1d1cd7855bf5bd59f15970eb7ad7078a698986ce61",
+    "types.py": "4b42c6aa70f50198f2c9485b42880d17dbce85d344a18bc102af424407a20cb5"
+  },
+  "validation": {
+    "command": "python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "test_count": 12,
+    "recorded_at": "2026-09-22"
+  },
+  "limitations": [
+    "Synthetic fixtures and software contracts only",
+    "No native teacher corpus or training run",
+    "No claim of acceleration or full nested 100/500/2000 qualification"
+  ],
+  "next_action_issue": 10620
+}

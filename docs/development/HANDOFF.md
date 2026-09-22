@@ -3,47 +3,55 @@
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10655-local`.
-- Branch: `fix/8869-realtime-pubsub-decision`; PR #10655 (open). Governing
+- Branch: `fix/8869-realtime-pubsub-decision`; PR [#10655](https://github.com/D-sorganization/UpstreamDrift/pull/10655) (open). Governing
   issue #8869 (folds in #8868, #8942A). Seam #9406: `realtime` is `split
 pending` — UD keeps this facade.
 - Entry DL-#8869. **Decision: WIRE, not delete.** Explicit `transport="ws"` /
   `REALTIME_TRANSPORT=ws` routes to `WSPubSub`; other transports raise
   `ValueError` instead of silent file fallback. Renamed colliding
   `register_channel` → `register_channel_hint`; deleted dead `file_pubsub.py`.
-- Next action: push rebase onto main (post-#10654), green CI, merge, teardown.
+- Next action: green CI on post-#10653 merge, squash merge, teardown worktree.
 
-## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
+## Launcher Tile Consolidation #9479 / #9480 Handoff [MERGED]
 
-- Worktree: Worktrees/UpstreamDrift-10608-co04, branch
-  feat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680.
+- Merged via PR [#10653](https://github.com/D-sorganization/UpstreamDrift/pull/10653) on `main` (`c70555a5e`).
+
+## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
+
+- Merged to main via PR [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687)
+  (squash merge SHA `f191dd09d`).
+- Delivered: `club_only/control_replay.py` recovers minimum-effort controls
+  (reuses `ContactForceAllocator` for floating-base plants; reduced software
+  plants copy RNEA onto actuated channels), separates net torque / actuated /
+  passive / ground / grip / root slack, saves continuous control packages, and
+  independently open-loop replays from q0/v0 with no measured-state resets.
+  Root slack, infeasible contact, unknown impact, and measured resets reject
+  with actionable reasons; kinematic preview stays separate from torque replay.
+  Schema `club-control-replay/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_control_replay.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_control_replay.py -q`
+  GREEN (12 passed).
+- Limitations: software-contract / unit-inertia plant only; native G1 remains
+  blocked (`native_g1_qualification_requires_desk_native_receipt`,
+  `software_contract_replay_is_not_native_evidence`). No invented native pass.
+- Validation addendum: split allocate/replay helpers under function-line budget;
+  wrap require() preds in bool() for mypy.
+- CI fix: `native_g1_gates.validate_native_g1_claim_contract` shared by
+  `control_replay.py` and `replay_package.py` (DRY fingerprint d169d28ac9c7);
+  regenerate monolith register + divergence inventory for new club_only modules.
+- Merged `origin/main` through MS-51 MyoSuite golfer scene landings and CO-06 #10687.
+
+## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608) [MERGED]
+
+- Merged to main via PR [#10680](https://github.com/D-sorganization/UpstreamDrift/pull/10680).
 - Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
   original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
   retention; first-frame-before-integrate scoring; eight-cell double/triple ×
   four-trial matrix with replay packages and named native blockers (no invented
   G1 pass). Evidence:
   docs/plans/club_only_matching/evidence/club_pendulum_match.json.
-- Dependency fix (CI check_dependency_direction): moved fit orchestration and
-  matrix builder to
-  src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py
-  and club_match_matrix.py; shared keeps pure contracts in
-  club_only/pendulum_match.py (engines → shared only). Architecture-budget
-  split: \_fit_triple / match_club_pendulum helpers keep each function ≤100 lines.
-  Mypy: prescribed-hub track fills hub_pos[:, :] in-place so (n, 2) dtype stays.
-- Merged origin/main (MS-61 #10676, MS-102 #10677, NM-02 #10679, CO-05 #10681);
-  conflicts in handoff, turnover, club_only **init** exports, and divergence
-  inventory — kept both CO-04 and CO-05 exports; architecture splits and
-  engine-layer orchestration preserved (no shared→engines top-level imports).
-- CI fix: regenerated docs/shared_tools/divergence_inventory.{v1.json,md} after
-  club_only/match_matrix.py move and after CO-05 main merge. Unit-test-gate then
-  failed on missing tools-only `launch_monitor/gspro_connect.py` — local vendor
-  checkout lacked the pin file; restored vendor to `a9ed0e7c5` and re-wrote
-  inventory so gspro_connect is recorded.
-- Validation: python -m scripts.shared_tools.divergence_inventory --check OK;
-  prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Confirm quality-gate green + squash auto-merge of PR #10680. Next
-  dispatch after land is CO-06 #10610.
 
 ## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609) [MERGED]
 
@@ -55,6 +63,49 @@ pending` — UD keeps this facade.
 - Limitations: synthetic fixtures for software contracts only; no native G1
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
+
+## MS-14 Pinocchio MatchingPlant Full Lane #10333 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10333-ms14`.
+- Branch: `feat/10333-pinocchio-matching-plant`; PR [#10684](https://github.com/D-sorganization/UpstreamDrift/pull/10684) open with squash auto-merge armed. Governing issue #10333
+  (MS-14, epic #10363). Session `cursor-10333-ms14`.
+- Entry DL-#10333. Delivered: PinocchioMatchingPlant derivatives +
+  `create_constrained_ik` (Pink), fitter `resolve_fit_native_plant` bridge,
+  ConstrainedIkReceipt `closure_residual_m` budget, unit contracts in
+  `test_pinocchio_plant.py`, honest blocked receipts under
+  `docs/development/full_body_models/evidence/ground_support/anthro_driver_{pinocchio,pink}/`.
+- Validation: `pytest tests/unit/motion_matching/pipeline/test_pinocchio_plant.py -q -n 0 --no-cov`
+  (contracts green; native tests skip without real Pinocchio); ruff + architecture budget clean.
+  CI hygiene (PR #10684): `python -m scripts.shared_tools.divergence_inventory --write`;
+  `python -m src.shared.python.motion_matching ledger --write`; unit tests for divergence
+  inventory, ledger freshness, and ground-support receipt scan (MS-14 lane schema excluded).
+- Limitation: Windows host has no Pinocchio/Pink; receipts are `blocked` /
+  `accepted=false` / `native_claims=false`. Do not treat as G1 or green weld closure.
+- Rebased: merged origin/main through CO-06 #10687 (`f191dd09d`); kept MS-14 +
+  CO-06 HANDOFF/DL rows; regenerated matched_swing status README + divergence
+  inventory; blocked native G1 receipts unchanged.
+- Next: Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower
+  `upstream-motion-runtime` for native pink receipts when scheduled (MS-107 owns G1).
+
+## MS-51 MyoSuite Golfer Scene #10344 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10344-ms51`.
+- Branch: `fix/10344-ms51-myosuite-repair`; PR [#10685](https://github.com/D-sorganization/UpstreamDrift/pull/10685) **merged** to main. Governing issue #10344
+  (MS-51, epic #10363). Soft dep: merged MS-102 #10376 / PR #10677.
+- Entry DL-#10344. Delivered: pinned myo_sim documentation + bootstrap scripts;
+  `golfer_scene.generate_golfer_scene` (myobody_simpleupper + club_models + dual
+  grip welds + four foot contact markers); coordinate map with explicit omissions;
+  inventory `myosuite/driver`+`iron` status `ready` with generated hashes; native
+  MuJoCo load/step tests; docs/engines/myosuite.md.
+- Validation: `pytest tests/unit/engines/myosuite/test_golfer_scene.py -q -n 0 --no-cov`;
+  `python scripts/ci/check_lod.py src/engines/physics_engines/myosuite/python/golfer_scene.py`;
+  architecture budget clean on `golfer_scene.py` (generate_golfer_scene ≤100 lines).
+- CI repair (SELF): LoD helper for path basename lowercasing; receipt payload
+  extracted from generate_golfer_scene; unit tests use defusedxml.ElementTree.
+- Honest limits: no G1 success; `parity_budget_qualified=false`; partial map is
+  diagnostic only; muscle params are upstream myo_sim (not golf-calibrated);
+  contact spheres are contype=0 markers for the shared law.
+- Next: not applicable — landed on main via #10685; MS-14 rematch only.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348 [MERGED]
 
@@ -75,9 +126,9 @@ pending` — UD keeps this facade.
 - Entry DL-#10376. Delivered: src/config/engine_model_inventory.json (authority-
   derived ledger), src/engines/model_inventory.py (load/reconcile/qualify), unit
   tests, structural receipts under docs/development/matched_swing_program/evidence/ms102/.
-- Six flagship engines × driver/iron packaged; JaxSim/putting_green reconciled;
+- Six flagship engines Ã— driver/iron packaged; JaxSim/putting_green reconciled;
   MyoSuite flagship status
-  epair → #10344 (MS-51); Simscape R2025b required.
+  epair â†’ #10344 (MS-51); Simscape R2025b required.
 - Next: native SDK receipts on supported hosts via MS-103 preflight (not claimed by
   structural receipts).
 
@@ -105,7 +156,7 @@ pending` — UD keeps this facade.
     coverage for null-space and tradeoff acceptance criteria.
 - Reproduction:
   `pytest tests/unit/motion_matching/test_force_nullspace.py tests/unit/motion_matching/test_force_nullspace_pf06.py -v`.
-- Status: rebased onto `origin/main` (includes MS-62); SPEC §12 `#10504`
+- Status: rebased onto `origin/main` (includes MS-62); SPEC Â§12 `#10504`
   present; focused PF-06 suites 29 passed; architecture budget and DRY
   duplication gates clean locally.
 - Next: Confirm CI green after force-with-lease push; merge closes #10436.
@@ -114,7 +165,7 @@ pending` — UD keeps this facade.
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10347-ms60`.
 - Branch: `fix/issue-10347-ms60-run-management`; PR #10669 **merged**. Governing issue #10347 (MS-60, epic #10363).
-- Entry DL-#10347 (shipped). Delivered: fail-closed R2025b run manifest, returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
+- Entry DL-#10347 (shipped). Delivered: fail-closed R2025b run manifest, returned-replayâ†’MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
 - Next action: DeskComputer second-person replay under 30 minutes when MS-61 Fit is scheduled.
 
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
@@ -141,7 +192,7 @@ pending` — UD keeps this facade.
 - Branch: `conductor/issue-9544`; base `b455aa4fd` (origin/main); implementation
   SELF; PR #10455. Governing issue #9544 (epic #9541). Pinned Tools
   `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` (gitlink unchanged; the issue's
-  audit pin `3d93bb2c…` predates the current gitlink).
+  audit pin `3d93bb2câ€¦` predates the current gitlink).
 - Entry DL-#9544. Delivered: `bunkershot3d.ball.regimes` (four regimes,
   refusal of every non-splash launch), `RotationMode`/`RotationCoupling` on
   `solvers/shot.py` with wrench conventions, `vandv.conservation`
@@ -168,8 +219,8 @@ pending` — UD keeps this facade.
   `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1`, materialised read-only into the
   worktree's empty `vendor/ud-tools` for the test run; not edited.
 - Entry DL-#9543. Objective: the software half of the sand-to-ball transfer
-  measurement-to-prediction program (intake → calibration → held-out
-  validation → versioned evidence), with the launch verdict floor lifted only
+  measurement-to-prediction program (intake â†’ calibration â†’ held-out
+  validation â†’ versioned evidence), with the launch verdict floor lifted only
   inside a qualified regime.
 - Files: `src/bunkershot3d/ball/qualification.py` (contract, registered matrix
   and protocol, tolerances, evidence object, #9239 disposition),
@@ -189,7 +240,7 @@ pending` — UD keeps this facade.
   the launch model's own status is `WITHIN` inside a qualified regime and the
   solver's verdict still combines via `worst_of`.
 - Validation: `python3 -m pytest tests/bunkershot3d/ball tests/bunkershot3d/vandv tests/bunkershot3d/sand tests/bunkershot3d/study tests/bunkershot3d/test_public_api_8608.py -q -n 4 --timeout=120`
-  → 1018 passed; scoped `ruff check`, `ruff format --check`, `mypy`,
+  â†’ 1018 passed; scoped `ruff check`, `ruff format --check`, `mypy`,
   `scripts/ci/check_lod.py src/bunkershot3d/ball`, file-size, architecture and
   error-handling ratchet checks pass. Not run: the full suite and pre-push
   `pytest-unit` hook (CI's job).
@@ -219,12 +270,12 @@ and `dumps_canonical`. `capture` and `record` write `mocap_session.json` beside
 requires for retained raw video, otherwise the export is `rejected` as data.
 Docs: `docs/motion_capture/capture_rig.md` (Tools Schema Bridge), SPEC row.
 
-Validation: `python3 tests/fixtures/mocap_session_export/run_checks.py` — 8
+Validation: `python3 tests/fixtures/mocap_session_export/run_checks.py` â€” 8
 passed (Tools family resolved first, like the capture-rig worker checks);
 `python3 -m pytest tests/motion_capture/rig/test_tools_session_export.py
 tests/motion_capture/rig/test_recorder_bridge_cli.py
 tests/motion_capture/rig/test_bundle_record.py
-tests/unit/repo_hygiene/test_vendored_tools_fallback.py` — 40 passed. Known,
+tests/unit/repo_hygiene/test_vendored_tools_fallback.py` â€” 40 passed. Known,
 pre-existing on this workstation: `python3 -I` subprocess checks
 (`test_reference_calibration_worker.py` and the new integration test) fail
 with `No module named 'numpy'` because numpy lives in the user site; CI has
@@ -236,7 +287,7 @@ Constraints: the root test process keeps `sidekick.lab.mocap` unresolvable
 by design (`src/__init__.py`, UD's own Sidekick cached first); the ready path
 is therefore checked in a Tools-first process, not by building a hybrid
 package. D-track (Tools #4707; D3 #4717 open) and prerequisites #8865/#8866/
-#8867 stay open — #9422 is not closed by this slice.
+#8867 stay open â€” #9422 is not closed by this slice.
 
 Next steps: (1) open the PR for this branch; (2) route the C3D upload path
 (#8865) through the same pinned contract; (3) surface `tools_schema.export`
@@ -284,7 +335,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Reproduction: `pytest tests/unit/motion_matching/test_matching_strategy.py -v`.
 - Next: PR auto-merge, complete lease on #10440, claim next issue.
 
-## Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) — 2026-09-11
+## Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) â€” 2026-09-11
 
 - Worktree: C:/Users/diete/Repositories/\_issue_worktrees/UpstreamDrift-conductor-issue-8684.
 - Branch: conductor/issue-8684; checkpoint SELF; PR #9998. Parent #8668.
@@ -334,24 +385,46 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
+## Neural Teacher Episodes NM-04 #10619 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10619`.
+- Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
+- Base: merged `origin/main` (merge commit on branch tip `SELF`).
+- Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt; training reuse seams `neural_teacher_corpus_budget` (`training/scheduler.py`) and `register_teacher_episode_corpus` (`training/datasets.py`) for phantom-guard Rule 3.
+- DRY unblock (SELF): extracted `_require_episode_corpus_args`, `_probe_episode_store_layout`, `_register_hdf5_episode_dataset` so NM-03/NM-04 register helpers no longer trip fingerprints `506c08597d83` / `7153fb978f65` / `c8b715837b45` (baseline max 1).
+- Inventory unblock (SELF): regenerated `docs/shared_tools/divergence_inventory.v1.json` for `neural_motion/teachers/*` (ud-only).
+- Validation: unit tests for datasets + corpus registration + inventory freshness green; scoped DRY scan clears the three failing hashes; architecture budget clean.
+- Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
+- Next action: confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
+
+## Neural Episode Storage NM-03 #10618 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10618`.
+- Branch: `feat/10618-nm03-episode-storage`; PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686) **merged** (`800703cb`). Governing issue #10618 (NM-03, epic #10603). Entry DL-#10618 shipped.
+- Delivered: `src/shared/python/neural_motion/episodes/` (`neural-episode-store/1.0.0`); episode_storage.md + receipt.
+- Limitations: synthetic software-contract tests only.
+- Next action: superseded by NM-04 dispatch.
+
 ## Neural Dataset Labels NM-02 #10617 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree).
-- Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) **merged** (squash 4bb10daa). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
+- Branch: `fix/10617-nm02-native-dataset-labels`; PR [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679) **merged** (`4bb10daa0`). Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617 shipped.
 - Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
 - CI unblock (SELF): split `_finalize_channels` under architecture function-lines budget; fix `MockPhysicsEngine.set_control` mypy; DRY helpers `_first_step_native_residual`, `_residual_norm`, `_single_sample_dynamics_config` (fingerprint `2430854b10cc`); SPEC §12 row keyed `#10679`; regenerate divergence inventory for `channel_finalize` / `sim_buffers` / `sim_recording` after core.py split.
 - Main sync (SELF): after CI Standard green on `4f8de75bf`, PR went DIRTY; merged `origin/main` and kept NM-02 inventory totals (`ud-only` 1415) plus the three generator-split modules.
 - Validation: adapters.py DRY scan clean for `2430854b10cc`; NM-02 unit tests green locally; `test_committed_inventory_is_current_when_vendor_present` green after inventory refresh; prior tip CI Standard SUCCESS.
 - Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
-- Next action: superseded; CO-04 #10608 / PR #10680 is the active merge drive. Do not start NM-03+.
+- Next action: superseded by NM-03 dispatch.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678 shipped; active child [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, and NM-02/#10679 shipped; next child NM-03 not started here.
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md).
-- **CO-04 state:** Double/triple pendulum club-only match matrix on PR #10680; DL-#10608.
-- **Next:** Confirm quality-gate green + squash auto-merge of PR #10680. Do not start CO-05+.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678, CO-04/#10680 shipped; next child [CO-06 #10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679, NM-03/#10686 shipped; active child [NM-04 #10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md).
+- **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
+- **NM-03 state:** MERGED via PR #10686 (`800703cb`); DL-#10618.
+- **NM-04 state:** in_review on PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698); DL-#10619.
+- **Next:** Confirm CI green + squash auto-merge of #10698; do not start NM-05+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
@@ -375,7 +448,7 @@ to the live `shipped_register()` (zero measurements) and
 `credibility_assessment()` (validation 0 of 4), so the matrix cannot be greened
 by editing JSON. `CLAUDE.md` documents the update-on-land rule.
 
-Validation: `py -3.12 -m pytest tests/config/bunkershot3d_qualification tests/config/industrial_readiness -p no:randomly` → 37 passed; `ruff check` and `ruff format --check` clean on the new test.
+Validation: `py -3.12 -m pytest tests/config/bunkershot3d_qualification tests/config/industrial_readiness -p no:randomly` â†’ 37 passed; `ruff check` and `ruff format --check` clean on the new test.
 Not done and not claimed: no physics, calibration, GUI or API change; no
 measurement, rendered evidence or independent review. The tool remains an
 exploratory simulator.
@@ -390,7 +463,7 @@ Updated 2026-09-18. Governing epic #10363; documentation review branch
 Review workspace: `C:/Users/diete/Repositories/_codex_worktrees/upstream-matching-handoff`.
 Development-log entry: `DL-#10363`.
 
-OpenSim golf-model improvement epic #10394 now has nine children (#10395–#10403).
+OpenSim golf-model improvement epic #10394 now has nine children (#10395â€“#10403).
 Start with [the golf-model assignment](opensim_tour_matching/GOLF_MODEL_AGENT_PROMPT.md)
 and [detailed epic](opensim_tour_matching/EPIC_GOLF_MODEL.md) for the missing club,
 arm scaling, address alignment and muscle/tendon extension work.
@@ -418,7 +491,7 @@ it is not the latest Pinocchio/OpenSim state.
 - Branch: `feat/issue-10432-pf02-pinocchio-kinematics-grip-calibration`, PR #10497 (auto-merge armed), lease `antigravity-ud-10432`, DL-#10432.
 - Changes:
   - `marker_kinematics.py`: Added `SolveDiagnostics` with projected gradient norm, cost decrease, active bounds count, and convergence metrics. Added `solve_frame_multi_start` with unconstrained geometric floor estimation. Added `refine_overlapping_window` with triangular window blending and temporal continuity.
-  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility (q_dot ≈ v and v_dot ≈ a), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
+  - `kinematic_smoothing.py`: Implemented zero-phase Butterworth smoothing with analytical/numerical derivative compatibility (q_dot â‰ˆ v and v_dot â‰ˆ a), `BoundarySpikeAudit` for boundary jerk and acceleration jump detection, and `audit_cutoff_sensitivity`.
   - Addressed backlog items:
     - MM-2 (#10104): Physiological wrist range of motion compliance producing 0 violations.
     - MM-5 (#10107): Left elbow pit up-and-inward address verification (`dot(pit, up) > 0.3` and `dot(pit, inward) > 0.3`).
@@ -883,7 +956,7 @@ Implemented name-mapped armature and saved-control replay through the existing
 MuJoCo rigid-grip/shared-contact plant, exact G1 slicing and fail-closed checks.
 See [Reproduction and Results](../../evidence/matched/driver_full_mujoco_replay/README.md)
 for commands, candidate identity and receipt. Historical source evidence is
-unchanged. Diagnostic armature 0.005 kg·m² follows turnover guidance but cannot
+unchanged. Diagnostic armature 0.005 kgÂ·mÂ² follows turnover guidance but cannot
 be certified as source-identical: the merged analytic producer never applies
 armature and its receipt omits it, contact configuration and interpolation.
 Missing root history and independent source dynamics also block qualification.
@@ -953,7 +1026,7 @@ Current turnover: `docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODD
 ## Current Status
 
 Run102 is the latest committed native fit found in the 2026-09-16 review.
-It is a rejected0–0.85 s prefix: MATLAB terminal RMS40.301 mm exceeds35 mm.
+It is a rejected0â€“0.85 s prefix: MATLAB terminal RMS40.301 mm exceeds35 mm.
 Overall20.267 mm, early9.995 mm, club8.389 mm and yaw0.610% pass their gates.
 The optimizer exhausted its physical evaluation budget and returned a fallback;
 accepted=false and optimizer_converged=false. No full-swing acceptance exists.
@@ -994,8 +1067,8 @@ native q6.06676e-7, closure pose6.60249e-11/rate1.61521e-10. Elapsed61.2725 s.
 Therefore58's isolated pass is not robust convergence or representation acceptance.
 Those representation runs are terminal. The pointwise acceleration/history audit
 found no sampled history dependence or substantial actuator-route mismatch:
-maximum routed native acceleration difference2.18034e-6 rad/s² at a reference
-539073.49 rad/s²; effort roundtrip1.25056e-12. Sampled unscaled inertia condition
+maximum routed native acceleration difference2.18034e-6 rad/sÂ² at a reference
+539073.49 rad/sÂ²; effort roundtrip1.25056e-12. Sampled unscaled inertia condition
 is about6.7e7 in both representations. These results support investigating
 conditioning/trajectory sensitivity, not declaring a physical-model mismatch.
 They do not establish global convergence. Detailed receipt:
@@ -1233,12 +1306,12 @@ working replays coincide while both differ from tight by that amount: the
 integration is max-step limited and the non-reproducible part is step-sequence
 roundoff/constraint-solver noise, so tolerance alone does not shrink it. Base
 replays reproduce run76's primal arrays exactly. Every factor-one failure sits
-at the smallest step with absolute error1.02x–1.14x the single-pair floor;
+at the smallest step with absolute error1.02xâ€“1.14x the single-pair floor;
 `reclassify.py` applies the tested `floor_safety_factor=2` to the same archived
 arrays and every direction/block then has a resolved pass (LSInputX h1e-4;
 mixed h1e-6 and h1e-5) or an orthonormality-verified structural zero, with no
 unexplained failure. Gates are unchanged. Evidence and turnover:
-native_evidence/two_window_floor_9967_77 (raw ZIP SHA2563d5768fc…).
+native_evidence/two_window_floor_9967_77 (raw ZIP SHA2563d5768fcâ€¦).
 
 MultipleShootingOptions now also accepts shared_boundary_policy="once"
 (default "both"), which observes the capture sample shared by adjacent windows
@@ -1246,9 +1319,9 @@ only in the earlier window so marker rows, Jacobian rows, segmented RMS and
 equality offsets match an uninterrupted single-window objective at zero
 defect. Four RED/GREEN tests;46 combined shooting tests, mypy and Ruff pass.
 
-## Two-Window Direct-Node SLSQP Trials 78–81 (Terminal, Historical)
+## Two-Window Direct-Node SLSQP Trials 78â€“81 (Terminal, Historical)
 
-Runs 78–81 explored direct-node SLSQP optimizations restarting from run 73/79/80 (see `native_evidence/two_window_fit_9967_78` through `81`). All terminated at bounds or iteration limits with continuity defects remaining between 3.99e-4 and 1.61e-3, leaving candidates rejected against the 25/35 mm gates. Continuations only reshaped the last 0.1 s; error growth 0.4–0.75 s remained unchanged from run 73. Archived rotation-chart audits confirm Jacobian conditioning issues. See native evidence for archived raw ZIPs.
+Runs 78â€“81 explored direct-node SLSQP optimizations restarting from run 73/79/80 (see `native_evidence/two_window_fit_9967_78` through `81`). All terminated at bounds or iteration limits with continuity defects remaining between 3.99e-4 and 1.61e-3, leaving candidates rejected against the 25/35 mm gates. Continuations only reshaped the last 0.1 s; error growth 0.4â€“0.75 s remained unchanged from run 73. Archived rotation-chart audits confirm Jacobian conditioning issues. See native evidence for archived raw ZIPs.
 
 The archived run73 sampled rotation-chart audit gives peak condition2.680/17.886/
 2.889 for hip/left/right shoulder. These samples do not bound between-sample
@@ -1263,7 +1336,7 @@ It specifies integrated nodes, retraction/continuity chain-rule checks and bound
 SLSQP acceptance without recreating the solver or accepting state-reset motion.
 
 1. Decide, one receipt each, on rebalancing terminal/early weighting (early RMS
-   and pelvis yaw regress under the100x terminal weight), relaxing the ±0.05 node
+   and pelvis yaw regress under the100x terminal weight), relaxing the Â±0.05 node
    box, or extending the horizon beyond0.85 s with additional integrated nodes on
    actual capture samples (same-input replay check first). Continue from exact
    returned81 with the run81 driver pattern; report early-motion and pelvis-yaw
@@ -1326,6 +1399,9 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-22T12:40:00Z — Rematch #10684 onto origin/main after CO-06 #10687 merge (`f191dd09d`); kept MS-14 + CO-06 HANDOFF/DL rows; regenerated matched_swing README + divergence inventory; blocked G1 honesty preserved. Commit SELF.
+- 2026-09-22T07:15:00Z — Rematch #10684 onto origin/main after MS-51 #10685 merge; kept MS-14 + MS-51 DL/HANDOFF rows; regenerated matched_swing status README. Commit SELF.
+- 2026-09-22T03:50:00Z — Fix unit-test-gate on #10684: divergence inventory, ledger (103→106 receipts), MS-14 lane receipt excluded from ground-support schema scan. Commit SELF.
 - 2026-09-21T21:10:00Z — Refresh matched_swing ledger (101 receipts) for #10660 unit-test-gate freshness. Commit SELF.
 - 2026-09-21T20:42:00Z — Fix architecture budget on #10660: ShootingFitConfig and dynamics artifact helper. Commit SELF.
 - 2026-09-21T20:25:00Z — Restore finite-bounds gate for minimize.least_squares on #10660; tip includes main MS-52. Commit SELF.
