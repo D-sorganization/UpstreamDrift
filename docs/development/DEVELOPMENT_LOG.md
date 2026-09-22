@@ -17,19 +17,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
-
-- **State:** in_review
-- **Owner:** local
-- **Issue:** #8880
-- **Branch:** fix/8880-gui-thread-blocking-sims
-- **PR:** #10656
-- **Paths:** src/tools/bunker_shot_gui/gui.py; src/tools/ball_flight_gui/gui.py; src/tools/swing_flight_pipeline/gui.py; src/tools/motion_matching/gui.py; src/shared/python/theme/tool_stylesheet.py; scripts/ci/check_gui_thread_blocking_ratchet.py; scripts/config/gui_thread_blocking_baseline.json; tests/tools/bunker_shot_gui/test_async_actions.py; tests/tools/ball_flight_gui/test_async_actions.py; tests/tools/swing_flight_pipeline/test_async_actions.py; tests/unit/scripts/test_gui_thread_blocking_ratchet.py
-- **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main; DRY duplication gate clean after shared comparison/banner helpers and `wire_primary_action_button`; ruff clean on touched files.
-- **Summary:** Migrated `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline` onto `src/tools/async_action.py`; added lower-only GUI-thread-blocking ratchet (baseline 12); primary run buttons use shared theme wiring (#10654). ~9 tools remain un-migrated (see PR #10656 Deferred).
-- **Next step:** Merge PR #10656 after CI green; follow-up PRs for remaining inline tools.
-
 ### DL-#9479 · Consolidate Engine Meta-Tiles and Clarify Confusable Launcher Tile Names
 
 - **State:** in_review
@@ -124,7 +111,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 (`98abb965f1`) — RED shown for the batching regression test (25 calls before the fix), then GREEN; numerical-equivalence and empty-trajectory tests pass; `tests/unit/physics/` shows no new failures versus unmodified main (three pre-existing rust-engine/tolerance failures reproduced identically via `git stash`); ruff check/format clean.
 - **Summary:** `BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.
-- **Next step:** Land the vectorization PR (#10648) if not already merged.
 
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 

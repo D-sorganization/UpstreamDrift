@@ -260,18 +260,7 @@ def generate_replay(
         plant, kin, q[:count], v[:count]
     )
     convergence = _convergence(plant, kin, arrays, efforts, markers, settings)
-    evidence = {
-        "parity": not failures,
-        "complete": complete,
-        "converged": convergence is not None and convergence <= 1e-5,
-        "root_history": "delta_tau_root" in arrays
-        and np.isfinite(arrays["delta_tau_root"]).all().item()
-        and float(np.max(np.abs(arrays["delta_tau_root"]))) <= 0.1,
-        "coverage": complete and metric_coverage(arrays, g1_count),
-        # This archive stores smoothed IK, not an independent forward replay.
-        # Source dynamics qualification remains blocked under #10336.
-        "source_dynamics": False,
-    }
+    evidence = {"parity": not failures, "complete": complete, "converged": convergence is not None and convergence <= 1e-5, "root_history": "delta_tau_root" in arrays and np.isfinite(arrays["delta_tau_root"]).all().item() and float(np.max(np.abs(arrays["delta_tau_root"]))) <= 0.1, "coverage": complete and metric_coverage(arrays, g1_count), "source_dynamics": False}  # fmt: skip # This archive stores smoothed IK, not an independent forward replay. Source dynamics qualification remains blocked under #10336.
     receipt = CandidateReplayReceipt(
         engine="mujoco",
         engine_version=mujoco.__version__,
@@ -289,13 +278,13 @@ def generate_replay(
             "controller": "none",
             "grip": "rigid KKT",
             "integrator": "DOP853",
-        },
+        },  # fmt: skip
         parity={
             "status": "UNVERIFIED" if failures else "PASSED",
             "failures": failures,
             "same_state_marker_max_m": marker_parity,
             "dynamics_parity": "UNVERIFIED: no independent source forward replay",
-        },
+        },  # fmt: skip
         integration={
             "acceptance_audit_sha256": _digest(
                 Path(__file__).with_name("replay_contract.py")
@@ -308,7 +297,7 @@ def generate_replay(
             "pose_resets": 0,
             "g1_convergence_max_marker_m": convergence,
             "g1_convergence_tolerance_m": 1e-5,
-        },
+        },  # fmt: skip
         shared_metrics=full_metrics,
         g1_metrics=g1_metrics,
         acceptance=AcceptanceReceipt.model_validate(
@@ -318,7 +307,5 @@ def generate_replay(
         elapsed_s=perf_counter() - start,
         qualification="Diagnostic replay only. Legacy source lacks plant/control provenance and root history; IK playback is not dynamics acceptance.",
     ).model_dump(mode="json")
-    (files.output / "receipt.json").write_text(
-        json.dumps(receipt, indent=2, allow_nan=False) + "\n"
-    )
+    (files.output / "receipt.json").write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")  # fmt: skip
     return receipt

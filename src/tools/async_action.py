@@ -60,7 +60,6 @@ __all__ = [
     "WorkerCancelled",
     "WorkerContext",
     "WorkerHandle",
-    "add_primary_async_run_control",
     "run_in_worker",
 ]
 
@@ -398,20 +397,3 @@ class AsyncActionBar(QWidget):
         self.cancel_button.setEnabled(busy)
         for button in self._trigger_buttons:
             button.setEnabled(not busy)
-
-
-def add_primary_async_run_control(
-    layout: Any,
-    label: str,
-    handler: Callable[[], None],
-) -> tuple[QPushButton, AsyncActionBar]:
-    """Add a themed primary run button and :class:`AsyncActionBar` to *layout*."""
-    from src.shared.python.theme.tool_stylesheet import wire_primary_action_button
-
-    run_btn = QPushButton(label)
-    wire_primary_action_button(run_btn, handler)
-    layout.addWidget(run_btn)
-    action_bar = AsyncActionBar()
-    action_bar.set_trigger_buttons(run_btn)
-    layout.addWidget(action_bar)
-    return run_btn, action_bar

@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import os
 import sys
-import time
 
 import numpy as np
 import pytest
@@ -24,7 +23,6 @@ pytest.importorskip("PyQt6", reason="the workbench shell needs a Qt binding")
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt6.QtCore import QCoreApplication  # noqa: E402
 from PyQt6.QtWidgets import QApplication, QMainWindow  # noqa: E402
 
 from bunkershot3d.solvers import EnvelopeStatus  # noqa: E402
@@ -69,28 +67,9 @@ def qapp() -> QApplication:
 
 
 @pytest.fixture()
-def widget():  # noqa: ANN201
+def widget() -> BunkerShotWidget:
     """A workbench wired to a cheap but genuine model."""
-    the_widget = BunkerShotWidget(model_factory=_coarse_model)
-    yield the_widget
-    the_widget.cleanup()
-
-
-def _pump_until(predicate, timeout_s: float = 20.0) -> bool:  # noqa: ANN001
-    """Process Qt events until ``predicate`` is true or ``timeout_s`` elapses.
-
-    Needed for the buttons that now run through async_action (#8880): a
-    click starts a worker thread, so the result only appears once the event
-    loop has processed the finished signal.
-    """
-    deadline = time.monotonic() + timeout_s
-    while time.monotonic() < deadline:
-        QCoreApplication.processEvents()
-        if predicate():
-            return True
-        time.sleep(0.005)
-    QCoreApplication.processEvents()
-    return predicate()
+    return BunkerShotWidget(model_factory=_coarse_model)
 
 
 class TestConstruction:
@@ -145,7 +124,7 @@ class TestRunningADesign:
 
     def test_the_run_button_is_wired(self, widget: BunkerShotWidget) -> None:
         widget._run_button.click()
-        assert _pump_until(lambda: "Peak resultant force" in widget.report_text)
+        assert "Peak resultant force" in widget.report_text
 
 
 class TestRefusalIsUnmissable:
@@ -228,7 +207,7 @@ class TestComparison:
 
     def test_the_compare_button_is_wired(self, widget: BunkerShotWidget) -> None:
         widget._compare_button.click()
-        assert _pump_until(lambda: "A/B:" in widget.report_text)
+        assert "A/B:" in widget.report_text
 
     def test_the_banner_shows_the_worse_of_the_two_verdicts(
         self, widget: BunkerShotWidget

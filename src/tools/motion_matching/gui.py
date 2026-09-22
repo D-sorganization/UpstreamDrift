@@ -8,13 +8,7 @@ A tabbed PyQt6 launcher tile over :mod:`src.tools.motion_matching.pipeline`:
 3. MJX tab: export MJX differentiable optimization package and validate optimized
    references in the shared-law plant.
 
-Nothing here computes; pipeline scripts do -- every long-running action is
-already an out-of-process ``QProcess`` command queue (see ``_ProcessQueue``
-below), so it never blocks the GUI thread and does not need the
-``async_action`` worker-thread helper from issue #8880.
-Epic #10162, child #10158 (HO-4).
-
-# noqa: gui-thread/ok -- QProcess-backed, not inline compute (see docstring).
+Nothing here computes; pipeline scripts do. Epic #10162, child #10158 (HO-4).
 """
 
 from __future__ import annotations

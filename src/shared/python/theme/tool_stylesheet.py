@@ -107,12 +107,6 @@ def apply_tool_theme(widget: Any) -> None:
     """)
 
 
-def wire_primary_action_button(button: Any, on_clicked: Any) -> None:
-    """Style a tool's primary action button and connect its click handler."""
-    button.setStyleSheet(primary_button_style())
-    button.clicked.connect(on_clicked)
-
-
 def primary_button_style() -> str:
     """Return the shared stylesheet snippet for a tool's primary action button.
 
