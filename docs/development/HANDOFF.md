@@ -233,22 +233,26 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-co02-10606`.
-- Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) open (squash auto-merge). Governing issue #10606 (CO-02, epic #10602). Prerequisite CO-01 #10605 / PR #10670 merged. Head SELF (includes main NM-01 `f2e625099`).
-- Entry DL-#10606. Delivered: `GolfPlausibilityPriors` / `PriorAssumption`, per-roster `ClubOnlyProfile` (observation/physical/plausibility + ObjectiveRule), `assess_ambiguity`, `evaluate_club_only_acceptance` with separated `ClubOnlyStatuses`, normalized position/SO(3) orientation errors, evidence JSON for all 20 registered models.
-- Validation: focused CO-02 suite 13 passed earlier; merge conflict with main cleared (HANDOFF + regenerated divergence inventory).
-- Limitations: software contracts and synthetic acceptance cases only; no native physical qualification, retrieval/IK (CO-03), or pendulum matching (CO-04).
-- Next action: push merge tip, confirm CI green + squash merge of #10675; do not start CO-03+.
+- Merged to main via [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) at `262152c8f`. Governing issue #10606 (CO-02, epic #10602). Entry DL-#10606 shipped.
+- Delivered: golf plausibility priors, per-roster profiles, ambiguity, club-only acceptance with separated statuses.
+- Next action: do not start CO-03 until explicitly dispatched.
+
+## Neural Dataset Labels NM-02 #10617 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10617-nm02` (sole NM-02 worktree; `UpstreamDrift-nm02-10617` removed).
+- Branch: `fix/10617-nm02-native-dataset-labels`; base `origin/main` tip `262152c8f`. Governing issue #10617 (NM-02, epic #10603). Entry DL-#10617.
+- Delivered: channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, `ModelDoFLayout`, restore `StateError`, residual helper, first-wave mock + ODE adapters and receipts.
+- Validation: `pytest tests/unit/data_io/test_dataset_labels_nm02.py tests/unit/data_io/test_nm02_adapters.py -q -n 0 --no-cov` green; `ruff check` clean on touched paths.
+- Limitations: software + ODE residual only; no training/speed claims; other engines deferred to NM-09.
+- Next action: open/update PR with Fixes #10617, squash auto-merge; do not start NM-03+.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667 and CO-01/#10670 shipped; active child [CO-02 #10606](https://github.com/D-sorganization/UpstreamDrift/issues/10606) via PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-01 [#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) merged (#10672).
-- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md).
-- **NM-00 state:** Fail-closed dataset/checkpoint/claim audit remains authoritative; no native training or speed claim from NM-00.
-- **NM-01 state:** Learning-task contracts, TB-00-keyed roster and benefit experiment frozen in `src/shared/python/neural_motion/{tasks,roster,experiment}.py` with evidence under `docs/plans/neural_motion_matching/evidence/nm01_*.json`.
-- **CO-02 state:** Roster profiles, priors, ambiguity, and club-only acceptance implemented (synthetic tests + evidence receipt); PR #10675 in review with squash auto-merge. DL-#10602, DL-#10604, DL-#10605, DL-#10606.
-- **Next:** Land CO-02/#10675 CI + squash merge; then dispatch [NM-02 #10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617). Do not start CO-03 until #10675 merges.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped. Do not start CO-03 until dispatched.
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668 and NM-01/#10672 shipped; active child [NM-02 #10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617).
+- **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md).
+- **NM-02 state:** DatasetGenerator label semantics + first-wave receipts in progress on `fix/10617-nm02-native-dataset-labels`. DL-#10617.
+- **Next:** Land NM-02/#10617 PR + squash merge. Do not start NM-03+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 

@@ -6810,6 +6810,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10617 | NM-02 complete/semantically correct native dataset labels: channel evidence, native vs interval acceleration, requested/applied controls, DoF layout, restore StateError, first-wave mock+ODE receipts; no training claims. |
 | 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
 | 2026-09-21 | #10672 | NM-01 freeze learning tasks, TB-00 model roster and benefit experiment (`neural-learning-tasks/1.0.0`, `neural-model-roster/1.0.0`, `neural-benefit-experiment/1.0.0`); no training or speed claims. |
 | 2026-09-21 | #10669 | Add Simscape R2025b run management for MS-60 (#10347): fail-closed run manifest schema, returned-replay→MatchedSwingCandidate converter, scripted `run_simscape_candidate.ps1`, and committed run-102 candidate/manifest/playback GIF under native_evidence. |

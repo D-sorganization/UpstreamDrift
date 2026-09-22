@@ -316,6 +316,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10617 (epic #10603)
+- **Branch:** fix/10617-nm02-native-dataset-labels
+- **PR:** not created
+- **Paths:** src/shared/python/data_io/dataset_generator/{core,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF — `pytest tests/unit/data_io/test_dataset_labels_nm02.py tests/unit/data_io/test_nm02_adapters.py tests/unit/test_dataset_generator.py -q -n 0 --no-cov` green; ODE and mock residuals 0.0
+- **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
+- **Next step:** Confirm CI green on the NM-02 PR and squash auto-merge.
+- **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
+
 ### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
 
 - **State:** shipped
@@ -327,7 +341,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-21
 - **Last verified:** 2026-09-21 — merged to main via #10672 (`f2e625099`)
 - **Summary:** Freezes typed forward/inverse/masked learning-task contracts (dimensions from TB-00 identities; inverse non-uniqueness policy required), a 20-model neural roster with full-body deferred pending benefit, and the benefit experiment (nested 100/500/2000 stages, three seeds, five baselines, all-phase latency including failures, 2× median/non-worse p95 gates, break-even None when savings ≤ 0). No training or speed claim.
-- **Next step:** Dispatch NM-02 (#10617) under the frozen learning contracts.
+- **Next step:** Continue NM-02 (#10617) under the frozen learning contracts.
 - **Evidence:** docs/plans/neural_motion_matching/learning_freeze.md; docs/plans/neural_motion_matching/evidence/nm01_learning_tasks_pilot.json; docs/plans/neural_motion_matching/evidence/nm01_model_roster.json; docs/plans/neural_motion_matching/evidence/nm01_benefit_experiment_receipt.json.
 
 ### DL-#10615 · NM-00 Dataset Checkpoint and Training Claim Audit
@@ -388,16 +402,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10606 · CO-02 Define Golf Plausibility Priors, Ambiguity and Acceptance
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10606 (epic #10602)
 - **Branch:** feat/co02-golf-plausibility-priors
 - **PR:** #10675
 - **Paths:** src/shared/python/motion_matching/club_only/priors.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/ambiguity.py; src/shared/python/motion_matching/club_only/acceptance.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-21T23:30:00Z at SELF — merged `origin/main` (NM-01 `f2e625099`); regenerated divergence inventory; HANDOFF conflict resolved; PR #10675 squash auto-merge armed.
+- **Last verified:** 2026-09-22 — merged to main via #10675 (`262152c8f`)
 - **Summary:** Freezes per-roster observation/physical/plausibility profiles, named GolfPlausibilityPriors (not measured truth), ambiguity retention for distinct body hashes on identical club residuals, and club-only acceptance that keeps kinematic preview, torque replay, scientific, and product statuses separate while preserving full-body G3 gates.
-- **Next step:** Drive PR #10675 CI green after main merge; do not start CO-03.
+- **Next step:** Do not start CO-03 until explicitly dispatched.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_plausibility_acceptance.json; tests/unit/motion_matching/test_club_plausibility_acceptance.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
@@ -409,9 +423,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-20 at c3111a9177885af945018d730ec40de308cd9971 (source/workbook review; four unique numeric trials audited and TW_wiffle event parsing defect reproduced; implementation and training not performed)
+- **Last verified:** 2026-09-22 — NM-02 (#10617) in progress on fix/10617-nm02-native-dataset-labels; CO-02 (#10606) shipped via #10675
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Dispatch #10617 (NM-02); NM-01 (#10616) shipped via #10672.
+- **Next step:** Land NM-02 (#10617) PR; do not start NM-03+.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#9550 · Impact Explorer Acceptance Matrix and Served-Bundle Verification

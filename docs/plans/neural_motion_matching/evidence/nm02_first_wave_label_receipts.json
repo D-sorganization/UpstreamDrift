@@ -1,0 +1,59 @@
+{
+  "schema": "native-dataset-labels/1.0.0",
+  "governing_issue": "#10617",
+  "parent_epic": "#10603",
+  "receipts": [
+    {
+      "schema": "native-dataset-labels/1.0.0",
+      "model_id": "mock_software_contract",
+      "adapter": "MockPhysicsEngine",
+      "qualified": true,
+      "residual_norm": 0.0,
+      "channel_summary": {
+        "positions": "available",
+        "velocities": "available",
+        "requested_controls": "available",
+        "applied_controls": "available",
+        "interval_accelerations": "available",
+        "native_accelerations": "available",
+        "mass_matrices": "available",
+        "bias_forces": "available",
+        "gravity_forces": "not_requested",
+        "contact_forces": "not_requested"
+      },
+      "limitations": [
+        "MockPhysicsEngine is a software-contract fixture, not native evidence"
+      ],
+      "content_digest": "4dbebc3982c5d4f6ddc0cef9132e70fb6660bf0c67ff247e1777fea2b1a7f30f"
+    },
+    {
+      "schema": "native-dataset-labels/1.0.0",
+      "model_id": "driven_double_pendulum",
+      "adapter": "ODEBackend",
+      "qualified": true,
+      "residual_norm": 0.0,
+      "channel_summary": {
+        "positions": "available",
+        "velocities": "available",
+        "requested_controls": "available",
+        "applied_controls": "available",
+        "interval_accelerations": "available",
+        "native_accelerations": "available",
+        "mass_matrices": "available",
+        "bias_forces": "available",
+        "gravity_forces": "not_requested",
+        "contact_forces": "not_requested"
+      },
+      "limitations": [
+        "Contact/gravity channels intentionally unavailable on planar ODE model",
+        "Triple-pendulum and upper-body adapters deferred to NM-09 ownership"
+      ],
+      "content_digest": "bcd9fa70a7dedc832030faa9b1b0662f37c96aa7bef9f32d393f6d6362b83524"
+    }
+  ],
+  "limitations": [
+    "Mock receipt is software-contract only, not native evidence",
+    "ODE double-pendulum residual is the native first-wave sample",
+    "Remaining engines deferred to NM-09"
+  ]
+}
