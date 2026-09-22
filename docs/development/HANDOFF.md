@@ -1,5 +1,28 @@
 # Current Matching Continuation Handoff
 
+## CO-06 Recover Feasible Controls and Independently Replay Candidates (#10610)
+
+- Worktree: Worktrees/UpstreamDrift-10610-co06, branch
+  feat/issue-10610-co06-control-replay, DL-#10610, PR not created.
+- Session: b27ccab3-1128-492c-a0fb-001367ea3aa8 (agent local).
+- Delivered: `club_only/control_replay.py` recovers min-effort constrained ID
+  allocations (net/actuator/passive/reactions separated; not unique measured
+  torques), fits continuous Bernstein policies with prescribed base + solver
+  settings, and independently replays the full horizon from one q0/v0 with
+  no measured-state resets. Root slack cannot qualify; rejected dynamics keep
+  kinematic preview with a separate status. Ball impact is modeled/unknown/
+  outside-model; CHS/ball type are refused as force observations. Reuses
+  ContactForceAllocator, prefix_fit Bernstein conversion, and acceptance
+  services. Evidence:
+  docs/plans/club_only_matching/evidence/club_control_replay.json.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_control_replay.py -q -n 0 --no-cov --timeout=60`
+  GREEN (11 passed). Ruff check/format clean on touched files.
+- Limitations: synthetic software contracts only; no native G1 pass; open-loop
+  plant for contract replay is a double-integrator stand-in, not engine-native
+  forward dynamics.
+- Next: Open ready-for-review PR Fixes #10610 with squash auto-merge; then
+  dispatch CO-07 #10611.
+
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
 - Worktree: Worktrees/UpstreamDrift-10608-co04, branch
