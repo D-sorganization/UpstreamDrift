@@ -971,6 +971,14 @@
       "issue": 10591,
       "reason": "Issue #10591: Bolt optimization added extra lines to replace np.linalg.norm with np.sqrt(np.einsum) causing function line count to marginally exceed 100.",
       "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/replay_evidence.py",
+      "symbol": "_build_receipt",
+      "rule": "parameters",
+      "owner": "@jules",
+      "reason": "Decomposition for optimization split. See issue #10336",
+      "expires_on": "2026-12-31"
     }
   ]
 }

@@ -292,7 +292,6 @@ class C3DAdapter(MocapSourceAdapter):
             calibration=calibration,
             metadata={
                 "source_file": str(p),
-                "fps": fps,
                 "units": units,
                 "source_labels": labels,
                 # The native payload does not distinguish absent units from its
@@ -388,7 +387,6 @@ class C3DAdapter(MocapSourceAdapter):
             calibration=calibration,
             metadata={
                 "source_file": str(p),
-                "fps": fps,
                 "units": units,
                 "source_labels": labels,
                 "units_declared": bool(params["POINT"]["UNITS"]["value"]),
