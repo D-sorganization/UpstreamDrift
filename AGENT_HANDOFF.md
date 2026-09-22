@@ -22,11 +22,15 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619)
+## Neural Motion Matching NM-05: Dynamics Baselines (#10620)
 
-Branch `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) (squash auto-merge armed); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-02/#10679 and NM-03/#10686 merged on main.
-NM-04 adds `src/shared/python/neural_motion/teachers/` (`neural-teacher-episodes/1.0.0`, `neural-acquisition-log/1.0.0`): structured teacher generation, nested corpus with resume/duplicate-seed avoidance, rejection/quarantine ledger, active acquisition that cannot consume test labels. Evidence: `docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json`. Software-contract tests only; no training claim.
-Next after merge: dispatch NM-05 ([#10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620)).
+Branch `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/#10686 and NM-04/#10698 merged on main.
+NM-05 adds `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`): trial-level matrices from `EpisodeStore`, analytical/ridge/nearest-neighbor baselines, optional small MLP, three-seed validation checkpointing with test untouched, inverse `InverseLabelConditioning`, identity-leakage and unavailable-torque guards. Reuses per-step and inverse-timestep training patterns; scheduler lookup unchanged via `runner_registry`. Evidence: `docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json`. Software-contract tests only; no native training success claim.
+Next after merge: dispatch NM-06 ([#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621)).
+
+## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619) [MERGED]
+
+Branch merged in PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) (`2142d380b`).
 
 ## Neural Motion Matching NM-03: Episode Storage, Splits and Views (#10618) [MERGED]
 
@@ -48,11 +52,11 @@ Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/Ups
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-06 shipped on main; active [CO-07 #10611](https://github.com/D-sorganization/UpstreamDrift/issues/10611) on `feat/10611-co07-fast-matching` (fast matching + Pareto diversity).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-07 shipped on main; active [CO-08 #10612](https://github.com/D-sorganization/UpstreamDrift/issues/10612) on `feat/issue-10612-co08-matrix` (matrix qualification + plausibility tradeoffs).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679).
 - **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-07 adds bounded fast-preview/verified-fit orchestration with cache, checkpoint, and Pareto diversity (software contracts; no native G1). NM-00 fail-closed audit remains authoritative.
-- **Next:** Land CO-07 PR for #10611; then CO-08 qualification matrix.
+- **State:** CO-08 independently qualifies the trial×roster matrix with frozen CO-02 gates, withheld-body semantics, and visual-cannot-override-physical (software contracts; no native G1). NM-00 fail-closed audit remains authoritative.
+- **Next:** Land CO-08 PR for #10612; then CO-09 UI integration.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
