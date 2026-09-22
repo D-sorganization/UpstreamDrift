@@ -721,113 +721,99 @@ def _native_urdf_bundle(package: ModelPackage, repo_root: Path) -> dict[str, Any
     )
 
 
-def _run_native_pipeline(
-    package: ModelPackage,
-    repo_root: Path,
-    host: str,
+_NATIVE_FOLLOWUP_STEPS: tuple[QualificationStep, ...] = (
+    QualificationStep.INITIALIZE,
+    QualificationStep.FK_MASS,
+    QualificationStep.DYNAMICS_SMOKE,
+    QualificationStep.VIEWER,
+    QualificationStep.SAVE_RELOAD,
+)
+
+
+def _native_pipeline_with_followups(
+    first: StepResult,
+    followup_outcome: QualificationOutcome,
+    followup_detail: str,
 ) -> list[StepResult]:
-    if host not in package.supported_hosts:
-        skip = _step(
-            QualificationStep.LOAD_COMPILE,
-            QualificationOutcome.SKIP,
-            f"host {host!r} not in supported_hosts {list(package.supported_hosts)}",
-            remediation="Run native smoke on a supported host.",
-        )
-        return [
-            skip,
-            _step(
-                QualificationStep.INITIALIZE,
-                QualificationOutcome.SKIP,
-                "host unsupported",
-            ),
-            _step(
-                QualificationStep.FK_MASS, QualificationOutcome.SKIP, "host unsupported"
-            ),
-            _step(
-                QualificationStep.DYNAMICS_SMOKE,
-                QualificationOutcome.SKIP,
-                "host unsupported",
-            ),
-            _step(
-                QualificationStep.VIEWER, QualificationOutcome.SKIP, "host unsupported"
-            ),
-            _step(
-                QualificationStep.SAVE_RELOAD,
-                QualificationOutcome.SKIP,
-                "host unsupported",
-            ),
-        ]
+    """Attach uniform follow-up steps after a decisive LOAD_COMPILE result."""
+    return [
+        first,
+        *[
+            _step(step, followup_outcome, followup_detail)
+            for step in _NATIVE_FOLLOWUP_STEPS
+        ],
+    ]
 
-    if package.status is PackageStatus.REPAIR:
-        fail = _step(
-            QualificationStep.LOAD_COMPILE,
-            QualificationOutcome.FAIL,
-            f"package status is repair; blocker #{package.repair_task.issue if package.repair_task else '?'}",
-            remediation=(
-                package.repair_task.title
-                if package.repair_task
-                else "Complete the named repair task before native qualification."
-            ),
-        )
-        return [
-            fail,
-            _step(
-                QualificationStep.INITIALIZE,
-                QualificationOutcome.FAIL,
-                "blocked by repair",
-            ),
-            _step(
-                QualificationStep.FK_MASS,
-                QualificationOutcome.FAIL,
-                "blocked by repair",
-            ),
-            _step(
-                QualificationStep.DYNAMICS_SMOKE,
-                QualificationOutcome.FAIL,
-                "blocked by repair",
-            ),
-            _step(
-                QualificationStep.VIEWER, QualificationOutcome.FAIL, "blocked by repair"
-            ),
-            _step(
-                QualificationStep.SAVE_RELOAD,
-                QualificationOutcome.FAIL,
-                "blocked by repair",
-            ),
-        ]
 
-    try:
-        loaded = _native_load_step(package, repo_root)
-    except (ImportError, ModuleNotFoundError, OSError, RuntimeError, ValueError) as exc:
-        message = f"{type(exc).__name__}: {exc}"
-        remediation = (
-            "Install/repair the engine runtime via MS-103 preflight "
-            f'(python -c "from src.engines.preflight import PreflightRunner; '
-            f"print(PreflightRunner(engines=['{package.engine}']).run_all().to_json())\")."
-        )
-        fail = _step(
-            QualificationStep.LOAD_COMPILE,
-            QualificationOutcome.FAIL,
-            message,
-            remediation=remediation,
-        )
-        return [
-            fail,
-            _step(
-                QualificationStep.INITIALIZE, QualificationOutcome.FAIL, "load failed"
-            ),
-            _step(QualificationStep.FK_MASS, QualificationOutcome.FAIL, "load failed"),
-            _step(
-                QualificationStep.DYNAMICS_SMOKE,
-                QualificationOutcome.FAIL,
-                "load failed",
-            ),
-            _step(QualificationStep.VIEWER, QualificationOutcome.FAIL, "load failed"),
-            _step(
-                QualificationStep.SAVE_RELOAD, QualificationOutcome.FAIL, "load failed"
-            ),
-        ]
+def _uniform_native_pipeline(
+    outcome: QualificationOutcome,
+    detail: str,
+    *,
+    remediation: str | None = None,
+) -> list[StepResult]:
+    """Fill every native qualification step with the same outcome/detail."""
+    return [
+        _step(QualificationStep.LOAD_COMPILE, outcome, detail, remediation=remediation),
+        *[
+            _step(step, outcome, detail, remediation=remediation)
+            for step in _NATIVE_FOLLOWUP_STEPS
+        ],
+    ]
 
+
+def _native_host_gate(package: ModelPackage, host: str) -> list[StepResult] | None:
+    if host in package.supported_hosts:
+        return None
+    first = _step(
+        QualificationStep.LOAD_COMPILE,
+        QualificationOutcome.SKIP,
+        f"host {host!r} not in supported_hosts {list(package.supported_hosts)}",
+        remediation="Run native smoke on a supported host.",
+    )
+    return _native_pipeline_with_followups(
+        first, QualificationOutcome.SKIP, "host unsupported"
+    )
+
+
+def _native_repair_gate(package: ModelPackage) -> list[StepResult] | None:
+    if package.status is not PackageStatus.REPAIR:
+        return None
+    first = _step(
+        QualificationStep.LOAD_COMPILE,
+        QualificationOutcome.FAIL,
+        f"package status is repair; blocker #{package.repair_task.issue if package.repair_task else '?'}",
+        remediation=(
+            package.repair_task.title
+            if package.repair_task
+            else "Complete the named repair task before native qualification."
+        ),
+    )
+    return _native_pipeline_with_followups(
+        first, QualificationOutcome.FAIL, "blocked by repair"
+    )
+
+
+def _native_load_failure(package: ModelPackage, exc: BaseException) -> list[StepResult]:
+    message = f"{type(exc).__name__}: {exc}"
+    remediation = (
+        "Install/repair the engine runtime via MS-103 preflight "
+        f'(python -c "from src.engines.preflight import PreflightRunner; '
+        f"print(PreflightRunner(engines=['{package.engine}']).run_all().to_json())\")."
+    )
+    first = _step(
+        QualificationStep.LOAD_COMPILE,
+        QualificationOutcome.FAIL,
+        message,
+        remediation=remediation,
+    )
+    return _native_pipeline_with_followups(
+        first, QualificationOutcome.FAIL, "load failed"
+    )
+
+
+def _native_success_pipeline(
+    package: ModelPackage, loaded: dict[str, Any]
+) -> list[StepResult]:
     mass = loaded.get("mass_kg")
     fk_ok = mass is None or (
         isinstance(mass, (int, float)) and mass == mass and mass > 0
@@ -860,7 +846,9 @@ def _run_native_pipeline(
             QualificationStep.VIEWER,
             QualificationOutcome.SKIP,
             "viewer open skipped in headless harness; use engine GUI tile",
-            remediation="Launch the engine tile from the desktop launcher for interactive view.",
+            remediation=(
+                "Launch the engine tile from the desktop launcher for interactive view."
+            ),
         ),
         _step(
             QualificationStep.SAVE_RELOAD,
@@ -870,15 +858,25 @@ def _run_native_pipeline(
     ]
 
 
+def _run_native_pipeline(
+    package: ModelPackage,
+    repo_root: Path,
+    host: str,
+) -> list[StepResult]:
+    gated = _native_host_gate(package, host) or _native_repair_gate(package)
+    if gated is not None:
+        return gated
+
+    try:
+        loaded = _native_load_step(package, repo_root)
+    except (ImportError, ModuleNotFoundError, OSError, RuntimeError, ValueError) as exc:
+        return _native_load_failure(package, exc)
+
+    return _native_success_pipeline(package, loaded)
+
+
 def _skip_native_pipeline(reason: str) -> list[StepResult]:
-    return [
-        _step(QualificationStep.LOAD_COMPILE, QualificationOutcome.SKIP, reason),
-        _step(QualificationStep.INITIALIZE, QualificationOutcome.SKIP, reason),
-        _step(QualificationStep.FK_MASS, QualificationOutcome.SKIP, reason),
-        _step(QualificationStep.DYNAMICS_SMOKE, QualificationOutcome.SKIP, reason),
-        _step(QualificationStep.VIEWER, QualificationOutcome.SKIP, reason),
-        _step(QualificationStep.SAVE_RELOAD, QualificationOutcome.SKIP, reason),
-    ]
+    return _uniform_native_pipeline(QualificationOutcome.SKIP, reason)
 
 
 def _overall(steps: tuple[StepResult, ...]) -> QualificationOutcome:
