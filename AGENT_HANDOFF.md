@@ -24,7 +24,7 @@ Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https:/
 
 ## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619)
 
-Branch `local/nm-04-teacher-episodes`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-02/#10679 and NM-03/#10686 merged on main.
+Branch `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) (squash auto-merge armed); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-02/#10679 and NM-03/#10686 merged on main.
 NM-04 adds `src/shared/python/neural_motion/teachers/` (`neural-teacher-episodes/1.0.0`, `neural-acquisition-log/1.0.0`): structured teacher generation, nested corpus with resume/duplicate-seed avoidance, rejection/quarantine ledger, active acquisition that cannot consume test labels. Evidence: `docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json`. Software-contract tests only; no training claim.
 Next after merge: dispatch NM-05 ([#10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620)).
 

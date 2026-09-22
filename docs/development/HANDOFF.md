@@ -325,12 +325,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Neural Teacher Episodes NM-04 #10619 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10619`.
-- Branch: `local/nm-04-teacher-episodes`; PR not created yet. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
+- Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
 - Base: merged `origin/main` through NM-03 #10686 (`800703cb`).
 - Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt.
 - Validation: `python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60` (12 passed); ruff clean on touched paths.
 - Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
-- Next action: open PR Fixes #10619 with squash auto-merge; do not start NM-05+.
+- Next action: confirm CI green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
 
 ## Neural Episode Storage NM-03 #10618 Handoff
 
@@ -358,8 +358,8 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md).
 - **CO-04 state:** MERGED via PR #10680 (squash 79f12c85); DL-#10608.
 - **NM-03 state:** MERGED via PR #10686 (`800703cb`); DL-#10618.
-- **NM-04 state:** in progress on `local/nm-04-teacher-episodes`; DL-#10619.
-- **Next:** Land NM-04 PR Fixes #10619; do not start NM-05+.
+- **NM-04 state:** in_review on PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698); DL-#10619.
+- **Next:** Confirm CI green + squash auto-merge of #10698; do not start NM-05+.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
