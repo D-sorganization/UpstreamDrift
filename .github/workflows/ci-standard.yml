@@ -944,6 +944,9 @@ jobs:
       - name: Suppression Discipline Ratchet (issue #5916)
         run: python3 scripts/ci/check_suppression_ratchet.py
 
+      - name: GUI Thread-Blocking Ratchet (issue #8880)
+        run: python3 scripts/ci/check_gui_thread_blocking_ratchet.py
+
       - name: Repo Root Clutter Check
         run: python3 scripts/check_root_clutter.py
 
