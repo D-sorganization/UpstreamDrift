@@ -8,6 +8,7 @@ Falls back to :class:`MockKinematicsService` when MATLAB is not installed.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import importlib.util
 from pathlib import Path
 
@@ -140,6 +141,11 @@ class SimscapeKinematicsService:
 
     def capabilities(self) -> ServiceCapabilities:
         return _SIMSCAPE_CAPABILITIES
+
+    def joint_limits(self) -> Mapping[str, tuple[float, float]]:
+        """Return an empty mapping: no anatomical joint-limit data is
+        wired for this engine yet (issue #8887)."""
+        return {}
 
 
 def create_simscape_service() -> LiveKinematicsService:

@@ -756,6 +756,16 @@ class ConstrainedIkReceipt(BaseModel):
         description="Maximum observed joint velocity to limit ratio",
         json_schema_extra={"unit": "ratio", "stage": "ik"},
     )
+    closure_residual_m: float | None = Field(
+        None,
+        description="Maximum dual-grip weld translation residual over solved frames",
+        json_schema_extra={"unit": "m", "stage": "ik"},
+    )
+    closure_residual_budget_m: float | None = Field(
+        None,
+        description="Fail-closed weld translation budget for qualified Pink receipts",
+        json_schema_extra={"unit": "m", "stage": "ik"},
+    )
     is_qualified: bool = Field(
         ...,
         description="Whether the solved trajectory meets all qualification criteria",
@@ -766,11 +776,36 @@ class ConstrainedIkReceipt(BaseModel):
         description="Qualification state label (qualified, disqualified, etc.)",
         json_schema_extra={"unit": "string", "stage": "ik"},
     )
+    block_reason: str | None = Field(
+        None,
+        description="Honest block reason when native Pink/Pinocchio is unavailable",
+        json_schema_extra={"unit": "string", "stage": "ik"},
+    )
 
     @model_validator(mode="after")
     def _validate_qualification(self) -> ConstrainedIkReceipt:
         if self.is_qualified and not self.all_frames_converged:
             raise ValueError("is_qualified cannot be True if not all frames converged")
+        budget = self.closure_residual_budget_m
+        residual = self.closure_residual_m
+        if (
+            self.is_qualified
+            and residual is not None
+            and budget is not None
+            and residual > budget
+        ):
+            raise ValueError(
+                "is_qualified cannot be True when closure_residual_m exceeds budget"
+            )
+        if (
+            self.is_qualified
+            and residual is not None
+            and budget is None
+            and residual > 1.0e-4
+        ):
+            raise ValueError(
+                "is_qualified cannot be True when closure_residual_m exceeds 1e-4 m"
+            )
         return self
 
 

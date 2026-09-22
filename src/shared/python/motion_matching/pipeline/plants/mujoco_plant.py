@@ -54,7 +54,10 @@ class MujocoMatchingPlant:
         return self.adapter.ground_plane
 
     def create_ik(
-        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
         from src.engines.physics_engines.mujoco.python.full_body_ik import (
             FullBodyMarkerKinematics,
@@ -71,6 +74,16 @@ class MujocoMatchingPlant:
             )
             for label in attachments
         }
+        if ik_backend == "mujoco-minimize":
+            from src.engines.physics_engines.mujoco.python.ik_minimize import (
+                MinimizeMarkerKinematics,
+            )
+
+            return MinimizeMarkerKinematics(self.adapter, ordered)
+        if ik_backend != "lm":
+            raise ValueError(
+                f"Unknown MuJoCo IK backend {ik_backend!r}; expected 'lm' or 'mujoco-minimize'"
+            )
         return FullBodyMarkerKinematics(self.adapter, ordered)
 
     def frame_poses(

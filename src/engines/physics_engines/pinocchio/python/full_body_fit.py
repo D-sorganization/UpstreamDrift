@@ -168,18 +168,43 @@ def _native_targets(inputs: FitInputs) -> MarkerTargets:
     )
 
 
+def resolve_fit_native_plant(
+    document: Mapping[str, Any],
+    matching_plant: Any | None = None,
+) -> Any:
+    """Resolve the native Pinocchio model used by the Crocoddyl fitter.
+
+    Prefer an existing ``PinocchioMatchingPlant`` from the MS-10 registry so the
+    fitter and pipeline share one plant abstraction (MS-14 LoD).
+    """
+    require(
+        matching_plant is None
+        or getattr(matching_plant, "engine_name", None) == "pinocchio",
+        "matching_plant must be a pinocchio MatchingPlant",
+        getattr(matching_plant, "engine_name", None),
+    )
+    if matching_plant is not None:
+        return matching_plant.model
+    from src.engines.physics_engines.pinocchio.python.native_model import (
+        build_full_body_pinocchio_model,
+    )
+
+    return build_full_body_pinocchio_model(document)
+
+
 class _PlantContext:
     """Plant, coordinate map, marker table and scratch data shared by IK, DAM and replay."""
 
-    def __init__(self, inputs: FitInputs) -> None:
+    def __init__(
+        self,
+        inputs: FitInputs,
+        *,
+        matching_plant: Any | None = None,
+    ) -> None:
         import pinocchio as pin
 
-        from src.engines.physics_engines.pinocchio.python.native_model import (
-            build_full_body_pinocchio_model,
-        )
-
         self.pin = pin
-        self.plant = build_full_body_pinocchio_model(inputs.document)
+        self.plant = resolve_fit_native_plant(inputs.document, matching_plant)
         self.plant.ground_plane = GroundPlane((0.0, 0.0, 1.0), inputs.ground_height_m)
         self.map = CoordinateMap.from_plant(self.plant)
         self.table: MarkerTable = build_marker_table(
