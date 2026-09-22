@@ -151,6 +151,14 @@ class ClubOnlyProfile:
         ):
             raise ValueError("only full-body multibody profiles preserve G3 gates")
 
+    def max_closure_residual_m(self) -> float:
+        """LoD facade for physical closure residual (avoids profile.physical.*)."""
+        return float(self.physical.max_closure_residual_m)
+
+    def golf_priors(self) -> GolfPlausibilityPriors:
+        """LoD facade for attached plausibility priors."""
+        return self.plausibility.priors
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "model_id": self.model_id,
