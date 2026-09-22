@@ -139,3 +139,7 @@
 ## 2026-09-20 - Committing Temporary Files
 **Learning:** Generating utility scripts (like `patch_all.py` or `run_tests_opensim.sh`) and then tracking them into the branch breaks the `repo-structure-gates` check.
 **Action:** Always delete shell scripts and Python utility files used to modify the repo before checking `git status` and invoking `git commit`. Use `git ls-files --others --exclude-standard` to verify the working tree is clean.
+
+## 2024-05-21 - [Optimize Terminal Norm Calculation in RL]
+**Learning:** In reinforcement learning reward and metric calculations (e.g. `src/reinforcement_learning/trajectory_funnel_benchmark.py`), calculating the distance between the final state and the reference state using `np.linalg.norm(states[-1] - reference[-1])` incurs overhead. Replacing it with `math.sqrt(np.vdot(diff, diff))` avoids intermediate array allocations and NumPy dispatch overhead for small 1D state arrays.
+**Action:** Replace `np.linalg.norm(states[-1] - reference[-1])` with pre-calculated differences and `math.sqrt(np.vdot(diff, diff))` for terminal state error calculations.
