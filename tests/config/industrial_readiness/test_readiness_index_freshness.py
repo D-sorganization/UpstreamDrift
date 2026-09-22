@@ -1,7 +1,8 @@
-"""Freshness gate: the committed readiness index must match the ledger (#9539).
+"""Freshness gate: each committed readiness index must match its ledger.
 
-Regenerates docs/operations/industrial-readiness-index.md in memory from
-src/config/industrial_readiness.json and compares it to the committed file.
+Regenerates docs/operations/industrial-readiness-index.md (#9539) and
+docs/operations/impact-zone-readiness-index.md (#9546) in memory from their
+ledgers and compares them to the committed files.
 """
 
 from __future__ import annotations
@@ -9,29 +10,37 @@ from __future__ import annotations
 import pytest
 from src.config.industrial_readiness_loader import IndustrialReadinessLedger
 
-from scripts.generate_industrial_readiness_index import INDEX_PATH, render_index
+from scripts.generate_industrial_readiness_index import (
+    INDEX_SPECS,
+    IndexSpec,
+    render_index,
+)
 
 pytestmark = pytest.mark.unit
 
+_SPEC_IDS = [spec.ledger_path.stem for spec in INDEX_SPECS]
 
-def test_committed_index_doc_exists() -> None:
-    assert INDEX_PATH.exists(), (
-        f"Missing generated doc {INDEX_PATH}. "
+
+@pytest.mark.parametrize("spec", INDEX_SPECS, ids=_SPEC_IDS)
+def test_committed_index_doc_exists(spec: IndexSpec) -> None:
+    assert spec.index_path.exists(), (
+        f"Missing generated doc {spec.index_path}. "
         "Run: python3 -m scripts.generate_industrial_readiness_index"
     )
 
 
-def test_committed_index_matches_ledger() -> None:
-    ledger = IndustrialReadinessLedger.load()
-    rendered = render_index(ledger)
-    committed = INDEX_PATH.read_text(encoding="utf-8")
+@pytest.mark.parametrize("spec", INDEX_SPECS, ids=_SPEC_IDS)
+def test_committed_index_matches_ledger(spec: IndexSpec) -> None:
+    ledger = IndustrialReadinessLedger.load(spec.ledger_path)
+    rendered = render_index(ledger, spec)
+    committed = spec.index_path.read_text(encoding="utf-8")
     assert committed == rendered, (
-        "docs/operations/industrial-readiness-index.md is stale relative to "
-        "src/config/industrial_readiness.json. "
+        f"{spec.index_path.name} is stale relative to {spec.ledger_path.name}. "
         "Regenerate with: python3 -m scripts.generate_industrial_readiness_index"
     )
 
 
-def test_render_index_is_deterministic() -> None:
-    ledger = IndustrialReadinessLedger.load()
-    assert render_index(ledger) == render_index(ledger)
+@pytest.mark.parametrize("spec", INDEX_SPECS, ids=_SPEC_IDS)
+def test_render_index_is_deterministic(spec: IndexSpec) -> None:
+    ledger = IndustrialReadinessLedger.load(spec.ledger_path)
+    assert render_index(ledger, spec) == render_index(ledger, spec)

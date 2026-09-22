@@ -6,8 +6,10 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.bernstein_controls import (
+    BernsteinFitResidualPolicy,
     bernstein_curvature_penalty,
     evaluate_bernstein_controls,
+    solve_bounded_bernstein_least_squares,
 )
 
 
@@ -76,3 +78,30 @@ def test_curvature_penalty_is_flattened_by_actuator_and_rejects_bad_weight() -> 
     )
     with pytest.raises(ValueError, match="weight"):
         bernstein_curvature_penalty(controls, weight=-0.01)
+
+
+def test_fit_residual_uses_shared_tracking_curvature_and_effort_order() -> None:
+    """All bounded fitters append the same regularization convention."""
+    policy = BernsteinFitResidualPolicy(
+        curvature_weight=4.0,
+        effort_weight=1.0,
+        effort_scale=2.0,
+    )
+    result = policy.assemble(
+        np.array([1.0, -2.0]),
+        np.array([[0.0, 1.0, 2.0], [2.0, 2.0, 2.0]]),
+    )
+    expected = np.array([1.0, -2.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0])
+    np.testing.assert_allclose(result, expected)
+
+
+def test_bounded_fit_solver_uses_declared_bounds_and_minimum_budget() -> None:
+    """All Bernstein fitters share finite bounds and convergence tolerances."""
+    result = solve_bounded_bernstein_least_squares(
+        lambda parameters: parameters - np.array([0.5]),
+        np.array([0.0]),
+        np.array([-1.0]),
+        np.array([1.0]),
+        max_evaluations=1,
+    )
+    np.testing.assert_allclose(result.x, np.array([0.5]), atol=1e-5)
