@@ -73,6 +73,7 @@ _DEFAULT_MISSING_RUNTIME: frozenset[str] = frozenset(
 __all__ = [
     "CANDIDATE_SCHEMA",
     "BodyCandidate",
+    "BodyCandidateOptions",
     "BodyCandidateReport",
     "BodyCandidateResult",
     "ModelTrialCell",
@@ -417,8 +418,185 @@ def _rejected_candidate(
     )
 
 
+@dataclass(frozen=True)
+class BodyCandidateOptions:
+    """Optional knobs for CO-05 candidate generation (keeps the public arity low)."""
+
+    n_nullspace_proposals: int = 3
+    runtime_available: bool = True
+    runtime_blocker: str | None = None
+    force_reject: RejectionReason | None = None
+
+
+def _co05_limitations(profile: ClubOnlyProfile) -> list[str]:
+    limitations = list(profile.limitations)
+    limitations.append(
+        "CO-05 candidates are kinematic previews; torque replay and scientific "
+        "qualification remain with CO-06/08 and native owners."
+    )
+    return limitations
+
+
+def _missing_runtime_result(
+    *,
+    observation: ClubObservation,
+    profile: ClubOnlyProfile,
+    options: BodyCandidateOptions,
+) -> BodyCandidateResult:
+    missing_blocker = options.runtime_blocker or (
+        f"native runtime unavailable for model={profile.model_id!r}; "
+        "cell remains unqualified"
+    )
+    cell = ModelTrialCell(
+        model_id=profile.model_id,
+        trial_id=observation.trial_id,
+        status="missing_runtime",
+        blocker=missing_blocker,
+        candidate_ids=(),
+    )
+    return BodyCandidateResult(
+        candidates=(),
+        cells=(cell,),
+        limitations=tuple(_co05_limitations(profile)),
+    )
+
+
+@dataclass(frozen=True)
+class _SeedExpansionCtx:
+    observation: ClubObservation
+    profile: ClubOnlyProfile
+    priors: GolfPlausibilityPriors
+    prior_strength: float
+    options: BodyCandidateOptions
+    started: float
+
+
+def _accepted_from_seed(
+    *,
+    ctx: _SeedExpansionCtx,
+    seed: CandidateSeed,
+    q0: NDArray[np.float64],
+    analysis: Any,
+) -> list[BodyCandidate]:
+    """Expand one seed into accepted null-space proposals (or a singular reject)."""
+    if analysis.is_singular:
+        return [
+            _rejected_candidate(
+                candidate_id=f"reject:{seed.seed_id}:singular",
+                seed=seed,
+                profile=ctx.profile,
+                q=q0,
+                prior_strength=ctx.prior_strength,
+                reason=RejectionReason.SINGULAR_NULLSPACE,
+                runtime_s=float(time.perf_counter() - ctx.started),
+            )
+        ]
+
+    n_prop = int(ctx.options.n_nullspace_proposals)
+    amplitudes = tuple(0.015 * (i + 1) for i in range(max(1, n_prop - 1)))
+    offsets = propose_nullspace_offsets(analysis, amplitudes=amplitudes)[:n_prop]
+    return [
+        _build_accepted_proposal(ctx=ctx, seed=seed, q_prop=q0 + offset, index=index)
+        for index, offset in enumerate(offsets)
+    ]
+
+
+def _build_accepted_proposal(
+    *,
+    ctx: _SeedExpansionCtx,
+    seed: CandidateSeed,
+    q_prop: NDArray[np.float64],
+    index: int,
+) -> BodyCandidate:
+    closure_q, _, _ = _closure_triplet(q_prop, grip_tol_m=ctx.priors.grip_closure_tol_m)
+    q_proj = reproject_onto_closure(
+        q_prop,
+        closure_residual_m=closure_q,
+        tol_m=ctx.profile.physical.max_closure_residual_m,
+    )
+    closure_q, closure_v, closure_a = _closure_triplet(
+        q_proj, grip_tol_m=ctx.priors.grip_closure_tol_m
+    )
+    plaus, sensitivity = _plausibility(
+        q_proj,
+        priors=ctx.priors,
+        prior_strength=ctx.prior_strength,
+        base_prior=float(seed.prior_score),
+    )
+    return BodyCandidate(
+        candidate_id=f"body:{ctx.profile.model_id}:{seed.seed_id}:{index}",
+        trial_id=ctx.observation.trial_id,
+        model_id=ctx.profile.model_id,
+        topology=ctx.profile.topology,
+        seed_id=seed.seed_id,
+        q=q_proj,
+        v=np.zeros_like(q_proj),
+        a=np.zeros_like(q_proj),
+        timestamps_s=np.asarray(ctx.observation.native_time_s, dtype=np.float64),
+        observation_fit_m=float(seed.observed_residual_m),
+        plausibility_score=plaus,
+        contact_effort=_contact_effort(q_proj, prior_strength=ctx.prior_strength),
+        runtime_s=float(time.perf_counter() - ctx.started),
+        prior_strength=ctx.prior_strength,
+        body_configuration_hash=_body_hash(q_proj),
+        closure_q_m=closure_q,
+        closure_v_m_s=closure_v,
+        closure_a_m_s2=closure_a,
+        accepted=True,
+        prior_sensitivity=sensitivity,
+    )
+
+
+def _candidates_for_seeds(
+    *,
+    observation: ClubObservation,
+    profile: ClubOnlyProfile,
+    seeds: Sequence[CandidateSeed],
+    priors: GolfPlausibilityPriors,
+    prior_strength: float,
+    options: BodyCandidateOptions,
+) -> list[BodyCandidate]:
+    mapping = _default_mapping(profile.model_id)
+    target_nq = int(mapping.target_nq)
+    jacobian = synthetic_grip_jacobian(target_nq, n_constraints=min(3, target_nq))
+    analysis = analyze_grip_jacobian_nullspace(jacobian)
+    ctx = _SeedExpansionCtx(
+        observation=observation,
+        profile=profile,
+        priors=priors,
+        prior_strength=prior_strength,
+        options=options,
+        started=time.perf_counter(),
+    )
+    candidates: list[BodyCandidate] = []
+    for seed in seeds:
+        q0 = map_reduced_seed_to_body(
+            q_reduced=np.asarray(seed.q, dtype=np.float64),
+            mapping=mapping,
+            target_nq=target_nq,
+        )
+        if options.force_reject is not None:
+            reason = options.force_reject
+            candidates.append(
+                _rejected_candidate(
+                    candidate_id=f"reject:{seed.seed_id}:{reason.value}",
+                    seed=seed,
+                    profile=profile,
+                    q=q0,
+                    prior_strength=prior_strength,
+                    reason=reason,
+                    runtime_s=float(time.perf_counter() - ctx.started),
+                )
+            )
+            continue
+        candidates.extend(
+            _accepted_from_seed(ctx=ctx, seed=seed, q0=q0, analysis=analysis)
+        )
+    return candidates
+
+
 @precondition(
-    lambda observation, profile, seeds, priors, prior_strength, n_nullspace_proposals=3, runtime_available=True, runtime_blocker=None, force_reject=None: (  # noqa: E501
+    lambda observation, profile, seeds, priors, prior_strength, options=None: (
         isinstance(observation, ClubObservation)
         and isinstance(profile, ClubOnlyProfile)
         and isinstance(priors, GolfPlausibilityPriors)
@@ -436,46 +614,24 @@ def generate_plausible_body_candidates(
     seeds: Sequence[CandidateSeed],
     priors: GolfPlausibilityPriors,
     prior_strength: float,
-    n_nullspace_proposals: int = 3,
-    runtime_available: bool = True,
-    runtime_blocker: str | None = None,
-    force_reject: RejectionReason | None = None,
+    options: BodyCandidateOptions | None = None,
 ) -> BodyCandidateResult:
     """Generate a bounded set of upper/full-body candidates from club seeds.
 
     Fail-closed on nonfinite/wrong dims/incompatible clocks. Missing runtime
     yields an unqualified cell without fabricating native success.
     """
+    opts = options or BodyCandidateOptions()
     if not np.isfinite(prior_strength) or prior_strength <= 0.0:
         raise ValueError("prior_strength must be finite and > 0")
-    if int(n_nullspace_proposals) < 1:
+    if int(opts.n_nullspace_proposals) < 1:
         raise ValueError("n_nullspace_proposals must be >= 1")
+    if not opts.runtime_available:
+        return _missing_runtime_result(
+            observation=observation, profile=profile, options=opts
+        )
     if not seeds:
         raise ValueError("seeds must be non-empty when runtime is available")
-
-    limitations = list(profile.limitations)
-    limitations.append(
-        "CO-05 candidates are kinematic previews; torque replay and scientific "
-        "qualification remain with CO-06/08 and native owners."
-    )
-
-    if not runtime_available:
-        missing_blocker = runtime_blocker or (
-            f"native runtime unavailable for model={profile.model_id!r}; "
-            "cell remains unqualified"
-        )
-        cell = ModelTrialCell(
-            model_id=profile.model_id,
-            trial_id=observation.trial_id,
-            status="missing_runtime",
-            blocker=missing_blocker,
-            candidate_ids=(),
-        )
-        return BodyCandidateResult(
-            candidates=(),
-            cells=(cell,),
-            limitations=tuple(limitations),
-        )
 
     for seed in seeds:
         _assert_finite_seed_q(seed)
@@ -483,112 +639,17 @@ def generate_plausible_body_candidates(
         if seed.trial_id != observation.trial_id:
             raise ValueError("seed trial_id incompatible with observation")
 
-    mapping = _default_mapping(profile.model_id)
-    target_nq = int(mapping.target_nq)
-    jacobian = synthetic_grip_jacobian(target_nq, n_constraints=min(3, target_nq))
-    analysis = analyze_grip_jacobian_nullspace(jacobian)
-
-    started = time.perf_counter()
-    candidates: list[BodyCandidate] = []
-    for seed in seeds:
-        q0 = map_reduced_seed_to_body(
-            q_reduced=np.asarray(seed.q, dtype=np.float64),
-            mapping=mapping,
-            target_nq=target_nq,
-        )
-        if force_reject is not None:
-            candidates.append(
-                _rejected_candidate(
-                    candidate_id=f"reject:{seed.seed_id}:{force_reject.value}",
-                    seed=seed,
-                    profile=profile,
-                    q=q0,
-                    prior_strength=prior_strength,
-                    reason=force_reject,
-                    runtime_s=float(time.perf_counter() - started),
-                )
-            )
-            continue
-
-        if analysis.is_singular:
-            candidates.append(
-                _rejected_candidate(
-                    candidate_id=f"reject:{seed.seed_id}:singular",
-                    seed=seed,
-                    profile=profile,
-                    q=q0,
-                    prior_strength=prior_strength,
-                    reason=RejectionReason.SINGULAR_NULLSPACE,
-                    runtime_s=float(time.perf_counter() - started),
-                )
-            )
-            continue
-
-        amplitudes = tuple(
-            0.015 * (i + 1) for i in range(max(1, int(n_nullspace_proposals) - 1))
-        )
-        offsets = propose_nullspace_offsets(analysis, amplitudes=amplitudes)
-        # Bound proposals for this call.
-        offsets = offsets[: int(n_nullspace_proposals)]
-
-        for index, offset in enumerate(offsets):
-            q_prop = q0 + offset
-            closure_q, closure_v, closure_a = _closure_triplet(
-                q_prop, grip_tol_m=priors.grip_closure_tol_m
-            )
-            q_proj = reproject_onto_closure(
-                q_prop,
-                closure_residual_m=closure_q,
-                tol_m=profile.physical.max_closure_residual_m,
-            )
-            closure_q, closure_v, closure_a = _closure_triplet(
-                q_proj, grip_tol_m=priors.grip_closure_tol_m
-            )
-            plaus, sensitivity = _plausibility(
-                q_proj,
-                priors=priors,
-                prior_strength=prior_strength,
-                base_prior=float(seed.prior_score),
-            )
-            v = np.zeros_like(q_proj)
-            a = np.zeros_like(q_proj)
-            # Finite q/v/a with zero rates for kinematic preview.
-            runtime_s = float(time.perf_counter() - started)
-            candidates.append(
-                BodyCandidate(
-                    candidate_id=f"body:{profile.model_id}:{seed.seed_id}:{index}",
-                    trial_id=observation.trial_id,
-                    model_id=profile.model_id,
-                    topology=profile.topology,
-                    seed_id=seed.seed_id,
-                    q=q_proj,
-                    v=v,
-                    a=a,
-                    timestamps_s=np.asarray(
-                        observation.native_time_s, dtype=np.float64
-                    ),
-                    observation_fit_m=float(seed.observed_residual_m),
-                    plausibility_score=plaus,
-                    contact_effort=_contact_effort(
-                        q_proj, prior_strength=prior_strength
-                    ),
-                    runtime_s=runtime_s,
-                    prior_strength=prior_strength,
-                    body_configuration_hash=_body_hash(q_proj),
-                    closure_q_m=closure_q,
-                    closure_v_m_s=closure_v,
-                    closure_a_m_s2=closure_a,
-                    accepted=True,
-                    prior_sensitivity=sensitivity,
-                )
-            )
-
+    candidates = _candidates_for_seeds(
+        observation=observation,
+        profile=profile,
+        seeds=seeds,
+        priors=priors,
+        prior_strength=prior_strength,
+        options=opts,
+    )
     accepted_ids = tuple(c.candidate_id for c in candidates if c.accepted)
-    cell_status: str
-    cell_blocker: str | None
     if accepted_ids:
-        cell_status = "generated"
-        cell_blocker = None
+        cell_status, cell_blocker = "generated", None
     else:
         cell_status = "rejected"
         cell_blocker = "all proposals rejected (grip/contact/collision/singular)"
@@ -602,7 +663,7 @@ def generate_plausible_body_candidates(
     return BodyCandidateResult(
         candidates=tuple(candidates),
         cells=(cell,),
-        limitations=tuple(limitations),
+        limitations=tuple(_co05_limitations(profile)),
     )
 
 
@@ -733,8 +794,10 @@ def build_body_candidate_report(
                 seeds=(seed,),
                 priors=profile.plausibility.priors,
                 prior_strength=prior_strength,
-                n_nullspace_proposals=n_nullspace_proposals,
-                runtime_available=True,
+                options=BodyCandidateOptions(
+                    n_nullspace_proposals=n_nullspace_proposals,
+                    runtime_available=True,
+                ),
             )
             all_candidates.extend(result.candidates)
             all_cells.extend(result.cells)
