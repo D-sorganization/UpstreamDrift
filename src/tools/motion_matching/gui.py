@@ -466,7 +466,7 @@ class MotionMatchingWidget(QWidget):
         self.club_log.setReadOnly(True)
         self._club_session = None
         self._club_checkpoint = None
-        self._club_handle = None
+        self._club_handle: Any = None
         self._club_run_buttons = (preview_btn, verified_btn, resume_btn)
 
         layout = QVBoxLayout(widget)
