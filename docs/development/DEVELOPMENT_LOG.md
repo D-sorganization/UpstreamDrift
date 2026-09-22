@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10378 · Full-Swing Qualification for All Six Engines (MS-104)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10378 (MS-104, epic #10363; folded MS-109/110/112 owner blockers)
+- **Branch:** feat/ms104-full-swing-qualification
+- **PR:** #10707
+- **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — 15 unit tests green; empty-ledger evidence snapshot `release_status=blocked` with 36 incomplete required rows; ruff clean; rebased onto origin/main after CO-08.
+- **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
+- **Next step:** Confirm PR #10707 CI green and squash auto-merge lands.
+
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
 - **State:** in_review
