@@ -1458,6 +1458,13 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
+- 2026-09-22T14:35:07Z — CI remediation for #10650: joint_panel unit tests now
+  construct a module-scoped offscreen `QApplication` (autouse `qapp` fixture,
+  mirroring `starting_pose_matcher/test_joint_slider_panel.py`) — constructing
+  `JointPanel` without a `QApplication` aborts the process (Qt `qFatal`,
+  Windows exit 9 / 0xC0000409), so the rewritten real-Qt assertions never ran.
+  Focused check: `QT_QPA_PLATFORM=offscreen python -m pytest
+tests/unit/tools/pose_studio/test_joint_panel.py -q` (13 passed). Commit SELF.
 - 2026-09-22T12:40:00Z — Rematch #10684 onto origin/main after CO-06 #10687 merge (`f191dd09d`); kept MS-14 + CO-06 HANDOFF/DL rows; regenerated matched_swing README + divergence inventory; blocked G1 honesty preserved. Commit SELF.
 - 2026-09-22T07:15:00Z — Rematch #10684 onto origin/main after MS-51 #10685 merge; kept MS-14 + MS-51 DL/HANDOFF rows; regenerated matched_swing status README. Commit SELF.
 - 2026-09-22T03:50:00Z — Fix unit-test-gate on #10684: divergence inventory, ledger (103→106 receipts), MS-14 lane receipt excluded from ground-support schema scan. Commit SELF.
