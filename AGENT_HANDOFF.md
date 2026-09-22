@@ -26,7 +26,7 @@ Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https:/
 
 Branch `feat/10621-nm06-masked-proposals`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/04/05 merged on main.
 NM-06 generalizes temporal inverse to masked trajectory-to-control proposals with variable control dims, selected-teacher + mixture heads, observation-after-rollout training loss, collapse diagnostics (cVAE plateau evidence retained), A..G time-domain conversion, and hybrid fail-closed native refinement. Evidence: `docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json`. Software-contract tests only; no native training success claim.
-Next: confirm CI green on PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); do not start NM-07 (#10622) in this slice.
+Tip clears DRY via `proposal_shared`, regenerates divergence inventory for NM-06 ud-only paths, and merges main through CO-09. Next: confirm CI green on PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); do not start NM-07 (#10622) in this slice.
 
 ## Neural Motion Matching NM-05: Dynamics Baselines (#10620) [MERGED]
 

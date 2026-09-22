@@ -435,9 +435,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10709
 - **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{**init**,masked_proposal,proposal_shared,proposal_training,regressor_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_inverse_regressor_training.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — DRY gate cleared by extracting proposal_shared helpers (plant, trajectory coerce, polish parse, positive int / training floors) shared by inverse + neural_motion; no baseline max raise; architecture budgets + optional-torch path kept
+- **Last verified:** 2026-09-22 at SELF — merged origin/main (CO-09); DRY cleared via proposal_shared; divergence inventory regenerated for NM-06 ud-only paths
 - **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse proposal_shared consolidates duplicated contract logic; proposal_training and regressor_training stay under function-line/parameter budgets; inverse package lazily loads torch-backed cVAE/regressor exports for unit-lane collection.
-- **Next step:** Confirm repo-structure-gates (DRY) green on PR #10709 tip; squash auto-merge remains armed.
+- **Next step:** Confirm unit-test-gate and repo-structure-gates green on PR #10709 tip after push.
 - **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 
 ### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
