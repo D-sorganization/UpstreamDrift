@@ -15,6 +15,7 @@ from src.shared.python.motion_matching.club_only.fast_matching import (
     FAST_MATCH_SCHEMA,
     CacheKeyMismatchError,
     EmptyNeuralProposalProvider,
+    FastMatchOptions,
     ImmutableMatchCache,
     MatchBudget,
     MatchCancelledError,
@@ -148,9 +149,11 @@ def test_bounded_cancellation() -> None:
         seed=seed,
         geometry_hash=g_hash,
         profile_hash=p_hash,
-        preset=MatchPreset.FAST_PREVIEW,
-        budget=budget,
-        n_branches=6,
+        options=FastMatchOptions(
+            preset=MatchPreset.FAST_PREVIEW,
+            budget=budget,
+            n_branches=6,
+        ),
     )
     assert result.cancelled is True
     assert result.evaluations_used <= 2
@@ -258,7 +261,7 @@ def test_neural_proposals_optional_without_weights() -> None:
         seed=seed,
         geometry_hash=g_hash,
         profile_hash=p_hash,
-        neural_provider=provider,
+        options=FastMatchOptions(neural_provider=provider),
     )
     assert result.neural_proposals_used == 0
     assert result.pareto
@@ -283,7 +286,7 @@ def test_profiling_includes_verification_time() -> None:
         seed=seed,
         geometry_hash=g_hash,
         profile_hash=p_hash,
-        preset=MatchPreset.VERIFIED_FIT,
+        options=FastMatchOptions(preset=MatchPreset.VERIFIED_FIT),
     )
     timings = result.profiling
     assert timings.verification_s >= 0.0
@@ -371,7 +374,7 @@ def test_cancel_check_raises_match_cancelled() -> None:
             seed=seed,
             geometry_hash=g_hash,
             profile_hash=p_hash,
-            cancel_check=lambda: True,
+            options=FastMatchOptions(cancel_check=lambda: True),
         )
 
 
@@ -395,21 +398,23 @@ def test_resume_from_checkpoint_skips_prior_evaluations() -> None:
         seed=seed,
         geometry_hash=g_hash,
         profile_hash=p_hash,
-        budget=budget,
-        n_branches=8,
-        checkpoint=MatchCheckpoint(
-            cache_key=cache_key_from_parts(
-                trial_id=obs.trial_id,
-                model_id=profile.model_id,
-                geometry_hash=g_hash,
-                profile_hash=p_hash,
-                target_content_hash=target_content_hash(obs),
+        options=FastMatchOptions(
+            budget=budget,
+            n_branches=8,
+            checkpoint=MatchCheckpoint(
+                cache_key=cache_key_from_parts(
+                    trial_id=obs.trial_id,
+                    model_id=profile.model_id,
+                    geometry_hash=g_hash,
+                    profile_hash=p_hash,
+                    target_content_hash=target_content_hash(obs),
+                ),
+                preset=MatchPreset.FAST_PREVIEW,
+                evaluations_used=4,
+                branch_index=4,
+                pareto_ids=(),
+                diversity_seed=10611,
             ),
-            preset=MatchPreset.FAST_PREVIEW,
-            evaluations_used=4,
-            branch_index=4,
-            pareto_ids=(),
-            diversity_seed=10611,
         ),
     )
     assert partial.evaluations_used <= 8

@@ -13,66 +13,66 @@
     "software_contract_fast_match_is_not_native_evidence"
   ],
   "profiling": {
-    "load_s": 0.00021249998826533556,
-    "calibration_s": 7.599999662488699e-6,
-    "ik_s": 0.0011597000120673329,
-    "dynamics_s": 0.0007860000187065452,
-    "replay_s": 3.0499999411404133e-5,
-    "verification_s": 6.00004568696022e-7,
-    "total_s": 0.0021969000226818025
+    "load_s": 0.0001799000019673258,
+    "calibration_s": 8.100003469735384e-6,
+    "ik_s": 0.0009213000012096018,
+    "dynamics_s": 0.0005779000057373196,
+    "replay_s": 3.029999788850546e-5,
+    "verification_s": 7.00005330145359e-7,
+    "total_s": 0.0017182000156026334
   },
   "quality_vs_time": [
     {
       "evaluations": 1,
-      "wall_s": 0.0015159999893512577,
+      "wall_s": 0.001319299975875765,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 2,
-      "wall_s": 0.0016069000121206045,
+      "wall_s": 0.001384199975291267,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 3,
-      "wall_s": 0.0016826000064611435,
+      "wall_s": 0.0014223999751266092,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 4,
-      "wall_s": 0.0017556000093463808,
+      "wall_s": 0.0014599999994970858,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 5,
-      "wall_s": 0.0018357000080868602,
+      "wall_s": 0.0015363999991677701,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 6,
-      "wall_s": 0.0020352999854367226,
+      "wall_s": 0.0015937999996822327,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 7,
-      "wall_s": 0.0020930999889969826,
+      "wall_s": 0.001631699997233227,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 8,
-      "wall_s": 0.0021320999949239194,
+      "wall_s": 0.001664999988861382,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     },
     {
       "evaluations": 9,
-      "wall_s": 0.002167900005588308,
+      "wall_s": 0.0017001999949570745,
       "best_observation_fit_m": 0.02,
       "failed_attempts": 0
     }
