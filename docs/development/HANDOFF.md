@@ -1,10 +1,25 @@
 # Current Matching Continuation Handoff
 
-## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613)
+## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614)
 
-- Worktree: `Worktrees/UpstreamDrift-local-10613`, branch
-  `feat/co09-club-only-ui-10613`, DL-#10613, PR
-  [#10711](https://github.com/D-sorganization/UpstreamDrift/pull/10711).
+- Worktree: `Worktrees/UpstreamDrift-local-10614`, branch
+  `feat/co10-club-only-turnover-10614`, DL-#10614, PR not created yet.
+- Delivered: `club_only/reproduction.py` freezes exact saved-job commands,
+  trial/model roster, raw-source provenance, assumptions, candidate selection,
+  clean-environment portable replay (MS-105 jobs), and evidence-linked matrix
+  reconciliation with executable next-step prompts. Operator guide
+  `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`; evidence
+  `docs/plans/club_only_matching/evidence/club_reproduction_turnover.json`;
+  schema `club-only-reproduction/1.0.0`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60`.
+- Limitations: software-contract turnover only; `native_g1_pass` false;
+  `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
+- Next: Open ready-for-review PR with `Fixes #10614`, enable squash auto-merge,
+  drive CI green; schedule desk-native Fit/G1 for unresolved matrix cells.
+
+## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
+
+- Merged via PR [#10711](https://github.com/D-sorganization/UpstreamDrift/pull/10711).
 - Delivered: `club_only/ui_integration.py` binds workbook identity + fast
   matching into FitSwingProvider/pipeline/ledger/`ResultsBrowser` without a
   parallel solver. Preview vs verified display statuses stay honest;
@@ -13,11 +28,10 @@
   blockers. Motion Matching GUI adds a Club-Only tab; ResultsBrowser indexes
   `club_only_ui_result` JSON. Schema `club-only-ui-integration/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_ui_integration.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py -q -n 0 --no-cov --timeout=90` (14 passed); pre-push mypy/bandit GREEN. CI repair: `python -m scripts.gen_monolith_register --write`; `python -m scripts.shared_tools.divergence_inventory --write`; GUI tab test expects 4 tabs including Club-Only (three prior unit-test-gate failures GREEN locally).
 - Limitations: software-contract UI only; `native_g1_pass` false; blockers
   `native_g1_qualification_requires_desk_native_receipt`,
   `software_contract_ui_integration_is_not_native_evidence`.
-- Next: Confirm CI green on PR #10711 and squash-merge; do not start CO-10 until merge.
+- Next: N/A — merged; continue CO-10 on main.
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 
