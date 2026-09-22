@@ -507,9 +507,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10687
 - **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — pytest tests/unit/motion_matching/test_club_control_replay.py GREEN (12 passed); evidence schema club-control-replay/1.0.0 with native_g1_pass false
+- **Last verified:** 2026-09-22 at SELF — merged origin/main (NM-03); architecture-budget + mypy bool() fixes; pytest test_club_control_replay.py GREEN (12); native_g1_pass false
 - **Summary:** Recover minimum-effort feasible controls from CO-04/CO-05 candidates, separate net torque / actuated / passive / reactions / root slack, independently open-loop replay from q0/v0 without measured-state resets, and retain named native G1 blockers on software-contract fixtures only.
-- **Next step:** Merge PR #10687 when CI quality-gate is green; do not start CO-07+.
+- **Next step:** Confirm CI green and squash merge of PR #10687; do not start CO-07+.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
 
 ### DL-#10603 · Neural Motion Matching Plan

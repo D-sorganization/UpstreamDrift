@@ -252,10 +252,12 @@ class ControlRecoveryRequest:
             (q.shape, times.size, self.n_actuated),
         )
         require(
-            np.all(np.isfinite(q))
-            and np.all(np.isfinite(v))
-            and np.all(np.isfinite(a))
-            and np.all(np.isfinite(tau)),
+            bool(
+                np.all(np.isfinite(q))
+                and np.all(np.isfinite(v))
+                and np.all(np.isfinite(a))
+                and np.all(np.isfinite(tau))
+            ),
             "q, v, a, tau_rnea must be finite",
         )
         if self.n_contact_spheres < 0:
@@ -271,7 +273,7 @@ class ControlRecoveryRequest:
         if self.measured_q_inject is not None:
             inject = np.asarray(self.measured_q_inject, dtype=np.float64)
             require(
-                inject.shape == q.shape and np.all(np.isfinite(inject)),
+                bool(inject.shape == q.shape and np.all(np.isfinite(inject))),
                 "measured_q_inject must be finite and match q shape",
                 inject.shape,
             )
@@ -407,7 +409,7 @@ def detect_measured_state_resets(
         (claimed.shape, open_loop.shape),
     )
     require(
-        np.all(np.isfinite(claimed)) and np.all(np.isfinite(open_loop)),
+        bool(np.all(np.isfinite(claimed)) and np.all(np.isfinite(open_loop))),
         "states must be finite",
     )
     require(np.isfinite(atol) and atol >= 0.0, "atol must be finite and >= 0", atol)
@@ -453,7 +455,7 @@ def independent_forward_residual(
         "q_reference shape must match policy/timestamps",
         ref.shape,
     )
-    require(np.all(np.isfinite(ref)), "q_reference must be finite")
+    require(bool(np.all(np.isfinite(ref))), "q_reference must be finite")
     q_replay = _integrate_open_loop(
         q0=policy.q0,
         v0=policy.v0,
@@ -541,6 +543,116 @@ def evaluate_tighter_step_sensitivity(
     )
 
 
+def _allocation_arrays(
+    *, n: int, nv: int, n_ground: int
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+]:
+    return (
+        np.zeros((n, nv), dtype=np.float64),
+        np.zeros((n, n_ground), dtype=np.float64),
+        np.zeros((n, 6), dtype=np.float64),
+        np.zeros((n, 6), dtype=np.float64),
+    )
+
+
+def _allocate_reduced_software_plant(
+    request: ControlRecoveryRequest,
+    *,
+    tau_act: NDArray[np.float64],
+    f_ground: NDArray[np.float64],
+    lambda_grip: NDArray[np.float64],
+    delta_root: NDArray[np.float64],
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    float,
+    bool,
+    tuple[str, ...],
+]:
+    """Unit-inertia / reduced DoF path: copy RNEA onto actuated channels."""
+    for i in range(request.timestamps_s.size):
+        tau_act[i] = np.asarray(request.tau_rnea[i], dtype=np.float64)
+    max_root = 0.0
+    if request.root_slack_override is not None:
+        max_root = float(request.root_slack_override)
+        delta_root[:, 0] = request.root_slack_override
+    return tau_act, f_ground, lambda_grip, delta_root, max_root, True, ()
+
+
+def _allocate_floating_base_contacts(
+    request: ControlRecoveryRequest,
+    *,
+    tau_act: NDArray[np.float64],
+    lambda_grip: NDArray[np.float64],
+    delta_root: NDArray[np.float64],
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    float,
+    bool,
+    tuple[str, ...],
+]:
+    """Floating-base plant: reuse ContactForceAllocator (requires nv > 6)."""
+    nv = request.n_actuated
+    n_spheres = max(0, request.n_contact_spheres)
+    n = request.timestamps_s.size
+    actuated = tuple(range(6, nv))  # floating base occupies 0..5
+    allocator = ContactForceAllocator(
+        nv=nv,
+        actuated_indices=actuated or tuple(range(nv)),
+        n_contact_spheres=n_spheres,
+        regularisation_contact=1.0,
+        regularisation_grip=1.0,
+        root_penalty_weight=1e6,
+    )
+    f_ground = np.zeros((n, allocator.n_ground_vars), dtype=np.float64)
+    j_ground = np.zeros((allocator.n_ground_vars, nv), dtype=np.float64)
+    j_grip = np.zeros((6, nv), dtype=np.float64)
+    reasons: list[str] = []
+    contact_ok = True
+    max_root = 0.0
+    for i in range(n):
+        tau_full = np.asarray(request.tau_rnea[i], dtype=np.float64)
+        allocation = allocator.allocate(
+            tau_rnea=tau_full,
+            j_ground=j_ground,
+            j_grip=j_grip,
+            objective=request.allocation_objective,
+            contact_mask=[True] * allocator.n_contact_spheres,
+        )
+        tau_act[i, list(allocator.actuated_indices)] = allocation.tau_actuated
+        f_ground[i] = allocation.f_ground
+        lambda_grip[i] = allocation.lambda_grip
+        delta_root[i] = allocation.delta_tau_root
+        max_root = max(max_root, float(allocation.root_slack_norm))
+        if (
+            not allocation.is_physically_feasible
+            or allocation.feasibility_status is not FeasibilityStatus.FEASIBLE
+        ):
+            contact_ok = False
+            reasons.append(allocation.feasibility_status.value)
+    if request.root_slack_override is not None:
+        max_root = max(max_root, float(request.root_slack_override))
+        delta_root[:, 0] = request.root_slack_override
+    return (
+        tau_act,
+        f_ground,
+        lambda_grip,
+        delta_root,
+        max_root,
+        contact_ok,
+        tuple(reasons),
+    )
+
+
 def _allocate_trajectory(
     request: ControlRecoveryRequest,
 ) -> tuple[
@@ -562,89 +674,35 @@ def _allocate_trajectory(
     n_spheres = max(0, request.n_contact_spheres)
     n_ground = max(1, n_spheres) * 3 if n_spheres > 0 else 1
     n = request.timestamps_s.size
-    tau_act = np.zeros((n, nv), dtype=np.float64)
-    f_ground = np.zeros((n, n_ground), dtype=np.float64)
-    lambda_grip = np.zeros((n, 6), dtype=np.float64)
-    delta_root = np.zeros((n, 6), dtype=np.float64)
-    reasons: list[str] = []
-    contact_ok = True
-    max_root = 0.0
+    tau_act, f_ground, lambda_grip, delta_root = _allocation_arrays(
+        n=n, nv=nv, n_ground=n_ground
+    )
 
     if request.force_infeasible_contact:
-        contact_ok = False
-        reasons.append("infeasible_reaction_contact")
         return (
             tau_act,
             f_ground,
             lambda_grip,
             delta_root,
-            max_root,
-            contact_ok,
-            tuple(reasons),
+            0.0,
+            False,
+            ("infeasible_reaction_contact",),
         )
 
-    # Software-contract / reduced plant: unit-inertia actuated DoFs only.
     if nv <= 6 or n_spheres == 0:
-        for i in range(n):
-            tau_act[i] = np.asarray(request.tau_rnea[i], dtype=np.float64)
-        if request.root_slack_override is not None:
-            max_root = max(max_root, float(request.root_slack_override))
-            delta_root[:, 0] = request.root_slack_override
-        return (
-            tau_act,
-            f_ground,
-            lambda_grip,
-            delta_root,
-            max_root,
-            contact_ok,
-            tuple(reasons),
+        return _allocate_reduced_software_plant(
+            request,
+            tau_act=tau_act,
+            f_ground=f_ground,
+            lambda_grip=lambda_grip,
+            delta_root=delta_root,
         )
 
-    actuated = tuple(range(6, nv))  # floating base occupies 0..5
-    allocator = ContactForceAllocator(
-        nv=nv,
-        actuated_indices=actuated or tuple(range(nv)),
-        n_contact_spheres=n_spheres,
-        regularisation_contact=1.0,
-        regularisation_grip=1.0,
-        root_penalty_weight=1e6,
-    )
-    f_ground = np.zeros((n, allocator.n_ground_vars), dtype=np.float64)
-    j_ground = np.zeros((allocator.n_ground_vars, nv), dtype=np.float64)
-    j_grip = np.zeros((6, nv), dtype=np.float64)
-    for i in range(n):
-        tau_full = np.asarray(request.tau_rnea[i], dtype=np.float64)
-        allocation = allocator.allocate(
-            tau_rnea=tau_full,
-            j_ground=j_ground,
-            j_grip=j_grip,
-            objective=request.allocation_objective,
-            contact_mask=[True] * allocator.n_contact_spheres,
-        )
-        tau_act[i, list(allocator.actuated_indices)] = allocation.tau_actuated
-        f_ground[i] = allocation.f_ground
-        lambda_grip[i] = allocation.lambda_grip
-        delta_root[i] = allocation.delta_tau_root
-        max_root = max(max_root, float(allocation.root_slack_norm))
-        if (
-            not allocation.is_physically_feasible
-            or allocation.feasibility_status is not FeasibilityStatus.FEASIBLE
-        ):
-            contact_ok = False
-            reasons.append(allocation.feasibility_status.value)
-
-    if request.root_slack_override is not None:
-        max_root = max(max_root, float(request.root_slack_override))
-        delta_root[:, 0] = request.root_slack_override
-
-    return (
-        tau_act,
-        f_ground,
-        lambda_grip,
-        delta_root,
-        max_root,
-        contact_ok,
-        tuple(reasons),
+    return _allocate_floating_base_contacts(
+        request,
+        tau_act=tau_act,
+        lambda_grip=lambda_grip,
+        delta_root=delta_root,
     )
 
 
@@ -673,33 +731,17 @@ def _work_balance_error(
     return float(abs(work - rect) / denom)
 
 
-def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecoveryResult:
-    """Recover minimum-effort controls and independently replay one candidate."""
-    limitations: list[str] = []
-    rejection: list[str] = []
-    impact, impact_limits = _impact_regime(request)
-    limitations.extend(impact_limits)
-
-    tau_act, f_ground, lambda_grip, delta_root, max_root, contact_ok, alloc_reasons = (
-        _allocate_trajectory(request)
-    )
-    rejection.extend(alloc_reasons)
-
+def _build_control_policy(
+    request: ControlRecoveryRequest,
+    *,
+    tau_act: NDArray[np.float64],
+    f_ground: NDArray[np.float64],
+    lambda_grip: NDArray[np.float64],
+    delta_root: NDArray[np.float64],
+) -> ControlPolicy:
+    """Assemble the continuous control package from an allocation."""
     passive = np.zeros_like(tau_act)
     net = tau_act + passive
-    dt = float(np.mean(np.diff(request.timestamps_s)))
-    rate_ok, _ = verify_torque_and_rate_bounds(
-        tau_act,
-        dt=max(dt, 1e-9),
-        tau_bounds=(
-            np.full(request.n_actuated, -1e3),
-            np.full(request.n_actuated, 1e3),
-        ),
-        rate_bounds=1e4,
-    )
-    if not rate_ok:
-        rejection.append("torque_rate_bounds_violated")
-
     basis = _bernstein_basis_from_tau(tau_act)
     hash_payload = {
         "candidate_id": request.candidate_id,
@@ -710,7 +752,7 @@ def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecover
         "tau_actuated": tau_act.tolist(),
         "allocation_objective": request.allocation_objective,
     }
-    policy = ControlPolicy(
+    return ControlPolicy(
         q0=request.q[0],
         v0=request.v[0],
         timestamps_s=request.timestamps_s,
@@ -734,7 +776,18 @@ def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecover
         claims_unique_measured_torques=False,
     )
 
-    # Independent open-loop replay from q0/v0 only.
+
+def _run_independent_replay(
+    request: ControlRecoveryRequest,
+    policy: ControlPolicy,
+    *,
+    tau_act: NDArray[np.float64],
+    max_root: float,
+    contact_ok: bool,
+    rate_ok: bool,
+) -> tuple[IndependentReplayResult, list[str]]:
+    """Open-loop replay from q0/v0; append rejection reasons for resets/slack."""
+    rejection: list[str] = []
     q_open = _integrate_open_loop(
         q0=policy.q0,
         v0=policy.v0,
@@ -762,12 +815,10 @@ def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecover
         q_reference=request.q,
         coarse_residual=forward,
     )
-    work_err = _work_balance_error(tau_act, request.v, request.timestamps_s)
-    closure = float(np.linalg.norm(q_open[-1] - request.q[-1]))
-
     if max_root > _ROOT_SLACK_QUALIFY_LIMIT:
         rejection.append("root_slack_cannot_qualify")
 
+    impact, _ = _impact_regime(request)
     replay = IndependentReplayResult(
         timestamps_s=request.timestamps_s,
         q_replay=q_open,
@@ -775,13 +826,59 @@ def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecover
         tighter_step_residual=sens.tighter_step_residual,
         used_measured_state_reset=used_reset,
         root_slack_norm=float(max_root),
-        work_balance_error=work_err,
+        work_balance_error=_work_balance_error(
+            tau_act, request.v, request.timestamps_s
+        ),
         torque_rate_ok=bool(rate_ok),
         contact_feasible=contact_ok,
-        closure_residual_m=closure,
+        closure_residual_m=float(np.linalg.norm(q_open[-1] - request.q[-1])),
         impact_regime=impact,
         interval_timing_ok=True,
     )
+    return replay, rejection
+
+
+def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecoveryResult:
+    """Recover minimum-effort controls and independently replay one candidate."""
+    limitations: list[str] = []
+    rejection: list[str] = []
+    impact, impact_limits = _impact_regime(request)
+    limitations.extend(impact_limits)
+
+    tau_act, f_ground, lambda_grip, delta_root, max_root, contact_ok, alloc_reasons = (
+        _allocate_trajectory(request)
+    )
+    rejection.extend(alloc_reasons)
+
+    dt = float(np.mean(np.diff(request.timestamps_s)))
+    rate_ok, _ = verify_torque_and_rate_bounds(
+        tau_act,
+        dt=max(dt, 1e-9),
+        tau_bounds=(
+            np.full(request.n_actuated, -1e3),
+            np.full(request.n_actuated, 1e3),
+        ),
+        rate_bounds=1e4,
+    )
+    if not rate_ok:
+        rejection.append("torque_rate_bounds_violated")
+
+    policy = _build_control_policy(
+        request,
+        tau_act=tau_act,
+        f_ground=f_ground,
+        lambda_grip=lambda_grip,
+        delta_root=delta_root,
+    )
+    replay, replay_reasons = _run_independent_replay(
+        request,
+        policy,
+        tau_act=tau_act,
+        max_root=max_root,
+        contact_ok=contact_ok,
+        rate_ok=bool(rate_ok),
+    )
+    rejection.extend(replay_reasons)
 
     if rejection:
         status = "rejected"
