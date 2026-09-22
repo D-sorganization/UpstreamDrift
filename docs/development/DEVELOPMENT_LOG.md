@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8932
+- **Branch:** fix/8932-analysis-debounce
+- **PR:** not created
+- **Paths:** `src/shared/python/dashboard/_analysis_refresh.py`; `src/shared/python/dashboard/advanced_analysis.py`; `tests/unit/shared_python/test_analysis_tab_refresh.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 on base `234b8dc14` plus this branch — RED shown for the six tab-level tests, then GREEN; 27 analysis-tab tests pass offscreen; ruff, mypy (dashboard scope), file-size and architecture budgets clean.
+- **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
+- **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
+
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
 - **State:** in_progress
