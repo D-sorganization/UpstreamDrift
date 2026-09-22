@@ -6819,7 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-22 | #10611 | Optimize fast club-only matching and expose candidate diversity (CO-07): bounded presets, immutable cache/checkpoint, cold/retrieval/reduced-to-full starts, feasibility-first Pareto pruning, optional neural slot without weights; software-contract only. |
+| 2026-09-22 | #10700 | Optimize fast club-only matching and expose candidate diversity (CO-07): bounded presets, immutable cache/checkpoint, cold/retrieval/reduced-to-full starts, feasibility-first Pareto pruning, optional neural slot without weights; software-contract only. |
 | 2026-09-22 | #10687 | Recover feasible club-only controls and independently replay candidates (CO-06): minimum-effort allocation, separated tau/passive/reactions/root slack, open-loop replay without measured-state resets; software-contract fixtures with named native G1 blockers. |
 | 2026-09-22 | #10344 | MS-51 MyoSuite repair: pin myo_sim, generate dual-grip driver/iron golfer scenes with four foot contact markers, diagnostic coordinate map, inventory flagship packages leave repair after native MuJoCo load (no G1/parity claim). |
 | 2026-09-22 | #10686 | NM-03 versioned episode HDF5 store, family splits, compact-1.0 adapter, task views, train-only normalizer and window cache; software-contract tests only. |

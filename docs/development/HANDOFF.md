@@ -3,7 +3,8 @@
 ## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
 
 - Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
-  `feat/10611-co07-fast-matching`, DL-#10611, PR not created yet.
+  `feat/10611-co07-fast-matching`, DL-#10611, PR
+  [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700) open.
 - Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
   budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
   cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
