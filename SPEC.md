@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | n/a | Optimized electrical model calculations by using np.sqrt(np.einsum('ij,ij->i', diff, diff)) instead of np.linalg.norm(..., axis=1) and math.sqrt(diff.dot(diff)) instead of np.linalg.norm(diff), providing a significant speedup. (spec-exempt: micro-optimization) |
 | 2026-09-22 | #10704 | MS-105 reliable matching jobs: atomic manifests/checkpoints, compatible resume, fault recovery, portable packages, both-shell progress, PF-08 service budgets without solve-time guarantees; reuses #8880 worker cancel (no second scheduler). |
 | 2026-09-22 | #10703 | Qualify club-only matrix and plausibility tradeoffs (CO-08): independent trial×roster evaluation with frozen CO-02 gates, published failures, withheld-body experiment, common-observable comparison; software-contract only. |
 | 2026-09-22 | #10701 | NM-05 classical and small neural dynamics baselines over episode store with analytical ridge NN optional MLP three-seed validation and test untouched software-contract tests only. |
