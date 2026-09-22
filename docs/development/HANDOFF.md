@@ -29,31 +29,33 @@
 - Next: confirm `quality-gate` green on the PR; squash auto-merge lands; release
   the lease.
 
-## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379)
+## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613)
 
-- Worktree: `agent-worktrees/issue-10379-local`, branch
-  `feat/10379-ms105-jobs-recovery`, DL-#10379, PR
-  [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704)
-  (squash auto-merge armed). Tip SHA: SELF.
-- Delivered: `src/shared/python/motion_matching/jobs/` reuses `#8880` /
-  `async_action` cancel-progress contracts and `managed_popen` terminate→kill
-  escalation — **no second scheduler**. Atomic run manifests/checkpoints with
-  data/model/runtime/controller/solver hash gates; resumed numerical vs
-  interrupted provenance; fault classification (cancel, crash, disk-full,
-  engine absence, host unavailable); portable packages with relative assets,
-  checksums, pickle rejection, input-capture overwrite protection, path
-  escape rejection; both-shell progress/failure DTOs; PF-08 (#10438)
-  time-to-accepted-swing service budgets with `guarantee=false`.
+- Worktree: `Worktrees/UpstreamDrift-local-10613`, branch
+  `feat/co09-club-only-ui-10613`, DL-#10613, PR
+  [#10711](https://github.com/D-sorganization/UpstreamDrift/pull/10711).
+- Delivered: `club_only/ui_integration.py` binds workbook identity + fast
+  matching into FitSwingProvider/pipeline/ledger/`ResultsBrowser` without a
+  parallel solver. Preview vs verified display statuses stay honest;
+  observed/inferred legend and trial clock are required; cancel/resume hooks
+  reuse CO-07 checkpoints; ledger lane is `club_only` with named native
+  blockers. Motion Matching GUI adds a Club-Only tab; ResultsBrowser indexes
+  `club_only_ui_result` JSON. Schema `club-only-ui-integration/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_ui_integration.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py -q -n 0 --no-cov --timeout=90` (14 passed); pre-push mypy/bandit GREEN. CI repair: `python -m scripts.gen_monolith_register --write`; `python -m scripts.shared_tools.divergence_inventory --write`; GUI tab test expects 4 tabs including Club-Only (three prior unit-test-gate failures GREEN locally).
+- Limitations: software-contract UI only; `native_g1_pass` false; blockers
+  `native_g1_qualification_requires_desk_native_receipt`,
+  `software_contract_ui_integration_is_not_native_evidence`.
+- Next: Confirm CI green on PR #10711 and squash-merge; do not start CO-10 until merge.
+
+## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
+
+- Merged via PR [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704).
+- Delivered: `src/shared/python/motion_matching/jobs/` — atomic run
+  manifests/checkpoints, fault classification, portable packages, both-shell
+  progress DTOs; PF-08 budgets with `guarantee=false`.
 - Evidence: `docs/plans/matched_swing/evidence/ms105_jobs_recovery.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/jobs/test_matching_jobs.py -q -n 0 --no-cov`
-  GREEN (28 passed); ruff clean on touched files.
-- Named blockers: native long-run DeskComputer recovery receipt; software
-  contract is not native timing evidence; no universal solve-time guarantee.
-- CI repair: DRY promote helper + divergence inventory; replace two
-  `# noqa: BLE001` catches in `jobs/service.py` with named exception tuples
-  (error-handling ratchet); rematched onto origin/main after NM-05 #10701
-  and regenerated divergence inventory.
-- Next: Confirm CI green on #10704; do not start MS-106+.
+- Next: N/A — merged; continue CO-09 on main.
 
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
@@ -70,6 +72,10 @@ pending` — UD keeps this facade.
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612) [MERGED]
 
 - Merged via PR [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) on `main` (`17a0ee033`).
+- Schema `club-matrix-qualification/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
+- Limitations: software-contract scoring only; no native Fit/G1 claim.
+- Next: N/A — merged; continue CO-09 on main.
 
 ## GUI Thread-Blocking Migration #8880 [MERGED]
 
