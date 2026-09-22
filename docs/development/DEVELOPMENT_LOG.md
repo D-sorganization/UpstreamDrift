@@ -402,16 +402,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10621 (epic #10603)
 - **Branch:** feat/10621-nm06-masked-proposals
-- **PR:** not created
+- **PR:** #10709
 - **Paths:** src/shared/python/motion_matching/inverse/{masked_proposal,proposal_training,basis_time,collapse,regressor,regressor_training,cvae}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 9 NM-06 unit tests green (`test_masked_proposals_nm06.py -n 0`); software-contract fixtures only; no native qualification claimed
+- **Last verified:** 2026-09-22 at SELF — 9 NM-06 unit tests green; PR #10709 open with squash auto-merge; software-contract fixtures only
 - **Summary:** Variable-dimension masked trajectory-to-control proposals with selected-teacher and mixture heads, observation-after-rollout training loss, mode-collapse diagnostics retaining cVAE plateau evidence, coefficient letter-order/time-domain conversion, and hybrid fail-closed checkpoint/refine+replay seams.
-- **Next step:** Open ready-for-review PR with `Fixes #10621` and arm squash auto-merge.
+- **Next step:** Confirm quality-gate and unit-test-gate green on PR #10709; squash auto-merge remains armed.
 - **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 
 ### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
