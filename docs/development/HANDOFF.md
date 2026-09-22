@@ -1,5 +1,23 @@
 # Current Matching Continuation Handoff
 
+## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613)
+
+- Worktree: `Worktrees/UpstreamDrift-local-10613`, branch
+  `feat/co09-club-only-ui-10613`, DL-#10613, PR not created.
+- Delivered: `club_only/ui_integration.py` binds workbook identity + fast
+  matching into FitSwingProvider/pipeline/ledger/`ResultsBrowser` without a
+  parallel solver. Preview vs verified display statuses stay honest;
+  observed/inferred legend and trial clock are required; cancel/resume hooks
+  reuse CO-07 checkpoints; ledger lane is `club_only` with named native
+  blockers. Motion Matching GUI adds a Club-Only tab; ResultsBrowser indexes
+  `club_only_ui_result` JSON. Schema `club-only-ui-integration/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_ui_integration.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py -q -n 0 --no-cov --timeout=90`.
+- Limitations: software-contract UI only; `native_g1_pass` false; blockers
+  `native_g1_qualification_requires_desk_native_receipt`,
+  `software_contract_ui_integration_is_not_native_evidence`.
+- Next: Open PR Fixes #10613 with squash auto-merge; do not start CO-10 until merge.
+
 ## Realtime Pub/Sub Wiring #8869 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10655-local`.
@@ -15,6 +33,10 @@ pending` — UD keeps this facade.
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612) [MERGED]
 
 - Merged via PR [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) on `main` (`17a0ee033`).
+- Schema `club-matrix-qualification/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
+- Limitations: software-contract scoring only; no native Fit/G1 claim.
+- Next: N/A — merged; continue CO-09 on main.
 
 ## GUI Thread-Blocking Migration #8880 [MERGED]
 
