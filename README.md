@@ -307,3 +307,7 @@ This project builds on
 [Pinocchio](https://stack-of-tasks.github.io/pinocchio/) for rigid-body dynamics,
 [MyoSuite](https://github.com/MyoHub/myosuite) for musculoskeletal models, and
 [OpenSim](https://opensim.stanford.edu/) for biomechanical modeling.
+
+## Future Validation Planning
+
+Unavailable physical and human studies are preserved in [repo-owned Board plans](docs/development/planning/README.md). Numerical, native-runtime and available-data work remain executable. Deferral grants no scientific or release approval.

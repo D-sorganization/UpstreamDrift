@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9700-Planning · Deferred External Validation Plans
+
+- **State:** in_review
+- **Owner:** codex (session `codex-validation-planning-20260922-ud`)
+- **Issue:** #9700; #10375; #10382; #9619; #9613; #9546
+- **Branch:** `docs/deferred-validation-planning`
+- **PR:** #10741
+- **Paths:** `docs/development/planning/`, `docs/development/HANDOFF.md`, `AGENT_HANDOFF.md`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 (source bodies unchanged; #9546 already closed by #10446 before migration)
+- **Summary:** Preserve external evidence requirements for Board consideration. Keep executable work distinct; no experimental results, actor approvals or provider changes.
+- **Next step:** Validate and publish six plans; verify exact artifacts before source comments. Keep five open sources open and preserve the existing #9546 disposition.
+
 ### DL-#8941 · Analysis Statistics Endpoint Off the Event Loop With Incremental Fetch
 
 - **State:** in_review
