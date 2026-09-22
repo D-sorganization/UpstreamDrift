@@ -23,7 +23,7 @@ from src.engines.physics_engines.pendulum.python.motion_matching.adapters import
     forward_kinematics_2d,
 )
 from src.shared.python.motion_matching.bernstein_controls import (
-    assemble_bernstein_fit_residual,
+    BernsteinFitResidualPolicy,
     bernstein_curvature_penalty,
     bernstein_effort_penalty,
     evaluate_bernstein_controls,
@@ -80,6 +80,11 @@ class BernsteinTorqueProfile:
             weight=weight,
             scale=100.0,
         )
+
+    @property
+    def control_points(self) -> np.ndarray:
+        """Return controls in the shared actuator-row representation."""
+        return np.vstack((self.shoulder_controls, self.wrist_controls))
 
 
 @dataclass(frozen=True)
@@ -272,6 +277,9 @@ def fit_bounded_double_pendulum(
     )
 
     n_eval = 0
+    residual_policy = BernsteinFitResidualPolicy(
+        opts.curvature_weight, opts.effort_weight, 100.0
+    )
 
     def residual_func(params: np.ndarray) -> np.ndarray:
         nonlocal n_eval
@@ -287,13 +295,7 @@ def fit_bounded_double_pendulum(
         tracking_res, _ = _compute_tracking_errors(
             q_rollout, target.l1, target.l2, p0, grip_arr, head_arr, observed_mask
         )
-        return assemble_bernstein_fit_residual(
-            tracking_res,
-            np.vstack((prof.shoulder_controls, prof.wrist_controls)),
-            curvature_weight=opts.curvature_weight,
-            effort_weight=opts.effort_weight,
-            effort_scale=100.0,
-        )
+        return residual_policy.assemble(tracking_res, prof.control_points)
 
     x0: np.ndarray = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
     opt_res = least_squares(

@@ -8,6 +8,7 @@ control remains within the row's control-point bounds.
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -85,24 +86,31 @@ def bernstein_effort_penalty(
     return math.sqrt(weight) * controls.reshape(-1) / scale
 
 
-def assemble_bernstein_fit_residual(
-    tracking_residual: np.ndarray,
-    control_points: np.ndarray,
-    *,
-    curvature_weight: float,
-    effort_weight: float,
-    effort_scale: float,
-) -> np.ndarray:
-    """Combine tracking and regularization residuals for a bounded control fit.
+@dataclass(frozen=True)
+class BernsteinFitResidualPolicy:
+    """Shared weights and assembly convention for a bounded control fit."""
 
-    The tracking vector is supplied by model-specific forward kinematics;
-    Bernstein smoothness and effort retain one numerical convention.
-    """
-    tracking = np.asarray(tracking_residual, dtype=np.float64)
-    if tracking.ndim != 1 or not np.isfinite(tracking).all():
-        raise ValueError("tracking_residual must be a finite one-dimensional array")
-    curvature = bernstein_curvature_penalty(control_points, weight=curvature_weight)
-    effort = bernstein_effort_penalty(
-        control_points, weight=effort_weight, scale=effort_scale
-    )
-    return np.concatenate((tracking, curvature, effort))
+    curvature_weight: float
+    effort_weight: float
+    effort_scale: float
+
+    def assemble(
+        self,
+        tracking_residual: np.ndarray,
+        control_points: np.ndarray,
+    ) -> np.ndarray:
+        """Combine tracking and regularization residuals for one control vector.
+
+        The tracking vector is supplied by model-specific forward kinematics;
+        Bernstein smoothness and effort retain one numerical convention.
+        """
+        tracking = np.asarray(tracking_residual, dtype=np.float64)
+        if tracking.ndim != 1 or not np.isfinite(tracking).all():
+            raise ValueError("tracking_residual must be a finite one-dimensional array")
+        curvature = bernstein_curvature_penalty(
+            control_points, weight=self.curvature_weight
+        )
+        effort = bernstein_effort_penalty(
+            control_points, weight=self.effort_weight, scale=self.effort_scale
+        )
+        return np.concatenate((tracking, curvature, effort))

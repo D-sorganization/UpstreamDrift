@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.bernstein_controls import (
-    assemble_bernstein_fit_residual,
+    BernsteinFitResidualPolicy,
     bernstein_curvature_penalty,
     evaluate_bernstein_controls,
 )
@@ -81,12 +81,14 @@ def test_curvature_penalty_is_flattened_by_actuator_and_rejects_bad_weight() -> 
 
 def test_fit_residual_uses_shared_tracking_curvature_and_effort_order() -> None:
     """All bounded fitters append the same regularization convention."""
-    result = assemble_bernstein_fit_residual(
-        np.array([1.0, -2.0]),
-        np.array([[0.0, 1.0, 2.0], [2.0, 2.0, 2.0]]),
+    policy = BernsteinFitResidualPolicy(
         curvature_weight=4.0,
         effort_weight=1.0,
         effort_scale=2.0,
+    )
+    result = policy.assemble(
+        np.array([1.0, -2.0]),
+        np.array([[0.0, 1.0, 2.0], [2.0, 2.0, 2.0]]),
     )
     expected = np.array([1.0, -2.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0])
     np.testing.assert_allclose(result, expected)
