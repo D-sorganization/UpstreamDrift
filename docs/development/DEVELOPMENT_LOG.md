@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10650 (open)
 - **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main; fixed unit-test-gate Pose Studio GUI assertions for real PyQt6 CI; suite markers on `test_joint_panel.py`; submodule init.
+- **Last verified:** 2026-09-22 at 3445d4f40 — merged origin/main; fixed unit-test-gate Pose Studio GUI assertions for real PyQt6 CI; suite markers on `test_joint_panel.py`; submodule init.
 - **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
 - **Next step:** Merge PR #10650 after CI green.
 
@@ -224,7 +224,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10348 · Simscape Topology + Full-Marker Terminal (MS-61)
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10348 (MS-61, epic #10363)
 - **Branch:** feat/issue-10348-ms61-simscape-topology
@@ -670,12 +670,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
 - **Branch:** feat/issue-10614-co10-turnover
-- **PR:** not created
+- **PR:** #10719
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/development/matched_swing_program/README.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — RED/GREEN on reproduction turnover tests; evidence regenerates from module; epic_closure_allowed false; 68 unresolved matrix cells retain owners and next-step prompts
 - **Summary:** Publishes operator reproduction guide with exact saved-job commands, trial/model roster, workbook provenance, assumptions, candidate selection, MS-105 clean-environment portable replay, and fail-closed promotion guards. Docs/GUI alone cannot close #10602 or claim native G1 / G3 / neural success.
-- **Next step:** Open ready-for-review PR Fixes #10614 with squash auto-merge; regenerate monolith/divergence inventories if CI requires.
+- **Next step:** Confirm CI green on PR #10719 and squash-merge Fixes #10614; leave epic #10602 open for desk-native cells.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
