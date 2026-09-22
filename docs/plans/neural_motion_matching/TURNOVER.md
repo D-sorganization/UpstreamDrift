@@ -46,11 +46,13 @@ NM-01 ([#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616)),
 NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) /
 [#10679](https://github.com/D-sorganization/UpstreamDrift/pull/10679)) and
 NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618) /
-[#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686)) are merged.
+[#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686)) and
+NM-04 ([#10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619) /
+[#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698)) are merged.
 The immediate task is
-**[#10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619) (NM-04)
-only** (feasible teacher episodes and active-learning candidates). Do not start
-NM-05+. This is a dispatch-ready plan, not authorization to run every expensive
+**[#10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620) (NM-05)
+only** (classical and small neural dynamics baselines). Do not start
+NM-06+. This is a dispatch-ready plan, not authorization to run every expensive
 experiment at once. Lower-cost agents handle bounded schema, adapter, fixture,
 CLI and UI work. An experienced reviewer checks model/observation semantics, force
 identifiability, contact, physical feasibility and scientific promotion. Dependencies

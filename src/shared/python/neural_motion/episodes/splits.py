@@ -36,6 +36,10 @@ class FamilySplitPlan(SortedJsonWritableMixin):
         except KeyError as exc:
             raise KeyError(f"unknown trial_id {trial_id!r}") from exc
 
+    def ids_for(self, split_name: str) -> tuple[str, ...]:
+        """Return trial ids assigned to ``split_name`` (empty if unused)."""
+        return self.splits.get(split_name, ())
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "schema": self.schema,
