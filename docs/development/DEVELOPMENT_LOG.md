@@ -350,7 +350,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10619 (epic #10603)
 - **Branch:** feat/10619-nm04-teacher-episodes
-- **PR:** not created
+- **PR:** #10699
 - **Paths:** src/shared/python/neural_motion/teacher/; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_pilot_receipt.json
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — teacher campaign on NM-03 EpisodeStore; mock backend tests GREEN; no training claim

@@ -3,7 +3,7 @@
 ## NM-04 Teacher Episodes and Active Learning (#10619)
 
 - Worktree: `Worktrees/UpstreamDrift-10619-nm04`, branch
-  `feat/10619-nm04-teacher-episodes`, DL-#10619, PR not created.
+  `feat/10619-nm04-teacher-episodes`, DL-#10619, PR #10699.
 - Delivered: `src/shared/python/neural_motion/teacher/` campaign on NM-03
   `EpisodeStore` (feasible vs rejected ledgers, teacher objective/replay ledger,
   resumable attempt keys, active-learning selection excluding test/eval splits,
