@@ -18,6 +18,7 @@ a skeleton without spinning up a real engine.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 
 import numpy as np
@@ -131,6 +132,10 @@ class MockKinematicsService:
     def capabilities(self) -> ServiceCapabilities:
         """Return the mock's capabilities (all ``False``)."""
         return _MOCK_CAPABILITIES
+
+    def joint_limits(self) -> Mapping[str, tuple[float, float]]:
+        """Return an empty mapping: the mock has no anatomical model."""
+        return {}
 
 
 __all__ = ["MockKinematicsService"]

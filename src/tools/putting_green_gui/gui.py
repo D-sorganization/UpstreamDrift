@@ -38,6 +38,7 @@ from src.shared.python.golf_viz import (
     roll_mode_colors,
 )
 from src.launchers.help_menu import build_help_menu
+from src.shared.python.theme.tool_stylesheet import primary_button_style
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.tools.putting_green_gui._scene_builder import (
     PuttConfig,
@@ -150,10 +151,7 @@ class PuttingGreenWidget(QWidget):
         left_layout.addWidget(preset_group)
 
         self._run_btn = QPushButton("▶  Simulate Putt")
-        self._run_btn.setStyleSheet(
-            "background-color: #2E7D32; color: white; font-weight: bold;"
-            " padding: 12px; border-radius: 5px;"
-        )
+        self._run_btn.setStyleSheet(primary_button_style())
         self._run_btn.clicked.connect(self._run_simulation)
         left_layout.addWidget(self._run_btn)
 

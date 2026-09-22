@@ -1,0 +1,120 @@
+{
+  "schema": "club-workbook-identity/1.0.0",
+  "manifests": [
+    {
+      "workbook_id": "club_data",
+      "relative_path": "data/Club_Data.xlsx",
+      "sha256": "5d9183e1d01ea7c6f9c162375dd6855c076ee26a96b76c90e59e9cf2679dde25",
+      "verified": true
+    },
+    {
+      "workbook_id": "wiffle_prov1_club_3d",
+      "relative_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx",
+      "sha256": "88d3eb31541d886031f6c5ad7c82493b0e3ee4e3f73a8652372277cc14d02234",
+      "verified": true
+    }
+  ],
+  "trials": [
+    {
+      "trial_id": "TW_wiffle",
+      "primary_sheet": "TW_wiffle",
+      "alias_sheets": [],
+      "lineage_id": "5f9eaec850808fa95c766da272a99484e32bf7f899427abcfca7086adf4a26ab",
+      "numeric_sample_count": 882,
+      "event_samples": {
+        "A": 240.0,
+        "T": 412.0,
+        "I": 519.0,
+        "F": 832.0,
+        "CHS": 114.5
+      },
+      "sheet_a1_label": "Wiffle ball",
+      "ball_label": "wiffle",
+      "ball_label_status": "stated_in_a1",
+      "time_range_s": [-2.158333333333333, 1.5125]
+    },
+    {
+      "trial_id": "TW_ProV1",
+      "primary_sheet": "TW_ProV1",
+      "alias_sheets": ["Filtering Experiments"],
+      "lineage_id": "3097da6dc43e3f0cc36dd92d35723485eb69def72348e2cfbcfa0e6020793fdb",
+      "numeric_sample_count": 775,
+      "event_samples": {
+        "A": 240.0,
+        "T": 418.0,
+        "I": 525.0,
+        "F": 725.0,
+        "CHS": 114.5
+      },
+      "sheet_a1_label": "ProV1",
+      "ball_label": "ProV1",
+      "ball_label_status": "stated_in_a1",
+      "time_range_s": [-2.183333333333333, 1.0416666666666667]
+    },
+    {
+      "trial_id": "GW_wiffle",
+      "primary_sheet": "GW_wiffle",
+      "alias_sheets": [],
+      "lineage_id": "a844410a2b4e8a84ee77c75c491afe31ccaf5e5d94de149c03bf99c4d22f4f53",
+      "numeric_sample_count": 774,
+      "event_samples": {
+        "A": 240.0,
+        "T": 448.0,
+        "I": 517.0,
+        "F": 724.0,
+        "CHS": 104.6
+      },
+      "sheet_a1_label": "ProV1",
+      "ball_label": null,
+      "ball_label_status": "conflict_sheet_name_vs_a1",
+      "time_range_s": [-2.15, 1.0708333333333333]
+    },
+    {
+      "trial_id": "GW_ProV11",
+      "primary_sheet": "GW_ProV11",
+      "alias_sheets": [],
+      "lineage_id": "3ad8bcc11e0adf28836e157969af2d49d7a6ee0d4a581249d28715c5d8fdc737",
+      "numeric_sample_count": 771,
+      "event_samples": {
+        "A": 240.0,
+        "T": 452.0,
+        "I": 521.0,
+        "F": 721.0,
+        "CHS": 115.1
+      },
+      "sheet_a1_label": "ProV1",
+      "ball_label": "ProV1",
+      "ball_label_status": "stated_in_a1",
+      "time_range_s": [-2.1666666666666665, 1.0416666666666667]
+    }
+  ],
+  "units": {
+    "declared_units": "inches",
+    "reviewed_units": "centimetres",
+    "to_meters_scale": 0.01,
+    "authority": "Definitions sheet declares inches; repository MATLAB/Python loaders and grip-to-face length (~1.07 m) qualify centimetre interpretation.",
+    "inches_scale_rejected": 0.0254
+  },
+  "frames": {
+    "definitions_global_x": "positive away from the target",
+    "definitions_global_y": "positive toward the ball",
+    "definitions_global_z": "positive up",
+    "definitions_local_z": "positive from club head toward grip",
+    "prose_conflict": "docs/motion_training/README.md describes X toward target and local X along shaft; Definitions sheet is retained as workbook authority until an explicit rigid transform is selected.",
+    "status": "conflict_recorded"
+  },
+  "events": {
+    "sample_rate_hz": 240.0,
+    "impact_time_s": 0.0,
+    "clock": "native impact-relative timestamps at 240 Hz",
+    "t_event_meaning": "Pelvis-rotation event as documented; no body trajectory is present \u2014 do not relabel T as club top.",
+    "label_normalization": "strip trailing '=' from A/T/I/F/CHS labels"
+  },
+  "orientation": {
+    "measured_axes": ["X", "Y"],
+    "missing_columns": ["Zx", "Zy", "Zz"],
+    "derived_axis": "Z",
+    "status_when_derived": "derived_not_measured",
+    "degeneracy_flag_required": true
+  }
+}

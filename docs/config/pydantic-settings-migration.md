@@ -50,7 +50,7 @@ cohesive clusters, each its own PR, migrating onto `Settings`:
       This is the largest cluster and the natural backbone — migrate the
       functional accessors to delegate to `Settings` fields.
 - [ ] `realtime/` cluster — `ws_pubsub.py`, `transport_file.py`,
-      `file_pubsub.py`, `api.py` (`UD_REALTIME_BACKEND`, realtime host/port).
+      `api.py` (`UD_REALTIME_BACKEND`, realtime host/port).
 - [ ] `api/` cluster — `database.py`, `auth/security.py`, `rate_limit.py`,
       `debug_guard.py`, `local_server.py`, `task_manager_durable.py`,
       `cors.py`, routes (`chat_ws.py`, `data_explorer.py`, `physics.py`,

@@ -117,7 +117,6 @@ PRIMARY_WORKSPACES: dict[str, WorkspaceInfo] = {
             "movement_optimizer",
             "swing_objective_lab",
             "training",
-            "pid_generator",
             "pendulum_simulator",
             "sg_optimizer",
         ),
@@ -190,6 +189,11 @@ SECONDARY_WORKSPACES: dict[str, WorkspaceInfo] = {
             "perturbation_analysis",
             "force_overlays",
             "motion_pipeline",
+            # Non-golf engineering utilities (#9480): reachable, but kept out
+            # of the primary task workspaces so they don't compete with the
+            # golf/biomechanics workflow for grid attention.
+            "pid_generator",
+            "tools_calculator_hub",
         ),
         is_primary=False,
     ),

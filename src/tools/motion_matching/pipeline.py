@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -69,6 +69,8 @@ CAPTURES = ("driver", "iron")
 CLUBS = ("driver", "iron7")
 CLUB_FOR_CAPTURE = {"driver": "driver", "iron": "iron7"}
 BACKENDS = ("mujoco", "drake", "pinocchio", "opensim", "pink")
+IK_BACKENDS = ("lm", "mujoco-minimize")
+TRACKING_BACKENDS = ("kkt", "mj-inverse")
 STEP_MODES = ("physical", "projection")
 SOLVERS = ("quadprog",)
 
@@ -133,6 +135,8 @@ class MatchRequest:
     shooting_gain: float = 0.7
     cutoff_hz: float | None = None
     backend: str = "mujoco"
+    ik_backend: str = "lm"
+    tracking: str = "kkt"
     step_mode: str = "physical"
     solver: str = "quadprog"
     output_root: Path | str | None = None
@@ -147,6 +151,18 @@ class MatchRequest:
             raise ValueError(f"Club must be one of {CLUBS}")
         if self.backend not in BACKENDS:
             raise ValueError(f"backend must be one of {BACKENDS}")
+        if self.ik_backend not in IK_BACKENDS:
+            raise ValueError(f"ik_backend must be one of {IK_BACKENDS}")
+        if self.tracking not in TRACKING_BACKENDS:
+            raise ValueError(f"tracking must be one of {TRACKING_BACKENDS}")
+        if self.backend != "mujoco" and self.ik_backend != "lm":
+            raise ValueError("Native IK backends require backend=mujoco")
+        if self.backend != "mujoco" and self.tracking != "kkt":
+            raise ValueError("mj-inverse tracking requires backend=mujoco")
+        if self.backend == "pink" and self.ik_backend != "lm":
+            raise ValueError("Pink backend cannot use native MuJoCo IK")
+        if self.backend == "pink" and self.tracking != "kkt":
+            raise ValueError("Pink backend cannot use mj-inverse tracking")
         if self.step_mode not in STEP_MODES:
             raise ValueError(f"step_mode must be one of {STEP_MODES}")
         if self.solver not in SOLVERS:
@@ -290,6 +306,10 @@ def match_command(request: MatchRequest) -> list[str]:
     ]
     if request.backend != "mujoco":
         cmd.extend(["--backend", request.backend])
+    if request.ik_backend != "lm":
+        cmd.extend(["--ik-backend", request.ik_backend])
+    if request.tracking != "kkt":
+        cmd.extend(["--tracking", request.tracking])
     if request.step_mode != "physical":
         cmd.extend(["--pink-step-mode", request.step_mode])
     if request.solver != "quadprog":
@@ -488,3 +508,61 @@ def list_runs(ledger_path: Path | None = None) -> Sequence[Any]:
         except (json.JSONDecodeError, OSError, ValueError):
             pass
     return scan().rows
+
+
+@dataclass(frozen=True)
+class ClubOnlyMatchRequest:
+    """Club-only Excel matching request bound to existing UI session facades."""
+
+    trial_id: str
+    model_id: str
+    preset: str = "fast_preview"
+    prior_choices: dict[str, Any] | None = None
+    geometry_choices: dict[str, Any] | None = None
+    user_edits: dict[str, Any] | None = None
+
+    @property
+    def source_kind(self) -> str:
+        return "club_only_excel"
+
+    def to_session(self) -> Any:
+        """Materialize a :class:`ClubOnlyUiSession` from this request."""
+        from src.shared.python.motion_matching.club_only.fast_matching import (
+            MatchPreset,
+        )
+        from src.shared.python.motion_matching.club_only.ui_integration import (
+            create_club_only_session,
+        )
+
+        try:
+            preset = MatchPreset(self.preset)
+        except ValueError as exc:
+            raise ValueError(f"unsupported club-only preset={self.preset!r}") from exc
+        return create_club_only_session(
+            trial_id=self.trial_id,
+            model_id=self.model_id,
+            preset=preset,
+            prior_choices=self.prior_choices,
+            geometry_choices=self.geometry_choices,
+            user_edits=self.user_edits,
+        )
+
+
+def summarize_club_only_result(view: Any) -> dict[str, Any]:
+    """Summarize a club-only result view for GUI/API consumers."""
+    if hasattr(view, "as_dict"):
+        payload = dict(view.as_dict())
+    elif isinstance(view, Mapping):
+        payload = dict(view)
+    else:
+        raise TypeError("view must expose as_dict() or be a mapping")
+    return {
+        "display_status": payload.get("display_status"),
+        "native_g1_pass": bool(payload.get("native_g1_pass", False)),
+        "trial_id": payload.get("trial_id"),
+        "model_id": payload.get("model_id"),
+        "preset": payload.get("preset"),
+        "qualification_blockers": list(payload.get("qualification_blockers") or ()),
+        "body_motion_disclaimer": payload.get("body_motion_disclaimer"),
+        "candidate_ids": list(payload.get("candidate_ids") or ()),
+    }
