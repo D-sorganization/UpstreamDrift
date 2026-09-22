@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10704
 - **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — CI repair: error-handling ratchet (named job/checkpoint catch tuples, no BLE001); 28 unit tests green; PR #10704 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after NM-05 #10701; DRY/inventory/BLE001 CI repairs; 28 unit tests green; PR #10704 squash auto-merge armed.
 - **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
 - **Next step:** Confirm CI green on PR #10704 and allow squash auto-merge to land.
 

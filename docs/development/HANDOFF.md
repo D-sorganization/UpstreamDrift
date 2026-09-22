@@ -22,7 +22,8 @@
   contract is not native timing evidence; no universal solve-time guarantee.
 - CI repair: DRY promote helper + divergence inventory; replace two
   `# noqa: BLE001` catches in `jobs/service.py` with named exception tuples
-  (error-handling ratchet).
+  (error-handling ratchet); rematched onto origin/main after NM-05 #10701
+  and regenerated divergence inventory.
 - Next: Confirm CI green on #10704; do not start MS-106+.
 
 ## GUI Thread-Blocking Migration #8880 Handoff
