@@ -2,7 +2,7 @@
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379)
 
-- Worktree: `Worktrees/UpstreamDrift-local-10379`, branch
+- Worktree: `agent-worktrees/issue-10379-local`, branch
   `feat/10379-ms105-jobs-recovery`, DL-#10379, PR
   [#10704](https://github.com/D-sorganization/UpstreamDrift/pull/10704)
   (squash auto-merge armed). Tip SHA: SELF.
@@ -26,68 +26,45 @@
   and regenerated divergence inventory.
 - Next: Confirm CI green on #10704; do not start MS-106+.
 
-## GUI Thread-Blocking Migration #8880 Handoff
+## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612)
 
-- Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10656-local`.
-- Branch: `fix/8880-gui-thread-blocking-sims`; PR [#10656](https://github.com/D-sorganization/UpstreamDrift/pull/10656).
-  Governing issue #8880. Entry DL-#8880.
-- Delivered: migrated `bunker_shot_gui` (`run_design_a`/`run_comparison`/
-  `run_cross_tier` gained `_async` siblings wired to the buttons, sync core
-  unchanged for tests), `ball_flight_gui` (`_run_simulation` split into
-  `_compute_trajectory`/`_render_trajectory`, `_run_simulation_async` added),
-  and `swing_flight_pipeline` (`_run_pipeline` split into
-  `_read_provider_and_config`/`_compute_pipeline_result`/
-  `_render_pipeline_result`, `_run_pipeline_async` added) onto
-  `src/tools/async_action.py`. Added `scripts/ci/check_gui_thread_blocking_ratchet.py`
-  (lower-only ratchet, baseline 12 un-migrated `src/tools/*/gui*.py` files),
-  wired into `ci-standard.yml`. Annotated `motion_matching/gui.py` with
-  `# noqa: gui-thread/ok` (already QProcess-backed, never blocked).
-- Compatibility constraint discovered mid-migration: in
-  `swing_flight_pipeline/gui.py`, the pre-existing inline handler imported
-  `SwingBallFlightPipeline` _before_ building the swing state, so a broken
-  pipeline module reported itself in the error message. Splitting the sync
-  core naively (build swing state, then import) reordered this and broke
-  `test_run_pipeline_handles_import_error` by surfacing an unrelated
-  `SwingState` ImportError from the provider's own lazy import instead.
-  Fixed by keeping the import-before-build order inside
-  `_compute_pipeline_result`.
-- Validation: targeted suites for all four touched tools pass, except three
-  pre-existing `bunker_shot_gui` failures (`test_shot_scene_render_vtk.py`,
-  `test_uncertainty_propagation_9243.py` x2) and one pre-existing
-  `swing_flight_pipeline` failure (`test_run_pipeline_passes_ui_parameters_to_swing_state`,
-  a clubhead-orientation numeric mismatch) — all four reproduced unmodified
-  against `origin/main` before this branch touched anything.
-  `ruff check` / `ruff format --check` clean on every changed file.
-- Limitations (declared): ~9 of ~25 `src/tools/*/gui*.py` files remain
-  genuinely un-migrated (not the false positives the ratchet's coarse
-  heuristic also flags, like `starting_pose_matcher`'s existing direct-QThread
-  mixins) — see the PR body's Deferred section for the list. The ratchet only
-  catches new growth in that count; it does not itself migrate anything.
-- CI repair (goal-wave5): merged `origin/main` (SPEC/HANDOFF/DEVELOPMENT_LOG +
-  `#10654` primary button styles); DRY gate fixes via `_read_comparison_designs`,
-  `_CROSS_TIER_BUSY_BANNER`, and `wire_primary_action_button`.
-- Next action: confirm CI green, enable squash auto-merge for PR #10656, tear
-  down this worktree after merge (`Refs #8880`, not `Closes`).
+- Worktree: `Worktrees/UpstreamDrift-10612-co08`, branch
+  `feat/issue-10612-co08-matrix`, DL-#10612, PR
+  [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) open.
+- Delivered: `club_only/matrix_qualification.py` independently reviews exported
+  candidate packages over native observation times for four workbook trials ×
+  the #10585 roster; freezes CO-02 gates and publishes failures; withheld-body
+  experiment keeps body markers out of fitting; visual attractiveness cannot
+  override physical failure; fail-closed tamper/leakage/phase/orientation/reset/
+  geometry/native checks. Path anchors: `fit_metrics.py`, `acceptance.py`,
+  `plot_fit_quality_card.py`. Schema `club-matrix-qualification/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
+- Validation: scoped club_only unit tests GREEN; local
+  `python scripts/ci/check_dry_duplication_gate.py` GREEN after extracting
+  `resolve_roster_matrix_scope` / `profile_from_roster` into `club_only/profiles.py`.
+- Limitations: software-contract scoring only; no native Fit/G1 claim; full-body
+  and missing-runtime cells remain unqualified with named blockers.
+- Next: Confirm CI green on PR #10703 (DRY gate); then squash-merge and dispatch CO-09.
 
-## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
+## GUI Thread-Blocking Migration #8880 [MERGED]
 
-- Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
-  `feat/10611-co07-fast-matching`, DL-#10611, PR
-  [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700) open.
+- Merged to main via PR [#10656](https://github.com/D-sorganization/UpstreamDrift/pull/10656).
+- Migrated `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline`
+  onto `src/tools/async_action.py`; added GUI thread-blocking ratchet.
+- Next: N/A — merged; remaining un-migrated tools tracked by the ratchet.
+
+## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611) [MERGED]
+
+- Merged to main via PR [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700)
+  (SHA `f9ece7f6a` on this worktree base).
 - Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
   budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
   cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
   bounded Pareto diversity, optional empty neural proposal slot, and stage
   profiling including verification time. Schema `club-fast-matching/1.0.0`;
   evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
-- Param-budget fix: collapse `run_fast_club_match` knobs onto `FastMatchOptions`
-  and private `_ScoreLoopCtx` / `_AssembleCtx` (repo-structure-gates).
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
-  GREEN (12 passed); `python scripts/ci/check_architecture_budget.py` OK.
-- Limitations: software-contract scoring only; no native Fit/G1 claim; no
-  unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
-  saved in the software-contract evidence for CO-08 (not native timing).
-- Next: Confirm CI green on PR #10700 after main merge through MS-14; squash auto-merge remains armed.
+- Limitations: software-contract scoring only; no native Fit/G1 claim.
+- Next: N/A — merged; continue CO-08/CO-09 on main.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
