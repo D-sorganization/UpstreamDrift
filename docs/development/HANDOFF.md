@@ -2,46 +2,57 @@
 
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
-- Worktree: `Worktrees/UpstreamDrift-10608-co04`, branch
-  `feat/issue-10608-co04-pendulum-club-match`, DL-#10608, PR #10680.
+- Worktree: Worktrees/UpstreamDrift-10608-co04, branch
+  eat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680.
 - Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
   original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
   retention; first-frame-before-integrate scoring; eight-cell double/triple ×
   four-trial matrix with replay packages and named native blockers (no invented
   G1 pass). Evidence:
-  `docs/plans/club_only_matching/evidence/club_pendulum_match.json`.
-- Dependency fix (CI `check_dependency_direction`): moved fit orchestration and
+  docs/plans/club_only_matching/evidence/club_pendulum_match.json.
+- Dependency fix (CI check_dependency_direction): moved fit orchestration and
   matrix builder to
-  `src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py`
-  and `club_match_matrix.py`; shared keeps pure contracts in
-  `club_only/pendulum_match.py` (engines → shared only). Architecture-budget
-  split: `_fit_triple` / `match_club_pendulum` helpers keep each function ≤100 lines.
-  Mypy: prescribed-hub track fills `hub_pos[:, :]` in-place so `(n, 2)` dtype stays.
-- Validation: `python scripts/check_dependency_direction.py` OK;
-  `python scripts/ci/check_architecture_budget.py` OK;
-  `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60`
+  src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py
+  and club_match_matrix.py; shared keeps pure contracts in
+  club_only/pendulum_match.py (engines → shared only). Architecture-budget
+  split: \_fit_triple / match_club_pendulum helpers keep each function ≤100 lines.
+  Mypy: prescribed-hub track fills hub_pos[:, :] in-place so (n, 2) dtype stays.
+- Merged origin/main (includes MS-61 #10676 / MS-102 #10677); conflicts only in
+  handoff + divergence inventory — architecture splits and engine-layer
+  orchestration preserved (no shared→engines top-level imports).
+- Validation: python scripts/check_dependency_direction.py OK;
+  python scripts/ci/check_architecture_budget.py OK;
+  python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60
   (10 passed); ruff clean on touched files.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
 - Next: Confirm CI green + squash auto-merge of PR #10680; then dispatch CO-05 (#10609)
   or await TB-05 (#10590) for native triple receipts.
 
+## MS-61 Simscape Topology + Full-Marker Terminal #10348
+
+- Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61.
+- Branch: feat/issue-10348-ms61-simscape-topology; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363).
+- Entry DL-#10348. Delivered: fail-closed topology classification (reduced_27_no_neck), dual terminal disclosure (full_marker_terminal.py + fit_metrics), acceptance hooks, run-103 blocked native_gate.json + R2025b runtime/parity receipts, runner -Fit fail-closed stub.
+- Rebased: merged origin/main (includes MS-102 #10677); kept fail-closed topology + blocked native_gate — no invented G1 pass.
+- CI fix: regenerated docs/development/matched_swing_program/README.md via python scripts/generate_matched_swing_status.py --write after ledger grew to 103 receipts (Simscape 40).
+- Validation: pytest tests/docs/test_matched_swing_status_freshness.py::test_matched_swing_status_section_is_fresh GREEN; prior focused topology suite still authoritative for MS-61 behavior.
+- Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
+- Next action: confirm CI green + squash auto-merge of PR #10676.
+
 ## MS-102 Engine and Model Inventory #10376 Handoff
 
-- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10376-ms102`.
-- Branch: `feat/ms102-engine-model-inventory`; PR #10677 open with squash auto-merge armed. Governing issue #10376
-  (MS-102, epic #10363). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`.
-- Entry DL-#10376. Delivered: `src/config/engine_model_inventory.json` (authority-
-  derived ledger), `src/engines/model_inventory.py` (load/reconcile/qualify), unit
-  tests, structural receipts under `docs/development/matched_swing_program/evidence/ms102/`.
-- Unblock after CO-02/NM-01: branch retargeted onto `origin/main`; split
-  `_run_native_pipeline` into host/repair/load/success helpers under architecture
-  budget; real `vendor/ud-tools` pin `a9ed0e7c5` (not a Tools junction).
+- Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10376-ms102.
+- Branch: eat/ms102-engine-model-inventory; PR #10677 **merged** to main. Governing issue #10376
+  (MS-102, epic #10363).
+- Entry DL-#10376. Delivered: src/config/engine_model_inventory.json (authority-
+  derived ledger), src/engines/model_inventory.py (load/reconcile/qualify), unit
+  tests, structural receipts under docs/development/matched_swing_program/evidence/ms102/.
 - Six flagship engines × driver/iron packaged; JaxSim/putting_green reconciled;
-  MyoSuite flagship status `repair` → #10344 (MS-51); Simscape R2025b required.
-- Validation: `python scripts/ci/check_architecture_budget.py`; `python -m pytest tests/unit/engines/test_model_inventory.py -q -n 0 --no-cov --timeout=120`; `python -m agent_context --root . check`.
-- Next: confirm CI green + squash auto-merge of PR #10677; native SDK receipts on
-  supported hosts via MS-103 preflight (not claimed by structural receipts).
+  MyoSuite flagship status
+  epair → #10344 (MS-51); Simscape R2025b required.
+- Next: native SDK receipts on supported hosts via MS-103 preflight (not claimed by
+  structural receipts).
 
 ## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
 
@@ -75,10 +86,9 @@
 ## MS-60 Simscape Run Management #10347 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10347-ms60`.
-- Branch: `fix/issue-10347-ms60-run-management`; PR #10669 open with auto-merge squash armed. Governing issue #10347 (MS-60, epic #10363).
-- Entry DL-#10347. Delivered: fail-closed R2025b run manifest (`SimscapeRunManifestRequest` + builder), returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
-- Validation: merged `origin/main` (cleared CONFLICTING/DIRTY), regenerated divergence inventory after vendor camera/launch_monitor path removals, refreshed `reports/matched_swing_ledger.json`; inventory + ledger freshness suites pass locally at SELF.
-- Next action: push conflict-clear tip, confirm CI green + squash auto-merge of PR #10669; DeskComputer second-person replay under 30 minutes.
+- Branch: `fix/issue-10347-ms60-run-management`; PR #10669 **merged**. Governing issue #10347 (MS-60, epic #10363).
+- Entry DL-#10347 (shipped). Delivered: fail-closed R2025b run manifest, returned-replay→MatchedSwingCandidate converter, `run_simscape_candidate.ps1`, committed run-102 candidate/manifest/playback GIF.
+- Next action: DeskComputer second-person replay under 30 minutes when MS-61 Fit is scheduled.
 
 ## MS-62 Simscape Coordinate Slice #10349 Handoff
 

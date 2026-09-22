@@ -1221,6 +1221,80 @@ def _evaluate_synthetic_engine(
     return results
 
 
+def _evaluate_full_body_profile(receipt: Mapping[str, Any]) -> list[GateResult]:
+    """Reject reduced-model profiles that claim full-body acceptance (MS-61)."""
+    profile = str(receipt.get("model_profile", "")).strip().lower()
+    if not profile:
+        nested = receipt.get("reduced_model_body_only")
+        if isinstance(nested, Mapping):
+            profile = str(nested.get("profile", "")).strip().lower()
+    if profile in {
+        "reduced_body_excluding_head",
+        "body_only",
+        "body-excluding-head",
+        "body_excluding_head",
+        "exclude_head",
+        "head_excluded",
+    }:
+        return [
+            GateResult(
+                name="full_body_profile",
+                status=GateStatus.FAILED,
+                threshold=1.0,
+                measured=0.0,
+                unit="match",
+                reason=(
+                    f"model_profile={profile!r} cannot satisfy full-body G1; "
+                    "body-excluding-head is diagnostic only (MS-61 / #10348)"
+                ),
+            )
+        ]
+    return []
+
+
+def _evaluate_dual_terminal_disclosure(
+    receipt: Mapping[str, Any],
+) -> list[GateResult]:
+    """Require both terminal metrics when the receipt opts into dual disclosure."""
+    required = bool(receipt.get("require_dual_terminal_metrics"))
+    full_g1 = receipt.get("full_marker_g1")
+    if isinstance(full_g1, Mapping) and full_g1.get("require_dual_terminal_metrics"):
+        required = True
+    if not required:
+        return []
+
+    full_t = _extract_metric(
+        receipt,
+        "terminal_full_marker_rmse_m",
+        "terminal_marker_rmse_m",
+        "terminal_rms_m",
+    )
+    body_t = _extract_metric(receipt, "terminal_body_excluding_head_rmse_m")
+    head_t = _extract_metric(receipt, "terminal_head_cluster_rmse_m")
+    if full_t is None or body_t is None or head_t is None:
+        return [
+            GateResult(
+                name="dual_terminal_disclosure",
+                status=GateStatus.MISSING,
+                threshold=1.0,
+                reason=(
+                    "require_dual_terminal_metrics needs terminal_full_marker_rmse_m, "
+                    "terminal_body_excluding_head_rmse_m, and "
+                    "terminal_head_cluster_rmse_m"
+                ),
+            )
+        ]
+    return [
+        GateResult(
+            name="dual_terminal_disclosure",
+            status=GateStatus.PASSED,
+            threshold=1.0,
+            measured=1.0,
+            unit="match",
+        )
+    ]
+
+
 @precondition(
     lambda receipt, horizon=Horizon.G1, gates=None, capture=None: isinstance(
         horizon, Horizon
@@ -1245,6 +1319,12 @@ def evaluate(
     contact_audit = receipt.get("contact_audit")
     gate_results: list[GateResult] = []
     gate_results.extend(_evaluate_marker_rmse(receipt, horizon, gates))
+    # MS-61 (#10348): never hide head-cluster terminal; body-only cannot pass full-body.
+    from src.shared.python.motion_matching.full_marker_terminal import (
+        evaluate_full_marker_terminal_disclosure,
+    )
+
+    gate_results.extend(evaluate_full_marker_terminal_disclosure(receipt))
     gate_results.extend(_evaluate_pelvis_yaw(receipt, horizon, gates))
     gate_results.extend(_evaluate_normal_contact_force(receipt, gates, contact_audit))
     gate_results.extend(_evaluate_ground_and_closure(receipt, gates, contact_audit))
@@ -1260,6 +1340,8 @@ def evaluate(
     gate_results.extend(_evaluate_club_coverage(receipt, gates))
     gate_results.extend(_evaluate_horizon_truncation(receipt, horizon, gates))
     gate_results.extend(_evaluate_synthetic_engine(receipt, gates))
+    gate_results.extend(_evaluate_full_body_profile(receipt))
+    gate_results.extend(_evaluate_dual_terminal_disclosure(receipt))
 
     # Overall verdict
     is_accepted = len(gate_results) > 0 and all(
