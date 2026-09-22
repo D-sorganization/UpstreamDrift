@@ -219,4 +219,3 @@ python -c "from pathlib import Path; from src.shared.python.motion_matching.jobs
 - Software-contract reproduction guide only; desk-native receipts required before scientific promotion.
 - Epic #10602 remains open while mandatory native fits are missing.
 - UI/docs GREEN does not close unqualified matrix cells.
-

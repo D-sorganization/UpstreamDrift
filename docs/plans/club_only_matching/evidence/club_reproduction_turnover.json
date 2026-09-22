@@ -1083,12 +1083,7 @@
   ],
   "schema": "club-only-reproduction/1.0.0",
   "scored_count": 12,
-  "trial_ids": [
-    "TW_wiffle",
-    "TW_ProV1",
-    "GW_wiffle",
-    "GW_ProV11"
-  ],
+  "trial_ids": ["TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"],
   "unresolved_count": 68,
   "workbook_identity_schema": "club-workbook-identity/1.0.0"
 }
