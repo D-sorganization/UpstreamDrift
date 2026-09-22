@@ -17,18 +17,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10591 (TB-06, parent #10584, program #10363)
+- **Branch:** feat/10591-upper-body-baseline
+- **PR:** #10732 (open)
+- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at `0d620ecf9` — replay contracts preserve every source-clock frame, record actuator torques separately from constraint reactions, require explicit marker attachments and capture-frame embedding, and evaluate physical marker metrics only on an identical body-target clock; 31 focused tests and scoped Ruff pass. PR #10732 is in CI.
+- **Summary:** Build the fail-closed constrained upper-body golfer adapter for Driver and Iron. The current replay foundation is native dynamics evidence only; it does not claim torque fitting, capture-specific calibration, or qualification.
+- **Next step:** Implement bounded torque fitting and capture-specific calibration over the explicit TB-06 replay and marker contracts.
+
 ### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #10592 (TB-07, parent #10584, program #10363)
-- **Branch:** feat/10592-reconcile-motion-results
-- **PR:** #10730 (open)
+- **PR:** #10730 (merged)
 - **Paths:** src/shared/python/tour_baselines/coverage.py; src/shared/python/motion_matching/ledger.py; tests/unit/tour_baselines/test_coverage_matrix.py; tests/unit/motion_matching/test_ledger.py; docs/plans/tour_baselines/coverage_matrix.md; docs/development/matched_swing_program/README.md; reports/matched_swing_ledger.json; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at HEAD — red ledger regression confirmed TB-04 receipts were absent from unified discovery; regenerated ledger/status after indexing both as `tools`/`tour_baselines` with `REJECTED` acceptance, then 24 focused tests passed along with Ruff and architecture/file-size budgets.
+- **Last verified:** 2026-09-22 at `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3` — merged after focused tests, Ruff, architecture/file-size budgets, and required PR checks passed.
 - **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix and unified run ledger preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence remains distinct from full-body G1/G2/G3 qualification.
-- **Next step:** Merge PR #10730 after required checks pass.
 - **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
