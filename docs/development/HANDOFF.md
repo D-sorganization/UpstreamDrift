@@ -439,8 +439,9 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Branch: `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701) open with squash auto-merge armed. Governing issue #10620 (NM-05, epic #10603). Entry DL-#10620.
 - Delivered: `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`); `DynamicsBaselineTrainerConfig` + modular pilot helpers; `FamilySplitPlan.ids_for`; classical then optional MLP; trial splits / inverse conditioning / identity-leakage guards; dynamics_baselines.md + receipt; training seams `neural_dynamics_baseline_budget` / `register_dynamics_baseline_corpus`.
 - CI unblock (SELF): LoD via `ids_for`; architecture budget via `DynamicsBaselineTrainerConfig` + pilot helpers; keep `inverse_timestep/` byte-identical to `origin/main` so grandfathered oversizes stay out of the changed-file architecture scan.
-- Validation: `pytest tests/unit/neural_motion/test_dynamics_baselines_nm05.py -q -n 0 --no-cov --timeout=120` (10 passed); architecture budget scoped to NM-05 baselines only; DRY helper \_state_control_features; software-contract fixtures only.
-- Next action: confirm lod-quality-gate + repo-structure-gates green on PR #10701; do not start NM-06+.
+- Validation: `pytest tests/unit/neural_motion/test_dynamics_baselines_nm05.py -q -n 2 --no-cov --timeout=120` (10 passed under xdist); architecture budget scoped to NM-05 baselines only; DRY helper \_state_control_features; software-contract fixtures only.
+- CI unblock (SELF): unit-test-gate — patch `torch_is_available` on the imported `baselines.neural` module object; assert `mlp_skipped_reason == "torch_unavailable"`. String-path monkeypatch fails under xdist on the `src.shared.python` namespace package. quality-gate was cascade of that failure only.
+- Next action: confirm unit-test-gate + quality-gate green on PR #10701; do not start NM-06+.
 
 ## Neural Teacher Episodes NM-04 #10619 Handoff
 
