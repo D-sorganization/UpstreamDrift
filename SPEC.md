@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | n/a | Replaced `np.linalg.norm` with `math.hypot` in `mujoco/python/full_body_ik.py` and `np.sqrt(np.einsum(...))` in `mujoco/python/replay_evidence.py` (spec-exempt: micro-optimization) |
 | 2026-09-22 | #10700 | Optimize fast club-only matching and expose candidate diversity (CO-07): bounded presets, immutable cache/checkpoint, cold/retrieval/reduced-to-full starts, feasibility-first Pareto pruning, optional neural slot without weights; software-contract only. |
 | 2026-09-22 | #10653 | Consolidate launcher engine meta-tiles (#9479): hide duplicate per-engine dashboards with documented reasons, reclassify three specialized tools to `simulation`, clarify confusable data/video tile names, and move non-golf utilities to Developer & Research (#9480); no capability removed. |
 | 2026-09-21 | #10657 | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization). |
