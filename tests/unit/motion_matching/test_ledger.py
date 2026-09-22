@@ -114,6 +114,7 @@ def test_disqualified_tour_baseline_receipts_are_indexed_as_rejected() -> None:
     assert all(row.acceptance["is_physically_accepted"] is False for row in rows)
 
 
+@pytest.mark.unit
 def test_upper_body_planarity_receipts_are_indexed_as_rejected() -> None:
     """TB-06 planarity preflight blocks fitting without disappearing from the ledger."""
     rows = [
