@@ -345,11 +345,11 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-local-10619`.
 - Branch: `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) open with squash auto-merge armed. Governing issue #10619 (NM-04, epic #10603). Entry DL-#10619.
-- Base: merged `origin/main` through NM-03 #10686 (`800703cb`).
-- Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt.
-- Validation: `python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60` (12 passed); ruff clean on touched paths.
+- Base: merged `origin/main` (merge commit on branch tip `SELF`).
+- Delivered: `src/shared/python/neural_motion/teachers/` (`TeacherSpec`/`TeacherOutcome`, `TeacherEpisodeGenerator`, `NestedTeacherCorpus`, `RejectionLedger`, `ActiveLearningAcquirer`); schemas `neural-teacher-episodes/1.0.0` and `neural-acquisition-log/1.0.0`; teacher_episodes.md + receipt; training reuse seams `neural_teacher_corpus_budget` (`training/scheduler.py`) and `register_teacher_episode_corpus` (`training/datasets.py`) for phantom-guard Rule 3.
+- Validation: `python -m pytest tests/unit/neural_motion/test_teacher_episodes_nm04.py -q -n 0 --no-cov --timeout=60`; ruff clean on touched paths.
 - Limitations: synthetic software-contract tests only; no native teacher corpus, training, or speed claim.
-- Next action: confirm CI green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
+- Next action: confirm phantom-guard + CI green on PR #10698; squash auto-merge remains armed; do not start NM-05+.
 
 ## Neural Episode Storage NM-03 #10618 Handoff
 
