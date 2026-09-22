@@ -750,3 +750,28 @@ tomorrow. `fleet-guard report` shows what has been caught.
   a fleet-guard verdict; fix the cause or ask the operator to change the mode.
 
 <!-- END FLEET-MANAGED: fleet-guard -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: deferred-validation -->
+
+## Deferred Experimental Work
+
+Before selecting work, read `docs/development/planning/catalog.json` when present.
+Unavailable physical measurements, participant tests, plant access and independent
+human approvals belong in repo-owned future plans for Board review. Never invent
+evidence to complete them. Keep independently executable software work active;
+split mixed issues rather than hiding defects or weakening release gates.
+
+Project Steward exposes these plans as `parked` charter features and resource
+decisions in the existing Projects status. Coding agents do not dispatch deferred
+experiments or reopen `roadmap` issues just because the experiment remains undone.
+Board approval plus verified resources permits a bounded activation issue assigned
+to the appropriate human/equipment owner; it does not establish validation.
+
+Preserve original issue context and acceptance in the owning repository, merge
+and verify the plan, then close eligible external-only issues as `not_planned`
+with `roadmap` and a durable record link. Respect existing claims and protected
+issues. Standard: Repository_Management `docs/fleet-deferred-validation.md`.
+
+<!-- END FLEET-MANAGED: deferred-validation -->

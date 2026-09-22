@@ -13,7 +13,6 @@ import math
 from typing import Any
 
 import numpy as np
-from scipy.optimize import least_squares
 
 from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
@@ -23,9 +22,11 @@ from src.engines.physics_engines.pendulum.python.motion_matching.adapters import
     forward_kinematics_2d,
 )
 from src.shared.python.motion_matching.bernstein_controls import (
+    BernsteinFitResidualPolicy,
     bernstein_curvature_penalty,
     bernstein_effort_penalty,
     evaluate_bernstein_controls,
+    solve_bounded_bernstein_least_squares,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,11 @@ class BernsteinTorqueProfile:
             weight=weight,
             scale=100.0,
         )
+
+    @property
+    def control_points(self) -> np.ndarray:
+        """Return controls in the shared actuator-row representation."""
+        return np.vstack((self.shoulder_controls, self.wrist_controls))
 
 
 @dataclass(frozen=True)
@@ -271,6 +277,9 @@ def fit_bounded_double_pendulum(
     )
 
     n_eval = 0
+    residual_policy = BernsteinFitResidualPolicy(
+        opts.curvature_weight, opts.effort_weight, 100.0
+    )
 
     def residual_func(params: np.ndarray) -> np.ndarray:
         nonlocal n_eval
@@ -286,19 +295,15 @@ def fit_bounded_double_pendulum(
         tracking_res, _ = _compute_tracking_errors(
             q_rollout, target.l1, target.l2, p0, grip_arr, head_arr, observed_mask
         )
-        curv_res = prof.curvature_penalty(opts.curvature_weight)
-        eff_res = prof.effort_penalty(opts.effort_weight)
-        return np.concatenate([tracking_res, curv_res, eff_res])
+        return residual_policy.assemble(tracking_res, prof.control_points)
 
     x0: np.ndarray = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
-    opt_res = least_squares(
+    opt_res = solve_bounded_bernstein_least_squares(
         residual_func,
         x0,
-        bounds=(lo, hi),
-        max_nfev=max(opts.max_nfev, 5),
-        ftol=1e-5,
-        xtol=1e-5,
-        gtol=1e-5,
+        lo,
+        hi,
+        max_evaluations=opts.max_nfev,
     )
 
     optimal_profile = BernsteinTorqueProfile(
