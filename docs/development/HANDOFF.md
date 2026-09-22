@@ -20,13 +20,14 @@
   GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
   `docs/shared_tools/divergence_inventory.v1.json` against pinned
   `vendor/ud-tools` (includes tools-only `launch_monitor/gspro_connect.py`).
-  Merged `origin/main` through #10709 (NM-06), #10718 (CO-10), and #10721
+  Merged `origin/main` through #10709 (NM-06), #10718/#10720 (CO-10), and #10721
   (succession handoff); `tests/unit/motion_matching/jobs/test_matching_jobs.py`
-  retained; SPEC keeps #10707, #10709, #10718, and #10721 rows.
+  retained; SPEC keeps one row each for #10707, #10709, #10718, #10720, #10721
+  (deduped duplicate #10721 key after main merge).
 - Named blockers: no invented six-engine native pass; every incomplete cell
   names its owner issue; software-contract fixtures only.
-- Next: Confirm CI green on #10707 after #10721 merge; do not start MS-106 or
-  steal NM-07 #10622 from this worktree.
+- Next: Confirm CI green on #10707 tip after SPEC duplicate-key repair; do not
+  start MS-106 or steal NM-07 #10622 from this worktree.
 
 ## Succession — Motion Matching (2026-09-22)
 
