@@ -1523,7 +1523,7 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
-- 2026-09-22T16:15:00Z — Succession handoff: CO-10 #10718 and NM-06 #10709 merged; duplicates #10719/#10720 closed; do not steal NM-07 #10622. Commit SELF.
+- 2026-09-22T16:15:00Z — Succession handoff PR #10721: CO-10 #10718 and NM-06 #10709 merged; duplicates #10719/#10720 closed; do not steal NM-07 #10622. Commit SELF.
 - 2026-09-22T15:00:00Z — NM-06 #10709: rematch onto origin/main after CO-09/#10650 landed; keep proposal_shared DRY helpers. Commit SELF.
 - 2026-09-22T14:35:07Z — CI remediation for #10650: joint_panel unit tests now
   construct a module-scoped offscreen QApplication (autouse qapp fixture,
