@@ -36,21 +36,27 @@ from src.engines.physics_engines.putting_green.python.turf_properties import (
 _FT_TO_M = 0.3048
 _BALL_LIFT_M = 0.021  # half a golf-ball diameter, so the path rides the surface
 
-# Documented control ranges (mirrored by the GUI spin-box bounds).
+# Documented control ranges (mirrored by the GUI spin-box bounds).  All
+# internal state is SI (issue #8886); the historical 1-30 ft distance range
+# is preserved exactly by converting its bounds through ``_FT_TO_M``.
 SPEED_RANGE_MS = (0.5, 8.0)
 AIM_RANGE_DEG = (-45.0, 45.0)
-DISTANCE_RANGE_FT = (1.0, 30.0)
+DISTANCE_RANGE_M = (1.0 * _FT_TO_M, 30.0 * _FT_TO_M)
 STIMP_RANGE = (6.0, 14.0)
 SLOPE_RANGE_DEG = (0.0, 5.0)
 
 
 @dataclass(frozen=True)
 class PuttConfig:
-    """User-facing putt configuration (matches the GUI controls)."""
+    """User-facing putt configuration (matches the GUI controls).
+
+    All fields are SI (metres, m/s, degrees) per the repository's unit
+    policy (issue #8886) -- there is no mixed-unit-system field here.
+    """
 
     putter_speed_ms: float = 2.5
     aim_deg: float = 0.0
-    cup_distance_ft: float = 10.0
+    cup_distance_m: float = 10.0 * _FT_TO_M
     stimp: float = 10.0
     slope_deg: float = 1.0
     integrator: str = "rk4"
@@ -92,7 +98,7 @@ def _validate(config: PuttConfig) -> None:
     checks = (
         ("putter_speed_ms", config.putter_speed_ms, SPEED_RANGE_MS),
         ("aim_deg", config.aim_deg, AIM_RANGE_DEG),
-        ("cup_distance_ft", config.cup_distance_ft, DISTANCE_RANGE_FT),
+        ("cup_distance_m", config.cup_distance_m, DISTANCE_RANGE_M),
         ("stimp", config.stimp, STIMP_RANGE),
         ("slope_deg", config.slope_deg, SLOPE_RANGE_DEG),
     )
@@ -223,7 +229,7 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
     """
     _validate(config)
 
-    dist_m = config.cup_distance_ft * _FT_TO_M
+    dist_m = config.cup_distance_m
     (
         ball_x,
         cup_x,
