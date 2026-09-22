@@ -1098,9 +1098,9 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _save_settings_on_close(self) -> None:
         """Save user preferences before closing."""
-        from PyQt6.QtCore import QSettings
+        from src.launchers.launcher_settings_store import launcher_settings
 
-        settings = QSettings("UpstreamDrift", "Launcher")
+        settings = launcher_settings()
         settings.setValue("chk_live", self.chk_live.isChecked())
         settings.setValue("chk_gpu", self.chk_gpu.isChecked())
         settings.setValue("chk_docker", self.chk_docker.isChecked())

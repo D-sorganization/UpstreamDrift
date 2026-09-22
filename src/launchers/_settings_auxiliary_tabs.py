@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.hover_copy_browser import HoverCopyTextBrowser
+from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 
@@ -182,7 +183,7 @@ class SettingsAuxiliaryTabsMixin:
     def _load_app_log(self) -> None:
         log_candidates = [
             Path.cwd() / "app_launch.log",
-            Path.home() / ".golf_modeling_suite" / "launcher.log",
+            user_config_path("launcher.log"),
         ]
         for log_path in log_candidates:
             if self._load_log_file(log_path, self._log_viewer, 200):
@@ -190,7 +191,7 @@ class SettingsAuxiliaryTabsMixin:
         self._log_viewer.setPlainText("(No log file found)")
 
     def _load_process_log(self) -> None:
-        log_path = Path.home() / ".golf_modeling_suite" / "process_output.log"
+        log_path = user_config_path("process_output.log")
         if self._load_log_file(log_path, self._proc_log_viewer, 300):
             return
         self._proc_log_viewer.setPlainText(
