@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,9 @@ import h5py
 from src.shared.python.simulation_backends.provenance import PROVENANCE_FLAT_PREFIX
 
 _RESULT_EXTENSIONS = frozenset({".h5", ".hdf5"})
+_JSON_EXTENSIONS = frozenset({".json"})
 _META_PREFIX = "meta_"
+_CLUB_ONLY_KIND = "club_only_ui_result"
 
 
 @dataclass(frozen=True)
@@ -49,10 +52,10 @@ class ResultFilter:
 
 
 class ResultsBrowser:
-    """Filesystem-backed indexer for CC-4 HDF5 result artifacts.
+    """Filesystem-backed indexer for CC-4 HDF5 and club-only JSON results.
 
     Postcondition: :meth:`index` returns a deterministic, path-sorted list of
-    artifacts that can be filtered without reopening HDF5 files.
+    artifacts that can be filtered without reopening backing files.
     """
 
     def __init__(self, root: Path | str) -> None:
@@ -66,7 +69,7 @@ class ResultsBrowser:
         return self._root
 
     def index(self, result_filter: ResultFilter | None = None) -> list[ResultArtifact]:
-        """Index all readable canonical HDF5 artifacts under ``root``."""
+        """Index readable HDF5/JSON result artifacts under ``root``."""
         if result_filter is not None and not isinstance(result_filter, ResultFilter):
             raise TypeError("result_filter must be ResultFilter or None")
         filter_value = result_filter or ResultFilter()
@@ -87,9 +90,13 @@ class ResultsBrowser:
             raise ValueError(f"root must be a directory: {self._root}")
         artifacts: list[ResultArtifact] = []
         for path in self._root.rglob("*"):
-            if path.suffix.lower() not in allowed or not path.is_file():
+            suffix = path.suffix.lower()
+            if suffix not in allowed or not path.is_file():
                 continue
-            artifact = _read_artifact(self._root, path)
+            if suffix in _JSON_EXTENSIONS:
+                artifact = _read_json_artifact(self._root, path)
+            else:
+                artifact = _read_artifact(self._root, path)
             if artifact is not None:
                 artifacts.append(artifact)
         return artifacts
@@ -117,6 +124,43 @@ def _read_artifact(root: Path, path: Path) -> ResultArtifact | None:
         backend=backend,
         metadata=metadata,
         provenance=provenance,
+    )
+
+
+def _read_json_artifact(root: Path, path: Path) -> ResultArtifact | None:
+    """Index club-only (and similarly shaped) JSON result packages."""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    kind = payload.get("kind")
+    if kind != _CLUB_ONLY_KIND:
+        return None
+    metadata: dict[str, Any] = {}
+    for key, value in payload.items():
+        if key.startswith(_META_PREFIX):
+            metadata[key[len(_META_PREFIX) :]] = value
+        elif key in {"session_id", "dataset_id", "project_id", "subject_id"}:
+            metadata[key] = value
+    if "session_id" not in metadata and "session_id" in payload:
+        metadata["session_id"] = payload["session_id"]
+    if "dataset_id" not in metadata and payload.get("meta_dataset_id"):
+        metadata["dataset_id"] = payload["meta_dataset_id"]
+    schema_version = payload.get("schema_version")
+    backend = payload.get("backend") or payload.get("model_id")
+    stat = path.stat()
+    return ResultArtifact(
+        path=str(path),
+        relative_path=path.relative_to(root).as_posix(),
+        size_bytes=stat.st_size,
+        modified_at=_mtime_to_iso(stat.st_mtime),
+        schema_version=str(schema_version) if schema_version is not None else None,
+        kind=str(kind),
+        backend=str(backend) if backend is not None else None,
+        metadata=metadata,
+        provenance={},
     )
 
 
