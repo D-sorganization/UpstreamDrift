@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10379 (MS-105, epic #10363; folded PF-08 #10438)
+- **Branch:** feat/10379-ms105-jobs-recovery
+- **PR:** #10704
+- **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after NM-05 #10701; DRY/inventory/BLE001 CI repairs; 28 unit tests green; PR #10704 squash auto-merge armed.
+- **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
+- **Next step:** Confirm CI green on PR #10704 and allow squash auto-merge to land.
+
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
 - **State:** in_review
@@ -400,18 +413,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
-### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
+### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
 
 - **State:** in_review
+- **Owner:** local
+- **Issue:** #10620 (epic #10603)
+- **Branch:** feat/issue-10620-nm05-baselines
+- **PR:** #10701
+- **Paths:** src/shared/python/neural_motion/baselines/; src/shared/python/neural_motion/episodes/splits.py; tests/unit/neural_motion/test_dynamics_baselines_nm05.py; docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — 10 NM-05 tests green under xdist (-n 2); module-object torch absence patch asserts torch_unavailable; software-contract only
+- **Summary:** Pilot dynamics baselines over NM-03 episode store: `DynamicsBaselineTrainerConfig`, split helpers, `FamilySplitPlan.ids_for`; analytical 1/2-DOF fixture map, ridge, nearest neighbor, optional small MLP; trial-level splits, train-only normalizer digest, inverse conditioning, identity-leakage and unavailable-torque guards; validation checkpointing with test untouched; honest analytical-vs-MLP comparison on fixtures.
+- **Next step:** Confirm unit-test-gate and quality-gate green on PR #10701; squash auto-merge remains armed.
+- **Evidence:** docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
+
+### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10619 (epic #10603)
 - **Branch:** local/nm-04-teacher-episodes
 - **PR:** #10698
 - **Paths:** src/shared/python/neural_motion/teachers/; src/shared/python/training/scheduler.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — DRY helpers + divergence inventory for `neural_motion/teachers/*`; squash auto-merge armed; software-contract only
+- **Last verified:** 2026-09-22 — merged to main via #10698 (`2142d380b`)
 - **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes; training scheduler admits teacher budgets via `neural_teacher_corpus_budget` and datasets register teacher corpus paths without all-RAM load.
-- **Next step:** Confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed.
+- **Next step:** Continue NM-05 (#10620) under frozen teacher and episode-store contracts.
 - **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
 
 ### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
@@ -584,17 +611,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10611 · CO-07 Optimize Fast Matching and Expose Candidate Diversity
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10611 (epic #10602)
 - **Branch:** feat/10611-co07-fast-matching
-- **PR:** #10700
+- **PR:** #10700 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — architecture param-budget fix via FastMatchOptions/\_ScoreLoopCtx/\_AssembleCtx; merged origin/main (MS-14); 12 unit tests GREEN; check_architecture_budget OK; native_g1_pass false
+- **Last verified:** 2026-09-22 at f9ece7f6a — squash-merged to main via PR #10700; native_g1_pass false on software-contract fixtures.
 - **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time. Public knobs collapse onto FastMatchOptions for architecture parameter budgets.
-- **Next step:** Confirm CI green and squash merge of PR Fixes #10611; do not start CO-08+.
+- **Next step:** Dispatch CO-08 (#10612) per club-only epic dependency order; do not invent native G1 pass.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
+
+### DL-#10612 · CO-08 Qualify the Club-Only Matrix and Plausibility Tradeoffs
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10612 (epic #10602)
+- **Branch:** feat/issue-10612-co08-matrix
+- **PR:** #10703
+- **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/fit_metrics.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/plot_fit_quality_card.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — DRY fingerprints extracted to resolve_roster_matrix_scope; local DRY gate + scoped unit tests GREEN; native_g1_pass false
+- **Summary:** Independent matrix qualification over native observation times for four workbook trials × #10585 roster with frozen CO-02 gates, published failures, withheld-body experiment semantics, common-observable comparison across complexities, and fail-closed checks for tamper/leakage/phase/orientation/reset/geometry/false-native claims. Shared roster/matrix scope helpers live in club_only/profiles.py.
+- **Next step:** Confirm CI green on PR #10703 and squash-merge Fixes #10612; do not start CO-09+ until merge.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_matrix_qualification.json; tests/unit/motion_matching/test_club_matrix_qualification.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
@@ -1678,6 +1719,20 @@ open. Preserve explicit ground configuration in independent replay.
 - **Last verified:** 2026-09-12 (`f712806df`)
 - **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.
 - **Next step:** Open PR, monitor CI checks, and merge.
+
+### DL-#8869 · Realtime Pub/Sub: Wire the WS Transport Instead of a Silent No-Op
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8869 (folds in #8868, #8942A; seam #9406 ruling: `realtime` is `split pending`, UD keeps this facade)
+- **Branch:** fix/8869-realtime-pubsub-decision
+- **PR:** #10655 (open)
+- **Paths:** `src/shared/python/realtime/api.py`; `src/shared/python/realtime/channels.py`; `src/shared/python/realtime/__init__.py`; `tests/unit/realtime/test_facade.py`; `tests/unit/realtime/test_channels.py`; `tests/shared/realtime/test_api.py`; `tests/shared/realtime/test_channels.py`; `docs/config/pydantic-settings-migration.md` (removed `file_pubsub.py` mention)
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF (rebased onto main including #10654; 125 tests pass in tests/unit/realtime + tests/shared/realtime, incl. new unsupported-transport and ws-routing tests; 3 tests skip cleanly when the optional `upstream_realtime` Rust wheel isn't built locally; ruff check/format clean; seam-drift gate passes with 14 pre-existing notes, no new overlap)
+- **Summary:** Decision (documented in full in the PR body): WIRE, not delete. `ws_pubsub.py` looked dead from `api.py`'s perspective but is a mature, independently soak-tested feature (`.github/workflows/realtime-soak.yml`, nightly 24h run against issue #5235/#5214 latency budgets, backed by the `upstream-realtime` Rust/Tokio crate) — deleting it would have thrown away real, maintained infrastructure. `api.py.publish()`/`subscribe()` now route to `WSPubSub` when `transport="ws"` or `REALTIME_TRANSPORT=ws` is set explicitly; any other value raises `ValueError` immediately instead of silently falling back to file (the literal defect in #8869's title). `channels.py`'s colliding `register_channel` was renamed to `register_channel_hint` to resolve the naming collision the issue flagged; its automatic frequency-based transport routing is intentionally **not** wired into the default path yet (constructing `WSPubSub` autostarts a background server — an implicit default-on network listener for existing unaware callers like Pose Studio is a separate, riskier product decision). Deleted `file_pubsub.py` (a genuinely redundant, fully-dead second file-transport implementation superseded by `transport_file.py`, imported by nothing but its own tests) and its two test files. Left `#8868` (training-progress publisher/subscriber default wiring) and `#8942A` (already appears fixed on main — `transport_file.py` already tracks a read offset and doesn't re-parse whole files) for separate follow-up; not claimed as resolved here.
+- **Next step:** Push rebase merge commit, await green CI, merge, release lease.
+- **Evidence:** tests/unit/realtime/test_facade.py (`test_publish_with_ws_transport_routes_to_ws`, `test_publish_with_unsupported_transport_raises`, `test_subscribe_with_ws_transport_routes_to_ws`); tests/shared/realtime/test_api.py (`test_publish_ws_transport_routes_to_ws`, `test_publish_unsupported_transport_raises`, `test_subscribe_ws_transport_routes_to_ws`).
 
 ### DL-#9193 · Companion Documentation and Capability Evidence Authority
 
