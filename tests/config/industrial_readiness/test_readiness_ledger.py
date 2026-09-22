@@ -1,4 +1,4 @@
-"""CI gate for the industrial-readiness ledger (epic #9539).
+"""CI gate for the readiness ledgers (epics #9539 and #9546).
 
 These tests ARE the readiness gate. They fail when:
     1. A ``merged`` entry claims completion without a merge SHA, a test, or
@@ -22,6 +22,7 @@ from typing import Any
 
 import pytest
 from src.config.industrial_readiness_loader import (
+    IMPACT_ZONE_LEDGER_PATH,
     LEDGER_PATH,
     REPO_ROOT,
     UNASSIGNED_OWNER,
@@ -34,10 +35,14 @@ from src.config.industrial_readiness_loader import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.fixture(scope="module")
-def ledger() -> IndustrialReadinessLedger:
-    """The committed ledger, loaded once per module."""
-    return IndustrialReadinessLedger.load()
+#: Every committed ledger is held to the same contract.
+_LEDGER_PATHS = (LEDGER_PATH, IMPACT_ZONE_LEDGER_PATH)
+
+
+@pytest.fixture(scope="module", params=_LEDGER_PATHS, ids=lambda p: p.stem)
+def ledger(request: pytest.FixtureRequest) -> IndustrialReadinessLedger:
+    """Each committed ledger, loaded once per module."""
+    return IndustrialReadinessLedger.load(request.param)
 
 
 @pytest.fixture(scope="module")
@@ -58,14 +63,29 @@ def _write(tmp_path: Path, payload: dict[str, Any]) -> Path:
 # ---------------------------------------------------------------------------
 
 
-def test_ledger_file_exists() -> None:
-    assert LEDGER_PATH.exists(), f"Missing readiness ledger {LEDGER_PATH}"
+@pytest.mark.parametrize("path", _LEDGER_PATHS, ids=lambda p: p.stem)
+def test_ledger_file_exists(path: Path) -> None:
+    assert path.exists(), f"Missing readiness ledger {path}"
 
 
 def test_ledger_loads(ledger: IndustrialReadinessLedger) -> None:
-    assert ledger.epic == 9539
+    assert ledger.epic in {9539, 9546}
     assert ledger.queue
     assert ledger.acceptance
+
+
+def test_impact_zone_ledger_is_the_epic_9546_record() -> None:
+    """The second ledger records the Impact Zone epic and its six children."""
+    ledger = IndustrialReadinessLedger.load(IMPACT_ZONE_LEDGER_PATH)
+    assert ledger.epic == 9546
+    assert {item.issue for item in ledger.queue} == {
+        9547,
+        9548,
+        9549,
+        9550,
+        9484,
+        9349,
+    }
 
 
 def test_every_referenced_path_exists(ledger: IndustrialReadinessLedger) -> None:
@@ -74,7 +94,7 @@ def test_every_referenced_path_exists(ledger: IndustrialReadinessLedger) -> None
         path for path in ledger.referenced_paths() if not (REPO_ROOT / path).exists()
     ]
     assert not missing, (
-        f"industrial_readiness.json references paths that do not exist: {missing}"
+        f"epic #{ledger.epic} ledger references paths that do not exist: {missing}"
     )
 
 
