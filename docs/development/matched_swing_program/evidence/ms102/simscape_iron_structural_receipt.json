@@ -1,0 +1,65 @@
+{
+  "package_id": "simscape/iron",
+  "engine": "simscape",
+  "host": "windows",
+  "overall": "pass",
+  "steps": [
+    {
+      "step": "resolve_assets",
+      "outcome": "pass",
+      "message": "all declared assets resolve under the repository root",
+      "remediation": null
+    },
+    {
+      "step": "hash_check",
+      "outcome": "pass",
+      "message": "identity hash b7fa7ca1713c1a7effe28ace5483e8e7c41fd0ca6c768b3fb0f6612ab42663a4",
+      "remediation": null
+    },
+    {
+      "step": "load_compile",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "initialize",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "fk_mass",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "dynamics_smoke",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "viewer",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    },
+    {
+      "step": "save_reload",
+      "outcome": "skip",
+      "message": "native steps disabled (allow_native=False); structural checks only",
+      "remediation": null
+    }
+  ],
+  "model_hash": "b7fa7ca1713c1a7effe28ace5483e8e7c41fd0ca6c768b3fb0f6612ab42663a4",
+  "source_hash": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
+  "runtime": {
+    "python": "3.13.5",
+    "platform": "win32",
+    "host": "windows",
+    "allow_native": false
+  },
+  "contract_sha256": "3152920a04fe3e6288bce64ac9d89a2aea7e5b474569a0e1e66960d96c3b37f5"
+}
