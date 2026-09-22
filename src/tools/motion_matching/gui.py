@@ -390,15 +390,16 @@ class MotionMatchingWidget(QWidget):
             ClubOnlySourceKind,
             import_club_only_workbook_catalog,
             keyboard_action_map,
-            list_motion_matching_source_kinds,
         )
 
         widget = QWidget()
         form = QFormLayout()
         self.club_source = QComboBox()
-        for kind in list_motion_matching_source_kinds():
-            self.club_source.addItem(kind.value, kind)
-        self.club_source.setCurrentText(ClubOnlySourceKind.CLUB_ONLY_EXCEL.value)
+        self.club_source.addItem(
+            ClubOnlySourceKind.CLUB_ONLY_EXCEL.value,
+            ClubOnlySourceKind.CLUB_ONLY_EXCEL,
+        )
+        self.club_source.setEnabled(False)
 
         self.club_trial = QComboBox()
         self.club_model = QComboBox()
@@ -449,15 +450,24 @@ class MotionMatchingWidget(QWidget):
         )
         clone_btn = QPushButton("Clone session (L)")
         clone_btn.clicked.connect(self._clone_club_only_session)
+        cancel_btn = QPushButton("Cancel (Esc)")
+        cancel_btn.clicked.connect(self._cancel_club_only_match)
+        resume_btn = QPushButton("Resume checkpoint")
+        resume_btn.clicked.connect(self._resume_club_only_match)
 
         row = QHBoxLayout()
         row.addWidget(preview_btn)
         row.addWidget(verified_btn)
         row.addWidget(clone_btn)
+        row.addWidget(cancel_btn)
+        row.addWidget(resume_btn)
 
         self.club_log = QPlainTextEdit()
         self.club_log.setReadOnly(True)
         self._club_session = None
+        self._club_checkpoint = None
+        self._club_handle = None
+        self._club_run_buttons = (preview_btn, verified_btn, resume_btn)
 
         layout = QVBoxLayout(widget)
         layout.addLayout(form)
@@ -465,8 +475,11 @@ class MotionMatchingWidget(QWidget):
         layout.addWidget(self.club_log)
         return widget
 
-    def _run_club_only_match(self, *, preset: str) -> None:
-        """Run club-only match via pipeline facade; log summary only."""
+    def _run_club_only_match(self, *, preset: str, resume: bool = False) -> None:
+        """Run club-only match off the GUI thread; persist results + ledger."""
+        if self._club_handle is not None and self._club_handle.is_running:
+            self.club_log.appendPlainText("Club-only match already running.")
+            return
         trial_id = self.club_trial.currentData() or self.club_trial.currentText()
         model_id = self.club_model.currentText()
         req = pipeline.ClubOnlyMatchRequest(
@@ -477,26 +490,110 @@ class MotionMatchingWidget(QWidget):
             geometry_choices={"handedness": "right"},
             user_edits=getattr(self, "_club_user_edits", {"notes": ""}),
         )
-        try:
-            from src.shared.python.motion_matching.club_only.observation import (
-                build_calibrated_observation_fixture,
+        resume_checkpoint = self._club_checkpoint if resume else None
+        for btn in self._club_run_buttons:
+            btn.setEnabled(False)
+
+        def _work(ctx: Any) -> dict[str, Any]:
+            from src.shared.python.motion_matching.club_only.fast_matching import (
+                MatchCancelledError,
             )
             from src.shared.python.motion_matching.club_only.ui_integration import (
                 build_club_only_result_view,
+                load_club_only_workbook_observation,
+                publish_club_only_ledger_row,
                 run_club_only_ui_match,
+                write_club_only_result_package,
+            )
+            from src.tools.async_action import WorkerCancelled
+            from src.tools.tour_matching_viewer.core import (
+                club_only_compare_from_ui_result,
             )
 
+            def _cancel() -> bool:
+                return bool(ctx.is_cancelled)
+
             session = req.to_session()
-            self._club_session = session
-            result = run_club_only_ui_match(
-                session,
-                observation=build_calibrated_observation_fixture(session.trial_id),
+            observation = load_club_only_workbook_observation(
+                pipeline.REPO_ROOT, session.trial_id
             )
+            try:
+                result = run_club_only_ui_match(
+                    session,
+                    observation=observation,
+                    cancel_hook=_cancel,
+                    resume_checkpoint=resume_checkpoint,
+                )
+            except MatchCancelledError as exc:
+                raise WorkerCancelled from exc
             view = build_club_only_result_view(result)
+            compare = club_only_compare_from_ui_result(result)
+            results_dir = pipeline.REPO_ROOT / "artifacts" / "club_only_ui"
+            receipt = results_dir / f"{session.session_id}.json"
+            write_club_only_result_package(view, receipt)
+            row = publish_club_only_ledger_row(view, receipt_path=receipt)
             summary = pipeline.summarize_club_only_result(view)
-            self.club_log.appendPlainText(json.dumps(summary, indent=2))
-        except (ValueError, TypeError, OSError, ImportError, RuntimeError) as exc:
-            self.club_log.appendPlainText(f"Club-only match failed: {exc}")
+            summary["receipt_path"] = receipt.as_posix()
+            summary["ledger_sha256"] = row.sha256
+            summary["compare"] = {
+                "predicted_unavailable_reason": compare.predicted_unavailable_reason,
+                "body_candidate_ids": list(compare.body_candidate_ids),
+                "trial_clock_hz": compare.trial_clock_hz,
+                "legend": list(compare.legend),
+            }
+            return {
+                "session": session,
+                "checkpoint": result.checkpoint,
+                "summary": summary,
+            }
+
+        from src.tools.async_action import run_in_worker
+
+        self._club_handle = run_in_worker(
+            self,
+            _work,
+            on_finished=self._on_club_only_finished,
+            on_failed=self._on_club_only_failed,
+            on_cancelled=self._on_club_only_cancelled,
+        )
+
+    def _resume_club_only_match(self) -> None:
+        if self._club_checkpoint is None:
+            self.club_log.appendPlainText("No checkpoint to resume.")
+            return
+        preset = self.club_preset.currentText() or "fast_preview"
+        self._run_club_only_match(preset=preset, resume=True)
+
+    def _cancel_club_only_match(self) -> None:
+        if self._club_handle is not None:
+            self._club_handle.request_cancel()
+            self.club_log.appendPlainText("Cancel requested…")
+
+    def _on_club_only_finished(self, payload: object) -> None:
+        for btn in self._club_run_buttons:
+            btn.setEnabled(True)
+        self._club_handle = None
+        if not isinstance(payload, dict):
+            self.club_log.appendPlainText(
+                "Club-only match returned unexpected payload."
+            )
+            return
+        self._club_session = payload.get("session")
+        self._club_checkpoint = payload.get("checkpoint")
+        summary = payload.get("summary", {})
+        self.club_log.appendPlainText(json.dumps(summary, indent=2, default=str))
+
+    def _on_club_only_failed(self, message: str) -> None:
+        for btn in self._club_run_buttons:
+            btn.setEnabled(True)
+        self._club_handle = None
+        self.club_log.appendPlainText(f"Club-only match failed: {message}")
+
+    def _on_club_only_cancelled(self) -> None:
+        for btn in self._club_run_buttons:
+            btn.setEnabled(True)
+        self._club_handle = None
+        self.club_log.appendPlainText("Club-only match cancelled.")
 
     def _clone_club_only_session(self) -> None:
         if self._club_session is None:

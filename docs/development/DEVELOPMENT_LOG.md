@@ -644,10 +644,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10613 (epic #10602)
 - **Branch:** feat/co09-club-only-ui-10613
 - **PR:** #10711
-- **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/tools/tour_matching_viewer/core.py; src/tools/tour_matching_viewer/**init**.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; tests/unit/tools/test_tour_matching_viewer_core.py; tests/unit/workspace/test_results_browser.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — regenerated monolith register + divergence inventory for `club_only/ui_integration.py`; GUI tab count assertion expects Club-Only; three prior unit-test-gate failures GREEN locally
-- **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser surfaces without parallel frameworks. Preview vs verified statuses stay honest; observed/inferred legend and trial clock required; cancel/resume reuse CO-07; ledger lane=club_only with named native blockers.
+- **Last verified:** 2026-09-22 at SELF — review-gap harden GREEN (workbook loader, receipt-hashed ledger, default JSON index, tour_matching_viewer compare); native_g1_pass false
+- **Summary:** Integrates club-only matching into existing FitSwingProvider/pipeline/ledger/ResultsBrowser/tour_matching_viewer surfaces without parallel frameworks. GUI loads selected Excel trials, persists packages, cancel/resume off-thread; observed/inferred legend and trial clock required; ledger lane=club_only with named native blockers.
 - **Next step:** Confirm CI green on PR #10711 and squash-merge Fixes #10613; do not start CO-10 until merge.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.
 
