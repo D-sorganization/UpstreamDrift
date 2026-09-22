@@ -27,18 +27,18 @@ def test_unknown_channel_defaults_to_file() -> None:
 
 
 def test_register_and_lookup_low_frequency() -> None:
-    channels.register_channel("test_low/example", "low")
+    channels.register_channel_hint("test_low/example", "low")
     assert channels.get_channel_transport("test_low/example") == "file"
 
 
 def test_register_and_lookup_high_frequency() -> None:
-    channels.register_channel("test_high/example", "high")
+    channels.register_channel_hint("test_high/example", "high")
     assert channels.get_channel_transport("test_high/example") == "ws"
 
 
 def test_register_invalid_frequency_hint_raises() -> None:
     with pytest.raises(ValueError):
-        channels.register_channel(
+        channels.register_channel_hint(
             "test_bad/example",
             "medium",  # type: ignore[arg-type]
         )
@@ -46,7 +46,7 @@ def test_register_invalid_frequency_hint_raises() -> None:
 
 def test_register_literal_channel_validates_name() -> None:
     with pytest.raises(ValueError):
-        channels.register_channel("BAD/Name", "high")
+        channels.register_channel_hint("BAD/Name", "high")
 
 
 def test_engine_wildcard_does_not_match_extra_segments() -> None:

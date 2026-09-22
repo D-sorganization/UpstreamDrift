@@ -37,10 +37,12 @@ from .runtime.runner_registry import RunnerRegistry
 from .status import TrainingStatus
 
 __all__ = [
+    "DynamicsBaselineBudget",
     "Scheduler",
     "SchedulerError",
     "StatusChangeEvent",
     "TeacherCorpusBudget",
+    "neural_dynamics_baseline_budget",
     "neural_teacher_corpus_budget",
 ]
 
@@ -116,6 +118,59 @@ def neural_teacher_corpus_budget() -> TeacherCorpusBudget:
         stages=NESTED_EPISODE_STAGES,
         teacher_schema=TEACHER_SCHEMA,
         acquisition_schema=ACQUISITION_SCHEMA,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class DynamicsBaselineBudget:
+    """Admission budget for NM-05 classical/neural dynamics pilots (#10620).
+
+    Attributes:
+        schema: Wire id for dynamics-baseline receipts.
+        seeds: Frozen three-seed schedule from NM-01 benefit experiment.
+        tasks: Forward acceleration, next-state and inverse-control tasks.
+    """
+
+    schema: str
+    seeds: tuple[int, ...]
+    tasks: tuple[object, ...]
+
+    def __post_init__(self) -> None:
+        if not self.schema.strip():
+            raise ValueError("schema must be non-empty")
+        if len(self.seeds) != 3:
+            raise ValueError("seeds must be the frozen three-seed schedule")
+        if not self.tasks:
+            raise ValueError("tasks must be non-empty")
+
+
+def neural_dynamics_baseline_budget() -> DynamicsBaselineBudget:
+    """Return frozen NM-05 schema, seeds and task kinds for job admission.
+
+    Design by Contract:
+    - Seeds come from NM-01 ``DEFAULT_TRAINING_SEEDS`` via the benefit
+      experiment freeze (three seeds); never invented here.
+    - Schema and task enums come from ``neural_motion.baselines``.
+    - Lazy imports keep the scheduler importable without neural extras.
+
+    This is the training-scheduler reuse seam for #10620. Framework runners
+    remain in :mod:`runtime.runner_registry`; the pilot trainer is separate.
+    """
+
+    from src.shared.python.neural_motion.baselines import (
+        BASELINE_SCHEMA,
+        DynamicsTaskKind,
+    )
+    from src.shared.python.neural_motion.experiment import DEFAULT_TRAINING_SEEDS
+
+    return DynamicsBaselineBudget(
+        schema=BASELINE_SCHEMA,
+        seeds=DEFAULT_TRAINING_SEEDS,
+        tasks=(
+            DynamicsTaskKind.FORWARD_ACCELERATION,
+            DynamicsTaskKind.FORWARD_NEXT_STATE,
+            DynamicsTaskKind.INVERSE_CONTROL,
+        ),
     )
 
 
