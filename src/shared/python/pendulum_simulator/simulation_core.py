@@ -79,7 +79,7 @@ def integrate_ode(
 
     t_eval = np.arange(0.0, t_end, dt)
     if t_eval.size == 0 or not np.isclose(t_eval[-1], t_end):
-        t_eval = np.append(t_eval, t_end)
+        t_eval = np.concatenate((t_eval, np.asarray([t_end], dtype=np.float64)))
 
     kwargs: dict = {
         "t_span": (0.0, t_end),
