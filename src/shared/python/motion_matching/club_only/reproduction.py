@@ -295,16 +295,17 @@ def build_saved_job_commands() -> tuple[SavedJobCommand, ...]:
                 "-c",
                 (
                     "from src.shared.python.motion_matching.club_only.ui_integration "
-                    "import create_club_only_session, run_club_only_ui_match; "
+                    "import create_club_only_session, run_club_only_ui_match, "
+                    "build_club_only_result_view; "
                     "from src.shared.python.motion_matching.club_only.fast_matching "
                     "import MatchPreset; "
                     "s=create_club_only_session(trial_id='TW_wiffle',"
                     " model_id='driven_double_pendulum',"
                     " preset=MatchPreset.FAST_PREVIEW); "
-                    "r=run_club_only_ui_match(s); "
-                    "assert r.display_status.value!='verified' or "
-                    "r.match.native_g1_pass is False; "
-                    "print(r.display_status, r.match.qualification_blockers)"
+                    "v=build_club_only_result_view(run_club_only_ui_match(s)); "
+                    "assert v.display_status.value!='verified' or "
+                    "v.native_g1_pass is False; "
+                    "print(v.display_status, v.qualification_blockers)"
                 ),
             ),
         ),
@@ -353,7 +354,8 @@ def build_clean_environment_replay() -> CleanEnvironmentReplay:
             'python -c "from pathlib import Path; '
             "from src.shared.python.motion_matching.jobs import "
             "export_portable_package; "
-            "export_portable_package(Path('runs/<run_id>'), Path('packages/<run_id>'))\""
+            "export_portable_package(Path('runs/<run_id>'), "
+            "Path('packages/<run_id>'), asset_paths={})\""
         ),
         import_command=(
             'python -c "from pathlib import Path; '
