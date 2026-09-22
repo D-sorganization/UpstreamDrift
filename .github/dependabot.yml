@@ -23,6 +23,14 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # casadi is pinned by the qualified Bioptim runtime contract:
+    # tests/unit/optimization/test_bioptim_dependency_contract.py
+    # (test_bioptim_admits_the_numerically_checked_runtime) requires the
+    # optimal-control + bioptim extras to accept exactly casadi 3.6.7 and
+    # reject newer releases until re-qualified numerically. Drop this
+    # ignore only alongside a re-qualification of the contract test.
+    ignore:
+      - dependency-name: "casadi"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

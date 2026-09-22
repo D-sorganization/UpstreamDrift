@@ -1,0 +1,71 @@
+{
+  "checker_source_sha256": "3c2e3d636fd4fbe2c50f184c30f2b5ca0e372d9c35aa118ee377984a7f532a4a",
+  "contract_hashes": {
+    "pyproject.toml": "1f186f9a150296d5b4e43f17b10a30184acddafd210b29122d64851e86e666ac",
+    "scripts/ci/run_native_engine_lane.py": "3c2e3d636fd4fbe2c50f184c30f2b5ca0e372d9c35aa118ee377984a7f532a4a",
+    "scripts/ci/run_native_engine_lane.sh": "ce866d05046fcd7149d2c54a299b0075be6bc6aa1f139a8f6cf7b533970f5f15"
+  },
+  "engine": "myosuite",
+  "engine_inventory": {
+    "available": false,
+    "error": "File \"<string>\", line 1\n    import importlib, importlib.metadata, json, platform, sys;module=importlib.import_module('myosuite');dist='myosuite';version=None;try: version=importlib.metadata.version(dist)except importlib.metadata.PackageNotFoundError: version=getattr(module,'__version__',None);print(json.dumps({'available': version is not None,'version': version,'module_file': getattr(module,'__file__',None),'child_python': {'executable': sys.executable, 'version': platform.python_version()}}, sort_keys=True))\n                                                                                                                                      ^^^\nSyntaxError: invalid syntax",
+    "module_file": null,
+    "source_sha256": null,
+    "version": null
+  },
+  "failure_reasons": [],
+  "generated_at": "2026-09-21T14:55:55.961622+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "pytest_probe": {
+    "command": [
+      "C:\\Python314\\python.exe",
+      "-m",
+      "pytest",
+      "tests",
+      "-m",
+      "requires_myosuite",
+      "-q",
+      "--tb=line",
+      "--junitxml=docs\\development\\matched_swing_program\\evidence\\nightly\\myosuite_native_lane_junit.xml"
+    ],
+    "name": "native_pytest_lane",
+    "result": {
+      "cases": [],
+      "collected": 0,
+      "errors": 0,
+      "failed": 0,
+      "parse_error": "missing junit file: docs\\development\\matched_swing_program\\evidence\\nightly\\myosuite_native_lane_junit.xml",
+      "passed": 0,
+      "skipped": 0
+    },
+    "returncode": null,
+    "status": "fail",
+    "stderr": "pytest timed out",
+    "stdout": "",
+    "timed_out": true
+  },
+  "python": "C:\\Python314\\python.exe",
+  "repository_revision": "835efaee37c9f242a72e53ba269a4906683c6253",
+  "runner_hint": "ControlTower with myosuite extra; nightly-cross-engine.yml",
+  "schema_version": 1,
+  "scope": "native-engine pytest lane only; no model, fit, acceptance, or release claim",
+  "source_freshness": {
+    "details": "?? scripts/ci/run_native_engine_lane.py\n?? scripts/ci/run_native_engine_lane.sh",
+    "paths": [
+      "scripts/ci/run_native_engine_lane.py",
+      "scripts/ci/run_native_engine_lane.sh",
+      "pyproject.toml"
+    ],
+    "status": "dirty"
+  },
+  "status": "fail",
+  "test_cases": [],
+  "tests": {
+    "collected": 0,
+    "errors": 0,
+    "executed": 0,
+    "failed": 0,
+    "passed": 0,
+    "skipped": 0
+  }
+}

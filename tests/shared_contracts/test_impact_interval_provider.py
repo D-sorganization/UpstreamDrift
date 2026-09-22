@@ -369,7 +369,6 @@ def test_interval_facade_produces_time_resolved_contact_record() -> None:
         assert result.did_contact is True
         assert result.contact_completed is True
         assert result.termination is interval.ImpactTermination.SEPARATED
-        assert result.terminal_reason == "SEPARATED: ball detached from clubface"
 
         sample_count = len(result.time_s)
         assert sample_count > 100

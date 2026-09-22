@@ -640,7 +640,7 @@
     },
     {
       "feature_id": "tools.motion_matching",
-      "title": "Motion Matching tour-average capture matching",
+      "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
       "pyqt": "src/tools/motion_matching/gui.py",
       "api": null,
@@ -651,7 +651,7 @@
       "tiles": [
         "motion_matching"
       ],
-      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355).",
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, MJX export/validation (MS-82 #10355), and Club-Only Excel matching UI (CO-09 #10613) reusing workbook identity, fast matching, ledger lane=club_only, and ResultsBrowser JSON packages. Native G1 remains blocked.",
       "id": "tools.motion_matching"
     },
     {
@@ -699,7 +699,7 @@
       "tiles": [
         "rate_of_closure"
       ],
-      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts.",
+      "notes": "Evidence so far (#9550): both runtimes execute the same pinned Tools revision, and CI verifies that /impact-explorer-app/ serves that revision's real JavaScript with manifest digests (scripts/ci/verify_impact_explorer_bundle.py). Parity is not claimed from the iframe alone: identical saved scenarios have not yet been compared numerically across the PyQt and web runtimes, and exposed controls are not yet enumerated against their contracts. Through-contact interval inspection (UD #9549 / epic #9546; Tools #4130, #4946) is provider work: the pinned Tools tree exposes the swing_sim.impact_interval facade, but its rate_of_closure run record carries no interval phase yet. UD adopts it through a reviewed pin bump; tests/shared_contracts/test_impact_interval_provider.py gates the pin and flips to a failure when the phase ships.",
       "id": "tools.rate_of_closure"
     },
     {
@@ -1178,8 +1178,8 @@
     },
     {
       "id": "video_analyzer",
-      "title": "Video Analyzer",
-      "description": "Video-based motion analysis with pose tracking",
+      "title": "Video Analyzer (Pose & Motion Tracking)",
+      "description": "Video-based motion analysis with pose estimation and tracking: extract poses and joint tracks from swing video. Not for converting or trimming video files -- see Video Processor for that.",
       "path": "vendor/ud-tools/src/video_analyzer/launch_video_analyzer.py",
       "launch_target": "tools://src/video_analyzer/launch_video_analyzer.py",
       "category": "motion_capture",
@@ -1193,8 +1193,8 @@
     },
     {
       "id": "video_processor",
-      "title": "Video Processor",
-      "description": "Shared media processor for video conversion, frame extraction, and analysis",
+      "title": "Video Processor (Convert & Extract Frames)",
+      "description": "Shared Tools media processor for video conversion, frame extraction, and analysis: format-convert clips and pull individual frames. Not for pose or motion tracking -- see Video Analyzer for that.",
       "path": "vendor/ud-tools/src/media_processing/video_processor/apps/web/launch_platform.py",
       "launch_target": "tools://src/media_processing/video_processor/apps/web/launch_platform.py",
       "category": "motion_capture",
@@ -1285,8 +1285,8 @@
     },
     {
       "id": "data_explorer",
-      "title": "Data Explorer",
-      "description": "Import, filter, and visualise simulation datasets",
+      "title": "Data Explorer (Import & Visualize)",
+      "description": "Import, filter, and visualize simulation datasets interactively. Not for signal processing or calculators -- see Data Processor for that.",
       "path": "vendor/ud-tools/src/data_explorer/data_explorer_app.py",
       "launch_target": "tools://src/data_explorer/data_explorer_app.py",
       "category": "tool",
@@ -1300,8 +1300,8 @@
     },
     {
       "id": "data_processor",
-      "title": "Data Processor",
-      "description": "Shared signal processing and time-series data analysis tool",
+      "title": "Data Processor (Signal & Time-Series)",
+      "description": "Shared Tools signal processing and time-series data analysis tool: filter, transform, and compute statistics over recorded signals. Not for open-ended dataset browsing -- see Data Explorer for that.",
       "path": "vendor/ud-tools/src/data_processing/data_processor/launch_pyqt6.py",
       "launch_target": "tools://src/data_processing/data_processor/launch_pyqt6.py",
       "category": "tool",
@@ -2868,9 +2868,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "ab36e654c25c5fc100547c7c6eb6cfd35c56a33381c230b852d5f65b2366b834",
-    "src/config/launcher_manifest.json": "c004401e04468a49905a27b3c079183ab010b8742e93a5f7d4d9580e35ba85a4",
-    "src/config/feature_parity.json": "e9c8d791d426991c8a516552eecb89b7f0443c6e1a40320f3fefe0eefa46a009",
+    "src/config/models.yaml": "b9397c369014e6bf0d9dd7a4cb35c48ada35921b1483e0bc1a2407fc7079381a",
+    "src/config/launcher_manifest.json": "15e853e4c2dc543a826cfcad5ac9e917c089469ed1454e1b1e2579b0107a94a7",
+    "src/config/feature_parity.json": "97cd851417337abf3bebe452c0560437f914dd2595d4fc1f37590bed5410887b",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
