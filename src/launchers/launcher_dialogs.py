@@ -21,6 +21,7 @@ from src.launchers.help_menu import show_keyboard_shortcuts_modal
 from src.launchers.launcher_constants import (
     AI_AVAILABLE,
     HELP_SYSTEM_AVAILABLE,
+    LAYOUT_CONFIG_FILE,
     REPOS_ROOT,
     UI_COMPONENTS_AVAILABLE,
 )
@@ -446,7 +447,7 @@ class DialogsManager:
 
     def _reset_layout_to_defaults(self) -> None:
         """Reset layout configuration to show all default tiles."""
-        config_file = Path.home() / ".golf_modeling_suite" / "launcher_layout.json"
+        config_file = LAYOUT_CONFIG_FILE
 
         try:
             backup_path = replace_existing_layout_backup(config_file)

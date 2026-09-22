@@ -26,6 +26,7 @@ from src.launchers.launcher_shared_tools_diagnostics import (
     inspect_shared_tools_freshness,
 )
 from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.data_io.user_config_root import user_config_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -33,8 +34,8 @@ logger = get_logger(__name__)
 # Constants — use centralized root discovery (issue #2354)
 REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
-CONFIG_DIR = Path.home() / ".golf_modeling_suite"
-LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
+CONFIG_DIR = user_config_dir()
+LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 
 
 def _load_parent_model_ids(models_yaml_path: Path) -> list[str]:

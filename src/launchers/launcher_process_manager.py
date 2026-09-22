@@ -30,6 +30,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
     SecureSubprocessError,
@@ -190,8 +191,8 @@ class ProcessManager:
         self.on_process_list_changed: Callable[[], None] | None = None
 
         # Persistent log file for all process output
-        self._log_dir = Path.home() / ".golf_modeling_suite"
-        self._log_file_path = self._log_dir / "process_output.log"
+        self._log_file_path = self.get_log_path()
+        self._log_dir = self._log_file_path.parent
         self._init_log_file()
 
     def _merge_python_paths(
@@ -419,7 +420,7 @@ class ProcessManager:
     @classmethod
     def get_log_path(cls) -> Path:
         """Return the path to the persistent process output log."""
-        return Path.home() / ".golf_modeling_suite" / "process_output.log"
+        return user_config_path("process_output.log")
 
     def _write_log_line(self, name: str, line: str) -> None:
         """Append a timestamped line to the persistent log file."""

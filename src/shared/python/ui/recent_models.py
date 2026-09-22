@@ -32,6 +32,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -48,7 +49,7 @@ except ImportError:
 logger = get_logger(__name__)
 
 # Recent models storage
-RECENT_FILE = Path.home() / ".golf_modeling_suite" / "recent_models.json"
+RECENT_FILE = user_config_path("recent_models.json")
 MAX_RECENT = 10
 
 

@@ -54,9 +54,12 @@ def open_integrations_health_window(parent: QWidget | None = None) -> QDialog:
     """
     from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
+    from src.launchers.launcher_settings_store import persist_window_geometry
+
     dialog = QDialog(parent)
     dialog.setWindowTitle("Integrations Health")
     dialog.resize(720, 360)
+    persist_window_geometry(dialog, "integrations_health")
 
     dashboard_class = _shared_dashboard_widget_class()
     if dashboard_class is None:
