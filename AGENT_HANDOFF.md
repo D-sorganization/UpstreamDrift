@@ -22,11 +22,15 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616)
+## Neural Motion Matching NM-02: Native Dataset Labels (#10617)
 
-Branch `feat/nm01-freeze-learning-tasks`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisite NM-00 [#10668](https://github.com/D-sorganization/UpstreamDrift/pull/10668) merged.
-NM-01 freezes typed forward/inverse/masked task contracts, a 20-model roster keyed to TB-00 identities (full-body deferred pending benefit) and benefit-experiment gates (100/500/2000 nested stages, three seeds, five baselines, latency including replay/refinement/failures, 2× median/non-worse p95, break-even undefined when savings ≤ 0). Evidence: `docs/plans/neural_motion_matching/evidence/nm01_*.json`. No training or speed claim.
-PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672) open with squash auto-merge. Next after merge: dispatch NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617)).
+Branch `fix/10617-nm02-native-dataset-labels`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-00/#10668 and NM-01/#10672 merged.
+NM-02 repairs `DatasetGenerator` label evidence (`native-dataset-labels/1.0.0`): no zero-as-measurement optional channels, native vs interval accelerations, requested/applied controls, DoF layout, restore `StateError`, first-wave Mock + ODE residual receipts. Evidence: `docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json`. No training or speed claim.
+Next after merge: dispatch NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618)).
+
+## Neural Motion Matching NM-01: Freeze Learning Tasks, Roster and Benefit Experiment (#10616) [MERGED]
+
+Branch `feat/nm01-freeze-learning-tasks` merged to main in PR [#10672](https://github.com/D-sorganization/UpstreamDrift/pull/10672).
 
 ## Neural Motion Matching NM-00: Audit Datasets, Checkpoints and Claims (#10615) [MERGED]
 
