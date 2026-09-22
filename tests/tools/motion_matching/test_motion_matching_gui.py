@@ -40,11 +40,12 @@ def widget() -> MotionMatchingWidget:
 
 
 def test_widget_construction_and_tabs(widget: MotionMatchingWidget) -> None:
-    assert widget.tabs.count() == 3
+    assert widget.tabs.count() == 4
     tab_titles = [widget.tabs.tabText(i) for i in range(widget.tabs.count())]
     assert "Matching" in tab_titles
     assert "Downswing experiment" in tab_titles
     assert "MJX" in tab_titles
+    assert "Club-Only" in tab_titles
 
 
 def test_stages_group_and_mutual_exclusion(widget: MotionMatchingWidget) -> None:
