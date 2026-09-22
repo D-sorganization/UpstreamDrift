@@ -6820,6 +6820,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10707 | MS-104 full-swing qualification matrix: 36 flagship engine×club×gate rows, fail-closed release_status, software-contract fixtures with named native blockers (no invented six-engine pass). |
+| 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
+| 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
 | 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; duplicates #10719/#10720 closed; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
 | 2026-09-22 | #10718 | Publish club-only reproduction guide and final turnover (CO-10): saved-job commands, provenance, assumptions, matrix reconciliation; software-contract only; epic #10602 stays open. |
 | 2026-09-22 | #10709 | NM-06 masked trajectory-to-control proposals with selected/mixture heads, observation-rollout training loss, collapse diagnostics, coefficient time-domain conversion, fail-closed native refinement, proposal_shared DRY helpers, regenerated divergence inventory for NM-06 paths, architecture-budget TrainingConfig splits, and optional-torch inverse imports; software-contract tests only. |

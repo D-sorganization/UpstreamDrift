@@ -16,7 +16,7 @@
   "cell_count": 80,
   "claims_native_qualification": false,
   "clean_environment_replay": {
-    "export_command": "python -c \"from pathlib import Path; from src.shared.python.motion_matching.jobs import export_portable_package; export_portable_package(Path('runs/<run_id>'), Path('packages/<run_id>'), asset_paths={'result': Path('runs/<run_id>/result.json')})\"",
+    "export_command": "python -c \"from pathlib import Path; from src.shared.python.motion_matching.jobs import export_portable_package; export_portable_package(Path('runs/<run_id>'), Path('packages/<run_id>'), asset_paths={})\"",
     "import_command": "python -c \"from pathlib import Path; from src.shared.python.motion_matching.jobs import import_portable_package; pkg=import_portable_package(Path('packages/<run_id>')); print(pkg.run_id, pkg.status)\"",
     "matlab_release": "R2025b",
     "portable_package_schema": "motion-matching-jobs/1.0.0",
@@ -1045,12 +1045,12 @@
       "argv": [
         "python",
         "-c",
-        "from src.shared.python.motion_matching.club_only.ui_integration import create_club_only_session, run_club_only_ui_match, build_club_only_result_view; from src.shared.python.motion_matching.club_only.fast_matching import MatchPreset; s=create_club_only_session(trial_id='TW_wiffle', model_id='driven_double_pendulum', preset=MatchPreset.FAST_PREVIEW); r=run_club_only_ui_match(s); v=build_club_only_result_view(r); assert v.display_status.value!='native_verified' or v.native_g1_pass; print(v.display_status, v.qualification_blockers)"
+        "from src.shared.python.motion_matching.club_only.ui_integration import create_club_only_session, run_club_only_ui_match, build_club_only_result_view; from src.shared.python.motion_matching.club_only.fast_matching import MatchPreset; s=create_club_only_session(trial_id='TW_wiffle', model_id='driven_double_pendulum', preset=MatchPreset.FAST_PREVIEW); v=build_club_only_result_view(run_club_only_ui_match(s)); assert v.display_status.value!='verified' or v.native_g1_pass is False; print(v.display_status, v.qualification_blockers)"
       ],
       "cwd_relative": ".",
       "name": "fast_preview_match",
       "purpose": "Run a software-contract FAST_PREVIEW club-only match for TW_wiffle.",
-      "shell": "python -c 'from src.shared.python.motion_matching.club_only.ui_integration import create_club_only_session, run_club_only_ui_match, build_club_only_result_view; from src.shared.python.motion_matching.club_only.fast_matching import MatchPreset; s=create_club_only_session(trial_id='\"'\"'TW_wiffle'\"'\"', model_id='\"'\"'driven_double_pendulum'\"'\"', preset=MatchPreset.FAST_PREVIEW); r=run_club_only_ui_match(s); v=build_club_only_result_view(r); assert v.display_status.value!='\"'\"'native_verified'\"'\"' or v.native_g1_pass; print(v.display_status, v.qualification_blockers)'"
+      "shell": "python -c \"from src.shared.python.motion_matching.club_only.ui_integration import create_club_only_session, run_club_only_ui_match, build_club_only_result_view; from src.shared.python.motion_matching.club_only.fast_matching import MatchPreset; s=create_club_only_session(trial_id='TW_wiffle', model_id='driven_double_pendulum', preset=MatchPreset.FAST_PREVIEW); v=build_club_only_result_view(run_club_only_ui_match(s)); assert v.display_status.value!='verified' or v.native_g1_pass is False; print(v.display_status, v.qualification_blockers)\""
     },
     {
       "argv": [
@@ -1061,7 +1061,7 @@
       "cwd_relative": ".",
       "name": "portable_package_roundtrip",
       "purpose": "Export/import an MS-105 portable package without a second scheduler.",
-      "shell": "python -c 'from pathlib import Path; from src.shared.python.motion_matching.jobs import (MatchingJobSpec, JobStage, HashBundle, export_portable_package, import_portable_package, JOBS_SCHEMA); print(JOBS_SCHEMA); print('\"'\"'export_portable_package'\"'\"', export_portable_package.__name__); print('\"'\"'import_portable_package'\"'\"', import_portable_package.__name__); print('\"'\"'MatchingJobSpec'\"'\"', MatchingJobSpec.__name__, JobStage.FIT_REPLAY)'"
+      "shell": "python -c \"from pathlib import Path; from src.shared.python.motion_matching.jobs import (MatchingJobSpec, JobStage, HashBundle, export_portable_package, import_portable_package, JOBS_SCHEMA); print(JOBS_SCHEMA); print('export_portable_package', export_portable_package.__name__); print('import_portable_package', import_portable_package.__name__); print('MatchingJobSpec', MatchingJobSpec.__name__, JobStage.FIT_REPLAY)\""
     },
     {
       "argv": [
