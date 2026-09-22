@@ -598,17 +598,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10611 · CO-07 Optimize Fast Matching and Expose Candidate Diversity
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10611 (epic #10602)
 - **Branch:** feat/10611-co07-fast-matching
-- **PR:** #10700
+- **PR:** #10700 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — architecture param-budget fix via FastMatchOptions/\_ScoreLoopCtx/\_AssembleCtx; merged origin/main (MS-14); 12 unit tests GREEN; check_architecture_budget OK; native_g1_pass false
+- **Last verified:** 2026-09-22 at f9ece7f6a — squash-merged to main via PR #10700; native_g1_pass false on software-contract fixtures.
 - **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time. Public knobs collapse onto FastMatchOptions for architecture parameter budgets.
-- **Next step:** Confirm CI green and squash merge of PR Fixes #10611; do not start CO-08+.
+- **Next step:** Dispatch CO-08 (#10612) per club-only epic dependency order; do not invent native G1 pass.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
+
+### DL-#10612 · CO-08 Qualify the Club-Only Matrix and Plausibility Tradeoffs
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10612 (epic #10602)
+- **Branch:** feat/issue-10612-co08-matrix
+- **PR:** #10703
+- **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/fit_metrics.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/plot_fit_quality_card.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — DRY fingerprints extracted to resolve_roster_matrix_scope; local DRY gate + scoped unit tests GREEN; native_g1_pass false
+- **Summary:** Independent matrix qualification over native observation times for four workbook trials × #10585 roster with frozen CO-02 gates, published failures, withheld-body experiment semantics, common-observable comparison across complexities, and fail-closed checks for tamper/leakage/phase/orientation/reset/geometry/false-native claims. Shared roster/matrix scope helpers live in club_only/profiles.py.
+- **Next step:** Confirm CI green on PR #10703 and squash-merge Fixes #10612; do not start CO-09+ until merge.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_matrix_qualification.json; tests/unit/motion_matching/test_club_matrix_qualification.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
