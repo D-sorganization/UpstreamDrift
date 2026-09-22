@@ -5,6 +5,8 @@
 - Worktree: `Worktrees/UpstreamDrift-local-10614`, branch
   `feat/co10-club-only-turnover-10614`, DL-#10614, PR
   [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718).
+- Fix (autofix): saved-job `shell`/guide quoting via `shlex`, `fast_preview_match`
+  uses `build_club_only_result_view`, export replay passes required `asset_paths`.
 - Delivered: `club_only/reproduction.py` freezes exact saved-job commands,
   trial/model roster, raw-source provenance, assumptions, candidate selection,
   clean-environment portable replay (MS-105 jobs), and evidence-linked matrix
