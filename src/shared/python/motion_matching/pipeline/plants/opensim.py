@@ -81,8 +81,15 @@ class OpensimMatchingPlant:
         return "not_run: use moco"
 
     def create_ik(
-        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
+        if ik_backend != "lm":
+            raise ValueError(
+                f"IK backend {ik_backend!r} is only supported on the MuJoCo plant"
+            )
         return OpensimFullBodyIK(self.spec_dict, attachments=attachments)
 
     def frame_poses(

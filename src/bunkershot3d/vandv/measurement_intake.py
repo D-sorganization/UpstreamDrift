@@ -97,6 +97,7 @@ EVIDENTIAL_RANK: Mapping[ProvenanceBasis, int] = MappingProxyType(
         ProvenanceBasis.ESTIMATED: 0,
         ProvenanceBasis.CONVENTION: 0,
         ProvenanceBasis.SPECIFICATION: 1,
+        ProvenanceBasis.CALIBRATED: 1,
         ProvenanceBasis.MEASURED: 2,
     }
 )
@@ -108,6 +109,12 @@ more checkable than one lifted from a hardware-store analogue
 (``BORROWED_ANALOGUE``) and that is worth having, but it is not better
 evidence, and a ranking that scored it higher would let a package walk
 itself up a credibility scale without ever touching a sample.
+
+``CALIBRATED`` (issue #9543) sits at rank 1 with ``SPECIFICATION``: a
+parameter fitted to instrument measurements on bunker sand and qualified
+on held-out sessions is constrained by data, which outranks every way of
+not having any, but the fit absorbs model-form error into the parameter,
+so it does not reach the rank of a measurement of the constant itself.
 """
 
 

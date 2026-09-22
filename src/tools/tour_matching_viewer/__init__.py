@@ -5,9 +5,11 @@ from __future__ import annotations
 import contextlib
 
 from src.tools.tour_matching_viewer.core import (
+    ClubOnlyCompareView,
     ReplayData,
     ViewerFrame,
     body_poses_from_state,
+    club_only_compare_from_ui_result,
     load_replay,
     viewer_frame,
 )
@@ -25,9 +27,11 @@ with contextlib.suppress(ImportError):
         register_embeddable_tool(_TourMatchingViewerEmbedAdapter())
 
 __all__ = [
+    "ClubOnlyCompareView",
     "ReplayData",
     "ViewerFrame",
     "body_poses_from_state",
+    "club_only_compare_from_ui_result",
     "load_replay",
     "viewer_frame",
 ]

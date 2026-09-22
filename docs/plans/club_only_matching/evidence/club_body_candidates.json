@@ -1,0 +1,202 @@
+{
+  "schema": "club-body-candidates/1.0.0",
+  "governing_issue": 10609,
+  "prior_strength": 1.0,
+  "models": {
+    "constrained_upper_body_golfer": {
+      "model_id": "constrained_upper_body_golfer",
+      "cell_count": 4,
+      "statuses": ["generated"]
+    },
+    "driven_double_pendulum": {
+      "model_id": "driven_double_pendulum",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "driven_triple_pendulum": {
+      "model_id": "driven_triple_pendulum",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "full_body_drake": {
+      "model_id": "full_body_drake",
+      "cell_count": 4,
+      "statuses": ["generated"]
+    },
+    "full_body_mujoco": {
+      "model_id": "full_body_mujoco",
+      "cell_count": 4,
+      "statuses": ["generated"]
+    },
+    "full_body_myosuite": {
+      "model_id": "full_body_myosuite",
+      "cell_count": 4,
+      "statuses": ["missing_runtime"]
+    },
+    "full_body_opensim": {
+      "model_id": "full_body_opensim",
+      "cell_count": 4,
+      "statuses": ["missing_runtime"]
+    },
+    "full_body_pinocchio": {
+      "model_id": "full_body_pinocchio",
+      "cell_count": 4,
+      "statuses": ["generated"]
+    },
+    "full_body_simscape": {
+      "model_id": "full_body_simscape",
+      "cell_count": 4,
+      "statuses": ["missing_runtime"]
+    },
+    "myosuite_body": {
+      "model_id": "myosuite_body",
+      "cell_count": 4,
+      "statuses": ["missing_runtime"]
+    },
+    "opensim_golfer": {
+      "model_id": "opensim_golfer",
+      "cell_count": 4,
+      "statuses": ["missing_runtime"]
+    },
+    "reconstruction_double_pendulum": {
+      "model_id": "reconstruction_double_pendulum",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reconstruction_golfer": {
+      "model_id": "reconstruction_golfer",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reconstruction_triple_pendulum": {
+      "model_id": "reconstruction_triple_pendulum",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reference_drake_urdf": {
+      "model_id": "reference_drake_urdf",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reference_human_subject": {
+      "model_id": "reference_human_subject",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reference_mujoco_humanoid": {
+      "model_id": "reference_mujoco_humanoid",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reference_pinocchio_urdf": {
+      "model_id": "reference_pinocchio_urdf",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reference_pinocchio_urdf_ik": {
+      "model_id": "reference_pinocchio_urdf_ik",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    },
+    "reference_simple_humanoid": {
+      "model_id": "reference_simple_humanoid",
+      "cell_count": 4,
+      "statuses": ["unsupported"]
+    }
+  },
+  "trials": {
+    "TW_wiffle": {
+      "trial_id": "TW_wiffle",
+      "cell_count": 20
+    },
+    "TW_ProV1": {
+      "trial_id": "TW_ProV1",
+      "cell_count": 20
+    },
+    "GW_wiffle": {
+      "trial_id": "GW_wiffle",
+      "cell_count": 20
+    },
+    "GW_ProV11": {
+      "trial_id": "GW_ProV11",
+      "cell_count": 20
+    }
+  },
+  "candidate_count": 32,
+  "accepted_candidate_count": 32,
+  "cell_count": 80,
+  "topology_mappings": [
+    {
+      "source_model_id": "driven_triple_pendulum",
+      "target_model_id": "constrained_upper_body_golfer",
+      "source_nq": 3,
+      "target_nq": 8,
+      "joint_map": [
+        [0, 3],
+        [1, 4],
+        [2, 5]
+      ],
+      "pelvis_indices": [0, 1, 2],
+      "allows_pelvis_teleport": false,
+      "allows_unlimited_root_actuation": false,
+      "allows_pasted_club_animation": false
+    },
+    {
+      "source_model_id": "driven_double_pendulum",
+      "target_model_id": "full_body_drake",
+      "source_nq": 2,
+      "target_nq": 40,
+      "joint_map": [
+        [0, 3],
+        [1, 4]
+      ],
+      "pelvis_indices": [0, 1, 2],
+      "allows_pelvis_teleport": false,
+      "allows_unlimited_root_actuation": false,
+      "allows_pasted_club_animation": false
+    },
+    {
+      "source_model_id": "driven_double_pendulum",
+      "target_model_id": "full_body_mujoco",
+      "source_nq": 2,
+      "target_nq": 38,
+      "joint_map": [
+        [0, 3],
+        [1, 4]
+      ],
+      "pelvis_indices": [0, 1, 2],
+      "allows_pelvis_teleport": false,
+      "allows_unlimited_root_actuation": false,
+      "allows_pasted_club_animation": false
+    },
+    {
+      "source_model_id": "driven_double_pendulum",
+      "target_model_id": "full_body_pinocchio",
+      "source_nq": 2,
+      "target_nq": 46,
+      "joint_map": [
+        [0, 3],
+        [1, 4]
+      ],
+      "pelvis_indices": [0, 1, 2],
+      "allows_pelvis_teleport": false,
+      "allows_unlimited_root_actuation": false,
+      "allows_pasted_club_animation": false
+    }
+  ],
+  "limitations": [
+    "Synthetic fixtures validate software contracts only; not native G1 evidence.",
+    "Pendulum fit paths remain owned by CO-04 (#10608).",
+    "Face orientation is unsupported without a calibrated face frame; orientation limitation is declared rather than a distorted target.",
+    "Lower-extremity body markers are out of scope for this model class.",
+    "Reduced-model club-only profiles do not satisfy full-body G3.",
+    "CO-05 candidates are kinematic previews; torque replay and scientific qualification remain with CO-06/08 and native owners.",
+    "Full-body G3 gates remain binding and separate from club-only priors.",
+    "Scientific qualification still requires native continuous replay evidence."
+  ],
+  "notes": [
+    "Upper/full-body providers consume club-only observations via this contract.",
+    "Observation fit, plausibility, contact/effort, and runtime stay separate.",
+    "Native qualification and continuous replay remain with CO-06/08."
+  ]
+}
