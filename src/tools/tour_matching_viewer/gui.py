@@ -19,6 +19,7 @@ import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.tools.motion_matching import club_only_ui as cui
 from src.tools.tour_matching_viewer.core import (
     ENGINE_COLORS,
     MultiCandidateReplay,
@@ -148,6 +149,16 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._rejection_banner.setVisible(False)
         layout.addWidget(self._rejection_banner)
 
+        legend_bits = [
+            f"{key}: {label}" for key, label in cui.observed_versus_inferred_legend()
+        ]
+        self.legend_label = QtWidgets.QLabel(" | ".join(legend_bits))
+        self.legend_label.setObjectName("observed_versus_inferred_legend")
+        self.legend_label.setWordWrap(True)
+        self.legend_label.setStyleSheet("color: #444444; font-size: 11px;")
+        self.legend_label.setVisible(False)
+        layout.addWidget(self.legend_label)
+
         # Center Content: 3D Viewport + Force Inspection Panel
         content_layout = QtWidgets.QHBoxLayout()
         self._figure = Figure(figsize=(6, 5), dpi=100)
@@ -188,6 +199,15 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
     def force_widget(self) -> Any:
         """Force/torque and counterfactual inspection widget."""
         return self._force_widget
+
+    @staticmethod
+    def observed_versus_inferred_legend() -> tuple[tuple[str, str], ...]:
+        """Shared club-only observed-versus-inferred legend (CO-09)."""
+        return cui.observed_versus_inferred_legend()
+
+    def set_club_only_legend_visible(self, visible: bool) -> None:
+        """Show the observed club vs inferred body legend for club-only runs."""
+        self.legend_label.setVisible(bool(visible))
 
     def _setup_3d_axes(self) -> None:
         self._ax.clear()

@@ -263,3 +263,59 @@ class TestMatchedSwingBrowserModel:
         # Uncreated npz should return None
         resolved_npz = model.resolve_artifact_path(row, "npz")
         assert resolved_npz is None
+
+    def test_club_only_metadata_filter_and_verified_gate(
+        self, fixture_rows: list[LedgerRow]
+    ) -> None:
+        """CO-09: club-only results reuse ledger lane; unqualified ≠ verified."""
+        from src.tools.motion_matching import club_only_ui as cui
+
+        meta = cui.build_results_metadata(
+            trial_id="TW_wiffle",
+            model_id="driven_double_pendulum",
+            matrix_cell_status="unqualified",
+            preset="verified_fit",
+            workbook_sha256="c" * 64,
+        )
+        club_row = LedgerRow(
+            receipt_path="reports/club_only/tw_wiffle/receipt.json",
+            sha256="clubsha1",
+            engine="pendulum",
+            lane=meta["lane"],
+            capture=None,
+            candidate_sha="cand_club",
+            horizon_s=1.2,
+            metrics=SharedMetrics(club_marker_rmse_m=0.012),
+            acceptance={
+                "status": cui.verified_display_label(
+                    matrix_cell_status=meta["matrix_cell_status"],
+                    preset=meta["preset"],
+                ),
+                "club_only": meta,
+            },
+            reason="club_only_excel",
+        )
+        rows = [*fixture_rows, club_row]
+        model = MatchedSwingBrowserModel()
+        filtered = model.filter_rows(rows, MatchedSwingFilter(lane=cui.CLUB_ONLY_LANE))
+        assert len(filtered) == 1
+        assert filtered[0].lane == cui.CLUB_ONLY_LANE
+        assert model.extract_verdict_string(filtered[0]) != "VERIFIED"
+        assert model.row_appears_verified(filtered[0]) is False
+
+        scored_meta = cui.build_results_metadata(
+            trial_id="TW_wiffle",
+            model_id="driven_double_pendulum",
+            matrix_cell_status="scored",
+            preset="verified_fit",
+            workbook_sha256="d" * 64,
+        )
+        scored_row = club_row.model_copy(
+            update={
+                "acceptance": {
+                    "status": "VERIFIED",
+                    "club_only": scored_meta,
+                }
+            }
+        )
+        assert model.row_appears_verified(scored_row) is True

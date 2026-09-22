@@ -40,13 +40,16 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
+    QRadioButton,
     QSpinBox,
     QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
+from src.tools.motion_matching import club_only_ui as cui
 from src.tools.motion_matching import pipeline
+from src.tools.motion_matching.club_only_panel import ClubOnlySourcePanel
 
 WINDOW_TITLE = "Motion Matching"
 
@@ -126,6 +129,7 @@ class MotionMatchingWidget(QWidget):
         self._metrics: dict[str, Any] = {}
         self._browser_window: Any = None
         self._viewer_window: Any = None
+        self._club_only_session = cui.ClubOnlySessionState()
 
         self.tabs = QTabWidget(self)
 
@@ -153,6 +157,18 @@ class MotionMatchingWidget(QWidget):
     # -------------------------------------------------------------------------
     def _create_matching_tab(self) -> QWidget:
         widget = QWidget()
+
+        source_box = QGroupBox("Source")
+        source_layout = QHBoxLayout(source_box)
+        self.rb_tour_capture = QRadioButton("Tour capture")
+        self.rb_club_only = QRadioButton("Club-Only Excel")
+        self.rb_tour_capture.setChecked(True)
+        source_layout.addWidget(self.rb_tour_capture)
+        source_layout.addWidget(self.rb_club_only)
+        source_layout.addStretch(1)
+        self.rb_tour_capture.toggled.connect(self._on_source_mode_changed)
+        self.rb_club_only.toggled.connect(self._on_source_mode_changed)
+
         self.capture = QComboBox()
         self.capture.addItems(list(pipeline.CAPTURES))
         self.club = QComboBox()
@@ -181,7 +197,8 @@ class MotionMatchingWidget(QWidget):
         self.arm = self._double_spin(1.10, 0.8, 1.4, 0.01)
         self.shoulder = self._double_spin(1.0, 0.8, 1.3, 0.01)
 
-        form = QFormLayout()
+        self.tour_capture_form = QWidget()
+        form = QFormLayout(self.tour_capture_form)
         form.addRow("Backend", self.backend)
         form.addRow("IK backend", self.ik_backend)
         form.addRow("Tracking", self.tracking)
@@ -225,6 +242,21 @@ class MotionMatchingWidget(QWidget):
         stages_layout.addRow("Shooting fit iterations", self.shooting_fit)
         stages_layout.addRow("Shooting gain", self.shooting_gain)
 
+        self.club_only_panel = ClubOnlySourcePanel(self)
+        self.club_only_panel.setVisible(False)
+        self.club_only_disclaimer = self.club_only_panel.disclaimer
+        self.club_only_trial = self.club_only_panel.trial
+        self.club_only_preview_btn = self.club_only_panel.preview_btn
+        self.club_only_verified_btn = self.club_only_panel.verified_btn
+        self.club_only_compare_btn = self.club_only_panel.compare_btn
+        self.club_only_preview_btn.clicked.connect(
+            lambda: self._start_club_only(preset="fast_preview")
+        )
+        self.club_only_verified_btn.clicked.connect(
+            lambda: self._start_club_only(preset="verified_fit")
+        )
+        self.club_only_compare_btn.clicked.connect(self._compare_club_only_candidates)
+
         self.run_button = QPushButton("Build document and match")
         self.run_button.clicked.connect(self.start)
         self.stop_button = QPushButton("Stop")
@@ -239,8 +271,10 @@ class MotionMatchingWidget(QWidget):
         results_group = self._create_results_section()
 
         layout = QVBoxLayout(widget)
-        layout.addLayout(form)
+        layout.addWidget(source_box)
+        layout.addWidget(self.tour_capture_form)
         layout.addWidget(self.stages_group)
+        layout.addWidget(self.club_only_panel)
         layout.addLayout(buttons)
         layout.addWidget(self.log, stretch=1)
         layout.addWidget(results_group)
@@ -456,6 +490,69 @@ class MotionMatchingWidget(QWidget):
     def _default_club(self, capture: str) -> None:
         self.club.setCurrentText(pipeline.CLUB_FOR_CAPTURE.get(capture, "driver"))
 
+    def _on_source_mode_changed(self) -> None:
+        club_only = self.rb_club_only.isChecked()
+        self.tour_capture_form.setVisible(not club_only)
+        self.stages_group.setVisible(not club_only)
+        self.run_button.setVisible(not club_only)
+        self.club_only_panel.setVisible(club_only)
+
+    def set_club_only_trials(self, trials: list[str]) -> None:
+        self.club_only_panel.set_trials(trials)
+
+    def apply_club_only_matrix_status(self, status: str, *, preset: str) -> None:
+        label = cui.verified_display_label(matrix_cell_status=status, preset=preset)
+        self.acceptance_badge.setText(label)
+        if label == "VERIFIED":
+            self.acceptance_badge.setStyleSheet("font-weight: bold; color: green;")
+        elif label in ("REJECTED", "UNQUALIFIED", "UNSUPPORTED", "MISSING RUNTIME"):
+            self.acceptance_badge.setStyleSheet("font-weight: bold; color: red;")
+        else:
+            self.acceptance_badge.setStyleSheet("font-weight: bold; color: gray;")
+
+    def club_only_session(self) -> cui.ClubOnlySessionState:
+        return self._club_only_session
+
+    def clear_club_only_cancel(self) -> None:
+        self._club_only_session.clear_cancel()
+
+    def resume_club_only_checkpoint(self, token: str) -> None:
+        self._club_only_session = self._club_only_session.with_checkpoint_token(token)
+
+    def _sync_club_only_session(self, *, preset: str) -> None:
+        path_text = self.club_only_panel.workbook_path.text().strip()
+        self._club_only_session.workbook_path = Path(path_text) if path_text else None
+        self._club_only_session.trial_id = self.club_only_trial.currentText()
+        self._club_only_session.model_id = self.club_only_panel.model.currentText()
+        self._club_only_session.preset = preset
+
+    def _start_club_only(self, *, preset: str) -> None:
+        self._sync_club_only_session(preset=preset)
+        self.clear_club_only_cancel()
+        self.log.appendPlainText(
+            f"Club-only {preset} requested for "
+            f"{self._club_only_session.trial_id} / "
+            f"{self._club_only_session.model_id}\n"
+            f"{cui.BODY_MOTION_DISCLAIMER}\n"
+        )
+        # Verified badge only after CO-08 scored matrix evidence is applied.
+        self.apply_club_only_matrix_status("unqualified", preset=preset)
+        self.results.setText(
+            "Club-only run queued. Apply matrix cell status==scored before VERIFIED."
+        )
+
+    def _compare_club_only_candidates(self) -> None:
+        self._sync_club_only_session(preset=self._club_only_session.preset)
+        legend = "; ".join(
+            f"{k}: {v}" for k, v in cui.observed_versus_inferred_legend()
+        )
+        self.log.appendPlainText(
+            "Compare candidates (observed club vs inferred body).\n"
+            f"{legend}\n"
+            f"{cui.BODY_MOTION_DISCLAIMER}\n"
+        )
+        self._on_open_viewer(club_only=True)
+
     # -------------------------------------------------------------------------
     # Request & Command Builders (LoD: widgets bind, pipeline builds)
     # -------------------------------------------------------------------------
@@ -552,6 +649,7 @@ class MotionMatchingWidget(QWidget):
         self._worker.start([self.mjx_validate_command()])
 
     def stop(self) -> None:
+        self._club_only_session.request_cancel()
         self._worker.stop()
 
     def _set_active_buttons(
@@ -727,12 +825,17 @@ class MotionMatchingWidget(QWidget):
         except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
             self.log.appendPlainText(f"Could not open results browser: {exc}\n")
 
-    def _on_open_viewer(self) -> None:
+    def _on_open_viewer(self, club_only: bool = False) -> None:
         """Open or show the Tour Matching Viewer window."""
         try:
             from src.tools.tour_matching_viewer.gui import TourMatchingViewerWindow
 
             self._viewer_window = TourMatchingViewerWindow()
+            widget = getattr(self._viewer_window, "widget", None)
+            if widget is not None and hasattr(widget, "set_club_only_legend_visible"):
+                widget.set_club_only_legend_visible(
+                    club_only or self.rb_club_only.isChecked()
+                )
             self._viewer_window.show()
         except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
             self.log.appendPlainText(f"Could not open viewer: {exc}\n")

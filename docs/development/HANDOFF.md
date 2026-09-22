@@ -1,5 +1,22 @@
 # Current Matching Continuation Handoff
 
+## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613)
+
+- Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10613-co09`,
+  branch `feat/issue-10613-co09-ui`, DL-#10613, PR not created (opening).
+  Tip SHA: SELF.
+- Delivered: thin `club_only_ui` facade + `ClubOnlySourcePanel` on Motion
+  Matching source selection (Club-Only Excel, four canonical trials, alias
+  conflicts/coverage); verified badge gated on matrix `status==scored` only;
+  observed-versus-inferred legend on Tour Matching Viewer; club_only lane
+  metadata for matched_swing_browser without a parallel store; cancel/resume
+  session hooks; clone preserves edits. Feature parity notes updated.
+- Validation: `python -m pytest tests/tools/motion_matching/test_club_only_ui.py
+tests/tools/motion_matching/test_motion_matching_gui.py
+tests/unit/tools/test_tour_matching_viewer_club_only_legend.py
+tests/tools/matched_swing_browser/test_model.py -q -n 0 --no-cov` GREEN.
+- Next: Open PR Fixes #10613, arm squash auto-merge; then CO-10 (#10614).
+
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379)
 
 - Worktree: `agent-worktrees/issue-10379-local`, branch

@@ -153,6 +153,24 @@ class MatchedSwingBrowserModel:
         return "REJECTED"
 
     @staticmethod
+    def row_appears_verified(row: LedgerRow) -> bool:
+        """CO-09: club-only rows are verified only when matrix status is scored."""
+        if not row.acceptance:
+            return False
+        club_meta = row.acceptance.get("club_only")
+        if isinstance(club_meta, dict):
+            status = str(club_meta.get("matrix_cell_status", "")).lower()
+            preset = str(club_meta.get("preset", "")).lower()
+            from src.tools.motion_matching import club_only_ui as cui
+
+            return (
+                cui.may_appear_as_verified(matrix_cell_status=status)
+                and preset == "verified_fit"
+                and bool(club_meta.get("appears_verified"))
+            )
+        return MatchedSwingBrowserModel.extract_verdict_string(row) == "VERIFIED"
+
+    @staticmethod
     def format_metric(value: float | None, unit: str = "mm") -> str:
         """Format a quantitative metric cleanly with units."""
         if value is None or math.isnan(value):

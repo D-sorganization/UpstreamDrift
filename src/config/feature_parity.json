@@ -93,7 +93,7 @@
       "web": null,
       "status": "parity",
       "tiles": ["motion_matching"],
-      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, and MJX export/validation (MS-82 #10355)."
+      "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, MJX export/validation (MS-82 #10355), and Club-Only Excel source selection with observed-vs-inferred body candidacy (CO-09 #10613)."
     },
     "tools.matched_swing_browser": {
       "title": "Matched Swing Results Browser",
@@ -103,7 +103,7 @@
       "status": "gap",
       "issue": 10353,
       "tiles": ["matched_swing_browser"],
-      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff."
+      "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff. Club-only results reuse the same ledger lane (`club_only`) with matrix status==scored verified gating (CO-09 #10613)."
     },
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
