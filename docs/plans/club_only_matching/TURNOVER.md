@@ -7,17 +7,20 @@ Companion epic: [#10603](https://github.com/D-sorganization/UpstreamDrift/issues
 **CO-00 (#10604)** shipped via PR #10667. **CO-01 (#10605)** shipped via PR #10670.
 **CO-02 (#10606)** shipped via PR #10675. **CO-03 (#10607)** shipped via PR #10678.
 **CO-04 (#10608)** shipped via PR #10680. **CO-05 (#10609)** shipped via PR
-#10681. **CO-06 (#10610)** is in progress: recover feasible controls via
-constrained inverse-dynamics allocation, separate tau/passive/reactions/root
-slack, independently replay candidates without measured-state resets, and keep
-named native G1 blockers (software-contract fixtures only). Evidence:
+#10681. **CO-06 (#10610)** shipped via PR #10687. **CO-07 (#10611)** is in
+progress: classical fast-preview/verified-fit presets, immutable
+target/model/profile caches, checkpoint/resume, feasibility-first Pareto
+diversity, optional neural proposal slot without weights, and quality-vs-time
+curves for CO-08 (software-contract fixtures only; named native G1 blockers).
+Evidence:
 [club_workbook_identity.json](evidence/club_workbook_identity.json),
 [club_observation_contracts.json](evidence/club_observation_contracts.json),
 [club_plausibility_acceptance.json](evidence/club_plausibility_acceptance.json),
 [club_starting_guesses.json](evidence/club_starting_guesses.json),
 [club_pendulum_match.json](evidence/club_pendulum_match.json),
 [club_body_candidates.json](evidence/club_body_candidates.json),
-[club_control_replay.json](evidence/club_control_replay.json).
+[club_control_replay.json](evidence/club_control_replay.json),
+[club_fast_matching.json](evidence/club_fast_matching.json).
 Existing reference epic
 [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) and
 native program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)
@@ -54,14 +57,14 @@ CO-00 -> CO-01 -> CO-02 -> CO-03 -> CO-04/CO-05 -> CO-06 -> CO-07 -> CO-08. CO-0
 follows the stable service contract; CO-10 is final acceptance.
 
 The immediate task is
-**[#10610](https://github.com/D-sorganization/UpstreamDrift/issues/10610) (CO-06)
-only** (CO-04/#10680 and CO-05/#10681 shipped). This is a dispatch-ready plan, not
+**[#10611](https://github.com/D-sorganization/UpstreamDrift/issues/10611) (CO-07)
+only** (CO-06/#10687 shipped). This is a dispatch-ready plan, not
 authorization to run every expensive
 experiment at once. Lower-cost agents handle bounded schema, adapter, fixture, CLI and
 UI work. An experienced reviewer checks model/observation semantics, force
 identifiability, contact, physical feasibility and scientific promotion. Dependencies
 are real contract gates: require merged implementation plus relevant tests/receipts, not
-merely a closed issue. Do not start CO-07 until CO-06 lands.
+merely a closed issue. Do not start CO-08 until CO-07 lands.
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model
