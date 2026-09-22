@@ -318,16 +318,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10617 · NM-02 Native Dataset Labels Complete and Semantically Correct
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10617 (epic #10603)
 - **Branch:** fix/10617-nm02-native-dataset-labels
-- **PR:** not created
+- **PR:** #10679
 - **Paths:** src/shared/python/data_io/dataset_generator/{core,models,labels,adapters,**init**}.py; src/shared/python/engine_core/mock_engine.py; tests/unit/data_io/test_dataset_labels_nm02.py; tests/unit/data_io/test_nm02_adapters.py; docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — `pytest tests/unit/data_io/test_dataset_labels_nm02.py tests/unit/data_io/test_nm02_adapters.py tests/unit/test_dataset_generator.py -q -n 0 --no-cov` green; ODE and mock residuals 0.0
+- **Last verified:** 2026-09-22 at SELF — PR #10679 open with squash auto-merge armed
 - **Summary:** Completes DatasetGenerator channel evidence (no zero-as-measurement), native vs interval accelerations, requested/applied controls, DoF layout and root-force gate, restore StateError, residual helper, and first-wave mock+ODE qualification receipts keyed to NM-01 pilot roster. No training or speed claim.
-- **Next step:** Confirm CI green on the NM-02 PR and squash auto-merge.
+- **Next step:** Confirm CI green on PR #10679 and squash auto-merge.
 - **Evidence:** docs/plans/neural_motion_matching/dataset_labels.md; docs/plans/neural_motion_matching/evidence/nm02_first_wave_label_receipts.json.
 
 ### DL-#10616 · NM-01 Freeze Learning Tasks Model Roster and Benefit Experiment
