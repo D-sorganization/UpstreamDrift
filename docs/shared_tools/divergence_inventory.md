@@ -82,7 +82,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `motion_matching` | 0 | 0 | 0 | 212 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
-| `neural_motion` | 0 | 0 | 0 | 18 | 0 | 0 |
+| `neural_motion` | 0 | 0 | 0 | 25 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `optimization` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -119,7 +119,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `swing_sim` | 0 | 0 | 0 | 0 | 400 | 0 |
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
-| `theme` | 0 | 0 | 0 | 3 | 23 | 0 |
+| `theme` | 0 | 0 | 0 | 4 | 23 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `tour_baselines` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 26 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1433** | **709** | **702** |
+| **Total** | **423** | **279** | **123** | **1441** | **709** | **702** |
 
 ## Diverged Files by Package
 

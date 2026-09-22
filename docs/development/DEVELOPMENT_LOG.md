@@ -365,11 +365,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10619 (epic #10603)
 - **Branch:** feat/10619-nm04-teacher-episodes
 - **PR:** #10699
-- **Paths:** src/shared/python/neural_motion/teacher/; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_pilot_receipt.json
+- **Paths:** src/shared/python/neural_motion/teacher/; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_pilot_receipt.json; docs/shared_tools/divergence_inventory.v1.json; docs/shared_tools/divergence_inventory.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — teacher campaign on NM-03 EpisodeStore; mock backend tests GREEN; no training claim
+- **Last verified:** 2026-09-22 at SELF — divergence inventory lists neural_motion/teacher ud-only paths; inventory check GREEN locally
 - **Summary:** Feasible teacher generation from CO-03-style anchors with stratified perturbations; rejected rollout accounting; teacher ledger with replay digest; resumable state; active-learning selection excluding test/eval splits; pilot spec for driven_double_pendulum under NM-01 nested stages.
-- **Next step:** Open PR Fixes #10619 with agent:local label and squash auto-merge after quality-gate.
+- **Next step:** Push PR #10699 and confirm unit-test-gate GREEN after auto-merge.
 - **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_pilot_receipt.json.
 
 ### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
