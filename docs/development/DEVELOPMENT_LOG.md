@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10379 (MS-105, epic #10363; folded PF-08 #10438)
 - **Branch:** feat/10379-ms105-jobs-recovery
-- **PR:** not created
+- **PR:** #10704
 - **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 28 unit tests green; ruff clean; software-contract only.
+- **Last verified:** 2026-09-22 at SELF — 28 unit tests green; ruff clean; PR #10704 squash auto-merge armed; software-contract only.
 - **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
-- **Next step:** Push branch and open ready-for-review PR Fixes #10379 with agent:local and squash auto-merge.
+- **Next step:** Confirm CI green on PR #10704 and allow squash auto-merge to land.
 
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
