@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10707
 - **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 15 unit tests green; empty-ledger evidence snapshot `release_status=blocked` with 36 incomplete required rows; ruff/mypy clean; rebased onto origin/main after CO-08; PR #10707 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at SELF — 15 unit tests green; divergence inventory regenerated for `full_swing_qualification.py` (ud-only); empty-ledger evidence snapshot `release_status=blocked` with 36 incomplete required rows; PR #10707 squash auto-merge armed.
 - **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
-- **Next step:** Confirm CI green on PR #10707 and allow squash auto-merge to land.
+- **Next step:** Confirm CI green on PR #10707 after inventory fix and allow squash auto-merge to land.
 
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
