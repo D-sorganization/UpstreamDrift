@@ -1,24 +1,20 @@
 # Current Matching Continuation Handoff
 
-## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612)
+## Realtime Pub/Sub Wiring #8869 Handoff
 
-- Worktree: `Worktrees/UpstreamDrift-10612-co08`, branch
-  `feat/issue-10612-co08-matrix`, DL-#10612, PR
-  [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) open.
-- Delivered: `club_only/matrix_qualification.py` independently reviews exported
-  candidate packages over native observation times for four workbook trials ×
-  the #10585 roster; freezes CO-02 gates and publishes failures; withheld-body
-  experiment keeps body markers out of fitting; visual attractiveness cannot
-  override physical failure; fail-closed tamper/leakage/phase/orientation/reset/
-  geometry/native checks. Path anchors: `fit_metrics.py`, `acceptance.py`,
-  `plot_fit_quality_card.py`. Schema `club-matrix-qualification/1.0.0`; evidence
-  `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
-- Validation: scoped club_only unit tests GREEN; local
-  `python scripts/ci/check_dry_duplication_gate.py` GREEN after extracting
-  `resolve_roster_matrix_scope` / `profile_from_roster` into `club_only/profiles.py`.
-- Limitations: software-contract scoring only; no native Fit/G1 claim; full-body
-  and missing-runtime cells remain unqualified with named blockers.
-- Next: Confirm CI green on PR #10703 (DRY gate); then squash-merge and dispatch CO-09.
+- Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10655-local`.
+- Branch: `fix/8869-realtime-pubsub-decision`; PR [#10655](https://github.com/D-sorganization/UpstreamDrift/pull/10655) (open). Governing
+  issue #8869 (folds in #8868, #8942A). Seam #9406: `realtime` is `split
+pending` — UD keeps this facade.
+- Entry DL-#8869. **Decision: WIRE, not delete.** Explicit `transport="ws"` /
+  `REALTIME_TRANSPORT=ws` routes to `WSPubSub`; other transports raise
+  `ValueError` instead of silent file fallback. Renamed colliding
+  `register_channel` → `register_channel_hint`; deleted dead `file_pubsub.py`.
+- Next action: green CI after post-#10703 merge, squash merge, teardown worktree.
+
+## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612) [MERGED]
+
+- Merged via PR [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) on `main` (`17a0ee033`).
 
 ## GUI Thread-Blocking Migration #8880 [MERGED]
 
