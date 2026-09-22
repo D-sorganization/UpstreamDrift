@@ -24,6 +24,7 @@ pytestmark = pytest.mark.unit
 # ``from src.shared.python.theme.layout_metrics import LayoutMetrics``
 # convention used elsewhere in this repo (see src/shared/python/_seam_redirect.py).
 import src.shared.python.theme.tool_stylesheet as ts
+from src.shared.python.theme import palette as theme_palette
 
 
 def test_primary_action_color_is_a_valid_hex_literal() -> None:
@@ -49,10 +50,7 @@ def test_get_tool_colors_falls_back_when_theme_lookup_raises(
     def _boom() -> None:
         raise ImportError("theme package unavailable")
 
-    monkeypatch.setattr(
-        "src.shared.python.theme.palette.get_current_colors",
-        _boom,
-    )
+    monkeypatch.setattr(theme_palette, "get_current_colors", _boom)
     colors = ts.get_tool_colors()
     assert colors == ts._FALLBACK_COLORS
 
@@ -67,10 +65,7 @@ def test_get_tool_colors_uses_live_theme_when_available(
         "text_primary": "#000004",
         "text_secondary": "#000005",
     }
-    monkeypatch.setattr(
-        "src.shared.python.theme.palette.get_current_colors",
-        lambda: live,
-    )
+    monkeypatch.setattr(theme_palette, "get_current_colors", lambda: live)
     assert ts.get_tool_colors() == live
 
 
