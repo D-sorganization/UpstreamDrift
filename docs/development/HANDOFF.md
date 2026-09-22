@@ -1,24 +1,34 @@
 # Current Matching Continuation Handoff
 
-## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611)
+## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612)
 
-- Worktree: `Worktrees/UpstreamDrift-10611-co07`, branch
-  `feat/10611-co07-fast-matching`, DL-#10611, PR
-  [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700) open.
+- Worktree: `Worktrees/UpstreamDrift-10612-co08`, branch
+  `feat/issue-10612-co08-matrix`, DL-#10612, PR not created yet.
+- Delivered: `club_only/matrix_qualification.py` independently reviews exported
+  candidate packages over native observation times for four workbook trials ×
+  the #10585 roster; freezes CO-02 gates and publishes failures; withheld-body
+  experiment keeps body markers out of fitting; visual attractiveness cannot
+  override physical failure; fail-closed tamper/leakage/phase/orientation/reset/
+  geometry/native checks. Schema `club-matrix-qualification/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_matrix_qualification.py -q -n 0 --no-cov`
+  GREEN (13 passed).
+- Limitations: software-contract scoring only; no native Fit/G1 claim; full-body
+  and missing-runtime cells remain unqualified with named blockers.
+- Next: Open ready-for-review PR with `Fixes #10612` and confirm CI green.
+
+## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611) [MERGED]
+
+- Merged to main via PR [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700)
+  (SHA `f9ece7f6a` on this worktree base).
 - Delivered: `club_only/fast_matching.py` with fast-preview vs verified-fit
   budgets, immutable target/model/profile cache keys, checkpoint/resume identity,
   cold vs retrieval vs reduced-to-full starts, feasibility-first pruning and
   bounded Pareto diversity, optional empty neural proposal slot, and stage
   profiling including verification time. Schema `club-fast-matching/1.0.0`;
   evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
-- Param-budget fix: collapse `run_fast_club_match` knobs onto `FastMatchOptions`
-  and private `_ScoreLoopCtx` / `_AssembleCtx` (repo-structure-gates).
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
-  GREEN (12 passed); `python scripts/ci/check_architecture_budget.py` OK.
-- Limitations: software-contract scoring only; no native Fit/G1 claim; no
-  unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
-  saved in the software-contract evidence for CO-08 (not native timing).
-- Next: Confirm CI green on PR #10700 after main merge through MS-14; squash auto-merge remains armed.
+- Limitations: software-contract scoring only; no native Fit/G1 claim.
+- Next: N/A — merged; continue CO-08/CO-09 on main.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
