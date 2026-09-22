@@ -13,7 +13,6 @@ import math
 from typing import Any
 
 import numpy as np
-from scipy.optimize import least_squares
 
 from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
@@ -27,6 +26,7 @@ from src.shared.python.motion_matching.bernstein_controls import (
     bernstein_curvature_penalty,
     bernstein_effort_penalty,
     evaluate_bernstein_controls,
+    solve_bounded_bernstein_least_squares,
 )
 
 logger = logging.getLogger(__name__)
@@ -298,14 +298,12 @@ def fit_bounded_double_pendulum(
         return residual_policy.assemble(tracking_res, prof.control_points)
 
     x0: np.ndarray = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
-    opt_res = least_squares(
+    opt_res = solve_bounded_bernstein_least_squares(
         residual_func,
         x0,
-        bounds=(lo, hi),
-        max_nfev=max(opts.max_nfev, 5),
-        ftol=1e-5,
-        xtol=1e-5,
-        gtol=1e-5,
+        lo,
+        hi,
+        max_evaluations=opts.max_nfev,
     )
 
     optimal_profile = BernsteinTorqueProfile(

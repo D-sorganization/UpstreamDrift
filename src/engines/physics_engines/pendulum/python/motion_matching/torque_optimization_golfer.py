@@ -17,7 +17,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.optimize import OptimizeResult, least_squares
+from scipy.optimize import OptimizeResult
 
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters_golfer import (
     GolferFeasibilityReport,
@@ -36,6 +36,7 @@ from src.shared.python.motion_matching.bernstein_controls import (
     bernstein_curvature_penalty,
     bernstein_effort_penalty,
     evaluate_bernstein_controls,
+    solve_bounded_bernstein_least_squares,
 )
 
 # Degree-6 Bernstein basis (7 control points per actuated joint), matching the
@@ -327,14 +328,12 @@ def _run_bernstein_least_squares(
         return residual_policy.assemble(tracking_res, prof.controls)
 
     x0 = np.zeros(n_params, dtype=np.float64)
-    opt_res = least_squares(
+    opt_res = solve_bounded_bernstein_least_squares(
         residual_func,
         x0,
-        bounds=(lo, hi),
-        max_nfev=max(opts.max_nfev, 5),
-        ftol=1e-5,
-        xtol=1e-5,
-        gtol=1e-5,
+        lo,
+        hi,
+        max_evaluations=opts.max_nfev,
     )
 
     optimal_profile = BernsteinGolferTorqueProfile(
