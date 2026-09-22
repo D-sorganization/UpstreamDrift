@@ -1,0 +1,54 @@
+{
+  "number": 10382,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/10382",
+  "title": "MS-108: Observable Golf Outputs, Impact Semantics and Accuracy Budgets",
+  "body": "## Objective\nEnsure marker fit quality supports useful and defensible golf outputs instead of hiding critical errors in whole-body RMS.\n\n## Scope and Deliverables\n- Specify clubhead position/speed/path, face orientation, impact timing, pelvis/torso sequencing and any advertised joint-load outputs with units, frames, phase windows, filtering/time alignment and error budgets tied to intended use.\n- Audit marker/club calibration observability, especially club axial rotation/face angle with sparse or collinear club markers. Unobservable outputs remain unavailable or uncertainty-qualified; add explicit calibration/marker acquisition requirements rather than inventing values.\n- Separate tracking through an impact timestamp from a physical ball-strike model. If physical impact/ball-flight claims are offered, create bounded dependent model/validation tasks for measured ball/club conditions and collision parameters; do not mark impact physics validated by C3D pose tracking.\n- Define phase-specific and peak/percentile errors, coverage and independent comparison against calibrated reference instruments when available. No acceptance threshold relaxation based solely on the current fitted trial.\n- Integrate metric metadata and confidence into existing receipts, viewer and exported report. Preserve canonical time rather than unconstrained time warping that conceals event errors.\n\n## Acceptance Tests\nSynthetic observable/unobservable club configurations; missing/gapped club markers; known event offsets; held-out reference comparisons. UI/export never displays precise validated face/load/impact outputs without supporting calibration and evidence.\n\n## Dependencies and Ownership\nMS-100 and MS-90 phase-A data audit; protocol coordination with MS-101 but no dependency on its final report. Accountable role: golf biomechanics/product metrics lead. Feeds MS-101 and MS-106.\n\n## Execution and Evidence Contract\nPart of epic #10363; owner-authorized contract revision 2026-09-17. This issue is planning, not evidence of implementation or qualification.\nBefore implementation, check/post the existing issue lease and register presence through Repository_Management; preserve existing owners and worktrees. Use the established source modules, candidate/receipt schemas, feature-parity and industrial-readiness registries. No parallel metrics or acceptance authority.\nUse focused topic PRs with issue references, repo-standard validation, relevant native-engine tests, and negative-path tests. Mocks or skipped native tests cannot qualify a native engine. Update the canonical handoff and the existing governing-issue development-log row in place. Store content-addressed evidence with source/model/data/runtime/contract hashes; keep historical evidence immutable and mark superseded verdicts explicitly. Workflow changes follow the Repository_Management fleet campaign process.\nThe program coordinator allocates a lease holder before implementation; the accountable role below is not a claim that an agent has accepted the task. Release remains blocked until the linked evidence passes the revised contracts.\n\n## Program Qualification Dependencies\n- MS-100 (#10374): Fail-Closed Metrics and Versioned Physical Acceptance Qualification\n- MS-101 (#10375): Independent Scientific Validation, Identifiability and Uncertainty\n- MS-106 (#10380): Professional Release Gate and Both-Shell Customer Qualification\n",
+  "updated_at": "2026-09-19T17:42:49Z",
+  "labels": [
+    {
+      "id": 10796034821,
+      "node_id": "LA_kwDOQqJAi88AAAACg35rBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/P2",
+      "name": "P2",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Medium priority",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10875053685,
+      "node_id": "LA_kwDOQqJAi88AAAACiDQmdQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/motion-matching",
+      "name": "motion-matching",
+      "color": "5319E7",
+      "default": false,
+      "description": "Simscape forward-dynamics motion matching effort",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12242097669,
+      "node_id": "LA_kwDOQqJAi88AAAAC2a-WBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/matched-swing-program",
+      "name": "matched-swing-program",
+      "color": "0E8A16",
+      "default": false,
+      "description": "Program: matched forward-dynamics swing in every engine, parity, launcher access (epic)",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12266883256,
+      "node_id": "LA_kwDOQqJAi88AAAAC2ynIuA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/triaged-2026-09",
+      "name": "triaged-2026-09",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Reviewed in the 2026-09-19 backlog triage",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "open"
+}

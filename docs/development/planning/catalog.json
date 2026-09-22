@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "repository": "D-sorganization/UpstreamDrift",
+  "entries": [
+    {
+      "id": "DV-10382",
+      "title": "MS-108: Observable Golf Outputs, Impact Semantics and Accuracy Budgets",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/10382",
+      "source_snapshot": "source-10382.json",
+      "record": "DV-10382.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Advertised face/impact/load accuracy needs calibrated independent instrument comparisons beyond marker-fit residuals.",
+      "prerequisites": [
+        {
+          "name": "Reference instruments and marker/club calibration sufficient for claimed observables",
+          "evidence": null
+        },
+        {
+          "name": "Synchronized held-out impact/club/ball observations with independent error budgets",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Report phase-specific, peak and percentile errors with coverage against independent references.",
+        "Keep unobservable face rotation and unsupported load/impact outputs unavailable or uncertainty-qualified; pose tracking is not collision validation."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
+      "id": "DV-10375",
+      "title": "MS-101: Independent Scientific Validation, Identifiability and Uncertainty",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/10375",
+      "source_snapshot": "source-10375.json",
+      "record": "DV-10375.md",
+      "disposition": "split",
+      "kind": "human-validation",
+      "status": "deferred",
+      "rationale": "Independent subject/trial generalization and physiological load claims need an approved cohort and synchronized reference measurements.",
+      "prerequisites": [
+        {
+          "name": "Independent representative subjects/trials with rights and provenance",
+          "evidence": null
+        },
+        {
+          "name": "Synchronized ground-reaction force, center-of-pressure and claim-appropriate muscle/reference evidence",
+          "evidence": null
+        },
+        {
+          "name": "Independent biomechanical reviewer and frozen validation cohort/thresholds",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Validate held-out observations without tuning on the validation set; report uncertainty coverage and domain failures.",
+        "Bind scientific claims to measured evidence; unsupported force/muscle/physiology outputs remain unqualified.",
+        "Driver/iron examples and synthetic recovery do not establish population generalization."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
+      "id": "DV-9700",
+      "title": "Epic: Swing-to-Impact Dynamics and Acoustic Sweetness Research",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9700",
+      "source_snapshot": "source-9700.json",
+      "record": "DV-9700.md",
+      "disposition": "split",
+      "kind": "human-validation",
+      "status": "deferred",
+      "rationale": "U4 requires synchronized physical acquisition and blinded participants; U2 integration and U3 registered numerical counterfactuals remain software/research work.",
+      "prerequisites": [
+        {
+          "name": "Calibrated synchronized impact, structural and microphone acquisition",
+          "evidence": null
+        },
+        {
+          "name": "Named equipment/operators, controlled ball/club/delivery conditions and traceable raw data",
+          "evidence": null
+        },
+        {
+          "name": "Approved participant protocol, consent/rights, blinded listening and analysis registration",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Predeclare matched-delivery versus matched-input estimands and separate delivery effects from collision effects.",
+        "Measure force/spin/vibration/radiation with uncertainty and held-out conditions, preserving exact provider and calibration identities.",
+        "Evaluate sweetness separately with blinded original-level and level-controlled comparisons; synthetic sonification is not perceptual evidence."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
+      "id": "DV-9619",
+      "title": "[EPIC] Self-calibrating markerless mocap: learn camera placement and skeleton from observed swings, with strict outlier rejection",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9619",
+      "source_snapshot": "source-9619.json",
+      "record": "DV-9619.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Everyday-reference placement accuracy needs held-out real paper/ruler/board measurements, not only synthetic geometry tests.",
+      "prerequisites": [
+        {
+          "name": "Known measured camera/reference placements and independent scale/pose ground truth",
+          "evidence": null
+        },
+        {
+          "name": "Authorized capture sessions spanning declared layouts and reference geometry",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Collect held-out reference-placement accuracy evidence and report scale-only/planar ambiguity and uncertainty.",
+        "Do not publish physical accuracy claims before independent measured comparison."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
+      "id": "DV-9613",
+      "title": "Rig soak: three-camera sessions intermittently fail to open cameras (dshow I/O error) and a camera re-enumerates mid-series",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9613",
+      "source_snapshot": "source-9613.json",
+      "record": "DV-9613.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Reproducing intermittent camera loss and separating bus topology/power from DirectShow causes needs the actual lab rig.",
+      "prerequisites": [
+        {
+          "name": "Three-camera lab rig and operator authorized to rewire its Thunderbolt/USB topology",
+          "evidence": null
+        },
+        {
+          "name": "Exact mode, timing, ffmpeg and device-arrival logs for both topologies",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Run ten consecutive three-camera captures at 1920x1200@60 with the TS4 on its own port and cameras directly connected; all supported, no re-enumeration.",
+        "Repeat with the TS4 chained to reproduce or clear the original topology rule; retain failed captures and logs."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
+      "id": "DV-9546",
+      "title": "Epic: Deliver and Qualify the Impact Zone and Impact Explorer Product",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9546",
+      "source_snapshot": "source-9546.json",
+      "record": "DV-9546.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "Impact Explorer physical-accuracy claims require independent calibration/measurements beyond product and numerical parity tests.",
+      "prerequisites": [
+        {
+          "name": "Calibrated independent club/ball/contact observations matching advertised model tiers",
+          "evidence": null
+        },
+        {
+          "name": "Equipment/condition provenance and predeclared validation accuracy budgets",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Demonstrate independent physical accuracy within the advertised domain before publishing predictive claims.",
+        "Keep unsupported approximation modes explicit and preserve no-hit, unfinished and unavailable outcomes."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    }
+  ]
+}

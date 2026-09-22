@@ -457,6 +457,16 @@ without `--consent-recorded` the export is refused and
 faked session. Nothing here restates the schema; a pin that ships a different
 one makes the export `unavailable`, not wrong.
 
+`tools_bridge.map_camera_records(manifest, plan)` gives each rig camera as Tools
+records (#9604): the same `CameraIdentity` the export writes, plus a
+`CameraCapabilities` advertising the negotiated mode (the requested mode when a
+camera never negotiated one) as its single resolution, frame rate and pixel
+format. UVC rig cameras declare no shutter kind, no hardware trigger, no device
+clock and no microsecond exposure range, so those are `unknown`, `unsupported`
+(with the reason) and absent rather than guessed. One record per manifest
+camera, in order; an unready schema, an unbound or duplicate view, or a clock
+domain without a Tools `ClockKind` is refused.
+
 ## Time Sync
 
 Three cameras on three USB root ports stamp frames in the host's monotonic
