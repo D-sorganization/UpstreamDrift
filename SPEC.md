@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #9604 | Tools session bridge maps every rig camera to a Tools `CameraIdentity` + `CameraCapabilities` record (`map_camera_records`): negotiated-else-requested mode, unknown shutter, unsupported hardware trigger and device timestamps (host clock), no exposure range; fail-closed on an unready schema, unbound or duplicate views and unmapped clock domains. |
 | 2026-09-22 | #8941 | Analysis statistics server side: metric history is a `deque(maxlen=500)` with a monotonic sample cursor, `/analysis/statistics` aggregates in one pass off the event loop, and optional `since`/`limit` query params (422 when out of range) trim `time_series` with the next cursor in `X-Analysis-Next-Since`; default response unchanged. |
 | 2026-09-22 | #10735 | Repair and supersede stale TB-06 fitting work with registered closed-loop golfer topology and feasibility diagnostics, native bounded Bernstein rollout/optimization, separate actuator/reaction and energy/work records, and explicit continuous-control replay; shares #10733's control algebra and does not fit or qualify a real capture. |
 | 2026-09-22 | #10733 | Extract contract-validated bounded Bernstein controls shared by the double and triple pendulum matchers, preserving endpoint, convex-bound, curvature, and effort semantics for the pending constrained upper-body optimizer; no capture fit or qualification claim. |
