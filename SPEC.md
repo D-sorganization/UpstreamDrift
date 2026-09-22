@@ -37,6 +37,15 @@ Extends the measured-club surface for epic #10602 without replacing legacy `Club
   - Mid-hands→butt-end requires an explicit shaft-axis offset (no silent rename).
 - **Legacy Adapters (`club_only/adapters.py`)**: Bidirectional `ClubObservation` ↔ `ClubTarget`; refuse inventing identity quats for unobserved orientation.
 - **Evidence**: `docs/plans/club_only_matching/evidence/club_observation_contracts.json` (four-trial synthetic fixtures; not native physical qualification).
+
+## Club-Only Double and Triple Pendulum Matching (CO-04, #10608)
+
+Matches club-only observations with driven double and triple pendulums for epic #10602:
+- **Orchestrator (`club_only/pendulum_match.py`)**: Eight-cell matrix (2 models × 4 canonical trials); in-plane vs spatial 3D residuals reported separately; first frame scored before integration; best of cold vs retrieval warm-start retained when seed DOF matches exactly.
+- **Double fit**: Reuses TB-04 Bernstein torque path (`torque_optimization.py`) with optional `initial_controls` warm-start.
+- **Triple fit (`torque_optimization_triple.py`)**: Moving-hub triple pendulum with external-work accounting; distinct model id from fixed-pivot double.
+- **Acceptance reuse**: CO-02 gates via `evaluate_club_only_acceptance`; synthetic fixtures list qualification blockers honestly.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_pendulum_match.json` (software contracts only; not native physical qualification).
 ## MyoSuite Kinematic Replay With Retarget Map and Marker Parity Receipt (MS-52, #10345)
 
 Adds kinematic-only replay of matched candidates in the MyoSuite engine lane with coordinate retargeting, marker parity receipts, cross-engine registration, and viewer support:
@@ -6810,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10608 | Match club-only motion with driven double and triple pendulums (CO-04): eight-cell matrix, in-plane vs 3D residuals, exact-DOF retrieval warm-start, moving-hub external work, synthetic evidence with qualification blockers. |
 | 2026-09-22 | #10607 | Build retrieval and constrained-IK starting guesses for club-only matching (CO-03): handedness-aware hand-frame offsets, single-rigid library retrieval, Pink/DLS capability records with fail-closed unsupported constraints, seed cache invalidated by geometry/profile hashes; kinematic preview only. |
 | 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
 | 2026-09-21 | #10677 | Add MS-102 engine/model inventory ledger and smoke qualification harness (#10376): dual-club flagship packages from models.yaml/capability matrix/ENGINE_TIERS, immutable hashes, named MyoSuite repair #10344, Simscape R2025b metadata, structural receipts. |

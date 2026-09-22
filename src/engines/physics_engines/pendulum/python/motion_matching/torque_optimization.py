@@ -196,6 +196,7 @@ class DoublePendulumFitOptions:
     tau2_bounds: tuple[float, float] = (-150.0, 150.0)
     curvature_weight: float = 0.05
     effort_weight: float = 0.001
+    initial_controls: np.ndarray | None = None
 
 
 @dataclass(frozen=True)
@@ -294,7 +295,17 @@ def fit_bounded_double_pendulum(
         eff_res = prof.effort_penalty(opts.effort_weight)
         return np.concatenate([tracking_res, curv_res, eff_res])
 
-    x0: np.ndarray = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
+    if opts.initial_controls is None:
+        x0 = np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64)
+    else:
+        x0 = np.asarray(opts.initial_controls, dtype=np.float64).reshape(-1)
+        if x0.size != 2 * COEFFS_PER_JOINT:
+            raise ValueError(
+                f"initial_controls must have length {2 * COEFFS_PER_JOINT}"
+            )
+        if not np.all(np.isfinite(x0)):
+            raise ValueError("initial_controls must be finite")
+        x0 = np.clip(x0, lo, hi)
     opt_res = least_squares(
         residual_func,
         x0,
