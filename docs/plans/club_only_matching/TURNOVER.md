@@ -8,11 +8,11 @@ Companion epic: [#10603](https://github.com/D-sorganization/UpstreamDrift/issues
 **CO-02 (#10606)** shipped via PR #10675. **CO-03 (#10607)** shipped via PR #10678.
 **CO-04 (#10608)** shipped via PR #10680. **CO-05 (#10609)** shipped via PR
 #10681. **CO-06 (#10610)** shipped via PR #10687. **CO-07 (#10611)** shipped via
-PR #10700. **CO-08 (#10612)** shipped via PR #10703. **CO-09 (#10613)** is in
-progress: integrate club-only matching into existing FitSwingProvider / pipeline
-/ ledger / ResultsBrowser / Motion Matching GUI surfaces without parallel
-frameworks (software-contract UI only; named native G1 blockers; no invented
-native verified claims).
+PR #10700. **CO-08 (#10612)** shipped via PR #10703. **CO-09 (#10613)** shipped via PR
+#10711. **CO-10 (#10614)** publishes the final operator/reproduction guide and
+turnover (software-contract only; epic #10602 stays open while mandatory native
+fits remain missing; no invented native/G1 or G3/neural success). Operator
+guide: [REPRODUCTION_GUIDE.md](REPRODUCTION_GUIDE.md).
 Evidence:
 [club_workbook_identity.json](evidence/club_workbook_identity.json),
 [club_observation_contracts.json](evidence/club_observation_contracts.json),
@@ -23,7 +23,8 @@ Evidence:
 [club_control_replay.json](evidence/club_control_replay.json),
 [club_fast_matching.json](evidence/club_fast_matching.json),
 [club_matrix_qualification.json](evidence/club_matrix_qualification.json),
-[club_ui_integration.json](evidence/club_ui_integration.json).
+[club_ui_integration.json](evidence/club_ui_integration.json),
+[club_reproduction_turnover.json](evidence/club_reproduction_turnover.json).
 Existing reference epic
 [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) and
 native program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)
@@ -59,15 +60,16 @@ unique workbook trials and the
 CO-00 -> CO-01 -> CO-02 -> CO-03 -> CO-04/CO-05 -> CO-06 -> CO-07 -> CO-08. CO-09
 follows the stable service contract; CO-10 is final acceptance.
 
-The immediate task is
-**[#10613](https://github.com/D-sorganization/UpstreamDrift/issues/10613) (CO-09)
-only** (CO-08/#10703 shipped). This is a dispatch-ready plan, not
-authorization to run every expensive
-experiment at once. Lower-cost agents handle bounded schema, adapter, fixture, CLI and
-UI work. An experienced reviewer checks model/observation semantics, force
-identifiability, contact, physical feasibility and scientific promotion. Dependencies
-are real contract gates: require merged implementation plus relevant tests/receipts, not
-merely a closed issue. Do not start CO-10 until CO-09 lands.
+CO-00 through CO-10 software-contract slices are complete. Epic
+[#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) remains
+**open** until mandatory native Fit/G1 receipts close unqualified /
+missing_runtime / unsupported matrix cells. Use
+[REPRODUCTION_GUIDE.md](REPRODUCTION_GUIDE.md) for exact saved-job commands,
+provenance, assumptions, candidate selection, and clean-environment portable
+replay. Lower-cost agents handle bounded schema/docs work; an experienced
+reviewer checks native mechanics, contact/force allocation, observation
+semantics and scientific promotion. Do not invent `native_g1_pass` from
+software-contract GREEN.
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model
