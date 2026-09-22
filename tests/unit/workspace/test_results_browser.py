@@ -111,6 +111,7 @@ def test_results_browser_filters_by_session_backend_and_text(tmp_path) -> None:
 def test_results_browser_skips_non_hdf5_and_unreadable_hdf5(tmp_path) -> None:
     (tmp_path / "notes.txt").write_text("ignore", encoding="utf-8")
     (tmp_path / "broken.h5").write_text("not hdf5", encoding="utf-8")
+    (tmp_path / "random.json").write_text('{"kind": "other"}', encoding="utf-8")
     write_trace(
         _trace(backend="ode", session_id="s1", dataset_id="d1"), tmp_path / "ok.h5"
     )
@@ -118,3 +119,24 @@ def test_results_browser_skips_non_hdf5_and_unreadable_hdf5(tmp_path) -> None:
     assert [item.relative_path for item in ResultsBrowser(tmp_path).index()] == [
         "ok.h5"
     ]
+
+
+def test_results_browser_default_extensions_include_club_only_json(tmp_path) -> None:
+    import json
+
+    write_trace(
+        _trace(backend="ode", session_id="s1", dataset_id="d1"), tmp_path / "ok.h5"
+    )
+    (tmp_path / "club.json").write_text(
+        json.dumps(
+            {
+                "kind": "club_only_ui_result",
+                "schema_version": "club-only-ui-integration/1.0.0",
+                "backend": "driven_double_pendulum",
+                "meta_session_id": "s-club",
+            }
+        ),
+        encoding="utf-8",
+    )
+    paths = [item.relative_path for item in ResultsBrowser(tmp_path).index()]
+    assert paths == ["club.json", "ok.h5"]

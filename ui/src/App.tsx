@@ -95,6 +95,16 @@ const WorkspacePage = lazy(() =>
     default: m.WorkspacePage,
   })),
 );
+const MatchedSwingsPage = lazy(() =>
+  import("./pages/MatchedSwings").then((m) => ({
+    default: m.MatchedSwingsPage,
+  })),
+);
+const CrossEngineDashboardPage = lazy(() =>
+  import("./pages/CrossEngineDashboard").then((m) => ({
+    default: m.CrossEngineDashboardPage,
+  })),
+);
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -138,6 +148,11 @@ export function RoutedContent() {
           <Route path="/tools/video-analyzer" element={<VideoAnalyzerPage />} />
           <Route path="/tools/data-explorer" element={<DataExplorerPage />} />
           <Route path="/tools/motion-capture" element={<MotionCapturePage />} />
+          <Route path="/tools/matched-swings" element={<MatchedSwingsPage />} />
+          <Route
+            path="/tools/cross-engine"
+            element={<CrossEngineDashboardPage />}
+          />
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />

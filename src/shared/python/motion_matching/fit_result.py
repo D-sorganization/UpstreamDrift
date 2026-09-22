@@ -17,6 +17,9 @@ class CanonicalFitResult:
 
     This replaces engine-specific FitResult dataclasses to guarantee
     cross-engine parity.
+
+    Neural motion matching (NM-01 #10616) reuses this type for native
+    inverse / proposal labels and classical baseline latency.
     """
 
     theta_optimal: NDArray[np.float64]
@@ -41,6 +44,27 @@ class CanonicalFitResult:
     solver_options: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
     receipt_path: Path | str | None = None
+
+    def learning_label_coefficients(self) -> tuple[float, ...]:
+        """Return theta_optimal as a finite 1-D label vector (NM-01)."""
+        theta = np.asarray(self.theta_optimal, dtype=np.float64)
+        if theta.ndim != 1:
+            raise ValueError(
+                f"theta_optimal must be 1-D for learning labels, got shape {theta.shape}"
+            )
+        if not np.all(np.isfinite(theta)):
+            raise ValueError("theta_optimal coefficients must be finite")
+        return tuple(float(value) for value in theta.tolist())
+
+    def latency_wall_clock_s(self) -> float:
+        """Return wall-clock seconds for benefit-experiment latency phases."""
+        seconds = float(self.wall_clock_s)
+        if not np.isfinite(seconds) or seconds < 0.0:
+            raise ValueError(
+                f"wall_clock_s must be finite and >= 0 for latency accounting, "
+                f"got {self.wall_clock_s!r}"
+            )
+        return seconds
 
     @classmethod
     def from_api_contract(

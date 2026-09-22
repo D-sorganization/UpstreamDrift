@@ -1,3 +1,94 @@
+## Engine Preflight Checker (MS-103, #10377)
+
+Adds `src/engines/preflight.py` with `EnginePreflightChecker`, `PreflightRunner`, and `PreflightSummary` for platform-aware engine readiness checks with DbC contracts:
+
+- **Five checks per engine**: `runtime_version`, `sdk_import`, `model_assets`, `display`, `capacity` — each returning a frozen `EnginePreflightResult` with outcome, message, and optional remediation string.
+- **Tier-aware degradation**: experimental engines (`opensim`, `myosuite`) that fail `sdk_import` return `SKIP` rather than `FAIL`; core/extended engines fail closed.
+- **DbC contracts**: `require()` / `ensure()` precondition/postcondition guards on all public API entry points; `@precondition` decorator on `EnginePreflightChecker.__init__`.
+- **Single source of truth**: `KNOWN_ENGINES` derived from `src/engines/tiers.py:ENGINE_TIERS` — no duplication of engine name registry.
+- **TDD test suite**: 62 tests in `tests/unit/engines/test_preflight.py` covering all check methods, tier degradation, `PreflightSummary` aggregation, and JSON serialization.
+
+## Simscape 44-to-27 Coordinate Slice and Boundary-Load Validation (MS-62, #10349)
+
+Separates kinematic projection from dynamic model reduction for Simscape upper-body replay:
+- **Coordinate Slice Module (`src/shared/python/motion_matching/coordinate_slice.py`)**:
+  - JSON-backed `SliceMap` defining 44 source coordinates (anthropometric driver spec) to 27 native Simscape coordinates with 17 omitted neck/leg DOFs.
+  - `project_kinematic_trajectory` performs name-based kinematic projection preserving shared coordinate names.
+  - `derive_boundary_wrenches` accumulates omitted-body joint efforts into six-axis boundary wrenches at cut joints.
+  - `check_slice_virtual_work` decomposes virtual power into retained and omitted contributions with fail-closed tolerance.
+  - `slice_candidate` writes sliced `.npz` candidates with receipt metadata; CLI via `python -m src.shared.python.motion_matching.coordinate_slice`.
+- **MATLAB Alignment Overrides (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/align_measured_to_model.m`)**:
+  - `opts.geometry_document` support maps anthropometry segment lengths to Simscape workspace variables (inches).
+- **Evidence (`evidence/matched/driver_g1_simscape_slice/`)**:
+  - Committed `slice_map.json`, `candidate27.npz`, `receipt.json`, `parity.json`, and `run_manifest.json`.
+  - Kinematic projection only; dynamic Simscape replay and boundary-load acceptance marked unqualified.
+- **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
+  - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
+
+## Club-Only Pendulum Matching (CO-04, #10608)
+
+Fits driven double and triple pendulum models to club-only observations for epic #10602:
+- **Hub Variants (`club_only/hub_accounting.py`)**: Distinct IDs for fixed-pivot vs prescribed moving-hub; moving hubs account external work via shared `compute_moving_hub_power`.
+- **Error Split (`club_only/match_errors.py`)**: In-plane RMSE kept separate from original 3D Euclidean RMSE (no collapsed single score).
+- **Match Service (`club_only/pendulum_match.py`)**: Calibrates q0/v0 and fixed lengths; fits bounded Bernstein controls; scores frame 0 before integration; warm-starts from CO-03 seeds when DOF/geometry/profile hashes match; retains best of cold vs retrieval; rejects body-only reconstruction model IDs.
+- **Eight-Cell Matrix (`club_only/match_matrix.py`, `replay_package.py`)**: Double×four-trial (fixed pivot) and triple×four-trial (prescribed moving hub) outcomes with replay inputs and named native G1 blockers; software contracts only.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_pendulum_match.json` (synthetic fixtures; not native physical qualification).
+
+## Canonical Club Observation Contracts and Calibration (CO-01, #10605)
+
+Extends the measured-club surface for epic #10602 without replacing legacy `ClubTarget`:
+- **ClubObservation (`src/shared/python/motion_matching/club_only/observation.py`)**:
+  - Explicit mid-hands and face position/orientation frames with component masks (`measured` / `derived_not_measured` / `unobserved`).
+  - Uncertainty and derivation metadata; native impact-relative 240 Hz clock; resampling recorded as a saved operation.
+  - Missing orientation/twist stays NaN (never identity); SO(3) residuals via geodesic distance; SLERP densification.
+- **Calibration (`src/shared/python/motion_matching/club_calibration.py`)**:
+  - Fixed tool-to-model SE(3), catalog length/type binding via `club_models`, grip-to-face rigidity cross-check, derived-axis qualification.
+  - Mid-hands→butt-end requires an explicit shaft-axis offset (no silent rename).
+- **Legacy Adapters (`club_only/adapters.py`)**: Bidirectional `ClubObservation` ↔ `ClubTarget`; refuse inventing identity quats for unobserved orientation.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_observation_contracts.json` (four-trial synthetic fixtures; not native physical qualification).
+## MyoSuite Kinematic Replay With Retarget Map and Marker Parity Receipt (MS-52, #10345)
+
+Adds kinematic-only replay of matched candidates in the MyoSuite engine lane with coordinate retargeting, marker parity receipts, cross-engine registration, and viewer support:
+- **Retarget Map (`src/engines/physics_engines/myosuite/python/retarget.py`, `coordinate_map_anthro.json`)**:
+  - Pure-numpy `RetargetMap` projects anthro coordinate order into a MyoSuite joint vector with chain interpolation and signed source-to-target mapping.
+  - `retarget_frame` / `retarget_trajectory` enforce DbC pre/postconditions for identity round-trip and finite outputs.
+- **Replay CLI (`src/engines/physics_engines/myosuite/python/replay.py`, `golfer_scene.py`, `viz/render_replay.py`)**:
+  - `run_kinematic_replay` retargets source `q`, embeds into placeholder MyoBody MJCF via MuJoCo FK, and writes receipt, candidate NPZ, and playback GIF under `evidence/matched/<driver>/`.
+  - Receipt declares `stage=replay`, `dynamics.status=not_run` (excitation-driven replay is MS-53), and honest marker parity on placeholder topology pending MS-51 golfer scene.
+  - `render_playback_gif` reuses shared cross-engine marker overlay rendering.
+- **Cross-Engine and Viewer Integration (`src/shared/python/motion_matching/cross_engine_replay.py`, `src/tools/tour_matching_viewer/core.py`)**:
+  - Registers `myosuite` in `VALID_ENGINES` and `KINEMATIC_ONLY_ENGINES`; tour matching viewer assigns engine colour `#8c564b`.
+- **Evidence (`evidence/matched/driver_g1_myosuite/receipt.json`, `candidate.npz`, `playback.gif`)**:
+  - Committed from canonical `driver_g1_crocoddyl_rk45_b100/candidate.npz`; native 15 mm marker parity gate deferred until MS-51 scene ships.
+- **Verification (`tests/unit/engines/myosuite/test_retarget.py`, `tests/myosuite/test_replay_native.py`, `tests/unit/engines/myosuite/test_cross_engine_registration.py`)**:
+  - TDD retarget round-trip, cross-engine registration, and native replay artifact emission with placeholder-aware parity gating.
+
+## Club Workbook Identity, Units, Events, and Trial Lineage (CO-00, #10604)
+
+Freezes content-addressed club Excel workbook identity for epic #10602 without altering source workbooks:
+- **Shared Event Labels (`src/shared/python/motion_matching/loaders/event_labels.py`)**:
+  - Normalizes bare and equals-suffixed markers (`A` / `A=`, …, `CHS`) and preserves real zero direction-cosine components (rejects `value or default` false zeros).
+- **Workbook Identity Package (`src/shared/python/motion_matching/club_only/workbook_identity.py`)**:
+  - Verifies SHA-256 for `data/Club_Data.xlsx` and the Wiffle/ProV1 companion workbook.
+  - Emits a four-trial lineage table; Filtering Experiments aliases TW_ProV1 by numeric fingerprint; trailing blank rows are not samples.
+  - Records centimetre interpretation with inches declaration retained, native 240 Hz impact-relative clock, T-event meaning, GW_wiffle ball-label conflict, and derived-not-measured orientation policy.
+- **Loader Alignment**: Excel `read_excel_event_markers` and Pinocchio `ClubTrajectoryParser` consume the shared helpers so TW_wiffle `A=` no longer returns NaN.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_workbook_identity.json` and `tests/unit/motion_matching/test_club_workbook_identity.py`.
+
+
+## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
+
+Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
+
+- **Lane Runner (`scripts/ci/run_native_engine_lane.sh`, `scripts/ci/run_native_engine_lane.py`)**:
+  - Executes `pytest -m requires_opensim` or `requires_myosuite` and writes JSON receipts under `docs/development/matched_swing_program/evidence/nightly/`.
+  - Records contract SHA-256 digests for the runner scripts and `pyproject.toml`, repository revision, engine module hash, and nonzero executed test counts when the lane passes.
+  - Default OpenSim venv path: `/home/dieterolson/opensim-10003` on ControlTower.
+- **Freshness Gate (`tests/docs/test_native_lane_freshness.py`)**:
+  - Validates receipt schema via `validate_receipt()` and warns when receipts are older than seven days; fails closed at thirty days.
+- **Evidence (`docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json`, `myosuite_receipt.json`)**:
+  - Bootstrap receipts committed; refresh weekly on ControlTower per `evidence/nightly/README.md`.
+
 ## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
 
 Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
@@ -352,6 +443,28 @@ Implements a dual-pane PyQt6 embeddable tool and lineage model (`src/tools/match
 - **Evidence & Verification**:
   - Automated tests: `tests/tools/matched_swing_browser/test_model.py` and `tests/tools/matched_swing_browser/test_matched_swing_browser_gui.py` (21 tests including headless journey test).
   - Headless screenshot evidence: `docs/development/matched_swing_program/evidence/browser/screenshot.png`.
+
+## Web Matched-Swing Results API and Results Page (MS-85, #10358)
+
+Exposes read-only, local-only matched-swing ledger routes for the web/Tauri shell and mounts the Results and Cross-Engine dashboard pages:
+- **API Service & Routes (`src/api/services/matched_swings_service.py`, `src/api/routes/matched_swings.py`)**:
+  - `GET /api/v1/matched-swings`: Public ledger index keyed by receipt SHA-256 (no absolute filesystem paths).
+  - `GET /api/v1/matched-swings/{id}`: Receipt JSON with summary, candidate hash, and explicit capability flags.
+  - `GET /api/v1/matched-swings/{id}/candidate`: NPZ stream or `preview_frame` JSON marker joints for 3D replay.
+  - `GET /api/v1/matched-swings/{id}/parity`: Cross-engine parity report JSON when present adjacent to the receipt.
+  - `GET /api/v1/matched-swings/{id}/animation.gif`: GIF animation stream when indexed in the ledger.
+  - Local-only guard rejects remote clients; typed job errors use structured HTTP 404 bodies.
+  - Reuses MS-02 ledger indexing and MS-80 browser artefact resolution (`MatchedSwingBrowserModel`).
+- **Web Results Page (`ui/src/pages/MatchedSwings.tsx`, `ui/src/api/matchedSwings.ts`)**:
+  - Route `/tools/matched-swings`: Filterable run list with verdict badges, five standardized metrics, GIF playback, and lazy `MocapSkeleton3D` marker preview.
+  - Links to `/tools/cross-engine` for parity/robustness review.
+- **Routing & Launcher Parity**:
+  - `ui/src/App.tsx`: Mounts `MatchedSwingsPage` and previously unmounted `CrossEngineDashboardPage`.
+  - `src/config/launcher_manifest.json`: `matched_swing_browser` and `cross_engine_dashboard` tiles use `web.mode: route`.
+  - `src/api/route_registry.py`: Registers `matched_swings` router as public (local-only evidence guard remains in handlers).
+- **Evidence & Verification**:
+  - API tests: `tests/api/test_matched_swings.py` (ledger, receipt, candidate NPZ/preview, parity, GIF, remote 403).
+  - UI tests: `ui/src/pages/MatchedSwings.test.tsx` (list badges, engine filter, 3D preview hook, cross-engine link).
 
 ## Consume Provider Ownership Decisions and Verify Runtime Import Authority (ORG-20, #10529)
 
@@ -1608,6 +1721,7 @@ Modularizes the monolithic `run_ground_support.py` script into a tested, cleanly
 - `pipeline.address`: Implements anatomical marker prior scaling (`scaled_offsets`), posture metrics (`posture_summary`), address pose optimization (`best_address`), static trial calibrations (`static_offsets`, `static_trial`), and functional hip calibration integration (`calibrate_legs`).
 - `pipeline.reference`: Implements reference trajectory solver orchestration (`full_capture_ik`), low-pass kinematic trajectory smoothing (`smooth_reference`), marker discrepancy auditing (`marker_errors`), and kinematic loop consistency resolution (`consistency_resolve`).
 - `pipeline.dynamics`: Implements forward dynamic tracking simulation (`replay`), shooting fit optimization (`shooting_fit`), ZMP support polygon filtering (`zmp_filter`), and center-of-mass excursion analysis (`com_report`).
+- `pipeline.cli` / `pipeline.plants.mujoco_plant` (MS-16 #10366): Exposes MuJoCo-native `--ik-backend mujoco-minimize` (marker IK via `mujoco.minimize.least_squares`) and `--tracking mj-inverse` (computed torque with native `mj_inverse` audit on the shared weld/contact plant); receipts record `ik_backend` and `tracking_backend`.
 - `pipeline.receipt`: Assembles and validates the structured ground-support receipt schema (`build_ground_support_receipt`).
 - `FullBodyMarkerKinematics` (`src/engines/physics_engines/mujoco/python/full_body_markers.py`):
   - Adds delegating properties `.nq`, `.sphere_names`, `.closure_sites`, and `.marker_bodies_and_offsets` to eliminate external structural reach-through.
@@ -6706,6 +6820,47 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-21 | #8886 | Fix Pose Studio's slider/spinbox tooltips lying about the display unit after `set_show_radians` toggles them, unify the Putting Green Simulator's `PuttConfig` to SI (`cup_distance_m` replaces the mixed-unit `cup_distance_ft`), and make the ball-flight and putting-green result panes use one consistent primary/secondary unit pair per line instead of an ad hoc mix. |
+| 2026-09-22 | #10732 | Add fail-closed constrained upper-body replay contracts: exact source-clock terminal frames, separate actuator and constraint-reaction traces, declared marker attachments and capture embedding, and same-clock physical marker metrics; no fitting or qualification claim. |
+| 2026-09-22 | #10730 | Reconcile TB-04 Driver and Iron tour-baseline evidence: committed qualification receipts are disqualified, so the coverage matrix and unified motion-matching ledger preserve and reject them; regressions prevent unsupported promotion. |
+| 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |
+| 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
+| 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
+| 2026-09-22 | #10718 | Publish club-only reproduction guide and final turnover (CO-10): saved-job commands, provenance, assumptions, matrix reconciliation; software-contract only; epic #10602 stays open. |
+| 2026-09-22 | #10709 | NM-06 masked trajectory-to-control proposals with selected/mixture heads, observation-rollout training loss, collapse diagnostics, coefficient time-domain conversion, fail-closed native refinement, proposal_shared DRY helpers, regenerated divergence inventory for NM-06 paths, architecture-budget TrainingConfig splits, and optional-torch inverse imports; software-contract tests only. |
+| 2026-09-22 | #10711 | Integrate club-only matching into existing UI/results (CO-09): FitSwingProvider/pipeline/ledger/ResultsBrowser/GUI without parallel frameworks; software-contract only. |
+| 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
+| 2026-09-22 | #10704 | MS-105 reliable matching jobs: atomic manifests/checkpoints, compatible resume, fault recovery, portable packages, both-shell progress, PF-08 service budgets without solve-time guarantees; reuses #8880 worker cancel (no second scheduler). |
+| 2026-09-22 | #10703 | Qualify club-only matrix and plausibility tradeoffs (CO-08): independent trial×roster evaluation with frozen CO-02 gates, published failures, withheld-body experiment, common-observable comparison; software-contract only. |
+| 2026-09-22 | #10701 | NM-05 classical and small neural dynamics baselines over episode store with analytical ridge NN optional MLP three-seed validation and test untouched software-contract tests only. |
+| 2026-09-22 | #10700 | Optimize fast club-only matching and expose candidate diversity (CO-07): bounded presets, immutable cache/checkpoint, cold/retrieval/reduced-to-full starts, feasibility-first Pareto pruning, optional neural slot without weights; software-contract only. |
+| 2026-09-22 | #10656 | Migrate `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline` off the GUI thread onto `src/tools/async_action.py`; add lower-only GUI-thread-blocking ratchet (`check_gui_thread_blocking_ratchet.py`); wire primary run buttons through shared theme helper (#8880, refs not closes). |
+| 2026-09-22 | #10653 | Consolidate launcher engine meta-tiles (#9479): hide duplicate per-engine dashboards with documented reasons, reclassify three specialized tools to `simulation`, clarify confusable data/video tile names, and move non-golf utilities to Developer & Research (#9480); no capability removed. |
+| 2026-09-21 | #10657 | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization). |
+| 2026-09-22 | #10684 | MS-14 Pinocchio MatchingPlant full-lane contracts: constraintDynamics/contact derivatives, Pink ConstrainedIkReceipt closure budget, fitter MatchingPlant bridge, fail-closed blocked evidence (no invented native G1). |
+| 2026-09-22 | #10698 | NM-04 feasible teacher episodes and active-learning candidates: versioned TeacherSpec/Outcome, nested corpus with resume/duplicate-seed/rejection ledger, acquisition that spares test labels; software-contract tests only. |
+| 2026-09-22 | #10687 | Recover feasible club-only controls and independently replay candidates (CO-06): minimum-effort allocation, separated tau/passive/reactions/root slack, open-loop replay without measured-state resets; software-contract fixtures with named native G1 blockers. |
+| 2026-09-22 | #10344 | MS-51 MyoSuite repair: pin myo_sim, generate dual-grip driver/iron golfer scenes with four foot contact markers, diagnostic coordinate map, inventory flagship packages leave repair after native MuJoCo load (no G1/parity claim). |
+| 2026-09-22 | #10686 | NM-03 versioned episode HDF5 store, family splits, compact-1.0 adapter, task views, train-only normalizer and window cache; software-contract tests only. |
+| 2026-09-21 | #10655 | Realtime pub/sub (#8869): wired `publish()`/`subscribe()` to route to `WSPubSub` on explicit `transport="ws"` / `REALTIME_TRANSPORT=ws` instead of silently falling back to file; unsupported transport values now raise `ValueError`. Deleted the genuinely-dead `file_pubsub.py` and its tests; renamed `channels.register_channel` to `register_channel_hint` to resolve a naming collision. |
+| 2026-09-21 | #10654 | Add `src/shared/python/theme/tool_stylesheet.py` as the UD-owned home for a canonical primary-action color token; fix the light-mode panel hardcoded inside the dark `model_explorer` visualization widget; unify the four mismatched "run" button colors across `putting_green_gui`/`ball_flight_gui`/`swing_flight_pipeline`/`training_controller`; add a hardcoded-style ratchet hygiene check (issue #8885). |
+| 2026-09-22 | #10680 | Match club-only motion with driven double/triple pendulums (CO-04): fixed-pivot vs prescribed moving-hub IDs with external-work accounting, separate in-plane/3D errors, cold vs retrieval warm-start retention, first-frame scoring before integration, eight-cell software-contract matrix with explicit native G1 blockers; reconstruction scores rejected. |
+| 2026-09-22 | #10681 | Generate plausible upper-body and full-body club-only candidates (CO-05): explicit topology maps, local null-space proposals with closure reprojection, roster×trial matrix with separated observation-fit/plausibility/contact-effort/runtime lanes; synthetic fixtures only. |
+| 2026-09-22 | #10679 | NM-02 complete/semantically correct native dataset labels: channel evidence, native vs interval acceleration, requested/applied controls, DoF layout, restore StateError, first-wave mock+ODE receipts; no training claims. |
+| 2026-09-21 | #10348 | MS-61 Simscape topology classification and full-marker terminal disclosure (run-103 scaffolding; native G1 blocked without licensed Fit / MS-104). |
+| 2026-09-22 | #10607 | Build retrieval and constrained-IK starting guesses for club-only matching (CO-03): handedness-aware hand-frame offsets, single-rigid library retrieval, Pink/DLS capability records with fail-closed unsupported constraints, seed cache invalidated by geometry/profile hashes; kinematic preview only. |
+| 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
+| 2026-09-21 | #10677 | Add MS-102 engine/model inventory ledger and smoke qualification harness (#10376): dual-club flagship packages from models.yaml/capability matrix/ENGINE_TIERS, immutable hashes, named MyoSuite repair #10344, Simscape R2025b metadata, structural receipts. |
+| 2026-09-21 | #10672 | NM-01 freeze learning tasks, TB-00 model roster and benefit experiment (`neural-learning-tasks/1.0.0`, `neural-model-roster/1.0.0`, `neural-benefit-experiment/1.0.0`); no training or speed claims. |
+| 2026-09-21 | #10669 | Add Simscape R2025b run management for MS-60 (#10347): fail-closed run manifest schema, returned-replay→MatchedSwingCandidate converter, scripted `run_simscape_candidate.ps1`, and committed run-102 candidate/manifest/playback GIF under native_evidence. |
+| 2026-09-21 | #10670 | Extend canonical club observation contracts with component masks, dual mid-hands/face frames, native 240 Hz clock, SO(3) residuals/interpolation, catalog-backed calibration, and legacy ClubTarget adapters (CO-01); synthetic fixtures only. |
+| 2026-09-21 | #10668 | NM-00 fail-closed audit of neural datasets, checkpoints and training claims (`neural-artifact-audit/1.0.0`); absent 10k corpus and note-only plateaus quarantined; no training or speed claims. |
+| 2026-09-21 | #10666 | MyoSuite kinematic replay with coordinate retarget map, marker parity receipt (`stage=replay`, `dynamics.status=not_run`), cross-engine kinematic-only registration, viewer support, and committed evidence for MS-52 (#10345); native 15 mm parity deferred until MS-51 scene. |
+| 2026-09-21 | #10667 | Freeze club workbook identity, shared A=/A event-label normalization, and four-trial lineage for CO-00 (#10604); centimetre unit authority retained with inches declaration recorded. |
+| 2026-09-21 | #10504 | Add PF-06 force-only null-space exploration (`force_nullspace.py`): scaled SVD/QR basis, feasible redistribution under cone and trail-side constraints, and bounded torque-tradeoff Pareto diagnostics without native replay approval (#10436). |
+| 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
+| 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
+| 2026-09-21 | #10658 | Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` in Model Generation API to mitigate XXE vulnerabilities. |
+| 2026-09-21 | #10650 | Add `LiveKinematicsService.joint_limits()` to the kinematics-service protocol (every engine service implements it, returning `{}` pending real anatomical data) and wire `JointPanel.set_limits()`/`set_error()` so Pose Studio re-ranges joints on engine switch and gives visible feedback on a rejected edit (#8887). |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
