@@ -19367,7 +19367,7 @@
       "classification": "ud-only",
       "package": "pendulum_simulator",
       "subpackage": "",
-      "ud_bytes": 8396,
+      "ud_bytes": 11704,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
