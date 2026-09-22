@@ -26,6 +26,7 @@ from PyQt6 import QtCore, QtWidgets
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
+from src.shared.python.theme.tool_stylesheet import error_field_border_style
 from src.tools.pose_studio.core import JOINT_REGION_LAYOUT
 
 # Reasonable default range for a 1-DOF revolute golfer joint.  A joint
@@ -33,11 +34,6 @@ from src.tools.pose_studio.core import JOINT_REGION_LAYOUT
 # this default; the active engine's :class:`LiveKinematicsService` can
 # report a tighter range via ``joint_limits()`` (issue #8887).
 _DEFAULT_DEG_RANGE: tuple[float, float] = (-180.0, 180.0)
-
-# Error-state border, matching the shared "recording/error" red already
-# used for status indication elsewhere in the theme
-# (``Styles.STATUSBAR_RECORDING``, #8885 tracks consolidating these).
-_ERROR_BORDER_STYLE = "border: 2px solid #e74c3c;"
 
 
 class JointPanel(QtWidgets.QScrollArea):
@@ -221,7 +217,9 @@ class JointPanel(QtWidgets.QScrollArea):
         """
         if name not in self._spinboxes:
             raise KeyError(f"unknown joint name {name!r}")
-        self._spinboxes[name].setStyleSheet(_ERROR_BORDER_STYLE if active else "")
+        self._spinboxes[name].setStyleSheet(
+            error_field_border_style() if active else ""
+        )
 
     def joint_widgets(self) -> dict[str, QtWidgets.QWidget]:
         """Return a flat dict of every joint's spinbox + slider, keyed

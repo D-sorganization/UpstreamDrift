@@ -113,6 +113,16 @@ def wire_primary_action_button(button: Any, on_clicked: Any) -> None:
     button.clicked.connect(on_clicked)
 
 
+def error_field_border_style() -> str:
+    """Return a red border for invalid field input (issues #8887, #8885).
+
+    Callers under ``src/tools`` should use this instead of embedding a hex
+    literal in ``setStyleSheet`` (see ``check_hardcoded_style_ratchet.py``).
+    """
+    color = _resolve_color("error", "#d06060")
+    return f"border: 2px solid {color};"
+
+
 def primary_button_style() -> str:
     """Return the shared stylesheet snippet for a tool's primary action button.
 
