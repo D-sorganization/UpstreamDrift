@@ -5,10 +5,10 @@
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61`.
 - Branch: `feat/issue-10348-ms61-simscape-topology`; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363). Session `b27ccab3-1128-492c-a0fb-001367ea3aa8`.
 - Entry DL-#10348. Delivered: fail-closed topology classification (`reduced_27_no_neck`), dual terminal disclosure (`full_marker_terminal.py` + `tour_metrics`), acceptance hooks, run-103 blocked `native_gate.json` + R2025b runtime/parity receipts, runner `-Fit` fail-closed stub.
-- Unblock after CO-02: merged `origin/main`; split `materialize` / `compute_shared_metrics` under architecture budget; regenerated divergence inventory against real `vendor/ud-tools` pin `a9ed0e7c5`; agent-context check/render clean.
-- Validation: `python scripts/ci/check_architecture_budget.py`; `python -m scripts.shared_tools.divergence_inventory --check`; `python -m agent_context --root . check`; `pytest tests/unit/motion_matching/test_simscape_topology_ms61.py tests/unit/motion_matching/test_acceptance.py -q`.
+- CI repair: narrowed `_requires_full_marker_disclosure` so ordinary G1 `terminal_marker_rmse_m` metrics no longer force head-cluster disclosure; regenerated ledger to 103 receipts (includes run-103).
+- Validation: focused RED→GREEN on mujoco G1 / OpenSim ladder / ledger freshness + `test_simscape_topology_ms61.py`.
 - Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
-- Next action: confirm CI green + squash auto-merge of PR #10676.
+- Next action: push repair; confirm CI green + squash auto-merge of PR #10676.
 
 ## PF-06 Feasible Force Null Spaces and Torque-Distribution Tradeoffs (#10436)
 
