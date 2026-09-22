@@ -15,7 +15,7 @@ The review does not qualify the evaluator or replace missing physical evidence.
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
 **Tour Baselines Epic:** [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) ([Tour Baselines Inventory](../../plans/tour_baselines/README.md))  
-**Club-Only Matching Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) — shared observation contracts land in CO-01 [#10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) (`ClubObservation` + `club_calibration`; evidence under `docs/plans/club_only_matching/evidence/`). Club-only profiles do not satisfy G3.  
+**Club-Only Matching Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) — shared observation contracts land in CO-01 [#10605](https://github.com/D-sorganization/UpstreamDrift/issues/10605) (`ClubObservation` + `club_calibration`; evidence under `docs/plans/club_only_matching/evidence/`). Final operator/reproduction turnover: [REPRODUCTION_GUIDE.md](../../plans/club_only_matching/REPRODUCTION_GUIDE.md) (CO-10 [#10614](https://github.com/D-sorganization/UpstreamDrift/issues/10614)). Club-only profiles do not satisfy G3; epic #10602 stays open until mandatory native fits land.  
 **Specification:** `SPEC.md` § Motion Matching Program  
 **Acceptance Contract:** [`GATES.md`](GATES.md) (`src/shared/python/motion_matching/acceptance.py`)  
 **Wave Structure:** [`WAVES.md`](WAVES.md)  

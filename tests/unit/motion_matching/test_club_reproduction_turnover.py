@@ -100,6 +100,22 @@ def test_saved_job_commands_are_exact_and_runnable() -> None:
         assert "python" in cmd.argv[0].lower() or cmd.argv[0] == "python"
         assert cmd.cwd_relative == "."
         assert cmd.purpose
+        shell = cmd.as_dict()["shell"]
+        assert shell.startswith("python")
+        if "-c" in cmd.argv:
+            # -c bodies must be quoted for operator copy-paste.
+            assert "'" in shell or '"' in shell
+
+
+def test_format_shell_argv_quotes_python_c_bodies() -> None:
+    from src.shared.python.motion_matching.club_only.reproduction import (
+        format_shell_argv,
+    )
+
+    shell = format_shell_argv(("python", "-c", "print('hi')"))
+    assert shell.startswith("python -c ")
+    assert "print(" in shell
+    assert shell.count("'") >= 2
 
 
 def test_clean_environment_replay_contract() -> None:
@@ -216,8 +232,17 @@ def test_docs_and_context_parity_freshness() -> None:
     assert "REPRODUCTION_GUIDE.md" in turnover
     assert "CO-10" in turnover or "#10614" in turnover
     assert "shipped" in turnover.lower() or "complete" in turnover.lower()
-    # Markdown on disk must match the renderer (docs/context parity).
-    assert guide_text.strip() == rendered.strip()
+    # Semantic parity with renderer (prettier may pad markdown tables).
+    for cmd in build_saved_job_commands():
+        assert f"`{cmd.name}`" in guide_text
+        assert cmd.purpose in guide_text
+    for trial_id in CANONICAL_TRIAL_SHEETS:
+        assert trial_id in guide_text
+    assert "epic_closure_allowed" in guide_text
+    assert "native_g1_pass" in guide_text
+    assert REPRODUCTION_SCHEMA in guide_text
+    assert "# Club-Only Reproduction Guide" in rendered
+    assert rendered.count("### `") == guide_text.count("### `")
     # Matrix evidence must remain the CO-08 schema the guide reconciles.
     matrix = json.loads(MATRIX_EVIDENCE.read_text(encoding="utf-8"))
     assert matrix["schema"] == MATRIX_SCHEMA
