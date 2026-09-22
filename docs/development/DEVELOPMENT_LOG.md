@@ -428,16 +428,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10621 (epic #10603)
 - **Branch:** feat/10621-nm06-masked-proposals
 - **PR:** #10709
 - **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{**init**,masked_proposal,proposal_shared,proposal_training,regressor_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_inverse_regressor_training.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main (CO-09); DRY cleared via proposal_shared; divergence inventory regenerated for NM-06 ud-only paths
+- **Last verified:** 2026-09-22 — merged via PR #10709 (`08bcec302`; tip `05f712281`)
 - **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse proposal_shared consolidates duplicated contract logic; proposal_training and regressor_training stay under function-line/parameter budgets; inverse package lazily loads torch-backed cVAE/regressor exports for unit-lane collection.
-- **Next step:** Confirm unit-test-gate and repo-structure-gates green on PR #10709 tip after push.
+- **Next step:** N/A — shipped; check NM-07 #10622 claim before any start (do not steal claim:antigravity).
 - **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 
 ### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
@@ -680,16 +680,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
 - **Branch:** feat/co10-club-only-turnover-10614
 - **PR:** #10718
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — merged origin/main through NM-06; regen divergence inventory; architecture-budget split; 12 unit tests GREEN
+- **Last verified:** 2026-09-22 — merged via PR #10718 (`2f6e119ef`); duplicates #10719/#10720 closed
 - **Summary:** Publishes operator/reproduction turnover with exact saved-job commands, trial/model roster, raw-source provenance, assumptions, candidate selection, clean-environment portable replay, and evidence-linked matrix reconciliation. Epic #10602 stays open; software-contract tests are not native evidence.
-- **Next step:** Confirm CI green on PR #10718 tip until squash auto-merge lands.
+- **Next step:** N/A — shipped; schedule desk-native Fit/G1 for unresolved matrix cells; check NM-07 claim before neural work.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
