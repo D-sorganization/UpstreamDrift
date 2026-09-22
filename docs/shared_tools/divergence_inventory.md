@@ -86,7 +86,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `optimization` | 0 | 0 | 0 | 29 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `pendulum_simulator` | 0 | 0 | 0 | 78 | 0 | 0 |
+| `pendulum_simulator` | 0 | 0 | 0 | 79 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `physics` | 0 | 0 | 0 | 71 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1473** | **709** | **702** |
+| **Total** | **423** | **279** | **123** | **1474** | **709** | **702** |
 
 ## Diverged Files by Package
 
