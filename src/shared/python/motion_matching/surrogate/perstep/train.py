@@ -1,4 +1,8 @@
-"""Train a PyTorch MLP that maps golf swing state/load samples to kinematics."""
+"""Train a PyTorch MLP that maps golf swing state/load samples to kinematics.
+
+NM-05 (#10620) reuses ``_standardize`` and ``DynamicsMLP`` patterns via
+``neural_motion.baselines``; do not fork a parallel per-step trainer.
+"""
 
 from __future__ import annotations
 

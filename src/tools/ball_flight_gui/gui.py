@@ -3,6 +3,14 @@
 Wraps the aerodynamics engine and ball flight simulators in a PyQt6
 dashboard for configuring launch conditions and visualizing trajectories
 with full aerodynamic force decomposition.
+
+The integration itself (up to 1000 RK-style steps at ``dt=0.01`` over
+``max_time=10.0``) runs off the GUI thread through
+:mod:`src.tools.async_action` (issue #8880): the button click reads the
+launch/environment inputs on the GUI thread, hands the pure simulate call to
+a worker, and renders the result back on the GUI thread in ``on_finished``.
+``_run_simulation`` stays the synchronous core other callers and tests use
+directly; ``_run_simulation_async`` is what the button now triggers.
 """
 
 from __future__ import annotations
@@ -31,6 +39,7 @@ from PyQt6.QtWidgets import (
 from src.launchers.help_menu import attach_tool_help_menu, build_help_menu
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
+from src.tools.async_action import WorkerContext, add_primary_async_run_control
 
 logger = logging.getLogger(__name__)
 
@@ -111,13 +120,9 @@ class BallFlightWidget(QWidget):
         left_layout.addWidget(self._build_aero_group())
         left_layout.addWidget(self._build_preset_group())
 
-        # Run
-        self._run_btn = QPushButton("Simulate Flight")
-        self._run_btn.setStyleSheet(
-            "background-color: #1565C0; color: white; font-weight: bold; padding: 12px;"
+        self._run_btn, self.action_bar = add_primary_async_run_control(
+            left_layout, "Simulate Flight", self._run_simulation_async
         )
-        self._run_btn.clicked.connect(self._run_simulation)
-        left_layout.addWidget(self._run_btn)
 
         left_layout.addStretch()
         return left
@@ -306,74 +311,128 @@ class BallFlightWidget(QWidget):
             spin_axis=spin_axis,
         )
 
-    def _run_simulation(self) -> None:
-        """Execute the ball flight simulation."""
-        try:
-            from src.shared.python.physics.ball_simulator import BallFlightSimulator
+    @staticmethod
+    def _compute_trajectory(launch: Any, env: Any) -> list[Any]:
+        """Integrate the trajectory. Pure compute -- safe off the GUI thread.
 
+        Args:
+            launch: Launch conditions built by :meth:`_build_launch`.
+            env: Environmental conditions built by :meth:`_build_environment`.
+
+        Returns:
+            The simulated trajectory points.
+        """
+        from src.shared.python.physics.ball_simulator import BallFlightSimulator
+
+        sim = BallFlightSimulator(env=env)
+        return sim.simulate_trajectory(launch, max_time=10.0, dt=0.01)
+
+    def _render_trajectory(self, trajectory: list[Any], env: Any) -> None:
+        """Render a completed trajectory. GUI-thread only (#8880)."""
+        if trajectory:
+            last = trajectory[-1]
+            carry = float(np.sqrt(last.position[0] ** 2 + last.position[1] ** 2))
+            max_h = max(p.position[2] for p in trajectory)
+
+            self._results_text.setPlainText(
+                f"Ball Flight Results\n"
+                f"{'=' * 40}\n"
+                f"Launch: {self._speed_spin.value():.0f} mph, "
+                f"{self._angle_spin.value():.1f}°, "
+                f"{self._spin_spin.value():.0f} rpm backspin, "
+                f"{self._sidespin_spin.value():.0f} rpm sidespin\n"
+                f"Environment: wind {self._wind_speed.value():.0f} mph @ "
+                f"{self._wind_dir.value():.0f}°, altitude "
+                f"{self._altitude.value():.0f} ft "
+                f"(air density {env.air_density:.3f} kg/m³)\n\n"
+                f"Carry:       {carry:.1f} m ({carry * 1.09361:.1f} yd)\n"
+                f"Max Height:  {max_h:.1f} m ({max_h * 3.28084:.1f} ft)\n"
+                f"Flight Time: {last.time:.2f} s\n"
+                f"Points:      {len(trajectory)}\n\n"
+                f"Landing Position:\n"
+                f"  X: {last.position[0]:.1f} m\n"
+                f"  Y: {last.position[1]:.1f} m\n"
+                f"  Z: {last.position[2]:.1f} m\n"
+            )
+
+            # Update 3D Visualization
+            if getattr(self, "_gl_view", None) is not None:
+                import pyqtgraph as pg  # noqa: F401
+                import pyqtgraph.opengl as gl
+
+                pts = np.array([p.position for p in trajectory])
+
+                if self._plot_item is not None:
+                    self._gl_view.removeItem(self._plot_item)
+
+                self._plot_item = gl.GLLinePlotItem(
+                    pos=pts, color=(0.0, 0.7, 1.0, 1.0), width=3, antialias=True
+                )
+                self._gl_view.addItem(self._plot_item)
+
+                # Auto-center camera on the trajectory midpoint
+                if len(pts) > 0:
+                    from pyqtgraph import Vector
+
+                    mid_x = max(pts[:, 0]) / 2.0
+                    self._gl_view.opts["center"] = Vector(mid_x, 0, 0)
+        else:
+            self._results_text.setPlainText("No trajectory generated.")
+
+    def _run_simulation(self) -> None:
+        """Execute the ball flight simulation synchronously.
+
+        Kept as the testable, directly-callable core; the button now goes
+        through :meth:`_run_simulation_async` instead (issue #8880).
+        """
+        try:
             launch = self._build_launch()
             env = self._build_environment()
-
-            sim = BallFlightSimulator(env=env)
-            trajectory = sim.simulate_trajectory(launch, max_time=10.0, dt=0.01)
-
-            if trajectory:
-                last = trajectory[-1]
-                carry = float(np.sqrt(last.position[0] ** 2 + last.position[1] ** 2))
-                max_h = max(p.position[2] for p in trajectory)
-
-                self._results_text.setPlainText(
-                    f"Ball Flight Results\n"
-                    f"{'=' * 40}\n"
-                    f"Launch: {self._speed_spin.value():.0f} mph, "
-                    f"{self._angle_spin.value():.1f}°, "
-                    f"{self._spin_spin.value():.0f} rpm backspin, "
-                    f"{self._sidespin_spin.value():.0f} rpm sidespin\n"
-                    f"Environment: wind {self._wind_speed.value():.0f} mph @ "
-                    f"{self._wind_dir.value():.0f}°, altitude "
-                    f"{self._altitude.value():.0f} ft "
-                    f"(air density {env.air_density:.3f} kg/m³)\n\n"
-                    f"Carry:       {carry:.1f} m ({carry * 1.09361:.1f} yd)\n"
-                    f"Max Height:  {max_h:.1f} m ({max_h * 3.28084:.1f} ft)\n"
-                    f"Flight Time: {last.time:.2f} s\n"
-                    f"Points:      {len(trajectory)}\n\n"
-                    f"Landing Position:\n"
-                    f"  X: {last.position[0]:.1f} m\n"
-                    f"  Y: {last.position[1]:.1f} m\n"
-                    f"  Z: {last.position[2]:.1f} m\n"
-                )
-
-                # Update 3D Visualization
-                if getattr(self, "_gl_view", None) is not None:
-                    import pyqtgraph as pg  # noqa: F401
-                    import pyqtgraph.opengl as gl
-
-                    pts = np.array([p.position for p in trajectory])
-
-                    if self._plot_item is not None:
-                        self._gl_view.removeItem(self._plot_item)
-
-                    self._plot_item = gl.GLLinePlotItem(
-                        pos=pts, color=(0.0, 0.7, 1.0, 1.0), width=3, antialias=True
-                    )
-                    self._gl_view.addItem(self._plot_item)
-
-                    # Auto-center camera on the trajectory midpoint
-                    if len(pts) > 0:
-                        from pyqtgraph import Vector
-
-                        mid_x = max(pts[:, 0]) / 2.0
-                        self._gl_view.opts["center"] = Vector(mid_x, 0, 0)
-            else:
-                self._results_text.setPlainText("No trajectory generated.")
+            trajectory = self._compute_trajectory(launch, env)
         except ImportError as e:
             self._results_text.setPlainText(f"Ball flight simulator not available: {e}")
+            return
         except Exception as e:
             logger.exception("Ball flight simulation failed")
             self._results_text.setPlainText(f"Simulation error: {e}")
+            return
+        self._render_trajectory(trajectory, env)
+
+    def _run_simulation_async(self) -> None:
+        """Run the simulation off the GUI thread, with progress and cancel.
+
+        The (cheap) input widgets are read here, on the GUI thread; the
+        integration itself runs in the worker and must not touch any Qt
+        widget (issue #8880).
+        """
+        try:
+            launch = self._build_launch()
+            env = self._build_environment()
+        except ImportError as e:
+            self._results_text.setPlainText(f"Ball flight simulator not available: {e}")
+            return
+        except Exception as e:
+            logger.exception("Ball flight simulation failed")
+            self._results_text.setPlainText(f"Simulation error: {e}")
+            return
+
+        def _work(ctx: WorkerContext) -> list[Any]:
+            ctx.report(None, "integrating trajectory")
+            return self._compute_trajectory(launch, env)
+
+        def _present(trajectory: list[Any]) -> None:
+            self._render_trajectory(trajectory, env)
+
+        def _failed(message: str) -> None:
+            self._results_text.setPlainText(f"Simulation error: {message}")
+
+        self.action_bar.start(
+            "Simulate Flight", _work, on_finished=_present, on_failed=_failed
+        )
 
     def cleanup(self) -> None:
         """Release resources."""
+        self.action_bar.shutdown()
         logger.debug("BallFlightWidget cleanup")
 
 
