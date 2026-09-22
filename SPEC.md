@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10719 | Publish club-only reproduction guide and final turnover (CO-10): exact saved-job commands, provenance, assumptions, candidate selection, clean-environment portable replay, fail-closed promotion guards; physical matrix gaps remain open with owners. |
 | 2026-09-22 | #10711 | Integrate club-only matching into existing UI/results (CO-09): FitSwingProvider/pipeline/ledger/ResultsBrowser/GUI without parallel frameworks; software-contract only. |
 | 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
 | 2026-09-22 | #10704 | MS-105 reliable matching jobs: atomic manifests/checkpoints, compatible resume, fault recovery, portable packages, both-shell progress, PF-08 service budgets without solve-time guarantees; reuses #8880 worker cancel (no second scheduler). |

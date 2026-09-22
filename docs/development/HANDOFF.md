@@ -3,7 +3,7 @@
 ## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614)
 
 - Worktree: `Worktrees/UpstreamDrift-10614-co10`, branch
-  `feat/issue-10614-co10-turnover`, DL-#10614, PR not created.
+  `feat/issue-10614-co10-turnover`, DL-#10614, PR #10719.
 - Delivered: `club_only/reproduction.py` freezes operator reproduction contracts
   (`club-only-reproduction/1.0.0`): exact saved-job commands, four-trial × #10585
   roster, workbook SHA-256 provenance, assumptions, Pareto candidate selection,
@@ -18,7 +18,7 @@
 - Limitations: software-contract closeout only; desk-native Fit/G1 receipts required
   before scientific promotion. Full-body G3 (#10363) and neural (#10603) remain
   separate programs.
-- Next: Open PR Fixes #10614 with squash auto-merge; after merge, schedule
+- Next: Confirm CI green on PR #10719 and squash-merge; after merge, schedule
   DeskComputer native G1 for unresolved unqualified cells.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
