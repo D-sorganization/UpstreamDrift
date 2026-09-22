@@ -432,10 +432,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10608 (epic #10602)
 - **Branch:** feat/issue-10608-co04-pendulum-club-match
 - **PR:** #10680
-- **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,match_matrix,replay_package}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json
+- **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,replay_package}.py; src/engines/physics_engines/pendulum/python/motion_matching/{club_pendulum_match,club_match_matrix}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at cabbd598e — RED ImportError then GREEN: 10 passed in test_club_pendulum_match.py; ruff clean; eight-cell matrix evidence written; native G1 explicitly blocked; PR #10680 opened.
-- **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass.
+- **Last verified:** 2026-09-22 at SELF — dependency-direction CI fix: fit/matrix orchestration moved under pendulum engines; shared keeps contracts only; `check_dependency_direction.py` OK; 10 passed in test_club_pendulum_match.py.
+- **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass. Fit orchestration lives in the pendulum engine package so shared never imports engines.
 - **Next step:** Confirm CI green on PR #10680 and squash merge; then dispatch #10609 (CO-05).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
 

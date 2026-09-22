@@ -36,14 +36,6 @@ from .hand_geometry import (
 )
 from .hub_accounting import HubMode, account_external_hub_work, hub_variant_id
 from .match_errors import ClubMatchErrorReport, separate_plane_and_3d_errors
-from .match_matrix import (
-    MATCH_SCHEMA,
-    PENDULUM_MATCH_MODELS,
-    MatchMatrixOutcome,
-    PendulumMatchMatrix,
-    build_pendulum_match_matrix,
-)
-from .match_matrix import evidence_payload as pendulum_match_evidence_payload
 from .observation import (
     OBSERVATION_SCHEMA,
     ClubObservation,
@@ -65,7 +57,6 @@ from .pendulum_match import (
     PendulumMatchRequest,
     PendulumMatchResult,
     map_seed_to_pendulum_q0,
-    match_club_pendulum,
     reject_reconstruction_as_club_evidence,
 )
 from .priors import PRIOR_SCHEMA, GolfPlausibilityPriors, PriorAssumption
@@ -225,3 +216,45 @@ __all__ = [
     "starting_guess_evidence_payload",
     "verify_workbook_hash",
 ]
+
+_ENGINE_EXPORTS = {
+    "MATCH_SCHEMA": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "MATCH_SCHEMA",
+    ),
+    "PENDULUM_MATCH_MODELS": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "PENDULUM_MATCH_MODELS",
+    ),
+    "MatchMatrixOutcome": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "MatchMatrixOutcome",
+    ),
+    "PendulumMatchMatrix": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "PendulumMatchMatrix",
+    ),
+    "build_pendulum_match_matrix": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "build_pendulum_match_matrix",
+    ),
+    "pendulum_match_evidence_payload": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix",
+        "evidence_payload",
+    ),
+    "match_club_pendulum": (
+        "src.engines.physics_engines.pendulum.python.motion_matching.club_pendulum_match",
+        "match_club_pendulum",
+    ),
+}
+
+
+def __getattr__(name: str):
+    """Lazily resolve engine-backed exports without shared→engines top-level imports."""
+    target = _ENGINE_EXPORTS.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_path, attr = target
+    from importlib import import_module
+
+    return getattr(import_module(module_path), attr)

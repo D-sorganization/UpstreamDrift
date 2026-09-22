@@ -9,6 +9,15 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.engines.physics_engines.pendulum.python.motion_matching.club_match_matrix import (
+    MATCH_SCHEMA,
+    PENDULUM_MATCH_MODELS,
+    build_pendulum_match_matrix,
+    evidence_payload,
+)
+from src.engines.physics_engines.pendulum.python.motion_matching.club_pendulum_match import (
+    match_club_pendulum,
+)
 from src.shared.python.motion_matching.club_only.hub_accounting import (
     HubMode,
     hub_variant_id,
@@ -18,12 +27,6 @@ from src.shared.python.motion_matching.club_only.match_errors import (
     ClubMatchErrorReport,
     separate_plane_and_3d_errors,
 )
-from src.shared.python.motion_matching.club_only.match_matrix import (
-    MATCH_SCHEMA,
-    PENDULUM_MATCH_MODELS,
-    build_pendulum_match_matrix,
-    evidence_payload,
-)
 from src.shared.python.motion_matching.club_only.observation import (
     build_calibrated_observation_fixture,
 )
@@ -31,7 +34,6 @@ from src.shared.python.motion_matching.club_only.pendulum_match import (
     PendulumMatchRequest,
     PendulumMatchResult,
     map_seed_to_pendulum_q0,
-    match_club_pendulum,
     reject_reconstruction_as_club_evidence,
 )
 from src.shared.python.motion_matching.club_only.profiles import get_club_only_profile
