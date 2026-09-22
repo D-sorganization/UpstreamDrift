@@ -1,5 +1,26 @@
 # Simscape Tour-Average Fit Continuation
 
+## GolfSwingVisualizer MATLAB Consolidation (#9225)
+
+Branch `bot/issue-9225-golfviz-consolidation` off `origin/main` @ `901b2de5e`;
+worktree `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`;
+governing issue [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
+(source:assessment P2, DRY PP1); DL-#9225.
+The four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines each; 323
+shared 8-line blocks between the worst pair) are deleted and replaced by one
+fleet-shared package class at
+`src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m`
+(the 2D-variant superset, restoring the `rng(1)` reproducible ground texture the
+3D copies had silently lost). Both `launch_gui.m` launchers add the shared
+directory to the MATLAB path and fail loudly if it is missing; all four call
+sites use `golfviz.GolfSwingVisualizer(...)`. Verified headless in MATLAB
+R2025b: package resolution from a bare `addpath`, class parse, DbC
+precondition, and both launchers' path setups. Honest gap: the DRY duplication
+ratchet is Python-scoped and does not fingerprint `.m` files, so no baseline
+drop is claimed (follow-up). Full GUI launch/render is not exercised (headless
+GUI rule).
+Next step: Confirm `quality-gate` green on the PR; squash auto-merge lands.
+
 ## Tour Baselines TB-04: Fit and Independently Replay the Actual Driven Double Pendulum (#10589)
 
 Branch `feat/tb04-double-pendulum-fit-10589`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).

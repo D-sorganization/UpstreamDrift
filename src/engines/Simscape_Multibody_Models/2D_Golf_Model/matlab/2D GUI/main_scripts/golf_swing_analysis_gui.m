@@ -1098,7 +1098,7 @@ function play_animation(src, ~)
 
         % Launch the skeleton plotter for animation
         fprintf('   Launching skeleton plotter for animation...\n');
-        GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ);
+        golfviz.GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ);
 
         fprintf('✅ Animation launched successfully\n');
 
@@ -1769,7 +1769,7 @@ function launch_skeleton_plotter(src, ~)
 
         % Launch the GolfSwingVisualizer (your MATLAB Exchange version)
         % This will handle all the visualization including dataset selection
-        GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ);
+        golfviz.GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ);
 
         fprintf('✅ GolfSwingVisualizer launched successfully\n');
 
