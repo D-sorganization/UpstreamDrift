@@ -20,14 +20,16 @@
 - Merged origin/main (includes MS-61 #10676 / MS-102 #10677); conflicts only in
   handoff + divergence inventory — architecture splits and engine-layer
   orchestration preserved (no shared→engines top-level imports).
-- Validation: python scripts/check_dependency_direction.py OK;
-  python scripts/ci/check_architecture_budget.py OK;
-  python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60
-  (10 passed); ruff clean on touched files.
+- CI fix: regenerated docs/shared_tools/divergence_inventory.{v1.json,md} after
+  club_only/match_matrix.py move (unit-test-gate / quality-gate blocker).
+  Non-required self-hosted failures (leaderboard publish, equivalence checkout
+  missing fetch-pinned-tools) left alone — do not invent native G1/TB-05 success.
+- Validation: python -m scripts.shared_tools.divergence_inventory --check OK;
+  prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Confirm CI green + squash auto-merge of PR #10680; then dispatch CO-05 (#10609)
-  or await TB-05 (#10590) for native triple receipts.
+- Next: Push tip past inventory fix; confirm quality-gate green + squash
+  auto-merge of PR #10680. Do not start CO-05+.
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
