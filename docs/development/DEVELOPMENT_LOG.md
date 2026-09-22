@@ -666,14 +666,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
 - **Branch:** feat/issue-10614-co10-turnover
 - **PR:** #10719
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/development/matched_swing_program/README.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — RED/GREEN on reproduction turnover tests; evidence regenerates from module; epic_closure_allowed false; 68 unresolved matrix cells retain owners and next-step prompts
+- **Last verified:** 2026-09-22 at 423f28d5f — PR #10719 open with squash auto-merge; 12 unit tests GREEN; epic_closure_allowed false; 68 unresolved matrix cells retain owners and next-step prompts
 - **Summary:** Publishes operator reproduction guide with exact saved-job commands, trial/model roster, workbook provenance, assumptions, candidate selection, MS-105 clean-environment portable replay, and fail-closed promotion guards. Docs/GUI alone cannot close #10602 or claim native G1 / G3 / neural success.
 - **Next step:** Confirm CI green on PR #10719 and squash-merge Fixes #10614; leave epic #10602 open for desk-native cells.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
