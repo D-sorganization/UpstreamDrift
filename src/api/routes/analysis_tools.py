@@ -17,9 +17,12 @@ import csv
 import io
 import json
 import math
+from collections import deque
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+import anyio
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -250,13 +253,33 @@ async def estimate_contraction_rate(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-def _get_metric_history(engine_manager: EngineManager) -> list[dict[str, Any]]:
+MAX_METRIC_HISTORY = 500
+"""Number of metric snapshots retained for statistics (see issue #8941)."""
+
+NEXT_SINCE_HEADER = "X-Analysis-Next-Since"
+"""Response header carrying the absolute index of the next stored sample."""
+
+
+def _get_metric_history(
+    engine_manager: EngineManager,
+) -> Sequence[dict[str, Any]]:
     """Get stored metric history from engine manager.
 
     Returns:
-        List of metric snapshots over time.
+        Metric snapshots over time, oldest first (a bounded deque once any
+        snapshot has been stored).
     """
-    return getattr(engine_manager, "_metric_history", [])
+    return getattr(engine_manager, "_metric_history", ())
+
+
+def _get_sample_total(engine_manager: EngineManager, history_len: int) -> int:
+    """Return how many snapshots have ever been stored (monotonic cursor).
+
+    Postcondition: the result is ``>= history_len``, so the absolute index of
+    the oldest retained snapshot, ``total - history_len``, is never negative
+    even when the history was assigned directly.
+    """
+    return max(int(getattr(engine_manager, "_metric_sample_total", 0)), history_len)
 
 
 def _store_metric_snapshot(
@@ -264,21 +287,100 @@ def _store_metric_snapshot(
 ) -> None:
     """Store a metric snapshot in the engine manager history.
 
-    Keeps a bounded buffer of metrics for statistics computation.
+    Keeps a bounded ``deque(maxlen=MAX_METRIC_HISTORY)`` so appending never
+    copies the buffer, and advances the monotonic sample counter used by the
+    ``since`` cursor of ``GET /analysis/statistics``.
 
     Args:
         engine_manager: Engine manager instance.
         metrics: Current metrics snapshot.
-    """
-    if not (engine_manager is not None):
-        raise ValueError("engine_manager must be provided")
-    max_history = 500
-    if not hasattr(engine_manager, "_metric_history"):
-        engine_manager._metric_history = []  # type: ignore[attr-defined]
 
-    engine_manager._metric_history.append(metrics)  # type: ignore[attr-defined]
-    if len(engine_manager._metric_history) > max_history:  # type: ignore[attr-defined]
-        engine_manager._metric_history = engine_manager._metric_history[-max_history:]  # type: ignore[attr-defined]
+    Raises:
+        ValueError: If ``engine_manager`` is ``None``.
+    """
+    if engine_manager is None:
+        raise ValueError("engine_manager must be provided")
+    history = getattr(engine_manager, "_metric_history", None)
+    if not isinstance(history, deque) or history.maxlen != MAX_METRIC_HISTORY:
+        history = deque(history or (), maxlen=MAX_METRIC_HISTORY)
+        engine_manager._metric_history = history  # type: ignore[attr-defined]
+    total = _get_sample_total(engine_manager, len(history))
+    history.append(metrics)
+    engine_manager._metric_sample_total = total + 1  # type: ignore[attr-defined]
+
+
+def _is_scalar_metric(value: Any) -> bool:
+    """Return True for finite-or-infinite numeric values that are not NaN."""
+    return isinstance(value, int | float) and not math.isnan(value)
+
+
+def _summarize_metric(key: str, values: list[float]) -> AnalysisMetricsSummary:
+    """Summarize one metric's non-empty value series."""
+    import numpy as np
+
+    arr = np.asarray(values, dtype=float)
+    return AnalysisMetricsSummary(
+        metric_name=key,
+        current=values[-1],
+        minimum=float(np.min(arr)),
+        maximum=float(np.max(arr)),
+        mean=float(np.mean(arr)),
+        std_dev=float(np.std(arr)),
+    )
+
+
+def _series_start(
+    count: int, first_index: int, since: int | None, limit: int | None
+) -> int:
+    """Return the offset into the window where returned time series begin."""
+    start = 0 if since is None else min(max(since - first_index, 0), count)
+    if limit is not None:
+        start = max(start, count - limit)
+    return start
+
+
+def _compute_statistics(
+    snapshots: Sequence[dict[str, Any]],
+    first_index: int,
+    since: int | None,
+    limit: int | None,
+) -> tuple[list[AnalysisMetricsSummary], dict[str, list[float]]]:
+    """Aggregate a metric window in a single pass (CPU-bound; run in a thread).
+
+    Summary statistics always cover the whole window; ``since``/``limit`` only
+    trim the returned time series.
+
+    Args:
+        snapshots: Immutable copy of the retained history, oldest first.
+        first_index: Absolute sample index of ``snapshots[0]``.
+        since: Return only samples with absolute index ``>= since``.
+        limit: Return at most this many of the most recent samples.
+
+    Returns:
+        ``(summaries, time_series)`` keyed/ordered by sorted metric name; every
+        summarized metric has a (possibly empty) time-series entry.
+
+    Raises:
+        ValueError: If a cursor argument is out of range.
+    """
+    if first_index < 0 or (since is not None and since < 0):
+        raise ValueError("first_index and since must be non-negative")
+    if limit is not None and limit < 1:
+        raise ValueError("limit must be >= 1")
+    start = _series_start(len(snapshots), first_index, since, limit)
+    values: dict[str, list[float]] = {}
+    series: dict[str, list[float]] = {}
+    for offset, snapshot in enumerate(snapshots):
+        for key, value in snapshot.items():
+            if not _is_scalar_metric(value):
+                continue
+            number = float(value)
+            values.setdefault(key, []).append(number)
+            if offset >= start:
+                series.setdefault(key, []).append(number)
+    keys = sorted(values)
+    summaries = [_summarize_metric(key, values[key]) for key in keys]
+    return summaries, {key: series.get(key, []) for key in keys}
 
 
 # ──────────────────────────────────────────────────────────────
@@ -322,14 +424,34 @@ async def get_analysis_metrics(
 
 
 @router.get("/analysis/statistics", response_model=AnalysisStatisticsResponse)
-async def get_analysis_statistics(  # noqa: C901
+async def get_analysis_statistics(
+    response: Response,
+    since: int | None = Query(
+        None,
+        ge=0,
+        description=(
+            "Absolute sample index; return only time-series points at or after "
+            "it. Take it from the previous response's "
+            f"{NEXT_SINCE_HEADER} header. Indices older than the retained "
+            "window are clamped to the oldest retained sample."
+        ),
+    ),
+    limit: int | None = Query(
+        None,
+        ge=1,
+        le=MAX_METRIC_HISTORY,
+        description="Return at most this many of the most recent points.",
+    ),
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> AnalysisStatisticsResponse:
     """Get statistical summary of analysis metrics over time.
 
-    Computes min, max, mean, and std_dev for each scalar metric
-    from the stored metric history.
+    Computes min, max, mean, and std_dev for each scalar metric over the whole
+    retained window (off the event loop). ``since``/``limit`` only trim the
+    returned ``time_series``; omitting both returns the full window exactly as
+    before. Out-of-range values are rejected with 422. The absolute index of
+    the next sample is returned in the ``X-Analysis-Next-Since`` header.
 
     Returns:
         Statistical summaries.
@@ -344,52 +466,18 @@ async def get_analysis_statistics(  # noqa: C901
             detail="No physics engine loaded. Load an engine first.",
         )
 
+    # Snapshot on the loop so the worker never iterates a deque being appended.
+    snapshots = tuple(_get_metric_history(engine_manager))
+    total = _get_sample_total(engine_manager, len(snapshots))
+    response.headers[NEXT_SINCE_HEADER] = str(total)
     try:
-        history = _get_metric_history(engine_manager)
-        sim_time = getattr(engine, "time", 0.0)
-
-        # Compute statistics for scalar metrics
-        metric_summaries: list[AnalysisMetricsSummary] = []
-        time_series: dict[str, list[float]] = {}
-
-        # Identify scalar metric keys
-        scalar_keys: set[str] = set()
-
-        for snapshot in history:
-            for key, value in snapshot.items():
-                if isinstance(value, int | float) and not math.isnan(value):
-                    scalar_keys.add(key)
-
-        for key in sorted(scalar_keys):
-            values = []
-            for snapshot in history:
-                val = snapshot.get(key)
-                if isinstance(val, int | float) and not math.isnan(val):
-                    values.append(float(val))
-
-            if not values:
-                continue
-
-            import numpy as np
-
-            arr = np.array(values)
-            metric_summaries.append(
-                AnalysisMetricsSummary(
-                    metric_name=key,
-                    current=values[-1],
-                    minimum=float(np.min(arr)),
-                    maximum=float(np.max(arr)),
-                    mean=float(np.mean(arr)),
-                    std_dev=float(np.std(arr)),
-                )
-            )
-
-            time_series[key] = values
-
+        summaries, time_series = await anyio.to_thread.run_sync(
+            _compute_statistics, snapshots, total - len(snapshots), since, limit
+        )
         return AnalysisStatisticsResponse(
-            sim_time=sim_time,
-            sample_count=len(history),
-            metrics=metric_summaries,
+            sim_time=getattr(engine, "time", 0.0),
+            sample_count=len(snapshots),
+            metrics=summaries,
             time_series=time_series,
         )
     except ImportError as exc:
@@ -428,7 +516,7 @@ async def export_analysis_data(  # noqa: C901
     Returns:
         Streaming file response.
     """
-    history = _get_metric_history(engine_manager)
+    history = list(_get_metric_history(engine_manager))
 
     if not history:
         raise HTTPException(
