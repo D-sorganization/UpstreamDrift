@@ -350,7 +350,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10618 (epic #10603)
 - **Branch:** feat/10618-nm03-episode-storage
-- **PR:** not created
+- **PR:** #10686
 - **Paths:** src/shared/python/neural_motion/episodes/; tests/unit/neural_motion/test_episode_store_nm03.py; docs/plans/neural_motion_matching/episode_storage.md; docs/plans/neural_motion_matching/evidence/nm03_episode_storage_receipt.json
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — NM-03 episode store, family splits, compact adapter, views, train-only normalizer and window cache with 15 unit tests green; no training claim
