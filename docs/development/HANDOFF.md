@@ -1,3 +1,29 @@
+# Deferred External Validation Planning — 2026-09-22
+
+- Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-validation-planning`.
+  Branch `docs/deferred-validation-planning`; implementation `cb127ad02`; PR #10741 is open.
+  Central Repository_Management #1687; governing impact epic #9700.
+- Six repo-owned plans preserve unavailable impact/acoustic/perceptual studies,
+  cohort/generalization validation, observable-accuracy reference measurements,
+  everyday-reference calibration, three-camera hardware soak and Impact Explorer
+  predictive-accuracy evidence. Catalog entries retain original issue snapshots,
+  missing resources, acceptance boundaries and Board/reactivation gates.
+- #9700/#10375/#10382/#9619/#9613 stay open for executable software and available
+  data. #9546 was already closed through #10446 at 66527df069df; this migration
+  preserves that state and makes no new completion claim. No engine, public
+  physics API, scientific evidence, calibration or provider pin changes here.
+- #10363/#10380 should reference DV-10375/DV-10382; use the same experiment
+  records rather than duplicate cohorts. Existing industrial/product/experiment
+  governance remains authoritative; a deferred requirement still blocks its
+  original physical, perceptual or release claim.
+- Validation: unchanged source bodies verified against the staged snapshot;
+  strict six-plan catalog, manual governance, SPEC and normal commit/push hooks
+  pass. Hosted checks are pending. The
+  checkout is sparse to conserve C: capacity; no full local suite is claimed.
+- Next: pass normal hooks and hosted checks, merge, compare published plan bytes,
+  then post immutable scope links and audit receipts. Preserve the existing
+  closed state of #9546 and keep the five open mixed sources open.
+
 # Current Matching Continuation Handoff
 
 ## Fleet Remediation — Ledger Freshness Test Pollution (2026-09-22)
@@ -12,6 +38,22 @@
 - **Validation:** receipt test then ledger test in one process, `-p no:randomly`: 11 passed
   (unpatched main: 1 failed, reproduced).
 - **Next:** none after merge.
+
+## Tools Session Bridge CameraCapabilities (#9604, DL-#9422) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_9604` · branch
+  `fix/9604-camera-capabilities` · commit `SELF` · PR not created at commit
+  time (see PR list for the branch). Agent `claude`, session
+  `fleet-remediation-i`.
+- **Done:** `src/motion_capture/rig/tools_bridge.py` gains `CameraRecord` and
+  `map_camera_records(manifest, plan)`: per-camera Tools `CameraIdentity` +
+  `CameraCapabilities` (vendor pin `a9ed0e7c`). The export reuses the same
+  identity builder, `_ready_tools()` probe guard and `_clock_kind()` lookup.
+- **Validation:** `python -I tests/fixtures/mocap_session_export/run_checks.py`
+  (14 passed); `python -m pytest tests/motion_capture/rig/test_tools_session_export.py -q --no-cov`.
+- **Next:** once merged, #9604 acceptance is complete; the C3D upload consumer
+  (#8865) is the next slice on DL-#9422.
 
 ## Analysis Statistics Server Side (#8941, DL-#8941) — 2026-09-22
 
