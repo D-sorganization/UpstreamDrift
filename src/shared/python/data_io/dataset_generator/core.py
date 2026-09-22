@@ -536,7 +536,20 @@ class DatasetGenerator(_DatasetExportMixin):
         n_steps: int,
     ) -> tuple[dict[str, ChannelEvidence], dict[str, Any]]:
         """Drop failed optional buffers and build channel evidence."""
-        finalized: dict[str, Any] = {
+        finalized = self._assemble_finalized_buffers(config, buffers, trackers)
+        evidence = self._build_channel_evidence(
+            config, trackers, finalized, layout, n_steps
+        )
+        return evidence, finalized
+
+    def _assemble_finalized_buffers(
+        self,
+        config: GeneratorConfig,
+        buffers: dict[str, np.ndarray | None],
+        trackers: dict[str, bool],
+    ) -> dict[str, Any]:
+        """Keep always-on channels and drop failed optional buffers."""
+        return {
             "times": buffers["times"],
             "positions": buffers["positions"],
             "velocities": buffers["velocities"],
@@ -586,7 +599,16 @@ class DatasetGenerator(_DatasetExportMixin):
             ),
         }
 
-        evidence: dict[str, ChannelEvidence] = {
+    def _build_channel_evidence(
+        self,
+        config: GeneratorConfig,
+        trackers: dict[str, bool],
+        finalized: dict[str, Any],
+        layout: ModelDoFLayout,
+        n_steps: int,
+    ) -> dict[str, ChannelEvidence]:
+        """Build per-channel availability evidence for the finalized buffers."""
+        return {
             "positions": ChannelEvidence(
                 name="positions",
                 availability=ChannelAvailability.AVAILABLE,
@@ -674,7 +696,6 @@ class DatasetGenerator(_DatasetExportMixin):
                 fail_note="engine raised or lacks contact channels",
             ),
         }
-        return evidence, finalized
 
     @staticmethod
     def _drop_if_failed(
