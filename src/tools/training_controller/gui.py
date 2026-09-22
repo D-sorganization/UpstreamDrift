@@ -36,6 +36,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.theme.tool_stylesheet import (
+    PRIMARY_ACTION_COLOR,
+    PRIMARY_ACTION_HOVER_COLOR,
+)
 from src.shared.python.training import (
     Dataset,
     DatasetRegistry,
@@ -65,51 +69,54 @@ try:
 except ImportError:
     HAS_MATPLOTLIB = False
 
-# Sleek Dark QSS Theme
-DARK_STYLE = """
-QWidget {
+# Sleek Dark QSS Theme. The accent color is the shared primary-action token
+# (issue #8885) so the submit button matches every other tool's "run" action;
+# the surrounding dark chrome literals are unrelated to that token and are
+# left as-is (out of scope for this change).
+DARK_STYLE = f"""
+QWidget {{
     background-color: #1e1e1e;
     color: #d4d4d4;
     font-family: "Segoe UI", "Arial", sans-serif;
     font-size: 13px;
-}
-QTableWidget {
+}}
+QTableWidget {{
     background-color: #252526;
     alternate-background-color: #1e1e1e;
     gridline-color: #2d2d2d;
     border: 1px solid #3e3e42;
     border-radius: 4px;
-}
-QTableWidget::item:selected {
-    background-color: #0A84FF;
+}}
+QTableWidget::item:selected {{
+    background-color: {PRIMARY_ACTION_COLOR};
     color: #ffffff;
-}
-QHeaderView::section {
+}}
+QHeaderView::section {{
     background-color: #2d2d2d;
     color: #d4d4d4;
     border: 1px solid #3e3e42;
     padding: 6px;
     font-weight: bold;
-}
-QListWidget {
+}}
+QListWidget {{
     background-color: #252526;
     border: 1px solid #3e3e42;
     border-radius: 4px;
     padding: 4px;
-}
-QListWidget::item:hover {
+}}
+QListWidget::item:hover {{
     background-color: #2d2d2d;
-}
-QListWidget::item:selected {
-    background-color: #0A84FF;
+}}
+QListWidget::item:selected {{
+    background-color: {PRIMARY_ACTION_COLOR};
     color: #ffffff;
-}
-QTabWidget::pane {
+}}
+QTabWidget::pane {{
     border: 1px solid #3e3e42;
     background-color: #1e1e1e;
     border-radius: 4px;
-}
-QTabBar::tab {
+}}
+QTabBar::tab {{
     background-color: #2d2d2d;
     color: #888888;
     padding: 8px 16px;
@@ -118,58 +125,58 @@ QTabBar::tab {
     border-top-right-radius: 4px;
     border: 1px solid #3e3e42;
     border-bottom: none;
-}
-QTabBar::tab:hover {
+}}
+QTabBar::tab:hover {{
     background-color: #333333;
     color: #d4d4d4;
-}
-QTabBar::tab:selected {
+}}
+QTabBar::tab:selected {{
     background-color: #1e1e1e;
     color: #ffffff;
-    border-bottom: 2px solid #0A84FF;
-}
-QPushButton {
+    border-bottom: 2px solid {PRIMARY_ACTION_COLOR};
+}}
+QPushButton {{
     background-color: #333333;
     border: 1px solid #444444;
     border-radius: 4px;
     color: #ffffff;
     padding: 6px 14px;
     font-weight: 500;
-}
-QPushButton:hover {
+}}
+QPushButton:hover {{
     background-color: #444444;
     border-color: #555555;
-}
-QPushButton:pressed {
-    background-color: #0A84FF;
-    border-color: #0A84FF;
-}
-QPushButton:disabled {
+}}
+QPushButton:pressed {{
+    background-color: {PRIMARY_ACTION_COLOR};
+    border-color: {PRIMARY_ACTION_COLOR};
+}}
+QPushButton:disabled {{
     background-color: #222222;
     border-color: #333333;
     color: #666666;
-}
-QPushButton#submit-btn {
-    background-color: #0A84FF;
-    border-color: #0A84FF;
+}}
+QPushButton#submit-btn {{
+    background-color: {PRIMARY_ACTION_COLOR};
+    border-color: {PRIMARY_ACTION_COLOR};
     font-weight: bold;
-}
-QPushButton#submit-btn:hover {
-    background-color: #2997FF;
-}
-QLineEdit, QComboBox {
+}}
+QPushButton#submit-btn:hover {{
+    background-color: {PRIMARY_ACTION_HOVER_COLOR};
+}}
+QLineEdit, QComboBox {{
     background-color: #2d2d2d;
     border: 1px solid #3e3e42;
     border-radius: 4px;
     padding: 6px;
     color: #ffffff;
-}
-QLineEdit:focus, QComboBox:focus {
-    border: 1px solid #0A84FF;
-}
-QDialog {
+}}
+QLineEdit:focus, QComboBox:focus {{
+    border: 1px solid {PRIMARY_ACTION_COLOR};
+}}
+QDialog {{
     background-color: #1e1e1e;
-}
+}}
 """
 
 
