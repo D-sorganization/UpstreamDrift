@@ -53,6 +53,11 @@ class EpisodeStore:
         self._index_path = self._root / _INDEX_NAME
         self._index = self._load_index()
 
+    @property
+    def root(self) -> Path:
+        """Corpus root directory (manifest + shards)."""
+        return self._root
+
     def shard_path(self, episode_id: str) -> Path:
         if not episode_id:
             raise ValueError("episode_id must be non-empty")

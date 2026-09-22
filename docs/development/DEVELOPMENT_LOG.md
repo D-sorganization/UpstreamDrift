@@ -400,18 +400,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
-### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
+### DL-#10620 · NM-05 Classical and Small Neural Dynamics Baselines
 
 - **State:** in_review
+- **Owner:** local
+- **Issue:** #10620 (epic #10603)
+- **Branch:** feat/issue-10620-nm05-baselines
+- **PR:** #10701
+- **Paths:** src/shared/python/neural_motion/baselines/; src/shared/python/neural_motion/episodes/splits.py; tests/unit/neural_motion/test_dynamics_baselines_nm05.py; docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — 10 NM-05 tests green under xdist (-n 2); module-object torch absence patch asserts torch_unavailable; software-contract only
+- **Summary:** Pilot dynamics baselines over NM-03 episode store: `DynamicsBaselineTrainerConfig`, split helpers, `FamilySplitPlan.ids_for`; analytical 1/2-DOF fixture map, ridge, nearest neighbor, optional small MLP; trial-level splits, train-only normalizer digest, inverse conditioning, identity-leakage and unavailable-torque guards; validation checkpointing with test untouched; honest analytical-vs-MLP comparison on fixtures.
+- **Next step:** Confirm unit-test-gate and quality-gate green on PR #10701; squash auto-merge remains armed.
+- **Evidence:** docs/plans/neural_motion_matching/dynamics_baselines.md; docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json
+
+### DL-#10619 · NM-04 Teacher Episodes and Active-Learning Candidates
+
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10619 (epic #10603)
 - **Branch:** local/nm-04-teacher-episodes
 - **PR:** #10698
 - **Paths:** src/shared/python/neural_motion/teachers/; src/shared/python/training/scheduler.py; src/shared/python/training/datasets.py; tests/unit/neural_motion/test_teacher_episodes_nm04.py; docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — DRY helpers + divergence inventory for `neural_motion/teachers/*`; squash auto-merge armed; software-contract only
+- **Last verified:** 2026-09-22 — merged to main via #10698 (`2142d380b`)
 - **Summary:** Versioned teacher generation (`neural-teacher-episodes/1.0.0`) with near-baseline/stratified/low-discrepancy/random-torque paths, rejection ledger and quarantine, nested corpus stages with resume/duplicate-seed avoidance, and active acquisition (`neural-acquisition-log/1.0.0`) that cannot consume test labels. Reuses NM-03 EpisodeStore and NM-01 nested stage sizes; training scheduler admits teacher budgets via `neural_teacher_corpus_budget` and datasets register teacher corpus paths without all-RAM load.
-- **Next step:** Confirm repo-structure/unit-test/quality gates green on PR #10698; squash auto-merge remains armed.
+- **Next step:** Continue NM-05 (#10620) under frozen teacher and episode-store contracts.
 - **Evidence:** docs/plans/neural_motion_matching/teacher_episodes.md; docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json.
 
 ### DL-#10618 · NM-03 Episode Storage Splits and Dataset Views
