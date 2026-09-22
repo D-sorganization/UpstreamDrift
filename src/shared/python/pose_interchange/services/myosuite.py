@@ -280,6 +280,11 @@ class MyosuiteKinematicsService:
     def capabilities(self) -> ServiceCapabilities:
         return _MYOSUITE_CAPABILITIES
 
+    def joint_limits(self) -> Mapping[str, tuple[float, float]]:
+        """Return an empty mapping: no anatomical joint-limit data is
+        wired for this engine yet (issue #8887)."""
+        return {}
+
 
 def create_myosuite_service() -> LiveKinematicsService:
     """Return a MyoSuite service if :mod:`myosuite` is installed, else mock."""
