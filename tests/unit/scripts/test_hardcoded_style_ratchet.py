@@ -18,6 +18,8 @@ import sys
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "ci" / "check_hardcoded_style_ratchet.py"
 
