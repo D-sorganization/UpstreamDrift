@@ -508,3 +508,28 @@ def test_manifest_lists_episodes_without_all_ram_load(tmp_path: Path) -> None:
     # Listing must not require materialising all arrays.
     listed = list(store.iter_episode_ids())
     assert set(listed) == set(ids)
+
+
+def test_training_registry_reuses_episode_store_without_all_ram(
+    tmp_path: Path,
+) -> None:
+    """Reuse anchor: training.datasets registers corpus paths, not loaded rows."""
+    from src.shared.python.training.datasets import (
+        DatasetRegistry,
+        register_neural_episode_corpus,
+    )
+
+    root = tmp_path / "corp"
+    store = EpisodeStore(root)
+    store.write_episode(_make_episode(trial_id="reg0", family_id="rf0", seed=1))
+    registry = DatasetRegistry()
+    handle = register_neural_episode_corpus(
+        registry,
+        dataset_id="nm03_pilot",
+        name="NM-03 Pilot Corpus",
+        root=root,
+    )
+    assert handle.format == "hdf5"
+    assert handle.path == root
+    assert registry.get("nm03_pilot").path == root
+    assert "neural-episode-store/1.0.0" in handle.description
