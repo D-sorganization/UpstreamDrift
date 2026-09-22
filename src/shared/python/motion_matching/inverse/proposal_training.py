@@ -14,6 +14,11 @@ from typing import Any, Sequence
 
 import numpy as np
 
+from src.shared.python.motion_matching.inverse.proposal_shared import (
+    coerce_training_output_dir,
+    require_positive_training_hparams,
+)
+
 from .masked_proposal import (
     MaskedControlProposal,
     MaskedObservation,
@@ -40,15 +45,15 @@ class ProposalTrainingConfig:
     control_regularization: float = 1e-3
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "output_dir", Path(self.output_dir))
-        if self.epochs < 1:
-            raise ValueError("epochs must be >= 1")
-        if self.batch_size < 1:
-            raise ValueError("batch_size must be >= 1")
-        if self.lr <= 0.0:
-            raise ValueError("lr must be positive")
-        if self.control_regularization < 0.0:
-            raise ValueError("control_regularization must be >= 0")
+        object.__setattr__(
+            self, "output_dir", coerce_training_output_dir(self.output_dir)
+        )
+        require_positive_training_hparams(
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            lr=self.lr,
+            control_regularization=self.control_regularization,
+        )
 
 
 @dataclass(frozen=True, slots=True)

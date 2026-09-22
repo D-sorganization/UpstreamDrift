@@ -18,6 +18,13 @@ from typing import Sequence
 import numpy as np
 from numpy.typing import NDArray
 
+from .proposal_shared import (
+    coerce_finite_trajectory_and_times,
+    mean_modes_succeed_mean_fails,
+    require_positive_int,
+    software_contract_plant_residual,
+)
+
 __all__ = [
     "MaskedControlProposal",
     "MaskedObservation",
@@ -50,18 +57,12 @@ class MaskedProposalConfig:
     control_scale: float = 5.0
 
     def __post_init__(self) -> None:
-        if self.control_dim <= 0:
-            raise ValueError(f"control_dim must be positive, got {self.control_dim}")
-        if self.trajectory_channels <= 0:
-            raise ValueError(
-                f"trajectory_channels must be positive, got {self.trajectory_channels}"
-            )
-        if self.seq_len <= 0:
-            raise ValueError(f"seq_len must be positive, got {self.seq_len}")
+        require_positive_int("control_dim", self.control_dim)
+        require_positive_int("trajectory_channels", self.trajectory_channels)
+        require_positive_int("seq_len", self.seq_len)
         if self.n_modes < 1:
             raise ValueError(f"n_modes must be >= 1, got {self.n_modes}")
-        if self.hidden <= 0:
-            raise ValueError(f"hidden must be positive, got {self.hidden}")
+        require_positive_int("hidden", self.hidden)
         if self.n_blocks < 1:
             raise ValueError(f"n_blocks must be >= 1, got {self.n_blocks}")
         if self.control_scale <= 0:
@@ -93,20 +94,13 @@ class MaskedObservation:
     contact_profile: str
 
     def __post_init__(self) -> None:
-        traj = np.asarray(self.trajectory, dtype=np.float64)
-        times = np.asarray(self.sample_times_s, dtype=np.float64)
-        if traj.ndim != 2 or traj.shape[0] < 1:
-            raise ValueError("trajectory must be 2-D with T >= 1")
-        if not bool(np.all(np.isfinite(traj))):
-            raise ValueError("trajectory values must be finite")
+        traj, times = coerce_finite_trajectory_and_times(
+            self.trajectory, self.sample_times_s
+        )
         object.__setattr__(self, "trajectory", traj)
+        object.__setattr__(self, "sample_times_s", times)
         if len(self.observation_mask) != traj.shape[1]:
             raise ValueError("observation_mask length must match trajectory channels")
-        if times.ndim != 1 or times.shape[0] != traj.shape[0]:
-            raise ValueError("sample_times_s length must equal trajectory T")
-        if not bool(np.all(np.isfinite(times))):
-            raise ValueError("sample_times_s values must be finite")
-        object.__setattr__(self, "sample_times_s", times)
         if not np.isfinite(self.duration_s) or self.duration_s <= 0.0:
             raise ValueError("duration_s must be a positive finite time")
         span = float(times[-1] - times[0]) if times.size > 1 else float(times[0])
@@ -145,23 +139,12 @@ def evaluate_control_on_linear_plant(
     Deterministic affine map used only for unit tests and training surrogates.
     Not a native dynamics claim.
     """
-    u = np.asarray(controls, dtype=np.float64).reshape(-1)
-    traj = np.asarray(observation.trajectory, dtype=np.float64)
-    mask = np.asarray(observation.observation_mask, dtype=np.float64)
-    if u.size < 1 or not bool(np.all(np.isfinite(u))):
-        raise ValueError("controls must be a non-empty finite vector")
-    if mask.shape != (traj.shape[1],):
-        raise ValueError("observation_mask length must match trajectory channels")
-    # Mask channels first, then map to control space (software plant only).
-    masked_traj = traj * mask.reshape(1, -1)
-    rng = np.random.default_rng(traj.shape[1] * 17 + u.size)
-    weight = rng.normal(0.0, 0.25, size=(traj.shape[1], u.size))
-    predicted = masked_traj @ weight
-    target = np.broadcast_to(u.reshape(1, -1), predicted.shape)
-    residual = predicted - target
-    # Time scaling so duration/timestamps influence the scalar score path.
-    time_scale = 1.0 + float(observation.duration_s)
-    return residual * time_scale
+    return software_contract_plant_residual(
+        trajectory=observation.trajectory,
+        observation_mask=observation.observation_mask,
+        controls=controls,
+        duration_s=observation.duration_s,
+    )
 
 
 def mean_control_fails_while_modes_succeed(
@@ -175,38 +158,12 @@ def mean_control_fails_while_modes_succeed(
     ``succeed`` means the masked L2 residual is <= ``target_residual_tol``.
     Uses the software-contract linear plant only.
     """
-    if len(modes) < 2:
-        raise ValueError("modes must contain at least two control vectors")
-    if not np.isfinite(target_residual_tol) or target_residual_tol < 0.0:
-        raise ValueError("target_residual_tol must be a finite non-negative float")
-
-    mode_arrs = [np.asarray(m, dtype=np.float64).reshape(-1) for m in modes]
-    dim = mode_arrs[0].size
-    if any(m.size != dim for m in mode_arrs):
-        raise ValueError("all modes must share the same control dimension")
-
-    def _score(u: NDArray[np.float64]) -> float:
-        residual = evaluate_control_on_linear_plant(observation, u)
-        return float(np.linalg.norm(residual))
-
-    # Construct an observation-aligned plant where each mode is a feasible
-    # fixed point for a subset of channels: score uses |u - teacher| after
-    # projecting the trajectory mean through the mask.
     traj = np.asarray(observation.trajectory, dtype=np.float64)
     mask = np.asarray(observation.observation_mask, dtype=np.float64)
     featured = float(np.sum(traj.mean(axis=0) * mask))
-
-    def _feasibility(u: NDArray[np.float64], teacher: NDArray[np.float64]) -> float:
-        # Feasible when close to its teacher; mean of opposite teachers fails.
-        return float(np.linalg.norm(u - teacher)) + 0.01 * abs(featured)
-
-    mode_ok = all(_feasibility(m, m) <= target_residual_tol for m in mode_arrs)
-    mean_u = np.mean(np.stack(mode_arrs, axis=0), axis=0)
-    # Distance from mean to each teacher — should exceed tol for opposite signs.
-    mean_fail = all(
-        _feasibility(mean_u, teacher) > target_residual_tol for teacher in mode_arrs
+    return mean_modes_succeed_mean_fails(
+        modes, featured=featured, target_residual_tol=target_residual_tol
     )
-    return bool(mode_ok and mean_fail)
 
 
 class MaskedControlProposal:
