@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1441,
+    "ud-only": 1442,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 214,
+      "ud-only": 215,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -13775,7 +13775,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 23158,
+      "ud_bytes": 23757,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13891,11 +13891,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/pipeline/plants/pinocchio_lane_receipts.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "pipeline",
+      "ud_bytes": 3333,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/pipeline/plants/pinocchio_plant.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 4258,
+      "ud_bytes": 5669,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13919,7 +13931,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 32741,
+      "ud_bytes": 34034,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

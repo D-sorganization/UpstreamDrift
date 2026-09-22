@@ -441,6 +441,21 @@ def _solve_pink_ik(
     )
     is_qualified = bool(all_converged and audit_result.passed and rate_limits_respected)
 
+    closure_residual_m = float(
+        max(
+            (
+                float(r.weld_translation_error_m)
+                for r in pink_result.frame_residuals
+                if np.isfinite(r.weld_translation_error_m)
+            ),
+            default=float("nan"),
+        )
+    )
+    if not np.isfinite(closure_residual_m):
+        closure_residual_m = float("inf")
+    closure_budget_m = 1.0e-4
+    if is_qualified and closure_residual_m > closure_budget_m:
+        is_qualified = False
     constrained_ik_dict = {
         "backend_name": "pink",
         "solver": args.pink_solver,
@@ -460,6 +475,8 @@ def _solve_pink_ik(
         "first_failed_frame": pink_result.first_failed_frame,
         "per_frame_status": [bool(x) for x in pink_result.frame_success],
         "max_velocity_ratio": max_ratio,
+        "closure_residual_m": closure_residual_m,
+        "closure_residual_budget_m": closure_budget_m,
         "is_qualified": is_qualified,
         "qualification_state": "qualified" if is_qualified else "disqualified",
     }
