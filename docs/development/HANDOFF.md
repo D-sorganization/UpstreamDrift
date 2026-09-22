@@ -320,8 +320,8 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00/#10668, NM-01/#10672, NM-02/#10679 shipped; active child [NM-03 #10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md).
 - **CO-03 state:** Retrieval + constrained-IK starting guesses on PR #10678; DL-#10607.
-- **NM-03 state:** in_review on branch `feat/10618-nm03-episode-storage`; DL-#10618.
-- **Next:** Open PR for NM-03 and confirm CI green; do not start NM-04+ until merged.
+- **NM-03 state:** in_review on PR [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686); DL-#10618.
+- **Next:** Confirm CI green + squash auto-merge of #10686; do not start NM-04+ until merged.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
