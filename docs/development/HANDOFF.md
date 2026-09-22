@@ -18,7 +18,7 @@
 - Limitations: synthetic fixtures for software contracts only; no native G1
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
-- Next: Open PR `Fixes #10609` with squash auto-merge; confirm CI green.
+- Next: Confirm CI green on PR #10681; squash auto-merge armed.
 
 ## MS-102 Engine and Model Inventory #10376 Handoff
 

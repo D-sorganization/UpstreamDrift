@@ -430,16 +430,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10609 (epic #10602)
 - **Branch:** feat/issue-10609-co05-plausible-body-candidates
-- **PR:** not created
+- **PR:** #10681 (squash auto-merge)
 - **Paths:** src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/club_only/topology_mapping.py; src/shared/python/motion_matching/club_only/nullspace_proposals.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_body_candidates.py; docs/plans/club_only_matching/evidence/club_body_candidates.json; docs/plans/club_only_matching/TURNOVER.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 — focused CO-05 suite 12 passed; ruff clean; synthetic fixtures only
 - **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
-- **Next step:** Open ready-for-review PR Fixes #10609 with squash auto-merge; confirm CI green.
+- **Next step:** Confirm CI green on PR #10681 and squash merge.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
