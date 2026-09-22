@@ -12,8 +12,9 @@
   evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
   GREEN (12 passed); scoped ruff check/format on touched files.
-- Limitations: software-contract scoring only; no native Fit/G1 claim; quality
-  vs time curves for CO-08 remain measured on desk/native paths.
+- Limitations: software-contract scoring only; no native Fit/G1 claim; no
+  unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
+  saved in the software-contract evidence for CO-08 (not native timing).
 - Next: Open PR `Fixes #10611`, confirm CI green, squash auto-merge.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]

@@ -3,6 +3,7 @@
   "governing_issue": 10611,
   "preset": "fast_preview",
   "evaluations_used": 9,
+  "failed_attempts": 0,
   "cancelled": false,
   "neural_proposals_used": 0,
   "claims_native_qualification": false,
@@ -12,14 +13,70 @@
     "software_contract_fast_match_is_not_native_evidence"
   ],
   "profiling": {
-    "load_s": 0.00025740001001395285,
-    "calibration_s": 9.799987310543656e-6,
-    "ik_s": 0.0011591999791562557,
-    "dynamics_s": 0.00029899997753091156,
-    "replay_s": 4.1300023440271616e-5,
-    "verification_s": 5.999754648655653e-7,
-    "total_s": 0.001767299952916801
+    "load_s": 0.0004150999884586781,
+    "calibration_s": 1.0399991879239678e-5,
+    "ik_s": 0.0011246999783907086,
+    "dynamics_s": 0.000601400010054931,
+    "replay_s": 3.350002225488424e-5,
+    "verification_s": 6.999762263149023e-7,
+    "total_s": 0.0021857999672647566
   },
+  "quality_vs_time": [
+    {
+      "evaluations": 1,
+      "wall_s": 0.0016607000143267214,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 2,
+      "wall_s": 0.0017305999936070293,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 3,
+      "wall_s": 0.001791999995475635,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 4,
+      "wall_s": 0.0018502000020816922,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 5,
+      "wall_s": 0.0019123000092804432,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 6,
+      "wall_s": 0.0019711999921128154,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 7,
+      "wall_s": 0.0020311000116635114,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 8,
+      "wall_s": 0.0020902999967802316,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    },
+    {
+      "evaluations": 9,
+      "wall_s": 0.002150000014808029,
+      "best_observation_fit_m": 0.02,
+      "failed_attempts": 0
+    }
+  ],
   "pareto": [
     {
       "branch_id": "cold:0",

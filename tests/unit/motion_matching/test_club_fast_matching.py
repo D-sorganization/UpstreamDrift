@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 
 import numpy as np
@@ -338,6 +337,8 @@ def test_fast_match_evidence_fixture_roundtrip() -> None:
     assert payload["claims_native_qualification"] is False
     assert payload["native_g1_pass"] is False
     assert payload["pareto"]
+    assert payload["quality_vs_time"]
+    assert payload["failed_attempts"] >= 0
     EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
     EVIDENCE.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     assert EVIDENCE.exists()
