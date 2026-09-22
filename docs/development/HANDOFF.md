@@ -14,8 +14,10 @@
   matrix builder to
   `src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py`
   and `club_match_matrix.py`; shared keeps pure contracts in
-  `club_only/pendulum_match.py` (engines → shared only).
+  `club_only/pendulum_match.py` (engines → shared only). Architecture-budget
+  split: `_fit_triple` / `match_club_pendulum` helpers keep each function ≤100 lines.
 - Validation: `python scripts/check_dependency_direction.py` OK;
+  `python scripts/ci/check_architecture_budget.py` OK;
   `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60`
   (10 passed); ruff clean on touched files.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
