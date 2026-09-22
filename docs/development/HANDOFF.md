@@ -3,15 +3,21 @@
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
 - Worktree: `Worktrees/UpstreamDrift-10608-co04`, branch
-  `feat/issue-10608-co04-pendulum-club-match`, DL-#10608.
+  `feat/issue-10608-co04-pendulum-club-match`, DL-#10608, PR #10680.
 - Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
   original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
   retention; first-frame-before-integrate scoring; eight-cell double/triple ×
   four-trial matrix with replay packages and named native blockers (no invented
   G1 pass). Evidence:
   `docs/plans/club_only_matching/evidence/club_pendulum_match.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60`
-  (10 passed); ruff check/format clean on touched files.
+- Dependency fix (CI `check_dependency_direction`): moved fit orchestration and
+  matrix builder to
+  `src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py`
+  and `club_match_matrix.py`; shared keeps pure contracts in
+  `club_only/pendulum_match.py` (engines → shared only).
+- Validation: `python scripts/check_dependency_direction.py` OK;
+  `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60`
+  (10 passed); ruff clean on touched files.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
 - Next: Confirm CI green + squash auto-merge of PR #10680; then dispatch CO-05 (#10609)

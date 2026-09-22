@@ -1,10 +1,16 @@
-"""Eight-cell double/triple × four-trial club-only pendulum match matrix (CO-04)."""
+"""Eight-cell club-only pendulum match matrix orchestration (CO-04 #10608).
+
+Engine-layer builder so shared code does not import pendulum adapters.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
 
+from src.engines.physics_engines.pendulum.python.motion_matching.club_pendulum_match import (
+    match_club_pendulum,
+)
 from src.shared.python.motion_matching.club_only.hub_accounting import HubMode
 from src.shared.python.motion_matching.club_only.observation import (
     build_calibrated_observation_fixture,
@@ -12,7 +18,6 @@ from src.shared.python.motion_matching.club_only.observation import (
 from src.shared.python.motion_matching.club_only.pendulum_match import (
     PendulumMatchRequest,
     PendulumMatchResult,
-    match_club_pendulum,
 )
 from src.shared.python.motion_matching.club_only.replay_package import (
     build_replay_package,
@@ -76,7 +81,7 @@ class MatchMatrixOutcome:
 
 @dataclass(frozen=True)
 class PendulumMatchMatrix:
-    """Complete 2×4 club-only pendulum match matrix."""
+    """Complete 2x4 club-only pendulum match matrix."""
 
     schema: str
     governing_issue: int
@@ -117,7 +122,7 @@ def _outcome_from_result(result: PendulumMatchResult) -> MatchMatrixOutcome:
 
 
 def build_pendulum_match_matrix(*, max_nfev: int = 8) -> PendulumMatchMatrix:
-    """Fit every driven double/triple × canonical trial cell (software contracts)."""
+    """Fit every driven double/triple x canonical trial cell (software contracts)."""
     outcomes: list[MatchMatrixOutcome] = []
     for model_id in PENDULUM_MATCH_MODELS:
         hub_mode = _hub_mode_for(model_id)
