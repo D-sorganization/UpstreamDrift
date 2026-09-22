@@ -1,5 +1,25 @@
 # Current Matching Continuation Handoff
 
+## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609)
+
+- Worktree: `Worktrees/UpstreamDrift-10609-co05`, branch
+  `feat/issue-10609-co05-plausible-body-candidates`, DL-#10609.
+- Session: `b27ccab3-1128-492c-a0fb-001367ea3aa8` (agent local); lease on #10609.
+- Path ownership (avoid CO-04 collision):
+  - Owned: `club_only/body_candidates.py`, `topology_mapping.py`,
+    `nullspace_proposals.py`, `__init__.py` exports, focused tests + evidence.
+  - Do not touch: pendulum fit / driven double-triple match paths owned by
+    CO-04 (#10608) on `UpstreamDrift-10608-co04`.
+- Delivered: explicit topology maps, local null-space proposals + closure
+  reprojection, roster×trial matrix with separated score lanes; schema
+  `club-body-candidates/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_body_candidates.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_body_candidates.py -q -n 0 --no-cov --timeout=60` (12 passed); ruff check/format clean on touched files.
+- Limitations: synthetic fixtures for software contracts only; no native G1
+  acceptance; missing-runtime cells remain unqualified; kinematic preview
+  pending CO-06 replay.
+- Next: Open PR `Fixes #10609` with squash auto-merge; confirm CI green.
+
 ## MS-102 Engine and Model Inventory #10376 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10376-ms102`.
