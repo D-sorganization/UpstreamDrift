@@ -245,3 +245,53 @@ def test_extract_five_metrics_and_acceptance_logic() -> None:
     summary_empty = {}
     _, verdict3 = pipeline.extract_five_metrics_and_acceptance(summary_empty)
     assert verdict3 == "UNCLASSIFIED"
+
+
+def test_club_only_source_panel_and_disclaimer(widget: MotionMatchingWidget) -> None:
+    """CO-09: Club-Only Excel source selection with disclaimer and trial list."""
+    from src.shared.python.motion_matching.club_only.workbook_identity import (
+        CANONICAL_TRIAL_SHEETS,
+    )
+    from src.tools.motion_matching import club_only_ui as cui
+
+    assert widget.rb_tour_capture is not None
+    assert widget.rb_club_only is not None
+    assert widget.rb_tour_capture.isChecked() is True
+
+    widget.rb_club_only.setChecked(True)
+    assert widget.club_only_panel.isVisibleTo(widget) is True
+    assert cui.BODY_MOTION_DISCLAIMER in widget.club_only_disclaimer.text()
+    assert widget.club_only_preview_btn is not None
+    assert widget.club_only_verified_btn is not None
+    assert widget.club_only_compare_btn is not None
+
+    # Populate trials without a workbook via façade helper used by the panel.
+    widget.set_club_only_trials(list(CANONICAL_TRIAL_SHEETS))
+    items = [
+        widget.club_only_trial.itemText(i)
+        for i in range(widget.club_only_trial.count())
+    ]
+    assert items == list(CANONICAL_TRIAL_SHEETS)
+
+
+def test_club_only_unqualified_badge_is_not_verified(
+    widget: MotionMatchingWidget,
+) -> None:
+    """CO-09: matrix status other than scored must not show VERIFIED."""
+    widget.rb_club_only.setChecked(True)
+    widget.apply_club_only_matrix_status("unqualified", preset="verified_fit")
+    assert widget.acceptance_badge.text() != "VERIFIED"
+    widget.apply_club_only_matrix_status("scored", preset="verified_fit")
+    assert widget.acceptance_badge.text() == "VERIFIED"
+
+
+def test_club_only_cancel_resume_via_session(widget: MotionMatchingWidget) -> None:
+    """CO-09: stop/cancel clears through session cancel_check; resume keeps token."""
+    widget.rb_club_only.setChecked(True)
+    session = widget.club_only_session()
+    session.request_cancel()
+    assert widget.club_only_session().cancel_check() is True
+    widget.clear_club_only_cancel()
+    assert widget.club_only_session().cancel_check() is False
+    widget.resume_club_only_checkpoint("token-xyz")
+    assert widget.club_only_session().checkpoint_token == "token-xyz"

@@ -623,18 +623,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Dispatch CO-08 (#10612) per club-only epic dependency order; do not invent native G1 pass.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
 
+### DL-#10613 · CO-09 Integrate Club-Only Matching Into Existing UI and Results
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10613 (epic #10602)
+- **Branch:** feat/issue-10613-co09-ui
+- **PR:** not created
+- **Paths:** src/tools/motion_matching/club_only_ui.py; src/tools/motion_matching/club_only_panel.py; src/tools/motion_matching/gui.py; src/tools/tour_matching_viewer/gui.py; src/tools/matched_swing_browser/model.py; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/tools/motion_matching/test_club_only_ui.py; tests/tools/motion_matching/test_motion_matching_gui.py; tests/unit/tools/test_tour_matching_viewer_club_only_legend.py; tests/tools/matched_swing_browser/test_model.py; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — scoped CO-09 pytest GREEN; matrix verified gate + legend + import/dedup
+- **Summary:** Integrate club-only Excel source selection into Motion Matching UI and results: four canonical trials with alias conflict/coverage display, preview/verified-fit gating on CO-08 matrix status==scored only, observed-versus-inferred viewer legend, and club_only lane metadata on the existing matched-swing ledger without a parallel store.
+- **Next step:** Open ready-for-review PR Fixes #10613 with squash auto-merge.
+- **Evidence:** tests/tools/motion_matching/test_club_only_ui.py; tests/tools/motion_matching/test_motion_matching_gui.py.
+
 ### DL-#10612 · CO-08 Qualify the Club-Only Matrix and Plausibility Tradeoffs
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10612 (epic #10602)
 - **Branch:** feat/issue-10612-co08-matrix
-- **PR:** #10703
+- **PR:** #10703 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/matrix_qualification.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/fit_metrics.py; src/shared/python/motion_matching/acceptance.py; src/shared/python/motion_matching/plot_fit_quality_card.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_matrix_qualification.py; tests/unit/motion_matching/test_club_plausibility_acceptance.py; docs/plans/club_only_matching/evidence/club_matrix_qualification.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; docs/shared_tools/divergence_inventory.v1.json; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — DRY fingerprints extracted to resolve_roster_matrix_scope; local DRY gate + scoped unit tests GREEN; native_g1_pass false
 - **Summary:** Independent matrix qualification over native observation times for four workbook trials × #10585 roster with frozen CO-02 gates, published failures, withheld-body experiment semantics, common-observable comparison across complexities, and fail-closed checks for tamper/leakage/phase/orientation/reset/geometry/false-native claims. Shared roster/matrix scope helpers live in club_only/profiles.py.
-- **Next step:** Confirm CI green on PR #10703 and squash-merge Fixes #10612; do not start CO-09+ until merge.
+- **Next step:** N/A — merged; continue CO-09 (#10613) UI integration.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_matrix_qualification.json; tests/unit/motion_matching/test_club_matrix_qualification.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
