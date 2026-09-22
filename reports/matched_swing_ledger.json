@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T22:06:09Z",
+  "generated_at": "2026-09-22T00:43:23Z",
   "rows": [
     {
       "acceptance": null,
@@ -2519,6 +2519,52 @@
       "sha256": "9a2186ab5e7cb981697b3b6a2e7f5071a6b69f84f17fab6ec9ab5674873a118a"
     },
     {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/parity_receipt.json",
+      "sha256": "74f585f7178c807f36efdab2331603e24c0af269864c8a97d92af819527fbfb4"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
+      "capture": "driver",
+      "engine": "simscape",
+      "horizon_s": null,
+      "lane": "native",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/runtime_license_receipt.json",
+      "sha256": "c8a81294e78897d607d82220ab01203acc1132bffd779236b24930970e14ba19"
+    },
+    {
       "acceptance": {
         "gates": [
           {
@@ -3696,5 +3742,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 101
+  "total_receipts": 103
 }
