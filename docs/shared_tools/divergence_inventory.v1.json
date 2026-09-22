@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1461,
+    "ud-only": 1460,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -637,7 +637,7 @@
     "realtime": {
       "identical": 0,
       "diverged": 2,
-      "ud-only": 5,
+      "ud-only": 4,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -22331,7 +22331,7 @@
       "classification": "ud-only",
       "package": "realtime",
       "subpackage": "",
-      "ud_bytes": 7708,
+      "ud_bytes": 11199,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -22343,19 +22343,7 @@
       "classification": "ud-only",
       "package": "realtime",
       "subpackage": "",
-      "ud_bytes": 4714,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "realtime/file_pubsub.py",
-      "classification": "ud-only",
-      "package": "realtime",
-      "subpackage": "",
-      "ud_bytes": 10920,
+      "ud_bytes": 5151,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
