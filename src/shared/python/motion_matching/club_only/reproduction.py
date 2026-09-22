@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shlex
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
@@ -63,6 +63,7 @@ __all__ = [
     "build_clean_environment_replay",
     "build_reproduction_guide",
     "build_saved_job_commands",
+    "format_shell_argv",
     "reconcile_matrix_blockers",
     "render_reproduction_guide_markdown",
     "reproduction_evidence_payload",
@@ -74,9 +75,24 @@ def _sha256_payload(payload: Mapping[str, Any]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def _argv_to_shell(argv: tuple[str, ...]) -> str:
-    """Copyable shell command with safe quoting for ``python -c`` payloads."""
-    return " ".join(shlex.quote(part) for part in argv)
+def _shell_quote(token: str) -> str:
+    """Quote one argv token for POSIX/bash copy-paste (DbC: never drop -c bodies)."""
+    if token == "":
+        return "''"
+    if re.fullmatch(r"[A-Za-z0-9_./:=+@%-]+", token):
+        return token
+    # Prefer double quotes when the payload already uses single-quoted Python
+    # strings so operator guides stay readable (avoid '"'"' soup).
+    if "'" in token and '"' not in token and "$" not in token and "`" not in token:
+        return '"' + token.replace("\\", "\\\\") + '"'
+    return "'" + token.replace("'", "'\"'\"'") + "'"
+
+
+def format_shell_argv(argv: tuple[str, ...] | list[str]) -> str:
+    """Join argv into an exact, copyable shell command string."""
+    if not argv:
+        raise ValueError("argv must be non-empty")
+    return " ".join(_shell_quote(part) for part in argv)
 
 
 @dataclass(frozen=True)
@@ -104,7 +120,7 @@ class SavedJobCommand:
             "purpose": self.purpose,
             "argv": list(self.argv),
             "cwd_relative": self.cwd_relative,
-            "shell": _argv_to_shell(self.argv),
+            "shell": format_shell_argv(self.argv),
         }
 
 
@@ -230,7 +246,7 @@ def _pytest_saved_job(
     *,
     timeout: int = 60,
 ) -> SavedJobCommand:
-    """Build a pytest-based saved-job command with the standard CI flags."""
+    """Build a pytest-based saved-job command."""
     return SavedJobCommand(
         name=name,
         purpose=purpose,
@@ -248,9 +264,52 @@ def _pytest_saved_job(
     )
 
 
-def _python_c_saved_job(name: str, purpose: str, code: str) -> SavedJobCommand:
-    """Build a ``python -c`` saved-job command."""
-    return SavedJobCommand(name=name, purpose=purpose, argv=("python", "-c", code))
+def _fast_preview_match_command() -> SavedJobCommand:
+    """Software-contract FAST_PREVIEW match for TW_wiffle."""
+    return SavedJobCommand(
+        name="fast_preview_match",
+        purpose="Run a software-contract FAST_PREVIEW club-only match for TW_wiffle.",
+        argv=(
+            "python",
+            "-c",
+            (
+                "from src.shared.python.motion_matching.club_only.ui_integration "
+                "import create_club_only_session, run_club_only_ui_match, "
+                "build_club_only_result_view; "
+                "from src.shared.python.motion_matching.club_only.fast_matching "
+                "import MatchPreset; "
+                "s=create_club_only_session(trial_id='TW_wiffle',"
+                " model_id='driven_double_pendulum',"
+                " preset=MatchPreset.FAST_PREVIEW); "
+                "v=build_club_only_result_view(run_club_only_ui_match(s)); "
+                "assert v.display_status.value!='verified' or "
+                "v.native_g1_pass is False; "
+                "print(v.display_status, v.qualification_blockers)"
+            ),
+        ),
+    )
+
+
+def _portable_package_roundtrip_command() -> SavedJobCommand:
+    """Export/import probe for MS-105 portable packages."""
+    return SavedJobCommand(
+        name="portable_package_roundtrip",
+        purpose="Export/import an MS-105 portable package without a second scheduler.",
+        argv=(
+            "python",
+            "-c",
+            (
+                "from pathlib import Path; "
+                "from src.shared.python.motion_matching.jobs import ("
+                "MatchingJobSpec, JobStage, HashBundle, "
+                "export_portable_package, import_portable_package, JOBS_SCHEMA); "
+                "print(JOBS_SCHEMA); "
+                "print('export_portable_package', export_portable_package.__name__); "
+                "print('import_portable_package', import_portable_package.__name__); "
+                "print('MatchingJobSpec', MatchingJobSpec.__name__, JobStage.FIT_REPLAY)"
+            ),
+        ),
+    )
 
 
 def build_saved_job_commands() -> tuple[SavedJobCommand, ...]:
@@ -272,39 +331,8 @@ def build_saved_job_commands() -> tuple[SavedJobCommand, ...]:
             "tests/unit/motion_matching/test_club_ui_integration.py",
             timeout=90,
         ),
-        _python_c_saved_job(
-            "fast_preview_match",
-            "Run a software-contract FAST_PREVIEW club-only match for TW_wiffle.",
-            (
-                "from src.shared.python.motion_matching.club_only.ui_integration "
-                "import create_club_only_session, run_club_only_ui_match, "
-                "build_club_only_result_view; "
-                "from src.shared.python.motion_matching.club_only.fast_matching "
-                "import MatchPreset; "
-                "s=create_club_only_session(trial_id='TW_wiffle',"
-                " model_id='driven_double_pendulum',"
-                " preset=MatchPreset.FAST_PREVIEW); "
-                "r=run_club_only_ui_match(s); "
-                "v=build_club_only_result_view(r); "
-                "assert v.display_status.value!='native_verified' or "
-                "v.native_g1_pass; "
-                "print(v.display_status, v.qualification_blockers)"
-            ),
-        ),
-        _python_c_saved_job(
-            "portable_package_roundtrip",
-            "Export/import an MS-105 portable package without a second scheduler.",
-            (
-                "from pathlib import Path; "
-                "from src.shared.python.motion_matching.jobs import ("
-                "MatchingJobSpec, JobStage, HashBundle, "
-                "export_portable_package, import_portable_package, JOBS_SCHEMA); "
-                "print(JOBS_SCHEMA); "
-                "print('export_portable_package', export_portable_package.__name__); "
-                "print('import_portable_package', import_portable_package.__name__); "
-                "print('MatchingJobSpec', MatchingJobSpec.__name__, JobStage.FIT_REPLAY)"
-            ),
-        ),
+        _fast_preview_match_command(),
+        _portable_package_roundtrip_command(),
         _pytest_saved_job(
             "reproduction_freshness",
             "Docs/context/parity freshness for the CO-10 reproduction guide.",
@@ -322,8 +350,8 @@ def build_clean_environment_replay() -> CleanEnvironmentReplay:
             'python -c "from pathlib import Path; '
             "from src.shared.python.motion_matching.jobs import "
             "export_portable_package; "
-            "export_portable_package(Path('runs/<run_id>'), Path('packages/<run_id>'), "
-            "asset_paths={'result': Path('runs/<run_id>/result.json')})\""
+            "export_portable_package(Path('runs/<run_id>'), "
+            "Path('packages/<run_id>'), asset_paths={})\""
         ),
         import_command=(
             'python -c "from pathlib import Path; '
@@ -601,7 +629,8 @@ def reproduction_evidence_payload(
     return payload
 
 
-def _render_guide_header(built: ReproductionGuide) -> list[str]:
+def _guide_intro_lines(built: ReproductionGuide) -> list[str]:
+    """Header through trial/model roster section."""
     scored = sum(1 for c in built.matrix_cells if c.status == "scored")
     unresolved = sum(1 for c in built.matrix_cells if c.status != "scored")
     return [
@@ -624,34 +653,40 @@ def _render_guide_header(built: ReproductionGuide) -> list[str]:
         f"- Models ({len(built.model_ids)}): {', '.join(built.model_ids)}",
         f"- Matrix cells: {len(built.matrix_cells)} "
         f"(scored={scored}, unresolved={unresolved})",
+        "",
     ]
 
 
-def _render_guide_provenance_and_selection(built: ReproductionGuide) -> list[str]:
-    lines = ["", "## Raw-Source Provenance", ""]
+def _guide_provenance_and_selection_lines(built: ReproductionGuide) -> list[str]:
+    """Raw-source provenance, assumptions, and candidate selection."""
+    lines: list[str] = ["## Raw-Source Provenance", ""]
     for entry in built.raw_source_provenance:
         lines.append(
             f"- `{entry['relative_path']}` — SHA-256 `{entry['sha256']}` "
             f"({entry['authority']})"
         )
     lines.extend(["", "## Assumptions", ""])
-    lines.extend(f"- {assumption}" for assumption in built.assumptions)
+    for assumption in built.assumptions:
+        lines.append(f"- {assumption}")
+    sel = built.candidate_selection
     lines.extend(
         [
             "",
             "## Candidate Selection",
             "",
-            f"- Strategy: {built.candidate_selection['strategy']}",
-            f"- Preview vs verified: {built.candidate_selection['preview_vs_verified']}",
-            f"- Ranking: {built.candidate_selection['ranking']}",
-            f"- Neural slot: {built.candidate_selection['neural_slot']}",
+            f"- Strategy: {sel['strategy']}",
+            f"- Preview vs verified: {sel['preview_vs_verified']}",
+            f"- Ranking: {sel['ranking']}",
+            f"- Neural slot: {sel['neural_slot']}",
+            "",
         ]
     )
     return lines
 
 
-def _render_guide_commands_and_replay(built: ReproductionGuide) -> list[str]:
-    lines = ["", "## Exact Saved-Job Commands", ""]
+def _guide_commands_and_replay_lines(built: ReproductionGuide) -> list[str]:
+    """Saved-job commands and clean-environment portable replay."""
+    lines: list[str] = ["## Exact Saved-Job Commands", ""]
     for cmd in built.saved_job_commands:
         lines.extend(
             [
@@ -660,7 +695,7 @@ def _render_guide_commands_and_replay(built: ReproductionGuide) -> list[str]:
                 cmd.purpose,
                 "",
                 "```bash",
-                _argv_to_shell(cmd.argv),
+                format_shell_argv(cmd.argv),
                 "```",
                 "",
             ]
@@ -686,14 +721,15 @@ def _render_guide_commands_and_replay(built: ReproductionGuide) -> list[str]:
             "```bash",
             replay.import_command,
             "```",
+            "",
         ]
     )
     return lines
 
 
-def _render_guide_blockers_and_matrix(built: ReproductionGuide) -> list[str]:
-    lines = [
-        "",
+def _guide_closure_and_matrix_lines(built: ReproductionGuide) -> list[str]:
+    """Qualification blockers, program separation, evidence, matrix, limitations."""
+    lines: list[str] = [
         "## Qualification Blockers and Epic Closure",
         "",
         f"- `epic_closure_allowed`: `{built.epic_closure_allowed}`",
@@ -701,19 +737,19 @@ def _render_guide_blockers_and_matrix(built: ReproductionGuide) -> list[str]:
         f"- `claims_native_qualification`: `{built.claims_native_qualification}`",
         "",
     ]
-    lines.extend(f"- {blocker}" for blocker in built.qualification_blockers)
+    for blocker in built.qualification_blockers:
+        lines.append(f"- {blocker}")
     lines.extend(["", "## Program Separation", ""])
-    lines.extend(f"- {note}" for note in built.program_separation_notes)
+    for note in built.program_separation_notes:
+        lines.append(f"- {note}")
     lines.extend(["", "## Evidence Links", ""])
-    lines.extend(
-        f"- [evidence/{name}](evidence/{name})" for name in built.evidence_links
-    )
+    for name in built.evidence_links:
+        lines.append(f"- [evidence/{name}](evidence/{name})")
     lines.extend(
         [
             "",
             "## Unresolved Matrix Cells (Executable Next Steps)",
             "",
-            "<!-- prettier-ignore-start -->",
             "| Model | Trial | Status | Owner | Next Step |",
             "| --- | --- | --- | --- | --- |",
         ]
@@ -726,8 +762,9 @@ def _render_guide_blockers_and_matrix(built: ReproductionGuide) -> list[str]:
             f"| `{cell.model_id}` | `{cell.trial_id}` | `{cell.status}` | "
             f"{cell.owner} | {prompt} |"
         )
-    lines.extend(["<!-- prettier-ignore-end -->", "", "## Limitations", ""])
-    lines.extend(f"- {limitation}" for limitation in built.limitations)
+    lines.extend(["", "## Limitations", ""])
+    for limitation in built.limitations:
+        lines.append(f"- {limitation}")
     lines.append("")
     return lines
 
@@ -740,8 +777,8 @@ def render_reproduction_guide_markdown(
     """Render the operator-facing reproduction guide markdown."""
     built = guide if guide is not None else build_reproduction_guide(repo_root)
     lines: list[str] = []
-    lines.extend(_render_guide_header(built))
-    lines.extend(_render_guide_provenance_and_selection(built))
-    lines.extend(_render_guide_commands_and_replay(built))
-    lines.extend(_render_guide_blockers_and_matrix(built))
+    lines.extend(_guide_intro_lines(built))
+    lines.extend(_guide_provenance_and_selection_lines(built))
+    lines.extend(_guide_commands_and_replay_lines(built))
+    lines.extend(_guide_closure_and_matrix_lines(built))
     return "\n".join(lines)
