@@ -34,6 +34,16 @@ from .hand_geometry import (
     ModelHandFrameOffsets,
     resolve_hand_frame_offsets,
 )
+from .hub_accounting import HubMode, account_external_hub_work, hub_variant_id
+from .match_errors import ClubMatchErrorReport, separate_plane_and_3d_errors
+from .match_matrix import (
+    MATCH_SCHEMA,
+    PENDULUM_MATCH_MODELS,
+    MatchMatrixOutcome,
+    PendulumMatchMatrix,
+    build_pendulum_match_matrix,
+)
+from .match_matrix import evidence_payload as pendulum_match_evidence_payload
 from .observation import (
     OBSERVATION_SCHEMA,
     ClubObservation,
@@ -51,6 +61,13 @@ from .observation import (
     orientation_residual_so3,
     scored_component_subset,
 )
+from .pendulum_match import (
+    PendulumMatchRequest,
+    PendulumMatchResult,
+    map_seed_to_pendulum_q0,
+    match_club_pendulum,
+    reject_reconstruction_as_club_evidence,
+)
 from .priors import PRIOR_SCHEMA, GolfPlausibilityPriors, PriorAssumption
 from .profiles import (
     PROFILE_SCHEMA,
@@ -62,6 +79,11 @@ from .profiles import (
     build_roster_profiles,
     evidence_payload,
     get_club_only_profile,
+)
+from .replay_package import (
+    REPLAY_SCHEMA,
+    ClubPendulumReplayPackage,
+    build_replay_package,
 )
 from .retrieval import (
     LibraryEntry,
@@ -108,6 +130,7 @@ __all__ = [
     "CLUB_DATA_SHA256",
     "CandidateScore",
     "CandidateSeed",
+    "ClubMatchErrorReport",
     "ClubOnlyAcceptanceVerdict",
     "ClubOnlyProfile",
     "ClubOnlyResidualReport",
@@ -115,6 +138,7 @@ __all__ = [
     "ClubObservation",
     "ClubObservationKinematics",
     "ClubObservationProvenance",
+    "ClubPendulumReplayPackage",
     "ClubWorkbookIdentity",
     "ComponentMask",
     "ComponentStatus",
@@ -125,11 +149,14 @@ __all__ = [
     "FRAME_AUTHORITY",
     "GolferHandedness",
     "GolfPlausibilityPriors",
+    "HubMode",
     "IDENTITY_SCHEMA",
     "IkBackendCapabilities",
     "IkFailureReason",
     "IkSolverKind",
     "LibraryEntry",
+    "MATCH_SCHEMA",
+    "MatchMatrixOutcome",
     "ModelHandFrameOffsets",
     "NATIVE_SAMPLE_RATE_HZ",
     "OBSERVATION_SCHEMA",
@@ -138,11 +165,16 @@ __all__ = [
     "ObservableClubDescriptor",
     "ObservationEvent",
     "ObservationProfile",
+    "PENDULUM_MATCH_MODELS",
     "PRIOR_SCHEMA",
     "PROFILE_SCHEMA",
+    "PendulumMatchMatrix",
+    "PendulumMatchRequest",
+    "PendulumMatchResult",
     "PhysicalProfile",
     "PlausibilityProfile",
     "PriorAssumption",
+    "REPLAY_SCHEMA",
     "ResampleRecord",
     "RigidPlacement",
     "SEED_SCHEMA",
@@ -154,11 +186,14 @@ __all__ = [
     "UnsupportedConstraintError",
     "WIFFLE_PROV1_SHA256",
     "WorkbookManifest",
+    "account_external_hub_work",
     "assert_backend_supports",
     "assess_ambiguity",
     "build_calibrated_observation_fixture",
     "build_club_workbook_identity",
     "build_observable_descriptor",
+    "build_pendulum_match_matrix",
+    "build_replay_package",
     "build_roster_profiles",
     "build_starting_guess_report",
     "capabilities_for",
@@ -169,18 +204,24 @@ __all__ = [
     "generate_posture_branches",
     "geometry_content_hash",
     "get_club_only_profile",
+    "hub_variant_id",
     "interpolate_observation",
     "load_observation_fixture_pack",
+    "map_seed_to_pendulum_q0",
+    "match_club_pendulum",
     "normalized_orientation_error",
     "normalized_position_error",
     "observation_to_club_target",
     "orientation_residual_so3",
+    "pendulum_match_evidence_payload",
     "profile_content_hash",
     "read_sheet_event_samples",
+    "reject_reconstruction_as_club_evidence",
     "resolve_hand_frame_offsets",
     "retrieve_starting_seeds",
     "run_constrained_ik_seeds",
     "scored_component_subset",
+    "separate_plane_and_3d_errors",
     "starting_guess_evidence_payload",
     "verify_workbook_hash",
 ]

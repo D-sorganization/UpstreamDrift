@@ -367,9 +367,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-22 — CO-02 merged (#10675); CO-03 retrieval/IK starting guesses in progress on feat/10607-co03-retrieval-constrained-ik
+- **Last verified:** 2026-09-22 — CO-03 merged (#10678); CO-04 pendulum club match in progress on feat/issue-10608-co04-pendulum-club-match
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land PR for #10607 (CO-03), then dispatch #10608 (CO-04).
+- **Next step:** Land PR for #10608 (CO-04), then dispatch #10609 (CO-05) or #10610 (CO-06) per dependency order.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -416,17 +416,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10607 · CO-03 Build Retrieval and Constrained IK Starting Guesses
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10607 (epic #10602)
 - **Branch:** feat/10607-co03-retrieval-constrained-ik
-- **PR:** #10678
-- **Paths:** src/shared/python/motion_matching/club_only/hand_geometry.py; src/shared/python/motion_matching/club_only/retrieval.py; src/shared/python/motion_matching/club_only/constrained_ik.py; src/shared/python/motion_matching/club_only/seeds.py; tests/unit/motion_matching/test_club_starting_guesses.py; docs/plans/club_only_matching/evidence/club_starting_guesses.json; docs/shared_tools/divergence_inventory.v1.json
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — PR #10678 opened with squash auto-merge; focused CO-03 suite 9 passed; ruff clean; divergence inventory regenerated.
+- **PR:** #10678 (merged)
 - **Summary:** Adds handedness-aware model hand-frame offsets, library retrieval with one rigid placement and native-clock preservation, constrained-IK seeds with distinct Pink/DLS capability records (unsupported constraints fail closed), and a geometry/profile-keyed seed cache. Four-trial retrieval-only and constrained-IK baselines are kinematic previews only.
-- **Next step:** Confirm CI green on PR #10678 and squash merge; then dispatch #10608 (CO-04).
+- **Next step:** Continue on #10608 (CO-04) double/triple pendulum club-only matching.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
+
+### DL-#10608 · CO-04 Match Club-Only Motion With Double and Triple Pendulums
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10608 (epic #10602)
+- **Branch:** feat/issue-10608-co04-pendulum-club-match
+- **PR:** not created
+- **Paths:** src/shared/python/motion_matching/club_only/{hub_accounting,match_errors,pendulum_match,match_matrix,replay_package}.py; tests/unit/motion_matching/test_club_pendulum_match.py; docs/plans/club_only_matching/evidence/club_pendulum_match.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — RED ImportError then GREEN: 10 passed in test_club_pendulum_match.py; ruff clean; eight-cell matrix evidence written; native G1 explicitly blocked.
+- **Summary:** Club-only double/triple pendulum matching consumes driven adapters, separates in-plane vs 3D errors and fixed-pivot vs prescribed moving-hub IDs with external-work accounting, warm-starts from valid CO-03 seeds, scores frame 0 before integrate, retains best of cold vs retrieval, and saves replay packages without inventing native G1 pass.
+- **Next step:** Open ready-for-review PR with Fixes #10608 and enable squash auto-merge.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_pendulum_match.json; tests/unit/motion_matching/test_club_pendulum_match.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 

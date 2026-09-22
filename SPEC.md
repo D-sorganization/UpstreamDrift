@@ -25,6 +25,15 @@ Separates kinematic projection from dynamic model reduction for Simscape upper-b
 - **Verification Suite (`tests/unit/motion_matching/test_coordinate_slice.py`)**:
   - 9 unit tests covering map coverage, projection, virtual work, boundary wrenches, fail-closed mismatch, and workspace overrides.
 
+## Club-Only Pendulum Matching (CO-04, #10608)
+
+Fits driven double and triple pendulum models to club-only observations for epic #10602:
+- **Hub Variants (`club_only/hub_accounting.py`)**: Distinct IDs for fixed-pivot vs prescribed moving-hub; moving hubs account external work via shared `compute_moving_hub_power`.
+- **Error Split (`club_only/match_errors.py`)**: In-plane RMSE kept separate from original 3D Euclidean RMSE (no collapsed single score).
+- **Match Service (`club_only/pendulum_match.py`)**: Calibrates q0/v0 and fixed lengths; fits bounded Bernstein controls; scores frame 0 before integration; warm-starts from CO-03 seeds when DOF/geometry/profile hashes match; retains best of cold vs retrieval; rejects body-only reconstruction model IDs.
+- **Eight-Cell Matrix (`club_only/match_matrix.py`, `replay_package.py`)**: Double×four-trial (fixed pivot) and triple×four-trial (prescribed moving hub) outcomes with replay inputs and named native G1 blockers; software contracts only.
+- **Evidence**: `docs/plans/club_only_matching/evidence/club_pendulum_match.json` (synthetic fixtures; not native physical qualification).
+
 ## Canonical Club Observation Contracts and Calibration (CO-01, #10605)
 
 Extends the measured-club surface for epic #10602 without replacing legacy `ClubTarget`:
@@ -6810,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10608 | Match club-only motion with driven double/triple pendulums (CO-04): fixed-pivot vs prescribed moving-hub IDs with external-work accounting, separate in-plane/3D errors, cold vs retrieval warm-start retention, first-frame scoring before integration, eight-cell software-contract matrix with explicit native G1 blockers; reconstruction scores rejected. |
 | 2026-09-22 | #10607 | Build retrieval and constrained-IK starting guesses for club-only matching (CO-03): handedness-aware hand-frame offsets, single-rigid library retrieval, Pink/DLS capability records with fail-closed unsupported constraints, seed cache invalidated by geometry/profile hashes; kinematic preview only. |
 | 2026-09-21 | #10675 | Define golf plausibility priors, per-model observation/physical/plausibility profiles, ambiguity semantics, and club-only acceptance with separated kinematic/torque/scientific/product statuses (CO-02); G3 gates unchanged. |
 | 2026-09-21 | #10677 | Add MS-102 engine/model inventory ledger and smoke qualification harness (#10376): dual-club flagship packages from models.yaml/capability matrix/ENGINE_TIERS, immutable hashes, named MyoSuite repair #10344, Simscape R2025b metadata, structural receipts. |

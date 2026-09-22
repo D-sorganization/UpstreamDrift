@@ -1,5 +1,22 @@
 # Current Matching Continuation Handoff
 
+## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
+
+- Worktree: `Worktrees/UpstreamDrift-10608-co04`, branch
+  `feat/issue-10608-co04-pendulum-club-match`, DL-#10608.
+- Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
+  original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
+  retention; first-frame-before-integrate scoring; eight-cell double/triple ×
+  four-trial matrix with replay packages and named native blockers (no invented
+  G1 pass). Evidence:
+  `docs/plans/club_only_matching/evidence/club_pendulum_match.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=60`
+  (10 passed); ruff check/format clean on touched files.
+- Limitations: software-contract / synthetic fixtures only; TB-05 native triple
+  qualification and desk native G1 remain open blockers.
+- Next: Open/merge PR with `Fixes #10608`; then dispatch CO-05 (#10609) or await
+  TB-05 (#10590) for native triple receipts.
+
 ## MS-102 Engine and Model Inventory #10376 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10376-ms102`.
@@ -248,14 +265,21 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10605 shipped. Delivered: `ClubObservation`, `club_calibration.py`, legacy adapters, four-trial fixture pack.
 - Next action: superseded by CO-02 #10606.
 
+## Club-Only Pendulum Matching CO-04 #10608 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10608-co04`.
+- Branch: `feat/issue-10608-co04-pendulum-club-match`; PR not created. Governing issue #10608 (CO-04, epic #10602). Prerequisites CO-02 #10675 and CO-03 #10678 merged on main. Head SELF.
+- Entry DL-#10608. Delivered: `hub_accounting` (fixed-pivot vs prescribed moving-hub IDs + external work), `match_errors` (separate in-plane/3D RMSE), `pendulum_match` (double/triple fit, first-frame before step, cold vs retrieval retention, reconstruction reject), `match_matrix`/`replay_package` (eight-cell software matrix with named native blockers), evidence `club_pendulum_match.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_pendulum_match.py -q -n 0 --no-cov --timeout=120` (10 passed); `ruff check` clean on touched Python.
+- Limitations: software-contract fits on synthetic CO-01 fixtures only; native G1 remains blocked with named gates; not CO-08 scientific qualification.
+- Next action: open PR with Fixes #10608 + squash auto-merge; then dispatch CO-05 #10609 (do not start in this PR).
+
 ## Club-Only Starting Guesses CO-03 #10607 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10607-co03`.
-- Branch: `feat/10607-co03-retrieval-constrained-ik`; PR [#10678](https://github.com/D-sorganization/UpstreamDrift/pull/10678) open (squash auto-merge). Governing issue #10607 (CO-03, epic #10602). Prerequisites CO-01 #10670 and CO-02 #10675 merged on main. Head SELF.
-- Entry DL-#10607. Delivered: `hand_geometry` (handedness-aware lead/trail frame offsets), `retrieval` (descriptor index + single rigid placement, native clock), `constrained_ik` (Pink vs DLS capability records, fail-closed unsupported constraints, posture branches), `seeds`/`SeedCache` (geometry/profile invalidation), four-trial evidence `club_starting_guesses.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_starting_guesses.py -q -n 0 --no-cov --timeout=60` (9 passed); `ruff check` clean on touched Python; divergence inventory regenerated.
-- Limitations: kinematic preview only (pending CO-06 replay); synthetic fixtures for software contracts; workbook smoke uses legacy Excel→observation path; no torque/physiological claim.
-- Next action: confirm CI green + squash merge of #10678; then dispatch CO-04 #10608.
+- Branch: `feat/10607-co03-retrieval-constrained-ik`; PR [#10678](https://github.com/D-sorganization/UpstreamDrift/pull/10678) merged. Governing issue #10607 (CO-03, epic #10602).
+- Entry DL-#10607 shipped. Delivered: hand geometry, retrieval, constrained IK, seed cache, evidence.
+- Next action: superseded by CO-04 #10608.
 
 ## Club-Only Plausibility Priors CO-02 #10606 Handoff
 
@@ -266,11 +290,11 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675 shipped; active child [CO-03 #10607](https://github.com/D-sorganization/UpstreamDrift/issues/10607).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00/#10667, CO-01/#10670, CO-02/#10675, CO-03/#10678 shipped; active child [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608).
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-01 [#10616](https://github.com/D-sorganization/UpstreamDrift/issues/10616) merged (#10672).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md).
-- **CO-03 state:** Retrieval + constrained-IK starting guesses implemented (synthetic tests + evidence); DL-#10602, DL-#10604, DL-#10605, DL-#10606, DL-#10607.
-- **Next:** Open/land CO-03 PR; then dispatch [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608).
+- **CO-04 state:** Double/triple pendulum club-only match matrix implemented (synthetic tests + evidence); DL-#10602, DL-#10604..DL-#10608.
+- **Next:** Land [CO-04 #10608](https://github.com/D-sorganization/UpstreamDrift/issues/10608); then dispatch [CO-05 #10609](https://github.com/D-sorganization/UpstreamDrift/issues/10609).
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
