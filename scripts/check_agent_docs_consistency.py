@@ -102,7 +102,7 @@ def _iter_repo_relative_paths(text: str) -> list[str]:
         suffix = text[candidate.end() : line_end if line_end >= 0 else len(text)]
         if re.search(r"\b(?:When|If)\s*$", prefix) and re.match(r"\s+exists\b", suffix):
             continue
-        if re.search(r"Repository_Management['’]s\s*$", prefix) or re.search(
+        if re.search(r"Repository_Management(?:['’]s)?\s*$", prefix) or re.search(
             r"^(?:`[^`]+`|[^.!?\n`])*\bwhen present\b", suffix
         ):
             continue
