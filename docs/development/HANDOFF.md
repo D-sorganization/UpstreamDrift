@@ -12,7 +12,7 @@
   `docs/plans/club_only_matching/REPRODUCTION_GUIDE.md`; evidence
   `docs/plans/club_only_matching/evidence/club_reproduction_turnover.json`;
   schema `club-only-reproduction/1.0.0`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60` (13 passed).
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60` (13 passed). Saved-job `fast_preview_match` uses `build_club_only_result_view`; clean export passes `asset_paths={}`.
 - Limitations: software-contract turnover only; `native_g1_pass` false;
   `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
 - Next: Drive CI green on PR #10720 and squash-merge; on DeskComputer schedule
