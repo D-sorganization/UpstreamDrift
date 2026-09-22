@@ -493,7 +493,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10697
 - **Paths:** src/shared/python/motion_matching/club_only/control_replay.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_control_replay.py; docs/plans/club_only_matching/evidence/club_control_replay.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — PR #10697 open with squash auto-merge; RED→GREEN 11 passed on test_club_control_replay.py
+- **Last verified:** 2026-09-22 — merged origin/main; fixed architecture/mypy/monolith CI; 11 control-replay tests green
 - **Summary:** Constrained min-effort ID recovers separated net/actuator/passive/reaction efforts (not unique measured torques), fits continuous Bernstein policies with prescribed base and solver settings, and independently replays the full horizon from one q0/v0 with no measured-state resets. Root slack cannot qualify; rejected dynamics retain kinematic preview with a separate status; CHS/ball type are not force observations. Synthetic software contracts only.
 - **Next step:** Confirm quality-gate green on PR #10697 and squash auto-merge; then dispatch CO-07 #10611.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_control_replay.json; tests/unit/motion_matching/test_club_control_replay.py.
