@@ -143,3 +143,7 @@
 ## 2024-05-21 - [Optimize Terminal Norm Calculation in RL]
 **Learning:** In reinforcement learning reward and metric calculations (e.g. `src/reinforcement_learning/trajectory_funnel_benchmark.py`), calculating the distance between the final state and the reference state using `np.linalg.norm(states[-1] - reference[-1])` incurs overhead. Replacing it with `math.sqrt(np.vdot(diff, diff))` avoids intermediate array allocations and NumPy dispatch overhead for small 1D state arrays.
 **Action:** Replace `np.linalg.norm(states[-1] - reference[-1])` with pre-calculated differences and `math.sqrt(np.vdot(diff, diff))` for terminal state error calculations.
+
+## 2026-09-22 - Optimize Shaft Model Apply Load Norm
+**Learning:** Even in shaft modal deformation applying load, calculating modal force using `np.linalg.norm(force)` on small 3D vectors takes significant dispatch overhead.
+**Action:** Replace `np.linalg.norm(force)` with `math.sqrt(np.vdot(force, force))` for single 3D vector norms in `_shaft_model.py`.
