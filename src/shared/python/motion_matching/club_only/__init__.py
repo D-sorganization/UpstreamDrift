@@ -17,6 +17,18 @@ from .ambiguity import (
     CandidateScore,
     assess_ambiguity,
 )
+from .body_candidates import (
+    CANDIDATE_SCHEMA,
+    BodyCandidate,
+    BodyCandidateOptions,
+    BodyCandidateReport,
+    BodyCandidateResult,
+    ModelTrialCell,
+    RejectionReason,
+    body_candidate_evidence_payload,
+    build_body_candidate_report,
+    generate_plausible_body_candidates,
+)
 from .constrained_ik import (
     ConstrainedIkRequest,
     ConstrainedIkResult,
@@ -36,6 +48,13 @@ from .hand_geometry import (
 )
 from .hub_accounting import HubMode, account_external_hub_work, hub_variant_id
 from .match_errors import ClubMatchErrorReport, separate_plane_and_3d_errors
+from .nullspace_proposals import (
+    NullSpaceAnalysis,
+    analyze_grip_jacobian_nullspace,
+    propose_nullspace_offsets,
+    reproject_onto_closure,
+    synthetic_grip_jacobian,
+)
 from .observation import (
     OBSERVATION_SCHEMA,
     ClubObservation,
@@ -93,6 +112,11 @@ from .seeds import (
     profile_content_hash,
 )
 from .seeds import evidence_payload as starting_guess_evidence_payload
+from .topology_mapping import (
+    TopologyMapping,
+    get_topology_mapping,
+    map_reduced_seed_to_body,
+)
 from .workbook_identity import (
     ALIAS_SHEETS,
     CANONICAL_TRIAL_SHEETS,
@@ -117,7 +141,12 @@ __all__ = [
     "ALIAS_SHEETS",
     "AmbiguityStatus",
     "AmbiguityVerdict",
+    "BodyCandidate",
+    "BodyCandidateOptions",
+    "BodyCandidateReport",
+    "BodyCandidateResult",
     "CANONICAL_TRIAL_SHEETS",
+    "CANDIDATE_SCHEMA",
     "CLUB_DATA_SHA256",
     "CandidateScore",
     "CandidateSeed",
@@ -149,7 +178,9 @@ __all__ = [
     "MATCH_SCHEMA",
     "MatchMatrixOutcome",
     "ModelHandFrameOffsets",
+    "ModelTrialCell",
     "NATIVE_SAMPLE_RATE_HZ",
+    "NullSpaceAnalysis",
     "OBSERVATION_SCHEMA",
     "ORIENTATION_AXIS_POLICY",
     "ObjectiveRule",
@@ -166,11 +197,13 @@ __all__ = [
     "PlausibilityProfile",
     "PriorAssumption",
     "REPLAY_SCHEMA",
+    "RejectionReason",
     "ResampleRecord",
     "RigidPlacement",
     "SEED_SCHEMA",
     "SeedCache",
     "StartingGuessReport",
+    "TopologyMapping",
     "TrialRecord",
     "UNIT_AUTHORITY",
     "UncertaintyMetadata",
@@ -178,8 +211,11 @@ __all__ = [
     "WIFFLE_PROV1_SHA256",
     "WorkbookManifest",
     "account_external_hub_work",
+    "analyze_grip_jacobian_nullspace",
     "assert_backend_supports",
     "assess_ambiguity",
+    "body_candidate_evidence_payload",
+    "build_body_candidate_report",
     "build_calibrated_observation_fixture",
     "build_club_workbook_identity",
     "build_observable_descriptor",
@@ -192,12 +228,15 @@ __all__ = [
     "count_numeric_samples",
     "evaluate_club_only_acceptance",
     "evidence_payload",
+    "generate_plausible_body_candidates",
     "generate_posture_branches",
     "geometry_content_hash",
     "get_club_only_profile",
+    "get_topology_mapping",
     "hub_variant_id",
     "interpolate_observation",
     "load_observation_fixture_pack",
+    "map_reduced_seed_to_body",
     "map_seed_to_pendulum_q0",
     "match_club_pendulum",
     "normalized_orientation_error",
@@ -206,14 +245,17 @@ __all__ = [
     "orientation_residual_so3",
     "pendulum_match_evidence_payload",
     "profile_content_hash",
+    "propose_nullspace_offsets",
     "read_sheet_event_samples",
     "reject_reconstruction_as_club_evidence",
+    "reproject_onto_closure",
     "resolve_hand_frame_offsets",
     "retrieve_starting_seeds",
     "run_constrained_ik_seeds",
     "scored_component_subset",
     "separate_plane_and_3d_errors",
     "starting_guess_evidence_payload",
+    "synthetic_grip_jacobian",
     "verify_workbook_hash",
 ]
 

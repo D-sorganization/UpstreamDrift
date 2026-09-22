@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.club_only.hand_geometry import (
 )
 from src.shared.python.motion_matching.club_only.observation import (
     build_calibrated_observation_fixture,
+    require_strictly_increasing_timestamps,
 )
 from src.shared.python.motion_matching.club_only.profiles import (
     ClubOnlyProfile,
@@ -76,13 +77,7 @@ class CandidateSeed:
         q = np.asarray(self.q, dtype=np.float64)
         if q.ndim != 1 or q.size < 1 or not np.all(np.isfinite(q)):
             raise ValueError("q must be a finite non-empty 1-D array")
-        times = np.asarray(self.timestamps_s, dtype=np.float64)
-        if times.ndim != 1 or times.size < 2:
-            raise ValueError("timestamps_s must have >= 2 samples")
-        if not np.all(np.isfinite(times)):
-            raise ValueError("timestamps_s must be finite")
-        if not np.all(np.diff(times) > 0.0):
-            raise ValueError("timestamps_s must be strictly increasing")
+        times = require_strictly_increasing_timestamps(self.timestamps_s)
         if not np.isfinite(self.observed_residual_m) or self.observed_residual_m < 0.0:
             raise ValueError("observed_residual_m must be finite and >= 0")
         if not np.isfinite(self.prior_score):
