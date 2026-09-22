@@ -680,16 +680,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10614 · CO-10 Publish Reproduction Guide and Final Club-Only Turnover
 
-- **State:** shipped
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
-- **Branch:** feat/co10-club-only-turnover-10614
-- **PR:** #10718
-- **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Branch:** feat/10614-co10-reproduction-turnover
+- **PR:** #10720 (survivor follow-up; baseline shipped via #10718)
+- **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/matched_swing_program/README.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — merged via PR #10718 (`2f6e119ef`); duplicates #10719/#10720 closed
-- **Summary:** Publishes operator/reproduction turnover with exact saved-job commands, trial/model roster, raw-source provenance, assumptions, candidate selection, clean-environment portable replay, and evidence-linked matrix reconciliation. Epic #10602 stays open; software-contract tests are not native evidence.
-- **Next step:** N/A — shipped; schedule desk-native Fit/G1 for unresolved matrix cells; check NM-07 claim before neural work.
+- **Last verified:** 2026-09-22 — rematch onto origin/main after #10718 baseline; keep runnable saved-job commands + architecture helper split; duplicate #10719 stays closed
+- **Summary:** Baseline operator/reproduction turnover landed via #10718. Survivor #10720 rematches unique fixes: runnable `fast_preview_match`/`asset_paths` saved-job commands, architecture-budget helper split, and succession docs. Epic #10602 stays open; software-contract tests are not native evidence.
+- **Next step:** Confirm CI green on rematched PR #10720 and squash-merge; do not reopen #10719; schedule desk-native Fit/G1 for unresolved matrix cells.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; tests/unit/motion_matching/test_club_reproduction_turnover.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
