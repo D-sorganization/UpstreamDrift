@@ -17,6 +17,10 @@ Diagnostic Features:
 - /api/diagnostics/html - Browser-friendly diagnostic page
 - /api/debug/routes - List all registered routes
 - /api/debug/static - Check static file configuration
+
+Matched Swing Results (MS-85, #10358):
+- /api/v1/matched-swings — ledger index (local-only; registered via route_registry)
+- /api/v1/matched-swings/{id} — receipt, candidate NPZ, parity, and GIF artefacts
 """
 
 from __future__ import annotations

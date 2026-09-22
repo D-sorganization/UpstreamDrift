@@ -1,0 +1,398 @@
+{
+  "governing_issue": 10608,
+  "models": ["driven_double_pendulum", "driven_triple_pendulum"],
+  "notes": [
+    "Software-contract matrix only; native G1 remains blocked with named gates.",
+    "In-plane and original 3D errors are reported separately per outcome.",
+    "Fixed-pivot double and prescribed moving-hub triple use distinct hub IDs.",
+    "Body-only reconstruction scores are rejected as club match evidence."
+  ],
+  "outcomes": [
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.40000000000000013,
+      "hub_variant_id": "driven_double_pendulum.fixed_pivot",
+      "in_plane_rmse_m": 1.8140743416959684,
+      "model_id": "driven_double_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.8140743416959684,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "fixed_pivot",
+        "in_plane_rmse_m": 1.8140743416959684,
+        "l_arm_m": 0.4,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": null,
+        "original_3d_rmse_m": 1.8140743416959684,
+        "q0": [3.141592653589793, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          19.47692533689669, 32.24972540719179, 45.02342328745951,
+          57.79878464588076, 70.57573352766518, 83.35357524203658,
+          96.13160562005292, 63.97426003240725, 45.229133934438934,
+          26.488222564748412, 7.752957854837904, -10.977050811689923,
+          -29.703320454800817, -48.42783640322472
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "TW_wiffle"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.40000000000000013,
+      "hub_variant_id": "driven_double_pendulum.fixed_pivot",
+      "in_plane_rmse_m": 1.8140743416959684,
+      "model_id": "driven_double_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.8140743416959684,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "fixed_pivot",
+        "in_plane_rmse_m": 1.8140743416959684,
+        "l_arm_m": 0.4,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": null,
+        "original_3d_rmse_m": 1.8140743416959684,
+        "q0": [3.141592653589793, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          19.47692533689669, 32.24972540719179, 45.02342328745951,
+          57.79878464588076, 70.57573352766518, 83.35357524203658,
+          96.13160562005292, 63.97426003240725, 45.229133934438934,
+          26.488222564748412, 7.752957854837904, -10.977050811689923,
+          -29.703320454800817, -48.42783640322472
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "TW_ProV1"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.40000000000000013,
+      "hub_variant_id": "driven_double_pendulum.fixed_pivot",
+      "in_plane_rmse_m": 1.8140743416959684,
+      "model_id": "driven_double_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.8140743416959684,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "fixed_pivot",
+        "in_plane_rmse_m": 1.8140743416959684,
+        "l_arm_m": 0.4,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": null,
+        "original_3d_rmse_m": 1.8140743416959684,
+        "q0": [3.141592653589793, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          19.47692533689669, 32.24972540719179, 45.02342328745951,
+          57.79878464588076, 70.57573352766518, 83.35357524203658,
+          96.13160562005292, 63.97426003240725, 45.229133934438934,
+          26.488222564748412, 7.752957854837904, -10.977050811689923,
+          -29.703320454800817, -48.42783640322472
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "GW_wiffle"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.40000000000000013,
+      "hub_variant_id": "driven_double_pendulum.fixed_pivot",
+      "in_plane_rmse_m": 1.8140743416959684,
+      "model_id": "driven_double_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.8140743416959684,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "fixed_pivot",
+        "in_plane_rmse_m": 1.8140743416959684,
+        "l_arm_m": 0.4,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": null,
+        "original_3d_rmse_m": 1.8140743416959684,
+        "q0": [3.141592653589793, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          19.47692533689669, 32.24972540719179, 45.02342328745951,
+          57.79878464588076, 70.57573352766518, 83.35357524203658,
+          96.13160562005292, 63.97426003240725, 45.229133934438934,
+          26.488222564748412, 7.752957854837904, -10.977050811689923,
+          -29.703320454800817, -48.42783640322472
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "GW_ProV11"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.5,
+      "hub_variant_id": "driven_triple_pendulum.prescribed_moving_hub",
+      "in_plane_rmse_m": 1.5226772028366045,
+      "model_id": "driven_triple_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.5226772028366045,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "tb05_triple_native_qualification_open",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "prescribed_moving_hub",
+        "in_plane_rmse_m": 1.5226772028366045,
+        "l_arm_m": 0.35,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": 0.15,
+        "original_3d_rmse_m": 1.5226772028366045,
+        "q0": [3.141592653589793, 0.0, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 0.0, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "TW_wiffle"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.5,
+      "hub_variant_id": "driven_triple_pendulum.prescribed_moving_hub",
+      "in_plane_rmse_m": 1.5226772028366045,
+      "model_id": "driven_triple_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.5226772028366045,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "tb05_triple_native_qualification_open",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "prescribed_moving_hub",
+        "in_plane_rmse_m": 1.5226772028366045,
+        "l_arm_m": 0.35,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": 0.15,
+        "original_3d_rmse_m": 1.5226772028366045,
+        "q0": [3.141592653589793, 0.0, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 0.0, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "TW_ProV1"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.5,
+      "hub_variant_id": "driven_triple_pendulum.prescribed_moving_hub",
+      "in_plane_rmse_m": 1.5226772028366045,
+      "model_id": "driven_triple_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.5226772028366045,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "tb05_triple_native_qualification_open",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "prescribed_moving_hub",
+        "in_plane_rmse_m": 1.5226772028366045,
+        "l_arm_m": 0.35,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": 0.15,
+        "original_3d_rmse_m": 1.5226772028366045,
+        "q0": [3.141592653589793, 0.0, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 0.0, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "GW_wiffle"
+    },
+    {
+      "coverage_fraction": 1.0,
+      "external_work_joules": 0.0,
+      "first_frame_rmse_m": 0.5,
+      "hub_variant_id": "driven_triple_pendulum.prescribed_moving_hub",
+      "in_plane_rmse_m": 1.5226772028366045,
+      "model_id": "driven_triple_pendulum",
+      "native_g1_pass": false,
+      "original_3d_rmse_m": 1.5226772028366045,
+      "qualification_blockers": [
+        "native_g1_qualification_requires_desk_native_receipt",
+        "tb05_triple_native_qualification_open",
+        "software_contract_fit_is_not_native_g1_evidence"
+      ],
+      "replay_inputs": {
+        "coverage_fraction": 1.0,
+        "external_work_joules": 0.0,
+        "hub_mode": "prescribed_moving_hub",
+        "in_plane_rmse_m": 1.5226772028366045,
+        "l_arm_m": 0.35,
+        "l_club_m": 1.1239999999999999,
+        "l_hub_m": 0.15,
+        "original_3d_rmse_m": 1.5226772028366045,
+        "q0": [3.141592653589793, 0.0, 0.0],
+        "selected_start": "cold",
+        "t0_evaluated_before_step": true,
+        "theta": [
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ],
+        "times_s": [
+          0.0, 0.004166666666666666, 0.008333333333333331, 0.012499999999999997,
+          0.016666666666666663, 0.020833333333333336, 0.025,
+          0.029166666666666667, 0.03333333333333333, 0.0375,
+          0.041666666666666664, 0.04583333333333334, 0.05, 0.05416666666666667,
+          0.058333333333333334, 0.0625, 0.06666666666666667,
+          0.07083333333333333, 0.075, 0.07916666666666666, 0.08333333333333333,
+          0.0875, 0.09166666666666667, 0.09583333333333333, 0.1,
+          0.10416666666666666, 0.10833333333333334, 0.11249999999999999,
+          0.11666666666666667, 0.12083333333333333, 0.125, 0.12916666666666665
+        ],
+        "v0": [-376.99111843077526, 0.0, 376.99111843077526]
+      },
+      "selected_start": "cold",
+      "t0_evaluated_before_step": true,
+      "trial_id": "GW_ProV11"
+    }
+  ],
+  "schema": "club-pendulum-match/1.0.0",
+  "trials": ["TW_wiffle", "TW_ProV1", "GW_wiffle", "GW_ProV11"]
+}

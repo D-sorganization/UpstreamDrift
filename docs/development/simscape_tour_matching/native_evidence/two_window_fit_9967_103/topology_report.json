@@ -1,0 +1,15 @@
+{
+  "schema_version": "simscape-topology-report/1",
+  "issue": "#10348",
+  "source_run_id": "two_window_fit_9967_102",
+  "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+  "profile": "reduced_27_no_neck",
+  "coordinate_count": 27,
+  "has_independent_neck": false,
+  "head_markers": ["HeadTop", "HeadFront", "HeadSide"],
+  "head_marker_bodies": ["Hub", "Hub", "Hub"],
+  "neck_coordinate_names": [],
+  "limitation": "Reduced 27-coordinate model has no independent neck; head markers attach to Hub. Terminal full-marker error is thorax-head coupled. Retained as a reduced-model oracle; MS-104 (#10378) owns full-body Simscape flagship work.",
+  "rigidity_floor_ref": "docs/development/simscape_tour_matching/native_evidence/fixed_attachment_rigidity_floor.json",
+  "note": "Software topology classification from the committed 27-DOF candidate. R2025b runtime identity is recorded in runtime_license_receipt.json (no inferred 1000-block license cap)."
+}

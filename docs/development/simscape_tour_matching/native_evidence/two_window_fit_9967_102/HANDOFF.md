@@ -65,9 +65,13 @@ The candidate evidence directory contains:
 - `returned.json`: Full report including cost history and active bounds (`active_bound_count: 0`).
 - `returned-nodes.json`: Intermediate shooting node chart coordinates.
 - `returned-replay.npz`: Complete multi-channel trajectory data.
+- `candidate.npz`: Versioned `MatchedSwingCandidate` package (MS-60 / #10347).
+- `run_manifest.json`: R2025b host/release/SHA/wall-clock receipt (MS-60).
+- `playback.gif`: Marker-overlay playback of the committed candidate (MS-60).
 - `pinocchio_replay.mat`: Converted Pinocchio trajectory.
 - `qualified_candidate_replay.json`: Independent MATLAB R2025b Update 5 forward simulation report.
 - `qualified_candidate_replay.mat`: Compact MATLAB replay data ($423\text{ KB}$).
 - `two_window_fit_102.py`: Full source script.
 - `run_audit_102.sh` & `run_full_102.sh`: Execution launchers.
 - `replay_returned102_r2025b.m` & `run_replay_102.bat`: R2025b validation scripts.
+- Fleet runner: `scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_102 -Replay`.

@@ -46,7 +46,10 @@ class MatchingPlant(FullBodyPlant, Protocol):
         ...
 
     def create_ik(
-        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
         """Instantiate an inverse kinematics solver adapter for this plant."""
         ...

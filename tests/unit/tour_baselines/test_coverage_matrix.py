@@ -10,6 +10,9 @@ TDD test-first suite verifying:
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from src.shared.python.tour_baselines.coverage import (
@@ -17,6 +20,7 @@ from src.shared.python.tour_baselines.coverage import (
     list_excluded_tools,
     render_coverage_markdown,
 )
+from src.shared.python.tour_baselines.models import EvidenceStatus
 from src.shared.python.tour_baselines.registry import list_golf_models
 
 pytestmark = pytest.mark.unit
@@ -96,3 +100,34 @@ def test_render_coverage_markdown():
     assert "reconstruction_double_pendulum" in md
     assert "driven_double_pendulum" in md
     assert "Non-Golf Tool Exclusions" in md
+
+
+def test_disqualified_driven_double_receipts_are_not_promoted() -> None:
+    """TB-04 receipts marked disqualified must remain rejected in the matrix."""
+    matrix = generate_coverage_matrix()
+    double_cells = [
+        cell for cell in matrix if cell.model_id == "driven_double_pendulum"
+    ]
+
+    assert {cell.capture for cell in double_cells} == {"driver", "iron"}
+    for cell in double_cells:
+        receipt_name = f"tb04_{cell.capture}_qualification_receipt.json"
+        receipt_path = (
+            Path(__file__).parents[3]
+            / "docs"
+            / "plans"
+            / "tour_baselines"
+            / "evidence"
+            / receipt_name
+        )
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        statuses = receipt["statuses"]
+
+        assert statuses["scientific_qualification"] == "disqualified"
+        assert statuses["kinematic_accuracy"] == "exceeds_threshold"
+        assert statuses["solver_convergence"] == "max_iterations"
+        assert cell.evidence_status is EvidenceStatus.REJECTED
+        assert cell.existing_artifact is not None
+        assert receipt_name in cell.existing_artifact
+        assert "DISQUALIFIED" in cell.existing_artifact
+        assert cell.blocked_reason is not None

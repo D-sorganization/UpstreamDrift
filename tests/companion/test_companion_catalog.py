@@ -27,6 +27,7 @@ SCREENSHOTS_SCHEMA_PATH = (
 )
 BUILDER_MODULES = (
     REPO_ROOT / "scripts/companion_catalog.py",
+    REPO_ROOT / "scripts/companion_evidence.py",
     REPO_ROOT / "scripts/companion_publication.py",
 )
 pytestmark = pytest.mark.unit
@@ -81,6 +82,13 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "feature_surface_paths": 90,
         "workflow_records": 15,
         "executable_workflow_records": 14,
+        "single_source_program_records": 36,
+        "documentation_records": 20,
+        "current_documentation_records": 4,
+        "engine_capability_records": 17,
+        "qualified_engine_capability_records": 4,
+        "undocumented_visible_program_records": 62,
+        "known_gap_records": 1,
     }
     assert len({record["id"] for record in catalog["programs"]}) == 76
     assert len({record["id"] for record in catalog["features"]}) == 46
@@ -302,6 +310,8 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
         "docs/api/contracts/upstreamdrift-companion-compatibility-v1.json",
         "docs/api/contracts/upstreamdrift-companion-v1.schema.json",
         "pyproject.toml",
+        "scripts/config/companion_capability_evidence.v1.json",
+        "scripts/config/companion_documentation.v1.json",
         "scripts/config/companion_workflows.v1.json",
         "src/config/feature_parity.json",
         "src/config/launcher_manifest.json",

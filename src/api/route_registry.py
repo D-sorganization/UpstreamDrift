@@ -109,6 +109,7 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "ball_flight",
     "data_explorer",
     "motion_capture",
+    "matched_swings",
 )
 
 
@@ -246,6 +247,7 @@ _PUBLIC_ROUTERS: frozenset[str] = frozenset(
         "observability",
         "capabilities",
         "launcher",
+        "matched_swings",
     }
 )
 

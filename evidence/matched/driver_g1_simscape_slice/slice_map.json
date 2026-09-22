@@ -1,0 +1,195 @@
+{
+  "schema_version": "coordinate-slice-v1",
+  "qualification": "kinematic projection map; boundary loads unqualified until Simscape R2025b replay",
+  "source_coordinates": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "SpineInputX",
+    "SpineInputY",
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "LScapInputX",
+    "LScapInputY",
+    "LSInputX",
+    "LSInputY",
+    "LSInputZ",
+    "LWInputX",
+    "LWInputY",
+    "REInput",
+    "RFInput",
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "RWInputX",
+    "RWInputY",
+    "NeckInputX",
+    "NeckInputY",
+    "NeckInputZ",
+    "hip_flexion_r",
+    "hip_adduction_r",
+    "hip_rotation_r",
+    "knee_angle_r",
+    "ankle_angle_r",
+    "subtalar_angle_r",
+    "mtp_angle_r",
+    "hip_flexion_l",
+    "hip_adduction_l",
+    "hip_rotation_l",
+    "knee_angle_l",
+    "ankle_angle_l",
+    "subtalar_angle_l",
+    "mtp_angle_l"
+  ],
+  "target_coordinates": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "SpineInputX",
+    "SpineInputY",
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "LScapInputX",
+    "LScapInputY",
+    "LSInputX",
+    "LSInputY",
+    "LSInputZ",
+    "LWInputX",
+    "LWInputY",
+    "REInput",
+    "RFInput",
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "RWInputX",
+    "RWInputY"
+  ],
+  "coordinate_indices": {
+    "TranslationInputX": 0,
+    "TranslationInputY": 1,
+    "TranslationInputZ": 2,
+    "HipInputX": 3,
+    "HipInputY": 4,
+    "HipInputZ": 5,
+    "SpineInputX": 6,
+    "SpineInputY": 7,
+    "TorsoInput": 8,
+    "LEInput": 9,
+    "LFInput": 10,
+    "LScapInputX": 11,
+    "LScapInputY": 12,
+    "LSInputX": 13,
+    "LSInputY": 14,
+    "LSInputZ": 15,
+    "LWInputX": 16,
+    "LWInputY": 17,
+    "REInput": 18,
+    "RFInput": 19,
+    "RScapInputX": 20,
+    "RScapInputY": 21,
+    "RSInputX": 22,
+    "RSInputY": 23,
+    "RSInputZ": 24,
+    "RWInputX": 25,
+    "RWInputY": 26
+  },
+  "omitted": {
+    "NeckInputX": {
+      "reason": "simscape_no_neck_joint",
+      "boundary_channel": "cervicale_reaction",
+      "axis": 3
+    },
+    "NeckInputY": {
+      "reason": "simscape_no_neck_joint",
+      "boundary_channel": "cervicale_reaction",
+      "axis": 4
+    },
+    "NeckInputZ": {
+      "reason": "simscape_no_neck_joint",
+      "boundary_channel": "cervicale_reaction",
+      "axis": 5
+    },
+    "hip_flexion_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 0
+    },
+    "hip_adduction_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 1
+    },
+    "hip_rotation_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 2
+    },
+    "knee_angle_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 3
+    },
+    "ankle_angle_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 4
+    },
+    "subtalar_angle_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 5
+    },
+    "mtp_angle_r": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 0
+    },
+    "hip_flexion_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 1
+    },
+    "hip_adduction_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 2
+    },
+    "hip_rotation_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 3
+    },
+    "knee_angle_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 4
+    },
+    "ankle_angle_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 5
+    },
+    "subtalar_angle_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 0
+    },
+    "mtp_angle_l": {
+      "reason": "lower_limb_omitted",
+      "boundary_channel": "pelvis_reaction",
+      "axis": 1
+    }
+  }
+}
