@@ -1720,6 +1720,20 @@ open. Preserve explicit ground configuration in independent replay.
 - **Summary:** Progressive burndown of the quarantine ledger (#8766). Prior tranches retired 43 packaging/governance tests (#10010), 11 deployment tests (#10012), 57 bunker shot and API route tests (#10013), 29 shared Python / physics tests (#10015), 16 AI adapter / launcher tests (#10026), 20 safe launcher / pipeline / model sources tests (#10031), 13 CORS tests (#10033), and 32 security and module docstring tests (#10034). This tranche burns down 67 quarantined tests across tests/launchers/test_golf_launcher.py (25), tests/launchers/test_launcher_ui_setup.py (21), tests/launchers/test_launcher_process_manager.py (17), and tests/launchers/test_library_widget.py (4), ratcheting debt down from 298 to 231.
 - **Next step:** Open PR, monitor CI checks, and merge.
 
+### DL-#8869 · Realtime Pub/Sub: Wire the WS Transport Instead of a Silent No-Op
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8869 (folds in #8868, #8942A; seam #9406 ruling: `realtime` is `split pending`, UD keeps this facade)
+- **Branch:** fix/8869-realtime-pubsub-decision
+- **PR:** #10655 (open)
+- **Paths:** `src/shared/python/realtime/api.py`; `src/shared/python/realtime/channels.py`; `src/shared/python/realtime/__init__.py`; `tests/unit/realtime/test_facade.py`; `tests/unit/realtime/test_channels.py`; `tests/shared/realtime/test_api.py`; `tests/shared/realtime/test_channels.py`; `docs/config/pydantic-settings-migration.md` (removed `file_pubsub.py` mention)
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at SELF (rebased onto main including #10654; 125 tests pass in tests/unit/realtime + tests/shared/realtime, incl. new unsupported-transport and ws-routing tests; 3 tests skip cleanly when the optional `upstream_realtime` Rust wheel isn't built locally; ruff check/format clean; seam-drift gate passes with 14 pre-existing notes, no new overlap)
+- **Summary:** Decision (documented in full in the PR body): WIRE, not delete. `ws_pubsub.py` looked dead from `api.py`'s perspective but is a mature, independently soak-tested feature (`.github/workflows/realtime-soak.yml`, nightly 24h run against issue #5235/#5214 latency budgets, backed by the `upstream-realtime` Rust/Tokio crate) — deleting it would have thrown away real, maintained infrastructure. `api.py.publish()`/`subscribe()` now route to `WSPubSub` when `transport="ws"` or `REALTIME_TRANSPORT=ws` is set explicitly; any other value raises `ValueError` immediately instead of silently falling back to file (the literal defect in #8869's title). `channels.py`'s colliding `register_channel` was renamed to `register_channel_hint` to resolve the naming collision the issue flagged; its automatic frequency-based transport routing is intentionally **not** wired into the default path yet (constructing `WSPubSub` autostarts a background server — an implicit default-on network listener for existing unaware callers like Pose Studio is a separate, riskier product decision). Deleted `file_pubsub.py` (a genuinely redundant, fully-dead second file-transport implementation superseded by `transport_file.py`, imported by nothing but its own tests) and its two test files. Left `#8868` (training-progress publisher/subscriber default wiring) and `#8942A` (already appears fixed on main — `transport_file.py` already tracks a read offset and doesn't re-parse whole files) for separate follow-up; not claimed as resolved here.
+- **Next step:** Push rebase merge commit, await green CI, merge, release lease.
+- **Evidence:** tests/unit/realtime/test_facade.py (`test_publish_with_ws_transport_routes_to_ws`, `test_publish_with_unsupported_transport_raises`, `test_subscribe_with_ws_transport_routes_to_ws`); tests/shared/realtime/test_api.py (`test_publish_ws_transport_routes_to_ws`, `test_publish_unsupported_transport_raises`, `test_subscribe_ws_transport_routes_to_ws`).
+
 ### DL-#9193 · Companion Documentation and Capability Evidence Authority
 
 - **State:** in_review
