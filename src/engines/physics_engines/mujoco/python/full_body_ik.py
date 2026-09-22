@@ -29,6 +29,15 @@ Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
 
 
+def _unit_ground_normal(ground: GroundPlane) -> Array:
+    """Return ``ground.normal`` normalized with a scalar 3-vector norm.
+
+    ``math.hypot`` is ~6x faster than ``np.linalg.norm`` for small 3D vectors.
+    """
+    n = np.asarray(ground.normal, dtype=float)
+    return n / math.hypot(n[0], n[1], n[2])
+
+
 class MujocoFullBodyIK(BaseFullBodyIK):
     """Full-body MuJoCo inverse kinematics adapter consuming a full-body spec."""
 
@@ -246,10 +255,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         return self._sphere_heights(ground)
 
     def _sphere_heights(self, ground: GroundPlane) -> dict[str, float]:
-        n = np.asarray(ground.normal, dtype=float)
-        n = n / math.hypot(
-            n[0], n[1], n[2]
-        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        n = _unit_ground_normal(ground)
         return {
             name: float(self.data.site_xpos[site] @ n - ground.height_m - radius)
             for name, (site, radius) in self._spheres.items()
@@ -351,10 +357,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
     ) -> None:
         if weight <= 0:
             return
-        n = np.asarray(ground.normal, dtype=float)
-        n = n / math.hypot(
-            n[0], n[1], n[2]
-        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        n = _unit_ground_normal(ground)
         nv = self.model.nv
         w = np.sqrt(weight)
         for name, (site, radius) in self._spheres.items():
@@ -389,10 +392,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
     ) -> None:
         if weight <= 0:
             return
-        n = np.asarray(ground.normal, dtype=float)
-        n = n / math.hypot(
-            n[0], n[1], n[2]
-        )  # ⚡ Bolt: math.hypot is ~6x faster than np.linalg.norm for small 3D vectors
+        n = _unit_ground_normal(ground)
         basis = np.linalg.svd(np.eye(3) - np.outer(n, n))[0][:, :2].T
         nv = self.model.nv
         self._mj.mj_comPos(self.model, self.data)
