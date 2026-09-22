@@ -1,18 +1,14 @@
 # Simscape Tour-Average Fit Continuation
 
-## Tour Baselines TB-04: Fit and Independently Replay the Actual Driven Double Pendulum (#10589)
+## Tour Baselines TB-07: Reconcile Existing Reference and Full-Body Results (#10592)
 
-Branch `feat/tb04-double-pendulum-fit-10589`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
-TB-04 ([#10589](https://github.com/D-sorganization/UpstreamDrift/issues/10589)) implements the bounded continuous dynamic fitting and independent replay verification of the driven double pendulum model on tour-average Driver and 7-Iron targets.
+Branch `feat/10592-reconcile-motion-results`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363).
 
-- Bidirectional mapping and verified mathematical & numerical acceleration parity (< 1e-14) between `DoublePendulumDynamics` and `Tools` (`physics.py`).
-- Continuous smooth bounded joint torques via degree-6 Bernstein polynomial basis strictly bounded in $[\tau_{\min}, \tau_{\max}]$ with curvature and effort regularization.
-- Fixed frame-0 off-by-one initial state evaluation bug, implemented non-uniform timestep integration, and added independent 4x tighter substep replay verification.
-- Authoritative qualification receipts and baseline packages generated for Driver and 7-Iron under `docs/plans/tour_baselines/evidence/`.
-- Updated `docs/plans/tour_baselines/coverage_matrix.md` marking `driven_double_pendulum` as Qualified for both Driver and Iron.
-- 15/15 unit tests pass cleanly in 6.5s across `test_double_pendulum_fit.py` and `test_motion_matching_provider.py`.
-- Ruff check/format clean, Black clean, Mypy 0 errors, architecture budget clean, file size budget clean, DRY gate clean.
-- Next step: Land PR via normal squash merge and proceed to TB-05 ([#10590](https://github.com/D-sorganization/UpstreamDrift/issues/10590): Fit and Independently Replay the Actual Driven Triple Pendulum).
+The TB-04 Driver and Iron receipts remain preserved, but both record `scientific_qualification=disqualified`, `kinematic_accuracy=exceeds_threshold`, and `solver_convergence=max_iterations`. The coverage matrix now reports them as rejected rather than qualified. Their close refined-replay agreement verifies numerical replay consistency; it does not establish measured-motion accuracy or product promotion.
+
+- The reconciliation rule lives in `src/shared/python/tour_baselines/coverage.py` with a regression test in `tests/unit/tour_baselines/test_coverage_matrix.py`.
+- Focused tour-baselines tests, Ruff, architecture/file-size budgets, and the LoD gate are clean in the current-main worktree.
+- Next step: commit and open the focused PR for #10592. Continue TB-05 only after reviewing the rejected double-pendulum evidence as an initialization source rather than a qualified baseline.
 
 ## Tour Baselines TB-03: Calibrate Swing Planes, Fixed Geometry, and Feasible Initial States (#10588) [MERGED]
 
