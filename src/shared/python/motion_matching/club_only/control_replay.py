@@ -546,13 +546,10 @@ def _impact_limitations(request: ControlReplayRequest) -> tuple[str, ...]:
     return tuple(notes)
 
 
-def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplayResult:
-    """Solve constrained ID, save continuous controls, and replay without resets."""
-    require(
-        isinstance(request, ControlReplayRequest),
-        "request must be ControlReplayRequest",
-    )
-    limitations = _impact_limitations(request)
+def _allocate_horizon_controls(
+    request: ControlReplayRequest,
+) -> tuple[TorqueDecomposition, NDArray[np.float64], list[str]]:
+    """Run per-frame constrained ID and assemble the torque decomposition."""
     nv = int(request.q0.size)
     allocator = ContactForceAllocator(
         nv=nv,
@@ -591,7 +588,6 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
     if request.force_root_slack_for_test is not None:
         root_slack_norm = float(request.force_root_slack_for_test)
         causes.append("root_slack_forced_for_test")
-
     if root_slack_norm > request.max_root_slack:
         causes.append(
             f"root_slack:{root_slack_norm:.3e}>max:{request.max_root_slack:.3e}"
@@ -608,12 +604,18 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
         feasibility_status=statuses[-1] if statuses else FeasibilityStatus.UNSUPPORTED,
         claims_unique_measured_torques=False,
     )
+    return decomposition, tau_act, causes
 
-    prescribed = dict(request.prescribed_base or {"mode": "unspecified"})
-    settings = dict(request.solver_settings or {})
-    settings.setdefault("atol", 1e-4)
-    settings["allocation_objective"] = request.allocation_objective.value
 
+def _open_loop_replay_package(
+    request: ControlReplayRequest,
+    *,
+    tau_act: NDArray[np.float64],
+    prescribed: Mapping[str, Any],
+    settings: Mapping[str, Any],
+    causes: list[str],
+) -> IndependentReplayPackage:
+    """Fit a continuous policy and independently replay without measured resets."""
     interval_ok = True
     try:
         require_strictly_increasing_timestamps(request.times_s)
@@ -644,7 +646,6 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
         reset_tolerance_m=1e-9,
     )
     if inject is not None:
-        # When measured states were injected, compare open-loop-only continuation.
         q_open, _ = _integrate_open_loop(
             q0=request.q0,
             v0=request.v0,
@@ -662,7 +663,37 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
     if reset_count > 0 and not request.allow_measured_state_resets:
         causes.append(f"measured_state_reset_count={reset_count}")
 
-    # Independently recompute forward residual from saved policy only.
+    q_check, forward_reported, tighter_sens = _replay_residuals(
+        request,
+        policy=policy,
+        q_replay=q_replay,
+        inject=inject,
+        causes=causes,
+    )
+    return IndependentReplayPackage(
+        q0=request.q0,
+        v0=request.v0,
+        times_s=request.times_s,
+        q_replay=q_replay if inject is None else q_check,
+        v_replay=v_replay if inject is None else np.zeros_like(q_check),
+        policy=policy,
+        prescribed_base=dict(prescribed),
+        measured_state_reset_count=reset_count,
+        forward_residual_independently_recomputed=forward_reported,
+        tighter_step_sensitivity=tighter_sens,
+        interval_timing_ok=interval_ok,
+    )
+
+
+def _replay_residuals(
+    request: ControlReplayRequest,
+    *,
+    policy: ControlPolicy,
+    q_replay: NDArray[np.float64],
+    inject: NDArray[np.float64] | None,
+    causes: list[str],
+) -> tuple[NDArray[np.float64], float, float]:
+    """Independently recompute forward residual and denser-step sensitivity."""
     q_check, _ = _integrate_open_loop(
         q0=request.q0,
         v0=request.v0,
@@ -675,10 +706,14 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
             np.max(np.linalg.norm(q_check - request.q_kinematic, axis=1))
         )
 
-    # Tighter-step sensitivity: densify time grid and compare endpoint state.
     factor = int(request.tighter_step_factor)
-    dense_times = np.linspace(
-        float(request.times_s[0]), float(request.times_s[-1]), (n - 1) * factor + 1
+    dense_times = np.asarray(
+        np.linspace(
+            float(request.times_s[0]),
+            float(request.times_s[-1]),
+            (request.times_s.size - 1) * factor + 1,
+        ),
+        dtype=np.float64,
     )
     q_dense, _ = _integrate_open_loop(
         q0=request.q0,
@@ -694,52 +729,36 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
         )
     if forward_residual > request.max_forward_residual and inject is not None:
         causes.append(
-            f"forward_residual:{forward_residual:.3e}>max:{request.max_forward_residual:.3e}"
+            f"forward_residual:{forward_residual:.3e}>max:"
+            f"{request.max_forward_residual:.3e}"
         )
+    kin_residual = float(np.max(np.linalg.norm(q_check - request.q_kinematic, axis=1)))
+    forward_reported = forward_residual if inject is not None else kin_residual
+    return q_check, forward_reported, tighter_sens
 
-    replay = IndependentReplayPackage(
-        q0=request.q0,
-        v0=request.v0,
-        times_s=request.times_s,
-        q_replay=q_replay if inject is None else q_check,
-        v_replay=v_replay if inject is None else np.zeros_like(q_check),
-        policy=policy,
-        prescribed_base=prescribed,
-        measured_state_reset_count=reset_count,
-        forward_residual_independently_recomputed=(
-            float(np.max(np.linalg.norm(q_check - q_check, axis=1)))
-            if inject is None
-            else forward_residual
-        ),
-        tighter_step_sensitivity=tighter_sens,
-        interval_timing_ok=interval_ok,
+
+def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplayResult:
+    """Solve constrained ID, save continuous controls, and replay without resets."""
+    require(
+        isinstance(request, ControlReplayRequest),
+        "request must be ControlReplayRequest",
     )
-    # When no injection, independent residual vs saved open-loop is identically zero;
-    # report residual of policy-evaluated dynamics vs kinematic preview instead.
-    if inject is None:
-        kin_residual = float(
-            np.max(np.linalg.norm(q_check - request.q_kinematic, axis=1))
-        )
-        object.__setattr__(
-            replay,
-            "forward_residual_independently_recomputed",
-            kin_residual,
-        )
-        # Re-freeze via reconstruction for immutability clarity.
-        replay = IndependentReplayPackage(
-            q0=replay.q0,
-            v0=replay.v0,
-            times_s=replay.times_s,
-            q_replay=replay.q_replay,
-            v_replay=replay.v_replay,
-            policy=replay.policy,
-            prescribed_base=replay.prescribed_base,
-            measured_state_reset_count=replay.measured_state_reset_count,
-            forward_residual_independently_recomputed=kin_residual,
-            tighter_step_sensitivity=replay.tighter_step_sensitivity,
-            interval_timing_ok=replay.interval_timing_ok,
-        )
+    limitations = _impact_limitations(request)
+    decomposition, tau_act, causes = _allocate_horizon_controls(request)
 
+    prescribed = dict(request.prescribed_base or {"mode": "unspecified"})
+    settings = dict(request.solver_settings or {})
+    settings.setdefault("atol", 1e-4)
+    settings["allocation_objective"] = request.allocation_objective.value
+
+    replay = _open_loop_replay_package(
+        request,
+        tau_act=tau_act,
+        prescribed=prescribed,
+        settings=settings,
+        causes=causes,
+    )
+    root_slack_norm = float(decomposition.root_slack_norm)
     rejected = bool(causes)
     dynamics = DynamicsStatus.REJECTED if rejected else DynamicsStatus.ACCEPTED
     statuses_map = {
@@ -760,7 +779,7 @@ def recover_and_replay_candidate(request: ControlReplayRequest) -> ControlReplay
                 "has_root_histories": True,
                 "max_root_residual_n_m": float(root_slack_norm),
             },
-            "control_policy": policy.as_dict(),
+            "control_policy": replay.policy.as_dict(),
             "solver_settings": settings,
         }
 

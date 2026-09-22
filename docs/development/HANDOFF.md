@@ -17,6 +17,10 @@
   docs/plans/club_only_matching/evidence/club_control_replay.json.
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_control_replay.py -q -n 0 --no-cov --timeout=60`
   GREEN (11 passed). Ruff check/format clean on touched files.
+- Catch-up: merged `origin/main` (NM-03 #10686 + MS-51 #10685); kept both SPEC
+  changelog rows. CI remediations: split `recover_and_replay_candidate` under
+  function-lines budget; float64 denser-step grid for mypy; regenerated
+  monolith register.
 - Limitations: synthetic software contracts only; no native G1 pass; open-loop
   plant for contract replay is a double-integrator stand-in, not engine-native
   forward dynamics.
