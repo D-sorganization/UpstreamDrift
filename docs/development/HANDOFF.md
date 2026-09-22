@@ -19,6 +19,13 @@
   and missing-runtime cells remain unqualified with named blockers.
 - Next: Confirm CI green on PR #10703; then dispatch CO-09.
 
+## GUI Thread-Blocking Migration #8880 [MERGED]
+
+- Merged to main via PR [#10656](https://github.com/D-sorganization/UpstreamDrift/pull/10656).
+- Migrated `bunker_shot_gui`, `ball_flight_gui`, and `swing_flight_pipeline`
+  onto `src/tools/async_action.py`; added GUI thread-blocking ratchet.
+- Next: N/A — merged; remaining un-migrated tools tracked by the ratchet.
+
 ## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611) [MERGED]
 
 - Merged to main via PR [#10700](https://github.com/D-sorganization/UpstreamDrift/pull/10700)
