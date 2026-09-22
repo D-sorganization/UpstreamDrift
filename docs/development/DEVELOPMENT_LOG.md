@@ -535,9 +535,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** not created
 - **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — fast-preview/verified-fit budgets, cache/checkpoint/cancel contracts, Pareto pruning tests GREEN; no native G1 claim
+- **Last verified:** 2026-09-22 at SELF — architecture split of `run_fast_club_match`; 12 unit tests GREEN; no native G1 claim
 - **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, and profiling that includes verification time.
-- **Next step:** Push branch, open PR with Fixes #10611, confirm CI green, squash merge.
+- **Next step:** Open PR with Fixes #10611, confirm CI green, squash merge.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
 
 ### DL-#10603 · Neural Motion Matching Plan

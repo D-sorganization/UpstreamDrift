@@ -43,6 +43,7 @@ __all__ = [
     "BranchScore",
     "CacheKeyMismatchError",
     "EmptyNeuralProposalProvider",
+    "FastMatchOptions",
     "FastMatchResult",
     "ImmutableCacheKey",
     "ImmutableMatchCache",
@@ -116,6 +117,32 @@ _PRESET_BUDGETS: dict[MatchPreset, MatchBudget] = {
         max_time_s=180.0, max_evaluations=400, max_pareto=12
     ),
 }
+
+
+@dataclass(frozen=True)
+class FastMatchOptions:
+    """Optional knobs for a fast-match run (CO-05-style options object)."""
+
+    preset: MatchPreset = MatchPreset.FAST_PREVIEW
+    budget: MatchBudget | None = None
+    cache: ImmutableMatchCache | None = None
+    checkpoint: MatchCheckpoint | None = None
+    neural_provider: NeuralProposalProvider | None = None
+    cancel_check: Callable[[], bool] | None = None
+    n_branches: int = 3
+    diversity_seed: int = _GOVERNING_ISSUE
+    strategies: tuple[StartStrategy, ...] = (
+        StartStrategy.COLD,
+        StartStrategy.RETRIEVAL,
+        StartStrategy.REDUCED_TO_FULL,
+    )
+
+    def __post_init__(self) -> None:
+        if self.n_branches < 1:
+            raise ValueError("n_branches must be >= 1")
+        object.__setattr__(self, "strategies", tuple(self.strategies))
+        if not self.strategies:
+            raise ValueError("strategies must be non-empty")
 
 
 def budget_for_preset(preset: MatchPreset) -> MatchBudget:
@@ -590,13 +617,17 @@ def _score_branches_under_budget(
     start_index: int,
     evaluations_used: int,
     budget: MatchBudget,
+    t0: float,
     deadline: float,
     cancel_check: Callable[[], bool] | None,
-) -> tuple[list[BranchScore], int, bool, float]:
-    """Score branches until budget/cancel; return scores, count, cancelled, dynamics_s."""
+) -> tuple[list[BranchScore], int, bool, float, list[QualityTimeSample]]:
+    """Score branches until budget/cancel; return scores, count, cancelled, dynamics_s, curve."""
     scored: list[BranchScore] = []
+    quality_curve: list[QualityTimeSample] = []
     cancelled = False
     used = evaluations_used
+    failed_attempts = 0
+    best_fit = float("inf")
     t_dyn = time.perf_counter()
     for branch_id, strategy, q in branch_specs[start_index:]:
         if cancel_check is not None and cancel_check():
@@ -607,17 +638,32 @@ def _score_branches_under_budget(
         if time.perf_counter() > deadline:
             cancelled = True
             break
-        scored.append(
-            score_branch(
-                branch_id=branch_id,
-                start_strategy=strategy,
-                q=q,
-                seed_residual_m=float(seed.observed_residual_m),
-                profile=profile,
+        scored_branch = score_branch(
+            branch_id=branch_id,
+            start_strategy=strategy,
+            q=q,
+            seed_residual_m=float(seed.observed_residual_m),
+            profile=profile,
+        )
+        scored.append(scored_branch)
+        used += 1
+        if not scored_branch.feasible:
+            failed_attempts += 1
+        if scored_branch.feasible and scored_branch.observation_fit_m < best_fit:
+            best_fit = scored_branch.observation_fit_m
+        quality_curve.append(
+            QualityTimeSample(
+                evaluations=used,
+                wall_s=time.perf_counter() - t0,
+                best_observation_fit_m=(
+                    best_fit
+                    if np.isfinite(best_fit)
+                    else scored_branch.observation_fit_m
+                ),
+                failed_attempts=failed_attempts,
             )
         )
-        used += 1
-    return scored, used, cancelled, time.perf_counter() - t_dyn
+    return scored, used, cancelled, time.perf_counter() - t_dyn, quality_curve
 
 
 def _assemble_fast_match_result(
@@ -633,6 +679,7 @@ def _assemble_fast_match_result(
     cancelled: bool,
     neural_n: int,
     diversity_seed: int,
+    quality_vs_time: Sequence[QualityTimeSample],
     load_s: float,
     calibration_s: float,
     ik_s: float,
@@ -654,6 +701,8 @@ def _assemble_fast_match_result(
             raise ValueError("verification found invalid observation fit")
     verification_s = time.perf_counter() - t_verify
 
+    failed_attempts = sum(1 for branch in scored if not branch.feasible)
+    failed_attempts = max(failed_attempts, len(rejected))
     best_strategy = pareto[0].start_strategy if pareto else None
     ckpt = MatchCheckpoint(
         cache_key=key,
@@ -677,6 +726,7 @@ def _assemble_fast_match_result(
         rejected=rejected,
         start_strategy_best=best_strategy,
         evaluations_used=evaluations_used,
+        failed_attempts=failed_attempts,
         cancelled=cancelled,
         neural_proposals_used=neural_n,
         profiling=MatchStageTimings(
@@ -687,6 +737,7 @@ def _assemble_fast_match_result(
             replay_s=replay_s,
             verification_s=verification_s,
         ),
+        quality_vs_time=tuple(quality_vs_time),
         checkpoint=ckpt,
         limitations=limitations,
     )
@@ -759,15 +810,20 @@ def run_fast_club_match(
 
     start_index = checkpoint.branch_index if checkpoint is not None else 0
     evaluations_used = checkpoint.evaluations_used if checkpoint is not None else 0
-    scored, evaluations_used, cancelled, dynamics_s = _score_branches_under_budget(
-        branch_specs=branch_specs,
-        seed=seed,
-        profile=profile,
-        start_index=start_index,
-        evaluations_used=evaluations_used,
-        budget=resolved_budget,
-        deadline=t0 + resolved_budget.max_time_s,
-        cancel_check=cancel_check,
+    # diversity_seed is retained on the checkpoint for CO-08 ablations;
+    # posture branches are already deterministic from q0.
+    scored, evaluations_used, cancelled, dynamics_s, quality_curve = (
+        _score_branches_under_budget(
+            branch_specs=branch_specs,
+            seed=seed,
+            profile=profile,
+            start_index=start_index,
+            evaluations_used=evaluations_used,
+            budget=resolved_budget,
+            t0=t0,
+            deadline=t0 + resolved_budget.max_time_s,
+            cancel_check=cancel_check,
+        )
     )
 
     return _assemble_fast_match_result(
@@ -782,6 +838,7 @@ def run_fast_club_match(
         cancelled=cancelled,
         neural_n=neural_n,
         diversity_seed=diversity_seed,
+        quality_vs_time=quality_curve,
         load_s=load_s,
         calibration_s=calibration_s,
         ik_s=ik_s,
