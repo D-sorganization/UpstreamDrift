@@ -8,7 +8,8 @@
   educed_27_no_neck), dual terminal disclosure (ull_marker_terminal.py + it_metrics), acceptance hooks, run-103 blocked
   ative_gate.json + R2025b runtime/parity receipts, runner -Fit fail-closed stub.
 - Rebased: merged origin/main (includes MS-102 #10677); kept fail-closed topology + blocked native_gate — no invented G1 pass.
-- Validation: focused RED→GREEN on mujoco G1 / OpenSim ladder / ledger freshness + est_simscape_topology_ms61.py.
+- CI fix (SELF): regenerated `docs/development/matched_swing_program/README.md` via `python scripts/generate_matched_swing_status.py --write` after ledger grew to 103 receipts (Simscape 40); branch already at origin/main merge-base (not DIRTY).
+- Validation: `pytest tests/docs/test_matched_swing_status_freshness.py::test_matched_swing_status_section_is_fresh` GREEN; prior focused topology suite still authoritative for MS-61 behavior.
 - Limitations: full-marker terminal still ~40.3 mm from run-102 source; neck/full-body model work owned by MS-104 (#10378); no invented native G1 pass.
 - Next action: confirm CI green + squash auto-merge of PR #10676.
 
