@@ -31,30 +31,25 @@
 - **Session:** `b27ccab3-1128-492c-a0fb-001367ea3aa8` · **agent:** `local`
 - **Durable copy:** agent store
   `…/b27ccab3-1128-492c-a0fb-001367ea3aa8/files/MOTION_MATCHING_HANDOFF.md`
-- **Landed:** CO-00..CO-10 baseline · NM-00..NM-06
+- **Landed:** CO-00..CO-10 · NM-00..NM-06
   - CO: #10667, #10670, #10675, #10678, #10680, #10681, #10687, #10700, #10703,
-    #10711, **#10718** (CO-10 baseline `2f6e119ef`)
+    #10711, **#10718** / **#10720** (CO-10 `abd35e66b`)
   - NM: #10668, #10672, #10679, #10686, #10698, #10701, **#10709** (merged
-    `08bcec302`, tip `05f712281`)
-- **In flight:** CO-10 survivor follow-up
-  [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720)
-  (`feat/10614-co10-reproduction-turnover`) rematching runnable saved-job
-  commands + architecture helper split onto trunk. Duplicate
-  [#10719](https://github.com/D-sorganization/UpstreamDrift/pull/10719)
-  CLOSED — do not reopen.
+    `08bcec302`)
+- **In flight:** CO-09 review-gap harden
+  [#10717](https://github.com/D-sorganization/UpstreamDrift/pull/10717)
+  (`fix/10613-co09-review-gaps`) rematched onto post-CO-10 main.
 - **Do NOT steal** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622)
   (`claim:antigravity`). Check claim before any start.
 - **Remaining:** NM-08..NM-12 (#10623–#10627). Epics
   [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) /
   [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) stay
   open until physical gaps (desk-native receipts) close.
-- **Ordered next:** (1) reopen + rematch #10720 onto latest main; arm squash
-  auto-merge + `agent:local` (2) do not reopen #10719; do not touch NM-06
-  #10709/#10717 (3) after #10720 lands, check NM-07 #10622 claim before starting
-  (4) renew leases via Repository_Management `post_agent_lease`
+- **Ordered next:** (1) land #10717 squash auto-merge (2) do not touch NM-07
+  #10622 (3) renew leases via Repository_Management `post_agent_lease`
 - **Worktrees:**
-  - CO-10 survivor rematch: `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10614-co10-push`
-    (and historically `…\UpstreamDrift-10614-co10-final`)
+  - CO-09 review-gap: `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10613-co09-local`
+  - CO-10 (merged): `…\UpstreamDrift-10614-co10-push` — leave idle
   - Duplicate CO-10 (closed #10719): `…\UpstreamDrift-10614-co10` — leave idle
   - NM-06 (merged): `…\UpstreamDrift-10621-nm06` — do not touch
   - Session root MS-60: `…\UpstreamDrift-10347-ms60` (clean; unrelated)
@@ -62,19 +57,17 @@
 - **Validation:**
   ```powershell
   $env:QT_QPA_PLATFORM='offscreen'; $env:MPLBACKEND='Agg'
-  python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=90
-  python -m scripts.ci.check_architecture_budget
+  python -m pytest tests/unit/motion_matching/test_club_ui_integration.py tests/unit/tools/test_tour_matching_viewer_core.py::test_club_only_compare_view_separates_observed_and_inferred tests/unit/workspace/test_results_browser.py -q -n 0 --no-cov --timeout=120
   ```
 - **Risks:** prior session shell flaky; push ref-lock races; SPEC §12 keep-both
   rows on rebase; never edit `vendor/ud-tools`.
 
-## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614)
+## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614) [MERGED]
 
 - Baseline merged via PR [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718)
   (squash `2f6e119ef`). Survivor follow-up PR
-  [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) on
-  `feat/10614-co10-reproduction-turnover` rematches runnable saved-job commands
-  - architecture helper split onto trunk. Duplicate #10719 stays closed.
+  [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) merged
+  (`abd35e66b`). Duplicate #10719 stays closed.
 - Delivered: `club_only/reproduction.py` freezes exact saved-job commands,
   trial/model roster, raw-source provenance, assumptions, candidate selection,
   clean-environment portable replay (MS-105 jobs), and evidence-linked matrix
@@ -85,11 +78,9 @@
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60` (13 passed); architecture budget GREEN after helper split. Saved-job `fast_preview_match` uses `build_club_only_result_view`; clean export passes `asset_paths={}`.
 - Limitations: software-contract turnover only; `native_g1_pass` false;
   `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
-- Next: Confirm CI green on rematched PR #10720 and squash-merge; on DeskComputer schedule
+- Next: N/A — merged; finish CO-09 review-gap #10717; on DeskComputer schedule
   native Fit/G1 for the first unresolved full_body_drake×TW_wiffle matrix cell
   and attach a receipt under docs/plans/club_only_matching/evidence/.
-- CI repair (SELF): rematch onto origin/main after #10718 baseline; keep survivor
-  runnable-command + architecture-budget helper split; do not reopen #10719.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
@@ -102,10 +93,20 @@
   blockers. Motion Matching GUI adds a Club-Only tab; ResultsBrowser indexes
   `club_only_ui_result` JSON. Schema `club-only-ui-integration/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_ui_integration.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/test_club_ui_integration.py tests/unit/tools/test_tour_matching_viewer_core.py::test_club_only_compare_view_separates_observed_and_inferred tests/unit/workspace/test_results_browser.py -q -n 0 --no-cov --timeout=120` GREEN after review-gap harden (workbook loader, receipt-hashed ledger, default JSON index, viewer compare). GUI tab test expects 4 tabs including Club-Only.
 - Limitations: software-contract UI only; `native_g1_pass` false; blockers
   `native_g1_qualification_requires_desk_native_receipt`,
-  `software_contract_ui_integration_is_not_native_evidence`.
-- Next: N/A — merged; continue CO-10 on main.
+  `software_contract_ui_integration_is_not_native_evidence`. Predicted club
+  frame series remains unavailable until a continuous trajectory package is
+  emitted (reason via `tour_matching_viewer.core.club_only_compare_from_ui_result`).
+- Next: Confirm CI green on review-gap PR [#10717](https://github.com/D-sorganization/UpstreamDrift/pull/10717) and squash-merge; CO-10 already on main via #10718/#10720.
+- 2026-09-22 — Review-gap autofix: full native workbook clock on load; cooperative
+  cancel saves checkpoint for resume with frozen session preset; ledger rows
+  append to `reports/matched_swing_ledger.json` with repo-relative receipt paths.
+- 2026-09-22 — Bugfix: clear club-only checkpoint after successful finish; ledger
+  dedup replaces rows for the same receipt path when bytes change.
+- Rematch (SELF): merge origin/main after CO-10 #10720; keep review-gap harden unique vs turnover.
+- 2026-09-22 — LOD fix: `ClubOnlyUiSession.preset_name()` delegates preset wire name so GUI cancel/resume avoids `session.preset.value` chains.
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 
