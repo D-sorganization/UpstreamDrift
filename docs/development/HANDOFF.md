@@ -285,8 +285,6 @@ exploratory simulator.
 Next: U1 (#9286) and U2 (#9542) first, per the matrix's dependency order; each
 landing PR records its merge SHA and proving test in its entry.
 
-> > > > > > > origin/main
-
 ---
 
 Updated 2026-09-18. Governing epic #10363; documentation review branch
