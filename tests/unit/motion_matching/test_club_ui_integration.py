@@ -104,6 +104,16 @@ def test_session_explains_inferred_body_and_exposes_budget_priors() -> None:
     assert session.neural_proposal_slot == "empty_provider"
 
 
+def test_session_preset_name_delegates_without_deep_chain() -> None:
+    session = create_club_only_session(
+        trial_id="TW_wiffle",
+        model_id="double_pendulum",
+        preset=MatchPreset.FAST_PREVIEW,
+    )
+    assert session.preset_name() == MatchPreset.FAST_PREVIEW.value
+    assert session.as_dict()["preset"] == session.preset_name()
+
+
 def test_clone_preserves_user_edits() -> None:
     session = create_club_only_session(
         trial_id="GW_wiffle",
@@ -219,7 +229,11 @@ def test_keyboard_action_map_covers_required_operations() -> None:
     assert actions["cancel"] == "Escape"
 
 
-def test_ledger_row_uses_club_only_lane_and_named_blockers() -> None:
+def test_ledger_row_uses_club_only_lane_and_named_blockers(tmp_path: Path) -> None:
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        write_club_only_result_package,
+    )
+
     observation = build_calibrated_observation_fixture("TW_wiffle")
     result = run_club_only_ui_match(
         create_club_only_session(
@@ -230,10 +244,9 @@ def test_ledger_row_uses_club_only_lane_and_named_blockers() -> None:
         observation=observation,
     )
     view = build_club_only_result_view(result)
-    row = publish_club_only_ledger_row(
-        view,
-        receipt_path="docs/plans/club_only_matching/evidence/club_ui_integration.json",
-    )
+    receipt = tmp_path / "ledger_receipt.json"
+    write_club_only_result_package(view, receipt)
+    row = publish_club_only_ledger_row(view, receipt_path=receipt)
     assert isinstance(row, LedgerRow)
     assert row.lane == "club_only"
     assert row.engine
@@ -298,3 +311,62 @@ def test_evidence_payload_is_versioned_and_honest() -> None:
     on_disk = json.loads(EVIDENCE.read_text(encoding="utf-8"))
     assert on_disk["schema_version"] == UI_SCHEMA
     assert on_disk["native_g1_pass"] is False
+
+
+def test_ledger_row_hashes_receipt_file_bytes(tmp_path: Path) -> None:
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        write_club_only_result_package,
+    )
+
+    observation = build_calibrated_observation_fixture("TW_wiffle")
+    result = run_club_only_ui_match(
+        create_club_only_session(
+            trial_id=observation.trial_id,
+            model_id="double_pendulum",
+            preset=MatchPreset.FAST_PREVIEW,
+        ),
+        observation=observation,
+    )
+    view = build_club_only_result_view(result)
+    receipt = tmp_path / "club_only_receipt.json"
+    digest = write_club_only_result_package(view, receipt)
+    assert receipt.is_file()
+    assert digest == __import__("hashlib").sha256(receipt.read_bytes()).hexdigest()
+    row = publish_club_only_ledger_row(view, receipt_path=receipt)
+    assert row.sha256 == digest
+
+
+def test_results_browser_default_index_includes_club_only_json(tmp_path: Path) -> None:
+    package = {
+        "schema_version": UI_SCHEMA,
+        "kind": "club_only_ui_result",
+        "backend": "driven_double_pendulum",
+        "meta_session_id": "sess-default",
+        "meta_dataset_id": "club-only-excel",
+        "native_g1_pass": False,
+        "display_status": VerificationDisplayStatus.PREVIEW.value,
+    }
+    (tmp_path / "club_only_result.json").write_text(
+        json.dumps(package), encoding="utf-8"
+    )
+    indexed = ResultsBrowser(tmp_path).index()
+    assert any(item.kind == "club_only_ui_result" for item in indexed)
+
+
+def test_workbook_observation_loader_uses_selected_trial() -> None:
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        load_club_only_workbook_observation,
+    )
+    from src.shared.python.motion_matching.club_only.workbook_identity import (
+        CLUB_DATA_RELATIVE,
+    )
+
+    workbook = REPO_ROOT / CLUB_DATA_RELATIVE
+    if not workbook.is_file():
+        pytest.skip("Club_Data.xlsx not present")
+    obs_a = load_club_only_workbook_observation(REPO_ROOT, "TW_wiffle")
+    obs_b = load_club_only_workbook_observation(REPO_ROOT, "GW_wiffle")
+    assert obs_a.trial_id == "TW_wiffle"
+    assert obs_b.trial_id == "GW_wiffle"
+    assert len(obs_a.native_time_s) > 32
+    assert not np.allclose(obs_a.face_xyz[0], obs_b.face_xyz[0])

@@ -25,6 +25,7 @@ __all__ = [
     "Dataset",
     "DatasetRegistry",
     "register_dynamics_baseline_corpus",
+    "register_masked_proposal_corpus",
     "register_neural_episode_corpus",
     "register_teacher_episode_corpus",
 ]
@@ -193,6 +194,45 @@ def register_dynamics_baseline_corpus(
         f"NM-05 dynamics baseline corpus ({BASELINE_SCHEMA} via "
         f"{EPISODE_STORE_SCHEMA}); load via EpisodeStore / family splits / "
         "DynamicsBaselineTrainer, not row-level shuffles."
+    )
+    return _register_hdf5_episode_dataset(
+        registry,
+        dataset_id=dataset_id,
+        name=name,
+        root=root,
+        description=notes,
+    )
+
+
+def register_masked_proposal_corpus(
+    registry: DatasetRegistry,
+    *,
+    dataset_id: str,
+    name: str,
+    root: Path,
+    description: str = "",
+) -> Dataset:
+    """Register an EpisodeStore root for NM-06 masked-proposal pilots.
+
+    Design by Contract:
+    - ``root`` must be a :class:`Path` for an :class:`EpisodeStore`.
+    - Format is always ``hdf5``; description cites
+      ``neural-masked-proposals/1.0.0``.
+    - Arrays are never materialised into RAM at registration time.
+
+    Companion to :func:`register_dynamics_baseline_corpus` (#10620) and
+    :func:`~src.shared.python.training.scheduler.neural_masked_proposal_budget`
+    (#10621). Does not invent a parallel store or native success claim.
+    """
+
+    _require_episode_corpus_args(registry, root)
+    from src.shared.python.neural_motion.episodes import EPISODE_STORE_SCHEMA
+
+    _probe_episode_store_layout(root)
+    notes = description.strip() or (
+        "NM-06 masked proposal corpus (neural-masked-proposals/1.0.0 via "
+        f"{EPISODE_STORE_SCHEMA}); load via EpisodeStore / family splits / "
+        "masked inverse proposals, not row-level shuffles."
     )
     return _register_hdf5_episode_dataset(
         registry,

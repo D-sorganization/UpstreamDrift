@@ -6819,6 +6819,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10732 | Add fail-closed constrained upper-body replay contracts: exact source-clock terminal frames, separate actuator and constraint-reaction traces, declared marker attachments and capture embedding, and same-clock physical marker metrics; no fitting or qualification claim. |
+| 2026-09-22 | #10730 | Reconcile TB-04 Driver and Iron tour-baseline evidence: committed qualification receipts are disqualified, so the coverage matrix and unified motion-matching ledger preserve and reject them; regressions prevent unsupported promotion. |
+| 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |
+| 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
+| 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
+| 2026-09-22 | #10718 | Publish club-only reproduction guide and final turnover (CO-10): saved-job commands, provenance, assumptions, matrix reconciliation; software-contract only; epic #10602 stays open. |
+| 2026-09-22 | #10709 | NM-06 masked trajectory-to-control proposals with selected/mixture heads, observation-rollout training loss, collapse diagnostics, coefficient time-domain conversion, fail-closed native refinement, proposal_shared DRY helpers, regenerated divergence inventory for NM-06 paths, architecture-budget TrainingConfig splits, and optional-torch inverse imports; software-contract tests only. |
 | 2026-09-22 | #10711 | Integrate club-only matching into existing UI/results (CO-09): FitSwingProvider/pipeline/ledger/ResultsBrowser/GUI without parallel frameworks; software-contract only. |
 | 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
 | 2026-09-22 | #10715 | Consolidated the four drifted `GolfSwingVisualizer.m` copies across the 2D/3D Simscape model trees into one fleet-shared `+golfviz` package class wired on both launchers' MATLAB paths (issue #9225). |
@@ -6853,6 +6860,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-21 | #10665 | Add JSON-backed 44-to-27 Simscape coordinate slice with kinematic projection, boundary-wrench derivation, virtual-work check, CLI, evidence receipts, and geometry-document workspace overrides for MS-62 (#10349); kinematic projection only, dynamic replay unqualified. |
 | 2026-09-21 | #10659 | Add OpenSim/MyoSuite native nightly lane runner, hashed receipts under `evidence/nightly/`, and freshness gate (warn 7 d, fail 30 d) for MS-43 (#10342); no workflow edits. |
 | 2026-09-21 | #10658 | Replace `xml.etree.ElementTree` with `defusedxml.ElementTree` in Model Generation API to mitigate XXE vulnerabilities. |
+| 2026-09-21 | #10650 | Add `LiveKinematicsService.joint_limits()` to the kinematics-service protocol (every engine service implements it, returning `{}` pending real anatomical data) and wire `JointPanel.set_limits()`/`set_error()` so Pose Studio re-ranges joints on engine switch and gives visible feedback on a rejected edit (#8887). |
 | 2026-09-21 | #10648 | Vectorize `BallFlightSimulator._post_process_rust` to build the trajectory's `(3, N)` batch once and call force calculation a single time instead of once per point (#8930); no numerical change. |
 | 2026-09-17 | #9548 | Consume the pinned Tools impact-interval energy audit (Tools #5079) through a fail-closed UD gate that re-derives the signed residual, separates free/supported momentum diagnostics, surfaces limitations in a report record and blocks qualified post-impact output on a failed numerical audit. |
 | 2026-09-20 | #10630 | Define versioned baseline packages, 3D Euclidean fit metrics, and qualification profiles for tour baselines (TB-02 #10587). |
