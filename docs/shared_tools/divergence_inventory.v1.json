@@ -33367,6 +33367,18 @@
       "spelling_only": false
     },
     {
+      "path": "theme/tool_stylesheet.py",
+      "classification": "ud-only",
+      "package": "theme",
+      "subpackage": "",
+      "ud_bytes": 4635,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "theme/matplotlib_style.py",
       "classification": "tools-only",
       "package": "theme",
