@@ -8,14 +8,16 @@
 - **Session:** `b27ccab3-1128-492c-a0fb-001367ea3aa8` · **agent:** `local`
 - **Durable copy:** agent store
   `…/b27ccab3-1128-492c-a0fb-001367ea3aa8/files/MOTION_MATCHING_HANDOFF.md`
-- **Landed:** CO-00..CO-09 · NM-00..NM-06
-  - CO: #10667, #10670, #10675, #10678, #10680, #10681, #10687, #10700, #10703, #10711
+- **Landed:** CO-00..CO-10 baseline · NM-00..NM-06
+  - CO: #10667, #10670, #10675, #10678, #10680, #10681, #10687, #10700, #10703,
+    #10711, **#10718** (CO-10 baseline `2f6e119ef`)
   - NM: #10668, #10672, #10679, #10686, #10698, #10701, **#10709** (merged
     `08bcec302`, tip `05f712281`)
-- **In flight:** CO-10 survivor
+- **In flight:** CO-10 survivor follow-up
   [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720)
-  (`feat/10614-co10-reproduction-turnover`, head `248ce4f27`, squash auto-merge
-  armed). Duplicate [#10719](https://github.com/D-sorganization/UpstreamDrift/pull/10719)
+  (`feat/10614-co10-reproduction-turnover`) rematching runnable saved-job
+  commands + architecture helper split onto trunk. Duplicate
+  [#10719](https://github.com/D-sorganization/UpstreamDrift/pull/10719)
   CLOSED — do not reopen.
 - **Do NOT steal** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622)
   (`claim:antigravity`). Check claim before any start.
@@ -23,14 +25,15 @@
   [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) /
   [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) stay
   open until physical gaps (desk-native receipts) close.
-- **Ordered next:** (1) land #10720 green + squash auto-merge (2) if DIRTY,
-  `git fetch origin main && git merge origin/main` then push — keep-both SPEC
-  changelog rows (3) after NM-06 (done), check NM-07 claim before starting
+- **Ordered next:** (1) reopen + rematch #10720 onto latest main; arm squash
+  auto-merge + `agent:local` (2) do not reopen #10719; do not touch NM-06
+  #10709/#10717 (3) after #10720 lands, check NM-07 #10622 claim before starting
   (4) renew leases via Repository_Management `post_agent_lease`
 - **Worktrees:**
-  - CO-10 survivor: `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10614-co10-final`
+  - CO-10 survivor rematch: `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10614-co10-push`
+    (and historically `…\UpstreamDrift-10614-co10-final`)
   - Duplicate CO-10 (closed #10719): `…\UpstreamDrift-10614-co10` — leave idle
-  - NM-06 (merged): `…\UpstreamDrift-10621-nm06`
+  - NM-06 (merged): `…\UpstreamDrift-10621-nm06` — do not touch
   - Session root MS-60: `…\UpstreamDrift-10347-ms60` (clean; unrelated)
   - CO-08 worktree removed after merge (#10703)
 - **Validation:**
@@ -44,10 +47,11 @@
 
 ## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614)
 
-- Worktree: `Worktrees/UpstreamDrift-10614-co10-final`, branch
-  `feat/10614-co10-reproduction-turnover`, DL-#10614, PR
-  [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720)
-  (head `248ce4f27`; squash auto-merge armed; mergeable, CI blocking).
+- Baseline merged via PR [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718)
+  (squash `2f6e119ef`). Survivor follow-up PR
+  [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) on
+  `feat/10614-co10-reproduction-turnover` rematches runnable saved-job commands
+  - architecture helper split onto trunk. Duplicate #10719 stays closed.
 - Delivered: `club_only/reproduction.py` freezes exact saved-job commands,
   trial/model roster, raw-source provenance, assumptions, candidate selection,
   clean-environment portable replay (MS-105 jobs), and evidence-linked matrix
@@ -58,11 +62,11 @@
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_reproduction_turnover.py -q -n 0 --no-cov --timeout=60` (13 passed); architecture budget GREEN after helper split. Saved-job `fast_preview_match` uses `build_club_only_result_view`; clean export passes `asset_paths={}`.
 - Limitations: software-contract turnover only; `native_g1_pass` false;
   `epic_closure_allowed` false; epic #10602 stays open; no G3/neural inheritance.
-- Next: Confirm CI green on PR #10720 and squash-merge; on DeskComputer schedule
+- Next: Confirm CI green on rematched PR #10720 and squash-merge; on DeskComputer schedule
   native Fit/G1 for the first unresolved full_body_drake×TW_wiffle matrix cell
   and attach a receipt under docs/plans/club_only_matching/evidence/.
-- CI repair (SELF): merged origin/main after NM-06 (SPEC keeps #10720 + #10709);
-  split oversized reproduction helpers for architecture budget.
+- CI repair (SELF): rematch onto origin/main after #10718 baseline; keep survivor
+  runnable-command + architecture-budget helper split; do not reopen #10719.
 
 ## CO-09 Integrate Club-Only Matching Into Existing UI and Results (#10613) [MERGED]
 
@@ -544,12 +548,12 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00..CO-09 shipped (#10667–#10711); active child [CO-10 #10614](https://github.com/D-sorganization/UpstreamDrift/issues/10614) via PR [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720).
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00..CO-10 baseline shipped (#10667–#10718); survivor follow-up PR [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) rematching unique runnable-command fixes.
 - **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); NM-00..NM-06 shipped (#10668–#10709); next candidate NM-07 #10622 only after claim check (`claim:antigravity` — do not steal). Remaining NM-08..NM-12 (#10623–#10627).
 - **Read:** [Shared Review](../plans/club_neural_review/REVIEW.md); [Club-Only Turnover](../plans/club_only_matching/TURNOVER.md); [Neural Turnover](../plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](../plans/neural_motion_matching/artifact_audit.md); [NM-01 Learning Freeze](../plans/neural_motion_matching/learning_freeze.md); [NM-02 Dataset Labels](../plans/neural_motion_matching/dataset_labels.md); [NM-03 Episode Storage](../plans/neural_motion_matching/episode_storage.md); [NM-04 Teacher Episodes](../plans/neural_motion_matching/teacher_episodes.md); [NM-05 Dynamics Baselines](../plans/neural_motion_matching/dynamics_baselines.md); [NM-06 Masked Proposals](../plans/neural_motion_matching/masked_proposals.md).
-- **CO-10 state:** in_review via PR [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) (head `248ce4f27`); DL-#10614. Duplicate #10719 closed.
-- **NM-06 state:** MERGED via PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) (`08bcec302`); DL-#10621.
-- **Next:** Land #10720; then check NM-07 claim before any neural work.
+- **CO-10 state:** baseline MERGED via [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718) (`2f6e119ef`); survivor [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) rematch in flight. Duplicate #10719 stays closed.
+- **NM-06 state:** MERGED via PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) (`08bcec302`); DL-#10621 — do not touch.
+- **Next:** Land rematched #10720; then check NM-07 claim before any neural work.
 
 ## BunkerShot3D Product Acceptance Matrix (Epic #9541)
 
@@ -1524,7 +1528,8 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 
 ## Change Log
 
-- 2026-09-22T16:00:00Z — Succession handoff: NM-06 #10709 merged; CO-10 survivor #10720 (`248ce4f27`) in flight; #10719 duplicate closed; do not steal NM-07 #10622. Commit SELF.
+- 2026-09-22T16:30:00Z — Rematch CO-10 survivor #10720 onto trunk after #10718 baseline; keep runnable saved-job + architecture split; do not reopen #10719; do not touch NM-06. Commit SELF.
+- 2026-09-22T16:15:00Z — Succession handoff PR #10721: CO-10 #10718 and NM-06 #10709 merged; do not steal NM-07 #10622. Commit SELF.
 - 2026-09-22T15:00:00Z — NM-06 #10709: rematch onto origin/main after CO-09/#10650 landed; keep proposal_shared DRY helpers. Commit SELF.
 - 2026-09-22T14:35:07Z — CI remediation for #10650: joint_panel unit tests now
   construct a module-scoped offscreen QApplication (autouse qapp fixture,
