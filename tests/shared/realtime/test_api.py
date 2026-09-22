@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.realtime import api as api_mod
 from src.shared.python.realtime.api import (
     CHANNEL_REGISTRY,
