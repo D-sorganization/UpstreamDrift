@@ -1,14 +1,41 @@
 from __future__ import annotations
 
+import sys
+
 import pytest
 import numpy as np
 
+if "PySide6" in sys.modules:
+    pytest.skip(
+        "PySide6 already loaded — PyQt6 DLLs unavailable", allow_module_level=True
+    )
+
+try:
+    from PyQt6.QtWidgets import QApplication  # noqa: F401
+
+    _HAVE_QT = True
+except Exception:  # noqa: BLE001
+    _HAVE_QT = False
+
+if not _HAVE_QT:  # pragma: no cover - environment-dependent
+    pytest.skip("PyQt6.QtWidgets unavailable", allow_module_level=True)
+
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
+
+from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 from src.tools.pose_studio.widgets.joint_panel import JointPanel
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
+
+
+@pytest.fixture(scope="module", autouse=True)
+def qapp() -> QApplication:
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication([])
+    return app
 
 
 def test_joint_panel_initialization() -> None:
