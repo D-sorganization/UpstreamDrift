@@ -1,0 +1,13 @@
+{
+  "schema_version": "matched-swing-lane/pinocchio-ms14/v1",
+  "engine": "pinocchio",
+  "status": "blocked",
+  "accepted": false,
+  "native_claims": false,
+  "gates": [],
+  "closure_residual_m": null,
+  "reason": "pinocchio/pink SDK unavailable on this Windows host; ControlTower micromamba env required for native constraintDynamics and Pink ConstrainedIkReceipt",
+  "host": "windows-local",
+  "repository_revision": "pending-commit",
+  "scope": "MS-14 Pinocchio MatchingPlant full lane; blocked until Pinocchio constraintDynamics + shared contact law run on a qualified host"
+}

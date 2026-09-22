@@ -1,0 +1,10 @@
+{
+  "schema_version": "matched-swing-parity/pinocchio-ms14/v1",
+  "status": "blocked",
+  "accepted": false,
+  "native_claims": false,
+  "reason": "pinocchio SDK unavailable; acceleration parity vs MuJoCo (1e-6) not executed",
+  "tolerance_m_s2": 1e-6,
+  "states_compared": 0,
+  "max_abs_acceleration_delta": null
+}

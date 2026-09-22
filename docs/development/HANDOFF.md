@@ -3,7 +3,7 @@
 ## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
 
 - Worktree: Worktrees/UpstreamDrift-10608-co04, branch
-  feat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680.
+  feat/issue-10608-co04-pendulum-club-match, DL-#10608, PR #10680 **merged**.
 - Delivered: hub-variant IDs + external-work accounting; separate in-plane vs
   original 3D errors; CO-03 seed mapping; cold vs retrieval best-feasible
   retention; first-frame-before-integrate scoring; eight-cell double/triple ×
@@ -30,8 +30,7 @@
   prior dependency/architecture/pytest gates still authoritative for CO-04.
 - Limitations: software-contract / synthetic fixtures only; TB-05 native triple
   qualification and desk native G1 remain open blockers.
-- Next: Confirm quality-gate green + squash auto-merge of PR #10680. Next
-  dispatch after land is CO-06 #10610.
+- Next: dispatch CO-06 #10610 after land.
 
 ## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609) [MERGED]
 
@@ -43,6 +42,23 @@
 - Limitations: synthetic fixtures for software contracts only; no native G1
   acceptance; missing-runtime cells remain unqualified; kinematic preview
   pending CO-06 replay.
+
+## MS-14 Pinocchio MatchingPlant Full Lane #10333 Handoff
+
+- Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10333-ms14`.
+- Branch: `feat/10333-pinocchio-matching-plant`; PR [#10684](https://github.com/D-sorganization/UpstreamDrift/pull/10684). Governing issue #10333
+  (MS-14, epic #10363). Session `cursor-10333-ms14`.
+- Entry DL-#10333. Delivered: PinocchioMatchingPlant derivatives +
+  `create_constrained_ik` (Pink), fitter `resolve_fit_native_plant` bridge,
+  ConstrainedIkReceipt `closure_residual_m` budget, unit contracts in
+  `test_pinocchio_plant.py`, honest blocked receipts under
+  `docs/development/full_body_models/evidence/ground_support/anthro_driver_{pinocchio,pink}/`.
+- Validation: `pytest tests/unit/motion_matching/pipeline/test_pinocchio_plant.py -q -n 0 --no-cov`
+  (contracts green; native tests skip without real Pinocchio); ruff + architecture budget clean.
+- Limitation: Windows host has no Pinocchio/Pink; receipts are `blocked` /
+  `accepted=false` / `native_claims=false`. Do not treat as G1 or green weld closure.
+- Next: Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower
+  `upstream-motion-runtime` for native pink receipts when scheduled (MS-107 owns G1).
 
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348 [MERGED]
 
