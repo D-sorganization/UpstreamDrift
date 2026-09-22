@@ -409,15 +409,10 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 ## Neural Masked Proposals NM-06 #10621 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10621-nm06`.
-- Branch: `feat/10621-nm06-masked-proposals`; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue
-  #10621 (NM-06, epic #10603). Entry DL-#10621.
-- Delivered: variable-dim masked proposals
-  (`motion_matching/inverse/{masked_proposal,proposal_training,collapse,basis_time}`),
-  anchors wired on `regressor.py` / `regressor_training.py` / `cvae.py`, hybrid
-  checkpoint/refine fail-closed seams; `masked_proposals.md` + receipt;
-  software-contract tests only.
-- Validation: `pytest tests/unit/motion_matching/test_masked_proposals_nm06.py -q -n 0 --no-cov --timeout=60` (9 passed).
-- Next action: confirm CI green on PR #10709; do not start NM-07+.
+- Branch: `feat/10621-nm06-masked-proposals`; PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709) open with squash auto-merge armed. Governing issue #10621 (NM-06, epic #10603). Entry DL-#10621.
+- Delivered: `src/shared/python/neural_motion/proposals/` (`neural-masked-proposals/1.0.0`) binding TaskDimensions.u_dim / MaskedTrajectoryTask, masked conditioning, selection + mixture ablation, observation/regularization training (not coeff MSE alone), hybrid fail-closed polish_fn refine, strict checkpoint mismatch rejection. Also retains inverse-path modules under motion_matching/inverse/ for stem/collapse/basis-time reuse.
+- Validation: `pytest tests/unit/neural_motion/test_masked_proposals_nm06.py tests/unit/motion_matching/test_masked_proposals_nm06.py -q -n 0 --no-cov --timeout=120` (19 passed). Software-contract fixtures only.
+- Next action: confirm quality-gate + unit-test-gate green on PR #10709; do not start NM-07+ until merge.
 
 ## Neural Dynamics Baselines NM-05 #10620 Handoff
 

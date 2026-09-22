@@ -6,20 +6,18 @@ Schema: `neural-masked-proposals/1.0.0`
 
 ## What Landed
 
-Generalized temporal inverse architecture under the saved model/basis contract:
+Primary package under `src/shared/python/neural_motion/proposals/` (NM-05-adjacent):
 
-- `motion_matching/inverse/masked_proposal.py` — masked observations,
-  native timestamps/duration, q0/v0/geometry conditioning; selected-teacher
-  and mixture heads with variable `control_dim` (not a fixed 189-vector)
-- `motion_matching/inverse/proposal_training.py` — observation residual after
-  differentiable software-contract rollout + control regularization; never
-  coefficient-MSE-alone as the selection criterion
-- `motion_matching/inverse/basis_time.py` — canonical A..G letter order gate and
-  time-domain torque conversion via `evaluate_polynomial_torque`
-- `motion_matching/inverse/collapse.py` — mode-collapse diagnostics; retained
-  cVAE plateau evidence (`CVAE_PLATEAU_EVIDENCE`)
-- Anchors wired: `regressor.py`, `regressor_training.py`, `cvae.py`,
-  `hybrid.py` (`refine_control_proposal`, fail-closed checkpoint contract)
+- `ProposalConfig` binds `MaskedTrajectoryTask` / `TaskDimensions.u_dim` (rejects hard-coded 189 as primary)
+- `MaskedProposalModel` emits `(B, u_dim)` or `(B, K, u_dim)` controls; optional `q0_hint` / `solver_start`
+- Masked conditioning via `ConditioningSpec.observation_mask`
+- Deterministic selection-objective path + mixture/multi-proposal ablation
+- `train_masked_proposals` with observation + regularization losses (control aux not sole)
+- `refine_proposal_hybrid` DI `polish_fn` fail-closed contract
+- Checkpoint schema `neural-masked-proposals/1.0.0` with strict model_id/u_dim/control_basis mismatch rejection
+
+Inverse-path reuse (stem / collapse / basis-time) remains under
+`motion_matching/inverse/` for temporal architecture continuity.
 
 ## Evidence
 
@@ -28,9 +26,8 @@ Generalized temporal inverse architecture under the saved model/basis contract:
 ## Limitations
 
 Software-contract fixtures only. No fabricated native training success,
-acceleration claim, or motion-matching certification. Independent-replay
-evidence is required for native refinement acceptance; missing replay fails
-closed. Mixture diversity must pass collapse diagnostics.
+acceleration claim, or motion-matching certification. Native refinement
+requires an independent-replay receipt; missing replay fails closed.
 
 ## Next Action
 
