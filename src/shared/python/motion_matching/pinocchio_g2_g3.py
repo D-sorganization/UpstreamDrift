@@ -276,6 +276,7 @@ def _target_end_s(club: ClubKind, horizon: Horizon) -> float:
 def _stage_ends_between(g1_end: float, target_end: float) -> tuple[float, ...]:
     """Build strictly increasing stage ends after G1 through the target horizon."""
     require(target_end > g1_end, "target must extend past G1", target_end)
+    candidates: tuple[float, ...]
     if target_end <= G2_END_S + 1e-9:
         candidates = (1.00, G2_END_S)
     else:
