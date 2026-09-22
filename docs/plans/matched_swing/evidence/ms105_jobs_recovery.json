@@ -1,0 +1,46 @@
+{
+  "schema": "motion-matching-jobs/1.0.0",
+  "governing_issue": 10379,
+  "folded_issues": [10438],
+  "parent_epic": 10363,
+  "kind": "software_contract_evidence",
+  "guarantee": false,
+  "reuses": {
+    "worker_progress_cancel": "src/tools/async_action.py (PR #9472 / #8880)",
+    "process_escalation": "src/shared/python/core/process_safety.managed_popen",
+    "cancel_token_contract": "src/shared/python/training/contracts.CancelToken",
+    "second_scheduler": false
+  },
+  "modules": [
+    "src/shared/python/motion_matching/jobs/contracts.py",
+    "src/shared/python/motion_matching/jobs/io_atomic.py",
+    "src/shared/python/motion_matching/jobs/checkpoint.py",
+    "src/shared/python/motion_matching/jobs/portable.py",
+    "src/shared/python/motion_matching/jobs/recovery.py",
+    "src/shared/python/motion_matching/jobs/process_guard.py",
+    "src/shared/python/motion_matching/jobs/benchmarks.py",
+    "src/shared/python/motion_matching/jobs/service.py"
+  ],
+  "tests": ["tests/unit/motion_matching/jobs/test_matching_jobs.py"],
+  "acceptance": {
+    "atomic_manifests": true,
+    "compatible_checkpoint_resume": true,
+    "incompatible_resume_rejected": true,
+    "partial_not_advertised_accepted": true,
+    "cancel_preserves_diagnostics": true,
+    "process_tree_termination": true,
+    "portable_relocate_reopen": true,
+    "pickle_rejected": true,
+    "input_capture_never_overwritten": true,
+    "path_escape_rejected": true,
+    "both_shell_progress_failure": true,
+    "pf08_service_targets_not_guarantees": true
+  },
+  "named_native_blockers": [
+    "native_long_run_host_recovery_requires_desk_receipt",
+    "software_contract_jobs_are_not_native_timing_evidence",
+    "no_universal_solve_time_guarantee",
+    "native_engine_unavailable"
+  ],
+  "service_targets_note": "PF-08 median budgets (IK 5s / reallocation 1s / candidate 10s / fit+replay 30s) are reference-hardware service budgets with guarantee=false."
+}
