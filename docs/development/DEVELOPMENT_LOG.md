@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10592 (TB-07, parent #10584, program #10363)
+- **Branch:** feat/10592-reconcile-motion-results
+- **PR:** not created
+- **Paths:** src/shared/python/tour_baselines/coverage.py; tests/unit/tour_baselines/test_coverage_matrix.py; docs/plans/tour_baselines/coverage_matrix.md; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at 84febb01b — red regression confirmed the stale `UNQUALIFIED` status failed the receipt verdict; `python3 -m pytest tests/unit/tour_baselines/test_coverage_matrix.py tests/unit/tour_baselines/test_reconciliation.py -q -n 0 --no-cov --timeout=60` passed (8 tests), as did Ruff, architecture/file-size budgets, and the LoD gate.
+- **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix must preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence must remain distinct from full-body G1/G2/G3 qualification.
+- **Next step:** Commit the reconciled evidence state and open a focused PR with `Fixes #10592`.
+- **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json.
+
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
 - **State:** in_review
