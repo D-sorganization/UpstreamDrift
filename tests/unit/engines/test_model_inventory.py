@@ -259,9 +259,39 @@ class TestQualificationHarness:
     def test_repair_package_does_not_claim_ready_native(
         self, inventory: EngineModelInventory
     ) -> None:
-        repairs = [p for p in inventory.packages if p.status == PackageStatus.REPAIR]
-        assert repairs, "expected at least one repair package (MyoSuite)"
-        receipt = qualify_package(repairs[0], repo_root=REPO_ROOT, allow_native=True)
+        # Synthetic repair package — inventory may have zero live repairs after MS-51.
+        from src.engines.model_inventory import RepairTask
+
+        package = inventory.get("mujoco/driver")
+        broken = ModelPackage(
+            id="synthetic/repair",
+            engine=package.engine,
+            club=package.club,
+            model_family=package.model_family,
+            model_class=package.model_class,
+            intended_use=package.intended_use,
+            status=PackageStatus.REPAIR,
+            source_spec=package.source_spec,
+            source_sha256=package.source_sha256,
+            generated_model=package.generated_model,
+            generated_sha256=package.generated_sha256,
+            generator=package.generator,
+            flagship=True,
+            supported_hosts=package.supported_hosts,
+            repair_task=RepairTask(issue=10344, title="synthetic repair gate"),
+            launcher_tile_ids=package.launcher_tile_ids,
+            license_terms=package.license_terms,
+            joints=package.joints,
+            units=package.units,
+            frames=package.frames,
+            marker_map=package.marker_map,
+            club_config=package.club_config,
+            grip_config=package.grip_config,
+            contact_config=package.contact_config,
+            actuation=package.actuation,
+            required_assets=package.required_assets,
+        )
+        receipt = qualify_package(broken, repo_root=REPO_ROOT, allow_native=True)
         assert receipt.overall != QualificationOutcome.PASS
 
     def test_harness_records_native_pass_when_loader_succeeds(
@@ -287,4 +317,11 @@ class TestInventorySummary:
         assert "packages" in summary
         assert "repair_tasks" in summary
         assert isinstance(summary["repair_tasks"], list)
-        assert any(t["issue"] == 10344 for t in summary["repair_tasks"])
+        # MS-51 cleared the MyoSuite repair blockers; remaining repairs (if any)
+        # must still name a positive issue.
+        for task in summary["repair_tasks"]:
+            assert int(task["issue"]) > 0
+        myo = [p for p in summary["packages"] if p["id"].startswith("myosuite/")]
+        assert myo
+        assert all(p["status"] == "ready" for p in myo if p.get("flagship"))
+        assert not any(t["issue"] == 10344 for t in summary["repair_tasks"])
