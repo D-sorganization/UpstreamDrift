@@ -1,5 +1,25 @@
 # Current Matching Continuation Handoff
 
+## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379)
+
+- Worktree: `Worktrees/UpstreamDrift-local-10379`, branch
+  `feat/10379-ms105-jobs-recovery`, DL-#10379, PR not created yet (SELF).
+- Delivered: `src/shared/python/motion_matching/jobs/` reuses `#8880` /
+  `async_action` cancel-progress contracts and `managed_popen` terminate→kill
+  escalation — **no second scheduler**. Atomic run manifests/checkpoints with
+  data/model/runtime/controller/solver hash gates; resumed numerical vs
+  interrupted provenance; fault classification (cancel, crash, disk-full,
+  engine absence, host unavailable); portable packages with relative assets,
+  checksums, pickle rejection, input-capture overwrite protection, path
+  escape rejection; both-shell progress/failure DTOs; PF-08 (#10438)
+  time-to-accepted-swing service budgets with `guarantee=false`.
+- Evidence: `docs/plans/matched_swing/evidence/ms105_jobs_recovery.json`.
+- Validation: `python -m pytest tests/unit/motion_matching/jobs/test_matching_jobs.py -q -n 0 --no-cov`
+  GREEN (28 passed); ruff clean on touched files.
+- Named blockers: native long-run DeskComputer recovery receipt; software
+  contract is not native timing evidence; no universal solve-time guarantee.
+- Next: Open PR `Fixes #10379`, enable squash auto-merge; do not start MS-106+.
+
 ## GUI Thread-Blocking Migration #8880 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/agent-worktrees/pr-10656-local`.
