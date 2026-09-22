@@ -15,6 +15,7 @@ Contains widgets and a dialog for advanced signal processing analysis:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -64,83 +65,135 @@ def _validate_dimension_index(dim_idx: int, *arrays: np.ndarray) -> bool:
     return True
 
 
-class SpectrogramTab(QtWidgets.QWidget):
-    """Tab for Spectrogram Analysis."""
+def _estimate_fs(times: Any) -> float:
+    """Sampling rate from the mean timestep, defaulting to 100 Hz."""
+    return float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
+
+
+class _SignalTransformTab(QtWidgets.QWidget):
+    """Shared scaffold for the per-signal transform tabs (spectrogram, CWT).
+
+    Owns the metric selector, the debounced dimension spinbox, the plot axes
+    and a bounded memo of transform results (#8932). Subclasses add controls
+    in ``_add_extra_controls`` and implement ``update_plot``.
+    """
 
     def __init__(
-        self, recorder: RecorderInterface, initial_key: str = "joint_positions"
+        self,
+        recorder: RecorderInterface,
+        initial_key: str,
+        metric_options: dict[str, str],
     ) -> None:
         if recorder is None:
             raise ValueError("recorder must be provided")
         super().__init__()
         self.recorder = recorder
         self.current_key = initial_key
-        # Spinbox ticks are debounced and transform results memoized (#8932).
+        self.metric_options = metric_options
         self._refresh = DebouncedRefresh(self.update_plot, parent=self)
         self._cache = BoundedResultCache()
 
         layout = QtWidgets.QVBoxLayout(self)
-
-        # Controls
         controls_layout = QtWidgets.QHBoxLayout()
         self.combo_metric = QtWidgets.QComboBox()
-        # Populate with standard metrics (can be extended)
-        self.metric_options = {
-            "Joint Positions": "joint_positions",
-            "Joint Velocities": "joint_velocities",
-            "Joint Torques": "joint_torques",
-            "Ground Forces": "ground_forces",
-            "Club Head Speed": "club_head_speed",
-            "Total Control Accel": "control_accel",
-        }
         self.combo_metric.addItems(list(self.metric_options.keys()))
-        # Set initial selection if possible
         for label, key in self.metric_options.items():
             if key == self.current_key:
                 self.combo_metric.setCurrentText(label)
                 break
-
         self.combo_metric.currentTextChanged.connect(self._on_metric_changed)
         controls_layout.addWidget(QtWidgets.QLabel("Metric:"))
         controls_layout.addWidget(self.combo_metric)
 
         self.spin_dim = QtWidgets.QSpinBox()
-        self.spin_dim.setPrefix("Dim: ")
         self.spin_dim.setRange(0, 100)
-        self.spin_dim.valueChanged.connect(self._refresh.trigger)
-        controls_layout.addWidget(self.spin_dim)
-
+        self._add_debounced_spinbox(controls_layout, self.spin_dim, "Dim: ")
+        self._add_extra_controls(controls_layout)
         layout.addLayout(controls_layout)
 
-        # Plot
         self.canvas = MplCanvas(width=5, height=4, dpi=100)
         self.ax = self.canvas.fig.add_subplot(111)
         layout.addWidget(self.canvas)
 
         self.update_plot()
 
+    def _add_extra_controls(self, controls_layout: QtWidgets.QHBoxLayout) -> None:
+        """Hook for subclass-specific controls; none by default."""
+
+    def _add_debounced_spinbox(
+        self,
+        controls_layout: QtWidgets.QHBoxLayout,
+        spin: QtWidgets.QSpinBox | QtWidgets.QDoubleSpinBox,
+        prefix: str,
+    ) -> None:
+        """Route an already-configured spinbox through the shared debounce."""
+        spin.setPrefix(prefix)
+        spin.valueChanged.connect(self._refresh.trigger)
+        controls_layout.addWidget(spin)
+
     def _on_metric_changed(self, label: str) -> None:
         self.current_key = self.metric_options[label]
         self.update_plot()
 
     def update_plot(self) -> None:
-        """Redraw the spectrogram for the selected metric and dimension."""
+        """Redraw the transform for the selected metric and dimension."""
+        raise NotImplementedError
+
+    def _begin_plot(self) -> tuple[Any, np.ndarray | None]:
+        """Clear the axes and load the selected metric.
+
+        Returns ``(times, data)`` with ``data`` shaped ``(N, D)``. When there is
+        no data, a "No Data" message is drawn and ``data`` is ``None``.
+        """
         self.ax.clear()
-
         times, raw_data = self.recorder.get_time_series(self.current_key)
-        data: np.ndarray | None
-        if isinstance(raw_data, list):
-            data = np.array(raw_data) if raw_data else None
-        else:
-            data = raw_data
+        if raw_data is None or len(raw_data) == 0 or len(times) == 0:
+            self._show_message("No Data")
+            return times, None
+        data = np.asarray(raw_data)
+        return times, data.reshape(-1, 1) if data.ndim == 1 else data
 
-        if data is None or len(times) == 0:
-            self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
-            self.canvas.draw_idle()
+    def _show_message(self, message: str) -> None:
+        self.ax.text(0.5, 0.5, message, ha="center", va="center")
+        self.canvas.draw_idle()
+
+    def _memoized(
+        self,
+        dim_idx: int,
+        fs: float,
+        signal: np.ndarray,
+        compute: Callable[[], Any],
+        **params: float,
+    ) -> Any:
+        """Return ``compute()`` memoized on the metric, dim, fs, params and data."""
+        key = analysis_cache_key(self.current_key, dim_idx, fs, signal, **params)
+        return self._cache.get_or_compute(key, compute)
+
+
+class SpectrogramTab(_SignalTransformTab):
+    """Tab for Spectrogram Analysis."""
+
+    def __init__(
+        self, recorder: RecorderInterface, initial_key: str = "joint_positions"
+    ) -> None:
+        super().__init__(
+            recorder,
+            initial_key,
+            {
+                "Joint Positions": "joint_positions",
+                "Joint Velocities": "joint_velocities",
+                "Joint Torques": "joint_torques",
+                "Ground Forces": "ground_forces",
+                "Club Head Speed": "club_head_speed",
+                "Total Control Accel": "control_accel",
+            },
+        )
+
+    def update_plot(self) -> None:
+        """Redraw the spectrogram for the selected metric and dimension."""
+        times, data = self._begin_plot()
+        if data is None:
             return
-
-        if data.ndim == 1:
-            data = data.reshape(-1, 1)
 
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, data):
@@ -152,125 +205,67 @@ class SpectrogramTab(QtWidgets.QWidget):
             dim_idx = 0  # Fallback to first dimension if invalid
 
         signal_data = data[:, dim_idx]
-
-        # Estimate fs
-        fs = float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
-
-        key = analysis_cache_key(self.current_key, dim_idx, fs, signal_data)
-        f, t, Sxx = self._cache.get_or_compute(
-            key, lambda: compute_spectrogram(signal_data, fs)
+        fs = _estimate_fs(times)
+        f, t, Sxx = self._memoized(
+            dim_idx, fs, signal_data, lambda: compute_spectrogram(signal_data, fs)
         )
 
-        # Plot
         self.ax.pcolormesh(
             t, f, DB_CONVERSION * np.log10(Sxx + LOG_EPSILON), shading="gouraud"
         )
         self.ax.set_ylabel("Frequency [Hz]")
         self.ax.set_xlabel("Time [sec]")
         self.ax.set_title(f"Spectrogram: {self.current_key} (Dim {dim_idx})")
-        # We can add colorbar if we want, but keeping it simple for now
-
         self.canvas.draw_idle()
 
 
-class WaveletTab(QtWidgets.QWidget):
+class WaveletTab(_SignalTransformTab):
     """Tab for Continuous Wavelet Transform (CWT) Analysis."""
 
     def __init__(
         self, recorder: RecorderInterface, initial_key: str = "joint_velocities"
     ) -> None:
-        if recorder is None:
-            raise ValueError("recorder must be provided")
-        super().__init__()
-        self.recorder = recorder
-        self.current_key = initial_key
-        # Spinbox ticks are debounced and transform results memoized (#8932).
-        self._refresh = DebouncedRefresh(self.update_plot, parent=self)
-        self._cache = BoundedResultCache()
+        super().__init__(
+            recorder,
+            initial_key,
+            {
+                "Joint Positions": "joint_positions",
+                "Joint Velocities": "joint_velocities",
+                "Joint Torques": "joint_torques",
+                "Club Head Speed": "club_head_speed",
+                "Total Control Accel": "control_accel",
+            },
+        )
 
-        layout = QtWidgets.QVBoxLayout(self)
-
-        # Controls
-        controls_layout = QtWidgets.QHBoxLayout()
-        self.combo_metric = QtWidgets.QComboBox()
-        self.metric_options = {
-            "Joint Positions": "joint_positions",
-            "Joint Velocities": "joint_velocities",
-            "Joint Torques": "joint_torques",
-            "Club Head Speed": "club_head_speed",
-            "Total Control Accel": "control_accel",
-        }
-        self.combo_metric.addItems(list(self.metric_options.keys()))
-        for label, key in self.metric_options.items():
-            if key == self.current_key:
-                self.combo_metric.setCurrentText(label)
-                break
-
-        self.combo_metric.currentTextChanged.connect(self._on_metric_changed)
-        controls_layout.addWidget(QtWidgets.QLabel("Metric:"))
-        controls_layout.addWidget(self.combo_metric)
-
-        self.spin_dim = QtWidgets.QSpinBox()
-        self.spin_dim.setPrefix("Dim: ")
-        self.spin_dim.setRange(0, 100)
-        self.spin_dim.valueChanged.connect(self._refresh.trigger)
-        controls_layout.addWidget(self.spin_dim)
-
+    def _add_extra_controls(self, controls_layout: QtWidgets.QHBoxLayout) -> None:
         self.spin_w0 = QtWidgets.QDoubleSpinBox()
-        self.spin_w0.setPrefix("w0: ")
         self.spin_w0.setRange(2.0, 20.0)
         self.spin_w0.setValue(6.0)
         self.spin_w0.setSingleStep(0.5)
-        self.spin_w0.valueChanged.connect(self._refresh.trigger)
-        controls_layout.addWidget(self.spin_w0)
-
-        layout.addLayout(controls_layout)
-
-        # Plot
-        self.canvas = MplCanvas(width=5, height=4, dpi=100)
-        self.ax = self.canvas.fig.add_subplot(111)
-        layout.addWidget(self.canvas)
-
-        self.update_plot()
-
-    def _on_metric_changed(self, label: str) -> None:
-        self.current_key = self.metric_options[label]
-        self.update_plot()
+        self._add_debounced_spinbox(controls_layout, self.spin_w0, "w0: ")
 
     def update_plot(self) -> None:
         """Redraw the continuous wavelet transform plot for the selected metric."""
-        self.ax.clear()
-
-        times, raw_data = self.recorder.get_time_series(self.current_key)
-        data: np.ndarray | None = np.asarray(raw_data) if raw_data is not None else None
-
-        if data is None or len(times) == 0:
-            self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
-            self.canvas.draw_idle()
+        times, data = self._begin_plot()
+        if data is None:
             return
-
-        if data.ndim == 1:
-            data = data.reshape(-1, 1)
 
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, data):
-            self.ax.text(0.5, 0.5, "Dimension out of bounds", ha="center", va="center")
-            self.canvas.draw_idle()
+            self._show_message("Dimension out of bounds")
             return
 
         signal_data = data[:, dim_idx]
-
-        # Estimate fs
-        fs = float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
-
+        fs = _estimate_fs(times)
         w0 = self.spin_w0.value()
-        key = analysis_cache_key(self.current_key, dim_idx, fs, signal_data, w0=w0)
-        freqs, t, cwt_mat = self._cache.get_or_compute(
-            key, lambda: compute_cwt(signal_data, fs, w0=w0, num_freqs=64)
+        freqs, t, cwt_mat = self._memoized(
+            dim_idx,
+            fs,
+            signal_data,
+            lambda: compute_cwt(signal_data, fs, w0=w0, num_freqs=64),
+            w0=w0,
         )
 
-        # Plot Magnitude
-        # Use abs(cwt_mat)
         mag = np.abs(cwt_mat)
         self.ax.pcolormesh(t, freqs, mag, shading="gouraud", cmap="plasma")
         self.ax.set_ylabel("Frequency [Hz]")
@@ -279,7 +274,6 @@ class WaveletTab(QtWidgets.QWidget):
         self.ax.set_title(
             f"Wavelet Transform (CWT): {self.current_key} (Dim {dim_idx})"
         )
-
         self.canvas.draw_idle()
 
 
