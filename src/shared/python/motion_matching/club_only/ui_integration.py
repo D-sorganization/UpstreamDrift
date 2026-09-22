@@ -633,7 +633,12 @@ def _append_row_to_matched_swing_ledger(repo_root: Path, row: LedgerRow) -> None
     if ledger_path.is_file():
         payload = json.loads(ledger_path.read_text(encoding="utf-8"))
         ledger = Ledger.model_validate(payload)
-        rows = [existing for existing in ledger.rows if existing.sha256 != row.sha256]
+        rows = [
+            existing
+            for existing in ledger.rows
+            if existing.sha256 != row.sha256
+            and existing.receipt_path != row.receipt_path
+        ]
     else:
         rows = []
     rows.append(row)

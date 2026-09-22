@@ -23,6 +23,8 @@
 - 2026-09-22 — Review-gap autofix: full native workbook clock on load; cooperative
   cancel saves checkpoint for resume with frozen session preset; ledger rows
   append to `reports/matched_swing_ledger.json` with repo-relative receipt paths.
+- 2026-09-22 — Bugfix: clear club-only checkpoint after successful finish; ledger
+  dedup replaces rows for the same receipt path when bytes change.
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 
