@@ -44,7 +44,10 @@ def test_joint_panel_set_show_radians() -> None:
     panel.set_show_radians(True)
     assert panel._show_radians is True
     assert panel._spinboxes[joint].suffix() == " rad"
-    assert panel._spinboxes[joint].value() == pytest.approx(float(np.radians(45.0)))
+    # Spinbox uses 4 decimal places in radian display mode.
+    assert panel._spinboxes[joint].value() == pytest.approx(
+        float(np.radians(45.0)), abs=1e-3
+    )
 
     panel.set_show_radians(False)
     assert panel._show_radians is False
