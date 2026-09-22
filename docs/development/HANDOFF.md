@@ -39,6 +39,21 @@
 - **Risks:** prior session shell flaky; push ref-lock races; SPEC §12 keep-both
   rows on rebase; never edit `vendor/ud-tools`.
 
+## Analysis Tab Debounce and Memoization (#8932) [IN REVIEW]
+
+- Repo/worktree: `C:\Users\diete\Repositories\_wt_ud_8932`, branch
+  `fix/8932-analysis-debounce` from `234b8dc14`; commit `SELF`; PR not yet created.
+- Delivered: `src/shared/python/dashboard/_analysis_refresh.py`
+  (`DebouncedRefresh` 150 ms single-shot QTimer, `BoundedResultCache` LRU of 8,
+  `analysis_cache_key` with DbC checks and a blake2b signal digest). Spectrogram
+  and Wavelet spinboxes are debounced and their transforms memoized;
+  SwingPlaneTab creates its axes once and swaps artists; `draw_idle()` on these
+  three tabs. DL entry `DL-#8932`.
+- Validation: `$env:QT_QPA_PLATFORM='offscreen'; $env:MPLBACKEND='Agg'; python -m pytest tests/unit/shared_python/test_analysis_tab_refresh.py tests/unit/shared_python/test_advanced_analysis_features.py tests/unit/shared_python/test_dashboard_advanced_analysis.py -q -o addopts=""` (27 passed); ruff check/format clean.
+- Remaining on #8932: repo-wide blocking `canvas.draw()` sweep and axes reuse in
+  `plot_engine/pyqt6_widget.py`; the PR uses `Refs #8932`.
+- Next: land the PR; then convert `plot_engine/pyqt6_widget.py` to axes reuse.
+
 ## CO-10 Publish Reproduction Guide and Final Club-Only Turnover (#10614) [MERGED]
 
 - Baseline merged via PR [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718)

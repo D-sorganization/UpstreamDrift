@@ -21,6 +21,11 @@ import numpy as np
 from PyQt6 import QtWidgets
 
 from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
+from src.shared.python.dashboard._analysis_refresh import (
+    BoundedResultCache,
+    DebouncedRefresh,
+    analysis_cache_key,
+)
 from src.shared.python.engine_core.interfaces import RecorderInterface
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plotting import MplCanvas
@@ -70,6 +75,9 @@ class SpectrogramTab(QtWidgets.QWidget):
         super().__init__()
         self.recorder = recorder
         self.current_key = initial_key
+        # Spinbox ticks are debounced and transform results memoized (#8932).
+        self._refresh = DebouncedRefresh(self.update_plot, parent=self)
+        self._cache = BoundedResultCache()
 
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -99,7 +107,7 @@ class SpectrogramTab(QtWidgets.QWidget):
         self.spin_dim = QtWidgets.QSpinBox()
         self.spin_dim.setPrefix("Dim: ")
         self.spin_dim.setRange(0, 100)
-        self.spin_dim.valueChanged.connect(self.update_plot)
+        self.spin_dim.valueChanged.connect(self._refresh.trigger)
         controls_layout.addWidget(self.spin_dim)
 
         layout.addLayout(controls_layout)
@@ -128,7 +136,7 @@ class SpectrogramTab(QtWidgets.QWidget):
 
         if data is None or len(times) == 0:
             self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         if data.ndim == 1:
@@ -148,7 +156,10 @@ class SpectrogramTab(QtWidgets.QWidget):
         # Estimate fs
         fs = float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
 
-        f, t, Sxx = compute_spectrogram(signal_data, fs)
+        key = analysis_cache_key(self.current_key, dim_idx, fs, signal_data)
+        f, t, Sxx = self._cache.get_or_compute(
+            key, lambda: compute_spectrogram(signal_data, fs)
+        )
 
         # Plot
         self.ax.pcolormesh(
@@ -159,7 +170,7 @@ class SpectrogramTab(QtWidgets.QWidget):
         self.ax.set_title(f"Spectrogram: {self.current_key} (Dim {dim_idx})")
         # We can add colorbar if we want, but keeping it simple for now
 
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
 
 class WaveletTab(QtWidgets.QWidget):
@@ -173,6 +184,9 @@ class WaveletTab(QtWidgets.QWidget):
         super().__init__()
         self.recorder = recorder
         self.current_key = initial_key
+        # Spinbox ticks are debounced and transform results memoized (#8932).
+        self._refresh = DebouncedRefresh(self.update_plot, parent=self)
+        self._cache = BoundedResultCache()
 
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -199,7 +213,7 @@ class WaveletTab(QtWidgets.QWidget):
         self.spin_dim = QtWidgets.QSpinBox()
         self.spin_dim.setPrefix("Dim: ")
         self.spin_dim.setRange(0, 100)
-        self.spin_dim.valueChanged.connect(self.update_plot)
+        self.spin_dim.valueChanged.connect(self._refresh.trigger)
         controls_layout.addWidget(self.spin_dim)
 
         self.spin_w0 = QtWidgets.QDoubleSpinBox()
@@ -207,7 +221,7 @@ class WaveletTab(QtWidgets.QWidget):
         self.spin_w0.setRange(2.0, 20.0)
         self.spin_w0.setValue(6.0)
         self.spin_w0.setSingleStep(0.5)
-        self.spin_w0.valueChanged.connect(self.update_plot)
+        self.spin_w0.valueChanged.connect(self._refresh.trigger)
         controls_layout.addWidget(self.spin_w0)
 
         layout.addLayout(controls_layout)
@@ -228,11 +242,11 @@ class WaveletTab(QtWidgets.QWidget):
         self.ax.clear()
 
         times, raw_data = self.recorder.get_time_series(self.current_key)
-        data: np.ndarray | None = np.array(raw_data) if raw_data is not None else None
+        data: np.ndarray | None = np.asarray(raw_data) if raw_data is not None else None
 
         if data is None or len(times) == 0:
             self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         if data.ndim == 1:
@@ -241,7 +255,7 @@ class WaveletTab(QtWidgets.QWidget):
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, data):
             self.ax.text(0.5, 0.5, "Dimension out of bounds", ha="center", va="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         signal_data = data[:, dim_idx]
@@ -250,7 +264,10 @@ class WaveletTab(QtWidgets.QWidget):
         fs = float(1.0 / np.mean(np.diff(times))) if len(times) > 1 else 100.0
 
         w0 = self.spin_w0.value()
-        freqs, t, cwt_mat = compute_cwt(signal_data, fs, w0=w0, num_freqs=64)
+        key = analysis_cache_key(self.current_key, dim_idx, fs, signal_data, w0=w0)
+        freqs, t, cwt_mat = self._cache.get_or_compute(
+            key, lambda: compute_cwt(signal_data, fs, w0=w0, num_freqs=64)
+        )
 
         # Plot Magnitude
         # Use abs(cwt_mat)
@@ -263,11 +280,15 @@ class WaveletTab(QtWidgets.QWidget):
             f"Wavelet Transform (CWT): {self.current_key} (Dim {dim_idx})"
         )
 
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
 
 class SwingPlaneTab(QtWidgets.QWidget):
-    """Tab for Swing Plane Analysis (3D)."""
+    """Tab for Swing Plane Analysis (3D).
+
+    The 3D and deviation axes are created once. A refresh only swaps the
+    data-bearing artists, so the expensive 3D axes is never rebuilt (#8932).
+    """
 
     def __init__(self, recorder: RecorderInterface) -> None:
         if recorder is None:
@@ -275,99 +296,121 @@ class SwingPlaneTab(QtWidgets.QWidget):
         super().__init__()
         self.recorder = recorder
         self.analyzer = SwingPlaneAnalyzer()
+        self._data_artists: list[Any] = []
 
         layout = QtWidgets.QVBoxLayout(self)
 
         self.canvas = MplCanvas(width=5, height=6, dpi=100)
-        # We need two subplots: 3D view and Deviation plot
-        # But MplCanvas init creates one figure.
-        # We can clear and add subplots dynamically.
+        self.ax3d = self.canvas.fig.add_subplot(211, projection="3d")
+        self.ax_dev = self.canvas.fig.add_subplot(212)
+        self._init_axes()
         layout.addWidget(self.canvas)
 
         self.update_plot()
 
-    def update_plot(self) -> None:
-        """Redraw the 3D swing plane and deviation plots."""
-        self.canvas.fig.clear()
-        ax3d = self.canvas.fig.add_subplot(211, projection="3d")
-        ax_dev = self.canvas.fig.add_subplot(212)
-
-        times, raw_pos = self.recorder.get_time_series("club_head_position")
-        pos: np.ndarray | None = np.array(raw_pos) if raw_pos is not None else None
-
-        if pos is None or len(times) == 0 or pos.ndim != 2 or pos.shape[1] != 3:
-            ax3d.text2D(0.5, 0.5, "No 3D Club Head Data", transform=ax3d.transAxes)  # type: ignore[attr-defined]
-            self.canvas.draw()
-            return
-
-        # Perform Analysis
-        try:
-            metrics = self.analyzer.analyze(pos)
-        except ValueError:
-            ax3d.text2D(0.5, 0.5, "Insufficient points", transform=ax3d.transAxes)  # type: ignore[attr-defined]
-            self.canvas.draw()
-            return
-
-        # 1. 3D Plot
-        ax3d.scatter(pos[:, 0], pos[:, 1], pos[:, 2], c=times, cmap="viridis")
+    def _init_axes(self) -> None:
+        """Create the static decorations and the reusable artists once."""
+        ax3d, ax_dev = self.ax3d, self.ax_dev
         ax3d.set_title("Club Head Trajectory & Fitted Plane")
         ax3d.set_xlabel("X")
         ax3d.set_ylabel("Y")
         ax3d.set_zlabel("Z")  # type: ignore[attr-defined]
+        self._status_text = ax3d.text2D(0.5, 0.5, "", transform=ax3d.transAxes)  # type: ignore[attr-defined]
 
-        # Draw Plane
-        # Generate grid around centroid
-        centroid = metrics.point_on_plane
-        normal = metrics.normal_vector
-        # Create a grid of points
-        d = -centroid.dot(normal)
-        # Plane eq: ax + by + cz + d = 0 => z = (-d - ax - by) / c
-        # Handle c close to 0
-        xlim = ax3d.get_xlim()
-        ylim = ax3d.get_ylim()
-        xx, yy = np.meshgrid(
-            np.linspace(xlim[0], xlim[1], 10), np.linspace(ylim[0], ylim[1], 10)
-        )
-
-        if abs(normal[2]) > 0.001:
-            zz = (-normal[0] * xx - normal[1] * yy - d) / normal[2]
-            ax3d.plot_surface(xx, yy, zz, alpha=0.2, color="blue")  # type: ignore[attr-defined]
-        else:
-            # Vertical plane, maybe just skip drawing surface or handle differently
-            pass
-
-        # 2. Deviation Plot
-        centroid, normal = self.analyzer.fit_plane(pos)
-        deviations = self.analyzer.calculate_deviation(pos, centroid, normal)
-        ax_dev.plot(times, deviations)
+        (self._dev_line,) = ax_dev.plot([], [])
         ax_dev.axhline(0, color="k", linestyle="--", alpha=0.5)
         ax_dev.set_xlabel("Time [s]")
         ax_dev.set_ylabel("Deviation from Plane [m]")
         ax_dev.set_title("Swing Plane Deviation")
         ax_dev.grid(True)
-
-        # Add text box with metrics
-        textstr = "\n".join(
-            (
-                f"Steepness: {metrics.steepness_deg:.1f}°",
-                f"Direction: {metrics.direction_deg:.1f}°",
-                f"RMSE: {metrics.rmse * 100:.1f} cm",
-                f"Max Dev: {metrics.max_deviation * 100:.1f} cm",
-            )
-        )
         props = {"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5}
-        ax_dev.text(
+        self._metrics_text = ax_dev.text(
             0.05,
             0.95,
-            textstr,
+            "",
             transform=ax_dev.transAxes,
             fontsize=10,
             verticalalignment="top",
             bbox=props,
         )
-
         self.canvas.fig.tight_layout()
-        self.canvas.draw()
+
+    def _clear_data_artists(self) -> None:
+        for artist in self._data_artists:
+            artist.remove()
+        self._data_artists.clear()
+
+    def _show_status(self, message: str) -> None:
+        """Replace the plotted data with a status message."""
+        self._clear_data_artists()
+        self._status_text.set_text(message)
+        self._dev_line.set_data([], [])
+        self._metrics_text.set_visible(False)
+        self.canvas.draw_idle()
+
+    def update_plot(self) -> None:
+        """Redraw the 3D swing plane and deviation plots."""
+        times, raw_pos = self.recorder.get_time_series("club_head_position")
+        pos: np.ndarray | None = np.asarray(raw_pos) if raw_pos is not None else None
+
+        if pos is None or len(times) == 0 or pos.ndim != 2 or pos.shape[1] != 3:
+            self._show_status("No 3D Club Head Data")
+            return
+
+        try:
+            metrics = self.analyzer.analyze(pos)
+        except ValueError:
+            self._show_status("Insufficient points")
+            return
+
+        self._clear_data_artists()
+        self._status_text.set_text("")
+        self._draw_trajectory(pos, times, metrics)
+        self._draw_deviation(pos, times, metrics)
+        self.canvas.draw_idle()
+
+    def _draw_trajectory(self, pos: np.ndarray, times: Any, metrics: Any) -> None:
+        """Scatter the club path and overlay the fitted plane on the 3D axes."""
+        ax3d: Any = self.ax3d
+        self._data_artists.append(
+            ax3d.scatter(pos[:, 0], pos[:, 1], pos[:, 2], c=times, cmap="viridis")
+        )
+
+        # Plane eq: ax + by + cz + d = 0 => z = (-d - ax - by) / c
+        centroid = metrics.point_on_plane
+        normal = metrics.normal_vector
+        d = -centroid.dot(normal)
+        xlim = ax3d.get_xlim()
+        ylim = ax3d.get_ylim()
+        xx, yy = np.meshgrid(
+            np.linspace(xlim[0], xlim[1], 10), np.linspace(ylim[0], ylim[1], 10)
+        )
+        # A (near-)vertical plane cannot be expressed as z(x, y); skip it.
+        if abs(normal[2]) > 0.001:
+            zz = (-normal[0] * xx - normal[1] * yy - d) / normal[2]
+            self._data_artists.append(
+                ax3d.plot_surface(xx, yy, zz, alpha=0.2, color="blue")
+            )
+
+    def _draw_deviation(self, pos: np.ndarray, times: Any, metrics: Any) -> None:
+        """Update the deviation trace and the metrics text box in place."""
+        centroid, normal = self.analyzer.fit_plane(pos)
+        deviations = self.analyzer.calculate_deviation(pos, centroid, normal)
+        self._dev_line.set_data(times, deviations)
+        self.ax_dev.relim()
+        self.ax_dev.autoscale_view()
+
+        self._metrics_text.set_text(
+            "\n".join(
+                (
+                    f"Steepness: {metrics.steepness_deg:.1f}°",
+                    f"Direction: {metrics.direction_deg:.1f}°",
+                    f"RMSE: {metrics.rmse * 100:.1f} cm",
+                    f"Max Dev: {metrics.max_deviation * 100:.1f} cm",
+                )
+            )
+        )
+        self._metrics_text.set_visible(True)
 
 
 class CorrelationTab(QtWidgets.QWidget):
