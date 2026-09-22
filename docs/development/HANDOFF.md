@@ -1,12 +1,32 @@
 # Current Matching Continuation Handoff
 
+## CO-05 Plausible Upper-Body and Full-Body Candidates (#10609)
+
+- Worktree: `Worktrees/UpstreamDrift-10609-co05`, branch
+  `feat/issue-10609-co05-plausible-body-candidates`, DL-#10609.
+- Session: `b27ccab3-1128-492c-a0fb-001367ea3aa8` (agent local); lease on #10609.
+- Path ownership (avoid CO-04 collision):
+  - Owned: `club_only/body_candidates.py`, `topology_mapping.py`,
+    `nullspace_proposals.py`, `__init__.py` exports, focused tests + evidence.
+  - Do not touch: pendulum fit / driven double-triple match paths owned by
+    CO-04 (#10608) on `UpstreamDrift-10608-co04`.
+- Delivered: explicit topology maps, local null-space proposals + closure
+  reprojection, roster×trial matrix with separated score lanes; schema
+  `club-body-candidates/1.0.0`; evidence
+  `docs/plans/club_only_matching/evidence/club_body_candidates.json`.
+- Validation: focused CO-05 suite 12 passed; register/inventory unit tests green after `--write`; DRY gate clean locally (shared `require_strictly_increasing_timestamps`); merged `origin/main` (not DIRTY).
+- Limitations: synthetic fixtures for software contracts only; no native G1
+  acceptance; missing-runtime cells remain unqualified; kinematic preview
+  pending CO-06 replay.
+- Next: Confirm CI green after NM-02 main rematch; squash auto-merge armed on PR #10681.
+
 ## MS-61 Simscape Topology + Full-Marker Terminal #10348
 
 - Workspace: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10348-ms61.
-- Branch: eat/issue-10348-ms61-simscape-topology; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363). Session 27ccab3-1128-492c-a0fb-001367ea3aa8.
+- Branch: feat/issue-10348-ms61-simscape-topology; PR [#10676](https://github.com/D-sorganization/UpstreamDrift/pull/10676) open with squash auto-merge armed. Governing issue #10348 (MS-61, epic #10363). Session b27ccab3-1128-492c-a0fb-001367ea3aa8.
 - Entry DL-#10348. Delivered: fail-closed topology classification (
-  educed_27_no_neck), dual terminal disclosure (ull_marker_terminal.py + it_metrics), acceptance hooks, run-103 blocked
-  ative_gate.json + R2025b runtime/parity receipts, runner -Fit fail-closed stub.
+  reduced_27_no_neck), dual terminal disclosure (full_marker_terminal.py + fit_metrics), acceptance hooks, run-103 blocked
+  native_gate.json + R2025b runtime/parity receipts, runner Fit fail-closed stub.
 - Rebased: merged origin/main (includes MS-102 #10677); kept fail-closed topology + blocked native_gate — no invented G1 pass.
 - CI fix (SELF): regenerated `docs/development/matched_swing_program/README.md` via `python scripts/generate_matched_swing_status.py --write` after ledger grew to 103 receipts (Simscape 40); branch already at origin/main merge-base (not DIRTY).
 - Validation: `pytest tests/docs/test_matched_swing_status_freshness.py::test_matched_swing_status_section_is_fresh` GREEN; prior focused topology suite still authoritative for MS-61 behavior.

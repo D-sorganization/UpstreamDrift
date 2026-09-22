@@ -6811,6 +6811,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-22 | #10686 | NM-03 versioned episode HDF5 store, family splits, compact-1.0 adapter, task views, train-only normalizer and window cache; software-contract tests only. |
+| 2026-09-22 | #10681 | Generate plausible upper-body and full-body club-only candidates (CO-05): explicit topology maps, local null-space proposals with closure reprojection, roster×trial matrix with separated observation-fit/plausibility/contact-effort/runtime lanes; synthetic fixtures only. |
 | 2026-09-22 | #10679 | NM-02 complete/semantically correct native dataset labels: channel evidence, native vs interval acceleration, requested/applied controls, DoF layout, restore StateError, first-wave mock+ODE receipts; no training claims. |
 | 2026-09-21 | #10348 | MS-61 Simscape topology classification and full-marker terminal disclosure (run-103 scaffolding; native G1 blocked without licensed Fit / MS-104). |
 | 2026-09-22 | #10607 | Build retrieval and constrained-IK starting guesses for club-only matching (CO-03): handedness-aware hand-frame offsets, single-rigid library retrieval, Pink/DLS capability records with fail-closed unsupported constraints, seed cache invalidated by geometry/profile hashes; kinematic preview only. |
