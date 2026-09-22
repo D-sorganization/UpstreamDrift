@@ -395,9 +395,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10628
 - **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-22 — CO-02 merged (#10675); CO-03 retrieval/IK starting guesses in progress on feat/10607-co03-retrieval-constrained-ik
+- **Last verified:** 2026-09-22 — CO-03 merged (#10678); CO-05 body candidates in progress on feat/issue-10609-co05-plausible-body-candidates; CO-04 sibling on separate worktree
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land PR for #10607 (CO-03), then dispatch #10608 (CO-04).
+- **Next step:** Land PR for #10609 (CO-05), keep CO-04 (#10608) on non-overlapping pendulum paths.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -444,17 +444,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10607 · CO-03 Build Retrieval and Constrained IK Starting Guesses
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10607 (epic #10602)
 - **Branch:** feat/10607-co03-retrieval-constrained-ik
-- **PR:** #10678
+- **PR:** #10678 (merged)
 - **Paths:** src/shared/python/motion_matching/club_only/hand_geometry.py; src/shared/python/motion_matching/club_only/retrieval.py; src/shared/python/motion_matching/club_only/constrained_ik.py; src/shared/python/motion_matching/club_only/seeds.py; tests/unit/motion_matching/test_club_starting_guesses.py; docs/plans/club_only_matching/evidence/club_starting_guesses.json; docs/shared_tools/divergence_inventory.v1.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — PR #10678 opened with squash auto-merge; focused CO-03 suite 9 passed; ruff clean; divergence inventory regenerated.
+- **Last verified:** 2026-09-22 — merged via #10678 onto main as prerequisite for CO-04/CO-05
 - **Summary:** Adds handedness-aware model hand-frame offsets, library retrieval with one rigid placement and native-clock preservation, constrained-IK seeds with distinct Pink/DLS capability records (unsupported constraints fail closed), and a geometry/profile-keyed seed cache. Four-trial retrieval-only and constrained-IK baselines are kinematic previews only.
-- **Next step:** Confirm CI green on PR #10678 and squash merge; then dispatch #10608 (CO-04).
+- **Next step:** Continue on #10608 (CO-04) and #10609 (CO-05) in parallel on non-overlapping paths.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_starting_guesses.json; tests/unit/motion_matching/test_club_starting_guesses.py.
+
+### DL-#10609 · CO-05 Generate Plausible Upper-Body and Full-Body Candidates
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10609 (epic #10602)
+- **Branch:** feat/issue-10609-co05-plausible-body-candidates
+- **PR:** #10681 (squash auto-merge)
+- **Paths:** src/shared/python/motion_matching/club_only/body_candidates.py; src/shared/python/motion_matching/club_only/topology_mapping.py; src/shared/python/motion_matching/club_only/nullspace_proposals.py; src/shared/python/motion_matching/club_only/observation.py; src/shared/python/motion_matching/club_only/profiles.py; src/shared/python/motion_matching/club_only/seeds.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_body_candidates.py; docs/plans/club_only_matching/evidence/club_body_candidates.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/monolith_refactor_register.md; docs/shared_tools/divergence_inventory.v1.json
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — merged origin/main; regenerated monolith register + divergence inventory (body_candidates ud-only); DRY helper already landed; register/inventory unit tests green
+- **Summary:** Explicit reduced→body topology maps (no pelvis teleport / unlimited root / pasted club animation), local grip-Jacobian null-space proposals with closure reprojection, and a roster × trial candidate matrix with separated observation-fit, plausibility, contact/effort, and runtime lanes; missing-runtime cells stay unqualified with precise blockers.
+- **Next step:** Confirm CI green on PR #10681 and squash merge.
+- **Evidence:** docs/plans/club_only_matching/evidence/club_body_candidates.json; tests/unit/motion_matching/test_club_body_candidates.py.
 
 ### DL-#10603 · Neural Motion Matching Plan
 
