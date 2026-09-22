@@ -94,6 +94,13 @@ def test_resolve_roster_matrix_scope_honors_explicit_model_and_trial_ids() -> No
     assert trials == ["TW_wiffle"]
 
 
+def test_resolve_roster_matrix_scope_rejects_bare_string_selectors() -> None:
+    with pytest.raises(TypeError, match="model_ids"):
+        resolve_roster_matrix_scope(model_ids="driven_double_pendulum")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="trial_ids"):
+        resolve_roster_matrix_scope(trial_ids="TW_wiffle")  # type: ignore[arg-type]
+
+
 def test_roster_profiles_cover_every_registered_model() -> None:
     init_default_registry()
     models = list_golf_models()

@@ -28,7 +28,6 @@ from src.shared.python.motion_matching.club_only.observation import (
 )
 from src.shared.python.motion_matching.club_only.profiles import (
     ClubOnlyProfile,
-    get_club_only_profile,
     profile_from_roster,
     resolve_roster_matrix_scope,
 )

@@ -13,11 +13,12 @@
   geometry/native checks. Path anchors: `fit_metrics.py`, `acceptance.py`,
   `plot_fit_quality_card.py`. Schema `club-matrix-qualification/1.0.0`; evidence
   `docs/plans/club_only_matching/evidence/club_matrix_qualification.json`.
-- Validation: `python -m pytest tests/unit/motion_matching/test_club_matrix_qualification.py -q -n 0 --no-cov`
-  GREEN (13 passed).
+- Validation: scoped club_only unit tests GREEN; local
+  `python scripts/ci/check_dry_duplication_gate.py` GREEN after extracting
+  `resolve_roster_matrix_scope` / `profile_from_roster` into `club_only/profiles.py`.
 - Limitations: software-contract scoring only; no native Fit/G1 claim; full-body
   and missing-runtime cells remain unqualified with named blockers.
-- Next: Confirm CI green on PR #10703; then dispatch CO-09.
+- Next: Confirm CI green on PR #10703 (DRY gate); then squash-merge and dispatch CO-09.
 
 ## GUI Thread-Blocking Migration #8880 [MERGED]
 
