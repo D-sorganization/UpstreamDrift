@@ -3,7 +3,8 @@
 ## CO-08 Qualify Club-Only Matrix and Plausibility Tradeoffs (#10612)
 
 - Worktree: `Worktrees/UpstreamDrift-10612-co08`, branch
-  `feat/issue-10612-co08-matrix`, DL-#10612, PR not created yet.
+  `feat/issue-10612-co08-matrix`, DL-#10612, PR
+  [#10703](https://github.com/D-sorganization/UpstreamDrift/pull/10703) open.
 - Delivered: `club_only/matrix_qualification.py` independently reviews exported
   candidate packages over native observation times for four workbook trials ×
   the #10585 roster; freezes CO-02 gates and publishes failures; withheld-body
@@ -16,8 +17,7 @@
   GREEN (13 passed).
 - Limitations: software-contract scoring only; no native Fit/G1 claim; full-body
   and missing-runtime cells remain unqualified with named blockers.
-- Next: Open ready-for-review PR with `Fixes #10612`, label `agent:local`, arm
-  squash auto-merge; then dispatch CO-09.
+- Next: Confirm CI green on PR #10703; then dispatch CO-09.
 
 ## CO-07 Optimize Fast Matching and Expose Candidate Diversity (#10611) [MERGED]
 
