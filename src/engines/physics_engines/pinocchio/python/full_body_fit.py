@@ -52,10 +52,17 @@ from src.engines.physics_engines.pinocchio.python.marker_kinematics import (
     marker_positions_and_jacobians,
 )
 from src.shared.python.contracts import ensure, require
+from src.shared.python.motion_matching.acceptance import Horizon
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
 from src.shared.python.motion_matching.pelvis_yaw import (
     compute_pelvis_yaw_residual_and_derivative,
+)
+from src.shared.python.motion_matching.pinocchio_g2_g3 import (
+    ClubKind,
+    IntegratorConfig,
+    build_continuation_schedule,
+    evaluate_integrator_parity,
 )
 from src.shared.python.motion_matching.replay_metrics import compute_replay_five_metrics
 from src.shared.python.motion_matching.tour_capture_contract import (
@@ -78,6 +85,12 @@ RECEIPT_SCHEMA = "matched-swing-fit/pinocchio-crocoddyl-v1"
 logger = logging.getLogger(__name__)
 
 
+def ms111_continuation_s(club: str, horizon: str) -> tuple[float, ...]:
+    """Return MS-111 G2/G3 stage ends for ``club`` (shared schedule contract)."""
+    schedule = build_continuation_schedule(ClubKind(club), Horizon(horizon))
+    return schedule.stage_ends_s
+
+
 @dataclass(frozen=True)
 class SolverSettings:
     max_iterations: int = 200
@@ -97,6 +110,22 @@ class SolverSettings:
     tracking_kd: float = 40.0
     continuation_s: tuple[float, ...] = ()
     stage_iterations: int = 40
+
+
+def assert_ms111_integrator_parity(settings: SolverSettings) -> None:
+    """Fail closed when node solve and independent replay integrators diverge."""
+    solve = IntegratorConfig(
+        name=settings.node_integrator,
+        rtol=settings.rk45_rtol,
+        fixed_step=settings.node_integrator != "rk45",
+    )
+    replay = IntegratorConfig(
+        name=settings.replay_integrator,
+        rtol=settings.rk45_rtol,
+        fixed_step=settings.replay_integrator != "rk45",
+    )
+    verdict = evaluate_integrator_parity(solve, replay)
+    require(verdict.accepted, verdict.reason or "integrator parity failed", verdict)
 
 
 @dataclass(frozen=True)
@@ -871,6 +900,12 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help="comma-separated stage end times in seconds, e.g. 0.05,0.10,0.20",
     )
+    parser.add_argument(
+        "--ms111-schedule",
+        choices=("driver:G2", "driver:G3", "iron:G2", "iron:G3"),
+        default=None,
+        help="MS-111 G2/G3 continuation schedule (overrides empty --continuation)",
+    )
     parser.add_argument("--stage-iterations", type=int, default=40)
     parser.add_argument("--warm-start-ridge", type=float, default=1e-2)
     parser.add_argument("--marker-weight", type=float, default=FitWeights().marker)
@@ -906,6 +941,10 @@ def main(argv: list[str] | None = None) -> int:
         weights,
         args.ground_height,
     )
+    continuation_s = tuple(float(t) for t in args.continuation.split(",") if t)
+    if not continuation_s and args.ms111_schedule:
+        club_name, horizon_name = args.ms111_schedule.split(":", 1)
+        continuation_s = ms111_continuation_s(club_name, horizon_name)
     settings = SolverSettings(
         max_iterations=args.max_iterations,
         effort_bound_n_m=args.effort_bound,
@@ -918,10 +957,11 @@ def main(argv: list[str] | None = None) -> int:
         rk45_rtol=args.rk45_rtol,
         tracking_kp=args.tracking_kp,
         tracking_kd=args.tracking_kd,
-        continuation_s=tuple(float(t) for t in args.continuation.split(",") if t),
+        continuation_s=continuation_s,
         stage_iterations=args.stage_iterations,
         warm_start_ridge=args.warm_start_ridge,
     )
+    assert_ms111_integrator_parity(settings)
     receipt = run_fit(
         inputs,
         settings,
