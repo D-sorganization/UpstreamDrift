@@ -22,11 +22,15 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-05: Dynamics Baselines (#10620)
+## Neural Motion Matching NM-06: Masked Proposals (#10621)
 
-Branch `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/#10686 and NM-04/#10698 merged on main.
-NM-05 adds `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`): trial-level matrices from `EpisodeStore`, analytical/ridge/nearest-neighbor baselines, optional small MLP, three-seed validation checkpointing with test untouched, inverse `InverseLabelConditioning`, identity-leakage and unavailable-torque guards. Reuses per-step and inverse-timestep training patterns; scheduler lookup unchanged via `runner_registry`. Evidence: `docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json`. Software-contract tests only; no native training success claim.
-Next after merge: dispatch NM-06 ([#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621)).
+Branch `feat/10621-nm06-masked-proposals`; parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/04/05 merged on main.
+NM-06 generalizes temporal inverse to masked trajectory-to-control proposals with variable control dims, selected-teacher + mixture heads, observation-after-rollout training loss, collapse diagnostics (cVAE plateau evidence retained), A..G time-domain conversion, and hybrid fail-closed native refinement. Evidence: `docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json`. Software-contract tests only; no native training success claim.
+Tip clears DRY via `proposal_shared`, regenerates divergence inventory for NM-06 ud-only paths, and merges main through CO-09. Next: confirm CI green on PR [#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709); do not start NM-07 (#10622) in this slice.
+
+## Neural Motion Matching NM-05: Dynamics Baselines (#10620) [MERGED]
+
+Branch `feat/issue-10620-nm05-baselines` merged via PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701).
 
 ## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619) [MERGED]
 
@@ -52,11 +56,11 @@ Next step: Continue under NM-01 ([#10616](https://github.com/D-sorganization/Ups
 
 ## Club-Only and Neural Matching Planning (2026-09-20)
 
-- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-08 shipped on main; active [CO-09 #10613](https://github.com/D-sorganization/UpstreamDrift/issues/10613) on `feat/co09-club-only-ui-10613` (UI/results integration).
-- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679).
-- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
-- **State:** CO-09 wires club-only matching into FitSwingProvider/pipeline/ledger/ResultsBrowser/GUI without parallel frameworks (software contracts; no native G1). NM-00 fail-closed audit remains authoritative.
-- **Next:** Land CO-09 PR for #10613; do not start CO-10 until merge.
+- **Club-Only Epic:** [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602); CO-00 through CO-10 baseline shipped via [#10718](https://github.com/D-sorganization/UpstreamDrift/pull/10718); survivor follow-up [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720) on `feat/10614-co10-reproduction-turnover` (runnable saved-job commands + architecture split).
+- **Neural Epic:** [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603), 13 bounded children; NM-00 [#10615](https://github.com/D-sorganization/UpstreamDrift/issues/10615) merged (#10668); NM-02 [#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) merged (#10679); NM-06 [#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621) merged (#10709).
+- **Read:** [Shared Review](docs/plans/club_neural_review/REVIEW.md); [Club-Only Turnover](docs/plans/club_only_matching/TURNOVER.md); [Reproduction Guide](docs/plans/club_only_matching/REPRODUCTION_GUIDE.md); [Neural Turnover](docs/plans/neural_motion_matching/TURNOVER.md); [NM-00 Artifact Audit](docs/plans/neural_motion_matching/artifact_audit.md).
+- **State:** CO-10 software-contract turnover is on main via #10718; #10720 rematches unique runnable-command/architecture fixes. Epic #10602 stays open until mandatory native fits land. Software contracts are not native G1/G3.
+- **Next:** Drive CI green on rematched PR [#10720](https://github.com/D-sorganization/UpstreamDrift/pull/10720); do not reopen #10719; schedule desk-native Fit/G1 for unresolved matrix cells.
 
 ## Tour Baselines TB-01: Audit Tour Targets, Marker Semantics, Events, and Provenance (#10586)
 
