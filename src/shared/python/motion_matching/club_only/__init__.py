@@ -152,6 +152,8 @@ from .profiles import (
     build_roster_profiles,
     evidence_payload,
     get_club_only_profile,
+    profile_from_roster,
+    resolve_roster_matrix_scope,
 )
 from .replay_package import (
     REPLAY_SCHEMA,
@@ -342,6 +344,8 @@ __all__ = [
     "generate_posture_branches",
     "geometry_content_hash",
     "get_club_only_profile",
+    "profile_from_roster",
+    "resolve_roster_matrix_scope",
     "get_topology_mapping",
     "hub_variant_id",
     "independent_forward_residual",

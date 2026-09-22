@@ -17,10 +17,6 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.tour_baselines.registry import (
-    init_default_registry,
-    list_golf_models,
-)
 from src.shared.python.motion_matching.club_only.acceptance import (
     ClubOnlyResidualReport,
     evaluate_club_only_acceptance,
@@ -32,15 +28,13 @@ from src.shared.python.motion_matching.club_only.observation import (
 )
 from src.shared.python.motion_matching.club_only.profiles import (
     ClubOnlyProfile,
-    build_roster_profiles,
     get_club_only_profile,
+    profile_from_roster,
+    resolve_roster_matrix_scope,
 )
 from src.shared.python.motion_matching.club_only.seeds import (
     geometry_content_hash,
     profile_content_hash,
-)
-from src.shared.python.motion_matching.club_only.workbook_identity import (
-    CANONICAL_TRIAL_SHEETS,
 )
 
 MATRIX_SCHEMA = "club-matrix-qualification/1.0.0"
@@ -705,14 +699,9 @@ def build_matrix_qualification_report(
     trial_ids: Sequence[str] | None = None,
 ) -> MatrixQualificationReport:
     """Build the trial × roster matrix with frozen CO-02 gates."""
-    init_default_registry()
-    roster = build_roster_profiles()
-    models = (
-        list(model_ids)
-        if model_ids is not None
-        else [m.model_id for m in list_golf_models()]
+    roster, models, trials = resolve_roster_matrix_scope(
+        model_ids=model_ids, trial_ids=trial_ids
     )
-    trials = list(trial_ids) if trial_ids is not None else list(CANONICAL_TRIAL_SHEETS)
     freeze_payload = {
         model_id: roster[model_id].as_dict()
         for model_id in models
@@ -721,13 +710,11 @@ def build_matrix_qualification_report(
     freeze_hash = _sha256_payload(freeze_payload)
     cells: list[MatrixCellResult] = []
     for model_id in models:
-        profile = (
-            roster[model_id] if model_id in roster else get_club_only_profile(model_id)
-        )
-        blocked = _cell_blocker_for(model_id, profile.topology)
+        profile = profile_from_roster(roster, model_id)
+        unsupported = _cell_blocker_for(model_id, profile.topology)
         for trial_id in trials:
-            if blocked is not None:
-                status, blocker = blocked
+            if unsupported is not None:
+                status, blocker = unsupported
                 cells.append(
                     MatrixCellResult(
                         model_id=model_id,
