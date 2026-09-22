@@ -150,14 +150,17 @@ AUDITED_CAPABILITIES: dict[str, AuditEntry] = {
     ),
     "video_analyzer": AuditEntry(
         capability_id="video_analyzer",
-        disposition=LaunchDisposition.PROVIDER_REQUIRED,
-        label="Video Analyzer (External Provider Required)",
+        disposition=LaunchDisposition.PRODUCTION_SOLVER,
+        label="Video Analyzer",
         explanation=(
-            "Video Analyzer requires the external Tools repository (vendor/ud-tools or TOOLS_REPO_PATH). "
-            "If provider is absent or uninitialized, yields an explicit diagnostic with remediation."
+            "File picker -> SwingAnalyzer.analyze_video() -> head-stability report, all "
+            "implemented in this repo (src/tools/video_analyzer/). No external Tools "
+            "repository provider is needed any more (issue #8883 replaced it). MediaPipe "
+            "is an optional runtime dependency; if it is not installed, Analyze surfaces "
+            "an explicit error in the report pane rather than a blank or placeholder window."
         ),
-        next_action="Initialize git submodule vendor/ud-tools or configure TOOLS_REPO_PATH.",
-        tracking_issue="#8858, #10512",
+        next_action=None,
+        tracking_issue="#8883",
     ),
 }
 
