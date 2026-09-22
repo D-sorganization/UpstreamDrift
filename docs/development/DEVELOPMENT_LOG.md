@@ -549,8 +549,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10700
 - **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_fast_matching.py; docs/plans/club_only_matching/evidence/club_fast_matching.json; docs/shared_tools/divergence_inventory.v1.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 12 unit tests GREEN; ruff/mypy clean; monolith+divergence inventories regenerated; native_g1_pass false
-- **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time.
+- **Last verified:** 2026-09-22 at SELF — architecture param-budget fix via FastMatchOptions/\_ScoreLoopCtx/\_AssembleCtx; 12 unit tests GREEN; check_architecture_budget OK; native_g1_pass false
+- **Summary:** Adds bounded fast club-only matching orchestration with immutable cache keys, resumable checkpoints, cold/retrieval/reduced-to-full starts, feasibility-first pruning and Pareto diversity, optional neural proposal slot without weights, quality-vs-time curves, and profiling that includes verification time. Public knobs collapse onto FastMatchOptions for architecture parameter budgets.
 - **Next step:** Confirm CI green and squash merge of PR Fixes #10611; do not start CO-08+.
 - **Evidence:** docs/plans/club_only_matching/evidence/club_fast_matching.json; tests/unit/motion_matching/test_club_fast_matching.py.
 

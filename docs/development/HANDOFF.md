@@ -11,8 +11,10 @@
   bounded Pareto diversity, optional empty neural proposal slot, and stage
   profiling including verification time. Schema `club-fast-matching/1.0.0`;
   evidence `docs/plans/club_only_matching/evidence/club_fast_matching.json`.
+- Param-budget fix: collapse `run_fast_club_match` knobs onto `FastMatchOptions`
+  and private `_ScoreLoopCtx` / `_AssembleCtx` (repo-structure-gates).
 - Validation: `python -m pytest tests/unit/motion_matching/test_club_fast_matching.py -q -n 0 --no-cov`
-  GREEN (12 passed); scoped ruff check/format on touched files.
+  GREEN (12 passed); `python scripts/ci/check_architecture_budget.py` OK.
 - Limitations: software-contract scoring only; no native Fit/G1 claim; no
   unsupported speed claim. Quality-vs-time curves and failed-attempt counts are
   saved in the software-contract evidence for CO-08 (not native timing).
