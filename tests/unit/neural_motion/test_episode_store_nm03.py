@@ -24,6 +24,7 @@ from src.shared.python.dataset_tools.canonical import (
 from src.shared.python.neural_motion.episodes import (
     EPISODE_STORE_SCHEMA,
     CompactAdapter,
+    CompactArrayBundle,
     EpisodeManifest,
     EpisodeRecord,
     EpisodeStore,
@@ -47,6 +48,24 @@ _T = 5
 def _finite_traj(seed: int, *, shape: tuple[int, ...] = (_T, _N)) -> np.ndarray:
     rng = np.random.default_rng(seed)
     return rng.normal(size=shape).astype(np.float64)
+
+
+def _compact_bundle(**overrides: object) -> CompactArrayBundle:
+    """Build a valid compact-1.0 payload with optional field overrides."""
+    base: dict[str, object] = {
+        "trial_id": "compact_0",
+        "family_id": "compact_fam",
+        "sample_times_s": np.linspace(0.0, 0.2, _T),
+        "q": _finite_traj(1),
+        "qd": _finite_traj(2),
+        "qdd": _finite_traj(3),
+        "tau": _finite_traj(4),
+        "joint_names": CANONICAL_JOINTS,
+        "coefficient_letters": COEFFICIENT_LETTERS,
+        "coefficients": np.arange(N_COEFFS, dtype=np.float64),
+    }
+    base.update(overrides)
+    return CompactArrayBundle(**base)  # type: ignore[arg-type]
 
 
 def _make_episode(
@@ -234,18 +253,7 @@ def test_compact_adapter_preserves_27_and_189_and_rejects_wrong_order(
 ) -> None:
     adapter = CompactAdapter()
     coeffs = np.arange(N_COEFFS, dtype=np.float64)
-    ep = adapter.from_compact_arrays(
-        trial_id="compact_0",
-        family_id="compact_fam",
-        sample_times_s=np.linspace(0.0, 0.2, _T),
-        q=_finite_traj(1),
-        qd=_finite_traj(2),
-        qdd=_finite_traj(3),
-        tau=_finite_traj(4),
-        joint_names=CANONICAL_JOINTS,
-        coefficient_letters=COEFFICIENT_LETTERS,
-        coefficients=coeffs,
-    )
+    ep = adapter.from_compact_arrays(_compact_bundle(coefficients=coeffs))
     assert ep.schema_version == EPISODE_STORE_SCHEMA
     assert ep.source_schema == COMPACT_SCHEMA
     assert len(ep.joint_names) == 27
@@ -254,29 +262,22 @@ def test_compact_adapter_preserves_27_and_189_and_rejects_wrong_order(
 
     with pytest.raises(ValueError, match="joint"):
         adapter.from_compact_arrays(
-            trial_id="bad",
-            family_id="f",
-            sample_times_s=np.linspace(0.0, 0.1, _T),
-            q=_finite_traj(1),
-            qd=_finite_traj(2),
-            qdd=_finite_traj(3),
-            tau=_finite_traj(4),
-            joint_names=tuple(reversed(CANONICAL_JOINTS)),
-            coefficient_letters=COEFFICIENT_LETTERS,
-            coefficients=coeffs,
+            _compact_bundle(
+                trial_id="bad",
+                family_id="f",
+                sample_times_s=np.linspace(0.0, 0.1, _T),
+                joint_names=tuple(reversed(CANONICAL_JOINTS)),
+                coefficients=coeffs,
+            )
         )
     with pytest.raises(ValueError, match="189|coeff"):
         adapter.from_compact_arrays(
-            trial_id="bad2",
-            family_id="f",
-            sample_times_s=np.linspace(0.0, 0.1, _T),
-            q=_finite_traj(1),
-            qd=_finite_traj(2),
-            qdd=_finite_traj(3),
-            tau=_finite_traj(4),
-            joint_names=CANONICAL_JOINTS,
-            coefficient_letters=COEFFICIENT_LETTERS,
-            coefficients=np.arange(10, dtype=np.float64),
+            _compact_bundle(
+                trial_id="bad2",
+                family_id="f",
+                sample_times_s=np.linspace(0.0, 0.1, _T),
+                coefficients=np.arange(10, dtype=np.float64),
+            )
         )
     with pytest.raises(ValueError, match="units|basis"):
         _make_episode(
@@ -294,16 +295,16 @@ def test_old_schema_adapter_round_trips_without_reinterpretation(
     adapter = CompactAdapter()
     coeffs = np.linspace(-1.0, 1.0, N_COEFFS)
     ep = adapter.from_compact_arrays(
-        trial_id="legacy",
-        family_id="leg",
-        sample_times_s=np.linspace(0.0, 0.1, _T),
-        q=_finite_traj(11),
-        qd=_finite_traj(12),
-        qdd=_finite_traj(13),
-        tau=_finite_traj(14),
-        joint_names=CANONICAL_JOINTS,
-        coefficient_letters=COEFFICIENT_LETTERS,
-        coefficients=coeffs,
+        _compact_bundle(
+            trial_id="legacy",
+            family_id="leg",
+            sample_times_s=np.linspace(0.0, 0.1, _T),
+            q=_finite_traj(11),
+            qd=_finite_traj(12),
+            qdd=_finite_traj(13),
+            tau=_finite_traj(14),
+            coefficients=coeffs,
+        )
     )
     store = EpisodeStore(tmp_path / "legacy")
     written = store.write_episode(ep)
