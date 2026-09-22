@@ -827,13 +827,14 @@ class DatasetGenerator(_DatasetExportMixin):
             n_q = n_v = 7
         n_u = n_v
         getter = getattr(self.engine, "get_control_dim", None)
+        num_u_attr = getattr(self.engine, "num_u", None)
         if callable(getter):
             try:
                 n_u = int(getter())
             except _OPTIONAL_CATCH:
                 n_u = n_v
-        elif getattr(self.engine, "num_u", None) is not None:
-            n_u = int(self.engine.num_u)
+        elif num_u_attr is not None:
+            n_u = int(num_u_attr)
         return ModelDoFLayout(n_q=n_q, n_v=n_v, n_u=n_u, n_force=0)
 
     def _get_joint_names(self) -> list[str]:

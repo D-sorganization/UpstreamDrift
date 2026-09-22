@@ -12,7 +12,7 @@ import hashlib
 import json
 import platform
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -26,6 +26,7 @@ from src.shared.python.data_io.dataset_generator.labels import (
     ChannelAvailability,
     dynamics_residual,
 )
+from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
 from src.shared.python.neural_motion.roster import (
     RosterStage,
@@ -96,7 +97,7 @@ def qualify_mock_adapter() -> NativeLabelReceipt:
     """Software-contract qualification via MockPhysicsEngine."""
     engine = MockPhysicsEngine(num_joints=2)
     engine.load_from_string("<mock/>")
-    gen = DatasetGenerator(engine)
+    gen = DatasetGenerator(cast(PhysicsEngine, engine))
     config = GeneratorConfig(
         num_samples=1,
         duration=0.04,
@@ -255,7 +256,7 @@ def qualify_ode_double_pendulum_adapter() -> NativeLabelReceipt:
     """Native residual qualification for driven_double_pendulum via ODEBackend."""
     resolve_roster_entry(build_neural_model_roster(), "driven_double_pendulum")
     engine = _ODEPhysicsEngineAdapter()
-    gen = DatasetGenerator(engine)  # type: ignore[arg-type]
+    gen = DatasetGenerator(cast(PhysicsEngine, engine))
     config = GeneratorConfig(
         num_samples=1,
         duration=0.05,
