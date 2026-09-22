@@ -492,7 +492,7 @@ class MotionMatchingWidget(QWidget):
         )
         resume_checkpoint = self._club_checkpoint if resume else None
         if resume and self._club_session is not None:
-            preset = self._club_session.preset.value
+            preset = self._club_session.preset_name()
         for btn in self._club_run_buttons:
             btn.setEnabled(False)
 
@@ -581,7 +581,7 @@ class MotionMatchingWidget(QWidget):
             self.club_log.appendPlainText("No checkpoint to resume.")
             return
         if self._club_session is not None:
-            preset = self._club_session.preset.value
+            preset = self._club_session.preset_name()
         else:
             preset = self.club_preset.currentText() or "fast_preview"
         self._run_club_only_match(preset=preset, resume=True)

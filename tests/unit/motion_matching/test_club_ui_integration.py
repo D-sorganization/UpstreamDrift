@@ -104,6 +104,16 @@ def test_session_explains_inferred_body_and_exposes_budget_priors() -> None:
     assert session.neural_proposal_slot == "empty_provider"
 
 
+def test_session_preset_name_delegates_without_deep_chain() -> None:
+    session = create_club_only_session(
+        trial_id="TW_wiffle",
+        model_id="double_pendulum",
+        preset=MatchPreset.FAST_PREVIEW,
+    )
+    assert session.preset_name() == MatchPreset.FAST_PREVIEW.value
+    assert session.as_dict()["preset"] == session.preset_name()
+
+
 def test_clone_preserves_user_edits() -> None:
     session = create_club_only_session(
         trial_id="GW_wiffle",

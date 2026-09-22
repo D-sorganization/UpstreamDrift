@@ -673,7 +673,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10711
 - **Paths:** src/shared/python/motion_matching/club_only/ui_integration.py; src/shared/python/motion_matching/club_only/**init**.py; src/shared/python/workspace/results_browser.py; src/tools/motion_matching/pipeline.py; src/tools/motion_matching/gui.py; src/tools/tour_matching_viewer/core.py; src/tools/tour_matching_viewer/**init**.py; src/config/feature_parity.json; tests/unit/motion_matching/test_club_ui_integration.py; tests/unit/tools/test_tour_matching_viewer_core.py; tests/unit/workspace/test_results_browser.py; docs/plans/club_only_matching/evidence/club_ui_integration.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — rematched onto post-CO-10 main; review-gap harden GREEN (workbook loader, receipt-hashed ledger, default JSON index, tour_matching_viewer compare); native_g1_pass false
+- **Last verified:** 2026-09-22 at SELF — rematched onto post-CO-10 main; LOD fix via `ClubOnlyUiSession.preset_name()`; review-gap harden GREEN; native_g1_pass false
 - **Summary:** Baseline UI integration shipped via #10711. Follow-up #10717 hardens workbook trial load, receipt-hashed ledger append/dedup, default JSON ResultsBrowser index, cancel/resume off-thread, and tour_matching_viewer observed/inferred compare without parallel frameworks.
 - **Next step:** Confirm CI green on PR #10717 and squash-merge; then check NM-07 #10622 claim (do not steal).
 - **Evidence:** docs/plans/club_only_matching/evidence/club_ui_integration.json; tests/unit/motion_matching/test_club_ui_integration.py.

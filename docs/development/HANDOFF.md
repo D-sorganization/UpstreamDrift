@@ -83,6 +83,7 @@
 - 2026-09-22 — Bugfix: clear club-only checkpoint after successful finish; ledger
   dedup replaces rows for the same receipt path when bytes change.
 - Rematch (SELF): merge origin/main after CO-10 #10720; keep review-gap harden unique vs turnover.
+- 2026-09-22 — LOD fix: `ClubOnlyUiSession.preset_name()` delegates preset wire name so GUI cancel/resume avoids `session.preset.value` chains.
 
 ## MS-105 Reliable Matching Jobs, Recovery and Portable Results (#10379) [MERGED]
 

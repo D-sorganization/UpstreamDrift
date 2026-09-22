@@ -189,13 +189,17 @@ class ClubOnlyUiSession:
     body_motion_disclaimer: str = _BODY_DISCLAIMER
     neural_proposal_slot: str = "empty_provider"
 
+    def preset_name(self) -> str:
+        """Return the match preset wire name without deep attribute chains."""
+        return str(self.preset.value)
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "session_id": self.session_id,
             "source_kind": self.source_kind.value,
             "trial_id": self.trial_id,
             "model_id": self.model_id,
-            "preset": self.preset.value,
+            "preset": self.preset_name(),
             "prior_choices": dict(self.prior_choices),
             "geometry_choices": dict(self.geometry_choices),
             "user_edits": dict(self.user_edits),
