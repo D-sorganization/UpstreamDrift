@@ -22,11 +22,15 @@ Branch `feat/tb03-trajectory-fitting-10588` merged to main in PR [#10631](https:
 
 Branch `feat/tb02-baseline-packages-10587` merged to main in PR [#10630](https://github.com/D-sorganization/UpstreamDrift/pull/10630).
 
-## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619)
+## Neural Motion Matching NM-05: Dynamics Baselines (#10620)
 
-Branch `local/nm-04-teacher-episodes`; PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) (squash auto-merge armed); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-02/#10679 and NM-03/#10686 merged on main.
-NM-04 adds `src/shared/python/neural_motion/teachers/` (`neural-teacher-episodes/1.0.0`, `neural-acquisition-log/1.0.0`): structured teacher generation, nested corpus with resume/duplicate-seed avoidance, rejection/quarantine ledger, active acquisition that cannot consume test labels. Evidence: `docs/plans/neural_motion_matching/evidence/nm04_teacher_episodes_receipt.json`. Software-contract tests only; no training claim.
-Next after merge: dispatch NM-05 ([#10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620)).
+Branch `feat/issue-10620-nm05-baselines`; PR [#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701); parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); prerequisites NM-03/#10686 and NM-04/#10698 merged on main.
+NM-05 adds `src/shared/python/neural_motion/baselines/` (`neural-dynamics-baselines/1.0.0`): trial-level matrices from `EpisodeStore`, analytical/ridge/nearest-neighbor baselines, optional small MLP, three-seed validation checkpointing with test untouched, inverse `InverseLabelConditioning`, identity-leakage and unavailable-torque guards. Reuses per-step and inverse-timestep training patterns; scheduler lookup unchanged via `runner_registry`. Evidence: `docs/plans/neural_motion_matching/evidence/nm05_dynamics_baselines_receipt.json`. Software-contract tests only; no native training success claim.
+Next after merge: dispatch NM-06 ([#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621)).
+
+## Neural Motion Matching NM-04: Teacher Episodes and Active Learning (#10619) [MERGED]
+
+Branch merged in PR [#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698) (`2142d380b`).
 
 ## Neural Motion Matching NM-03: Episode Storage, Splits and Views (#10618) [MERGED]
 
