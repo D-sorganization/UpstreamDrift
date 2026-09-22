@@ -20,7 +20,8 @@
   python -m pytest tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py -q -n 0 --no-cov --timeout=60
   python -O -c "from src.shared.python.motion_matching.pipeline.receipt_provenance import *"
   ```
-- **Next:** Open ready-for-review PR (`Fixes #10271`); after merge, regen natively when disk recovers.
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10722 (ready-for-review)
+- **Next:** Confirm CI green on #10722; after merge, regen natively when disk recovers.
 
 ## Succession — Motion Matching (2026-09-22)
 
