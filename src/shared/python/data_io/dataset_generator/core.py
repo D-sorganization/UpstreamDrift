@@ -4,7 +4,15 @@ Generates large-scale simulation datasets by varying inputs across physics engin
 Records all kinematics (q, v, a), kinetics (tau, forces, energies), and model
 data (inertia, bias forces, Jacobians) into structured databases for ML training.
 
-Data models are in _dataset_models.py.
+NM-02 (#10617): optional channels carry availability evidence; suppressed
+dynamics failures cannot leave a zero buffer presented as measurement.
+Instantaneous native acceleration is recorded separately from interval
+finite differences. Applied controls are distinguished from requested
+commands when saturation intervenes.
+
+Data models are in models.py / labels.py.
+Sim-step recording is in sim_recording.py.
+Channel finalize helpers are in channel_finalize.py.
 Export methods are in _dataset_export_mixin.py.
 
 Design by Contract:
@@ -13,48 +21,49 @@ Design by Contract:
         - Parameter ranges must be valid (min <= max)
         - Output directory must be writable
     Postconditions:
-        - Generated dataset contains all requested fields
-        - Data is validated (no NaN/Inf in physics quantities)
+        - Generated dataset contains all requested fields with evidence
+        - Data is validated (no NaN/Inf in available physics quantities)
         - Provenance metadata is attached to every dataset
     Invariants:
-        - Original engine state is restored after generation
+        - Original engine state/time is restored after generation or
+          StateError is raised when restore fails
         - All data is reproducible given the same seed
-
-Usage:
-    >>> from src.shared.python.data_io.dataset_generator import DatasetGenerator
-    >>> gen = DatasetGenerator(engine)
-    >>> config = GeneratorConfig(
-    ...     num_samples=1000,
-    ...     duration=2.0,
-    ...     timestep=0.002,
-    ...     vary_initial_positions=True,
-    ... )
-    >>> dataset = gen.generate(config)
-    >>> gen.export(dataset, "output/training_data", format="hdf5")
 """
 
 from __future__ import annotations
 
-import contextlib
+import hashlib
+import json
+import platform
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.core.contracts import invariant, postcondition, precondition
+from src.shared.python.core.contracts.exceptions import StateError
 from src.shared.python.core.error_utils import SimulationError
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .._dataset_export_mixin import _DatasetExportMixin
+from .channel_finalize import finalize_channels
 from .config import (
     ControlProfile,
     GeneratorConfig,
     ParameterRange,
 )
+from .labels import (
+    LABEL_SCHEMA,
+    AccelerationKind,
+    ActuationKind,
+    ModelDoFLayout,
+    SampleProvenance,
+)
 from .models import (
     SimulationSample,
     TrainingDataset,
 )
+from .sim_recording import _OPTIONAL_CATCH, _SimRecordingMixin
 
 logger = get_logger(__name__)
 
@@ -63,21 +72,11 @@ logger = get_logger(__name__)
     lambda self: self.engine is not None,
     "DatasetGenerator must have a valid engine reference",
 )
-class DatasetGenerator(_DatasetExportMixin):
+class DatasetGenerator(_SimRecordingMixin, _DatasetExportMixin):
     """Generates simulation datasets for neural network training.
 
     Uses a PhysicsEngine to run simulations with varied inputs and records
-    all relevant kinematics, kinetics, and model data.
-
-    Design by Contract:
-        Preconditions:
-            - engine must implement PhysicsEngine protocol
-            - engine must be in INITIALIZED state (model loaded)
-        Postconditions:
-            - Generated dataset contains valid, finite data
-            - Engine state is restored to original after generation
-        Invariants:
-            - Dataset generation is reproducible given same seed
+    all relevant kinematics, kinetics, and model data with channel evidence.
     """
 
     def __init__(self, engine: PhysicsEngine) -> None:
@@ -87,13 +86,13 @@ class DatasetGenerator(_DatasetExportMixin):
             engine: Physics engine instance with a loaded model.
 
         Raises:
-            ValueError: If engine has no model loaded.
+            ValueError: If engine is None.
         """
-
         if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
+        self._original_time: float | None = None
 
     @precondition(
         lambda self, config, progress_callback=None: config is not None,
@@ -126,27 +125,21 @@ class DatasetGenerator(_DatasetExportMixin):
             TrainingDataset containing all simulation samples.
 
         Raises:
-            RuntimeError: If simulation fails for all samples.
+            SimulationError: If simulation fails for all samples.
+            StateError: If original engine state/time cannot be restored.
         """
-
         if config is None:
             raise ValueError("config must be provided")
         rng = np.random.default_rng(config.seed)
 
-        # Save original state
-        try:
-            self._original_state = self.engine.get_state()
-        except (ValueError, RuntimeError, AttributeError):
-            self._original_state = None
+        self._capture_original_state()
 
-        # Get model info
         model_name = getattr(self.engine, "model_name", "unknown")
         engine_name = type(self.engine).__name__
         joint_names = self._get_joint_names()
+        layout = self._get_layout()
 
         n_steps = int(config.duration / config.timestep)
-        n_q, n_v = self._get_dimensions()
-
         samples: list[SimulationSample] = []
         failed_count = 0
 
@@ -164,14 +157,11 @@ class DatasetGenerator(_DatasetExportMixin):
                         config=config,
                         rng=rng,
                         n_steps=n_steps,
-                        n_q=n_q,
-                        n_v=n_v,
+                        layout=layout,
                     )
                     samples.append(sample)
-
                     if progress_callback is not None:
                         progress_callback(i + 1, config.num_samples)
-
                 except (RuntimeError, TypeError, ValueError) as e:
                     logger.warning("Sample %d failed: %s", i, e)
                     failed_count += 1
@@ -188,12 +178,8 @@ class DatasetGenerator(_DatasetExportMixin):
                     failed_count,
                     config.num_samples,
                 )
-
         finally:
-            # Restore original state regardless of success or failure
-            if self._original_state is not None:
-                with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-                    self.engine.set_state(*self._original_state)
+            self._restore_original_state()
 
         dataset = TrainingDataset(
             samples=samples,
@@ -202,14 +188,56 @@ class DatasetGenerator(_DatasetExportMixin):
             engine_name=engine_name,
             joint_names=joint_names,
         )
-
         logger.info(
             "Dataset generation complete: %d samples, %d total frames",
             dataset.num_samples,
             dataset.total_frames,
         )
-
         return dataset
+
+    def _capture_original_state(self) -> None:
+        try:
+            self._original_state = self.engine.get_state()
+        except _OPTIONAL_CATCH:
+            self._original_state = None
+        try:
+            self._original_time = float(self.engine.get_time())
+        except _OPTIONAL_CATCH:
+            self._original_time = None
+
+    def _restore_original_state(self) -> None:
+        """Restore engine state and time, or raise StateError."""
+        if self._original_state is None and self._original_time is None:
+            return
+        errors: list[str] = []
+        if self._original_state is not None:
+            try:
+                self.engine.set_state(*self._original_state)
+            except _OPTIONAL_CATCH as exc:
+                errors.append(f"state restore failed: {exc}")
+        if self._original_time is not None:
+            set_time = getattr(self.engine, "set_time", None)
+            if callable(set_time):
+                try:
+                    set_time(self._original_time)
+                except _OPTIONAL_CATCH as exc:
+                    errors.append(f"time restore failed: {exc}")
+            else:
+                try:
+                    current = float(self.engine.get_time())
+                    if abs(current - self._original_time) > 1e-9:
+                        errors.append(
+                            "time restore unsupported: engine has no set_time "
+                            f"(current={current}, expected={self._original_time})"
+                        )
+                except _OPTIONAL_CATCH as exc:
+                    errors.append(f"time restore unsupported: {exc}")
+        if errors:
+            raise StateError(
+                "Failed to restore engine state/time after dataset generation: "
+                + "; ".join(errors),
+                operation="restore",
+            )
 
     def _run_single_simulation(
         self,
@@ -217,39 +245,28 @@ class DatasetGenerator(_DatasetExportMixin):
         config: GeneratorConfig,
         rng: np.random.Generator,
         n_steps: int,
-        n_q: int,
-        n_v: int,
+        layout: ModelDoFLayout,
     ) -> SimulationSample:
-        """Run a single simulation and record data.
-
-        Args:
-            sample_id: Sample identifier.
-            config: Generator configuration.
-            rng: Random number generator.
-            n_steps: Number of simulation steps.
-            n_q: Number of position DOFs.
-            n_v: Number of velocity DOFs.
-
-        Returns:
-            SimulationSample with all recorded data.
-        """
-        # Reset engine and set initial conditions
+        """Run a single simulation and record labeled data."""
         self.engine.reset()
-        q0, v0 = self._generate_initial_conditions(config, rng, n_q, n_v)
+        q0, v0 = self._generate_initial_conditions(config, rng, layout.n_q, layout.n_v)
         self.engine.set_state(q0, v0)
 
-        # Generate control profile
         idx = rng.integers(len(config.control_profiles))
         profile = config.control_profiles[idx]
-        control_sequence = profile.generate(n_v, n_steps, config.timestep, rng)
+        control_sequence = profile.generate(layout.n_u, n_steps, config.timestep, rng)
 
-        # Pre-allocate recording arrays
-        buffers = self._allocate_sim_buffers(config, n_steps, n_q, n_v)
+        buffers, trackers = self._allocate_sim_buffers(config, n_steps, layout)
+        self._execute_sim_loop(config, control_sequence, n_steps, buffers, trackers)
 
-        # Run simulation loop
-        self._execute_sim_loop(config, control_sequence, n_steps, buffers)
+        channel_evidence, finalized = finalize_channels(
+            config, buffers, trackers, layout, n_steps
+        )
+        actuation_kind = self._infer_actuation_kind(
+            finalized["requested_controls"], finalized["applied_controls"]
+        )
+        provenance = self._build_provenance(config, layout)
 
-        # Build metadata and return sample
         metadata = {
             "sample_id": sample_id,
             "seed": config.seed,
@@ -259,214 +276,99 @@ class DatasetGenerator(_DatasetExportMixin):
             "initial_v": v0.tolist(),
             "control_profile": profile.name,
             "control_type": profile.profile_type,
+            "label_schema": LABEL_SCHEMA,
+            "dimensions": layout.as_dict(),
         }
-
-        if not (buffers["times"] is not None):
-            raise ValueError("times buffer must not be None")
-        if not (buffers["positions"] is not None):
-            raise ValueError("positions buffer must not be None")
-        if not (buffers["velocities"] is not None):
-            raise ValueError("velocities buffer must not be None")
-        if not (buffers["accelerations"] is not None):
-            raise ValueError("accelerations buffer must not be None")
-        if not (buffers["torques"] is not None):
-            raise ValueError("torques buffer must not be None")
-        if not (buffers["kinetic_energy"] is not None):
-            raise ValueError("kinetic_energy buffer must not be None")
-        if not (buffers["potential_energy"] is not None):
-            raise ValueError("potential_energy buffer must not be None")
 
         return SimulationSample(
             sample_id=sample_id,
             metadata=metadata,
-            times=buffers["times"],
-            positions=buffers["positions"],
-            velocities=buffers["velocities"],
-            accelerations=buffers["accelerations"],
-            torques=buffers["torques"],
-            mass_matrices=buffers["mass_matrices"],
-            bias_forces=buffers["bias_forces"],
-            gravity_forces=buffers["gravity"],
-            contact_forces=buffers["contact"],
-            drift_accelerations=buffers["drift"],
-            control_accelerations=buffers["control_accel"],
+            times=finalized["times"],
+            positions=finalized["positions"],
+            velocities=finalized["velocities"],
+            accelerations=finalized["interval_accelerations"],
+            torques=finalized["applied_controls"],
+            mass_matrices=finalized["mass_matrices"],
+            bias_forces=finalized["bias_forces"],
+            gravity_forces=finalized["gravity"],
+            contact_forces=finalized["contact"],
+            drift_accelerations=finalized["drift"],
+            control_accelerations=finalized["control_accel"],
             energies={
-                "kinetic": buffers["kinetic_energy"],
-                "potential": buffers["potential_energy"],
+                key: value
+                for key, value in (
+                    ("kinetic", finalized["kinetic_energy"]),
+                    ("potential", finalized["potential_energy"]),
+                )
+                if value is not None
             },
+            dimensions=layout,
+            channel_evidence=channel_evidence,
+            acceleration_kind=AccelerationKind.INTERVAL_FINITE_DIFFERENCE,
+            actuation_kind=actuation_kind,
+            requested_controls=finalized["requested_controls"],
+            applied_controls=finalized["applied_controls"],
+            native_accelerations=finalized["native_accelerations"],
+            interval_accelerations=finalized["interval_accelerations"],
+            contact_labels=(
+                ["fx", "fy", "fz"] if finalized["contact"] is not None else None
+            ),
+            provenance=provenance,
         )
 
     @staticmethod
-    def _allocate_sim_buffers(
-        config: GeneratorConfig,
-        n_steps: int,
-        n_q: int,
-        n_v: int,
-    ) -> dict[str, np.ndarray | None]:
-        """Pre-allocate all recording arrays for a simulation run.
+    def _infer_actuation_kind(
+        requested: np.ndarray | None, applied: np.ndarray | None
+    ) -> ActuationKind:
+        if requested is None or applied is None:
+            return ActuationKind.APPLIED
+        if not np.allclose(requested, applied):
+            return ActuationKind.APPLIED_SATURATED
+        return ActuationKind.APPLIED
 
-        Args:
-            config: Generator configuration.
-            n_steps: Number of simulation steps.
-            n_q: Number of position DOFs.
-            n_v: Number of velocity DOFs.
-
-        Returns:
-            Dictionary of named buffers.
-        """
-        return {
-            "times": np.zeros(n_steps),
-            "positions": np.zeros((n_steps, n_q)),
-            "velocities": np.zeros((n_steps, n_v)),
-            "accelerations": np.zeros((n_steps, n_v)),
-            "torques": np.zeros((n_steps, n_v)),
-            "mass_matrices": (
-                np.zeros((n_steps, n_v, n_v)) if config.record_mass_matrix else None
-            ),
-            "bias_forces": (
-                np.zeros((n_steps, n_v)) if config.record_bias_forces else None
-            ),
-            "gravity": np.zeros((n_steps, n_v)) if config.record_gravity else None,
-            "contact": (
-                np.zeros((n_steps, 3)) if config.record_contact_forces else None
-            ),
-            "drift": (
-                np.zeros((n_steps, n_v)) if config.record_drift_control else None
-            ),
-            "control_accel": (
-                np.zeros((n_steps, n_v)) if config.record_drift_control else None
-            ),
-            "kinetic_energy": np.zeros(n_steps),
-            "potential_energy": np.zeros(n_steps),
+    def _build_provenance(
+        self, config: GeneratorConfig, layout: ModelDoFLayout
+    ) -> SampleProvenance:
+        model_name = str(getattr(self.engine, "model_name", "unknown"))
+        engine_name = type(self.engine).__name__
+        settings = {
+            "seed": config.seed,
+            "duration": config.duration,
+            "timestep": config.timestep,
+            "dimensions": layout.as_dict(),
+            "record_mass_matrix": config.record_mass_matrix,
+            "record_bias_forces": config.record_bias_forces,
+            "record_gravity": config.record_gravity,
+            "record_contact_forces": config.record_contact_forces,
         }
+        settings_digest = hashlib.sha256(
+            json.dumps(settings, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        model_hash = hashlib.sha256(
+            f"{engine_name}:{model_name}:{layout.as_dict()}".encode()
+        ).hexdigest()
+        return SampleProvenance(
+            model_name=model_name,
+            engine_name=engine_name,
+            model_hash=model_hash,
+            native_runtime=platform.python_version(),
+            settings_digest=settings_digest,
+            numerical_refinement="none",
+        )
 
-    def _execute_sim_loop(
-        self,
-        config: GeneratorConfig,
-        control_sequence: np.ndarray,
-        n_steps: int,
-        buffers: dict[str, np.ndarray | None],
-    ) -> None:
-        """Execute the simulation loop, recording state and dynamics each step.
-
-        Args:
-            config: Generator configuration.
-            control_sequence: Control input array (n_steps, n_v).
-            n_steps: Number of simulation steps.
-            buffers: Pre-allocated recording buffers (modified in-place).
-        """
-        for step in range(n_steps):
-            tau = control_sequence[step]
-            self.engine.set_control(tau)
-
-            # Record pre-step state
-            q, v = self.engine.get_state()
-            t = self.engine.get_time()
-
-            buffers["times"][step] = t  # type: ignore[index]
-            buffers["positions"][step] = q  # type: ignore[index]
-            buffers["velocities"][step] = v  # type: ignore[index]
-            buffers["torques"][step] = tau  # type: ignore[index]
-
-            # Record dynamics quantities
-            self._record_dynamics_step(config, step, tau, v, buffers)
-
-            # Step simulation
-            self.engine.step(config.timestep)
-
-            # Record post-step accelerations
-            try:
-                q_new, v_new = self.engine.get_state()
-                buffers["accelerations"][step] = (v_new - v) / config.timestep  # type: ignore[index]
-            except (ValueError, RuntimeError, AttributeError):
-                pass
-
-    def _record_dynamics_step(  # noqa: C901
-        self,
-        config: GeneratorConfig,
-        step: int,
-        tau: np.ndarray,
-        v: np.ndarray,
-        buffers: dict[str, np.ndarray | None],
-    ) -> None:
-        """Record optional dynamics quantities for a single simulation step.
-
-        Args:
-            config: Generator configuration.
-            step: Current step index.
-            tau: Applied torque vector.
-            v: Current velocity vector.
-            buffers: Pre-allocated recording buffers (modified in-place).
-        """
-
-        if config is None:
-            raise ValueError("config must be provided")
-        if config.record_mass_matrix and buffers["mass_matrices"] is not None:
-            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-                buffers["mass_matrices"][step] = self.engine.compute_mass_matrix()
-
-        if config.record_bias_forces and buffers["bias_forces"] is not None:
-            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-                buffers["bias_forces"][step] = self.engine.compute_bias_forces()
-
-        if config.record_gravity and buffers["gravity"] is not None:
-            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-                buffers["gravity"][step] = self.engine.compute_gravity_forces()
-
-        if config.record_contact_forces and buffers["contact"] is not None:
-            try:
-                cf = self.engine.compute_contact_forces()
-                buffers["contact"][step, : len(cf)] = cf[:3]
-            except (ValueError, RuntimeError, AttributeError):
-                pass
-
-        if config.record_drift_control:
-            try:
-                if buffers["drift"] is not None:
-                    buffers["drift"][step] = self.engine.compute_drift_acceleration()
-                if buffers["control_accel"] is not None:
-                    buffers["control_accel"][step] = (
-                        self.engine.compute_control_acceleration(tau)
-                    )
-            except (ValueError, RuntimeError, AttributeError):
-                pass
-
-        # Compute energies
-        try:
-            M = self.engine.compute_mass_matrix()
-            buffers["kinetic_energy"][step] = 0.5 * float(v.T @ M @ v)  # type: ignore[index]
-        except (ValueError, RuntimeError, AttributeError):
-            pass
-        with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-            buffers["potential_energy"][step] = float(  # type: ignore[index]
-                self.engine.compute_potential_energy()  # type: ignore[attr-defined]
-            )
-
-    def _generate_initial_conditions(  # noqa: C901
+    def _generate_initial_conditions(
         self,
         config: GeneratorConfig,
         rng: np.random.Generator,
         n_q: int,
         n_v: int,
     ) -> tuple[np.ndarray, np.ndarray]:
-        """Generate randomized initial conditions.
-
-        Args:
-            config: Generator configuration.
-            rng: Random generator.
-            n_q: Number of position DOFs.
-            n_v: Number of velocity DOFs.
-
-        Returns:
-            Tuple of (initial_positions, initial_velocities).
-        """
-
+        """Generate randomized initial conditions."""
         if config is None:
             raise ValueError("config must be provided")
         if config.vary_initial_positions and config.position_ranges:
             q0 = np.zeros(n_q)
             for pr in config.position_ranges:
-                # Apply to all joints if name is "all", else by index
                 if pr.name == "all":
                     for j in range(n_q):
                         q0[j] = pr.sample(rng)
@@ -508,32 +410,35 @@ class DatasetGenerator(_DatasetExportMixin):
 
         return q0, v0
 
-    def _get_dimensions(self) -> tuple[int, int]:
-        """Get model dimensions (n_q, n_v).
-
-        Returns:
-            Tuple of (position_dims, velocity_dims).
-        """
+    def _get_layout(self) -> ModelDoFLayout:
+        """Resolve n_q / n_v / n_u from the engine."""
         try:
             q, v = self.engine.get_state()
-            return len(q), len(v)
-        except (ValueError, RuntimeError, AttributeError):
-            return 7, 7  # Reasonable default for a 7-DOF arm
+            n_q, n_v = len(q), len(v)
+        except _OPTIONAL_CATCH:
+            n_q = n_v = 7
+        n_u = n_v
+        getter = getattr(self.engine, "get_control_dim", None)
+        num_u_attr = getattr(self.engine, "num_u", None)
+        if callable(getter):
+            try:
+                n_u = int(getter())
+            except _OPTIONAL_CATCH:
+                n_u = n_v
+        elif num_u_attr is not None:
+            n_u = int(num_u_attr)
+        return ModelDoFLayout(n_q=n_q, n_v=n_v, n_u=n_u, n_force=0)
 
     def _get_joint_names(self) -> list[str]:
-        """Get joint names from engine.
-
-        Returns:
-            List of joint name strings.
-        """
+        """Get joint names from engine."""
         try:
             names = self.engine.get_joint_names()
             if names:
                 return names
-        except (ValueError, RuntimeError, AttributeError):
+        except _OPTIONAL_CATCH:
             pass
-        n_q, _ = self._get_dimensions()
-        return [f"joint_{i}" for i in range(n_q)]
+        layout = self._get_layout()
+        return [f"joint_{i}" for i in range(layout.n_q)]
 
 
 __all__ = [

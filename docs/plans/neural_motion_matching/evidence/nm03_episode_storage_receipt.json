@@ -1,0 +1,19 @@
+{
+  "schema": "neural-episode-storage-receipt/1.0.0",
+  "governing_issue": 10618,
+  "parent_epic": 10603,
+  "episode_store_schema": "neural-episode-store/1.0.0",
+  "compact_schema_preserved": "compact-1.0",
+  "validation": {
+    "command": "python -m pytest tests/unit/neural_motion/test_episode_store_nm03.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "test_count": 15,
+    "recorded_at": "2026-09-22"
+  },
+  "limitations": [
+    "Synthetic fixtures and software contracts only",
+    "No native teacher generation or training run",
+    "No claim of full corpus coverage or acceleration"
+  ],
+  "next_action_issue": 10619
+}

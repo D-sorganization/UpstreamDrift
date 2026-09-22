@@ -1,0 +1,21 @@
+{
+  "backend_name": "pink",
+  "solver": "quadprog",
+  "model_name": "anthro_driver",
+  "capture_name": "driver",
+  "step_mode": "physical",
+  "limit_policy": "enforce",
+  "task_policy": "dual_grip_hard_equality",
+  "time_semantics": "strict_physical_elapsed_dt",
+  "frame_count": 0,
+  "frame_success_count": 0,
+  "all_frames_converged": false,
+  "first_failed_frame": null,
+  "per_frame_status": [],
+  "max_velocity_ratio": null,
+  "closure_residual_m": null,
+  "closure_residual_budget_m": 0.0001,
+  "is_qualified": false,
+  "qualification_state": "blocked_unavailable",
+  "block_reason": "pinocchio/pink SDK unavailable on this Windows host; ControlTower micromamba env required for native Pink ConstrainedIkReceipt with closure_residual_m <= 1e-4"
+}

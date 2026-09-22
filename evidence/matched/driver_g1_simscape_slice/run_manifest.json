@@ -1,0 +1,11 @@
+{
+  "schema_version": "matched-swing-slice-manifest/1",
+  "issue": "#10349",
+  "source_candidate": "evidence/matched/driver_full_pinocchio/candidate.npz",
+  "output_candidate": "evidence/matched/driver_g1_simscape_slice/candidate27.npz",
+  "slice_map": "evidence/matched/driver_g1_simscape_slice/slice_map.json",
+  "command": "python -m src.shared.python.motion_matching.coordinate_slice --candidate evidence/matched/driver_full_pinocchio/candidate.npz --out evidence/matched/driver_g1_simscape_slice/candidate27.npz",
+  "source_coordinate_count": 44,
+  "target_coordinate_count": 27,
+  "omitted_count": 17
+}
