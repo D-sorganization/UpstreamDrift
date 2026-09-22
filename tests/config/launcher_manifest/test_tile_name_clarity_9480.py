@@ -12,6 +12,8 @@ import pytest
 
 from src.config.launcher_manifest_loader import LauncherManifest
 
+pytestmark = pytest.mark.unit
+
 CONFUSABLE_PAIRS = [
     ("data_explorer", "data_processor"),
     ("video_analyzer", "video_processor"),
