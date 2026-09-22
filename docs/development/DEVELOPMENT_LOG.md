@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
+
+- **State:** in_review
+- **Owner:** claude (session `fleet-remediation-k`)
+- **Issue:** #10743
+- **Branch:** `fix/10743-docs-consistency-cross-repo`
+- **PR:** pending
+- **Paths:** `scripts/check_agent_docs_consistency.py`, `tests/architecture/test_check_agent_docs_consistency.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 (checker passes on main CLAUDE.md; 33 focused tests pass)
+- **Summary:** Exempt sibling-repo-qualified backticked paths (possessive or not) from the local-existence check so the fleet-managed deferred-validation block no longer fails `repo-structure-gates`; bare local paths stay strict.
+
 ### DL-#9700-Planning · Deferred External Validation Plans
 
 - **State:** in_review

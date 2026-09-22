@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10743 | Treat CLAUDE.md backticked paths qualified by a sibling repo name (possessive or not, e.g. Repository_Management `docs/x.md`) as cross-repo via one named `_SIBLING_REPO_QUALIFIER` in `check_agent_docs_consistency.py`, with guard tests keeping bare local paths strict (hardens the inline #10740 fix). |
 | 2026-09-22 | #10741 | Preserve six unavailable external validation scopes in Board planning while retaining executable software and prior source dispositions. |
 | 2026-09-22 | #9604 | Tools session bridge maps every rig camera to a Tools `CameraIdentity` + `CameraCapabilities` record (`map_camera_records`): negotiated-else-requested mode, unknown shutter, unsupported hardware trigger and device timestamps (host clock), no exposure range; fail-closed on an unready schema, unbound or duplicate views and unmapped clock domains. |
 | 2026-09-22 | #10740 | Record each native C3D source clock and calibrate one fixed rigid upper-body capture plane from declared shoulder, elbow, and wrist markers; reproducible Driver/Iron preflight receipts preserve 110.4/112.7 mm irreducible normal-RMSE lower bounds above the 55 mm 3D marker ceiling, so both planar campaigns are disqualified without flattened measurements or invented fits. |
