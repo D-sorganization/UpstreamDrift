@@ -420,10 +420,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10621 (epic #10603)
 - **Branch:** feat/10621-nm06-masked-proposals
 - **PR:** #10709
-- **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{masked_proposal,proposal_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
+- **Paths:** src/shared/python/neural_motion/proposals/; src/shared/python/motion_matching/inverse/{masked_proposal,proposal_training,regressor_training,basis_time,collapse}.py; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_masked_proposals_nm06.py; tests/unit/motion_matching/test_inverse_regressor_training.py; docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — 19 NM-06 unit tests green (neural_motion proposals + inverse path); PR #10709; software-contract fixtures only
-- **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse-path modules retain stem/collapse/basis-time reuse.
+- **Last verified:** 2026-09-22 at SELF — architecture budget green after trainer splits; 25 unit tests (NM-06 + inverse regressor) green; PR #10709; software-contract fixtures only
+- **Summary:** neural_motion/proposals package binds task u_dim, masked conditioning, selection/mixture heads, observation+regularization training, hybrid fail-closed polish, and strict checkpoints; inverse-path modules retain stem/collapse/basis-time reuse; trainers split under architecture line/parameter budgets via helpers and TrainingConfig/ProposalFromTaskSpec.
 - **Next step:** Confirm quality-gate and unit-test-gate green on PR #10709; squash auto-merge remains armed.
 - **Evidence:** docs/plans/neural_motion_matching/masked_proposals.md; docs/plans/neural_motion_matching/evidence/nm06_masked_proposals_receipt.json
 
