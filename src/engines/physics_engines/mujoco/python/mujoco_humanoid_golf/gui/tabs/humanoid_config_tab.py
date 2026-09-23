@@ -23,7 +23,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
@@ -463,7 +463,7 @@ class HumanoidConfigTab(QWidget):
         width: int,
         height: int,
         widget: QWidget,
-        signal_obj: pyqtSignal,
+        signal_obj: Any,
         log_prefix: str,
     ) -> None:
         """Helper to show a generator dialog."""
