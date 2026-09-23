@@ -12,6 +12,28 @@ Branch `fix/10743-docs-consistency-cross-repo` teaches `scripts/check_agent_docs
 
 Branch `fix/10271-hipcal-provenance`; PR [#10722](https://github.com/D-sorganization/UpstreamDrift/pull/10722). Restores receipt provenance chain (`receipt-provenance-chain/1`) on `anthro_driver`/`anthro_iron` (software-contract; native regen deferred on low disk).
 
+## GolfSwingVisualizer MATLAB Consolidation (#9225)
+
+PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715) (open; implementation commit `f33b40c9c`); branch
+`bot/issue-9225-golfviz-consolidation` off `origin/main` @ `901b2de5e`;
+worktree `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`;
+governing issue [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
+(source:assessment P2, DRY PP1); DL-#9225.
+The four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines each; 323
+shared 8-line blocks between the worst pair) are deleted and replaced by one
+fleet-shared package class at
+`src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m`
+(the 2D-variant superset, restoring the `rng(1)` reproducible ground texture the
+3D copies had silently lost). Both `launch_gui.m` launchers add the shared
+directory to the MATLAB path and fail loudly if it is missing; all four call
+sites use `golfviz.GolfSwingVisualizer(...)`. Verified headless in MATLAB
+R2025b: package resolution from a bare `addpath`, class parse, DbC
+precondition, and both launchers' path setups. Honest gap: the DRY duplication
+ratchet is Python-scoped and does not fingerprint `.m` files, so no baseline
+drop is claimed (follow-up). Full GUI launch/render is not exercised (headless
+GUI rule).
+Next step: Confirm `quality-gate` green on the PR; squash auto-merge lands.
+
 ## Tour Baselines TB-06: Constrained Upper-Body Golfer (#10591)
 
 Branch `feat/10591-upper-body-capture`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363). Lease holder: `codex` (session `01a0ca1f-c09b-78a1-8878-37402a7d4eec`).

@@ -148,6 +148,35 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10722 (ready-for-review)
 - **Next:** Confirm CI green on #10722; after merge, regen natively when disk recovers.
 
+## GolfSwingVisualizer MATLAB Consolidation (#9225)
+
+- PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715)
+  (open); implementation commit `f33b40c9c`.
+- Worktree: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`,
+  branch `bot/issue-9225-golfviz-consolidation` (off `origin/main` @ `901b2de5e`),
+  DL-#9225. Governing issue
+  [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
+  (source:assessment P2, DRY PP1).
+- Delivered: the four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines
+  each) deleted; one fleet-shared package class at
+  `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m`
+  (2D-variant superset: the reproducible-ground-texture `rng(1)` seeding the 3D
+  copies had silently lost). Both `launch_gui.m` launchers add the shared
+  directory to the MATLAB path and fail loudly if it is missing; all four call
+  sites use `golfviz.GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ)`.
+- Validation: MATLAB R2025b `-batch` headless — package resolves from a bare
+  `addpath`, class parses (75 methods), constructor DbC precondition
+  `GolfSwingVisualizer:InvalidInput` fires, and both launchers' relative path
+  setups resolve the shared package with no shadow copy. Full GUI launch/render
+  is not exercised (headless GUI rule); the diff is behaviour-preserving except
+  for the restored `rng` seeding on the 3D trees.
+- Honest gaps: the `check_dry_duplication_gate.py` ratchet is Python-scoped
+  (`src/**/*.py`) and does not fingerprint `.m` files, so no ratchet baseline
+  drops; extending it to MATLAB is a follow-up. `quality-gate` is expected
+  green (no Python/CI surface changed).
+- Next: confirm `quality-gate` green on the PR; squash auto-merge lands; release
+  the lease.
+
 ## Succession — Motion Matching (2026-09-22)
 
 - **Goal:** Finish Antigravity-started motion matching (club-only CO + neural NM)
@@ -1832,6 +1861,11 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 [Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.
 
 ## Change Log
+
+- 2026-09-22T15:20:00Z — Consolidated the four drifted `GolfSwingVisualizer.m`
+  copies into one fleet-shared `+golfviz` package class; both launchers wire the
+  shared path; PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715)
+  open (DL-#9225, issue #9225). Commit f33b40c9c.
 
 - 2026-09-22T16:30:00Z — Rematch CO-10 survivor #10720 onto trunk after #10718 baseline; keep runnable saved-job + architecture split; do not reopen #10719; do not touch NM-06. Commit SELF.
 - 2026-09-22T16:15:00Z — Succession handoff PR #10721: CO-10 #10718 and NM-06 #10709 merged; do not steal NM-07 #10622. Commit SELF.
