@@ -347,6 +347,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** When Tools #4946 lands the live interval run record, bump the pin and mark I1/I2/I3 in the ledger with merge SHAs, tests and acceptance evidence.
 - **Evidence:** tests/config/industrial_readiness/; tests/shared_contracts/test_impact_interval_provider.py; docs/operations/impact-zone-readiness-index.md.
 
+### DL-#10590 · TB-05: Fit and Replay the Hub–Arm–Club Triple Pendulum
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10590 (parent #10584)
+- **Branch:** feat/tb05-triple-pendulum-fit-10590
+- **PR:** #10644
+- **Paths:** src/engines/physics_engines/pendulum/python/motion_matching/adapters_triple.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_triple.py; src/engines/physics_engines/pendulum/python/motion_matching/provider_triple.py; src/engines/physics_engines/pendulum/python/motion_matching/qualification_triple.py; tests/unit/engines/physics_engines/pendulum/test_triple_pendulum_fit.py; docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (All 23 pendulum unit tests pass; LOD zero new violations; architecture budget OK; DRY duplication gate passed; ruff check, ruff format, and mypy clean).
+- **Summary:** Implemented 3-DOF planar torque-driven Hub–Arm–Club triple pendulum fitting, independent 4x tighter replay, and Tools shipped simulator replay parity. Formulated 21 degree-6 Bernstein control points strictly bounded and regularized with curvature and effort penalties. Validated positive non-zero geometry calibration ($L_1 \approx 0.315\text{ m}, L_2 \approx 0.585\text{ m}, L_3 \approx 0.782\text{ m}$ for driver; $L_1 \approx 0.315\text{ m}, L_2 \approx 0.585\text{ m}, L_3 \approx 0.700\text{ m}$ for iron) seeded from double fit without invalid zero-length link reductions. Generated authoritative baseline packages and qualification receipts for Driver and 7-Iron.
+- **Next step:** Open PR referencing #10590, await green CI, merge and release lease.
+- **Evidence:** docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json; tests/unit/engines/physics_engines/pendulum/test_triple_pendulum_fit.py.
+
 ### DL-#9548 · Impact-Interval Energy Audit Consumer Gate
 
 - **State:** in_review
