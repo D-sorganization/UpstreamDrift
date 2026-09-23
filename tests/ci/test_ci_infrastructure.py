@@ -702,6 +702,25 @@ class TestCIEnvironmentCompatibility:
         assert "BOT_TRIGGER_TOKEN=$token" in workflow
         assert "steps.token-check.outputs.can_trigger == 'true'" in workflow
 
+    def test_bot_ci_trigger_never_dispatches_full_audit_ci_on_pr_heads(
+        self,
+    ) -> None:
+        """Bot CI Trigger must not workflow_dispatch ci-standard onto a PR head.
+
+        A dispatched ci-standard run takes the schedule/manual branches (full
+        src/ mypy baseline audit, --cov=src over the dependency-light lane with
+        a 75% floor), so it posts red ``code-quality``/``tests`` checks and a
+        red ``quality-gate`` onto the PR head SHA for code the PR never touched.
+        The trigger must instead approve the PR's own pending pull_request runs.
+        """
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "Bot-CI-Trigger.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "gh workflow run ci-standard.yml" not in workflow
+        assert "status=action_required" in workflow
+        assert "/approve" in workflow
+
     def test_frontend_cleanup_runs_before_ui_working_directory_default(self) -> None:
         """The frontend pre-checkout cleanup must not require ui/ to exist."""
         try:
