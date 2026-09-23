@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from src.shared.python.motion_matching.club_target import ClubTarget, SourceProvenance
 from src.shared.python.motion_matching.hybrid import (
     INFERENCE_SCHEMA,
