@@ -234,16 +234,19 @@ def test_bare_local_missing_path_still_fails_near_sibling_repo_mention(
 def test_fleet_managed_sections_are_exempt_from_local_path_checks(
     tmp_path: Path, monkeypatch
 ) -> None:
-    """Paths inside <!-- BEGIN FLEET-MANAGED --> blocks belong to hub docs (#10772)."""
+    """Paths inside <!-- BEGIN FLEET-MANAGED --> blocks are synced from RM and not local."""
     monkeypatch.setattr(checker, "ROOT", tmp_path)
     text = (
-        "<!-- BEGIN FLEET-MANAGED: test-section -->\n"
-        "Read `docs/fleet-night-watch.md` and `docs/agents/connect.md`.\n"
-        "<!-- END FLEET-MANAGED: test-section -->\n"
+        "<!-- BEGIN FLEET-MANAGED: agent-lanes -->\n"
+        "Staff Hub role playbooks `docs/fleet-night-watch.md`.\n"
+        "<!-- END FLEET-MANAGED: agent-lanes -->\n"
+        "Local required file `docs/required_local.md`.\n"
     )
     errors: list[str] = []
     checker._assert_path_references_exist(text, errors)
-    assert errors == []
+    assert errors == [
+        "CLAUDE.md references a missing path: docs/required_local.md",
+    ]
 
 
 def test_runner_dashboard_sibling_repo_qualified_paths_are_not_local(

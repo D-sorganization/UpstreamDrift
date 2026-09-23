@@ -37,21 +37,26 @@ _SIBLING_REPOS = (
     "Repository_Management",
     "Runner_Dashboard",
     "Tools",
-    "Tools_Private",
     "Gasification_Model",
+    "AffineDrift",
 )
 _SIBLING_REPO_QUALIFIER = re.compile(
     r"\b(?:" + "|".join(map(re.escape, _SIBLING_REPOS)) + r")(?:['’]s)?\s*$"
 )
-_FLEET_MANAGED_BLOCK = re.compile(
+_FLEET_MANAGED_SECTION = re.compile(
     r"<!-- BEGIN FLEET-MANAGED:[^\n]*?-->.*?<!-- END FLEET-MANAGED:[^\n]*?-->",
-    flags=re.DOTALL,
+    re.DOTALL,
 )
 
 
 def _strip_fleet_managed_sections(text: str) -> str:
-    """Remove fleet-managed sections centrally synced from Repository_Management."""
-    return _FLEET_MANAGED_BLOCK.sub("", text)
+    """Strip fleet-managed blocks synced centrally from Repository_Management.
+
+    These blocks describe fleet-wide infrastructure and cite playbooks or
+    tools housed in sibling repositories (e.g. Repository_Management or
+    Runner_Dashboard) which do not exist in this checkout.
+    """
+    return _FLEET_MANAGED_SECTION.sub("", text)
 
 
 def _read(path: Path) -> str:
@@ -187,8 +192,8 @@ def _is_glob_pattern(path_text: str) -> bool:
 
 
 def _assert_path_references_exist(claude: str, errors: list[str]) -> None:
-    unmanaged_text = _strip_fleet_managed_sections(claude)
-    for path_text in _iter_repo_relative_paths(unmanaged_text):
+    unmanaged_claude = _strip_fleet_managed_sections(claude)
+    for path_text in _iter_repo_relative_paths(unmanaged_claude):
         if _is_glob_pattern(path_text):
             continue
         if not (ROOT / path_text.rstrip("/")).exists():
