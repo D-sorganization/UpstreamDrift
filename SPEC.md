@@ -6842,6 +6842,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | n/a | ⚡ Bolt: replace np.linalg.norm with np.sqrt(np.einsum) and math.sqrt(np.dot) in electrical_model.py (spec-exempt: micro-optimization) |
 | 2026-09-23 | #10764 | Optimize norm calculations in motion capture reconstruct (spec-exempt: micro-optimization) |
 | 2026-09-23 | #10762 | Fix CI Standard deleted test check false-positives in shallow checkouts by diffing against merge-base (issue #10751). |
 | 2026-09-23 | #10761 | Fix tests mutating committed JSON artifacts in place (club_fast_matching.json, mujoco simulation_config.json); route test output to tmp_path (issue #10750). |

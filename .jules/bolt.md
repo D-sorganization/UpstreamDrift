@@ -143,3 +143,7 @@
 ## 2024-05-21 - [Optimize Terminal Norm Calculation in RL]
 **Learning:** In reinforcement learning reward and metric calculations (e.g. `src/reinforcement_learning/trajectory_funnel_benchmark.py`), calculating the distance between the final state and the reference state using `np.linalg.norm(states[-1] - reference[-1])` incurs overhead. Replacing it with `math.sqrt(np.vdot(diff, diff))` avoids intermediate array allocations and NumPy dispatch overhead for small 1D state arrays.
 **Action:** Replace `np.linalg.norm(states[-1] - reference[-1])` with pre-calculated differences and `math.sqrt(np.vdot(diff, diff))` for terminal state error calculations.
+
+## 2026-10-04 - [Optimize np.linalg.norm in electrical model]
+**Learning:** For small arrays or tight loops, replacing `np.linalg.norm` with `np.sqrt(np.einsum)` or `math.sqrt(np.dot)` provides significant performance speedups by avoiding temporary allocations and NumPy overhead. This was applied to `src/shared/python/sidekick/calculators/electrical/electrical_model.py`.
+**Action:** Replace `np.linalg.norm` with `np.sqrt(np.einsum)` for element-wise norm calculations and `math.sqrt(np.dot)` for small 1D array norm calculations when safe, ensuring no regressions.
