@@ -46,84 +46,31 @@ from src.shared.python.tour_baselines.calibration import (
     map_initial_state_double_pendulum,
 )
 
+from .provider import (
+    _build_failure_result,
+    _compute_target_hash,
+    _resolve_plane,
+    build_canonical_fit_result,
+    validate_club_target_preconditions,
+)
+
 logger = logging.getLogger(__name__)
 
 __all__ = ["TriplePendulumFitSwingProvider"]
 
 
-def _compute_target_hash(club: ClubTarget) -> str:
-    """Compute a deterministic 16-character SHA-256 target hash from observations."""
-    h = hashlib.sha256()
-    h.update(np.ascontiguousarray(club.time, dtype=np.float64).tobytes())
-    h.update(np.ascontiguousarray(club.butt, dtype=np.float64).tobytes())
-    h.update(np.ascontiguousarray(club.clubhead, dtype=np.float64).tobytes())
-    return h.hexdigest()[:16]
-
-
-def _build_failure_result(
+def _build_failure_result_triple(
     message: str,
     target_hash: str,
     engine_version: str,
 ) -> CanonicalFitResult:
-    """Construct an honest CanonicalFitResult representing solver or input failure."""
-    fail_cost = 999.0
-    return CanonicalFitResult(
-        theta_optimal=np.zeros(3 * COEFFS_PER_JOINT, dtype=np.float64),
-        final_cost=fail_cost,
-        final_rmse_m=float(math.sqrt(fail_cost)),
-        solver_status="failure",
-        iterations=0,
-        n_evaluations=0,
-        wall_clock_s=0.0,
+    """Construct an honest CanonicalFitResult representing solver or input failure for triple pendulum."""
+    return _build_failure_result(
         message=message,
-        history=(),
-        method="bounded_bernstein_least_squares_triple",
-        git_commit=git_commit_short(),
-        engine_version=engine_version,
         target_hash=target_hash,
-        timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        engine_version=engine_version,
+        theta_dim=3 * COEFFS_PER_JOINT,
     )
-
-
-def _resolve_plane(
-    club: ClubTarget,
-    opts: FitOptions | None,
-) -> tuple[ClubTarget, CalibratedSwingPlane | None, str | None]:
-    """Resolve calibrated swing plane from options or estimate from target observations."""
-    calibrated_plane: CalibratedSwingPlane | None = None
-    if opts and getattr(opts, "engine_options", None):
-        calibrated_plane = getattr(opts.engine_options, "calibrated_plane", None)
-
-    if calibrated_plane is not None:
-        projected = project_to_calibrated_plane(club, calibrated_plane)
-        return projected, calibrated_plane, None
-
-    joint_pts = np.vstack([club.butt, club.clubhead])
-    try:
-        plane = estimate_swing_plane(joint_pts)
-        projected = project_to_calibrated_plane(club, plane)
-        return projected, plane, None
-    except ValueError as exc:
-        logger.warning(
-            "Degenerate points for plane estimation (%s); falling back to canonical plane",
-            exc,
-        )
-        origin = np.zeros(3)
-        basis = np.eye(3)
-        res = GeometricProjectionResidual(
-            rmse=0.0, max_deviation=0.0, signed_deviations=np.zeros(0)
-        )
-        fallback_plane = CalibratedSwingPlane(
-            origin=origin,
-            basis=basis,
-            transform_world_to_plane=np.eye(4),
-            transform_plane_to_world=np.eye(4),
-            inclination_deg=0.0,
-            azimuth_deg=0.0,
-            residual=res,
-        )
-        projected = project_to_calibrated_plane(club, fallback_plane)
-        return projected, fallback_plane, None
 
 
 def _resolve_geometry_and_q0_triple(
@@ -194,32 +141,8 @@ def _build_canonical_triple_result(
             fit_res.profile.wrist_controls,
         ]
     )
-    final_rmse = fit_res.final_rmse_m
-    final_cost = float(final_rmse**2)
-    max_club_rmse = 0.150
-    is_success = bool(fit_res.converged and final_rmse <= max_club_rmse)
-
-    msg = (
-        f"t0_evaluated_before_step=True; "
-        f"unforced_rmse_m={fit_res.unforced_rmse_m:.4f}; "
-        f"converged={fit_res.converged}; {fit_res.message}"
-    )
-
-    return CanonicalFitResult(
-        theta_optimal=np.asarray(all_coeffs, dtype=np.float64),
-        final_cost=final_cost,
-        final_rmse_m=final_rmse,
-        solver_status="success" if is_success else "failure",
-        iterations=fit_res.iterations,
-        n_evaluations=fit_res.evaluations,
-        wall_clock_s=elapsed,
-        message=msg,
-        history=(final_cost,),
-        method="scipy SLSQP/TRF triple",
-        git_commit=git_commit_short(),
-        engine_version=engine_version,
-        target_hash=target_hash,
-        timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    return build_canonical_fit_result(
+        all_coeffs, fit_res, elapsed, target_hash, engine_version
     )
 
 
@@ -237,23 +160,18 @@ class TriplePendulumFitSwingProvider:
         t_start = time.perf_counter()
         target_hash = _compute_target_hash(club)
 
-        if len(club.time) < 2 or np.any(np.diff(club.time) <= 0.0):
-            return _build_failure_result(
-                "Target times must have at least 2 strictly increasing frames",
-                target_hash,
-                self.engine_version(),
-            )
-        if not (np.isfinite(club.butt).any() and np.isfinite(club.clubhead).any()):
-            return _build_failure_result(
-                "Target observations contain no finite points",
-                target_hash,
-                self.engine_version(),
-            )
+        precondition_err = validate_club_target_preconditions(
+            club, target_hash, self.engine_version(), theta_dim=3 * COEFFS_PER_JOINT
+        )
+        if precondition_err is not None:
+            return precondition_err
 
         # 1. Project onto calibrated swing plane
         projected_club, _, plane_err = _resolve_plane(club, opts)
         if plane_err is not None:
-            return _build_failure_result(plane_err, target_hash, self.engine_version())
+            return _build_failure_result_triple(
+                plane_err, target_hash, self.engine_version()
+            )
 
         # 2. Calibrate link geometry and map feasible initial state q0, v0
         pivot = np.zeros(3)
@@ -261,12 +179,13 @@ class TriplePendulumFitSwingProvider:
             projected_club, pivot
         )
         if init_err is not None:
-            return _build_failure_result(init_err, target_hash, self.engine_version())
+            return _build_failure_result_triple(
+                init_err, target_hash, self.engine_version()
+            )
 
-        # 3. Formulate analytical dynamics and execute bounded optimization
+        # 3. Optimize bounded Bernstein torques
         dynamics = create_calibrated_triple_pendulum_dynamics(l1, l2, l3)
         max_nfev = opts.maxiter if opts and opts.maxiter else 100
-
         target_data = TriplePendulumFitTarget(
             times=projected_club.time,
             grip=projected_club.butt,
@@ -289,7 +208,7 @@ class TriplePendulumFitSwingProvider:
                 options=fit_options,
             )
         except (ValueError, RuntimeError, np.linalg.LinAlgError) as exc:
-            return _build_failure_result(
+            return _build_failure_result_triple(
                 f"Optimization failed: {exc}", target_hash, self.engine_version()
             )
 

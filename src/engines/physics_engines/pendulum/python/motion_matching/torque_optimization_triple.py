@@ -21,6 +21,9 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.triple_pen
 from src.engines.physics_engines.pendulum.python.motion_matching.adapters_triple import (
     forward_kinematics_3dof,
 )
+from src.engines.physics_engines.pendulum.python.motion_matching.torque_optimization import (
+    prepare_fit_target_arrays,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -280,20 +283,9 @@ def fit_bounded_triple_pendulum(
 ) -> TripleFitTrajectoryResult:
     """Optimize 21 degree-6 Bernstein control points subject to explicit bounds and regularization."""
     opts = options or TriplePendulumFitOptions()
-    p0 = np.zeros(2) if opts.pivot is None else np.asarray(opts.pivot, dtype=float)[:2]
-    times = np.asarray(target.times, dtype=np.float64)
-    duration = float(times[-1] - times[0])
-    if duration <= 0.0:
-        raise ValueError("Target duration must be strictly positive")
-
-    grip_arr = np.asarray(target.grip, dtype=np.float64)[:, :2]
-    head_arr = np.asarray(target.head, dtype=np.float64)[:, :2]
-    observed_mask: np.ndarray = np.asarray(
-        np.isfinite(grip_arr).all(axis=1) & np.isfinite(head_arr).all(axis=1),
-        dtype=bool,
+    p0, times, duration, grip_arr, head_arr, observed_mask = prepare_fit_target_arrays(
+        target, opts.pivot
     )
-    if not np.any(observed_mask):
-        raise ValueError("Target contains no valid observations")
 
     lo, hi = _build_triple_torque_bounds(opts)
 
