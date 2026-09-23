@@ -74,7 +74,7 @@
     "l3_club_m": 0.7816981548978451,
     "replay_agreement_m": 0.23378341307331793,
     "replay_head_rmse_m": 0.5449108585421687,
-    "tools_shipped_replay_rmse_m": 0.5485286174040024,
+    "tools_shipped_replay_rmse_m": 0.5695958022023936,
     "unforced_rmse_m": 0.5342724026001054
   },
   "schema_version": "tour-baseline-package/1.0.0",

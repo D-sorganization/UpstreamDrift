@@ -50,6 +50,7 @@ tests/unit/data_io/test_user_config_root.py
 tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** relocate the MCP config in Tools; extend "Restore Defaults" to
   clear the canonical QSettings store.
+
 ## Fleet Remediation — Ledger Freshness Test Pollution (2026-09-22)
 
 - **Branch:** `fix/ledger-freshness-after-10733` · **agent:** `claude` (fleet-remediation)
