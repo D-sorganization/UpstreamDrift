@@ -7,6 +7,7 @@ PlanarDrivenPendulumProfile (TB-02).
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import json
 import logging
 from pathlib import Path
@@ -124,6 +125,51 @@ def _build_physical_metrics(
     )
 
 
+@dataclass(frozen=True)
+class EvaluatedRollouts:
+    q_rollout: np.ndarray
+    v_rollout: np.ndarray
+    q_replay: np.ndarray
+    v_replay: np.ndarray
+    head_arr: np.ndarray
+    grip_arr: np.ndarray
+    replay_dists: list[float]
+
+    @classmethod
+    def from_distances(
+        cls,
+        q_rollout: np.ndarray,
+        v_rollout: np.ndarray,
+        q_replay: np.ndarray,
+        v_replay: np.ndarray,
+        head_dists: list[float],
+        grip_dists: list[float],
+        replay_dists: list[float],
+    ) -> EvaluatedRollouts:
+        return cls(
+            q_rollout=q_rollout,
+            v_rollout=v_rollout,
+            q_replay=q_replay,
+            v_replay=v_replay,
+            head_arr=np.asarray(head_dists, dtype=np.float64),
+            grip_arr=np.asarray(grip_dists, dtype=np.float64),
+            replay_dists=replay_dists,
+        )
+
+    def __iter__(self):
+        return iter(
+            (
+                self.q_rollout,
+                self.v_rollout,
+                self.q_replay,
+                self.v_replay,
+                self.head_arr,
+                self.grip_arr,
+                self.replay_dists,
+            )
+        )
+
+
 def _simulate_and_evaluate_rollout(
     dynamics: DoublePendulumDynamics,
     q0: np.ndarray,
@@ -132,9 +178,7 @@ def _simulate_and_evaluate_rollout(
     profile: BernsteinTorqueProfile,
     l1: float,
     l2: float,
-) -> tuple[
-    np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[float]
-]:
+) -> EvaluatedRollouts:
     """Integrate nominal and 4x tighter replay, computing Euclidean distance tracking."""
     q_rollout, v_rollout = integrate_double_pendulum_rollout(
         dynamics, q0, v0, target.time, profile, substeps=1
@@ -158,15 +202,63 @@ def _simulate_and_evaluate_rollout(
         head_dists.append(float(np.linalg.norm(head_i - target.clubhead[i, :2])))
         replay_dists.append(float(np.linalg.norm(head_rep - head_i)))
 
-    return (
+    return EvaluatedRollouts.from_distances(
         q_rollout,
         v_rollout,
         q_replay,
         v_replay,
-        np.array(head_dists),
-        np.array(grip_dists),
+        head_dists,
+        grip_dists,
         replay_dists,
     )
+
+
+def build_pendulum_status_bundle(
+    solver_status: str,
+    is_within_tolerance: bool,
+) -> StatusBundle:
+    """Build standardized qualification status bundle for planar driven pendulums."""
+    return StatusBundle(
+        solver_convergence=(
+            SolverConvergenceStatus.CONVERGED
+            if solver_status == "success"
+            else SolverConvergenceStatus.MAX_ITERATIONS
+        ),
+        kinematic_accuracy=(
+            KinematicAccuracyStatus.WITHIN_TOLERANCE
+            if is_within_tolerance
+            else KinematicAccuracyStatus.EXCEEDS_THRESHOLD
+        ),
+        dynamic_feasibility=DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE,
+        scientific_qualification=(
+            ScientificQualificationStatus.QUALIFIED
+            if is_within_tolerance
+            else ScientificQualificationStatus.DISQUALIFIED
+        ),
+        product_promotion=ProductPromotionStatus.EXPLORATORY,
+        has_native_replay=True,
+    )
+
+
+def compute_pendulum_qualification_bundle(
+    head_arr: np.ndarray,
+    grip_arr: np.ndarray,
+    solver_status: str,
+    final_cost: float,
+    out_of_plane_res: float = 0.015,
+) -> tuple[float, PhysicalFitMetrics, StatusBundle]:
+    """Compute qualification metrics and status bundle for planar driven pendulums."""
+    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
+    metrics = _build_physical_metrics(
+        head_errors=head_arr,
+        grip_errors=grip_arr,
+        out_of_plane_res=out_of_plane_res,
+        opt_loss=final_cost,
+    )
+    qual_profile = PlanarDrivenPendulumProfile()
+    is_within_tolerance = replay_head_rmse <= qual_profile.max_club_rmse_m
+    statuses = build_pendulum_status_bundle(solver_status, is_within_tolerance)
+    return replay_head_rmse, metrics, statuses
 
 
 def _assemble_baseline_package(
@@ -183,36 +275,8 @@ def _assemble_baseline_package(
     head_arr, grip_arr, replay_dists = dists
     l1, l2 = lengths
 
-    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
-    metrics = _build_physical_metrics(
-        head_errors=head_arr,
-        grip_errors=grip_arr,
-        out_of_plane_res=0.015,
-        opt_loss=result.final_cost,
-    )
-
-    qual_profile = PlanarDrivenPendulumProfile()
-    is_within_tolerance = replay_head_rmse <= qual_profile.max_club_rmse_m
-
-    statuses = StatusBundle(
-        solver_convergence=(
-            SolverConvergenceStatus.CONVERGED
-            if result.solver_status == "success"
-            else SolverConvergenceStatus.MAX_ITERATIONS
-        ),
-        kinematic_accuracy=(
-            KinematicAccuracyStatus.WITHIN_TOLERANCE
-            if is_within_tolerance
-            else KinematicAccuracyStatus.EXCEEDS_THRESHOLD
-        ),
-        dynamic_feasibility=DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE,
-        scientific_qualification=(
-            ScientificQualificationStatus.QUALIFIED
-            if is_within_tolerance
-            else ScientificQualificationStatus.DISQUALIFIED
-        ),
-        product_promotion=ProductPromotionStatus.EXPLORATORY,
-        has_native_replay=True,
+    replay_head_rmse, metrics, statuses = compute_pendulum_qualification_bundle(
+        head_arr, grip_arr, result.solver_status, result.final_cost
     )
 
     identity = BaselineIdentity(
