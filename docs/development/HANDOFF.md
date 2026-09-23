@@ -73,8 +73,9 @@
   Server: `collect` query flag (default false) on `/analysis/statistics`.
 - **Validation:** in `ui/`: `npm ci`, `npx tsc -b`, `npm run lint`,
   `npx vitest run` (98 files / 925 tests passed), `npm run build`. Server:
-  `pytest tests/unit/api/test_analysis_statistics_window.py tests/unit/api/test_routes_analysis_tools.py tests/api/test_generated_ui_api_types.py --no-cov`
-  (39 passed); ruff, architecture budget and error-handling ratchet pass.
+  `pytest tests/unit/api/test_analysis_statistics_window.py tests/unit/api/test_routes_analysis_tools.py tests/api/test_generated_ui_api_types.py tests/scripts/test_monolith_register.py --no-cov`
+  (44 passed; `analysis_tools.py` kept at 800 LOC so it stays off the monolith register); ruff,
+  architecture budget and error-handling ratchet pass.
 - **Next:** remaining #8941 items — `ActuatorPanel`/`SimulationToolbar`
   1000 ms loops onto `usePolling`; force/analysis frames over `/ws/simulate`
   (#8936/#8940).
