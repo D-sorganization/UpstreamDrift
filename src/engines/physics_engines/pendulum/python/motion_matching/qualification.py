@@ -133,7 +133,8 @@ def _simulate_and_evaluate_rollout(
     l1: float,
     l2: float,
 ) -> tuple[
-    np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[float]
+    tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray, list[float]],
 ]:
     """Integrate nominal and 4x tighter replay, computing Euclidean distance tracking."""
     q_rollout, v_rollout = integrate_double_pendulum_rollout(
@@ -158,11 +159,7 @@ def _simulate_and_evaluate_rollout(
         head_dists.append(float(np.linalg.norm(head_i - target.clubhead[i, :2])))
         replay_dists.append(float(np.linalg.norm(head_rep - head_i)))
 
-    return (
-        q_rollout,
-        v_rollout,
-        q_replay,
-        v_replay,
+    return (q_rollout, v_rollout, q_replay, v_replay), (
         np.array(head_dists),
         np.array(grip_dists),
         replay_dists,
@@ -324,22 +321,16 @@ def generate_baseline_package_for_target(
 
     dynamics = create_calibrated_double_pendulum_dynamics(l1, l2)
 
-    (
-        q_rollout,
-        v_rollout,
-        q_replay,
-        v_replay,
-        head_arr,
-        grip_arr,
-        replay_dists,
-    ) = _simulate_and_evaluate_rollout(dynamics, q0, v0, target, profile, l1, l2)
+    trajectories, dists = _simulate_and_evaluate_rollout(
+        dynamics, q0, v0, target, profile, l1, l2
+    )
 
     pkg = _assemble_baseline_package(
         target=target,
         capture_kind=capture_kind,
         result=result,
-        trajectories=(q_rollout, v_rollout, q_replay, v_replay),
-        dists=(head_arr, grip_arr, replay_dists),
+        trajectories=trajectories,
+        dists=dists,
         lengths=(l1, l2),
         maxiter=maxiter,
     )

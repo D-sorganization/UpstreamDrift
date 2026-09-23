@@ -82,7 +82,8 @@ def _simulate_and_evaluate_triple_rollouts(
     profile: BernsteinTripleTorqueProfile,
     lengths: tuple[float, float, float],
 ) -> tuple[
-    np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[float]
+    tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray, list[float]],
 ]:
     """Integrate nominal and 4x tighter replay, computing Euclidean distance tracking."""
     l1, l2, l3 = lengths
@@ -118,11 +119,7 @@ def _simulate_and_evaluate_triple_rollouts(
         head_dists.append(float(np.linalg.norm(head_i - target.clubhead[i, :2])))
         replay_dists.append(float(np.linalg.norm(head_rep - head_i)))
 
-    return (
-        q_rollout,
-        v_rollout,
-        q_replay,
-        v_replay,
+    return (q_rollout, v_rollout, q_replay, v_replay), (
         np.array(head_dists),
         np.array(grip_dists),
         replay_dists,
@@ -264,15 +261,7 @@ def generate_triple_baseline_package_for_target(
     lengths = (l1, l2, l3)
     dynamics = create_calibrated_triple_pendulum_dynamics(l1, l2, l3)
 
-    (
-        q_rollout,
-        v_rollout,
-        q_replay,
-        v_replay,
-        head_arr,
-        grip_arr,
-        replay_dists,
-    ) = _simulate_and_evaluate_triple_rollouts(
+    trajectories, dists = _simulate_and_evaluate_triple_rollouts(
         dynamics, q0, v0, target, profile, lengths
     )
 
@@ -284,8 +273,8 @@ def generate_triple_baseline_package_for_target(
         target=target,
         capture_kind=capture_kind,
         result=result,
-        trajectories=(q_rollout, v_rollout, q_replay, v_replay),
-        dists=(head_arr, grip_arr, replay_dists),
+        trajectories=trajectories,
+        dists=dists,
         lengths=lengths,
         maxiter=maxiter,
         tools_replay_rmse=tools_replay_rmse,
