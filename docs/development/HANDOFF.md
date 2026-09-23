@@ -55,6 +55,30 @@
 - **Next:** once merged, #9604 acceptance is complete; the C3D upload consumer
   (#8865) is the next slice on DL-#9422.
 
+## Simulation Polling Client Side (#8941, DL-#8941) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_8941ui` · branch
+  `fix/8941-client-polling` · commit `SELF` · PR #10748 (predicted at commit
+  time; see PR list for the branch). Agent `claude`, session
+  `fleet-remediation-o`.
+- **Done:** `ui/src/hooks/usePolling.ts` (interval > 0 contract, single-flight
+  ticks, paused while disabled or the tab is hidden, cleared on unmount) and
+  `ui/src/hooks/useIncrementalSeries.ts` (monotonic `since` cursor via
+  `advanceCursor`, new epoch on regression, end-aligned append, `maxPoints`
+  window). `AnalysisPanel` fetches
+  `/api/analysis/statistics?collect=true&limit=&since=` once per tick through
+  `ui/src/api/analysisStatistics.ts`; `apiFetchWithHeaders` exposes the cursor
+  header. `ForceOverlayPanel` uses `usePolling` at 500 ms (was 200 ms).
+  Server: `collect` query flag (default false) on `/analysis/statistics`.
+- **Validation:** in `ui/`: `npm ci`, `npx tsc -b`, `npm run lint`,
+  `npx vitest run` (98 files / 925 tests passed), `npm run build`. Server:
+  `pytest tests/unit/api/test_analysis_statistics_window.py tests/unit/api/test_routes_analysis_tools.py tests/api/test_generated_ui_api_types.py --no-cov`
+  (39 passed); ruff, architecture budget and error-handling ratchet pass.
+- **Next:** remaining #8941 items — `ActuatorPanel`/`SimulationToolbar`
+  1000 ms loops onto `usePolling`; force/analysis frames over `/ws/simulate`
+  (#8936/#8940).
+
 ## Analysis Statistics Server Side (#8941, DL-#8941) — 2026-09-22
 
 - **Repo / worktree:** D-sorganization/UpstreamDrift ·

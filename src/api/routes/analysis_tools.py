@@ -423,6 +423,22 @@ async def get_analysis_metrics(
         ) from exc
 
 
+def _collect_and_store_snapshot(engine_manager: EngineManager, logger: Any) -> None:
+    """Collect current metrics and append them to the history.
+
+    Raises:
+        HTTPException: 500 if metric collection fails.
+    """
+    try:
+        _store_metric_snapshot(engine_manager, _collect_metrics(engine_manager))
+    except (RuntimeError, TypeError, AttributeError) as exc:
+        if logger:
+            logger.exception("Metrics collection error")
+        raise HTTPException(
+            status_code=500, detail=f"Metrics collection failed: {str(exc)}"
+        ) from exc
+
+
 @router.get("/analysis/statistics", response_model=AnalysisStatisticsResponse)
 async def get_analysis_statistics(
     response: Response,
@@ -442,6 +458,14 @@ async def get_analysis_statistics(
         le=MAX_METRIC_HISTORY,
         description="Return at most this many of the most recent points.",
     ),
+    collect: bool = Query(
+        False,
+        description=(
+            "Collect and store a fresh metric snapshot before aggregating, so a "
+            "polling client needs one request per tick instead of calling "
+            "/analysis/metrics first."
+        ),
+    ),
     engine_manager: EngineManager = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> AnalysisStatisticsResponse:
@@ -452,6 +476,7 @@ async def get_analysis_statistics(
     returned ``time_series``; omitting both returns the full window exactly as
     before. Out-of-range values are rejected with 422. The absolute index of
     the next sample is returned in the ``X-Analysis-Next-Since`` header.
+    ``collect=true`` stores a fresh snapshot first (one request per UI tick).
 
     Returns:
         Statistical summaries.
@@ -466,6 +491,8 @@ async def get_analysis_statistics(
             detail="No physics engine loaded. Load an engine first.",
         )
 
+    if collect:
+        _collect_and_store_snapshot(engine_manager, logger)
     # Snapshot on the loop so the worker never iterates a deque being appended.
     snapshots = tuple(_get_metric_history(engine_manager))
     total = _get_sample_total(engine_manager, len(snapshots))
