@@ -19,13 +19,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10783 · Enforce the Deferred Validation Catalog
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #10783; full rollout Repository_Management#1687
+- **PR:** #10784
 - **Branch:** `chore/10783-deferred-catalog-guard`
 - **Paths:** `shared_scripts/`, `tests/unit/repo_hygiene/test_deferred_catalog_hook.py`, `.pre-commit-config.yaml`, `docs/development/`, `AGENT_HANDOFF.md`, `README.md`, `SPEC.md`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 (`SELF`; five RED then GREEN controls; twenty combined tests; root Ruff/8162-file format, strict new-test typing, size/manual gates and actual commit/pre-push hooks pass; initialized exact existing Tools gitlink after retained setup failures)
+- **Last verified:** 2026-09-23 (`df571686df`; five RED then GREEN controls; twenty combined tests; root Ruff/8162-file format, strict new-test typing, size/manual gates and actual commit/pre-push hooks pass; initialized exact existing Tools gitlink after retained setup failures)
 - **Summary:** Install the exact central validator and always-run hook while preserving six published v1 plans, executable software and unavailable empirical acceptance.
 - **Next step:** Publish through protected review, then verify default-branch identities in the central audit.
 

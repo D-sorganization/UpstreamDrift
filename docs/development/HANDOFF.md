@@ -6,8 +6,8 @@
 - Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-guard`
 - Branch: `chore/10783-deferred-catalog-guard`
 - Baseline commit: `789e1658bf`
-- Implementation commit: `SELF`
-- Pull request: pending local qualification
+- Implementation commit: `df571686df` (continuation: `SELF`)
+- Pull request: #10784; protected checks pending
 - Governing issue/epic: #10783; Repository_Management#1687
 - Session: `codex-deferred-ud-guard-20260923`
 
@@ -62,7 +62,7 @@ scientific release qualification.
 
 ## Next Steps
 
-Publish a normal protected PR closing #10783,
+Complete protected publication of PR #10784 closing #10783,
 verify the installed files centrally, and update this continuation with results.
 Keep the full rollout and the original scientific acceptance obligations open.
 
