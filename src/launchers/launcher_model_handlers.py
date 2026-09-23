@@ -895,7 +895,10 @@ class SharedRepoHandler:
         model_path = getattr(model, "path", None) or getattr(
             model, "id", "sibling repo"
         )
-        expected_path = repo_path.parent / model_path if repo_path else Path(model_path)
+        model_path_str = str(model_path)
+        expected_path = (
+            repo_path.parent / model_path_str if repo_path else Path(model_path_str)
+        )
         return (
             f"Sibling repository '{model_path}' is not checked out at '{expected_path}'. "
             f"Direct Models/Integrations access requires cloning or checking out '{model_path}' "
