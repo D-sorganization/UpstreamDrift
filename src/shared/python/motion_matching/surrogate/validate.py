@@ -153,11 +153,12 @@ def resample_to_timegrid(
             out[:, d] = np.interp(dst_t, src_t, arr[:, d])
         return out
 
-    seq_len = (
-        int(dst_time)
-        if isinstance(dst_time, (int, np.integer))
-        else (len(dst_time) if dst_time is not None else src_n)
-    )
+    if isinstance(dst_time, (int, np.integer)):
+        seq_len = int(dst_time)
+    elif dst_time is not None:
+        seq_len = len(dst_time)
+    else:
+        seq_len = src_n
     if src_n == seq_len:
         return arr.copy()
     src_x = np.linspace(0.0, 1.0, src_n)

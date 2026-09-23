@@ -892,13 +892,13 @@ class SharedRepoHandler:
 
     def get_missing_checkout_diagnostic(self, model: Any, repo_path: Path) -> str:
         """Return an explicit, actionable diagnostic message for a missing sibling repo checkout."""
-        model_path = getattr(model, "path", None) or getattr(
-            model, "id", "sibling repo"
+        path_val = getattr(model, "path", None) or getattr(model, "id", "sibling repo")
+        expected_path = (
+            repo_path.parent / str(path_val) if repo_path else Path(str(path_val))
         )
-        expected_path = repo_path.parent / model_path if repo_path else Path(model_path)
         return (
-            f"Sibling repository '{model_path}' is not checked out at '{expected_path}'. "
-            f"Direct Models/Integrations access requires cloning or checking out '{model_path}' "
+            f"Sibling repository '{path_val}' is not checked out at '{expected_path}'. "
+            f"Direct Models/Integrations access requires cloning or checking out '{path_val}' "
             f"beside UpstreamDrift."
         )
 
