@@ -12455,7 +12455,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 30445,
+      "ud_bytes": 32080,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36895,9 +36895,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-26",
-        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -36986,9 +36986,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -38065,9 +38065,9 @@
     {
       "path": "realtime/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-27",
-        "commit": "667b3ba078b21c5873e5991a87af0aec005397b2"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -38078,9 +38078,9 @@
     {
       "path": "realtime/transport_file.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-06-09",
-        "commit": "64bd5222b1a4dd4643a1e4da6c702b8146149cfd"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -38520,9 +38520,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-20",
-        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",

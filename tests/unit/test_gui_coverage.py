@@ -15,6 +15,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MUJOCO_GL", "osmesa")
 
 from collections.abc import Generator
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -236,6 +237,7 @@ class TestMuJoCoSimWidget:
         widget.close()
 
 
+@pytest.mark.unit
 @skip_if_unavailable("mujoco")
 @skip_if_unavailable("pyqt6")
 class TestHumanoidLauncher:
@@ -277,6 +279,57 @@ class TestHumanoidLauncher:
         )
 
         launcher.close()
+
+    def test_launcher_does_not_mutate_committed_config(self, qapp) -> None:
+        """Instantiating HumanoidLauncher must never rewrite committed simulation_config.json (#10750)."""
+        from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
+            HumanoidLauncher,
+        )
+
+        committed_path = (
+            Path(__file__).resolve().parents[2]
+            / "src"
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "docker"
+            / "src"
+            / "simulation_config.json"
+        )
+        assert committed_path.exists(), (
+            f"Committed config must exist at {committed_path}"
+        )
+        committed_bytes_before = committed_path.read_bytes()
+
+        launcher = HumanoidLauncher()
+        try:
+            assert launcher.config.engine_root
+            assert launcher.config.model_root
+        finally:
+            launcher.close()
+
+        committed_bytes_after = committed_path.read_bytes()
+        assert committed_bytes_before == committed_bytes_after, (
+            "Committed simulation_config.json must not be mutated on instantiation"
+        )
+
+    def test_launcher_custom_config_path(self, qapp, tmp_path: Path) -> None:
+        """HumanoidLauncher respects custom config_path parameter (#10750)."""
+        from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
+            HumanoidLauncher,
+        )
+
+        custom_cfg = tmp_path / "custom_config.json"
+        launcher = HumanoidLauncher(config_path=custom_cfg)
+        try:
+            assert launcher.config_path == custom_cfg
+            assert not custom_cfg.exists(), "Should not save to disk on init"
+            launcher.save_config()
+            assert custom_cfg.exists(), (
+                "save_config() should write to custom config_path"
+            )
+        finally:
+            launcher.close()
 
 
 @skip_if_unavailable("mujoco")

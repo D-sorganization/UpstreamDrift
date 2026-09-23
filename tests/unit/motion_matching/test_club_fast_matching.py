@@ -28,6 +28,7 @@ from src.shared.python.motion_matching.club_only.fast_matching import (
     checkpoint_identity,
     prune_and_select_pareto,
     run_fast_club_match,
+    save_fast_match_evidence,
     score_branch,
     target_content_hash,
 )
@@ -314,7 +315,7 @@ def test_reduced_to_full_start_strategy_uses_topology_map() -> None:
     assert q_full.shape == (mapping.target_nq,)
 
 
-def test_fast_match_evidence_fixture_roundtrip() -> None:
+def test_fast_match_evidence_fixture_roundtrip(tmp_path: Path) -> None:
     obs = build_calibrated_observation_fixture("TW_wiffle")
     profile = get_club_only_profile("driven_double_pendulum")
     g_hash = _geometry_hash(obs)
@@ -342,9 +343,23 @@ def test_fast_match_evidence_fixture_roundtrip() -> None:
     assert payload["pareto"]
     assert payload["quality_vs_time"]
     assert payload["failed_attempts"] >= 0
-    EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-    EVIDENCE.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    out_file = save_fast_match_evidence(result, evidence_dir=tmp_path)
+    assert out_file.exists()
+    assert out_file.resolve() != EVIDENCE.resolve()
+    saved_payload = json.loads(out_file.read_text(encoding="utf-8"))
+    assert saved_payload["schema"] == FAST_MATCH_SCHEMA
     assert EVIDENCE.exists()
+
+
+def test_fast_match_evidence_does_not_mutate_committed_file(tmp_path: Path) -> None:
+    """Fast-match evidence tests must never mutate committed JSON evidence (#10750)."""
+    assert EVIDENCE.exists(), f"Committed evidence must exist at {EVIDENCE}"
+    committed_bytes_before = EVIDENCE.read_bytes()
+    test_fast_match_evidence_fixture_roundtrip(tmp_path)
+    committed_bytes_after = EVIDENCE.read_bytes()
+    assert committed_bytes_before == committed_bytes_after, (
+        "Committed club_fast_matching.json must not be modified by tests"
+    )
 
 
 def test_preset_budgets_are_ordered() -> None:
