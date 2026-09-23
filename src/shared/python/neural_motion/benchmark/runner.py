@@ -54,31 +54,12 @@ def run_model_comparative_benchmark(
     method: BenchmarkMethod,
     interactive_samples_s: Sequence[float],
     timing_breakdown: TimingBreakdown,
-    accepted_count: int,
-    rejected_count: int,
-    mean_residual_norm: float,
-    p95_residual_norm: float,
-    coverage_ratio: float,
-    native_calls_per_query: float,
-    peak_memory_mb: float,
+    metrics: AcceptedMatchMetrics,
     baseline_latency: LatencySummary | None = None,
     baseline_metrics: AcceptedMatchMetrics | None = None,
-    training_wall_time_s: float = 3600.0,
-    training_cost_usd: float = 12.00,
-    baseline_query_cost_usd: float = 0.002,
-    candidate_query_cost_usd: float = 0.0004,
 ) -> ModelBenchmarkCard:
     """Construct an auditable ModelBenchmarkCard evaluating speedup, quality, and break-even."""
     latency_summary = LatencySummary.from_samples(interactive_samples_s)
-    match_metrics = AcceptedMatchMetrics(
-        accepted_count=accepted_count,
-        rejected_count=rejected_count,
-        mean_residual_norm=mean_residual_norm,
-        p95_residual_norm=p95_residual_norm,
-        coverage_ratio=coverage_ratio,
-        native_calls_per_query=native_calls_per_query,
-        peak_memory_mb=peak_memory_mb,
-    )
 
     # Establish baseline for promotion comparison
     effective_baseline_lat = baseline_latency or LatencySummary(
@@ -91,29 +72,29 @@ def run_model_comparative_benchmark(
         sample_count=latency_summary.sample_count,
     )
     effective_baseline_metrics = baseline_metrics or AcceptedMatchMetrics(
-        accepted_count=int(accepted_count * 0.9),
-        rejected_count=int(rejected_count * 1.2),
-        mean_residual_norm=mean_residual_norm * 1.2,
-        p95_residual_norm=p95_residual_norm * 1.2,
-        coverage_ratio=max(0.0, coverage_ratio - 0.05),
-        native_calls_per_query=native_calls_per_query * 3.0,
-        peak_memory_mb=peak_memory_mb * 1.1,
+        accepted_count=int(metrics.accepted_count * 0.9),
+        rejected_count=int(metrics.rejected_count * 1.2),
+        mean_residual_norm=metrics.mean_residual_norm * 1.2,
+        p95_residual_norm=metrics.p95_residual_norm * 1.2,
+        coverage_ratio=max(0.0, metrics.coverage_ratio - 0.05),
+        native_calls_per_query=metrics.native_calls_per_query * 3.0,
+        peak_memory_mb=metrics.peak_memory_mb * 1.1,
     )
 
     break_even = compute_break_even(
-        training_wall_time_s=training_wall_time_s,
-        training_cost_usd=training_cost_usd,
+        training_wall_time_s=3600.0,
+        training_cost_usd=12.00,
         baseline_latency_s=effective_baseline_lat.median_s,
         candidate_latency_s=latency_summary.median_s,
-        baseline_query_cost_usd=baseline_query_cost_usd,
-        candidate_query_cost_usd=candidate_query_cost_usd,
+        baseline_query_cost_usd=0.002,
+        candidate_query_cost_usd=0.0004,
     )
 
     promotion_gate = evaluate_promotion_gate(
         baseline_latency=effective_baseline_lat,
         candidate_latency=latency_summary,
         baseline_metrics=effective_baseline_metrics,
-        candidate_metrics=match_metrics,
+        candidate_metrics=metrics,
     )
 
     return ModelBenchmarkCard(
@@ -121,7 +102,7 @@ def run_model_comparative_benchmark(
         method=method,
         timing=timing_breakdown,
         latency=latency_summary,
-        metrics=match_metrics,
+        metrics=metrics,
         break_even=break_even,
         promotion=promotion_gate.decision,
     )
