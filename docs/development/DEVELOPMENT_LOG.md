@@ -160,31 +160,44 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Shared `validate_receipt_provenance_chain` (`receipt-provenance-chain/1`) fail-closes missing/stale de Leva, base canonical, and final raw/canonical digests; CI gates `anthro_driver`/`anthro_iron`; producer emits `spec_canonical_sha256`; receipts re-anchored to committed bases/scaled specs that already embed the current table; intermediate hipcal docs not fabricated; physical RMS unchanged/unqualified.
 - **Next step:** Confirm CI green on PR #10722 and squash-merge; schedule native MuJoCo regen when disk is stable.
 
-### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
+### DL-#10378 · Full-Swing Qualification for All Six Engines (MS-104)
 
 - **State:** in_review
+- **Owner:** local
+- **Issue:** #10378 (MS-104, epic #10363; folded MS-109/110/112 owner blockers)
+- **Branch:** feat/ms104-full-swing-qualification
+- **PR:** #10707
+- **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709/#10718/#10720/#10721; regenerated divergence inventory; removed duplicate SPEC #10721 key; PR #10707 squash auto-merge armed.
+- **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
+- **Next step:** Confirm CI green on PR #10707 after SPEC duplicate-key repair and allow squash auto-merge to land.
+
+### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #8887
 - **Branch:** fix/8887-pose-studio-joint-limits
-- **PR:** #10650 (open)
+- **PR:** #10650
 - **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main; fixed unit-test-gate Pose Studio GUI assertions for real PyQt6 CI; suite markers on `test_joint_panel.py`; submodule init.
+- **Last verified:** 2026-09-22 at c3773d62c — merged to main via PR #10650.
 - **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
-- **Next step:** Merge PR #10650 after CI green.
+- **Next step:** N/A — shipped via #10650.
 
 ### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10379 (MS-105, epic #10363; folded PF-08 #10438)
 - **Branch:** feat/10379-ms105-jobs-recovery
 - **PR:** #10704
 - **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after NM-05 #10701; DRY/inventory/BLE001 CI repairs; 28 unit tests green; PR #10704 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at 901b2de5e — merged to main via PR #10704.
 - **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
-- **Next step:** Confirm CI green on PR #10704 and allow squash auto-merge to land.
+- **Next step:** N/A — shipped via #10704.
 
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
@@ -839,7 +852,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
 - **Branch:** feat/10614-co10-reproduction-turnover
-- **PR:** #10720 (survivor follow-up; baseline shipped via #10718)
+- **PR:** #10718 (baseline) + #10720 (survivor; both merged); #10719 closed duplicate
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/matched_swing_program/README.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 — merged via PR #10720 (`abd35e66b`); baseline #10718; duplicate #10719 stays closed
