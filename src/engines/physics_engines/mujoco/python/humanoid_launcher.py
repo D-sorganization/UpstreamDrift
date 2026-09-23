@@ -207,7 +207,11 @@ class ModernDarkPalette(QPalette):
 class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow):
     """Main launcher window for the Humanoid Golf Simulation Suite."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        config_path: Path | str | None = None,
+        save_on_init: bool = False,
+    ) -> None:
         super().__init__()
 
         self.setWindowTitle("Humanoid Golf Simulation Suite")
@@ -222,7 +226,14 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
         # engines/physics_engines/mujoco/python -> engines/physics_engines/mujoco
         self.repo_path = self.current_dir.parent
         # Save config in docker/src where the humanoid_golf simulation expects it
-        self.config_path = self.repo_path / "docker" / "src" / "simulation_config.json"
+        if config_path is not None:
+            self.config_path = Path(config_path)
+        elif "SIMULATION_CONFIG_PATH" in os.environ:
+            self.config_path = Path(os.environ["SIMULATION_CONFIG_PATH"])
+        else:
+            self.config_path = (
+                self.repo_path / "docker" / "src" / "simulation_config.json"
+            )
 
         # State
         self.config_manager = ConfigurationManager(self.config_path)
@@ -235,7 +246,8 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
             self.config.engine_root = str(self.repo_path)
         if not self.config.model_root:
             self.config.model_root = str(PROJECT_ROOT / "src" / "shared" / "urdf")
-        self.config_manager.save(self.config)
+        if save_on_init:
+            self.config_manager.save(self.config)
 
         # Ensure standard humanoid is downloaded
         try:
@@ -250,7 +262,7 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
         self.setup_ui()
 
 
-def get_dockable_ui() -> Any:
+def get_dockable_ui(config_path: Path | str | None = None) -> Any:
     """Return a dockable QWidget wrapping HumanoidLauncher for the unified launcher.
 
     ``HumanoidLauncher`` is a ``QMainWindow``, which has top-level window flags
@@ -261,7 +273,7 @@ def get_dockable_ui() -> Any:
     from PyQt6.QtCore import Qt
     from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
-    launcher_window = HumanoidLauncher()
+    launcher_window = HumanoidLauncher(config_path=config_path)
     launcher_window.setWindowFlags(Qt.WindowType.Widget)
 
     container = QWidget()

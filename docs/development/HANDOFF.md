@@ -51,6 +51,24 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** relocate the MCP config in Tools; extend "Restore Defaults" to
   clear the canonical QSettings store.
 
+## Tests In-Place JSON Mutation Fix (#10750) — 2026-09-23
+
+- **Repo / Worktree:** D-sorganization/UpstreamDrift · `C:\Users\diete\Repositories\_worktrees\UpstreamDrift-10750` · branch `fix/10750-tests-in-place-json-mutation` · agent `antigravity`
+- **Problem:** Running unit tests rewrote committed repository JSON files in place:
+  1. `test_fast_match_evidence_fixture_roundtrip` directly mutated `docs/plans/club_only_matching/evidence/club_fast_matching.json` with machine-specific timing profiles.
+  2. `HumanoidLauncher.__init__` unconditionally called `self.config_manager.save(self.config)` upon instantiation, dirtying `src/engines/physics_engines/mujoco/docker/src/simulation_config.json` with host-specific paths during test runs.
+- **Fix:**
+  1. Export `save_fast_match_evidence(result, evidence_dir=None)` in `fast_matching.py` with DbC contracts; default retains canonical committed evidence directory; `test_fast_match_evidence_fixture_roundtrip` writes to `tmp_path`, and `test_fast_match_evidence_does_not_mutate_committed_file` asserts committed bytes remain untouched.
+  2. Update `HumanoidLauncher.__init__(self, config_path=None, save_on_init=False)` to accept custom `config_path` (and optional `SIMULATION_CONFIG_PATH` env var) and avoid mutating on-disk config during initialization unless `save_on_init=True`. `save_config()` remains wired to explicit user save and simulation launch.
+  3. Mark `TestHumanoidLauncher` with `@pytest.mark.unit` to satisfy the suite-marker ratchet, and add regression tests asserting committed `simulation_config.json` is not mutated on instantiation and custom `config_path` routing is respected.
+  4. Regenerate `divergence_inventory.v1.json` and shrink `suite_marker_baseline.json`.
+- **Validation:**
+  - `pytest tests/unit/motion_matching/test_club_fast_matching.py` (13 passed, 0 dirty files).
+  - `pytest tests/unit/test_gui_coverage.py::TestHumanoidLauncher` (4 passed, 0 dirty files).
+  - `pytest tests/unit/engines/physics_engines/mujoco/test_humanoid_launchers.py tests/unit/launcher/test_launch_mode_fixes.py` (15 passed).
+  - `ruff check` and `ruff format` pass cleanly.
+- **Next:** Open PR, verify CI, auto-merge.
+
 ## Fleet Remediation — Ledger Freshness Test Pollution (2026-09-22)
 
 - **Branch:** `fix/ledger-freshness-after-10733` · **agent:** `claude` (fleet-remediation)

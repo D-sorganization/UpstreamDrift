@@ -11,12 +11,14 @@ import json
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Mapping, Protocol, Sequence
+from pathlib import Path
+from typing import Any, Callable, Final, Mapping, Protocol, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.motion_matching.club_only.constrained_ik import (
     generate_posture_branches,
 )
@@ -32,6 +34,7 @@ from src.shared.python.motion_matching.club_only.topology_mapping import (
 )
 
 FAST_MATCH_SCHEMA = "club-fast-matching/1.0.0"
+FAST_MATCH_EVIDENCE_FILENAME: Final[str] = "club_fast_matching.json"
 _GOVERNING_ISSUE = 10611
 _DEFAULT_BLOCKERS = (
     "native_g1_qualification_requires_desk_native_receipt",
@@ -39,6 +42,7 @@ _DEFAULT_BLOCKERS = (
 )
 
 __all__ = [
+    "FAST_MATCH_EVIDENCE_FILENAME",
     "FAST_MATCH_SCHEMA",
     "BranchScore",
     "CacheKeyMismatchError",
@@ -61,6 +65,7 @@ __all__ = [
     "checkpoint_identity",
     "prune_and_select_pareto",
     "run_fast_club_match",
+    "save_fast_match_evidence",
     "score_branch",
     "target_content_hash",
 ]
@@ -908,3 +913,44 @@ def build_fast_match_evidence(result: FastMatchResult) -> dict[str, Any]:
             else None
         ),
     }
+
+
+@precondition(
+    lambda result, evidence_dir=None: isinstance(result, FastMatchResult),
+    "result must be a FastMatchResult instance",
+)
+@postcondition(
+    lambda out_path: isinstance(out_path, Path) and out_path.exists(),
+    "save_fast_match_evidence must return an existing Path",
+)
+def save_fast_match_evidence(
+    result: FastMatchResult,
+    evidence_dir: Path | str | None = None,
+) -> Path:
+    """Serialize and save a fast-match result to club_fast_matching.json.
+
+    Parameters
+    ----------
+    result:
+        The fast-match execution result to serialize.
+    evidence_dir:
+        Directory to write the evidence file into. Defaults to
+        ``docs/plans/club_only_matching/evidence`` relative to repo root.
+        Tests should pass a temporary directory to avoid rewriting
+        committed evidence artifacts in place (issue #10750).
+
+    Returns
+    -------
+    Path
+        The path of the written JSON evidence file.
+    """
+    if evidence_dir is None:
+        evidence_dir = (
+            get_repo_root() / "docs" / "plans" / "club_only_matching" / "evidence"
+        )
+    evidence_path = Path(evidence_dir)
+    evidence_path.mkdir(parents=True, exist_ok=True)
+    out_file = evidence_path / FAST_MATCH_EVIDENCE_FILENAME
+    payload = build_fast_match_evidence(result)
+    out_file.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return out_file
