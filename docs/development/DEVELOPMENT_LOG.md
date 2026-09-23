@@ -58,16 +58,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
-- **Branch:** feat/10591-upper-body-controls
-- **PR:** #10735 (open)
-- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Branch:** feat/10591-upper-body-capture (merged)
+- **PR:** #10740 (`56ad6a8dcd13221699ec14442b13c1df6fc5729a`, merged)
+- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; src/engines/physics_engines/pendulum/python/motion_matching/upper_body_capture.py; scripts/motion_capture/upper_body_planarity_receipt.py; src/shared/python/tour_baselines/coverage.py; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json; docs/plans/tour_baselines/evidence/tb06_iron_planarity_receipt.json; reports/matched_swing_ledger.json; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at `cbf171f2d` — #10735 rebased onto merged #10733 (`91fff0cc5`) and supersedes stale/conflicted #10645 with its native closed-loop topology, feasibility, bounded-fitting, reaction, and work diagnostics. Its CI DRY gate prompted a shared residual-assembly helper; 31 focused tests, scoped Ruff/format, and the local DRY gate pass.
-- **Summary:** Build the fail-closed constrained upper-body golfer adapter for Driver and Iron. The current native replay and manufactured fitter establish software contracts only; no real capture has been calibrated or qualified.
-- **Next step:** Merge #10735; calibrate fixed geometry/q0/v0/attachments/frame against both native Driver and Iron clocks, preserve diagnostic receipts, and leave any infeasible campaign unqualified.
+- **Last verified:** 2026-09-22 — reproducible C3D preflight receipts preserve raw 360 Hz/654-frame Driver and 359 Hz/657-frame Iron clocks, shared 1 kHz evaluation grid, source hashes, and full coverage for six declared upper-body markers. Their 110.4/112.7 mm normal-RMSE lower bounds exceed the 55 mm profile ceiling, so both are rejected before unsupported planar attachment or torque fitting.
+- **Summary:** The native closed-loop replay and bounded torque fitter remain traceable, but the actual Driver and Iron source campaigns are scientifically disqualified by the fixed-plane lower bound. The coverage matrix and matched-swing ledger retain the two receipts as rejected outcomes rather than leaving a pending campaign or fabricating calibration.
+- **Next step:** Open a separately scoped spatial-topology issue only if a new model is authorized.
 
 ### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
 
