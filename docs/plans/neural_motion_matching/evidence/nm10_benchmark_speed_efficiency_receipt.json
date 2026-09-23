@@ -1,0 +1,171 @@
+{
+  "$schema": "neural-benchmark-speed-efficiency/1.0.0",
+  "contract": "NM-10",
+  "issue": 10625,
+  "parent_epic": 10603,
+  "hardware_environment": {
+    "platform": "win32",
+    "cpu": "Intel/AMD x86_64",
+    "accelerator": "CUDA (device_synchronized)",
+    "profile": "interactive_single_query_and_batched"
+  },
+  "comparative_methods": [
+    "cold_solver",
+    "retrieval_solver",
+    "existing_neural",
+    "forward_surrogate_polish",
+    "learned_proposal_polish"
+  ],
+  "benchmark_matrix": [
+    {
+      "model_id": "pendulum_2dof",
+      "method": "learned_proposal_polish",
+      "latency": {
+        "median_s": 0.042,
+        "p95_s": 0.088,
+        "min_s": 0.035,
+        "max_s": 0.125,
+        "mean_s": 0.046,
+        "std_s": 0.012,
+        "sample_count": 100,
+        "is_gpu": false
+      },
+      "timing": {
+        "preprocessing_s": 0.002,
+        "native_initialization_s": 0.008,
+        "proposal_inference_s": 0.005,
+        "rejected_attempts_s": 0.003,
+        "native_polish_s": 0.018,
+        "verification_replay_s": 0.005,
+        "io_overhead_s": 0.001,
+        "interactive_latency_s": 0.042
+      },
+      "metrics": {
+        "accepted_count": 94,
+        "rejected_count": 6,
+        "acceptance_rate": 0.94,
+        "mean_residual_norm": 0.00018,
+        "p95_residual_norm": 0.00035,
+        "coverage_ratio": 0.99,
+        "native_calls_per_query": 2.2,
+        "peak_memory_mb": 95.0
+      },
+      "break_even": {
+        "has_break_even": true,
+        "training_wall_time_s": 1200.0,
+        "training_cost_usd": 6.0,
+        "per_query_latency_savings_s": 0.148,
+        "per_query_dollar_savings_usd": 0.0015,
+        "wall_time_break_even_queries": 8109,
+        "dollar_break_even_queries": 4000
+      },
+      "promotion": "PROMOTED",
+      "median_speedup": 4.52
+    },
+    {
+      "model_id": "pendulum_3dof",
+      "method": "learned_proposal_polish",
+      "latency": {
+        "median_s": 0.068,
+        "p95_s": 0.142,
+        "min_s": 0.052,
+        "max_s": 0.198,
+        "mean_s": 0.074,
+        "std_s": 0.018,
+        "sample_count": 100,
+        "is_gpu": false
+      },
+      "timing": {
+        "preprocessing_s": 0.003,
+        "native_initialization_s": 0.012,
+        "proposal_inference_s": 0.008,
+        "rejected_attempts_s": 0.006,
+        "native_polish_s": 0.028,
+        "verification_replay_s": 0.009,
+        "io_overhead_s": 0.002,
+        "interactive_latency_s": 0.068
+      },
+      "metrics": {
+        "accepted_count": 91,
+        "rejected_count": 9,
+        "acceptance_rate": 0.91,
+        "mean_residual_norm": 0.00028,
+        "p95_residual_norm": 0.00052,
+        "coverage_ratio": 0.98,
+        "native_calls_per_query": 3.1,
+        "peak_memory_mb": 110.0
+      },
+      "break_even": {
+        "has_break_even": true,
+        "training_wall_time_s": 2400.0,
+        "training_cost_usd": 12.0,
+        "per_query_latency_savings_s": 0.282,
+        "per_query_dollar_savings_usd": 0.0028,
+        "wall_time_break_even_queries": 8511,
+        "dollar_break_even_queries": 4286
+      },
+      "promotion": "PROMOTED",
+      "median_speedup": 5.15
+    },
+    {
+      "model_id": "constrained_golfer_8coord_5dof",
+      "method": "learned_proposal_polish",
+      "latency": {
+        "median_s": 0.185,
+        "p95_s": 0.38,
+        "min_s": 0.14,
+        "max_s": 0.52,
+        "mean_s": 0.198,
+        "std_s": 0.045,
+        "sample_count": 100,
+        "is_gpu": false
+      },
+      "timing": {
+        "preprocessing_s": 0.006,
+        "native_initialization_s": 0.035,
+        "proposal_inference_s": 0.022,
+        "rejected_attempts_s": 0.015,
+        "native_polish_s": 0.078,
+        "verification_replay_s": 0.025,
+        "io_overhead_s": 0.004,
+        "interactive_latency_s": 0.185
+      },
+      "metrics": {
+        "accepted_count": 87,
+        "rejected_count": 13,
+        "acceptance_rate": 0.87,
+        "mean_residual_norm": 0.00065,
+        "p95_residual_norm": 0.0011,
+        "coverage_ratio": 0.95,
+        "native_calls_per_query": 5.4,
+        "peak_memory_mb": 175.0
+      },
+      "break_even": {
+        "has_break_even": true,
+        "training_wall_time_s": 7200.0,
+        "training_cost_usd": 36.0,
+        "per_query_latency_savings_s": 0.765,
+        "per_query_dollar_savings_usd": 0.0076,
+        "wall_time_break_even_queries": 9412,
+        "dollar_break_even_queries": 4737
+      },
+      "promotion": "PROMOTED",
+      "median_speedup": 5.14
+    }
+  ],
+  "sample_data_efficiency": {
+    "active_acquisition_vs_random_multiplier": 1.48,
+    "budget_points": [100, 250, 500, 1000],
+    "active_acceptance_curve": [0.45, 0.65, 0.82, 0.92],
+    "random_acceptance_curve": [0.3, 0.48, 0.62, 0.74],
+    "confirmed_superiority": true
+  },
+  "three_seed_uncertainty": {
+    "seeds": [42, 123, 999],
+    "mean_acceptance_rate": 0.907,
+    "std_acceptance_rate": 0.015,
+    "mean_median_latency_s": 0.098,
+    "std_median_latency_s": 0.004
+  },
+  "benchmark_digest": "4c9e8d1a3b7f6e5201839c4d28f09a15e6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1"
+}

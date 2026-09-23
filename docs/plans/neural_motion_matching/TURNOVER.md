@@ -56,11 +56,13 @@ NM-06 ([#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621) /
 NM-07 ([#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622) /
 [#10768](https://github.com/D-sorganization/UpstreamDrift/pull/10768)),
 NM-08 ([#10623](https://github.com/D-sorganization/UpstreamDrift/issues/10623) /
-[#10770](https://github.com/D-sorganization/UpstreamDrift/pull/10770)) and
-NM-09 ([#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624)) are implemented.
+[#10770](https://github.com/D-sorganization/UpstreamDrift/pull/10770)),
+NM-09 ([#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624) /
+[#10777](https://github.com/D-sorganization/UpstreamDrift/pull/10777)), and
+NM-10 ([#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625)) are implemented.
 The immediate task is
-**[#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625) (NM-10)
-only** (benchmark accepted-match speed, data efficiency and break-even).
+**[#10626](https://github.com/D-sorganization/UpstreamDrift/issues/10626) (NM-11)
+only** (integrate model-specific training and inference with existing tools).
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model

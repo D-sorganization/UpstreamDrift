@@ -6842,6 +6842,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-23 | #10625 | NM-10 benchmark accepted-match speed, data efficiency and break-even: comparative benchmark measuring end-to-end latency, timing breakdown, active vs random acquisition curves, break-even query count, promotion gate (2x speedup, p95 latency, accepted quality), and ModelBenchmarkCard cryptographic digest; software-contract tests only. |
 | 2026-09-23 | #10624 | NM-09 train and qualify a checkpoint for every physical model: per-model matrix covering the #10585 roster, ModelCheckpointCard with variable nq/nv/nu dimensions, assert_model_checkpoint_compatible, forward ODE native replay verification, kinematic proposals without fabricated torques, fail-closed runtime blockers, and deterministic cryptographic hash chain. |
 | 2026-09-23 | #10774 | docs(project): expose six deferred-validation plans and pending Board prerequisites through the existing Projects charter/status contract. |
 | 2026-09-23 | #10623 | NM-08 native verification, distribution checks, and safe fallback: VerifiedInferenceOrchestrator, DistributionBounds, empirical confidence domain metrics, checkpoint contract verification, fail-closed non-finite rejection, independent replay gate, shared remaining compute budget for classical/retrieval fallback, auditable attempt retention; software-contract tests only. |
