@@ -345,9 +345,9 @@ class LauncherTopBarUIMixin:
 
     def _setup_top_bar_config_checkboxes(self, top_bar: QHBoxLayout) -> None:
         """Create config checkboxes and layout controls, adding them to top bar."""
-        from PyQt6.QtCore import QSettings
+        from src.launchers.launcher_settings_store import launcher_settings
 
-        settings = QSettings("UpstreamDrift", "Launcher")
+        settings = launcher_settings()
 
         self.chk_live = QCheckBox("Live Viz")
         self.chk_live.setChecked(settings.value("chk_live", True, type=bool))

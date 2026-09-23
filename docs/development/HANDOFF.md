@@ -26,6 +26,30 @@
 
 # Current Matching Continuation Handoff
 
+## One User Config Root + QSettings Namespace (#8907, DL-#8907) — 2026-09-22
+
+- **Repo / worktree:** D-sorganization/UpstreamDrift ·
+  `C:\Users\diete\Repositories\_wt_ud_8907` · branch
+  `fix/8907-settings-root` · commit `SELF` · PR not created at commit time
+  (see PR list for the branch). Agent `claude`, session `fleet-remediation-j`.
+- **Done:** `src/shared/python/data_io/user_config_root.py` owns the root
+  (`user_config_dir`, `user_config_path`) and `migrate_legacy_user_dirs`
+  (copy launcher-owned names only, never clobber, marker file, retry on
+  failure). `launcher_constants._get_config_dir()` runs it after the `.kiro`
+  block. `src/launchers/launcher_settings_store.py` owns the canonical
+  QSettings pair, legacy aliasing and `persist_window_geometry()` (event
+  filter saves on hide). All listed writers and the diagnostics log viewer
+  now use the helpers.
+- **Not done (by design):** `~/.upstreamdrift/mcp_servers.json` is a
+  Tools-owned contract read by vendored `ai/mcp` modules; moving it needs a
+  Tools change first. Other `~/.golf_modeling_suite` users outside the issue
+  list (chat sessions, subjects, sidekick runs, auth credentials, C3D viewer
+  styles) are untouched.
+- **Validation:** `QT_QPA_PLATFORM=offscreen python -m pytest
+tests/unit/data_io/test_user_config_root.py
+tests/launchers/test_launcher_settings_store.py -q` (all pass).
+- **Next:** relocate the MCP config in Tools; extend "Restore Defaults" to
+  clear the canonical QSettings store.
 ## Fleet Remediation — Ledger Freshness Test Pollution (2026-09-22)
 
 - **Branch:** `fix/ledger-freshness-after-10733` · **agent:** `claude` (fleet-remediation)

@@ -10,6 +10,10 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.data_io.user_config_root import (
+    migrate_legacy_user_dirs,
+    user_config_dir,
+)
 from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
     get_logger,
@@ -31,28 +35,18 @@ REPOS_ROOT = Path(
 
 
 def _get_config_dir() -> Path:
-    """Return the platform-appropriate config directory for upstream-drift.
+    """Return the single per-user config root, migrating legacy roots first.
 
-    Migrates from the defunct .kiro/ path (issue #5713) to a proper location:
-    - Linux/macOS: ~/.config/upstream-drift/launcher  (via platformdirs)
-    - Windows:     %LOCALAPPDATA%/UpstreamDrift/launcher (via platformdirs)
+    The root is :func:`user_config_dir` (platformdirs ``upstream-drift`` /
+    ``launcher``). Legacy locations are migrated one time:
 
-    Backward compatibility: if the old .kiro/launcher path exists and the new
-    path does not yet contain a layout.json, existing config is copied on first
-    run.
+    - ``.kiro/launcher`` in the repo (issue #5713), and
+    - ``~/.golf_modeling_suite/`` and ``~/.upstreamdrift/`` (issue #8907),
+      via :func:`migrate_legacy_user_dirs` (idempotent, never clobbers).
 
     DbC postcondition: returned path does not contain '.kiro'.
     """
-    try:
-        from platformdirs import user_config_dir
-
-        new_dir = Path(user_config_dir("upstream-drift")) / "launcher"
-    except ImportError:
-        # Graceful fallback if platformdirs is somehow unavailable at runtime
-        if sys.platform == "win32":
-            new_dir = Path.home() / "AppData" / "Local" / "UpstreamDrift" / "launcher"
-        else:
-            new_dir = Path.home() / ".config" / "upstream-drift" / "launcher"
+    new_dir = user_config_dir()
 
     # Backward-compatibility migration: copy config from old .kiro/ path on first run
     old_dir = REPOS_ROOT / ".kiro" / "launcher"
@@ -73,6 +67,9 @@ def _get_config_dir() -> Path:
             )
         except OSError as exc:
             logger.warning("Could not migrate old .kiro/ config: %s", exc)
+
+    # One-time migration of the two legacy per-user roots (issue #8907)
+    migrate_legacy_user_dirs(new_dir)
 
     # DbC postcondition
     assert ".kiro" not in str(new_dir), (

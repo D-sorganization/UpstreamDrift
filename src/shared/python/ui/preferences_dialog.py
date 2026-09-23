@@ -40,6 +40,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.data_io.user_config_root import user_config_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -56,7 +57,7 @@ except ImportError:
 logger = get_logger(__name__)
 
 # Default preferences file location
-PREFS_DIR = Path.home() / ".golf_modeling_suite"
+PREFS_DIR = user_config_dir()
 PREFS_FILE = PREFS_DIR / "preferences.json"
 
 

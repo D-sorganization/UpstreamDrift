@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.launchers.startup import _get_theme_colors
+from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.layout_metrics import LayoutMetrics
 
@@ -36,7 +37,7 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-LIBRARY_DIR = Path.home() / ".golf_modeling_suite" / "library"
+LIBRARY_DIR = user_config_path("library")
 DB_PATH = LIBRARY_DIR / "library_index.db"
 
 

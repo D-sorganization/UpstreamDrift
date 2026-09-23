@@ -13,7 +13,7 @@
   "totals": {
     "identical": 423,
     "diverged": 279,
-    "ud-only": 1476,
+    "ud-only": 1477,
     "tools-only": 709,
     "spelling-only": 123
   },
@@ -266,7 +266,7 @@
     "data_io": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 29,
+      "ud-only": 30,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7008,6 +7008,18 @@
       "package": "data_io",
       "subpackage": "",
       "ud_bytes": 25447,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "data_io/user_config_root.py",
+      "classification": "ud-only",
+      "package": "data_io",
+      "subpackage": "",
+      "ud_bytes": 6297,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

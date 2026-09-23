@@ -62,6 +62,7 @@ from src.shared.python.plot_style import (
     PlotStyleSpec,
     PresetLibrary,
 )
+from src.launchers.launcher_settings_store import persist_window_geometry
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Re-exported for backwards compatibility: tests and downstream callers
@@ -1031,6 +1032,7 @@ def _create_dashboard_window_class() -> type:
             self._comparison_worker_class = comparison_worker_class
             self.setWindowTitle("Cross-Engine Perturbation Comparison Dashboard")
             self.setMinimumSize(900, 620)
+            persist_window_geometry(self, "cross_engine_dashboard")
             self._apply_dashboard_theme()
             self._shape_per_engine = bool(shape_per_engine)
             self._traj_renderer: MatplotlibMarkerRenderer | None = None

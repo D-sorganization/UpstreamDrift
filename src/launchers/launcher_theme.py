@@ -11,6 +11,10 @@ from __future__ import annotations
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QMenu
 
+from src.launchers.launcher_settings_store import (
+    launcher_settings,
+    launcher_settings_scope,
+)
 from src.launchers.launcher_manager_attrs import forward_manager_attribute
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.typography import CSS_FONT_UI
@@ -85,10 +89,11 @@ class ThemeManager:
 
             # Initialize FontManager
             if FontManager is not None:
+                settings_org, settings_app = launcher_settings_scope()
                 self._font_manager = FontManager(
                     app_context="UpstreamDrift",
-                    settings_org="D-sorganization",
-                    settings_app="UpstreamDrift",
+                    settings_org=settings_org,
+                    settings_app=settings_app,
                 )
                 self._font_manager.apply_font()
 
@@ -289,13 +294,12 @@ class ThemeManager:
         """
         if plot_menu is None:
             raise ValueError("plot_menu must be provided")
-        from PyQt6.QtCore import QSettings
         from PyQt6.QtGui import QActionGroup
 
         group = QActionGroup(self.launcher)
         group.setExclusive(True)
 
-        settings = QSettings("UpstreamDrift", "Launcher")
+        settings = launcher_settings()
         current_plot = settings.value("plot_theme", "follow_ui")
 
         # "Follow UI Theme" option
@@ -332,9 +336,7 @@ class ThemeManager:
         """Save plot theme preference to QSettings."""
         if theme_name is None:
             raise ValueError("theme_name must be provided")
-        from PyQt6.QtCore import QSettings
-
-        settings = QSettings("UpstreamDrift", "Launcher")
+        settings = launcher_settings()
         settings.setValue("plot_theme", theme_name)
         logger.info("Plot theme set to: %s", theme_name)
 
