@@ -315,3 +315,20 @@ class TestOptionalRuntimeBlockers:
             assert any(
                 "OpenSim" in b or "moco" in b.lower() for b in opensim_card.blockers
             )
+
+    def test_pendulum_model_registry_checkpoint_resolution(self) -> None:
+        from src.shared.python.pendulum_simulator.model_registry import (
+            resolve_model_checkpoint,
+        )
+
+        card_double = resolve_model_checkpoint("double")
+        assert card_double.model_id == "driven_double_pendulum"
+        assert card_double.status == ModelCheckpointStatus.QUALIFIED_NATIVE
+
+        card_triple = resolve_model_checkpoint("triple")
+        assert card_triple.model_id == "driven_triple_pendulum"
+        assert card_triple.status == ModelCheckpointStatus.QUALIFIED_NATIVE
+
+        card_golfer = resolve_model_checkpoint("golfer")
+        assert card_golfer.model_id == "constrained_upper_body_golfer"
+        assert card_golfer.status == ModelCheckpointStatus.QUALIFIED_NATIVE

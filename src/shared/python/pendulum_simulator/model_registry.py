@@ -108,6 +108,20 @@ def clear_registry() -> None:
     _registry.clear()
 
 
+def resolve_model_checkpoint(name: str) -> Any:
+    """Retrieve the qualified neural checkpoint card for a registered physics model (NM-09 #10624)."""
+    from src.shared.python.neural_motion.matrix import build_checkpoint_matrix
+
+    alias_map = {
+        "double": "driven_double_pendulum",
+        "triple": "driven_triple_pendulum",
+        "golfer": "constrained_upper_body_golfer",
+    }
+    canonical_id = alias_map.get(name, name)
+    matrix = build_checkpoint_matrix()
+    return matrix.get_card(canonical_id)
+
+
 # ---------------------------------------------------------------------------
 # Built-in model registrations
 # ---------------------------------------------------------------------------
