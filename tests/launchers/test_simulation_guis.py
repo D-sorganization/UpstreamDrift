@@ -131,17 +131,24 @@ class TestExternalToolsAdapter:
         result = mod._ensure_tools_on_path()
         assert isinstance(result, bool)
 
-    def test_get_video_analyzer_dockable_ui_fallback(self, qapp) -> None:
-        """get_video_analyzer_dockable_ui should return _UnavailableToolWindow if external fails."""
+    def test_get_video_analyzer_dockable_ui_is_self_contained(self, qapp) -> None:
+        """Video Analyzer no longer resolves an external Tools provider (#8883).
+
+        It used to try importing ``video_analyzer.launch_pyqt6`` from a sibling
+        repository that never existed in this checkout, and fell back to a
+        blank placeholder on ``ImportError``. The real implementation now
+        lives in this repo, so it must return the real window even when the
+        (irrelevant) Tools-repo resolution is unavailable.
+        """
         mod = importlib.import_module("src.launchers.external_tools_adapter")
         from unittest.mock import patch
 
+        from src.tools.video_analyzer.gui import VideoAnalyzerWindow
+
         with patch.object(mod, "_ensure_tools_on_path", return_value=False):
             win = mod.get_video_analyzer_dockable_ui()
-            assert win is not None
-            from src.launchers.external_tools_adapter import _UnavailableToolWindow
-
-            assert isinstance(win, _UnavailableToolWindow)
+            assert isinstance(win, VideoAnalyzerWindow)
+            assert win.main_widget.choose_button is not None
 
 
 # ===========================================================================

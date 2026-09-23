@@ -7,7 +7,7 @@
  * See issue #1203
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -19,26 +19,9 @@ import {
   Legend,
 } from 'recharts';
 import { Download, BarChart2, Activity, TrendingUp } from 'lucide-react';
-import { apiFetch } from '@/api/fetch';
+import { fetchAnalysisStatisticsPage } from '@/api/analysisStatistics';
+import { useIncrementalSeries } from '@/hooks/useIncrementalSeries';
 import { BiomechanicsExplorer } from './BiomechanicsExplorer';
-
-/** Analysis metric from the backend. */
-interface AnalysisMetric {
-  metric_name: string;
-  current: number;
-  minimum: number;
-  maximum: number;
-  mean: number;
-  std_dev: number;
-}
-
-/** Statistics response from the backend. */
-interface AnalysisStatistics {
-  sim_time: number;
-  sample_count: number;
-  metrics: AnalysisMetric[];
-  time_series: Record<string, number[]> | null;
-}
 
 interface Props {
   /** Whether the simulation is running */
@@ -75,72 +58,27 @@ export function AnalysisPanel({
   pollInterval = 500,
   maxDataPoints = 200,
 }: Props) {
-  const [statistics, setStatistics] = useState<AnalysisStatistics | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'metrics' | 'plots' | 'export' | 'biomechanics'>(
     'metrics',
   );
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
-  const [timeSeriesData, setTimeSeriesData] = useState<
-    Record<string, number>[]
-  >([]);
-
-  // Fetch metrics and statistics from the backend
-  const fetchStatistics = useCallback(async () => {
-    try {
-      // First collect a new metric snapshot
-      await apiFetch<unknown>('/api/analysis/metrics');
-
-      // Then get statistics
-      const data = await apiFetch<AnalysisStatistics>('/api/analysis/statistics');
-      setStatistics(data);
-      setError(null);
-
-      // Build time series chart data
-      if (data.time_series) {
-        const timeSeries = data.time_series;
-        const maxLen = Math.max(
-          ...Object.values(timeSeries).map((v) => v.length),
-          0,
-        );
-        const chartData: Record<string, number>[] = [];
-        for (let i = Math.max(0, maxLen - maxDataPoints); i < maxLen; i++) {
-          const point: Record<string, number> = { index: i };
-          for (const [key, values] of Object.entries(timeSeries)) {
-            if (i < values.length) {
-              point[key] = values[i];
-            }
-          }
-          chartData.push(point);
-        }
-        setTimeSeriesData(chartData);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch');
-    }
-  }, [maxDataPoints]);
-
-  // Start/stop polling when simulation runs
-  useEffect(() => {
-    if (isRunning) {
-      fetchStatistics();
-      pollRef.current = setInterval(fetchStatistics, pollInterval);
-    } else {
-      if (pollRef.current) {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
-    }
-    return () => {
-      if (pollRef.current) {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
-    };
-  }, [isRunning, pollInterval, fetchStatistics]);
+  // One request per tick (#8941): the server collects a snapshot and returns
+  // only the samples after the last cursor; the hook keeps the window.
+  const {
+    latest: statistics,
+    points: timeSeriesData,
+    error: pollError,
+  } = useIncrementalSeries({
+    fetchPage: fetchAnalysisStatisticsPage,
+    maxPoints: maxDataPoints,
+    intervalMs: pollInterval,
+    enabled: isRunning,
+  });
+  const error = exportError ?? pollError;
 
   // Export handler
   const handleExport = useCallback(async (format: 'csv' | 'json') => {
+    setExportError(null);
     try {
       // Export returns a binary blob (not JSON), so apiFetch — which parses
       // JSON — is not suitable here. Build the URL via getApiBase() to stay
@@ -160,7 +98,7 @@ export function AnalysisPanel({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed');
+      setExportError(err instanceof Error ? err.message : 'Export failed');
     }
   }, []);
 
