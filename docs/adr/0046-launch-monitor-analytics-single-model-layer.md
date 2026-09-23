@@ -84,7 +84,14 @@ any stage.
   G1 port plan per module — the reviewed inventory of the 30 UD modules with
   keep-port-already-home classification is
   [ADR-0046 G1: Launch-Monitor Port Plan](0048-launch-monitor-port-plan.md) (#9348);
-  G2 re-pointing PRs per tab.
+  G2 re-pointing PRs per tab (#9349) — module retirement landed across four
+  waves under #9348 (see ADR-0048 "Stage 2 Blocker (G2)"), gated by
+  `tests/unit/launch_monitor/test_canonical_layer_parity.py`; the UD
+  workbench consumes the canonical layer through the
+  `src/tools/launch_monitor_model/` façade, the Impact Explorer tab
+  through Tools' own `rate_of_closure` re-point, and both launcher tiles
+  state the "same analytics engine" relationship on both launchers, pinned
+  by `tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py`.
 - **Owner ruling (2026-09-02) — TypeScript-Twin Obligation: deferred-twin
   policy.** ADR-0048 G1 sized the TS-twin obligation implied by this record's
   "arrive in the canonical layer's TS twins" framing above and found it
