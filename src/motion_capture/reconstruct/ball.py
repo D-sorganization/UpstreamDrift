@@ -24,6 +24,7 @@ disambiguates several balls on one mat.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -31,7 +32,7 @@ from pydantic import BaseModel, ConfigDict
 
 from src.shared.python.core.contracts import require
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 
 
 @dataclass(frozen=True)
@@ -183,6 +184,7 @@ def ball_at_rest(
         if len(run) >= min_frames:
             pts = np.array(run[-min_frames:])
             med = np.median(pts, axis=0)
-            if np.all(np.linalg.norm(pts - med, axis=1) <= max_drift_px):
+            diff = pts - med
+            if np.all(np.sqrt(np.einsum("ij,ij->i", diff, diff)) <= max_drift_px):
                 return float(med[0]), float(med[1])
     return None
