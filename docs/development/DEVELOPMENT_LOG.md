@@ -17,18 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
+### DL-#10751 · Fix CI Standard 'Deleted Python Test Files' Check False-Positives in Shallow Checkouts
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** antigravity
-- **Issue:** #10750
-- **Branch:** fix/10750-tests-in-place-json-mutation
-- **PR:** #10761
-- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; tests/unit/motion_matching/test_club_fast_matching.py; src/engines/physics_engines/mujoco/python/humanoid_launcher.py; tests/unit/test_gui_coverage.py
+- **Issue:** #10751
+- **Branch:** fix/10751-deleted-tests-shallow-checkout
+- **PR:** #10762
+- **Paths:** scripts/ci/check_deleted_test_files.py; tests/scripts/test_check_deleted_test_files.py; .github/workflows/ci-standard.yml; tests/ci/test_ci_infrastructure.py
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 (`2a9e7a4d3`)
-- **Summary:** Thread optional evidence_dir through save_fast_match_evidence and point tests at tmp_path; support optional config_path and avoid unconditional save_config on HumanoidLauncher instantiation so tests never rewrite committed JSON artifacts.
-- **Next step:** Open PR, verify CI, auto-merge.
+- **Last verified:** 2026-09-23 (`008487870` + c31f26e; 10 passed in test_check_deleted_test_files.py, 85 passed in test_ci_infrastructure.py)
+- **Summary:** Compute deleted tests diff against merge-base instead of base ref tip to prevent tests added on main from being falsely reported as deleted in PRs; set fetch-depth: 0 on checkout in tests job; invoke standalone check_deleted_test_files.py with unit and regression test coverage and fallback-to-base support directly from the CI workflow.
+- **Next step:** Await owner workflow approval for #10762.
 
 ### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
 
@@ -2010,6 +2010,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #10750
+- **Branch:** fix/10750-tests-in-place-json-mutation
+- **PR:** #10761
+- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; tests/unit/motion_matching/test_club_fast_matching.py; src/engines/physics_engines/mujoco/python/humanoid_launcher.py; tests/unit/test_gui_coverage.py
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 (`008487870`)
+- **Summary:** Thread optional evidence_dir through save_fast_match_evidence and point tests at tmp_path; support optional config_path and avoid unconditional save_config on HumanoidLauncher instantiation so tests never rewrite committed JSON artifacts.
+- **Evidence:** PR #10761 merged cleanly to main at 008487870 with all CI checks passing.
 
 ### DL-#8875 · Motion Pipeline Formats Documentation Reconcile
 
