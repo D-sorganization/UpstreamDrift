@@ -17,6 +17,12 @@
   All configured documentation pre-push checks pass; no executable source changes.
 - A first push hit a credential-helper lookup failure; the scoped GitHub CLI
   helper succeeded through all normal hooks. No credential or auth policy changed.
+- CI follow-up: run 35904481521 failed because `docs/index.md` lacked the new
+  `project/` catalog entry. Added its owner/stability row and regenerated both
+  documentation maps with the existing generator. The catalog now passes;
+  documentation governance, size budget, design-manual gate and all 30 related
+  contract tests pass locally. Design-manual release remains inventory-blocked.
+  Hosted checks for this correction must pass before merge.
 - Next: merge through protected review, verify main bytes and actual Projects
   API/UI after reviewed deployment. Keep full rollout parents open.
 - Preserve historical source-specific handoffs below; their PR observations are
