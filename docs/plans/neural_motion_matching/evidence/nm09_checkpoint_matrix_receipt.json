@@ -1,0 +1,56 @@
+{
+  "schema": "neural-checkpoint-matrix-receipt/1.0.0",
+  "governing_issue": 10624,
+  "parent_epic": 10603,
+  "matrix_schema": "neural-checkpoint-matrix/1.0.0",
+  "checkpoint_schema": "neural-model-checkpoint/1.0.0",
+  "matrix_digest": "a73d0303e16aec98b68cd0bbd69fe2b0fe337474ea0b37ca3830e9a8b6e93b72",
+  "source_hashes": {
+    "src/shared/python/neural_motion/matrix/__init__.py": "fb6410ad79c8987788327b595e0ae5604b56f89fa0a4afbde0d6cf6c41901b85",
+    "src/shared/python/neural_motion/matrix/adapters.py": "e602e411d099213b89e864889da2b24f70c75771aa1bebba11cc28af7badec92",
+    "src/shared/python/neural_motion/matrix/builder.py": "d72f13e9d26a426a9e27ed8e0a1022b5a601a06ae2d968689e1fc9ad0339d0b6",
+    "src/shared/python/neural_motion/matrix/replay.py": "2474031c97d607d938ed5c3dfdf9fd788f5f33271259fe1f07e7ba8b102af254",
+    "src/shared/python/neural_motion/matrix/types.py": "e4e046dc7e752b9f1d0936df5229b8a47f18339a41de5a135cc2347e5ec27154",
+    "src/shared/python/neural_motion/__init__.py": "18f11baf439dfeedc070af4395137b3e5c4bd4e162f2220bde54a643504c04e1"
+  },
+  "roster_coverage": {
+    "total_models_evaluated": 20,
+    "qualified_native": [
+      "driven_double_pendulum",
+      "driven_triple_pendulum",
+      "constrained_upper_body_golfer"
+    ],
+    "kinematic_proposals": [
+      "reconstruction_golfer",
+      "reconstruction_double_pendulum",
+      "reconstruction_triple_pendulum"
+    ],
+    "blocked_prerequisites": [
+      "full_body_simscape",
+      "full_body_myosuite",
+      "full_body_opensim",
+      "full_body_drake"
+    ],
+    "reference_catalog_only": [
+      "reference_pinocchio_urdf",
+      "reference_pinocchio_urdf_ik",
+      "reference_drake_urdf",
+      "reference_simple_humanoid",
+      "reference_human_subject",
+      "reference_mujoco_humanoid",
+      "myosuite_body",
+      "opensim_golfer"
+    ]
+  },
+  "validation": {
+    "command": "python -m pytest tests/unit/neural_motion/test_checkpoint_matrix_nm09.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "recorded_at": "2026-09-23"
+  },
+  "limitations": [
+    "Software contracts and native ODE replay verified on reduced planar mechanisms",
+    "Reconstruction models forbid torque fabrication; kinematic representations only",
+    "Full-body models with uninstalled runtimes fail closed with explicit named blockers rather than false success"
+  ],
+  "next_action_issue": 10625
+}
