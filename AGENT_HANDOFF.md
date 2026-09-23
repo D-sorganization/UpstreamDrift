@@ -78,6 +78,19 @@ Branch `feat/10591-upper-body-capture`; parent epic [#10584](https://github.com/
 
 PR [#10730](https://github.com/D-sorganization/UpstreamDrift/pull/10730) merged as `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3`. The TB-04 Driver and Iron receipts remain `DISQUALIFIED`; coverage and the unified ledger report them as rejected rather than qualified.
 
+## Tour Baselines TB-08: Bounded Fit Campaigns With Checkpoints (#10593)
+
+Branch `feat/tb08-bounded-fit-campaigns-10593`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363). Lease holder: `antigravity` (session `f826c3ee-41ca-461c-87f2-1ab5695f3736`).
+
+- Implemented `src/shared/python/tour_baselines/campaign.py`:
+  - `CampaignJobSpec`: parameter bounds, basis/order, holdout window, seeds, wall-time limits, reproduction command, content hashes.
+  - `rank_candidates`: Pareto / feasibility ordering where feasible candidates always beat lower-error infeasible candidates, which are retained as rejected evidence.
+  - `FitCampaignService`: atomic immutable checkpoints, cryptographic hash checking on resume with `IncompatibleResumeError`, cancellation/timeout diagnostics without candidate promotion.
+  - `GeneralizationDisclaimer`: explicit notice that within-capture holdout is not population generalization.
+  - `compute_clock_scores`: exact full-rate clock scores matching stored metrics without resampling distortion.
+  - Pilot benchmark runner for measuring per-evaluation runtime and freezing campaign budgets.
+- Verified by unit test matrix in `tests/unit/tour_baselines/test_fit_campaign.py` (7 passed) and full tour baseline suite (64 passed).
+
 ## Required Before Continuing
 
 - Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
