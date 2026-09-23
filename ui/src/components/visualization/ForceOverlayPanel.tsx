@@ -7,9 +7,10 @@
  * See issue #1199
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type { ForceVector3D, ForceOverlayConfig } from './ForceOverlay';
 import { apiFetch } from '@/api/fetch';
+import { usePolling } from '@/hooks/usePolling';
 
 interface ForceOverlayPanelProps {
   /** Callback when vectors update */
@@ -19,6 +20,12 @@ interface ForceOverlayPanelProps {
   /** Polling interval in ms (0 to disable) */
   pollInterval?: number;
 }
+
+/**
+ * Default overlay refresh period. 2 Hz (was 5 Hz, #8941): the overlay only
+ * polls while it is switched on, the simulation runs and the tab is visible.
+ */
+export const FORCE_POLL_INTERVAL_MS = 500;
 
 const DEFAULT_CONFIG: ForceOverlayConfig = {
   enabled: false,
@@ -45,7 +52,7 @@ const FORCE_TYPE_OPTIONS = [
 export function ForceOverlayPanel({
   onVectorsChange,
   isRunning,
-  pollInterval = 200,
+  pollInterval = FORCE_POLL_INTERVAL_MS,
 }: ForceOverlayPanelProps) {
   const [config, setConfig] = useState<ForceOverlayConfig>(DEFAULT_CONFIG);
   const [totalForce, setTotalForce] = useState(0);
@@ -81,18 +88,12 @@ export function ForceOverlayPanel({
     }
   }, [config, onVectorsChange]);
 
-  // Poll for vectors when enabled and simulation is running.
-  // Use setInterval for polling; the callback (fetchVectors) calls
-  // setState asynchronously via the fetch callback, not synchronously
-  // in the effect body.
-  useEffect(() => {
-    if (!config.enabled || !isRunning || pollInterval <= 0) {
-      return;
-    }
-
-    const interval = setInterval(fetchVectors, pollInterval);
-    return () => clearInterval(interval);
-  }, [config.enabled, isRunning, pollInterval, fetchVectors]);
+  // Poll only while the overlay is on, the simulation runs and the tab is
+  // visible; one request per tick, interval cleared on unmount (#8941).
+  usePolling(fetchVectors, {
+    intervalMs: pollInterval > 0 ? pollInterval : FORCE_POLL_INTERVAL_MS,
+    enabled: config.enabled && isRunning && pollInterval > 0,
+  });
 
   const toggleForceType = useCallback((forceType: string) => {
     setConfig((prev) => {
