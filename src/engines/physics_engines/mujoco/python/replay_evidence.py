@@ -214,7 +214,7 @@ def _convergence(
         return None
     refined_markers = np.stack([kin.marker_positions(qi) for qi in qr])
     diff = markers[:count] - refined_markers
-    return float(np.sqrt(np.max(np.einsum('...i,...i->...', diff, diff))))
+    return float(np.sqrt(np.max(np.einsum("...i,...i->...", diff, diff))))
 
 
 @precondition(lambda files: files.candidate.is_file(), "Source candidate required")
@@ -232,7 +232,7 @@ def generate_replay(
     kin = FullBodyMarkerKinematics(plant.adapter, attachments)
     reference = np.stack([kin.marker_positions(q) for q in arrays["q"]])
     diff = reference - arrays["markers_m"]
-    difference = np.sqrt(np.einsum('...i,...i->...', diff, diff))
+    difference = np.sqrt(np.einsum("...i,...i->...", diff, diff))
     marker_parity = float(np.max(difference[arrays["valid"]]))
     if marker_parity > 1e-8:
         failures.append("Same-state marker parity exceeds 1e-8 m")
