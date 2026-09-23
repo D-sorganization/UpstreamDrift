@@ -1,3 +1,78 @@
+# Deferred Catalog Enforcement — #10783
+
+## Identity
+
+- Repository: D-sorganization/UpstreamDrift
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-guard`
+- Branch: `chore/10783-deferred-catalog-guard`
+- Baseline commit: `789e1658bf`
+- Implementation commit: `SELF`
+- Pull request: pending local qualification
+- Governing issue/epic: #10783; Repository_Management#1687
+- Session: `codex-deferred-ud-guard-20260923`
+
+## Objective and Status
+
+Enforce the six published v1 plans without changing their scope or claiming
+physical evidence. Local implementation and qualification are complete; protected publication
+remains outstanding.
+
+## Files and Decisions
+
+- Three exact central checker blobs come from Repository_Management
+  `0a1041018e737173e49ff97ed4b82283e3cb672f`; the SHA-256 receipt is
+  `docs/development/deferred-catalog-bundle.json`.
+- The existing hook configuration retains every prior hook and adds the
+  always-run catalog command. Both agent-rule blocks already match approved
+  central `a59cb194`; neither needs editing.
+- Five consumer tests exercise the configured command, reject missing checker,
+  premature activation and competing catalog, and verify exact bundle bytes.
+- Original planning files, provider pin, engine code and scientific evidence
+  remain unchanged. Published projection #10776 merged as
+  `8c15de9dafdc0caf5d172c1aa97037ffd4655c74`; all six parked rows and links
+  were verified in the central post-reboot UI/API receipt. Prior sections below
+  preserve historical observations rather than current publication status.
+
+## Validation
+
+- Five tests failed first for missing hook/receipt, then all five passed (1.76 s)
+  using `python3 -m pytest tests/unit/repo_hygiene/test_deferred_catalog_hook.py
+--confcutdir=tests/unit/repo_hygiene -o addopts= -q --tb=short`.
+  This standalone checker test does not require engine fixtures.
+- Ruff lint and format checks pass on all four added Python files; the canonical
+  bundle needs no local formatter changes. Root Ruff and all 8,162 formatted
+  files pass, as do strict new-test typing, size budget, manual governance and
+  twenty combined catalog/SPEC/manual tests. All configured commit hooks pass.
+- All pre-push hooks pass after initializing the exact existing Tools gitlink
+  `a9ed0e7c5c6905b1164082659051d6381068052d`. The first unit-hook collection
+  failed because this fresh worktree lacked that submodule. A pre-existing
+  local clone URL was refused by Git's file-transport policy; a command-scoped
+  override to the tracked HTTPS remote resolved setup without changing policy.
+  The repeated actual unit hook passes; Bandit and other hooks passed already.
+- Strict typing with follow-imports=skip initially hid pytest's decorator types;
+  the ordinary follow-imports=silent invocation passes. No test suppression.
+- The new continuation validates. Four historical placeholder-example findings
+  reproduce in the baseline handoff and remain unchanged.
+
+## Blockers and Risks
+
+Protected CI and default-branch identity verification
+remain open. Catalog validity is not Board approval, physical validation or a
+scientific release qualification.
+
+## Next Steps
+
+Publish a normal protected PR closing #10783,
+verify the installed files centrally, and update this continuation with results.
+Keep the full rollout and the original scientific acceptance obligations open.
+
+## Change Log
+
+- 2026-09-23: Five RED-to-GREEN consumer controls and exact shared bundle installed;
+  preserve six owner plans and all peer turnover content.
+
+---
+
 # Deferred Validation Project Projection — #10774
 
 - Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-project`.

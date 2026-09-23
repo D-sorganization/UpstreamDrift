@@ -1,0 +1,9 @@
+{
+  "source_repository": "D-sorganization/Repository_Management",
+  "source_commit": "0a1041018e737173e49ff97ed4b82283e3cb672f",
+  "files": {
+    "shared_scripts/deferred_validation.py": "152ab473b23daf5b3a32618563ef0cddcdb957d71580cf09aeeb03c17f9d5ee5",
+    "shared_scripts/deferred_planning.py": "521f1a98fecf36990f1f31696144163c85d023be34a465dfbde9aacf81f33f94",
+    "shared_scripts/handoff_validator.py": "eac9039b72c2a2d7f5708b0cb098f84d2a1e78568ed1ec6d17f6756ca6274cd5"
+  }
+}

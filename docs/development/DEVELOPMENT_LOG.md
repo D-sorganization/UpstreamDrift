@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10783 · Enforce the Deferred Validation Catalog
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #10783; full rollout Repository_Management#1687
+- **Branch:** `chore/10783-deferred-catalog-guard`
+- **Paths:** `shared_scripts/`, `tests/unit/repo_hygiene/test_deferred_catalog_hook.py`, `.pre-commit-config.yaml`, `docs/development/`, `AGENT_HANDOFF.md`, `README.md`, `SPEC.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 (`SELF`; five RED then GREEN controls; twenty combined tests; root Ruff/8162-file format, strict new-test typing, size/manual gates and actual commit/pre-push hooks pass; initialized exact existing Tools gitlink after retained setup failures)
+- **Summary:** Install the exact central validator and always-run hook while preserving six published v1 plans, executable software and unavailable empirical acceptance.
+- **Next step:** Publish through protected review, then verify default-branch identities in the central audit.
+
 ### DL-#10593 · Tour Baselines Bounded Fit Campaigns (TB-08)
 
 - **State:** in_progress
@@ -31,16 +43,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10774 · Deferred Validation Project Projection
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #10774; parents Repository_Management#1687 and Runner_Dashboard#1248
 - **Branch:** `docs/deferred-project-projection`
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10776
 - **Paths:** `docs/project/`, `docs/index.md`, `docs/README.md`, `docs/development/HANDOFF.md`, `SPEC.md`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 (a0beddd8ec plus documentation; catalog valid, actual parsers agree on six parked plans/twenty decisions; original planning preserved; scoped title and commit hooks pass; new log entry valid, baseline log findings retained)
+- **Last verified:** 2026-09-23 (8c15de9dafdc0caf5d172c1aa97037ffd4655c74; merged #10776; six parked owner rows/links verified in post-reboot central UI/API receipt; original plans unchanged)
 - **Summary:** Projects all six published external-validation owner plans without inventing evidence, resource approval or completion. Software and research authorities are preserved.
-- **Next step:** Publish the CI catalog correction (run 35904481521); local catalog, generated maps, size/manual/governance gates and 30 documentation tests pass. Merge through protected checks and verify actual project projection; full fleet rollout remains open.
+- **Next step:** Projection published; Board decisions remain pending. Enforcement continues in DL-#10783.
 
 ### DL-#10751 · Fix CI Standard 'Deleted Python Test Files' Check False-Positives in Shallow Checkouts
 
