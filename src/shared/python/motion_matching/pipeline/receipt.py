@@ -59,6 +59,19 @@ class GroundSupportReceiptInputs:
     validate: bool = True
 
 
+def _spec_canonical_sha256(spec_bytes: bytes) -> str:
+    """Canonical digest of UTF-8 JSON specification bytes."""
+    try:
+        document = json.loads(spec_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "spec_bytes must be UTF-8 JSON to compute spec_canonical_sha256"
+        ) from exc
+    if not isinstance(document, dict):
+        raise ValueError("spec_bytes JSON root must be an object")
+    return canonical_sha256(document)
+
+
 def build_ground_support_receipt(
     inputs: GroundSupportReceiptInputs,
 ) -> dict[str, Any]:
@@ -101,6 +114,7 @@ def build_ground_support_receipt(
         ),
         "posture_top_of_backswing": tob_posture,
         "spec_sha256": hashlib.sha256(inputs.spec_bytes).hexdigest(),
+        "spec_canonical_sha256": _spec_canonical_sha256(inputs.spec_bytes),
         "hip_calibration": inputs.hip_report,
         "candidate_sha256": hashlib.sha256(inputs.candidate_bytes).hexdigest(),
         "capture": inputs.capture_name,

@@ -50,6 +50,7 @@ tests/unit/data_io/test_user_config_root.py
 tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** relocate the MCP config in Tools; extend "Restore Defaults" to
   clear the canonical QSettings store.
+
 ## Fleet Remediation — Ledger Freshness Test Pollution (2026-09-22)
 
 - **Branch:** `fix/ledger-freshness-after-10733` · **agent:** `claude` (fleet-remediation)
@@ -123,6 +124,85 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** client-side #8941 items — merge metrics+statistics calls, use
   `since`, delete the 200 ms / 500 ms polling loops, publish frames on
   `/ws/simulate`. Do not touch `ui/` from this branch.
+
+## Hip-Calibrated Receipt Provenance (#10271) — 2026-09-22
+
+- **Goal:** Restore end-to-end provenance for `anthro_driver` / `anthro_iron`
+  ground-support receipts (child of #10254).
+- **Branch / worktree:** `fix/10271-hipcal-provenance` at
+  `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10271-provenance`
+- **Lease:** `cursor-10271-202609220928` (agent `local`)
+- **Done:** `receipt_provenance.py` chain validator (`receipt-provenance-chain/1`);
+  TDD suite; producer emits `spec_canonical_sha256`; CI gate on both baselines;
+  receipts re-anchored to current base + scaled digests after verifying scaled
+  docs already carry current de Leva/shank; intermediate hipcal not fabricated;
+  physical metrics unchanged.
+- **Disk blocker:** C: ≈ 1.5–2 GB free — full native MuJoCo re-execution deferred;
+  provenance re-anchor is software-contract only (not a new physical run).
+- **Validate:**
+  ```powershell
+  $env:QT_QPA_PLATFORM='offscreen'; $env:MPLBACKEND='Agg'; $env:PYTHONPATH='.'
+  python -m pytest tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py -q -n 0 --no-cov --timeout=60
+  python -O -c "from src.shared.python.motion_matching.pipeline.receipt_provenance import *"
+  ```
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10722 (ready-for-review)
+- **Next:** Confirm CI green on #10722; after merge, regen natively when disk recovers.
+
+## GolfSwingVisualizer MATLAB Consolidation (#9225)
+
+- PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715)
+  (open); implementation commit `f33b40c9c`.
+- Worktree: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/local-9225`,
+  branch `bot/issue-9225-golfviz-consolidation` (off `origin/main` @ `901b2de5e`),
+  DL-#9225. Governing issue
+  [#9225](https://github.com/D-sorganization/UpstreamDrift/issues/9225)
+  (source:assessment P2, DRY PP1).
+- Delivered: the four per-tree `GolfSwingVisualizer.m` copies (1180–1183 lines
+  each) deleted; one fleet-shared package class at
+  `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m`
+  (2D-variant superset: the reproducible-ground-texture `rng(1)` seeding the 3D
+  copies had silently lost). Both `launch_gui.m` launchers add the shared
+  directory to the MATLAB path and fail loudly if it is missing; all four call
+  sites use `golfviz.GolfSwingVisualizer(BASEQ, ZTCFQ, DELTAQ)`.
+- Validation: MATLAB R2025b `-batch` headless — package resolves from a bare
+  `addpath`, class parses (75 methods), constructor DbC precondition
+  `GolfSwingVisualizer:InvalidInput` fires, and both launchers' relative path
+  setups resolve the shared package with no shadow copy. Full GUI launch/render
+  is not exercised (headless GUI rule); the diff is behaviour-preserving except
+  for the restored `rng` seeding on the 3D trees.
+- Honest gaps: the `check_dry_duplication_gate.py` ratchet is Python-scoped
+  (`src/**/*.py`) and does not fingerprint `.m` files, so no ratchet baseline
+  drops; extending it to MATLAB is a follow-up. `quality-gate` is expected
+  green (no Python/CI surface changed).
+- Next: confirm `quality-gate` green on the PR; squash auto-merge lands; release
+  the lease.
+
+## MS-104 Full-Swing Qualification Matrix (#10378)
+
+- PR [#10707](https://github.com/D-sorganization/UpstreamDrift/pull/10707)
+  (open); branch `feat/ms104-full-swing-qualification` off origin/main.
+- Delivered: `src/shared/python/motion_matching/full_swing_qualification.py`
+  evaluates 36 required full-body flagship cells (6 engines × driver/iron ×
+  G1/G2/G3) against the matched-swing ledger plus explicit evidence links
+  (MS-100 acceptance, MS-72 conformance, native replay, numerical
+  convergence, provenance hashes). Fail-closed `release_status`; reduced
+  27-DOF Simscape oracle is partial only and cannot fill a flagship cell.
+  Named per-engine owner blockers retained (MS-21/30/42/53/107/111; folded
+  MS-109/110/112 → #10378).
+- Evidence: `docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json`
+  (`release_status=blocked`, `incomplete_required_count=36`).
+- Validation: `python -m pytest tests/unit/motion_matching/test_full_swing_qualification.py -q -n 0 --no-cov`
+  GREEN (15 passed); ruff clean on touched files. CI fix: regenerated
+  `docs/shared_tools/divergence_inventory.v1.json` against pinned
+  `vendor/ud-tools` (includes tools-only `launch_monitor/gspro_connect.py`).
+  Merged `origin/main` through #10709 (NM-06), #10718/#10720 (CO-10), and #10721
+  (succession handoff); `tests/unit/motion_matching/jobs/test_matching_jobs.py`
+  retained; SPEC keeps one row each for #10707, #10709, #10718, #10720, #10721
+  (deduped duplicate #10721 key after main merge).
+- Named blockers: no invented six-engine native pass; every incomplete cell
+  names its owner issue; software-contract fixtures only.
+- Next: Confirm CI green on #10707 tip after SPEC duplicate-key repair; do not
+  start MS-106 or steal NM-07 #10622 from this worktree.
 
 ## Succession — Motion Matching (2026-09-22)
 
@@ -1808,6 +1888,11 @@ ControlTower: ssh alias controltower; WSL ControlTower-Runner. Raw run receipts 
 [Convergence Review](simscape_tour_matching/CONVERGENCE_REVIEW_20260912.md) gives strategy and delegation gates. [Historical Handoff](HANDOFF_HISTORY_20260912.md) preserves earlier matching history. Update this concise handoff and DEVELOPMENT_LOG with each commit.
 
 ## Change Log
+
+- 2026-09-22T15:20:00Z — Consolidated the four drifted `GolfSwingVisualizer.m`
+  copies into one fleet-shared `+golfviz` package class; both launchers wire the
+  shared path; PR [#10715](https://github.com/D-sorganization/UpstreamDrift/pull/10715)
+  open (DL-#9225, issue #9225). Commit f33b40c9c.
 
 - 2026-09-22T16:30:00Z — Rematch CO-10 survivor #10720 onto trunk after #10718 baseline; keep runnable saved-job + architecture split; do not reopen #10719; do not touch NM-06. Commit SELF.
 - 2026-09-22T16:15:00Z — Succession handoff PR #10721: CO-10 #10718 and NM-06 #10709 merged; do not steal NM-07 #10622. Commit SELF.

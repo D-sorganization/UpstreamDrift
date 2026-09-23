@@ -193,3 +193,39 @@ def test_repeated_headings_are_not_flagged_as_duplicate_paragraphs() -> None:
         "Rule 2 explanation.\n"
     )
     assert checker._iter_duplicate_paragraphs(text) == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # Exact fleet-managed sentence synced into CLAUDE.md by #10741 (#10743).
+        "issues. Standard: Repository_Management `docs/fleet-deferred-validation.md`.\n",
+        "Create it from Repository_Management's `docs/templates/HANDOFF.md`.\n",
+        "See Repository_Management’s `docs/fleet-deferred-validation.md`.\n",
+    ],
+)
+def test_sibling_repo_qualified_paths_are_not_local(
+    tmp_path: Path, monkeypatch, text: str
+) -> None:
+    """A path immediately qualified by a sibling repo name is cross-repo (#10743)."""
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == []
+
+
+def test_bare_local_missing_path_still_fails_near_sibling_repo_mention(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The exemption must not leak to unqualified local paths (#10743)."""
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    text = (
+        "Repository_Management owns fleet policy. Read `docs/local_missing.md`.\n"
+        "Read `docs/also_missing.md` before Repository_Management `docs/x.md`.\n"
+    )
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == [
+        "CLAUDE.md references a missing path: docs/local_missing.md",
+        "CLAUDE.md references a missing path: docs/also_missing.md",
+    ]

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T23:16:01Z",
+  "generated_at": "2026-09-23T05:30:25Z",
   "rows": [
     {
       "acceptance": null,
@@ -452,7 +452,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
-      "sha256": "3f0a0809ba61c2dfa5a17c1c67f905b157c71f7c9a5fa8c880c117d6f2890d1d"
+      "sha256": "82b463bc4d703c7f3b62788dcfe4668d96433e8bcca08995b6c088160a3e35a3"
     },
     {
       "acceptance": {
@@ -979,7 +979,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
-      "sha256": "0a58d29aaebc654dd83e4cd897704b0dd4d99057a4f32543f81831734ded37e0"
+      "sha256": "2f4f35320226dac0dec187491e43c2765acd81f93f336d8b7165b7268c0099c7"
     },
     {
       "acceptance": {
@@ -2760,6 +2760,62 @@
         "whole_marker_rmse_m": null
       },
       "reason": null,
+      "receipt_path": "docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json",
+      "sha256": "6e73af194d18fd007a16aa8f5a1cc65afe3b1830c2d7830cc97bbc9d8531ca8d"
+    },
+    {
+      "acceptance": {
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "receipt declares scientific_qualification=disqualified; the ledger preserves it as rejected evidence",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
+      },
+      "candidate_sha": null,
+      "capture": "iron",
+      "engine": "tools",
+      "horizon_s": null,
+      "lane": "tour_baselines",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json",
+      "sha256": "6a63ca63aeabd001d72489140cbfccf0ae536bba88d049cf799ae84ee235664b"
+    },
+    {
+      "acceptance": {
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "receipt declares scientific_qualification=disqualified; the ledger preserves it as rejected evidence",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "tools",
+      "horizon_s": null,
+      "lane": "tour_baselines",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json",
       "sha256": "25631e3856948d7ae98029675b594c34223814c940f46aacf9d6230dd36c70cb"
     },
@@ -3969,5 +4025,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 112
+  "total_receipts": 114
 }

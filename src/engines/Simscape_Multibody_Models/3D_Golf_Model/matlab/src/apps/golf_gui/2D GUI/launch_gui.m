@@ -12,6 +12,14 @@ function launch_gui()
     % Add all subdirectories to the MATLAB path
     addpath(genpath(script_dir));
 
+    % Add the fleet-shared golfviz package (single canonical GolfSwingVisualizer, #9225)
+    sharedDir = fullfile(script_dir, '..', '..', '..', '..', '..', '..', 'shared');
+    if isfolder(sharedDir)
+        addpath(sharedDir);
+    else
+        error('launch_gui:SharedDirNotFound', 'Shared golfviz package directory not found at %s', sharedDir);
+    end
+
     % Launch the GUI
     main_scripts_dir = fullfile(script_dir, 'main_scripts');
     if exist(fullfile(main_scripts_dir, 'golf_swing_analysis_gui.m'), 'file')
