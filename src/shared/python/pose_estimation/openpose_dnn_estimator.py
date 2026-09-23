@@ -42,7 +42,7 @@ MIN_PEAK = 0.05
 def _cv2_net(prototxt: Path, weights: Path) -> Any:
     import cv2
 
-    return cv2.dnn.readNetFromCaffe(str(prototxt), str(weights))
+    return cv2.dnn.readNetFromCaffe(str(prototxt), str(weights))  # type: ignore[attr-defined]
 
 
 class OpenPoseDnnEstimator(PoseEstimator):

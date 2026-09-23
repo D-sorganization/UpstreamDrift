@@ -19,6 +19,38 @@
       "code": "arg-type"
     },
     {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 126,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"mean\" has incompatible type \"ndarray[tuple[int, ...], dtype[number[Any, int | float | complex]]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 129,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"std\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]] | dtype[complexfloating[Any, Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]] | dtype[complexfloating[Any, Any]]]] | builtins.bool | int | float | complex | _NestedSequence[builtins.bool | int | float | complex]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 130,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 1 to \"corrcoef\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/validation_pkg/comparative_analysis.py",
+      "line": 130,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"corrcoef\" has incompatible type \"ndarray[tuple[Any, ...], dtype[float64 | complex128]]\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]] | dtype[integer[Any]] | dtype[floating[Any]]]] | builtins.bool | int | float | _NestedSequence[builtins.bool | int | float] | None\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/api/routes/auth.py",
       "line": 135,
       "column": null,
@@ -27,35 +59,27 @@
       "code": "arg-type"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 142,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"differential_evolution\" has incompatible type \"list[tuple[float, float]]\"; expected \"tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Bounds[tuple[Any, ...], float64 | Any]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_mocap_processor.py",
+      "line": 142,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"kind\" to \"interp1d\" has incompatible type \"str\"; expected \"Literal['linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next'] | int\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
       "line": 145,
       "column": null,
       "severity": "error",
       "message": "Argument 1 to \"open\" has incompatible type \"str | None\"; expected \"int | str | bytes | PathLike[str] | PathLike[bytes]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 153,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 162,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 164,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"question\" of \"QMessageBox\" has incompatible type \"SimulationMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -71,7 +95,7 @@
       "line": 173,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"savez_compressed\" has incompatible type \"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"bool\"",
+      "message": "Argument 2 to \"savez_compressed\" has incompatible type \"**dict[str, ndarray[Any, Any]]\"; expected \"bool\"",
       "code": "arg-type"
     },
     {
@@ -83,67 +107,11 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 187,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"question\" of \"QMessageBox\" has incompatible type \"SimulationMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 195,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"QDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 229,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"SimulationMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 230,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/actuator_controls_mixin.py",
       "line": 236,
       "column": null,
       "severity": "error",
       "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"_ActuatorControlsMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 240,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/myosuite/python/perturbation/analyzer.py",
-      "line": 242,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"prod\" has incompatible type \"tuple[int, ...] | None\"; expected \"_SupportsArray[dtype[numpy.bool[builtins.bool]]] | _NestedSequence[_SupportsArray[dtype[numpy.bool[builtins.bool]]]] | builtins.bool | _NestedSequence[builtins.bool]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 249,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"QDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
       "code": "arg-type"
     },
     {
@@ -167,23 +135,7 @@
       "line": 282,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 300,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"getSaveFileName\" of \"QFileDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 305,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"getOpenFileName\" of \"QFileDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
       "code": "arg-type"
     },
     {
@@ -203,30 +155,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/shared/python/data_io/swing_capture_import.py",
-      "line": 359,
-      "column": null,
-      "severity": "error",
-      "message": "Argument \"frame_rate\" to \"JointTrajectory\" has incompatible type \"floating[Any] | float\"; expected \"float\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/myosuite/python/motion_matching/inverse_surrogate.py",
-      "line": 36,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"append\" of \"list\" has incompatible type \"LayerNorm\"; expected \"Linear\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/myosuite/python/motion_matching/inverse_surrogate.py",
-      "line": 37,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"append\" of \"list\" has incompatible type \"GELU\"; expected \"Linear\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/deployment/safety/collision.py",
       "line": 371,
       "column": null,
@@ -235,11 +163,19 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/myosuite/python/motion_matching/inverse_surrogate.py",
-      "line": 39,
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 387,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 to \"append\" of \"list\" has incompatible type \"Dropout\"; expected \"Linear\"",
+      "message": "Argument 2 to \"differential_evolution\" has incompatible type \"list[tuple[float, float]]\"; expected \"tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Bounds[tuple[Any, ...], float64 | Any]\"",
+      "code": "arg-type"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 390,
+      "column": null,
+      "severity": "error",
+      "message": "Argument \"callback\" to \"differential_evolution\" has incompatible type \"Callable[[Any, float], builtins.bool]\"; expected \"Callable[[OptimizeResult], None] | Callable[[ndarray[tuple[int], dtype[float64]], float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], None] | None\"",
       "code": "arg-type"
     },
     {
@@ -251,51 +187,19 @@
       "code": "arg-type"
     },
     {
-      "path": "src/shared/python/data_io/swing_capture_import.py",
-      "line": 418,
-      "column": null,
-      "severity": "error",
-      "message": "Argument \"frame_rate\" to \"JointTrajectory\" has incompatible type \"floating[Any] | float\"; expected \"float\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/shared/python/pendulum_simulator/gui/perturbation_panel.py",
       "line": 427,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 to \"_display_summary\" of \"PerturbationPanel\" has incompatible type \"dict[str, float | ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"PerturbationSummary\"",
+      "message": "Argument 1 to \"_display_summary\" of \"PerturbationPanel\" has incompatible type \"dict[str, float | ndarray[Any, Any]]\"; expected \"PerturbationSummary\"",
       "code": "arg-type"
     },
     {
-      "path": "src/shared/python/pose_estimation/keypoint_offsets.py",
-      "line": 430,
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer.py",
+      "line": 439,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 to \"require\" has incompatible type \"Literal[False] | numpy.bool[builtins.bool]\"; expected \"builtins.bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 447,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 459,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"warning\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 466,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"getItem\" of \"QInputDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "message": "Argument 6 to \"evaluate_solution\" has incompatible type \"Callable[[CubicSpline[float64]], tuple[ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]]]]\"; expected \"_TrajectoryCallable\"",
       "code": "arg-type"
     },
     {
@@ -303,15 +207,7 @@
       "line": 474,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]\"; expected \"bool\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 481,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"critical\" of \"QMessageBox\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
+      "message": "Argument 2 to \"savez\" has incompatible type \"**dict[str, ndarray[tuple[int, ...], dtype[Any]]]\"; expected \"bool\"",
       "code": "arg-type"
     },
     {
@@ -363,22 +259,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 537,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_copy_command_vector\" of \"RealTimeController\" has incompatible type \"ndarray[tuple[Any, ...], dtype[floating[Any]]] | None\"; expected \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 544,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_copy_command_vector\" of \"RealTimeController\" has incompatible type \"ndarray[tuple[Any, ...], dtype[floating[Any]]] | None\"; expected \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 544,
       "column": null,
@@ -392,14 +272,6 @@
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 548,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_copy_command_vector\" of \"RealTimeController\" has incompatible type \"ndarray[tuple[Any, ...], dtype[floating[Any]]] | None\"; expected \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\"",
       "code": "arg-type"
     },
     {
@@ -420,37 +292,13 @@
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 552,
+      "line": 553,
       "column": null,
       "severity": "error",
       "message": "Argument \"signal_obj\" to \"_show_generator_dialog\" of \"HumanoidConfigTab\" has incompatible type \"pyqtBoundSignal\"; expected \"pyqtSignal\"",
       "code": "arg-type"
     },
     {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 553,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_copy_command_vector\" of \"RealTimeController\" has incompatible type \"ndarray[tuple[Any, ...], dtype[floating[Any]]] | None\"; expected \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 555,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_copy_command_vector\" of \"RealTimeController\" has incompatible type \"ndarray[tuple[Any, ...], dtype[floating[Any]]] | None\"; expected \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 556,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"_copy_command_vector\" of \"RealTimeController\" has incompatible type \"ndarray[tuple[Any, ...], dtype[floating[Any]]] | None\"; expected \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 560,
       "column": null,
@@ -480,14 +328,6 @@
       "column": null,
       "severity": "error",
       "message": "Argument 2 to \"require\" has incompatible type \"Callable[[], bool]\"; expected \"str\"",
-      "code": "arg-type"
-    },
-    {
-      "path": "src/unreal_integration/viewer_backends_pyvista.py",
-      "line": 57,
-      "column": null,
-      "severity": "error",
-      "message": "Argument \"window_size\" to \"Plotter\" has incompatible type \"tuple[int, int]\"; expected \"list[int] | None\"",
       "code": "arg-type"
     },
     {
@@ -811,6 +651,14 @@
       "code": "arg-type"
     },
     {
+      "path": "src/tools/contraction/verifier.py",
+      "line": 81,
+      "column": null,
+      "severity": "error",
+      "message": "Argument 2 to \"_estimate_single_rate\" of \"ContractionVerifier\" has incompatible type \"ndarray[tuple[int, ...], dtype[floating[Any]]]\"; expected \"ndarray[tuple[int, ...], dtype[float64]]\"",
+      "code": "arg-type"
+    },
+    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 811,
       "column": null,
@@ -827,12 +675,20 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 96,
+      "path": "src/shared/python/golf_viz/_colors.py",
+      "line": 100,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 to \"getColor\" of \"QColorDialog\" has incompatible type \"AnalysisMixin\"; expected \"QWidget | None\"",
-      "code": "arg-type"
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[Any]]\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/shared/python/golf_viz/_colors.py",
+      "line": 101,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[Any]]\", variable has type \"ndarray[tuple[int], dtype[Any]]\")",
+      "code": "assignment"
     },
     {
       "path": "src/shared/python/model_generation/tests/test_physics_validation.py",
@@ -843,35 +699,27 @@
       "code": "assignment"
     },
     {
-      "path": "src/shared/python/body_part_viz/shapes/_mesh_io.py",
-      "line": 21,
+      "path": "src/engines/physics_engines/pinocchio/python/perturbation/analyzer.py",
+      "line": 239,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
-      "path": "src/shared/python/body_part_viz/shapes/_mesh_io.py",
-      "line": 22,
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
+      "line": 262,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"None\", variable has type \"Callable[[Any, Any, Any, Any, Any], Any]\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
-      "path": "src/shared/python/body_part_viz/shapes/_mesh_decimation.py",
-      "line": 26,
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
+      "line": 316,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"None\", variable has type Module)",
-      "code": "assignment"
-    },
-    {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 287,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"QVBoxLayout\", variable has type \"Callable[[], QLayout | None]\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
@@ -891,19 +739,11 @@
       "code": "assignment"
     },
     {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 43,
+      "path": "src/research/differentiable/engine.py",
+      "line": 553,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"QVBoxLayout\", variable has type \"Callable[[], QLayout | None]\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/deployment/realtime/controller.py",
-      "line": 556,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[Any, ...], dtype[floating[Any]]]\", variable has type \"float\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
@@ -923,19 +763,19 @@
       "code": "assignment"
     },
     {
-      "path": "src/unreal_integration/viewer_backends/pyvista_backend.py",
-      "line": 58,
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "line": 580,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"tuple[float, float, float]\", variable has type \"Color\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
-      "path": "src/unreal_integration/viewer_backends_pyvista.py",
-      "line": 59,
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py",
+      "line": 583,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"tuple[float, float, float]\", variable has type \"Color\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[float64]]\", variable has type \"ndarray[tuple[int, int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
@@ -944,6 +784,14 @@
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"bool | ExportOutcome\", variable has type \"bool\")",
+      "code": "assignment"
+    },
+    {
+      "path": "src/research/differentiable/engine.py",
+      "line": 643,
+      "column": null,
+      "severity": "error",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[int, ...], dtype[Any]]\", variable has type \"ndarray[tuple[int], dtype[Any]]\")",
       "code": "assignment"
     },
     {
@@ -968,14 +816,6 @@
       "column": null,
       "severity": "error",
       "message": "Incompatible types in assignment (expression has type \"None\", variable has type \"MockCollision\")",
-      "code": "assignment"
-    },
-    {
-      "path": "src/tools/bunker_shot_gui/render3d_vtk.py",
-      "line": 864,
-      "column": null,
-      "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[Any, ...], dtype[float64]]\", variable has type \"pyvista_ndarray\")",
       "code": "assignment"
     },
     {
@@ -1015,7 +855,7 @@
       "line": 94,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[Any, ...], dtype[Any]] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[tuple[Any, ...], dtype[Any]]\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[Any, Any] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[Any, Any]\")",
       "code": "assignment"
     },
     {
@@ -1023,7 +863,7 @@
       "line": 95,
       "column": null,
       "severity": "error",
-      "message": "Incompatible types in assignment (expression has type \"ndarray[tuple[Any, ...], dtype[Any]] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[tuple[int], dtype[float64]]\")",
+      "message": "Incompatible types in assignment (expression has type \"ndarray[Any, Any] | None\", base class \"SimulationMixin\" defined the type as \"ndarray[tuple[int], dtype[float64]]\")",
       "code": "assignment"
     },
     {
@@ -1040,14 +880,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"transform\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 101,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -1107,22 +939,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/viz/trajectory_overlay.py",
-      "line": 103,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 103,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"recorder\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 103,
       "column": null,
@@ -1171,14 +987,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 109,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_parser.py",
       "line": 11,
       "column": null,
@@ -1211,14 +1019,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 115,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"btn_run\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 115,
       "column": null,
@@ -1243,35 +1043,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 117,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"btn_stop\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 119,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 119,
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_on_load_c3d_body_clicked\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 120,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"mode_help_label\"",
       "code": "attr-defined"
     },
     {
@@ -1299,30 +1075,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 122,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"btn_poly_generator\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 122,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlim\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 122,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 122,
       "column": null,
@@ -1339,14 +1091,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 123,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"view_init\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui.py",
       "line": 123,
       "column": null,
@@ -1355,27 +1099,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 124,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"btn_signal_toolkit\"; maybe \"open_signal_toolkit\"?",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 124,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 128,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"plot_wireframe\"",
       "code": "attr-defined"
     },
     {
@@ -1395,22 +1123,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 131,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"current_dir\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 131,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 131,
       "column": null,
@@ -1419,35 +1131,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 132,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"open_polynomial_generator\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 133,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"btn_video\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 134,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"show_ball\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 135,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"btn_data\"",
       "code": "attr-defined"
     },
     {
@@ -1483,22 +1171,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 138,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 138,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"open_signal_toolkit\"; maybe \"btn_signal_toolkit\"?",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 139,
       "column": null,
@@ -1512,14 +1184,6 @@
       "column": null,
       "severity": "error",
       "message": "Module \"src.shared.python.core.constants\" has no attribute \"PI_HALF\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 140,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
       "code": "attr-defined"
     },
     {
@@ -1547,27 +1211,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 145,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 146,
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"transform\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 147,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
       "code": "attr-defined"
     },
     {
@@ -1587,27 +1235,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 149,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 151,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"event_labels\"; maybe \"event_label_preset\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 154,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
       "code": "attr-defined"
     },
     {
@@ -1624,14 +1256,6 @@
       "column": null,
       "severity": "error",
       "message": "\"Model\" has no attribute \"names\"; maybe \"name\" or \"nframes\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 156,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"btn_run\"",
       "code": "attr-defined"
     },
     {
@@ -1659,22 +1283,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 158,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"btn_stop\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 158,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"on_control_mode_changed\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 160,
       "column": null,
@@ -1688,22 +1296,6 @@
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"_update_viewer\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 161,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/club.py",
-      "line": 165,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"plot_surface\"",
       "code": "attr-defined"
     },
     {
@@ -1723,27 +1315,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/plotting/renderers/club.py",
-      "line": 169,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 174,
       "column": null,
       "severity": "error",
       "message": "\"Model\" has no attribute \"names\"; maybe \"name\" or \"nframes\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 174,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"on_control_mode_changed\"",
       "code": "attr-defined"
     },
     {
@@ -1755,27 +1331,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 176,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 176,
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"_update_viewer\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 178,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"chk_live\"",
       "code": "attr-defined"
     },
     {
@@ -1824,14 +1384,6 @@
       "column": null,
       "severity": "error",
       "message": "Module \"src.shared.python.theme\" has no attribute \"get_theme_manager\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 180,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -1923,14 +1475,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 194,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 194,
       "column": null,
@@ -1963,14 +1507,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 199,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"repo_path\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/shared/python/movement_optimizer/theme_bridge.py",
       "line": 20,
       "column": null,
@@ -1984,14 +1520,6 @@
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"_update_viewer\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 203,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -2027,22 +1555,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 207,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 207,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 207,
       "column": null,
@@ -2056,14 +1568,6 @@
       "column": null,
       "severity": "error",
       "message": "\"UISetupMixin\" has no attribute \"_update_viewer\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 209,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"browse_file\"",
       "code": "attr-defined"
     },
     {
@@ -2083,22 +1587,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 210,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"add_collection3d\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 210,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 215,
       "column": null,
@@ -2115,22 +1603,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 217,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"repo_path\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 217,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 217,
       "column": null,
@@ -2144,14 +1616,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"show_ground\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/stability.py",
-      "line": 219,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -2211,14 +1675,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 223,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"repo_path\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 223,
       "column": null,
@@ -2232,14 +1688,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 224,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"browse_file\"",
       "code": "attr-defined"
     },
     {
@@ -2272,14 +1720,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"events\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/stability.py",
-      "line": 228,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlim\"",
       "code": "attr-defined"
     },
     {
@@ -2403,14 +1843,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 242,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"start_simulation\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 244,
       "column": null,
@@ -2424,14 +1856,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"poses\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 250,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"stop_simulation\"",
       "code": "attr-defined"
     },
     {
@@ -2456,14 +1880,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"poses\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 256,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"rebuild_docker\"",
       "code": "attr-defined"
     },
     {
@@ -2619,14 +2035,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 274,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 274,
       "column": null,
@@ -2643,27 +2051,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 277,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"open_video\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 277,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"transform\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 278,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -2680,14 +2072,6 @@
       "column": null,
       "severity": "error",
       "message": "\"PoseLibraryMixin\" has no attribute \"data\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 283,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"open_data\"",
       "code": "attr-defined"
     },
     {
@@ -2755,22 +2139,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 289,
-      "column": null,
-      "severity": "error",
-      "message": "\"Callable[[], QLayout | None]\" has no attribute \"addWidget\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 289,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"plot_induced_acceleration\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/components.py",
       "line": 29,
       "column": null,
@@ -2792,14 +2160,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"df\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/stability.py",
-      "line": 291,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -2912,14 +2272,6 @@
       "column": null,
       "severity": "error",
       "message": "\"Data\" has no attribute \"kinetic_energy\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 312,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"recorder\"",
       "code": "attr-defined"
     },
     {
@@ -3075,43 +2427,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 326,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 326,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"spin_height\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 326,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"spin_phase_end\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 328,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 328,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"slider_weight\"",
       "code": "attr-defined"
     },
     {
@@ -3147,43 +2467,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 330,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 330,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"slider_length\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 330,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"cb_frame_marker\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 332,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 332,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"slider_mass\"",
       "code": "attr-defined"
     },
     {
@@ -3203,43 +2491,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 336,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"chk_two_hand\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 336,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 337,
       "column": null,
       "severity": "error",
       "message": "\"Model\" has no attribute \"inertias\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 338,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"chk_face\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 338,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -3259,22 +2515,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 340,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"chk_fingers\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 340,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 341,
       "column": null,
@@ -3291,30 +2531,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 344,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 344,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"txt_save_path\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 345,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 345,
       "column": null,
@@ -3323,51 +2539,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 346,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 346,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"txt_load_path\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 350,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"chk_live\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 350,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 350,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"spin_frame\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 351,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -3395,27 +2571,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 354,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"combo_control\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 355,
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"_update_time_label\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 357,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -3443,14 +2603,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 360,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 361,
       "column": null,
@@ -3467,35 +2619,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 363,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 364,
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"df\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 365,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 365,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config_manager\"",
       "code": "attr-defined"
     },
     {
@@ -3531,27 +2659,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 367,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config_path\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 367,
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"df\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 37,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"setCentralWidget\"",
       "code": "attr-defined"
     },
     {
@@ -3584,30 +2696,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 384,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 385,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"set_btn_color\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 386,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"pick_color\"",
       "code": "attr-defined"
     },
     {
@@ -3656,14 +2744,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_SessionMixin\" has no attribute \"event_labels\"; maybe \"event_label_preset\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 404,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"save_config\"",
       "code": "attr-defined"
     },
     {
@@ -3787,14 +2867,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 430,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 433,
       "column": null,
@@ -3808,14 +2880,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_step_frame\"; maybe \"spin_frame\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 44,
-      "column": null,
-      "severity": "error",
-      "message": "\"Callable[[], QLayout | None]\" has no attribute \"setContentsMargins\"",
       "code": "attr-defined"
     },
     {
@@ -3835,14 +2899,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 444,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"current_dir\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 444,
       "column": null,
@@ -3851,35 +2907,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/launchers/launcher_process_manager.py",
-      "line": 447,
-      "column": null,
-      "severity": "error",
-      "message": "\"ProcessManager\" has no attribute \"on_process_list_changed\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 448,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 452,
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"show_torso_disk\"; maybe \"_draw_torso_disk\"?",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 453,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
       "code": "attr-defined"
     },
     {
@@ -3915,27 +2947,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/movement_optimizer/tests/test_bilateral_3d_renderer.py",
-      "line": 47,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"get_zlim\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_pose_library.py",
       "line": 47,
       "column": null,
       "severity": "error",
       "message": "\"PoseLibraryMixin\" has no attribute \"data\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 472,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -3955,14 +2971,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 478,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 482,
       "column": null,
@@ -3971,16 +2979,8 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 484,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 488,
+      "line": 489,
       "column": null,
       "severity": "error",
       "message": "\"pyqtSignal\" has no attribute \"connect\"",
@@ -4011,14 +3011,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 498,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"save_config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_constraint_manager.py",
       "line": 50,
       "column": null,
@@ -4040,14 +3032,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"playback_target\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 51,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"recorder\"",
       "code": "attr-defined"
     },
     {
@@ -4091,14 +3075,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/tools/bunker_shot_gui/render3d.py",
-      "line": 519,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"text2D\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 52,
       "column": null,
@@ -4107,27 +3083,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
-      "line": 520,
-      "column": null,
-      "severity": "error",
-      "message": "\"UISetupMixin\" has no attribute \"clear_log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 529,
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_on_frame_override_toggled\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 53,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"live_plot\"",
       "code": "attr-defined"
     },
     {
@@ -4144,14 +3104,6 @@
       "column": null,
       "severity": "error",
       "message": "\"DummyTab\" has no attribute \"_inline_hand_includes\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 54,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"config\"",
       "code": "attr-defined"
     },
     {
@@ -4243,14 +3195,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 564,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 568,
       "column": null,
@@ -4259,27 +3203,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/launchers/_shot_tracer_gui.py",
-      "line": 597,
-      "column": null,
-      "severity": "error",
-      "message": "\"QCoreApplication\" has no attribute \"setStyleSheet\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 599,
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_live_body_target\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 60,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"txt_log\"",
       "code": "attr-defined"
     },
     {
@@ -4307,22 +3235,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 63,
-      "column": null,
-      "severity": "error",
-      "message": "\"Callable[[], QLayout | None]\" has no attribute \"addLayout\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/kinetics.py",
-      "line": 633,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 650,
       "column": null,
@@ -4339,22 +3251,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 66,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"txt_log\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 67,
-      "column": null,
-      "severity": "error",
-      "message": "\"Callable[[], QLayout | None]\" has no attribute \"addWidget\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/sidekick/_embed_adapter.py",
       "line": 68,
       "column": null,
@@ -4363,27 +3259,11 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 68,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"txt_log\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
       "line": 714,
       "column": null,
       "severity": "error",
       "message": "\"_BuildersMixin\" has no attribute \"_on_lock_xy_toggled\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 72,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"txt_log\"",
       "code": "attr-defined"
     },
     {
@@ -4555,14 +3435,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 81,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"repo_path\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_render_mixin.py",
       "line": 81,
       "column": null,
@@ -4619,14 +3491,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
-      "line": 88,
-      "column": null,
-      "severity": "error",
-      "message": "\"AnalysisMixin\" has no attribute \"config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/_constraint_manager.py",
       "line": 91,
       "column": null,
@@ -4648,14 +3512,6 @@
       "column": null,
       "severity": "error",
       "message": "\"Callable[[MutableMapping[str, Any], Callable[[], Awaitable[MutableMapping[str, Any]]], Callable[[MutableMapping[str, Any]], Awaitable[None]]], Awaitable[None]]\" has no attribute \"routes\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/launchers/launcher_process_manager.py",
-      "line": 920,
-      "column": null,
-      "severity": "error",
-      "message": "\"ProcessManager\" has no attribute \"on_process_list_changed\"",
       "code": "attr-defined"
     },
     {
@@ -4699,22 +3555,6 @@
       "code": "attr-defined"
     },
     {
-      "path": "src/shared/python/plotting/renderers/club.py",
-      "line": 97,
-      "column": null,
-      "severity": "error",
-      "message": "\"Axes\" has no attribute \"set_zlabel\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 97,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"save_config\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 98,
       "column": null,
@@ -4728,14 +3568,6 @@
       "column": null,
       "severity": "error",
       "message": "Module \"src.shared.python.theme\" has no attribute \"ThemeManager\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
-      "line": 99,
-      "column": null,
-      "severity": "error",
-      "message": "\"SimulationMixin\" has no attribute \"log\"",
       "code": "attr-defined"
     },
     {
@@ -4760,14 +3592,6 @@
       "column": null,
       "severity": "error",
       "message": "Unexpected keyword argument \"add_collision_exclusions\" for \"URDFWriter\"",
-      "code": "call-arg"
-    },
-    {
-      "path": "src/deployment/digital_twin/twin.py",
-      "line": 203,
-      "column": null,
-      "severity": "error",
-      "message": "Too many arguments for \"step\" of \"PhysicsEngineProtocol\"",
       "code": "call-arg"
     },
     {
@@ -4811,6 +3635,22 @@
       "code": "call-arg"
     },
     {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[Any, Any]], float]\", \"ndarray[tuple[int], Any]\", \"str\", \"list[tuple[float, float]]\", \"Any\", \"dict[str, int]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/bunkershot3d/study/optimisation.py",
+      "line": 229,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[Any], float]\", \"Any\", \"str\", \"list[tuple[Any, Any]]\"",
+      "code": "call-overload"
+    },
+    {
       "path": "src/tools/starting_pose_matcher/widgets/calibration_dialog.py",
       "line": 257,
       "column": null,
@@ -4819,12 +3659,44 @@
       "code": "call-overload"
     },
     {
-      "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
-      "line": 352,
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
       "column": null,
       "severity": "error",
-      "message": "Cannot determine type of \"show_ground\"",
-      "code": "has-type"
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int, ...], dtype[float64]]\", \"str\", \"list[tuple[float, float]]\", \"dict[str, float]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 380,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[float64]]], float]\", \"ndarray[tuple[int, ...], dtype[floating[Any]]]\", \"str\", \"dict[str, object]\", \"list[tuple[float, float]]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[Any, Any]], float]\", \"ndarray[tuple[int], Any]\", \"str\", \"list[dict[Any, Any]]\", \"dict[str, float]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 426,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[..., Any]\", \"ndarray[Any, Any]\", \"str\", \"dict[str, int]\", \"Callable[[Any], bool]\"",
+      "code": "call-overload"
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "error",
+      "message": "No overload variant of \"minimize\" matches argument types \"Callable[[ndarray[tuple[int, ...], dtype[Any]]], float]\", \"ndarray[tuple[int, ...], dtype[Any]]\", \"str\", \"list[tuple[float, float]]\", \"list[dict[Any, Any]]\", \"Callable[[ndarray[tuple[int, ...], dtype[Any]]], None]\", \"dict[str, float]\"",
+      "code": "call-overload"
     },
     {
       "path": "src/tools/starting_pose_matcher/gui_builders_mixin.py",
@@ -4939,22 +3811,6 @@
       "code": "list-item"
     },
     {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 287,
-      "column": null,
-      "severity": "error",
-      "message": "Cannot assign to a method",
-      "code": "method-assign"
-    },
-    {
-      "path": "src/shared/python/ui/qt/widgets/document_reader.py",
-      "line": 43,
-      "column": null,
-      "severity": "error",
-      "message": "Cannot assign to a method",
-      "code": "method-assign"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 106,
       "column": null,
@@ -4979,22 +3835,6 @@
       "code": "misc"
     },
     {
-      "path": "src/shared/python/pose_estimation/rtmpose_onnx_estimator.py",
-      "line": 123,
-      "column": null,
-      "severity": "error",
-      "message": "Cannot assign to class variable \"LAYOUT_NAME\" via instance",
-      "code": "misc"
-    },
-    {
-      "path": "src/shared/python/pose_estimation/rtmpose_onnx_estimator.py",
-      "line": 124,
-      "column": null,
-      "severity": "error",
-      "message": "Cannot assign to class variable \"LANDMARK_MAP\" via instance",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 124,
       "column": null,
@@ -5011,6 +3851,14 @@
       "code": "misc"
     },
     {
+      "path": "src/robotics/planning/motion/_tree_index.py",
+      "line": 13,
+      "column": null,
+      "severity": "error",
+      "message": "Cannot assign to a type",
+      "code": "misc"
+    },
+    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/analysis_mixin.py",
       "line": 130,
       "column": null,
@@ -5024,6 +3872,14 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin.VisualizationMixin\"",
+      "code": "misc"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py",
+      "line": 134,
+      "column": null,
+      "severity": "error",
+      "message": "Expected iterable as variadic argument",
       "code": "misc"
     },
     {
@@ -5083,14 +3939,6 @@
       "code": "misc"
     },
     {
-      "path": "src/tools/pose_subscriber_demo/gui.py",
-      "line": 193,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 212,
       "column": null,
@@ -5115,14 +3963,6 @@
       "code": "misc"
     },
     {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 221,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 226,
       "column": null,
@@ -5136,14 +3976,6 @@
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.analysis_mixin.AnalysisMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/tools/tour_matching_viewer/gui.py",
-      "line": 235,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5211,27 +4043,11 @@
       "code": "misc"
     },
     {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 260,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 262,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin.SimulationMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 264,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5371,14 +4187,6 @@
       "code": "misc"
     },
     {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 427,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
       "line": 44,
       "column": null,
@@ -5403,22 +4211,6 @@
       "code": "misc"
     },
     {
-      "path": "src/shared/python/plotting/renderers/kinematics.py",
-      "line": 545,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/kinetics.py",
-      "line": 614,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py",
       "line": 67,
       "column": null,
@@ -5427,27 +4219,11 @@
       "code": "misc"
     },
     {
-      "path": "src/shared/python/plotting/renderers/club.py",
-      "line": 73,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
-      "code": "misc"
-    },
-    {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/ui_setup_mixin.py",
       "line": 75,
       "column": null,
       "severity": "error",
       "message": "The erased type of self \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.PinocchioGUI\" is not a supertype of its class \"src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.ui_setup_mixin.UISetupMixin\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/club.py",
-      "line": 76,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5472,14 +4248,6 @@
       "column": null,
       "severity": "error",
       "message": "Invalid self argument \"PinocchioGUI\" to attribute function \"_setup_ui\" with type \"Callable[[PinocchioGUI], None]\"",
-      "code": "misc"
-    },
-    {
-      "path": "src/shared/python/plotting/renderers/club.py",
-      "line": 85,
-      "column": null,
-      "severity": "error",
-      "message": "\"scatter\" of \"Axes\" gets multiple values for keyword argument \"s\"",
       "code": "misc"
     },
     {
@@ -5519,7 +4287,7 @@
       "line": 32,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"eventFilter\" is incompatible with supertype \"QObject\"; supertype defines the argument type as \"QObject | None\"",
+      "message": "Argument 1 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QObject | None\"",
       "code": "override"
     },
     {
@@ -5527,32 +4295,32 @@
       "line": 32,
       "column": null,
       "severity": "error",
-      "message": "Argument 2 of \"eventFilter\" is incompatible with supertype \"QObject\"; supertype defines the argument type as \"QEvent | None\"",
+      "message": "Argument 2 of \"eventFilter\" is incompatible with supertype \"PyQt6.QtCore.QObject\"; supertype defines the argument type as \"QEvent | None\"",
       "code": "override"
     },
     {
-      "path": "src/launchers/startup.py",
-      "line": 354,
+      "path": "src/research/mpc/controller.py",
+      "line": 504,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"QSplashScreen\"; supertype defines the argument type as \"QMouseEvent | None\"",
-      "code": "override"
+      "message": "Value of type variable \"_Shape2T\" of \"cho_factor\" cannot be \"tuple[int, ...]\"",
+      "code": "type-var"
     },
     {
-      "path": "src/launchers/startup.py",
-      "line": 354,
+      "path": "src/shared/python/analysis/basic_stats.py",
+      "line": 102,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"mousePressEvent\" is incompatible with supertype \"QWidget\"; supertype defines the argument type as \"QMouseEvent | None\"",
-      "code": "override"
+      "message": "TypedDict \"_PeakProperties_0\" has no key \"prominences\"",
+      "code": "typeddict-item"
     },
     {
-      "path": "src/launchers/startup.py",
-      "line": 359,
+      "path": "src/shared/python/analysis/basic_stats.py",
+      "line": 107,
       "column": null,
       "severity": "error",
-      "message": "Argument 1 of \"keyPressEvent\" is incompatible with supertype \"QWidget\"; supertype defines the argument type as \"QKeyEvent | None\"",
-      "code": "override"
+      "message": "TypedDict \"_PeakProperties_0\" has no key \"widths\"",
+      "code": "typeddict-item"
     },
     {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/simulation_mixin.py",
@@ -5627,22 +4395,6 @@
       "code": "union-attr"
     },
     {
-      "path": "src/launchers/docker_manager.py",
-      "line": 202,
-      "column": null,
-      "severity": "error",
-      "message": "Item \"None\" of \"IO[str] | None\" has no attribute \"readline\"",
-      "code": "union-attr"
-    },
-    {
-      "path": "src/launchers/docker_manager.py",
-      "line": 207,
-      "column": null,
-      "severity": "error",
-      "message": "Item \"None\" of \"IO[str] | None\" has no attribute \"close\"",
-      "code": "union-attr"
-    },
-    {
       "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
       "line": 219,
       "column": null,
@@ -5699,14 +4451,6 @@
       "code": "union-attr"
     },
     {
-      "path": "src/shared/python/ui/info_button.py",
-      "line": 58,
-      "column": null,
-      "severity": "error",
-      "message": "Item \"None\" of \"QStyle | None\" has no attribute \"standardIcon\"",
-      "code": "union-attr"
-    },
-    {
       "path": "src/shared/python/calc_backend/tests/test_standard_response.py",
       "line": 147,
       "column": null,
@@ -5760,6 +4504,102 @@
       "column": null,
       "severity": "note",
       "message": "Error code \"union-attr\" not covered by \"type: ignore\" comment",
+      "code": null
+    },
+    {
+      "path": "src/robotics/planning/motion/_tree_index.py",
+      "line": 13,
+      "column": null,
+      "severity": "note",
+      "message": "Error code \"misc\" not covered by \"type: ignore\" comment",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py",
+      "line": 134,
+      "column": null,
+      "severity": "note",
+      "message": "Error code \"misc\" not covered by \"type: ignore\" comment",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/motion_optimization.py",
+      "line": 149,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/bunkershot3d/study/optimisation.py",
+      "line": 229,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/bunkershot3d/study/optimisation.py",
+      "line": 229,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/bunkershot3d/study/optimisation.py",
+      "line": 229,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/bunkershot3d/study/optimisation.py",
+      "line": 229,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/bunkershot3d/study/optimisation.py",
+      "line": 229,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
       "code": null
     },
     {
@@ -5827,11 +4667,43 @@
       "code": null
     },
     {
-      "path": "src/shared/python/qt_utils/wheel_event_filter.py",
-      "line": 32,
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
       "column": null,
       "severity": "note",
-      "message": "See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/motion_matching/fit_swing.py",
+      "line": 295,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
       "code": null
     },
     {
@@ -5839,39 +4711,183 @@
       "line": 32,
       "column": null,
       "severity": "note",
-      "message": "This violates the Liskov substitution principle",
-      "code": null
-    },
-    {
-      "path": "src/launchers/startup.py",
-      "line": 354,
-      "column": null,
-      "severity": "note",
       "message": "See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides",
       "code": null
     },
     {
-      "path": "src/launchers/startup.py",
-      "line": 354,
+      "path": "src/shared/python/qt_utils/wheel_event_filter.py",
+      "line": 32,
       "column": null,
       "severity": "note",
       "message": "This violates the Liskov substitution principle",
       "code": null
     },
     {
-      "path": "src/launchers/startup.py",
-      "line": 359,
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 380,
       "column": null,
       "severity": "note",
-      "message": "See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides",
+      "message": "Possible overload variants:",
       "code": null
     },
     {
-      "path": "src/launchers/startup.py",
-      "line": 359,
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 380,
       "column": null,
       "severity": "note",
-      "message": "This violates the Liskov substitution principle",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 380,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 380,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/robotics/contact/grasp_analysis.py",
+      "line": 380,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_optimization.py",
+      "line": 413,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 426,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 426,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 426,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 426,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/optimization_widget.py",
+      "line": 426,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer.py",
+      "line": 439,
+      "column": null,
+      "severity": "note",
+      "message": "\"_TrajectoryCallable.__call__\" has type \"def __call__(self, splines: object) -> tuple[ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]], ndarray[tuple[int, ...], dtype[Any]]]\"",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "Possible overload variants:",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def [_Float1DT: ndarray[tuple[int], dtype[float64]]] minimize(fun: def (_Float1DT, /, *Any, **Any) -> _Float1DT, x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., jac: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Literal['2-point', '3-point', 'cs'] | Literal[False] | numpy.bool[Literal[False]] | Literal[0] | None = ..., hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...] = ..., method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None = ..., *, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
+      "code": null
+    },
+    {
+      "path": "src/shared/python/movement_optimizer/trajectory/optimizer_diagnostics.py",
+      "line": 64,
+      "column": null,
+      "severity": "note",
+      "message": "def minimize(fun: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool], _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]], x0: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]], args: tuple[object, ...], method: Literal['Nelder-Mead', 'nelder-mead', 'Powell', 'powell', 'CG', 'cg', 'BFGS', 'bfgs', 'Newton-CG', 'newton-cg', 'L-BFGS-B', 'l-bfgs-b', 'TNC', 'tnc', 'COBYLA', 'cobyla', 'COBYQA', 'cobyqa', 'SLSQP', 'slsqp', 'Trust-Constr', 'trust-constr', 'Dogleg', 'dogleg', 'Trust-NCG', 'trust-ncg', 'Trust-Exact', 'trust-exact', 'Trust-Krylov', 'trust-krylov'] | _MinimizeMethodFun | None, jac: Literal[True] | numpy.bool[Literal[True]] | Literal[1], hess: def (ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[_CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]]] | Literal['2-point', '3-point', 'cs'] | HessianUpdateStrategy | None = ..., hessp: def (ndarray[tuple[int], dtype[float64]], ndarray[tuple[int], dtype[float64]], /, *Any, **Any) -> _CanArrayND[floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | Sequence[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool]] | None = ..., bounds: Sequence[tuple[float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None, float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None]] | Bounds[tuple[Any, ...], float64 | Any] | None = ..., constraints: LinearConstraint | NonlinearConstraint | _ConstraintDict | Sequence[LinearConstraint | NonlinearConstraint | _ConstraintDict] = ..., tol: float | floating[Any] | integer[Any] | numpy.bool[builtins.bool] | None = ..., callback: _CallbackResult | _CallbackVector | None = ..., options: _MinimizeOptions | None = ...) -> OptimizeResult",
       "code": null
     }
   ]
