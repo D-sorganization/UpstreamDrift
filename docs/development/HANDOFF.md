@@ -1,3 +1,27 @@
+# Deferred Validation Project Projection — #10774
+
+- Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-project`.
+- Branch: `docs/deferred-project-projection`; base `a0beddd8ec`; commit `SELF`; PR not created.
+- Governing issue #10774; fleet parents Repository_Management#1687 and Runner_Dashboard#1248; DL-#10774.
+- Adds an initial charter/status projection for all six published owner plans.
+  Stable IDs/links, parked status and pending resource decisions are explicit.
+  Counts cover only this planning slice; original software obligations remain.
+- Original planning files, source snapshots, provider pin, engine code and frozen
+  research evidence are unchanged. Source issue closure is not physical approval.
+- Validation: central catalog and actual central/dashboard parsers agree on six
+  parked plans and twenty decisions; source authorities unchanged. Scoped title
+  and normal commit hooks pass. The full title audit finds historical violations
+  and its Windows console hits a Unicode encoding error; scoped UTF-8 checks
+  pass. Central development-log errors reproduce on unmodified HEAD, while the
+  new entry validates independently. No unrelated histories are rewritten.
+  All configured documentation pre-push checks pass; no executable source changes.
+- Next: publish through protected review, verify main bytes and actual Projects
+  API/UI after reviewed deployment. Keep full rollout parents open.
+- Preserve historical source-specific handoffs below; their PR observations are
+  dated context, not a new claim about the current queue.
+
+---
+
 # Deferred External Validation Planning — 2026-09-22
 
 - Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-validation-planning`.
