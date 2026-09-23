@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** antigravity
 - **Issue:** #10750
 - **Branch:** fix/10750-tests-in-place-json-mutation
-- **PR:** pending
+- **PR:** #10761
 - **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; tests/unit/motion_matching/test_club_fast_matching.py; src/engines/physics_engines/mujoco/python/humanoid_launcher.py; tests/unit/test_gui_coverage.py
 - **Started:** 2026-09-23
 - **Last verified:** 2026-09-23 (`2a9e7a4d3`)
