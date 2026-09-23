@@ -503,9 +503,14 @@ class UpstreamDriftLauncher(QMainWindow):
                 model, self, **kwargs
             ),
             create_header_func=self._create_category_header,
+            on_clear_filters=self._on_empty_state_clear_filters,
         )
         self.model_cards = self.layout_manager.model_cards
         self.model_order = self.layout_manager.model_order
+
+    def _on_empty_state_clear_filters(self) -> None:
+        """Handle clear-filters action from the empty-state label."""
+        self.ui_setup_manager._clear_all_filters()
 
     # -- Model management methods --
 
