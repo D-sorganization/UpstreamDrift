@@ -19,7 +19,11 @@ Public types (see individual modules for full docs):
 
 from __future__ import annotations
 
-from .adapters import PyTorchCVAERunner
+from .adapters import (
+    KNOWN_NEURAL_MOTION_ENTRY_POINTS,
+    NeuralMotionRunner,
+    PyTorchCVAERunner,
+)
 from .driver import (
     Driver,
     DriverError,
@@ -35,7 +39,7 @@ from .progress_sinks import (
     RealtimeChannelProgressSink,
     training_channel_for,
 )
-from .runner_registry import RunnerRegistry
+from .runner_registry import NoRunnerAvailableError, RunnerRegistry
 from .subprocess_driver import SubprocessDriver, scan_pidfiles
 
 __all__ = [
@@ -47,6 +51,9 @@ __all__ = [
     "JobHandle",
     "JobHandleStatus",
     "JsonlFileProgressSink",
+    "KNOWN_NEURAL_MOTION_ENTRY_POINTS",
+    "NeuralMotionRunner",
+    "NoRunnerAvailableError",
     "NullProgressSink",
     "PyTorchCVAERunner",
     "RealtimeChannelProgressSink",

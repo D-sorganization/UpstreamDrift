@@ -246,3 +246,58 @@ def test_extract_five_metrics_and_acceptance_logic() -> None:
     summary_empty = {}
     _, verdict3 = pipeline.extract_five_metrics_and_acceptance(summary_empty)
     assert verdict3 == "UNCLASSIFIED"
+
+
+def test_neural_assisted_controls_initialization(widget: MotionMatchingWidget) -> None:
+    """Verify Neural-Assisted Motion Matching group and controls (NM-11, #10626)."""
+    assert widget.neural_group is not None
+    assert widget.neural_mode.count() == 3
+    assert widget.neural_mode.currentText() == "Classical Only"
+    assert widget.allow_classical_fallback.isChecked() is True
+    assert widget.neural_model_selector.count() >= 3
+    model_ids = [
+        widget.neural_model_selector.itemText(i)
+        for i in range(widget.neural_model_selector.count())
+    ]
+    assert "driven_double_pendulum" in model_ids
+
+
+def test_update_neural_metrics_display(widget: MotionMatchingWidget) -> None:
+    """Verify neural badge, empirical confidence, and time breakdown formatting (NM-11, #10626)."""
+    # 1. Preview mode
+    widget.update_neural_metrics(
+        status="NEURAL_ACCEPTED",
+        is_preview=True,
+        confidence=0.885,
+        t_neural_s=0.015,
+        t_polish_s=0.045,
+        t_total_s=0.060,
+    )
+    assert "PREVIEW" in widget.neural_status_badge.text()
+    assert "0.885" in widget.metric_neural_confidence.text()
+    assert "15.0ms" in widget.metric_time_breakdown.text()
+
+    # 2. Verified mode
+    widget.update_neural_metrics(
+        status="VERIFIED",
+        is_preview=False,
+        confidence=0.942,
+        t_neural_s=0.020,
+        t_polish_s=0.080,
+        t_total_s=0.100,
+    )
+    assert widget.neural_status_badge.text() == "VERIFIED"
+    assert "0.942" in widget.metric_neural_confidence.text()
+    assert "20.0ms" in widget.metric_time_breakdown.text()
+
+    # 3. Classical fallback
+    widget.update_neural_metrics(
+        status="CLASSICAL_FALLBACK",
+        is_preview=False,
+        confidence=0.450,
+        t_neural_s=0.020,
+        t_polish_s=0.0,
+        t_total_s=0.150,
+    )
+    assert widget.neural_status_badge.text() == "CLASSICAL FALLBACK"
+    assert "0.450" in widget.metric_neural_confidence.text()

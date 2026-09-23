@@ -43,10 +43,13 @@ from src.shared.python.training.resource_monitor import ResourceSample
 
 from .view_model import (
     DashboardModel,
+    DatasetSchemaItem,
     GpuSnapshot,
     JobRow,
     MetricSeries,
+    ModelTopologyItem,
     ResourceSnapshot,
+    default_neural_motion_topologies,
     job_row_from_training_job,
 )
 
@@ -449,6 +452,24 @@ class TrainingDashboardController:
             metric_series_for_selected=series,
             resources=resources,
         )
+
+    def available_model_topologies(self) -> tuple[ModelTopologyItem, ...]:
+        """Return registered or default neural motion model topologies (NM-11, #10626)."""
+        return default_neural_motion_topologies()
+
+    def available_dataset_schemas(self) -> tuple[DatasetSchemaItem, ...]:
+        """Return view-model items for all registered datasets in DatasetRegistry (NM-11, #10626)."""
+        with self._lock:
+            entries = self._datasets.list()
+            return tuple(
+                DatasetSchemaItem(
+                    dataset_id=d.dataset_id,
+                    display_name=d.name if getattr(d, "name", None) else d.dataset_id,
+                    sample_count=getattr(d, "size_bytes", 0),
+                    format=d.format,
+                )
+                for d in entries
+            )
 
 
 # --------------------------------------------------------------------- helpers
