@@ -237,14 +237,14 @@ def _evaluate_unforced_baseline(
     return unforced_rmse
 
 
-def fit_bounded_double_pendulum(
-    target: DoublePendulumFitTarget,
-    dynamics: DoublePendulumDynamics,
-    options: DoublePendulumFitOptions | None = None,
-) -> FitTrajectoryResult:
-    """Optimize degree-6 Bernstein control points subject to explicit bounds and regularization."""
-    opts = options or DoublePendulumFitOptions()
-    p0 = np.zeros(2) if opts.pivot is None else np.asarray(opts.pivot, dtype=float)[:2]
+def validate_fit_target_planar(
+    target: Any,
+) -> tuple[np.ndarray, float, np.ndarray, np.ndarray, np.ndarray]:
+    """Validate target time series and extract planar observation arrays.
+
+    Returns:
+        times, duration, grip_arr, head_arr, observed_mask
+    """
     times = np.asarray(target.times, dtype=np.float64)
     duration = float(times[-1] - times[0])
     if duration <= 0.0:
@@ -258,6 +258,20 @@ def fit_bounded_double_pendulum(
     )
     if not np.any(observed_mask):
         raise ValueError("Target contains no valid observations")
+    return times, duration, grip_arr, head_arr, observed_mask
+
+
+def fit_bounded_double_pendulum(
+    target: DoublePendulumFitTarget,
+    dynamics: DoublePendulumDynamics,
+    options: DoublePendulumFitOptions | None = None,
+) -> FitTrajectoryResult:
+    """Optimize degree-6 Bernstein control points subject to explicit bounds and regularization."""
+    opts = options or DoublePendulumFitOptions()
+    p0 = np.zeros(2) if opts.pivot is None else np.asarray(opts.pivot, dtype=float)[:2]
+    times, duration, grip_arr, head_arr, observed_mask = validate_fit_target_planar(
+        target
+    )
 
     lo = np.concatenate(
         [
