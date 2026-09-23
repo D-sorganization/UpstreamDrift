@@ -19,11 +19,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10774 · Deferred Validation Project Projection
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #10774; parents Repository_Management#1687 and Runner_Dashboard#1248
 - **Branch:** `docs/deferred-project-projection`
-- **PR:** not created
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10776
 - **Paths:** `docs/project/`, `docs/development/HANDOFF.md`, `SPEC.md`
 - **Started:** 2026-09-23
 - **Last verified:** 2026-09-23 (a0beddd8ec plus documentation; catalog valid, actual parsers agree on six parked plans/twenty decisions; original planning preserved; scoped title and commit hooks pass; new log entry valid, baseline log findings retained)

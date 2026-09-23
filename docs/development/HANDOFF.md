@@ -1,7 +1,7 @@
 # Deferred Validation Project Projection — #10774
 
 - Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-project`.
-- Branch: `docs/deferred-project-projection`; base `a0beddd8ec`; commit `SELF`; PR not created.
+- Branch: `docs/deferred-project-projection`; base `a0beddd8ec`; commit `SELF`; PR [#10776](https://github.com/D-sorganization/UpstreamDrift/pull/10776), open with protected auto-merge armed.
 - Governing issue #10774; fleet parents Repository_Management#1687 and Runner_Dashboard#1248; DL-#10774.
 - Adds an initial charter/status projection for all six published owner plans.
   Stable IDs/links, parked status and pending resource decisions are explicit.
@@ -15,7 +15,9 @@
   pass. Central development-log errors reproduce on unmodified HEAD, while the
   new entry validates independently. No unrelated histories are rewritten.
   All configured documentation pre-push checks pass; no executable source changes.
-- Next: publish through protected review, verify main bytes and actual Projects
+- A first push hit a credential-helper lookup failure; the scoped GitHub CLI
+  helper succeeded through all normal hooks. No credential or auth policy changed.
+- Next: merge through protected review, verify main bytes and actual Projects
   API/UI after reviewed deployment. Keep full rollout parents open.
 - Preserve historical source-specific handoffs below; their PR observations are
   dated context, not a new claim about the current queue.
