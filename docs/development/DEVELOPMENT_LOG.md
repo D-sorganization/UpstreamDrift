@@ -28,6 +28,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 (checker passes on main CLAUDE.md; 33 focused tests pass)
 - **Summary:** Exempt sibling-repo-qualified backticked paths (possessive or not) from the local-existence check so the fleet-managed deferred-validation block no longer fails `repo-structure-gates`; bare local paths stay strict.
+### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8932
+- **Branch:** fix/8932-analysis-debounce
+- **PR:** #10734 (open)
+- **Paths:** `src/shared/python/dashboard/_analysis_refresh.py`; `src/shared/python/dashboard/advanced_analysis.py`; `tests/unit/shared_python/test_analysis_tab_refresh.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at `3d62f6441` plus the DRY follow-up — shared `_SignalTransformTab` base clears the DRY duplication gate; RED shown for the six tab-level tests, then GREEN; 27 analysis-tab tests pass offscreen; ruff, mypy (dashboard scope), file-size and architecture budgets clean.
+- **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
+- **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
+
+### DL-#8883 · Video Analyzer Real GUI Replacing the Placeholder Label
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #8883 (related #8854, #10512)
+- **Branch:** fix/8883-video-analyzer-gui
+- **PR:** #10651
+- **Paths:** src/tools/video_analyzer/analyzer.py; src/tools/video_analyzer/gui.py; src/launchers/external_tools_adapter.py; src/launchers/task_launch_truthfulness.py; tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (ruff check/format clean; mypy clean on the four changed src files; pytest green on tests/unit/test_video_analyzer_pipeline.py, tests/unit/test_video_analyzer_math.py, tests/ui/tools/video_analyzer, tests/launchers/test_simulation_guis.py, tests/launchers/test_task_launch_truthfulness.py, tests/config/feature_parity).
+- **Summary:** Replaced the static `QLabel("Video Analyzer (GUI placeholder)")` with a real `MainWidget` (choose video, Analyze, report pane) wired to a new `SwingAnalyzer.analyze_video()` that runs MediaPipe pose estimation (via the existing `pose_estimation` registry) and feeds the already-tested head-stability math. Removed the launcher's dead sibling-repo import fallback (`video_analyzer.launch_pyqt6`, confirmed nonexistent by #8854) so the tile no longer depends on an external Tools provider; updated `task_launch_truthfulness`'s audit entry from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` accordingly.
+- **Next step:** Open PR `Closes #8883`, push, and drive CI to green.
+- **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
 
 ### DL-#9700-Planning · Deferred External Validation Plans
 
@@ -42,18 +68,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Preserve external evidence requirements for Board consideration. Keep executable work distinct; no experimental results, actor approvals or provider changes.
 - **Next step:** Validate and publish six plans; verify exact artifacts before source comments. Keep five open sources open and preserve the existing #9546 disposition.
 
-### DL-#8941 · Analysis Statistics Endpoint Off the Event Loop With Incremental Fetch
+### DL-#8941 · Simulation-Page Analysis/Force Polling (Server + Client)
 
 - **State:** in_review
 - **Owner:** claude
-- **Issue:** #8941 (server-side part; client-side items remain)
-- **Branch:** fix/8941-analysis-stats-server
-- **PR:** #10736 (open)
-- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py
+- **Issue:** #8941 (server via #10736 merged; client polling here; WS frames stay with #8936/#8940)
+- **Branch:** fix/8941-client-polling
+- **PR:** #10748 (open; server part #10736 merged)
+- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py; ui/src/hooks/usePolling.ts; ui/src/hooks/useIncrementalSeries.ts; ui/src/api/analysisStatistics.ts; ui/src/api/fetch.ts; ui/src/components/analysis/AnalysisPanel.tsx; ui/src/components/visualization/ForceOverlayPanel.tsx
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — bounded deque history, single-pass aggregation in `anyio.to_thread.run_sync`, `since`/`limit` cursor params; 87 focused API tests, scoped Ruff/mypy, architecture budget and error-handling ratchet pass.
-- **Summary:** Server-side fix for #8941: stop copying the 500-snapshot history per metrics call, stop walking it twice per metric on the event loop, and let clients fetch only new time-series points. Client polling-loop removal, endpoint merge in the UI and WS frames are out of scope here.
-- **Next step:** Switch `AnalysisPanel.tsx` to pass `since` from the `X-Analysis-Next-Since` header instead of refetching the whole window every 500 ms.
+- **Last verified:** 2026-09-22 — `statistics?collect=true` stores a snapshot (one request per tick); shared `usePolling`/`useIncrementalSeries` hooks drive `AnalysisPanel` (`since` cursor from `X-Analysis-Next-Since`) and `ForceOverlayPanel` (500 ms, was 200 ms); vitest 925 passed, tsc/eslint/build clean, 39 focused API tests pass.
+- **Summary:** Fix #8941 short of WebSocket frames: bounded deque history, single-pass off-loop aggregation and `since`/`limit`/`collect` on `/analysis/statistics` (server), then one incremental request per tick with visibility/running-state gating in one shared polling hook (client). The 1000 ms `ActuatorPanel`/`SimulationToolbar` loops and `/ws/simulate` frames remain.
+- **Next step:** Move `ActuatorPanel` and `SimulationToolbar` onto `usePolling` so they also pause while the tab is hidden.
 
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
@@ -1876,6 +1902,18 @@ open. Preserve explicit ground configuration in independent replay.
 - **Last verified:** 2026-09-17 (SELF; `tests/companion` 140 passed locally with the workflow-execution test deselected for a pre-existing interpreter/env issue; ruff, ruff-format, mypy clean on changed files; generated page `--check` current)
 - **Summary:** Replace the empty documentation inventory and unqualified engine placeholders with two hashed registries parsed by one module: exact-commit, hash-bound, immutable-URL documentation records with derived freshness; engine capabilities qualified only by exact test/artifact evidence with an executing CI gate; per-program documentation routes; known gaps with owning issues; derived publication blockers; generated, freshness-checked provider page.
 - **Next step:** Open the non-draft PR with `Closes #9193`, then record reviews for the sixteen `unknown` documentation records in follow-up PRs.
+
+### DL-#9349 · ADR-0046 G2 Workbench Re-Point Closure
+
+- **Issue:** #9349 (ADR-0046 Stage 2; module retirement landed under #9348)
+- **Branch:** conductor/issue-9349
+- **PR:** not created
+- **Paths:** src/config/launcher_manifest.json, src/config/models.yaml, tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py, docs/adr/0046-launch-monitor-analytics-single-model-layer.md, ui/public/capability-atlas, docs/architecture/CAPABILITY_ATLAS.md
+- **Started:** 2026-09-14
+- **Last verified:** 2026-09-14 (SELF; new manifest test 4 pass; test_canonical_layer_parity.py and tests/ui/tools/launch_monitor pass against the vendored canonical layer at pin e83bd2e4; capability atlas regenerated)
+- **Summary:** Closes the last Stage 2 deliverable this repository owns: both launch-monitor tiles (UD workbench and Rate of Closure Impact Explorer) now state the "same analytics engine" relationship in models.yaml (desktop launcher) and launcher_manifest.json (web launcher), pinned by a test; ADR-0046 follow-ups record G2 as landed. No workbench code changed — both UIs keep their identity.
+- **Next step:** Open the PR with `Closes #9349` and merge once quality-gate is green.
+- **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
 
