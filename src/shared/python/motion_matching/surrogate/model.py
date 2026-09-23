@@ -18,10 +18,25 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
-import torch
-import torch.nn as nn
-from torch.nn import functional as F
+
+if TYPE_CHECKING:
+    import torch
+    import torch.nn as nn
+    from torch.nn import functional as F
+else:
+    try:
+        import torch
+        import torch.nn as nn
+        from torch.nn import functional as F
+    except ModuleNotFoundError:
+        torch = None
+        nn = None
+        F = None
+
+_BaseModule = nn.Module if nn is not None else object
+
 
 from src.shared.python.core.contracts import postcondition, precondition
 
@@ -118,7 +133,7 @@ def _canonicalize_quaternion_sign(q: torch.Tensor) -> torch.Tensor:
     return q * sign
 
 
-class _FiLMLayer(nn.Module):
+class _FiLMLayer(_BaseModule):  # type: ignore[misc,valid-type]
     """Single FiLM-modulated MLP layer: ``y = gelu(gamma * Wx + beta)``."""
 
     def __init__(self, hidden_dim: int, dropout: float) -> None:
@@ -139,7 +154,7 @@ class _FiLMLayer(nn.Module):
         return self.dropout(h)
 
 
-class SwingSurrogate(nn.Module):
+class SwingSurrogate(_BaseModule):  # type: ignore[misc,valid-type]
     """FiLM-conditioned MLP forward surrogate.
 
     See ``option2_nn_surrogate/APPROACH.md`` for the full algorithmic
@@ -150,6 +165,8 @@ class SwingSurrogate(nn.Module):
 
     def __init__(self, cfg: SurrogateConfig) -> None:
         """Initialise the FiLM-MLP. See :class:`SurrogateConfig` for fields."""
+        if nn is None:
+            raise RuntimeError("PyTorch is required for SwingSurrogate")
         self._validate_cfg(cfg)
         super().__init__()
         self.cfg = cfg

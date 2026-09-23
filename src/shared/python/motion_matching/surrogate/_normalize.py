@@ -8,9 +8,17 @@ normalized (they are already unit-norm).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import torch
+
+if TYPE_CHECKING:
+    import torch
+else:
+    try:
+        import torch
+    except ModuleNotFoundError:
+        torch = None
 
 
 @dataclass(frozen=True)
@@ -74,30 +82,36 @@ def fit_stats(
     )
 
 
-def zscore_coeffs(coeffs: torch.Tensor, stats: NormalizationStats) -> torch.Tensor:
+def zscore_coeffs(coeffs: Any, stats: NormalizationStats) -> Any:
     """Apply ``(x - mean) / std`` to a batch of coefficient vectors."""
+    if torch is None:
+        raise RuntimeError("PyTorch is required for zscore_coeffs")
     mean = torch.as_tensor(stats.coeffs_mean, dtype=coeffs.dtype, device=coeffs.device)
     std = torch.as_tensor(stats.coeffs_std, dtype=coeffs.dtype, device=coeffs.device)
     return (coeffs - mean) / std
 
 
 def zscore_positions(
-    positions: torch.Tensor,
+    positions: Any,
     mean: np.ndarray,
     std: np.ndarray,
-) -> torch.Tensor:
+) -> Any:
     """Z-score a batch of position tensors of shape ``(B, T, 3)``."""
+    if torch is None:
+        raise RuntimeError("PyTorch is required for zscore_positions")
     m = torch.as_tensor(mean, dtype=positions.dtype, device=positions.device)
     s = torch.as_tensor(std, dtype=positions.dtype, device=positions.device)
     return (positions - m) / s
 
 
 def denormalize_positions(
-    z: torch.Tensor,
+    z: Any,
     mean: np.ndarray,
     std: np.ndarray,
-) -> torch.Tensor:
+) -> Any:
     """Inverse of :func:`zscore_positions`."""
+    if torch is None:
+        raise RuntimeError("PyTorch is required for denormalize_positions")
     m = torch.as_tensor(mean, dtype=z.dtype, device=z.device)
     s = torch.as_tensor(std, dtype=z.dtype, device=z.device)
     return z * s + m

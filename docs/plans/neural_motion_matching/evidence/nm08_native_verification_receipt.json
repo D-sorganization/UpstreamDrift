@@ -1,0 +1,29 @@
+{
+  "schema": "neural-verified-inference-receipt/1.0.0",
+  "governing_issue": 10623,
+  "parent_epic": 10603,
+  "inference_schema": "neural-verified-inference/1.0.0",
+  "source_hashes": {
+    "src/shared/python/neural_motion/inference/__init__.py": "d6e522437eabb86d9b89ed730aee173cb519d42a59e840c5a784a08e99d16d92",
+    "src/shared/python/neural_motion/inference/types.py": "9a5d9741768fdb9929f3bd82a3ffdceae2ed11a22e9e819b41c136acc423f74e",
+    "src/shared/python/neural_motion/inference/distribution.py": "6b559dcdba7d1398100750da8af650b6d31759552807aaf0fb4242b30c0b8dbc",
+    "src/shared/python/neural_motion/inference/orchestration.py": "133ddd652b7ffe3630829cb3aa58464fa79da294dd476764721a7e062b20f421",
+    "src/shared/python/motion_matching/hybrid.py": "da7f89ea2586b8ed5696d304d64ad77b0dc8a4a681345753fc978a48ef95d350"
+  },
+  "auditable_statuses": {
+    "neural_accepted": "proposal + polish passes independent forward replay and physical acceptance gates",
+    "classical_fallback": "failed neural proposal, missing checkpoint, or rejected replay triggers fallback with remaining compute budget; retains both attempts",
+    "rejected": "out-of-distribution or exhausted budget terminates fail-closed"
+  },
+  "validation": {
+    "command": "python -m pytest tests/unit/neural_motion/test_verified_inference_nm08.py tests/unit/motion_matching/test_verified_inference_nm08.py tests/unit/motion_matching/test_hybrid.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "recorded_at": "2026-09-23"
+  },
+  "limitations": [
+    "Synthetic fixtures and software contracts only",
+    "No fabricated native training acceleration or physical certification",
+    "Confidence metric records empirical domain coverage, not human golfer truth probability"
+  ],
+  "next_action_issue": 10624
+}

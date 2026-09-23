@@ -7,17 +7,24 @@ its training distribution, which is exactly the regime where the surrogate is
 unreliable (see ``ASSUMPTIONS.md § A1``).
 """
 
-from __future__ import annotations
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import torch
+
+if TYPE_CHECKING:
+    import torch
+else:
+    try:
+        import torch
+    except ModuleNotFoundError:
+        torch = None
 
 __all__ = ["clamp_", "default_bounds", "validate_bounds"]
 
 
 def validate_bounds(
-    bounds_low: np.ndarray | torch.Tensor,
-    bounds_high: np.ndarray | torch.Tensor,
+    bounds_low: np.ndarray | Any,
+    bounds_high: np.ndarray | Any,
     coeff_dim: int,
 ) -> None:
     """Raise ``ValueError`` if bounds are malformed.
@@ -54,10 +61,10 @@ def default_bounds(coeff_dim: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 def clamp_(
-    coeffs: torch.Tensor,
-    bounds_low: torch.Tensor,
-    bounds_high: torch.Tensor,
-) -> torch.Tensor:
+    coeffs: Any,
+    bounds_low: Any,
+    bounds_high: Any,
+) -> Any:
     """Project ``coeffs`` onto ``[bounds_low, bounds_high]`` *in place*.
 
     Mirrors ``coeffs.data.clamp_(lo, hi)`` from APPROACH.md but supports
@@ -65,6 +72,8 @@ def clamp_(
     (``Tensor.clamp_`` only accepts scalars in older torch versions).
     Returns the same tensor for convenience.
     """
+    if torch is None:
+        raise RuntimeError("PyTorch is required for clamp_")
     if coeffs.shape[-1] != bounds_low.shape[0]:
         raise ValueError(
             f"coeffs last dim {coeffs.shape[-1]} != bounds dim {bounds_low.shape[0]}"
