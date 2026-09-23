@@ -37,6 +37,7 @@ from src.launchers.settings_close_contract import SettingsCloseContract
 from src.launchers.docker_manager import DockerBuildThread
 from src.launchers.docker_profile_info import load_docker_profiles
 from src.launchers.launcher_constants import DOCKER_STAGES
+from src.launchers.launcher_settings_store import persist_window_geometry
 from src.launchers._settings_auxiliary_tabs import SettingsAuxiliaryTabsMixin
 from src.launchers.settings_runtime import (
     RuntimeDependencyCheckFailure as RuntimeDependencyCheckFailure,
@@ -1118,6 +1119,7 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.resize(850, 650)
+        persist_window_geometry(self, "settings_dialog")
 
         layout = QVBoxLayout(self)
         self.widget = SettingsWidget(

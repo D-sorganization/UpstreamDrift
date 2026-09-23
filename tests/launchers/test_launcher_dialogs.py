@@ -292,9 +292,7 @@ def test_reset_layout_to_defaults_overwrites_existing_backup(
     launcher,
     tmp_path: Path,
 ) -> None:
-    config_dir = tmp_path / ".golf_modeling_suite"
-    config_dir.mkdir()
-    config_file = config_dir / "launcher_layout.json"
+    config_file = tmp_path / "layout.json"
     backup_file = config_file.with_suffix(".json.bak")
     backup_file.write_text("old backup", encoding="utf-8")
     config_file.write_text("first layout", encoding="utf-8")
@@ -302,7 +300,7 @@ def test_reset_layout_to_defaults_overwrites_existing_backup(
     launcher._sync_model_cards = MagicMock()
     launcher._rebuild_grid = MagicMock()
 
-    with patch("src.launchers.launcher_dialogs.Path.home", return_value=tmp_path):
+    with patch("src.launchers.launcher_dialogs.LAYOUT_CONFIG_FILE", config_file):
         launcher._reset_layout_to_defaults()
         config_file.write_text("second layout", encoding="utf-8")
         launcher._reset_layout_to_defaults()

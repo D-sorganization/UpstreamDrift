@@ -32,6 +32,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.typography import Weights, get_display_font, get_qfont
 
@@ -41,7 +42,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 # Config file path for storing onboarding dismissal state
-ONBOARDING_CONFIG_PATH = Path.home() / ".upstreamdrift" / "onboarding_config.json"
+ONBOARDING_CONFIG_PATH = user_config_path("onboarding_config.json")
 
 # Single-sourced onboarding card copy, shared with the web onboarding overlay
 # via GET /api/v1/about/onboarding (issue #7459).

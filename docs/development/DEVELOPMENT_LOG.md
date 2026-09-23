@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8907 · One User Config Root and One QSettings Namespace for the Launcher
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8907
+- **Branch:** fix/8907-settings-root
+- **PR:** #10742 (open)
+- **Paths:** src/shared/python/data_io/user_config_root.py; src/launchers/launcher_settings_store.py; src/launchers/launcher_constants.py; tests/unit/data_io/test_user_config_root.py; tests/launchers/test_launcher_settings_store.py
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — migration, alias and three-window geometry round-trip tests pass offscreen; launcher/ui suites show no new failures versus origin/main; Ruff, format, file-size, architecture and error-handling gates pass.
+- **Summary:** Launcher writers (preferences, recent models, library, onboarding, process/launcher logs, layout reset/diagnostics) resolve through `user_config_path()` under the platformdirs root with a one-time copy from the two legacy dot-dirs; QSettings consolidated on `(UpstreamDrift, Launcher)` with legacy aliasing; three secondary windows persist geometry.
+- **Next step:** Relocate the Tools-owned `~/.upstreamdrift/mcp_servers.json` contract in Tools, then point `McpServersConfig.default_path()` at the shared constant.
 ### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
 
 - **State:** in_review
