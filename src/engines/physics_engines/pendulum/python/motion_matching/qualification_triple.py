@@ -27,6 +27,7 @@ from src.engines.physics_engines.pendulum.python.motion_matching.qualification i
     _build_physical_metrics,
     build_pendulum_status_bundle,
     compute_pendulum_qualification_bundle,
+    resolve_qualification_paths,
 )
 from src.engines.physics_engines.pendulum.python.motion_matching.provider_triple import (
     TriplePendulumFitSwingProvider,
@@ -304,13 +305,9 @@ def save_triple_qualification_receipts(
     ``repo_root``; tests pass a temporary directory so they never rewrite
     committed receipts that the matched-swing ledger fingerprints.
     """
-    root = Path(repo_root)
-    driver_c3d = root / "data" / "C3D_TA_Driver.c3d"
-    iron_c3d = root / "data" / "C3D_TA_Iron.c3d"
-    if evidence_dir is None:
-        evidence_dir = root / "docs" / "plans" / "tour_baselines" / "evidence"
-    evidence_dir = Path(evidence_dir)
-    evidence_dir.mkdir(parents=True, exist_ok=True)
+    driver_c3d, iron_c3d, evidence_dir = resolve_qualification_paths(
+        repo_root, evidence_dir
+    )
 
     driver_pkg, driver_verdict = generate_triple_baseline_package_for_target(
         driver_c3d, "driver", maxiter=30
