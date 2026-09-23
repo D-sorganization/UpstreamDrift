@@ -115,6 +115,20 @@ def test_disqualified_tour_baseline_receipts_are_indexed_as_rejected() -> None:
 
 
 @pytest.mark.unit
+def test_upper_body_planarity_receipts_are_indexed_as_rejected() -> None:
+    """TB-06 planarity preflight blocks fitting without disappearing from the ledger."""
+    rows = [
+        row
+        for row in scan().rows
+        if "docs/plans/tour_baselines/evidence/tb06_" in row.receipt_path
+    ]
+    assert {row.capture for row in rows} == {"driver", "iron"}
+    assert all(row.engine == "tools" for row in rows)
+    assert all(row.acceptance is not None for row in rows)
+    assert all(row.acceptance["status"] == "REJECTED" for row in rows)
+
+
+@pytest.mark.unit
 def test_ledger_is_deterministic():
     """Two successive scans produce byte-identical rows and totals."""
     ledger1 = scan()
