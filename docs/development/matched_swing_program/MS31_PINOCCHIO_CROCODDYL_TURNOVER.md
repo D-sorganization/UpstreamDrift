@@ -52,6 +52,15 @@ at every checkpoint so another agent can continue without the chat history.
   `stage_0.60s.npz`, and a stabilised-replay definition for cross-engine parity
   (below). MS-111 (#10385) takes it to G2/G3.
 
+## MS-111 Contract Slice (2026-09-22, Local)
+
+Software contracts landed in `src/shared/python/motion_matching/pinocchio_g2_g3.py`
+and the fitter `--ms111-schedule` / integrator-parity guard. Evidence:
+`docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json`
+(`claims_native_success=false`). Native ControlTower G2/G3 continuation still
+requires an accepted MS-107 G1 checkpoint and MS-100 receipts — do not treat
+this slice as desk qualification.
+
 ## Objective
 
 Produce the program's first G1-accepted candidate (driver capture, 0 to 0.85 s)
