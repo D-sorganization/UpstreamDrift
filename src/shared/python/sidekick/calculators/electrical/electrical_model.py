@@ -314,7 +314,6 @@ class ThreePhaseElectricalModelEnhanced:
         # Segment distances (uniform for trapezoidal approximation)
         # All interior segments use the same distance
         # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm for small 1D arrays
-
         base_segment_distance = math.sqrt(wall_diff.dot(wall_diff)) / num_segments
         segment_distance_m = base_segment_distance * 0.0254  # Convert to m
 
