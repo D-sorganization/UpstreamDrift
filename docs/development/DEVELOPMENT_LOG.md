@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10593 · Tour Baselines Bounded Fit Campaigns (TB-08)
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10593 (TB-08, parent #10584, program #10363)
+- **Branch:** `feat/tb08-bounded-fit-campaigns-10593`
+- **Paths:** `src/shared/python/tour_baselines/campaign.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/motion_matching/tour_baselines.py`; `tests/unit/tour_baselines/test_fit_campaign.py`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 — 7 passed in `test_fit_campaign.py`, 64 passed in full `tests/unit/tour_baselines/` suite, 20 passed in repo hygiene child-copy contract. Ruff check and format clean.
+- **Summary:** Implemented `CampaignJobSpec`, `CampaignCandidate`, `CandidateRanking`, `rank_candidates`, `CampaignEvaluationRecord`, `CampaignManifest`, `CampaignResult`, `PilotBudget`, `GeneralizationDisclaimer`, and `FitCampaignService` enforcing deterministic Pareto ranking (feasible candidate beats infeasible lower-error candidate), immutable checkpointing, hash-checked resume (`IncompatibleResumeError`), diagnostic preservation on cancel/timeout without promotion, exact full-clock score verification, and holdout disclaimers.
+- **Next step:** Push branch, open PR with squash auto-merge, and achieve 100% green CI/CD.
+
 ### DL-#10774 · Deferred Validation Project Projection
 
 - **State:** in_review

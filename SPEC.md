@@ -1,3 +1,20 @@
+## Tour Baselines Bounded Fit Campaigns (TB-08, #10593)
+
+Adds `src/shared/python/tour_baselines/campaign.py` with reproducible bounded fit campaigns, incremental immutable checkpoints, Pareto candidate ranking, full-clock score verification, and within-capture holdout evaluation:
+- **Campaign Job Contracts (`CampaignJobSpec`, `CampaignCandidate`, `CandidateRanking`, `rank_candidates`)**:
+  - Declares model ID, capture versions, qualification profile, seeds, evaluation/wall-time limits, parameter bounds, basis/order, holdout window, and exact reproduction commands.
+  - Deterministic Pareto ranking enforces feasibility before error: feasible candidates strictly beat lower-error infeasible candidates, which are retained as rejected evidence rather than promoted or discarded.
+- **Service & Incremental Checkpoints (`FitCampaignService`, `CampaignEvaluationRecord`, `CampaignManifest`, `CampaignResult`)**:
+  - Saves immutable stage checkpoints containing serializable evaluation records and cryptographic content hashes (`data_hash`, `model_hash`, `runtime_hash`, `controller_hash`, `solver_hash`).
+  - Resumes validate all hashes against current environment and fail closed with `IncompatibleResumeError` on divergence.
+  - Cooperative cancellation and wall-time expiration write unverified diagnostic manifests and preserve partial artifacts without promoting candidates.
+- **Clock Validation & Generalization Disclaimer (`GeneralizationDisclaimer`, `compute_clock_scores`, `run_pilot_benchmark`)**:
+  - Full-rate 360 Hz / 359 Hz grid evaluation computes exact Euclidean RMSE and maximum marker distance matching stored receipt metrics without clock distortion.
+  - Pilot benchmark measures per-evaluation runtime and freezes computation budgets prior to full campaigns.
+  - Reports explicitly disclaimer that within-capture holdout is not population generalization.
+- **Verification Suite (`tests/unit/tour_baselines/test_fit_campaign.py`)**:
+  - 7 unit tests covering manufactured candidate selection, checkpoint equivalence, hash validation on resume, timeout preservation without promotion, full-rate clock scores, pilot budgets, and holdout disclaimers.
+
 ## Engine Preflight Checker (MS-103, #10377)
 
 Adds `src/engines/preflight.py` with `EnginePreflightChecker`, `PreflightRunner`, and `PreflightSummary` for platform-aware engine readiness checks with DbC contracts:
