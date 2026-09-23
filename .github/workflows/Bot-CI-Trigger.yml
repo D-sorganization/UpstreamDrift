@@ -202,12 +202,25 @@ jobs:
               continue
             }
 
-            # Method 1: Try to trigger workflow_dispatch on ci-standard
-            # Method 2: If workflow_dispatch fails, add empty commit to trigger
-            if ! gh workflow run ci-standard.yml \
-              --ref "$branch" \
-              2>/dev/null; then
-              echo "workflow_dispatch failed, trying empty commit method"
+            # Method 1: approve the PR head's own pending pull_request runs.
+            # Never workflow_dispatch CI Standard here: a dispatched run
+            # takes the schedule/manual branches (full src/ mypy baseline
+            # audit, --cov=src over the dependency-light lane at a 75% floor)
+            # and posts red code-quality/tests/quality-gate checks onto the PR
+            # head for code the PR never touched.
+            # Method 2: if nothing was approved, add empty commit to trigger
+            head_sha=$(gh pr view "$pr" --json headRefOid --jq '.headRefOid') || head_sha=""
+            approved=0
+            if [ -n "$head_sha" ]; then
+              for run_id in $(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$head_sha&status=action_required&per_page=100" \
+                --jq '.workflow_runs[] | select(.event == "pull_request") | select(.head_repository.full_name == "${{ github.repository }}") | .id' 2>/dev/null); do
+                if gh api -X POST "repos/${{ github.repository }}/actions/runs/$run_id/approve" >/dev/null 2>&1; then
+                  approved=$((approved + 1))
+                fi
+              done
+            fi
+            if [ "$approved" -eq 0 ]; then
+              echo "No pending pull_request runs approved, trying empty commit method"
 
               git fetch origin "$branch"
               git checkout "$branch"
