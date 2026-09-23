@@ -785,10 +785,12 @@ never as a silent close, never as a fabricated result.
 
 ### What to Do When You Hit One
 
-1. **Do not attempt the measurement and do not simulate it.** Never write a
-   number into an issue, a test, a report or a commit that was not measured.
-2. **Do not close the issue.** Propose a record in the repository's
-   `docs/planning/deferred-validation.json`: the original issue URL, its
+1. **Never fabricate a measurement.** Explicitly synthetic numerical fixtures
+   remain useful software tests; they cannot satisfy physical acceptance.
+2. **Do not close first.** Read `docs/development/planning/catalog.json` for
+   an existing v1 adopter; otherwise use `docs/planning/deferred-validation.json`.
+   Maintain one authority; never create a competing empty catalog. Preserve the
+   original issue URL, its
    acceptance criteria copied verbatim, why it is external, the resources it
    needs, and what would reopen it. Validate with
    `python -m shared_scripts.deferred_validation --repo-root .`.
@@ -798,6 +800,11 @@ never as a silent close, never as a fabricated result.
    closed as not planned after the record is merged, its `record_url` resolves
    on the default branch, and a named human or the Board signed it off
    (`reviewed_by` / `reviewed_on`).
+
+Existing deployed plans retain their original source snapshots, pending Board
+resource decisions and reactivation requirements. A schema change supplies no
+review approval or measurement. Do not reopen already deferred `roadmap` work
+because its experiment remains undone; inspect the plan and publication receipt.
 
 ### Discovery Is Not Authority
 
