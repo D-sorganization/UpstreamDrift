@@ -627,12 +627,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10623 (epic #10603)
 - **Branch:** feat/nm08-native-verification-10623
-- **PR:** #10623
+- **PR:** #10770
 - **Paths:** src/shared/python/neural_motion/inference/; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_verified_inference_nm08.py; tests/unit/motion_matching/test_verified_inference_nm08.py; docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json
 - **Started:** 2026-09-23
 - **Last verified:** 2026-09-23 — 16 unit and behavioral tests pass across neural_motion and motion_matching; architecture budgets and ruff clean.
 - **Summary:** Added VerifiedInferenceOrchestrator, DistributionBounds, and check_target_distribution under neural_motion/inference/ (schema neural-verified-inference/1.0.0). Enforces fail-closed validation of non-finite inputs, geometry/engine/control dimension mismatch, and incompatible checkpoint contracts. Validates empirical coverage (durations, peak velocities, contact regimes) with confidence scoring recorded as domain metrics, not golfer truth probability. Enforces mandatory independent replay before dynamic acceptance; on failed proposal or missing checkpoint, falls back to classical/retrieval solver with shared remaining wall-clock budget and retains all attempts with auditable statuses (NEURAL_ACCEPTED, CLASSICAL_FALLBACK, REJECTED). Integrated fit_swing_verified_inference into hybrid.py facade.
-- **Next step:** Create PR, enable auto-merge, verify CI passes, and hand off to NM-09 (#10624).
+- **Next step:** Enable auto-merge, verify CI passes, and hand off to NM-09 (#10624).
 - **Evidence:** docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json
 
 ### DL-#10622 · NM-07 Compare Forward Surrogates and Physics-Structured Alternatives
@@ -646,7 +646,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-23
 - **Last verified:** 2026-09-23 — 24 focused tests pass across motion_matching and neural_motion; architecture budgets and ruff pass.
 - **Summary:** Compare forward surrogate inversion, hybrid polish, physics-structured residual dynamics, and diffusion fallback under schema neural-surrogate-comparison/1.0.0. Added real-clock timegrid resampling, antipodal quaternion geodesic distance, trust-region validation, directional derivative gradient fidelity check, and contact-boundary failure rejection to validate.py. Documented adversarial exploitation risk of unconstrained forward surrogate inversion and high latency/sample inefficiency of diffusion fallback.
-- **Next step:** PR #10768 in review with auto-merge armed; proceed to NM-08 (#10623).
+- **Next step:** PR #10768 merged into main; proceed with NM-08 (#10623).
 - **Evidence:** docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
 
 ### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
