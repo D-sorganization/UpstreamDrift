@@ -57,18 +57,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Preserve external evidence requirements for Board consideration. Keep executable work distinct; no experimental results, actor approvals or provider changes.
 - **Next step:** Validate and publish six plans; verify exact artifacts before source comments. Keep five open sources open and preserve the existing #9546 disposition.
 
-### DL-#8941 · Analysis Statistics Endpoint Off the Event Loop With Incremental Fetch
+### DL-#8941 · Simulation-Page Analysis/Force Polling (Server + Client)
 
 - **State:** in_review
 - **Owner:** claude
-- **Issue:** #8941 (server-side part; client-side items remain)
-- **Branch:** fix/8941-analysis-stats-server
-- **PR:** #10736 (open)
-- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py
+- **Issue:** #8941 (server via #10736 merged; client polling here; WS frames stay with #8936/#8940)
+- **Branch:** fix/8941-client-polling
+- **PR:** #10748 (open; server part #10736 merged)
+- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py; ui/src/hooks/usePolling.ts; ui/src/hooks/useIncrementalSeries.ts; ui/src/api/analysisStatistics.ts; ui/src/api/fetch.ts; ui/src/components/analysis/AnalysisPanel.tsx; ui/src/components/visualization/ForceOverlayPanel.tsx
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — bounded deque history, single-pass aggregation in `anyio.to_thread.run_sync`, `since`/`limit` cursor params; 87 focused API tests, scoped Ruff/mypy, architecture budget and error-handling ratchet pass.
-- **Summary:** Server-side fix for #8941: stop copying the 500-snapshot history per metrics call, stop walking it twice per metric on the event loop, and let clients fetch only new time-series points. Client polling-loop removal, endpoint merge in the UI and WS frames are out of scope here.
-- **Next step:** Switch `AnalysisPanel.tsx` to pass `since` from the `X-Analysis-Next-Since` header instead of refetching the whole window every 500 ms.
+- **Last verified:** 2026-09-22 — `statistics?collect=true` stores a snapshot (one request per tick); shared `usePolling`/`useIncrementalSeries` hooks drive `AnalysisPanel` (`since` cursor from `X-Analysis-Next-Since`) and `ForceOverlayPanel` (500 ms, was 200 ms); vitest 925 passed, tsc/eslint/build clean, 39 focused API tests pass.
+- **Summary:** Fix #8941 short of WebSocket frames: bounded deque history, single-pass off-loop aggregation and `since`/`limit`/`collect` on `/analysis/statistics` (server), then one incremental request per tick with visibility/running-state gating in one shared polling hook (client). The 1000 ms `ActuatorPanel`/`SimulationToolbar` loops and `/ws/simulate` frames remain.
+- **Next step:** Move `ActuatorPanel` and `SimulationToolbar` onto `usePolling` so they also pause while the tab is hidden.
 
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 

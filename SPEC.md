@@ -6819,6 +6819,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-22 | #10748 | #8941 Simulation-page polling client side: shared `usePolling`/`useIncrementalSeries` hooks (single-flight ticks, paused while stopped or the tab is hidden, cleared on unmount); `AnalysisPanel` makes one `/analysis/statistics?collect=true&since=` request per tick using the `X-Analysis-Next-Since` cursor; `ForceOverlayPanel` polls at 2 Hz instead of 5 Hz. |
 | 2026-09-22 | #10737 | Keep the TB-04 qualification-receipt test output in `tmp_path` (`save_qualification_receipts(evidence_dir=...)`) so it no longer rewrites committed evidence and breaks `test_ledger_freshness`. |
 | 2026-09-22 | #8932 | Analysis tabs: shared 150 ms spinbox debounce, bounded memoization of spectrogram/CWT keyed on a signal digest, SwingPlaneTab reuses its axes, and draw_idle on these interactive paths. |
 | 2026-09-22 | #10741 | Preserve six unavailable external validation scopes in Board planning while retaining executable software and prior source dispositions. |
