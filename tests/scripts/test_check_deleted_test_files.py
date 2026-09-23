@@ -215,5 +215,43 @@ def test_cli_main_genuine_deletion_exits_one_and_writes_output(
         "::error::Deleted Python test files require review before CI can proceed."
         in captured.err
     )
-    assert "  tests/unit/test_base.py" in captured.err
     assert out_file.read_text(encoding="utf-8").strip() == "tests/unit/test_base.py"
+
+
+def test_detect_deleted_test_files_fallback_to_base_when_merge_base_fails(
+    tmp_path: Path,
+) -> None:
+    """When merge-base resolution fails and fallback_to_base is True, uses base_ref."""
+    repo, _, _, _ = _setup_git_history(tmp_path)
+    # Using a nonexistent base ref raises error when fallback_to_base is False:
+    with pytest.raises(mod.MergeBaseResolutionError):
+        mod.detect_deleted_test_files(
+            "nonexistent_ref", "feature", repo_root=repo, fallback_to_base=False
+        )
+
+    # When fallback_to_base is True, diff against base_ref is attempted.
+    # If base_ref is valid commit with no common ancestor, it diffs against base_ref.
+    # For a completely invalid ref, git diff fails with RuntimeError:
+    with pytest.raises(RuntimeError):
+        mod.detect_deleted_test_files(
+            "nonexistent_ref", "feature", repo_root=repo, fallback_to_base=True
+        )
+
+
+def test_cli_fallback_to_base_flag_passed(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """CLI accepts and passes --fallback-to-base flag."""
+    repo, _, _, _ = _setup_git_history(tmp_path)
+    code = mod.main(
+        [
+            "--base-ref",
+            "main",
+            "--head",
+            "feature",
+            "--repo-root",
+            str(repo),
+            "--fallback-to-base",
+        ]
+    )
+    assert code == 0

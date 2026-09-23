@@ -2027,8 +2027,11 @@ jobs:
 
             # Compute deleted tests against merge_base to prevent false positives
             # from tests newly added on the base branch (issue #10751).
-            diff_into "$RUNNER_TEMP/core_deleted_tests.txt" \
-              --diff-filter=D "${merge_base:-$diff_base}" HEAD -- 'tests/**/*.py'
+            python scripts/ci/check_deleted_test_files.py \
+              --base-ref "${merge_base:-$diff_base}" \
+              --head HEAD \
+              --output "$RUNNER_TEMP/core_deleted_tests.txt" \
+              --fallback-to-base
             mapfile -t deleted_tests < "$RUNNER_TEMP/core_deleted_tests.txt"
             if [ "${#deleted_tests[@]}" -gt 0 ]; then
               echo "::error::Deleted Python test files require review before CI can proceed."

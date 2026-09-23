@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10751 · Fix CI Standard 'Deleted Python Test Files' Check False-Positives in Shallow Checkouts
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** antigravity
 - **Issue:** #10751
 - **Branch:** fix/10751-deleted-tests-shallow-checkout
 - **PR:** #10762
 - **Paths:** scripts/ci/check_deleted_test_files.py; tests/scripts/test_check_deleted_test_files.py; .github/workflows/ci-standard.yml; tests/ci/test_ci_infrastructure.py
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 (`008487870`)
-- **Summary:** Compute deleted tests diff against merge-base instead of base ref tip to prevent tests added on main from being falsely reported as deleted in PRs; set fetch-depth: 0 on checkout in tests job; extract standalone check_deleted_test_files.py with unit and regression test coverage.
-- **Next step:** Open PR with do-not-merge label for owner review, verify CI.
+- **Last verified:** 2026-09-23 (`008487870` + c31f26e; 10 passed in test_check_deleted_test_files.py, 85 passed in test_ci_infrastructure.py)
+- **Summary:** Compute deleted tests diff against merge-base instead of base ref tip to prevent tests added on main from being falsely reported as deleted in PRs; set fetch-depth: 0 on checkout in tests job; invoke standalone check_deleted_test_files.py with unit and regression test coverage and fallback-to-base support directly from the CI workflow.
+- **Next step:** Await owner workflow approval for #10762.
 
 ### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
 
