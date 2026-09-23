@@ -27,12 +27,18 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.club_target import ClubTarget
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.surrogate.invert import FitResult
+    from src.shared.python.motion_matching.surrogate.model import ClubTrajectory
+    from src.shared.python.motion_matching.surrogate.train import TrainedSurrogate
 
 __all__ = [
     "ValidationReport",
@@ -320,19 +326,33 @@ def _default_sim_fn() -> Callable[[np.ndarray], object]:
 
 
 def _check_args(
-    result: FitResult,
+    result: object,
     target: ClubTarget,
-    surrogate: TrainedSurrogate,
+    surrogate: object,
     *,
     sim_fn: Callable[[np.ndarray], object] | None = None,
     threshold: float = 2.0,
 ) -> bool:
     """Precondition predicate for :func:`validate_against_simscape`."""
     del sim_fn  # presence is checked at runtime
+    try:
+        from src.shared.python.motion_matching.surrogate.invert import FitResult
+        from src.shared.python.motion_matching.surrogate.train import TrainedSurrogate
+
+        is_result_valid = isinstance(result, FitResult)
+        is_surrogate_valid = isinstance(surrogate, TrainedSurrogate)
+    except (ImportError, ModuleNotFoundError):
+        is_result_valid = hasattr(result, "coefficients") and hasattr(
+            result, "surrogate_pred"
+        )
+        is_surrogate_valid = hasattr(surrogate, "model") or hasattr(
+            surrogate, "norm_stats"
+        )
+
     return (
-        isinstance(result, FitResult)
+        is_result_valid
         and isinstance(target, ClubTarget)
-        and isinstance(surrogate, TrainedSurrogate)
+        and is_surrogate_valid
         and isinstance(threshold, (int, float))
         and float(threshold) > 0.0
     )
