@@ -760,3 +760,45 @@ def test_search_and_zoom_shortcuts_have_object_names(launcher) -> None:
     for sc in shortcuts:
         assert sc.objectName()
         assert sc.objectName() != "(shortcut)"
+
+
+# ---------------------------------------------------------------------------
+# Search debouncing (issue #8905)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_search_debounce_timer_setup(launcher) -> None:
+    """Search debounce timer is configured with correct interval."""
+    launcher._setup_top_bar()
+
+    assert hasattr(launcher, "_search_debounce_timer")
+    assert launcher._search_debounce_timer.isSingleShot()
+    assert launcher._search_debounce_timer.interval() == 150
+
+
+@pytest.mark.unit
+def test_search_text_change_restarts_timer(launcher) -> None:
+    """Each keystroke restarts the debounce timer."""
+    launcher._setup_top_bar()
+
+    # First keystroke
+    launcher._on_search_text_changed("a")
+    assert launcher._pending_search_text == "a"
+    assert launcher._search_debounce_timer.isActive()
+
+    # Second keystroke should still have timer running
+    launcher._on_search_text_changed("ab")
+    assert launcher._pending_search_text == "ab"
+    assert launcher._search_debounce_timer.isActive()
+
+
+@pytest.mark.unit
+def test_apply_debounced_search_calls_filter(launcher) -> None:
+    """Debounced search applies the pending text to the filter."""
+    launcher._setup_top_bar()
+    launcher._pending_search_text = "test query"
+
+    launcher._apply_debounced_search()
+
+    launcher.update_search_filter.assert_called_once_with("test query")

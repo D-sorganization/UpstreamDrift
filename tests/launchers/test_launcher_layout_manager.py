@@ -579,3 +579,160 @@ def test_rebuild_grid_dynamic_columns(qapp, available_models, get_model_func) ->
         assert c0 == 0 and r0 == 0
         assert c1 == 0 and r1 == 1
         assert c2 == 0 and r2 == 2
+
+
+# ---------------------------------------------------------------------------
+# Empty filter state (issue #8905)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_rebuild_grid_shows_empty_state_when_no_matches(
+    qapp, available_models, get_model_func
+) -> None:
+    """When no models match the filter, an empty-state label is displayed."""
+    container = QWidget()
+    grid_layout = QGridLayout(container)
+    container.show()
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=lambda model, **_kwargs: QFrame(),
+        create_header_func=lambda name: QLabel(name),
+    )
+    manager.model_order = ["model_1", "model_2"]
+    manager.update_search_filter("does-not-exist-xyz")
+
+    manager.rebuild_grid(grid_layout)
+
+    assert manager._empty_state_label is not None
+    assert manager._empty_state_label.isVisible()
+    assert "does-not-exist-xyz" in manager._empty_state_label.text()
+    assert "Clear filters" in manager._empty_state_label.text()
+    container.deleteLater()
+
+
+@pytest.mark.unit
+def test_rebuild_grid_empty_state_includes_category_filter(
+    qapp, available_models, get_model_func
+) -> None:
+    """Empty-state label mentions both search text and category filter."""
+    container = QWidget()
+    grid_layout = QGridLayout(container)
+    container.show()
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=lambda model, **_kwargs: QFrame(),
+        create_header_func=lambda name: QLabel(name),
+    )
+    manager.model_order = ["model_1", "model_2"]
+    manager.update_search_filter("nonexistent")
+    manager.current_category_filter = "Engines"
+
+    manager.rebuild_grid(grid_layout)
+
+    label_text = manager._empty_state_label.text()
+    assert "nonexistent" in label_text
+    assert "Engines" in label_text
+    container.deleteLater()
+
+
+@pytest.mark.unit
+def test_rebuild_grid_removes_empty_state_when_results_found(
+    qapp, available_models, get_model_func
+) -> None:
+    """Empty-state label is removed when the filter produces results."""
+    container = QWidget()
+    grid_layout = QGridLayout(container)
+    container.show()
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=lambda model, **_kwargs: QFrame(),
+        create_header_func=lambda name: QLabel(name),
+    )
+    manager.model_order = ["model_1", "model_2"]
+
+    # First show empty state
+    manager.update_search_filter("does-not-exist")
+    manager.rebuild_grid(grid_layout)
+    assert manager._empty_state_label is not None
+
+    # Then clear filter to show results
+    manager.update_search_filter("")
+    manager.rebuild_grid(grid_layout)
+    assert manager._empty_state_label is None
+    container.deleteLater()
+
+
+@pytest.mark.unit
+def test_rebuild_grid_empty_state_calls_clear_filters_callback(
+    qapp, available_models, get_model_func
+) -> None:
+    """Clicking 'Clear filters' link invokes the on_clear_filters callback."""
+    container = QWidget()
+    grid_layout = QGridLayout(container)
+    container.show()
+
+    callback_called = []
+
+    def on_clear():
+        callback_called.append(True)
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=lambda model, **_kwargs: QFrame(),
+        create_header_func=lambda name: QLabel(name),
+        on_clear_filters=on_clear,
+    )
+    manager.model_order = ["model_1"]
+    manager.update_search_filter("nonexistent")
+    manager.rebuild_grid(grid_layout)
+
+    # Simulate clicking the link
+    manager._handle_empty_state_link("clear-filters")
+
+    assert len(callback_called) == 1
+    container.deleteLater()
+
+
+@pytest.mark.unit
+def test_rebuild_grid_empty_state_ignores_unknown_links(
+    qapp, available_models, get_model_func
+) -> None:
+    """Unknown link hrefs don't trigger callbacks."""
+    container = QWidget()
+    grid_layout = QGridLayout(container)
+    container.show()
+
+    callback_called = []
+
+    def on_clear():
+        callback_called.append(True)
+
+    manager = LayoutManager(
+        config_file=Path("/fake/config.json"),
+        available_models=available_models,
+        get_model_func=get_model_func,
+        create_card_func=lambda model, **_kwargs: QFrame(),
+        create_header_func=lambda name: QLabel(name),
+        on_clear_filters=on_clear,
+    )
+    manager.model_order = ["model_1"]
+    manager.update_search_filter("nonexistent")
+    manager.rebuild_grid(grid_layout)
+
+    # Unknown link should not trigger callback
+    manager._handle_empty_state_link("some-other-link")
+
+    assert len(callback_called) == 0
+    container.deleteLater()
