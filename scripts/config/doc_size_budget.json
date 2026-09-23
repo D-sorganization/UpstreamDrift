@@ -84,6 +84,18 @@
       "owner": "@maintainers",
       "reason": "Generated feature parity matrix table from feature_parity.json; pending topic decomposition.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "AGENTS.md",
+      "owner": "@maintainers",
+      "reason": "Root agent instructions include fleet-managed sections synced from Repository_Management.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "CLAUDE.md",
+      "owner": "@maintainers",
+      "reason": "Root Claude instructions include fleet-managed sections synced from Repository_Management.",
+      "expires_on": "2026-12-31"
     }
   ]
 }

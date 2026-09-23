@@ -254,8 +254,7 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **In flight:** CO-09 review-gap harden
   [#10717](https://github.com/D-sorganization/UpstreamDrift/pull/10717)
   (`fix/10613-co09-review-gaps`) rematched onto post-CO-10 main.
-- **Do NOT steal** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622)
-  (`claim:antigravity`). Check claim before any start.
+- **In flight / Landed:** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622) (in flight by `local` session `76a4b2bb-f31a-4077-a500-f97c2a7c1541`).
 - **Remaining:** NM-08..NM-12 (#10623–#10627). Epics
   [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) /
   [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) stay
@@ -872,6 +871,26 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Branch: `feat/co02-golf-plausibility-priors`; PR [#10675](https://github.com/D-sorganization/UpstreamDrift/pull/10675) merged. Governing issue #10606 (CO-02, epic #10602).
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
+
+## Neural Forward Surrogates and Physics-Structured Alternatives NM-07 #10622 Handoff [IN PROGRESS]
+
+- Workspace: `C:/Users/diete/Repositories/UpstreamDrift`.
+- Branch: `feat/nm07-forward-surrogates-10622`; PR #10622 in flight. Governing issue #10622 (NM-07, epic #10603). Entry DL-#10622 in_progress.
+- Delivered:
+  - `src/shared/python/neural_motion/surrogates/` (`neural-surrogate-comparison/1.0.0`): `SurrogateCandidateKind`, `SurrogateComparisonConfig`, `SurrogateAblationResult`, `SurrogateComparisonReport`.
+  - `PhysicsStructuredSurrogate`: analytical rigid polynomial prior + bounded residual dynamics with trust-region and contact-boundary awareness.
+  - `compare_surrogates_and_alternatives`: comparative benchmark evaluating unconstrained forward surrogate inversion (flagged for adversarial exploitation risk), hybrid polish, physics-structured residual dynamics, masked proposal, and diffusion fallback (rejected due to >500 ms latency and sample inefficiency).
+  - `src/shared/python/motion_matching/surrogate/validate.py`: real-clock timegrid resampling (`resample_to_timegrid`), sign-invariant SO(3) geodesic distance (`quaternion_geodesic_error_rad`), trust-region verification, directional derivative / cosine-similarity gradient fidelity check, and contact-boundary failure rejection.
+  - `src/shared/python/motion_matching/surrogate/nm07_comparison.py`: discovery module.
+  - Evidence: `docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json`; schema `neural-surrogate-comparison-receipt/1.0.0`.
+  - Documentation: `docs/plans/neural_motion_matching/forward_surrogates.md`.
+- Validation:
+  ```powershell
+  python -m pytest tests/unit/motion_matching/test_forward_surrogates_nm07.py tests/unit/neural_motion/test_forward_surrogates_nm07.py tests/unit/neural_motion/test_surrogate_nm07_discovery.py tests/unit/motion_matching/test_surrogate_validate.py tests/unit/motion_matching/test_hybrid.py -q -n 0 --no-cov --timeout=60
+  ```
+  All tests passed; architecture budget OK; ruff check & format OK; spec changelog duplicates check OK.
+- Limitations: Software contracts and synthetic fixtures only; no fabricated native acceleration or training success claims; contact boundaries fail closed for smooth rigid models without hybrid collision handling.
+- Next action: Hand off to NM-08 (#10623): Closed-Loop Tracking vs Native Tracking Baseline under epic #10603.
 
 ## Neural Masked Proposals NM-06 #10621 Handoff [MERGED]
 
