@@ -275,6 +275,41 @@ def _check_result(result: FitResult) -> bool:
     )
 
 
+def _build_fit_result(
+    coeffs: Any,
+    history: np.ndarray,
+    init: np.ndarray,
+    surrogate: SwingSurrogate,
+    norm_stats: NormalizationStats | None,
+    opts: InvertOptions,
+) -> FitResult:
+    final_per_restart = history[:, -1]
+    best = int(np.argmin(final_per_restart))
+    best_coeffs_t = coeffs.detach()[best : best + 1]
+    with torch.no_grad():
+        fed_best = (
+            zscore_coeffs(best_coeffs_t, norm_stats)
+            if norm_stats is not None
+            else best_coeffs_t
+        )
+        surrogate_pred = surrogate(fed_best)
+
+    logger.debug(
+        "fit_swing_via_surrogate: best restart %d, loss %.6e (over %d starts)",
+        best,
+        float(final_per_restart[best]),
+        opts.n_starts,
+    )
+
+    return FitResult(
+        coefficients=best_coeffs_t.cpu().numpy().reshape(-1).astype(np.float32),
+        final_loss=float(final_per_restart[best]),
+        history={"loss": history},
+        all_starts=[init[k].copy() for k in range(opts.n_starts)],
+        surrogate_pred=surrogate_pred,
+    )
+
+
 @precondition(_check_args, "target/surrogate/opts must be the right types")
 @postcondition(_check_result, "best coefficients must be finite, loss >= 0")
 def fit_swing_via_surrogate(
@@ -354,28 +389,4 @@ def fit_swing_via_surrogate(
             clamp_(coeffs, bounds_low_t, bounds_high_t)
         history[:, it] = per_restart_loss.detach().cpu().numpy()
 
-    final_per_restart = history[:, -1]
-    best = int(np.argmin(final_per_restart))
-    best_coeffs_t = coeffs.detach()[best : best + 1]
-    with torch.no_grad():
-        fed_best = (
-            zscore_coeffs(best_coeffs_t, norm_stats)
-            if norm_stats is not None
-            else best_coeffs_t
-        )
-        surrogate_pred = surrogate(fed_best)
-
-    logger.debug(
-        "fit_swing_via_surrogate: best restart %d, loss %.6e (over %d starts)",
-        best,
-        float(final_per_restart[best]),
-        opts.n_starts,
-    )
-
-    return FitResult(
-        coefficients=best_coeffs_t.cpu().numpy().reshape(-1).astype(np.float32),
-        final_loss=float(final_per_restart[best]),
-        history={"loss": history},
-        all_starts=[init[k].copy() for k in range(opts.n_starts)],
-        surrogate_pred=surrogate_pred,
-    )
+    return _build_fit_result(coeffs, history, init, surrogate, norm_stats, opts)
