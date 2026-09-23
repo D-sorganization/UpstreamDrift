@@ -70,11 +70,12 @@ def _build_failure_result(
     message: str,
     target_hash: str,
     engine_version: str,
+    theta_dim: int = 2 * COEFFS_PER_JOINT,
 ) -> CanonicalFitResult:
     """Construct an honest CanonicalFitResult representing solver or input failure."""
     fail_cost = 999.0
     return CanonicalFitResult(
-        theta_optimal=np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64),
+        theta_optimal=np.zeros(theta_dim, dtype=np.float64),
         final_cost=fail_cost,
         final_rmse_m=float(math.sqrt(fail_cost)),
         solver_status="failure",
@@ -89,6 +90,30 @@ def _build_failure_result(
         target_hash=target_hash,
         timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
     )
+
+
+def validate_club_target_preconditions(
+    club: ClubTarget,
+    target_hash: str,
+    engine_version: str,
+    theta_dim: int = 2 * COEFFS_PER_JOINT,
+) -> CanonicalFitResult | None:
+    """Validate strictly increasing times and finite observations before optimization."""
+    if len(club.time) < 2 or np.any(np.diff(club.time) <= 0.0):
+        return _build_failure_result(
+            "Target times must have at least 2 strictly increasing frames",
+            target_hash,
+            engine_version,
+            theta_dim=theta_dim,
+        )
+    if not (np.isfinite(club.butt).any() and np.isfinite(club.clubhead).any()):
+        return _build_failure_result(
+            "Target observations contain no finite points",
+            target_hash,
+            engine_version,
+            theta_dim=theta_dim,
+        )
+    return None
 
 
 def _resolve_plane(
@@ -173,19 +198,17 @@ def _resolve_geometry_and_q0(
     return l1, l2, q0, v0, None
 
 
-def _build_canonical_result(
-    fit_res: FitTrajectoryResult,
+def build_canonical_fit_result(
+    theta_optimal: np.ndarray,
+    fit_res: Any,
     elapsed: float,
     target_hash: str,
     engine_version: str,
+    max_club_rmse: float = 0.150,
 ) -> CanonicalFitResult:
-    """Assemble CanonicalFitResult from double pendulum optimization rollout."""
-    all_coeffs = np.concatenate(
-        [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
-    )
+    """Assemble CanonicalFitResult from optimization rollout."""
     final_rmse = fit_res.final_rmse_m
     final_cost = float(final_rmse**2)
-    max_club_rmse = 0.150
     is_success = bool(fit_res.converged and final_rmse <= max_club_rmse)
 
     msg = (
@@ -195,7 +218,7 @@ def _build_canonical_result(
     )
 
     return CanonicalFitResult(
-        theta_optimal=np.asarray(all_coeffs, dtype=np.float64),
+        theta_optimal=np.asarray(theta_optimal, dtype=np.float64),
         final_cost=final_cost,
         final_rmse_m=final_rmse,
         solver_status="success" if is_success else "failure",
@@ -209,6 +232,21 @@ def _build_canonical_result(
         engine_version=engine_version,
         target_hash=target_hash,
         timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+
+
+def _build_canonical_result(
+    fit_res: FitTrajectoryResult,
+    elapsed: float,
+    target_hash: str,
+    engine_version: str,
+) -> CanonicalFitResult:
+    """Assemble CanonicalFitResult from double pendulum optimization rollout."""
+    all_coeffs = np.concatenate(
+        [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
+    )
+    return build_canonical_fit_result(
+        all_coeffs, fit_res, elapsed, target_hash, engine_version
     )
 
 
@@ -227,18 +265,11 @@ class PendulumFitSwingProvider:
         target_hash = _compute_target_hash(club)
 
         # Precondition checks
-        if len(club.time) < 2 or np.any(np.diff(club.time) <= 0.0):
-            return _build_failure_result(
-                "Target times must have at least 2 strictly increasing frames",
-                target_hash,
-                self.engine_version(),
-            )
-        if not (np.isfinite(club.butt).any() and np.isfinite(club.clubhead).any()):
-            return _build_failure_result(
-                "Target observations contain no finite points",
-                target_hash,
-                self.engine_version(),
-            )
+        precondition_err = validate_club_target_preconditions(
+            club, target_hash, self.engine_version()
+        )
+        if precondition_err is not None:
+            return precondition_err
 
         # 1. Project onto calibrated swing plane
         projected_club, _, plane_err = _resolve_plane(club, opts)

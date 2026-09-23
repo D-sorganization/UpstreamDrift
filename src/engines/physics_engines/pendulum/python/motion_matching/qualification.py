@@ -169,35 +169,17 @@ def _simulate_and_evaluate_rollout(
     )
 
 
-def _assemble_baseline_package(
-    target: ClubTarget,
-    capture_kind: str,
-    result: CanonicalFitResult,
-    trajectories: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
-    dists: tuple[np.ndarray, np.ndarray, list[float]],
-    lengths: tuple[float, float],
-    maxiter: int,
-) -> BaselinePackage:
-    """Construct complete BaselinePackage with metadata, metrics, and statuses."""
-    q_rollout, v_rollout, q_replay, v_replay = trajectories
-    head_arr, grip_arr, replay_dists = dists
-    l1, l2 = lengths
-
-    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
-    metrics = _build_physical_metrics(
-        head_errors=head_arr,
-        grip_errors=grip_arr,
-        out_of_plane_res=0.015,
-        opt_loss=result.final_cost,
-    )
-
-    qual_profile = PlanarDrivenPendulumProfile()
-    is_within_tolerance = replay_head_rmse <= qual_profile.max_club_rmse_m
-
-    statuses = StatusBundle(
+def build_status_bundle(
+    solver_status: str,
+    replay_head_rmse: float,
+    max_club_rmse_m: float,
+) -> StatusBundle:
+    """Evaluate qualification statuses from solver convergence and replay tolerance."""
+    is_within_tolerance = replay_head_rmse <= max_club_rmse_m
+    return StatusBundle(
         solver_convergence=(
             SolverConvergenceStatus.CONVERGED
-            if result.solver_status == "success"
+            if solver_status == "success"
             else SolverConvergenceStatus.MAX_ITERATIONS
         ),
         kinematic_accuracy=(
@@ -213,6 +195,48 @@ def _assemble_baseline_package(
         ),
         product_promotion=ProductPromotionStatus.EXPLORATORY,
         has_native_replay=True,
+    )
+
+
+def compute_qualification_summary(
+    head_arr: np.ndarray,
+    grip_arr: np.ndarray,
+    opt_loss: float,
+    solver_status: str,
+) -> tuple[float, PhysicalFitMetrics, StatusBundle]:
+    """Compute replay RMSE, physical fit metrics, and status bundle."""
+    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
+    metrics = _build_physical_metrics(
+        head_errors=head_arr,
+        grip_errors=grip_arr,
+        out_of_plane_res=0.015,
+        opt_loss=opt_loss,
+    )
+    qual_profile = PlanarDrivenPendulumProfile()
+    statuses = build_status_bundle(
+        solver_status=solver_status,
+        replay_head_rmse=replay_head_rmse,
+        max_club_rmse_m=qual_profile.max_club_rmse_m,
+    )
+    return replay_head_rmse, metrics, statuses
+
+
+def _assemble_baseline_package(
+    target: ClubTarget,
+    capture_kind: str,
+    result: CanonicalFitResult,
+    trajectories: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+    dists: tuple[np.ndarray, np.ndarray, list[float]],
+    lengths: tuple[float, float],
+    maxiter: int,
+) -> BaselinePackage:
+    """Construct complete BaselinePackage with metadata, metrics, and statuses."""
+    q_rollout, v_rollout, q_replay, v_replay = trajectories
+    head_arr, grip_arr, replay_dists = dists
+    l1, l2 = lengths
+
+    replay_head_rmse, metrics, statuses = compute_qualification_summary(
+        head_arr, grip_arr, result.final_cost, result.solver_status
     )
 
     identity = BaselineIdentity(

@@ -65,61 +65,13 @@ from src.shared.python.tour_baselines.qualification_profiles import (
     evaluate_baseline_qualification,
 )
 
+from .qualification import (
+    _build_physical_metrics,
+    build_status_bundle,
+    compute_qualification_summary,
+)
+
 logger = logging.getLogger(__name__)
-
-
-def _build_triple_physical_metrics(
-    head_errors: np.ndarray,
-    grip_errors: np.ndarray,
-    out_of_plane_res: float,
-    opt_loss: float,
-) -> PhysicalFitMetrics:
-    """Construct PhysicalFitMetrics from Euclidean head and grip errors."""
-    all_errors = np.concatenate([head_errors, grip_errors])
-    whole_rmse = float(np.sqrt(np.mean(all_errors**2)))
-    p95_err = float(np.percentile(all_errors, 95))
-    max_err = float(np.max(all_errors))
-
-    head_rmse = float(np.sqrt(np.mean(head_errors**2)))
-    grip_rmse = float(np.sqrt(np.mean(grip_errors**2)))
-
-    per_marker = {
-        "Grip": MarkerMetricSummary(
-            rmse_m=grip_rmse,
-            max_m=float(np.max(grip_errors)),
-            p95_m=float(np.percentile(grip_errors, 95)),
-            valid_count=len(grip_errors),
-            total_count=len(grip_errors),
-        ),
-        "Marker_3": MarkerMetricSummary(
-            rmse_m=head_rmse,
-            max_m=float(np.max(head_errors)),
-            p95_m=float(np.percentile(head_errors, 95)),
-            valid_count=len(head_errors),
-            total_count=len(head_errors),
-        ),
-    }
-
-    sig = compute_landmark_signature(("Grip", "Marker_2", "Marker_3"))
-
-    return PhysicalFitMetrics(
-        whole_marker_rmse_m=whole_rmse,
-        p95_marker_error_m=p95_err,
-        max_marker_error_m=max_err,
-        per_marker=per_marker,
-        per_phase={},
-        endpoint_error_m=float(head_errors[-1]),
-        impact_error_m=float(head_errors[len(head_errors) // 2]),
-        in_plane_rmse_m=head_rmse,
-        out_of_plane_residual_m=out_of_plane_res,
-        pelvis_yaw_rmse_rad=None,
-        optimizer_weighted_loss=opt_loss,
-        n_valid=len(all_errors),
-        n_excluded=0,
-        total_observations=len(all_errors),
-        coverage_fraction=1.0,
-        landmark_set_signature=sig,
-    )
 
 
 def _simulate_and_evaluate_triple_rollouts(
@@ -230,36 +182,8 @@ def _assemble_triple_baseline_package(
     head_arr, grip_arr, replay_dists = dists
     l1, l2, l3 = lengths
 
-    replay_head_rmse = float(np.sqrt(np.mean(head_arr**2)))
-    metrics = _build_triple_physical_metrics(
-        head_errors=head_arr,
-        grip_errors=grip_arr,
-        out_of_plane_res=0.015,
-        opt_loss=result.final_cost,
-    )
-
-    qual_profile = PlanarDrivenPendulumProfile()
-    is_within_tolerance = replay_head_rmse <= qual_profile.max_club_rmse_m
-
-    statuses = StatusBundle(
-        solver_convergence=(
-            SolverConvergenceStatus.CONVERGED
-            if result.solver_status == "success"
-            else SolverConvergenceStatus.MAX_ITERATIONS
-        ),
-        kinematic_accuracy=(
-            KinematicAccuracyStatus.WITHIN_TOLERANCE
-            if is_within_tolerance
-            else KinematicAccuracyStatus.EXCEEDS_THRESHOLD
-        ),
-        dynamic_feasibility=DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE,
-        scientific_qualification=(
-            ScientificQualificationStatus.QUALIFIED
-            if is_within_tolerance
-            else ScientificQualificationStatus.DISQUALIFIED
-        ),
-        product_promotion=ProductPromotionStatus.EXPLORATORY,
-        has_native_replay=True,
+    replay_head_rmse, metrics, statuses = compute_qualification_summary(
+        head_arr, grip_arr, result.final_cost, result.solver_status
     )
 
     identity = BaselineIdentity(
