@@ -17,6 +17,33 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8932
+- **Branch:** fix/8932-analysis-debounce
+- **PR:** #10734 (open)
+- **Paths:** `src/shared/python/dashboard/_analysis_refresh.py`; `src/shared/python/dashboard/advanced_analysis.py`; `tests/unit/shared_python/test_analysis_tab_refresh.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at `3d62f6441` plus the DRY follow-up — shared `_SignalTransformTab` base clears the DRY duplication gate; RED shown for the six tab-level tests, then GREEN; 27 analysis-tab tests pass offscreen; ruff, mypy (dashboard scope), file-size and architecture budgets clean.
+- **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
+- **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
+
+### DL-#8883 · Video Analyzer Real GUI Replacing the Placeholder Label
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #8883 (related #8854, #10512)
+- **Branch:** fix/8883-video-analyzer-gui
+- **PR:** #10651
+- **Paths:** src/tools/video_analyzer/analyzer.py; src/tools/video_analyzer/gui.py; src/launchers/external_tools_adapter.py; src/launchers/task_launch_truthfulness.py; tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (ruff check/format clean; mypy clean on the four changed src files; pytest green on tests/unit/test_video_analyzer_pipeline.py, tests/unit/test_video_analyzer_math.py, tests/ui/tools/video_analyzer, tests/launchers/test_simulation_guis.py, tests/launchers/test_task_launch_truthfulness.py, tests/config/feature_parity).
+- **Summary:** Replaced the static `QLabel("Video Analyzer (GUI placeholder)")` with a real `MainWidget` (choose video, Analyze, report pane) wired to a new `SwingAnalyzer.analyze_video()` that runs MediaPipe pose estimation (via the existing `pose_estimation` registry) and feeds the already-tested head-stability math. Removed the launcher's dead sibling-repo import fallback (`video_analyzer.launch_pyqt6`, confirmed nonexistent by #8854) so the tile no longer depends on an external Tools provider; updated `task_launch_truthfulness`'s audit entry from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` accordingly.
+- **Next step:** Open PR `Closes #8883`, push, and drive CI to green.
+- **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
+
 ### DL-#9700-Planning · Deferred External Validation Plans
 
 - **State:** in_review
