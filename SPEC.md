@@ -6842,6 +6842,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-23 | #10762 | Fix CI Standard deleted test check false-positives in shallow checkouts by diffing against merge-base (issue #10751). |
 | 2026-09-23 | #10761 | Fix tests mutating committed JSON artifacts in place (club_fast_matching.json, mujoco simulation_config.json); route test output to tmp_path (issue #10750). |
 | 2026-09-22 | #10723 | MS-111 Pinocchio driver/iron G2/G3 continuation contracts: schedules, same-integrator parity, armature-propagated independent replay save/reopen, failed-continuation evidence, open-loop q0/v0 feed, PF-07 robustness roster, fitter `--ms111-schedule`; software-contract only (`claims_native_success=false`). |
 | 2026-09-22 | #10722 | Restore hip-calibrated ground-support receipt provenance chain (`receipt-provenance-chain/1`): shared validator, CI baselines, dual raw/canonical spec digests; no fabricated hipcal intermediates; physical metrics unchanged. |

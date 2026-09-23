@@ -51,6 +51,22 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** relocate the MCP config in Tools; extend "Restore Defaults" to
   clear the canonical QSettings store.
 
+## Fix CI Standard 'Deleted Python Test Files' Check False-Positives in Shallow Checkouts (#10751) — 2026-09-23
+
+- **Repo / Worktree:** D-sorganization/UpstreamDrift · `C:\Users\diete\Repositories\_worktrees\UpstreamDrift-10751` · branch `fix/10751-deleted-tests-shallow-checkout` · agent `antigravity`
+- **Problem:** In CI Standard (`.github/workflows/ci-standard.yml`), the `tests` job evaluated deleted test files by comparing `diff_base` directly against `HEAD`. When `merge_base` resolution failed in shallow checkouts (due to default `fetch-depth: 1` and `--depth=10`), `diff_base` fell back to `origin/${{ github.base_ref }}` (tip of `main`). Any new test files added to `main` after the PR branched were falsely reported as deleted by the PR, blocking unrelated dependabot and feature PRs.
+- **Fix:**
+  1. Updated `actions/checkout` in `ci-standard.yml` `tests` job to use `fetch-depth: 0`, and updated base ref fetch without shallow depth restriction.
+  2. Created `scripts/ci/check_deleted_test_files.py` providing a reusable, DbC-decorated, LoD-compliant detection CLI and Python API with merge-base resolution and fallback-to-base support.
+  3. Invoked `scripts/ci/check_deleted_test_files.py` directly from `ci-standard.yml`, avoiding duplication between bash diffing and python helper.
+  4. Added comprehensive test suite `tests/scripts/test_check_deleted_test_files.py` (10 tests) including an explicit regression test reproducing the scenario of test files added to `main` after a PR branch is cut, plus fallback-to-base test coverage.
+  5. Updated `tests/ci/test_ci_infrastructure.py` asserting `fetch-depth: 0` and helper script invocation.
+- **Validation:**
+  - `pytest tests/scripts/test_check_deleted_test_files.py -v` (10 passed).
+  - `pytest tests/ci/test_ci_infrastructure.py` (85 passed, 1 skipped).
+  - `ruff check`, `black --check`, and `run_mypy.py` pass cleanly with zero errors.
+- **Next:** Await owner review for workflow change on PR #10762.
+
 ## Tests In-Place JSON Mutation Fix (#10750) — 2026-09-23
 
 - **Repo / Worktree:** D-sorganization/UpstreamDrift · `C:\Users\diete\Repositories\_worktrees\UpstreamDrift-10750` · branch `fix/10750-tests-in-place-json-mutation` · agent `antigravity`
