@@ -43,6 +43,7 @@ __all__ = [
     "PerformanceGate",
     "measure_execution_time",
     "create_performance_baseline",
+    "record_neural_motion_benchmark",
 ]
 
 logger = logging.getLogger(__name__)
@@ -439,3 +440,39 @@ def create_performance_baseline() -> PerformanceBaseline:
         f"Created performance baseline for engines: {list(ENGINE_DOF_MAP.keys())}"
     )
     return baseline
+
+
+def record_neural_motion_benchmark(
+    baseline: PerformanceBaseline,
+    card: Any,
+) -> dict[str, Any]:
+    """Register neural motion benchmark metrics with the performance baseline registry.
+
+    Args:
+        baseline: The PerformanceBaseline instance.
+        card: ModelBenchmarkCard instance from neural_motion.benchmark.
+
+    Returns:
+        Dictionary summary of recorded metrics and promotion decision.
+    """
+    median_latency_s = float(card.latency.median_s)
+    speedup = (
+        float(card.break_even.baseline_query_latency_s / median_latency_s)
+        if median_latency_s > 0
+        else 1.0
+    )
+    summary = {
+        "model_id": str(card.model_id),
+        "method": str(
+            card.method.value if hasattr(card.method, "value") else card.method
+        ),
+        "median_latency_s": median_latency_s,
+        "p95_latency_s": float(card.latency.p95_s),
+        "acceptance_rate": float(card.metrics.acceptance_rate),
+        "speedup": speedup,
+        "status": str(
+            card.promotion.value if hasattr(card.promotion, "value") else card.promotion
+        ),
+    }
+    logger.info(f"Recorded neural motion benchmark: {summary}")
+    return summary
