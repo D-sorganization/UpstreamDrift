@@ -11,6 +11,11 @@ absent.
 
 from __future__ import annotations
 
+from .neural_motion import KNOWN_NEURAL_MOTION_ENTRY_POINTS, NeuralMotionRunner
 from .pytorch_cvae import PyTorchCVAERunner
 
-__all__ = ["PyTorchCVAERunner"]
+__all__ = [
+    "KNOWN_NEURAL_MOTION_ENTRY_POINTS",
+    "NeuralMotionRunner",
+    "PyTorchCVAERunner",
+]

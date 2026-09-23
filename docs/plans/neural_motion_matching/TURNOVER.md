@@ -58,11 +58,13 @@ NM-07 ([#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622) /
 NM-08 ([#10623](https://github.com/D-sorganization/UpstreamDrift/issues/10623) /
 [#10770](https://github.com/D-sorganization/UpstreamDrift/pull/10770)),
 NM-09 ([#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624) /
-[#10777](https://github.com/D-sorganization/UpstreamDrift/pull/10777)), and
-NM-10 ([#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625)) are implemented.
+[#10777](https://github.com/D-sorganization/UpstreamDrift/pull/10777)),
+NM-10 ([#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625) /
+[#10778](https://github.com/D-sorganization/UpstreamDrift/pull/10778)), and
+NM-11 ([#10626](https://github.com/D-sorganization/UpstreamDrift/issues/10626)) are implemented.
 The immediate task is
-**[#10626](https://github.com/D-sorganization/UpstreamDrift/issues/10626) (NM-11)
-only** (integrate model-specific training and inference with existing tools).
+**[#10627](https://github.com/D-sorganization/UpstreamDrift/issues/10627) (NM-12)**
+(publish model cards, reproduction commands and final turnover).
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model

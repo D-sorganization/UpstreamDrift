@@ -19,10 +19,13 @@ from src.shared.python.training.metrics import MetricKind
 
 __all__ = [
     "DashboardModel",
+    "DatasetSchemaItem",
     "GpuSnapshot",
     "JobRow",
     "MetricSeries",
+    "ModelTopologyItem",
     "ResourceSnapshot",
+    "default_neural_motion_topologies",
     "job_row_from_training_job",
 ]
 
@@ -355,3 +358,95 @@ class DashboardModel:
             if row.job_id == job_id.value:
                 return row
         return None
+
+
+@dataclass(frozen=True, slots=True)
+class ModelTopologyItem:
+    """View-model projection of a neural motion model topology (NM-11, #10626).
+
+    Invariants:
+        - model_id: non-empty string.
+        - display_name: non-empty string.
+        - framework: non-empty string.
+        - default_entry_point: non-empty string.
+        - description: string.
+    """
+
+    model_id: str
+    display_name: str
+    framework: str
+    default_entry_point: str
+    description: str = ""
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.model_id, str) or not self.model_id.strip():
+            raise ValueError("model_id must be a non-empty string")
+        if not isinstance(self.display_name, str) or not self.display_name.strip():
+            raise ValueError("display_name must be a non-empty string")
+        if not isinstance(self.framework, str) or not self.framework.strip():
+            raise ValueError("framework must be a non-empty string")
+        if (
+            not isinstance(self.default_entry_point, str)
+            or not self.default_entry_point.strip()
+        ):
+            raise ValueError("default_entry_point must be a non-empty string")
+        if not isinstance(self.description, str):
+            raise TypeError("description must be a string")
+
+
+@dataclass(frozen=True, slots=True)
+class DatasetSchemaItem:
+    """View-model projection of an available dataset and its schema (NM-11, #10626).
+
+    Invariants:
+        - dataset_id: non-empty string.
+        - display_name: non-empty string.
+        - sample_count: non-negative int.
+        - format: non-empty string.
+    """
+
+    dataset_id: str
+    display_name: str
+    sample_count: int
+    format: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.dataset_id, str) or not self.dataset_id.strip():
+            raise ValueError("dataset_id must be a non-empty string")
+        if not isinstance(self.display_name, str) or not self.display_name.strip():
+            raise ValueError("display_name must be a non-empty string")
+        if (
+            not isinstance(self.sample_count, int)
+            or isinstance(self.sample_count, bool)
+            or self.sample_count < 0
+        ):
+            raise ValueError("sample_count must be a non-negative int")
+        if not isinstance(self.format, str) or not self.format.strip():
+            raise ValueError("format must be a non-empty string")
+
+
+def default_neural_motion_topologies() -> tuple[ModelTopologyItem, ...]:
+    """Default catalogue of supported neural motion topologies (NM-11, #10626)."""
+    return (
+        ModelTopologyItem(
+            model_id="driven_double_pendulum",
+            display_name="Driven Double Pendulum (2-DOF)",
+            framework="pytorch",
+            default_entry_point="neural_motion:train_masked_proposals",
+            description="Driven planar double pendulum benchmark for high-speed wrist release.",
+        ),
+        ModelTopologyItem(
+            model_id="mujoco_humanoid_3d",
+            display_name="MuJoCo Humanoid 3D (Full Body)",
+            framework="pytorch",
+            default_entry_point="neural_motion:train_masked_proposals",
+            description="Full-body 3D humanoid golfer with joint limits and contact envelopes.",
+        ),
+        ModelTopologyItem(
+            model_id="pinocchio_golf_arm",
+            display_name="Pinocchio Golf Arm (Analytical Polish)",
+            framework="pytorch",
+            default_entry_point="neural_motion:train_checkpoint_matrix",
+            description="High-precision kinematics and dynamics matrix for arm & club swing.",
+        ),
+    )

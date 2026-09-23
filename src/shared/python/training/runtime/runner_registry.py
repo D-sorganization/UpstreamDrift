@@ -43,11 +43,12 @@ class NoRunnerAvailableError(TrainingError, LookupError):
 class RunnerRegistry:
     """Thread-safe lookup table of :class:`TrainingJobRunner` adapters."""
 
-    __slots__ = ("_lock", "_runners")
+    __slots__ = ("_all_runners", "_lock", "_runners")
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
         self._runners: dict[TrainingFramework, TrainingJobRunner] = {}
+        self._all_runners: dict[TrainingFramework, list[TrainingJobRunner]] = {}
 
     def register(self, runner: TrainingJobRunner) -> None:
         """Register a runner adapter.
@@ -68,12 +69,17 @@ class RunnerRegistry:
             )
         with self._lock:
             self._runners[framework] = runner
+            if framework not in self._all_runners:
+                self._all_runners[framework] = []
+            if runner not in self._all_runners[framework]:
+                self._all_runners[framework].append(runner)
 
     def unregister(self, framework: TrainingFramework) -> None:
         """Remove the runner for ``framework`` if present."""
 
         with self._lock:
             self._runners.pop(framework, None)
+            self._all_runners.pop(framework, None)
 
     def get(self, framework: TrainingFramework) -> TrainingJobRunner:
         """Return the registered runner for ``framework``.
@@ -94,22 +100,32 @@ class RunnerRegistry:
     def resolve(self, config: TrainingConfig) -> TrainingJobRunner:
         """Return the runner that can handle ``config``.
 
-        Goes through two filters: framework match first, then the
-        runner's own :meth:`can_run` predicate (which may decline a
-        config that demands a resource the runner cannot supply).
+        Goes through two filters: framework match first, then candidate
+        runner :meth:`can_run` predicates.
 
         Raises:
             NoRunnerAvailableError: When no registered runner matches
                 or all candidates decline via ``can_run``.
         """
 
-        runner = self.get(config.framework)
-        if not runner.can_run(config):
+        with self._lock:
+            candidates = list(reversed(self._all_runners.get(config.framework, [])))
+            if not candidates and config.framework in self._runners:
+                candidates = [self._runners[config.framework]]
+
+        if not candidates:
             raise NoRunnerAvailableError(
-                f"runner for {config.framework.value!r} declined the job "
-                f"(can_run returned False)"
+                f"no runner registered for framework {config.framework.value!r}"
             )
-        return runner
+
+        for runner in candidates:
+            if runner.can_run(config):
+                return runner
+
+        raise NoRunnerAvailableError(
+            f"all runners for {config.framework.value!r} declined the job "
+            f"(can_run returned False)"
+        )
 
     def frameworks(self) -> frozenset[TrainingFramework]:
         """Snapshot of registered frameworks."""
