@@ -488,6 +488,15 @@ Run commands from that central checkout, with `--repo` naming the repository
 being edited. If the CLI is not yet available, keep the existing lease/comment
 workflow and report the rollout gap.
 
+- The Runner Dashboard fronts the same board over HTTP for every agent (Claude
+  Code, Codex, Gemini CLI, Grok Bot, staff runs). One call returns board
+  priorities, directives, holds, live sessions and claim steps for a repo:
+  `GET /api/coordination/briefing?repo=REPO` on a dashboard node (default
+  `http://127.0.0.1:8321`), the `fleet_briefing` tool of the `fleet` MCP server,
+  or `python3 fleetctl.py briefing --repo REPO`. The MCP server and CLI are in
+  Runner_Dashboard `clients/fleet/`, and its `docs/agents/connect.md` has the
+  setup. Presence, messages and claims have matching endpoints and tools. The
+  board issue stays the single store, and both routes can be mixed freely.
 - Keep existing issue claim checks and leases. Presence is advisory, not a lock.
 - Register a unique session before editing: `python -m scripts.agent_communicate
 --repo REPO --session UNIQUE_ID register --agent AGENT --issue N --branch BRANCH
@@ -636,18 +645,25 @@ If implementation files changed but no material development-log update is requir
 
 ### Lane Matrix
 
-| Platform           | Lane                                                                                                                                     |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Codex**          | High-frequency sweeps: PR queue, red CI, issue triage, dependency bumps. Wired as hourly crons in `config/codex_fleet_automations.json`. |
-| **Claude**         | Multi-file refactors, spec and plan work, PR review response, cross-repo migrations.                                                     |
-| **Antigravity**    | Local interactive work, browser and UI verification, MATLAB and notebook work.                                                           |
-| **Local / Ollama** | Offline drafting, bulk mechanical edits.                                                                                                 |
+Lanes are owned by **roles**, not by model vendors. A role is a scheduled or on-demand job with a playbook; any provider seat (Claude, Codex, Antigravity, Cursor, Gemini, local Ollama) may execute it. The role source of truth is `Repository_Management/staff/roles/<role>.yml` (schema `staff/schema.json`, validated by `shared_scripts/staff_roles.py`); playbooks are `Repository_Management/docs/fleet-<role>.md`.
+
+| Lane                                                                                     | Owner                                                                                                                                                                                                                                                         | How it is dispatched                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sweeps**: idle PR queue, red CI, issue backlog, runner health, worktree/branch hygiene | Staff Hub roles `night-watch` with wings `pr-remediator` and `issue-remediator`; `sanitation`; `cartographer` (playbooks `docs/fleet-night-watch.md`, `fleet-pr-remediator.md`, `fleet-issue-remediator.md`, `fleet-sanitation.md`, `fleet-cartographer.md`). | Scheduled from the Runner Dashboard Staff Hub (Runner_Dashboard#1192) on the node chosen by capacity; on demand via `POST /api/staff/{role}/run`; or by any human/agent following the playbook by hand. |
+| **Issue implementation** (capacity-gated, one dispatch per cycle per host)               | Conductor (`Repository_Management/conductor/`, `conductor/RUNBOOK.md`)                                                                                                                                                                                        | `Conductor-RealWork-RM-30min` scheduled task on each host; output is a draft PR labelled `conductor`.                                                                                                   |
+| **Multi-file refactors, spec and plan work, PR review response, cross-repo migrations**  | Interactive Claude Code sessions (and any seat given the task explicitly)                                                                                                                                                                                     | Human-directed.                                                                                                                                                                                         |
+| **Local interactive work, browser and UI verification, MATLAB and notebook work**        | Antigravity                                                                                                                                                                                                                                                   | Human-directed.                                                                                                                                                                                         |
+| **Offline drafting, bulk mechanical edits**                                              | Local / Ollama                                                                                                                                                                                                                                                | Human-directed.                                                                                                                                                                                         |
+| **Portfolio direction** (briefs, priorities, dispatch requests)                          | Grok Bot `barb` and `orchestrator` (`docs/grok-bridge.md`, `docs/fleet-dispatcher.md`)                                                                                                                                                                        | Only through the hub API (`POST /api/staff/{role}/run`, `GET /api/staff/summary`); never bot-to-bot, never raw shell on a host.                                                                         |
+
+Retired: the Codex desktop-app automations rendered from `config/codex_fleet_automations.json` (`fleet-pr-queue`, `fleet-issue-sweeper`, …) last ran on 2026-05-27 and are **not** a lane. Do not defer sweep work to them, and do not revive them; use the Staff Hub roles above (Repository_Management#1681).
 
 ### Policies
 
-1. **Defer out-of-lane work**: An agent asked to do work assigned to another lane should defer rather than race.
+1. **Defer out-of-lane work**: An agent asked to do work assigned to another lane should defer rather than race — but only to a lane that is actually running. If the owning role has no live schedule or lease (check `GET /api/staff/board`, the `claim:<role>` label, or the presence board), the work is unowned and the asking agent may take it under its own lease.
 2. **Unattended execution boundary**: Unattended agents only act in portfolios explicitly configured in `config/fleet_manifest.yaml` under `portfolios.<name>.unattended_agents`. Portfolios with empty lists (e.g. `personal`) require interactive human direction.
 3. **Lease before edit**: Every agent must check for active claims or leases on an issue before starting implementation and post its own claim/lease to prevent concurrent duplicate work.
+4. **Do not starve CI to jump the queue**: Never cancel another PR's workflow runs to free runners for your own; every fleet workflow already cancels superseded runs of the same ref via its `concurrency` group. Batch-rebasing many PRs at once has the same effect and is likewise out of policy.
 
 <!-- END FLEET-MANAGED: agent-lanes -->
 
@@ -755,23 +771,129 @@ tomorrow. `fleet-guard report` shows what has been caught.
 
 <!-- BEGIN FLEET-MANAGED: deferred-validation -->
 
-## Deferred Experimental Work
+## 🔬 Work You Cannot Execute: Defer It, Never Fake It
 
-Before selecting work, read `docs/development/planning/catalog.json` when present.
-Unavailable physical measurements, participant tests, plant access and independent
-human approvals belong in repo-owned future plans for Board review. Never invent
-evidence to complete them. Keep independently executable software work active;
-split mixed issues rather than hiding defects or weakening release gates.
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/deferred-validation.md.
 
-Project Steward exposes these plans as `parked` charter features and resource
-decisions in the existing Projects status. Coding agents do not dispatch deferred
-experiments or reopen `roadmap` issues just because the experiment remains undone.
-Board approval plus verified resources permits a bounded activation issue assigned
-to the appropriate human/equipment owner; it does not establish validation.
+Owner decision (Dieter Olson, 2026-09-22,
+[Repository_Management#1687](https://github.com/D-sorganization/Repository_Management/issues/1687)):
+an issue whose remaining acceptance criteria need a physical measurement,
+laboratory access, a field collection, specialised hardware or a human trial
+cannot be finished by you. It leaves the queue as a durable planning record —
+never as a silent close, never as a fabricated result.
 
-Preserve original issue context and acceptance in the owning repository, merge
-and verify the plan, then close eligible external-only issues as `not_planned`
-with `roadmap` and a durable record link. Respect existing claims and protected
-issues. Standard: Repository_Management `docs/fleet-deferred-validation.md`.
+### What to Do When You Hit One
+
+1. **Do not attempt the measurement and do not simulate it.** Never write a
+   number into an issue, a test, a report or a commit that was not measured.
+2. **Do not close the issue.** Propose a record in the repository's
+   `docs/planning/deferred-validation.json`: the original issue URL, its
+   acceptance criteria copied verbatim, why it is external, the resources it
+   needs, and what would reopen it. Validate with
+   `python -m shared_scripts.deferred_validation --repo-root .`.
+3. **Split mixed issues.** If part of the issue is implementable software or CI
+   work, that part stays open as `retained_issue_url` and you may do it.
+4. **Publish, verify, then close — in that order.** The original issue is only
+   closed as not planned after the record is merged, its `record_url` resolves
+   on the default branch, and a named human or the Board signed it off
+   (`reviewed_by` / `reviewed_on`).
+
+### Discovery Is Not Authority
+
+Matching keywords like `measure`, `rig`, `chamber`, `specimen`, `calibrat` or
+`trial` is how you **find** candidates. It never authorises closing an issue.
+The catalog validator refuses a closed origin with no recorded review.
+
+The standard, the schema and the per-role instructions are in
+[`docs/fleet-deferred-validation.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/fleet-deferred-validation.md).
 
 <!-- END FLEET-MANAGED: deferred-validation -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: pr-queue-consolidation -->
+
+## PR Queue Consolidation: One PR per Repository When the Queue Is Large
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/pr-queue-consolidation.md.
+
+Owner decision (Dieter Olson, 2026-09-22, Repository_Management#1691): when a
+repository has many open PRs, agents **consolidate** them into one PR per
+repository instead of draining the queue serially.
+
+Why: Tools_Private had 39 open PRs on a runner pool at 84–92 % utilisation
+(Tools_Private#1797). Its `main` protection is `strict` (branch must be up to
+date), so every merge invalidated every other open PR, each one then needed a
+full CI cycle after re-rebase, and workflows with `concurrency:
+cancel-in-progress` cancelled each other's runs. The queue never drained.
+Consolidating the 24 already-rebased PRs into one branch needs one CI cycle.
+
+### Trigger
+
+Consolidate when either holds for a repository:
+
+- **≥ 6 open non-draft PRs** and the `main` branch protection requires
+  branches to be up to date (`required_status_checks.strict`), or
+- **runner utilisation ≥ 70 %** as reported by
+  `GET /api/runners/fleet/capacity` on the Runner Dashboard.
+
+The threshold numbers are initial defaults pending owner confirmation; the
+procedure below does not depend on them.
+
+### Staff Hub Implementation
+
+The `pr-remediator` role carries `strategy.consolidate_when {open_prs: 6,
+utilisation_pct: 70}` in its role file (Repository_Management#1690, role
+schema; lands after #1677). The Runner Dashboard scheduler and the Assign form
+evaluate the threshold and log `consolidated N PRs into #M` when the role runs
+in consolidation mode (Runner_Dashboard#1213).
+
+### Procedure
+
+1. **Freeze serial pushes.** Announce on the presence board; do not rebase or
+   re-push individual PRs while consolidation is in progress.
+2. **Prepare each PR in its own worktree** (`git worktree add
+../<repo>-worktrees/consolidate-<pr> pr-<pr>`; rebase onto `origin/main`).
+   Keep **both** sides of conflicting rows in `SPEC.md`, `HANDOFF.md` and
+   `DEVELOPMENT_LOG.md` — rows are keyed by PR or issue and never renumbered.
+3. **Run each PR's own tests** in its worktree before it is accepted into the
+   batch; a PR that is red on its own is excluded, not carried.
+4. **Build the consolidated branch** `feat/<area>-consolidated-<date>` from
+   `origin/main` by merging the prepared commits in dependency order (base
+   chains before their tips; see the stacked-PR rule: a tip does not subsume
+   its base chain).
+5. **Run the full suite and acceptance once** on the consolidated branch.
+6. **Open one PR** whose body has a per-PR table (`PR | title | issue | tests`)
+   and every original `Closes #<issue>` line. Apply `large-pr-approved` and
+   `deletions-acknowledged` where the diff size or deletion count requires it.
+7. **Arm auto-merge only through** `python scripts/automerge_guard.py
+<owner>/<repo> <pr> --arm --strategy squash`; never `gh pr merge --admin`.
+8. **After merge, close the originals** with the comment
+   `superseded by #<consolidated PR>` and release their leases.
+
+### Exclusions
+
+Never fold these into a consolidated branch:
+
+- Draft PRs.
+- PRs labelled `do-not-merge`, `do-not-automate` or `claim:local`.
+- PRs owned by another live session, unless that session agreed on the
+  presence board (`python -m scripts.agent_communicate ... send`).
+- PRs that change `.github/workflows/**` (workflow changes ship alone).
+- Bot snapshot PRs that delete lines present on `main`.
+
+### Never Cancel or Re-Run Other PRs' CI
+
+Consolidation is the only sanctioned way to reduce CI load. Cancelling another
+PR's runs, re-triggering them, or batch-rebasing the queue to jump ahead stays
+out of policy (see Agent Lanes, policy 4).
+
+### Expected Outcome
+
+For N eligible PRs the repository needs one or two CI cycles (consolidated
+branch, plus one re-run if `main` moved) instead of at least N cycles under a
+`strict` protection, and the runner pool is freed for other repositories.
+
+<!-- END FLEET-MANAGED: pr-queue-consolidation -->
