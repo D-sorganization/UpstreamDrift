@@ -35,10 +35,13 @@ from .live_subscriber import (
 )
 from .view_model import (
     DashboardModel,
+    DatasetSchemaItem,
     GpuSnapshot,
     JobRow,
     MetricSeries,
+    ModelTopologyItem,
     ResourceSnapshot,
+    default_neural_motion_topologies,
     job_row_from_training_job,
 )
 
@@ -64,17 +67,20 @@ _register_embed_adapter()
 __all__ = [
     "DEFAULT_ROLLING_WINDOW",
     "DashboardModel",
+    "DatasetSchemaItem",
     "GpuSnapshot",
     "JobRow",
     "MetricCallback",
     "MetricSeries",
     "ModelChangeCallback",
+    "ModelTopologyItem",
     "ResourceProvider",
     "ResourceSnapshot",
     "StatusCallback",
     "TrainingDashboardController",
     "TrainingJobLiveSubscriber",
     "_register_embed_adapter",
+    "default_neural_motion_topologies",
     "job_row_from_training_job",
     "TrainingControllerAdapter",
 ]
