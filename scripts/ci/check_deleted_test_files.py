@@ -110,7 +110,7 @@ def resolve_merge_base(base_ref: str, head_ref: str, repo_root: Path) -> str | N
 
 
 @precondition(
-    lambda base_ref, head_ref, test_pattern, repo_root: (
+    lambda base_ref, head_ref, test_pattern, repo_root, fallback_to_base=False: (
         isinstance(base_ref, str)
         and bool(base_ref.strip())
         and isinstance(head_ref, str)
@@ -118,6 +118,7 @@ def resolve_merge_base(base_ref: str, head_ref: str, repo_root: Path) -> str | N
         and isinstance(test_pattern, str)
         and bool(test_pattern.strip())
         and (repo_root is None or isinstance(repo_root, Path))
+        and isinstance(fallback_to_base, bool)
     )
 )
 @postcondition(
@@ -128,27 +129,38 @@ def detect_deleted_test_files(
     head_ref: str = "HEAD",
     test_pattern: str = "tests/**/*.py",
     repo_root: Path | None = None,
+    fallback_to_base: bool = False,
 ) -> list[str]:
     """Detect test files deleted between the merge-base of base_ref and head_ref.
 
     Raises:
-        MergeBaseResolutionError: If merge-base cannot be resolved.
+        MergeBaseResolutionError: If merge-base cannot be resolved and fallback_to_base is False.
     """
     root = repo_root or REPO_ROOT
     merge_base = resolve_merge_base(base_ref, head_ref, root)
 
     if merge_base is None:
-        raise MergeBaseResolutionError(
-            f"Cannot resolve merge-base between '{base_ref}' and '{head_ref}'. "
-            "Ensure sufficient git fetch depth is available in the checkout."
-        )
+        if fallback_to_base:
+            logger.warning(
+                "Cannot resolve merge-base between '%s' and '%s'; falling back to base ref",
+                base_ref,
+                head_ref,
+            )
+            diff_target = base_ref
+        else:
+            raise MergeBaseResolutionError(
+                f"Cannot resolve merge-base between '{base_ref}' and '{head_ref}'. "
+                "Ensure sufficient git fetch depth is available in the checkout."
+            )
+    else:
+        diff_target = merge_base
 
     code, stdout, stderr = run_git_command(
         [
             "diff",
             "--name-only",
             "--diff-filter=D",
-            merge_base,
+            diff_target,
             head_ref,
             "--",
             test_pattern,
@@ -157,7 +169,7 @@ def detect_deleted_test_files(
     )
     if code != 0:
         raise RuntimeError(
-            f"git diff failed between {merge_base} and {head_ref}: {stderr.strip()}"
+            f"git diff failed between {diff_target} and {head_ref}: {stderr.strip()}"
         )
 
     deleted_files = [
@@ -185,6 +197,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Path glob pattern for test files (default: tests/**/*.py)",
     )
     parser.add_argument(
+        "--fallback-to-base",
+        action="store_true",
+        help="Fall back to base-ref if merge-base cannot be resolved",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -205,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
             head_ref=args.head,
             test_pattern=args.test_pattern,
             repo_root=args.repo_root,
+            fallback_to_base=args.fallback_to_base,
         )
     except MergeBaseResolutionError as err:
         sys.stderr.write(f"::error::{err}\n")

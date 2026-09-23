@@ -1249,9 +1249,11 @@ class TestCIEnvironmentCompatibility:
         ]
 
         assert "fetch-depth: 0" in workflow
-        assert "mapfile -t deleted_tests" in pr_block
-        assert "--diff-filter=D" in pr_block
+        assert "scripts/ci/check_deleted_test_files.py" in pr_block
+        assert "--base-ref" in pr_block
+        assert "--fallback-to-base" in pr_block
         assert "${merge_base:-$diff_base}" in pr_block
+        assert "mapfile -t deleted_tests" in pr_block
         assert "Deleted Python test files require review" in pr_block
         assert (
             "exit 1"
