@@ -65,7 +65,6 @@ from .persistence import (
     training_metric_from_dict,
     training_metric_to_dict,
 )
-from .portable import export_job_package, import_job_package
 from .registry import JobFilter, JobRegistry
 from .resources import ResourceRequest
 from .scheduler import Scheduler, SchedulerError, StatusChangeEvent
@@ -115,9 +114,7 @@ __all__ = [
     "TrainingStatus",
     "best_per_metric",
     "can_transition",
-    "export_job_package",
     "filter_by_tags",
-    "import_job_package",
     "new_job_id",
     "new_run_id",
     "run_result_from_dict",
