@@ -34,10 +34,6 @@ from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.club_target import ClubTarget
 
-from .invert import FitResult
-from .model import ClubTrajectory
-from .train import TrainedSurrogate
-
 __all__ = [
     "ValidationReport",
     "check_contact_boundary_failure",
