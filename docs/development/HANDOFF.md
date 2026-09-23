@@ -54,6 +54,19 @@ remains outstanding.
 - The new continuation validates. Four historical placeholder-example findings
   reproduce in the baseline handoff and remain unchanged.
 
+- Hosted structure job `107430082628` and the local architecture gate exposed
+  three unchanged central functions over the 100-line budget (174/117/147).
+  Three symbol-specific, codex-owned exceptions under #10783 expire 2026-10-23.
+  The global budget is unchanged and bundle-digest tests forbid local growth.
+  Central refactoring and consumer requalification are required before expiry;
+  no workflow or canonical-source bypass is used.
+  The corrected architecture gate and eleven combined catalog/architecture tests
+  pass locally (3.56 s on the final rerun). Hosted acceptance of this correction
+  remains pending; the preceding failed head is `bca452a6d5`.
+  DRY duplication, root clutter, agent-document consistency and test-layout
+  checks also pass. The DRY checker reports historical quarantine reductions;
+  those unrelated entries were retained.
+
 ## Blockers and Risks
 
 Protected CI and default-branch identity verification
@@ -65,6 +78,9 @@ scientific release qualification.
 Complete protected publication of PR #10784 closing #10783,
 verify the installed files centrally, and update this continuation with results.
 Keep the full rollout and the original scientific acceptance obligations open.
+The user requested a committed PR checkpoint and then a pause. Continue from
+this branch only after claiming the handoff; do not interpret the pause as
+scientific completion. Central continuation is Repository_Management#1727.
 
 ## Change Log
 
