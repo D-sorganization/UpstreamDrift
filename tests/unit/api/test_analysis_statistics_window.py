@@ -345,3 +345,30 @@ def test_json_export_after_stored_snapshots(
     data = response.json()
     assert data["record_count"] == 3
     assert [row["value"] for row in data["data"]] == [0.0, 1.0, 2.0]
+
+
+# ── collect=true: one request per client tick (client half of #8941) ──
+
+
+def test_collect_stores_a_snapshot_before_aggregating(
+    client: TestClient, manager: _Manager
+) -> None:
+    _store_values(manager, 2)
+
+    response = client.get("/analysis/statistics?collect=true&since=2")
+
+    assert response.status_code == 200
+    assert response.headers[NEXT_SINCE_HEADER] == "3"
+    data = response.json()
+    assert data["sample_count"] == 3
+    # Only the freshly collected sample is returned for since=2.
+    assert data["time_series"]["sim_time"] == [2.5]
+
+
+def test_collect_defaults_to_false(client: TestClient, manager: _Manager) -> None:
+    _store_values(manager, 2)
+
+    response = client.get("/analysis/statistics")
+
+    assert response.headers[NEXT_SINCE_HEADER] == "2"
+    assert response.json()["sample_count"] == 2

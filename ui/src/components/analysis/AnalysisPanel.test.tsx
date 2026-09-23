@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 
 // Mock recharts to avoid canvas rendering in tests
 vi.mock('recharts', () => ({
@@ -102,6 +102,85 @@ describe('AnalysisPanel', () => {
 
       expect(csvButton).toBeDisabled();
       expect(jsonButton).toBeDisabled();
+    });
+  });
+
+  describe('polling (#8941)', () => {
+    function statsResponse(nextSince: number, series: number[]) {
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'X-Analysis-Next-Since': String(nextSince) }),
+        json: () =>
+          Promise.resolve({
+            sim_time: 1,
+            sample_count: nextSince,
+            metrics: [],
+            time_series: { club_head_speed: series },
+          }),
+      };
+    }
+
+    async function flush() {
+      await act(async () => {
+        for (let i = 0; i < 5; i++) await Promise.resolve();
+      });
+    }
+
+    it('sends exactly one request per tick and advances the since cursor', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(statsResponse(3, [1, 2, 3]))
+        .mockResolvedValueOnce(statsResponse(4, [4]))
+        .mockResolvedValue(statsResponse(5, [5]));
+      global.fetch = fetchMock;
+
+      render(<AnalysisPanel isRunning={true} pollInterval={500} />);
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const firstUrl = String(fetchMock.mock.calls[0][0]);
+      expect(firstUrl).toContain('/api/analysis/statistics?');
+      expect(firstUrl).toContain('collect=true');
+      expect(firstUrl).not.toContain('since=');
+
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(String(fetchMock.mock.calls[1][0])).toContain('since=3');
+
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      expect(String(fetchMock.mock.calls[2][0])).toContain('since=4');
+      expect(
+        fetchMock.mock.calls.some(([url]) => String(url).includes('/api/analysis/metrics')),
+      ).toBe(false);
+    });
+
+    it('does not poll while the simulation is stopped', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      render(<AnalysisPanel isRunning={false} />);
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('stops polling on unmount', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(statsResponse(1, [1]));
+      global.fetch = fetchMock;
+      const { unmount } = render(<AnalysisPanel isRunning={true} />);
+      await flush();
+      unmount();
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
   });
 });
