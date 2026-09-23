@@ -594,7 +594,7 @@ models:
 
   - id: "launch_monitor_analytics"
     name: "Launch Monitor Analytics"
-    description: "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends"
+    description: "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends. The deep-desk workbench for the same analytics engine as the Rate of Closure Impact Explorer's launch-monitor tab."
     type: "special_app"
     path: "src/tools/launch_monitor_analytics/__main__.py"
     capabilities:
@@ -614,7 +614,7 @@ models:
 
   - id: "rate_of_closure"
     name: "Rate of Closure Impact Explorer"
-    description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)"
+    description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center). Its launch-monitor tab is the in-context surface of the same analytics engine as Launch Monitor Analytics."
     type: "special_app"
     path: "tools://src/rate_of_closure/launch_pyqt6.py"
     working_dir: "."
