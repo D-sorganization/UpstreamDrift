@@ -227,6 +227,37 @@ pending` — UD keeps this facade.
 
 ## CO-06 Recover Feasible Controls and Independently Replay (#10610) [MERGED]
 
+## Issue #8905: Empty Filter State and Search Debounce
+
+- Branch: cursor/fix-issue-8905-empty-filter-debounce-7996
+- PR: not created (pending)
+- Governing issue: #8905
+- Objective: Fix blank void when model grid filter results are empty; debounce
+  search input to avoid costly grid teardown/rebuild on every keystroke.
+- Files changed:
+  - `src/launchers/launcher_layout_manager.py`: Added `_show_empty_state`,
+    `_handle_empty_state_link`, `on_clear_filters` callback, and
+    `_empty_state_label` state. Empty state shows centered QLabel with query
+    info and "Clear filters" link when active filters produce zero results.
+  - `src/launchers/_launcher_top_bar_ui.py`: Added 150ms debounce timer for
+    search input via `_search_debounce_timer`, `_on_search_text_changed`, and
+    `_apply_debounced_search`.
+  - `src/launchers/upstream_drift_launcher.py`: Added `on_clear_filters`
+    callback wiring to layout manager and `_on_empty_state_clear_filters` handler.
+  - `tests/launchers/test_launcher_layout_manager.py`: Added 5 unit tests for
+    empty state visibility, content, removal, and callback behavior.
+  - `tests/launchers/test_launcher_ui_setup.py`: Added 3 unit tests for
+    debounce timer setup and behavior.
+- Validation:
+  - `python3 -m pytest tests/launchers/test_launcher_layout_manager.py -v` — 40 passed
+  - `python3 -m pytest tests/launchers/test_launcher_ui_setup.py -v -k "debounce or search_text"` — 3 passed
+  - `python3 -m ruff check <files>` — all checks passed
+  - `python3 -m ruff format --check <files>` — already formatted
+- Blockers: None
+- Next: Commit, push, and create PR.
+
+## CO-04 Match Club-Only Motion With Double and Triple Pendulums (#10608)
+
 - Merged to main via PR [#10687](https://github.com/D-sorganization/UpstreamDrift/pull/10687)
   (squash merge SHA `f191dd09d`).
 - Delivered: `club_only/control_replay.py` recovers minimum-effort controls
