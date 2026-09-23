@@ -1,33 +1,84 @@
-"""Generate the industrial readiness index from industrial_readiness.json.
+"""Generate the readiness indexes from the machine-readable ledgers.
 
 Epic #9539 is the repository-level execution index for the 2026-09-04
-industrial readiness review. The committed markdown index must always match
-the machine-readable ledger; the freshness test in
+industrial readiness review; epic #9546 is the same review's Impact Zone and
+Impact Explorer product program. Each committed markdown index must always
+match its ledger; the freshness test in
 tests/config/industrial_readiness/test_readiness_index_freshness.py
-regenerates the doc and compares it byte-for-byte.
+regenerates every doc and compares it byte-for-byte.
 
 Usage:
     python -m scripts.generate_industrial_readiness_index [--check]
 
-``--check`` exits non-zero (without writing) when the committed doc is stale.
+``--check`` exits non-zero (without writing) when any committed doc is stale.
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.config.industrial_readiness_loader import (  # noqa: E402
+    IMPACT_ZONE_LEDGER_PATH,
+    LEDGER_PATH,
     AcceptanceCriterion,
     IndustrialReadinessLedger,
     ReadinessItem,
 )
 
-INDEX_PATH = REPO_ROOT / "docs" / "operations" / "industrial-readiness-index.md"
+_DOCS_DIR = REPO_ROOT / "docs" / "operations"
+
+
+@dataclass(frozen=True)
+class IndexSpec:
+    """One ledger -> one generated index document.
+
+    Attributes:
+        ledger_path: Machine-readable ledger the doc is generated from
+        index_path: Committed markdown document
+        title: Top-level heading
+        scope: Prose lines describing what the epic's queue covers
+    """
+
+    ledger_path: Path
+    index_path: Path
+    title: str
+    scope: tuple[str, ...]
+
+
+INDUSTRIAL_INDEX = IndexSpec(
+    ledger_path=LEDGER_PATH,
+    index_path=_DOCS_DIR / "industrial-readiness-index.md",
+    title="Industrial Readiness Index",
+    scope=(
+        "industrial readiness review. The priority children hold the code changes;",
+        "this record says which of them landed, what proves it, and which remain",
+        "open. It is a software-correctness record only — scientific and human",
+    ),
+)
+
+IMPACT_ZONE_INDEX = IndexSpec(
+    ledger_path=IMPACT_ZONE_LEDGER_PATH,
+    index_path=_DOCS_DIR / "impact-zone-readiness-index.md",
+    title="Impact Zone Readiness Index",
+    scope=(
+        "review's Impact Zone and Impact Explorer product program. Tools owns the",
+        "shared impact/flight runtime, so provider fixes land there first and this",
+        "record says which reviewed pins UpstreamDrift has consumed, what proves",
+        "it, and which product slices remain open. It is a software-correctness",
+        "record only — scientific and human",
+    ),
+)
+
+INDEX_SPECS: tuple[IndexSpec, ...] = (INDUSTRIAL_INDEX, IMPACT_ZONE_INDEX)
+
+#: Kept for callers that predate the second ledger.
+INDEX_PATH = INDUSTRIAL_INDEX.index_path
 
 _ISSUE_URL = "https://github.com/D-sorganization/UpstreamDrift/issues"
 
@@ -107,31 +158,32 @@ def _render_acceptance(criterion: AcceptanceCriterion) -> list[str]:
     ]
 
 
-def render_index(ledger: IndustrialReadinessLedger) -> str:
-    """Render the readiness ledger as a markdown index.
+def render_index(
+    ledger: IndustrialReadinessLedger, spec: IndexSpec = INDUSTRIAL_INDEX
+) -> str:
+    """Render a readiness ledger as a markdown index.
 
     Args:
-        ledger: Loaded industrial-readiness ledger
+        ledger: Loaded readiness ledger
+        spec: Which index document the ledger renders into
 
     Returns:
         Full markdown document content (deterministic for a given ledger)
     """
     open_items = ledger.open_items
     merged_items = ledger.merged_items
+    ledger_rel = spec.ledger_path.relative_to(REPO_ROOT).as_posix()
     lines = [
-        "# Industrial Readiness Index",
+        f"# {spec.title}",
         "",
         "<!-- AUTO-GENERATED — do not edit by hand. -->",
         "<!-- Regenerate with: python3 -m scripts.generate_industrial_readiness_index -->",
         "",
-        "Generated from [`src/config/industrial_readiness.json`]"
-        "(../../src/config/industrial_readiness.json)"
+        f"Generated from [`{ledger_rel}`](../../{ledger_rel})"
         f" (ledger v{ledger.version}).",
         "",
         f"Execution index for epic {_issue_link(ledger.epic)}, the 2026-09-04",
-        "industrial readiness review. The priority children hold the code changes;",
-        "this record says which of them landed, what proves it, and which remain",
-        "open. It is a software-correctness record only — scientific and human",
+        *spec.scope,
         "qualification are recorded separately, through the design-manual",
         "governance pathway.",
         "",
@@ -202,24 +254,30 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    ledger = IndustrialReadinessLedger.load()
-    rendered = render_index(ledger)
+    stale = False
+    for spec in INDEX_SPECS:
+        ledger = IndustrialReadinessLedger.load(spec.ledger_path)
+        rendered = render_index(ledger, spec)
+        index_path = spec.index_path
 
-    if args.check:
-        current = INDEX_PATH.read_text(encoding="utf-8") if INDEX_PATH.exists() else ""
-        if current != rendered:
-            print(  # noqa: T201 - CLI tool output
-                f"STALE: {INDEX_PATH} does not match industrial_readiness.json. "
-                "Run: python3 -m scripts.generate_industrial_readiness_index"
+        if args.check:
+            current = (
+                index_path.read_text(encoding="utf-8") if index_path.exists() else ""
             )
-            return 1
-        print(f"OK: {INDEX_PATH} is up to date.")  # noqa: T201 - CLI tool output
-        return 0
+            if current != rendered:
+                stale = True
+                print(  # noqa: T201 - CLI tool output
+                    f"STALE: {index_path} does not match {spec.ledger_path.name}. "
+                    "Run: python3 -m scripts.generate_industrial_readiness_index"
+                )
+            else:
+                print(f"OK: {index_path} is up to date.")  # noqa: T201 - CLI output
+            continue
 
-    INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
-    INDEX_PATH.write_text(rendered, encoding="utf-8", newline="\n")
-    print(f"Wrote {INDEX_PATH}")  # noqa: T201 - CLI tool output
-    return 0
+        index_path.parent.mkdir(parents=True, exist_ok=True)
+        index_path.write_text(rendered, encoding="utf-8", newline="\n")
+        print(f"Wrote {index_path}")  # noqa: T201 - CLI tool output
+    return 1 if stale else 0
 
 
 if __name__ == "__main__":

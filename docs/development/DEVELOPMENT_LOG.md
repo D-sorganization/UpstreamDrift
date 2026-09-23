@@ -17,18 +17,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
+### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8932
+- **Branch:** fix/8932-analysis-debounce
+- **PR:** #10734 (open)
+- **Paths:** `src/shared/python/dashboard/_analysis_refresh.py`; `src/shared/python/dashboard/advanced_analysis.py`; `tests/unit/shared_python/test_analysis_tab_refresh.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at `3d62f6441` plus the DRY follow-up — shared `_SignalTransformTab` base clears the DRY duplication gate; RED shown for the six tab-level tests, then GREEN; 27 analysis-tab tests pass offscreen; ruff, mypy (dashboard scope), file-size and architecture budgets clean.
+- **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
+- **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
+
+### DL-#8883 · Video Analyzer Real GUI Replacing the Placeholder Label
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #8883 (related #8854, #10512)
+- **Branch:** fix/8883-video-analyzer-gui
+- **PR:** #10651
+- **Paths:** src/tools/video_analyzer/analyzer.py; src/tools/video_analyzer/gui.py; src/launchers/external_tools_adapter.py; src/launchers/task_launch_truthfulness.py; tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/; tests/launchers/test_simulation_guis.py; tests/launchers/test_task_launch_truthfulness.py
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-21 at HEAD (ruff check/format clean; mypy clean on the four changed src files; pytest green on tests/unit/test_video_analyzer_pipeline.py, tests/unit/test_video_analyzer_math.py, tests/ui/tools/video_analyzer, tests/launchers/test_simulation_guis.py, tests/launchers/test_task_launch_truthfulness.py, tests/config/feature_parity).
+- **Summary:** Replaced the static `QLabel("Video Analyzer (GUI placeholder)")` with a real `MainWidget` (choose video, Analyze, report pane) wired to a new `SwingAnalyzer.analyze_video()` that runs MediaPipe pose estimation (via the existing `pose_estimation` registry) and feeds the already-tested head-stability math. Removed the launcher's dead sibling-repo import fallback (`video_analyzer.launch_pyqt6`, confirmed nonexistent by #8854) so the tile no longer depends on an external Tools provider; updated `task_launch_truthfulness`'s audit entry from `PROVIDER_REQUIRED` to `PRODUCTION_SOLVER` accordingly.
+- **Next step:** Open PR `Closes #8883`, push, and drive CI to green.
+- **Evidence:** tests/unit/test_video_analyzer_pipeline.py; tests/ui/tools/video_analyzer/test_gui.py.
+
+### DL-#9700-Planning · Deferred External Validation Plans
+
+- **State:** in_review
+- **Owner:** codex (session `codex-validation-planning-20260922-ud`)
+- **Issue:** #9700; #10375; #10382; #9619; #9613; #9546
+- **Branch:** `docs/deferred-validation-planning`
+- **PR:** #10741
+- **Paths:** `docs/development/planning/`, `docs/development/HANDOFF.md`, `AGENT_HANDOFF.md`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 (source bodies unchanged; #9546 already closed by #10446 before migration)
+- **Summary:** Preserve external evidence requirements for Board consideration. Keep executable work distinct; no experimental results, actor approvals or provider changes.
+- **Next step:** Validate and publish six plans; verify exact artifacts before source comments. Keep five open sources open and preserve the existing #9546 disposition.
+
+### DL-#8941 · Analysis Statistics Endpoint Off the Event Loop With Incremental Fetch
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #8941 (server-side part; client-side items remain)
+- **Branch:** fix/8941-analysis-stats-server
+- **PR:** #10736 (open)
+- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 — bounded deque history, single-pass aggregation in `anyio.to_thread.run_sync`, `since`/`limit` cursor params; 87 focused API tests, scoped Ruff/mypy, architecture budget and error-handling ratchet pass.
+- **Summary:** Server-side fix for #8941: stop copying the 500-snapshot history per metrics call, stop walking it twice per metric on the event loop, and let clients fetch only new time-series points. Client polling-loop removal, endpoint merge in the UI and WS frames are out of scope here.
+- **Next step:** Switch `AnalysisPanel.tsx` to pass `since` from the `X-Analysis-Next-Since` header instead of refetching the whole window every 500 ms.
+
+### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #10591 (TB-06, parent #10584, program #10363)
-- **Branch:** feat/10591-upper-body-calibration
-- **PR:** #10733 (open)
-- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Branch:** feat/10591-upper-body-capture (merged)
+- **PR:** #10740 (`56ad6a8dcd13221699ec14442b13c1df6fc5729a`, merged)
+- **Paths:** src/shared/python/pendulum_simulator/upper_body_replay.py; src/shared/python/pendulum_simulator/simulation_core.py; src/shared/python/motion_matching/bernstein_controls.py; src/engines/physics_engines/pendulum/python/motion_matching/adapters_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_golfer.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization.py; src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py; src/engines/physics_engines/pendulum/python/motion_matching/upper_body_capture.py; scripts/motion_capture/upper_body_planarity_receipt.py; src/shared/python/tour_baselines/coverage.py; docs/plans/tour_baselines/coverage_matrix.md; docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json; docs/plans/tour_baselines/evidence/tb06_iron_planarity_receipt.json; reports/matched_swing_ledger.json; tests/unit/engines/physics_engines/pendulum/test_golfer_fit.py; tests/unit/pendulum_simulator/test_upper_body_replay.py; tests/unit/motion_matching/test_bernstein_controls.py; AGENT_HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at `234b8dc14` — PR #10732 merged after standard CI, including 18,367 passing Green-Suite unit tests. The calibration branch adds a shared bounded Bernstein-control contract, exercised by double and triple fitters plus replay regressions; 59 focused tests and scoped Ruff pass.
-- **Summary:** Build the fail-closed constrained upper-body golfer adapter for Driver and Iron. The current replay foundation is native dynamics evidence only; it does not claim torque fitting, capture-specific calibration, or qualification.
-- **Next step:** Implement bounded torque fitting and capture-specific calibration over the explicit TB-06 replay and marker contracts.
+- **Last verified:** 2026-09-22 — reproducible C3D preflight receipts preserve raw 360 Hz/654-frame Driver and 359 Hz/657-frame Iron clocks, shared 1 kHz evaluation grid, source hashes, and full coverage for six declared upper-body markers. Their 110.4/112.7 mm normal-RMSE lower bounds exceed the 55 mm profile ceiling, so both are rejected before unsupported planar attachment or torque fitting.
+- **Summary:** The native closed-loop replay and bounded torque fitter remain traceable, but the actual Driver and Iron source campaigns are scientifically disqualified by the fixed-plane lower bound. The coverage matrix and matched-swing ledger retain the two receipts as rejected outcomes rather than leaving a pending campaign or fabricating calibration.
+- **Next step:** Open a separately scoped spatial-topology issue only if a new model is authorized.
 
 ### DL-#10592 · Reconcile Existing Reference and Full-Body Results (TB-07)
 
@@ -205,6 +258,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Open the PR referencing #9543 (not `Closes`), then acquire measured strokes under `MEASUREMENT_PROTOCOL` before any qualification is attempted.
 - **Evidence:** tests/bunkershot3d/ball/test_transfer_qualification.py; docs/bunkershot3d/transfer-qualification.md.
 
+### DL-#9546 · Impact Zone Readiness Execution Index and I1/I2 Pin Consumption
+
+- **Issue:** #9546 (children #9547, #9548, #9549, #9550; reused #9484, #9349)
+- **Branch:** conductor/issue-9546
+- **PR:** #10446
+- **Paths:** src/config/impact_zone_readiness.json; src/config/industrial_readiness_loader.py; scripts/generate_industrial_readiness_index.py; docs/operations/impact-zone-readiness-index.md; tests/config/industrial_readiness/; tests/shared_contracts/test_impact_interval_provider.py
+- **Last verified:** 2026-09-18 (SELF; ledger + freshness gates 45 passed; consumer contract 3 passed with `--tools-mode=vendored` against Tools pin `62e8cdbf9`)
+- **Summary:** Epic #9546 gets the same machine-readable execution index as #9539: `impact_zone_readiness.json` reconciles I1–I4 and the two reused issues against `5347cba0f` and the vendored Tools pin, under the existing loader contract (keys `I<n>`/`R<n>` admitted, nothing else relaxed). The Tools fixes for I1 (#5088) and I2 (#5079) are consumed by a UD consumer contract that drives the audit probe through the vendored solver; I3, I4 and the Tools half of #9349 remain open with ordered plans, and `release_status` is `blocked`.
+- **Next step:** When Tools #4946 lands the live interval run record, bump the pin and mark I1/I2/I3 in the ledger with merge SHAs, tests and acceptance evidence.
+- **Evidence:** tests/config/industrial_readiness/; tests/shared_contracts/test_impact_interval_provider.py; docs/operations/impact-zone-readiness-index.md.
+
 ### DL-#9548 · Impact-Interval Energy Audit Consumer Gate
 
 - **State:** in_review
@@ -218,6 +282,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The pinned Tools solver already integrates release, dashpot/friction, torsional damping and boundary storage independently of the residual (Tools #5079). UD consumes that pin through a fail-closed gate that recomputes the residual from the ledger identity, audits free vs supported momentum separately, reports evidence plus limitations as a JSON-ready record, and refuses `to_post_impact_state()` on unseparated contact or a failed audit. No UI consumer of the interval solver exists yet; the report record is the surface for one.
 - **Next step:** Open the PR with `Closes #9548`, then wire the verdict report into the first UI/report consumer of the interval solver when one lands.
 - **Evidence:** tests/shared_contracts/test_impact_interval_provider.py (interrupted compression 32.54 J stored / 0 J release / −0.063 J signed residual; clipping release 1.71 J; perturbed law residual > 0.5 J blocked; halving dt lowers both residuals).
+  > > > > > > > origin/main
 
 ### DL-#10359 · Wire Video and Fit-Quality Report Export
 
@@ -325,8 +390,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #10466 (open)
 - **Paths:** src/motion_capture/rig/tools_bridge.py; src/motion_capture/rig/**main**.py; tests/motion_capture/rig/test_tools_session_export.py; tests/fixtures/mocap_session_export/; docs/motion_capture/capture_rig.md
 - **Started:** 2026-09-19
-- **Last verified:** 2026-09-19 at HEAD (SELF; 8 Tools-first export checks pass under `tests/fixtures/mocap_session_export/run_checks.py`; 40 in-process rig/bridge/bundle/hygiene tests pass; scoped Ruff clean).
-- **Summary:** The bridge now probes the pinned Tools family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`, and projects a rig capture session onto the Tools `MocapSessionManifest` through the Tools builders and canonical serializer; `capture`/`record` write `mocap_session.json` beside the rig manifest and record the export outcome under `tools_schema.export`. Retained raw video without `--consent-recorded` is refused by the Tools policy, not faked. D-track (Tools #4707, D3 open) and the #8865/#8866/#8867 prerequisites remain open; this is the first consumer slice, not closure of the program.
+- **Last verified:** 2026-09-22 at HEAD (SELF; #9604 `CameraCapabilities` mapping: 14 Tools-first export checks pass under `tests/fixtures/mocap_session_export/run_checks.py`; in-process bridge tests pass; scoped Ruff + mypy clean).
+- **Summary:** The bridge now probes the pinned Tools family (`shared.python.sidekick.lab.mocap`), pins `mocap-session/1.0.0`, and projects a rig capture session onto the Tools `MocapSessionManifest` through the Tools builders and canonical serializer; `capture`/`record` write `mocap_session.json` beside the rig manifest and record the export outcome under `tools_schema.export`. Retained raw video without `--consent-recorded` is refused by the Tools policy, not faked. #9604 adds `map_camera_records`: one Tools `CameraIdentity` + `CameraCapabilities` per rig camera. D-track (Tools #4707, D3 open) and the #8865/#8866/#8867 prerequisites remain open; this is the first consumer slice, not closure of the program.
 - **Next step:** Open the PR, then route the C3D upload path (#8865) through the same pinned contract as the next consumer slice.
 - **Evidence:** tests/fixtures/mocap_session_export/export_checks.py; tests/motion_capture/rig/test_tools_session_export.py.
 

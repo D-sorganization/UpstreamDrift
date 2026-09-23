@@ -17,10 +17,7 @@ import pytest
 from PyQt6.QtWidgets import QMainWindow
 
 from src.config.launcher_manifest_loader import LauncherManifest
-from src.launchers.external_tools_adapter import (
-    _UnavailableToolWindow,
-    get_video_analyzer_dockable_ui,
-)
+from src.launchers.external_tools_adapter import get_video_analyzer_dockable_ui
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.task_launch_truthfulness import (
     AUDITED_CAPABILITY_IDS,
@@ -105,42 +102,35 @@ class TestProblematicTilesCannotReportReady:
 
 
 class TestVideoAnalyzerTruthfulness:
-    """Missing Video Analyzer provider yields a diagnostic, not a blank working window."""
+    """Video Analyzer never falls back to a blank placeholder window (#8883).
 
-    def test_missing_video_analyzer_provider_yields_diagnostic_not_blank_working_window(
+    The tile used to try importing ``video_analyzer.launch_pyqt6`` from a
+    sibling repository that never existed in this checkout, and silently
+    fell back to a static "GUI placeholder" label on ``ImportError``. The
+    real implementation now lives in this repo
+    (``src.tools.video_analyzer.gui``), wired to the tested
+    ``SwingAnalyzer`` math, so the external Tools-repo resolution is no
+    longer part of this tile's launch path at all.
+    """
+
+    def test_video_analyzer_never_falls_back_to_blank_placeholder(
         self, qapp: object
     ) -> None:
-        """When the external Tools repository cannot be imported, get_video_analyzer_dockable_ui
+        """The dockable UI is the real, functional widget, not a placeholder.
 
-        must return an explicit _UnavailableToolWindow with actionable diagnostic and remediation,
-        and NEVER fall back to a blank placeholder VideoAnalyzerWindow.
+        Simulating an unavailable external Tools repo must have no effect:
+        Video Analyzer no longer depends on it.
         """
-        # Simulate missing external tools repo / import failure
+        from src.tools.video_analyzer.gui import VideoAnalyzerWindow
+
         with patch(
             "src.launchers.external_tools_adapter._ensure_tools_on_path",
             return_value=False,
         ):
             window = get_video_analyzer_dockable_ui()
-            assert isinstance(window, _UnavailableToolWindow)
-            assert getattr(window, "is_tool_available", True) is False
-            assert "Unavailable" in window.windowTitle()
-
-        # Simulate import failure even if path was added
-        with (
-            patch(
-                "src.launchers.external_tools_adapter._ensure_tools_on_path",
-                return_value=True,
-            ),
-            patch(
-                "src.launchers.external_tools_adapter._import_video_analyzer",
-                side_effect=ImportError(
-                    "No module named 'video_analyzer.launch_pyqt6'"
-                ),
-            ),
-        ):
-            window = get_video_analyzer_dockable_ui()
-            assert isinstance(window, _UnavailableToolWindow)
-            assert getattr(window, "is_tool_available", True) is False
+            assert isinstance(window, VideoAnalyzerWindow)
+            assert window.main_widget.choose_button is not None
+            assert window.main_widget.analyze_button is not None
 
 
 # =============================================================================

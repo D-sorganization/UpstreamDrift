@@ -82,6 +82,41 @@ def test_joint_panel_set_show_radians() -> None:
     assert panel._spinboxes[joint].value() == pytest.approx(45.0)
 
 
+@pytest.mark.unit
+def test_joint_panel_tooltip_matches_display_mode() -> None:
+    """Regression test for #8886: the slider/spinbox tooltips must reflect
+    the *current* display unit, not always claim degrees."""
+    panel = JointPanel()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+
+    # Degrees is the default: tooltips must say "deg", never "rad".
+    slider_tooltip = panel._sliders[joint].toolTip()
+    spin_tooltip = panel._spinboxes[joint].toolTip()
+    assert "deg" in slider_tooltip
+    assert "rad" not in slider_tooltip
+    assert "deg" in spin_tooltip
+    assert "rad" not in spin_tooltip
+
+    # Flip to radians: both tooltips must update to say "rad", never "deg",
+    # and the lying "-180 to 180 deg" text must be gone.
+    panel.set_show_radians(True)
+    slider_tooltip = panel._sliders[joint].toolTip()
+    spin_tooltip = panel._spinboxes[joint].toolTip()
+    assert "rad" in slider_tooltip
+    assert "deg" not in slider_tooltip
+    assert "rad" in spin_tooltip
+    assert "deg" not in spin_tooltip
+
+    # Flip back: tooltips must revert to degrees.
+    panel.set_show_radians(False)
+    slider_tooltip = panel._sliders[joint].toolTip()
+    spin_tooltip = panel._spinboxes[joint].toolTip()
+    assert "deg" in slider_tooltip
+    assert "rad" not in slider_tooltip
+    assert "deg" in spin_tooltip
+    assert "rad" not in spin_tooltip
+
+
 def test_joint_panel_joint_widgets() -> None:
     panel = JointPanel()
     widgets = panel.joint_widgets()
