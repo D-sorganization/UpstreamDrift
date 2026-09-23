@@ -621,18 +621,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
-### DL-#10622 · NM-07 Compare Forward Surrogates and Physics-Structured Alternatives
+### DL-#10623 · NM-08 Add Native Verification, Distribution Checks and Safe Fallback
 
 - **State:** in_progress
 - **Owner:** local
+- **Issue:** #10623 (epic #10603)
+- **Branch:** feat/nm08-native-verification-10623
+- **PR:** #10623
+- **Paths:** src/shared/python/neural_motion/inference/; src/shared/python/motion_matching/hybrid.py; tests/unit/neural_motion/test_verified_inference_nm08.py; tests/unit/motion_matching/test_verified_inference_nm08.py; docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 — 16 unit and behavioral tests pass across neural_motion and motion_matching; architecture budgets and ruff clean.
+- **Summary:** Added VerifiedInferenceOrchestrator, DistributionBounds, and check_target_distribution under neural_motion/inference/ (schema neural-verified-inference/1.0.0). Enforces fail-closed validation of non-finite inputs, geometry/engine/control dimension mismatch, and incompatible checkpoint contracts. Validates empirical coverage (durations, peak velocities, contact regimes) with confidence scoring recorded as domain metrics, not golfer truth probability. Enforces mandatory independent replay before dynamic acceptance; on failed proposal or missing checkpoint, falls back to classical/retrieval solver with shared remaining wall-clock budget and retains all attempts with auditable statuses (NEURAL_ACCEPTED, CLASSICAL_FALLBACK, REJECTED). Integrated fit_swing_verified_inference into hybrid.py facade.
+- **Next step:** Create PR, enable auto-merge, verify CI passes, and hand off to NM-09 (#10624).
+- **Evidence:** docs/plans/neural_motion_matching/native_verification.md; docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json
+
+### DL-#10622 · NM-07 Compare Forward Surrogates and Physics-Structured Alternatives
+
+- **State:** in_review
+- **Owner:** local
 - **Issue:** #10622 (epic #10603)
 - **Branch:** feat/nm07-forward-surrogates-10622
-- **PR:** #10622
+- **PR:** #10768
 - **Paths:** src/shared/python/motion_matching/surrogate/validate.py; src/shared/python/motion_matching/surrogate/nm07_comparison.py; src/shared/python/neural_motion/surrogates/; tests/unit/motion_matching/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_surrogate_nm07_discovery.py; docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 — 11 focused tests pass across motion_matching and neural_motion; architecture budgets and ruff pass.
+- **Last verified:** 2026-09-23 — 24 focused tests pass across motion_matching and neural_motion; architecture budgets and ruff pass.
 - **Summary:** Compare forward surrogate inversion, hybrid polish, physics-structured residual dynamics, and diffusion fallback under schema neural-surrogate-comparison/1.0.0. Added real-clock timegrid resampling, antipodal quaternion geodesic distance, trust-region validation, directional derivative gradient fidelity check, and contact-boundary failure rejection to validate.py. Documented adversarial exploitation risk of unconstrained forward surrogate inversion and high latency/sample inefficiency of diffusion fallback.
-- **Next step:** Create PR, enable auto-merge, verify CI passes, and hand off to NM-08 (#10623).
+- **Next step:** PR #10768 in review with auto-merge armed; proceed to NM-08 (#10623).
 - **Evidence:** docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
 
 ### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals

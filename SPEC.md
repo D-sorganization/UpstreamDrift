@@ -6842,6 +6842,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-23 | #10623 | NM-08 native verification, distribution checks, and safe fallback: VerifiedInferenceOrchestrator, DistributionBounds, empirical confidence domain metrics, checkpoint contract verification, fail-closed non-finite rejection, independent replay gate, shared remaining compute budget for classical/retrieval fallback, auditable attempt retention; software-contract tests only. |
 | 2026-09-23 | #10622 | NM-07 compare forward surrogates and physics-structured alternatives: real-clock timegrid resampling, antipodal quaternion geodesic distance, trust-region validation, adversarial gradient fidelity check, contact-boundary failure rejection, bounded ablations (forward surrogate, hybrid polish, physics-structured residual, diffusion fallback); software-contract tests only. |
 | 2026-09-23 | #10764 | Optimize norm calculations in motion capture reconstruct (spec-exempt: micro-optimization) |
 | 2026-09-23 | #10762 | Fix CI Standard deleted test check false-positives in shallow checkouts by diffing against merge-base (issue #10751). |
