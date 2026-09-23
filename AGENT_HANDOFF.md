@@ -4,9 +4,24 @@ Deferred external validation: six Board plans live in `docs/development/planning
 Software remains active; no physical evidence is supplied. See the current
 `docs/development/HANDOFF.md` for scope, prior #9546 closure and publication gates.
 
+## NM-10: Benchmark Accepted-Match Speed, Data Efficiency and Break-Even (#10625)
+
+Branch `feat/nm10-benchmark-speed-10625`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625).
+
+- Implements `neural_motion.benchmark`: comparative 5-method benchmarking (`cold_solver`, `retrieval_solver`, `existing_neural`, `forward_surrogate_polish`, `learned_proposal_polish`).
+- Latency decomposition accounts for preprocessing, native initialization, proposal inference, rejected attempts, native polish, verification replay, and I/O.
+- Acceptance rate calculation strictly includes rejected attempts in denominator ($A_{\text{rate}} = \frac{N_{\text{acc}}}{N_{\text{acc}} + N_{\text{rej}}}$).
+- Truthful break-even calculation: if savings $\le 0$, explicitly reports `has_break_even=False` with no queries.
+- Frozen promotion gates enforce $\ge 2\times$ median speedup, non-worse p95 latency, and non-worse accepted quality rate; failing models marked as `RESEARCH_ONLY`.
+- Data efficiency trajectory confirms active acquisition superiority (1.48x sample multiplier over random).
+- Evidence receipt: `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json`.
+- Markdown report: `docs/plans/neural_motion_matching/benchmark_accepted_speed.md`.
+- Focused verification: `python -m pytest tests/unit/neural_motion/test_benchmark_nm10.py -q -n 0 --no-cov --timeout=60` (13 passed in 0.58s).
+
 ## NM-09: Train and Qualify a Checkpoint for Every Physical Model (#10624)
 
 Branch `feat/nm09-checkpoint-matrix-10624`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624).
+
 - Implements `neural_motion.matrix`: `NeuralCheckpointMatrix` and `ModelCheckpointCard` evaluating all 20 models across the #10585 roster.
 - Models with variable dimensions ($n_q, n_v, n_u, n_c$) strictly match registered `GolfModelIdentity`.
 - Precondition `assert_model_checkpoint_compatible` enforces that no model can accidentally load another's card.
