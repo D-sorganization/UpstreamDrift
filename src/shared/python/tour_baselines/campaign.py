@@ -297,13 +297,13 @@ class FitCampaignService:
 
     def save_checkpoint(self, record: CampaignEvaluationRecord) -> Path:
         """Persist an immutable checkpoint to disk beside run artifacts."""
-        self.spec.run_root.mkdir(parents=True, exist_ok=True)
-        checkpoint_path = (
-            self.spec.run_root / f"checkpoint_stage_{record.stage_index}.json"
-        )
+        run_root = self.spec.run_root
+        run_root.mkdir(parents=True, exist_ok=True)
+        checkpoint_path = run_root / f"checkpoint_stage_{record.stage_index}.json"
+        spec_hashes = self.spec.hashes
         data = {
             "record": record.to_dict(),
-            "hashes": self.spec.hashes.to_dict(),
+            "hashes": spec_hashes.to_dict(),
         }
         with open(checkpoint_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
@@ -321,6 +321,7 @@ class FitCampaignService:
             data = json.load(f)
 
         stored_hashes = data.get("hashes", {})
+        spec_hashes = self.spec.hashes
         for key in (
             "data_hash",
             "model_hash",
@@ -328,7 +329,7 @@ class FitCampaignService:
             "controller_hash",
             "solver_hash",
         ):
-            expected = getattr(self.spec.hashes, key)
+            expected = getattr(spec_hashes, key)
             actual = stored_hashes.get(key)
             if actual != expected:
                 raise IncompatibleResumeError(
@@ -347,8 +348,9 @@ class FitCampaignService:
             diagnostic_message=reason,
             hashes=self.spec.hashes,
         )
-        self.spec.run_root.mkdir(parents=True, exist_ok=True)
-        manifest_path = self.spec.run_root / "manifest.json"
+        run_root = self.spec.run_root
+        run_root.mkdir(parents=True, exist_ok=True)
+        manifest_path = run_root / "manifest.json"
         with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest.to_dict(), f, indent=2)
         return manifest
