@@ -28,8 +28,8 @@ separated from current guidance.
 ### Stable
 
 - [`adapters/`](adapters/authoring_guide.md) - 1 page
-- [`adr/`](adr/README.md) - 53 pages
-- [`agent_context/`](agent_context/README.md) - 7 pages
+- [`adr/`](adr/README.md) - 54 pages
+- [`agent_context/`](agent_context/README.md) - 8 pages
 - [`agents/`](agents/shared-infrastructure.md) - 1 page
 - [`api/`](api/README.md) - 7 pages
 - [`architecture/`](architecture/) - 22 pages
@@ -40,9 +40,9 @@ separated from current guidance.
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
 - [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 170 pages
+- [`development/`](development/README.md) - 193 pages
 - [`engineering/`](engineering/) - 2 pages
-- [`engines/`](engines/README.md) - 15 pages
+- [`engines/`](engines/README.md) - 17 pages
 - [`estimation/`](estimation/) - 2 pages
 - [`examples/`](examples/) - no Markdown pages
 - [`governance/`](governance/) - 6 pages
@@ -72,7 +72,7 @@ separated from current guidance.
 ### Draft
 
 - [`ai_implementation/`](ai_implementation/README.md) - 5 pages
-- [`bunkershot3d/`](bunkershot3d/) - 8 pages
+- [`bunkershot3d/`](bunkershot3d/) - 10 pages
 - [`competitive_analysis/`](competitive_analysis/COMPETITOR_ANALYSIS.md) - 1 page
 - [`config/`](config/pydantic-settings-migration.md) - 1 page
 - [`design/`](design/) - 2 pages
@@ -80,7 +80,8 @@ separated from current guidance.
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
 - [`motion_capture/`](motion_capture/) - 21 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
-- [`plans/`](plans/README.md) - 46 pages
+- [`plans/`](plans/README.md) - 67 pages
+- [`project/`](project/) - 2 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
 - [`research/`](research/) - 33 pages
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
@@ -185,6 +186,7 @@ repository, which made them effectively unreachable.
 | `operations/`           | @platform-team        | stable    | Operational runbooks, observability notes, and production maintenance guidance.                                                     |
 | `physics/`              | @physics-team         | stable    | Physics assumptions, validation sources, and biomechanical modeling references.                                                     |
 | `plans/`                | @product-team         | draft     | Roadmaps, implementation plans, and active planning documents.                                                                      |
+| `project/`              | @product-team         | draft     | Project charter, deferred-validation visibility, and pending Board resource decisions.                                              |
 | `portfolio/`            | @developer-experience | stable    | Reviewer-facing demonstrations and concise project showcase material.                                                               |
 | `proposals/`            | @product-team         | draft     | Proposed changes and design alternatives pending acceptance or archival.                                                            |
 | `references/`           | @research-team        | stable    | External references, source maps, and supporting research material.                                                                 |
