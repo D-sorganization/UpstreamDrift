@@ -76,6 +76,21 @@ export async function apiFetch<T>(
   path: string,
   init?: ApiFetchInit,
 ): Promise<T> {
+  return (await apiFetchWithHeaders<T>(path, init)).data;
+}
+
+/**
+ * apiFetchWithHeaders — `apiFetch` that also returns the response headers,
+ * for endpoints that report metadata such as a paging cursor in a header
+ * (issue #8941: `X-Analysis-Next-Since`). Same errors as `apiFetch`.
+ *
+ * @returns The parsed JSON body and the response headers (undefined only
+ *   when a test double omits them)
+ */
+export async function apiFetchWithHeaders<T>(
+  path: string,
+  init?: ApiFetchInit,
+): Promise<{ data: T; headers: Headers | undefined }> {
   const url = `${getApiBase()}${path}`;
   const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = init ?? {};
 
@@ -115,7 +130,8 @@ export async function apiFetch<T>(
     throw new Error(detail ?? `HTTP ${response.status} ${response.statusText} — ${path}`);
   }
 
-  return response.json() as Promise<T>;
+  const data = (await response.json()) as T;
+  return { data, headers: response.headers };
 }
 
 /**
