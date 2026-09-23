@@ -1,10 +1,11 @@
 {
-  "base_spec_sha256": "f0100b39d25133b91e9a8252277d09b0e5284c992589697d28ba84870804d56d",
+  "base_spec_sha256": "aba8196843e66c897770795e04cc0d2fca7c9ee4ba2472b2aa380d62a817ff31",
   "base_spec_file": "full_body_spec_anthro_iron7.json",
   "spec_file": "full_body_spec_hipcal_scaled.json",
   "hipcal_spec_file": "full_body_spec_hipcal.json",
   "recalibrate_upper": false,
   "anthropometric": null,
+  "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
   "posture_top_of_backswing": {
     "spine_bend_deg": {
       "total_deg": 19.453914362207374,
@@ -17,7 +18,8 @@
     },
     "hips_to_shoulder_centre_m": 0.5749673329365025
   },
-  "spec_sha256": "0a3dbb827b39b59cfe1b8559683a859778d3575e3bada343f7097fa0cf23304f",
+  "spec_sha256": "8dd02b124b70491f4b78c89bd020d0539f74938f55579ac0717e92bc8b4dc6ea",
+  "spec_canonical_sha256": "c2b834ab0fdd0619b4bec47e8f1a44c06cf3ab46a7907c817bf59ebe8dea51aa",
   "hip_calibration": {
     "spec_sha256": "c9e1c394b71e3a96f58df8f4bd21e738246447e77330cb1dd6a06aa336ccd6e3",
     "centre_r_hip_frame_m": [

@@ -50,6 +50,7 @@ tests/unit/data_io/test_user_config_root.py
 tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** relocate the MCP config in Tools; extend "Restore Defaults" to
   clear the canonical QSettings store.
+
 ## Fleet Remediation — Ledger Freshness Test Pollution (2026-09-22)
 
 - **Branch:** `fix/ledger-freshness-after-10733` · **agent:** `claude` (fleet-remediation)
@@ -123,6 +124,29 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **Next:** client-side #8941 items — merge metrics+statistics calls, use
   `since`, delete the 200 ms / 500 ms polling loops, publish frames on
   `/ws/simulate`. Do not touch `ui/` from this branch.
+
+## Hip-Calibrated Receipt Provenance (#10271) — 2026-09-22
+
+- **Goal:** Restore end-to-end provenance for `anthro_driver` / `anthro_iron`
+  ground-support receipts (child of #10254).
+- **Branch / worktree:** `fix/10271-hipcal-provenance` at
+  `C:\Users\diete\Repositories\Worktrees\UpstreamDrift-10271-provenance`
+- **Lease:** `cursor-10271-202609220928` (agent `local`)
+- **Done:** `receipt_provenance.py` chain validator (`receipt-provenance-chain/1`);
+  TDD suite; producer emits `spec_canonical_sha256`; CI gate on both baselines;
+  receipts re-anchored to current base + scaled digests after verifying scaled
+  docs already carry current de Leva/shank; intermediate hipcal not fabricated;
+  physical metrics unchanged.
+- **Disk blocker:** C: ≈ 1.5–2 GB free — full native MuJoCo re-execution deferred;
+  provenance re-anchor is software-contract only (not a new physical run).
+- **Validate:**
+  ```powershell
+  $env:QT_QPA_PLATFORM='offscreen'; $env:MPLBACKEND='Agg'; $env:PYTHONPATH='.'
+  python -m pytest tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py -q -n 0 --no-cov --timeout=60
+  python -O -c "from src.shared.python.motion_matching.pipeline.receipt_provenance import *"
+  ```
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10722 (ready-for-review)
+- **Next:** Confirm CI green on #10722; after merge, regen natively when disk recovers.
 
 ## Succession — Motion Matching (2026-09-22)
 

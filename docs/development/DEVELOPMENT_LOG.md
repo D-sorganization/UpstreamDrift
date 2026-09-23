@@ -17,8 +17,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-<<<<<<< HEAD
-
 ### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
 
 - **State:** in_review
@@ -134,6 +132,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Software contracts for Pinocchio driver/iron G2/G3 continuation schedules, same-integrator solve/replay parity (reject integrator-specific solutions), armature propagation to equivalent-model independent replay packages (save/reopen), failed-continuation evidence preservation, open-loop q0/v0 control feed (no per-frame poses), and PF-07 robustness roster. Fitter exposes `--ms111-schedule` and fail-closed integrator parity. Native G2/G3 qualification remains blocked on MS-107 accepted G1 + MS-100 receipts.
 - **Next step:** Confirm CI green on PR #10723 and allow squash auto-merge to land.
 - **Evidence:** docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json; tests/unit/motion_matching/test_pinocchio_g2_g3.py.
+
+### DL-#10271 · Restore End-to-End Provenance for Hip-Calibrated Motion Evidence
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10271 (child of #10254; blocks #10162 physical acceptance provenance)
+- **Branch:** fix/10271-hipcal-provenance
+- **PR:** #10722
+- **Paths:** src/shared/python/motion_matching/pipeline/receipt_provenance.py; src/shared/python/motion_matching/pipeline/receipt.py; src/shared/python/motion_matching/pipeline/receipt_schema.py; tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py; docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json; docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json; docs/development/full_body_models/RECEIPTS.md; docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — PR #10722 opened ready-for-review; RED→GREEN provenance suite; push hooks passed.
+- **Summary:** Shared `validate_receipt_provenance_chain` (`receipt-provenance-chain/1`) fail-closes missing/stale de Leva, base canonical, and final raw/canonical digests; CI gates `anthro_driver`/`anthro_iron`; producer emits `spec_canonical_sha256`; receipts re-anchored to committed bases/scaled specs that already embed the current table; intermediate hipcal docs not fabricated; physical RMS unchanged/unqualified.
+- **Next step:** Confirm CI green on PR #10722 and squash-merge; schedule native MuJoCo regen when disk is stable.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
