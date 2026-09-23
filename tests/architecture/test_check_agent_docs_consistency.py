@@ -229,3 +229,21 @@ def test_bare_local_missing_path_still_fails_near_sibling_repo_mention(
         "CLAUDE.md references a missing path: docs/local_missing.md",
         "CLAUDE.md references a missing path: docs/also_missing.md",
     ]
+
+
+def test_fleet_managed_sections_are_exempt_from_local_path_checks(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Paths inside <!-- BEGIN FLEET-MANAGED --> blocks are synced from RM and not local."""
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    text = (
+        "<!-- BEGIN FLEET-MANAGED: agent-lanes -->\n"
+        "Staff Hub role playbooks `docs/fleet-night-watch.md`.\n"
+        "<!-- END FLEET-MANAGED: agent-lanes -->\n"
+        "Local required file `docs/required_local.md`.\n"
+    )
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == [
+        "CLAUDE.md references a missing path: docs/required_local.md",
+    ]

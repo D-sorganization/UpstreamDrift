@@ -621,6 +621,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Auto-merge PR, release lease on #10439 and claim #10440 (PF-10).
 - **Evidence:** tests/unit/motion_matching/test_native_force_equations.py; tests/unit/motion_matching/test_multi_engine_torque_allocator.py; tests/unit/motion_matching/test_force_bridges_pf09.py.
 
+### DL-#10622 · NM-07 Compare Forward Surrogates and Physics-Structured Alternatives
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10622 (epic #10603)
+- **Branch:** feat/nm07-forward-surrogates-10622
+- **PR:** #10622
+- **Paths:** src/shared/python/motion_matching/surrogate/validate.py; src/shared/python/motion_matching/surrogate/nm07_comparison.py; src/shared/python/neural_motion/surrogates/; tests/unit/motion_matching/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_forward_surrogates_nm07.py; tests/unit/neural_motion/test_surrogate_nm07_discovery.py; docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 — 11 focused tests pass across motion_matching and neural_motion; architecture budgets and ruff pass.
+- **Summary:** Compare forward surrogate inversion, hybrid polish, physics-structured residual dynamics, and diffusion fallback under schema neural-surrogate-comparison/1.0.0. Added real-clock timegrid resampling, antipodal quaternion geodesic distance, trust-region validation, directional derivative gradient fidelity check, and contact-boundary failure rejection to validate.py. Documented adversarial exploitation risk of unconstrained forward surrogate inversion and high latency/sample inefficiency of diffusion fallback.
+- **Next step:** Create PR, enable auto-merge, verify CI passes, and hand off to NM-08 (#10623).
+- **Evidence:** docs/plans/neural_motion_matching/forward_surrogates.md; docs/plans/neural_motion_matching/evidence/nm07_forward_surrogates_receipt.json
+
 ### DL-#10621 · NM-06 Masked Trajectory-to-Control Proposals
 
 - **State:** shipped
