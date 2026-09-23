@@ -1,10 +1,12 @@
-% Save this code as GolfSwingVisualizer.m
+% Fleet-shared golf swing visualizer (single canonical implementation for the
+% 2D and 3D Simscape model trees; issue #9225). Resolved as a MATLAB package
+% class, so no per-tree copy can shadow it.
 classdef GolfSwingVisualizer < handle
     % GolfSwingVisualizer Creates a GUI to visualize 3D golf swing data.
     % (Version: Velocity face normal, custom colors, adjusted ball pos & lighting)
     %
     %   Usage:
-    %       viz = GolfSwingVisualizer(BASEQ_table, ZTCFQ_table, DELTAQ_table);
+    %       viz = golfviz.GolfSwingVisualizer(BASEQ_table, ZTCFQ_table, DELTAQ_table);
     %
     %   Inputs:
     %       BASEQ_table, ZTCFQ_table, DELTAQ_table: MATLAB tables containing

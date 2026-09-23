@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
+
+- **State:** in_review
+- **Owner:** claude (session `fleet-remediation-k`)
+- **Issue:** #10743
+- **Branch:** `fix/10743-docs-consistency-cross-repo`
+- **PR:** #10744
+- **Paths:** `scripts/check_agent_docs_consistency.py`, `tests/architecture/test_check_agent_docs_consistency.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 (checker passes on main CLAUDE.md; 33 focused tests pass)
+- **Summary:** Exempt sibling-repo-qualified backticked paths (possessive or not) from the local-existence check so the fleet-managed deferred-validation block no longer fails `repo-structure-gates`; bare local paths stay strict.
+
 ### DL-#8907 · One User Config Root and One QSettings Namespace for the Launcher
 
 - **State:** in_review
@@ -29,6 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-22 — migration, alias and three-window geometry round-trip tests pass offscreen; launcher/ui suites show no new failures versus origin/main; Ruff, format, file-size, architecture and error-handling gates pass.
 - **Summary:** Launcher writers (preferences, recent models, library, onboarding, process/launcher logs, layout reset/diagnostics) resolve through `user_config_path()` under the platformdirs root with a one-time copy from the two legacy dot-dirs; QSettings consolidated on `(UpstreamDrift, Launcher)` with legacy aliasing; three secondary windows persist geometry.
 - **Next step:** Relocate the Tools-owned `~/.upstreamdrift/mcp_servers.json` contract in Tools, then point `McpServersConfig.default_path()` at the shared constant.
+
 ### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
 
 - **State:** in_review
@@ -41,6 +54,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-22 at `3d62f6441` plus the DRY follow-up — shared `_SignalTransformTab` base clears the DRY duplication gate; RED shown for the six tab-level tests, then GREEN; 27 analysis-tab tests pass offscreen; ruff, mypy (dashboard scope), file-size and architecture budgets clean.
 - **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
 - **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
+
+### DL-#9225 · GolfSwingVisualizer MATLAB Duplication Consolidation
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #9225 (source:assessment P2; DRY PP1)
+- **Branch:** bot/issue-9225-golfviz-consolidation
+- **PR:** #10715
+- **Paths:** src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m; src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/launch_gui.m; src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/launch_gui.m; the two `2D GUI/main_scripts/golf_swing_analysis_gui.m` call sites; four deleted per-tree copies
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at f33b40c9c (#10715) — MATLAB R2025b headless: package resolves to the single shared file from a bare `addpath`, class parses (75 methods), DbC precondition `GolfSwingVisualizer:InvalidInput` fires, and both launchers' relative path setups resolve the package with no shadow copy.
+- **Summary:** Four near-identical `GolfSwingVisualizer.m` copies (1180–1183 lines each, 323 shared 8-line blocks between the worst pair) consolidated into one fleet-shared `+golfviz` package class; the two launchers add the shared directory to the MATLAB path and all four call sites use `golfviz.GolfSwingVisualizer`. Canonical behavior is the 2D variant superset (reproducible ground texture via `rng(1)` seeding that the 3D copies had silently lost); no genuine 2D-vs-3D behavioural divergence existed, so no parameter was needed.
+- **Next step:** Confirm `quality-gate` green on the PR and allow squash auto-merge to land.
+- **Evidence:** MATLAB R2025b `-batch` verification transcript in the PR body; `git ls-files` shows one `GolfSwingVisualizer.m`.
 
 ### DL-#8883 · Video Analyzer Real GUI Replacing the Placeholder Label
 
@@ -105,33 +132,72 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3` — merged after focused tests, Ruff, architecture/file-size budgets, and required PR checks passed.
 - **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix and unified run ledger preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence remains distinct from full-body G1/G2/G3 qualification.
-- **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json.
+
+### DL-#10385 · Pinocchio Driver/Iron G2-G3 Continuation and Independent Replay (MS-111)
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10385 (MS-111, epic #10363; folded PF-07 #10437)
+- **Branch:** feat/10385-ms111-pinocchio-g2-g3-replay
+- **PR:** #10723
+- **Paths:** src/shared/python/motion_matching/pinocchio_g2_g3.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/test_pinocchio_g2_g3.py; docs/development/matched_swing_program/evidence/ms111/; docs/development/matched_swing_program/README.md; docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native ControlTower desk claim.
+- **Summary:** Software contracts for Pinocchio driver/iron G2/G3 continuation schedules, same-integrator solve/replay parity (reject integrator-specific solutions), armature propagation to equivalent-model independent replay packages (save/reopen), failed-continuation evidence preservation, open-loop q0/v0 control feed (no per-frame poses), and PF-07 robustness roster. Fitter exposes `--ms111-schedule` and fail-closed integrator parity. Native G2/G3 qualification remains blocked on MS-107 accepted G1 + MS-100 receipts.
+- **Next step:** Confirm CI green on PR #10723 and allow squash auto-merge to land.
+- **Evidence:** docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json; tests/unit/motion_matching/test_pinocchio_g2_g3.py.
+
+### DL-#10271 · Restore End-to-End Provenance for Hip-Calibrated Motion Evidence
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10271 (child of #10254; blocks #10162 physical acceptance provenance)
+- **Branch:** fix/10271-hipcal-provenance
+- **PR:** #10722
+- **Paths:** src/shared/python/motion_matching/pipeline/receipt_provenance.py; src/shared/python/motion_matching/pipeline/receipt.py; src/shared/python/motion_matching/pipeline/receipt_schema.py; tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py; docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json; docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json; docs/development/full_body_models/RECEIPTS.md; docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — PR #10722 opened ready-for-review; RED→GREEN provenance suite; push hooks passed.
+- **Summary:** Shared `validate_receipt_provenance_chain` (`receipt-provenance-chain/1`) fail-closes missing/stale de Leva, base canonical, and final raw/canonical digests; CI gates `anthro_driver`/`anthro_iron`; producer emits `spec_canonical_sha256`; receipts re-anchored to committed bases/scaled specs that already embed the current table; intermediate hipcal docs not fabricated; physical RMS unchanged/unqualified.
+- **Next step:** Confirm CI green on PR #10722 and squash-merge; schedule native MuJoCo regen when disk is stable.
+
+### DL-#10378 · Full-Swing Qualification for All Six Engines (MS-104)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #10378 (MS-104, epic #10363; folded MS-109/110/112 owner blockers)
+- **Branch:** feat/ms104-full-swing-qualification
+- **PR:** #10707
+- **Paths:** src/shared/python/motion_matching/full_swing_qualification.py; tests/unit/motion_matching/test_full_swing_qualification.py; docs/plans/matched_swing/evidence/ms104_full_swing_qualification.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — merged origin/main through #10709/#10718/#10720/#10721; regenerated divergence inventory; removed duplicate SPEC #10721 key; PR #10707 squash auto-merge armed.
+- **Summary:** Software-contract qualification matrix over 6 engines × driver/iron × G1/G2/G3. Rows require MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence links; reduced Simscape oracle stays partial. Release stays blocked until every required cell is fully linked — no invented six-engine native pass.
+- **Next step:** Confirm CI green on PR #10707 after SPEC duplicate-key repair and allow squash auto-merge to land.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #8887
 - **Branch:** fix/8887-pose-studio-joint-limits
-- **PR:** #10650 (open)
+- **PR:** #10650
 - **Paths:** src/shared/python/pose_interchange/live_kinematics.py; src/shared/python/pose_interchange/services/\_mock.py; src/shared/python/pose_interchange/services/drake.py; src/shared/python/pose_interchange/services/mujoco.py; src/shared/python/pose_interchange/services/myosuite.py; src/shared/python/pose_interchange/services/opensim.py; src/shared/python/pose_interchange/services/pinocchio.py; src/shared/python/pose_interchange/services/simscape.py; src/tools/pose_studio/controllers/engine_controller.py; src/tools/pose_studio/gui.py; src/tools/pose_studio/widgets/joint_panel.py; tests/tools/pose_studio/test_engine_controller_internals.py; tests/unit/tools/pose_studio/test_gui.py; tests/unit/tools/pose_studio/test_joint_panel.py
 - **Started:** 2026-09-21
-- **Last verified:** 2026-09-22 at SELF — merged origin/main; fixed unit-test-gate Pose Studio GUI assertions for real PyQt6 CI; suite markers on `test_joint_panel.py`; submodule init.
+- **Last verified:** 2026-09-22 at c3773d62c — merged to main via PR #10650.
 - **Summary:** `LiveKinematicsService.joint_limits()` extends the kinematics-service protocol (every engine service implements it, `{}` pending real anatomical data); `JointPanel.set_limits()`/`set_error()` re-range joints per engine and give visible feedback on a rejected edit; wired from `MainWidget` on init, engine switch, and angle-edit rejection/success.
-- **Next step:** Merge PR #10650 after CI green.
+- **Next step:** N/A — shipped via #10650.
 
 ### DL-#10379 · Reliable Motion-Matching Jobs, Recovery and Portable Results (MS-105)
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** local
 - **Issue:** #10379 (MS-105, epic #10363; folded PF-08 #10438)
 - **Branch:** feat/10379-ms105-jobs-recovery
 - **PR:** #10704
 - **Paths:** src/shared/python/motion_matching/jobs/; tests/unit/motion_matching/jobs/test_matching_jobs.py; docs/plans/matched_swing/evidence/ms105_jobs_recovery.json; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after NM-05 #10701; DRY/inventory/BLE001 CI repairs; 28 unit tests green; PR #10704 squash auto-merge armed.
+- **Last verified:** 2026-09-22 at 901b2de5e — merged to main via PR #10704.
 - **Summary:** Matching job contracts with atomic manifests/checkpoints, compatible resume, fault recovery, process-tree cancel, portable packages, both-shell progress/failure views, and PF-08 service budgets (`guarantee=false`). Reuses `#8880`/`async_action` and `managed_popen`; no second scheduler.
-- **Next step:** Confirm CI green on PR #10704 and allow squash auto-merge to land.
+- **Next step:** N/A — shipped via #10704.
 
 ### DL-#8880 · GUI Thread-Blocking Simulation Migration to Async Action
 
@@ -280,6 +346,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Epic #9546 gets the same machine-readable execution index as #9539: `impact_zone_readiness.json` reconciles I1–I4 and the two reused issues against `5347cba0f` and the vendored Tools pin, under the existing loader contract (keys `I<n>`/`R<n>` admitted, nothing else relaxed). The Tools fixes for I1 (#5088) and I2 (#5079) are consumed by a UD consumer contract that drives the audit probe through the vendored solver; I3, I4 and the Tools half of #9349 remain open with ordered plans, and `release_status` is `blocked`.
 - **Next step:** When Tools #4946 lands the live interval run record, bump the pin and mark I1/I2/I3 in the ledger with merge SHAs, tests and acceptance evidence.
 - **Evidence:** tests/config/industrial_readiness/; tests/shared_contracts/test_impact_interval_provider.py; docs/operations/impact-zone-readiness-index.md.
+
+### DL-#10590 · TB-05: Fit and Replay the Hub–Arm–Club Triple Pendulum
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10590 (parent #10584)
+- **Branch:** feat/tb05-triple-pendulum-fit-10590
+- **PR:** #10644
+- **Paths:** src/engines/physics_engines/pendulum/python/motion_matching/adapters_triple.py; src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_triple.py; src/engines/physics_engines/pendulum/python/motion_matching/provider_triple.py; src/engines/physics_engines/pendulum/python/motion_matching/qualification_triple.py; tests/unit/engines/physics_engines/pendulum/test_triple_pendulum_fit.py; docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json
+- **Started:** 2026-09-21
+- **Last verified:** 2026-09-22 at HEAD (All 41 pendulum unit tests pass; LOD zero new violations; DRY duplication gate passed with 0 unapproved duplicates; ruff check, ruff format, and mypy clean).
+- **Summary:** Implemented 3-DOF planar torque-driven Hub–Arm–Club triple pendulum fitting, independent 4x tighter replay, and Tools shipped simulator replay parity. Formulated 21 degree-6 Bernstein control points strictly bounded and regularized with curvature and effort penalties. Validated positive non-zero geometry calibration ($L_1 \approx 0.315\text{ m}, L_2 \approx 0.585\text{ m}, L_3 \approx 0.782\text{ m}$ for driver; $L_1 \approx 0.315\text{ m}, L_2 \approx 0.585\text{ m}, L_3 \approx 0.700\text{ m}$ for iron) seeded from double fit without invalid zero-length link reductions. Generated authoritative baseline packages and qualification receipts for Driver and 7-Iron. Completed comprehensive DRY refactoring eliminating duplicate windows across qualification, provider, and torque optimization modules.
+- **Next step:** Open PR referencing #10590, await green CI, merge and release lease.
+- **Evidence:** docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json; tests/unit/engines/physics_engines/pendulum/test_triple_pendulum_fit.py.
 
 ### DL-#9548 · Impact-Interval Energy Audit Consumer Gate
 
@@ -786,7 +866,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10614 (epic #10602)
 - **Branch:** feat/10614-co10-reproduction-turnover
-- **PR:** #10720 (survivor follow-up; baseline shipped via #10718)
+- **PR:** #10718 (baseline) + #10720 (survivor; both merged); #10719 closed duplicate
 - **Paths:** src/shared/python/motion_matching/club_only/reproduction.py; src/shared/python/motion_matching/club_only/**init**.py; tests/unit/motion_matching/test_club_reproduction_turnover.py; docs/plans/club_only_matching/REPRODUCTION_GUIDE.md; docs/plans/club_only_matching/evidence/club_reproduction_turnover.json; docs/plans/club_only_matching/TURNOVER.md; docs/development/matched_swing_program/README.md; docs/development/HANDOFF.md; docs/development/DEVELOPMENT_LOG.md; AGENT_HANDOFF.md; SPEC.md
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 — merged via PR #10720 (`abd35e66b`); baseline #10718; duplicate #10719 stays closed

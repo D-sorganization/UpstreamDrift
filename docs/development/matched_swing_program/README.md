@@ -107,6 +107,14 @@ The source analytic-fit receipt omits armature, interpolation, candidate hash
 and root-assistance history. Same-state marker agreement is a kinematic check;
 it does not establish native dynamics parity or a qualified full swing.
 
+### MS-111 Pinocchio G2/G3 Continuation (#10385)
+
+| Scope                                       | State                                                                                           | Evidence                                                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| G2/G3 schedules + integrator parity         | Software contracts landed; `--ms111-schedule` on Pinocchio fitter                               | `src/shared/python/motion_matching/pinocchio_g2_g3.py`                                                                |
+| Independent replay package (save/reopen)    | Armature-propagated portable package; fail-closed schema                                        | [continuation_contract_status.json](evidence/ms111/continuation_contract_status.json)                                 |
+| Native driver/iron G2/G3 desk qualification | **Blocked** — awaits MS-107 accepted same-integrator G1 + MS-100 receipts; no native claim here | [continuation_contract_status.json](evidence/ms111/continuation_contract_status.json) (`claims_native_success=false`) |
+
 The section below is generated directly from `reports/matched_swing_ledger.json` by running:
 
 ```bash
@@ -130,7 +138,7 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 112 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 114 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------------ |

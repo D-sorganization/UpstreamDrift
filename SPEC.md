@@ -89,6 +89,29 @@ Adds a ControlTower-oriented native-engine pytest lane with hashed nightly recei
 - **Evidence (`docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json`, `myosuite_receipt.json`)**:
   - Bootstrap receipts committed; refresh weekly on ControlTower per `evidence/nightly/README.md`.
 
+## Fit and Independently Replay Hub–Arm–Club Triple Pendulum (TB-05, #10590)
+
+Fits bounded continuous joint torques to observed swing data and verifies forward dynamics replay for the 3-DOF planar Hub–Arm–Club triple pendulum under the Tour Baselines program:
+- **Bidirectional Mapping and Dynamics Parity (`src/engines/physics_engines/pendulum/python/motion_matching/adapters_triple.py`)**:
+  - Implements bidirectional parameter conversion between `TriplePendulumParameters` and Tools `physics_triple.py` (`TriplePendulumParams`).
+  - Verifies exact analytical acceleration parity ($< 10^{-12}\text{ rad/s}^2$) and mass matrix parity ($< 10^{-14}$) between `TriplePendulumDynamics` and Tools physics across broad state and forcing grids.
+  - Exposes `check_triple_dynamics_parity` as a reusable qualification gate.
+- **Bounded Smooth 3-Joint Torque Optimization (`src/engines/physics_engines/pendulum/python/motion_matching/torque_optimization_triple.py`)**:
+  - Formulates hub, arm, and club joint torque profiles $\tau(t)$ using degree-6 Bernstein polynomials strictly bounded within physical limits $[\tau_{\min}, \tau_{\max}]$ via control point bounds (21 total parameters).
+  - Incorporates combined objective function penalizing Euclidean marker tracking error on grip and clubhead, torque rate curvature, and effort regularizer.
+  - Implements `fit_bounded_triple_pendulum` using bounded non-linear least squares (`scipy.optimize.least_squares` with `method="trf"`).
+- **Motion Matching Provider Integration (`src/engines/physics_engines/pendulum/python/motion_matching/provider_triple.py`)**:
+  - Implements `TriplePendulumFitSwingProvider` adhering to `FitSwingProvider` Protocol (`engine_name = "pendulum_triple"`).
+  - Computes deterministic cryptographic 16-character SHA-256 target hashes.
+  - Supports non-uniform observation timestamps and maps initial observations directly to initial generalized state $(q_0, v_0)$ seeded from calibrated double fit geometry without invalid zero-length reductions.
+- **Authoritative Qualification & Independent Dual Replay (`src/engines/physics_engines/pendulum/python/motion_matching/qualification_triple.py`)**:
+  - Replays fitted continuous torques in an independent forward simulation using 4x tighter integration substeps (`Radau` / `RK45`).
+  - Replays fitted parameters in the shipped Tools simulation engine (`src.shared.python.pendulum_simulator.simulation_triple.run_simulation`) verifying cross-package trajectory parity.
+  - Generates authoritative baseline packages (`tb05_driver_baseline_package.npz`, `tb05_iron_baseline_package.npz`) and qualification receipts (`tb05_driver_qualification_receipt.json`, `tb05_iron_qualification_receipt.json`).
+  - Updates tour baseline coverage matrix (`docs/plans/tour_baselines/coverage_matrix.md`) with transparent comparative reporting against double pendulum.
+- **Verification Suite (`tests/unit/engines/physics_engines/pendulum/test_triple_pendulum_fit.py`)**:
+  - Unit test suite validating 3-DOF known-pose forward kinematics, analytical-to-Tools dynamics parity, target hash determinism, initial frame evaluation at $t_0$, non-uniform time integration, bounded torque guarantee, tighter-step replay, malformed control rejection, constant geometry invariants, and driver/iron qualification receipts.
+
 ## Candidate Video and Fit-Quality Report Export (MS-86, #10359)
 
 Wires candidate video animation export (MP4 and GIF) and comprehensive fit-quality and acceptance reporting (Markdown and PDF) with complete cryptographic provenance conforming to #8820 / Industrial Readiness U3:
@@ -6819,25 +6842,15 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-22 | #8907 | One per-user config root and one QSettings namespace: launcher writers resolve paths via `user_config_path()` under `launcher_constants.user_config_dir()`, with an idempotent, non-clobbering one-time copy of launcher-owned files from `~/.golf_modeling_suite/` and `~/.upstreamdrift/`; QSettings canonical pair `(UpstreamDrift, Launcher)` with read-old-if-new-missing aliasing of `(D-sorganization, UpstreamDrift)`; Settings, Cross-Engine Dashboard and Integrations Health windows persist geometry via `persist_window_geometry()`; diagnostics tab shows the new log path. |
-| 2026-09-22 | #10748 | #8941 Simulation-page polling client side: shared `usePolling`/`useIncrementalSeries` hooks (single-flight ticks, paused while stopped or the tab is hidden, cleared on unmount); `AnalysisPanel` makes one `/analysis/statistics?collect=true&since=` request per tick using the `X-Analysis-Next-Since` cursor; `ForceOverlayPanel` polls at 2 Hz instead of 5 Hz. |
-| 2026-09-22 | #10737 | Keep the TB-04 qualification-receipt test output in `tmp_path` (`save_qualification_receipts(evidence_dir=...)`) so it no longer rewrites committed evidence and breaks `test_ledger_freshness`. |
-| 2026-09-22 | #8932 | Analysis tabs: shared 150 ms spinbox debounce, bounded memoization of spectrogram/CWT keyed on a signal digest, SwingPlaneTab reuses its axes, and draw_idle on these interactive paths. |
-| 2026-09-22 | #10741 | Preserve six unavailable external validation scopes in Board planning while retaining executable software and prior source dispositions. |
-| 2026-09-22 | #9604 | Tools session bridge maps every rig camera to a Tools `CameraIdentity` + `CameraCapabilities` record (`map_camera_records`): negotiated-else-requested mode, unknown shutter, unsupported hardware trigger and device timestamps (host clock), no exposure range; fail-closed on an unready schema, unbound or duplicate views and unmapped clock domains. |
-| 2026-09-22 | #10740 | Record each native C3D source clock and calibrate one fixed rigid upper-body capture plane from declared shoulder, elbow, and wrist markers; reproducible Driver/Iron preflight receipts preserve 110.4/112.7 mm irreducible normal-RMSE lower bounds above the 55 mm 3D marker ceiling, so both planar campaigns are disqualified without flattened measurements or invented fits. |
-| 2026-09-22 | #8941 | Analysis statistics server side: metric history is a `deque(maxlen=500)` with a monotonic sample cursor, `/analysis/statistics` aggregates in one pass off the event loop, and optional `since`/`limit` query params (422 when out of range) trim `time_series` with the next cursor in `X-Analysis-Next-Since`; default response unchanged. |
-| 2026-09-21 | #8883 | Replace the Video Analyzer launcher tile's static "GUI placeholder" label with a real, minimal GUI (file picker -> `SwingAnalyzer.analyze_video` -> head-stability report) wired to the already-tested pose math in `src/tools/video_analyzer/analyzer.py`; drop the dead sibling-repo import fallback in `external_tools_adapter._import_video_analyzer` (confirmed dead by #8854) so the tile no longer depends on an external Tools provider. |
-| 2026-09-21 | #8886 | Fix Pose Studio's slider/spinbox tooltips lying about the display unit after `set_show_radians` toggles them, unify the Putting Green Simulator's `PuttConfig` to SI (`cup_distance_m` replaces the mixed-unit `cup_distance_ft`), and make the ball-flight and putting-green result panes use one consistent primary/secondary unit pair per line instead of an ad hoc mix. |
-| 2026-09-22 | #10735 | Repair and supersede stale TB-06 fitting work with registered closed-loop golfer topology and feasibility diagnostics, native bounded Bernstein rollout/optimization, separate actuator/reaction and energy/work records, and explicit continuous-control replay; shares #10733's control algebra and does not fit or qualify a real capture. |
-| 2026-09-22 | #10733 | Extract contract-validated bounded Bernstein controls shared by the double and triple pendulum matchers, preserving endpoint, convex-bound, curvature, and effort semantics for the pending constrained upper-body optimizer; no capture fit or qualification claim. |
-| 2026-09-22 | #10732 | Add fail-closed constrained upper-body replay contracts: exact source-clock terminal frames, separate actuator and constraint-reaction traces, declared marker attachments and capture embedding, and same-clock physical marker metrics; no fitting or qualification claim. |
-| 2026-09-22 | #10730 | Reconcile TB-04 Driver and Iron tour-baseline evidence: committed qualification receipts are disqualified, so the coverage matrix and unified motion-matching ledger preserve and reject them; regressions prevent unsupported promotion. |
+| 2026-09-22 | #10723 | MS-111 Pinocchio driver/iron G2/G3 continuation contracts: schedules, same-integrator parity, armature-propagated independent replay save/reopen, failed-continuation evidence, open-loop q0/v0 feed, PF-07 robustness roster, fitter `--ms111-schedule`; software-contract only (`claims_native_success=false`). |
+| 2026-09-22 | #10722 | Restore hip-calibrated ground-support receipt provenance chain (`receipt-provenance-chain/1`): shared validator, CI baselines, dual raw/canonical spec digests; no fabricated hipcal intermediates; physical metrics unchanged. |
 | 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |
+| 2026-09-22 | #10707 | MS-104 full-swing qualification matrix: 36 flagship engine×club×gate rows, fail-closed release_status, software-contract fixtures with named native blockers (no invented six-engine pass). |
 | 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
-| 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
+| 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; duplicates #10719/#10720 closed; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
 | 2026-09-22 | #10718 | Publish club-only reproduction guide and final turnover (CO-10): saved-job commands, provenance, assumptions, matrix reconciliation; software-contract only; epic #10602 stays open. |
 | 2026-09-22 | #10709 | NM-06 masked trajectory-to-control proposals with selected/mixture heads, observation-rollout training loss, collapse diagnostics, coefficient time-domain conversion, fail-closed native refinement, proposal_shared DRY helpers, regenerated divergence inventory for NM-06 paths, architecture-budget TrainingConfig splits, and optional-torch inverse imports; software-contract tests only. |
+| 2026-09-22 | #10715 | Consolidated the four drifted `GolfSwingVisualizer.m` copies across the 2D/3D Simscape model trees into one fleet-shared `+golfviz` package class wired on both launchers' MATLAB paths (issue #9225). |
 | 2026-09-22 | #10711 | Integrate club-only matching into existing UI/results (CO-09): FitSwingProvider/pipeline/ledger/ResultsBrowser/GUI without parallel frameworks; software-contract only. |
 | 2026-09-21 | n/a | Optimized terminal state norm calculation in trajectory funnel benchmark using math.sqrt(np.vdot) (spec-exempt: micro-optimization) |
 | 2026-09-22 | #10704 | MS-105 reliable matching jobs: atomic manifests/checkpoints, compatible resume, fault recovery, portable packages, both-shell progress, PF-08 service budgets without solve-time guarantees; reuses #8880 worker cancel (no second scheduler). |

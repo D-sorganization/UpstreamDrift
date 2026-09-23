@@ -70,11 +70,13 @@ def _build_failure_result(
     message: str,
     target_hash: str,
     engine_version: str,
+    dof: int = 2,
+    method: str = "bounded_bernstein_least_squares",
 ) -> CanonicalFitResult:
     """Construct an honest CanonicalFitResult representing solver or input failure."""
     fail_cost = 999.0
     return CanonicalFitResult(
-        theta_optimal=np.zeros(2 * COEFFS_PER_JOINT, dtype=np.float64),
+        theta_optimal=np.zeros(dof * COEFFS_PER_JOINT, dtype=np.float64),
         final_cost=fail_cost,
         final_rmse_m=float(math.sqrt(fail_cost)),
         solver_status="failure",
@@ -83,12 +85,54 @@ def _build_failure_result(
         wall_clock_s=0.0,
         message=message,
         history=(),
-        method="bounded_bernstein_least_squares",
+        method=method,
         git_commit=git_commit_short(),
         engine_version=engine_version,
         target_hash=target_hash,
         timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
     )
+
+
+def validate_and_project_target(
+    target: MultiSourceTarget | ClubTarget,
+    opts: FitOptions,
+    engine_version: str,
+    dof: int = 2,
+    method: str = "bounded_bernstein_least_squares",
+) -> tuple[ClubTarget, str, float] | CanonicalFitResult:
+    """Validate input club target and project to calibrated swing plane."""
+    club = resolve_club_target(target)
+    t_start = time.perf_counter()
+    target_hash = _compute_target_hash(club)
+
+    if len(club.time) < 2 or np.any(np.diff(club.time) <= 0.0):
+        return _build_failure_result(
+            "Target times must have at least 2 strictly increasing frames",
+            target_hash,
+            engine_version,
+            dof=dof,
+            method=method,
+        )
+    if not (np.isfinite(club.butt).any() and np.isfinite(club.clubhead).any()):
+        return _build_failure_result(
+            "Target observations contain no finite points",
+            target_hash,
+            engine_version,
+            dof=dof,
+            method=method,
+        )
+
+    projected_club, _, plane_err = _resolve_plane(club, opts)
+    if plane_err is not None:
+        return _build_failure_result(
+            plane_err,
+            target_hash,
+            engine_version,
+            dof=dof,
+            method=method,
+        )
+
+    return projected_club, target_hash, t_start
 
 
 def _resolve_plane(
@@ -173,16 +217,15 @@ def _resolve_geometry_and_q0(
     return l1, l2, q0, v0, None
 
 
-def _build_canonical_result(
-    fit_res: FitTrajectoryResult,
+def assemble_pendulum_canonical_result(
+    all_coeffs: np.ndarray,
+    fit_res: Any,
     elapsed: float,
     target_hash: str,
     engine_version: str,
+    method: str = "scipy SLSQP",
 ) -> CanonicalFitResult:
-    """Assemble CanonicalFitResult from double pendulum optimization rollout."""
-    all_coeffs = np.concatenate(
-        [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
-    )
+    """Assemble CanonicalFitResult from pendulum optimization rollout."""
     final_rmse = fit_res.final_rmse_m
     final_cost = float(final_rmse**2)
     max_club_rmse = 0.150
@@ -204,11 +247,31 @@ def _build_canonical_result(
         wall_clock_s=elapsed,
         message=msg,
         history=(final_cost,),
-        method="scipy SLSQP",
+        method=method,
         git_commit=git_commit_short(),
         engine_version=engine_version,
         target_hash=target_hash,
         timestamp_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+
+
+def _build_canonical_result(
+    fit_res: FitTrajectoryResult,
+    elapsed: float,
+    target_hash: str,
+    engine_version: str,
+) -> CanonicalFitResult:
+    """Assemble CanonicalFitResult from double pendulum optimization rollout."""
+    all_coeffs = np.concatenate(
+        [fit_res.profile.shoulder_controls, fit_res.profile.wrist_controls]
+    )
+    return assemble_pendulum_canonical_result(
+        all_coeffs=all_coeffs,
+        fit_res=fit_res,
+        elapsed=elapsed,
+        target_hash=target_hash,
+        engine_version=engine_version,
+        method="scipy SLSQP",
     )
 
 
@@ -222,28 +285,16 @@ class PendulumFitSwingProvider:
         target: MultiSourceTarget | ClubTarget,
         opts: FitOptions,
     ) -> CanonicalFitResult:
-        club = resolve_club_target(target)
-        t_start = time.perf_counter()
-        target_hash = _compute_target_hash(club)
-
-        # Precondition checks
-        if len(club.time) < 2 or np.any(np.diff(club.time) <= 0.0):
-            return _build_failure_result(
-                "Target times must have at least 2 strictly increasing frames",
-                target_hash,
-                self.engine_version(),
-            )
-        if not (np.isfinite(club.butt).any() and np.isfinite(club.clubhead).any()):
-            return _build_failure_result(
-                "Target observations contain no finite points",
-                target_hash,
-                self.engine_version(),
-            )
-
-        # 1. Project onto calibrated swing plane
-        projected_club, _, plane_err = _resolve_plane(club, opts)
-        if plane_err is not None:
-            return _build_failure_result(plane_err, target_hash, self.engine_version())
+        validation = validate_and_project_target(
+            target,
+            opts,
+            self.engine_version(),
+            dof=2,
+            method="bounded_bernstein_least_squares",
+        )
+        if isinstance(validation, CanonicalFitResult):
+            return validation
+        projected_club, target_hash, t_start = validation
 
         # 2. Calibrate link geometry and map feasible initial state q0, v0
         pivot = np.zeros(3)
