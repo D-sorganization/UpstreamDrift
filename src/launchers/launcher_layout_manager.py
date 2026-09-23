@@ -94,6 +94,7 @@ class LayoutManager:
         get_model_func: Any,
         create_card_func: Any,
         create_header_func: Any = None,
+        on_clear_filters: Any = None,
     ) -> None:
         """Initialize the layout manager.
 
@@ -102,6 +103,9 @@ class LayoutManager:
             available_models: Dictionary of available model configurations.
             get_model_func: Callback to retrieve a model by ID.
             create_card_func: Callback to create a model card widget.
+            create_header_func: Callback to create category header labels.
+            on_clear_filters: Callback invoked when user clicks "Clear filters"
+                in the empty-state message.
         """
         if config_file is None:
             raise ValueError("config_file must be provided")
@@ -111,6 +115,7 @@ class LayoutManager:
         self._get_model = get_model_func
         self._create_card = create_card_func
         self._create_header = create_header_func
+        self._on_clear_filters = on_clear_filters
 
         # State
         self.model_order: list[str] = []
@@ -124,6 +129,7 @@ class LayoutManager:
         self.launch_stats: dict[str, dict[str, Any]] = {}
         self.workspace: dict[str, Any] | None = None
         self.dock_state: str | None = None
+        self._empty_state_label: Any = None
 
     def record_launch(self, model_id: str) -> None:
         """Increment launch count and record the last launched time for history tracking."""
@@ -711,6 +717,21 @@ class LayoutManager:
             if model_id in self.model_cards:
                 widgets_to_add.append(self.model_cards[model_id])
 
+        # Handle empty filter results with a user-friendly message
+        # Only show empty state when an active filter causes zero results
+        has_active_filter = bool(self.current_filter_text) or (
+            self.current_category_filter and self.current_category_filter != "All"
+        )
+        if not widgets_to_add and has_active_filter:
+            self._show_empty_state(grid_layout)
+            return
+
+        # Remove empty state label if it exists (results found)
+        if self._empty_state_label is not None:
+            self._empty_state_label.setParent(None)
+            self._empty_state_label.deleteLater()
+            self._empty_state_label = None
+
         # Add to grid as a flat, continuously wrapping list (no headers!)
         row = 0
         col = 0
@@ -731,6 +752,76 @@ class LayoutManager:
         # Final cleanup for grid layout rows
         if not is_list and col > 0:
             row += 1
+
+    def _show_empty_state(self, grid_layout: QGridLayout) -> None:
+        """Display a centered empty-state label when no models match filters.
+
+        Args:
+            grid_layout: The Qt grid layout to add the empty state to.
+        """
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import QLabel
+
+        # Build descriptive message
+        parts = []
+        if self.current_filter_text:
+            parts.append(f'"{self.current_filter_text}"')
+        if self.current_category_filter and self.current_category_filter != "All":
+            parts.append(f"in {self.current_category_filter}")
+
+        if parts:
+            filter_desc = " ".join(parts)
+            message = f"No models found matching {filter_desc}"
+        else:
+            message = "No models available"
+
+        # Create or reuse empty state label
+        if self._empty_state_label is None:
+            self._empty_state_label = QLabel()
+            self._empty_state_label.setAlignment(
+                Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+            )
+            self._empty_state_label.setOpenExternalLinks(False)
+            self._empty_state_label.setTextFormat(Qt.TextFormat.RichText)
+            self._empty_state_label.setWordWrap(True)
+            self._empty_state_label.setStyleSheet("""
+                QLabel {
+                    color: #888888;
+                    font-size: 14px;
+                    padding: 40px;
+                }
+                QLabel a {
+                    color: #007acc;
+                    text-decoration: none;
+                }
+                QLabel a:hover {
+                    text-decoration: underline;
+                }
+            """)
+            # Connect clear-filters link if callback provided
+            if self._on_clear_filters is not None:
+                self._empty_state_label.linkActivated.connect(
+                    self._handle_empty_state_link
+                )
+
+        html = f"""
+            <div style="text-align: center;">
+                <p style="font-size: 16px; margin-bottom: 12px;">{message}</p>
+                <p><a href="clear-filters">Clear filters</a></p>
+            </div>
+        """
+        self._empty_state_label.setText(html)
+        grid_layout.addWidget(self._empty_state_label, 0, 0, 1, -1)
+        self._empty_state_label.show()
+
+    def _handle_empty_state_link(self, link: str) -> None:
+        """Handle clicks on links in the empty-state label.
+
+        Args:
+            link: The href value of the clicked link.
+        """
+        if link == "clear-filters" and self._on_clear_filters is not None:
+            self._on_clear_filters()
 
     def set_edit_mode(self, enabled: bool) -> None:
         """Set layout edit mode.
