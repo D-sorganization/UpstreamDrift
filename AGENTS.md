@@ -794,23 +794,35 @@ never as a silent close, never as a fabricated result.
    acceptance criteria copied verbatim, why it is external, the resources it
    needs, and what would reopen it. Validate with
    `python -m shared_scripts.deferred_validation --repo-root .`.
-3. **Split mixed issues.** If part of the issue is implementable software or CI
-   work, that part stays open as `retained_issue_url` and you may do it.
-4. **Publish, verify, then close — in that order.** The original issue is only
-   closed as not planned after the record is merged, its `record_url` resolves
-   on the default branch, and a named human or the Board signed it off
-   (`reviewed_by` / `reviewed_on`).
+3. **Split mixed issues.** Independently executable software or CI stays active.
+   In v1, retain its source issue and owner-plan software section; in the
+   new-adopter format, use `retained_issue_url`. Never add fields from one
+   schema to the other.
+4. **Publish, verify, then close - in that order.** Preserve the original scope
+   and acceptance, verify the merged owner-plan link, and record the authorized
+   disposition before closing external-only work as not planned. New-adopter
+   records additionally require their `record_url` and recorded review fields;
+   v1 owners retain source snapshots and central publication/closure receipts.
+   User authorization to defer work is not Board approval to fund or execute it.
 
-Existing deployed plans retain their original source snapshots, pending Board
-resource decisions and reactivation requirements. A schema change supplies no
-review approval or measurement. Do not reopen already deferred `roadmap` work
-because its experiment remains undone; inspect the plan and publication receipt.
+For v1, external-only is `disposition: defer`, mixed is `split`, and unavailable
+work remains `status: deferred` with `board.decision: pending`. Reactivation
+requires Board approval/evidence, evidence for every `prerequisites` entry and
+an accountable execution owner; then link the bounded `activation_issue`.
+`ready` or `activated` never means a measurement or validation was completed.
+GitHub Projects draft cards are optional views, not prerequisites to activation.
+
+Existing deployed plans retain original source snapshots and resource decisions.
+A schema change supplies no review approval or measurement. Do not reopen already
+deferred `roadmap` work because its experiment remains undone; inspect the plan
+and publication receipt.
 
 ### Discovery Is Not Authority
 
 Matching keywords like `measure`, `rig`, `chamber`, `specimen`, `calibrat` or
 `trial` is how you **find** candidates. It never authorises closing an issue.
-The catalog validator refuses a closed origin with no recorded review.
+The applicable catalog and publication receipts must support the disposition;
+new-adopter records require their recorded review fields.
 
 The standard, the schema and the per-role instructions are in
 [`docs/fleet-deferred-validation.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/fleet-deferred-validation.md).
