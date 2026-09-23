@@ -6818,7 +6818,9 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | Date | PR | Changes |
+| --- | --- | --- |
 | 2026-09-22 | #10723 | MS-111 Pinocchio driver/iron G2/G3 continuation contracts: schedules, same-integrator parity, armature-propagated independent replay save/reopen, failed-continuation evidence, open-loop q0/v0 feed, PF-07 robustness roster, fitter `--ms111-schedule`; software-contract only (`claims_native_success=false`). |
+| 2026-09-22 | #10722 | Restore hip-calibrated ground-support receipt provenance chain (`receipt-provenance-chain/1`): shared validator, CI baselines, dual raw/canonical spec digests; no fabricated hipcal intermediates; physical metrics unchanged. |
 | 2026-09-22 | #10717 | Harden CO-09 UI after #10711: workbook trial load, receipt-hashed ledger, viewer compare, default JSON ResultsBrowser. |
 | 2026-09-22 | #10720 | Rematch CO-10 survivor after #10718 baseline: runnable saved-job commands (`build_club_only_result_view`, `asset_paths`), architecture-budget helper split, succession docs; software-contract only; epic #10602 stays open. |
 | 2026-09-22 | #10721 | Motion-matching succession handoff: CO-10 #10718 and NM-06 #10709 recorded merged; do-not-steal NM-07 #10622; epics #10602/#10603 stay open. |
