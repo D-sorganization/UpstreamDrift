@@ -287,13 +287,18 @@ def generate_triple_baseline_package_for_target(
 
 def save_triple_qualification_receipts(
     repo_root: Path | str,
+    evidence_dir: Path | str | None = None,
 ) -> dict[str, str]:
     """Generate and save Driver and Iron triple pendulum qualification receipts."""
     root = Path(repo_root)
     driver_c3d = root / "data" / "C3D_TA_Driver.c3d"
     iron_c3d = root / "data" / "C3D_TA_Iron.c3d"
-    evidence_dir = root / "docs" / "plans" / "tour_baselines" / "evidence"
-    evidence_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = (
+        Path(evidence_dir)
+        if evidence_dir is not None
+        else root / "docs" / "plans" / "tour_baselines" / "evidence"
+    )
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     driver_pkg, driver_verdict = generate_triple_baseline_package_for_target(
         driver_c3d, "driver", maxiter=30
@@ -302,10 +307,10 @@ def save_triple_qualification_receipts(
         iron_c3d, "iron", maxiter=30
     )
 
-    driver_json_path = evidence_dir / "tb05_driver_qualification_receipt.json"
-    iron_json_path = evidence_dir / "tb05_iron_qualification_receipt.json"
-    driver_pkg_path = evidence_dir / "tb05_driver_baseline_package.npz"
-    iron_pkg_path = evidence_dir / "tb05_iron_baseline_package.npz"
+    driver_json_path = out_dir / "tb05_driver_qualification_receipt.json"
+    iron_json_path = out_dir / "tb05_iron_qualification_receipt.json"
+    driver_pkg_path = out_dir / "tb05_driver_baseline_package.npz"
+    iron_pkg_path = out_dir / "tb05_iron_baseline_package.npz"
 
     export_baseline_package(driver_pkg, driver_pkg_path)
     export_baseline_package(iron_pkg, iron_pkg_path)

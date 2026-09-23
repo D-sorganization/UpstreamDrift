@@ -187,17 +187,21 @@ def test_triple_independent_tighter_step_replay() -> None:
         assert result.final_rmse_m >= 0.0
 
 
-def test_triple_driver_and_iron_qualification_receipts() -> None:
-    """Driver and iron targets produce complete triple baseline packages and receipts."""
+def test_triple_driver_and_iron_qualification_receipts(tmp_path: Path) -> None:
+    """Driver and iron targets produce complete triple baseline packages and receipts.
+
+    Receipts are written to ``tmp_path``: rewriting committed evidence in place
+    breaks ``test_ledger_freshness``.
+    """
     from src.engines.physics_engines.pendulum.python.motion_matching.qualification_triple import (
         save_triple_qualification_receipts,
     )
 
     repo_root = Path(__file__).resolve().parents[5]
-    summary = save_triple_qualification_receipts(repo_root)
-    assert Path(summary["driver_receipt"]).is_file()
-    assert Path(summary["iron_receipt"]).is_file()
-    assert Path(summary["driver_package"]).is_file()
-    assert Path(summary["iron_package"]).is_file()
+    summary = save_triple_qualification_receipts(repo_root, evidence_dir=tmp_path)
+    for key in ("driver_receipt", "iron_receipt", "driver_package", "iron_package"):
+        written = Path(summary[key])
+        assert written.is_file()
+        assert written.parent == tmp_path
     assert float(summary["driver_club_rmse_m"]) > 0.0
     assert float(summary["iron_club_rmse_m"]) > 0.0
