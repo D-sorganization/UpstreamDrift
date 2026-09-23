@@ -229,6 +229,8 @@ class MotionMatchingWidget(QWidget):
         stages_layout.addRow("Shooting fit iterations", self.shooting_fit)
         stages_layout.addRow("Shooting gain", self.shooting_gain)
 
+        self.neural_group = self._create_neural_group()
+
         self.run_button = QPushButton("Build document and match")
         self.run_button.clicked.connect(self.start)
         self.stop_button = QPushButton("Stop")
@@ -245,10 +247,38 @@ class MotionMatchingWidget(QWidget):
         layout = QVBoxLayout(widget)
         layout.addLayout(form)
         layout.addWidget(self.stages_group)
+        layout.addWidget(self.neural_group)
         layout.addLayout(buttons)
         layout.addWidget(self.log, stretch=1)
         layout.addWidget(results_group)
         return widget
+
+    def _create_neural_group(self) -> QGroupBox:
+        """Create neural-assisted matching controls (NM-11, #10626)."""
+        box = QGroupBox("Neural-Assisted Motion Matching")
+        layout = QFormLayout(box)
+        self.neural_mode = QComboBox()
+        self.neural_mode.addItems(
+            ["Classical Only", "Neural Preview", "Neural Verified"]
+        )
+        self.neural_mode.setCurrentText("Classical Only")
+
+        self.neural_model_selector = QComboBox()
+        self.neural_model_selector.addItems(
+            [
+                "driven_double_pendulum",
+                "mujoco_humanoid_3d",
+                "pinocchio_golf_arm",
+            ]
+        )
+
+        self.allow_classical_fallback = QCheckBox("Allow classical fallback")
+        self.allow_classical_fallback.setChecked(True)
+
+        layout.addRow("Inference Mode:", self.neural_mode)
+        layout.addRow("Neural Model:", self.neural_model_selector)
+        layout.addRow(self.allow_classical_fallback)
+        return box
 
     def _create_results_section(self) -> QGroupBox:
         box = QGroupBox("Results & Playback")
@@ -286,6 +316,12 @@ class MotionMatchingWidget(QWidget):
         metrics_form.addRow(
             "Inside Support Polygon Fraction:", self.metric_support_polygon
         )
+        self.neural_status_badge = QLabel("-")
+        self.metric_neural_confidence = QLabel("-")
+        self.metric_time_breakdown = QLabel("-")
+        metrics_form.addRow("Neural Status:", self.neural_status_badge)
+        metrics_form.addRow("Empirical Confidence:", self.metric_neural_confidence)
+        metrics_form.addRow("Time Breakdown:", self.metric_time_breakdown)
         vbox.addLayout(metrics_form)
 
         # Animations row
@@ -928,6 +964,59 @@ class MotionMatchingWidget(QWidget):
         self.results.setText(
             json.dumps(summary, indent=1) + f"\nPlayback: {gifs or 'none'}"
         )
+
+        neural_info = summary.get("neural_inference") or metrics.get("neural_inference")
+        if isinstance(neural_info, dict):
+            self.update_neural_metrics(
+                status=str(neural_info.get("status", "NEURAL_ACCEPTED")),
+                is_preview=bool(neural_info.get("is_preview", False)),
+                confidence=neural_info.get("confidence"),
+                t_neural_s=float(neural_info.get("t_neural_s", 0.0)),
+                t_polish_s=float(neural_info.get("t_polish_s", 0.0)),
+                t_total_s=float(neural_info.get("t_total_s", 0.0)),
+            )
+
+    def update_neural_metrics(
+        self,
+        *,
+        status: str,
+        is_preview: bool = False,
+        confidence: float | None = None,
+        t_neural_s: float = 0.0,
+        t_polish_s: float = 0.0,
+        t_total_s: float = 0.0,
+    ) -> None:
+        """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626)."""
+        if is_preview:
+            self.neural_status_badge.setText(f"PREVIEW ({status})")
+            self.neural_status_badge.setStyleSheet(
+                "font-weight: bold; color: darkorange; background-color: cornsilk; border-radius: 4px; padding: 2px 6px;"
+            )
+        elif status in ("VERIFIED", "NEURAL_ACCEPTED"):
+            self.neural_status_badge.setText("VERIFIED")
+            self.neural_status_badge.setStyleSheet(
+                "font-weight: bold; color: forestgreen; background-color: honeydew; border-radius: 4px; padding: 2px 6px;"
+            )
+        elif status == "CLASSICAL_FALLBACK":
+            self.neural_status_badge.setText("CLASSICAL FALLBACK")
+            self.neural_status_badge.setStyleSheet(
+                "font-weight: bold; color: royalblue; background-color: aliceblue; border-radius: 4px; padding: 2px 6px;"
+            )
+        else:
+            self.neural_status_badge.setText(status)
+            self.neural_status_badge.setStyleSheet("font-weight: bold; color: gray;")
+
+        if confidence is not None:
+            self.metric_neural_confidence.setText(f"{confidence:.3f} (domain support)")
+        else:
+            self.metric_neural_confidence.setText("-")
+
+        if t_total_s > 0.0:
+            self.metric_time_breakdown.setText(
+                f"Neural: {t_neural_s * 1000:.1f}ms | Polish: {t_polish_s * 1000:.1f}ms | Total: {t_total_s * 1000:.1f}ms"
+            )
+        else:
+            self.metric_time_breakdown.setText("-")
 
     def metrics_values(self) -> dict[str, Any]:
         """Return the extracted five headline metrics from the last matching run."""
