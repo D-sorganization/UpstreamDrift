@@ -189,6 +189,7 @@ def test_triple_independent_tighter_step_replay() -> None:
 
 def test_triple_driver_and_iron_qualification_receipts() -> None:
     """Driver and iron targets produce complete triple baseline packages and receipts."""
+    pytest.importorskip("ezc3d")
     from src.engines.physics_engines.pendulum.python.motion_matching.qualification_triple import (
         save_triple_qualification_receipts,
     )
