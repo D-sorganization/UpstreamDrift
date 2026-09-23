@@ -427,6 +427,15 @@ pending` — UD keeps this facade.
 - Honest limit: placeholder MyoBody MJCF yields diagnostic marker parity only; 15 mm gate deferred to MS-51 scene.
 - Next action: merge PR #10666 after rebase CI green; teardown worktree.
 
+## ADR-0046 G2 Re-Point Workbenches at Canonical Layer (#9349)
+
+- Worktree: `_worktrees/UpstreamDrift-pr-10178`, branch `conductor/issue-9349`, PR #10178.
+- Status: Stage 2 (G2) closed. Module retirement previously landed under #9348.
+  - Both launch-monitor tiles state they are surfaces of "the same analytics engine" in `src/config/models.yaml` (desktop) and `src/config/launcher_manifest.json` (web).
+  - Pinned by `tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py`.
+  - ADR-0046 records G2 as landed; capability atlas regenerated.
+- Verification: 4 unit tests pass in `test_launch_monitor_tiles_share_one_engine.py`.
+
 ## Video Analyzer Real GUI #8883 Handoff
 
 - Workspace: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-issue-8883`.
@@ -649,6 +658,7 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
   - Test suites: 8 unit tests in `test_matching_strategy.py` verifying stage ordering, acceptance invariants, contract serialization, .npz roundtrip, name-permuted remapping, comparison service, capability invalidation, and 6-engine / dual-club contract coverage.
 - Reproduction: `pytest tests/unit/motion_matching/test_matching_strategy.py -v`.
 - Next: PR auto-merge, complete lease on #10440, claim next issue.
+  > > > > > > > origin/main
 
 ## Coupled Grip, Shaft, and Ground Rollup Handoff Checkpoint (#8684) â€” 2026-09-11
 

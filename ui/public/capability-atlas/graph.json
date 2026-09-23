@@ -1319,7 +1319,7 @@
     {
       "id": "launch_monitor_analytics",
       "title": "Launch Monitor Analytics",
-      "description": "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends",
+      "description": "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends. The deep-desk workbench for the same analytics engine as the Rate of Closure Impact Explorer's launch-monitor tab.",
       "path": "src/tools/launch_monitor_analytics/__main__.py",
       "launch_target": "src/tools/launch_monitor_analytics/__main__.py",
       "category": "tool",
@@ -1338,7 +1338,7 @@
     {
       "id": "rate_of_closure",
       "title": "Rate of Closure Impact Explorer",
-      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)",
+      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center). Its launch-monitor tab is the in-context surface of the same analytics engine as Launch Monitor Analytics.",
       "path": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
       "launch_target": "tools://src/rate_of_closure/launch_pyqt6.py",
       "category": "simulation",
@@ -2868,8 +2868,8 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "b9397c369014e6bf0d9dd7a4cb35c48ada35921b1483e0bc1a2407fc7079381a",
-    "src/config/launcher_manifest.json": "15e853e4c2dc543a826cfcad5ac9e917c089469ed1454e1b1e2579b0107a94a7",
+    "src/config/models.yaml": "1d12be4928b8234b422f1972ba67726dd0ea5046ead686b9e1bfd2843c070a11",
+    "src/config/launcher_manifest.json": "72f0d537333b3970ab2c17a159dacc5a61f9e1ae7870b927ec504eacc64864f5",
     "src/config/feature_parity.json": "954f535107ea6635e6ae619ad73fb581145ae98fc83a1570012f1259e33874b1",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
