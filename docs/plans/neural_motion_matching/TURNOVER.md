@@ -48,18 +48,19 @@ NM-02 ([#10617](https://github.com/D-sorganization/UpstreamDrift/issues/10617) /
 NM-03 ([#10618](https://github.com/D-sorganization/UpstreamDrift/issues/10618) /
 [#10686](https://github.com/D-sorganization/UpstreamDrift/pull/10686)),
 NM-04 ([#10619](https://github.com/D-sorganization/UpstreamDrift/issues/10619) /
-[#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698)) and
+[#10698](https://github.com/D-sorganization/UpstreamDrift/pull/10698)),
 NM-05 ([#10620](https://github.com/D-sorganization/UpstreamDrift/issues/10620) /
-[#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701)) are merged.
+[#10701](https://github.com/D-sorganization/UpstreamDrift/pull/10701)),
+NM-06 ([#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621) /
+[#10709](https://github.com/D-sorganization/UpstreamDrift/pull/10709)),
+NM-07 ([#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622) /
+[#10768](https://github.com/D-sorganization/UpstreamDrift/pull/10768)),
+NM-08 ([#10623](https://github.com/D-sorganization/UpstreamDrift/issues/10623) /
+[#10770](https://github.com/D-sorganization/UpstreamDrift/pull/10770)) and
+NM-09 ([#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624)) are implemented.
 The immediate task is
-**[#10621](https://github.com/D-sorganization/UpstreamDrift/issues/10621) (NM-06)
-only** (masked trajectory-to-control proposals with native refinement). Do not
-start NM-07+. This is a dispatch-ready plan, not authorization to run every expensive
-experiment at once. Lower-cost agents handle bounded schema, adapter, fixture,
-CLI and UI work. An experienced reviewer checks model/observation semantics, force
-identifiability, contact, physical feasibility and scientific promotion. Dependencies
-are real contract gates: require merged implementation plus relevant tests/receipts, not
-merely a closed issue.
+**[#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625) (NM-10)
+only** (benchmark accepted-match speed, data efficiency and break-even).
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model
