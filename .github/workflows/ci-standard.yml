@@ -1779,6 +1779,8 @@ jobs:
             fi
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
       - name: Fetch pinned Tools packages
         uses: ./.github/actions/fetch-pinned-tools
       - name: Check for core test relevant changes
@@ -1975,18 +1977,16 @@ jobs:
           }
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # Fetch base branch with enough depth for merge-base resolution.
-            # When the base branch has advanced, shallow fetches may not have
-            # the merge-base, so we fetch with depth=10 to ensure common history.
-            git fetch --no-tags --depth=10 origin "${{ github.base_ref }}"
+            # Fetch base branch for merge-base resolution.
+            git fetch --no-tags origin "${{ github.base_ref }}"
 
-            # Try to compute merge-base for accurate diff. If merge-base fails
-            # (e.g., due to shallow history), fall back to direct base ref diff.
+            # Compute merge-base for accurate three-way diff. If shallow, unshallow to resolve.
             merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
             if [ -z "$merge_base" ]; then
-              # Merge-base not available (shallow history), fall back to
-              # direct diff against base ref. This may include extra changes
-              # but ensures tests run rather than silently skipping.
+              git fetch --unshallow origin "${{ github.base_ref }}" 2>/dev/null || true
+              merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
+            fi
+            if [ -z "$merge_base" ]; then
               echo "NOTE: merge-base unavailable; using direct diff against origin/${{ github.base_ref }}"
             fi
             diff_base="${merge_base:-origin/${{ github.base_ref }}}"
@@ -2025,8 +2025,10 @@ jobs:
               --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
             mapfile -t changed_tests < "$RUNNER_TEMP/core_changed_tests.txt"
 
+            # Compute deleted tests against merge_base to prevent false positives
+            # from tests newly added on the base branch (issue #10751).
             diff_into "$RUNNER_TEMP/core_deleted_tests.txt" \
-              --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
+              --diff-filter=D "${merge_base:-$diff_base}" HEAD -- 'tests/**/*.py'
             mapfile -t deleted_tests < "$RUNNER_TEMP/core_deleted_tests.txt"
             if [ "${#deleted_tests[@]}" -gt 0 ]; then
               echo "::error::Deleted Python test files require review before CI can proceed."
