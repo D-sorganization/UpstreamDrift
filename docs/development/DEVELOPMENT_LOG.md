@@ -17,6 +17,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+<<<<<<< HEAD
+
 ### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
 
 - **State:** in_review
@@ -118,7 +120,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3` — merged after focused tests, Ruff, architecture/file-size budgets, and required PR checks passed.
 - **Summary:** Reconcile tour-baseline reporting with immutable TB-04 receipt verdicts. The coverage matrix and unified run ledger preserve replay evidence while rejecting the two disqualified candidates; historical/reduced evidence remains distinct from full-body G1/G2/G3 qualification.
-- **Evidence:** docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json; docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json.
+
+### DL-#10385 · Pinocchio Driver/Iron G2-G3 Continuation and Independent Replay (MS-111)
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10385 (MS-111, epic #10363; folded PF-07 #10437)
+- **Branch:** feat/10385-ms111-pinocchio-g2-g3-replay
+- **PR:** #10723
+- **Paths:** src/shared/python/motion_matching/pinocchio_g2_g3.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/test_pinocchio_g2_g3.py; docs/development/matched_swing_program/evidence/ms111/; docs/development/matched_swing_program/README.md; docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 at SELF — unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native ControlTower desk claim.
+- **Summary:** Software contracts for Pinocchio driver/iron G2/G3 continuation schedules, same-integrator solve/replay parity (reject integrator-specific solutions), armature propagation to equivalent-model independent replay packages (save/reopen), failed-continuation evidence preservation, open-loop q0/v0 control feed (no per-frame poses), and PF-07 robustness roster. Fitter exposes `--ms111-schedule` and fail-closed integrator parity. Native G2/G3 qualification remains blocked on MS-107 accepted G1 + MS-100 receipts.
+- **Next step:** Confirm CI green on PR #10723 and allow squash auto-merge to land.
+- **Evidence:** docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json; tests/unit/motion_matching/test_pinocchio_g2_g3.py.
 
 ### DL-#8887 · Wire Per-Engine Joint Limits Into Pose Studio's JointPanel
 
