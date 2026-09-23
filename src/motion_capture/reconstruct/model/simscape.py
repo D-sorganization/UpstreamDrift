@@ -27,7 +27,7 @@ import json
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -35,7 +35,7 @@ from scipy.spatial.transform import Rotation
 
 from src.shared.python.core.contracts import require
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 
 #: Joint -> (parent body, child body, candidate angle-column sets). A logged
 #: frame pair may span more than one Simscape joint (the Spine sensor sits
@@ -160,7 +160,8 @@ def _mean_rotation(mats: Array) -> Array:
 
 def _spread_rad(mats: Array, mean: Array) -> float:
     rel = np.einsum("ij,tjk->tik", mean.T, mats)
-    return float(np.mean(np.linalg.norm(Rotation.from_matrix(rel).as_rotvec(), axis=1)))
+    rotvec = Rotation.from_matrix(rel).as_rotvec()
+    return float(np.mean(np.sqrt(np.einsum("ij,ij->i", rotvec, rotvec))))
 
 
 def _als(
@@ -281,6 +282,10 @@ def identify_joint(
             frames.rotation[parent],
             frames.position[child] - frames.position[parent],
         )
+
+    d_mean = d.mean(axis=0)
+    diff = d - d_mean
+
     return JointConvention(
         joint=joint,
         order=order_str,
@@ -288,8 +293,8 @@ def identify_joint(
         pre_frame_rotvec=tuple(float(v) for v in Rotation.from_matrix(a).as_rotvec()),
         post_frame_rotvec=tuple(float(v) for v in Rotation.from_matrix(b).as_rotvec()),
         residual_rad=res,
-        offset_parent_frame_m=tuple(float(v) for v in d.mean(axis=0)),
-        offset_spread_m=float(np.linalg.norm(d - d.mean(axis=0), axis=1).mean()),
+        offset_parent_frame_m=tuple(float(v) for v in d_mean),
+        offset_spread_m=float(np.sqrt(np.einsum("ij,ij->i", diff, diff)).mean()),
         frames=frames.frames,
         reference=reference,
         angle_columns=tuple(cols),
