@@ -249,7 +249,14 @@ class LauncherTopBarUIMixin:
         self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
         self.search_input.setAccessibleName("Search models")
         self.search_input.setClearButtonEnabled(True)
-        self.search_input.textChanged.connect(self.update_search_filter)
+
+        # Debounce search to avoid costly grid rebuilds on every keystroke
+        self._search_debounce_timer = QTimer()
+        self._search_debounce_timer.setSingleShot(True)
+        self._search_debounce_timer.setInterval(150)
+        self._search_debounce_timer.timeout.connect(self._apply_debounced_search)
+        self._pending_search_text = ""
+        self.search_input.textChanged.connect(self._on_search_text_changed)
         top_bar.addWidget(self.search_input)
 
         self.btn_clear_filters = QPushButton("Clear Filters")
@@ -294,6 +301,19 @@ class LauncherTopBarUIMixin:
 
         if running:
             self._open_settings(tab=8)
+
+    def _on_search_text_changed(self, text: str) -> None:
+        """Handle search input changes with debouncing.
+
+        Restarts the debounce timer on each keystroke to avoid rebuilding
+        the grid until the user pauses typing.
+        """
+        self._pending_search_text = text
+        self._search_debounce_timer.start()
+
+    def _apply_debounced_search(self) -> None:
+        """Apply the debounced search filter after the timer fires."""
+        self.update_search_filter(self._pending_search_text)
 
     def _ensure_launch_button(self) -> None:
         """Create ``self.btn_launch`` if it doesn't exist yet (idempotent).
