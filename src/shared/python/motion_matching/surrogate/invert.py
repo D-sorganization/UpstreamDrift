@@ -13,12 +13,20 @@ Public API:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Literal
 from collections.abc import Callable
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-import torch
+
+if TYPE_CHECKING:
+    import torch
+else:
+    try:
+        import torch
+    except ModuleNotFoundError:
+        torch = None
+
 
 from src.shared.python.core.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -303,8 +311,11 @@ def fit_swing_via_surrogate(
     Raises:
         ValueError: If bounds shapes are wrong or any input is non-finite.
     """
+    if torch is None:
+        raise RuntimeError("PyTorch is required for fit_swing_via_surrogate")
     coeff_dim = surrogate.cfg.coeff_dim
     low_np, high_np = bounds if bounds is not None else default_bounds(coeff_dim)
+
     validate_bounds(low_np, high_np, coeff_dim)
 
     surrogate.eval()
