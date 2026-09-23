@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T23:16:01Z",
+  "generated_at": "2026-09-23T05:44:05Z",
   "rows": [
     {
       "acceptance": null,
@@ -2760,6 +2760,62 @@
         "whole_marker_rmse_m": null
       },
       "reason": null,
+      "receipt_path": "docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json",
+      "sha256": "54c825d99b0fd824896dde683a5fcfd65f7dff84674942ff4c8954b737032254"
+    },
+    {
+      "acceptance": {
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "receipt declares scientific_qualification=disqualified; the ledger preserves it as rejected evidence",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
+      },
+      "candidate_sha": null,
+      "capture": "iron",
+      "engine": "tools",
+      "horizon_s": null,
+      "lane": "tour_baselines",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json",
+      "sha256": "19f471cd43acc889a4d30ddc9fb4c07767aacc04b3b16f087d59f390a4a506ac"
+    },
+    {
+      "acceptance": {
+        "horizon": "G1",
+        "is_physically_accepted": false,
+        "qualification_note": "receipt declares scientific_qualification=disqualified; the ledger preserves it as rejected evidence",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
+      },
+      "candidate_sha": null,
+      "capture": "driver",
+      "engine": "tools",
+      "horizon_s": null,
+      "lane": "tour_baselines",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json",
       "sha256": "25631e3856948d7ae98029675b594c34223814c940f46aacf9d6230dd36c70cb"
     },
@@ -3969,5 +4025,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 112
+  "total_receipts": 114
 }
