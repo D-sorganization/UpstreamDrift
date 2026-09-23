@@ -69,8 +69,13 @@ def test_neural_motion_runner_conforms_to_protocol() -> None:
     assert runner.framework is TrainingFramework.PYTORCH
 
 
-def test_runner_registry_multi_runner_resolution() -> None:
+def test_runner_registry_multi_runner_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """RunnerRegistry resolves different runners sharing TrainingFramework.PYTORCH."""
+    monkeypatch.setattr(
+        importlib.util, "find_spec", lambda name: object() if name == "torch" else None
+    )
     registry = RunnerRegistry()
     cvae_runner = PyTorchCVAERunner()
     nm_runner = NeuralMotionRunner()
