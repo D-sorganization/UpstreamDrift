@@ -44,7 +44,6 @@ from src.shared.python.motion_matching.inverse.proposal_shared import (
     coefficients_from_polish_mapping,
     parse_native_polish_outcome,
 )
-
 from .surrogate import FitResult, InvertOptions, SwingSurrogate, fit_swing_via_surrogate
 
 if TYPE_CHECKING:
