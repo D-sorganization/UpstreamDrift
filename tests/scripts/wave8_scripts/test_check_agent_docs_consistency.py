@@ -69,6 +69,12 @@ def test_iter_repo_relative_paths_deduplicates() -> None:
     assert paths.count("src/x.py") == 1
 
 
+@pytest.mark.unit
+def test_iter_repo_relative_paths_ignores_repository_management_references() -> None:
+    text = "Standard: Repository_Management `docs/fleet-deferred-validation.md`."
+    assert mod._iter_repo_relative_paths(text) == []
+
+
 def test_assert_contains_appends_error() -> None:
     errors: list[str] = []
     mod._assert_contains("abc", "z", "msg", errors)

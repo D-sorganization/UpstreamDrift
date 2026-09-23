@@ -20,11 +20,11 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any, Literal
 
-from src.shared.python.core.contracts import StateError, require
+from src.shared.python.core.contracts import StateError, ensure, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .plan import RigPlan
-from .session import CaptureOutcome, SessionManifest
+from .plan import CaptureMode, RigPlan
+from .session import CameraStats, CaptureOutcome, SessionManifest
 from .sources import HOST_MONOTONIC
 
 logger = get_logger(__name__)
@@ -120,35 +120,122 @@ def probe_tools_schema(module_name: str = TOOLS_MOCAP_MODULE) -> SchemaProbe:
     return SchemaProbe("ready", None, module_name, str(version))
 
 
-def _cameras(mocap: Any, manifest: SessionManifest, plan: RigPlan) -> tuple[Any, ...]:
+@dataclass(frozen=True)
+class CameraRecord:
+    """One rig camera as Tools records: identity plus advertised capabilities.
+
+    ``identity`` is a Tools ``CameraIdentity`` and ``capabilities`` a Tools
+    ``CameraCapabilities``; ``view`` keeps the rig's name for the camera.
+    """
+
+    view: str
+    identity: Any
+    capabilities: Any
+
+
+def _ready_tools() -> Any:
+    """The pinned Tools mocap module, or :class:`StateError` if it is not ready."""
+    probe = probe_tools_schema()
+    if probe.status != "ready":
+        raise StateError(f"Tools mocap schema {probe.status}: {probe.reason}")
+    return importlib.import_module(probe.module)
+
+
+def _clock_kind(domain: str) -> str:
+    kind = _CLOCK_KINDS.get(domain)
+    if kind is None:
+        raise ValueError(f"clock domain {domain!r} has no Tools ClockKind")
+    return kind
+
+
+def _advertised_mode(stats: CameraStats) -> CaptureMode:
+    """The negotiated mode, else the requested one when none was negotiated."""
+    return stats.effective_mode or stats.requested_mode
+
+
+def _unsupported(mocap: Any, reason: str) -> Any:
+    return mocap.FeatureSupport(mocap.SupportLevel.UNSUPPORTED, reason)
+
+
+def _capabilities(mocap: Any, stats: CameraStats) -> Any:
+    """Map one rig camera onto a Tools ``CameraCapabilities``.
+
+    UVC rig cameras free-run on the host clock and declare neither a shutter
+    kind nor an exposure range in microseconds (UVC exposure units are
+    driver-specific), so those are reported as unknown/unsupported/absent
+    rather than guessed.
+    """
+    mode = _advertised_mode(stats)
+    clock = _clock_kind(stats.clock_domain)
+    return mocap.CameraCapabilities(
+        resolutions_px=((mode.width, mode.height),),
+        frame_rates_hz=(float(mode.fps),),
+        pixel_formats=(mode.fourcc,),
+        shutter=mocap.ShutterKind.UNKNOWN,
+        hardware_trigger=_unsupported(
+            mocap, "UVC rig cameras free-run; no hardware trigger input"
+        ),
+        device_timestamps=_unsupported(
+            mocap, f"frames are stamped on the {clock} host clock, not the device"
+        ),
+    )
+
+
+def _camera_records(
+    mocap: Any, manifest: SessionManifest, plan: RigPlan
+) -> tuple[CameraRecord, ...]:
+    views = [stats.view for stats in manifest.cameras]
+    if len(set(views)) != len(views):
+        raise ValueError(f"manifest camera views must be unique: {views}")
     bindings = {binding.view: binding for binding in plan.cameras}
-    identities = []
+    records = []
     for stats in manifest.cameras:
         binding = bindings.get(stats.view)
         if binding is None:
             raise ValueError(f"camera view {stats.view!r} is not bound by the plan")
-        identities.append(
-            mocap.CameraIdentity(
-                provider_id=RIG_PROVIDER_ID,
-                device_id=stats.identity,
-                transport=RIG_TRANSPORT,
-                serial_number=binding.serial,
-            )
+        identity = mocap.CameraIdentity(
+            provider_id=RIG_PROVIDER_ID,
+            device_id=stats.identity,
+            transport=RIG_TRANSPORT,
+            serial_number=binding.serial,
         )
-    return tuple(identities)
+        records.append(CameraRecord(stats.view, identity, _capabilities(mocap, stats)))
+    return tuple(records)
+
+
+def map_camera_records(
+    manifest: SessionManifest, plan: RigPlan
+) -> tuple[CameraRecord, ...]:
+    """Tools ``CameraIdentity`` + ``CameraCapabilities`` for every rig camera.
+
+    Preconditions: ``manifest`` is a :class:`SessionManifest` and ``plan`` a
+    :class:`RigPlan` (else ``ValueError``); the pinned schema probes ``ready``
+    (else :class:`StateError`); camera views are unique, bound by ``plan`` and
+    on a clock domain with a Tools ``ClockKind`` (else ``ValueError``).
+
+    Postconditions: exactly one record per manifest camera, in manifest order,
+    with each view and device id preserved; the identities are the ones
+    :func:`export_session_manifest` writes.
+    """
+    require(isinstance(manifest, SessionManifest), "manifest must be a SessionManifest")
+    require(isinstance(plan, RigPlan), "plan must be a RigPlan")
+    records = _camera_records(_ready_tools(), manifest, plan)
+    ensure(
+        [(r.view, r.identity.device_id) for r in records]
+        == [(s.view, s.identity) for s in manifest.cameras],
+        "one camera record per manifest camera, ids preserved",
+    )
+    return records
 
 
 def _clocks(mocap: Any, manifest: SessionManifest) -> tuple[Any, ...]:
     domains = dict.fromkeys(stats.clock_domain for stats in manifest.cameras)
     clocks = []
     for domain in domains:
-        kind = _CLOCK_KINDS.get(domain)
-        if kind is None:
-            raise ValueError(f"clock domain {domain!r} has no Tools ClockKind")
         clocks.append(
             mocap.ClockDomain(
                 clock_id=domain,
-                kind=mocap.ClockKind(kind),
+                kind=mocap.ClockKind(_clock_kind(domain)),
                 tick_period_seconds=1e-9,
                 monotonic=True,
             )
@@ -179,10 +266,7 @@ def export_session_manifest(
     require(isinstance(manifest, SessionManifest), "manifest must be a SessionManifest")
     require(isinstance(plan, RigPlan), "plan must be a RigPlan")
     require(isinstance(terms, RecordingTerms), "terms must be RecordingTerms")
-    probe = probe_tools_schema()
-    if probe.status != "ready":
-        raise StateError(f"Tools mocap schema {probe.status}: {probe.reason}")
-    mocap = importlib.import_module(probe.module)
+    mocap = _ready_tools()
 
     warnings = list(dict.fromkeys(manifest.reasons))
     if not terms.consent_recorded:
@@ -196,7 +280,7 @@ def export_session_manifest(
         created_at_utc=manifest.started_utc,
         state=state,
         world_frame=mocap.CoordinateFrame.affinedrift_world_v1(),
-        cameras=_cameras(mocap, manifest, plan),
+        cameras=tuple(r.identity for r in _camera_records(mocap, manifest, plan)),
         clocks=_clocks(mocap, manifest),
         methods=(
             mocap.MethodDescriptor(

@@ -29,6 +29,7 @@ from src.motion_capture.rig.tools_bridge import (
     SchemaProbe,
     export_session_manifest,
     export_to_bundle,
+    map_camera_records,
     probe_tools_schema,
 )
 from src.shared.python.core.contracts import StateError
@@ -94,3 +95,24 @@ def test_ready_path_round_trips_through_tools_in_its_own_process() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert probe_tools_schema() == before
+
+
+def test_camera_records_check_their_inputs_before_touching_tools() -> None:
+    plan = _plan()
+    manifest = _captured(plan)
+    with pytest.raises(ValueError, match="manifest must be a SessionManifest"):
+        map_camera_records({"cameras": ()}, plan)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="plan must be a RigPlan"):
+        map_camera_records(manifest, "bench")  # type: ignore[arg-type]
+
+
+def test_camera_records_fail_closed_when_the_pinned_schema_is_not_ready(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    plan = _plan()
+    absent = SchemaProbe("incompatible", "ships mocap-session/2.0.0")
+    monkeypatch.setattr(
+        "src.motion_capture.rig.tools_bridge.probe_tools_schema", lambda: absent
+    )
+    with pytest.raises(StateError, match="incompatible: ships mocap-session/2.0.0"):
+        map_camera_records(_captured(plan), plan)

@@ -200,15 +200,20 @@ def _wrap_external_widget(tool_name: str, import_func: Any) -> QMainWindow:
 # --- Video Analyzer ---
 
 
-def _import_video_analyzer() -> QWidget:
-    from video_analyzer.launch_pyqt6 import VideoAnalyzerWidget  # type: ignore[import-untyped]
-
-    return VideoAnalyzerWidget()
-
-
 def get_video_analyzer_dockable_ui() -> QMainWindow:
-    """Return the Video Analyzer window for docking."""
-    return _wrap_external_widget("Video Analyzer", _import_video_analyzer)
+    """Return the Video Analyzer window for docking.
+
+    This used to try importing ``video_analyzer.launch_pyqt6`` from a
+    sibling repository that has never existed in this checkout (issue
+    #8854 confirmed those paths are dead) and silently fell back to a
+    static "GUI placeholder" label on ``ImportError`` (issue #8883). The
+    real implementation now lives in this repo at
+    ``src.tools.video_analyzer.gui``, wired to the tested
+    ``SwingAnalyzer`` math, so no external resolution is needed here.
+    """
+    from src.tools.video_analyzer.gui import get_dockable_ui
+
+    return get_dockable_ui()
 
 
 # --- Data Explorer ---
