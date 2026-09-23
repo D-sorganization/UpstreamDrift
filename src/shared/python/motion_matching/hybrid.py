@@ -44,7 +44,6 @@ from src.shared.python.motion_matching.inverse.proposal_shared import (
     coefficients_from_polish_mapping,
     parse_native_polish_outcome,
 )
-
 from .surrogate import FitResult, InvertOptions, SwingSurrogate, fit_swing_via_surrogate
 
 if TYPE_CHECKING:
@@ -52,14 +51,36 @@ if TYPE_CHECKING:
         MaskedObservation,
     )
 
+from src.shared.python.neural_motion.inference import (
+    INFERENCE_SCHEMA,
+    AttemptRecord,
+    DistributionBounds,
+    DomainCheckResult,
+    InferenceBudget,
+    InferenceStatus,
+    VerifiedInferenceOrchestrator,
+    VerifiedInferenceReport,
+    check_target_distribution,
+)
+
 __all__ = [
+    "DistributionBounds",
+    "DomainCheckResult",
     "HybridFitResult",
     "HybridOptions",
+    "INFERENCE_SCHEMA",
+    "InferenceBudget",
+    "InferenceStatus",
     "PolishCallable",
     "ProposalCheckpointContract",
     "ProposalRefinementResult",
+    "VerifiedInferenceOptions",
+    "VerifiedInferenceOrchestrator",
+    "VerifiedInferenceReport",
     "assert_proposal_checkpoint_compatible",
+    "check_target_distribution",
     "fit_swing_hybrid",
+    "fit_swing_verified_inference",
     "refine_control_proposal",
 ]
 
@@ -422,4 +443,37 @@ def refine_control_proposal(
         independent_replay=independent,
         polish_phase=polish_map,
         duration_s=_time.perf_counter() - t0,
+    )
+
+
+# ---------------------------------------------------------------------------
+# NM-08: verified inference with safe classical fallback
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class VerifiedInferenceOptions:
+    """Configuration options for verified inference orchestration (NM-08)."""
+
+    total_budget_s: float = 10.0
+    require_independent_replay: bool = True
+    is_preview: bool = False
+
+    def __post_init__(self) -> None:
+        if self.total_budget_s <= 0.0:
+            raise ValueError("total_budget_s must be positive")
+
+
+def fit_swing_verified_inference(
+    target: Any,
+    orchestrator: VerifiedInferenceOrchestrator,
+    options: VerifiedInferenceOptions | None = None,
+) -> VerifiedInferenceReport:
+    """Orchestrate verified inference with safe classical fallback (NM-08)."""
+    opts = options or VerifiedInferenceOptions()
+    return orchestrator.orchestrate(
+        target,
+        total_budget_s=opts.total_budget_s,
+        require_independent_replay=opts.require_independent_replay,
+        is_preview=opts.is_preview,
     )

@@ -254,8 +254,8 @@ tests/launchers/test_launcher_settings_store.py -q` (all pass).
 - **In flight:** CO-09 review-gap harden
   [#10717](https://github.com/D-sorganization/UpstreamDrift/pull/10717)
   (`fix/10613-co09-review-gaps`) rematched onto post-CO-10 main.
-- **In flight / Landed:** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622) (in flight by `local` session `76a4b2bb-f31a-4077-a500-f97c2a7c1541`).
-- **Remaining:** NM-08..NM-12 (#10623–#10627). Epics
+- **In flight / Landed:** NM-07 [#10622](https://github.com/D-sorganization/UpstreamDrift/issues/10622) (PR [#10768](https://github.com/D-sorganization/UpstreamDrift/pull/10768) merged into main); NM-08 [#10623](https://github.com/D-sorganization/UpstreamDrift/issues/10623) (PR [#10770](https://github.com/D-sorganization/UpstreamDrift/pull/10770)) in flight by `local` session `76a4b2bb-f31a-4077-a500-f97c2a7c1541`.
+- **Remaining:** NM-09..NM-12 (#10624–#10627). Epics
   [#10602](https://github.com/D-sorganization/UpstreamDrift/issues/10602) /
   [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) stay
   open until physical gaps (desk-native receipts) close.
@@ -872,10 +872,29 @@ in the capture-rig UI as a disabled-reason, not a hidden failure.
 - Entry DL-#10606 shipped. Delivered: priors, profiles, ambiguity, club-only acceptance.
 - Next action: superseded by CO-03 #10607.
 
-## Neural Forward Surrogates and Physics-Structured Alternatives NM-07 #10622 Handoff [IN PROGRESS]
+## Neural Native Verification and Safe Fallback NM-08 #10623 Handoff [IN PROGRESS]
 
 - Workspace: `C:/Users/diete/Repositories/UpstreamDrift`.
-- Branch: `feat/nm07-forward-surrogates-10622`; PR #10622 in flight. Governing issue #10622 (NM-07, epic #10603). Entry DL-#10622 in_progress.
+- Branch: `feat/nm08-native-verification-10623`; PR [#10770](https://github.com/D-sorganization/UpstreamDrift/pull/10770) in flight. Governing issue #10623 (NM-08, epic #10603). Entry DL-#10623 in_progress.
+- Delivered:
+  - `src/shared/python/neural_motion/inference/` (`neural-verified-inference/1.0.0`): `InferenceStatus` (`NEURAL_ACCEPTED`, `NEURAL_REFINED`, `CLASSICAL_FALLBACK`, `REJECTED`), `DomainCheckResult`, `InferenceBudget`, `AttemptRecord`, `VerifiedInferenceReport`.
+  - `DistributionBounds` & `check_target_distribution`: validates empirical training bounds (durations, peak velocities, contact regimes) and computes empirical confidence $[0.0, 1.0]$ as domain coverage, not golfer truth probability. Rejects non-finite/NaN targets fail-closed.
+  - `VerifiedInferenceOrchestrator`: single entry service coordinating input validation, checkpoint contract compatibility, fail-closed proposal execution, mandatory independent replay verification, and shared remaining compute budget classical fallback. Retains all attempts.
+  - `src/shared/python/motion_matching/hybrid.py`: re-exports inference API and provides `fit_swing_verified_inference` facade supporting both `ClubTarget` and complete `MultiSourceTarget`.
+  - Evidence: `docs/plans/neural_motion_matching/evidence/nm08_native_verification_receipt.json`.
+  - Documentation: `docs/plans/neural_motion_matching/native_verification.md`.
+- Validation:
+  ```powershell
+  python -m pytest tests/unit/neural_motion/test_verified_inference_nm08.py tests/unit/motion_matching/test_verified_inference_nm08.py tests/unit/motion_matching/test_hybrid.py -q -n 0 --no-cov --timeout=60
+  ```
+  All 23 tests pass; architecture budgets pass; ruff check & format clean; spec changelog duplicates check passes.
+- Limitations: Software contracts and synthetic fixtures only; no fabricated native acceleration or physical qualification claims; confidence metric records domain coverage, not human golfer truth probability.
+- Next action: Hand off to NM-09 (#10624): Multi-Engine Native Parity and Dynamic Feasibility Transfer under epic #10603.
+
+## Neural Forward Surrogates and Physics-Structured Alternatives NM-07 #10622 Handoff [MERGED]
+
+- Workspace: `C:/Users/diete/Repositories/UpstreamDrift`.
+- Branch: `feat/nm07-forward-surrogates-10622`; PR [#10768](https://github.com/D-sorganization/UpstreamDrift/pull/10768) merged into main. Governing issue #10622 (NM-07, epic #10603). Entry DL-#10622 merged.
 - Delivered:
   - `src/shared/python/neural_motion/surrogates/` (`neural-surrogate-comparison/1.0.0`): `SurrogateCandidateKind`, `SurrogateComparisonConfig`, `SurrogateAblationResult`, `SurrogateComparisonReport`.
   - `PhysicsStructuredSurrogate`: analytical rigid polynomial prior + bounded residual dynamics with trust-region and contact-boundary awareness.
