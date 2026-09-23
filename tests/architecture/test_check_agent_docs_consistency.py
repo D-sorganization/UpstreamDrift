@@ -247,3 +247,14 @@ def test_fleet_managed_sections_are_exempt_from_local_path_checks(
     assert errors == [
         "CLAUDE.md references a missing path: docs/required_local.md",
     ]
+
+
+def test_runner_dashboard_sibling_repo_qualified_paths_are_not_local(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Paths qualified by Runner_Dashboard are cross-repo and exempt."""
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    text = "Setup in Runner_Dashboard `docs/agents/connect.md`.\n"
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == []

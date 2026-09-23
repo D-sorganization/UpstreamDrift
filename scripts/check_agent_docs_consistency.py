@@ -37,14 +37,14 @@ _SIBLING_REPOS = (
     "Repository_Management",
     "Runner_Dashboard",
     "Tools",
-    "Tools_Private",
+    "Gasification_Model",
     "AffineDrift",
 )
 _SIBLING_REPO_QUALIFIER = re.compile(
     r"\b(?:" + "|".join(map(re.escape, _SIBLING_REPOS)) + r")(?:['’]s)?\s*$"
 )
 _FLEET_MANAGED_SECTION = re.compile(
-    r"<!-- BEGIN FLEET-MANAGED:[^\n]* -->.*?<!-- END FLEET-MANAGED:[^\n]* -->",
+    r"<!-- BEGIN FLEET-MANAGED:[^\n]*?-->.*?<!-- END FLEET-MANAGED:[^\n]*?-->",
     re.DOTALL,
 )
 
