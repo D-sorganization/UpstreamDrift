@@ -24,11 +24,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10774; parents Repository_Management#1687 and Runner_Dashboard#1248
 - **Branch:** `docs/deferred-project-projection`
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10776
-- **Paths:** `docs/project/`, `docs/development/HANDOFF.md`, `SPEC.md`
+- **Paths:** `docs/project/`, `docs/index.md`, `docs/README.md`, `docs/development/HANDOFF.md`, `SPEC.md`
 - **Started:** 2026-09-23
 - **Last verified:** 2026-09-23 (a0beddd8ec plus documentation; catalog valid, actual parsers agree on six parked plans/twenty decisions; original planning preserved; scoped title and commit hooks pass; new log entry valid, baseline log findings retained)
 - **Summary:** Projects all six published external-validation owner plans without inventing evidence, resource approval or completion. Software and research authorities are preserved.
-- **Next step:** Validate, publish and verify actual project projection; full fleet rollout remains open.
+- **Next step:** Publish the CI catalog correction (run 35904481521); local catalog, generated maps, size/manual/governance gates and 30 documentation tests pass. Merge through protected checks and verify actual project projection; full fleet rollout remains open.
 
 ### DL-#10751 · Fix CI Standard 'Deleted Python Test Files' Check False-Positives in Shallow Checkouts
 
