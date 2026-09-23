@@ -39,6 +39,13 @@ repos:
   # Guard for formatter guidance consistency (Makefile/docs/pre-commit)
   - repo: local
     hooks:
+      - id: deferred-validation
+        name: deferred validation catalog
+        entry: python shared_scripts/deferred_validation.py --repo-root .
+        language: python
+        pass_filenames: false
+        always_run: true
+
       - id: formatter-guidance-consistency
         name: "formatter guidance consistency (ruff)"
         entry: python scripts/check_formatter_guidance.py
