@@ -33,10 +33,25 @@ _MANAGED_NOTICE = (
 # immediately preceded by one of these names (possessive or not), e.g.
 # "Repository_Management `docs/x.md`" or "Repository_Management's `docs/x.md`",
 # lives in that repo and must not be checked against this checkout (#10743).
-_SIBLING_REPOS = ("Repository_Management",)
+_SIBLING_REPOS = (
+    "Repository_Management",
+    "Runner_Dashboard",
+    "Tools",
+    "Tools_Private",
+    "Gasification_Model",
+)
 _SIBLING_REPO_QUALIFIER = re.compile(
     r"\b(?:" + "|".join(map(re.escape, _SIBLING_REPOS)) + r")(?:['’]s)?\s*$"
 )
+_FLEET_MANAGED_BLOCK = re.compile(
+    r"<!-- BEGIN FLEET-MANAGED:[^\n]*?-->.*?<!-- END FLEET-MANAGED:[^\n]*?-->",
+    flags=re.DOTALL,
+)
+
+
+def _strip_fleet_managed_sections(text: str) -> str:
+    """Remove fleet-managed sections centrally synced from Repository_Management."""
+    return _FLEET_MANAGED_BLOCK.sub("", text)
 
 
 def _read(path: Path) -> str:
@@ -172,7 +187,8 @@ def _is_glob_pattern(path_text: str) -> bool:
 
 
 def _assert_path_references_exist(claude: str, errors: list[str]) -> None:
-    for path_text in _iter_repo_relative_paths(claude):
+    unmanaged_text = _strip_fleet_managed_sections(claude)
+    for path_text in _iter_repo_relative_paths(unmanaged_text):
         if _is_glob_pattern(path_text):
             continue
         if not (ROOT / path_text.rstrip("/")).exists():

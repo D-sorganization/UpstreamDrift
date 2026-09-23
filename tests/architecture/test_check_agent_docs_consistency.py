@@ -229,3 +229,29 @@ def test_bare_local_missing_path_still_fails_near_sibling_repo_mention(
         "CLAUDE.md references a missing path: docs/local_missing.md",
         "CLAUDE.md references a missing path: docs/also_missing.md",
     ]
+
+
+def test_fleet_managed_sections_are_exempt_from_local_path_checks(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Paths inside <!-- BEGIN FLEET-MANAGED --> blocks belong to hub docs (#10772)."""
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    text = (
+        "<!-- BEGIN FLEET-MANAGED: test-section -->\n"
+        "Read `docs/fleet-night-watch.md` and `docs/agents/connect.md`.\n"
+        "<!-- END FLEET-MANAGED: test-section -->\n"
+    )
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == []
+
+
+def test_runner_dashboard_sibling_repo_qualified_paths_are_not_local(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Paths qualified by Runner_Dashboard are cross-repo and exempt."""
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    text = "Setup in Runner_Dashboard `docs/agents/connect.md`.\n"
+    errors: list[str] = []
+    checker._assert_path_references_exist(text, errors)
+    assert errors == []
