@@ -123,7 +123,7 @@ class PlanarDoublePendulumGeneratorAdapter(GeneratorAdapterBase):
         q = np.zeros((n_steps, 2), dtype=np.float64)
         q[:, 0] = np.sin(2.0 * np.pi * t / horizon_s) * 0.8
         q[:, 1] = np.sin(4.0 * np.pi * t / horizon_s) * 1.2
-        v = np.gradient(q, time_step_s, axis=0)
+        v = np.asarray(np.gradient(q, time_step_s, axis=0), dtype=np.float64)
         u = rng.uniform(-10.0, 10.0, size=(n_steps, 2))
         return {"t": t, "q": q, "v": v, "u": u}
 
@@ -149,7 +149,7 @@ class PlanarTriplePendulumGeneratorAdapter(GeneratorAdapterBase):
         q[:, 0] = np.sin(np.pi * t / horizon_s) * 0.4
         q[:, 1] = np.sin(2.0 * np.pi * t / horizon_s) * 0.8
         q[:, 2] = np.sin(4.0 * np.pi * t / horizon_s) * 1.2
-        v = np.gradient(q, time_step_s, axis=0)
+        v = np.asarray(np.gradient(q, time_step_s, axis=0), dtype=np.float64)
         u = rng.uniform(-10.0, 10.0, size=(n_steps, 3))
         return {"t": t, "q": q, "v": v, "u": u}
 
@@ -175,7 +175,7 @@ class ConstrainedUpperBodyGeneratorAdapter(GeneratorAdapterBase):
         q = np.zeros((n_steps, 8), dtype=np.float64)
         for i in range(8):
             q[:, i] = np.sin((i + 1) * np.pi * t / horizon_s) * (0.3 / (i + 1))
-        v = np.gradient(q, time_step_s, axis=0)
+        v = np.asarray(np.gradient(q, time_step_s, axis=0), dtype=np.float64)
         u = rng.uniform(-15.0, 15.0, size=(n_steps, 5))
         return {"t": t, "q": q, "v": v, "u": u}
 
@@ -203,7 +203,7 @@ class KinematicReconstructionGeneratorAdapter(GeneratorAdapterBase):
         q = np.zeros((n_steps, self.dof), dtype=np.float64)
         for i in range(self.dof):
             q[:, i] = np.sin((i + 1) * np.pi * t / horizon_s) * 0.2
-        v = np.gradient(q, time_step_s, axis=0)
+        v = np.asarray(np.gradient(q, time_step_s, axis=0), dtype=np.float64)
         # Never fabricate torques; return kinematic positions and velocities only
         return {"t": t, "q": q, "v": v}
 
