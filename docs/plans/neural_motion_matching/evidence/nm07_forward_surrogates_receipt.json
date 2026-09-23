@@ -1,0 +1,31 @@
+{
+  "schema": "neural-surrogate-comparison-receipt/1.0.0",
+  "governing_issue": 10622,
+  "parent_epic": 10603,
+  "comparison_schema": "neural-surrogate-comparison/1.0.0",
+  "source_hashes": {
+    "src/shared/python/motion_matching/surrogate/validate.py": "c9432df71c155ecde54f60d27262a8cad630814f9aeb1e675ea09656a1bb8c8e",
+    "src/shared/python/motion_matching/surrogate/nm07_comparison.py": "d9370e5e7f5200278923a585df23cbedcf7b0bf60b43086b5951269a05cb110c",
+    "src/shared/python/neural_motion/surrogates/__init__.py": "f00c8686fb6f3bde2a4ce7f1ce57ea8bff5243576bc5caa24d4fa90609d72c42",
+    "src/shared/python/neural_motion/surrogates/types.py": "b2bc8b4400c4eaa1af09668c9ba4663b9a9b02c9d0078a3cacae14f78c182f03",
+    "src/shared/python/neural_motion/surrogates/physics_structured.py": "3be6b7aba1a890318fdcf45b1353bd3ba1b6ee4bbc5d3669d97f9b81be8e0140",
+    "src/shared/python/neural_motion/surrogates/comparison.py": "7da3691b4e3cb740be0afc15999322a7e2bb70a5f5b68871da0fbe365b95586a"
+  },
+  "comparison_findings": {
+    "forward_surrogate_inversion": "adversarial exploitation on native mechanics; unconstrained gradient search finds non-physical states; trust-region & gradient fidelity required",
+    "hybrid_polish": "retains native feasibility while leveraging surrogate initialization",
+    "physics_structured": "analytical rigid prior + bounded residual ensures physical consistency and contact-aware flagging",
+    "diffusion_fallback": "rejected for interactive control; multi-step sampling violates latency budget without multimodal ambiguity justification"
+  },
+  "validation": {
+    "command": "python -m pytest tests/unit/motion_matching/test_forward_surrogates_nm07.py tests/unit/neural_motion/test_forward_surrogates_nm07.py tests/unit/neural_motion/test_surrogate_nm07_discovery.py tests/unit/motion_matching/test_surrogate_validate.py tests/unit/motion_matching/test_hybrid.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "recorded_at": "2026-09-23"
+  },
+  "limitations": [
+    "Synthetic fixtures and software contracts only",
+    "No fabricated training success or physical acceleration claims",
+    "Contact boundaries require hybrid or native collision resolution; smooth rigid approximations fail closed on impacts"
+  ],
+  "next_action_issue": 10623
+}
