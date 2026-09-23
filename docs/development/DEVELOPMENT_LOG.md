@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10750
+- **Branch:** fix/10750-tests-in-place-json-mutation
+- **PR:** #10761
+- **Paths:** src/shared/python/motion_matching/club_only/fast_matching.py; tests/unit/motion_matching/test_club_fast_matching.py; src/engines/physics_engines/mujoco/python/humanoid_launcher.py; tests/unit/test_gui_coverage.py
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 (`2a9e7a4d3`)
+- **Summary:** Thread optional evidence_dir through save_fast_match_evidence and point tests at tmp_path; support optional config_path and avoid unconditional save_config on HumanoidLauncher instantiation so tests never rewrite committed JSON artifacts.
+- **Next step:** Open PR, verify CI, auto-merge.
+
 ### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
 
 - **State:** in_review
