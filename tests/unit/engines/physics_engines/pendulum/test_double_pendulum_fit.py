@@ -204,14 +204,20 @@ def test_synthetic_torque_rollout_recovery() -> None:
     assert result.final_rmse_m < 0.20
 
 
-def test_driver_and_iron_qualification_receipts() -> None:
-    """Driver and iron targets produce complete baseline packages with independent replay."""
+def test_driver_and_iron_qualification_receipts(tmp_path) -> None:
+    """Driver and iron targets produce complete baseline packages with independent replay.
+
+    Receipts are written to ``tmp_path``: rewriting the committed evidence in
+    place changed its sha256 mid-run and broke ``test_ledger_freshness``.
+    """
     from pathlib import Path
     from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
         save_qualification_receipts,
     )
 
     repo_root = Path(__file__).resolve().parents[5]
-    summary = save_qualification_receipts(repo_root)
-    assert Path(summary["driver_receipt"]).is_file()
-    assert Path(summary["iron_receipt"]).is_file()
+    summary = save_qualification_receipts(repo_root, evidence_dir=tmp_path)
+    for key in ("driver_receipt", "iron_receipt", "driver_package", "iron_package"):
+        written = Path(summary[key])
+        assert written.is_file()
+        assert written.parent == tmp_path

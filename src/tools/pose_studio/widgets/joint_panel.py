@@ -92,10 +92,7 @@ class JointPanel(QtWidgets.QScrollArea):
         slider.setMinimum(int(_DEFAULT_DEG_RANGE[0] * 10))
         slider.setMaximum(int(_DEFAULT_DEG_RANGE[1] * 10))
         slider.setValue(0)
-        slider.setToolTip(
-            f"Drag to set {joint} angle in the canonical degrees convention. "
-            f"Range {_DEFAULT_DEG_RANGE[0]:.0f} to {_DEFAULT_DEG_RANGE[1]:.0f} deg."
-        )
+        slider.setToolTip(self._slider_tooltip(joint))
         slider.valueChanged.connect(
             lambda value, name=joint: self._on_slider_changed(name, value)
         )
@@ -107,9 +104,7 @@ class JointPanel(QtWidgets.QScrollArea):
         spin.setSingleStep(0.5)
         spin.setSuffix(" deg")
         spin.setMinimumWidth(96)
-        spin.setToolTip(
-            f"Type a precise value for {joint} (degrees in the canonical convention)."
-        )
+        spin.setToolTip(self._spin_tooltip(joint))
         spin.valueChanged.connect(
             lambda value, name=joint: self._on_spinbox_changed(name, value)
         )
@@ -167,6 +162,8 @@ class JointPanel(QtWidgets.QScrollArea):
                 spin.setSingleStep(0.5)
                 spin.setValue(current_deg)
             del blocker
+            spin.setToolTip(self._spin_tooltip(name))
+            slider.setToolTip(self._slider_tooltip(name))
 
     def set_limits(self, limits: Mapping[str, tuple[float, float]]) -> None:
         """Re-range every joint's slider + spinbox to *limits* (degrees).
@@ -235,6 +232,24 @@ class JointPanel(QtWidgets.QScrollArea):
         return out
 
     # ---- internals -----------------------------------------------------
+
+    def _display_range(self) -> tuple[float, float]:
+        """Return the current display-unit range, matching ``_show_radians``."""
+        if self._show_radians:
+            return (
+                float(np.radians(_DEFAULT_DEG_RANGE[0])),
+                float(np.radians(_DEFAULT_DEG_RANGE[1])),
+            )
+        return _DEFAULT_DEG_RANGE
+
+    def _slider_tooltip(self, joint: str) -> str:
+        unit = "rad" if self._show_radians else "deg"
+        lo, hi = self._display_range()
+        return f"Drag to set {joint} angle. Range {lo:.2f} to {hi:.2f} {unit}."
+
+    def _spin_tooltip(self, joint: str) -> str:
+        unit = "rad" if self._show_radians else "deg"
+        return f"Type a precise value for {joint} ({unit})."
 
     def _to_display_value(self, deg: float) -> float:
         return float(np.radians(deg)) if self._show_radians else deg
