@@ -1,0 +1,58 @@
+{
+  "schema": "neural-turnover-receipt/1.0.0",
+  "governing_issue": 10627,
+  "parent_epic": 10603,
+  "card_catalog": {
+    "total_models": 20,
+    "promoted_models": [
+      "constrained_upper_body_golfer",
+      "driven_double_pendulum",
+      "driven_triple_pendulum"
+    ],
+    "research_only_models": [
+      "reconstruction_double_pendulum",
+      "reconstruction_golfer",
+      "reconstruction_triple_pendulum"
+    ],
+    "blocked_prerequisite_models": [
+      "full_body_drake",
+      "full_body_mujoco",
+      "full_body_myosuite",
+      "full_body_opensim",
+      "full_body_pinocchio",
+      "full_body_simscape"
+    ],
+    "reference_only_models": [
+      "myosuite_body",
+      "opensim_golfer",
+      "reference_drake_urdf",
+      "reference_human_subject",
+      "reference_mujoco_humanoid",
+      "reference_pinocchio_urdf",
+      "reference_pinocchio_urdf_ik",
+      "reference_simple_humanoid"
+    ]
+  },
+  "reproduction_commands": {
+    "phases": ["generate", "train", "evaluate", "infer", "replay"]
+  },
+  "end_to_end_verification": {
+    "steps": [
+      "DATASET_REGISTRATION",
+      "TRAINING_RUN",
+      "CHECKPOINT_SELECTION",
+      "OBSERVED_MOTION_MATCHING",
+      "PHYSICAL_REPLAY"
+    ],
+    "test_suite": "tests/unit/neural_motion/test_turnover_nm12.py",
+    "test_count": 16,
+    "status": "passed"
+  },
+  "epic_status": {
+    "epic_id": 10603,
+    "title": "Neural Motion Matching",
+    "all_issues_completed": true,
+    "closing_issue": 10627,
+    "recorded_at": "2026-09-23"
+  }
+}

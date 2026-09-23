@@ -61,10 +61,11 @@ NM-09 ([#10624](https://github.com/D-sorganization/UpstreamDrift/issues/10624) /
 [#10777](https://github.com/D-sorganization/UpstreamDrift/pull/10777)),
 NM-10 ([#10625](https://github.com/D-sorganization/UpstreamDrift/issues/10625) /
 [#10778](https://github.com/D-sorganization/UpstreamDrift/pull/10778)), and
-NM-11 ([#10626](https://github.com/D-sorganization/UpstreamDrift/issues/10626)) are implemented.
-The immediate task is
-**[#10627](https://github.com/D-sorganization/UpstreamDrift/issues/10627) (NM-12)**
-(publish model cards, reproduction commands and final turnover).
+NM-11 ([#10626](https://github.com/D-sorganization/UpstreamDrift/issues/10626) /
+[#10780](https://github.com/D-sorganization/UpstreamDrift/pull/10780)), and
+NM-12 ([#10627](https://github.com/D-sorganization/UpstreamDrift/issues/10627)) are implemented.
+With NM-12 (model cards, reproduction commands and final turnover), all 13 work packages
+of Epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603) are complete.
 
 External prerequisites:
 [#10585](https://github.com/D-sorganization/UpstreamDrift/issues/10585) model
