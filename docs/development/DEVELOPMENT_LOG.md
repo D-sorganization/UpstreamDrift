@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10743 · Docs-Consistency Cross-Repo Path Exemption
+
+- **State:** in_review
+- **Owner:** claude (session `fleet-remediation-k`)
+- **Issue:** #10743
+- **Branch:** `fix/10743-docs-consistency-cross-repo`
+- **PR:** #10744
+- **Paths:** `scripts/check_agent_docs_consistency.py`, `tests/architecture/test_check_agent_docs_consistency.py`
+- **Started:** 2026-09-22
+- **Last verified:** 2026-09-22 (checker passes on main CLAUDE.md; 33 focused tests pass)
+- **Summary:** Exempt sibling-repo-qualified backticked paths (possessive or not) from the local-existence check so the fleet-managed deferred-validation block no longer fails `repo-structure-gates`; bare local paths stay strict.
+
 ### DL-#8907 · One User Config Root and One QSettings Namespace for the Launcher
 
 - **State:** in_review
@@ -29,6 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-22 — migration, alias and three-window geometry round-trip tests pass offscreen; launcher/ui suites show no new failures versus origin/main; Ruff, format, file-size, architecture and error-handling gates pass.
 - **Summary:** Launcher writers (preferences, recent models, library, onboarding, process/launcher logs, layout reset/diagnostics) resolve through `user_config_path()` under the platformdirs root with a one-time copy from the two legacy dot-dirs; QSettings consolidated on `(UpstreamDrift, Launcher)` with legacy aliasing; three secondary windows persist geometry.
 - **Next step:** Relocate the Tools-owned `~/.upstreamdrift/mcp_servers.json` contract in Tools, then point `McpServersConfig.default_path()` at the shared constant.
+
 ### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
 
 - **State:** in_review
