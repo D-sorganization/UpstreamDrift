@@ -111,23 +111,17 @@ def _bootstrap_import_paths(paths_to_add: list[str]) -> None:
 
 
 _requested_tools_path = os.environ.get("TOOLS_REPO_PATH")
-_default_vendor_tools = _REPO_ROOT / "vendor" / "ud-tools"
 _requested_tools_root = (
     Path(_requested_tools_path).expanduser().resolve()
     if _requested_tools_path
-    else (
-        _default_vendor_tools.resolve()
-        if (_default_vendor_tools / "src").is_dir()
-        else None
-    )
+    else None
 )
 _bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _requested_tools_root))
 from src.launchers.tools_repo_path import (  # noqa: E402
-    resolve_tools_repo as _resolve_tools_repo,
+    resolve_explicit_tools_root as _resolve_explicit_tools_root,
 )
 
-_tools_resolution = _resolve_tools_repo(_REPO_ROOT, _requested_tools_path)
-_TOOLS_ROOT = _tools_resolution.path if _tools_resolution is not None else None
+_TOOLS_ROOT = _resolve_explicit_tools_root(_requested_tools_path)
 _bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _TOOLS_ROOT))
 
 
