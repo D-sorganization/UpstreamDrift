@@ -140,13 +140,13 @@ class OverlayDataset:
             diff = (
                 self.model_points[frame_index] - self.target_points[frame_index]
             ) * 1000.0
-            dist = np.linalg.norm(diff, axis=-1)
+            dist = np.sqrt(np.einsum("...i,...i->...", diff, diff))
             valid = self.target_valid[frame_index]
             dist[~valid] = np.nan
             return dist
 
         diff = (self.model_points - self.target_points) * 1000.0
-        dist = np.linalg.norm(diff, axis=-1)
+        dist = np.sqrt(np.einsum("...i,...i->...", diff, diff))
         dist[~self.target_valid] = np.nan
         return dist
 
