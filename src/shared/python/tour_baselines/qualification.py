@@ -28,6 +28,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.tour_baselines.baseline_package import (
+    BaselineIdentity,
     BaselinePackage,
     DynamicFeasibilityStatus,
     KinematicAccuracyStatus,
@@ -310,6 +311,61 @@ def compute_package_digest(package: BaselinePackage) -> str:
     return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
 
 
+def _compute_missing_identity_hashes(
+    ident: BaselineIdentity,
+    package: BaselinePackage,
+    q_arr: np.ndarray,
+    v_arr: np.ndarray,
+    tau_arr: np.ndarray,
+) -> BaselineIdentity:
+    """Compute identity hashes if missing from legacy baseline package."""
+    q0_hash = ident.q0_hash or (
+        hashlib.sha256(q_arr[0].tobytes()).hexdigest() if len(q_arr) > 0 else ""
+    )
+    v0_hash = ident.v0_hash or (
+        hashlib.sha256(v_arr[0].tobytes()).hexdigest() if len(v_arr) > 0 else ""
+    )
+    controls_hash = ident.controls_hash or (
+        hashlib.sha256(tau_arr.tobytes()).hexdigest() if len(tau_arr) > 0 else ""
+    )
+
+    fixed_geom_hash = ident.fixed_geometry_hash
+    if not fixed_geom_hash:
+        l1 = float(package.reports.get("l1_arm_m", 0.65))
+        l2 = float(package.reports.get("l2_club_m", 1.05))
+        fixed_geom_hash = hashlib.sha256(
+            np.asarray([l1, l2], dtype=np.float64).tobytes()
+        ).hexdigest()
+
+    fixed_inertia_hash = ident.fixed_inertia_hash
+    if not fixed_inertia_hash:
+        if ident.topology == ModelTopology.PLANAR_DRIVEN_PENDULUM:
+            l1 = float(package.reports.get("l1_arm_m", 0.65))
+            l2 = float(package.reports.get("l2_club_m", 1.05))
+            from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
+                create_calibrated_double_pendulum_dynamics,
+            )
+            from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
+                compute_pendulum_inertia_hash,
+            )
+
+            dyn = create_calibrated_double_pendulum_dynamics(l1, l2)
+            fixed_inertia_hash = compute_pendulum_inertia_hash(dyn)
+        else:
+            fixed_inertia_hash = hashlib.sha256(
+                f"{ident.model_id}_fixed_inertia".encode()
+            ).hexdigest()
+
+    return replace(
+        ident,
+        q0_hash=q0_hash,
+        v0_hash=v0_hash,
+        controls_hash=controls_hash,
+        fixed_geometry_hash=fixed_geom_hash,
+        fixed_inertia_hash=fixed_inertia_hash,
+    )
+
+
 def migrate_legacy_package(package: BaselinePackage) -> BaselinePackage:
     """Migrate legacy baseline packages missing time/tau or cryptographic hashes (TB-10 bot review #10794).
 
@@ -355,53 +411,7 @@ def migrate_legacy_package(package: BaselinePackage) -> BaselinePackage:
     tau_arr = trajs["tau"]
 
     # 3. Compute identity hashes if missing
-    q0_hash = ident.q0_hash
-    if not q0_hash and len(q_arr) > 0:
-        q0_hash = hashlib.sha256(q_arr[0].tobytes()).hexdigest()
-
-    v0_hash = ident.v0_hash
-    if not v0_hash and len(v_arr) > 0:
-        v0_hash = hashlib.sha256(v_arr[0].tobytes()).hexdigest()
-
-    controls_hash = ident.controls_hash
-    if not controls_hash and len(tau_arr) > 0:
-        controls_hash = hashlib.sha256(tau_arr.tobytes()).hexdigest()
-
-    fixed_geom_hash = ident.fixed_geometry_hash
-    if not fixed_geom_hash:
-        l1 = float(package.reports.get("l1_arm_m", 0.65))
-        l2 = float(package.reports.get("l2_club_m", 1.05))
-        fixed_geom_hash = hashlib.sha256(
-            np.asarray([l1, l2], dtype=np.float64).tobytes()
-        ).hexdigest()
-
-    fixed_inertia_hash = ident.fixed_inertia_hash
-    if not fixed_inertia_hash:
-        if ident.topology == ModelTopology.PLANAR_DRIVEN_PENDULUM:
-            l1 = float(package.reports.get("l1_arm_m", 0.65))
-            l2 = float(package.reports.get("l2_club_m", 1.05))
-            from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
-                create_calibrated_double_pendulum_dynamics,
-            )
-            from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
-                compute_pendulum_inertia_hash,
-            )
-
-            dyn = create_calibrated_double_pendulum_dynamics(l1, l2)
-            fixed_inertia_hash = compute_pendulum_inertia_hash(dyn)
-        else:
-            fixed_inertia_hash = hashlib.sha256(
-                f"{ident.model_id}_fixed_inertia".encode()
-            ).hexdigest()
-
-    new_ident = replace(
-        ident,
-        q0_hash=q0_hash,
-        v0_hash=v0_hash,
-        controls_hash=controls_hash,
-        fixed_geometry_hash=fixed_geom_hash,
-        fixed_inertia_hash=fixed_inertia_hash,
-    )
+    new_ident = _compute_missing_identity_hashes(ident, package, q_arr, v_arr, tau_arr)
 
     # Explicit migration compatibility operation leaves package unverified until regenerated (#10799)
     status = replace(

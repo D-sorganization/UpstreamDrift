@@ -289,6 +289,9 @@ def compute_pendulum_inertia_hash(
     return hashlib.sha256(inertia_array.tobytes()).hexdigest()
 
 
+HORIZON_PLANAR = "G1"
+
+
 def _assemble_baseline_package(
     target: ClubTarget,
     capture_kind: str,
@@ -297,7 +300,6 @@ def _assemble_baseline_package(
     dists: tuple[np.ndarray, np.ndarray, list[float]],
     lengths: tuple[float, float],
     maxiter: int,
-    horizon: str = "G1",
     dynamics: DoublePendulumDynamics | None = None,
 ) -> BaselinePackage:
     """Construct complete BaselinePackage with metadata, metrics, and statuses."""
@@ -342,7 +344,7 @@ def _assemble_baseline_package(
         fit_mode=FitMode.TORQUE_DRIVEN,
         capture=capture_kind,
         capture_sha256=target.source.sha256,
-        horizon=horizon,
+        horizon=HORIZON_PLANAR,
         fixed_geometry_hash=fixed_geometry_hash,
         fixed_inertia_hash=fixed_inertia_hash,
         q0_hash=q0_hash,
