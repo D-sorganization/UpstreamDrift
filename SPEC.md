@@ -6966,6 +6966,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-24 | n/a | Optimized metric norms by replacing `np.linalg.norm` with `np.einsum` or `np.vdot` to speed up distance and difference calculations. (spec-exempt: micro-optimization) |
 | 2026-09-17 | n/a | Optimized small 1D array norm checks by replacing `np.linalg.norm(vel)` with `math.sqrt(vel.dot(vel))` in `src/shared/python/pendulum_simulator/cross_engine_perturbation.py` for ~2.5x speedup. (spec-exempt: micro-optimization) |
 | 2026-09-24 | #10860 | Derive pendulum inertia digest from cached integration parameters and refresh dynamics cache on length calibration (#10849, #10850, #10851). |
 | 2026-09-24 | #10838 | Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude for ~2x speedup and integer overflow safety (#10845, #10848). |
