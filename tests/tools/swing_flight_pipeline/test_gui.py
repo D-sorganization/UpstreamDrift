@@ -31,6 +31,8 @@ from src.tools.swing_flight_pipeline.gui import (  # noqa: E402
     get_dockable_ui,
 )
 
+pytestmark = pytest.mark.unit
+
 _APP: QApplication | None = None
 
 
