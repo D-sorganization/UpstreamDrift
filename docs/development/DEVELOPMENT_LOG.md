@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10842 · SPEC Change Log and Root Handoff Governance
+### DL-#10849 · Pendulum Inertia Hash Integration Parameter Digest & Dynamics Cache Refresh
 
 - **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #10849, #10850, #10851
+- **PR:** #10860
+- **Branch:** `fix/10849-10850-inertia-hash-and-spec-keys`
+- **Paths:** `src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py`, `src/engines/physics_engines/pendulum/python/motion_matching/adapters.py`, `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`, `tests/unit/tour_baselines/test_qualification.py`, `SPEC.md`, `AGENT_HANDOFF.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified calibrated length initialization before caching, refresh_cache() synchronization, and derivation of inertia digest from cached integration parameters
+- **Summary:** Updated DoublePendulumDynamics and qualification routines to derive the inertia digest directly from the cached properties consumed by simulation integration, initialize calibrated segment lengths before parameter caching, and key SPEC.md change log rows accurately (#10849, #10850, #10851).
+- **Next step:** Open PR with auto-merge enabled, monitor CI, and close issues #10849, #10850, #10851 upon merge.
+
+### DL-#10842 · SPEC Change Log and Root Handoff Governance
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #10842, #10843
 - **PR:** #10853
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-24
 - **Last verified:** 2026-09-24 — verified spec changelog rows, title-case consistency, and root handoff length <= 150 lines
 - **Summary:** Registered missing Tour Baselines exact capture (#10837) and fail-closed qualification (#10841) rows in SPEC.md, and synchronized root AGENT_HANDOFF.md with active state per repository guidelines.
-- **Next step:** Land PR with clean CI and auto-merge, close issues #10842 and #10843.
+- **Next step:** Shipped to main in PR #10853.
 
 ### DL-#10838 · Optimize GripContactModel Slip Margin Performance
 
