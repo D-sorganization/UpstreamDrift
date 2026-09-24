@@ -41,7 +41,7 @@ def reset_registry():
     clear_golf_model_registry()
     init_default_registry()
     yield
-    clear_golf_model_registry()
+    init_default_registry()
 
 
 def test_identically_named_models_with_different_topologies_stay_distinct():

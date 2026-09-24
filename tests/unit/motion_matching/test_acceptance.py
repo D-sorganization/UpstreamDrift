@@ -456,3 +456,14 @@ def test_fixture_synthetic_engine_false_qualification_fails_closed() -> None:
     gate_map = {g.name: g for g in verdict.gates}
     assert "synthetic_engine" in gate_map
     assert gate_map["synthetic_engine"].status == GateStatus.FAILED
+
+
+def test_qualify_tour_baseline_integration() -> None:
+    """TB-09 #10594: qualify_tour_baseline executes independent checks."""
+    from src.shared.python.motion_matching.acceptance import qualify_tour_baseline
+    from tests.unit.tour_baselines.test_qualification import _make_test_package
+
+    package = _make_test_package(horizon="G1")
+    verdict = qualify_tour_baseline(package)
+    assert verdict is not None
+    assert verdict.passed is True

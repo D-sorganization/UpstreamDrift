@@ -32,15 +32,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10593 · Tour Baselines Bounded Fit Campaigns (TB-08)
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10593 (TB-08, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10775
 - **Branch:** `feat/tb08-bounded-fit-campaigns-10593`
 - **Paths:** `src/shared/python/tour_baselines/campaign.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/motion_matching/tour_baselines.py`; `tests/unit/tour_baselines/test_fit_campaign.py`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 — 7 passed in `test_fit_campaign.py`, 64 passed in full `tests/unit/tour_baselines/` suite, 20 passed in repo hygiene child-copy contract. Ruff check and format clean.
+- **Last verified:** 2026-09-23 — 7 passed in `test_fit_campaign.py`, 64 passed in full `tests/unit/tour_baselines/` suite, 20 passed in repo hygiene child-copy contract. Ruff check and format clean. Merged via PR #10775.
 - **Summary:** Implemented `CampaignJobSpec`, `CampaignCandidate`, `CandidateRanking`, `rank_candidates`, `CampaignEvaluationRecord`, `CampaignManifest`, `CampaignResult`, `PilotBudget`, `GeneralizationDisclaimer`, and `FitCampaignService` enforcing deterministic Pareto ranking (feasible candidate beats infeasible lower-error candidate), immutable checkpointing, hash-checked resume (`IncompatibleResumeError`), diagnostic preservation on cancel/timeout without promotion, exact full-clock score verification, and holdout disclaimers.
-- **Next step:** Push branch, open PR with squash auto-merge, and achieve 100% green CI/CD.
+- **Next step:** Landed on main. Proceed to TB-09 (#10594).
+
+### DL-#10594 · Tour Baselines Independent Qualification (TB-09)
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10594 (TB-09, parent #10584, program #10363)
+- **Branch:** `feat/tb09-independent-qualification-10594`
+- **Paths:** `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/tour_baselines/coverage.py`; `tests/unit/tour_baselines/test_qualification.py`; `tests/unit/tour_baselines/test_model_identities.py`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 — 18 passed in `test_qualification.py`, 82 passed in full `tests/unit/tour_baselines/` suite, 20 passed in repo hygiene child-copy contract. Ruff check and format clean. check_lod clean. Mypy clean.
+- **Summary:** Implemented `IntegrityViolation`, `IntegrityReport`, `RolloutReconstructionResult`, `ConstraintEvaluationResult`, `RecomputedMetrics`, `EndpointCheckResult`, `ModelAdequacyDecomposition`, `compare_cross_complexity`, `RefinementSensitivityRecord`, `ForceIdentifiabilityDisclaimer`, `RosterVerdict`, `evaluate_full_roster_qualification`, and `ExpertSignoff` enforcing cryptographic hash integrity, forward dynamic rollout reconstruction from single (q0, v0), physical and geometric constraint evaluation, independent metric recomputation, 3-way model adequacy decomposition, cross-complexity comparison over common observation sets, refinement sensitivity under dt, force identifiability disclaimer, full 40-cell coverage matrix qualification verdicts with strict G3 reduced model exclusion, and auditable JSON export.
+- **Next step:** Open PR, run CI checks to 100% green, and land on main via squash auto-merge.
 
 ### DL-#10774 · Deferred Validation Project Projection
 
