@@ -180,6 +180,15 @@ def test_presenter_lists_models_for_both_captures(baseline_store: Path) -> None:
     assert len(iron_models) >= 10
     assert all(m.capture in ("iron", "iron7") for m in iron_models)
 
+    # Exact-capture package matching on roster (#10829)
+    driver_triple = next(
+        m for m in driver_models if m.model_id == "driven_triple_pendulum"
+    )
+    assert driver_triple.has_package is True
+
+    iron_triple = next(m for m in iron_models if m.model_id == "driven_triple_pendulum")
+    assert iron_triple.has_package is False
+
 
 def test_presenter_badge_presentation_without_color_alone(baseline_store: Path) -> None:
     """Requirement: readable statuses without color alone; accessible text and symbols."""

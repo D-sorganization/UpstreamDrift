@@ -671,8 +671,106 @@ def test_qualify_legacy_package_migration() -> None:
     assert migrated.identity.fixed_geometry_hash != ""
     assert migrated.identity.fixed_inertia_hash != ""
 
-    # qualify should auto-migrate legacy package
+    # qualify must fail-closed on unmigrated legacy packages missing evidence/hashes (#10799)
     qualifier = IndependentBaselineQualifier()
-    verdict = qualifier.qualify(package)
-    assert verdict is not None
-    assert verdict.passed is True
+    with pytest.raises(IntegrityViolation) as exc_info:
+        qualifier.qualify(package)
+    assert "Package integrity failure" in str(exc_info.value)
+
+    # migrate_legacy_package is an explicit operation that leaves qualification unverified until regenerated
+    assert (
+        migrated.statuses.scientific_qualification
+        == ScientificQualificationStatus.UNVERIFIED
+    )
+
+
+def test_pendulum_fixed_inertia_hash_changes_with_inertia_parameters() -> None:
+    """TB-10 bot review #10800: fixed_inertia_hash digests actual dynamics parameters."""
+    from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
+        create_calibrated_double_pendulum_dynamics,
+    )
+    from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
+        _assemble_baseline_package,
+    )
+    from src.shared.python.motion_matching.club_target import (
+        ClubTarget,
+        SourceProvenance,
+    )
+    from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+
+    n_samples = 10
+    time_arr = np.linspace(0.0, 0.1, n_samples)
+    club_quat = np.zeros((n_samples, 4))
+    club_quat[:, 0] = 1.0
+
+    target = ClubTarget(
+        time=time_arr,
+        butt=np.zeros((n_samples, 3)),
+        clubhead=np.ones((n_samples, 3)) * 0.5,
+        club_quat=club_quat,
+        impact_idx=5,
+        source=SourceProvenance(
+            filename="test.c3d",
+            format="c3d",
+            subject_id="tour_avg",
+            trial_id="driver_01",
+            sha256="0" * 64,
+        ),
+    )
+    fit_result = CanonicalFitResult(
+        theta_optimal=np.zeros(14),
+        final_cost=0.001,
+        final_rmse_m=0.01,
+        solver_status="success",
+        iterations=10,
+        n_evaluations=20,
+        wall_clock_s=1.0,
+        message="converged",
+        history=(0.01, 0.001),
+        method="trf",
+        git_commit="abcdef0",
+        engine_version="1.0.0",
+        target_hash="0" * 64,
+        timestamp_utc="2026-09-24T00:00:00Z",
+    )
+    trajs = (
+        np.zeros((n_samples, 2)),
+        np.zeros((n_samples, 2)),
+        np.zeros((n_samples, 2)),
+        np.zeros((n_samples, 2)),
+    )
+    dists = (
+        np.zeros(n_samples),
+        np.zeros(n_samples),
+        [0.001] * n_samples,
+    )
+
+    dyn1 = create_calibrated_double_pendulum_dynamics(0.65, 1.05)
+    pkg1 = _assemble_baseline_package(
+        target=target,
+        capture_kind="driver",
+        result=fit_result,
+        trajectories=trajs,
+        dists=dists,
+        lengths=(0.65, 1.05),
+        maxiter=10,
+        dynamics=dyn1,
+    )
+
+    dyn2 = create_calibrated_double_pendulum_dynamics(0.65, 1.05)
+    # Modify inertia parameter: clubhead mass
+    dyn2.parameters.lower_segment.clubhead_mass_kg += 0.05
+    pkg2 = _assemble_baseline_package(
+        target=target,
+        capture_kind="driver",
+        result=fit_result,
+        trajectories=trajs,
+        dists=dists,
+        lengths=(0.65, 1.05),
+        maxiter=10,
+        dynamics=dyn2,
+    )
+
+    assert pkg1.identity.fixed_inertia_hash != ""
+    assert pkg2.identity.fixed_inertia_hash != ""
+    assert pkg1.identity.fixed_inertia_hash != pkg2.identity.fixed_inertia_hash

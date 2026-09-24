@@ -1,67 +1,54 @@
-# Implementation Handoff — Remove Dead Skeleton Extractors Providers
+# Implementation Handoff — Tour Baselines Roster Exact Matching and Fail-Closed Qualification
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `/home/dieterolson/staff-worktrees/UpstreamDrift-run-b571f75d9fb0`
-- Branch: `staff/issue-remediator-task-2852a7`
-- Baseline commit: `447cfada0`
+- Working directory: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-remediation-batch-2`
+- Branch: `fix/tour-baselines-remediation-batch-2`
+- Baseline commit: `2fb7b2f24`
 - Implementation commit: `SELF`
-- Pull request: #10808 (merged)
-- Governing issue/epic: #8866
-- Session: `issue-remediator-run-b571f75d9fb0`
+- Pull request: #10828 (merged) and active remediation PR
+- Governing issue/epic: #10596
+- Session: `antigravity-20260924-remediation-tour-baselines`
 
 ## Objective and Status
 
-- Objective: Delete the six per-engine skeleton extractor modules under `src/tools/starting_pose_matcher/skeleton_extractors/` (~1,614 lines) that have no callers in any shipped `src/` code, along with their eight dedicated test modules. Prune stale baseline rows referencing the deleted paths.
-- Status: Complete (merged to main in PR #10808)
-- Completed: Removed 6 uncalled modules and 8 test suites, pruned stale baseline entries in mypy, suite markers, and LoD baselines.
-- Remaining: None (shipped)
+- Objective: Require exact capture match across TourBaselinesPresenter (model detail, comparison deltas, baseline opening, and roster package flags), hash actual pendulum dynamics mass/inertia parameters in fixed_inertia_hash, and maintain fail-closed independent baseline qualification for unsigned legacy evidence.
+- Status: Complete
+- Completed: Enforced exact-capture matching in `_has_discovered_package()`, eliminating cross-capture roster flags (#10829); hashed actual pendulum dynamics parameters in `fixed_inertia_hash` (#10800); set `auto_migrate=False` and marked legacy migrated packages unverified (#10799); refreshed DL-#10596 (#10831); updated handoff (#10830).
+- Remaining: None (ready for PR and merge)
 
 ## Files and Decisions
 
 - Files changed:
-  - Deleted source (6 files, ~1,614 lines):
-    - `src/tools/starting_pose_matcher/skeleton_extractors/drake.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/openpose.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/opensim.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py`
-  - Deleted tests (8 files):
-    - `tests/unit/tools/starting_pose_matcher/test_drake_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_mujoco_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_opensim_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_pinocchio_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_observed_input_providers.py`
-    - `tests/unit/tools/starting_pose_matcher/test_provider_error_paths.py`
-    - `tests/tools/starting_pose_matcher/test_observed_extractors.py`
-    - `tests/tools/starting_pose_matcher/test_physics_extractors_with_stubs.py`
-  - Updated baselines:
-    - `scripts/config/full_src_mypy_baseline.json`
-    - `scripts/config/suite_marker_baseline.json`
-    - `scripts/ci/lod_baseline.txt`
-  - Updated docs:
-    - `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md`
-- Key decisions: Pure deletion of 6 uncalled skeleton extractor engines in starting_pose_matcher and 8 dedicated tests; preserved singular `skeleton_extractor.py` for `JsonSkeletonExtractor` in GUI.
+  - `src/tools/motion_matching/tour_baselines_presenter.py`: Removed generic model-only fallback in `_has_discovered_package()`.
+  - `tests/unit/motion_matching/test_tour_baselines_presenter.py`: Added exact-capture roster flag assertions.
+  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Replaced link-length string hashing with array digest of actual upper/lower segment mass and inertia tensor parameters.
+  - `src/shared/python/tour_baselines/qualification.py`: Set `auto_migrate=False` default in `qualify()` to fail closed on missing evidence, and marked migrated packages `UNVERIFIED`.
+  - `tests/unit/tour_baselines/test_qualification.py`: Added tests verifying fail-closed unmigrated rejection and inertia parameter sensitivity.
+  - `docs/development/DEVELOPMENT_LOG.md`: Refreshed DL-#10596 with exact-capture verification.
+  - `docs/development/HANDOFF.md`: Updated handoff to current state.
+  - `SPEC.md`: Added PR row to Change Log.
+- Key decisions: Fail closed on unverified/stripped legacy packages; require exact capture match for roster flags without generic cross-capture fallback.
 - User-owned or unrelated worktree changes: None observed
 
 ## Validation
 
-- `ruff check .` — all checks passed (zero violations)
-- `ruff format --check .` — no new diffs introduced by this change
-- `scripts/ci/check_file_size_budget.py` — OK
-- CI Standard: passed 100% green on PR #10808 (run 35973035906)
+- `pytest tests/unit/motion_matching/test_tour_baselines_presenter.py` — 9/9 passed
+- `pytest tests/unit/tour_baselines/` — 102/102 passed
+- `python shared_scripts/handoff_validator.py docs/development/HANDOFF.md` — passed
+- `python scripts/check_document_title_case.py docs/development/DEVELOPMENT_LOG.md docs/development/HANDOFF.md` — 0 violations
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (verified dead code with no remaining callers in shipped code)
+- Risks/assumptions: None (all contract tests verified green)
 
 ## Next Steps
 
-1. Maintain pruned baselines and direct future pose extraction to `pose_interchange`.
+1. Submit PR, verify 100% green CI checks, merge via squash.
+2. Release acquired agent leases for #10829, #10830, #10831, #10800, #10799.
 
 ## Change Log
 
-- `SELF` — Restore canonical handoff schema (Files and Decisions, Change Log, Governing issue/epic) and update PR state to merged PR #10808.
+- `SELF` — Implement exact capture match for roster flags (#10829), hash actual pendulum inertia parameters (#10800), enforce fail-closed legacy qualification (#10799), refresh DL-#10596 (#10831), and record current implementation state (#10830).

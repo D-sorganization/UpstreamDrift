@@ -390,10 +390,21 @@ def migrate_legacy_package(package: BaselinePackage) -> BaselinePackage:
         fixed_inertia_hash=fixed_inertia_hash,
     )
 
+    new_statuses = replace(
+        package.statuses,
+        scientific_qualification=ScientificQualificationStatus.UNVERIFIED,
+        has_native_replay=False,
+    )
+    new_reports = dict(package.reports)
+    new_reports["legacy_migration"] = True
+    new_reports["unverified_evidence"] = True
+
     return replace(
         package,
         identity=new_ident,
         trajectories=trajs,
+        statuses=new_statuses,
+        reports=new_reports,
     )
 
 
@@ -716,7 +727,7 @@ class IndependentBaselineQualifier:
         package: BaselinePackage,
         profile_version: str = QUALIFICATION_PROFILE_VERSION,
         *,
-        auto_migrate: bool = True,
+        auto_migrate: bool = False,
     ) -> QualificationVerdict:
         """Perform comprehensive independent scientific qualification. Fail-closed."""
         if profile_version != QUALIFICATION_PROFILE_VERSION:

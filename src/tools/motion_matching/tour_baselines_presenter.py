@@ -246,13 +246,7 @@ class TourBaselinesPresenter:
         matches = self._discovery.discover(
             filter_spec=BaselineFilter(model_id=model_id, club=capture)
         )
-        if matches:
-            return True
-        # Try generic match
-        return (
-            len(self._discovery.discover(filter_spec=BaselineFilter(model_id=model_id)))
-            > 0
-        )
+        return len(matches) > 0
 
     def get_model_detail(self, model_id: str, capture: str) -> TourBaselineDetailView:
         """Retrieve full detail view for a given model and capture."""

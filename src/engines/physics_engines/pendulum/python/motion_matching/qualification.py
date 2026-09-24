@@ -271,6 +271,7 @@ def _assemble_baseline_package(
     lengths: tuple[float, float],
     maxiter: int,
     horizon: str = "G1",
+    dynamics: DoublePendulumDynamics | None = None,
 ) -> BaselinePackage:
     """Construct complete BaselinePackage with metadata, metrics, and statuses."""
     q_rollout, v_rollout, q_replay, v_replay = trajectories
@@ -302,9 +303,27 @@ def _assemble_baseline_package(
     )
     geom_bytes = np.asarray([l1, l2], dtype=np.float64).tobytes()
     fixed_geometry_hash = hashlib.sha256(geom_bytes).hexdigest()
-    fixed_inertia_hash = hashlib.sha256(
-        f"planar_driven_pendulum_l1_{l1:.6f}_l2_{l2:.6f}".encode()
-    ).hexdigest()
+
+    if dynamics is not None:
+        dyn_params = dynamics.parameters
+    else:
+        dyn_params = create_calibrated_double_pendulum_dynamics(l1, l2).parameters
+
+    u_seg = dyn_params.upper_segment
+    l_seg = dyn_params.lower_segment
+    inertia_payload = np.array(
+        [
+            u_seg.mass_kg,
+            u_seg.center_of_mass_ratio,
+            u_seg.inertia_about_com,
+            l_seg.shaft_mass_kg,
+            l_seg.clubhead_mass_kg,
+            l_seg.shaft_com_ratio,
+            l_seg.inertia_about_com,
+        ],
+        dtype=np.float64,
+    ).tobytes()
+    fixed_inertia_hash = hashlib.sha256(inertia_payload).hexdigest()
 
     identity = BaselineIdentity(
         model_id=MODEL_ID_ANALYTICAL,
@@ -416,6 +435,7 @@ def generate_baseline_package_for_target(
         dists=(head_arr, grip_arr, replay_dists),
         lengths=(l1, l2),
         maxiter=maxiter,
+        dynamics=dynamics,
     )
 
     qual_profile = PlanarDrivenPendulumProfile()
