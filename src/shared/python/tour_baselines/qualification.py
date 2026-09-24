@@ -289,6 +289,25 @@ class ExpertSignoff:
         return json.dumps(self.to_dict(), indent=indent)
 
 
+def compute_package_digest(package: BaselinePackage) -> str:
+    """Compute deterministic SHA-256 fingerprint binding manifest and all array checksums."""
+    manifest_dict = package.to_dict()
+    array_hashes = {
+        name: hashlib.sha256(np.ascontiguousarray(arr).tobytes()).hexdigest()
+        for name, arr in sorted(package.trajectories.items())
+    }
+    if package.coefficients is not None:
+        array_hashes["coefficients"] = hashlib.sha256(
+            np.ascontiguousarray(package.coefficients).tobytes()
+        ).hexdigest()
+    payload = {
+        "manifest": manifest_dict,
+        "array_hashes": array_hashes,
+    }
+    canonical_json = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+
+
 class IndependentBaselineQualifier:
     """Independent qualification service validating exported baseline packages fresh."""
 
@@ -314,37 +333,53 @@ class IndependentBaselineQualifier:
             ("time", time_arr),
         ]
         for name, arr in arrays_to_check:
-            if not np.all(np.isfinite(arr)):
+            if len(arr) == 0:
+                violations.append(
+                    f"Required trajectory array '{name}' is missing or empty"
+                )
+            elif not np.all(np.isfinite(arr)):
                 violations.append(
                     f"Non-finite values detected in trajectory array '{name}'"
                 )
 
         # Verify q0_hash
-        if len(q_arr) > 0:
+        if not ident.q0_hash:
+            violations.append("Identity is missing required 'q0_hash'")
+        elif len(q_arr) > 0:
             q0_bytes = q_arr[0].tobytes()
             expected_q0_hash = hashlib.sha256(q0_bytes).hexdigest()
-            if ident.q0_hash and ident.q0_hash != expected_q0_hash:
+            if ident.q0_hash != expected_q0_hash:
                 violations.append(
                     f"q0_hash mismatch: expected {ident.q0_hash}, calculated {expected_q0_hash}"
                 )
 
         # Verify v0_hash
-        if len(v_arr) > 0:
+        if not ident.v0_hash:
+            violations.append("Identity is missing required 'v0_hash'")
+        elif len(v_arr) > 0:
             v0_bytes = v_arr[0].tobytes()
             expected_v0_hash = hashlib.sha256(v0_bytes).hexdigest()
-            if ident.v0_hash and ident.v0_hash != expected_v0_hash:
+            if ident.v0_hash != expected_v0_hash:
                 violations.append(
                     f"v0_hash mismatch: expected {ident.v0_hash}, calculated {expected_v0_hash}"
                 )
 
         # Verify controls_hash
-        if len(tau_arr) > 0:
+        if not ident.controls_hash:
+            violations.append("Identity is missing required 'controls_hash'")
+        elif len(tau_arr) > 0:
             controls_bytes = tau_arr.tobytes()
             expected_controls_hash = hashlib.sha256(controls_bytes).hexdigest()
-            if ident.controls_hash and ident.controls_hash != expected_controls_hash:
+            if ident.controls_hash != expected_controls_hash:
                 violations.append(
                     f"controls_hash mismatch: expected {ident.controls_hash}, calculated {expected_controls_hash}"
                 )
+
+        # Verify fixed geometry and inertia hashes
+        if not ident.fixed_geometry_hash:
+            violations.append("Identity is missing required 'fixed_geometry_hash'")
+        if not ident.fixed_inertia_hash:
+            violations.append("Identity is missing required 'fixed_inertia_hash'")
 
         identity_hash = ident.compute_hash()
         is_intact = len(violations) == 0
@@ -635,7 +670,7 @@ class IndependentBaselineQualifier:
         """Produce an auditable signoff receipt with exact hashes and scientific disclaimers."""
         ident = package.identity
         profile = get_qualification_profile(ident.topology)
-        package_hash = ident.compute_hash()
+        package_hash = compute_package_digest(package)
         p_name = getattr(profile, "name", "AuthoritativeFullBodyProfile")
         p_ver = getattr(profile, "version", QUALIFICATION_PROFILE_VERSION)
         iso_now = datetime.now(timezone.utc).isoformat()

@@ -1,3 +1,24 @@
+## Tour Baselines Discovery, Portable Loading and Safe Model Presets (TB-10, #10595)
+
+Adds `src/shared/python/tour_baselines/discovery.py` integrating catalog discovery, portable export/import, and safe model presets:
+- **Safe Model Presets (`SafeModelPreset`, `IncompatiblePresetError`, `MissingDependencyError`, `BaselineNotFoundError`)**:
+  - Extracts verified state (`q0`, `v0`), geometry, inertia, and controls from authoritative `BaselinePackage`.
+  - Fail-closed compatibility checking (`verify_compatibility`): raises `IncompatiblePresetError` on model topology mismatch and `MissingDependencyError` on absent physics/simulator dependencies.
+  - Safe session cloning (`clone_into_session`): creates isolated copies in user session directories without mutating parent or official nominated baselines.
+- **Discovery Service & Filtering (`BaselineDiscoveryService`, `BaselineFilter`, `BaselineSummary`, `BaselineDetail`)**:
+  - Scans configurable search paths recursively without machine-specific hardcoded paths.
+  - Multi-field filtering across model ID, club (driver/iron), horizon (G1/G2/G3), and qualification status.
+  - Distinguishes official nominated standard baseline from exploratory or unverified candidate packages.
+  - Fail-closed default preset selection: unverified/unqualified packages can never be auto-selected as default presets (`IncompatiblePresetError`).
+- **Portable Archives & Deterministic Indexing (`export_preset_package`, `import_preset_package`, `rebuild_index`, `export_to_ledger_rows`)**:
+  - Portable export and clean-machine import validating SHA-256 array checksums with fail-closed rejection of corrupted archives.
+  - Rebuilding index preserves deterministic baseline identities.
+  - Formats discovery summaries into result index ledger rows conforming to shared repository schemas.
+- **Headless CLI (`main`)**:
+  - Provides headless `list`, `inspect`, `export`, and `import` CLI operations with JSON and structured text output.
+- **Verification Suite (`tests/unit/tour_baselines/test_discovery.py`, `tests/unit/tour_baselines/test_qualification.py`)**:
+  - 14 unit tests covering preset extraction, compatibility verification, session cloning, multi-field filtering, fail-closed unverified rejection, archive export/import, tampered archive rejection, ledger conversion, and CLI execution.
+
 ## Tour Baselines Bounded Fit Campaigns (TB-08, #10593)
 
 Adds `src/shared/python/tour_baselines/campaign.py` with reproducible bounded fit campaigns, incremental immutable checkpoints, Pareto candidate ranking, full-clock score verification, and within-capture holdout evaluation:

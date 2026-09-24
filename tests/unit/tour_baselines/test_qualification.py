@@ -55,6 +55,7 @@ from src.shared.python.tour_baselines.qualification import (
     ModelAdequacyDecomposition,
     RefinementSensitivityRecord,
     RosterVerdict,
+    compute_package_digest,
     evaluate_full_roster_qualification,
 )
 from src.shared.python.tour_baselines.qualification_profiles import (
@@ -79,6 +80,7 @@ def _make_test_package(
     tau_limit: float = 50.0,
     tamper_data: bool = False,
     inject_nan: bool = False,
+    scientific_qualification: ScientificQualificationStatus | None = None,
 ) -> BaselinePackage:
     """Construct a well-formed BaselinePackage with exact hash chain."""
     time_arr = np.linspace(0.0, (n_nodes - 1) * dt, n_nodes)
@@ -143,11 +145,20 @@ def _make_test_package(
         file_hashes={},
     )
 
+    if scientific_qualification is None:
+        sci_status = (
+            ScientificQualificationStatus.QUALIFIED
+            if has_native_replay
+            else ScientificQualificationStatus.UNVERIFIED
+        )
+    else:
+        sci_status = scientific_qualification
+
     statuses = StatusBundle(
         solver_convergence=SolverConvergenceStatus.CONVERGED,
         kinematic_accuracy=KinematicAccuracyStatus.WITHIN_TOLERANCE,
         dynamic_feasibility=DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE,
-        scientific_qualification=ScientificQualificationStatus.UNVERIFIED,
+        scientific_qualification=sci_status,
         product_promotion=ProductPromotionStatus.EXPLORATORY,
         has_native_replay=has_native_replay,
     )
@@ -480,9 +491,45 @@ def test_expert_signoff_receipt_generation() -> None:
         notes="Educational planar baseline satisfies frozen PlanarDrivenPendulumProfile.",
     )
     assert isinstance(signoff, ExpertSignoff)
-    assert signoff.package_hash == package.identity.compute_hash()
+    assert signoff.package_hash == compute_package_digest(package)
     assert signoff.profile_version == "tour-qualification-profile/1.0.0"
     receipt_json = signoff.to_json()
     parsed = json.loads(receipt_json)
     assert parsed["verdict"] == "qualified_reduced"
     assert "disclaimer" in parsed
+
+
+def test_expert_signoff_digest_changes_on_evidence_tampering() -> None:
+    """Modifying trajectory or artifact evidence after signoff alters package digest (#10787)."""
+    package = _make_test_package()
+    digest_before = compute_package_digest(package)
+
+    # Alter trajectory data
+    package.trajectories["q"][0, 0] += 0.05
+    digest_after = compute_package_digest(package)
+    assert digest_before != digest_after
+
+
+def test_missing_arrays_or_empty_hashes_rejected_by_integrity() -> None:
+    """Integrity verification fails closed when arrays or hashes are empty (#10786)."""
+    qualifier = IndependentBaselineQualifier()
+
+    # Package missing q array
+    pkg_missing_q = _make_test_package()
+    del pkg_missing_q.trajectories["q"]
+    report = qualifier.verify_integrity(pkg_missing_q)
+    assert not report.is_intact
+    assert any(
+        "Required trajectory array 'q' is missing or empty" in v
+        for v in report.violations
+    )
+
+    # Package missing q0_hash
+    pkg_empty_hash = _make_test_package()
+    from dataclasses import replace
+
+    new_ident = replace(pkg_empty_hash.identity, q0_hash="")
+    object.__setattr__(pkg_empty_hash, "identity", new_ident)
+    report2 = qualifier.verify_integrity(pkg_empty_hash)
+    assert not report2.is_intact
+    assert any("missing required 'q0_hash'" in v for v in report2.violations)

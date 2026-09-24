@@ -45,14 +45,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10594 · Tour Baselines Independent Qualification (TB-09)
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10594 (TB-09, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10785
 - **Branch:** `feat/tb09-independent-qualification-10594`
 - **Paths:** `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/tour_baselines/coverage.py`; `tests/unit/tour_baselines/test_qualification.py`; `tests/unit/tour_baselines/test_model_identities.py`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 — 18 passed in `test_qualification.py`, 82 passed in full `tests/unit/tour_baselines/` suite, 20 passed in repo hygiene child-copy contract. Ruff check and format clean. check_lod clean. Mypy clean.
+- **Last verified:** 2026-09-24 — 20 passed in `test_qualification.py`, 84 passed in full `tests/unit/tour_baselines/` suite. Merged via PR #10785.
 - **Summary:** Implemented `IntegrityViolation`, `IntegrityReport`, `RolloutReconstructionResult`, `ConstraintEvaluationResult`, `RecomputedMetrics`, `EndpointCheckResult`, `ModelAdequacyDecomposition`, `compare_cross_complexity`, `RefinementSensitivityRecord`, `ForceIdentifiabilityDisclaimer`, `RosterVerdict`, `evaluate_full_roster_qualification`, and `ExpertSignoff` enforcing cryptographic hash integrity, forward dynamic rollout reconstruction from single (q0, v0), physical and geometric constraint evaluation, independent metric recomputation, 3-way model adequacy decomposition, cross-complexity comparison over common observation sets, refinement sensitivity under dt, force identifiability disclaimer, full 40-cell coverage matrix qualification verdicts with strict G3 reduced model exclusion, and auditable JSON export.
+- **Next step:** Landed on main. Proceed to TB-10 (#10595).
+
+### DL-#10595 · Tour Baselines Discovery, Portable Loading and Safe Model Presets (TB-10)
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10595 (TB-10, parent #10584, program #10363)
+- **Branch:** `feat/tb10-baseline-discovery-presets-10595`
+- **Paths:** `src/shared/python/tour_baselines/discovery.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/tour_baselines/qualification.py`; `tests/unit/tour_baselines/test_discovery.py`; `tests/unit/tour_baselines/test_qualification.py`; `docs/shared_tools/divergence_inventory.v1.json`; `docs/shared_tools/divergence_inventory.md`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-23 — 14 passed in `test_discovery.py`, 20 passed in `test_qualification.py`, 98 passed in full `tests/unit/tour_baselines/` suite. Ruff check and format clean. check_lod clean. Mypy clean.
+- **Summary:** Implemented `SafeModelPreset`, `IncompatiblePresetError`, `MissingDependencyError`, `BaselineNotFoundError`, `BaselineFilter`, `BaselineSummary`, `BaselineDetail`, `BaselineDiscoveryService`, `export_to_ledger_rows`, and headless CLI supporting catalog scanning across configurable search paths, multi-field filtering (model, club, horizon, qualification status), fail-closed preset compatibility checks (refusing topology mismatches and missing solver dependencies), fail-closed default preset selection (unverified packages cannot be auto-selected), safe session cloning preserving user workspace, portable export and clean-machine import with SHA-256 verification and dependency diagnostics, deterministic re-indexing, and result index ledger conversion. Also remediated bot review items #10786, #10787, #10789, #10790.
 - **Next step:** Open PR, run CI checks to 100% green, and land on main via squash auto-merge.
 
 ### DL-#10774 · Deferred Validation Project Projection
