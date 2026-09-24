@@ -6955,8 +6955,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-24 | #10860 | Derive pendulum inertia digest from cached integration parameters and refresh dynamics cache on length calibration (#10849, #10850, #10851). |
 | 2026-09-24 | #10838 | Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude for ~2x speedup and integer overflow safety (#10845, #10848). |
-| 2026-09-24 | n/a | Optimize quaternion norm calculation using np.einsum in surrogate validation (spec-exempt: micro-optimization) |
+| 2026-09-24 | #10844 | Optimize quaternion norm calculation using np.einsum in surrogate validation (#10844). |
 | 2026-09-24 | #10853 | Register Tour Baselines exact-capture change-log rows and update canonical AGENT_HANDOFF.md (#10842, #10843). |
 | 2026-09-24 | #10841 | Fail-closed legacy tour baseline qualification without auto-migration and dynamic inertia parameter hashing (#10799, #10800). |
 | 2026-09-24 | #10837 | Enforce exact capture matching in roster package flags without falling back to cross-capture defaults (#10829, #10830, #10831). |
