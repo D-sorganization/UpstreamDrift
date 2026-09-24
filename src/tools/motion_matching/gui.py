@@ -47,6 +47,13 @@ from PyQt6.QtWidgets import (
 )
 
 from src.tools.motion_matching import pipeline
+from src.tools.motion_matching.tour_baselines_presenter import (
+    ComputeBudgetView,
+    EvidenceInspectionReport,
+    ModelComparisonReport,
+    TourBaselineDetailView,
+    TourBaselinesPresenter,
+)
 
 WINDOW_TITLE = "Motion Matching"
 
@@ -116,8 +123,13 @@ class RunWorker(QObject):
 class MotionMatchingWidget(QWidget):
     """Tabbed interface exposing Matching, Downswing Experiments, and MJX stages."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        tb_presenter: TourBaselinesPresenter | None = None,
+    ) -> None:
         super().__init__(parent)
+        self._tb_presenter = tb_presenter or TourBaselinesPresenter()
         self._worker = RunWorker(self)
         self._request: pipeline.MatchRequest | None = None
         self._exp_request: pipeline.ExperimentRequest | None = None
@@ -144,6 +156,10 @@ class MotionMatchingWidget(QWidget):
         # Tab 4: Club-Only Excel (CO-09 #10613)
         club_widget = self._create_club_only_tab()
         self.tabs.addTab(club_widget, "Club-Only")
+
+        # Tab 5: Tour Baselines (TB-11 #10596)
+        baselines_widget = self._create_tour_baselines_tab()
+        self.tabs.addTab(baselines_widget, "Tour Baselines")
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)
@@ -673,6 +689,62 @@ class MotionMatchingWidget(QWidget):
         self.club_log.appendPlainText(
             f"Cloned session {cloned.session_id} (edits preserved: {cloned.user_edits})"
         )
+
+    # -------------------------------------------------------------------------
+    # Tour Baselines Tab (TB-11 #10596)
+    # -------------------------------------------------------------------------
+    def _create_tour_baselines_tab(self) -> QWidget:
+        """Expose Tour Baselines, coverage matrix, model comparison, and reproduction."""
+        from src.tools.motion_matching.tour_baselines_widget import TourBaselinesWidget
+
+        self.tb_widget = TourBaselinesWidget(self, presenter=self._tb_presenter)
+
+        self.tb_capture = self.tb_widget.tb_capture
+        self.tb_model = self.tb_widget.tb_model
+        self.tb_fit_mode = self.tb_widget.tb_fit_mode
+        self.tb_badge = self.tb_widget.tb_badge
+        self.tb_ownership = self.tb_widget.tb_ownership
+        self.tb_support = self.tb_widget.tb_support
+        self.tb_rmse = self.tb_widget.tb_rmse
+        self.tb_residual = self.tb_widget.tb_residual
+        self.tb_assumptions = self.tb_widget.tb_assumptions
+        self.tb_markers = self.tb_widget.tb_markers
+        self.tb_phases = self.tb_widget.tb_phases
+        self.tb_blocker_info = self.tb_widget.tb_blocker_info
+        self.tb_budget = self.tb_widget.tb_budget
+        self.tb_toggle_where_btn = self.tb_widget.tb_toggle_where_btn
+        self.tb_where_group = self.tb_widget.tb_where_group
+        self.tb_raw_hash = self.tb_widget.tb_raw_hash
+        self.tb_freq = self.tb_widget.tb_freq
+        self.tb_preproc = self.tb_widget.tb_preproc
+        self.tb_geom = self.tb_widget.tb_geom
+        self.tb_fit_cfg = self.tb_widget.tb_fit_cfg
+        self.tb_receipt = self.tb_widget.tb_receipt
+        self.tb_limitations = self.tb_widget.tb_limitations
+        self.tb_open_btn = self.tb_widget.tb_open_btn
+        self.tb_clone_btn = self.tb_widget.tb_clone_btn
+        self.tb_compare_btn = self.tb_widget.tb_compare_btn
+        self.tb_evidence_btn = self.tb_widget.tb_evidence_btn
+        self.tb_reproduce_btn = self.tb_widget.tb_reproduce_btn
+        self.tb_log = self.tb_widget.tb_log
+        self.tb_results = self.tb_widget.tb_results
+
+        return self.tb_widget
+
+    def _on_tb_open(self) -> None:
+        self.tb_widget._on_tb_open()
+
+    def _on_tb_clone(self) -> None:
+        self.tb_widget._on_tb_clone()
+
+    def _on_tb_compare(self) -> None:
+        self.tb_widget._on_tb_compare()
+
+    def _on_tb_inspect_evidence(self) -> None:
+        self.tb_widget._on_tb_inspect_evidence()
+
+    def _on_tb_reproduce(self) -> None:
+        self.tb_widget._on_tb_reproduce()
 
     # -------------------------------------------------------------------------
     # MJX Tab

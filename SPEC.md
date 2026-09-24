@@ -1,3 +1,28 @@
+## Expose Tour Baselines in Motion Matching, Pendulum Tools and Replay (TB-11, #10596)
+
+Integrates Tour Baselines into Motion Matching and Replay launchers:
+- **Presenter & View Models (`src/tools/motion_matching/tour_baselines_presenter.py`)**:
+  - `TourBaselinesPresenter`: Pure-Python presenter decoupled from Qt widgets coordinating coverage discovery, detailed model views, comparison, and evidence inspection.
+  - Lists models from the canonical two-capture coverage matrix across Driver (360 Hz) and 7-Iron (359 Hz) captures.
+  - Accessible Status Badges (`_format_badge`): Formats readable status symbols and text labels (`[PASS]`, `[REJECTED]`, `[BLOCKED]`, `[REF]`, `[CANDIDATE]`, `[UNQUALIFIED]`) without relying on color alone.
+  - Visual Semantics (`BaselineOpenResult`): Enforces visual distinction between 3D and projected 2D views, and explicitly differentiates observed club markers (`marker_points`) from simulated club graphics (`continuous_mesh`).
+  - Plain-Language "Where This Came From" Panel (`WhereThisCameFromView`): Surfaces raw capture SHA-256 hashes, capture frequencies, preprocessing pipeline notes, subject & club geometries, fit configurations, replay receipt links, and explicit scientific limitations (force identifiability and holdout generalization disclaimers).
+  - Session Actions (`open_baseline`, `clone_for_experiment`, `compare_models`, `inspect_evidence`, `reproduce`):
+    - `clone_for_experiment`: clones verified baseline presets into isolated user session directories without mutating parent baselines.
+    - `compare_models`: compares models across shared captures, computing metric deltas and topology differences.
+    - `inspect_evidence`: inspects audit receipts, five-fold status bundles, engine versions, and git commit provenance.
+    - `reproduce`: generates exact reproduction CLI commands.
+  - Compute Budget View (`ComputeBudgetView`, `get_compute_budget`): Surfaces declared wall clock limits, evaluation limits, and parameter dimensions.
+- **Motion Matching GUI Integration (`src/tools/motion_matching/gui.py`)**:
+  - Adds "Tour Baselines" tab (`_create_tour_baselines_tab`) to `MotionMatchingWidget`:
+    - Capture selector (Driver vs 7-Iron) and Model selector dynamically populated from coverage matrix.
+    - Immediate metadata display for qualification badges, source ownership, support status, error metrics, model assumptions, marker sets, phase coverage, and blocker explanations.
+    - Collapsible "Where This Came From" panel with toggle button.
+    - Interactive action buttons for Open in Viewer, Clone for Experiment, Compare Models, Inspect Evidence, and Reproduce.
+- **Verification Suites (`tests/unit/motion_matching/test_tour_baselines_presenter.py`, `tests/tools/motion_matching/test_motion_matching_gui.py`)**:
+  - 8 unit tests in `test_tour_baselines_presenter.py` verifying model listing, accessible badge formatting, Where This Came From metadata, visual semantics, session cloning, model comparison, evidence inspection, and exact reproduction commands.
+  - 14 integration and unit tests in `test_motion_matching_gui.py` verifying tabbed widget construction (5 tabs), Tour Baselines tab controls and selectors, collapsible where panel toggle, and action button dispatches.
+
 ## Tour Baselines Discovery, Portable Loading and Safe Model Presets (TB-10, #10595)
 
 Adds `src/shared/python/tour_baselines/discovery.py` integrating catalog discovery, portable export/import, and safe model presets:
