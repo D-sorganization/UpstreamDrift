@@ -436,7 +436,13 @@ def _attach_help_menu(widget: Any, tile_id: str) -> None:
         logger.debug("could not build help menu for %s: %s", tile_id, exc)
         return
 
-    from PyQt6.QtGui import QAction
+    from PyQt6.QtGui import QAction, QKeySequence
+
+    # Defensively clear any conflicting F1 shortcut on menu actions (such as
+    # pre-existing or legacy User Guide bindings) to prevent ambiguous shortcuts (#10868).
+    for existing_action in menu.actions():
+        if existing_action.shortcut().toString().upper() == "F1":
+            existing_action.setShortcut(QKeySequence())
 
     action = QAction("This &Tool's Help", widget)
     action.setToolTip("Open this tool's help page")

@@ -173,11 +173,10 @@ def test_component_help_entries_are_substantive() -> None:
 # Qt wiring (#8846)
 # ---------------------------------------------------------------------------
 
-pytest.importorskip("PyQt6.QtWidgets")
-
 
 @pytest.fixture
 def qapp():
+    pytest.importorskip("PyQt6.QtWidgets")
     from PyQt6.QtWidgets import QApplication
 
     app = QApplication.instance() or QApplication([])
@@ -224,9 +223,15 @@ def test_attach_tile_help_builds_a_help_menu_on_a_window(qapp, registry) -> None
     ]
     help_menus = [m for m in menus if m.title().replace("&", "") == "Help"]
     assert help_menus, "no Help menu was created"
-    labels = [a.text().replace("&", "") for a in help_menus[0].actions()]
+    actions = help_menus[0].actions()
+    labels = [a.text().replace("&", "") for a in actions]
     assert "This Tool's Help" in labels
     assert "About" in labels
+
+    # Confirm no action in the Help menu claims F1 as a shortcut (#10868)
+    # to avoid ambiguous shortcut overloads with the window's QShortcut.
+    f1_actions = [a.text() for a in actions if a.shortcut().toString().upper() == "F1"]
+    assert not f1_actions, f"Help menu actions still bind F1: {f1_actions}"
     window.deleteLater()
 
 

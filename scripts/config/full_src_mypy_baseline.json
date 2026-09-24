@@ -283,14 +283,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 553,
-      "column": null,
-      "severity": "error",
-      "message": "Argument \"signal_obj\" to \"_show_generator_dialog\" of \"HumanoidConfigTab\" has incompatible type \"pyqtBoundSignal\"; expected \"pyqtSignal\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
       "line": 560,
       "column": null,
@@ -2952,14 +2944,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"ax\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/humanoid_config_tab.py",
-      "line": 489,
-      "column": null,
-      "severity": "error",
-      "message": "\"pyqtSignal\" has no attribute \"connect\"",
       "code": "attr-defined"
     },
     {

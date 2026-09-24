@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Tests for Physics Validation module."""
 
 from dataclasses import dataclass

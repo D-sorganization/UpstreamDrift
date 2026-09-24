@@ -1,3 +1,17 @@
+## Resolve Tile Help F1 Overload, Isolate PyQt6 Fixtures, and Restore CI Baseline (#10868, #10869, #10858)
+
+Resolves duplicate F1 shortcut ambiguity on top-level windows, isolates PyQt6 test execution, and synchronizes full-src typing baselines:
+- **Disambiguate Top-Level Window Help Shortcuts (`src/launchers/help_menu.py`, `src/shared/python/ui/tile_help.py`, #10868)**:
+  - Removed redundant `shortcut="F1"` on the general User Guide menu action in `help_menu.py`, reserving F1 for context-aware tile help.
+  - Defensively cleared any conflicting F1 shortcuts on menu actions in `_attach_help_menu`, preventing Qt's ambiguous shortcut overloads.
+- **Isolate Qt Unit Test Dependencies (`tests/help/test_tile_help_wiring.py`, #10869)**:
+  - Removed top-level `pytest.importorskip("PyQt6.QtWidgets")` so pure data and registry assertions execute in headless/minimal environments without PyQt6.
+  - Scoped Qt skips cleanly to the `qapp` fixture and added regression assertions that Help menu actions do not bind F1.
+- **Restore Full-Src Mypy Baseline and Typing Contracts (`src/shared/python/model_generation/canonical_model.py`, `scripts/config/full_src_mypy_baseline.json`, #10858)**:
+  - Standardized `canonical_model.py` imports to use `shared.python.model_generation` package paths consistent with the rest of the package.
+  - Marked `src/shared/python/model_generation/tests/test_physics_validation.py` with `# mypy: ignore-errors` matching `physics_validation.py`.
+  - Pruned stale resolved baseline entries from `scripts/config/full_src_mypy_baseline.json` to keep baseline audits passing 100%.
+
 ## Wire Tile Help System to Every Tile via F1 and Help Menu (#9413)
 
 Wires the help system across all tiles in the suite to provide a uniform help affordance:
