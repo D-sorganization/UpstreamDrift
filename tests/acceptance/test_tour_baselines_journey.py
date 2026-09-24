@@ -168,8 +168,10 @@ def baseline_store(tmp_path: Path) -> Path:
     store.mkdir()
     pkg_driver = _make_test_package("driven_double_pendulum", "driver", 0.012)
     pkg_iron = _make_test_package("driven_double_pendulum", "iron", 0.009)
+    pkg_triple = _make_test_package("driven_triple_pendulum", "driver", 0.015)
     export_baseline_package(pkg_driver, store / "driver_pendulum.npz")
     export_baseline_package(pkg_iron, store / "iron_pendulum.npz")
+    export_baseline_package(pkg_triple, store / "driver_triple.npz")
     return store
 
 
@@ -276,7 +278,8 @@ def test_session_cloning_isolation(
 def test_model_comparison_across_complexities(
     presenter: TourBaselinesPresenter,
 ) -> None:
-    """Verify model comparison produces deltas and topological explanations."""
+    """Verify model comparison produces deltas when measured and handles unmeasured packages honestly."""
+    # Both measured: produces delta and topological explanations
     report = presenter.compare_models(
         model_a_id="driven_double_pendulum",
         model_b_id="driven_triple_pendulum",
@@ -285,8 +288,25 @@ def test_model_comparison_across_complexities(
     assert isinstance(report, ModelComparisonReport)
     assert len(report.verdict) > 0
     assert "marker_rmse_delta_mm" in report.metric_deltas
+    assert report.metric_deltas["marker_rmse_delta_mm"] == pytest.approx(3.0)
+    assert "delta RMSE = +3.00 mm" in report.verdict
     assert "model_a_ownership" in report.topology_comparison
     assert "model_b_ownership" in report.topology_comparison
+
+    # Model lacking package: reports comparison unavailable without computing false delta (#10810)
+    report_unmeasured = presenter.compare_models(
+        model_a_id="driven_double_pendulum",
+        model_b_id="full_body_pinocchio",
+        capture="driver",
+    )
+    assert isinstance(report_unmeasured, ModelComparisonReport)
+    assert "marker_rmse_delta_mm" not in report_unmeasured.metric_deltas
+    assert report_unmeasured.metric_deltas == {}
+    assert "comparison unavailable" in report_unmeasured.verdict
+    assert (
+        "full_body_pinocchio lacks measured baseline package"
+        in report_unmeasured.verdict
+    )
 
 
 def test_evidence_inspection_and_audit_receipt(

@@ -493,9 +493,8 @@ class TourBaselinesPresenter:
         detail_a = self.get_model_detail(model_a_id, norm_cap)
         detail_b = self.get_model_detail(model_b_id, norm_cap)
 
-        err_a = detail_a.original_frame_error_mm or 0.0
-        err_b = detail_b.original_frame_error_mm or 0.0
-        delta = err_b - err_a
+        err_a = detail_a.original_frame_error_mm
+        err_b = detail_b.original_frame_error_mm
 
         topo_comp = {
             "model_a_ownership": detail_a.ownership,
@@ -504,15 +503,28 @@ class TourBaselinesPresenter:
             "model_b_supported": detail_b.supported,
         }
 
-        verdict = (
-            f"{model_a_id} vs {model_b_id} on {norm_cap}: delta RMSE = {delta:+.2f} mm"
-        )
+        if err_a is not None and err_b is not None:
+            delta = err_b - err_a
+            metric_deltas = {"marker_rmse_delta_mm": delta}
+            verdict = f"{model_a_id} vs {model_b_id} on {norm_cap}: delta RMSE = {delta:+.2f} mm"
+        else:
+            metric_deltas = {}
+            if err_a is None and err_b is None:
+                missing = f"both {model_a_id} and {model_b_id}"
+            elif err_a is None:
+                missing = model_a_id
+            else:
+                missing = model_b_id
+            verdict = (
+                f"{model_a_id} vs {model_b_id} on {norm_cap}: comparison unavailable "
+                f"({missing} lacks measured baseline package)"
+            )
 
         return ModelComparisonReport(
             model_a_id=model_a_id,
             model_b_id=model_b_id,
             capture=norm_cap,
-            metric_deltas={"marker_rmse_delta_mm": delta},
+            metric_deltas=metric_deltas,
             topology_comparison=topo_comp,
             verdict=verdict,
         )
