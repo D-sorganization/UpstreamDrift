@@ -10,6 +10,7 @@ from src.shared.python.physics._contact_types import (
     GripParameters,
 )
 from src.shared.python.physics._friction_laws import (
+    _magnitude,
     classify_contact_state,
     decompose_contact_force,
 )
@@ -115,7 +116,8 @@ class GripContactModel:
             return {"min_margin": 0.0, "mean_margin": 0.0, "any_slipping": True}
 
         margins = [
-            (max_tangent - np.linalg.norm(c.tangent_force)) / max_tangent
+            (max_tangent - _magnitude(c.tangent_force))
+            / max_tangent  # ⚡ Bolt: _magnitude (float-promoted dot product) is faster than np.linalg.norm and safe against integer overflow (#10845)
             for c in self.current_state.contacts
             if c.normal_force > 0
             and (max_tangent := self.params.static_friction * c.normal_force) > 0

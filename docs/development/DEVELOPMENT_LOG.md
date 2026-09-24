@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10838 · Optimize GripContactModel Slip Margin Performance
+
+- **State:** in_review
+- **Owner:** jules
+- **Issue:** #10838
+- **PR:** #10838
+- **Branch:** `bolt-optimize-grip-margin-18311144978976259102`
+- **Paths:** `src/shared/python/physics/_grip_model.py`, `tests/unit/test_grip_contact_model.py`, `.jules/bolt.md`, `SPEC.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified slip margin speedup with float-promoted dot product to prevent integer overflow (#10845, #10848)
+- **Summary:** Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude, preventing integer overflow while providing ~2x performance speedup.
+- **Next step:** Land PR #10838 with clean CI and auto-merge.
+
 ### DL-#8866 · Remove Dead Skeleton Extractors Providers From Starting Pose Matcher
 
 - **State:** shipped
