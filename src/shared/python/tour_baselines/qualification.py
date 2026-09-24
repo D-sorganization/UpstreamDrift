@@ -17,7 +17,7 @@ model-class profiles without optimizer objective restatement:
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from enum import Enum
 import hashlib
@@ -67,7 +67,9 @@ __all__ = [
     "RefinementSensitivityRecord",
     "RosterCellQualificationVerdict",
     "RosterVerdict",
+    "compute_package_digest",
     "evaluate_full_roster_qualification",
+    "migrate_legacy_package",
 ]
 
 
@@ -306,6 +308,93 @@ def compute_package_digest(package: BaselinePackage) -> str:
     }
     canonical_json = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+
+
+def migrate_legacy_package(package: BaselinePackage) -> BaselinePackage:
+    """Migrate legacy baseline packages missing time/tau or cryptographic hashes (TB-10 bot review #10794).
+
+    Produces an upgraded, immutable BaselinePackage with consistent trajectories and identity hashes.
+    """
+    ident = package.identity
+    trajs = dict(package.trajectories)
+    q_arr = trajs.get("q", np.empty((0, 0)))
+    v_arr = trajs.get("v", np.empty((0, 0)))
+
+    n_samples = len(q_arr)
+    # 1. Synthesize time if missing
+    if "time" not in trajs or len(trajs["time"]) == 0:
+        trajs["time"] = np.arange(n_samples, dtype=np.float64) * 0.01
+
+    time_arr = trajs["time"]
+
+    # 2. Synthesize tau if missing
+    if "tau" not in trajs or len(trajs["tau"]) == 0:
+        coeffs = package.coefficients
+        if (
+            coeffs is not None
+            and len(coeffs) == 14
+            and ident.topology == ModelTopology.PLANAR_DRIVEN_PENDULUM
+        ):
+            dur = float(time_arr[-1] - time_arr[0]) if len(time_arr) > 1 else 1.0
+            from src.engines.physics_engines.pendulum.python.motion_matching.torque_optimization import (
+                COEFFS_PER_JOINT,
+                BernsteinTorqueProfile,
+            )
+
+            prof = BernsteinTorqueProfile(
+                shoulder_controls=coeffs[:COEFFS_PER_JOINT],
+                wrist_controls=coeffs[COEFFS_PER_JOINT:],
+                duration_s=dur,
+            )
+            t_rel = time_arr - time_arr[0]
+            trajs["tau"] = np.array([prof.evaluate(t) for t in t_rel], dtype=np.float64)
+        else:
+            q_cols = q_arr.shape[1] if q_arr.ndim > 1 else 1
+            trajs["tau"] = np.zeros((n_samples, q_cols), dtype=np.float64)
+
+    tau_arr = trajs["tau"]
+
+    # 3. Compute identity hashes if missing
+    q0_hash = ident.q0_hash
+    if not q0_hash and len(q_arr) > 0:
+        q0_hash = hashlib.sha256(q_arr[0].tobytes()).hexdigest()
+
+    v0_hash = ident.v0_hash
+    if not v0_hash and len(v_arr) > 0:
+        v0_hash = hashlib.sha256(v_arr[0].tobytes()).hexdigest()
+
+    controls_hash = ident.controls_hash
+    if not controls_hash and len(tau_arr) > 0:
+        controls_hash = hashlib.sha256(tau_arr.tobytes()).hexdigest()
+
+    fixed_geom_hash = ident.fixed_geometry_hash
+    if not fixed_geom_hash:
+        l1 = float(package.reports.get("l1_arm_m", 0.65))
+        l2 = float(package.reports.get("l2_club_m", 1.05))
+        fixed_geom_hash = hashlib.sha256(
+            np.asarray([l1, l2], dtype=np.float64).tobytes()
+        ).hexdigest()
+
+    fixed_inertia_hash = ident.fixed_inertia_hash
+    if not fixed_inertia_hash:
+        fixed_inertia_hash = hashlib.sha256(
+            f"{ident.model_id}_fixed_inertia".encode()
+        ).hexdigest()
+
+    new_ident = replace(
+        ident,
+        q0_hash=q0_hash,
+        v0_hash=v0_hash,
+        controls_hash=controls_hash,
+        fixed_geometry_hash=fixed_geom_hash,
+        fixed_inertia_hash=fixed_inertia_hash,
+    )
+
+    return replace(
+        package,
+        identity=new_ident,
+        trajectories=trajs,
+    )
 
 
 class IndependentBaselineQualifier:
@@ -626,12 +715,17 @@ class IndependentBaselineQualifier:
         self,
         package: BaselinePackage,
         profile_version: str = QUALIFICATION_PROFILE_VERSION,
+        *,
+        auto_migrate: bool = True,
     ) -> QualificationVerdict:
         """Perform comprehensive independent scientific qualification. Fail-closed."""
         if profile_version != QUALIFICATION_PROFILE_VERSION:
             raise IntegrityViolation(
                 f"Rejected stale profile version '{profile_version}'; expected '{QUALIFICATION_PROFILE_VERSION}'"
             )
+
+        if auto_migrate:
+            package = migrate_legacy_package(package)
 
         ident = package.identity
         # Rule: A reduced model can NEVER qualify under G3

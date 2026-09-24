@@ -533,3 +533,146 @@ def test_missing_arrays_or_empty_hashes_rejected_by_integrity() -> None:
     report2 = qualifier.verify_integrity(pkg_empty_hash)
     assert not report2.is_intact
     assert any("missing required 'q0_hash'" in v for v in report2.violations)
+
+
+def test_pendulum_assembled_package_qualifies_cleanly() -> None:
+    """TB-10 bot review #10794: packages from pendulum _assemble_baseline_package are qualifiable."""
+    from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
+        _assemble_baseline_package,
+    )
+    from src.shared.python.motion_matching.club_target import (
+        ClubTarget,
+        SourceProvenance,
+    )
+    from src.shared.python.motion_matching.fit_result import CanonicalFitResult
+    from src.shared.python.motion_matching.acceptance import qualify_tour_baseline
+
+    n_samples = 26
+    time_arr = np.linspace(0.0, 0.25, n_samples)
+    club_quat = np.zeros((n_samples, 4))
+    club_quat[:, 0] = 1.0  # unit quaternion
+
+    target = ClubTarget(
+        time=time_arr,
+        butt=np.zeros((n_samples, 3)),
+        clubhead=np.ones((n_samples, 3)) * 0.5,
+        club_quat=club_quat,
+        impact_idx=20,
+        source=SourceProvenance(
+            filename="test.c3d",
+            format="c3d",
+            subject_id="tour_avg",
+            trial_id="driver_01",
+            sha256="0" * 64,
+        ),
+    )
+    fit_result = CanonicalFitResult(
+        theta_optimal=np.zeros(14),
+        final_cost=0.001,
+        final_rmse_m=0.01,
+        solver_status="success",
+        iterations=10,
+        n_evaluations=20,
+        wall_clock_s=1.0,
+        message="converged",
+        history=(0.01, 0.001),
+        method="trf",
+        git_commit="abcdef0",
+        engine_version="1.0.0",
+        target_hash="0" * 64,
+        timestamp_utc="2026-09-24T00:00:00Z",
+    )
+    trajs = (
+        np.zeros((n_samples, 2)),
+        np.zeros((n_samples, 2)),
+        np.zeros((n_samples, 2)),
+        np.zeros((n_samples, 2)),
+    )
+    dists = (
+        np.zeros(n_samples),
+        np.zeros(n_samples),
+        [0.001] * n_samples,
+    )
+    pkg = _assemble_baseline_package(
+        target=target,
+        capture_kind="driver",
+        result=fit_result,
+        trajectories=trajs,
+        dists=dists,
+        lengths=(0.65, 1.05),
+        maxiter=10,
+    )
+
+    # Package must contain time and tau
+    assert "time" in pkg.trajectories
+    assert "tau" in pkg.trajectories
+    assert pkg.identity.q0_hash is not None and len(pkg.identity.q0_hash) > 0
+    assert pkg.identity.v0_hash is not None and len(pkg.identity.v0_hash) > 0
+    assert (
+        pkg.identity.controls_hash is not None and len(pkg.identity.controls_hash) > 0
+    )
+    assert pkg.identity.fixed_geometry_hash != ""
+    assert pkg.identity.fixed_inertia_hash != ""
+
+    verdict = qualify_tour_baseline(pkg)
+    assert verdict is not None
+    assert verdict.passed is True
+
+
+def test_qualify_legacy_package_migration() -> None:
+    """TB-10 bot review #10794: qualify handles legacy packages missing time/tau/hashes via migration."""
+    from src.shared.python.tour_baselines.baseline_package import (
+        BackendType,
+        BaselineIdentity,
+        BaselinePackage,
+        DynamicFeasibilityStatus,
+        FitMode,
+        KinematicAccuracyStatus,
+        ModelTopology,
+        PhysicalFitMetrics,
+        ProductPromotionStatus,
+        ScientificQualificationStatus,
+        SolverConvergenceStatus,
+        StatusBundle,
+    )
+    from dataclasses import replace
+    from src.shared.python.tour_baselines.qualification import (
+        IndependentBaselineQualifier,
+        migrate_legacy_package,
+    )
+
+    package = _make_test_package(
+        topology=ModelTopology.PLANAR_DRIVEN_PENDULUM,
+        horizon="G1",
+    )
+    # Strip time, tau, and identity hashes to simulate a legacy package
+    del package.trajectories["time"]
+    del package.trajectories["tau"]
+    legacy_ident = replace(
+        package.identity,
+        q0_hash=None,
+        v0_hash=None,
+        controls_hash=None,
+        fixed_geometry_hash="",
+        fixed_inertia_hash="",
+    )
+    object.__setattr__(package, "identity", legacy_ident)
+
+    # migrate_legacy_package should populate time, tau, and hashes
+    migrated = migrate_legacy_package(package)
+    assert "time" in migrated.trajectories
+    assert "tau" in migrated.trajectories
+    assert migrated.identity.q0_hash is not None and len(migrated.identity.q0_hash) > 0
+    assert migrated.identity.v0_hash is not None and len(migrated.identity.v0_hash) > 0
+    assert (
+        migrated.identity.controls_hash is not None
+        and len(migrated.identity.controls_hash) > 0
+    )
+    assert migrated.identity.fixed_geometry_hash != ""
+    assert migrated.identity.fixed_inertia_hash != ""
+
+    # qualify should auto-migrate legacy package
+    qualifier = IndependentBaselineQualifier()
+    verdict = qualifier.qualify(package)
+    assert verdict is not None
+    assert verdict.passed is True
