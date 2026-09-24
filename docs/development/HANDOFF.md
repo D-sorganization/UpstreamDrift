@@ -1,63 +1,61 @@
-# Implementation Handoff — Fail-Closed Legacy Evidence Qualification & Dynamic Inertia Digest
+# Implementation Handoff — Optimize Grip Contact Model Slip Margin Performance
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10799`
-- Branch: `fix/10799-10800-qualification-integrity`
-- Baseline commit: `a9651a161c`
+- Working directory: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-bolt-10838`
+- Branch: `bolt-optimize-grip-margin-18311144978976259102`
+- Baseline commit: `56653cc49`
 - Implementation commit: `SELF`
-- Pull request: not created
-- Governing issue/epic: #10799, #10800 (parent review on PR #10798; TB-09 #10594, TB-10 #10595)
-- Session: `antigravity-20260924-remediation-tour-baselines`
+- Pull request: #10838
+- Governing issue/epic: #10838 (addressing review comments #10845, #10846, #10847, #10848)
+- Session: `antigravity-20260924-remediation-bolt-10838`
 
 ## Objective and Status
 
-- Objective: Address bot review feedback on PR #10798:
-  1. Keep qualification strictly fail-closed for unsigned legacy evidence (#10799) by eliminating silent auto-migration from `IndependentBaselineQualifier.qualify()`, and ensure `migrate_legacy_package` explicitly leaves packages unverified (`UNVERIFIED`, `has_native_replay=False`) until native evidence is regenerated.
-  2. Hash actual pendulum dynamics inertia parameters (#10800) in `fixed_inertia_hash` (segment masses, center-of-mass ratios, rotational inertias) via `compute_pendulum_inertia_hash` using rollout `DoublePendulumDynamics` parameters rather than just link lengths or model labels.
-- Status: Complete / ready for PR
+- Objective: Optimize `GripContactModel.check_slip_margin` calculation by avoiding `np.linalg.norm` dispatch overhead for small 1D array operations, and address review feedback on PR #10838:
+  1. Cast/promote tangent forces to float (`_magnitude`) before dot product calculation to prevent integer overflow (#10845).
+  2. Add required canonical handoff update (#10846).
+  3. Record implementation in development log (#10847).
+  4. Key SPEC change log row to PR #10838 (#10848).
+- Status: Complete / ready for auto-merge
 - Completed:
-  1. Removed `auto_migrate` parameter and auto-migration from `IndependentBaselineQualifier.qualify()`.
-  2. Updated `migrate_legacy_package` to mark `statuses` with `scientific_qualification=ScientificQualificationStatus.UNVERIFIED` and `has_native_replay=False`.
-  3. Implemented `compute_pendulum_inertia_hash()` in `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py` digesting segment masses, COM ratios, and rotational inertias from actual `DoublePendulumDynamics` parameters.
-  4. Updated `_assemble_baseline_package` and `generate_baseline_package_for_target` to pass `dynamics` and compute `fixed_inertia_hash` from actual dynamics parameters.
-  5. Added regression and unit tests in `tests/unit/tour_baselines/test_qualification.py`.
-  6. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md` (DL-#10799), and this `HANDOFF.md`.
-- Remaining: Push branch, create pull request with auto-merge, and release agent lease.
+  1. Replaced `np.linalg.norm(c.tangent_force)` with `_magnitude(c.tangent_force)` in `src/shared/python/physics/_grip_model.py`.
+  2. Added unit test `test_slip_margin_with_integer_dtype_tangent_force` in `tests/unit/test_grip_contact_model.py` verifying integer-dtype arrays (e.g. `int16`) do not overflow or error.
+  3. Added learning note to `.jules/bolt.md`.
+  4. Resolved merge conflict with latest `main` in `SPEC.md` and keyed entry to `#10838`.
+  5. Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#10838).
+  6. Updated this handoff document.
+- Remaining: Push commit to branch, monitor CI checks and auto-merge, close review issues #10845-#10848.
 
 ## Files and Decisions
 
 - Files changed:
-  - `src/shared/python/tour_baselines/qualification.py`: Removed auto-migration from `qualify()`; updated `migrate_legacy_package` to set `UNVERIFIED` and `has_native_replay=False`, and compute pendulum inertia digest via `compute_pendulum_inertia_hash`.
-  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Added `compute_pendulum_inertia_hash()`; wired `dynamics` through `_assemble_baseline_package`.
-  - `tests/unit/tour_baselines/test_qualification.py`: Added assertions verifying fail-closed legacy rejection and unverified status after migration; added `test_pendulum_inertia_hash_reflects_dynamics_parameters`.
-  - `SPEC.md`: Documented fail-closed legacy qualification and dynamics inertia parameter hashing.
-  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10799 entry.
+  - `src/shared/python/physics/_grip_model.py`: Use `_magnitude` in `check_slip_margin`.
+  - `tests/unit/test_grip_contact_model.py`: Added `test_slip_margin_with_integer_dtype_tangent_force`.
+  - `.jules/bolt.md`: Added Bolt performance optimization entry with integer overflow guard notes.
+  - `SPEC.md`: Added PR #10838 changelog row.
+  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10838 entry.
   - `docs/development/HANDOFF.md`: Updated canonical handoff.
 - Key decisions:
-  - Fail-closed qualification ensures an untrusted or stripped candidate package cannot bypass cryptographic verification without native evidence.
-  - Inertia hash digests actual mass/inertia arrays rather than link lengths, guaranteeing that modifications to model physics invalidate stored inertia digests.
+  - Reusing `_magnitude` from `_friction_laws` promotes tangent forces to `float` before taking the dot product, eliminating integer overflow while keeping the ~2x performance speedup.
 
 ## Validation
 
-- `pytest tests/unit/tour_baselines/test_qualification.py` — 23 passed (100% green).
-- `pytest tests/unit/tour_baselines/` — 102 passed (100% green).
-- `pytest tests/unit/motion_matching/test_acceptance.py` — 21 passed (100% green).
+- `pytest tests/unit/test_grip_contact_model.py` — 33 passed in 4.93s.
+- `ruff check src/shared/python/physics/_grip_model.py tests/unit/test_grip_contact_model.py` — clean.
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (improves integrity verification without changing valid package rollouts)
+- Risks/assumptions: None (preserves exact floating-point physics behavior and improves robustness against integer-dtype inputs).
 
 ## Next Steps
 
-1. Run ruff and mypy checks.
-2. Push `fix/10799-10800-qualification-integrity` to origin.
-3. Create PR referencing #10799, #10800.
-4. Enable auto-merge (`--auto --squash`).
-5. Release leases on #10799 and #10800 via `scripts.release_agent_lease`.
+1. Push to `bolt-optimize-grip-margin-18311144978976259102`.
+2. Confirm green CI Standard on PR #10838 and let auto-merge complete.
+3. Close review issues #10845, #10846, #10847, #10848.
 
 ## Change Log
 
-- `SELF` — Keep qualification fail-closed for unsigned legacy evidence and hash actual dynamics inertia parameters (#10799, #10800).
+- `SELF` — Optimize GripContactModel.check_slip_margin with float-promoted dot product and address review issues (#10845, #10846, #10847, #10848).
