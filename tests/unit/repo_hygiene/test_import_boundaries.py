@@ -26,6 +26,11 @@ _ALLOWED_SHARED_UPWARD_IMPORTS = {
         _SHARED_ROOT / "workspace" / "trajectory_handoff.py",
         "src.launchers._shot_tracer_trajectory_import",
     ),
+    # Lazy UI runtime bridge to launcher help menu builder (issue #9413 / #8846).
+    (
+        _SHARED_ROOT / "ui" / "tile_help.py",
+        "src.launchers.help_menu",
+    ),
 }
 
 
