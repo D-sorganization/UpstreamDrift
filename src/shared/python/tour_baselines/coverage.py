@@ -326,7 +326,13 @@ def generate_coverage_matrix() -> list[CoverageCell]:
     - Fail-closed evidence status
     """
     cells: list[CoverageCell] = []
-    for m in list_golf_models():
+    models = list_golf_models()
+    if not models:
+        from .registry import init_default_registry
+
+        init_default_registry()
+        models = list_golf_models()
+    for m in models:
         for capture in ("driver", "iron"):
             cell = _cell_for_model(m, capture)
             if cell is not None:
