@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 from src.shared.python.dashboard import advanced_analysis
@@ -11,6 +13,9 @@ from src.shared.python.dashboard._analysis_refresh import (
     analysis_cache_key,
 )
 from src.shared.python.dashboard.advanced_analysis import (
+    CoherenceTab,
+    CorrelationTab,
+    PhasePlaneTab,
     SpectrogramTab,
     SwingPlaneTab,
     WaveletTab,
@@ -21,6 +26,8 @@ pytestmark = pytest.mark.unit
 
 class MutableRecorder:
     """Recorder whose data can be replaced between refreshes."""
+
+    engine: Any = None
 
     def __init__(self) -> None:
         self.t = np.linspace(0, 1, 200)
@@ -36,6 +43,15 @@ class MutableRecorder:
         if key == "club_head_position":
             return self.t, self.position
         return self.t, self.signal
+
+    def get_induced_acceleration_series(
+        self, source_name: str | int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Stub for induced acceleration time series."""
+        return self.t, np.zeros_like(self.signal)
+
+    def set_analysis_config(self, config: dict[str, Any]) -> None:
+        """Stub for analysis config."""
 
 
 class CallCounter:
@@ -157,6 +173,13 @@ def spectrogram_spy(monkeypatch) -> CallCounter:
     return spy
 
 
+@pytest.fixture
+def coherence_spy(monkeypatch) -> CallCounter:
+    spy = CallCounter(advanced_analysis.compute_coherence)
+    monkeypatch.setattr(advanced_analysis, "compute_coherence", spy)
+    return spy
+
+
 def test_wavelet_spinbox_burst_recomputes_once(qtbot, cwt_spy) -> None:
     tab = WaveletTab(MutableRecorder())
     qtbot.addWidget(tab)
@@ -246,3 +269,69 @@ def test_swing_plane_no_data_then_data_keeps_axes(qtbot) -> None:
     tab.update_plot()
     assert tab.canvas.fig.axes == axes_before
     assert len(axes_before[0].collections) == 2
+
+
+def test_phase_plane_dim_burst_recomputes_once(qtbot, monkeypatch) -> None:
+    calls: list[int] = []
+    monkeypatch.setattr(PhasePlaneTab, "update_plot", lambda self: calls.append(1))
+    recorder = MutableRecorder()
+    tab = PhasePlaneTab(recorder)
+    qtbot.addWidget(tab)
+    assert len(calls) == 1  # initial synchronous plot
+
+    for dim in (1, 0, 1):
+        tab.spin_dim.setValue(dim)
+    assert len(calls) == 1  # debounced, not called immediately
+
+    qtbot.waitUntil(lambda: len(calls) == 2, timeout=2000)
+    qtbot.wait(250)
+    assert len(calls) == 2
+
+
+def test_coherence_dim_burst_recomputes_once(qtbot, coherence_spy) -> None:
+    recorder = MutableRecorder()
+    tab = CoherenceTab(recorder)
+    qtbot.addWidget(tab)
+    assert coherence_spy.calls == 1
+
+    for dim in (1, 0, 1):
+        tab.spin_dim.setValue(dim)
+    assert coherence_spy.calls == 1  # not recomputed mid-burst
+
+    qtbot.waitUntil(lambda: coherence_spy.calls == 2, timeout=2000)
+    qtbot.wait(250)
+    assert coherence_spy.calls == 2
+
+
+def test_coherence_memoizes_and_invalidates_on_data_change(
+    qtbot, coherence_spy
+) -> None:
+    recorder = MutableRecorder()
+    tab = CoherenceTab(recorder)
+    qtbot.addWidget(tab)
+    assert coherence_spy.calls == 1
+
+    tab.update_plot()  # identical inputs -> cache hit
+    assert coherence_spy.calls == 1
+
+    recorder.signal = recorder.signal * 2.0  # modified data -> miss
+    tab.update_plot()
+    assert coherence_spy.calls == 2
+
+
+@pytest.mark.parametrize("tab_cls", [PhasePlaneTab, CoherenceTab, CorrelationTab])
+def test_analysis_tabs_use_draw_idle_not_blocking_draw(
+    qtbot, monkeypatch, tab_cls
+) -> None:
+    recorder = MutableRecorder()
+    tab = tab_cls(recorder)
+    qtbot.addWidget(tab)
+
+    draw_spy = CallCounter(tab.canvas.draw)
+    idle_spy = CallCounter(tab.canvas.draw_idle)
+    monkeypatch.setattr(tab.canvas, "draw", draw_spy)
+    monkeypatch.setattr(tab.canvas, "draw_idle", idle_spy)
+
+    tab.update_plot()
+    assert draw_spy.calls == 0, f"{tab_cls.__name__} called blocking canvas.draw()"
+    assert idle_spy.calls >= 1, f"{tab_cls.__name__} did not call canvas.draw_idle()"
