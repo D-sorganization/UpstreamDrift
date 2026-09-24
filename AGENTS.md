@@ -728,13 +728,37 @@ starting with `fleet-guard` is addressed to you.
 
 ### The Rules
 
-| Rule               | Applies to | What it means for you                                                                                                                                                                                         |
-| ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `primary-checkout` | agents     | Never commit in a repository's primary checkout. Work in your own worktree: `git worktree add ../<repo>-worktrees/<agent>-<issue> -b <branch> origin/main`, or start via `fleet-guard run <agent> --issue N`. |
-| `conflict-markers` | everyone   | A staged diff with `<<<<<<<` / `=======` / `>>>>>>>` is refused.                                                                                                                                              |
-| `protected-push`   | everyone   | No direct or forced push to `main`/`master`. Open a PR; auto-merge lands it.                                                                                                                                  |
-| `stale-push`       | agents     | If the remote branch has commits you do not have (bot force-push, auto-update merge, another session), rebase or merge first. **Never** `--force` around it.                                                  |
-| `handoff`          | agents     | Source staged without `docs/development/HANDOFF.md` → warning. Update the handoff in the same commit.                                                                                                         |
+| Rule                  | Applies to | What it means for you                                                                                                                                                                                         |
+| --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `primary-checkout`    | agents     | Never commit in a repository's primary checkout. Work in your own worktree: `git worktree add ../<repo>-worktrees/<agent>-<issue> -b <branch> origin/main`, or start via `fleet-guard run <agent> --issue N`. |
+| `foreign-worktree`    | agents     | Never commit in a worktree you did not create. A tree registered by another live session is refused — staging there destroys that session's uncommitted work. `fleet-guard status` shows who holds what.      |
+| `conflict-markers`    | everyone   | A staged diff with `<<<<<<<` / `=======` / `>>>>>>>` is refused.                                                                                                                                              |
+| `tolerance-loosening` | agents     | Never loosen a verification tolerance or performance budget to make CI green — fix the cause. See below for the evidence trailer that permits a genuine widening.                                             |
+| `protected-push`      | everyone   | No direct or forced push to `main`/`master`. Open a PR; auto-merge lands it.                                                                                                                                  |
+| `stale-push`          | agents     | If the remote branch has commits you do not have (bot force-push, auto-update merge, another session), rebase or merge first. **Never** `--force` around it.                                                  |
+| `handoff`             | agents     | Source staged without `docs/development/HANDOFF.md` → warning. Update the handoff in the same commit.                                                                                                         |
+
+### Loosening a Bound Needs Evidence, Not a Flag
+
+A test that fails is telling you something. Raising the number it compares
+against — a tolerance, an `rtol`, a performance budget, a coverage floor —
+deletes the signal and keeps the defect. Three commits did exactly this in one
+day (Tools_Private #1800, #1817, #1826: a 60 s sector budget to 180 s and then
+to 300 s, an axi/sector parity tolerance from 3.5 % to 5 %). All three were
+reverted; in every case the original bound was correct and the real cause was
+found within hours.
+
+So: **fix the cause, or file an issue with the measurements.** If the wider
+bound is genuinely right, put the numbers on an issue and cite it in the
+commit message:
+
+```
+Tolerance-Change-Evidence: #1826 — p95 118 s over 20 runs on self-hosted, see comment
+```
+
+The trailer must name an issue (`#N` or an issue URL). `tolerance-loosening`
+inspects test, benchmark, perf and validation files only, and never flags a
+bound you tighten.
 
 ### Modes
 
