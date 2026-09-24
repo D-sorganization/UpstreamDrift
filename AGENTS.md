@@ -517,6 +517,7 @@ workflow and report the rollout gap.
 - The mailbox is checkpoint-driven. Do not claim push delivery into a model
   session unless that host has a working adapter. Agents sharing a GitHub
   account are cooperative peers, not separate authenticated security identities.
+- Agents propose architectural, cross-repository, or strategic directions through the formal `board-proposal` issue form in `Repository_Management`, never by opening ad-hoc "idea" issues.
 
 <!-- END FLEET-MANAGED: agent-communication -->
 
