@@ -362,3 +362,5 @@ the launcher UI:
   widget rather than refactoring it into a new `MainWidget` factory.
 - [`docs/development/sidekick.md`](sidekick.md) — Sidekick feature
   overview (design tokens, chat context bridge, agentic tools).
+- [`docs/development/unit_policy.md`](unit_policy.md) — Fleet Unit
+  Policy for Tool Development (Issue #8886).

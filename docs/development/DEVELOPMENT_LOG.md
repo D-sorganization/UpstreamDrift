@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8886 · Unified Display Units Policy and Cross-Tool Consistency
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #8886
+- **PR:** #10893
+- **Branch:** `fix/8886-unify-tool-units`
+- **Paths:** `src/shared/python/ui/units.py`, `src/shared/python/ui/preferences_dialog.py`, `src/tools/ball_flight_gui/gui.py`, `src/tools/swing_flight_pipeline/gui.py`, `src/tools/putting_green_gui/gui.py`, `docs/development/unit_policy.md`, `docs/development/embedding_a_tool.md`, `tests/unit/shared_python/test_units.py`, `tests/tools/ball_flight_gui/test_ball_flight_gui.py`, `tests/tools/swing_flight_pipeline/test_gui.py`, `tests/tools/putting_green_gui/test_putting_green_gui.py`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified 133 unit tests pass across units conversions, settings persistence, ball flight, swing pipeline, putting green, and pose studio
+- **Summary:** Implemented unified display units module with UnitSystem enum, settings persistence in PreferencesDialog, dynamic unit switching in ball flight, swing pipeline, and putting green simulators, and published fleet unit policy documentation (Fixes #8886).
+- **Next step:** Push branch, open PR referencing #8886, enable auto-merge, verify CI green on main.
+
 ### DL-#10883 · Restore Green Main: Jules Bolt Learning Title Case Compliance
 
 - **State:** in_review
