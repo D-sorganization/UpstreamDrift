@@ -239,16 +239,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#8932 · Debounce and Memoize Advanced Analysis Tab Refreshes
 
-- **State:** in_review
-- **Owner:** claude
+- **State:** completed
+- **Owner:** antigravity
 - **Issue:** #8932
-- **Branch:** fix/8932-analysis-debounce
-- **PR:** #10734 (open)
+- **Branch:** fix/8932-analysis-tab-debounce-idle
 - **Paths:** `src/shared/python/dashboard/_analysis_refresh.py`; `src/shared/python/dashboard/advanced_analysis.py`; `tests/unit/shared_python/test_analysis_tab_refresh.py`
 - **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 at `3d62f6441` plus the DRY follow-up — shared `_SignalTransformTab` base clears the DRY duplication gate; RED shown for the six tab-level tests, then GREEN; 27 analysis-tab tests pass offscreen; ruff, mypy (dashboard scope), file-size and architecture budgets clean.
-- **Summary:** SpectrogramTab/WaveletTab spinboxes go through one shared `DebouncedRefresh` (150 ms) and memoize transforms in a `BoundedResultCache` keyed by metric, dim, fs, w0, sample count and a signal digest; SwingPlaneTab builds its axes once and swaps artists; these paths use `draw_idle()`. The repo-wide draw() sweep and `plot_engine/pyqt6_widget.py` remain open on #8932.
-- **Next step:** Land the analysis-tab PR, then convert `plot_engine/pyqt6_widget.py` to axes reuse under #8932.
+- **Last verified:** 2026-09-24 — PhasePlaneTab and CoherenceTab spinboxes debounced with `DebouncedRefresh` (150 ms); CoherenceTab memoizes `compute_coherence` with `BoundedResultCache` on `analysis_cache_key`; all tabs in `advanced_analysis.py` (CorrelationTab, PhasePlaneTab, CoherenceTab, SwingPlaneTab, SpectrogramTab, WaveletTab) use `draw_idle()` with 0 blocking `canvas.draw()`; all 25 unit tests pass offscreen; ruff, black, mypy, DRY duplication gate clean.
+- **Summary:** SpectrogramTab/WaveletTab/PhasePlaneTab/CoherenceTab spinboxes go through `DebouncedRefresh` (150 ms); CoherenceTab, SpectrogramTab, and WaveletTab memoize expensive transforms in `BoundedResultCache`; SwingPlaneTab builds its axes once and swaps artists; all six analysis tabs use non-blocking `draw_idle()`.
 
 ### DL-#9225 · GolfSwingVisualizer MATLAB Duplication Consolidation
 

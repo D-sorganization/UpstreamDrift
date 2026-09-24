@@ -470,7 +470,7 @@ class CorrelationTab(QtWidgets.QWidget):
 
         if len(data_dict) < 2:
             self.ax.text(0.5, 0.5, "Not enough data for correlation", ha="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         # Stack into matrix (N_samples, N_features)
@@ -486,7 +486,7 @@ class CorrelationTab(QtWidgets.QWidget):
             corr_mat = np.corrcoef(X, rowvar=False)
         except (ValueError, TypeError, RuntimeError):
             self.ax.text(0.5, 0.5, "Computation Error", ha="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         # Plot Heatmap
@@ -514,7 +514,7 @@ class CorrelationTab(QtWidgets.QWidget):
                 )
 
         self.canvas.fig.tight_layout()
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
 
 class PhasePlaneTab(QtWidgets.QWidget):
@@ -528,13 +528,15 @@ class PhasePlaneTab(QtWidgets.QWidget):
 
         layout = QtWidgets.QVBoxLayout(self)
 
+        self._refresh = DebouncedRefresh(self.update_plot, parent=self)
+
         # Controls
         controls_layout = QtWidgets.QHBoxLayout()
 
         self.spin_dim = QtWidgets.QSpinBox()
         self.spin_dim.setPrefix("Dim: ")
         self.spin_dim.setRange(0, 100)
-        self.spin_dim.valueChanged.connect(self.update_plot)
+        self.spin_dim.valueChanged.connect(self._refresh.trigger)
         controls_layout.addWidget(QtWidgets.QLabel("Joint Index:"))
         controls_layout.addWidget(self.spin_dim)
 
@@ -572,7 +574,7 @@ class PhasePlaneTab(QtWidgets.QWidget):
             self.ax.text(
                 0.5, 0.5, "No Position/Velocity Data", ha="center", va="center"
             )
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         # Ensure shapes match
@@ -585,7 +587,7 @@ class PhasePlaneTab(QtWidgets.QWidget):
             self.ax.text(
                 0.5, 0.5, f"Dimension {dim_idx} out of bounds", ha="center", va="center"
             )
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         p = pos[:, dim_idx]
@@ -603,7 +605,7 @@ class PhasePlaneTab(QtWidgets.QWidget):
             self.ax.plot(p[-1], v[-1], "ro", label="End")
             self.ax.legend()
 
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
 
 class CoherenceTab(QtWidgets.QWidget):
@@ -619,6 +621,9 @@ class CoherenceTab(QtWidgets.QWidget):
             raise ValueError("recorder must be provided")
         super().__init__()
         self.recorder = recorder
+
+        self._refresh = DebouncedRefresh(self.update_plot, parent=self)
+        self._cache = BoundedResultCache()
 
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -659,7 +664,7 @@ class CoherenceTab(QtWidgets.QWidget):
 
         self.spin_dim = QtWidgets.QSpinBox()
         self.spin_dim.setPrefix("Dim: ")
-        self.spin_dim.valueChanged.connect(self.update_plot)
+        self.spin_dim.valueChanged.connect(self._refresh.trigger)
         controls_layout.addWidget(self.spin_dim)
 
         layout.addLayout(controls_layout)
@@ -694,7 +699,7 @@ class CoherenceTab(QtWidgets.QWidget):
 
         if d1 is None or d2 is None or len(t1) == 0:
             self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         # Sync lengths
@@ -706,7 +711,7 @@ class CoherenceTab(QtWidgets.QWidget):
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, d1, d2):
             self.ax.text(0.5, 0.5, "Dimension out of bounds", ha="center", va="center")
-            self.canvas.draw()
+            self.canvas.draw_idle()
             return
 
         x = d1[:, dim_idx]
@@ -714,7 +719,15 @@ class CoherenceTab(QtWidgets.QWidget):
 
         fs = float(1.0 / np.mean(np.diff(t1))) if len(t1) > 1 else 100.0
 
-        f, Cxy = compute_coherence(x, y, fs)
+        cache_key = analysis_cache_key(
+            f"{key1}:{key2}",
+            dim_idx,
+            fs,
+            np.concatenate([x, y]),
+        )
+        f, Cxy = self._cache.get_or_compute(
+            cache_key, lambda: compute_coherence(x, y, fs)
+        )
 
         self.ax.plot(f, Cxy)
         self.ax.set_xlabel("Frequency (Hz)")
@@ -723,7 +736,7 @@ class CoherenceTab(QtWidgets.QWidget):
         self.ax.set_ylim(0, 1.05)
         self.ax.grid(True)
 
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
 
 class AdvancedAnalysisDialog(QtWidgets.QDialog):
