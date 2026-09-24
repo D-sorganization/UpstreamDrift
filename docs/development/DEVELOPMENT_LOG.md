@@ -97,15 +97,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10596 · Expose Tour Baselines in Motion Matching, Pendulum Tools and Replay (TB-11)
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10596 (TB-11, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10809
 - **Branch:** `feat/tb11-expose-tour-baselines-10596`
-- **Paths:** `src/tools/motion_matching/tour_baselines_presenter.py`; `src/tools/motion_matching/gui.py`; `tests/unit/motion_matching/test_tour_baselines_presenter.py`; `tests/tools/motion_matching/test_motion_matching_gui.py`; `SPEC.md`
+- **Paths:** `src/tools/motion_matching/tour_baselines_presenter.py`; `src/tools/motion_matching/tour_baselines_widget.py`; `src/tools/motion_matching/gui.py`; `tests/unit/motion_matching/test_tour_baselines_presenter.py`; `tests/tools/motion_matching/test_motion_matching_gui.py`; `SPEC.md`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-24 — 8 passed in `test_tour_baselines_presenter.py`, 14 passed in `test_motion_matching_gui.py`. check_lod clean on `src/tools/motion_matching`. Divergence inventory verified.
+- **Last verified:** 2026-09-24 — Merged cleanly into main via PR #10809 with 100% green CI (all 53 checks passing).
 - **Summary:** Implemented `TourBaselinesPresenter`, `TourBaselineDetailView`, `ModelItemView`, `WhereThisCameFromView`, `BaselineOpenResult`, `ModelComparisonReport`, `EvidenceInspectionReport`, and `ComputeBudgetView` exposing the canonical two-capture coverage matrix, accessible status badges with text labels and symbols without relying on color alone, visual semantics distinguishing 3D and projected 2D views and observed markers from simulated meshes, plain-language "Where This Came From" metadata linking raw hashes, preprocessing, geometry, fit configs, and scientific limitations (force identifiability and holdout disclaimers), and session actions (Open in Viewer, Clone for Experiment, Compare Models, Inspect Evidence, Reproduce). Integrated "Tour Baselines" tab into `MotionMatchingWidget` with interactive capture/model selectors, immediate metadata display, collapsible provenance panel, and action button dispatches.
-- **Next step:** Open PR, achieve 100% green CI, and land via squash auto-merge.
+- **Next step:** Landed on main. Proceed to TB-12 (#10597).
+
+### DL-#10597 · Tour Baselines Baseline Guide, Agent Runbook, and End-to-End Acceptance (TB-12)
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10597 (TB-12, parent #10584, program #10363)
+- **Branch:** `feat/tb12-baseline-guide-acceptance-10597`
+- **Paths:** `docs/plans/tour_baselines/baseline_guide.md`; `docs/plans/tour_baselines/agent_runbook.md`; `docs/plans/tour_baselines/final_acceptance_report.md`; `tests/acceptance/test_tour_baselines_journey.py`; `docs/plans/tour_baselines/README.md`; `docs/development/matched_swing_program/README.md`; `docs/development/DEVELOPMENT_LOG.md`; `SPEC.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — 8 passed in `tests/acceptance/test_tour_baselines_journey.py` (100% pass). Documentation links and runbook instructions verified.
+- **Summary:** Published concise Operator User Guide covering launcher navigation, driver vs. iron capture, complexity tradeoffs, loading/cloning, and physical error formulas; Agent Runbook with copyable clean-environment reproduction commands, hash verification, MATLAB R2025b requirements, and tamper detection; and Final Acceptance Report recording the completed two-capture coverage matrix, software integration sign-off, and governing issue links for outstanding full-body models. Authored comprehensive end-to-end acceptance test suite verifying the full user journey.
+- **Next step:** Run CI pre-commit checks, open PR, auto-merge, and close Epic #10584.
 
 ### DL-#10774 · Deferred Validation Project Projection
 
