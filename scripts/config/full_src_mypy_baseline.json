@@ -75,14 +75,6 @@
       "code": "arg-type"
     },
     {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
-      "line": 145,
-      "column": null,
-      "severity": "error",
-      "message": "Argument 1 to \"open\" has incompatible type \"str | None\"; expected \"int | str | bytes | PathLike[str] | PathLike[bytes]\"",
-      "code": "arg-type"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 170,
       "column": null,
@@ -867,14 +859,6 @@
       "code": "assignment"
     },
     {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py",
-      "line": 100,
-      "column": null,
-      "severity": "error",
-      "message": "Module has no attribute \"JointModelFreeFlyer\"",
-      "code": "attr-defined"
-    },
-    {
       "path": "src/tools/starting_pose_matcher/gui_session_mixin.py",
       "line": 100,
       "column": null,
@@ -1024,14 +1008,6 @@
       "column": null,
       "severity": "error",
       "message": "\"_RenderMixin\" has no attribute \"frame_override_active\"",
-      "code": "attr-defined"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py",
-      "line": 116,
-      "column": null,
-      "severity": "error",
-      "message": "\"Model\" has no attribute \"names\"; maybe \"name\" or \"nframes\"?",
       "code": "attr-defined"
     },
     {
@@ -3720,54 +3696,6 @@
       "column": null,
       "severity": "error",
       "message": "Invalid index type \"str\" for \"dict[tuple[str, str | None, str | None, str | None, float | None], BaseAgentAdapter]\"; expected type \"tuple[str, str | None, str | None, str | None, float | None]\"",
-      "code": "index"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
-      "line": 245,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type \"tuple[float, float, float] | None\" is not indexable",
-      "code": "index"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
-      "line": 246,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type \"tuple[float, float, float] | None\" is not indexable",
-      "code": "index"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/openpose.py",
-      "line": 247,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type \"tuple[float, float, float] | None\" is not indexable",
-      "code": "index"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py",
-      "line": 249,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type \"tuple[float, float, float] | None\" is not indexable",
-      "code": "index"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py",
-      "line": 250,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type \"tuple[float, float, float] | None\" is not indexable",
-      "code": "index"
-    },
-    {
-      "path": "src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py",
-      "line": 251,
-      "column": null,
-      "severity": "error",
-      "message": "Value of type \"tuple[float, float, float] | None\" is not indexable",
       "code": "index"
     },
     {
