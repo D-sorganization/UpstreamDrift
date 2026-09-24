@@ -26,6 +26,9 @@ The **Tour Baselines Program** provides a single source of truth across all 13 p
 - [Target Audit, Marker Semantics, Events, and Provenance](target_audit.md) — Cryptographic capture contracts, versioned measurement maps, native clocks, inferred event landmarks, and shared subject anatomy.
 - [Baseline Packages, Manifest Identities, and Status Bundles](baseline_packages.md) — Versioned baseline package contract (`tour-baseline-package/1.0.0`), 5-status bundle, error formulas, and clean-machine portability.
 - [Qualification Profiles and Attainable-Geometry Baselines](qualification_profiles.md) — Frozen numeric qualification profiles for authoritative full-body and reduced educational models with documented geometric rationale.
+- [Tour Baselines User Guide](baseline_guide.md) — Operator instructions covering launcher navigation, driver vs. iron capture, complexity tradeoffs, loading/cloning, and physical error metric interpretation.
+- [Agent Runbook: Clean Reproduction](agent_runbook.md) — Copyable clean-environment reproduction commands, dependency checks, MATLAB R2025b requirements, and tamper validation.
+- [Final Acceptance Report](final_acceptance_report.md) — Software integration sign-off, coverage matrix summary, 8/8 acceptance test results, and outstanding full-body scientific tracking.
 
 ---
 

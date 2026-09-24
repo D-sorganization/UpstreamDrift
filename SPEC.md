@@ -1,3 +1,28 @@
+## Tour Baselines User Guide, Agent Runbook, and End-to-End Acceptance (TB-12, #10597)
+
+Completes the documentation and end-to-end acceptance deliverables for Epic #10584:
+- **Tour Baselines User Guide (`docs/plans/tour_baselines/baseline_guide.md`)**:
+  - Published comprehensive user and operator guide with Title-Case document headings.
+  - Documents full launcher navigation path: `Launcher -> Motion Matching -> Tour Baselines Tab -> Capture Selection -> Model Roster -> Evidence / Open / Compare / Clone`.
+  - Contrasts Driver (360 Hz, 654 frames, upward attack angle) and 7-Iron (359 Hz, 654 frames, downward compression) tour captures.
+  - Explains 4-tier model complexity hierarchy (Planar Pendulums, Constrained Upper Body, Rigid Full Body, Musculoskeletal & Neural).
+  - Specifies baseline loading, strict visual distinction semantics (measured `marker_points` vs simulated `continuous_mesh`), session cloning isolation, and native replay.
+  - Documents standardized physical 3D Euclidean marker RMSE formulas, separation of physical metrics from optimizer loss, percentile errors, and swing phase breakdowns.
+  - Details cryptographic provenance tracking across capture SHA-256, runtime commits, geometry/inertia hashes, and controls.
+- **Agent Runbook: Clean-Environment Reproduction (`docs/plans/tour_baselines/agent_runbook.md`)**:
+  - Provides copyable, deterministic commands for reproducing all baseline packages from a clean environment.
+  - Verifies submodule commit pin (`vendor/ud-tools` at `a9ed0e7c5c6905b1164082659051d6381068052d`) and tour capture file hashes.
+  - Explicitly documents mandatory reduced-model reproduction commands (`driven_double_pendulum`, `driven_triple_pendulum` on Driver & 7-Iron) and gate evaluation commands.
+  - Details full-body engine reproduction requirements: explicit MATLAB R2025b requirement for Simscape (#10440), MuJoCo ground support (#10363), Pinocchio/Crocoddyl trajectory optimization (#10378), OpenSim Moco (#10003), and MyoSuite placeholder status.
+  - Outlines package export, import, and tamper-detection verification procedures and troubleshooting runbook.
+- **Final Acceptance Report (`docs/plans/tour_baselines/final_acceptance_report.md`)**:
+  - Formally accepts Epic #10584, separating completed software integration (100% verified) from ongoing physical qualification.
+  - Records the complete two-capture coverage matrix across all registered models.
+  - Summarizes the 8/8 passing automated acceptance test results.
+  - Re-anchors outstanding full-body scientific qualification obligations to governing issues #10363, #10378, #10430, and #10440.
+- **End-to-End Acceptance Test Suite (`tests/acceptance/test_tour_baselines_journey.py`)**:
+  - 8 acceptance tests validating the full user journey: roster completeness across Driver/Iron, model detail & provenance integrity, visual distinction semantics, session cloning isolation, model comparison, evidence inspection with audit receipts, copyable CLI reproduction, and GUI widget integration.
+
 ## Expose Tour Baselines in Motion Matching, Pendulum Tools and Replay (TB-11, #10596)
 
 Integrates Tour Baselines into Motion Matching and Replay launchers:
