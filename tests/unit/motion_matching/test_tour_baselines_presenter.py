@@ -326,6 +326,21 @@ def test_compare_models_preserves_missing_rmse_without_fabricating_delta(
     assert "comparison unavailable" in report_both.verdict
     assert "both full_body_drake and full_body_pinocchio" in report_both.verdict
 
+    # Cross-capture fallback avoidance (#10826):
+    # driven_triple_pendulum only has a Driver package in baseline_store, not Iron.
+    # Comparing on Iron must not use the Driver RMSE to fabricate a cross-capture delta.
+    report_cross = presenter.compare_models(
+        model_a_id="driven_double_pendulum",
+        model_b_id="driven_triple_pendulum",
+        capture="iron",
+    )
+    assert "marker_rmse_delta_mm" not in report_cross.metric_deltas
+    assert report_cross.metric_deltas == {}
+    assert "comparison unavailable" in report_cross.verdict
+    assert (
+        "driven_triple_pendulum lacks measured baseline package" in report_cross.verdict
+    )
+
 
 def test_inspect_evidence_returns_audit_and_receipt(baseline_store: Path) -> None:
     """Requirement: Inspect Evidence shows raw receipt, status bundle, and validation logs."""
