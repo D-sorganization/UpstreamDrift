@@ -144,6 +144,6 @@
 **Learning:** In reinforcement learning reward and metric calculations (e.g. `src/reinforcement_learning/trajectory_funnel_benchmark.py`), calculating the distance between the final state and the reference state using `np.linalg.norm(states[-1] - reference[-1])` incurs overhead. Replacing it with `math.sqrt(np.vdot(diff, diff))` avoids intermediate array allocations and NumPy dispatch overhead for small 1D state arrays.
 **Action:** Replace `np.linalg.norm(states[-1] - reference[-1])` with pre-calculated differences and `math.sqrt(np.vdot(diff, diff))` for terminal state error calculations.
 
-## 2026-09-24 - [Avoid Np.Linalg.Norm For Small 1D Array Operations]
+## 2026-09-24 - [Avoid Np.Linalg.Norm for Small 1D Array Operations]
 **Learning:** `np.linalg.norm` has significant overhead for small arrays. For calculating norms of small 1D vectors (like tangent forces), replacing it with `math.sqrt(np.vdot(v, v))` provides a substantial ~2x performance speedup.
 **Action:** Always prefer `math.sqrt(np.vdot(v, v))` over `np.linalg.norm` for small 1D NumPy arrays in computation-heavy paths like physics simulation updates or evaluations.
