@@ -152,8 +152,14 @@ def baseline_store(tmp_path: Path) -> Path:
         club="iron",
         rmse=0.009,
     )
+    pkg_triple = _make_test_package(
+        model_id="driven_triple_pendulum",
+        club="driver",
+        rmse=0.018,
+    )
     export_baseline_package(pkg_driver, store / "driver_pendulum.npz")
     export_baseline_package(pkg_iron, store / "iron_pendulum.npz")
+    export_baseline_package(pkg_triple, store / "driver_triple_pendulum.npz")
     return store
 
 
@@ -273,7 +279,7 @@ def test_clone_for_experiment_preserves_session_directory(
 def test_compare_models_generates_metric_and_topology_diffs(
     baseline_store: Path,
 ) -> None:
-    """Requirement: Compare Models between two baseline models / topologies."""
+    """Requirement: Compare Models between two baseline models / topologies with packages."""
     presenter = TourBaselinesPresenter(search_roots=[baseline_store])
 
     report = presenter.compare_models(
@@ -286,7 +292,63 @@ def test_compare_models_generates_metric_and_topology_diffs(
     assert report.model_b_id == "driven_triple_pendulum"
     assert report.capture == "driver"
     assert "marker_rmse_delta_mm" in report.metric_deltas
+    assert report.metric_deltas["marker_rmse_delta_mm"] == pytest.approx(6.0)
+    assert "+6.00 mm" in report.verdict
     assert report.topology_comparison is not None
+
+
+def test_compare_models_reports_unavailable_when_model_b_missing_package(
+    baseline_store: Path,
+) -> None:
+    """Requirement: Missing RMSE is not treated as zero when model_b lacks package."""
+    presenter = TourBaselinesPresenter(search_roots=[baseline_store])
+
+    report = presenter.compare_models(
+        model_a_id="driven_double_pendulum",
+        model_b_id="full_body_mujoco",
+        capture="driver",
+    )
+    assert isinstance(report, ModelComparisonReport)
+    assert "marker_rmse_delta_mm" not in report.metric_deltas
+    assert "marker RMSE delta unavailable" in report.verdict
+    assert "full_body_mujoco lacks package evidence" in report.verdict
+
+
+def test_compare_models_reports_unavailable_when_model_a_missing_package(
+    baseline_store: Path,
+) -> None:
+    """Requirement: Missing RMSE is not treated as zero when model_a lacks package."""
+    presenter = TourBaselinesPresenter(search_roots=[baseline_store])
+
+    report = presenter.compare_models(
+        model_a_id="full_body_mujoco",
+        model_b_id="driven_double_pendulum",
+        capture="driver",
+    )
+    assert isinstance(report, ModelComparisonReport)
+    assert "marker_rmse_delta_mm" not in report.metric_deltas
+    assert "marker RMSE delta unavailable" in report.verdict
+    assert "full_body_mujoco lacks package evidence" in report.verdict
+
+
+def test_compare_models_reports_unavailable_when_both_models_missing_packages(
+    baseline_store: Path,
+) -> None:
+    """Requirement: Missing RMSE is not treated as zero when both models lack packages."""
+    presenter = TourBaselinesPresenter(search_roots=[baseline_store])
+
+    report = presenter.compare_models(
+        model_a_id="full_body_mujoco",
+        model_b_id="full_body_pinocchio",
+        capture="driver",
+    )
+    assert isinstance(report, ModelComparisonReport)
+    assert "marker_rmse_delta_mm" not in report.metric_deltas
+    assert "marker RMSE delta unavailable" in report.verdict
+    assert (
+        "both full_body_mujoco and full_body_pinocchio lack package evidence"
+        in report.verdict
+    )
 
 
 def test_inspect_evidence_returns_audit_and_receipt(baseline_store: Path) -> None:
@@ -299,6 +361,21 @@ def test_inspect_evidence_returns_audit_and_receipt(baseline_store: Path) -> Non
     assert evidence.status_bundle is not None
     assert evidence.status_bundle["convergence"] == "converged"
     assert evidence.status_bundle["feasibility"] == "physically_feasible"
+    assert "marker_rmse_mm" in evidence.metrics
+    assert evidence.metrics["marker_rmse_mm"] == pytest.approx(12.0)
+
+
+def test_inspect_evidence_omits_missing_metrics_for_unpackaged_model(
+    baseline_store: Path,
+) -> None:
+    """Requirement: Inspect evidence does not synthesize 0.0 error when package is absent."""
+    presenter = TourBaselinesPresenter(search_roots=[baseline_store])
+
+    evidence = presenter.inspect_evidence("full_body_mujoco", "driver")
+    assert isinstance(evidence, EvidenceInspectionReport)
+    assert evidence.model_id == "full_body_mujoco"
+    assert "marker_rmse_mm" not in evidence.metrics
+    assert "projection_residual_mm" not in evidence.metrics
 
 
 def test_reproduce_returns_exact_command(baseline_store: Path) -> None:

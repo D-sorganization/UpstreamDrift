@@ -9,8 +9,8 @@ Integrates Tour Baselines into Motion Matching and Replay launchers:
   - Plain-Language "Where This Came From" Panel (`WhereThisCameFromView`): Surfaces raw capture SHA-256 hashes, capture frequencies, preprocessing pipeline notes, subject & club geometries, fit configurations, replay receipt links, and explicit scientific limitations (force identifiability and holdout generalization disclaimers).
   - Session Actions (`open_baseline`, `clone_for_experiment`, `compare_models`, `inspect_evidence`, `reproduce`):
     - `clone_for_experiment`: clones verified baseline presets into isolated user session directories without mutating parent baselines.
-    - `compare_models`: compares models across shared captures, computing metric deltas and topology differences.
-    - `inspect_evidence`: inspects audit receipts, five-fold status bundles, engine versions, and git commit provenance.
+    - `compare_models`: compares models across shared captures, computing metric deltas and topology differences. Honestly preserves missing RMSE instead of treating it as zero; reports unavailable marker RMSE delta with missing package evidence descriptions when either or both models lack packages.
+    - `inspect_evidence`: inspects audit receipts, five-fold status bundles, engine versions, and git commit provenance, omitting unmeasured metrics rather than synthesizing 0.0 error.
     - `reproduce`: generates exact reproduction CLI commands.
   - Compute Budget View (`ComputeBudgetView`, `get_compute_budget`): Surfaces declared wall clock limits, evaluation limits, and parameter dimensions.
 - **Motion Matching GUI Integration (`src/tools/motion_matching/gui.py`)**:
@@ -20,7 +20,7 @@ Integrates Tour Baselines into Motion Matching and Replay launchers:
     - Collapsible "Where This Came From" panel with toggle button.
     - Interactive action buttons for Open in Viewer, Clone for Experiment, Compare Models, Inspect Evidence, and Reproduce.
 - **Verification Suites (`tests/unit/motion_matching/test_tour_baselines_presenter.py`, `tests/tools/motion_matching/test_motion_matching_gui.py`)**:
-  - 8 unit tests in `test_tour_baselines_presenter.py` verifying model listing, accessible badge formatting, Where This Came From metadata, visual semantics, session cloning, model comparison, evidence inspection, and exact reproduction commands.
+  - 12 unit tests in `test_tour_baselines_presenter.py` verifying model listing, accessible badge formatting, Where This Came From metadata, visual semantics, session cloning, model comparison with honest missing metric handling, evidence inspection without synthetic metrics, and exact reproduction commands.
   - 14 integration and unit tests in `test_motion_matching_gui.py` verifying tabbed widget construction (5 tabs), Tour Baselines tab controls and selectors, collapsible where panel toggle, and action button dispatches.
 
 ## Tour Baselines Discovery, Portable Loading and Safe Model Presets (TB-10, #10595)

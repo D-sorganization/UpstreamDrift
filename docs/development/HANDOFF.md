@@ -1,3 +1,36 @@
+# Preserve Missing RMSE in Tour Baselines Model Comparison — #10810
+
+## Identity
+
+- Repository: D-sorganization/UpstreamDrift
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10810`
+- Branch: `fix/10810-tour-baselines-missing-rmse`
+- Baseline commit: `origin/main`
+- Governing issue: #10810 (and duplicates #10812, #10813)
+- Session: `antigravity-20260924-issue-10810`
+
+## Objective and Status
+
+Preserve missing RMSE instead of treating it as zero. When either model lacks a discovered package in `compare_models`, avoid computing a delta or publishing a false verdict. Report unavailable marker RMSE delta with specific missing package evidence descriptions. In `inspect_evidence`, omit unmeasured metrics rather than synthesizing 0.0 error.
+
+## Files and Decisions
+
+- `src/tools/motion_matching/tour_baselines_presenter.py`:
+  - `compare_models`: Check `detail.original_frame_error_mm`. If both models have valid metrics, compute numeric delta and delta verdict. If either or both lack package evidence, do not compute delta (`metric_deltas` omits `marker_rmse_delta_mm`) and format verdict stating marker RMSE delta is unavailable with specific model names.
+  - `inspect_evidence`: Only include `marker_rmse_mm` and `projection_residual_mm` in `metrics` if non-None.
+- `tests/unit/motion_matching/test_tour_baselines_presenter.py`:
+  - Added `pkg_triple` package to `baseline_store` fixture.
+  - Added unit test cases for model_b missing package, model_a missing package, both models missing packages, and unpackaged model evidence inspection.
+- `SPEC.md`: Documented honest handling of missing metrics in model comparison and updated test counts.
+- `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10810 entry and updated DL-#10596 to shipped.
+
+## Validation
+
+- 12 passed in `tests/unit/motion_matching/test_tour_baselines_presenter.py`.
+- `ruff check`: All checks passed.
+- `ruff format`: Clean.
+- `mypy --follow-imports=silent`: Success: no issues found in 2 source files.
+
 # Deferred Catalog Enforcement — #10783
 
 ## Identity
