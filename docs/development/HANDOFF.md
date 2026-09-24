@@ -73,10 +73,19 @@ Protected CI and default-branch identity verification
 remain open. Catalog validity is not Board approval, physical validation or a
 scientific release qualification.
 
+Fresh structure job `107433594917` in run `35936097540` at `150cf769ff`
+passes the architecture correction and reaches a different failure:
+`check_suite_marker_ratchet.py` reports three unmarked test functions in
+`tests/unit/repo_hygiene/test_deferred_catalog_hook.py` (five parametrized cases).
+The next agent should apply the appropriate unit-suite marker, validate the
+unchanged behavioral controls and suite-marker gate, and publish through normal
+hooks. No test/baseline suppression or speculative fix was added at handoff.
+
 ## Next Steps
 
 Complete protected publication of PR #10784 closing #10783,
 verify the installed files centrally, and update this continuation with results.
+Resolve the freshly observed suite-marker failure before expecting publication.
 Keep the full rollout and the original scientific acceptance obligations open.
 The user requested a committed PR checkpoint and then a pause. Continue from
 this branch only after claiming the handoff; do not interpret the pause as
