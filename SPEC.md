@@ -8619,3 +8619,31 @@ The general optimal-control extra retains its separate version range (#9842).
 - Replaced `np.linalg.norm` with `math.sqrt(np.dot)` for small 1D arrays in `bunker_shot_gui` and `simulation_backends_launcher` for performance improvement. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/shared/python/biomechanics/golf_trajectory.py` to bypass linear algebra overhead for multi-dimensional distance calculations. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm()` with `math.sqrt(np.dot())` for small 1D vectors in `src/engines/physics_engines/pinocchio/python/native_model.py`, `src/engines/physics_engines/drake/python/full_body_model.py`, and `src/shared/python/physics/ground_reaction_forces.py` to bypass linear algebra overhead. (spec-exempt: micro-optimization)
+
+## Independent Baseline Qualification, Model Adequacy and Full-Capture Coverage (TB-09, #10594)
+
+Establishes the independent qualification service for candidate tour baseline packages across full-capture coverage (G3 horizon), enforcing physical, structural, and numerical adequacy without trusting cached or claimed fit metrics:
+- **Cryptographic Artifact Integrity (`verify_artifact_integrity`, `IntegrityReport`, `IntegrityViolation`)**:
+  - Validates bitwise provenance of initial states ($q_0, v_0$), controls, and fixed geometry/inertia against canonical target hashes.
+  - Generates immutable `IntegrityReport` and raises structured `IntegrityViolation` upon tampering, missing hashes, or target mismatches.
+- **Pure Forward Dynamic Rollout Reconstruction (`reconstruct_rollout`, `RolloutReconstructionResult`)**:
+  - Simulates forward dynamics strictly from single initial configuration $(q_0, v_0)$ and candidate controls.
+  - Rejects intermediate target-state injection, midpoint resets, or artificial stabilization forces.
+- **Physical, Structural and Geometric Constraint Evaluation (`evaluate_constraints`, `ConstraintEvaluationResult`)**:
+  - Enforces joint position limits, torque bounds, torque-rate limits, and weld closures.
+  - Strictly prohibits unauthorized base actuation and rejects time-varying segment/inertia parameters.
+- **Independent Metric Recomputation (`recompute_metrics`, `RecomputedMetrics`)**:
+  - Computes 3D Euclidean distances, in-plane errors, per-marker deviations, and clubhead coverage directly from simulated rollouts.
+- **Endpoint Verification (`check_endpoints`, `EndpointCheckResult`)**:
+  - Evaluates impact alignment and follow-through constraints against canonical target tolerances.
+- **Model Adequacy Decomposition and Refinement Sensitivity (`ModelAdequacyDecomposition`, `RefinementSensitivityRecord`)**:
+  - Separates total error into expressiveness gap, optimization gap, and numerical integration error.
+  - Quantifies refinement sensitivity across integration timesteps ($dt$) to detect integration artifacts.
+- **Cross-Complexity Evaluation and Full-Capture Coverage (`compare_cross_complexity`, `evaluate_full_roster_qualification`)**:
+  - Enforces like-for-like comparisons across model complexities strictly over shared observation subsets.
+  - Evaluates qualification status across all 40 coverage cells (5 models $\times$ 4 captures $\times$ 2 clubs).
+  - Enforces rule that reduced models can never qualify under G3 full-body gates (`QUALIFIED_REDUCED` only).
+- **Auditability and Identifiability Disclaimers (`ExpertSignoff`, `ForceIdentifiabilityDisclaimer`)**:
+  - Mandatory disclosure that identified internal forces and torques are non-unique and model-dependent.
+  - Issues signed, auditable `ExpertSignoff` receipts exportable to JSON.
+
