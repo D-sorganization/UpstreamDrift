@@ -8,10 +8,11 @@
  * See issue #1198
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { PolynomialGeneratorPanel } from './PolynomialGeneratorPanel';
 import { ActuatorSlider } from './ActuatorSlider';
 import { apiFetch } from '@/api/fetch';
+import { usePolling } from '@/hooks/usePolling';
 
 /** Actuator descriptor from the API. See issue #1198 */
 export interface ActuatorInfo {
@@ -117,18 +118,23 @@ export function ActuatorPanel({
     }
   }, []);
 
+  const hasMountedRef = useRef(false);
   useEffect(() => {
-    // fetchActuators is async (awaits apiFetch before any setState), so the
-    // updates never run synchronously inside the effect. Scheduling via a
-    // microtask makes that explicit for react-hooks/set-state-in-effect.
-    const refresh = () => void Promise.resolve().then(fetchActuators);
-    refresh();
-
-    if (isRunning && refreshInterval > 0) {
-      const interval = setInterval(refresh, refreshInterval);
-      return () => clearInterval(interval);
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      if (!isRunning) {
+        void Promise.resolve().then(fetchActuators);
+      }
     }
-  }, [fetchActuators, isRunning, refreshInterval]);
+  }, [fetchActuators, isRunning]);
+
+  // Poll only while the simulation runs and the tab is visible; skips overlapping
+  // ticks and clears interval on disable/unmount (#8941).
+  usePolling(fetchActuators, {
+    intervalMs: refreshInterval > 0 ? refreshInterval : 1000,
+    enabled: isRunning && refreshInterval > 0,
+    immediate: true,
+  });
 
   const handleValueChange = useCallback(async (index: number, value: number) => {
     // #6898: surface failures (bad index, engine not loaded) instead of

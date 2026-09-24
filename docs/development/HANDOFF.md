@@ -1,60 +1,63 @@
-# Implementation Handoff — Pendulum Inertia Hash Integration Parameter Digest & Dynamics Cache Refresh
+# Implementation Handoff — Simulation Page Polling Migration to Shared usePolling Hook
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-fix-10849`
-- Branch: `fix/10849-10850-inertia-hash-and-spec-keys`
-- Baseline commit: `f4ba2b4b4`
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-sim-polling`
+- Branch: `fix/8941-use-polling-toolbar-actuator`
+- Baseline commit: `0dd23bde7d`
 - Implementation commit: `SELF`
-- Pull request: #10860
-- Governing issue/epic: #10849, #10850, #10851 (addressing review comments on PR #10841 and #10844)
-- Session: `antigravity-20260924-inertia-hash-governance`
+- Pull request: #10881
+- Governing issue: #8941
+- Session: `antigravity-8941-sim-polling`
 
 ## Objective and Status
 
-- Objective: Address review feedback on PR #10841 and PR #10844:
-  1. Hash the actual cached integration parameters consumed by simulation rollout, instantiate calibrated dynamics before caching, and add `refresh_cache()` (#10849).
-  2. Replace `n/a` placeholder for PR #10844 in `SPEC.md` Section 12 with `#10844` (#10850).
-  3. Synchronize canonical handoff with quaternion norm optimization (#10851).
+- Objective: Complete the client-side REST polling cleanup for #8941:
+  1. Migrate `ActuatorPanel` (1000 ms) and `SimulationToolbar` (1000 ms) from raw `setInterval` loops to the shared `usePolling` hook.
+  2. Ensure polling automatically pauses when the browser tab is hidden (`document.visibilityState === 'hidden'`) and resumes on visible.
+  3. Ensure no concurrent/overlapping ticks occur when requests are in flight.
+  4. Ensure intervals and pending tasks are cleaned up on unmount or disable.
 - Status: Complete / ready for PR
 - Completed:
-  1. Added `refresh_cache()` to `DoublePendulumDynamics`.
-  2. Updated `create_calibrated_double_pendulum_dynamics` to construct `DoublePendulumDynamics(parameters=dyn_params)` so calibrated lengths are cached immediately.
-  3. Updated `compute_pendulum_inertia_hash` to derive the digest directly from cached integration parameters `(_m1, _m2, _l1, _lc1, _lc2, _i1, _i2)` after calling `refresh_cache()`.
-  4. Added regression test `test_calibrated_pendulum_dynamics_caches_lengths_and_updates_on_mutation` in `tests/unit/tour_baselines/test_qualification.py`.
-  5. Updated `SPEC.md`, `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`, and this handoff.
-- Remaining: Push branch, open PR with auto-merge, verify checks, and close issues.
+  1. Updated `ui/src/components/simulation/ActuatorPanel.tsx` to use `usePolling` and guard initial load with `hasMountedRef`.
+  2. Updated `ui/src/components/simulation/SimulationToolbar.tsx` to use `usePolling` and removed unneeded `pollRef`.
+  3. Added comprehensive test coverage in `ActuatorPanel.test.tsx` and `SimulationToolbar.test.tsx` verifying cadence, tab-hidden pause, stopped simulation gating, and unmount cleanup.
+  4. Verified all 98 test files / 934 tests pass in vitest, `tsc -b`, ESLint, and production build.
+  5. Updated `docs/development/DEVELOPMENT_LOG.md` and this handoff.
+- Remaining: Push branch, open PR with auto-merge, verify checks, and close issue.
 
 ## Files and Decisions
 
 - Files changed:
-  - `src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py`: Added `refresh_cache()`.
-  - `src/engines/physics_engines/pendulum/python/motion_matching/adapters.py`: Configured `DoublePendulumParameters` before constructing `DoublePendulumDynamics`.
-  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Derived inertia hash directly from cached integration properties.
-  - `tests/unit/tour_baselines/test_qualification.py`: Added regression tests for calibrated dynamics caching and parameter mutation.
-  - `SPEC.md`: Replaced `n/a` with `#10844` and added row for this PR.
-  - `AGENT_HANDOFF.md`: Synchronized root handoff.
-  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10849 and marked DL-#10842 as shipped.
+  - `ui/src/components/simulation/ActuatorPanel.tsx`: Replaced raw `setInterval` effect with `usePolling` and `hasMountedRef`.
+  - `ui/src/components/simulation/SimulationToolbar.tsx`: Replaced raw `setInterval` effect with `usePolling` and removed `pollRef`.
+  - `ui/src/components/simulation/ActuatorPanel.test.tsx`: Added polling test suite.
+  - `ui/src/components/simulation/SimulationToolbar.test.tsx`: Added polling test suite.
+  - `docs/development/DEVELOPMENT_LOG.md`: Updated DL-#8941.
   - `docs/development/HANDOFF.md`: Updated handoff document.
 
 ## Validation
 
-- `pytest tests/unit/tour_baselines/test_qualification.py` — 24 passed in 4.76s.
-- `python scripts/ci/check_spec_changelog_duplicates.py` — passed.
-- `python scripts/check_document_title_case.py --changed-from origin/main` — passed.
+- `npx vitest run src/components/visualization/ForceOverlayPanel.test.tsx src/components/simulation/ActuatorPanel.test.tsx src/components/simulation/SimulationToolbar.test.tsx` — 31 passed in 2.35s.
+- `npx vitest run` — 98 test files passed, 934 tests passed in 35.30s.
+- `npx tsc -b && npm run lint` — passed cleanly.
+- `npm run build` — passed cleanly.
+- `python scripts/ci/check_architecture_budget.py` — passed.
+- `python scripts/ci/check_error_handling_ratchet.py` — passed.
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (improves physical consistency of cryptographic receipts).
+- Risks/assumptions: None (standardization on proven `usePolling` hook created in #10748).
 
 ## Next Steps
 
-1. Push branch to origin and open PR.
-2. Enable auto-merge and verify green CI.
-3. Close issues #10849, #10850, #10851.
+1. Commit and push branch to origin.
+2. Open PR with `agent:local` label and auto-merge enabled.
+3. Monitor CI and verify merge.
+4. Release lease on issue #8941.
 
 ## Change Log
 
-- `SELF` — Derive pendulum inertia digest from cached integration parameters and refresh dynamics cache on length calibration (#10849, #10850, #10851).
+- `SELF` — Migrate ActuatorPanel and SimulationToolbar to shared usePolling hook (#8941).
