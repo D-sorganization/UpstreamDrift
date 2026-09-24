@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10883 · Restore Green Main: Jules Bolt Learning Title Case Compliance
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #10883
+- **PR:** n/a
+- **Branch:** `fix/10883-docs-governance-title-case`
+- **Paths:** `.jules/bolt.md`, `tests/scripts/test_document_title_case.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified Title Case check passes across diff, unit tests in test_document_title_case.py pass (5/5)
+- **Summary:** Backticked code tokens (`np.linalg.norm`) in .jules/bolt.md heading to restore green main against required docs-governance-gates and added unit regression test (#10883).
+- **Next step:** Create PR, enable auto-merge, verify CI green on main.
+
 ### DL-#10849 · Pendulum Inertia Hash Integration Parameter Digest & Dynamics Cache Refresh
 
 - **State:** in_review
