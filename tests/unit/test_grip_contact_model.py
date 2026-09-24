@@ -607,6 +607,7 @@ class TestDynamicSwingValidation:
         assert state.num_slipping >= 1
         assert state.num_sticking >= 1
 
+    @pytest.mark.unit
     def test_slip_margin_with_integer_dtype_tangent_force(self) -> None:
         """Should safely calculate slip margin without integer overflow (#10845)."""
         model = GripContactModel()
