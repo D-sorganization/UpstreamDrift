@@ -41,7 +41,28 @@ class TourBaselinesWidget(QWidget):
         self._init_ui()
 
     def _init_ui(self) -> None:
-        # 1. Capture & Model Selectors
+        sel_form = self._build_selectors_layout()
+        meta_group = self._build_metadata_group()
+        self._build_where_group()
+        actions_row = self._build_actions_layout()
+
+        self.tb_log = QPlainTextEdit()
+        self.tb_log.setReadOnly(True)
+        self.tb_results = QLabel("Ready")
+        self.tb_results.setWordWrap(True)
+
+        layout = QVBoxLayout(self)
+        layout.addLayout(sel_form)
+        layout.addWidget(meta_group)
+        layout.addWidget(self.tb_toggle_where_btn)
+        layout.addWidget(self.tb_where_group)
+        layout.addLayout(actions_row)
+        layout.addWidget(self.tb_log, stretch=1)
+        layout.addWidget(self.tb_results)
+
+        self._populate_tb_models()
+
+    def _build_selectors_layout(self) -> QFormLayout:
         sel_form = QFormLayout()
         self.tb_capture = QComboBox()
         self.tb_capture.addItems(["Driver", "7-Iron"])
@@ -58,8 +79,9 @@ class TourBaselinesWidget(QWidget):
         sel_form.addRow("Tour Capture:", self.tb_capture)
         sel_form.addRow("Model Preset:", self.tb_model)
         sel_form.addRow("Fit Mode:", self.tb_fit_mode)
+        return sel_form
 
-        # 2. Metadata Display Group
+    def _build_metadata_group(self) -> QGroupBox:
         meta_group = QGroupBox("Model Metadata & Scientific Qualification")
         meta_form = QFormLayout(meta_group)
 
@@ -84,8 +106,9 @@ class TourBaselinesWidget(QWidget):
         meta_form.addRow("Phase Coverage:", self.tb_phases)
         meta_form.addRow("Active Blocker:", self.tb_blocker_info)
         meta_form.addRow("Compute Budget:", self.tb_budget)
+        return meta_group
 
-        # 3. Where This Came From Collapsible Panel
+    def _build_where_group(self) -> None:
         self.tb_toggle_where_btn = QPushButton("Toggle 'Where This Came From' Panel")
         self.tb_toggle_where_btn.clicked.connect(self._toggle_where_panel)
 
@@ -110,7 +133,7 @@ class TourBaselinesWidget(QWidget):
         where_form.addRow("Replay Receipt:", self.tb_receipt)
         where_form.addRow("Scientific Limitations:", self.tb_limitations)
 
-        # 4. Actions Row
+    def _build_actions_layout(self) -> QHBoxLayout:
         actions_row = QHBoxLayout()
         self.tb_open_btn = QPushButton("Open in Viewer")
         self.tb_clone_btn = QPushButton("Clone for Experiment")
@@ -129,24 +152,7 @@ class TourBaselinesWidget(QWidget):
         actions_row.addWidget(self.tb_compare_btn)
         actions_row.addWidget(self.tb_evidence_btn)
         actions_row.addWidget(self.tb_reproduce_btn)
-
-        # 5. Output Log & Results
-        self.tb_log = QPlainTextEdit()
-        self.tb_log.setReadOnly(True)
-        self.tb_results = QLabel("Ready")
-        self.tb_results.setWordWrap(True)
-
-        layout = QVBoxLayout(self)
-        layout.addLayout(sel_form)
-        layout.addWidget(meta_group)
-        layout.addWidget(self.tb_toggle_where_btn)
-        layout.addWidget(self.tb_where_group)
-        layout.addLayout(actions_row)
-        layout.addWidget(self.tb_log, stretch=1)
-        layout.addWidget(self.tb_results)
-
-        # Populate initial models
-        self._populate_tb_models()
+        return actions_row
 
     def _populate_tb_models(self) -> None:
         capture = self.tb_capture.currentText().strip().lower()
