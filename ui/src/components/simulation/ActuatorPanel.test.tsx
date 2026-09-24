@@ -4,8 +4,8 @@
  * See issue #1198
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ActuatorPanel } from './ActuatorPanel';
 import type { ActuatorInfo, ActuatorPanelState } from './ActuatorPanel';
 
@@ -289,5 +289,98 @@ describe('ActuatorPanel React Component', () => {
     fireEvent.change(filterSelect, { target: { value: 'Upper Body' } });
     expect(screen.queryByText(/hip_rot_/i)).not.toBeInTheDocument();
     expect(screen.getByText('shoulder_flex_0')).toBeInTheDocument();
+  });
+
+  describe('ActuatorPanel polling (#8941)', () => {
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    function actuatorsResponse() {
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers(),
+        json: () => Promise.resolve(mockStateSmall),
+      };
+    }
+
+    async function flush() {
+      await act(async () => {
+        for (let i = 0; i < 5; i++) await Promise.resolve();
+      });
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      fetchMock = vi.fn().mockResolvedValue(actuatorsResponse());
+      global.fetch = fetchMock as unknown as typeof fetch;
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => 'visible',
+      });
+    });
+
+    it('fetches once on mount when isRunning is false and does not poll', async () => {
+      render(<ActuatorPanel isRunning={false} refreshInterval={1000} />);
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      // Still exactly 1 call -- no timer polling while stopped
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('polls periodically when isRunning is true', async () => {
+      render(<ActuatorPanel isRunning={true} refreshInterval={1000} />);
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      for (let tick = 1; tick <= 3; tick++) {
+        await act(async () => {
+          vi.advanceTimersByTime(1000);
+        });
+        await flush();
+      }
+      // 1 initial + 3 ticks = 4 calls over 3 seconds
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+      expect(String(fetchMock.mock.calls[0][0])).toContain('/api/simulation/actuators');
+    });
+
+    it('pauses polling while the tab is hidden', async () => {
+      render(<ActuatorPanel isRunning={true} refreshInterval={1000} />);
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        Object.defineProperty(document, 'visibilityState', {
+          configurable: true,
+          get: () => 'hidden',
+        });
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      // Stays paused at 1 call while hidden
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears interval on unmount', async () => {
+      const { unmount } = render(<ActuatorPanel isRunning={true} refreshInterval={1000} />);
+      await flush();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      unmount();
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
   });
 });

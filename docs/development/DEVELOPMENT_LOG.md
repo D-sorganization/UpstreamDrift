@@ -278,18 +278,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Preserve external evidence requirements for Board consideration. Keep executable work distinct; no experimental results, actor approvals or provider changes.
 - **Next step:** Validate and publish six plans; verify exact artifacts before source comments. Keep five open sources open and preserve the existing #9546 disposition.
 
-### DL-#8941 · Simulation-Page Analysis/Force Polling (Server + Client)
+### DL-#8941 · Simulation-Page Polling Complete (Server + Client)
 
 - **State:** in_review
-- **Owner:** claude
-- **Issue:** #8941 (server via #10736 merged; client polling here; WS frames stay with #8936/#8940)
-- **Branch:** fix/8941-client-polling
-- **PR:** #10748 (open; server part #10736 merged)
-- **Paths:** src/api/routes/analysis_tools.py; tests/unit/api/test_analysis_statistics_window.py; ui/src/hooks/usePolling.ts; ui/src/hooks/useIncrementalSeries.ts; ui/src/api/analysisStatistics.ts; ui/src/api/fetch.ts; ui/src/components/analysis/AnalysisPanel.tsx; ui/src/components/visualization/ForceOverlayPanel.tsx
-- **Started:** 2026-09-22
-- **Last verified:** 2026-09-22 — `statistics?collect=true` stores a snapshot (one request per tick); shared `usePolling`/`useIncrementalSeries` hooks drive `AnalysisPanel` (`since` cursor from `X-Analysis-Next-Since`) and `ForceOverlayPanel` (500 ms, was 200 ms); vitest 925 passed, tsc/eslint/build clean, 39 focused API tests pass.
-- **Summary:** Fix #8941 short of WebSocket frames: bounded deque history, single-pass off-loop aggregation and `since`/`limit`/`collect` on `/analysis/statistics` (server), then one incremental request per tick with visibility/running-state gating in one shared polling hook (client). The 1000 ms `ActuatorPanel`/`SimulationToolbar` loops and `/ws/simulate` frames remain.
-- **Next step:** Move `ActuatorPanel` and `SimulationToolbar` onto `usePolling` so they also pause while the tab is hidden.
+- **Owner:** local
+- **Issue:** #8941 (server via #10736 merged; client polling via #10748 merged; ActuatorPanel and SimulationToolbar loops onto usePolling here; WS frames stay with #8936/#8940)
+- **Branch:** fix/8941-use-polling-toolbar-actuator
+- **PR:** #10881 (open)
+- **Paths:** ui/src/components/simulation/ActuatorPanel.tsx; ui/src/components/simulation/ActuatorPanel.test.tsx; ui/src/components/simulation/SimulationToolbar.tsx; ui/src/components/simulation/SimulationToolbar.test.tsx
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — ActuatorPanel and SimulationToolbar migrated from raw setInterval to shared usePolling hook (pauses when tab hidden or simulation stopped, single-flight ticks, interval cleared on unmount); 31 focused vitest tests pass, full ui suite (98 files / 934 tests) passes, tsc -b/eslint/build clean, architecture budget and error handling ratchet pass.
+- **Summary:** Complete the client REST polling migration for #8941: both ActuatorPanel (1000 ms) and SimulationToolbar (1000 ms) now use the shared usePolling hook with visibility and simulation-running gating, eliminating background resource contention when tabs are hidden.
+- **Next step:** Publish force and analysis frames over /ws/simulate in #8936/#8940 to deprecate REST polling entirely.
 
 ### DL-#10591 · Constrained Upper-Body Golfer Baseline (TB-06)
 
