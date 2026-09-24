@@ -278,14 +278,11 @@ class TourBaselinesPresenter:
         fit_markers = self._derive_fitted_markers(model_id)
         phase_cov = {"address": True, "top": True, "impact": True, "finish": True}
 
-        # Check for discovered package
+        # Check for discovered package matching the exact requested capture
         discovered_pkgs = self._discovery.discover(
             filter_spec=BaselineFilter(model_id=model_id, club=norm_cap)
         )
-        if not discovered_pkgs:
-            discovered_pkgs = self._discovery.discover(
-                filter_spec=BaselineFilter(model_id=model_id)
-            )
+
         orig_err: float | None = None
         proj_res: float | None = None
         if discovered_pkgs:
@@ -425,10 +422,7 @@ class TourBaselinesPresenter:
         candidates = self._discovery.discover(
             filter_spec=BaselineFilter(model_id=model_id, club=norm_cap)
         )
-        if not candidates:
-            candidates = self._discovery.discover(
-                filter_spec=BaselineFilter(model_id=model_id)
-            )
+
         pkg: BaselinePackage | None = None
         preset: SafeModelPreset | None = None
         if candidates:
