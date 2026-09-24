@@ -449,6 +449,20 @@ def _attach_help_menu(widget: Any, tile_id: str) -> None:
     else:  # pragma: no cover - build_help_menu always adds actions
         menu.addAction(action)
 
+    # Defensively clear any F1 shortcut across the menu and menubar actions to
+    # prevent Qt's ambiguous shortcut overload warning with
+    # QShortcut(HELP_SHORTCUT, widget) (#10868).
+    def _clear_f1(actions: list[Any]) -> None:
+        for act in actions:
+            if act.shortcut().toString() == HELP_SHORTCUT:
+                act.setShortcut("")
+            submenu = act.menu()
+            if submenu is not None:
+                _clear_f1(submenu.actions())
+
+    _clear_f1(menubar.actions())
+    _clear_f1(menu.actions())
+
 
 def attached_tile_id(widget: Any) -> str | None:
     """Return the tile id whose help is attached to ``widget``, if any."""

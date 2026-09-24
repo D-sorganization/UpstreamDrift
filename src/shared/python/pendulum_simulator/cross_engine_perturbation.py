@@ -31,6 +31,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
+import math
 import numpy as np
 
 from src.shared.python.pendulum_simulator.perturbation_analysis import (
@@ -556,11 +557,17 @@ class CrossEnginePerturbationRunner:
             if callable(fn):
                 try:
                     vel = fn()
-                    return float(np.linalg.norm(vel))
+                    vel_f = np.asarray(vel, dtype=float).ravel()
+                    return float(
+                        math.sqrt(vel_f.dot(vel_f))
+                    )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
                 except TypeError:
                     try:
                         vel = fn(q, v)
-                        return float(np.linalg.norm(vel))
+                        vel_f = np.asarray(vel, dtype=float).ravel()
+                        return float(
+                            math.sqrt(vel_f.dot(vel_f))
+                        )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
                     except (TypeError, ValueError, AttributeError, RuntimeError):
                         pass
                 except (ValueError, AttributeError, RuntimeError):
@@ -580,7 +587,10 @@ class CrossEnginePerturbationRunner:
                     )
                 else:
                     vel = J @ v_vec
-                return float(np.linalg.norm(vel))
+                vel_f = np.asarray(vel, dtype=float).ravel()
+                return float(
+                    math.sqrt(vel_f.dot(vel_f))
+                )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
             except (TypeError, ValueError, AttributeError, RuntimeError, IndexError):
                 pass
 
@@ -605,7 +615,10 @@ class CrossEnginePerturbationRunner:
                 pass
 
         # 4. Fallback norm of generalized velocities
-        return float(np.linalg.norm(v))
+        v_f = np.asarray(v, dtype=float).ravel()
+        return float(
+            math.sqrt(v_f.dot(v_f))
+        )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
 
     @staticmethod
     def _aggregate(result: CrossEngineRunResult) -> None:

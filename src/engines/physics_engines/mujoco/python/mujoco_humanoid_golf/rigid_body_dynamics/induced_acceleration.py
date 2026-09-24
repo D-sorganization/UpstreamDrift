@@ -66,7 +66,10 @@ class MuJoCoInducedAccelerationAnalyzer:
         # 1. Mass Matrix M
         M = np.zeros((nv, nv))
         # Ensure inertia is updated
-        mujoco.mj_fullM(self.model, M, self.data.qM)
+        try:
+            mujoco.mj_fullM(self.model, M, self.data.qM if hasattr(self.data, 'qM') else self.data.M)
+        except AttributeError:
+            mujoco.mj_fullM(self.model, M, self.data.M)
 
         # 2. Compute G(q) (Gravity Force vector)
         # In MuJoCo qfrc_bias = C + G.
