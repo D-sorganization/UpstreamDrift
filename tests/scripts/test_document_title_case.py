@@ -24,6 +24,10 @@ def test_expected_title_preserves_minor_words_and_technical_tokens() -> None:
         expected_title("state-of-the-art control in SO(3)")
         == "State-of-the-Art Control in SO(3)"
     )
+    assert (
+        expected_title("Optimize `np.linalg.norm` for Distance Metrics")
+        == "Optimize `np.linalg.norm` for Distance Metrics"
+    )
 
 
 def test_quarto_and_latex_structural_titles_are_checked() -> None:
