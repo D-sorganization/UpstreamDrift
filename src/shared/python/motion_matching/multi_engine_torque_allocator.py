@@ -218,7 +218,7 @@ class MujocoForceAdapter:
         self._prepare_state(q, v)
         model, data = self._model.model, self._model.data
         mass = np.zeros((self._nv, self._nv), dtype=np.float64)
-        self._mj.mj_fullM(model, mass, data.qM)
+        self._mj.mj_fullM(model, mass, data.qM if hasattr(data, 'qM') else data.M)
         return mass, data.qfrc_bias.copy()
 
     def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:

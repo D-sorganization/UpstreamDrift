@@ -6,11 +6,12 @@ was dead code). Concretely they assert that
 
 * every help page a tile declares exists on disk and is loadable,
 * every ``ready`` / ``beta`` tile declares a page of its own,
-* the help dock resolves a tile's page through the registry rather than a
-  hand-maintained rule table,
-* ``attach_tile_help`` installs an F1 shortcut on plain widgets and a Help
-  menu (built by the previously-dead ``build_help_menu``) on windows, and
+* every non-hidden tile's help is loadable,
+* the help gate passes on the committed registry, and
 * every component registered in ``UI_HELP_TOPICS`` resolves to help content.
+
+For Qt-level affordances (shortcuts, Help menu wiring, docks, dialogs), see
+``test_tile_help_qt.py`` (#10869).
 """
 
 from __future__ import annotations
@@ -167,140 +168,3 @@ def test_component_help_entries_are_substantive() -> None:
         assert content is not None
         assert content["title"]
         assert len(content["description"].strip()) > 80, component
-
-
-# ---------------------------------------------------------------------------
-# Qt wiring (#8846)
-# ---------------------------------------------------------------------------
-
-pytest.importorskip("PyQt6.QtWidgets")
-
-
-@pytest.fixture
-def qapp():
-    from PyQt6.QtWidgets import QApplication
-
-    app = QApplication.instance() or QApplication([])
-    yield app
-
-
-def _first_ready_tile_with_help(registry):
-    for tile in registry.tiles:
-        if tile.help and tile.maturity == "ready":
-            return tile
-    pytest.skip("no ready tile declares a help page")
-
-
-def test_attach_tile_help_installs_f1_on_a_plain_widget(qapp, registry) -> None:
-    from PyQt6.QtGui import QShortcut
-    from PyQt6.QtWidgets import QWidget
-
-    tile = _first_ready_tile_with_help(registry)
-    widget = QWidget()
-    assert tile_help.attach_tile_help(widget, tile.id) is True
-    assert tile_help.attached_tile_id(widget) == tile.id
-
-    keys = {sc.key().toString() for sc in widget.findChildren(QShortcut)}
-    assert tile_help.HELP_SHORTCUT in keys
-
-    # Idempotent: re-embedding the same tool must not stack shortcuts.
-    assert tile_help.attach_tile_help(widget, tile.id) is False
-    assert len(widget.findChildren(QShortcut)) == 1
-    widget.deleteLater()
-
-
-def test_attach_tile_help_builds_a_help_menu_on_a_window(qapp, registry) -> None:
-    """``build_help_menu`` is no longer dead code (#8846)."""
-    from PyQt6.QtWidgets import QMainWindow
-
-    tile = _first_ready_tile_with_help(registry)
-    window = QMainWindow()
-    assert tile_help.attach_tile_help(window, tile.id) is True
-
-    menus = [
-        action.menu()
-        for action in window.menuBar().actions()
-        if action.menu() is not None
-    ]
-    help_menus = [m for m in menus if m.title().replace("&", "") == "Help"]
-    assert help_menus, "no Help menu was created"
-    labels = [a.text().replace("&", "") for a in help_menus[0].actions()]
-    assert "This Tool's Help" in labels
-    assert "About" in labels
-    window.deleteLater()
-
-
-def test_attach_tile_help_is_a_noop_without_a_tile_id(qapp) -> None:
-    from PyQt6.QtWidgets import QWidget
-
-    widget = QWidget()
-    assert tile_help.attach_tile_help(widget, None) is False
-    assert tile_help.attached_tile_id(widget) is None
-    widget.deleteLater()
-
-
-def test_attach_tile_help_never_breaks_a_launch(qapp, registry) -> None:
-    """Help is an affordance, not a dependency.
-
-    A widget that cannot carry a Qt shortcut — a plain object, a test double,
-    a C++-side object already destroyed — must make ``attach_tile_help``
-    return ``False``, not raise into the tool's launch path.
-    """
-    tile = _first_ready_tile_with_help(registry)
-
-    class NotAWidget:
-        pass
-
-    assert tile_help.attach_tile_help(NotAWidget(), tile.id) is False
-
-    from unittest.mock import MagicMock
-
-    from PyQt6.QtWidgets import QMainWindow
-
-    assert tile_help.attach_tile_help(MagicMock(spec=QMainWindow), tile.id) is False
-
-
-def test_help_dock_loads_every_declared_page(qapp, registry) -> None:
-    """The dock must render each tile's registry page, not a "not found"."""
-    from src.launchers.help_dialogs import ContextHelpDock
-
-    dock = ContextHelpDock()
-    failures: list[str] = []
-    for tile in registry.tiles:
-        if not tile.help or tile.maturity == "hidden":
-            continue
-        dock.update_context(tile.id)
-        text = dock.text_area.toPlainText()
-        if not text.strip() or "No documentation file has been written" in text:
-            failures.append(tile.id)
-    assert not failures, f"dock could not load help for: {failures}"
-    dock.deleteLater()
-
-
-def test_help_dock_prefers_the_registry_over_the_legacy_rule_table(
-    qapp, registry
-) -> None:
-    """Registry `help:` wins over the hand-maintained fallback rules."""
-    from src.launchers.help_dialogs import ContextHelpDock
-
-    tile = registry.get("mujoco_unified")
-    assert tile is not None and tile.help, "mujoco_unified should declare help"
-    dock = ContextHelpDock()
-    candidates = dock._doc_candidates("mujoco_unified")
-    assert [p.as_posix() for p in candidates] == [(REPO_ROOT / tile.help).as_posix()]
-    dock.deleteLater()
-
-
-def test_show_tile_help_renders_the_page(qapp, registry) -> None:
-    from PyQt6.QtWidgets import QTextBrowser
-
-    tile = _first_ready_tile_with_help(registry)
-    dialog = tile_help.show_tile_help(None, tile.id)
-    try:
-        assert tile.name in dialog.windowTitle()
-        browsers = dialog.findChildren(QTextBrowser)
-        assert browsers, "help dialog has no text browser"
-        assert browsers[0].toPlainText().strip()
-    finally:
-        dialog.close()
-        dialog.deleteLater()

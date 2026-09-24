@@ -165,7 +165,6 @@ def build_help_menu(
         tooltip="Open the bundled user guide in the system browser",
         status_tip="Opens user guide",
         handler=open_user_guide,
-        shortcut="F1",
     )
     _add_action(
         menu,

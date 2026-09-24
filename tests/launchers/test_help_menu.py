@@ -72,6 +72,10 @@ def test_build_help_menu_creates_expected_actions(parent_window, qapp) -> None:
     assert "&Keyboard Shortcuts" in labels
     assert "&Report a Bug" in labels
     assert "&About" in labels
+    user_guide_action = next(a for a in actions if a.text() == "&User Guide")
+    assert user_guide_action.shortcut().isEmpty(), (
+        "User Guide must not bind F1 (#10868)"
+    )
 
 
 def test_build_help_menu_with_doc_target(parent_window, qapp) -> None:
