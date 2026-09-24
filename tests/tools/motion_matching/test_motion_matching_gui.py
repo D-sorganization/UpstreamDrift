@@ -40,12 +40,13 @@ def widget() -> MotionMatchingWidget:
 
 
 def test_widget_construction_and_tabs(widget: MotionMatchingWidget) -> None:
-    assert widget.tabs.count() == 4
+    assert widget.tabs.count() == 5
     tab_titles = [widget.tabs.tabText(i) for i in range(widget.tabs.count())]
     assert "Matching" in tab_titles
     assert "Downswing experiment" in tab_titles
     assert "MJX" in tab_titles
     assert "Club-Only" in tab_titles
+    assert "Tour Baselines" in tab_titles
 
 
 def test_stages_group_and_mutual_exclusion(widget: MotionMatchingWidget) -> None:
@@ -301,3 +302,91 @@ def test_update_neural_metrics_display(widget: MotionMatchingWidget) -> None:
     )
     assert widget.neural_status_badge.text() == "CLASSICAL FALLBACK"
     assert "0.450" in widget.metric_neural_confidence.text()
+
+
+def test_tour_baselines_tab_controls_and_metadata(widget: MotionMatchingWidget) -> None:
+    """Verify Tour Baselines tab initialization, selectors, and metadata display (TB-11, #10596)."""
+    assert widget.tb_capture.count() == 2
+    assert "Driver" in [
+        widget.tb_capture.itemText(i) for i in range(widget.tb_capture.count())
+    ]
+    assert "7-Iron" in [
+        widget.tb_capture.itemText(i) for i in range(widget.tb_capture.count())
+    ]
+
+    assert widget.tb_fit_mode.count() == 3
+    assert widget.tb_model.count() >= 10
+
+    # Initial metadata displayed
+    badge_text = widget.tb_badge.text()
+    assert len(badge_text) > 0
+    # Must contain bracketed symbol for accessibility
+    assert any(
+        sym in badge_text
+        for sym in (
+            "[PASS]",
+            "[REJECTED]",
+            "[BLOCKED]",
+            "[REF]",
+            "[CANDIDATE]",
+            "[UNQUALIFIED]",
+        )
+    )
+
+    assert len(widget.tb_ownership.text()) > 0
+    assert len(widget.tb_support.text()) > 0
+    assert len(widget.tb_assumptions.text()) > 0
+    assert "markers" in widget.tb_markers.text().lower()
+
+    # Budget info
+    assert "Wall clock limit" in widget.tb_budget.text()
+    assert "Max evaluations" in widget.tb_budget.text()
+
+    # Where This Came From panel
+    assert len(widget.tb_raw_hash.text()) == 64
+    assert "Hz" in widget.tb_freq.text()
+    assert len(widget.tb_preproc.text()) > 0
+    assert len(widget.tb_geom.text()) > 0
+    assert len(widget.tb_limitations.text()) > 0
+
+    # Toggle where panel
+    initial_hidden = widget.tb_where_group.isHidden()
+    widget.tb_toggle_where_btn.click()
+    assert widget.tb_where_group.isHidden() != initial_hidden
+
+    # Switch capture to 7-Iron
+    widget.tb_capture.setCurrentText("7-Iron")
+    assert "359" in widget.tb_freq.text() or "360" in widget.tb_freq.text()
+    assert widget.tb_model.count() >= 10
+
+
+def test_tour_baselines_tab_actions(widget: MotionMatchingWidget) -> None:
+    """Verify Tour Baselines tab actions: open, clone, compare, inspect evidence, reproduce (TB-11, #10596)."""
+    # 1. Open
+    widget._on_tb_open()
+    log_text = widget.tb_log.toPlainText()
+    assert "[OPEN]" in log_text
+    assert "View Mode:" in log_text
+    assert "Observed Club:" in log_text
+    assert "Simulated Club:" in log_text
+    assert "marker" in log_text.lower()
+    assert "mesh" in log_text.lower()
+
+    # 2. Compare
+    widget._on_tb_compare()
+    log_text2 = widget.tb_log.toPlainText()
+    assert "[COMPARE]" in log_text2
+    assert "Verdict:" in log_text2
+
+    # 3. Inspect Evidence
+    widget._on_tb_inspect_evidence()
+    log_text3 = widget.tb_log.toPlainText()
+    assert "[EVIDENCE]" in log_text3
+    assert "Git Commit:" in log_text3
+    assert "Status Bundle:" in log_text3
+
+    # 4. Reproduce
+    widget._on_tb_reproduce()
+    log_text4 = widget.tb_log.toPlainText()
+    assert "[REPRODUCE]" in log_text4
+    assert "--reproduce" in log_text4
