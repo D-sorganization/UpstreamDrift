@@ -1,3 +1,18 @@
+## Advanced Analysis Tabs Debounce, Memoization and Non-Blocking Idle Redraw (#8932)
+
+Completes the responsiveness optimization program across the Advanced Analysis tabs in the Unified Dashboard:
+- **PhasePlaneTab Debounce & Non-Blocking Draw (`src/shared/python/dashboard/advanced_analysis.py`)**:
+  - Connects `spin_dim` (joint index) through `DebouncedRefresh` (150 ms single-shot QTimer) to coalesce spinbox arrow bursts into a single delayed redraw.
+  - Replaces blocking synchronous `canvas.draw()` calls with non-blocking `canvas.draw_idle()`.
+- **CoherenceTab Debounce, Memoization & Non-Blocking Draw (`src/shared/python/dashboard/advanced_analysis.py`)**:
+  - Connects `spin_dim` through `DebouncedRefresh` (150 ms) to eliminate redundant FFT/Welch coherence recomputations.
+  - Memoizes expensive `compute_coherence` outputs using `BoundedResultCache` (LRU) keyed by signals digest, dimension, and sampling frequency via `analysis_cache_key`.
+  - Replaces blocking synchronous `canvas.draw()` calls with non-blocking `canvas.draw_idle()`.
+- **CorrelationTab Non-Blocking Draw (`src/shared/python/dashboard/advanced_analysis.py`)**:
+  - Replaces all blocking synchronous `canvas.draw()` calls with non-blocking `canvas.draw_idle()`.
+- **Tab Suite Verification (`tests/unit/shared_python/test_analysis_tab_refresh.py`)**:
+  - Adds 4 unit tests covering burst coalescing on `PhasePlaneTab` and `CoherenceTab`, memoization hit and invalidation on data change for `CoherenceTab`, and verifying 0 blocking `canvas.draw()` calls across analysis tabs.
+
 ## Resolve Help System Review Feedback: F1 Shortcut Overload & Qt Test Decoupling (#10868, #10869)
 
 Resolves post-merge review feedback on the tile help system:
