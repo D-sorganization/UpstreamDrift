@@ -6935,7 +6935,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-24 | n/a | Optimized `GripContactModel.check_slip_margin` by replacing `np.linalg.norm` with `math.sqrt(np.vdot)` for a ~2x speedup. (spec-exempt: micro-optimization) |
+| 2026-09-24 | #10838 | Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude for ~2x speedup and integer overflow safety (#10845, #10848). |
+| 2026-09-24 | n/a | Optimize quaternion norm calculation using np.einsum in surrogate validation (spec-exempt: micro-optimization) |
 | 2026-09-24 | #10828 | Tour baselines presenter exact capture matching without cross-capture fallback (#10826); restore canonical schema and title casing for docs/development/HANDOFF.md (#10818, #10819, #10824, #10825). |
 | 2026-09-24 | #10814 | Publish Tour Baselines User Guide, Agent Runbook, end-to-end acceptance tests, and final acceptance report concluding child work packages under Epic #10584 (TB-12 #10597). |
 | 2026-09-24 | #10808 | Remove dead per-engine skeleton_extractors from starting_pose_matcher: delete 6 unwired source files (~1,614 lines), 8 test modules, and prune stale mypy/suite-marker/lod baseline rows. |
