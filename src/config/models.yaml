@@ -11,6 +11,7 @@ models:
   # =============================================================================
 
   - id: "mujoco_unified"
+    help: "docs/help/mujoco_unified.md"
     name: "MuJoCo"
     description: "Biomechanical golf swing analysis (humanoid + simulation)"
     type: "custom_humanoid"
@@ -27,6 +28,7 @@ models:
       default_launch: "tab"
 
   - id: "drake_golf"
+    help: "docs/help/drake_golf.md"
     name: "Drake"
     description: "Drake robotics with MeshCat visualisation"
     type: "drake"
@@ -39,6 +41,7 @@ models:
       default_launch: "tab"
 
   - id: "pinocchio_golf"
+    help: "docs/help/pinocchio_golf.md"
     name: "Pinocchio"
     description: "Rigid-body dynamics with analytical derivatives"
     type: "pinocchio"
@@ -51,6 +54,7 @@ models:
       default_launch: "tab"
 
   - id: "opensim_golf"
+    help: "docs/help/opensim_golf.md"
     name: "OpenSim"
     description: "Musculoskeletal modelling for biomechanics"
     type: "opensim"
@@ -63,6 +67,7 @@ models:
       default_launch: "tab"
 
   - id: "myosim_suite"
+    help: "docs/help/myosim_suite.md"
     name: "MyoSuite"
     description: "MyoSuite engine dashboard: engine availability and environment status (driving a simulation requires the optional myosuite package — #9478)"
     type: "myosim"
@@ -75,6 +80,7 @@ models:
       default_launch: "tab"
 
   - id: "matlab_suite"
+    help: "docs/help/matlab_suite.md"
     name: "Matlab Models"
     description: "MATLAB / Simscape models, dataset generators, and tooling"
     type: "matlab_suite"
@@ -90,6 +96,7 @@ models:
   # =============================================================================
 
   - id: "golf_simulation_suite"
+    help: "docs/help/golf_simulation_suite.md"
     name: "Golf Simulation Suite"
     description: "Prototype visualization and demo inspection suite; not a production physics solver"
     type: "golf_simulation"
@@ -102,6 +109,7 @@ models:
       default_launch: "tab"
 
   - id: "golf_simulator"
+    help: "docs/help/golf_simulator.md"
     name: "Golf Simulator Console"
     description: "Capability-aware destination controls and replay submission for simulator integration"
     type: "special_app"
@@ -116,6 +124,7 @@ models:
       default_launch: "tab"
 
   - id: "putting_green"
+    help: "docs/help/putting_green.md"
     name: "Putting Green"
     description: "Realistic putting green with ball-rolling physics"
     type: "putting_green"
@@ -130,6 +139,7 @@ models:
       status: "ready"
 
   - id: "mujoco_models_shared"
+    help: "docs/help/mujoco_models_shared.md"
     name: "MuJoCo Models"
     description: "MuJoCo simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if MuJoCo_Models is absent beside this repository — #10514)"
     type: "shared_repo"
@@ -147,6 +157,7 @@ models:
       status: "experimental"
 
   - id: "drake_models_shared"
+    help: "docs/help/drake_models_shared.md"
     name: "Drake Models"
     description: "Drake simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Drake_Models is absent beside this repository — #10514)"
     type: "shared_repo"
@@ -164,6 +175,7 @@ models:
       status: "experimental"
 
   - id: "pinocchio_models_shared"
+    help: "docs/help/pinocchio_models_shared.md"
     name: "Pinocchio Models"
     description: "Pinocchio simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if Pinocchio_Models is absent beside this repository — #10514)"
     type: "shared_repo"
@@ -181,6 +193,7 @@ models:
       status: "experimental"
 
   - id: "opensim_models_shared"
+    help: "docs/help/opensim_models_shared.md"
     name: "OpenSim Models"
     description: "OpenSim simulation models repository folder (Models/Integrations access; emits explicit missing-checkout diagnostic if OpenSim_Models is absent beside this repository — #10514)"
     type: "shared_repo"
@@ -202,6 +215,7 @@ models:
   # pointing at a GUI that never imported the model. The workbench is now the
   # single user-facing surface of the F0 solver.
   - id: "bunkershot3d"
+    help: "docs/help/simulation_controls.md"
     name: "BunkerShot3D Designer Workbench"
     description: "Wedge sole design against the F0 dynamic-RFT bunker model"
     type: "special_app"
@@ -213,6 +227,7 @@ models:
       default_launch: "tab"
 
   - id: "pendulum_simulator"
+    help: "docs/help/pendulum_simulator.md"
     name: "Pendulum Simulator"
     description: "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics"
     type: "special_app"
@@ -230,6 +245,7 @@ models:
       default_launch: "tab"
 
   - id: "swing_objective_lab"
+    help: "docs/help/swing_objective_lab.md"
     name: "Swing Objective Lab"
     description: "Compare downswings optimized for clubhead speed against centrifugal, Coriolis, energy, and impulse transfer"
     type: "special_app"
@@ -246,6 +262,7 @@ models:
       default_launch: "tab"
 
   - id: "shot_tracer"
+    help: "docs/help/shot_tracer.md"
     name: "Shot Tracer"
     description: "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)"
     type: "special_app"
@@ -257,6 +274,7 @@ models:
       default_launch: "tab"
 
   - id: "cross_engine_dashboard"
+    help: "docs/help/cross_engine_dashboard.md"
     name: "Cross-Engine Dashboard"
     description: "Perturbation robustness comparison across physics engines"
     type: "special_app"
@@ -271,6 +289,7 @@ models:
       default_launch: "tab"
 
   - id: "terrain_engine"
+    help: "docs/help/terrain_engine.md"
     name: "Terrain Engine"
     description: "Topography presets and surface queries for terrain-aware ball physics"
     type: "special_app"
@@ -282,6 +301,7 @@ models:
       default_launch: "tab"
 
   - id: "golf_environment"
+    help: "docs/help/golf_environment.md"
     name: "Golf Environment"
     description: "3D Driving Range and Golf Course Hole visualization"
     type: "special_app"
@@ -300,6 +320,7 @@ models:
   # #8618): two tiles pointed at two different things for one tool.
 
   - id: "swing_flight_pipeline"
+    help: "docs/help/swing_flight_pipeline.md"
     name: "Swing → Flight Pipeline"
     description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"
     type: "special_app"
@@ -315,6 +336,7 @@ models:
       default_launch: "tab"
 
   - id: "ball_flight_simulator"
+    help: "docs/help/ball_flight_simulator.md"
     name: "Ball Flight Simulator"
     description: "Aerodynamic ball flight simulator with drag, Magnus, and wind models"
     type: "special_app"
@@ -331,6 +353,7 @@ models:
       default_launch: "tab"
 
   - id: "putting_green_gui"
+    help: "docs/help/putting_green.md"
     name: "Putting Green"
     description: "Legacy alias for the canonical putting_green launcher tile."
     type: "special_app"
@@ -352,6 +375,7 @@ models:
   # =============================================================================
 
   - id: "motion_target_preview"
+    help: "docs/help/motion_target_preview.md"
     name: "Motion-Match Preview"
     description: "Preview multi-source motion-capture targets on a shared timegrid"
     type: "special_app"
@@ -364,6 +388,7 @@ models:
       default_launch: "tab"
 
   - id: "motion_matching"
+    help: "docs/help/motion_matching.md"
     name: "Motion Matching"
     description: "Match the tour-average driver or 7-iron capture with full-body forward dynamics on the anthropometric golfer"
     type: "special_app"
@@ -376,6 +401,7 @@ models:
       default_launch: "tab"
 
   - id: "pose_studio"
+    help: "docs/help/pose_studio.md"
     name: "Pose Studio"
     description: "Cross-engine interactive pose editor"
     type: "special_app"
@@ -386,6 +412,7 @@ models:
       status: "beta"
 
   - id: "capture_rig"
+    help: "docs/help/capture_rig.md"
     name: "Capture Rig"
     description: "Multi-camera capture, pose ingest and reconstruction with an overlay player"
     type: "special_app"
@@ -401,6 +428,7 @@ models:
       status: "beta"
 
   - id: "starting_pose_matcher"
+    help: "docs/help/pose_studio.md"
     name: "Starting-Pose Matcher (legacy)"
     description: "Legacy alias for motion_target_preview. Hidden by default."
     type: "special_app"
@@ -418,6 +446,7 @@ models:
   # =============================================================================
 
   - id: "c3d_viewer"
+    help: "docs/help/c3d_viewer.md"
     name: "C3D Viewer"
     description: "Visualise and analyse optical mocap data (.c3d)"
     type: "special_app"
@@ -433,6 +462,7 @@ models:
       default_launch: "tab"
 
   - id: "video_analyzer"
+    help: "docs/help/video_analyzer.md"
     name: "Video Analyzer (Pose & Motion Tracking)"
     description: "Video-based motion analysis with pose estimation and tracking: extract poses and joint tracks from swing video. Not for converting or trimming video files -- see Video Processor for that."
     type: "special_app"
@@ -449,6 +479,7 @@ models:
     embed_adapter: "src/launchers/external_tools_adapter.py::get_video_analyzer_dockable_ui"
 
   - id: "video_processor"
+    help: "docs/help/video_processor.md"
     name: "Video Processor (Convert & Extract Frames)"
     description: "Shared Tools media processor for video conversion, frame extraction, and analysis: format-convert clips and pull individual frames. Not for pose or motion tracking -- see Video Analyzer for that."
     type: "special_app"
@@ -465,6 +496,7 @@ models:
       default_launch: "tab"
 
   - id: "openpose_analysis"
+    help: "docs/help/openpose_analysis.md"
     name: "OpenPose"
     description: "High-accuracy body pose estimation (Academic License)"
     type: "special_app"
@@ -479,6 +511,7 @@ models:
       status: "ready"
 
   - id: "mediapipe_analysis"
+    help: "docs/help/mediapipe_analysis.md"
     name: "MediaPipe"
     description: "Fast pose estimation via Google MediaPipe (Apache 2.0)"
     type: "special_app"
@@ -493,6 +526,7 @@ models:
       status: "ready"
 
   - id: "shadow_tracker"
+    help: "docs/help/motion_capture.md"
     name: "Shadow Tracker"
     description: "Articulated silhouette tracking, manual mask correction, and forward rollout verification"
     type: "special_app"
@@ -514,6 +548,7 @@ models:
   # =============================================================================
 
   - id: "model_explorer"
+    help: "docs/help/model_explorer.md"
     name: "Model Explorer"
     description: "Explore models and generate URDFs"
     type: "special_app"
@@ -525,6 +560,7 @@ models:
       default_launch: "tab"
 
   - id: "tour_matching_viewer"
+    help: "docs/help/tour_matching_viewer.md"
     name: "Tour Matching Viewer"
     description: "Interactive 3D replay and kinematic playback of full-body matching candidates against tour capture"
     type: "special_app"
@@ -540,6 +576,7 @@ models:
       default_launch: "tab"
 
   - id: "matched_swing_browser"
+    help: "docs/help/matched_swing_browser.md"
     name: "Results Browser"
     description: "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations"
     type: "special_app"
@@ -558,6 +595,7 @@ models:
       default_launch: "tab"
 
   - id: "data_explorer"
+    help: "docs/help/data_explorer.md"
     name: "Data Explorer (Import & Visualize)"
     description: "Import, filter, and visualize simulation datasets interactively. Not for signal processing or calculators -- see Data Processor for that."
     type: "special_app"
@@ -575,6 +613,7 @@ models:
       default_launch: "tab"
 
   - id: "data_processor"
+    help: "docs/help/data_processor.md"
     name: "Data Processor (Signal & Time-Series)"
     description: "Shared Tools signal processing and time-series data analysis tool: filter, transform, and compute statistics over recorded signals. Not for open-ended dataset browsing -- see Data Explorer for that."
     type: "special_app"
@@ -593,6 +632,7 @@ models:
       default_launch: "tab"
 
   - id: "launch_monitor_analytics"
+    help: "docs/help/launch_monitor_analytics.md"
     name: "Launch Monitor Analytics"
     description: "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends. The deep-desk workbench for the same analytics engine as the Rate of Closure Impact Explorer's launch-monitor tab."
     type: "special_app"
@@ -613,6 +653,7 @@ models:
       default_launch: "tab"
 
   - id: "rate_of_closure"
+    help: "docs/help/rate_of_closure.md"
     name: "Rate of Closure Impact Explorer"
     description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center). Its launch-monitor tab is the in-context surface of the same analytics engine as Launch Monitor Analytics."
     type: "special_app"
@@ -638,6 +679,7 @@ models:
       default_launch: "tab"
 
   - id: "sidekick"
+    help: "docs/help/sidekick.md"
     name: "Sidekick"
     description: "AI assistant chat panel — embed as a dock or tab"
     type: "special_app"
@@ -653,6 +695,7 @@ models:
       default_launch: "dock"
 
   - id: "training_controller"
+    help: "docs/help/training_controller.md"
     name: "Training Controller"
     description: "Schedule, monitor, and manage model-training jobs across engines."
     type: "special_app"
@@ -668,6 +711,7 @@ models:
       default_launch: "tab"
 
   - id: "config_setup_wizard"
+    help: "docs/help/config_setup_wizard.md"
     name: "Setup Wizard"
     description: "Validate canonical-core units, model dimensions, and calibration before a run."
     type: "special_app"
@@ -687,6 +731,7 @@ models:
   # =============================================================================
 
   - id: "pose_subscriber_demo"
+    help: "docs/help/pose_studio.md"
     name: "Pose Subscriber (demo)"
     description: "Live mirror of Pose Studio's canonical pose via the realtime IPC layer"
     type: "special_app"
@@ -702,6 +747,7 @@ models:
       default_launch: "dock"
 
   - id: "project_map"
+    help: "docs/help/project_map.md"
     name: "Project Map"
     description: "Map of every feature and module in the suite"
     type: "document"
@@ -712,6 +758,7 @@ models:
       status: "ready"
 
   - id: "library_tool"
+    help: "docs/help/library_tool.md"
     name: "Library"
     description: "Research library for managing publications, LaTeX references, and documents"
     type: "special_app"
@@ -733,6 +780,7 @@ models:
   # =============================================================================
 
   - id: "biomech_gait"
+    help: "docs/help/biomech_gait.md"
     name: "Gait Model"
     description: "Saved shortcut/preset forwarding gait filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)"
     type: "biomech_exercise"
@@ -748,6 +796,7 @@ models:
       default_launch: "tab"
 
   - id: "biomech_sit_to_stand"
+    help: "docs/help/biomech_sit_to_stand.md"
     name: "Sit-to-Stand Model"
     description: "Saved shortcut/preset forwarding sit-to-stand filter to Exercise Dashboard (persists filter parameters through serialization and dispatch — #10514)"
     type: "biomech_exercise"
@@ -763,6 +812,7 @@ models:
       default_launch: "tab"
 
   - id: "movement_optimizer"
+    help: "docs/help/movement_optimizer.md"
     name: "Movement Optimizer"
     description: "Cross-engine barbell trajectory optimization (unified task mapped with tools_movement_optimizer under #9406 authority; retains legacy IDs and alternate provider diagnostics — #10514)"
     type: "special_app"
@@ -787,6 +837,7 @@ models:
       default_launch: "tab"
 
   - id: "canonical_core_estimation"
+    help: "docs/help/analysis_tools.md"
     name: "Canonical-Core Estimation"
     description: "CC-19 estimation services in the unified workspace"
     type: "special_app"
@@ -804,6 +855,7 @@ models:
       web_route: "/tools/canonical-core/estimation"
 
   - id: "canonical_core_comparison"
+    help: "docs/help/analysis_tools.md"
     name: "Canonical-Core Comparison"
     description: "CC-27 comparison services in the unified workspace"
     type: "special_app"
@@ -828,6 +880,7 @@ models:
   # =============================================================================
 
   - id: "simulation_backends"
+    help: "docs/help/simulation_backends.md"
     name: "Simulation Backends"
     description: "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends with rollouts, sweeps, and HDF5 export"
     type: "special_app"
@@ -845,6 +898,7 @@ models:
       default_launch: "tab"
 
   - id: "motion_capture"
+    help: "docs/help/motion_capture.md"
     name: "Motion Capture"
     description: "FreeMoCap sidecar: markerless motion capture recording and processing (command-line interface requiring --input; it is not yet a launchable GUI tile — #9478)"
     type: "special_app"
@@ -860,6 +914,7 @@ models:
       default_launch: "tab"
 
   - id: "biomech_exercise"
+    help: "docs/help/biomech_exercise.md"
     name: "Exercise Dashboard"
     description: "Biomechanics exercise workflows with injury risk and joint stress analysis"
     type: "special_app"
@@ -875,6 +930,7 @@ models:
       default_launch: "tab"
 
   - id: "swing_optimizer"
+    help: "docs/help/movement_optimizer.md"
     name: "Swing Optimizer"
     description: "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16"
     type: "special_app"
@@ -887,6 +943,7 @@ models:
       default_launch: "tab"
 
   - id: "injury_analysis"
+    help: "docs/help/analysis_tools.md"
     name: "Injury Risk Analysis"
     description: "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17"
     type: "special_app"
@@ -899,6 +956,7 @@ models:
       default_launch: "tab"
 
   - id: "drake_dashboard"
+    help: "docs/help/drake_golf.md"
     name: "Drake Dashboard"
     description: "Interactive Drake simulation dashboard (advanced mode of Drake engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
@@ -916,6 +974,7 @@ models:
       default_launch: "tab"
 
   - id: "mujoco_dashboard"
+    help: "docs/help/mujoco_unified.md"
     name: "MuJoCo Dashboard"
     description: "Interactive MuJoCo simulation dashboard (advanced mode of MuJoCo engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
@@ -933,6 +992,7 @@ models:
       default_launch: "tab"
 
   - id: "pinocchio_dashboard"
+    help: "docs/help/pinocchio_golf.md"
     name: "Pinocchio Dashboard"
     description: "Interactive Pinocchio simulation dashboard (advanced mode of Pinocchio engine destination; specialized and dashboard controls both available — #10514)"
     type: "special_app"
@@ -954,6 +1014,7 @@ models:
   # =============================================================================
 
   - id: "pinn_pure_rigid"
+    help: "docs/help/simulation_backends.md"
     name: "Pure Rigid Body"
     description: "Pinocchio inverse dynamics only — no ML"
     type: "physics_informed"
@@ -967,6 +1028,7 @@ models:
       status: "experimental"
 
   - id: "pinn_hybrid"
+    help: "docs/help/simulation_backends.md"
     name: "PINN Hybrid"
     description: "Rigid body + JAX residual torque MLP"
     type: "physics_informed"

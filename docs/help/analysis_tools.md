@@ -4,9 +4,7 @@ Analyze simulation results with plots, metrics, and export capabilities.
 
 ## Overview
 
-UpstreamDrift provides comprehensive analysis tools to extract insights from simulation data, including energy analysis, phase diagrams, kinematic sequences, force/torque profiles, and Jacobian conditioning diagnostics.
-
-Headless and GUI analyses are powered by `src.shared.python.analysis` (`AnalysisOrchestrator`), `src.shared.python.biomechanics.kinematic_sequence` (`SegmentTimingAnalyzer`), `src.shared.python.spatial_algebra.manipulability`, and engine-level validation tools.
+UpstreamDrift provides comprehensive analysis tools to extract insights from simulation data, including energy analysis, phase diagrams, kinematic sequences, and force/torque profiles.
 
 ## Energy Analysis
 
@@ -45,34 +43,24 @@ The energy panel displays:
 
 ### Using Energy Analysis
 
-Retrieve structured energy time series via `AnalysisOrchestrator` or evaluate metrics directly with `EnergyMetricsMixin`:
-
 ```python
-from src.shared.python.analysis import AnalysisOrchestrator
-from src.shared.python.analysis.energy_metrics import EnergyMetricsMixin
+from shared.python.analysis import EnergyAnalyzer
 
-# Extract structured plot data from recorder
-orchestrator = AnalysisOrchestrator(recorder)
-plot_data = orchestrator.get_plot_data("energies")
+analyzer = EnergyAnalyzer(simulation_data)
 
-# Access series
-for series in plot_data.series:
-    print(f"{series.name}: {len(series.y)} points ({series.units})")
+# Get energy time series
+ke, pe, total = analyzer.compute_energy()
 
-# Compute numerical energy metrics directly
-energy_mixin = EnergyMetricsMixin()
-times, ke = recorder.get_time_series("kinetic_energy")
-_, pe = recorder.get_time_series("potential_energy")
-metrics = energy_mixin.compute_energy_metrics(ke, pe)
-print(
-    f"Max KE: {metrics['max_kinetic_energy']:.2f} J, Variation: {metrics['energy_variation']:.2f} J"
-)
+# Check conservation
+is_conserved = analyzer.check_conservation(tolerance=0.01)
+
+# Find peak kinetic energy
+peak_time, peak_ke = analyzer.find_peak_kinetic()
 ```
 
 ## Phase Diagrams
 
 ### What Are Phase Diagrams?
-
 Phase diagrams plot position vs. velocity for each degree of freedom, revealing:
 
 - Dynamic stability
@@ -93,18 +81,18 @@ Phase diagrams plot position vs. velocity for each degree of freedom, revealing:
 ### Creating Phase Plots
 
 ```python
-from src.shared.python.analysis import AnalysisOrchestrator
+from shared.python.plotting import PhaseDiagramPlotter
 
-orchestrator = AnalysisOrchestrator(recorder, joint_names=["Pelvis", "Thorax", "Arm"])
+plotter = PhaseDiagramPlotter(simulation_data)
 
-# Get phase diagram for Joint 0 (Pelvis)
-phase_data = orchestrator.get_plot_data("phase_diagram")
+# Plot single joint
+fig = plotter.plot_joint(joint_index=0)
 
-angles = phase_data.series[0].x  # degrees
-velocities = phase_data.series[0].y  # deg/s
+# Plot multiple joints
+fig = plotter.plot_joints([0, 1, 2])
 
-# Compute 3D Poincaré map section crossings
-poincare_data = orchestrator.get_plot_data("poincare_map_3d")
+# 3D phase space
+fig = plotter.plot_3d_phase_space(joint_index=0)
 ```
 
 ## Kinematic Sequence Analysis
@@ -136,37 +124,22 @@ The X-factor measures torso-pelvis separation:
 - **Top of backswing:** Maximum separation
 - **X-factor stretch:** Increase during transition
 
-### Using Kinematic Sequence Analysis
-
-Use `SegmentTimingAnalyzer` from `src.shared.python.biomechanics.kinematic_sequence` to analyze peak timing across segments:
+### Using Kinematic Sequence
 
 ```python
-import numpy as np
-from src.shared.python.biomechanics.kinematic_sequence import (
-    SegmentTimingAnalyzer,
-)
+from shared.python.analysis import KinematicSequenceAnalyzer
 
-# Define expected proximal-to-distal order
-analyzer = SegmentTimingAnalyzer(
-    expected_order=["pelvis", "torso", "lead_arm", "club"]
-)
+analyzer = KinematicSequenceAnalyzer(simulation_data)
 
-# Analyze timing from angular velocity series
-result = analyzer.analyze(
-    segment_velocities={
-        "pelvis": pelvis_vel,
-        "torso": torso_vel,
-        "lead_arm": arm_vel,
-        "club": club_vel,
-    },
-    times=timestamps,
-)
+# Compute full sequence
+sequence = analyzer.compute_sequence()
 
-print(f"Sequence consistency: {result.sequence_consistency:.2f}")
-print(f"Observed peak order: {result.sequence_order}")
-print(f"Valid sequence: {result.is_valid_sequence}")
-for peak in result.peaks:
-    print(f"{peak.name}: peak = {peak.peak_velocity:.1f} at t = {peak.time:.3f} s")
+print(f"Pelvis peak: {sequence.pelvis_peak_velocity:.0f} deg/s")
+print(f"Torso peak: {sequence.torso_peak_velocity:.0f} deg/s")
+print(f"Club peak: {sequence.club_peak_velocity:.0f} deg/s")
+
+# Check sequencing order
+is_correct = analyzer.verify_sequence_order()
 ```
 
 ## Force and Torque Analysis
@@ -202,33 +175,26 @@ Analyze ball-club impact:
 - Force direction
 - Impulse calculation
 
-### Force and Torque Analysis API
+### Force Analysis API
 
 ```python
-from src.shared.python.analysis import AnalysisOrchestrator
+from shared.python.analysis import ForceAnalyzer
 
-orchestrator = AnalysisOrchestrator(recorder)
+analyzer = ForceAnalyzer(simulation_data)
 
-# Joint torques time series
-torque_plot = orchestrator.get_plot_data("joint_torques")
+# Joint torques
+torques = analyzer.get_joint_torques()
 
-# Ground reaction forces (butterfly diagram with vector arrows)
-grf_butterfly = orchestrator.get_plot_data("grf_butterfly_diagram")
-vectors = grf_butterfly.metadata["vectors"]
+# Ground reaction forces
+grf = analyzer.get_ground_reaction_forces()
 
-# Center of Pressure trajectory and Stability (CoM vs CoP)
-cop_plot = orchestrator.get_plot_data("cop_trajectory")
-stability_plot = orchestrator.get_plot_data("stability_diagram")
-
-# Joint power curves and impulse accumulation
-power_plot = orchestrator.get_plot_data("joint_power_curves")
-impulse_plot = orchestrator.get_plot_data("impulse_accumulation")
+# Contact forces
+impact = analyzer.get_impact_forces()
 ```
 
 ## Jacobian Analysis
 
 ### What Is the Jacobian?
-
 The Jacobian matrix relates joint velocities to end-effector (clubhead) velocities:
 
 ```
@@ -255,29 +221,19 @@ The manipulability ellipsoid visualizes:
 
 ### Using Jacobian Analysis
 
-Use diagnostic utilities from `src.shared.python.spatial_algebra.manipulability`:
-
 ```python
-from src.shared.python.spatial_algebra.manipulability import (
-    check_jacobian_conditioning,
-    compute_manipulability_ellipsoid,
-    compute_manipulability_index,
-)
+from shared.python.analysis import JacobianAnalyzer
 
-# Spatial Jacobian (6 x n) computed by physics engine for clubhead
-J = engine.compute_jacobian("clubhead")["spatial"]
+analyzer = JacobianAnalyzer(engine)
 
-# Yoshikawa manipulability index: mu = sqrt(det(J * J^T))
-manip_index = compute_manipulability_index(J)
+# Get Jacobian at current configuration
+J = analyzer.get_jacobian()
 
-# Condition number: kappa = sigma_max / sigma_min
-condition_number = check_jacobian_conditioning(J, body_name="clubhead", warn=True)
+# Compute manipulability
+manip = analyzer.compute_manipulability()
 
-# Principal ellipsoid axes and radii (singular values)
-radii, axes = compute_manipulability_ellipsoid(J)
-print(
-    f"Manipulability Index: {manip_index:.3e}, Condition Number: {condition_number:.2e}"
-)
+# Find singular configurations
+singulars = analyzer.find_singular_configurations()
 ```
 
 ## Comparative Analysis
@@ -295,29 +251,22 @@ Compare multiple swings:
 
 ### Cross-Engine Validation
 
-Validate numerical consistency across physics engines using `CrossEngineValidator`:
+Compare results across physics engines:
 
 ```python
-import numpy as np
-from src.shared.python.engine_core.cross_engine_validator import (
-    CrossEngineValidator,
-)
+from shared.python.cross_engine_validator import CrossEngineValidator
 
 validator = CrossEngineValidator()
 
-# Validate consistency between MuJoCo and Drake trajectories
-result = validator.compare_states(
-    "MuJoCo",
-    mujoco_positions,
-    "Drake",
-    drake_positions,
-    metric="position",
+# Run same simulation on multiple engines
+results = validator.compare_engines(
+    engines=["mujoco", "drake", "pinocchio"],
+    params=simulation_params
 )
 
-print(f"Validation passed: {result.passed}")
-print(
-    f"Max deviation: {result.max_deviation:.2e} m (tolerance: {result.tolerance:.2e} m)"
-)
+# Check deviations
+for engine, data in results.items():
+    print(f"{engine}: max deviation = {data.max_deviation}")
 ```
 
 ## Data Export
@@ -340,81 +289,54 @@ print(
 
 ### Quick Export
 
-Export structured analysis data to JSON or CSV:
-
 ```python
-import json
-from src.shared.python.analysis import AnalysisOrchestrator
-from src.shared.python.analysis.reporting import ReportingMixin
+from shared.python.export import DataExporter
 
-# 1. Export PlotData to JSON via AnalysisOrchestrator
-orchestrator = AnalysisOrchestrator(recorder)
-plot_data = orchestrator.get_plot_data("energies")
-with open("energy_plot.json", "w", encoding="utf-8") as f:
-    json.dump(plot_data.to_dict(), f, indent=2)
+exporter = DataExporter(simulation_data)
 
-# 2. Export Statistical Report to CSV via StatisticalAnalyzer
-# (inherits ReportingMixin.export_statistics_csv)
-from src.shared.python.validation_pkg.statistical_analysis import (
-    StatisticalAnalyzer,
-)
+# Export to CSV
+exporter.to_csv("results.csv", columns=["time", "q", "v", "tau"])
 
-analyzer = StatisticalAnalyzer(
-    times=times,
-    joint_positions=q,
-    joint_velocities=v,
-    joint_torques=tau,
-    club_head_speed=club_speed,
-)
-analyzer.export_statistics_csv("swing_statistics.csv")
+# Export to JSON with metadata
+exporter.to_json("results.json", include_metadata=True)
+
+# Export plots
+exporter.export_plots("plots/", format="png", dpi=300)
 ```
 
 ## Custom Analysis
 
-### Extending Analysis With Mixins
+### Writing Custom Analyzers
 
-Custom analysis routines can integrate with UpstreamDrift's modular analysis framework:
+Extend the analysis framework:
 
 ```python
-import numpy as np
-from src.shared.python.analysis import BasicStatsMixin, EnergyMetricsMixin
+from shared.python.analysis import BaseAnalyzer
 
+class MyAnalyzer(BaseAnalyzer):
+    def compute(self):
+        # Access simulation data
+        time = self.data.time
+        positions = self.data.q
 
-class CustomBiomechanicsAnalyzer(BasicStatsMixin, EnergyMetricsMixin):
+        # Your analysis
+        result = my_custom_analysis(time, positions)
 
-    def __init__(self, times: np.ndarray, joint_positions: np.ndarray) -> None:
-        self.times = times
-        self.joint_positions = joint_positions
-        self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
-
-    def compute_custom_metrics(self) -> dict[str, float]:
-        summary = self.compute_summary_stats(self.joint_positions[:, 0])
-        return {
-            "mean_pos": summary.mean,
-            "max_pos": summary.max_val,
-            "rom": summary.range_of_motion,
-        }
+        return result
 ```
 
-### Extending Orchestrator Plot Types
+### Registering Custom Plots
 
-The headless `AnalysisOrchestrator` maps plot-type identifiers to extractor methods returning structured `PlotData`:
+Add custom plots to the analysis panel:
 
 ```python
-from src.shared.python.analysis.plot_data import PlotData, PlotSeries
+from shared.python.plotting import register_custom_plot
 
-
-def make_custom_plot_data(
-    name: str, x: list[float], y: list[float], units: str = "deg"
-) -> PlotData:
-    return PlotData(
-        plot_type="custom_metric",
-        title=f"Custom Metric: {name}",
-        x_label="Time (s)",
-        y_label=f"Value ({units})",
-        series=[PlotSeries(name=name, x=x, y=y, units=units)],
-        metadata={"custom": True},
-    )
+@register_custom_plot("My Custom Plot")
+def my_plot(data, ax):
+    ax.plot(data.time, data.q[:, 0])
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Position")
 ```
 
 ## Troubleshooting

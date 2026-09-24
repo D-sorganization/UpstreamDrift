@@ -1,309 +1,93 @@
-# Motion Capture Integration
-
-Import, process, and analyze motion capture data for biomechanical analysis.
-
-## Overview
-
-UpstreamDrift supports multiple motion capture formats and pose estimation systems, allowing you to import real-world movement data for analysis and simulation.
-
-## Supported Formats
-
-### C3D Files (.c3d)
-
-C3D is the industry-standard format for biomechanics motion capture.
-
-**Features:**
-
-- 3D marker positions
-- Analog data (force plates, EMG)
-- Frame rate and timing information
-- Metadata and labels
-
-**Use for:** Professional motion capture lab data (Vicon, OptiTrack, Qualisys)
-
-### CSV Files (.csv)
-
-Flexible format for custom marker data.
-
-**Expected columns:**
-
-- Time or frame number
-- X, Y, Z coordinates per marker
-- Optional: velocity, acceleration data
-
-**Example format:**
-
-```csv
-time,marker1_x,marker1_y,marker1_z,marker2_x,marker2_y,marker2_z
-0.000,0.123,0.456,0.789,0.321,0.654,0.987
-0.001,0.124,0.457,0.790,0.322,0.655,0.988
-```
-
-### JSON Files (.json)
-
-Structured format with hierarchical data.
-
-**Use for:** Pose estimation output, custom applications
-
-**Example structure:**
-
-```json
-{
-  "frame_rate": 120,
-  "frames": [
-    {
-      "time": 0.0,
-      "markers": {
-        "left_shoulder": [0.1, 0.5, 1.2],
-        "right_shoulder": [0.3, 0.5, 1.2]
-      }
-    }
-  ]
-}
-```
-
-## Importing Motion Capture Data
-
-### Using the Import Dialog
-
-1. **Open Import Dialog**
-
-   - File menu > Import Motion Capture
-   - Or press Ctrl+I
-
-2. **Select File**
-
-   - Browse to your data file
-   - Supported formats shown in filter
-
-3. **Configure Import Settings**
-
-   - Set coordinate system (if needed)
-   - Map markers to standard names
-   - Specify frame range (optional)
-
-4. **Preview Data**
-
-   - View marker trajectories
-   - Check for gaps or errors
-   - Verify coordinate system
-
-5. **Import**
-   - Click Import to load data
-   - Data appears in Motion Capture panel
-
-### Using Python API
-
-```python
-from shared.python.motion_capture import MotionCaptureLoader
-
-# Load C3D file
-mocap = MotionCaptureLoader.load_c3d("swing.c3d")
-
-# Load CSV with custom mapping
-mocap = MotionCaptureLoader.load_csv(
-    "data.csv",
-    marker_columns={
-        "left_shoulder": ["LSH_X", "LSH_Y", "LSH_Z"],
-        "right_shoulder": ["RSH_X", "RSH_Y", "RSH_Z"],
-    }
-)
-```
-
-## C3D Viewer
-
-The built-in C3D Viewer provides specialized visualization for motion capture data.
-
-### Features
-
-- **3D Marker Visualization**
-
-  - Animated marker positions
-  - Trajectory trails
-  - Color-coded marker groups
-
-- **Analog Data Plotting**
-
-  - Force plate data
-  - EMG signals
-  - Custom analog channels
-
-- **Navigation**
-  - Frame-by-frame stepping
-  - Playback speed control
-  - Jump to specific frame/time
-
-### Controls
-
-| Key        | Action       |
-| ---------- | ------------ |
-| Space      | Play/Pause   |
-| Left/Right | Step frame   |
-| Home       | Go to start  |
-| End        | Go to end    |
-| +/-        | Adjust speed |
-
-## Pose Estimation from Video
-
-UpstreamDrift can extract motion data from video using pose estimation.
-
-### Supported Systems
-
-| System    | Keypoints | Speed     | Accuracy  |
-| --------- | --------- | --------- | --------- |
-| MediaPipe | 33        | Fast      | Good      |
-| OpenPose  | 25        | Medium    | Excellent |
-| MoveNet   | 17        | Very Fast | Good      |
-
-### Processing Video
-
-1. **Import Video**
-
-   - File > Import Video for Pose Estimation
-   - Supported formats: MP4, AVI, MOV
-
-2. **Select Pose Estimator**
-
-   - MediaPipe (recommended for local processing)
-   - OpenPose (requires separate installation)
-   - MoveNet (fast, lower accuracy)
-
-3. **Configure Settings**
-
-   - Frame rate for extraction
-   - Confidence threshold
-   - Smoothing options
-
-4. **Process**
-
-   - Click "Process Video"
-   - Progress bar shows completion
-   - Results saved automatically
-
-5. **Review Results**
-   - Preview detected poses
-   - Adjust confidence threshold if needed
-   - Export or use directly
-
-### Tips for Video Capture
-
-- Use high frame rate (60fps+) for fast movements
-- Ensure good lighting
-- Minimize background clutter
-- Keep camera stable
-- Capture from multiple angles if possible
-
-## Motion Retargeting
-
-Map motion capture data to your simulation model.
-
-### Retargeting Process
-
-1. **Load Motion Data**
-
-   - Import your motion capture file
-
-2. **Select Target Model**
-
-   - Choose the simulation model to drive
-
-3. **Define Marker Mapping**
-
-   - Map mocap markers to model joints/bodies
-   - Example: "LSHO" marker -> "left_shoulder" joint
-
-4. **Configure Options**
-
-   - Scaling: Match model proportions
-   - Filtering: Smooth noisy data
-   - Gap filling: Interpolate missing data
-
-5. **Execute Retargeting**
-
-   - Click "Retarget"
-   - Review results in 3D view
-
-6. **Fine-tune**
-   - Adjust individual joint mappings
-   - Apply offsets if needed
-   - Re-run retargeting
-
-### Marker Mapping
-
-Standard marker set mappings are provided for common configurations:
-
-| Marker Set       | Markers  | Use Case           |
-| ---------------- | -------- | ------------------ |
-| Plug-in Gait     | 39       | Full body clinical |
-| Helen Hayes      | 15       | Lower body         |
-| Cleveland Clinic | 12       | Upper body golf    |
-| Custom           | Variable | User-defined       |
-
-### Python API for Retargeting
-
-```python
-from shared.python.motion_capture import MotionRetargeting
-
-# Create retargeter
-retargeter = MotionRetargeting(
-    source_skeleton="vicon_full_body",
-    target_model=my_model
-)
-
-# Define mapping
-marker_mapping = {
-    "LSHO": "left_shoulder",
-    "RSHO": "right_shoulder",
-    "LELB": "left_elbow",
-    # ... more markers
-}
-retargeter.set_marker_mapping(marker_mapping)
-
-# Perform retargeting
-joint_trajectory = retargeter.retarget(mocap_data)
-```
-
-## Data Quality
-
-### Common Issues
-
-| Issue  | Cause            | Solution                  |
-| ------ | ---------------- | ------------------------- |
-| Gaps   | Occlusion        | Gap filling interpolation |
-| Noise  | Marker vibration | Low-pass filtering        |
-| Spikes | Marker swap      | Manual correction         |
-| Drift  | Calibration      | Re-calibrate or correct   |
-
-### Quality Metrics
-
-The system reports:
-
-- Gap percentage per marker
-- RMS noise estimate
-- Outlier detection
-- Coordinate system verification
-
-## Troubleshooting
-
-### Import Fails
-
-- Verify file format is correct
-- Check file is not corrupted
-- Ensure all required columns present (CSV)
-- Check encoding (UTF-8 recommended)
-
-### Wrong Coordinate System
-
-- Use coordinate system transform tool
-- Specify axis mapping in import dialog
-- Apply rotation/translation after import
-
-### Missing Markers
-
-- Enable gap filling
-- Interpolation options: Linear, Cubic, Pattern-based
-- Mark critical frames for manual review
-
+---
+title: Motion Capture
+tile_id: motion_capture
+status: complete
 ---
 
-_See also: [Full User Manual](../user_guide/user_manual.md) | [Visualization](visualization.md) | [Analysis Tools](analysis_tools.md)_
+# Motion Capture
+
+## Purpose
+
+Turn a multi-camera video recording of a swing into frame-by-frame 3D
+landmark positions, by driving [FreeMoCap](https://freemocap.org/) as an
+isolated subprocess. Use this tile when you have already recorded and
+calibrated a FreeMoCap session and want its triangulated landmarks on
+disk so the rest of UpstreamDrift can consume them. It is the markerless
+counterpart to the optical-marker workflow in [C3D Viewer](c3d_viewer.md).
+
+## Inputs
+
+| Input | Unit / type | Notes |
+| --- | --- | --- |
+| `--input` session directory | filesystem path (required) | Directory of the FreeMoCap session recordings (the synchronised camera videos). |
+| `--output` directory | filesystem path (required) | Created if absent; receives `landmarks.csv` and `metadata.json`. |
+| `--env-python` | filesystem path (optional) | Interpreter inside the separate FreeMoCap virtualenv. Defaults to the current `sys.executable`, which will normally *not* have FreeMoCap installed. |
+| `--timeout` | seconds (float, default `1800.0`) | Subprocess wall-clock limit, i.e. 30 minutes. |
+| `--dry-run` | flag | Skips the subprocess entirely and writes stub artifacts. |
+| `--json` | flag | Prints the result record to stdout as JSON. |
+
+Camera count, capture frame rate (Hz) and calibration are properties of
+the FreeMoCap session you recorded, not of this tile; it passes the
+directory through untouched.
+
+## Outputs
+
+| Output | Unit / type | Notes |
+| --- | --- | --- |
+| `landmarks.csv` | columns `frame,landmark_id,x,y,z` | `frame` is a 0-based integer frame index; `landmark_id` is a 0-based integer. `x`/`y`/`z` are written by FreeMoCap in whatever length unit it emits (typically metres) - **the sidecar performs no unit conversion and no axis reorientation**. |
+| `metadata.json` | JSON object | Session metadata as emitted by FreeMoCap: `freemocap_version`, `n_frames` (frames), `n_landmarks` (count), `fps` (Hz), `duration_s` (seconds). |
+| Process exit code | integer | `0` on success; otherwise the subprocess return code, with `-1` for timeout and `127` for a missing interpreter. |
+| `FreeMoCapResult` (Python API) | dataclass | `success`, `used_real_freemocap`, `return_code`, `stderr_tail` (last 4 KB of stderr), and the two artifact paths. |
+
+## Method
+
+`run_freemocap_sidecar()` in
+[`src/tools/freemocap_sidecar/run_freemocap.py`](../../src/tools/freemocap_sidecar/run_freemocap.py)
+shells out to `<env-python> -m freemocap --input ... --output ...` and
+then reads the results back with the standard library only. No symbol
+from `freemocap` is ever imported into the UpstreamDrift process. This
+is a licence boundary, not a performance choice: UpstreamDrift is MIT
+and FreeMoCap is AGPL. The rationale and the process diagram are in
+[FreeMoCap sidecar pipeline](../motion_capture/freemocap_sidecar.md) and
+[FreeMoCap integration](../motion_capture/freemocap.md).
+
+FreeMoCap's own landmark estimation is MediaPipe-based, and its
+`n_landmarks` is reported as 33 in the documented output contract.
+
+## Limitations
+
+- **It is a command-line runner, not a GUI.** The module exposes an
+  `argparse` CLI and no Qt window, and both `--input` and `--output` are
+  required. Invoking it with no arguments exits with an argparse usage
+  error.
+- **It does not record.** Recording, camera synchronisation and
+  checkerboard calibration all happen inside FreeMoCap itself,
+  beforehand.
+- **It does not install FreeMoCap**, and will not work until you have
+  built a separate virtualenv and passed its interpreter via
+  `--env-python`. Installing FreeMoCap into the main UpstreamDrift
+  environment is explicitly disallowed.
+- **A "successful"-looking run can be a stub.** When the interpreter is
+  missing, or the module is not installed, or `--dry-run` is set, the
+  sidecar still writes `landmarks.csv` and `metadata.json` so downstream
+  code has a stable contract. Stub metadata carries `"stub": true`,
+  `"n_landmarks": 1` and `"freemocap_version": "stub"`. Check
+  `used_real_freemocap` before trusting any numbers.
+- **Landmark positions are inference, not measurement.** They are the
+  triangulated output of a pose estimator run on video, with no optical
+  markers to anchor them. The repo documentation notes plainly that
+  MediaPipe Holistic was not trained on high-speed sports motion, so
+  tracking dropouts through the downswing are expected.
+- **No smoothing, gap filling, unit conversion, retargeting or scaling
+  happens here.** Those belong to the motion pipeline downstream.
+- The tile is registered at maturity `beta`.
+
+## See Also
+- [FreeMoCap sidecar pipeline](../motion_capture/freemocap_sidecar.md)
+- [FreeMoCap integration](../motion_capture/freemocap.md)
+- [Markerless mocap acceptance criteria](../motion_capture/markerless_mocap_acceptance.md)
+- [Motion pipeline workflow guide](../motion_pipeline/README.md)
+- [Motion pipeline format matrix](../motion_pipeline/formats.md)
+- [Motion pipeline troubleshooting](../motion_pipeline/troubleshooting.md)
+- [ADR-0007: motion pipeline architecture](../adr/0007-motion-pipeline-architecture.md)
+- [C3D Viewer](c3d_viewer.md), [MediaPipe](mediapipe_analysis.md), [OpenPose](openpose_analysis.md)
