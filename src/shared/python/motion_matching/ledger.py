@@ -39,6 +39,7 @@ DEFAULT_ROOTS: tuple[Path, ...] = (
     Path("docs/development/simscape_tour_matching/native_evidence"),
     Path("docs/development/opensim_tour_matching/evidence"),
     Path("docs/plans/tour_baselines/evidence"),
+    Path("artifacts/tour_baselines"),
     Path("evidence"),
 )
 
