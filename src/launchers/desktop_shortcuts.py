@@ -219,17 +219,22 @@ Write-Output "Description=$($Shortcut.Description)"
         ps_command = self._generate_powershell_script(destination, spec)
 
         try:
-            result = subprocess.run(
-                ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_command],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
+            self._run_powershell(ps_command)
             _logger.info("Successfully installed shortcut: %s", destination)
             return True
         except (subprocess.CalledProcessError, OSError) as exc:
             _logger.error("Failed to install shortcut at %s: %s", destination, exc)
             return False
+
+    @staticmethod
+    def _run_powershell(ps_command: str) -> subprocess.CompletedProcess[str]:
+        """Execute a PowerShell command string safely."""
+        return subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_command],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
     @staticmethod
     def _parse_metadata(
@@ -270,12 +275,7 @@ Write-Output "Description=$($Shortcut.Description)"
 
         ps_command = self._generate_read_script(shortcut_path)
         try:
-            result = subprocess.run(
-                ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_command],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
+            result = self._run_powershell(ps_command)
             return self._parse_metadata(shortcut_path, result.stdout)
         except (subprocess.CalledProcessError, OSError) as exc:
             _logger.warning("Could not read shortcut %s: %s", shortcut_path, exc)
