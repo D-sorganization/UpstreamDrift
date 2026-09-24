@@ -1397,3 +1397,26 @@ def reject_visual_override_of_physical_failure(package: Any) -> bool:
     if not isinstance(package, ExportedCandidatePackage):
         raise TypeError("package must be ExportedCandidatePackage")
     return physical_overrides_visual(package)
+
+
+def qualify_tour_baseline(
+    package: Any,
+    profile_version: str | None = None,
+) -> Any:
+    """Independently qualify tour baseline package against canonical criteria (TB-09 #10594).
+
+    Recomputes all metrics and verifies artifact integrity, dynamic rollout,
+    physical/geometric constraints, and endpoint criteria.
+    """
+    from src.shared.python.tour_baselines.qualification import (
+        QUALIFICATION_PROFILE_VERSION,
+        IndependentBaselineQualifier,
+    )
+
+    ver = (
+        profile_version
+        if profile_version is not None
+        else QUALIFICATION_PROFILE_VERSION
+    )
+    qualifier = IndependentBaselineQualifier()
+    return qualifier.qualify(package, profile_version=ver)
