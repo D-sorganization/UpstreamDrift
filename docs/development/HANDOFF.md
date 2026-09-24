@@ -1,67 +1,63 @@
-# Implementation Handoff — Remove Dead Skeleton Extractors Providers
+# Implementation Handoff — Fail-Closed Legacy Evidence Qualification & Dynamic Inertia Digest
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `/home/dieterolson/staff-worktrees/UpstreamDrift-run-b571f75d9fb0`
-- Branch: `staff/issue-remediator-task-2852a7`
-- Baseline commit: `447cfada0`
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10799`
+- Branch: `fix/10799-10800-qualification-integrity`
+- Baseline commit: `a9651a161c`
 - Implementation commit: `SELF`
-- Pull request: #10808 (merged)
-- Governing issue/epic: #8866
-- Session: `issue-remediator-run-b571f75d9fb0`
+- Pull request: not created
+- Governing issue/epic: #10799, #10800 (parent review on PR #10798; TB-09 #10594, TB-10 #10595)
+- Session: `antigravity-20260924-remediation-tour-baselines`
 
 ## Objective and Status
 
-- Objective: Delete the six per-engine skeleton extractor modules under `src/tools/starting_pose_matcher/skeleton_extractors/` (~1,614 lines) that have no callers in any shipped `src/` code, along with their eight dedicated test modules. Prune stale baseline rows referencing the deleted paths.
-- Status: Complete (merged to main in PR #10808)
-- Completed: Removed 6 uncalled modules and 8 test suites, pruned stale baseline entries in mypy, suite markers, and LoD baselines.
-- Remaining: None (shipped)
+- Objective: Address bot review feedback on PR #10798:
+  1. Keep qualification strictly fail-closed for unsigned legacy evidence (#10799) by eliminating silent auto-migration from `IndependentBaselineQualifier.qualify()`, and ensure `migrate_legacy_package` explicitly leaves packages unverified (`UNVERIFIED`, `has_native_replay=False`) until native evidence is regenerated.
+  2. Hash actual pendulum dynamics inertia parameters (#10800) in `fixed_inertia_hash` (segment masses, center-of-mass ratios, rotational inertias) via `compute_pendulum_inertia_hash` using rollout `DoublePendulumDynamics` parameters rather than just link lengths or model labels.
+- Status: Complete / ready for PR
+- Completed:
+  1. Removed `auto_migrate` parameter and auto-migration from `IndependentBaselineQualifier.qualify()`.
+  2. Updated `migrate_legacy_package` to mark `statuses` with `scientific_qualification=ScientificQualificationStatus.UNVERIFIED` and `has_native_replay=False`.
+  3. Implemented `compute_pendulum_inertia_hash()` in `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py` digesting segment masses, COM ratios, and rotational inertias from actual `DoublePendulumDynamics` parameters.
+  4. Updated `_assemble_baseline_package` and `generate_baseline_package_for_target` to pass `dynamics` and compute `fixed_inertia_hash` from actual dynamics parameters.
+  5. Added regression and unit tests in `tests/unit/tour_baselines/test_qualification.py`.
+  6. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md` (DL-#10799), and this `HANDOFF.md`.
+- Remaining: Push branch, create pull request with auto-merge, and release agent lease.
 
 ## Files and Decisions
 
 - Files changed:
-  - Deleted source (6 files, ~1,614 lines):
-    - `src/tools/starting_pose_matcher/skeleton_extractors/drake.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/openpose.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/opensim.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py`
-  - Deleted tests (8 files):
-    - `tests/unit/tools/starting_pose_matcher/test_drake_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_mujoco_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_opensim_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_pinocchio_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_observed_input_providers.py`
-    - `tests/unit/tools/starting_pose_matcher/test_provider_error_paths.py`
-    - `tests/tools/starting_pose_matcher/test_observed_extractors.py`
-    - `tests/tools/starting_pose_matcher/test_physics_extractors_with_stubs.py`
-  - Updated baselines:
-    - `scripts/config/full_src_mypy_baseline.json`
-    - `scripts/config/suite_marker_baseline.json`
-    - `scripts/ci/lod_baseline.txt`
-  - Updated docs:
-    - `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md`
-- Key decisions: Pure deletion of 6 uncalled skeleton extractor engines in starting_pose_matcher and 8 dedicated tests; preserved singular `skeleton_extractor.py` for `JsonSkeletonExtractor` in GUI.
-- User-owned or unrelated worktree changes: None observed
+  - `src/shared/python/tour_baselines/qualification.py`: Removed auto-migration from `qualify()`; updated `migrate_legacy_package` to set `UNVERIFIED` and `has_native_replay=False`, and compute pendulum inertia digest via `compute_pendulum_inertia_hash`.
+  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Added `compute_pendulum_inertia_hash()`; wired `dynamics` through `_assemble_baseline_package`.
+  - `tests/unit/tour_baselines/test_qualification.py`: Added assertions verifying fail-closed legacy rejection and unverified status after migration; added `test_pendulum_inertia_hash_reflects_dynamics_parameters`.
+  - `SPEC.md`: Documented fail-closed legacy qualification and dynamics inertia parameter hashing.
+  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10799 entry.
+  - `docs/development/HANDOFF.md`: Updated canonical handoff.
+- Key decisions:
+  - Fail-closed qualification ensures an untrusted or stripped candidate package cannot bypass cryptographic verification without native evidence.
+  - Inertia hash digests actual mass/inertia arrays rather than link lengths, guaranteeing that modifications to model physics invalidate stored inertia digests.
 
 ## Validation
 
-- `ruff check .` — all checks passed (zero violations)
-- `ruff format --check .` — no new diffs introduced by this change
-- `scripts/ci/check_file_size_budget.py` — OK
-- CI Standard: passed 100% green on PR #10808 (run 35973035906)
+- `pytest tests/unit/tour_baselines/test_qualification.py` — 23 passed (100% green).
+- `pytest tests/unit/tour_baselines/` — 102 passed (100% green).
+- `pytest tests/unit/motion_matching/test_acceptance.py` — 21 passed (100% green).
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (verified dead code with no remaining callers in shipped code)
+- Risks/assumptions: None (improves integrity verification without changing valid package rollouts)
 
 ## Next Steps
 
-1. Maintain pruned baselines and direct future pose extraction to `pose_interchange`.
+1. Run ruff and mypy checks.
+2. Push `fix/10799-10800-qualification-integrity` to origin.
+3. Create PR referencing #10799, #10800.
+4. Enable auto-merge (`--auto --squash`).
+5. Release leases on #10799 and #10800 via `scripts.release_agent_lease`.
 
 ## Change Log
 
-- `SELF` — Restore canonical handoff schema (Files and Decisions, Change Log, Governing issue/epic) and update PR state to merged PR #10808.
+- `SELF` — Keep qualification fail-closed for unsigned legacy evidence and hash actual dynamics inertia parameters (#10799, #10800).

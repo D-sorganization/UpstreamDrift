@@ -28,7 +28,7 @@ Completes the documentation and end-to-end acceptance deliverables for Epic #105
 Integrates Tour Baselines into Motion Matching and Replay launchers:
 - **Presenter & View Models (`src/tools/motion_matching/tour_baselines_presenter.py`)**:
   - `TourBaselinesPresenter`: Pure-Python presenter decoupled from Qt widgets coordinating coverage discovery, detailed model views, comparison, and evidence inspection.
-  - Lists models from the canonical two-capture coverage matrix across Driver (360 Hz) and 7-Iron (359 Hz) captures.
+  - Lists models from the canonical two-capture coverage matrix across Driver (360 Hz) and 7-Iron (359 Hz) captures with exact-capture package discovery flags (#10829).
   - Accessible Status Badges (`_format_badge`): Formats readable status symbols and text labels (`[PASS]`, `[REJECTED]`, `[BLOCKED]`, `[REF]`, `[CANDIDATE]`, `[UNQUALIFIED]`) without relying on color alone.
   - Visual Semantics (`BaselineOpenResult`): Enforces visual distinction between 3D and projected 2D views, and explicitly differentiates observed club markers (`marker_points`) from simulated club graphics (`continuous_mesh`).
   - Plain-Language "Where This Came From" Panel (`WhereThisCameFromView`): Surfaces raw capture SHA-256 hashes, capture frequencies, preprocessing pipeline notes, subject & club geometries, fit configurations, replay receipt links, and explicit scientific limitations (force identifiability and holdout generalization disclaimers).
@@ -68,10 +68,11 @@ Adds `src/shared/python/tour_baselines/discovery.py` integrating catalog discove
   - Provides headless `list`, `inspect`, `export`, and `import` CLI operations with JSON and structured text output.
 - **Verification Suite (`tests/unit/tour_baselines/test_discovery.py`, `tests/unit/tour_baselines/test_qualification.py`)**:
   - 15 unit tests covering preset extraction, compatibility verification, session cloning, multi-field filtering, fail-closed unverified rejection, archive export/import, tampered archive rejection, ledger conversion, and CLI execution.
-- **Review Hardening & Legacy Migration (#10794, #10795)**:
+- **Review Hardening & Legacy Migration (#10794, #10795, #10799, #10800)**:
   - Reconstructs `SafeModelPreset` directly from checksum-verified archive array members (`q0`, `v0`, `controls`) and verifies bitwise equality against embedded manifest arrays, failing closed if manifest values are manipulated.
   - Ensures `_assemble_baseline_package` generates fully qualifiable packages with evaluated `tau` torques, `time`, `horizon="G1"` default, and non-empty identity hashes.
-  - Implements `migrate_legacy_package` and auto-migration in `IndependentBaselineQualifier.qualify()` to upgrade legacy packages missing `tau`/`time` and identity hashes.
+  - Fixed inertia parameter digest (#10800): `compute_pendulum_inertia_hash` digests actual dynamics parameters (segment masses, center-of-mass ratios, and rotational inertias) used for rollout rather than just link lengths or model labels.
+  - Fail-closed legacy evidence qualification (#10799): `IndependentBaselineQualifier.qualify()` remains strictly fail-closed without silent auto-migration; `migrate_legacy_package` remains an explicit compatibility operation that marks status as `UNVERIFIED` with `has_native_replay=False` until native evidence is regenerated.
 
 ## Tour Baselines Bounded Fit Campaigns (TB-08, #10593)
 

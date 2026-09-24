@@ -82,6 +82,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Implemented `SafeModelPreset`, `IncompatiblePresetError`, `MissingDependencyError`, `BaselineNotFoundError`, `BaselineFilter`, `BaselineSummary`, `BaselineDetail`, `BaselineDiscoveryService`, `export_to_ledger_rows`, and headless CLI supporting catalog scanning across configurable search paths, multi-field filtering (model, club, horizon, qualification status), fail-closed preset compatibility checks (refusing topology mismatches and missing solver dependencies), fail-closed default preset selection (unverified packages cannot be auto-selected), safe session cloning preserving user workspace, portable export and clean-machine import with SHA-256 verification and dependency diagnostics, deterministic re-indexing, and result index ledger conversion. Also remediated bot review items #10786, #10787, #10789, #10790.
 - **Next step:** Landed on main. Address follow-up bot reviews #10794 and #10795.
 
+### DL-#10799 · Fail-Closed Qualification for Unsigned Legacy Evidence & Dynamic Inertia Digest (#10799, #10800)
+
+- **State:** ready
+- **Owner:** antigravity
+- **Issue:** #10799, #10800
+- **Branch:** `fix/10799-10800-qualification-integrity`
+- **Paths:** `src/shared/python/tour_baselines/qualification.py`; `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`; `tests/unit/tour_baselines/test_qualification.py`; `SPEC.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — 23 unit tests passed in `tests/unit/tour_baselines/test_qualification.py`, 102 passed in full `tests/unit/tour_baselines/` suite, 21 passed in `tests/unit/motion_matching/test_acceptance.py`.
+- **Summary:** Remediated bot review feedback on PR #10798:
+  1. Kept qualification strictly fail-closed for unsigned legacy evidence (#10799): removed silent auto-migration from `IndependentBaselineQualifier.qualify()`, ensuring packages without recorded controls, time, or identity hashes are rejected at the integrity gate with `IntegrityViolation`. Explicit `migrate_legacy_package` compatibility operations leave package status as `UNVERIFIED` with `has_native_replay=False` rather than silently passing qualification.
+  2. Built `fixed_inertia_hash` from actual dynamics parameters (#10800): introduced `compute_pendulum_inertia_hash` in pendulum qualification to digest segment masses, center-of-mass ratios, and rotational inertias from the actual `DoublePendulumDynamics` rollout parameters, ensuring changes to dynamics physics invalidate the inertia digest even when link lengths remain identical.
+- **Next step:** Run CI pre-commit checks, push branch, open PR with `--auto --squash`, verify merge, and release coordination leases.
+
 ### DL-#10794 · Reconstruct Presets From Verified Arrays & Qualifiable Pendulum Baselines (#10794, #10795)
 
 - **State:** shipped
@@ -104,8 +118,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/tb11-expose-tour-baselines-10596`
 - **Paths:** `src/tools/motion_matching/tour_baselines_presenter.py`; `src/tools/motion_matching/tour_baselines_widget.py`; `src/tools/motion_matching/gui.py`; `tests/unit/motion_matching/test_tour_baselines_presenter.py`; `tests/tools/motion_matching/test_motion_matching_gui.py`; `SPEC.md`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-24 — Merged cleanly into main via PR #10809 with 100% green CI (all 53 checks passing).
-- **Summary:** Implemented `TourBaselinesPresenter`, `TourBaselineDetailView`, `ModelItemView`, `WhereThisCameFromView`, `BaselineOpenResult`, `ModelComparisonReport`, `EvidenceInspectionReport`, and `ComputeBudgetView` exposing the canonical two-capture coverage matrix, accessible status badges with text labels and symbols without relying on color alone, visual semantics distinguishing 3D and projected 2D views and observed markers from simulated meshes, plain-language "Where This Came From" metadata linking raw hashes, preprocessing, geometry, fit configs, and scientific limitations (force identifiability and holdout disclaimers), and session actions (Open in Viewer, Clone for Experiment, Compare Models, Inspect Evidence, Reproduce). Integrated "Tour Baselines" tab into `MotionMatchingWidget` with interactive capture/model selectors, immediate metadata display, collapsible provenance panel, and action button dispatches.
+- **Last verified:** 2026-09-24 — Exact-capture filtering applied to presenter roster package flags (#10829) and comparison (#10826); 10 unit tests passing in tests/unit/motion_matching/test_tour_baselines_presenter.py.
+- **Summary:** Implemented `TourBaselinesPresenter`, `TourBaselineDetailView`, `ModelItemView`, `WhereThisCameFromView`, `BaselineOpenResult`, `ModelComparisonReport`, `EvidenceInspectionReport`, and `ComputeBudgetView` exposing the canonical two-capture coverage matrix, accessible status badges with text labels and symbols without relying on color alone, visual semantics distinguishing 3D and projected 2D views and observed markers from simulated meshes, plain-language "Where This Came From" metadata linking raw hashes, preprocessing, geometry, fit configs, and scientific limitations (force identifiability and holdout disclaimers), and session actions (Open in Viewer, Clone for Experiment, Compare Models, Inspect Evidence, Reproduce). Enforced exact capture matching in roster package flags and detail views to eliminate cross-capture fallbacks. Integrated "Tour Baselines" tab into `MotionMatchingWidget` with interactive capture/model selectors, immediate metadata display, collapsible provenance panel, and action button dispatches.
 - **Next step:** Landed on main. Proceed to TB-12 (#10597).
 
 ### DL-#10597 · Tour Baselines Baseline Guide, Agent Runbook, and End-to-End Acceptance (TB-12)
