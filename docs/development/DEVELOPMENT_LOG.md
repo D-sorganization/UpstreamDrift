@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10838 · Optimize GripContactModel Slip Margin Performance
+### DL-#10842 · SPEC Change Log and Root Handoff Governance
 
 - **State:** in_review
+- **Owner:** codex
+- **Issue:** #10842, #10843
+- **PR:** #10853
+- **Branch:** `docs/10842-10843-spec-and-handoff-governance`
+- **Paths:** `SPEC.md`, `AGENT_HANDOFF.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified spec changelog rows, title-case consistency, and root handoff length <= 150 lines
+- **Summary:** Registered missing Tour Baselines exact capture (#10837) and fail-closed qualification (#10841) rows in SPEC.md, and synchronized root AGENT_HANDOFF.md with active state per repository guidelines.
+- **Next step:** Land PR with clean CI and auto-merge, close issues #10842 and #10843.
+
+### DL-#10838 · Optimize GripContactModel Slip Margin Performance
+
+- **State:** shipped
 - **Owner:** jules
 - **Issue:** #10838
 - **PR:** #10838
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-24
 - **Last verified:** 2026-09-24 — verified slip margin speedup with float-promoted dot product to prevent integer overflow (#10845, #10848)
 - **Summary:** Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude, preventing integer overflow while providing ~2x performance speedup.
-- **Next step:** Land PR #10838 with clean CI and auto-merge.
+- **Next step:** Shipped to main in PR #10838.
 
 ### DL-#8866 · Remove Dead Skeleton Extractors Providers From Starting Pose Matcher
 
