@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from src.shared.python.ui import units as units_module
 from src.shared.python.ui.units import (
     UnitSystem,
     distance_suffix,
@@ -38,9 +39,7 @@ class TestUnitPreference:
     def test_get_and_set_unit_preference(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path
     ) -> None:
-        monkeypatch.setattr(
-            "src.shared.python.ui.units.user_config_dir", lambda: tmp_path
-        )
+        monkeypatch.setattr(units_module, "user_config_dir", lambda: tmp_path)
         set_unit_preference(UnitSystem.IMPERIAL)
         assert get_unit_preference() == UnitSystem.IMPERIAL
         set_unit_preference(UnitSystem.METRIC)
@@ -49,9 +48,7 @@ class TestUnitPreference:
     def test_set_unit_preference_string(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path
     ) -> None:
-        monkeypatch.setattr(
-            "src.shared.python.ui.units.user_config_dir", lambda: tmp_path
-        )
+        monkeypatch.setattr(units_module, "user_config_dir", lambda: tmp_path)
         set_unit_preference("imperial")
         assert get_unit_preference() == UnitSystem.IMPERIAL
         set_unit_preference("metric")
