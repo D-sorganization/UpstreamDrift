@@ -603,12 +603,31 @@ class BaselineDiscoveryService:
                     raise ValueError(
                         f"Checksum mismatch for '{key}': expected {expected_hash}, got {actual_hash}"
                     )
+                manifest_arr = np.asarray(manifest.get(key, []))
+                if not np.array_equal(manifest_arr, data[key]):
+                    raise ValueError(
+                        f"Manifest embedded array '{key}' does not match verified array member"
+                    )
 
-            if "controls" in data and "controls" in checksums:
+            if "controls" in data:
+                if "controls" not in checksums:
+                    raise ValueError(
+                        "Required array 'controls' missing or unchecksummed"
+                    )
                 actual_hash = _compute_array_hash(data["controls"])
                 if actual_hash != checksums["controls"]:
                     raise ValueError("Checksum mismatch for 'controls'")
+                manifest_controls = np.asarray(manifest.get("controls", []))
+                if not np.array_equal(manifest_controls, data["controls"]):
+                    raise ValueError(
+                        "Manifest embedded array 'controls' does not match verified array member"
+                    )
 
+            # Reconstruct preset from verified array members
+            manifest["q0"] = data["q0"]
+            manifest["v0"] = data["v0"]
+            if "controls" in data:
+                manifest["controls"] = data["controls"]
             preset = SafeModelPreset.from_dict(manifest)
 
         # Copy archive to target directory
