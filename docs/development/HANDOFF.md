@@ -1,3 +1,103 @@
+# Deferred Catalog Enforcement — #10783
+
+## Identity
+
+- Repository: D-sorganization/UpstreamDrift
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-guard`
+- Branch: `chore/10783-deferred-catalog-guard`
+- Baseline commit: `789e1658bf`
+- Implementation commit: `df571686df` (continuation: `SELF`)
+- Pull request: #10784; protected checks pending
+- Governing issue/epic: #10783; Repository_Management#1687
+- Session: `codex-deferred-ud-guard-20260923`
+
+## Objective and Status
+
+Enforce the six published v1 plans without changing their scope or claiming
+physical evidence. Local implementation and qualification are complete; protected publication
+remains outstanding.
+
+## Files and Decisions
+
+- Three exact central checker blobs come from Repository_Management
+  `0a1041018e737173e49ff97ed4b82283e3cb672f`; the SHA-256 receipt is
+  `docs/development/deferred-catalog-bundle.json`.
+- The existing hook configuration retains every prior hook and adds the
+  always-run catalog command. Both agent-rule blocks already match approved
+  central `a59cb194`; neither needs editing.
+- Five consumer tests exercise the configured command, reject missing checker,
+  premature activation and competing catalog, and verify exact bundle bytes.
+- Original planning files, provider pin, engine code and scientific evidence
+  remain unchanged. Published projection #10776 merged as
+  `8c15de9dafdc0caf5d172c1aa97037ffd4655c74`; all six parked rows and links
+  were verified in the central post-reboot UI/API receipt. Prior sections below
+  preserve historical observations rather than current publication status.
+
+## Validation
+
+- Five tests failed first for missing hook/receipt, then all five passed (1.76 s)
+  using `python3 -m pytest tests/unit/repo_hygiene/test_deferred_catalog_hook.py
+--confcutdir=tests/unit/repo_hygiene -o addopts= -q --tb=short`.
+  This standalone checker test does not require engine fixtures.
+- Ruff lint and format checks pass on all four added Python files; the canonical
+  bundle needs no local formatter changes. Root Ruff and all 8,162 formatted
+  files pass, as do strict new-test typing, size budget, manual governance and
+  twenty combined catalog/SPEC/manual tests. All configured commit hooks pass.
+- All pre-push hooks pass after initializing the exact existing Tools gitlink
+  `a9ed0e7c5c6905b1164082659051d6381068052d`. The first unit-hook collection
+  failed because this fresh worktree lacked that submodule. A pre-existing
+  local clone URL was refused by Git's file-transport policy; a command-scoped
+  override to the tracked HTTPS remote resolved setup without changing policy.
+  The repeated actual unit hook passes; Bandit and other hooks passed already.
+- Strict typing with follow-imports=skip initially hid pytest's decorator types;
+  the ordinary follow-imports=silent invocation passes. No test suppression.
+- The new continuation validates. Four historical placeholder-example findings
+  reproduce in the baseline handoff and remain unchanged.
+
+- Hosted structure job `107430082628` and the local architecture gate exposed
+  three unchanged central functions over the 100-line budget (174/117/147).
+  Three symbol-specific, codex-owned exceptions under #10783 expire 2026-10-23.
+  The global budget is unchanged and bundle-digest tests forbid local growth.
+  Central refactoring and consumer requalification are required before expiry;
+  no workflow or canonical-source bypass is used.
+  The corrected architecture gate and eleven combined catalog/architecture tests
+  pass locally (3.56 s on the final rerun). Hosted acceptance of this correction
+  remains pending; the preceding failed head is `bca452a6d5`.
+  DRY duplication, root clutter, agent-document consistency and test-layout
+  checks also pass. The DRY checker reports historical quarantine reductions;
+  those unrelated entries were retained.
+
+## Blockers and Risks
+
+Protected CI and default-branch identity verification
+remain open. Catalog validity is not Board approval, physical validation or a
+scientific release qualification.
+
+Fresh structure job `107433594917` in run `35936097540` at `150cf769ff`
+passes the architecture correction and reaches a different failure:
+`check_suite_marker_ratchet.py` reports three unmarked test functions in
+`tests/unit/repo_hygiene/test_deferred_catalog_hook.py` (five parametrized cases).
+The next agent should apply the appropriate unit-suite marker, validate the
+unchanged behavioral controls and suite-marker gate, and publish through normal
+hooks. No test/baseline suppression or speculative fix was added at handoff.
+
+## Next Steps
+
+Complete protected publication of PR #10784 closing #10783,
+verify the installed files centrally, and update this continuation with results.
+Resolve the freshly observed suite-marker failure before expecting publication.
+Keep the full rollout and the original scientific acceptance obligations open.
+The user requested a committed PR checkpoint and then a pause. Continue from
+this branch only after claiming the handoff; do not interpret the pause as
+scientific completion. Central continuation is Repository_Management#1727.
+
+## Change Log
+
+- 2026-09-23: Five RED-to-GREEN consumer controls and exact shared bundle installed;
+  preserve six owner plans and all peer turnover content.
+
+---
+
 # Deferred Validation Project Projection — #10774
 
 - Worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-deferred-project`.

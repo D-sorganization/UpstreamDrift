@@ -311,3 +311,7 @@ This project builds on
 ## Future Validation Planning
 
 Unavailable physical and human studies are preserved in [repo-owned Board plans](docs/development/planning/README.md). Numerical, native-runtime and available-data work remain executable. Deferral grants no scientific or release approval.
+
+Validate the existing catalog with `python3 shared_scripts/deferred_validation.py --repo-root .`.
+Install the configured always-run gate with `python3 -m pre_commit install`;
+invalid activation and competing catalogs fail without changing the plans.
