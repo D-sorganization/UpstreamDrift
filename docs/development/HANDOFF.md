@@ -1,4 +1,4 @@
-# Remove Dead skeleton_extractors Providers — #8866
+# Remove Dead `skeleton_extractors` Providers — #8866
 
 ## Identity
 
@@ -26,6 +26,7 @@ re-targets the deletion against current `main`.
 ## Files Changed
 
 **Deleted source (6 files, ~1,614 lines):**
+
 - `src/tools/starting_pose_matcher/skeleton_extractors/drake.py`
 - `src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py`
 - `src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py`
@@ -34,6 +35,7 @@ re-targets the deletion against current `main`.
 - `src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py`
 
 **Deleted tests (8 files):**
+
 - `tests/unit/tools/starting_pose_matcher/test_drake_provider.py`
 - `tests/unit/tools/starting_pose_matcher/test_mujoco_provider.py`
 - `tests/unit/tools/starting_pose_matcher/test_opensim_provider.py`
@@ -44,11 +46,13 @@ re-targets the deletion against current `main`.
 - `tests/tools/starting_pose_matcher/test_physics_extractors_with_stubs.py`
 
 **Updated baselines:**
+
 - `scripts/config/full_src_mypy_baseline.json` — removed 9 entries (611 → 602)
 - `scripts/config/suite_marker_baseline.json` — removed 89 node IDs (19584 → 19495)
 - `scripts/ci/lod_baseline.txt` — removed 3 rows (428 → 425)
 
 **Updated docs:**
+
 - `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md` — updated stale
   reference to deleted `skeleton_extractors/opensim.py` noting removal and directing
   future OpenSim pose extraction to `pose_interchange`
