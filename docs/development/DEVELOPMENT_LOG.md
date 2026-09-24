@@ -19,10 +19,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10883 · Restore Green Main: Jules Bolt Learning Title Case Compliance
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #10883
-- **PR:** n/a
+- **PR:** #10884
 - **Branch:** `fix/10883-docs-governance-title-case`
 - **Paths:** `.jules/bolt.md`, `tests/scripts/test_document_title_case.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
 - **Started:** 2026-09-24

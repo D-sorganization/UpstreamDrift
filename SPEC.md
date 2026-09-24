@@ -6966,7 +6966,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-24 | n/a | Restore green main: enforce Title Case protection with backticks in .jules/bolt.md and add unit test coverage (#10883). |
+| 2026-09-24 | #10884 | Restore green main: enforce Title Case protection with backticks in .jules/bolt.md and add unit test coverage (#10883). |
 | 2026-09-24 | n/a | Optimized metric norms by replacing `np.linalg.norm` with `np.einsum` or `np.vdot` to speed up distance and difference calculations. (spec-exempt: micro-optimization) |
 | 2026-09-17 | n/a | Optimized small 1D array norm checks by replacing `np.linalg.norm(vel)` with `math.sqrt(vel.dot(vel))` in `src/shared/python/pendulum_simulator/cross_engine_perturbation.py` for ~2.5x speedup. (spec-exempt: micro-optimization) |
 | 2026-09-24 | #10881 | Migrate ActuatorPanel and SimulationToolbar to shared usePolling hook with visibility gating and single-flight tick protection (#8941). |

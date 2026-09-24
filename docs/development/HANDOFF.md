@@ -7,7 +7,7 @@
 - Branch: `fix/10883-docs-governance-title-case`
 - Baseline commit: `ec8a12fbf9`
 - Implementation commit: `SELF`
-- Pull request: n/a
+- Pull request: #10884
 - Governing issue: #10883
 - Session: `antigravity-10883-docs-gov`
 
