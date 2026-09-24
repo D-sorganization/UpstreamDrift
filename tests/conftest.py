@@ -412,6 +412,7 @@ _FAKE_PYQT6_GUI_TESTS = (
     "tests/unit/tools/starting_pose_matcher",
     "tests/unit/ui",
     "tests/ui",
+    "tests/help/test_tile_help_qt.py",
 )
 
 
@@ -1159,7 +1160,6 @@ from tests.support.suite_markers import (  # noqa: E402
     suite_marker_ratchet_enabled,
     suite_markers_enforced,
 )
-
 
 _UNIT_GATE_QUARANTINE_PATH = (
     Path(__file__).resolve().parents[1]
