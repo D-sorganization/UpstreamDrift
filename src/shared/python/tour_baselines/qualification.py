@@ -377,9 +377,22 @@ def migrate_legacy_package(package: BaselinePackage) -> BaselinePackage:
 
     fixed_inertia_hash = ident.fixed_inertia_hash
     if not fixed_inertia_hash:
-        fixed_inertia_hash = hashlib.sha256(
-            f"{ident.model_id}_fixed_inertia".encode()
-        ).hexdigest()
+        if ident.topology == ModelTopology.PLANAR_DRIVEN_PENDULUM:
+            l1 = float(package.reports.get("l1_arm_m", 0.65))
+            l2 = float(package.reports.get("l2_club_m", 1.05))
+            from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
+                create_calibrated_double_pendulum_dynamics,
+            )
+            from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
+                compute_pendulum_inertia_hash,
+            )
+
+            dyn = create_calibrated_double_pendulum_dynamics(l1, l2)
+            fixed_inertia_hash = compute_pendulum_inertia_hash(dyn)
+        else:
+            fixed_inertia_hash = hashlib.sha256(
+                f"{ident.model_id}_fixed_inertia".encode()
+            ).hexdigest()
 
     new_ident = replace(
         ident,
@@ -390,10 +403,18 @@ def migrate_legacy_package(package: BaselinePackage) -> BaselinePackage:
         fixed_inertia_hash=fixed_inertia_hash,
     )
 
+    # Explicit migration compatibility operation leaves package unverified until regenerated (#10799)
+    status = replace(
+        package.statuses,
+        scientific_qualification=ScientificQualificationStatus.UNVERIFIED,
+        has_native_replay=False,
+    )
+
     return replace(
         package,
         identity=new_ident,
         trajectories=trajs,
+        statuses=status,
     )
 
 
@@ -715,17 +736,12 @@ class IndependentBaselineQualifier:
         self,
         package: BaselinePackage,
         profile_version: str = QUALIFICATION_PROFILE_VERSION,
-        *,
-        auto_migrate: bool = True,
     ) -> QualificationVerdict:
         """Perform comprehensive independent scientific qualification. Fail-closed."""
         if profile_version != QUALIFICATION_PROFILE_VERSION:
             raise IntegrityViolation(
                 f"Rejected stale profile version '{profile_version}'; expected '{QUALIFICATION_PROFILE_VERSION}'"
             )
-
-        if auto_migrate:
-            package = migrate_legacy_package(package)
 
         ident = package.identity
         # Rule: A reduced model can NEVER qualify under G3
