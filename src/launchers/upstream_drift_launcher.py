@@ -99,7 +99,12 @@ from src.shared.python.ui import (
 # Windows taskbar identity. Declaring this (before any window is shown) is what
 # makes the taskbar use the app icon instead of the generic python.exe icon —
 # the piece earlier favicon fixes missed.
-_APP_USER_MODEL_ID = "D-sorganization.UpstreamDrift"
+from src.launchers.app_identity import (
+    APP_USER_MODEL_ID,
+    CANONICAL_ICON_CANDIDATES,
+)
+
+_APP_USER_MODEL_ID = APP_USER_MODEL_ID
 
 # Backward-compatible re-exports
 __all__ = [
@@ -359,13 +364,11 @@ class UpstreamDriftLauncher(QMainWindow):
         # Sets the AppUserModelID (idempotent), the application icon, and this
         # window's icon. The AppUserModelID is what fixes the Windows taskbar
         # icon; setting only the window icon (as before) was not enough.
+        candidates = [ASSETS_DIR / name for name in CANONICAL_ICON_CANDIDATES]
         apply_window_icon(
             app=QApplication.instance(),
             window=self,
-            icon_candidates=[
-                ASSETS_DIR / "golf_logo.ico",
-                ASSETS_DIR / "golf_logo.png",
-            ],
+            icon_candidates=candidates,
             app_id=_APP_USER_MODEL_ID,
         )
 

@@ -1,3 +1,24 @@
+## Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity (#10487)
+
+Implements robust, portable, and validated Desktop and Start Menu shortcuts, shared app identity across startup paths, and favicon parity:
+- **Canonical Application Identity (`src/launchers/app_identity.py`, `tests/unit/launchers/test_app_identity.py`)**:
+  - Defines canonical Windows AppUserModelID: `D-sorganization.UpstreamDrift`.
+  - Implements immutable `AppIdentity` dataclass enforcing Design by Contract (DbC) invariants (non-empty strings, positive version numbers, valid executable paths).
+  - Implements `set_windows_app_user_model_id` via `ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID` for proper Windows taskbar grouping and branding.
+  - Implements `resolve_canonical_icon_path` with deterministic fallback hierarchy (`golf_robot_cropped.ico` -> `golf_robot_cropped.png` -> `ui/public/favicon.ico`).
+  - Implements `sync_and_validate_favicon` guaranteeing bitwise parity between launcher icon assets and web UI favicon.
+- **Desktop & Start Menu Shortcut Management (`src/launchers/desktop_shortcuts.py`, `tests/unit/launchers/test_desktop_shortcuts.py`)**:
+  - Implements idempotent `ShortcutManager` and `ShortcutSpec` adhering to the Law of Demeter (LoD) and DRY.
+  - Installs verified Windows shortcuts in both Desktop and Start Menu (`Programs`) locations via safe PowerShell WScript.Shell generation.
+  - Implements `read_shortcut_metadata` for programmatic verification of shortcut target path, arguments, working directory, icon location, and description.
+  - Exposes CLI interface (`python -m src.launchers.desktop_shortcuts` and `python launch_upstream_drift.py --install-shortcuts`).
+  - Updates helper scripts `scripts/create_shortcut.ps1` and `scripts/create_golf_robot_shortcut.ps1` to delegate to `src.launchers.desktop_shortcuts`.
+- **Favicon & Web Identity Parity (`ui/index.html`, `ui/public/favicon.ico`)**:
+  - Synchronizes `ui/public/favicon.ico` with canonical launcher icon.
+  - Updates `ui/index.html` with explicit `<link rel="icon" type="image/x-icon" href="/favicon.ico" />`.
+- **Documentation & User Guidance (`docs/development/desktop_viewer_setup.md`)**:
+  - Documents shortcut creation, taskbar grouping behavior, Windows OS taskbar pinning policy, asset resolution hierarchy, and troubleshooting procedures.
+
 ## Unified Display Units Policy and Cross-Tool Consistency (#8886)
 
 Implements fleet-wide unified display units and eliminates unit inconsistencies across tools modeling the golf physical chain:

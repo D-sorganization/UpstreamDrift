@@ -1,59 +1,26 @@
-# Golf Modeling Suite Desktop Shortcut Creator
-# Uses the new GolfingRobot icon
+# UpstreamDrift Desktop and Start Menu Shortcut Creator
+# Delegates to canonical Python shortcut manager (src.launchers.desktop_shortcuts)
 
-$WshShell = New-Object -comObject WScript.Shell
-$Desktop = [Environment]::GetFolderPath("Desktop")
-$ShortcutPath = Join-Path $Desktop "Golf Modeling Suite.lnk"
-$Shortcut = $WshShell.CreateShortcut($ShortcutPath)
-
-# Derive paths dynamically based on script location
-# $PSScriptRoot is the scripts/ directory, so go one level up for repo root
+$ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
-$pythonExePath = (Get-Command python -ErrorAction SilentlyContinue).Source
-if (-not $pythonExePath) {
+
+$pythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source
+if (-not $pythonExe) {
+    $pythonExe = (Get-Command python3 -ErrorAction SilentlyContinue).Source
+}
+if (-not $pythonExe) {
     $pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\Python") "Python313"
-    $pythonExePath = Join-Path $pythonBasePath "python.exe"
+    $pythonExe = Join-Path $pythonBasePath "python.exe"
 }
-$launcherPath = Join-Path $repoRoot "launch_golf_suite.py"
 
-# Use the Windows-optimized GolfingRobot icon for maximum clarity on Windows
-$iconCandidates = @(
-    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_windows_optimized.ico"),
-    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_ultra_sharp.ico"),
-    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_cropped_icon.ico"),
-    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_robot_icon.ico"),
-    (Join-Path (Join-Path $repoRoot "src\launchers\assets") "golf_icon.ico")
-)
-
-$iconPath = $null
-foreach ($candidate in $iconCandidates) {
-    if (Test-Path $candidate) {
-        $iconPath = $candidate
-        Write-Host "Using icon: $iconPath"
-        break
+if ($pythonExe -and (Test-Path $pythonExe)) {
+    Push-Location $repoRoot
+    try {
+        & $pythonExe -m src.launchers.desktop_shortcuts
+    } finally {
+        Pop-Location
     }
+} else {
+    Write-Error "Python executable not found; could not install UpstreamDrift shortcuts."
+    exit 1
 }
-
-if (-not $iconPath) {
-    Write-Warning "No icon file found, shortcut will use default icon"
-    $iconPath = ""
-}
-
-# Configure shortcut properties
-$Shortcut.TargetPath = $pythonExePath
-$Shortcut.Arguments = "`"$launcherPath`" --classic"
-$Shortcut.WorkingDirectory = $repoRoot
-$Shortcut.Description = "Launch the Golf Modeling Suite with GolfingRobot"
-# Set icon if available
-if ($iconPath -and $iconPath -ne "") {
-    $Shortcut.IconLocation = $iconPath
-}
-
-# Save the shortcut
-$Shortcut.Save()
-
-Write-Host "Golf Modeling Suite shortcut created successfully!"
-Write-Host "Location: $ShortcutPath"
-Write-Host "Icon: $iconPath"
-Write-Host ""
-Write-Host "The shortcut uses the new GolfingRobot icon and will launch the Golf Modeling Suite."

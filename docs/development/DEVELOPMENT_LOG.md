@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8886 · Unified Display Units Policy and Cross-Tool Consistency
+### DL-#10487 · Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity
 
 - **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10487
+- **PR:** #10894
+- **Branch:** `fix/10487-desktop-shortcuts-identity`
+- **Paths:** `src/launchers/app_identity.py`, `src/launchers/desktop_shortcuts.py`, `src/launchers/upstream_drift_launcher.py`, `src/launchers/upstream_drift_launcher_main.py`, `launch_upstream_drift.py`, `scripts/create_shortcut.ps1`, `scripts/create_golf_robot_shortcut.ps1`, `ui/index.html`, `ui/public/favicon.ico`, `docs/development/desktop_viewer_setup.md`, `tests/unit/launchers/test_app_identity.py`, `tests/unit/launchers/test_desktop_shortcuts.py`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — verified 15 unit tests pass in test_app_identity.py and test_desktop_shortcuts.py; verified favicon bitwise parity, canonical AUMID registration, and idempotent shortcut creation
+- **Summary:** Implemented canonical AppUserModelID registration and icon resolution hierarchy in app_identity.py, idempotent Desktop and Start Menu shortcut manager in desktop_shortcuts.py with readback validation, synchronized web UI favicon with launcher assets, and added setup documentation (Fixes #10487).
+- **Next step:** Run CI pre-commit verification, push branch, open PR, enable auto-merge.
+
+### DL-#8886 · Unified Display Units Policy and Cross-Tool Consistency
+
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #8886
 - **PR:** #10893
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-24
 - **Last verified:** 2026-09-24 — verified 133 unit tests pass across units conversions, settings persistence, ball flight, swing pipeline, putting green, and pose studio
 - **Summary:** Implemented unified display units module with UnitSystem enum, settings persistence in PreferencesDialog, dynamic unit switching in ball flight, swing pipeline, and putting green simulators, and published fleet unit policy documentation (Fixes #8886).
-- **Next step:** Push branch, open PR referencing #8886, enable auto-merge, verify CI green on main.
+- **Next step:** Shipped to main in PR #10893.
 
 ### DL-#10883 · Restore Green Main: Jules Bolt Learning Title Case Compliance
 
