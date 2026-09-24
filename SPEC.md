@@ -1,3 +1,29 @@
+## Unified Display Units Policy and Cross-Tool Consistency (#8886)
+
+Implements fleet-wide unified display units and eliminates unit inconsistencies across tools modeling the golf physical chain:
+- **Shared Units Module (`src/shared/python/ui/units.py`, `tests/unit/shared_python/test_units.py`)**:
+  - Implements `UnitSystem` enum (`metric`, `imperial`), configuration preferences (`get_unit_preference`, `set_unit_preference`), and canonical conversions (`to_display_distance`, `from_display_distance`, `to_display_speed`, `from_display_speed`, `to_display_mass`, `from_display_mass`).
+  - Implements formatting helpers (`format_distance`, `format_speed`, `format_spin`) ensuring primary preference display with secondary system parentheticals (`220.0 m (240.6 yd)` in metric, `240.6 yd (220.0 m)` in imperial).
+  - Uses exact NIST conversion factors matching `physics_constants.py` (`0.44704` m/s per mph, `0.3048` m per ft).
+- **Settings Store & Appearance Dialog Integration (`src/shared/python/ui/preferences_dialog.py`)**:
+  - Adds `unit_system` field to `UserPreferences` dataclass (defaulting to `metric`).
+  - Wires "Display units:" combo into `Appearance` tab in `PreferencesDialog` with persistence to `preferences.json` and `launcher_settings`.
+- **Ball Flight Simulator Harmonization (`src/tools/ball_flight_gui/gui.py`, `tests/tools/ball_flight_gui/test_ball_flight_gui.py`)**:
+  - Adds `unit_system` property and dynamic `set_unit_system()` switching.
+  - Suffixes and ranges adapt between metric ([20-90] m/s, [0-25] m/s wind, [0-3000] m altitude) and imperial ([50-200] mph, [0-50] mph wind, [0-10000] ft altitude).
+  - Formats carry, altitude, max height, and wind consistently without mixing systems.
+- **Swing-to-Flight Pipeline Harmonization (`src/tools/swing_flight_pipeline/gui.py`, `tests/tools/swing_flight_pipeline/test_gui.py`)**:
+  - Adds `unit_system` property and dynamic `set_unit_system()` switching.
+  - Controls clubhead speed ([20-60] m/s vs [45-140] mph) and clubhead mass ([0.100-0.400] kg vs [0.220-0.880] lb).
+  - Formats headline `ProvenanceValueLabel` widgets (`Carry Distance`, `Launch Speed`) and impact/launch/flight result text using user unit preference with secondary parentheticals.
+- **Putting Green Simulator Harmonization (`src/tools/putting_green_gui/gui.py`, `tests/tools/putting_green_gui/test_putting_green_gui.py`)**:
+  - Adds `unit_system` property and dynamic `set_unit_system()` switching.
+  - Controls putter speed ([0.5-8.0] m/s vs [1.0-18.0] mph) and cup distance (meters vs feet).
+  - Formats metrics panel with active unit system first and dual parenthetical representation.
+- **Tool Development Unit Policy Documentation (`docs/development/unit_policy.md`, `docs/development/embedding_a_tool.md`)**:
+  - Documents strict internal SI computation rule with LoD presentation-layer conversions.
+  - Sets widget guidelines for unit awareness, dynamic switching, honest tooltips, and dual result formatting.
+
 ## Advanced Analysis Tabs Debounce, Memoization and Non-Blocking Idle Redraw (#8932)
 
 Completes the responsiveness optimization program across the Advanced Analysis tabs in the Unified Dashboard:

@@ -48,7 +48,12 @@ if TYPE_CHECKING:
 
 # Import theme if available
 try:
-    from src.shared.python.theme import Colors, Sizes, Weights, get_qfont  # noqa: F401
+    from src.shared.python.theme import (  # type: ignore[attr-defined] # noqa: F401
+        Colors,
+        Sizes,
+        Weights,
+        get_qfont,
+    )
 
     THEME_AVAILABLE = True
 except ImportError:
@@ -91,6 +96,9 @@ class UserPreferences:
     # Paths
     default_export_path: str = ""
     recent_models: list[str] = field(default_factory=list)
+
+    # Units
+    unit_system: str = "metric"  # "metric", "imperial"
 
     # Tab Behavior
     confirm_close_tabs: str = "unsaved"  # "always", "unsaved", "never"
@@ -186,7 +194,7 @@ class PreferencesDialog(QDialog):
         # Build theme list: core presets + fleet themes
         theme_items = ["Dark", "Light", "High Contrast"]
         try:
-            from src.shared.python.theme import ThemeManager
+            from src.shared.python.theme import ThemeManager  # type: ignore[attr-defined]
 
             fleet = ThemeManager.instance().get_available_themes()
             for name in fleet:
@@ -240,6 +248,20 @@ class PreferencesDialog(QDialog):
         ui_layout.addWidget(self.compact_check)
 
         layout.addWidget(ui_group)
+
+        # Units group (#8886)
+        units_group = QGroupBox("Units")
+        units_layout = QFormLayout(units_group)
+        self.unit_system_combo = QComboBox()
+        self.unit_system_combo.addItem("Metric (m, m/s, kg)", "metric")
+        self.unit_system_combo.addItem("Imperial (yd, mph, lb)", "imperial")
+        current_unit = getattr(self.prefs, "unit_system", "metric")
+        idx = self.unit_system_combo.findData(current_unit)
+        if idx >= 0:
+            self.unit_system_combo.setCurrentIndex(idx)
+        self.unit_system_combo.setToolTip("Display unit system for tools and results")
+        units_layout.addRow("Display units:", self.unit_system_combo)
+        layout.addWidget(units_group)
 
         layout.addStretch()
         return tab
@@ -423,6 +445,11 @@ class PreferencesDialog(QDialog):
             preload_engines=self.preload_check.isChecked(),
             default_export_path=self.prefs.default_export_path,
             recent_models=self.prefs.recent_models,
+            unit_system=(
+                self.unit_system_combo.currentData()
+                if hasattr(self, "unit_system_combo")
+                else getattr(self.prefs, "unit_system", "metric")
+            ),
             confirm_close_tabs={
                 "Always Ask": "always",
                 "Only for Unsaved Work": "unsaved",
@@ -434,6 +461,12 @@ class PreferencesDialog(QDialog):
         """Apply current settings without closing."""
         self.prefs = self._collect_preferences()
         self.prefs.save()
+        try:
+            from src.shared.python.ui.units import set_unit_preference
+
+            set_unit_preference(self.prefs.unit_system)
+        except Exception:
+            pass
 
     def _on_accept(self) -> None:
         """Accept and save settings."""
@@ -476,6 +509,10 @@ class PreferencesDialog(QDialog):
         self.recent_spin.setValue(defaults.max_recent_models)
         self.cache_previews_check.setChecked(defaults.cache_model_previews)
         self.preload_check.setChecked(defaults.preload_engines)
+        if hasattr(self, "unit_system_combo"):
+            idx = self.unit_system_combo.findData(defaults.unit_system)
+            if idx >= 0:
+                self.unit_system_combo.setCurrentIndex(idx)
 
         val_map = {
             "always": "Always Ask",
@@ -493,7 +530,10 @@ class PreferencesDialog(QDialog):
     def _preview_theme(self, theme_name: str) -> None:
         """Live-preview theme when combo selection changes."""
         try:
-            from src.shared.python.theme import ThemeManager, ThemePreset
+            from src.shared.python.theme import (  # type: ignore[attr-defined]
+                ThemeManager,
+                ThemePreset,
+            )
 
             manager = ThemeManager.instance()
 

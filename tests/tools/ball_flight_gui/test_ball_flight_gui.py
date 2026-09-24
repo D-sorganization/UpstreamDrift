@@ -21,6 +21,7 @@ import numpy as np
 import pytest
 from PyQt6.QtWidgets import QApplication, QMainWindow
 
+from src.shared.python.ui.units import UnitSystem
 from src.tools.ball_flight_gui.gui import (
     BallFlightWidget,
     BallFlightWindow,
@@ -44,7 +45,7 @@ def _ensure_qapp() -> QApplication:
 @pytest.fixture()
 def widget() -> BallFlightWidget:
     _ensure_qapp()
-    return BallFlightWidget()
+    return BallFlightWidget(unit_system=UnitSystem.IMPERIAL)
 
 
 def _make_traj_point(x: float, y: float, z: float, t: float):
@@ -459,3 +460,58 @@ def test_get_dockable_ui_returns_window() -> None:
     win = get_dockable_ui()
     assert isinstance(win, BallFlightWindow)
     win.close()
+
+
+# --- Unit System Tests (Issue #8886) -------------------------------------
+
+
+def test_widget_metric_mode_construction() -> None:
+    _ensure_qapp()
+    m_widget = BallFlightWidget(unit_system=UnitSystem.METRIC)
+    assert m_widget.unit_system == UnitSystem.METRIC
+    assert m_widget._speed_spin.suffix() == " m/s"
+    assert m_widget._wind_speed.suffix() == " m/s"
+    assert m_widget._altitude.suffix() == " m"
+    assert m_widget._speed_spin.minimum() == pytest.approx(20.0)
+    assert m_widget._speed_spin.maximum() == pytest.approx(90.0)
+    assert m_widget._altitude.maximum() == pytest.approx(3000.0)
+    assert m_widget._wind_speed.maximum() == pytest.approx(25.0)
+
+
+def test_set_unit_system_toggle(widget: BallFlightWidget) -> None:
+    """Switching unit systems dynamically converts values and suffixes."""
+    assert widget.unit_system == UnitSystem.IMPERIAL
+    assert widget._speed_spin.suffix() == " mph"
+    widget._speed_spin.setValue(100.0)  # 100 mph
+    widget._altitude.setValue(1000.0)  # 1000 ft
+
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget.unit_system == UnitSystem.METRIC
+    assert widget._speed_spin.suffix() == " m/s"
+    assert widget._altitude.suffix() == " m"
+    assert widget._speed_spin.value() == pytest.approx(100.0 * 0.44704, rel=1e-3)
+    assert widget._altitude.value() == pytest.approx(1000.0 * 0.3048, rel=1e-3)
+
+    # Switch back to imperial
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget.unit_system == UnitSystem.IMPERIAL
+    assert widget._speed_spin.suffix() == " mph"
+    assert widget._speed_spin.value() == pytest.approx(100.0, rel=1e-3)
+    assert widget._altitude.value() == pytest.approx(1000.0, rel=1e-3)
+
+
+def test_metric_simulation_renders_metric_readouts() -> None:
+    _ensure_qapp()
+    m_widget = BallFlightWidget(unit_system=UnitSystem.METRIC)
+    traj = [
+        _make_traj_point(0.0, 0.0, 0.0, 0.0),
+        _make_traj_point(200.0, 0.0, 25.0, 3.5),
+    ]
+    ctx, fake_sim, _ = _patch_physics(traj)
+    with ctx:
+        m_widget._speed_spin.setValue(70.0)
+        m_widget._run_simulation()
+
+    text = m_widget._results_text.toPlainText()
+    assert "Launch: 70.0 m/s (156.6 mph)" in text
+    assert "Carry:       200.0 m (218.7 yd)" in text

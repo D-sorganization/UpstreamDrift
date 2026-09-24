@@ -39,6 +39,19 @@ from PyQt6.QtWidgets import (
 from src.launchers.help_menu import attach_tool_help_menu, build_help_menu
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
+from src.shared.python.ui.units import (
+    UnitSystem,
+    distance_suffix,
+    format_distance,
+    format_speed,
+    format_spin,
+    from_display_distance,
+    from_display_speed,
+    get_unit_preference,
+    speed_suffix,
+    to_display_distance,
+    to_display_speed,
+)
 from src.tools.async_action import WorkerContext, add_primary_async_run_control
 
 logger = logging.getLogger(__name__)
@@ -94,9 +107,54 @@ def combine_spins(backspin_rpm: float, sidespin_rpm: float) -> tuple[float, np.n
 class BallFlightWidget(QWidget):
     """Central widget for the aerodynamic ball flight simulator."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        *,
+        unit_system: UnitSystem | None = None,
+    ) -> None:
         super().__init__(parent)
+        self._unit_system = (
+            unit_system if unit_system is not None else get_unit_preference()
+        )
         self._build_ui()
+
+    @property
+    def unit_system(self) -> UnitSystem:
+        """The active display unit system."""
+        return self._unit_system
+
+    def set_unit_system(self, system: UnitSystem) -> None:
+        """Switch display unit system dynamically and update spinbox suffixes/values."""
+        if system == self._unit_system:
+            return
+        old_speed_ms = from_display_speed(self._speed_spin.value(), self._unit_system)
+        old_wind_ms = from_display_speed(self._wind_speed.value(), self._unit_system)
+        old_alt_m = (
+            self._altitude.value()
+            if self._unit_system == UnitSystem.METRIC
+            else self._altitude.value() * _FT_TO_M
+        )
+        self._unit_system = system
+
+        self._speed_spin.setSuffix(speed_suffix(system))
+        if system == UnitSystem.METRIC:
+            self._speed_spin.setRange(20.0, 90.0)
+            self._wind_speed.setRange(0.0, 25.0)
+            self._altitude.setRange(0.0, 3000.0)
+            self._altitude.setSuffix(" m")
+            self._speed_spin.setValue(to_display_speed(old_speed_ms, system))
+            self._wind_speed.setValue(to_display_speed(old_wind_ms, system))
+            self._altitude.setValue(old_alt_m)
+        else:
+            self._speed_spin.setRange(50.0, 200.0)
+            self._wind_speed.setRange(0.0, 50.0)
+            self._altitude.setRange(0.0, 10000.0)
+            self._altitude.setSuffix(" ft")
+            self._speed_spin.setValue(to_display_speed(old_speed_ms, system))
+            self._wind_speed.setValue(to_display_speed(old_wind_ms, system))
+            self._altitude.setValue(old_alt_m * (1.0 / _FT_TO_M))
+        self._wind_speed.setSuffix(speed_suffix(system))
 
     def _build_ui(self) -> None:
         install_two_pane_splitter(
@@ -133,9 +191,15 @@ class BallFlightWidget(QWidget):
         launch_form = QFormLayout(launch_group)
 
         self._speed_spin = QDoubleSpinBox()
-        self._speed_spin.setRange(50.0, 200.0)
-        self._speed_spin.setValue(163.0)
-        self._speed_spin.setSuffix(" mph")
+        if self._unit_system == UnitSystem.METRIC:
+            self._speed_spin.setRange(20.0, 90.0)
+            self._speed_spin.setValue(
+                to_display_speed(163.0 * _MPH_TO_MS, UnitSystem.METRIC)
+            )
+        else:
+            self._speed_spin.setRange(50.0, 200.0)
+            self._speed_spin.setValue(163.0)
+        self._speed_spin.setSuffix(speed_suffix(self._unit_system))
         launch_form.addRow("Ball Speed:", self._speed_spin)
 
         self._angle_spin = QDoubleSpinBox()
@@ -164,9 +228,12 @@ class BallFlightWidget(QWidget):
         env_form = QFormLayout(env_group)
 
         self._wind_speed = QDoubleSpinBox()
-        self._wind_speed.setRange(0.0, 50.0)
+        if self._unit_system == UnitSystem.METRIC:
+            self._wind_speed.setRange(0.0, 25.0)
+        else:
+            self._wind_speed.setRange(0.0, 50.0)
         self._wind_speed.setValue(0.0)
-        self._wind_speed.setSuffix(" mph")
+        self._wind_speed.setSuffix(speed_suffix(self._unit_system))
         env_form.addRow("Wind Speed:", self._wind_speed)
 
         self._wind_dir = QDoubleSpinBox()
@@ -181,9 +248,13 @@ class BallFlightWidget(QWidget):
         env_form.addRow("Wind Direction:", self._wind_dir)
 
         self._altitude = QDoubleSpinBox()
-        self._altitude.setRange(0.0, 10000.0)
+        if self._unit_system == UnitSystem.METRIC:
+            self._altitude.setRange(0.0, 3000.0)
+            self._altitude.setSuffix(" m")
+        else:
+            self._altitude.setRange(0.0, 10000.0)
+            self._altitude.setSuffix(" ft")
         self._altitude.setValue(0.0)
-        self._altitude.setSuffix(" ft")
         env_form.addRow("Altitude:", self._altitude)
 
         return env_group
@@ -268,7 +339,11 @@ class BallFlightWidget(QWidget):
         return right
 
     def _apply_preset(self, speed: float, angle: float, spin: float) -> None:
-        self._speed_spin.setValue(speed)
+        if self._unit_system == UnitSystem.METRIC:
+            disp_speed = to_display_speed(speed * _MPH_TO_MS, self._unit_system)
+        else:
+            disp_speed = speed
+        self._speed_spin.setValue(disp_speed)
         self._angle_spin.setValue(angle)
         self._spin_spin.setValue(spin)
 
@@ -283,8 +358,13 @@ class BallFlightWidget(QWidget):
             EnvironmentalConditions,
         )
 
-        wind = build_wind_vector(self._wind_speed.value(), self._wind_dir.value())
-        altitude_m = self._altitude.value() * _FT_TO_M
+        wind_ms = from_display_speed(self._wind_speed.value(), self._unit_system)
+        wind_mph = wind_ms * (1.0 / _MPH_TO_MS)
+        wind = build_wind_vector(wind_mph, self._wind_dir.value())
+        if self._unit_system == UnitSystem.METRIC:
+            altitude_m = self._altitude.value()
+        else:
+            altitude_m = self._altitude.value() * _FT_TO_M
         return EnvironmentalConditions.from_altitude(
             altitude_m=altitude_m,
             wind_velocity=wind,
@@ -300,7 +380,7 @@ class BallFlightWidget(QWidget):
             LaunchConditions,
         )
 
-        speed_ms = self._speed_spin.value() * _MPH_TO_MS
+        speed_ms = from_display_speed(self._speed_spin.value(), self._unit_system)
         spin_rpm, spin_axis = combine_spins(
             self._spin_spin.value(), self._sidespin_spin.value()
         )
@@ -334,29 +414,35 @@ class BallFlightWidget(QWidget):
             carry = float(np.sqrt(last.position[0] ** 2 + last.position[1] ** 2))
             max_h = max(p.position[2] for p in trajectory)
 
+            speed_ms = from_display_speed(self._speed_spin.value(), self._unit_system)
+            launch_speed_str = format_speed(speed_ms, self._unit_system)
+            wind_ms = from_display_speed(self._wind_speed.value(), self._unit_system)
+            wind_speed_str = format_speed(wind_ms, self._unit_system)
+            alt_m = (
+                self._altitude.value()
+                if self._unit_system == UnitSystem.METRIC
+                else self._altitude.value() * _FT_TO_M
+            )
+            alt_str = format_distance(alt_m, self._unit_system, unit="ft")
+
             self._results_text.setPlainText(
                 f"Ball Flight Results\n"
                 f"{'=' * 40}\n"
-                f"Launch: {self._speed_spin.value():.0f} mph, "
+                f"Launch: {launch_speed_str}, "
                 f"{self._angle_spin.value():.1f}°, "
-                f"{self._spin_spin.value():.0f} rpm backspin, "
-                f"{self._sidespin_spin.value():.0f} rpm sidespin\n"
-                f"Environment: wind {self._wind_speed.value():.0f} mph @ "
+                f"{format_spin(self._spin_spin.value(), self._sidespin_spin.value())}\n"
+                f"Environment: wind {wind_speed_str} @ "
                 f"{self._wind_dir.value():.0f}°, altitude "
-                f"{self._altitude.value():.0f} ft "
+                f"{alt_str} "
                 f"(air density {env.air_density:.3f} kg/m³)\n\n"
-                # Primary unit is always SI (m); the secondary
-                # parenthetical is always yards, so the two length
-                # readouts in this pane never disagree on system
-                # (issue #8886).
-                f"Carry:       {carry:.1f} m ({carry * 1.09361:.1f} yd)\n"
-                f"Max Height:  {max_h:.1f} m ({max_h * 1.09361:.2f} yd)\n"
+                f"Carry:       {format_distance(carry, self._unit_system, unit='yd')}\n"
+                f"Max Height:  {format_distance(max_h, self._unit_system, unit='yd')}\n"
                 f"Flight Time: {last.time:.2f} s\n"
                 f"Points:      {len(trajectory)}\n\n"
                 f"Landing Position:\n"
-                f"  X: {last.position[0]:.1f} m\n"
-                f"  Y: {last.position[1]:.1f} m\n"
-                f"  Z: {last.position[2]:.1f} m\n"
+                f"  X: {format_distance(last.position[0], self._unit_system, unit='yd')}\n"
+                f"  Y: {format_distance(last.position[1], self._unit_system, unit='yd')}\n"
+                f"  Z: {format_distance(last.position[2], self._unit_system, unit='yd')}\n"
             )
 
             # Update 3D Visualization

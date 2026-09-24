@@ -18,6 +18,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication, QMainWindow  # noqa: E402
 
+from src.shared.python.ui.units import UnitSystem
 from src.tools.putting_green_gui import gui as gui_mod  # noqa: E402
 from src.tools.putting_green_gui.gui import (  # noqa: E402
     PuttingGreenWidget,
@@ -319,3 +320,55 @@ def test_module_exposes_public_classes() -> None:
     assert hasattr(gui_mod, "PuttingGreenWindow")
     assert hasattr(gui_mod, "get_dockable_ui")
     assert callable(gui_mod.get_dockable_ui)
+
+
+# ---------------------------------------------------------------------------
+# Unit System Tests (Issue #8886)
+# ---------------------------------------------------------------------------
+
+
+def test_putting_widget_imperial_mode(qapp: QApplication) -> None:
+    w = PuttingGreenWidget(unit_system=UnitSystem.IMPERIAL)
+    try:
+        assert w.unit_system == UnitSystem.IMPERIAL
+        assert w._speed_spin.suffix() == " mph"
+        assert w._distance_spin.suffix() == " ft"
+        assert w._speed_spin.minimum() == pytest.approx(1.0)
+        assert w._speed_spin.maximum() == pytest.approx(18.0)
+        assert w._distance_spin.minimum() == pytest.approx(1.0)
+        assert w._distance_spin.maximum() == pytest.approx(30.0)
+    finally:
+        w.cleanup()
+
+
+def test_putting_widget_set_unit_system_toggle(widget: PuttingGreenWidget) -> None:
+    """Switching unit system dynamically updates spinbox ranges, suffixes, and values."""
+    assert widget.unit_system == UnitSystem.METRIC
+    assert widget._speed_spin.suffix() == " m/s"
+    assert widget._distance_spin.suffix() == " m"
+
+    widget._speed_spin.setValue(2.0)  # 2.0 m/s
+    widget._distance_spin.setValue(3.0)  # 3.0 m
+
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget.unit_system == UnitSystem.IMPERIAL
+    assert widget._speed_spin.suffix() == " mph"
+    assert widget._distance_spin.suffix() == " ft"
+    assert widget._speed_spin.value() == pytest.approx(2.0 * 2.23694, rel=1e-2)
+    assert widget._distance_spin.value() == pytest.approx(3.0 * 3.28084, rel=1e-2)
+
+    # Switch back to metric
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget.unit_system == UnitSystem.METRIC
+    assert widget._speed_spin.suffix() == " m/s"
+    assert widget._distance_spin.suffix() == " m"
+    assert widget._speed_spin.value() == pytest.approx(2.0, rel=1e-2)
+    assert widget._distance_spin.value() == pytest.approx(3.0, rel=1e-2)
+
+
+def test_putting_widget_imperial_metrics_formatting(widget: PuttingGreenWidget) -> None:
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    widget._run_simulation()
+    text = widget._results_text.toPlainText()
+    assert "ft (" in text
+    assert "mph (" in text
