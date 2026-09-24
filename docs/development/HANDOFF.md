@@ -1,62 +1,60 @@
-# Implementation Handoff — Simulation Page Polling Migration to Shared usePolling Hook
+# Implementation Handoff — Restore Green Main: Jules Bolt Learning Title Case Compliance
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-sim-polling`
-- Branch: `fix/8941-use-polling-toolbar-actuator`
-- Baseline commit: `0dd23bde7d`
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-fix-10883`
+- Branch: `fix/10883-docs-governance-title-case`
+- Baseline commit: `ec8a12fbf9`
 - Implementation commit: `SELF`
-- Pull request: #10881
-- Governing issue: #8941
-- Session: `antigravity-8941-sim-polling`
+- Pull request: #10884
+- Governing issue: #10883
+- Session: `antigravity-10883-docs-gov`
 
 ## Objective and Status
 
-- Objective: Complete the client-side REST polling cleanup for #8941:
-  1. Migrate `ActuatorPanel` (1000 ms) and `SimulationToolbar` (1000 ms) from raw `setInterval` loops to the shared `usePolling` hook.
-  2. Ensure polling automatically pauses when the browser tab is hidden (`document.visibilityState === 'hidden'`) and resumes on visible.
-  3. Ensure no concurrent/overlapping ticks occur when requests are in flight.
-  4. Ensure intervals and pending tasks are cleaned up on unmount or disable.
+- Objective: Restore green main by fixing the Title Case check failure on `.jules/bolt.md` introduced in commit `ec8a12fbf9` (#10880):
+  1. Enclose code tokens (`np.linalg.norm`) in backticks in `.jules/bolt.md` so they are correctly recognized as code expressions and exempted from title-case transformations.
+  2. Add unit test coverage in `tests/scripts/test_document_title_case.py` verifying backticked code tokens are preserved.
+  3. Verify all documentation governance checks pass cleanly locally.
 - Status: Complete / ready for PR
 - Completed:
-  1. Updated `ui/src/components/simulation/ActuatorPanel.tsx` to use `usePolling` and guard initial load with `hasMountedRef`.
-  2. Updated `ui/src/components/simulation/SimulationToolbar.tsx` to use `usePolling` and removed unneeded `pollRef`.
-  3. Added comprehensive test coverage in `ActuatorPanel.test.tsx` and `SimulationToolbar.test.tsx` verifying cadence, tab-hidden pause, stopped simulation gating, and unmount cleanup.
-  4. Verified all 98 test files / 934 tests pass in vitest, `tsc -b`, ESLint, and production build.
-  5. Updated `docs/development/DEVELOPMENT_LOG.md` and this handoff.
-- Remaining: Push branch, open PR with auto-merge, verify checks, and close issue.
+  1. Updated heading in `.jules/bolt.md` to `## 2026-09-24 - [Optimize `np.linalg.norm` for Distance Metrics]`.
+  2. Added test in `tests/scripts/test_document_title_case.py`.
+  3. Ran all doc governance checks and tests: all passed cleanly (30/30 pytest passed, title case passed 0 violations).
+  4. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, and this handoff.
+- Remaining: Commit, push branch, open PR with auto-merge, verify CI green.
 
 ## Files and Decisions
 
 - Files changed:
-  - `ui/src/components/simulation/ActuatorPanel.tsx`: Replaced raw `setInterval` effect with `usePolling` and `hasMountedRef`.
-  - `ui/src/components/simulation/SimulationToolbar.tsx`: Replaced raw `setInterval` effect with `usePolling` and removed `pollRef`.
-  - `ui/src/components/simulation/ActuatorPanel.test.tsx`: Added polling test suite.
-  - `ui/src/components/simulation/SimulationToolbar.test.tsx`: Added polling test suite.
-  - `docs/development/DEVELOPMENT_LOG.md`: Updated DL-#8941.
+  - `.jules/bolt.md`: Wrapped code token in backticks in heading line 151.
+  - `tests/scripts/test_document_title_case.py`: Added assertion verifying preservation of backticked code expressions in `test_expected_title_preserves_minor_words_and_technical_tokens`.
+  - `SPEC.md`: Added change log entry.
+  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10883 entry.
   - `docs/development/HANDOFF.md`: Updated handoff document.
 
 ## Validation
 
-- `npx vitest run src/components/visualization/ForceOverlayPanel.test.tsx src/components/simulation/ActuatorPanel.test.tsx src/components/simulation/SimulationToolbar.test.tsx` — 31 passed in 2.35s.
-- `npx vitest run` — 98 test files passed, 934 tests passed in 35.30s.
-- `npx tsc -b && npm run lint` — passed cleanly.
-- `npm run build` — passed cleanly.
-- `python scripts/ci/check_architecture_budget.py` — passed.
-- `python scripts/ci/check_error_handling_ratchet.py` — passed.
+- `python scripts/check_docs_governance.py` — passed.
+- `python -m scripts.check_design_manual_governance` — passed.
+- `python scripts/check_doc_catalog.py` — passed.
+- `python scripts/check_doc_size_budget.py` — passed.
+- `python scripts/check_document_title_case.py --changed-from 5acbb3a1c8e9ab20754035eeaffb9d9d961df05d` — passed (0 violations).
+- `pytest tests/scripts/test_document_title_case.py` — 5 passed.
+- `pytest tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py tests/scripts/test_document_title_case.py -q` — 30 passed.
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (standardization on proven `usePolling` hook created in #10748).
+- Risks/assumptions: None
 
 ## Next Steps
 
 1. Commit and push branch to origin.
 2. Open PR with `agent:local` label and auto-merge enabled.
-3. Monitor CI and verify merge.
-4. Release lease on issue #8941.
+3. Monitor CI, verify merge, and verify green main.
+4. Release lease on issue #10883.
 
 ## Change Log
 
