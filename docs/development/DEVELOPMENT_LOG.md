@@ -17,7 +17,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#8866 · Remove Dead skeleton_extractors Providers From starting_pose_matcher
+### DL-#8866 · Remove Dead `skeleton_extractors` Providers From `starting_pose_matcher`
 
 - **State:** in_review
 - **Owner:** issue-remediator
