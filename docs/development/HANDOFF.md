@@ -1,67 +1,56 @@
-# Implementation Handoff — Remove Dead Skeleton Extractors Providers
+# Implementation Handoff — Exact Capture Matching for Tour Baselines Presenter
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `/home/dieterolson/staff-worktrees/UpstreamDrift-run-b571f75d9fb0`
-- Branch: `staff/issue-remediator-task-2852a7`
-- Baseline commit: `447cfada0`
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10829`
+- Branch: `fix/10829-tour-baselines-exact-capture-roster`
+- Baseline commit: `81cbf1709a`
 - Implementation commit: `SELF`
-- Pull request: #10808 (merged)
-- Governing issue/epic: #8866
-- Session: `issue-remediator-run-b571f75d9fb0`
+- Pull request: not created
+- Governing issue/epic: #10829 (companion review issues #10830, #10831; parent #10596, epic #10584)
+- Session: `antigravity-20260924-remediation-tour-baselines`
 
 ## Objective and Status
 
-- Objective: Delete the six per-engine skeleton extractor modules under `src/tools/starting_pose_matcher/skeleton_extractors/` (~1,614 lines) that have no callers in any shipped `src/` code, along with their eight dedicated test modules. Prune stale baseline rows referencing the deleted paths.
-- Status: Complete (merged to main in PR #10808)
-- Completed: Removed 6 uncalled modules and 8 test suites, pruned stale baseline entries in mypy, suite markers, and LoD baselines.
-- Remaining: None (shipped)
+- Objective: Apply exact-capture matching to the roster package discovery flag in `TourBaselinesPresenter` to avoid cross-capture fallbacks where models with only Driver packages advertise `has_package=True` in Iron views, refresh DL-#10596, and update this handoff to describe the exact-capture work and validation.
+- Status: Complete / ready for PR
+- Completed:
+  1. Removed generic discovery fallback in `_has_discovered_package()`, strictly matching the normalized capture (`BaselineFilter(model_id=model_id, club=norm_cap)`).
+  2. Added regression unit test `test_presenter_roster_exact_capture_has_package` in `tests/unit/motion_matching/test_tour_baselines_presenter.py`.
+  3. Refreshed DL-#10596 in `docs/development/DEVELOPMENT_LOG.md`.
+  4. Updated `docs/development/HANDOFF.md` and `SPEC.md`.
+- Remaining: Push branch, create pull request with auto-merge, and release agent lease.
 
 ## Files and Decisions
 
 - Files changed:
-  - Deleted source (6 files, ~1,614 lines):
-    - `src/tools/starting_pose_matcher/skeleton_extractors/drake.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/openpose.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/opensim.py`
-    - `src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py`
-  - Deleted tests (8 files):
-    - `tests/unit/tools/starting_pose_matcher/test_drake_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_mujoco_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_opensim_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_pinocchio_provider.py`
-    - `tests/unit/tools/starting_pose_matcher/test_observed_input_providers.py`
-    - `tests/unit/tools/starting_pose_matcher/test_provider_error_paths.py`
-    - `tests/tools/starting_pose_matcher/test_observed_extractors.py`
-    - `tests/tools/starting_pose_matcher/test_physics_extractors_with_stubs.py`
-  - Updated baselines:
-    - `scripts/config/full_src_mypy_baseline.json`
-    - `scripts/config/suite_marker_baseline.json`
-    - `scripts/ci/lod_baseline.txt`
-  - Updated docs:
-    - `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md`
-- Key decisions: Pure deletion of 6 uncalled skeleton extractor engines in starting_pose_matcher and 8 dedicated tests; preserved singular `skeleton_extractor.py` for `JsonSkeletonExtractor` in GUI.
-- User-owned or unrelated worktree changes: None observed
+  - `src/tools/motion_matching/tour_baselines_presenter.py`: Updated `_has_discovered_package` to require exact capture match via normalized capture string.
+  - `tests/unit/motion_matching/test_tour_baselines_presenter.py`: Added `test_presenter_roster_exact_capture_has_package` verifying that models possessing only Driver baseline packages report `has_package=False` in Iron roster listings.
+  - `docs/development/DEVELOPMENT_LOG.md`: Refreshed DL-#10596 `Last verified` timestamp and summary.
+  - `docs/development/HANDOFF.md`: Replaced stale handoff with current exact-capture presenter state.
+  - `SPEC.md`: Documented exact-capture roster package discovery flags under TB-11 (#10596).
+- Key decisions: `_has_discovered_package` strictly matches normalized capture (`BaselineFilter(model_id=model_id, club=norm_cap)`), eliminating cross-capture false positive `has_package=True` in the model roster.
+- User-owned or unrelated worktree changes: None observed.
 
 ## Validation
 
-- `ruff check .` — all checks passed (zero violations)
-- `ruff format --check .` — no new diffs introduced by this change
-- `scripts/ci/check_file_size_budget.py` — OK
-- CI Standard: passed 100% green on PR #10808 (run 35973035906)
+- `pytest tests/unit/motion_matching/test_tour_baselines_presenter.py` — 10 passed (100% green).
+- `ruff check src/tools/motion_matching/tour_baselines_presenter.py tests/unit/motion_matching/test_tour_baselines_presenter.py` — all checks passed.
+- `ruff format --check src/tools/motion_matching/tour_baselines_presenter.py tests/unit/motion_matching/test_tour_baselines_presenter.py` — no reformatting needed.
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (verified dead code with no remaining callers in shipped code)
+- Risks/assumptions: None (pure refinement of existing capture-specific presenter behavior)
 
 ## Next Steps
 
-1. Maintain pruned baselines and direct future pose extraction to `pose_interchange`.
+1. Push `fix/10829-tour-baselines-exact-capture-roster` to origin.
+2. Create PR referencing #10829, #10830, #10831.
+3. Enable auto-merge (`--auto --squash`).
+4. Release lease on #10829, #10830, #10831 via `scripts.release_agent_lease`.
 
 ## Change Log
 
-- `SELF` — Restore canonical handoff schema (Files and Decisions, Change Log, Governing issue/epic) and update PR state to merged PR #10808.
+- `SELF` — Enforce exact capture match in `_has_discovered_package`, add regression test, refresh DL-#10596, and update canonical handoff (#10829, #10830, #10831).
