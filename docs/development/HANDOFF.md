@@ -1,56 +1,63 @@
-# Implementation Handoff — Exact Capture Matching for Tour Baselines Presenter
+# Implementation Handoff — Fail-Closed Legacy Evidence Qualification & Dynamic Inertia Digest
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10829`
-- Branch: `fix/10829-tour-baselines-exact-capture-roster`
-- Baseline commit: `81cbf1709a`
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-10799`
+- Branch: `fix/10799-10800-qualification-integrity`
+- Baseline commit: `a9651a161c`
 - Implementation commit: `SELF`
 - Pull request: not created
-- Governing issue/epic: #10829 (companion review issues #10830, #10831; parent #10596, epic #10584)
+- Governing issue/epic: #10799, #10800 (parent review on PR #10798; TB-09 #10594, TB-10 #10595)
 - Session: `antigravity-20260924-remediation-tour-baselines`
 
 ## Objective and Status
 
-- Objective: Apply exact-capture matching to the roster package discovery flag in `TourBaselinesPresenter` to avoid cross-capture fallbacks where models with only Driver packages advertise `has_package=True` in Iron views, refresh DL-#10596, and update this handoff to describe the exact-capture work and validation.
+- Objective: Address bot review feedback on PR #10798:
+  1. Keep qualification strictly fail-closed for unsigned legacy evidence (#10799) by eliminating silent auto-migration from `IndependentBaselineQualifier.qualify()`, and ensure `migrate_legacy_package` explicitly leaves packages unverified (`UNVERIFIED`, `has_native_replay=False`) until native evidence is regenerated.
+  2. Hash actual pendulum dynamics inertia parameters (#10800) in `fixed_inertia_hash` (segment masses, center-of-mass ratios, rotational inertias) via `compute_pendulum_inertia_hash` using rollout `DoublePendulumDynamics` parameters rather than just link lengths or model labels.
 - Status: Complete / ready for PR
 - Completed:
-  1. Removed generic discovery fallback in `_has_discovered_package()`, strictly matching the normalized capture (`BaselineFilter(model_id=model_id, club=norm_cap)`).
-  2. Added regression unit test `test_presenter_roster_exact_capture_has_package` in `tests/unit/motion_matching/test_tour_baselines_presenter.py`.
-  3. Refreshed DL-#10596 in `docs/development/DEVELOPMENT_LOG.md`.
-  4. Updated `docs/development/HANDOFF.md` and `SPEC.md`.
+  1. Removed `auto_migrate` parameter and auto-migration from `IndependentBaselineQualifier.qualify()`.
+  2. Updated `migrate_legacy_package` to mark `statuses` with `scientific_qualification=ScientificQualificationStatus.UNVERIFIED` and `has_native_replay=False`.
+  3. Implemented `compute_pendulum_inertia_hash()` in `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py` digesting segment masses, COM ratios, and rotational inertias from actual `DoublePendulumDynamics` parameters.
+  4. Updated `_assemble_baseline_package` and `generate_baseline_package_for_target` to pass `dynamics` and compute `fixed_inertia_hash` from actual dynamics parameters.
+  5. Added regression and unit tests in `tests/unit/tour_baselines/test_qualification.py`.
+  6. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md` (DL-#10799), and this `HANDOFF.md`.
 - Remaining: Push branch, create pull request with auto-merge, and release agent lease.
 
 ## Files and Decisions
 
 - Files changed:
-  - `src/tools/motion_matching/tour_baselines_presenter.py`: Updated `_has_discovered_package` to require exact capture match via normalized capture string.
-  - `tests/unit/motion_matching/test_tour_baselines_presenter.py`: Added `test_presenter_roster_exact_capture_has_package` verifying that models possessing only Driver baseline packages report `has_package=False` in Iron roster listings.
-  - `docs/development/DEVELOPMENT_LOG.md`: Refreshed DL-#10596 `Last verified` timestamp and summary.
-  - `docs/development/HANDOFF.md`: Replaced stale handoff with current exact-capture presenter state.
-  - `SPEC.md`: Documented exact-capture roster package discovery flags under TB-11 (#10596).
-- Key decisions: `_has_discovered_package` strictly matches normalized capture (`BaselineFilter(model_id=model_id, club=norm_cap)`), eliminating cross-capture false positive `has_package=True` in the model roster.
-- User-owned or unrelated worktree changes: None observed.
+  - `src/shared/python/tour_baselines/qualification.py`: Removed auto-migration from `qualify()`; updated `migrate_legacy_package` to set `UNVERIFIED` and `has_native_replay=False`, and compute pendulum inertia digest via `compute_pendulum_inertia_hash`.
+  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Added `compute_pendulum_inertia_hash()`; wired `dynamics` through `_assemble_baseline_package`.
+  - `tests/unit/tour_baselines/test_qualification.py`: Added assertions verifying fail-closed legacy rejection and unverified status after migration; added `test_pendulum_inertia_hash_reflects_dynamics_parameters`.
+  - `SPEC.md`: Documented fail-closed legacy qualification and dynamics inertia parameter hashing.
+  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10799 entry.
+  - `docs/development/HANDOFF.md`: Updated canonical handoff.
+- Key decisions:
+  - Fail-closed qualification ensures an untrusted or stripped candidate package cannot bypass cryptographic verification without native evidence.
+  - Inertia hash digests actual mass/inertia arrays rather than link lengths, guaranteeing that modifications to model physics invalidate stored inertia digests.
 
 ## Validation
 
-- `pytest tests/unit/motion_matching/test_tour_baselines_presenter.py` — 10 passed (100% green).
-- `ruff check src/tools/motion_matching/tour_baselines_presenter.py tests/unit/motion_matching/test_tour_baselines_presenter.py` — all checks passed.
-- `ruff format --check src/tools/motion_matching/tour_baselines_presenter.py tests/unit/motion_matching/test_tour_baselines_presenter.py` — no reformatting needed.
+- `pytest tests/unit/tour_baselines/test_qualification.py` — 23 passed (100% green).
+- `pytest tests/unit/tour_baselines/` — 102 passed (100% green).
+- `pytest tests/unit/motion_matching/test_acceptance.py` — 21 passed (100% green).
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (pure refinement of existing capture-specific presenter behavior)
+- Risks/assumptions: None (improves integrity verification without changing valid package rollouts)
 
 ## Next Steps
 
-1. Push `fix/10829-tour-baselines-exact-capture-roster` to origin.
-2. Create PR referencing #10829, #10830, #10831.
-3. Enable auto-merge (`--auto --squash`).
-4. Release lease on #10829, #10830, #10831 via `scripts.release_agent_lease`.
+1. Run ruff and mypy checks.
+2. Push `fix/10799-10800-qualification-integrity` to origin.
+3. Create PR referencing #10799, #10800.
+4. Enable auto-merge (`--auto --squash`).
+5. Release leases on #10799 and #10800 via `scripts.release_agent_lease`.
 
 ## Change Log
 
-- `SELF` — Enforce exact capture match in `_has_discovered_package`, add regression test, refresh DL-#10596, and update canonical handoff (#10829, #10830, #10831).
+- `SELF` — Keep qualification fail-closed for unsigned legacy evidence and hash actual dynamics inertia parameters (#10799, #10800).
