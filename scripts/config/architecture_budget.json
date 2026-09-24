@@ -971,6 +971,33 @@
       "issue": 10591,
       "reason": "Issue #10591: Bolt optimization added extra lines to replace np.linalg.norm with np.sqrt(np.einsum) causing function line count to marginally exceed 100.",
       "expires_on": "2027-01-01"
+    },
+    {
+      "path": "shared_scripts/deferred_validation.py",
+      "symbol": "_validate_record_shape",
+      "rule": "function-lines",
+      "owner": "codex",
+      "issue": 10783,
+      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
+      "expires_on": "2026-10-23"
+    },
+    {
+      "path": "shared_scripts/deferred_validation.py",
+      "symbol": "validate_catalog",
+      "rule": "function-lines",
+      "owner": "codex",
+      "issue": 10783,
+      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
+      "expires_on": "2026-10-23"
+    },
+    {
+      "path": "shared_scripts/handoff_validator.py",
+      "symbol": "validate_handoff_content",
+      "rule": "function-lines",
+      "owner": "codex",
+      "issue": 10783,
+      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
+      "expires_on": "2026-10-23"
     }
   ]
 }

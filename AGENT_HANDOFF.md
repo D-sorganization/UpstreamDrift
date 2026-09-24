@@ -2,7 +2,7 @@
 
 Deferred external validation: six Board plans live in `docs/development/planning/`.
 Software remains active; no physical evidence is supplied. See the current
-`docs/development/HANDOFF.md` for scope, prior #9546 closure and publication gates.
+`docs/development/HANDOFF.md` for #10783 enforcement, prior #9546 closure and publication gates.
 
 ## NM-12: Publish Model Cards, Reproduction Commands and Final Turnover (#10627)
 
