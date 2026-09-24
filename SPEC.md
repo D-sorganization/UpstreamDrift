@@ -6934,6 +6934,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-24 | #10839 | Enforce exact-capture matching for roster package flags (#10829), hash actual pendulum inertia parameters (#10800), and maintain fail-closed qualification for legacy evidence (#10799). |
 | 2026-09-24 | #10828 | Tour baselines presenter exact capture matching without cross-capture fallback (#10826); restore canonical schema and title casing for docs/development/HANDOFF.md (#10818, #10819, #10824, #10825). |
 | 2026-09-24 | #10814 | Publish Tour Baselines User Guide, Agent Runbook, end-to-end acceptance tests, and final acceptance report concluding child work packages under Epic #10584 (TB-12 #10597). |
 | 2026-09-24 | #10808 | Remove dead per-engine skeleton_extractors from starting_pose_matcher: delete 6 unwired source files (~1,614 lines), 8 test modules, and prune stale mypy/suite-marker/lod baseline rows. |

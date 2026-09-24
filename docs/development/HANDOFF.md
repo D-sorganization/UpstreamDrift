@@ -7,7 +7,7 @@
 - Branch: `fix/tour-baselines-remediation-batch-2`
 - Baseline commit: `2fb7b2f24`
 - Implementation commit: `SELF`
-- Pull request: #10828 (merged) and active remediation PR
+- Pull request: #10839
 - Governing issue/epic: #10596
 - Session: `antigravity-20260924-remediation-tour-baselines`
 

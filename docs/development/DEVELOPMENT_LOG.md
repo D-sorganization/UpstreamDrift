@@ -100,7 +100,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10596 (TB-11, parent #10584, program #10363)
-- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10809, https://github.com/D-sorganization/UpstreamDrift/pull/10828
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10809, https://github.com/D-sorganization/UpstreamDrift/pull/10828, https://github.com/D-sorganization/UpstreamDrift/pull/10839
 - **Branch:** `feat/tb11-expose-tour-baselines-10596`
 - **Paths:** `src/tools/motion_matching/tour_baselines_presenter.py`; `src/tools/motion_matching/tour_baselines_widget.py`; `src/tools/motion_matching/gui.py`; `tests/unit/motion_matching/test_tour_baselines_presenter.py`; `tests/tools/motion_matching/test_motion_matching_gui.py`; `SPEC.md`
 - **Started:** 2026-09-23
