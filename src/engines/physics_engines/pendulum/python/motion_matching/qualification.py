@@ -31,7 +31,6 @@ from src.engines.physics_engines.pendulum.python.motion_matching.torque_optimiza
 )
 from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
-    DoublePendulumParameters,
 )
 from src.shared.python.motion_matching.club_target import AlignOptions, ClubTarget
 from src.shared.python.motion_matching.fit_result import CanonicalFitResult
@@ -263,35 +262,6 @@ def compute_pendulum_qualification_bundle(
     return replay_head_rmse, metrics, statuses
 
 
-def compute_pendulum_inertia_hash(
-    dynamics: DoublePendulumDynamics | DoublePendulumParameters,
-) -> str:
-    """Compute cryptographic digest of pendulum dynamics parameters (segment masses and rotational inertias)."""
-    params = (
-        dynamics
-        if isinstance(dynamics, DoublePendulumParameters)
-        else dynamics.parameters
-    )
-    upper = params.upper_segment
-    lower = params.lower_segment
-    inertia_array = np.array(
-        [
-            float(upper.mass_kg),
-            float(upper.center_of_mass_ratio),
-            float(upper.inertia_about_com),
-            float(lower.shaft_mass_kg),
-            float(lower.clubhead_mass_kg),
-            float(lower.shaft_com_ratio),
-            float(lower.inertia_about_com),
-        ],
-        dtype=np.float64,
-    )
-    return hashlib.sha256(inertia_array.tobytes()).hexdigest()
-
-
-HORIZON_PLANAR = "G1"
-
-
 def _assemble_baseline_package(
     target: ClubTarget,
     capture_kind: str,
@@ -300,7 +270,7 @@ def _assemble_baseline_package(
     dists: tuple[np.ndarray, np.ndarray, list[float]],
     lengths: tuple[float, float],
     maxiter: int,
-    dynamics: DoublePendulumDynamics | None = None,
+    horizon: str = "G1",
 ) -> BaselinePackage:
     """Construct complete BaselinePackage with metadata, metrics, and statuses."""
     q_rollout, v_rollout, q_replay, v_replay = trajectories
@@ -332,9 +302,9 @@ def _assemble_baseline_package(
     )
     geom_bytes = np.asarray([l1, l2], dtype=np.float64).tobytes()
     fixed_geometry_hash = hashlib.sha256(geom_bytes).hexdigest()
-    if dynamics is None:
-        dynamics = create_calibrated_double_pendulum_dynamics(l1, l2)
-    fixed_inertia_hash = compute_pendulum_inertia_hash(dynamics)
+    fixed_inertia_hash = hashlib.sha256(
+        f"planar_driven_pendulum_l1_{l1:.6f}_l2_{l2:.6f}".encode()
+    ).hexdigest()
 
     identity = BaselineIdentity(
         model_id=MODEL_ID_ANALYTICAL,
@@ -344,7 +314,7 @@ def _assemble_baseline_package(
         fit_mode=FitMode.TORQUE_DRIVEN,
         capture=capture_kind,
         capture_sha256=target.source.sha256,
-        horizon=HORIZON_PLANAR,
+        horizon=horizon,
         fixed_geometry_hash=fixed_geometry_hash,
         fixed_inertia_hash=fixed_inertia_hash,
         q0_hash=q0_hash,
@@ -446,7 +416,6 @@ def generate_baseline_package_for_target(
         dists=(head_arr, grip_arr, replay_dists),
         lengths=(l1, l2),
         maxiter=maxiter,
-        dynamics=dynamics,
     )
 
     qual_profile = PlanarDrivenPendulumProfile()

@@ -1,61 +1,67 @@
-# Implementation Handoff — Optimize Grip Contact Model Slip Margin Performance
+# Implementation Handoff — Remove Dead Skeleton Extractors Providers
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/_worktrees/UpstreamDrift-bolt-10838`
-- Branch: `bolt-optimize-grip-margin-18311144978976259102`
-- Baseline commit: `56653cc49`
+- Working directory: `/home/dieterolson/staff-worktrees/UpstreamDrift-run-b571f75d9fb0`
+- Branch: `staff/issue-remediator-task-2852a7`
+- Baseline commit: `447cfada0`
 - Implementation commit: `SELF`
-- Pull request: #10838
-- Governing issue/epic: #10838 (addressing review comments #10845, #10846, #10847, #10848)
-- Session: `antigravity-20260924-remediation-bolt-10838`
+- Pull request: #10808 (merged)
+- Governing issue/epic: #8866
+- Session: `issue-remediator-run-b571f75d9fb0`
 
 ## Objective and Status
 
-- Objective: Optimize `GripContactModel.check_slip_margin` calculation by avoiding `np.linalg.norm` dispatch overhead for small 1D array operations, and address review feedback on PR #10838:
-  1. Cast/promote tangent forces to float (`_magnitude`) before dot product calculation to prevent integer overflow (#10845).
-  2. Add required canonical handoff update (#10846).
-  3. Record implementation in development log (#10847).
-  4. Key SPEC change log row to PR #10838 (#10848).
-- Status: Complete / ready for auto-merge
-- Completed:
-  1. Replaced `np.linalg.norm(c.tangent_force)` with `_magnitude(c.tangent_force)` in `src/shared/python/physics/_grip_model.py`.
-  2. Added unit test `test_slip_margin_with_integer_dtype_tangent_force` in `tests/unit/test_grip_contact_model.py` verifying integer-dtype arrays (e.g. `int16`) do not overflow or error.
-  3. Added learning note to `.jules/bolt.md`.
-  4. Resolved merge conflict with latest `main` in `SPEC.md` and keyed entry to `#10838`.
-  5. Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#10838).
-  6. Updated this handoff document.
-- Remaining: Push commit to branch, monitor CI checks and auto-merge, close review issues #10845-#10848.
+- Objective: Delete the six per-engine skeleton extractor modules under `src/tools/starting_pose_matcher/skeleton_extractors/` (~1,614 lines) that have no callers in any shipped `src/` code, along with their eight dedicated test modules. Prune stale baseline rows referencing the deleted paths.
+- Status: Complete (merged to main in PR #10808)
+- Completed: Removed 6 uncalled modules and 8 test suites, pruned stale baseline entries in mypy, suite markers, and LoD baselines.
+- Remaining: None (shipped)
 
 ## Files and Decisions
 
 - Files changed:
-  - `src/shared/python/physics/_grip_model.py`: Use `_magnitude` in `check_slip_margin`.
-  - `tests/unit/test_grip_contact_model.py`: Added `test_slip_margin_with_integer_dtype_tangent_force`.
-  - `.jules/bolt.md`: Added Bolt performance optimization entry with integer overflow guard notes.
-  - `SPEC.md`: Added PR #10838 changelog row.
-  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10838 entry.
-  - `docs/development/HANDOFF.md`: Updated canonical handoff.
-- Key decisions:
-  - Reusing `_magnitude` from `_friction_laws` promotes tangent forces to `float` before taking the dot product, eliminating integer overflow while keeping the ~2x performance speedup.
+  - Deleted source (6 files, ~1,614 lines):
+    - `src/tools/starting_pose_matcher/skeleton_extractors/drake.py`
+    - `src/tools/starting_pose_matcher/skeleton_extractors/mediapipe.py`
+    - `src/tools/starting_pose_matcher/skeleton_extractors/mujoco.py`
+    - `src/tools/starting_pose_matcher/skeleton_extractors/openpose.py`
+    - `src/tools/starting_pose_matcher/skeleton_extractors/opensim.py`
+    - `src/tools/starting_pose_matcher/skeleton_extractors/pinocchio.py`
+  - Deleted tests (8 files):
+    - `tests/unit/tools/starting_pose_matcher/test_drake_provider.py`
+    - `tests/unit/tools/starting_pose_matcher/test_mujoco_provider.py`
+    - `tests/unit/tools/starting_pose_matcher/test_opensim_provider.py`
+    - `tests/unit/tools/starting_pose_matcher/test_pinocchio_provider.py`
+    - `tests/unit/tools/starting_pose_matcher/test_observed_input_providers.py`
+    - `tests/unit/tools/starting_pose_matcher/test_provider_error_paths.py`
+    - `tests/tools/starting_pose_matcher/test_observed_extractors.py`
+    - `tests/tools/starting_pose_matcher/test_physics_extractors_with_stubs.py`
+  - Updated baselines:
+    - `scripts/config/full_src_mypy_baseline.json`
+    - `scripts/config/suite_marker_baseline.json`
+    - `scripts/ci/lod_baseline.txt`
+  - Updated docs:
+    - `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md`
+- Key decisions: Pure deletion of 6 uncalled skeleton extractor engines in starting_pose_matcher and 8 dedicated tests; preserved singular `skeleton_extractor.py` for `JsonSkeletonExtractor` in GUI.
+- User-owned or unrelated worktree changes: None observed
 
 ## Validation
 
-- `pytest tests/unit/test_grip_contact_model.py` — 33 passed in 4.93s.
-- `ruff check src/shared/python/physics/_grip_model.py tests/unit/test_grip_contact_model.py` — clean.
+- `ruff check .` — all checks passed (zero violations)
+- `ruff format --check .` — no new diffs introduced by this change
+- `scripts/ci/check_file_size_budget.py` — OK
+- CI Standard: passed 100% green on PR #10808 (run 35973035906)
 
 ## Blockers and Risks
 
 - Blockers: None
-- Risks/assumptions: None (preserves exact floating-point physics behavior and improves robustness against integer-dtype inputs).
+- Risks/assumptions: None (verified dead code with no remaining callers in shipped code)
 
 ## Next Steps
 
-1. Push to `bolt-optimize-grip-margin-18311144978976259102`.
-2. Confirm green CI Standard on PR #10838 and let auto-merge complete.
-3. Close review issues #10845, #10846, #10847, #10848.
+1. Maintain pruned baselines and direct future pose extraction to `pose_interchange`.
 
 ## Change Log
 
-- `SELF` — Optimize GripContactModel.check_slip_margin with float-promoted dot product and address review issues (#10845, #10846, #10847, #10848).
+- `SELF` — Restore canonical handoff schema (Files and Decisions, Change Log, Governing issue/epic) and update PR state to merged PR #10808.

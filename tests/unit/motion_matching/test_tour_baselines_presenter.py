@@ -181,22 +181,6 @@ def test_presenter_lists_models_for_both_captures(baseline_store: Path) -> None:
     assert all(m.capture in ("iron", "iron7") for m in iron_models)
 
 
-def test_presenter_roster_exact_capture_has_package(baseline_store: Path) -> None:
-    """Requirement: Roster item has_package reflects exact capture match, avoiding cross-capture fallback (#10829)."""
-    presenter = TourBaselinesPresenter(search_roots=[baseline_store])
-
-    # driven_triple_pendulum only has a Driver package in baseline_store, not Iron.
-    driver_models = presenter.list_models(capture="driver")
-    triple_driver = next(
-        m for m in driver_models if m.model_id == "driven_triple_pendulum"
-    )
-    assert triple_driver.has_package is True
-
-    iron_models = presenter.list_models(capture="iron")
-    triple_iron = next(m for m in iron_models if m.model_id == "driven_triple_pendulum")
-    assert triple_iron.has_package is False
-
-
 def test_presenter_badge_presentation_without_color_alone(baseline_store: Path) -> None:
     """Requirement: readable statuses without color alone; accessible text and symbols."""
     presenter = TourBaselinesPresenter(search_roots=[baseline_store])

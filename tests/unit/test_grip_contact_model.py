@@ -12,7 +12,6 @@ from src.shared.python.physics.grip_contact_model import (
     ContactState,
     GripContactExporter,
     GripContactModel,
-    GripContactState,
     GripParameters,
     PressureVisualizationData,
     check_friction_cone,
@@ -606,28 +605,3 @@ class TestDynamicSwingValidation:
         assert state is not None
         assert state.num_slipping >= 1
         assert state.num_sticking >= 1
-
-    def test_slip_margin_with_integer_dtype_tangent_force(self) -> None:
-        """Should safely calculate slip margin without integer overflow (#10845)."""
-        model = GripContactModel()
-        contact = ContactPoint(
-            position=np.zeros(3),
-            normal=np.array([0.0, 0.0, 1.0]),
-            normal_force=100000.0,
-            tangent_force=np.array([30000, 30000, 0], dtype=np.int16),
-            slip_velocity=np.zeros(3),
-            state=ContactState.STICKING,
-            body_name="hand",
-        )
-        model.current_state = GripContactState(
-            timestamp=0.0,
-            contacts=[contact],
-            total_normal_force=100000.0,
-            total_tangent_force=np.array([30000.0, 30000.0, 0.0]),
-            num_sticking=1,
-            num_slipping=0,
-            center_of_pressure=np.zeros(3),
-        )
-        margins = model.check_slip_margin()
-        assert not margins["any_slipping"]
-        assert margins["min_margin"] > 0

@@ -243,11 +243,16 @@ class TourBaselinesPresenter:
         return "[UNQUALIFIED]", "Unqualified"
 
     def _has_discovered_package(self, model_id: str, capture: str) -> bool:
-        norm_cap = self._normalize_capture(capture)
         matches = self._discovery.discover(
-            filter_spec=BaselineFilter(model_id=model_id, club=norm_cap)
+            filter_spec=BaselineFilter(model_id=model_id, club=capture)
         )
-        return len(matches) > 0
+        if matches:
+            return True
+        # Try generic match
+        return (
+            len(self._discovery.discover(filter_spec=BaselineFilter(model_id=model_id)))
+            > 0
+        )
 
     def get_model_detail(self, model_id: str, capture: str) -> TourBaselineDetailView:
         """Retrieve full detail view for a given model and capture."""

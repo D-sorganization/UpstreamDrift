@@ -187,9 +187,8 @@ def quaternion_geodesic_error_rad(q1: np.ndarray, q2: np.ndarray) -> float:
             f"quaternions must have shape (T, 4); got {q1.shape} and {q2.shape}"
         )
 
-    # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.5x faster than np.linalg.norm(..., axis=-1, keepdims=True)
-    n1 = np.sqrt(np.einsum("...i,...i->...", q1, q1))[:, np.newaxis]
-    n2 = np.sqrt(np.einsum("...i,...i->...", q2, q2))[:, np.newaxis]
+    n1 = np.linalg.norm(q1, axis=-1, keepdims=True)
+    n2 = np.linalg.norm(q2, axis=-1, keepdims=True)
     q1_norm = q1 / np.maximum(n1, 1e-12)
     q2_norm = q2 / np.maximum(n2, 1e-12)
 
