@@ -558,12 +558,16 @@ class CrossEnginePerturbationRunner:
                 try:
                     vel = fn()
                     vel_f = np.asarray(vel, dtype=float).ravel()
-                    return float(math.sqrt(vel_f.dot(vel_f)))  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
+                    return float(
+                        math.sqrt(vel_f.dot(vel_f))
+                    )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
                 except TypeError:
                     try:
                         vel = fn(q, v)
                         vel_f = np.asarray(vel, dtype=float).ravel()
-                        return float(math.sqrt(vel_f.dot(vel_f)))  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
+                        return float(
+                            math.sqrt(vel_f.dot(vel_f))
+                        )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
                     except (TypeError, ValueError, AttributeError, RuntimeError):
                         pass
                 except (ValueError, AttributeError, RuntimeError):
@@ -584,7 +588,9 @@ class CrossEnginePerturbationRunner:
                 else:
                     vel = J @ v_vec
                 vel_f = np.asarray(vel, dtype=float).ravel()
-                return float(math.sqrt(vel_f.dot(vel_f)))  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
+                return float(
+                    math.sqrt(vel_f.dot(vel_f))
+                )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
             except (TypeError, ValueError, AttributeError, RuntimeError, IndexError):
                 pass
 
@@ -610,7 +616,9 @@ class CrossEnginePerturbationRunner:
 
         # 4. Fallback norm of generalized velocities
         v_f = np.asarray(v, dtype=float).ravel()
-        return float(math.sqrt(v_f.dot(v_f)))  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
+        return float(
+            math.sqrt(v_f.dot(v_f))
+        )  # ⚡ Bolt: math.sqrt(dot) avoids np.linalg.norm overhead
 
     @staticmethod
     def _aggregate(result: CrossEngineRunResult) -> None:
