@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -115,7 +116,8 @@ class GripContactModel:
             return {"min_margin": 0.0, "mean_margin": 0.0, "any_slipping": True}
 
         margins = [
-            (max_tangent - np.linalg.norm(c.tangent_force)) / max_tangent
+            (max_tangent - math.sqrt(np.vdot(c.tangent_force, c.tangent_force)))
+            / max_tangent  # ⚡ Bolt: math.sqrt(np.vdot) is faster than np.linalg.norm for small 1D arrays
             for c in self.current_state.contacts
             if c.normal_force > 0
             and (max_tangent := self.params.static_friction * c.normal_force) > 0
