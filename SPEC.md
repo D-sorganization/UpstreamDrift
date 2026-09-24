@@ -28,7 +28,7 @@ Completes the documentation and end-to-end acceptance deliverables for Epic #105
 Integrates Tour Baselines into Motion Matching and Replay launchers:
 - **Presenter & View Models (`src/tools/motion_matching/tour_baselines_presenter.py`)**:
   - `TourBaselinesPresenter`: Pure-Python presenter decoupled from Qt widgets coordinating coverage discovery, detailed model views, comparison, and evidence inspection.
-  - Lists models from the canonical two-capture coverage matrix across Driver (360 Hz) and 7-Iron (359 Hz) captures.
+  - Lists models from the canonical two-capture coverage matrix across Driver (360 Hz) and 7-Iron (359 Hz) captures with exact-capture package discovery flags (#10829).
   - Accessible Status Badges (`_format_badge`): Formats readable status symbols and text labels (`[PASS]`, `[REJECTED]`, `[BLOCKED]`, `[REF]`, `[CANDIDATE]`, `[UNQUALIFIED]`) without relying on color alone.
   - Visual Semantics (`BaselineOpenResult`): Enforces visual distinction between 3D and projected 2D views, and explicitly differentiates observed club markers (`marker_points`) from simulated club graphics (`continuous_mesh`).
   - Plain-Language "Where This Came From" Panel (`WhereThisCameFromView`): Surfaces raw capture SHA-256 hashes, capture frequencies, preprocessing pipeline notes, subject & club geometries, fit configurations, replay receipt links, and explicit scientific limitations (force identifiability and holdout generalization disclaimers).
