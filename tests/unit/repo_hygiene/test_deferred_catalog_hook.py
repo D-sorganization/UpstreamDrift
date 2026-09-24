@@ -16,6 +16,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[3]
 CATALOG = Path("docs/development/planning/catalog.json")
 
+pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
 
 def _hook() -> dict[str, object]:
     config = yaml.safe_load(
