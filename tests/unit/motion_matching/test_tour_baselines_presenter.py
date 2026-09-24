@@ -152,8 +152,14 @@ def baseline_store(tmp_path: Path) -> Path:
         club="iron",
         rmse=0.009,
     )
+    pkg_triple = _make_test_package(
+        model_id="driven_triple_pendulum",
+        club="driver",
+        rmse=0.015,
+    )
     export_baseline_package(pkg_driver, store / "driver_pendulum.npz")
     export_baseline_package(pkg_iron, store / "iron_pendulum.npz")
+    export_baseline_package(pkg_triple, store / "driver_triple.npz")
     return store
 
 
@@ -286,7 +292,39 @@ def test_compare_models_generates_metric_and_topology_diffs(
     assert report.model_b_id == "driven_triple_pendulum"
     assert report.capture == "driver"
     assert "marker_rmse_delta_mm" in report.metric_deltas
+    assert report.metric_deltas["marker_rmse_delta_mm"] == pytest.approx(3.0)
+    assert "delta RMSE = +3.00 mm" in report.verdict
     assert report.topology_comparison is not None
+
+
+def test_compare_models_preserves_missing_rmse_without_fabricating_delta(
+    baseline_store: Path,
+) -> None:
+    """Requirement: Missing RMSE reports comparison unavailable instead of assuming 0.0 mm (#10810)."""
+    presenter = TourBaselinesPresenter(search_roots=[baseline_store])
+
+    # full_body_pinocchio has no package in baseline_store
+    report = presenter.compare_models(
+        model_a_id="driven_double_pendulum",
+        model_b_id="full_body_pinocchio",
+        capture="driver",
+    )
+    assert isinstance(report, ModelComparisonReport)
+    assert "marker_rmse_delta_mm" not in report.metric_deltas
+    assert report.metric_deltas == {}
+    assert "comparison unavailable" in report.verdict
+    assert "full_body_pinocchio lacks measured baseline package" in report.verdict
+
+    # Both models missing package
+    report_both = presenter.compare_models(
+        model_a_id="full_body_drake",
+        model_b_id="full_body_pinocchio",
+        capture="driver",
+    )
+    assert "marker_rmse_delta_mm" not in report_both.metric_deltas
+    assert report_both.metric_deltas == {}
+    assert "comparison unavailable" in report_both.verdict
+    assert "both full_body_drake and full_body_pinocchio" in report_both.verdict
 
 
 def test_inspect_evidence_returns_audit_and_receipt(baseline_store: Path) -> None:

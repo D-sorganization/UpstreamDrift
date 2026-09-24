@@ -6934,6 +6934,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-24 | #10814 | Publish Tour Baselines User Guide, Agent Runbook, end-to-end acceptance tests, and final acceptance report concluding child work packages under Epic #10584 (TB-12 #10597). |
 | 2026-09-24 | #10808 | Remove dead per-engine skeleton_extractors from starting_pose_matcher: delete 6 unwired source files (~1,614 lines), 8 test modules, and prune stale mypy/suite-marker/lod baseline rows. |
 | 2026-09-23 | #10784 | Enforce the existing deferred-validation catalog with the exact central checker, always-run hook and publication contract tests; original plans and scientific gates retained. |
 | 2026-09-23 | #10627 | NM-12 publish model cards, reproduction commands and final turnover: ModelReproductionCard schema, comprehensive 20-model catalog covering all registered models without omissions or fabricated dynamics, clean-environment CLI reproduction commands for 5 lifecycle phases, promotion verdicts (promoted, research-only, blocked-prerequisite, reference-only), 5-step automated user flow verification, and turnover receipt concluding Epic #10603. |

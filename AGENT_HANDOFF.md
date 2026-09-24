@@ -4,6 +4,23 @@ Deferred external validation: six Board plans live in `docs/development/planning
 Software remains active; no physical evidence is supplied. See the current
 `docs/development/HANDOFF.md` for #10783 enforcement, prior #9546 closure and publication gates.
 
+## TB-12: Publish Baseline Guide, Agent Runbooks and End-to-End Acceptance (#10597) [MERGED] / Epic #10584 [CLOSED]
+
+Branch `feat/tb12-baseline-guide-acceptance-10597`; PR [#10814](https://github.com/D-sorganization/UpstreamDrift/pull/10814) merged to `main` (`fbebf5c47`) on 2026-09-24. Parent Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (CLOSED); governing issue [#10597](https://github.com/D-sorganization/UpstreamDrift/issues/10597).
+
+- Deliverables:
+  - User Guide: `docs/plans/tour_baselines/baseline_guide.md` (Title-Case headings, launcher navigation, Driver/Iron physics, 4-tier model hierarchy, visual semantics, physical 3D RMSE formulas, cryptographic provenance).
+  - Agent Runbook: `docs/plans/tour_baselines/agent_runbook.md` (clean-environment reproduction, submodule pin checks, MATLAB R2025b requirements for Simscape, tamper verification).
+  - Final Acceptance Report: `docs/plans/tour_baselines/final_acceptance_report.md` (coverage matrix, software integration sign-off vs. ongoing full-body physical qualification under #10363, #10378, #10430, #10440).
+  - End-to-End Acceptance Tests: `tests/acceptance/test_tour_baselines_journey.py` (8 acceptance tests covering roster completeness, detail inspectability, where-this-came-from provenance, headless replay, safe cloning, model comparisons, evidence audits, and reproduction commands).
+- Scientific Status & Boundaries:
+  - Planar double pendulum baselines (`driven_double_pendulum`) qualify within tolerance ($< 15$ mm 3D marker RMSE) with valid cryptographic packages.
+  - Planar upper-body golfer models reject due to out-of-plane planar projection residuals ($> 110$ mm normal residual vs 55 mm ceiling).
+  - Full-body and spatial models (Simscape, Pinocchio, Drake, OpenSim, MyoSuite) remain governed by their dedicated program issues (#10363, #10378, #10430, #10440) and fail-closed software contracts; no physical qualification or fake convergence is claimed.
+- Epic Closure: Concludes all 13 child work packages under Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (TB-00 through TB-12). All child packages are merged and closed.
+- Next Handoff: Full-body native model qualifications under governing programs (#10363, #10378, #10430, #10440).
+- Focused verification: `pytest tests/acceptance/test_tour_baselines_journey.py tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
+
 ## NM-12: Publish Model Cards, Reproduction Commands and Final Turnover (#10627)
 
 Branch `feat/nm12-model-cards-repro-turnover-10627`; PR against `main`. Parent epic [#10603](https://github.com/D-sorganization/UpstreamDrift/issues/10603); governing issue [#10627](https://github.com/D-sorganization/UpstreamDrift/issues/10627).
@@ -103,22 +120,13 @@ Branch `feat/10591-upper-body-capture`; parent epic [#10584](https://github.com/
 
 PR [#10730](https://github.com/D-sorganization/UpstreamDrift/pull/10730) merged as `22b7fd7a534ddfbc0b1db943e6443fdc9ac7efb3`. The TB-04 Driver and Iron receipts remain `DISQUALIFIED`; coverage and the unified ledger report them as rejected rather than qualified.
 
-## Tour Baselines TB-08: Bounded Fit Campaigns With Checkpoints (#10593)
+## Tour Baselines TB-08: Bounded Fit Campaigns With Checkpoints (#10593) [MERGED]
 
-Branch `feat/tb08-bounded-fit-campaigns-10593`; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584); program [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363). Lease holder: `antigravity` (session `f826c3ee-41ca-461c-87f2-1ab5695f3736`).
-
-- Implemented `src/shared/python/tour_baselines/campaign.py`:
-  - `CampaignJobSpec`: parameter bounds, basis/order, holdout window, seeds, wall-time limits, reproduction command, content hashes.
-  - `rank_candidates`: Pareto / feasibility ordering where feasible candidates always beat lower-error infeasible candidates, which are retained as rejected evidence.
-  - `FitCampaignService`: atomic immutable checkpoints, cryptographic hash checking on resume with `IncompatibleResumeError`, cancellation/timeout diagnostics without candidate promotion.
-  - `GeneralizationDisclaimer`: explicit notice that within-capture holdout is not population generalization.
-  - `compute_clock_scores`: exact full-rate clock scores matching stored metrics without resampling distortion.
-  - Pilot benchmark runner for measuring per-evaluation runtime and freezing campaign budgets.
-- Verified by unit test matrix in `tests/unit/tour_baselines/test_fit_campaign.py` (7 passed) and full tour baseline suite (64 passed).
+PR [#10786](https://github.com/D-sorganization/UpstreamDrift/pull/10786) merged; parent epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584). Implemented `src/shared/python/tour_baselines/campaign.py`: `CampaignJobSpec`, Pareto candidate ranking, `FitCampaignService` with immutable checkpoints, `IncompatibleResumeError`, full-rate clock scores, and generalization disclaimers.
 
 ## Required Before Continuing
 
 - Read `AGENTS.md`, `CLAUDE.md`, and `docs/development/DEVELOPMENT_LOG.md`.
-- Keep #10591 open until a merged PR demonstrably meets its acceptance criteria. A replay foundation or a rejected candidate is not qualification.
+- Epic #10584 and all child packages TB-00 through TB-12 are closed. Full-body models remain under governing programs (#10363, #10378, #10430, #10440).
 - Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
