@@ -1,3 +1,23 @@
+## Wire Tile Help System to Every Tile via F1 and Help Menu (#9413)
+
+Wires the help system across all tiles in the suite to provide a uniform help affordance:
+- **Registry Help Declarations (`src/config/models.yaml`)**:
+  - Declares `help:` pointing to `docs/help/<tile_id>.md` for every tile in the registry.
+- **Shared Tile Help Affordance (`src/shared/python/ui/tile_help.py`)**:
+  - Resolves tile IDs to help pages via `help_relpath_for` and `help_path_for`.
+  - Attaches standard `F1` shortcut on embedded widgets and Help menu with "This Tool's Help" on `QMainWindow` windows via `attach_tile_help`.
+  - Idempotent attachment prevents duplicate shortcuts upon re-docking or tab switching.
+  - Safe error handling guarantees that missing documentation or destroyed widgets never crash tool launch.
+- **Context Help Integration (`src/launchers/help_dialogs.py`)**:
+  - `ContextHelpDock` prioritizes registry-defined help pages over legacy rule-based heuristics.
+- **Launcher Integration (`src/launchers/embedded_host.py` & `src/launchers/launcher_simulation.py`)**:
+  - Embedded host tab and dock launching (`_build_tool_widget`) attaches tile help on creation.
+  - Simulation launcher (`_try_dockable_launch`) attaches tile help on dockable widgets.
+- **Manual & Topic Harmonization (`src/shared/python/gui_pkg/help_system.py`)**:
+  - Points `USER_MANUAL_PATH` to `docs/user_guide/upstream_drift_user_manual.md` with fallback to `user_manual.md`.
+- **Anti-Regression Testing (`tests/help/test_tile_help_wiring.py`)**:
+  - 19 unit tests validating help page presence, markdown loading, F1 shortcut installation, Help menu building, and fallback diagnostic behavior.
+
 ## Tour Baselines User Guide, Agent Runbook, and End-to-End Acceptance (TB-12, #10597)
 
 Completes the documentation and end-to-end acceptance deliverables for Epic #10584:

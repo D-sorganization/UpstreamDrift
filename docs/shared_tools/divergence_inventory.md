@@ -124,7 +124,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `tour_baselines` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
-| `ui` | 0 | 0 | 0 | 27 | 9 | 0 |
+| `ui` | 0 | 0 | 0 | 28 | 9 | 0 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **423** | **279** | **123** | **1509** | **709** | **702** |
+| **Total** | **423** | **279** | **123** | **1510** | **709** | **702** |
 
 ## Diverged Files by Package
 
