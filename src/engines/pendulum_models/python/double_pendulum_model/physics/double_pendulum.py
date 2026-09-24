@@ -345,6 +345,10 @@ class DoublePendulumDynamics:
         self._d1 = p.damping_shoulder
         self._d2 = p.damping_wrist
 
+    def refresh_cache(self) -> None:
+        """Refresh cached physical properties from parameters."""
+        self._cache_parameters()
+
     def mass_matrix(self, theta2: float) -> Matrix2x2:
         """Compute the 2x2 mass matrix for the given relative angle."""
         # Use cached values
