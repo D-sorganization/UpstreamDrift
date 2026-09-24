@@ -1,3 +1,14 @@
+## Resolve Help System Review Feedback: F1 Shortcut Overload & Qt Test Decoupling (#10868, #10869)
+
+Resolves post-merge review feedback on the tile help system:
+- **F1 Shortcut Overload Elimination (`src/launchers/help_menu.py`, `src/shared/python/ui/tile_help.py`, #10868)**:
+  - Removed duplicate `shortcut="F1"` from `&User Guide` action in `build_help_menu()`, keeping F1 dedicated to context-sensitive Tile Help across the application.
+  - Defensively clears any existing F1 shortcuts across menu bar and submenu actions in `_attach_help_menu()`, preventing Qt's ambiguous shortcut collision warning and ensuring reliable tile help invocation.
+- **Headless Test Suite Isolation (`tests/help/test_tile_help_wiring.py`, `tests/help/test_tile_help_qt.py`, #10869)**:
+  - Decoupled pure-Python registry, markdown loading, and documentation validation tests in `tests/help/test_tile_help_wiring.py` from Qt, allowing full execution in headless environments without PyQt6.
+  - Isolated Qt-dependent affordance tests into `tests/help/test_tile_help_qt.py`, gated with `pytest.importorskip` and registered in `_FAKE_PYQT6_GUI_TESTS`.
+  - Added unit regression tests verifying no ambiguous shortcut collision and defensive stripping of rogue F1 action shortcuts.
+
 ## Wire Tile Help System to Every Tile via F1 and Help Menu (#9413)
 
 Wires the help system across all tiles in the suite to provide a uniform help affordance:
@@ -6955,6 +6966,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-17 | n/a | Optimized small 1D array norm checks by replacing `np.linalg.norm(vel)` with `math.sqrt(vel.dot(vel))` in `src/shared/python/pendulum_simulator/cross_engine_perturbation.py` for ~2.5x speedup. (spec-exempt: micro-optimization) |
 | 2026-09-24 | #10860 | Derive pendulum inertia digest from cached integration parameters and refresh dynamics cache on length calibration (#10849, #10850, #10851). |
 | 2026-09-24 | #10838 | Optimized GripContactModel.check_slip_margin by replacing np.linalg.norm with float-promoted dot product magnitude for ~2x speedup and integer overflow safety (#10845, #10848). |
 | 2026-09-24 | #10844 | Optimize quaternion norm calculation using np.einsum in surrogate validation (#10844). |
