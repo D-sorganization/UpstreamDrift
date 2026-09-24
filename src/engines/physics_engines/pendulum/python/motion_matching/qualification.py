@@ -262,6 +262,37 @@ def compute_pendulum_qualification_bundle(
     return replay_head_rmse, metrics, statuses
 
 
+HORIZON_PLANAR = "G1"
+
+
+def compute_pendulum_inertia_hash(
+    dynamics: DoublePendulumDynamics | None,
+    l1: float,
+    l2: float,
+) -> str:
+    """Digest actual double pendulum segment masses, COM ratios, and rotational inertias."""
+    if dynamics is not None:
+        dyn_params = dynamics.parameters
+    else:
+        dyn_params = create_calibrated_double_pendulum_dynamics(l1, l2).parameters
+
+    u_seg = dyn_params.upper_segment
+    l_seg = dyn_params.lower_segment
+    inertia_payload = np.array(
+        [
+            u_seg.mass_kg,
+            u_seg.center_of_mass_ratio,
+            u_seg.inertia_about_com,
+            l_seg.shaft_mass_kg,
+            l_seg.clubhead_mass_kg,
+            l_seg.shaft_com_ratio,
+            l_seg.inertia_about_com,
+        ],
+        dtype=np.float64,
+    ).tobytes()
+    return hashlib.sha256(inertia_payload).hexdigest()
+
+
 def _assemble_baseline_package(
     target: ClubTarget,
     capture_kind: str,
@@ -270,7 +301,6 @@ def _assemble_baseline_package(
     dists: tuple[np.ndarray, np.ndarray, list[float]],
     lengths: tuple[float, float],
     maxiter: int,
-    horizon: str = "G1",
     dynamics: DoublePendulumDynamics | None = None,
 ) -> BaselinePackage:
     """Construct complete BaselinePackage with metadata, metrics, and statuses."""
@@ -303,27 +333,7 @@ def _assemble_baseline_package(
     )
     geom_bytes = np.asarray([l1, l2], dtype=np.float64).tobytes()
     fixed_geometry_hash = hashlib.sha256(geom_bytes).hexdigest()
-
-    if dynamics is not None:
-        dyn_params = dynamics.parameters
-    else:
-        dyn_params = create_calibrated_double_pendulum_dynamics(l1, l2).parameters
-
-    u_seg = dyn_params.upper_segment
-    l_seg = dyn_params.lower_segment
-    inertia_payload = np.array(
-        [
-            u_seg.mass_kg,
-            u_seg.center_of_mass_ratio,
-            u_seg.inertia_about_com,
-            l_seg.shaft_mass_kg,
-            l_seg.clubhead_mass_kg,
-            l_seg.shaft_com_ratio,
-            l_seg.inertia_about_com,
-        ],
-        dtype=np.float64,
-    ).tobytes()
-    fixed_inertia_hash = hashlib.sha256(inertia_payload).hexdigest()
+    fixed_inertia_hash = compute_pendulum_inertia_hash(dynamics, l1, l2)
 
     identity = BaselineIdentity(
         model_id=MODEL_ID_ANALYTICAL,
@@ -333,7 +343,7 @@ def _assemble_baseline_package(
         fit_mode=FitMode.TORQUE_DRIVEN,
         capture=capture_kind,
         capture_sha256=target.source.sha256,
-        horizon=horizon,
+        horizon=HORIZON_PLANAR,
         fixed_geometry_hash=fixed_geometry_hash,
         fixed_inertia_hash=fixed_inertia_hash,
         q0_hash=q0_hash,

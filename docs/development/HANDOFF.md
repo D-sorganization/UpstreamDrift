@@ -23,7 +23,7 @@
 - Files changed:
   - `src/tools/motion_matching/tour_baselines_presenter.py`: Removed generic model-only fallback in `_has_discovered_package()`.
   - `tests/unit/motion_matching/test_tour_baselines_presenter.py`: Added exact-capture roster flag assertions.
-  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Replaced link-length string hashing with array digest of actual upper/lower segment mass and inertia tensor parameters.
+  - `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`: Replaced link-length string hashing with array digest of actual upper/lower segment mass and inertia tensor parameters, and conformed `_assemble_baseline_package` to architecture budget limits.
   - `src/shared/python/tour_baselines/qualification.py`: Set `auto_migrate=False` default in `qualify()` to fail closed on missing evidence, and marked migrated packages `UNVERIFIED`.
   - `tests/unit/tour_baselines/test_qualification.py`: Added tests verifying fail-closed unmigrated rejection and inertia parameter sensitivity.
   - `docs/development/DEVELOPMENT_LOG.md`: Refreshed DL-#10596 with exact-capture verification.
