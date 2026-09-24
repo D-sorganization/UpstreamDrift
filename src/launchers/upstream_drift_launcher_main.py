@@ -17,9 +17,13 @@ from src.launchers.ui_components import (
     AsyncStartupWorker,
     SplashScreen,
 )
+from src.launchers.app_identity import (
+    APP_USER_MODEL_ID,
+    CANONICAL_ICON_CANDIDATES,
+)
 from src.shared.python.ui import resolve_icon_path, set_app_user_model_id
 
-_APP_USER_MODEL_ID = "D-sorganization.UpstreamDrift"
+_APP_USER_MODEL_ID = APP_USER_MODEL_ID
 
 
 def _install_global_ui_zoom(app: QApplication) -> None:
@@ -67,17 +71,16 @@ def _set_windows_app_user_model_id() -> None:
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "UpstreamDrift.Launcher.1"
+            _APP_USER_MODEL_ID
         )
-    except ImportError:
+    except (AttributeError, OSError, NameError, ImportError):
         logger.debug("ctypes not available; skipping Windows AppUserModelID assignment")
 
 
 def _apply_app_icon(app: QApplication) -> None:
     set_app_user_model_id(_APP_USER_MODEL_ID)
-    app_icon = resolve_icon_path(
-        [ASSETS_DIR / "golf_logo.ico", ASSETS_DIR / "golf_logo.png"]
-    )
+    candidates = [ASSETS_DIR / name for name in CANONICAL_ICON_CANDIDATES]
+    app_icon = resolve_icon_path(candidates)
     if app_icon is not None:
         app.setWindowIcon(QIcon(str(app_icon)))
 

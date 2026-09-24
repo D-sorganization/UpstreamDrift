@@ -1,18 +1,26 @@
-$WshShell = New-Object -comObject WScript.Shell
-$Desktop = [Environment]::GetFolderPath("Desktop")
-$ShortcutPath = Join-Path $Desktop "Golf Modeling Suite.lnk"
-$Shortcut = $WshShell.CreateShortcut($ShortcutPath)
-# Derive paths dynamically based on script location
-$repoRoot = $PSScriptRoot
-$pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\Python") "Python313"
-$pythonExePath = Join-Path $pythonBasePath "python.exe"
-$launcherPath = Join-Path $repoRoot "launch_golf_suite.py"
-$iconPath = Join-Path (Join-Path $repoRoot "launchers\assets") "golf_icon.ico"
+# UpstreamDrift Desktop and Start Menu Shortcut Creator
+# Delegates to canonical Python shortcut manager (src.launchers.desktop_shortcuts)
 
-$Shortcut.TargetPath = $pythonExePath
-$Shortcut.Arguments = $launcherPath
-$Shortcut.WorkingDirectory = $repoRoot
-$Shortcut.Description = "Launch the Golf Modeling Suite"
-$Shortcut.IconLocation = $iconPath
-$Shortcut.Save()
-Write-Host "Shortcut created at $ShortcutPath"
+$ErrorActionPreference = 'Stop'
+$repoRoot = Split-Path $PSScriptRoot -Parent
+
+$pythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source
+if (-not $pythonExe) {
+    $pythonExe = (Get-Command python3 -ErrorAction SilentlyContinue).Source
+}
+if (-not $pythonExe) {
+    $pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\Python") "Python313"
+    $pythonExe = Join-Path $pythonBasePath "python.exe"
+}
+
+if ($pythonExe -and (Test-Path $pythonExe)) {
+    Push-Location $repoRoot
+    try {
+        & $pythonExe -m src.launchers.desktop_shortcuts
+    } finally {
+        Pop-Location
+    }
+} else {
+    Write-Error "Python executable not found; could not install UpstreamDrift shortcuts."
+    exit 1
+}

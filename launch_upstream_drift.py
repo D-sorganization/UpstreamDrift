@@ -20,7 +20,7 @@ if sys.platform == "win32":
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "UpstreamDrift.Launcher.1"
+            "D-sorganization.UpstreamDrift"
         )
     except (AttributeError, OSError, NameError, ImportError):
         pass
@@ -51,9 +51,8 @@ def _ud_tools_distribution_installed() -> bool:
         from importlib import metadata
 
         metadata.distribution("ud-tools")
-    except metadata.PackageNotFoundError:
-        return False
-    except Exception:  # noqa: BLE001 - metadata backends may raise anything; treat as absent
+    except (metadata.PackageNotFoundError, Exception):  # noqa: BLE001
+        # metadata backends may raise arbitrary errors; treat as absent
         return False
     return True
 
@@ -112,17 +111,23 @@ def _bootstrap_import_paths(paths_to_add: list[str]) -> None:
 
 
 _requested_tools_path = os.environ.get("TOOLS_REPO_PATH")
+_default_vendor_tools = _REPO_ROOT / "vendor" / "ud-tools"
 _requested_tools_root = (
     Path(_requested_tools_path).expanduser().resolve()
     if _requested_tools_path
-    else None
+    else (
+        _default_vendor_tools.resolve()
+        if (_default_vendor_tools / "src").is_dir()
+        else None
+    )
 )
 _bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _requested_tools_root))
 from src.launchers.tools_repo_path import (  # noqa: E402
-    resolve_explicit_tools_root as _resolve_explicit_tools_root,
+    resolve_tools_repo as _resolve_tools_repo,
 )
 
-_TOOLS_ROOT = _resolve_explicit_tools_root(_requested_tools_path)
+_tools_resolution = _resolve_tools_repo(_REPO_ROOT, _requested_tools_path)
+_TOOLS_ROOT = _tools_resolution.path if _tools_resolution is not None else None
 _bootstrap_import_paths(_launcher_bootstrap_paths(_REPO_ROOT, _TOOLS_ROOT))
 
 
@@ -231,6 +236,11 @@ Examples:
         help="Use classic PyQt6 desktop launcher instead of web UI",
     )
     parser.add_argument(
+        "--install-shortcuts",
+        action="store_true",
+        help="Install UpstreamDrift desktop and Start Menu shortcuts",
+    )
+    parser.add_argument(
         "--api-only",
         action="store_true",
         help="Start API server only (no UI)",
@@ -281,9 +291,22 @@ def route_launch(args: argparse.Namespace) -> None:
 
     engine_arg = getattr(args, "engine", None)
     classic_arg = getattr(args, "classic", False)
+    install_shortcuts_arg = getattr(args, "install_shortcuts", False)
     api_only_arg = getattr(args, "api_only", False)
     port_arg = getattr(args, "port", 8000)
     no_browser_arg = getattr(args, "no_browser", False)
+
+    if install_shortcuts_arg:
+        from src.launchers.desktop_shortcuts import (
+            install_desktop_and_start_menu_shortcuts,
+        )
+
+        res = install_desktop_and_start_menu_shortcuts(repo_root=_REPO_ROOT)
+        if not res.success:
+            logger.error("Failed to install shortcuts.")
+            exit(1)
+        logger.info("Successfully installed desktop and Start Menu shortcuts.")
+        return
 
     if engine_arg:
         # Direct engine launch (legacy support)
