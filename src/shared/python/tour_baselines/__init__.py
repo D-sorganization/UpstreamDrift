@@ -130,7 +130,9 @@ from .qualification import (
     RefinementSensitivityRecord,
     RosterCellQualificationVerdict,
     RosterVerdict,
+    compute_package_digest,
     evaluate_full_roster_qualification,
+    migrate_legacy_package,
 )
 from .discovery import (
     BaselineDetail,
@@ -244,6 +246,7 @@ __all__ = [
     "compute_fit_metrics",
     "compute_landmark_signature",
     "compute_moving_hub_power",
+    "compute_package_digest",
     "detect_provider_mismatch",
     "detect_tour_events",
     "evaluate_baseline_qualification",
@@ -266,6 +269,7 @@ __all__ = [
     "list_golf_models",
     "load_canonical_tour_target",
     "map_initial_state_double_pendulum",
+    "migrate_legacy_package",
     "rank_candidates",
     "register_golf_model",
     "render_coverage_markdown",

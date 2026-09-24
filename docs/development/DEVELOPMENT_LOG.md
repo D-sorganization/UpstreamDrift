@@ -58,15 +58,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10595 · Tour Baselines Discovery, Portable Loading and Safe Model Presets (TB-10)
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10595 (TB-10, parent #10584, program #10363)
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10793
 - **Branch:** `feat/tb10-baseline-discovery-presets-10595`
 - **Paths:** `src/shared/python/tour_baselines/discovery.py`; `src/shared/python/tour_baselines/__init__.py`; `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/motion_matching/ledger.py`; `tests/unit/tour_baselines/test_discovery.py`; `tests/unit/tour_baselines/test_qualification.py`; `docs/shared_tools/divergence_inventory.v1.json`; `docs/shared_tools/divergence_inventory.md`
 - **Started:** 2026-09-23
-- **Last verified:** 2026-09-23 — 14 passed in `test_discovery.py`, 20 passed in `test_qualification.py`, 98 passed in full `tests/unit/tour_baselines/` suite. Ruff check and format clean. check_lod clean. Mypy clean.
+- **Last verified:** 2026-09-24 — 14 passed in `test_discovery.py`, 20 passed in `test_qualification.py`, 98 passed in full `tests/unit/tour_baselines/` suite. Merged via PR #10793.
 - **Summary:** Implemented `SafeModelPreset`, `IncompatiblePresetError`, `MissingDependencyError`, `BaselineNotFoundError`, `BaselineFilter`, `BaselineSummary`, `BaselineDetail`, `BaselineDiscoveryService`, `export_to_ledger_rows`, and headless CLI supporting catalog scanning across configurable search paths, multi-field filtering (model, club, horizon, qualification status), fail-closed preset compatibility checks (refusing topology mismatches and missing solver dependencies), fail-closed default preset selection (unverified packages cannot be auto-selected), safe session cloning preserving user workspace, portable export and clean-machine import with SHA-256 verification and dependency diagnostics, deterministic re-indexing, and result index ledger conversion. Also remediated bot review items #10786, #10787, #10789, #10790.
-- **Next step:** Open PR, run CI checks to 100% green, and land on main via squash auto-merge.
+- **Next step:** Landed on main. Address follow-up bot reviews #10794 and #10795.
+
+### DL-#10794 · Reconstruct Presets From Verified Arrays & Qualifiable Pendulum Baselines (#10794, #10795)
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #10794, #10795
+- **Branch:** `fix/review-feedback-10794-10795`
+- **Paths:** `src/shared/python/tour_baselines/discovery.py`; `src/shared/python/tour_baselines/qualification.py`; `src/shared/python/tour_baselines/__init__.py`; `src/engines/physics_engines/pendulum/python/motion_matching/qualification.py`; `tests/unit/tour_baselines/test_discovery.py`; `tests/unit/tour_baselines/test_qualification.py`
+- **Started:** 2026-09-23
+- **Last verified:** 2026-09-24 — 15 passed in `test_discovery.py`, 22 passed in `test_qualification.py`, 101 passed in full `tests/unit/tour_baselines/` suite. Ruff check and format clean. check_lod clean. Mypy clean.
+- **Summary:** Remediated bot review feedback on TB-10: reconstructed `SafeModelPreset` from verified archive array members and added `np.array_equal` check against manifest-embedded arrays to prevent manifest tampering (#10795); evaluated continuous torque into `tau`, recorded `time`, set `horizon="G1"`, and generated non-empty identity hashes in pendulum `_assemble_baseline_package`, and implemented `migrate_legacy_package` in `qualification.py` with auto-migration support in `IndependentBaselineQualifier.qualify()` (#10794).
+- **Next step:** Open PR, verify 100% green CI, and land via squash auto-merge.
 
 ### DL-#10774 · Deferred Validation Project Projection
 

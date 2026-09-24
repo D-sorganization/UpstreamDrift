@@ -8,6 +8,7 @@ PlanarDrivenPendulumProfile (TB-02).
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -269,6 +270,7 @@ def _assemble_baseline_package(
     dists: tuple[np.ndarray, np.ndarray, list[float]],
     lengths: tuple[float, float],
     maxiter: int,
+    horizon: str = "G1",
 ) -> BaselinePackage:
     """Construct complete BaselinePackage with metadata, metrics, and statuses."""
     q_rollout, v_rollout, q_replay, v_replay = trajectories
@@ -279,6 +281,31 @@ def _assemble_baseline_package(
         head_arr, grip_arr, result.solver_status, result.final_cost
     )
 
+    time_arr = np.asarray(target.time, dtype=np.float64)
+    duration = float(time_arr[-1] - time_arr[0]) if len(time_arr) > 1 else 1.0
+    profile = BernsteinTorqueProfile(
+        shoulder_controls=result.theta_optimal[:COEFFS_PER_JOINT],
+        wrist_controls=result.theta_optimal[COEFFS_PER_JOINT:],
+        duration_s=duration,
+    )
+    t_rel = time_arr - time_arr[0]
+    tau_arr = np.array([profile.evaluate(t) for t in t_rel], dtype=np.float64)
+
+    q0_hash = (
+        hashlib.sha256(q_rollout[0].tobytes()).hexdigest() if len(q_rollout) > 0 else ""
+    )
+    v0_hash = (
+        hashlib.sha256(v_rollout[0].tobytes()).hexdigest() if len(v_rollout) > 0 else ""
+    )
+    controls_hash = (
+        hashlib.sha256(tau_arr.tobytes()).hexdigest() if len(tau_arr) > 0 else ""
+    )
+    geom_bytes = np.asarray([l1, l2], dtype=np.float64).tobytes()
+    fixed_geometry_hash = hashlib.sha256(geom_bytes).hexdigest()
+    fixed_inertia_hash = hashlib.sha256(
+        f"planar_driven_pendulum_l1_{l1:.6f}_l2_{l2:.6f}".encode()
+    ).hexdigest()
+
     identity = BaselineIdentity(
         model_id=MODEL_ID_ANALYTICAL,
         topology=ModelTopology.PLANAR_DRIVEN_PENDULUM,
@@ -287,7 +314,12 @@ def _assemble_baseline_package(
         fit_mode=FitMode.TORQUE_DRIVEN,
         capture=capture_kind,
         capture_sha256=target.source.sha256,
-        horizon="G3",
+        horizon=horizon,
+        fixed_geometry_hash=fixed_geometry_hash,
+        fixed_inertia_hash=fixed_inertia_hash,
+        q0_hash=q0_hash,
+        v0_hash=v0_hash,
+        controls_hash=controls_hash,
         solver_name="scipy_least_squares",
         solver_config={
             "max_nfev": maxiter,
@@ -311,6 +343,8 @@ def _assemble_baseline_package(
         trajectories={
             "q": q_rollout,
             "v": v_rollout,
+            "tau": tau_arr,
+            "time": time_arr,
             "q_replay_4x": q_replay,
             "v_replay_4x": v_replay,
         },

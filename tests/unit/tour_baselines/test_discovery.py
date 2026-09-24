@@ -43,6 +43,7 @@ from src.shared.python.tour_baselines.discovery import (
     BaselineSummary,
     IncompatiblePresetError,
     MissingDependencyError,
+    PRESET_MANIFEST_KEY,
     SafeModelPreset,
     export_to_ledger_rows,
     main,
@@ -304,6 +305,42 @@ def test_tampered_archive_import_fails_closed(tmp_path: Path) -> None:
 
     with pytest.raises((ValueError, OSError)):
         service.import_preset_package(archive_path, target_dir=tmp_path / "corrupt")
+
+
+def test_tampered_manifest_with_valid_arrays_fails_closed(tmp_path: Path) -> None:
+    """TB-10 bot review #10795: Tampering with manifest array values while keeping array checksums intact fails closed."""
+    package = _make_test_package()
+    preset = SafeModelPreset.from_package(package)
+
+    archive_path = tmp_path / "tampered_manifest.npz"
+    service = BaselineDiscoveryService(search_roots=[tmp_path])
+    service.export_preset_package(preset, archive_path)
+
+    # Read archive, tamper with manifest q0 values while leaving data['q0'] and checksum intact
+    with np.load(archive_path, allow_pickle=False) as data:
+        manifest_str = str(data[PRESET_MANIFEST_KEY])
+        manifest = json.loads(manifest_str)
+        manifest["q0"] = [999.0, 999.0]
+        tampered_manifest_json = json.dumps(manifest)
+        q0 = np.array(data["q0"])
+        v0 = np.array(data["v0"])
+
+    np.savez(
+        archive_path,
+        **{
+            PRESET_MANIFEST_KEY: np.array(tampered_manifest_json),
+            "q0": q0,
+            "v0": v0,
+        },
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Manifest embedded array 'q0' does not match verified array member",
+    ):
+        service.import_preset_package(
+            archive_path, target_dir=tmp_path / "tampered_dir"
+        )
 
 
 def test_rebuilding_index_preserves_identities(populated_baseline_dir: Path) -> None:
