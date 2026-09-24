@@ -725,3 +725,35 @@ def test_pendulum_inertia_hash_reflects_dynamics_parameters() -> None:
     dyn4.parameters.upper_segment.center_of_mass_ratio = 0.50
     hash4 = compute_pendulum_inertia_hash(dyn4)
     assert hash4 != hash1
+
+
+@pytest.mark.unit
+def test_calibrated_pendulum_dynamics_caches_lengths_and_updates_on_mutation() -> None:
+    """TB-10 bot review #10849: calibrated lengths are cached and mutate integration values."""
+    from src.engines.physics_engines.pendulum.python.motion_matching.adapters import (
+        create_calibrated_double_pendulum_dynamics,
+    )
+    from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
+        compute_pendulum_inertia_hash,
+    )
+
+    # 1. Calibrated lengths must be reflected in cached _l1 immediately
+    dyn = create_calibrated_double_pendulum_dynamics(0.72, 1.15)
+    assert dyn._l1 == 0.72
+    m_calibrated = dyn.mass_matrix(0.0)
+
+    dyn_default = create_calibrated_double_pendulum_dynamics(0.65, 1.05)
+    m_default = dyn_default.mass_matrix(0.0)
+    assert m_calibrated != m_default
+
+    # 2. Mutating parameters and calling refresh_cache must update mass matrix and hash
+    hash_before = compute_pendulum_inertia_hash(dyn)
+    dyn.parameters.upper_segment.mass_kg += 1.0
+    dyn.refresh_cache()
+    m_mutated = dyn.mass_matrix(0.0)
+    assert m_mutated != m_calibrated
+    hash_after = compute_pendulum_inertia_hash(dyn)
+    assert hash_after != hash_before
+
+    # 3. Direct DoublePendulumParameters hashing matches DoublePendulumDynamics hashing
+    assert compute_pendulum_inertia_hash(dyn.parameters) == hash_after

@@ -103,13 +103,14 @@ drop is claimed (follow-up). Full GUI launch/render is not exercised (headless
 GUI rule).
 Next step: Confirm `quality-gate` green on the PR; squash auto-merge lands.
 
-## Tour Baselines: Exact-Capture Matching & Fail-Closed Qualification (#10829, #10830, #10831, #10799, #10800) [MERGED]
+## Tour Baselines: Exact-Capture Matching & Fail-Closed Qualification (#10829, #10830, #10831, #10799, #10800, #10844, #10849) [MERGED]
 
-PRs [#10837](https://github.com/D-sorganization/UpstreamDrift/pull/10837) and [#10841](https://github.com/D-sorganization/UpstreamDrift/pull/10841) merged to `main` on 2026-09-24.
+PRs [#10837](https://github.com/D-sorganization/UpstreamDrift/pull/10837), [#10841](https://github.com/D-sorganization/UpstreamDrift/pull/10841), [#10844](https://github.com/D-sorganization/UpstreamDrift/pull/10844), and [#10853](https://github.com/D-sorganization/UpstreamDrift/pull/10853) merged to `main` on 2026-09-24.
 
 - Exact capture match enforced across `TourBaselinesPresenter` and baseline package generation; unmatching session captures fail closed with `has_exact_capture_match=False` rather than silently falling back to unmatching session captures.
 - Fail-closed legacy evidence: eliminated auto-migration from `IndependentBaselineQualifier.qualify()`; explicit migration sets `UNVERIFIED` and `has_native_replay=False` until native evidence is regenerated.
-- Dynamics inertia digest: `compute_pendulum_inertia_hash` digests actual mass, center-of-mass ratio, and rotational inertia arrays from rollout `DoublePendulumDynamics` parameters rather than only link lengths or model labels.
+- Dynamics inertia digest & cache refresh: `compute_pendulum_inertia_hash` digests actual cached physical properties consumed during rollout integration; `create_calibrated_double_pendulum_dynamics` passes calibrated lengths to constructor before parameter caching; `refresh_cache()` synchronizes runtime parameter mutations (#10849).
+- Surrogate validation quaternion norm optimization: vectorized norm calculation via `np.einsum` (#10844).
 - Focused verification: `pytest tests/unit/tour_baselines/ tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
 
 ## Required Before Continuing

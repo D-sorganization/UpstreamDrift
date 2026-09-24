@@ -267,22 +267,21 @@ def compute_pendulum_inertia_hash(
     dynamics: DoublePendulumDynamics | DoublePendulumParameters,
 ) -> str:
     """Compute cryptographic digest of pendulum dynamics parameters (segment masses and rotational inertias)."""
-    params = (
-        dynamics
-        if isinstance(dynamics, DoublePendulumParameters)
-        else dynamics.parameters
-    )
-    upper = params.upper_segment
-    lower = params.lower_segment
+    if isinstance(dynamics, DoublePendulumDynamics):
+        dynamics.refresh_cache()
+        dyn = dynamics
+    else:
+        dyn = DoublePendulumDynamics(parameters=dynamics)
+
     inertia_array = np.array(
         [
-            float(upper.mass_kg),
-            float(upper.center_of_mass_ratio),
-            float(upper.inertia_about_com),
-            float(lower.shaft_mass_kg),
-            float(lower.clubhead_mass_kg),
-            float(lower.shaft_com_ratio),
-            float(lower.inertia_about_com),
+            float(dyn._m1),
+            float(dyn._m2),
+            float(dyn._l1),
+            float(dyn._lc1),
+            float(dyn._lc2),
+            float(dyn._i1),
+            float(dyn._i2),
         ],
         dtype=np.float64,
     )
