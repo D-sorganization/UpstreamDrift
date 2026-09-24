@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from time import perf_counter
@@ -125,7 +126,10 @@ def _audit(
             dict(zip(plant.names, vi, strict=True)),
         )
         forces.append(
-            sum(float(np.linalg.norm(s.normal_force_n)) for s in samples.values())
+            sum(
+                float(math.sqrt(np.vdot(s.normal_force_n, s.normal_force_n)))
+                for s in samples.values()
+            )
         )
         penetrations.extend(s.penetration_m for s in samples.values())
         translation, rotation = kin.closure_error(qi)
@@ -213,7 +217,8 @@ def _convergence(
     if failure is not None:
         return None
     refined_markers = np.stack([kin.marker_positions(qi) for qi in qr])
-    return float(np.max(np.linalg.norm(markers[:count] - refined_markers, axis=-1)))
+    diff = markers[:count] - refined_markers
+    return float(np.sqrt(np.max(np.einsum("...i,...i->...", diff, diff))))
 
 
 @precondition(lambda files: files.candidate.is_file(), "Source candidate required")
@@ -230,7 +235,8 @@ def generate_replay(
     plant = ReplayPlant(document, source["ground_height_m"], settings)
     kin = FullBodyMarkerKinematics(plant.adapter, attachments)
     reference = np.stack([kin.marker_positions(q) for q in arrays["q"]])
-    difference = np.linalg.norm(reference - arrays["markers_m"], axis=-1)
+    diff_ref = reference - arrays["markers_m"]
+    difference = np.sqrt(np.einsum("...i,...i->...", diff_ref, diff_ref))
     marker_parity = float(np.max(difference[arrays["valid"]]))
     if marker_parity > 1e-8:
         failures.append("Same-state marker parity exceeds 1e-8 m")
