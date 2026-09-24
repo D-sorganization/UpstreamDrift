@@ -11,7 +11,7 @@
  * See issue #1179
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Move,
   Ruler,
@@ -22,6 +22,7 @@ import {
   ArrowUpDown,
 } from 'lucide-react';
 import { apiFetch } from '@/api/fetch';
+import { usePolling } from '@/hooks/usePolling';
 
 /** Joint angle data from the measurement tools endpoint. */
 export interface JointAngleDisplay {
@@ -71,7 +72,6 @@ export function SimulationToolbar({
   const [measurements, setMeasurements] = useState<MeasurementResult[]>([]);
   const [showJoints, setShowJoints] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle tool mode change
   const handleModeChange = useCallback(
@@ -109,27 +109,12 @@ export function SimulationToolbar({
     }
   }, []);
 
-  // Poll for joint angles when showing and simulation is running
-  useEffect(() => {
-    // fetchMeasurements is async (awaits apiFetch before any setState); a
-    // microtask makes the deferral explicit for react-hooks/set-state-in-effect.
-    const refresh = () => void Promise.resolve().then(fetchMeasurements);
-    if (showJoints && isRunning) {
-      refresh();
-      pollRef.current = setInterval(refresh, pollInterval);
-    } else {
-      if (pollRef.current) {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
-    }
-    return () => {
-      if (pollRef.current) {
-        clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
-    };
-  }, [showJoints, isRunning, pollInterval, fetchMeasurements]);
+  // Poll only while joint angles are toggled on, the simulation runs and the
+  // tab is visible; skips overlapping ticks and clears interval on disable/unmount (#8941).
+  usePolling(fetchMeasurements, {
+    intervalMs: pollInterval > 0 ? pollInterval : 1000,
+    enabled: showJoints && isRunning && pollInterval > 0,
+  });
 
   return (
     <div className="space-y-2">
