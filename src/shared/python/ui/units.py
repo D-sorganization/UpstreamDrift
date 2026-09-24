@@ -79,15 +79,6 @@ def set_unit_preference(system: UnitSystem | str) -> None:
     except Exception:
         pass
 
-    # 2. Update QSettings if available
-    try:
-        from src.launchers.launcher_settings_store import launcher_settings
-
-        settings = launcher_settings()
-        settings.setValue("units/system", unit_sys.value)
-    except Exception:
-        pass
-
 
 # ---- Distance conversions ----------------------------------------------------
 
