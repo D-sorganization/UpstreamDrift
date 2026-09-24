@@ -41,16 +41,30 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.launchers.help_menu import build_help_menu
 from src.shared.python.contracts import require
 from src.shared.python.physics.swing_state_providers import (
     SwingStateConfig,
     SwingStateProvider,
     available_swing_state_providers,
 )
-from src.launchers.help_menu import build_help_menu
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
 from src.shared.python.ui.provenance_value import ProvenanceValueLabel
+from src.shared.python.ui.units import (
+    UnitSystem,
+    distance_suffix,
+    format_distance,
+    format_speed,
+    from_display_mass,
+    from_display_speed,
+    get_unit_preference,
+    mass_suffix,
+    speed_suffix,
+    to_display_distance,
+    to_display_mass,
+    to_display_speed,
+)
 from src.shared.python.ux.provenance import ProvenanceRecord, ProvenanceValue
 from src.tools.async_action import WorkerContext, add_primary_async_run_control
 
@@ -86,13 +100,50 @@ def _populate_engine_combo(
 class SwingFlightWidget(QWidget):
     """Central widget for the swing-to-flight pipeline dashboard."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        *,
+        unit_system: UnitSystem | None = None,
+    ) -> None:
         super().__init__(parent)
+        self._unit_system = (
+            unit_system if unit_system is not None else get_unit_preference()
+        )
         self._result: Any = None
         self._run_counter: int = 0
         self._carry_label: ProvenanceValueLabel | None = None
         self._launch_speed_label: ProvenanceValueLabel | None = None
         self._build_ui()
+
+    @property
+    def unit_system(self) -> UnitSystem:
+        """The active display unit system."""
+        return self._unit_system
+
+    def set_unit_system(self, system: UnitSystem) -> None:
+        """Switch display unit system dynamically and update spinbox suffixes/values."""
+        if system == self._unit_system:
+            return
+        old_speed_ms = from_display_speed(self._speed_spin.value(), self._unit_system)
+        old_mass_kg = from_display_mass(self._mass_spin.value(), self._unit_system)
+        self._unit_system = system
+
+        self._speed_spin.setSuffix(speed_suffix(system))
+        self._mass_spin.setSuffix(mass_suffix(system))
+        if system == UnitSystem.METRIC:
+            self._speed_spin.setRange(20.0, 60.0)
+            self._mass_spin.setRange(0.100, 0.400)
+            self._speed_spin.setValue(to_display_speed(old_speed_ms, system))
+            self._mass_spin.setValue(to_display_mass(old_mass_kg, system))
+        else:
+            self._speed_spin.setRange(45.0, 140.0)
+            self._mass_spin.setRange(0.220, 0.880)
+            self._speed_spin.setValue(to_display_speed(old_speed_ms, system))
+            self._mass_spin.setValue(to_display_mass(old_mass_kg, system))
+
+        if self._result is not None:
+            self._render_pipeline_result(self._result)
 
     def _build_ui(self) -> None:
         install_two_pane_splitter(
@@ -128,9 +179,13 @@ class SwingFlightWidget(QWidget):
         swing_form = QFormLayout(swing_group)
 
         self._speed_spin = QDoubleSpinBox()
-        self._speed_spin.setRange(20.0, 60.0)
-        self._speed_spin.setValue(45.0)
-        self._speed_spin.setSuffix(" m/s")
+        if self._unit_system == UnitSystem.METRIC:
+            self._speed_spin.setRange(20.0, 60.0)
+            self._speed_spin.setValue(45.0)
+        else:
+            self._speed_spin.setRange(45.0, 140.0)
+            self._speed_spin.setValue(to_display_speed(45.0, self._unit_system))
+        self._speed_spin.setSuffix(speed_suffix(self._unit_system))
         swing_form.addRow("Clubhead Speed:", self._speed_spin)
 
         self._loft_spin = QDoubleSpinBox()
@@ -140,10 +195,14 @@ class SwingFlightWidget(QWidget):
         swing_form.addRow("Loft Angle:", self._loft_spin)
 
         self._mass_spin = QDoubleSpinBox()
-        self._mass_spin.setRange(0.100, 0.400)
-        self._mass_spin.setValue(0.200)
+        if self._unit_system == UnitSystem.METRIC:
+            self._mass_spin.setRange(0.100, 0.400)
+            self._mass_spin.setValue(0.200)
+        else:
+            self._mass_spin.setRange(0.220, 0.880)
+            self._mass_spin.setValue(to_display_mass(0.200, self._unit_system))
         self._mass_spin.setDecimals(3)
-        self._mass_spin.setSuffix(" kg")
+        self._mass_spin.setSuffix(mass_suffix(self._unit_system))
         swing_form.addRow("Clubhead Mass:", self._mass_spin)
 
         return swing_group
@@ -238,7 +297,7 @@ class SwingFlightWidget(QWidget):
         return right
 
     def _apply_preset(self, speed: float, loft: float) -> None:
-        self._speed_spin.setValue(speed)
+        self._speed_spin.setValue(to_display_speed(speed, self._unit_system))
         self._loft_spin.setValue(loft)
 
     def _read_provider_and_config(self) -> tuple[SwingStateProvider, SwingStateConfig]:
@@ -254,9 +313,13 @@ class SwingFlightWidget(QWidget):
         """
         provider = self._providers[self._engine_combo.currentText()]
         config = SwingStateConfig(
-            clubhead_speed_ms=self._speed_spin.value(),
+            clubhead_speed_ms=from_display_speed(
+                self._speed_spin.value(), self._unit_system
+            ),
             loft_deg=self._loft_spin.value(),
-            clubhead_mass_kg=self._mass_spin.value(),
+            clubhead_mass_kg=from_display_mass(
+                self._mass_spin.value(), self._unit_system
+            ),
         )
         return provider, config
 
@@ -284,20 +347,31 @@ class SwingFlightWidget(QWidget):
         self._result = result
         self._update_provenance_labels(result)
 
+        ball_speed_str = format_speed(
+            math.hypot(*result.impact_state.ball_velocity), self._unit_system
+        )
+        launch_speed_str = format_speed(
+            result.launch_conditions.velocity, self._unit_system
+        )
+        carry_str = format_distance(result.carry_m, self._unit_system, unit="yd")
+        max_height_str = format_distance(
+            result.max_height_m, self._unit_system, unit="yd"
+        )
+
         self._results_text.setPlainText(
             f"Pipeline Complete\n"
             f"{'=' * 40}\n"
             f"Engine: {result.swing_state.engine_name}\n\n"
             f"Impact Results:\n"
-            f"  Ball speed: {math.hypot(*result.impact_state.ball_velocity):.1f} m/s\n"  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small slices
+            f"  Ball speed: {ball_speed_str}\n"
             f"  Ball spin:  {math.hypot(*result.impact_state.ball_angular_velocity):.0f} rad/s\n\n"  # ⚡ Bolt: math.hypot is ~7x faster than np.linalg.norm for small slices
             f"Launch Conditions:\n"
-            f"  Speed:      {result.launch_conditions.velocity:.1f} m/s\n"
+            f"  Speed:      {launch_speed_str}\n"
             f"  Angle:      {result.launch_conditions.launch_angle:.1f}°\n"
             f"  Spin Rate:  {result.launch_conditions.spin_rate:.0f} rad/s\n\n"
             f"Flight Results:\n"
-            f"  Carry:      {result.carry_m:.1f} m ({result.carry_m * 1.09361:.1f} yd)\n"
-            f"  Max Height: {result.max_height_m:.1f} m\n"
+            f"  Carry:      {carry_str}\n"
+            f"  Max Height: {max_height_str}\n"
             f"  Flight Time:{result.flight_time_s:.2f} s\n"
             f"  Landing:    {result.landing_angle_deg:.1f}°\n\n"
             f"Trajectory: {len(result.trajectory)} points\n"
@@ -416,10 +490,14 @@ class SwingFlightWidget(QWidget):
             engine=engine_name,
             run_id=run_id,
         )
+        disp_carry = to_display_distance(
+            float(result.carry_m), self._unit_system, unit="yd"
+        )
+        carry_unit = distance_suffix(self._unit_system, unit="yd").strip()
         carry_value = ProvenanceValue(
-            value=round(float(result.carry_m), 1),
+            value=round(disp_carry, 1),
             record=carry_record,
-            display_units="m",
+            display_units=carry_unit,
             label="Carry Distance",
         )
         self._carry_label = self._replace_row_widget(
@@ -440,10 +518,14 @@ class SwingFlightWidget(QWidget):
             engine=engine_name,
             run_id=run_id,
         )
+        disp_speed = to_display_speed(
+            float(result.launch_conditions.velocity), self._unit_system
+        )
+        speed_unit = speed_suffix(self._unit_system).strip()
         speed_value = ProvenanceValue(
-            value=round(float(result.launch_conditions.velocity), 1),
+            value=round(disp_speed, 1),
             record=speed_record,
-            display_units="m/s",
+            display_units=speed_unit,
             label="Launch Speed",
         )
         self._launch_speed_label = self._replace_row_widget(

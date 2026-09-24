@@ -40,6 +40,18 @@ from src.shared.python.golf_viz import (
 from src.launchers.help_menu import build_help_menu
 from src.shared.python.theme.tool_stylesheet import primary_button_style
 from src.shared.python.ui import HoverCopyTextBrowser  # type: ignore[attr-defined]
+from src.shared.python.ui.units import (
+    UnitSystem,
+    distance_suffix,
+    format_distance,
+    format_speed,
+    from_display_distance,
+    from_display_speed,
+    get_unit_preference,
+    speed_suffix,
+    to_display_distance,
+    to_display_speed,
+)
 from src.tools.putting_green_gui._scene_builder import (
     PuttConfig,
     PuttScene,
@@ -76,8 +88,16 @@ QPushButton:hover { background-color: #2c3f52; }
 class PuttingGreenWidget(QWidget):
     """Central widget for the putting green simulator dashboard."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        *,
+        unit_system: UnitSystem | None = None,
+    ) -> None:
         super().__init__(parent)
+        self._unit_system = (
+            unit_system if unit_system is not None else get_unit_preference()
+        )
         self._scene: PuttScene | None = None
         self._anim_timer = QTimer(self)
         self._anim_timer.setInterval(30)
@@ -93,6 +113,45 @@ class PuttingGreenWidget(QWidget):
         self._aim_item: Any = None
         self._start_item: Any = None
         self._build_ui()
+
+    @property
+    def unit_system(self) -> UnitSystem:
+        """The active display unit system."""
+        return self._unit_system
+
+    def set_unit_system(self, system: UnitSystem) -> None:
+        """Switch display unit system dynamically and update spinbox suffixes/values."""
+        if system == self._unit_system:
+            return
+        old_speed_ms = from_display_speed(self._speed_spin.value(), self._unit_system)
+        old_dist_m = from_display_distance(
+            self._distance_spin.value(), self._unit_system, unit="ft"
+        )
+        self._unit_system = system
+
+        self._speed_spin.setSuffix(speed_suffix(system))
+        self._distance_spin.setSuffix(distance_suffix(system, unit="ft"))
+        if system == UnitSystem.METRIC:
+            self._speed_spin.setRange(0.5, 8.0)
+            self._speed_spin.setDecimals(1)
+            self._distance_spin.setRange(1.0 * _FT_TO_M, 30.0 * _FT_TO_M)
+            self._distance_spin.setDecimals(2)
+            self._speed_spin.setValue(to_display_speed(old_speed_ms, system))
+            self._distance_spin.setValue(old_dist_m)
+        else:
+            self._speed_spin.setRange(1.0, 18.0)
+            self._speed_spin.setDecimals(1)
+            self._distance_spin.setRange(1.0, 30.0)
+            self._distance_spin.setDecimals(1)
+            self._speed_spin.setValue(to_display_speed(old_speed_ms, system))
+            self._distance_spin.setValue(
+                to_display_distance(old_dist_m, system, unit="ft")
+            )
+
+        if self._scene is not None:
+            self._results_text.setPlainText(
+                _format_metrics(self._scene, self._unit_system)
+            )
 
     # ------------------------------------------------------------------
     # UI construction
@@ -118,13 +177,19 @@ class PuttingGreenWidget(QWidget):
 
         putt_group = QGroupBox("Putt Configuration")
         putt_form = QFormLayout(putt_group)
-        self._speed_spin = self._make_spin(0.5, 8.0, 2.5, " m/s")
+        if self._unit_system == UnitSystem.METRIC:
+            self._speed_spin = self._make_spin(0.5, 8.0, 2.5, " m/s")
+            self._distance_spin = self._make_spin(
+                1.0 * _FT_TO_M, 30.0 * _FT_TO_M, 10.0 * _FT_TO_M, " m", decimals=2
+            )
+        else:
+            self._speed_spin = self._make_spin(
+                1.0, 18.0, to_display_speed(2.5, UnitSystem.IMPERIAL), " mph"
+            )
+            self._distance_spin = self._make_spin(1.0, 30.0, 10.0, " ft", decimals=1)
         putt_form.addRow("Putter Speed:", self._speed_spin)
         self._aim_spin = self._make_spin(-45.0, 45.0, 0.0, "°")
         putt_form.addRow("Aim Angle:", self._aim_spin)
-        self._distance_spin = self._make_spin(
-            1.0 * _FT_TO_M, 30.0 * _FT_TO_M, 10.0 * _FT_TO_M, " m", decimals=2
-        )
         putt_form.addRow("Cup Distance:", self._distance_spin)
         left_layout.addWidget(putt_group)
 
@@ -250,14 +315,20 @@ class PuttingGreenWidget(QWidget):
     # ------------------------------------------------------------------
 
     def _apply_preset(self, speed: float, dist: float) -> None:
-        self._speed_spin.setValue(speed)
-        self._distance_spin.setValue(dist)
+        self._speed_spin.setValue(to_display_speed(speed, self._unit_system))
+        self._distance_spin.setValue(
+            to_display_distance(dist, self._unit_system, unit="ft")
+        )
 
     def _current_config(self) -> PuttConfig:
         return PuttConfig(
-            putter_speed_ms=self._speed_spin.value(),
+            putter_speed_ms=from_display_speed(
+                self._speed_spin.value(), self._unit_system
+            ),
             aim_deg=self._aim_spin.value(),
-            cup_distance_m=self._distance_spin.value(),
+            cup_distance_m=from_display_distance(
+                self._distance_spin.value(), self._unit_system, unit="ft"
+            ),
             stimp=self._stimp_spin.value(),
             slope_deg=self._slope_spin.value(),
         )
@@ -273,7 +344,7 @@ class PuttingGreenWidget(QWidget):
             return
 
         self._scene = scene
-        self._results_text.setPlainText(_format_metrics(scene))
+        self._results_text.setPlainText(_format_metrics(scene, self._unit_system))
         self._render_scene(scene)
 
     def _render_scene(self, scene: PuttScene) -> None:
@@ -332,29 +403,59 @@ class PuttingGreenWidget(QWidget):
         logger.debug("PuttingGreenWidget cleanup")
 
 
-def _format_metrics(scene: PuttScene) -> str:
+def _format_metrics(
+    scene: PuttScene, unit_system: UnitSystem = UnitSystem.METRIC
+) -> str:
     """Render a human-readable metrics panel for a finished putt."""
     outcome = "HOLED" if scene.holed else "Missed"
     dist_cm = scene.final_distance_to_cup_m * 100.0
-    miss_line = (
-        "Result:        HOLED"
-        if scene.holed
-        else f"Result:        Missed by {dist_cm:.1f} cm"
-    )
-    # Primary unit is always SI; the secondary parenthetical is always
-    # imperial, so no two lines in this pane mix systems inconsistently
-    # (issue #8886).
+
+    if unit_system == UnitSystem.METRIC:
+        miss_line = (
+            "Result:        HOLED"
+            if scene.holed
+            else f"Result:        Missed by {dist_cm:.1f} cm"
+        )
+        roll_line = (
+            f"Total roll:    {scene.total_roll_m:.2f} m "
+            f"({scene.total_roll_m * _M_TO_FT:.1f} ft)\n"
+        )
+        break_line = (
+            f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
+            f"({scene.peak_break_m * _M_TO_FT * 12.0:.2f} in)\n"
+        )
+        speed_line = (
+            f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
+            f"({scene.launch_speed_ms * _MS_TO_MPH:.1f} mph)\n"
+        )
+    else:
+        dist_in = dist_cm / 2.54
+        miss_line = (
+            "Result:        HOLED"
+            if scene.holed
+            else f"Result:        Missed by {dist_in:.1f} in ({dist_cm:.1f} cm)"
+        )
+        roll_line = (
+            f"Total roll:    {scene.total_roll_m * _M_TO_FT:.1f} ft "
+            f"({scene.total_roll_m:.2f} m)\n"
+        )
+        break_line = (
+            f"Peak break:    {scene.peak_break_m * _M_TO_FT * 12.0:.2f} in "
+            f"({scene.peak_break_m * _M_TO_CM:.1f} cm)\n"
+        )
+        speed_line = (
+            f"Launch speed:  {scene.launch_speed_ms * _MS_TO_MPH:.1f} mph "
+            f"({scene.launch_speed_ms:.2f} m/s)\n"
+        )
+
     return (
         f"Putting Simulation - {outcome}\n"
         f"{'=' * 44}\n"
         f"{miss_line}\n"
-        f"Total roll:    {scene.total_roll_m:.2f} m "
-        f"({scene.total_roll_m * _M_TO_FT:.1f} ft)\n"
+        f"{roll_line}"
         f"Roll time:     {scene.duration_s:.2f} s\n"
-        f"Peak break:    {scene.peak_break_m * _M_TO_CM:.1f} cm "
-        f"({scene.peak_break_m * _M_TO_FT * 12.0:.2f} in)\n"
-        f"Launch speed:  {scene.launch_speed_ms:.2f} m/s "
-        f"({scene.launch_speed_ms * _MS_TO_MPH:.1f} mph)\n"
+        f"{break_line}"
+        f"{speed_line}"
         f"Roll model:    {scene.roll_model}\n"
         f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
     )

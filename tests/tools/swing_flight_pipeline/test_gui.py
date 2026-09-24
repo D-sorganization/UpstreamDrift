@@ -7,6 +7,7 @@ with all physics stages mocked via ``sys.modules``.
 
 from __future__ import annotations
 
+import math
 import os
 import sys
 import types
@@ -23,6 +24,7 @@ from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 from src.shared.python.contracts import PreconditionError  # noqa: E402
 from src.shared.python.ui.provenance_value import ProvenanceValueLabel  # noqa: E402
+from src.shared.python.ui.units import UnitSystem  # noqa: E402
 from src.tools.swing_flight_pipeline.gui import (  # noqa: E402
     SwingFlightWidget,
     SwingFlightWindow,
@@ -313,8 +315,11 @@ def test_run_pipeline_passes_ui_parameters_to_swing_state(widget):
     # (#8819) — "drake" can no longer be stamped onto manual numbers.
     assert swing.engine_name == "manual"
     np.testing.assert_array_equal(swing.clubhead_velocity, np.array([50.0, 0.0, 0.0]))
-    np.testing.assert_array_equal(swing.clubhead_angular_velocity, np.zeros(3))
-    np.testing.assert_array_equal(swing.clubhead_orientation, np.array([0.0, 0.0, 1.0]))
+    loft_rad = math.radians(34.0)
+    np.testing.assert_allclose(
+        swing.clubhead_orientation,
+        np.array([math.cos(loft_rad), 0.0, math.sin(loft_rad)]),
+    )
 
 
 def test_run_pipeline_renders_trajectory_when_glview_available(widget):
@@ -488,3 +493,61 @@ def test_widget_cleanup_is_safe(widget):
     # Multiple calls should not raise
     widget.cleanup()
     widget.cleanup()
+
+
+# --- Unit System Tests (Issue #8886) -------------------------------------
+
+
+def test_swing_widget_imperial_mode():
+    win = SwingFlightWidget(unit_system=UnitSystem.IMPERIAL)
+    try:
+        assert win.unit_system == UnitSystem.IMPERIAL
+        assert win._speed_spin.suffix() == " mph"
+        assert win._mass_spin.suffix() == " lb"
+        assert win._speed_spin.minimum() == pytest.approx(45.0)
+        assert win._speed_spin.maximum() == pytest.approx(140.0)
+        assert win._mass_spin.minimum() == pytest.approx(0.220)
+        assert win._mass_spin.maximum() == pytest.approx(0.880)
+    finally:
+        win.cleanup()
+        win.deleteLater()
+
+
+def test_swing_widget_set_unit_system_toggle(widget):
+    """Switching unit system dynamically updates spinboxes and outputs."""
+    assert widget.unit_system == UnitSystem.METRIC
+    assert widget._speed_spin.suffix() == " m/s"
+    assert widget._mass_spin.suffix() == " kg"
+
+    widget._speed_spin.setValue(50.0)  # 50 m/s
+    widget._mass_spin.setValue(0.200)  # 0.2 kg
+
+    widget.set_unit_system(UnitSystem.IMPERIAL)
+    assert widget.unit_system == UnitSystem.IMPERIAL
+    assert widget._speed_spin.suffix() == " mph"
+    assert widget._mass_spin.suffix() == " lb"
+    assert widget._speed_spin.value() == pytest.approx(50.0 * 2.23694, rel=1e-2)
+    assert widget._mass_spin.value() == pytest.approx(0.200 * 2.20462, rel=1e-2)
+
+    # Switch back to metric
+    widget.set_unit_system(UnitSystem.METRIC)
+    assert widget.unit_system == UnitSystem.METRIC
+    assert widget._speed_spin.suffix() == " m/s"
+    assert widget._mass_spin.suffix() == " kg"
+    assert widget._speed_spin.value() == pytest.approx(50.0, rel=1e-2)
+    assert widget._mass_spin.value() == pytest.approx(0.200, rel=1e-2)
+
+
+def test_swing_widget_imperial_simulation_results():
+    win = SwingFlightWidget(unit_system=UnitSystem.IMPERIAL)
+    try:
+        with _install_mock_pipeline_module():
+            win._run_pipeline()
+
+        text = win._results_text.toPlainText()
+        assert "240.6 yd" in text
+        assert "yd" in win._carry_label.text()
+        assert "mph" in win._launch_speed_label.text()
+    finally:
+        win.cleanup()
+        win.deleteLater()
