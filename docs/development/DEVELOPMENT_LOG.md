@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#8866 · Remove Dead skeleton_extractors Providers From starting_pose_matcher
+
+- **State:** in_review
+- **Owner:** issue-remediator
+- **Issue:** #8866
+- **PR:** (pending open)
+- **Branch:** `staff/issue-remediator-task-2852a7`
+- **Paths:** `src/tools/starting_pose_matcher/skeleton_extractors/` (deleted); `tests/unit/tools/starting_pose_matcher/test_{drake,mujoco,opensim,pinocchio}_provider.py`, `test_observed_input_providers.py`, `test_provider_error_paths.py` (deleted); `tests/tools/starting_pose_matcher/test_{observed_extractors,physics_extractors_with_stubs}.py` (deleted); `scripts/config/full_src_mypy_baseline.json`, `scripts/config/suite_marker_baseline.json`, `scripts/ci/lod_baseline.txt`, `docs/development/opensim_tour_matching/EPIC_GOLF_MODEL.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — ruff check passes, ruff format no new diffs, file-size budget passes; 9 mypy baseline stubs, 89 suite-marker baseline nodes, and 3 lod entries removed for deleted files
+- **Summary:** Deleted 6 per-engine skeleton extractors in `skeleton_extractors/` (~1,614 lines) that have no callers outside tests, plus their 8 test modules; pruned stale baseline rows. Previous PR #10041 was approved but closed as obsolete against pre-refactor state; this re-targets the same deletion against current main.
+- **Next step:** CI green → merge.
+
 ### DL-#10783 · Enforce the Deferred Validation Catalog
 
 - **State:** in_review

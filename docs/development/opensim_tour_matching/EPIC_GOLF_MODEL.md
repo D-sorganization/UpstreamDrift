@@ -135,8 +135,9 @@ current main/native branch difference before selecting an integration base.
 - `src/shared/python/motion_matching/club_models.py` (`ClubSpec`) and
   `src/engines/physics_engines/opensim/python/opensim_golf/fk.py`.
 - Existing `motion_matching/provider.py`, `opensim_physics_engine.py`,
-  `src/tools/starting_pose_matcher/skeleton_extractors/opensim.py` and the
-  shared pose-interchange boundaries; inspect their public APIs first.
+  and the shared pose-interchange boundaries; inspect their public APIs first.
+  (`skeleton_extractors/opensim.py` was removed — issue #8866 — as it had no
+  callers; future OpenSim pose extraction should use `pose_interchange`.)
 - `muscle_analysis.py`, `POST_MVP_MUSCLES.md`, tests/opensim/test_muscle_cmc.py
   and #4296. Historical fixture/license notes require re-verification.
 
