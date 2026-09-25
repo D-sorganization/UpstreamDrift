@@ -941,3 +941,54 @@ branch, plus one re-run if `main` moved) instead of at least N cycles under a
 `strict` protection, and the runner pool is freed for other repositories.
 
 <!-- END FLEET-MANAGED: pr-queue-consolidation -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: agent-tiers -->
+
+## 🎚️ Agent Tiers: Labels Decide Who Does the Work
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/agent-tiers.md.
+
+Owner decision (Dieter Olson, 2026-09-25,
+[Repository_Management#1751](https://github.com/D-sorganization/Repository_Management/issues/1751)):
+the frontier agents handle complex and design work, and well-specified work
+is delegated to cheaper CLI agents. The issue's labels say which is which.
+
+| Label         | Who may take it                                                                                             | Typical work                                                                                        |
+| ------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `tier:strong` | **Reserved.** Frontier agents only: Claude Opus 5.5, Codex at high effort, or an interactive owner session. | Design and ADRs, architecture, security, cross-repo changes, contested decisions, anything unclear. |
+| `tier:cli`    | Any CLI agent. The preferred executors are agy with Gemini 3.8 Flash, then Claude Sonnet 5.                 | Well-specified implementation with acceptance criteria: tests, small features, UI passes, renames.  |
+| `tier:ollama` | Local Ollama models, or any agent.                                                                          | Mechanical work: formatting, lint fixes, labels, typos.                                             |
+
+### Rules
+
+1. **An explicit `tier:*` label always wins.** Without one, the tier comes from
+   the issue taxonomy through `conductor.tiers.derive_tier`. That function is the
+   single implementation used by the conductor, the dispatcher and the labeler:
+   - Any of `complexity:complex|deep|research`, `judgement:design|contested`,
+     `panel-review`, `type:epic` or `security` makes the issue strong.
+   - Otherwise, `complexity:trivial|simple|routine` makes it cli.
+   - **Anything unclassified is strong** (fail-safe).
+2. **A CLI-tier agent never claims a `tier:strong` issue.** If a CLI-tier issue
+   turns out to need a design decision, open a draft PR with a `Blocked:`
+   section and stop. Do not guess. A frontier agent may re-label the issue.
+3. **Delegated work comes back as a draft PR.** A frontier agent or the owner
+   reviews it before it is marked ready and merged.
+4. **Dispatch through the tool, not by hand.** Run
+   `python -m scripts.dispatch_cli_agent <OWNER/REPO> <N> --repo-dir <clone>`
+   from Repository_Management; add `--cli claude` for Sonnet 5. It refuses
+   anything that is not CLI tier, `claim:local`, `do-not-automate`, leased by
+   another agent, or already covered by an open PR. Then it creates the worktree,
+   posts the lease, and sends the standard prompt
+   (`docs/agents/prompts/cli_tier_task.md`: TDD, DbC, LoD, DRY, repo rules,
+   draft PR).
+5. **Label new issues when you file them.** Put the taxonomy labels on the issue,
+   or a `tier:*` label directly. To back-fill a repository, run
+   `python -m scripts.apply_tier_labels <OWNER/REPO> --apply` (one repository per run).
+
+The full guide is in
+[`docs/agents/AGENT_TIER_ROUTING.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agents/AGENT_TIER_ROUTING.md).
+
+<!-- END FLEET-MANAGED: agent-tiers -->
