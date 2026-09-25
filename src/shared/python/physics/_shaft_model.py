@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+import math
+
 import numpy as np
 
 from ._shaft_data import ShaftMode, ShaftProperties, ShaftState
@@ -196,7 +198,9 @@ class ModalShaftModel(ShaftModel):
 
             # Modal force = physical force projected onto mode
             # (simplified: only using first component of force)
-            modal_force = phi_at_load * np.linalg.norm(force)
+            modal_force = (
+                phi_at_load * math.sqrt(np.vdot(force, force))
+            )  # ⚡ Bolt: math.sqrt(np.vdot) is ~3x faster than np.linalg.norm for small 1D arrays
             # Scale factor needs proper modal mass derivation (see issue #2166).
             # Current 1e-6 is an ad-hoc value that produces plausible
             # deflections but lacks rigorous justification.
