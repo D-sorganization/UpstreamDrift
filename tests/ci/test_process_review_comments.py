@@ -11,6 +11,7 @@ import pytest
 
 from scripts.ci.process_review_comments import (
     CommentToIssueProcessor,
+    ReviewCommentContext,
     format_issue_body,
     format_issue_title,
     is_actionable_comment,
@@ -132,7 +133,7 @@ def test_format_issue_title_truncation() -> None:
 
 
 def test_format_issue_body_includes_metadata_and_marker() -> None:
-    body = format_issue_body(
+    ctx = ReviewCommentContext(
         pr_num="10931",
         pr_title="Harden review comments workflow",
         pr_author="dieterolson",
@@ -145,6 +146,7 @@ def test_format_issue_body_includes_metadata_and_marker() -> None:
         created_at="2026-09-25T05:00:00Z",
         feedback_body="TODO: please ensure thread lock is released in finally block",
     )
+    body = format_issue_body(ctx)
     assert "<!-- comment-to-issue: comment_id=987654321 pr=10931 -->" in body
     assert "**Source PR:** #10931 - Harden review comments workflow" in body
     assert "**File:** `src/engine.py` (line 150)" in body

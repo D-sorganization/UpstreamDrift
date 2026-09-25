@@ -108,41 +108,46 @@ def format_issue_title(file_path: str, line: int) -> str:
     return title[:97] + "..." if len(title) > 100 else title
 
 
-def format_issue_body(
-    pr_num: str,
-    pr_title: str,
-    pr_author: str,
-    pr_branch: str,
-    author: str,
-    file_path: str,
-    line: int,
-    comment_id: str,
-    html_url: str,
-    created_at: str,
-    feedback_body: str,
-) -> str:
-    """Format the GitHub issue body with embedded metadata marker."""
-    return f"""<!-- comment-to-issue: comment_id={comment_id} pr={pr_num} -->
-## Review Comment from @{author}
+@dataclass
+class ReviewCommentContext:
+    """Contextual metadata describing a review comment and its source PR."""
 
-**Source PR:** #{pr_num} - {pr_title}
-**File:** `{file_path}` (line {line})
-**Original Comment:** {html_url}
+    pr_num: str
+    pr_title: str
+    pr_author: str
+    pr_branch: str
+    author: str
+    file_path: str
+    line: int
+    comment_id: str
+    html_url: str
+    created_at: str
+    feedback_body: str
+
+
+def format_issue_body(ctx: ReviewCommentContext) -> str:
+    """Format the GitHub issue body with embedded metadata marker."""
+    return f"""<!-- comment-to-issue: comment_id={ctx.comment_id} pr={ctx.pr_num} -->
+## Review Comment from @{ctx.author}
+
+**Source PR:** #{ctx.pr_num} - {ctx.pr_title}
+**File:** `{ctx.file_path}` (line {ctx.line})
+**Original Comment:** {ctx.html_url}
 
 ---
 
 ### Feedback
 
-{feedback_body}
+{ctx.feedback_body}
 
 ---
 
 ### Context
 
-- **PR Author:** @{pr_author}
-- **Branch:** `{pr_branch}`
-- **Reviewed by:** @{author}
-- **Date:** {created_at}
+- **PR Author:** @{ctx.pr_author}
+- **Branch:** `{ctx.pr_branch}`
+- **Reviewed by:** @{ctx.author}
+- **Date:** {ctx.created_at}
 
 ---
 
@@ -237,6 +242,128 @@ class CommentToIssueProcessor:
         )
         return self.cmd_runner(args)
 
+    def _evaluate_issue_candidate(
+        self,
+        ctx: ReviewCommentContext,
+        actionable: bool,
+        tracking: dict[str, Any],
+        result: ProcessResult,
+    ) -> None:
+        if not actionable or self.archive_only:
+            return
+        if ctx.comment_id in tracking.get("created_issues", {}):
+            result.duplicate_count += 1
+            return
+        if self._issue_exists_remotely(ctx.comment_id):
+            tracking["created_issues"][ctx.comment_id] = "remote-existing"
+            result.duplicate_count += 1
+            return
+        if result.created_count >= self.max_issues:
+            result.rate_limited_count += 1
+            return
+
+        issue_title = format_issue_title(ctx.file_path, ctx.line)
+        if self.dry_run:
+            result.created_count += 1
+            return
+
+        code, stdout, stderr = self._dispatch_issue_create(
+            issue_title, format_issue_body(ctx)
+        )
+        if code == 0:
+            url = stdout.strip()
+            result.created_count += 1
+            result.created_issues.append(
+                {"comment_id": ctx.comment_id, "issue_url": url}
+            )
+            tracking.setdefault("created_issues", {})[ctx.comment_id] = url
+        else:
+            logger.error("Failed to create issue: %s", stderr)
+        if ctx.comment_id not in tracking.setdefault("processed_comments", []):
+            tracking["processed_comments"].append(ctx.comment_id)
+
+    def _process_single_comment(
+        self,
+        comment: dict[str, Any],
+        pr_meta: tuple[str, str, str, str],
+        tracking: dict[str, Any],
+        result: ProcessResult,
+    ) -> dict[str, Any] | None:
+        result.total_comments += 1
+        comment_id = str(comment.get("id", ""))
+        user_info = comment.get("user")
+        author = user_info.get("login", "unknown") if user_info else "unknown"
+
+        if is_bot_user(user_info, author):
+            result.bot_count += 1
+            return None
+
+        pr_num, pr_title, pr_author, pr_branch = pr_meta
+        body = comment.get("body", "")
+        file_path = comment.get("path", "")
+        line = comment.get("line") or comment.get("original_line") or 0
+        actionable = is_actionable_comment(body)
+
+        ctx = ReviewCommentContext(
+            pr_num=pr_num,
+            pr_title=pr_title,
+            pr_author=pr_author,
+            pr_branch=pr_branch,
+            author=author,
+            file_path=file_path,
+            line=line,
+            comment_id=comment_id,
+            html_url=comment.get("html_url", ""),
+            created_at=comment.get("created_at", ""),
+            feedback_body=body,
+        )
+        self._evaluate_issue_candidate(ctx, actionable, tracking, result)
+        return {
+            "pr_number": pr_num,
+            "pr_title": pr_title,
+            "comment_id": comment_id,
+            "author": author,
+            "file": file_path,
+            "line": line,
+            "body": body,
+            "url": ctx.html_url,
+            "created_at": ctx.created_at,
+            "has_suggestion": "```suggestion" in body,
+            "is_actionable": actionable,
+        }
+
+    def _process_pr_file(
+        self,
+        details_file: Path,
+        tracking: dict[str, Any],
+        result: ProcessResult,
+    ) -> list[dict[str, Any]]:
+        match = re.search(r"pr_(\d+)_details\.json", details_file.name)
+        if not match:
+            return []
+        pr_num = match.group(1)
+        pr_details = self._load_json_file(details_file, {})
+        if not pr_details:
+            return []
+
+        rf = self.comments_dir / f"pr_{pr_num}_review_comments.json"
+        if not is_pr_open(pr_details):
+            result.skipped_closed_count += len(self._load_json_file(rf, []))
+            return []
+
+        pr_meta = (
+            pr_num,
+            pr_details.get("title", f"PR #{pr_num}"),
+            pr_details.get("author", {}).get("login", "unknown"),
+            pr_details.get("headRefName", "unknown"),
+        )
+        entries: list[dict[str, Any]] = []
+        for c in self._load_json_file(rf, []):
+            entry = self._process_single_comment(c, pr_meta, tracking, result)
+            if entry is not None:
+                entries.append(entry)
+        return entries
+
     def run(self) -> ProcessResult:
         result = ProcessResult()
         self.archive_dir.mkdir(parents=True, exist_ok=True)
@@ -244,140 +371,14 @@ class CommentToIssueProcessor:
         tracking = self._load_json_file(
             tracking_file, {"processed_comments": [], "created_issues": {}}
         )
-        archived_comments: list[dict[str, Any]] = []
 
-        for details_file in sorted(self.comments_dir.glob("pr_*_details.json")):
-            match = re.search(r"pr_(\d+)_details\.json", details_file.name)
-            if not match:
-                continue
-            pr_num = match.group(1)
-            pr_details = self._load_json_file(details_file, {})
-            if not pr_details:
-                continue
+        archived: list[dict[str, Any]] = []
+        for df in sorted(self.comments_dir.glob("pr_*_details.json")):
+            archived.extend(self._process_pr_file(df, tracking, result))
 
-            if not is_pr_open(pr_details):
-                logger.info(
-                    "Skipping PR #%s: not open (state: %s)",
-                    pr_num,
-                    pr_details.get("state"),
-                )
-                rf = self.comments_dir / f"pr_{pr_num}_review_comments.json"
-                result.skipped_closed_count += len(self._load_json_file(rf, []))
-                continue
-
-            pr_title = pr_details.get("title", f"PR #{pr_num}")
-            pr_author = pr_details.get("author", {}).get("login", "unknown")
-            pr_branch = pr_details.get("headRefName", "unknown")
-            review_file = self.comments_dir / f"pr_{pr_num}_review_comments.json"
-            review_comments = self._load_json_file(review_file, [])
-
-            for comment in review_comments:
-                result.total_comments += 1
-                comment_id = str(comment.get("id", ""))
-                user_info = comment.get("user")
-                author = user_info.get("login", "unknown") if user_info else "unknown"
-
-                if is_bot_user(user_info, author):
-                    logger.info("Ignoring comment %s from bot @%s", comment_id, author)
-                    result.bot_count += 1
-                    continue
-
-                body = comment.get("body", "")
-                file_path = comment.get("path", "")
-                line = comment.get("line") or comment.get("original_line") or 0
-                created_at = comment.get("created_at", "")
-                html_url = comment.get("html_url", "")
-                actionable = is_actionable_comment(body)
-
-                archived_comments.append(
-                    {
-                        "pr_number": pr_num,
-                        "pr_title": pr_title,
-                        "comment_id": comment_id,
-                        "author": author,
-                        "file": file_path,
-                        "line": line,
-                        "body": body,
-                        "url": html_url,
-                        "created_at": created_at,
-                        "has_suggestion": "```suggestion" in body,
-                        "is_actionable": actionable,
-                    }
-                )
-
-                if not actionable or self.archive_only:
-                    continue
-
-                if comment_id in tracking.get("created_issues", {}):
-                    logger.info(
-                        "Comment %s already tracked as created issue",
-                        comment_id,
-                    )
-                    result.duplicate_count += 1
-                    continue
-
-                if self._issue_exists_remotely(comment_id):
-                    logger.info(
-                        "Issue for comment %s already exists remotely",
-                        comment_id,
-                    )
-                    tracking["created_issues"][comment_id] = "remote-existing"
-                    result.duplicate_count += 1
-                    continue
-
-                if result.created_count >= self.max_issues:
-                    logger.warning(
-                        "Rate limit reached (%s issues); skipping comment %s",
-                        self.max_issues,
-                        comment_id,
-                    )
-                    result.rate_limited_count += 1
-                    continue
-
-                issue_title = format_issue_title(file_path, line)
-                issue_body = format_issue_body(
-                    pr_num=pr_num,
-                    pr_title=pr_title,
-                    pr_author=pr_author,
-                    pr_branch=pr_branch,
-                    author=author,
-                    file_path=file_path,
-                    line=line,
-                    comment_id=comment_id,
-                    html_url=html_url,
-                    created_at=created_at,
-                    feedback_body=body,
-                )
-
-                if self.dry_run:
-                    logger.info("[Dry Run] Would create issue: %s", issue_title)
-                    result.created_count += 1
-                    continue
-
-                returncode, stdout, stderr = self._dispatch_issue_create(
-                    issue_title, issue_body
-                )
-                if returncode == 0:
-                    issue_url = stdout.strip()
-                    logger.info("Successfully created issue: %s", issue_url)
-                    result.created_count += 1
-                    result.created_issues.append(
-                        {"comment_id": comment_id, "issue_url": issue_url}
-                    )
-                    tracking.setdefault("created_issues", {})[comment_id] = issue_url
-                else:
-                    logger.error(
-                        "Failed to create issue for comment %s: %s",
-                        comment_id,
-                        stderr,
-                    )
-
-                if comment_id not in tracking.setdefault("processed_comments", []):
-                    tracking["processed_comments"].append(comment_id)
-
-        result.archived_count = len(archived_comments)
-        if archived_comments and not self.dry_run:
-            self._write_archive_markdown(archived_comments)
+        result.archived_count = len(archived)
+        if archived and not self.dry_run:
+            self._write_archive_markdown(archived)
             try:
                 with tracking_file.open("w", encoding="utf-8") as handle:
                     json.dump(tracking, handle, indent=2)
