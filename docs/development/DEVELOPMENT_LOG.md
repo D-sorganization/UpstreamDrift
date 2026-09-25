@@ -17,18 +17,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10487 · Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity
+### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #10921 (companion #10918, #10919, #10920, #10924, #10925)
+- **PR:** #10923
+- **Branch:** `fix/10921-shortcuts-feedback`
+- **Paths:** `src/launchers/desktop_shortcuts.py`, `tests/unit/launchers/test_desktop_shortcuts.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-24
+- **Last verified:** 2026-09-24 — unit tests pass in test_desktop_shortcuts.py verifying partial installation failure
+- **Summary:** Enforce that shortcut installation requires both Desktop and Start Menu destinations to succeed, and synchronize canonical handoff documentation and SPEC change log (#10918, #10919, #10920, #10921, #10924, #10925).
+- **Next step:** Land PR and close review feedback issues.
+
+### DL-#10487 · Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity
+
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10487
-- **PR:** #10894
+- **PR:** #10909
 - **Branch:** `fix/10487-desktop-shortcuts-identity`
 - **Paths:** `src/launchers/app_identity.py`, `src/launchers/desktop_shortcuts.py`, `src/launchers/upstream_drift_launcher.py`, `src/launchers/upstream_drift_launcher_main.py`, `launch_upstream_drift.py`, `scripts/create_shortcut.ps1`, `scripts/create_golf_robot_shortcut.ps1`, `ui/index.html`, `ui/public/favicon.ico`, `docs/development/desktop_viewer_setup.md`, `tests/unit/launchers/test_app_identity.py`, `tests/unit/launchers/test_desktop_shortcuts.py`
 - **Started:** 2026-09-24
-- **Last verified:** 2026-09-24 — verified 15 unit tests pass in test_app_identity.py and test_desktop_shortcuts.py; verified favicon bitwise parity, canonical AUMID registration, and idempotent shortcut creation
+- **Last verified:** 2026-09-24 (`73185d259`) — verified 15 unit tests pass in test_app_identity.py and test_desktop_shortcuts.py; verified favicon bitwise parity, canonical AUMID registration, and idempotent shortcut creation
 - **Summary:** Implemented canonical AppUserModelID registration and icon resolution hierarchy in app_identity.py, idempotent Desktop and Start Menu shortcut manager in desktop_shortcuts.py with readback validation, synchronized web UI favicon with launcher assets, and added setup documentation (Fixes #10487).
-- **Next step:** Run CI pre-commit verification, push branch, open PR, enable auto-merge.
+- **Next step:** Shipped in PR #10909.
 
 ### DL-#8886 · Unified Display Units Policy and Cross-Tool Consistency
 
