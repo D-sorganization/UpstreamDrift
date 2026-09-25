@@ -166,14 +166,14 @@ class TestPreferencesDialogUnits:
         self, monkeypatch: pytest.MonkeyPatch, tmp_path
     ) -> None:
         from PyQt6.QtWidgets import QApplication, QMainWindow
+        from src.shared.python.ui import preferences_dialog
         from src.shared.python.ui.preferences_dialog import PreferencesDialog
 
         _ = QApplication.instance() or QApplication([])
+        monkeypatch.setattr(preferences_dialog, "PREFS_DIR", tmp_path)
         monkeypatch.setattr(
-            "src.shared.python.ui.preferences_dialog.PREFS_DIR", tmp_path
-        )
-        monkeypatch.setattr(
-            "src.shared.python.ui.preferences_dialog.PREFS_FILE",
+            preferences_dialog,
+            "PREFS_FILE",
             tmp_path / "preferences.json",
         )
 
