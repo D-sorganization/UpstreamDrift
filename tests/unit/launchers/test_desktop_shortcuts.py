@@ -150,6 +150,39 @@ def test_install_desktop_and_start_menu_shortcuts_idempotent(
         assert result.start_menu_shortcut == start_menu_dir / SHORTCUT_FILENAME
 
 
+def test_install_shortcuts_fails_if_either_destination_fails(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Shortcut installation fails if either Desktop or Start Menu fails."""
+    desktop_dir = tmp_path / "Desktop"
+    desktop_dir.mkdir()
+    start_menu_dir = tmp_path / "StartMenu"
+    start_menu_dir.mkdir()
+
+    monkeypatch.setattr(
+        "src.launchers.desktop_shortcuts.get_desktop_dir", lambda: desktop_dir
+    )
+    monkeypatch.setattr(
+        "src.launchers.desktop_shortcuts.get_start_menu_dir", lambda: start_menu_dir
+    )
+
+    # Desktop succeeds, Start Menu fails
+    with patch(
+        "src.launchers.desktop_shortcuts.ShortcutManager.create_shortcut",
+        side_effect=[True, False],
+    ):
+        result = install_desktop_and_start_menu_shortcuts(repo_root=tmp_path)
+        assert result.success is False
+
+    # Desktop fails, Start Menu succeeds
+    with patch(
+        "src.launchers.desktop_shortcuts.ShortcutManager.create_shortcut",
+        side_effect=[False, True],
+    ):
+        result = install_desktop_and_start_menu_shortcuts(repo_root=tmp_path)
+        assert result.success is False
+
+
 def test_parse_shortcut_metadata() -> None:
     """_parse_metadata correctly extracts properties from WScript.Shell output."""
     raw_output = """
