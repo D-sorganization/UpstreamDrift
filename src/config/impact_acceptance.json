@@ -9,8 +9,8 @@
   },
   "reconciled_against": {
     "upstreamdrift": "5347cba0f4378cd72a6e8afea9fb27c8bfe5db75",
-    "tools": "a9ed0e7c5c6905b1164082659051d6381068052d",
-    "reconciled_on": "2026-09-20"
+    "tools": "95ed6b47857e9a47211ab1973d02b28beae718bc",
+    "reconciled_on": "2026-09-25"
   },
   "release_claim": "code_verified_only",
   "predictive_accuracy_claim": false,

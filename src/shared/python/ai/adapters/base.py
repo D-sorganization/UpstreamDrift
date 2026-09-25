@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -395,7 +395,13 @@ class BaseAgentAdapter(ABC):
         self,
         context: ConversationContext | None,
     ) -> str:
-        """Build repository and persisted-memory prompt context."""
+        """Build repository, persisted-memory and Wizard knowledge prompt context.
+
+        When the conversation's ``project_root`` has a Wizard
+        (``knowledge/wizard.yml``), the latest user message is answered from
+        that product's knowledge pack: cited passages, plus a banner when the
+        pack is stale (Tools#5346). Without a Wizard the section is unchanged.
+        """
         if context is None:
             return ""
 
@@ -410,13 +416,16 @@ class BaseAgentAdapter(ABC):
         if not isinstance(prompt_memory, dict):
             prompt_memory = None
 
-        return cast(
-            str,
-            build_memory_prompt_section(
-                prompt_memory=prompt_memory,
-                agents_md=load_agents_md(project_root),
-            ),
+        memory: str = build_memory_prompt_section(
+            prompt_memory=prompt_memory,
+            agents_md=load_agents_md(project_root),
         )
+        from src.shared.python.ai.wizards import knowledge_for_context
+
+        knowledge = knowledge_for_context(context)
+        if knowledge is None:
+            return memory
+        return "\n\n".join(part for part in (memory, knowledge.render()) if part)
 
     def _classify_error(
         self,

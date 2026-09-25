@@ -281,7 +281,9 @@ class AIAssistantPanel(QWidget):
     def _init_tools(self) -> None:
         register_file_tools(self._tools_registry)
         register_codemap_tools(self._tools_registry)
-        register_panel_tools(self._tools_registry, self._rag_store)
+        register_panel_tools(
+            self._tools_registry, self._rag_store, project_root=self._project_root
+        )
 
     # ------------------------------------------------------------------
     # UI assembly

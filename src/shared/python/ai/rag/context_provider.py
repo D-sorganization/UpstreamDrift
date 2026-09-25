@@ -1,5 +1,11 @@
 """RAG context provider for chat sessions.
 
+.. deprecated::
+    Superseded by product Wizards (Tools#5346): ``knowledge/wizard.yml`` plus
+    a built knowledge pack, injected by
+    :func:`shared.python.ai.wizards.knowledge_for_context`. Nothing in the
+    Sidekick chat path calls this provider.
+
 Wraps the existing ``SimpleRAGStore`` to provide contextual document
 retrieval that enriches chat prompts with relevant codebase and
 documentation snippets.
@@ -22,6 +28,7 @@ Usage::
 from __future__ import annotations
 
 import logging
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -54,6 +61,12 @@ class RAGContextProvider:
         Args:
             store: Optional pre-built store. Creates a new one if None.
         """
+        warnings.warn(
+            "RAGContextProvider is deprecated; use a product Wizard "
+            "(shared.python.ai.wizards) instead (Tools#5346).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._store = store or SimpleRAGStore()
         self._indexed_paths: set[str] = set()
 
