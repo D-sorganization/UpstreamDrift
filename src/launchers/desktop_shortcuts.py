@@ -342,7 +342,13 @@ def install_desktop_and_start_menu_shortcuts(
         if meta:
             result.metadata[start_menu_shortcut] = meta
 
-    result.success = bool(result.created or result.updated)
+    has_desktop = bool(
+        desktop_shortcut in result.created or desktop_shortcut in result.updated
+    )
+    has_start_menu = bool(
+        start_menu_shortcut in result.created or start_menu_shortcut in result.updated
+    )
+    result.success = has_desktop and has_start_menu
     return result
 
 

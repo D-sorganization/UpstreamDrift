@@ -1,48 +1,45 @@
-# Implementation Handoff — Restore Green Main: Jules Bolt Learning Title Case Compliance
+# Implementation Handoff — Desktop Shortcuts Review Feedback & Handoff Governance
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-fix-10883`
-- Branch: `fix/10883-docs-governance-title-case`
-- Baseline commit: `ec8a12fbf9`
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/fix-10921-review-feedback`
+- Branch: `fix/10921-shortcuts-feedback`
+- Baseline commit: `73185d259`
 - Implementation commit: `SELF`
-- Pull request: #10884
-- Governing issue: #10883
-- Session: `antigravity-10883-docs-gov`
+- Pull request: #10923
+- Governing issue: #10921 (companion #10918, #10919, #10920)
+- Session: `44d3df2b-c188-4439-b2fd-1a5a2ea5a5f6`
 
 ## Objective and Status
 
-- Objective: Restore green main by fixing the Title Case check failure on `.jules/bolt.md` introduced in commit `ec8a12fbf9` (#10880):
-  1. Enclose code tokens (`np.linalg.norm`) in backticks in `.jules/bolt.md` so they are correctly recognized as code expressions and exempted from title-case transformations.
-  2. Add unit test coverage in `tests/scripts/test_document_title_case.py` verifying backticked code tokens are preserved.
-  3. Verify all documentation governance checks pass cleanly locally.
+- Objective: Address review feedback from PR #10909:
+  1. Enforce that `install_desktop_and_start_menu_shortcuts` requires both Desktop and Start Menu destinations to succeed (`#10921`).
+  2. Add unit test coverage in `tests/unit/launchers/test_desktop_shortcuts.py` verifying partial installation fails.
+  3. Register PR #10909 in Section 12 Change Log of `SPEC.md` (`#10919`).
+  4. Synchronize canonical handoff documentation in `docs/development/HANDOFF.md` and `docs/development/DEVELOPMENT_LOG.md` (`#10920`).
 - Status: Complete / ready for PR
 - Completed:
-  1. Updated heading in `.jules/bolt.md` to `## 2026-09-24 - [Optimize `np.linalg.norm` for Distance Metrics]`.
-  2. Added test in `tests/scripts/test_document_title_case.py`.
-  3. Ran all doc governance checks and tests: all passed cleanly (30/30 pytest passed, title case passed 0 violations).
-  4. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, and this handoff.
+  1. Updated `src/launchers/desktop_shortcuts.py` to check that both destinations succeed.
+  2. Added test `test_install_shortcuts_fails_if_either_destination_fails` in `tests/unit/launchers/test_desktop_shortcuts.py`.
+  3. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, and this handoff.
 - Remaining: Commit, push branch, open PR with auto-merge, verify CI green.
 
 ## Files and Decisions
 
 - Files changed:
-  - `.jules/bolt.md`: Wrapped code token in backticks in heading line 151.
-  - `tests/scripts/test_document_title_case.py`: Added assertion verifying preservation of backticked code expressions in `test_expected_title_preserves_minor_words_and_technical_tokens`.
-  - `SPEC.md`: Added change log entry.
-  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10883 entry.
+  - `src/launchers/desktop_shortcuts.py`: Require both `desktop_shortcut` and `start_menu_shortcut` to be in created/updated for `result.success`.
+  - `tests/unit/launchers/test_desktop_shortcuts.py`: Added regression test verifying failure if either destination fails.
+  - `SPEC.md`: Added change log entries for #10909 and #10923.
+  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10921 entry and marked DL-#10487 shipped.
   - `docs/development/HANDOFF.md`: Updated handoff document.
 
 ## Validation
 
-- `python scripts/check_docs_governance.py` — passed.
-- `python -m scripts.check_design_manual_governance` — passed.
-- `python scripts/check_doc_catalog.py` — passed.
-- `python scripts/check_doc_size_budget.py` — passed.
-- `python scripts/check_document_title_case.py --changed-from 5acbb3a1c8e9ab20754035eeaffb9d9d961df05d` — passed (0 violations).
-- `pytest tests/scripts/test_document_title_case.py` — 5 passed.
-- `pytest tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py tests/scripts/test_document_title_case.py -q` — 30 passed.
+- `pytest tests/unit/launchers/test_desktop_shortcuts.py` — passed (8/8).
+- `python scripts/ci/check_spec_changelog_duplicates.py` — passed.
+- `ruff check src/launchers/desktop_shortcuts.py tests/unit/launchers/test_desktop_shortcuts.py` — passed.
+- `black --check src/launchers/desktop_shortcuts.py tests/unit/launchers/test_desktop_shortcuts.py` — passed.
 
 ## Blockers and Risks
 
@@ -54,7 +51,7 @@
 1. Commit and push branch to origin.
 2. Open PR with `agent:local` label and auto-merge enabled.
 3. Monitor CI, verify merge, and verify green main.
-4. Release lease on issue #10883.
+4. Close feedback issues #10918, #10919, #10920, #10921.
 
 ## Change Log
 
