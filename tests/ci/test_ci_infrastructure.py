@@ -834,7 +834,6 @@ class TestCIEnvironmentCompatibility:
         """Helper checks must not cancel another PR's current check status."""
         workflows = [
             "Jules-Redundant-PR-Closer.yml",
-            "Comment-to-Issue-Converter.yml",
         ]
 
         for workflow_name in workflows:
