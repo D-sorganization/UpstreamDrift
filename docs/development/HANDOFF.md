@@ -30,13 +30,13 @@
 - Files changed:
   - `src/launchers/desktop_shortcuts.py`: Require both `desktop_shortcut` and `start_menu_shortcut` to be in created/updated for `result.success`.
   - `tests/unit/launchers/test_desktop_shortcuts.py`: Added regression test verifying failure if either destination fails.
-  - `SPEC.md`: Added change log entries for #10909 and #10923.
+  - `SPEC.md`: Added change log entry for #10923.
   - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10921 entry and marked DL-#10487 shipped.
   - `docs/development/HANDOFF.md`: Updated handoff document.
 
 ## Validation
 
-- `pytest tests/unit/launchers/test_desktop_shortcuts.py` — passed (8/8).
+- `pytest tests/unit/launchers/test_desktop_shortcuts.py` — passed (9/9).
 - `python scripts/ci/check_spec_changelog_duplicates.py` — passed.
 - `ruff check src/launchers/desktop_shortcuts.py tests/unit/launchers/test_desktop_shortcuts.py` — passed.
 - `black --check src/launchers/desktop_shortcuts.py tests/unit/launchers/test_desktop_shortcuts.py` — passed.
@@ -51,7 +51,7 @@
 1. Commit and push branch to origin.
 2. Open PR with `agent:local` label and auto-merge enabled.
 3. Monitor CI, verify merge, and verify green main.
-4. Close feedback issues #10918, #10919, #10920, #10921.
+4. Close feedback issues #10918, #10919, #10920, #10921, #10924, #10925.
 
 ## Change Log
 

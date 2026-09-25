@@ -21,13 +21,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** local
-- **Issue:** #10921 (companion #10918, #10919, #10920)
+- **Issue:** #10921 (companion #10918, #10919, #10920, #10924, #10925)
 - **PR:** #10923
 - **Branch:** `fix/10921-shortcuts-feedback`
 - **Paths:** `src/launchers/desktop_shortcuts.py`, `tests/unit/launchers/test_desktop_shortcuts.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
 - **Started:** 2026-09-24
 - **Last verified:** 2026-09-24 — unit tests pass in test_desktop_shortcuts.py verifying partial installation failure
-- **Summary:** Enforce that shortcut installation requires both Desktop and Start Menu destinations to succeed, add PR #10909 Section 12 changelog row, and synchronize canonical handoff documentation (#10918, #10919, #10920, #10921).
+- **Summary:** Enforce that shortcut installation requires both Desktop and Start Menu destinations to succeed, and synchronize canonical handoff documentation and SPEC change log (#10918, #10919, #10920, #10921, #10924, #10925).
 - **Next step:** Land PR and close review feedback issues.
 
 ### DL-#10487 · Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity
