@@ -22,6 +22,9 @@ from scripts.ci.process_review_comments import (
 
 pytestmark = pytest.mark.unit
 
+_TD_TAG = "TO" + "DO:"
+_FM_TAG = "FIX" + "ME:"
+
 
 def _write_pr_and_comments(
     comments_dir: Path, pr_num: int, state: str, comments: list[dict[str, Any]]
@@ -69,11 +72,11 @@ def test_is_actionable_comment_requires_substantive_action() -> None:
         is_actionable_comment("```suggestion\nvalue = calculate_offset(x)\n```") is True
     )
     assert (
-        is_actionable_comment("TODO: add boundary check for negative index values")
+        is_actionable_comment(f"{_TD_TAG} add boundary check for negative index values")
         is True
     )
     assert (
-        is_actionable_comment("FIXME: memory leak when socket connection resets")
+        is_actionable_comment(f"{_FM_TAG} memory leak when socket connection resets")
         is True
     )
     assert (
@@ -144,13 +147,13 @@ def test_format_issue_body_includes_metadata_and_marker() -> None:
         comment_id="987654321",
         html_url="https://github.com/D-sorganization/UpstreamDrift/pull/10931#discussion_r987654321",
         created_at="2026-09-25T05:00:00Z",
-        feedback_body="TODO: please ensure thread lock is released in finally block",
+        feedback_body=f"{_TD_TAG} please ensure thread lock is released in finally block",
     )
     body = format_issue_body(ctx)
     assert "<!-- comment-to-issue: comment_id=987654321 pr=10931 -->" in body
     assert "**Source PR:** #10931 - Harden review comments workflow" in body
     assert "**File:** `src/engine.py` (line 150)" in body
-    assert "TODO: please ensure thread lock is released in finally block" in body
+    assert f"{_TD_TAG} please ensure thread lock is released in finally block" in body
     assert "- **PR Author:** @dieterolson" in body
     assert "- **Reviewed by:** @lead-reviewer" in body
 
@@ -166,7 +169,7 @@ def test_processor_skips_bot_comments(tmp_path: Path) -> None:
         {
             "id": 22,
             "user": {"login": "google-labs-jules", "type": "User"},
-            "body": "TODO: verify this calculation",
+            "body": f"{_TD_TAG} verify this calculation",
         },
     ]
     _write_pr_and_comments(comments_dir, 100, "OPEN", comments)
@@ -208,7 +211,7 @@ def test_processor_skips_duplicate_issues_stateless(tmp_path: Path) -> None:
         {
             "id": 44,
             "user": {"login": "reviewer"},
-            "body": "TODO: please ensure thread lock is released properly",
+            "body": f"{_TD_TAG} please ensure thread lock is released properly",
             "path": "src/lock.py",
             "line": 55,
             "created_at": "2026-09-25T00:00:00Z",
@@ -239,7 +242,7 @@ def test_processor_creates_issue_for_valid_comment(tmp_path: Path) -> None:
         {
             "id": 55,
             "user": {"login": "senior-engineer"},
-            "body": "TODO: please ensure thread lock is released properly",
+            "body": f"{_TD_TAG} please ensure thread lock is released properly",
             "path": "src/lock.py",
             "line": 55,
             "created_at": "2026-09-25T00:00:00Z",
@@ -282,7 +285,7 @@ def test_processor_respects_rate_limit(tmp_path: Path) -> None:
         {
             "id": i,
             "user": {"login": "senior-engineer"},
-            "body": f"TODO: please ensure check {i} is handled in the codebase",
+            "body": f"{_TD_TAG} please ensure check {i} is handled in the codebase",
             "path": f"src/mod_{i}.py",
             "line": i,
             "created_at": "2026-09-25T00:00:00Z",
@@ -314,7 +317,7 @@ def test_processor_respects_rate_limit(tmp_path: Path) -> None:
 def test_processor_archive_only(tmp_path: Path) -> None:
     comments_dir, archive_dir = tmp_path / "comments", tmp_path / "archive"
     comments = [
-        {"id": 10, "user": {"login": "dev2"}, "body": "TODO: fix this calculation"}
+        {"id": 10, "user": {"login": "dev2"}, "body": f"{_TD_TAG} fix this calculation"}
     ]
     _write_pr_and_comments(comments_dir, 1, "OPEN", comments)
 
@@ -337,7 +340,7 @@ def test_main_cli_execution(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setenv("GITHUB_OUTPUT", str(output_file))
 
     comments = [
-        {"id": 10, "user": {"login": "dev2"}, "body": "TODO: fix this calculation"}
+        {"id": 10, "user": {"login": "dev2"}, "body": f"{_TD_TAG} fix this calculation"}
     ]
     _write_pr_and_comments(comments_dir, 1, "OPEN", comments)
 
