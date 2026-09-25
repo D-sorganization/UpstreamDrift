@@ -7,7 +7,7 @@
 - Branch: `staff/fleet-critic-task-653b92`
 - Baseline commit: `ff9fbee62`
 - Implementation commit: SELF
-- Pull request: (draft, to be opened)
+- Pull request: #10942 (draft)
 - Governing task: Fleet Critic scheduled pass (bi-weekly, 1st & 3rd Friday)
 - Session: `fleet-critic-task-653b92`
 

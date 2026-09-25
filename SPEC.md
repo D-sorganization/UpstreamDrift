@@ -7048,6 +7048,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-25 | #10942 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims. |
 | 2024-05-22 | n/a | Micro-optimization: use np.sqrt(np.einsum) instead of np.linalg.norm(..., axis=-1) in distribution.py (spec-exempt: micro-optimization) |
 | 2026-09-24 | n/a | Optimized small 1D array norm calculation by replacing `np.linalg.norm(force)` with `math.sqrt(np.vdot(force, force))` in `src/shared/python/physics/_shaft_model.py` for ~3x speedup. (spec-exempt: micro-optimization) |
 | 2026-09-24 | #10923 | Require both Desktop and Start Menu shortcut destinations to succeed and update handoff governance (#10918, #10919, #10920, #10921, #10924, #10925). |
