@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#1755 · Retire the Review-Comment-to-Issue Converter
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** Repository_Management#1755
+- **Branch:** `chore/retire-comment-converter`
+- **PR:** not created
+- **Paths:** `.github/workflows/Comment-to-Issue-Converter.yml`, `scripts/ci/process_review_comments.py`, `tests/ci/test_process_review_comments.py`, `tests/ci/test_ci_infrastructure.py`, `docs/development/`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 (retire_converter.py --check exits 0 after --apply; test_ci_infrastructure.py helper-workflow test passes)
+- **Summary:** Remove the retired Convert-Review-Comments-to-Issues workflow and its processor/tests from this repository per the fleet-wide Repository_Management#1755 campaign.
+- **Next step:** Open the draft removal PR for review.
+
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress
