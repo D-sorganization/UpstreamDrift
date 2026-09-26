@@ -433,6 +433,7 @@ def test_real_budget_defines_production_coverage_gates() -> None:
         assert date.fromisoformat(gate["ratchet_on"]) <= next_cap_reduction
 
 
+@pytest.mark.unit
 def test_budget_fails_when_exclusion_matches_no_tracked_files() -> None:
     """Every exclusion must match at least one tracked repository file."""
     errors = checker.validate_budget(
@@ -464,6 +465,7 @@ def test_budget_fails_when_exclusion_matches_no_tracked_files() -> None:
     assert "src/ghost.py: exclusion matches no tracked files" in errors
 
 
+@pytest.mark.unit
 def test_main_fails_when_exclusion_matches_no_tracked_files_in_git(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -518,6 +520,7 @@ def test_main_fails_when_exclusion_matches_no_tracked_files_in_git(
     assert "src/ghost.py: exclusion matches no tracked files" in capsys.readouterr().err
 
 
+@pytest.mark.unit
 def test_real_budget_passes_at_october_ratchet() -> None:
     """The real repository budget must pass cleanly at the 2026-10-01 ratchet."""
     assert (
