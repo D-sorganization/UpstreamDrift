@@ -21,20 +21,8 @@ function report = gs3dx_build_slim(info, opts)
     for r = cellstr(names.roles)
         pairs(end+1, :) = {names.clone_subsys(r{1}), names.slim_subsys(r{1})}; %#ok<AGROW>
     end
-    target = @(stem) fullfile(info.models_dir, [stem '.slx']);
-    for k = 1:size(pairs, 1)
-        if isfile(target(pairs{k, 2})) && ~opts.overwrite
-            error('gs3dx:slim', '%s exists; pass overwrite=true to rebuild it.', target(pairs{k, 2}));
-        end
-    end
-    for k = 1:size(pairs, 1)
-        if bdIsLoaded(pairs{k, 2})
-            close_system(pairs{k, 2}, 0);
-        end
-        copyfile(target(pairs{k, 1}), target(pairs{k, 2}), 'f');
-        fileattrib(target(pairs{k, 2}), '+w');
-    end
-    rehash;
+    files = cellfun(@(stem) fullfile(info.models_dir, [stem '.slx']), pairs, 'UniformOutput', false);
+    gs3dx_copy_models(files, opts.overwrite, 'gs3dx:slim');
 
     report = struct('axes_rewired', containers.Map(), 'repointed', {{}});
     for r = cellstr(names.roles)

@@ -27,10 +27,12 @@ the regression drive (`gs3dx_drive(info, "impact", mdl)`).
   last part of the window is not physical.
 - A RelTol change of one part in a million gives 2.58 m and 3,781 steps.
   Rounding differences grow about 1e6-fold within 10 ms.
-- Zeroing the 225 polynomial coefficients in `PolynomialInputValues.mat`
-  through the model workspace does not change the persisted run at all. Those
-  variables are not what drives this run. Not investigated further, because
-  it is outside this epic.
+- The persisted polynomial torque coefficients are non-physical (for
+  example `HipInputXA` = -6.9e9, and actuator torques reach 1e4 to 1e5 N·m).
+  `ModelingMode` = 3 selects them.
+- The impact input file sets `ModelingMode` = 0, and every joint actuator
+  torque is then exactly zero: the impact drive is a passive run. It proves
+  the passive dynamics but not the torque path.
 
 ## Consequence For `GS3DX_Slim`
 

@@ -7,6 +7,7 @@ function names = gs3dx_names()
 %     .original_subsys   map of role -> original referenced-subsystem name
 %     .clone_subsys      map of role -> GS3DX referenced-subsystem name
 %     .slim_subsys       map of role -> direct-torque-drive subsystem (#10954)
+%     .spherical_subsys  Spherical-joint stand-in for GS3DX_KDS_Gimbal (#10955)
 %     .variants          GS3DX top-level model names by stage
 %
 %   Every tool reads names from here (DRY) so a rename happens in one place.
@@ -28,6 +29,7 @@ function names = gs3dx_names()
     names.slim_subsys = containers.Map( ...
         cellstr(roles), ...
         {'GS3DX_KDS_Gimbal', 'GS3DX_KDS_Revolute', 'GS3DX_KDS_Universal'});
+    names.spherical_subsys = 'GS3DX_KDS_Spherical';
 
     names.variants = struct( ...
         'baseline', "GS3DX_Baseline", ...   % verbatim renamed clone

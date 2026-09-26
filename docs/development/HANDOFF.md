@@ -19,7 +19,8 @@
   move shoulders and hip to quaternion joints, and grow to a full-body model under
   the 1,000 non-virtual-block Home-license limit, without touching the originals.
 - Status: GS3DX-1 (#10951) scaffold, GS3DX-2 (#10952) regression harness, GS3DX-3
-  (#10953) block budget and GS3DX-4 (#10954) `GS3DX_Slim` done.
+  (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim` and GS3DX-5 (#10955) `GS3DX_Quat`
+  quaternion shoulders done.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -44,6 +45,20 @@
   7. Found the persisted drive is ill-conditioned (clubhead > 4 km/s by 0.3 s; a 1e-9
      RelTol change moves the clubhead 2.4 m), so it cannot prove any restructuring;
      the impact drive is the regression drive. `docs/SENSITIVITY_FINDINGS.md`.
+  8. #10955: `gs3dx_build_quat` copies Slim/KDS_Gimbal to `GS3DX_Quat`/`GS3DX_KDS_Spherical`;
+     `gs3dx_gimbal_to_spherical` swaps the Gimbal Joint for a Spherical Joint keeping the
+     subsystem interface (ports, mask, 21 bus elements) via `gs3dx_xyz_map` (Euler X-Y-Z <->
+     quaternion; `XYZ Torque` and `XYZ Kinematics` MATLAB Function blocks, `Angle Reference`
+     integrator for the 360-degree branch). 609 -> 599 blocks. Isolated rig
+     (`gs3dx_joint_rig`): all 21 signals match the Gimbal to <= 2e-7 of peak at RelTol 1e-8.
+     Full model: the Low-priority right shoulder assembles differently in a closed chain, so
+     `gs3dx_pinned_drive` pins its start state; then Quat converges to Slim as RelTol tightens
+     (clubhead gap 13.9 mm / 0.54 mm / 0.039 mm at 1e-3/1e-5/1e-7), is closer than Slim to the
+     converged answer at every tolerance, and takes 7-9% fewer steps.
+     `docs/QUATERNION_SHOULDERS.md`.
+  9. Refactors: `gs3dx_physical_graph` + `gs3dx_redraw_nets` (shared net surgery),
+     `gs3dx_copy_models` (copy guard), `gs3dx_simulate` `block_parameters` option,
+     `gs3dx_repoint_references` skips subsystem-reference internals.
 
 ## Files and Decisions
 
@@ -65,11 +80,22 @@
   end ports. `gs3dx_direct_torque_drive` finds nets by union-find over all segments.
 - Count blocks on a freshly loaded model: after a simulation in the same session
   `find_system` counts differ (+101 on Slim).
+- The KDS Bus Creator is named `Bus
+Creator` (newline); find it by BlockType.
+- A MATLAB Function block is direct feedthrough, and the sensed acceleration depends on the
+  torque, so torque and kinematics mapping are two blocks (one would form an algebraic loop).
+  The damping Constant needs SampleTime 0: constant-time blocks may not touch the shoulder
+  input-function loop.
+- A Spherical Joint has one target per quantity: the mask init asserts equal Rx/Ry/Rz
+  priorities, so set all six priorities in one `set_param` call.
+- Impact-input mode sweep: mode 3 ill-conditioned, mode 2 torqued but 1e8 N\*m, mode 1 fails at
+  35 ms in hip gimbal lock (motivates #10956).
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 32 passed, 0 failed, 177 s (exclude simulations with `'ExcludeTag','Simulation'`).
+  → 47 passed, 0 failed (2026-09-26; the Simulation-tagged tests take most of the time;
+  select `~HasTag('Simulation')` for the 41 structural tests).
 - The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
 ## Blockers and Risks
@@ -78,8 +104,6 @@
 
 ## Next Steps
 
-1. #10955 `GS3DX_KD_Spherical` + `GS3DX_Quat` shoulders (Spherical joint, 3-vector
-   torque in the follower frame, Euler outputs for the bus), built on `GS3DX_Slim`;
-   compare on the impact drive, with steps and wall time.
-2. #10956 quaternion hip, then #10957/#10958 lower body under the budget with >= 10%
-   margin; #10959 Sonnet visual QA.
+1. #10956 quaternion hip: inspect the hip Bushing subsystem, replace it with a quaternion
+   joint using the same `gs3dx_xyz_map` pattern, prove with the rig and convergence tests.
+2. #10957/#10958 lower body under the budget with >= 10% margin; #10959 Sonnet visual QA.

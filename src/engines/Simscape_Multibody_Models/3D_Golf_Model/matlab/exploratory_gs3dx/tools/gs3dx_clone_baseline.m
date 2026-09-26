@@ -36,20 +36,7 @@ function report = gs3dx_clone_baseline(info, opts)
         fullfile(info.original_model_dir, [char(names.original_model) '.slx']), ...
         fullfile(info.models_dir, [top '.slx'])};
 
-    for k = 1:size(pairs, 1)
-        [src, dst] = pairs{k, :};
-        assert(isfile(src), 'gs3dx:clone', 'Original not found: %s', src);
-        if isfile(dst) && ~opts.overwrite
-            error('gs3dx:clone', '%s exists; pass overwrite=true to replace it.', dst);
-        end
-        [~, stem] = fileparts(dst);
-        if bdIsLoaded(stem)
-            close_system(stem, 0);
-        end
-        copyfile(src, dst, 'f');
-        fileattrib(dst, '+w');
-    end
-    rehash;
+    gs3dx_copy_models(pairs, opts.overwrite, 'gs3dx:clone');
 
     % Referenced subsystems still point at the original names in the fresh
     % copy.  Load without resolving them and re-point.
