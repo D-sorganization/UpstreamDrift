@@ -92,13 +92,15 @@ class TestCalculateFinancialModel:
         assert result.total_revenue == 0.0
 
     def test_negative_capital_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(
+            ValueError, match=r"Capital investment must be non-negative"
+        ):
             self._CALC.calculate_financial_model(
                 _base_params(total_capital_investment=-1.0)
             )
 
     def test_negative_operating_days_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"Operating days must be non-negative"):
             self._CALC.calculate_financial_model(
                 _base_params(operating_days_per_year=-1)
             )

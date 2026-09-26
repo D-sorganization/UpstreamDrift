@@ -55,7 +55,7 @@ def test_registry_subscribe_multiple_callbacks() -> None:
 
 def test_subscribe_none_raises_type_error() -> None:
     """DbC: subscribe(None) raises TypeError."""
-    with pytest.raises(TypeError, match="callable"):
+    with pytest.raises(TypeError, match=r"callback must not be None"):
         WorkspaceRegistry().subscribe(None)  # type: ignore[arg-type]
 
 

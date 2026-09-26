@@ -48,27 +48,27 @@ class TestCalculateWaterVaporPressure:
 class TestCalculateSaturatedPropertiesFromTemperature:
     def test_returns_steam_properties(self) -> None:
         eng = SteamCalculationEngine()
-        props = eng.calculate_saturated_properties_from_temperature(100.0)
+        props = eng.calculate_saturated_properties_from_temperature(373.15)
         assert isinstance(props, SteamProperties)
 
     def test_temperature_matches_input(self) -> None:
         eng = SteamCalculationEngine()
-        props = eng.calculate_saturated_properties_from_temperature(100.0)
-        assert props.temperature == 100.0
+        props = eng.calculate_saturated_properties_from_temperature(373.15)
+        assert props.temperature == 373.15
 
     def test_enthalpy_positive(self) -> None:
         eng = SteamCalculationEngine()
-        props = eng.calculate_saturated_properties_from_temperature(100.0)
+        props = eng.calculate_saturated_properties_from_temperature(373.15)
         assert props.enthalpy > 0.0
 
     def test_cp_positive(self) -> None:
         eng = SteamCalculationEngine()
-        props = eng.calculate_saturated_properties_from_temperature(100.0)
+        props = eng.calculate_saturated_properties_from_temperature(373.15)
         assert props.cp > 0.0
 
     def test_quality_at_saturation(self) -> None:
         eng = SteamCalculationEngine()
-        props = eng.calculate_saturated_properties_from_temperature(100.0)
+        props = eng.calculate_saturated_properties_from_temperature(373.15)
         # Quality should be defined (not NaN)
         assert not math.isnan(float(props.quality))
 

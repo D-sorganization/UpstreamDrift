@@ -10,6 +10,7 @@ from __future__ import annotations
 
 __all__ = [
     "CalibrationError",
+    "CapabilityError",
     "OutOfEnvelopeError",
     "ShotTruncatedError",
     "SolverError",
@@ -48,6 +49,15 @@ class OutOfEnvelopeError(SolverError):
     def __init__(self, message: str, *, verdict: object | None = None) -> None:
         super().__init__(message)
         self.verdict = verdict
+
+
+class CapabilityError(OutOfEnvelopeError, ValueError):
+    """The requested sand-motion capability is not supported by the pathway.
+
+    Raised when a caller requests 3-D grain trajectories, 3-D ball spin,
+    or physical fidelity from a pathway that cannot provide it
+    (issue #9688, ADR-0044).
+    """
 
 
 class ShotTruncatedError(SolverError):

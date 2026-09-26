@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
+from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.motion_matching.club_only.matrix_qualification import (
     MATRIX_SCHEMA,
     MatrixCellResult,
@@ -35,6 +36,8 @@ from src.shared.python.motion_matching.club_only.workbook_identity import (
     WIFFLE_PROV1_SHA256,
 )
 from src.shared.python.motion_matching.jobs import JOBS_SCHEMA
+from src.shared.python.tour_baselines.models import BackendType
+from src.shared.python.tour_baselines.registry import get_golf_model
 
 REPRODUCTION_SCHEMA = "club-only-reproduction/1.0.0"
 _GOVERNING_ISSUE = 10614
@@ -67,6 +70,8 @@ __all__ = [
     "reconcile_matrix_blockers",
     "render_reproduction_guide_markdown",
     "reproduction_evidence_payload",
+    "write_reproduction_guide_markdown",
+    "write_reproduction_turnover_evidence",
 ]
 
 
@@ -375,6 +380,26 @@ def _owner_for_status(status: str) -> str:
     return "club-only program"
 
 
+_NATIVE_RUNTIME_LABELS: Mapping[BackendType, str] = {
+    BackendType.SIMSCAPE: "MATLAB R2025b",
+    BackendType.DRAKE: "Drake",
+    BackendType.MUJOCO: "MuJoCo",
+    BackendType.PINOCCHIO: "Pinocchio",
+    BackendType.OPENSIM: "OpenSim",
+    BackendType.MYOSUITE: "MyoSuite",
+    BackendType.SCIPY_ODE: "scipy_ode",
+}
+
+
+def _native_runtime_for_model(model_id: str) -> str:
+    """Return the registered backend's runtime label for a remediation prompt."""
+    try:
+        backend = get_golf_model(model_id).backend
+    except KeyError:  # unregistered or ambiguous id: name no specific runtime
+        return "native runtime"
+    return _NATIVE_RUNTIME_LABELS.get(backend, "native runtime")
+
+
 def _next_step_for_cell(cell: MatrixCellResult) -> str:
     if cell.status == "scored":
         return (
@@ -383,8 +408,9 @@ def _next_step_for_cell(cell: MatrixCellResult) -> str:
             f"G1 for {cell.model_id}×{cell.trial_id} before scientific promotion"
         )
     if cell.status == "unqualified":
+        runtime = _native_runtime_for_model(cell.model_id)
         return (
-            f"On DeskComputer with MATLAB R2025b, run native Fit/G1 for "
+            f"On DeskComputer with {runtime}, run native Fit/G1 for "
             f"{cell.model_id}×{cell.trial_id} and attach a receipt under "
             "docs/plans/club_only_matching/evidence/; do not invent native_g1_pass"
         )
@@ -782,3 +808,41 @@ def render_reproduction_guide_markdown(
     lines.extend(_guide_commands_and_replay_lines(built))
     lines.extend(_guide_closure_and_matrix_lines(built))
     return "\n".join(lines)
+
+
+def write_reproduction_turnover_evidence(
+    repo_root: Path | str | None = None,
+    *,
+    guide: ReproductionGuide | None = None,
+    path: Path | str | None = None,
+) -> Path:
+    """Serialize and write the CO-10 evidence receipt to disk."""
+    root = Path(repo_root) if repo_root is not None else get_repo_root()
+    out_path = Path(path) if path is not None else root / _EVIDENCE_RELATIVE
+    payload = reproduction_evidence_payload(root, guide=guide)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return out_path
+
+
+def write_reproduction_guide_markdown(
+    repo_root: Path | str | None = None,
+    *,
+    guide: ReproductionGuide | None = None,
+    path: Path | str | None = None,
+) -> Path:
+    """Render and write REPRODUCTION_GUIDE.md to disk."""
+    root = Path(repo_root) if repo_root is not None else get_repo_root()
+    out_path = Path(path) if path is not None else root / _GUIDE_RELATIVE
+    markdown = render_reproduction_guide_markdown(root, guide=guide)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        markdown + "\n" if not markdown.endswith("\n") else markdown,
+        encoding="utf-8",
+    )
+    return out_path
+
+
+if __name__ == "__main__":
+    write_reproduction_turnover_evidence()
+    write_reproduction_guide_markdown()
