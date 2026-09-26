@@ -30,6 +30,9 @@
   from `acceptance.py` to `motion_matching/evidence_integrity.py` (+5 lines net on main
   instead of +73), and the module-size reason now records 1427 lines. Motion-matching and
   shared-contract tests: 16 failures, all identical on main.
+- CI round 3 (`23f7b906c`): the only unit failure was the divergence inventory missing
+  the new `evidence_integrity.py`; regenerated with `python -m
+scripts.shared_tools.divergence_inventory --write` (`--check` passes).
 - Next: CI green on the consolidated PR, arm via `scripts/automerge_guard.py`,
   then close the nine originals as superseded.
 
