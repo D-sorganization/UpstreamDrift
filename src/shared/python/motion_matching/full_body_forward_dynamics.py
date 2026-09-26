@@ -83,7 +83,7 @@ class ForwardRolloutResult:
     qd: Array
     predicted_markers_m: Array
     shared_metrics: SharedMetrics | None
-    contact_audit: ContactAuditResult
+    contact_audit: ContactAuditResult | None
     max_closure_translation_m: float
     max_closure_rotation_rad: float | None
     max_closure_residual_m: float
@@ -198,7 +198,9 @@ class ForwardRolloutResult:
             "max_closure_rotation_rad": self.max_closure_rotation_rad,
             "legacy_mixed_unit_closure_value": self.max_closure_residual_m,
             "max_closure_residual_m": self.max_closure_residual_m,
-            "contact_audit": self.contact_audit.as_dict(),
+            "contact_audit": (
+                self.contact_audit.as_dict() if self.contact_audit is not None else None
+            ),
             "shared_metrics": (
                 self.shared_metrics.as_dict()
                 if self.shared_metrics is not None
@@ -349,24 +351,19 @@ def _build_failed_rollout(
 ) -> ForwardRolloutResult:
     """Construct a fallback ForwardRolloutResult when numerical integration fails or is invalid."""
     n_frames = len(times)
-    if capture is not None and marker_offsets is not None:
-        eval_cap = _slice_capture(capture, n_frames)
-        zero_markers = np.zeros((n_frames, len(eval_cap.labels), 3), dtype=np.float64)
-        shared_metrics = compute_shared_metrics(
-            capture=eval_cap,
-            predicted_points_m=zero_markers,
-            tracked_labels=list(marker_offsets.keys()),
-        )
-    else:
-        zero_markers = np.empty((n_frames, 0, 3), dtype=np.float64)
-        shared_metrics = None
+    # NaN, not zeros: no metric may be computed from a rollout that never ran (#10960 P1-9).
+    unrun_markers = (
+        np.full((n_frames, len(capture.labels), 3), np.nan, dtype=np.float64)
+        if capture is not None
+        else np.empty((n_frames, 0, 3), dtype=np.float64)
+    )
     return ForwardRolloutResult(
         time_s=times,
         q=np.zeros((n_frames, n_coords)),
         qd=np.zeros((n_frames, n_coords)),
-        predicted_markers_m=zero_markers,
-        shared_metrics=shared_metrics,
-        contact_audit=_audit_contact_samples([], n_frames),
+        predicted_markers_m=unrun_markers,
+        shared_metrics=None,
+        contact_audit=None,
         max_closure_translation_m=max_closure_translation_m,
         max_closure_rotation_rad=max_closure_rotation_rad,
         max_closure_residual_m=max_closure_residual_m,
@@ -659,11 +656,11 @@ def _simulate_rk45(
         atol=options.atol,
     )
     if not sol.success:
-        zero_markers = np.zeros((n_frames, len(labels), 3), dtype=np.float64)
+        unrun_markers = np.zeros((n_frames, len(labels), 3), dtype=np.float64)
         return (
             np.zeros((n_frames, n_coords)),
             np.zeros((n_frames, n_coords)),
-            zero_markers,
+            unrun_markers,
             [],
             float("nan"),
             None,

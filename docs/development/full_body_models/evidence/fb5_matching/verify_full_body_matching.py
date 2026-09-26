@@ -305,14 +305,18 @@ def _execute_forward_rollout(ctx: MatchingContext) -> Any:
     c = rollout.contact_audit
     logger.info("Forward Simulation Results:")
     logger.info("  Status: %s", rollout.status)
-    logger.info("  Whole marker RMSE: %.2f mm", m.whole_marker_rmse_m * 1000.0)
-    logger.info("  Early marker RMSE: %.2f mm", m.early_marker_rmse_m * 1000.0)
-    logger.info("  Terminal marker RMSE: %.2f mm", m.terminal_marker_rmse_m * 1000.0)
-    logger.info("  Club marker RMSE: %.2f mm", m.club_marker_rmse_m * 1000.0)
-    logger.info("  Pelvis yaw RMSE: %.4f rad", m.pelvis_yaw_rmse_rad)
-    logger.info("  Max normal ground force: %.2f N", c.max_normal_force_n)
-    logger.info("  Max friction ground force: %.2f N", c.max_friction_force_n)
-    logger.info("  Max penetration: %.2f mm", c.max_penetration_m * 1000.0)
+    if m is not None:
+        logger.info("  Whole marker RMSE: %.2f mm", m.whole_marker_rmse_m * 1000.0)
+        logger.info("  Early marker RMSE: %.2f mm", m.early_marker_rmse_m * 1000.0)
+        logger.info(
+            "  Terminal marker RMSE: %.2f mm", m.terminal_marker_rmse_m * 1000.0
+        )
+        logger.info("  Club marker RMSE: %.2f mm", m.club_marker_rmse_m * 1000.0)
+        logger.info("  Pelvis yaw RMSE: %.4f rad", m.pelvis_yaw_rmse_rad)
+    if c is not None:
+        logger.info("  Max normal ground force: %.2f N", c.max_normal_force_n)
+        logger.info("  Max friction ground force: %.2f N", c.max_friction_force_n)
+        logger.info("  Max penetration: %.2f mm", c.max_penetration_m * 1000.0)
     logger.info(
         "  Max closure residual: %.2f mm", rollout.max_closure_residual_m * 1000.0
     )
@@ -394,14 +398,22 @@ def _archive_artifacts_and_receipt(
             "duration_s": float(ctx.time_grid[-1]),
             "ground_height_m": ctx.ground_height_m,
             "max_closure_residual_m": rollout.max_closure_residual_m,
-            "shared_metrics": {
-                "whole_marker_rmse_m": rollout.shared_metrics.whole_marker_rmse_m,
-                "early_marker_rmse_m": rollout.shared_metrics.early_marker_rmse_m,
-                "terminal_marker_rmse_m": rollout.shared_metrics.terminal_marker_rmse_m,
-                "club_marker_rmse_m": rollout.shared_metrics.club_marker_rmse_m,
-                "pelvis_yaw_rmse_rad": rollout.shared_metrics.pelvis_yaw_rmse_rad,
-            },
-            "contact_audit": rollout.contact_audit.as_dict(),
+            "shared_metrics": (
+                {
+                    "whole_marker_rmse_m": rollout.shared_metrics.whole_marker_rmse_m,
+                    "early_marker_rmse_m": rollout.shared_metrics.early_marker_rmse_m,
+                    "terminal_marker_rmse_m": rollout.shared_metrics.terminal_marker_rmse_m,
+                    "club_marker_rmse_m": rollout.shared_metrics.club_marker_rmse_m,
+                    "pelvis_yaw_rmse_rad": rollout.shared_metrics.pelvis_yaw_rmse_rad,
+                }
+                if rollout.shared_metrics is not None
+                else None
+            ),
+            "contact_audit": (
+                rollout.contact_audit.as_dict()
+                if rollout.contact_audit is not None
+                else None
+            ),
         },
         "artifacts": {
             f"forward_trajectory_{ctx.engine}_sha256": traj_sha256,

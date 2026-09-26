@@ -213,8 +213,16 @@ def _write_receipt(
             "num_frames": len(rollout_res.time_s),
             "duration_s": float(rollout_res.time_s[-1]),
             "max_closure_residual_m": rollout_res.max_closure_residual_m,
-            "shared_metrics": rollout_res.shared_metrics.as_dict(),
-            "contact_audit": rollout_res.contact_audit.as_dict(),
+            "shared_metrics": (
+                rollout_res.shared_metrics.as_dict()
+                if rollout_res.shared_metrics is not None
+                else None
+            ),
+            "contact_audit": (
+                rollout_res.contact_audit.as_dict()
+                if rollout_res.contact_audit is not None
+                else None
+            ),
         },
         "artifacts": {
             f"forward_trajectory_{engine}_sha256": sha256_file(traj_path),
