@@ -44,6 +44,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
       - name: Purge pip cache
         run: python3 -m pip cache purge || true
 
@@ -51,6 +54,8 @@ jobs:
         run: python3 -m pip install pyyaml
 
       - name: Build Knowledge Pack
+        env:
+          PYTHONPATH: .:vendor/ud-tools/src
         run: |
           python3 -m src.shared.python.ai.knowledge build knowledge/pack.yml --root UpstreamDrift=. --out .knowledge/pack.sqlite
 

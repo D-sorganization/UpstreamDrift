@@ -6,8 +6,8 @@
 - Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-10943`
 - Branch: `agy/issue-10943`
 - Baseline commit: `2d5830d18642c46d915f7639f0f996f995b149ad` (origin/main)
-- Implementation commit: `SELF`
-- Pull request: not created
+- Implementation commit: `3c4c3940f`
+- Pull request: #10968
 - Governing issue: #10943
 - Lease session: `antigravity-ud-10943`
 
