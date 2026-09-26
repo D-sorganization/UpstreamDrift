@@ -1,7 +1,8 @@
 function g = gs3dx_physical_graph(mdl)
 %GS3DX_PHYSICAL_GRAPH  Physical-connection nets of a diagram's top level.
 %
-%   G = GS3DX_PHYSICAL_GRAPH(MDL) returns, for the loaded diagram MDL:
+%   G = GS3DX_PHYSICAL_GRAPH(MDL) returns, for the loaded diagram or
+%   subsystem MDL (its own level only):
 %     .line      (1,L) handles of every line segment
 %     .line_net  (1,L) net id per segment (the handle of its root segment)
 %     .port      (1,P) physical port handles (LConn and RConn) of every block
@@ -35,6 +36,7 @@ function g = gs3dx_physical_graph(mdl)
     g.line_net = arrayfun(@(i) g.line(root(i)), 1:numel(g.line));
 
     blocks = find_system(mdl, 'SearchDepth', 1, 'Type', 'Block');
+    blocks = blocks(~strcmp(blocks, getfullname(mdl)));  % a subsystem lists itself
     g.port = []; g.owner = []; g.net = [];
     for k = 1:numel(blocks)
         ph = get_param(blocks{k}, 'PortHandles');

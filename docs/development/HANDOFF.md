@@ -19,8 +19,8 @@
   move shoulders and hip to quaternion joints, and grow to a full-body model under
   the 1,000 non-virtual-block Home-license limit, without touching the originals.
 - Status: GS3DX-1 (#10951) scaffold, GS3DX-2 (#10952) regression harness, GS3DX-3
-  (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim` and GS3DX-5 (#10955) `GS3DX_Quat`
-  quaternion shoulders done.
+  (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim`, GS3DX-5 (#10955) `GS3DX_Quat`
+  quaternion shoulders and GS3DX-6 (#10956) quaternion hip done.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -59,6 +59,12 @@
   9. Refactors: `gs3dx_physical_graph` + `gs3dx_redraw_nets` (shared net surgery),
      `gs3dx_copy_models` (copy guard), `gs3dx_simulate` `block_parameters` option,
      `gs3dx_repoint_references` skips subsystem-reference internals.
+  10. #10956: `gs3dx_quaternion_swap` is the shared swap core (port map per joint type);
+      `gs3dx_gimbal_to_spherical` and `gs3dx_bushing_to_6dof` are thin specs over it.
+      The hip Bushing Joint becomes a 6-DOF Joint (prismatics copied, rotation quaternion);
+      `GS3DX_Quat` is 594 blocks (15 below Slim). `gs3dx_hip_rig` (+ `gs3dx_rig_scaffold`,
+      `gs3dx_rig_simulate`, shared with the refactored joint rig): all 30 HipLogs signals match
+      the Bushing to <= 1.9e-6 of peak. Convergence with the hip: 14.8 / 0.61 mm at 1e-3 / 1e-5.
 
 ## Files and Decisions
 
@@ -88,14 +94,19 @@ Creator` (newline); find it by BlockType.
   input-function loop.
 - A Spherical Joint has one target per quantity: the mask init asserts equal Rx/Ry/Rz
   priorities, so set all six priorities in one `set_param` call.
-- Impact-input mode sweep: mode 3 ill-conditioned, mode 2 torqued but 1e8 N\*m, mode 1 fails at
-  35 ms in hip gimbal lock (motivates #10956).
+- Impact-input mode sweep: mode 3 ill-conditioned, mode 2 torqued but 1e8 N\*m, mode 1 fails
+  early. Not gimbal lock: Quat (quaternion hip) fails at 19.9 ms with hip Y at 49° while the
+  mode-1 hip torque command reaches ~2e7 N\*m. The drive blows up, not the joint.
+- `gs3dx_physical_graph` on a subsystem: `find_system` lists the subsystem itself; exclude it.
+- Rig constant signals are logged once; `gs3dx_rig_simulate` expands them to the output grid.
+- The hip rig's default torques keep the Bushing's Y angle within -72..62°; 6x larger
+  torques reach 84° (near singular, 1.8e4 deg/s).
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 47 passed, 0 failed (2026-09-26; the Simulation-tagged tests take most of the time;
-  select `~HasTag('Simulation')` for the 41 structural tests).
+  → 49 passed, 0 failed, 481 s (2026-09-26; the Simulation-tagged tests take most of the time;
+  select `~HasTag('Simulation')` for the structural tests).
 - The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
 ## Blockers and Risks
@@ -104,6 +115,6 @@ Creator` (newline); find it by BlockType.
 
 ## Next Steps
 
-1. #10956 quaternion hip: inspect the hip Bushing subsystem, replace it with a quaternion
-   joint using the same `gs3dx_xyz_map` pattern, prove with the rig and convergence tests.
-2. #10957/#10958 lower body under the budget with >= 10% margin; #10959 Sonnet visual QA.
+1. #10957 lower body: design pelvis/legs (hips, knees, ankles) on `GS3DX_Quat` with
+   quaternion hips/ankles from `gs3dx_quaternion_swap`, <= 900 non-virtual blocks.
+2. #10958 feet/ground and full-body integration; #10959 Sonnet visual QA.

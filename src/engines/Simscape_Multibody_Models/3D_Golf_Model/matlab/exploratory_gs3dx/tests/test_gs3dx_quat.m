@@ -1,12 +1,14 @@
 classdef test_gs3dx_quat < matlab.unittest.TestCase
-%TEST_GS3DX_QUAT  GS3DX_Quat: quaternion (Spherical Joint) shoulders (#10955).
+%TEST_GS3DX_QUAT  GS3DX_Quat: quaternion shoulders (#10955) and hip (#10956).
 %
 %   GS3DX_KDS_Spherical replaces GS3DX_KDS_Gimbal's Gimbal Joint with a
 %   Spherical Joint and keeps the subsystem interface: the Torque X/Y/Z
 %   inputs and every SignalBus element keep their Gimbal-axis meaning
 %   (GS3DX_XYZ_MAP).  Equivalence is shown on an isolated, torqued joint
 %   rig (GS3DX_JOINT_RIG), because the full model has no torqued,
-%   well-conditioned drive (docs/SENSITIVITY_FINDINGS.md).
+%   well-conditioned drive (docs/SENSITIVITY_FINDINGS.md).  The hip's
+%   Bushing Joint becomes a 6-DOF Joint (quaternion rotation, same three
+%   prismatics) the same way, shown on GS3DX_HIP_RIG.
 
     properties
         info struct
@@ -16,8 +18,11 @@ classdef test_gs3dx_quat < matlab.unittest.TestCase
     properties (Constant)
         Spherical = 'sm_lib/Joints/Spherical Joint'
         Gimbal    = 'sm_lib/Joints/Gimbal Joint'
+        SixDof    = 'sm_lib/Joints/6-DOF Joint'
+        Bushing   = 'sm_lib/Joints/Bushing Joint'
+        Hip       = 'Hips and Torso Inputs/Hip Kinetically Driven'
         % Rig solved at RelTol = AbsTol = 1e-8; observed differences are
-        % <= 2e-7 of each signal's peak.
+        % <= 2e-7 of each signal's peak (hip rig: <= 1.9e-6).
         RigRelTol = 1e-5
     end
 
@@ -67,10 +72,25 @@ classdef test_gs3dx_quat < matlab.unittest.TestCase
                 'BlockType', 'SubSystem', 'ReferencedSubsystem', testCase.names.slim_subsys('Gimbal')));
         end
 
-        function quat_model_saves_ten_blocks(testCase)
+        function quat_hip_is_a_6dof_joint(testCase)
+            quat = char(testCase.names.variants.quat);
+            load_system(quat);
+            hip = [quat '/' testCase.Hip];
+            testCase.verifyEmpty(find_system(hip, 'LookUnderMasks', 'all', 'ReferenceBlock', testCase.Bushing));
+            testCase.verifyEqual(find_system(hip, 'LookUnderMasks', 'all', 'ReferenceBlock', testCase.SixDof), ...
+                {[hip '/Hip Joint']});
+            slim = char(testCase.names.variants.slim);
+            load_system(slim);
+            bus = @(m) get_param(find_system([m '/' testCase.Hip], 'SearchDepth', 1, 'BlockType', 'BusCreator'), ...
+                'InputSignalNames');
+            testCase.verifyEqual(bus(quat), bus(slim));
+        end
+
+        function quat_model_saves_fifteen_blocks(testCase)
+            % 10 from the two shoulders, 5 from the hip.
             slim = local_fresh_budget(char(testCase.names.variants.slim));
             quat = local_fresh_budget(char(testCase.names.variants.quat));
-            testCase.verifyEqual(slim.nonvirtual_total - quat.nonvirtual_total, 10);
+            testCase.verifyEqual(slim.nonvirtual_total - quat.nonvirtual_total, 15);
         end
 
         function builder_refuses_to_overwrite(testCase)
@@ -89,6 +109,23 @@ classdef test_gs3dx_quat < matlab.unittest.TestCase
                     1e-9 + testCase.RigRelTol * max(abs(a(:))), f{1});
             end
             fprintf('Joint rig wall time: Gimbal %.2f s, Spherical %.2f s\n', g.wall_s, s.wall_s);
+        end
+
+        function sixdof_hip_rig_matches_bushing_hip_rig(testCase)
+            slim = char(testCase.names.variants.slim);
+            quat = char(testCase.names.variants.quat);
+            load_system(slim); load_system(quat);
+            b = gs3dx_hip_rig(slim);
+            q = gs3dx_hip_rig(quat);
+            % The drive must stay clear of the Bushing's Y-angle singularity.
+            testCase.assertLessThan(max(abs(b.signals.HipAngularPositionY)), 80);
+            testCase.verifyEqual(sort(fieldnames(q.signals)), sort(fieldnames(b.signals)));
+            for f = reshape(fieldnames(b.signals), 1, [])
+                a = b.signals.(f{1});
+                testCase.verifyLessThanOrEqual(max(abs(q.signals.(f{1})(:) - a(:))), ...
+                    1e-9 + testCase.RigRelTol * max(abs(a(:))), f{1});
+            end
+            fprintf('Hip rig wall time: Bushing %.2f s, 6-DOF %.2f s\n', b.wall_s, q.wall_s);
         end
 
         function quat_converges_to_the_slim_solution(testCase)
