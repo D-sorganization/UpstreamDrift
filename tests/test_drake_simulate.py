@@ -118,7 +118,7 @@ class TestSimOutShape:
     """Postcondition shape checks for the canonical SimOut dataclass."""
 
     @staticmethod
-    def _valid_arrays(n: int, n_joints: int) -> dict[str, np.ndarray]:
+    def _valid_arrays(n: int, n_joints: int) -> dict[str, Any]:
         return {
             "time": np.linspace(0, 0.3, n),
             "q": np.zeros((n, n_joints)),
@@ -314,7 +314,7 @@ def test_mocked_simulate_returns_canonical_simout(
     assert out.tau.shape == (11, n_joints)
     assert out.grip.shape == (11, 3)
     assert out.grip_quat.shape == (11, 4)
-    assert out.solver_status in {"success", "warning", "failed"}
+    assert out.solver_status in {"success", "warning", "failed", "partial"}
 
 
 def test_mocked_simulate_is_deterministic(
@@ -435,6 +435,66 @@ def test_mocked_simulate_advance_to_value_error_propagates(
             theta,
             options=SimOptions(simulation_time_s=0.01, sample_rate_hz=1000.0),
         )
+
+
+@pytest.mark.unit
+def test_mocked_simulate_forced_energy_error_yields_nan_and_partial(
+    _mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Issue #10960: forced energy error produces NaN and solver_status='partial'."""
+    plant = _mocked_pydrake["plant"]
+    plant.CalcKineticEnergy.side_effect = ValueError("kinetic energy failure")
+
+    n_joints = 19
+    theta = np.linspace(-0.1, 0.1, n_joints * COEFFS_PER_JOINT)
+    out = simulate_with_coefficients(
+        theta,
+        options=SimOptions(
+            simulation_time_s=0.01, sample_rate_hz=1000.0, compute_energy=True
+        ),
+    )
+
+    assert out.solver_status == "partial"
+    assert np.all(np.isnan(out.kinetic_energy))
+
+
+@pytest.mark.unit
+def test_mocked_simulate_clean_run_reports_success(
+    _mocked_pydrake: dict[str, MagicMock],
+) -> None:
+    """Issue #10960: clean run with resolved bodies and energies reports 'success'."""
+    plant = _mocked_pydrake["plant"]
+    plant.HasBodyNamed.return_value = True
+    body_mock = MagicMock(name="Body")
+    plant.GetBodyByName.return_value = body_mock
+
+    transform_mock = MagicMock()
+    transform_mock.translation.return_value = np.array([0.1, 0.2, 0.3])
+    quat_mock = MagicMock()
+    quat_mock.w.return_value = 1.0
+    quat_mock.x.return_value = 0.0
+    quat_mock.y.return_value = 0.0
+    quat_mock.z.return_value = 0.0
+    transform_mock.rotation.return_value.ToQuaternion.return_value = quat_mock
+    plant.CalcRelativeTransform.return_value = transform_mock
+
+    plant.CalcKineticEnergy.return_value = 10.0
+    plant.CalcPotentialEnergy.return_value = 5.0
+
+    n_joints = 19
+    theta = np.zeros(n_joints * COEFFS_PER_JOINT)
+    out = simulate_with_coefficients(
+        theta,
+        options=SimOptions(
+            simulation_time_s=0.01, sample_rate_hz=1000.0, compute_energy=True
+        ),
+    )
+
+    assert out.solver_status == "success"
+    assert np.all(np.isfinite(out.kinetic_energy))
+    assert np.all(np.isfinite(out.potential_energy))
+    assert np.all(np.isfinite(out.grip))
+    assert np.all(np.isfinite(out.clubhead))
 
 
 # ---------------------------------------------------------------------------

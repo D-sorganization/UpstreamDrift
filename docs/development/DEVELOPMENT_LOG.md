@@ -120,6 +120,58 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Python `HillMuscleModel`s were never forwarded to the Rust `MuscleGroup` (it summed zero muscles, so net torque was always 0.0) and the Rust path skipped the activation precondition. Muscles are now converted to their Rust equivalent (or the group drops to pure Python when a muscle has custom physics), activations are validated once before backend choice, the antagonist pair is rebuilt from the groups' current backends, and a parity test pins Rust == Python.
 - **Next step:** CI green, review, merge.
 
+### DL-#10960 · Fabricated-Evidence Audit: Fail-Closed Remediation of Literal Receipts and Self-Scored Fits
+
+- **State:** in_review
+- **Owner:** claude (agy executors on DeskComputer and OG Laptop)
+- **Issue:** #10960
+- **PR:** consolidated PR from `claude/ud-consolidated2-20260926` (supersedes #10974)
+- **Branch:** `claude/ud-consolidated2-20260926`
+- **Paths:** `src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/*/python/motion_matching/provider.py`, `src/shared/python/neural_motion/surrogates/`, `src/shared/python/neural_motion/matrix/`, `src/shared/python/neural_motion/turnover/`, `src/shared/python/neural_motion/benchmark/runner.py`, `src/shared/python/neural_motion/inference/orchestration.py`, `src/shared/python/motion_matching/contact_identification.py`, `src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`, `docs/plans/neural_motion_matching/evidence/`, `docs/development/full_body_models/evidence/contact_id/receipt.json`, `src/shared/python/motion_matching/parity_report.py`, `src/shared/python/motion_matching/parity_schema.py`, `src/shared/python/motion_matching/cross_engine_replay.py`, `src/shared/python/motion_matching/full_body_forward_dynamics.py`, `src/shared/python/motion_matching/candidate_session.py`, `docs/development/full_body_models/evidence/fb5_matching/`, `docs/development/full_body_models/evidence/fb6_parity/`, `evidence/matched/driver_g1/parity_report.json`, `docs/development/full_body_models/evidence/_gates.py`, `docs/development/full_body_models/evidence/fb3_drake/`, `docs/development/full_body_models/evidence/fb4_calibration/`, `evidence/matched/driver_g1_pinocchio/`, `src/tools/matched_swing_browser/model.py`, `src/engines/physics_engines/opensim/python/tour_matching/document_ik.py`, `docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json`, `src/shared/python/motion_matching/matching_strategy.py`, `src/shared/python/motion_matching/ledger.py`, `reports/matched_swing_ledger.json`, `tests/fixtures/motion_matching_strategy.py`, `src/shared/python/motion_matching/club_only/`, `src/tools/motion_matching/gui.py`, `src/shared/python/motion_matching/acceptance.py`, `src/shared/python/motion_matching/kinematic_smoothing.py`, `src/shared/python/motion_matching/loaders/body_json.py`, `src/engines/physics_engines/drake/python/motion_matching/simulate.py`, `src/engines/physics_engines/pendulum/python/motion_matching/club_pendulum_match.py`, `src/shared/python/tour_baselines/calibration.py`, `src/shared/python/pose_interchange/pose_io.py`, `docs/plans/club_only_matching/evidence/club_body_candidates.json`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-26 — consolidated branch on `71610a4ff`: motion_matching, neural_motion, opensim, tools/motion_matching, config and every changed test file: 3034 passed, 21 failed, all baseline or host-only (16 known motion_matching failures, OpenSim binding absent, Rajagopal asset absent, local 10k corpus present); ledger regenerated and fresh.
+- **Summary:** P0 slices 1, 3, 5-6, 7, 8, 9, 24 and P1-7, P1-8, P1-9, P1-10: body-target fits, NM-07 surrogate ablation, NM-09/NM-12 checkpoint matrix and turnover, NM-10 benchmark baselines, NM-08 orchestration verdicts, MS-20 contact identification and OpenSim full-swing receipts no longer emit literal success values; unmeasured fields are None/UNQUALIFIED/unmeasured or the call raises NotImplementedError. Parity reports only qualify a row after a comparison ran (missing reference, shape mismatch and never-gated engines are `unverified`, empty is `PARTIAL`, no self-comparison fallback) and publish `is_parity_accepted`; failed forward rollouts carry `contact_audit=None`, `shared_metrics=None` and NaN markers. FB-3..FB-6 verify scripts compute status from recorded thresholds through one gate helper (committed receipts relabelled); the OpenSim document-IK receipt is built only from OpenSim fields (`opensim-document-ik/v1`, `IK_PARITY_ONLY`, never physically accepted); the sample strategy builder moved to test fixtures; the ledger no longer reports solver wall-clock `elapsed_s` as a trajectory horizon. P1-1..P1-6 and P1-11: constrained IK fails closed with no solver; the retrieval library excludes the query trial; branch fit and closure are None (infeasible) until computed; the GUI and club-only UI refuse synthetic seeds (`VERIFIED_SEED_SOURCES`); CO-05 body candidates are never accepted without a measured fit (0/32 committed) and carry no invented closure; control replay reports `software_contract_consistent` with nullable circular metrics; the acceptance force gate matches native-fit lanes exactly and emits `NOT_APPLICABLE`, and dual-terminal disclosure is `DISCLOSED`, not PASSED. P2: kinematic smoothing reports `smoothing_applied`, Drake simulate reports NaN and `partial`, body-JSON digests are hashed from the file, fixed-pivot hub work is None. The OpenSim full-swing lane cannot qualify while its marker residuals are self-scored.
+- **Next step:** Get the consolidated PR's quality-gate green and merge it through `automerge_guard.py`.
+
+### DL-#9415 · Repository Root Allowlist Check in Docs Governance
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9415
+- **PR:** draft PR from `agy/ud-9415-root-allowlist`
+- **Branch:** `agy/ud-9415-root-allowlist`
+- **Paths:** `scripts/check_docs_governance.py`, `scripts/config/root_allowlist.json`, `docs/governance/DOCS_GOVERNANCE.md`, `tests/scripts/test_doc_governance_checks.py`, `tests/unit/scripts/test_check_docs_governance_root_allowlist.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — `python scripts/check_docs_governance.py` exits 0; 26/26 docs-governance tests pass (junit count); new tests error on the base checker (red) and pass after; ruff clean; architecture budget OK.
+- **Summary:** Committed root entries (`git ls-tree --name-only HEAD`) must match `scripts/config/root_allowlist.json`; unlisted and stale entries both fail, and a failed git call or malformed config fails closed. Closes the last software checkbox of #9415; the history rewrite, Jules workflows and SPEC cap remain owner decisions.
+- **Next step:** CI green, review, merge.
+
+### DL-#10965 · Coverage Gate Checker Reads the Budget File and Maps Cobertura Sources
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10965
+- **PR:** draft PR from `agy/ud-10965-coverage-gates`
+- **Branch:** `agy/ud-10965-coverage-gates`
+- **Paths:** `scripts/check_coverage_gates.py`, `tests/unit/scripts/test_check_coverage_gates.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — 23/23 checker and budget tests pass; checker run on a measured unit-lane report (OG, 2026-09-26) maps all six gates (5 below the 30% floor, see PR body); ruff clean; architecture budget OK.
+- **Summary:** `check_coverage_gates.py` now takes its gates from `coverage_gates` in `scripts/config/mypy_exclusion_budget.json` (hard-coded COVERAGE_GATES/MODULE_PATTERNS were never enforced and are gone), reads Cobertura XML or coverage.py JSON, resolves XML filenames through `<sources>` against the repo root, and treats a gate with no matching files or an unmappable source as exit 2. Not wired into CI yet; the ratchet dates cannot move before 2026-10-01 because of the #8731 pin.
+- **Next step:** CI green, review, merge.
+
+### DL-#9191 · Verify Companion Screenshot Bytes and Pixel Dimensions
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9191
+- **PR:** draft PR from `agy/ud-9191-screenshot-verifier`
+- **Branch:** `agy/ud-9191-screenshot-verifier`
+- **Paths:** `scripts/verify_companion_screenshots.py`, `tests/unit/scripts/test_verify_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — 57/57 pass across the verifier tests and tests/companion/test_companion_catalog.py; ruff clean; architecture budget OK.
+- **Summary:** `scripts/verify_companion_screenshots.py` recomputes SHA-256 and PNG IHDR pixel size for every captured screenshot record (path must resolve inside the repo, alt text required) and requires pending records to carry null asset fields plus a reason; the companion catalog tests run it on the exporter's real payload. Delivers the #9191 'SHA-256/dimension verification' item; the governed capture workflow, real assets and AffineDrift #4025 alignment remain.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review

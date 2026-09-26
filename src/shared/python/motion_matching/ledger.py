@@ -160,9 +160,7 @@ def extract_horizon_s(data: Mapping[str, Any]) -> float | None:
                 v = nested.get(k)
                 if isinstance(v, (int, float)) and not math.isnan(v):
                     return float(v)
-    val = data.get("elapsed_s")
-    if isinstance(val, (int, float)) and not math.isnan(val):
-        return float(val)
+    # `elapsed_s` is solver wall-clock time, never a trajectory horizon (#10960 P1-8).
     frames = None
     if isinstance(data.get("ik"), Mapping) and "frames" in data["ik"]:
         frames = data["ik"]["frames"]

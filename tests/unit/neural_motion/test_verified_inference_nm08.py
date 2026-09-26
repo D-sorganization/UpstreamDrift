@@ -443,3 +443,71 @@ def test_preview_only_flag_propagates_explicitly() -> None:
 
     report_full = orchestrator.orchestrate(target, is_preview=False)
     assert report_full.is_preview_only is False
+
+
+@pytest.mark.unit
+def test_orchestrate_without_polish_fn_and_replay_required_is_not_neural_accepted() -> (
+    None
+):
+    """Orchestration without polish_fn when replay required fails closed (#10960 P0-6)."""
+    target = _make_dummy_target()
+    orchestrator = VerifiedInferenceOrchestrator(
+        proposal_fn=lambda t: np.zeros(27),
+        polish_fn=None,
+        classical_fn=None,
+    )
+    report = orchestrator.orchestrate(target, require_independent_replay=True)
+    assert report.status != InferenceStatus.NEURAL_ACCEPTED
+    assert report.status == InferenceStatus.REJECTED
+    assert len(report.attempts) >= 1
+    att = report.attempts[0]
+    assert att.phase == "neural_proposal"
+    assert att.acceptance_status == "rejected"
+    assert att.rejection_reason == "no native polish/replay"
+
+
+@pytest.mark.unit
+def test_orchestrate_polish_returning_empty_acceptance_is_rejected() -> None:
+    """Polish returning empty acceptance dict must fail closed to False (#10960 P0-6)."""
+    target = _make_dummy_target()
+    orchestrator = VerifiedInferenceOrchestrator(
+        proposal_fn=lambda t: np.zeros(27),
+        polish_fn=lambda t, u: {
+            "controls": u,
+            "independent_replay": True,
+            "acceptance": {},
+        },
+        classical_fn=None,
+    )
+    report = orchestrator.orchestrate(target, require_independent_replay=True)
+    assert report.status != InferenceStatus.NEURAL_ACCEPTED
+    assert report.status == InferenceStatus.REJECTED
+    att = report.attempts[0]
+    assert att.phase == "neural_refined"
+    assert att.acceptance_status == "failed"
+
+
+@pytest.mark.unit
+def test_orchestrate_polish_returning_explicit_passed_verdict_reported_verbatim() -> (
+    None
+):
+    """Polish returning an explicit PASSED verdict must be reported verbatim (#10960 P0-6)."""
+    target = _make_dummy_target()
+    verdict = {
+        "is_physically_accepted": True,
+        "status": "PASSED",
+        "custom_receipt_code": "NM08_VERIFIED_77",
+        "residual_rms": 0.0012,
+    }
+    orchestrator = VerifiedInferenceOrchestrator(
+        proposal_fn=lambda t: np.zeros(27),
+        polish_fn=lambda t, u: {
+            "controls": u,
+            "independent_replay": True,
+            "acceptance": verdict,
+        },
+        classical_fn=None,
+    )
+    report = orchestrator.orchestrate(target, require_independent_replay=True)
+    assert report.status == InferenceStatus.NEURAL_ACCEPTED
+    assert report.acceptance_verdict == verdict

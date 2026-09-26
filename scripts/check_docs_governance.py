@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from collections import Counter
+from collections.abc import Iterable
 from pathlib import Path
 import re
 
@@ -24,6 +26,117 @@ SOURCE_OF_TRUTH_HEADINGS = {
         "Support Matrix",
     }
 }
+ROOT_ALLOWLIST_CONFIG = ROOT / "scripts" / "config" / "root_allowlist.json"
+
+
+def _tracked_root_entries() -> list[str] | None:
+    """Return tracked root entries via git ls-tree, or None on git command failure."""
+    cp = subprocess.run(
+        ["git", "ls-tree", "--name-only", "HEAD"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if cp.returncode != 0:
+        return None
+    return [line.strip() for line in cp.stdout.splitlines() if line.strip()]
+
+
+def _load_root_allowlist(config_path: Path | None = None) -> list[str]:
+    """Load and validate the repository root allowlist config.
+
+    Preconditions:
+        - config file exists and contains valid JSON object
+        - 'entries' key is present and is a list of strings
+        - no entries contain path separators ('/' or '\\')
+        - no entries are empty strings
+        - no duplicate entries exist
+    Postconditions:
+        - returns list of distinct root entry names
+    """
+    path = config_path if config_path is not None else ROOT_ALLOWLIST_CONFIG
+    if not path.exists():
+        raise ValueError(f"Root allowlist config not found: {path}")
+
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Invalid JSON in root allowlist config {path}: {exc}"
+        ) from exc
+
+    if not isinstance(data, dict):
+        raise ValueError(f"Root allowlist config at {path} must be a JSON object")
+
+    if "entries" not in data:
+        raise ValueError(f"Root allowlist config at {path} missing 'entries' key")
+
+    raw_entries = data["entries"]
+    if not isinstance(raw_entries, list):
+        raise ValueError(f"Root allowlist 'entries' in {path} must be a list")
+
+    seen: set[str] = set()
+    entries: list[str] = []
+    for entry in raw_entries:
+        if not isinstance(entry, str):
+            raise ValueError(
+                f"Allowlist entry must be a string, got {type(entry).__name__}: {entry!r}"
+            )
+        if "/" in entry or "\\" in entry:
+            raise ValueError(
+                f"Allowlist entry cannot contain path separators ('/' or '\\'): {entry!r}"
+            )
+        if not entry.strip():
+            raise ValueError(f"Allowlist entry cannot be empty: {entry!r}")
+        if entry in seen:
+            raise ValueError(f"Duplicate root allowlist entry: {entry!r}")
+        seen.add(entry)
+        entries.append(entry)
+
+    return entries
+
+
+def _unexpected_root_entries(
+    tracked: Iterable[str], allowlist: Iterable[str]
+) -> list[str]:
+    """Return tracked root entries not present in the allowlist, sorted."""
+    allowlist_set = set(allowlist)
+    return sorted(entry for entry in set(tracked) if entry not in allowlist_set)
+
+
+def _stale_root_entries(tracked: Iterable[str], allowlist: Iterable[str]) -> list[str]:
+    """Return allowlist entries that are no longer tracked, sorted."""
+    tracked_set = set(tracked)
+    return sorted(entry for entry in set(allowlist) if entry not in tracked_set)
+
+
+def _root_allowlist_failure() -> str | None:
+    """Failure message for root entries outside the allowlist or stale entries, else None.
+
+    Fails closed: an invalid config or a failed ``git ls-tree`` is a failure.
+    """
+    try:
+        allowlist = _load_root_allowlist()
+    except ValueError as exc:
+        return f"Invalid root allowlist config:\n- {exc}"
+    tracked_root = _tracked_root_entries()
+    if tracked_root is None:
+        return "Failed to list tracked repository root entries with git ls-tree"
+    unexpected_root = _unexpected_root_entries(tracked_root, allowlist)
+    if unexpected_root:
+        return (
+            "Unexpected repository root entries (add to "
+            "scripts/config/root_allowlist.json with review):\n- "
+            + "\n- ".join(unexpected_root)
+        )
+    stale_root = _stale_root_entries(tracked_root, allowlist)
+    if stale_root:
+        return (
+            "Stale repository root allowlist entries (remove from "
+            "scripts/config/root_allowlist.json):\n- " + "\n- ".join(stale_root)
+        )
+    return None
 
 
 def _git_changed_files() -> list[str]:
@@ -148,6 +261,9 @@ def main() -> int:
         return _fail(
             "Duplicate root process directories detected:\n- " + "\n- ".join(duplicates)
         )
+    root_failure = _root_allowlist_failure()
+    if root_failure:
+        return _fail(root_failure)
     duplicate_headings = _duplicate_source_of_truth_headings()
     if duplicate_headings:
         return _fail(

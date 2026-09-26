@@ -73,6 +73,8 @@ class DrakeFitSwingProvider:
         Raises:
             TypeError: If ``target`` lacks a usable ``.club`` /
                 :class:`ClubTarget` shape.
+            NotImplementedError: If ``target`` carries a body target, as the
+                body-target fit lane is not wired (#10960 P0-1).
         """
         if has_body_target(target):
             return execute_body_fit(

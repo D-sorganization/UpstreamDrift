@@ -35,6 +35,8 @@ from src.shared.python.motion_matching.contact_force_allocator import (
 )
 
 CONTROL_REPLAY_SCHEMA = "club-control-replay/1.0.0"
+STATUS_SOFTWARE_CONTRACT_CONSISTENT = "software_contract_consistent"
+DEFAULT_INTERVAL_TIMING_TOLERANCE_S = 1e-4
 _GOVERNING_ISSUE = 10610
 _ROOT_SLACK_QUALIFY_LIMIT = 1e-3
 _DEFAULT_BLOCKERS = (
@@ -48,8 +50,10 @@ __all__ = [
     "ControlRecoveryRequest",
     "ControlRecoveryResult",
     "ControlReplayReport",
+    "DEFAULT_INTERVAL_TIMING_TOLERANCE_S",
     "ImpactRegime",
     "IndependentReplayResult",
+    "STATUS_SOFTWARE_CONTRACT_CONSISTENT",
     "TighterStepSensitivity",
     "control_replay_evidence_payload",
     "detect_measured_state_resets",
@@ -57,6 +61,7 @@ __all__ = [
     "independent_forward_residual",
     "recover_and_replay_candidates",
     "recover_feasible_controls",
+    "verify_interval_timing",
 ]
 
 
@@ -138,27 +143,55 @@ class ControlPolicy:
         }
 
 
+def verify_interval_timing(
+    timestamps_s: NDArray[np.floating] | Sequence[float],
+    declared_interval_s: float | None = None,
+    *,
+    tolerance_s: float = DEFAULT_INTERVAL_TIMING_TOLERANCE_S,
+) -> bool:
+    """Verify timestamps are strictly increasing and match declared interval within tolerance."""
+    times = np.asarray(timestamps_s, dtype=np.float64)
+    if times.ndim != 1 or times.size < 2:
+        return False
+    if not np.all(np.isfinite(times)):
+        return False
+    diffs = np.diff(times)
+    if np.any(diffs <= 0.0):
+        return False
+    nominal = (
+        declared_interval_s if declared_interval_s is not None else float(diffs[0])
+    )
+    if nominal <= 0.0 or not np.isfinite(nominal):
+        return False
+    return bool(np.all(np.abs(diffs - nominal) <= tolerance_s))
+
+
 @dataclass(frozen=True)
 class IndependentReplayResult:
     """Independent open-loop replay diagnostics (no measured-state resets)."""
 
     timestamps_s: NDArray[np.float64]
     q_replay: NDArray[np.float64]
-    forward_residual: float
-    tighter_step_residual: float
+    forward_residual: float | None
+    tighter_step_residual: float | None
     used_measured_state_reset: bool
     root_slack_norm: float
     work_balance_error: float
     torque_rate_ok: bool
-    contact_feasible: bool
-    closure_residual_m: float
+    contact_feasible: bool | None
+    closure_residual_m: float | None
     impact_regime: ImpactRegime
     interval_timing_ok: bool
+    forward_residual_status: str = "evaluated"
+    forward_residual_reason: str | None = None
+    contact_feasible_reason: str | None = None
 
     def __post_init__(self) -> None:
-        times = require_strictly_increasing_timestamps(
-            np.asarray(self.timestamps_s, dtype=np.float64)
-        )
+        times = np.asarray(self.timestamps_s, dtype=np.float64)
+        if times.ndim != 1 or times.size < 2:
+            raise ValueError("timestamps_s must be a 1-D array with at least 2 samples")
+        if not np.all(np.isfinite(times)):
+            raise ValueError("timestamps_s must be finite")
         q = np.asarray(self.q_replay, dtype=np.float64)
         if q.ndim != 2 or q.shape[0] != times.size:
             raise ValueError("q_replay must be (N, dof) aligned with timestamps")
@@ -167,11 +200,15 @@ class IndependentReplayResult:
         for name, value in (
             ("forward_residual", self.forward_residual),
             ("tighter_step_residual", self.tighter_step_residual),
-            ("root_slack_norm", self.root_slack_norm),
-            ("work_balance_error", self.work_balance_error),
             ("closure_residual_m", self.closure_residual_m),
         ):
-            if not np.isfinite(value) or value < 0.0:
+            if value is not None and (not np.isfinite(value) or value < 0.0):
+                raise ValueError(f"{name} must be finite and >= 0 when set")
+        for name, req_val in (
+            ("root_slack_norm", self.root_slack_norm),
+            ("work_balance_error", self.work_balance_error),
+        ):
+            if not np.isfinite(req_val) or req_val < 0.0:
                 raise ValueError(f"{name} must be finite and >= 0")
         object.__setattr__(self, "timestamps_s", times.copy())
         object.__setattr__(self, "q_replay", q.copy())
@@ -179,12 +216,15 @@ class IndependentReplayResult:
     def as_dict(self) -> dict[str, Any]:
         return {
             "forward_residual": self.forward_residual,
+            "forward_residual_status": self.forward_residual_status,
+            "forward_residual_reason": self.forward_residual_reason,
             "tighter_step_residual": self.tighter_step_residual,
             "used_measured_state_reset": self.used_measured_state_reset,
             "root_slack_norm": self.root_slack_norm,
             "work_balance_error": self.work_balance_error,
             "torque_rate_ok": self.torque_rate_ok,
             "contact_feasible": self.contact_feasible,
+            "contact_feasible_reason": self.contact_feasible_reason,
             "closure_residual_m": self.closure_residual_m,
             "impact_regime": self.impact_regime.value,
             "interval_timing_ok": self.interval_timing_ok,
@@ -195,9 +235,10 @@ class IndependentReplayResult:
 class TighterStepSensitivity:
     """Coarse vs finer-step open-loop residual comparison."""
 
-    coarse_residual: float
-    tighter_step_residual: float
-    ratio: float
+    coarse_residual: float | None
+    tighter_step_residual: float | None
+    ratio: float | None
+    unassessed_reason: str | None = None
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -205,8 +246,8 @@ class TighterStepSensitivity:
             ("tighter_step_residual", self.tighter_step_residual),
             ("ratio", self.ratio),
         ):
-            if not np.isfinite(value) or value < 0.0:
-                raise ValueError(f"{name} must be finite and >= 0")
+            if value is not None and (not np.isfinite(value) or value < 0.0):
+                raise ValueError(f"{name} must be finite and >= 0 when set")
 
 
 @dataclass(frozen=True)
@@ -232,6 +273,10 @@ class ControlRecoveryRequest:
     kinematic_preview_ok: bool = True
     qualification_blockers: tuple[str, ...] = _DEFAULT_BLOCKERS
     allocation_objective: str = AllocationObjective.MINIMUM_EFFORT.value
+    declared_interval_s: float | None = None
+    is_circular_plant: bool | None = None
+    j_ground: NDArray[np.float64] | None = None
+    j_grip: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         if not self.candidate_id or not self.trial_id or not self.model_id:
@@ -273,6 +318,18 @@ class ControlRecoveryRequest:
             not np.isfinite(self.root_slack_override) or self.root_slack_override < 0.0
         ):
             raise ValueError("root_slack_override must be finite and >= 0 when set")
+        if self.declared_interval_s is not None and (
+            not np.isfinite(self.declared_interval_s) or self.declared_interval_s <= 0.0
+        ):
+            raise ValueError("declared_interval_s must be finite and > 0 when set")
+        if self.j_ground is not None:
+            jg = np.asarray(self.j_ground, dtype=np.float64)
+            require(bool(np.all(np.isfinite(jg))), "j_ground must be finite")
+            object.__setattr__(self, "j_ground", jg.copy())
+        if self.j_grip is not None:
+            jk = np.asarray(self.j_grip, dtype=np.float64)
+            require(bool(np.all(np.isfinite(jk))), "j_grip must be finite")
+            object.__setattr__(self, "j_grip", jk.copy())
         if self.measured_q_inject is not None:
             inject = np.asarray(self.measured_q_inject, dtype=np.float64)
             require(
@@ -318,6 +375,7 @@ class ControlRecoveryResult:
             qualification_blockers=self.qualification_blockers,
         )
         if self.torque_replay_status not in {
+            STATUS_SOFTWARE_CONTRACT_CONSISTENT,
             "passed",
             "rejected",
             "unevaluated",
@@ -446,8 +504,11 @@ def independent_forward_residual(
     *,
     times: NDArray[np.floating],
     q_reference: NDArray[np.floating],
-) -> float:
+    is_circular: bool = False,
+) -> float | None:
     """Recompute open-loop residual from saved policy; never trust claimed values."""
+    if is_circular:
+        return None
     times_arr = require_strictly_increasing_timestamps(
         np.asarray(times, dtype=np.float64)
     )
@@ -472,11 +533,18 @@ def evaluate_tighter_step_sensitivity(
     *,
     times: NDArray[np.floating],
     q_reference: NDArray[np.floating],
-    coarse_residual: float,
+    coarse_residual: float | None,
 ) -> TighterStepSensitivity:
     """Replay with half-step open-loop integration and compare residuals."""
     if policy is None:
         raise ValueError("policy required for tighter-step sensitivity")
+    if coarse_residual is None:
+        return TighterStepSensitivity(
+            coarse_residual=None,
+            tighter_step_residual=None,
+            ratio=None,
+            unassessed_reason="circular_plant",
+        )
     if not np.isfinite(coarse_residual) or coarse_residual < 0.0:
         raise ValueError("coarse_residual must be finite and >= 0")
     times_arr = require_strictly_increasing_timestamps(
@@ -574,7 +642,7 @@ def _allocate_reduced_software_plant(
     NDArray[np.float64],
     NDArray[np.float64],
     float,
-    bool,
+    bool | None,
     tuple[str, ...],
 ]:
     """Unit-inertia / reduced DoF path: copy RNEA onto actuated channels."""
@@ -584,7 +652,15 @@ def _allocate_reduced_software_plant(
     if request.root_slack_override is not None:
         max_root = float(request.root_slack_override)
         delta_root[:, 0] = request.root_slack_override
-    return tau_act, f_ground, lambda_grip, delta_root, max_root, True, ()
+    return (
+        tau_act,
+        f_ground,
+        lambda_grip,
+        delta_root,
+        max_root,
+        None,
+        ("reduced_plant_contact_unassessed",),
+    )
 
 
 def _allocate_floating_base_contacts(
@@ -599,7 +675,7 @@ def _allocate_floating_base_contacts(
     NDArray[np.float64],
     NDArray[np.float64],
     float,
-    bool,
+    bool | None,
     tuple[str, ...],
 ]:
     """Floating-base plant: reuse ContactForceAllocator (requires nv > 6)."""
@@ -615,11 +691,23 @@ def _allocate_floating_base_contacts(
         regularisation_grip=1.0,
         root_penalty_weight=1e6,
     )
+    if request.j_ground is not None:
+        j_ground = np.asarray(request.j_ground, dtype=np.float64)
+    else:
+        j_ground = np.zeros((allocator.n_ground_vars, nv), dtype=np.float64)
+    if request.j_grip is not None:
+        j_grip = np.asarray(request.j_grip, dtype=np.float64)
+    else:
+        j_grip = np.zeros((6, nv), dtype=np.float64)
+
+    if np.all(j_ground == 0.0) or np.all(j_grip == 0.0):
+        raise ValueError(
+            "all-zero Jacobians cannot resolve floating-base contact forces; non-zero Jacobians required"
+        )
+
     f_ground = np.zeros((n, allocator.n_ground_vars), dtype=np.float64)
-    j_ground = np.zeros((allocator.n_ground_vars, nv), dtype=np.float64)
-    j_grip = np.zeros((6, nv), dtype=np.float64)
     reasons: list[str] = []
-    contact_ok = True
+    contact_ok: bool | None = True
     max_root = 0.0
     for i in range(n):
         tau_full = np.asarray(request.tau_rnea[i], dtype=np.float64)
@@ -655,6 +743,22 @@ def _allocate_floating_base_contacts(
     )
 
 
+def _uses_reduced_software_plant(request: ControlRecoveryRequest) -> bool:
+    """True when allocation copies RNEA onto a reduced plant (nv <= 6 or no contacts)."""
+    return request.n_actuated <= 6 or request.n_contact_spheres <= 0
+
+
+def _is_circular_plant(request: ControlRecoveryRequest) -> bool:
+    """Replay is circular when it re-integrates the plant that produced ``tau``.
+
+    An explicit ``request.is_circular_plant`` wins; otherwise the reduced
+    software plant (a copy of RNEA) is circular by construction (#10960 P1-6).
+    """
+    if request.is_circular_plant is not None:
+        return bool(request.is_circular_plant)
+    return _uses_reduced_software_plant(request)
+
+
 def _allocate_trajectory(
     request: ControlRecoveryRequest,
 ) -> tuple[
@@ -663,7 +767,7 @@ def _allocate_trajectory(
     NDArray[np.float64],
     NDArray[np.float64],
     float,
-    bool,
+    bool | None,
     tuple[str, ...],
 ]:
     """Frame-wise constrained ID allocation.
@@ -691,7 +795,7 @@ def _allocate_trajectory(
             ("infeasible_reaction_contact",),
         )
 
-    if nv <= 6 or n_spheres == 0:
+    if _uses_reduced_software_plant(request):
         return _allocate_reduced_software_plant(
             request,
             tau_act=tau_act,
@@ -785,7 +889,7 @@ def _run_independent_replay(
     *,
     tau_act: NDArray[np.float64],
     max_root: float,
-    contact_ok: bool,
+    contact_ok: bool | None,
     rate_ok: bool,
 ) -> tuple[IndependentReplayResult, list[str]]:
     """Open-loop replay from q0/v0; append rejection reasons for resets/slack."""
@@ -808,9 +912,21 @@ def _run_independent_replay(
     if used_reset:
         rejection.append("measured_state_reset_detected")
 
-    forward = independent_forward_residual(
-        policy, times=request.timestamps_s, q_reference=request.q
-    )
+    is_circular = _is_circular_plant(request)
+
+    if is_circular:
+        forward = None
+        fwd_status = "unassessed"
+        fwd_reason = "circular_plant"
+        closure_res = None
+    else:
+        forward = independent_forward_residual(
+            policy, times=request.timestamps_s, q_reference=request.q, is_circular=False
+        )
+        fwd_status = "evaluated"
+        fwd_reason = None
+        closure_res = float(np.linalg.norm(q_open[-1] - request.q[-1]))
+
     sens = evaluate_tighter_step_sensitivity(
         policy,
         times=request.timestamps_s,
@@ -820,7 +936,15 @@ def _run_independent_replay(
     if max_root > _ROOT_SLACK_QUALIFY_LIMIT:
         rejection.append("root_slack_cannot_qualify")
 
+    timing_ok = verify_interval_timing(
+        request.timestamps_s,
+        declared_interval_s=request.declared_interval_s,
+    )
+    if not timing_ok:
+        rejection.append("interval_timing_mismatch")
+
     impact, _ = _impact_regime(request)
+    contact_reason = "reduced_plant_contact_unassessed" if contact_ok is None else None
     replay = IndependentReplayResult(
         timestamps_s=request.timestamps_s,
         q_replay=q_open,
@@ -833,9 +957,12 @@ def _run_independent_replay(
         ),
         torque_rate_ok=bool(rate_ok),
         contact_feasible=contact_ok,
-        closure_residual_m=float(np.linalg.norm(q_open[-1] - request.q[-1])),
+        closure_residual_m=closure_res,
         impact_regime=impact,
-        interval_timing_ok=True,
+        interval_timing_ok=bool(timing_ok),
+        forward_residual_status=fwd_status,
+        forward_residual_reason=fwd_reason,
+        contact_feasible_reason=contact_reason,
     )
     return replay, rejection
 
@@ -850,7 +977,14 @@ def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecover
     tau_act, f_ground, lambda_grip, delta_root, max_root, contact_ok, alloc_reasons = (
         _allocate_trajectory(request)
     )
-    rejection.extend(alloc_reasons)
+    if contact_ok is False:
+        rejection.extend(alloc_reasons)
+    elif contact_ok is None:
+        limitations.extend(alloc_reasons)
+
+    is_circular = _is_circular_plant(request)
+    if is_circular:
+        limitations.append("circular_plant")
 
     dt = float(np.mean(np.diff(request.timestamps_s)))
     rate_ok, _ = verify_torque_and_rate_bounds(
@@ -888,7 +1022,7 @@ def recover_feasible_controls(request: ControlRecoveryRequest) -> ControlRecover
         status = "blocked"
         limitations.append("impact_outside_declared_contact_model")
     else:
-        status = "passed"
+        status = STATUS_SOFTWARE_CONTRACT_CONSISTENT
 
     return ControlRecoveryResult(
         schema=CONTROL_REPLAY_SCHEMA,
@@ -945,6 +1079,11 @@ def control_replay_evidence_payload(report: ControlReplayReport) -> dict[str, An
         "results": [result.as_dict() for result in report.results],
         "summary": {
             "n_candidates": len(report.results),
+            "n_torque_software_contract_consistent": sum(
+                1
+                for r in report.results
+                if r.torque_replay_status == STATUS_SOFTWARE_CONTRACT_CONSISTENT
+            ),
             "n_torque_passed": sum(
                 1 for r in report.results if r.torque_replay_status == "passed"
             ),

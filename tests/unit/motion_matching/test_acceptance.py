@@ -265,11 +265,15 @@ def test_driver_g1_pinocchio_is_rejected() -> None:
     assert DRIVER_G1_RECEIPT.is_file(), (
         f"Expected driver G1 receipt at {DRIVER_G1_RECEIPT}"
     )
-    receipt = _load_json(DRIVER_G1_RECEIPT)
-
-    # Confirm the receipt self-declares accepted=true and status=PASSED in legacy blocks
-    assert receipt.get("status") == "PASSED"
-    assert receipt.get("receipt", {}).get("accepted") is True
+    committed = _load_json(DRIVER_G1_RECEIPT)
+    # The committed receipt was relabelled REJECTED (#10960 P0-9); re-add the legacy
+    # self-declared PASS to prove the evaluator still ignores it.
+    assert committed.get("status") != "PASSED"
+    receipt = {
+        **committed,
+        "status": "PASSED",
+        "receipt": {**committed.get("receipt", {}), "accepted": True},
+    }
 
     # Evaluator must fail closed based on physical forward rollout metrics (2.76 m drift)
     verdict = evaluate(receipt, horizon=Horizon.G1)

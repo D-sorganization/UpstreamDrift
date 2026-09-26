@@ -179,12 +179,17 @@ class TestReproductionCatalog:
 
     def test_promoted_models_classification(self) -> None:
         catalog = {c.model_id: c for c in build_reproduction_catalog()}
-        assert catalog["driven_double_pendulum"].verdict == PromotionVerdict.PROMOTED
-        assert catalog["driven_triple_pendulum"].verdict == PromotionVerdict.PROMOTED
+        assert catalog["driven_double_pendulum"].verdict != PromotionVerdict.PROMOTED
+        assert catalog["driven_double_pendulum"].verdict == PromotionVerdict.UNMEASURED
+        assert catalog["driven_triple_pendulum"].verdict == PromotionVerdict.UNMEASURED
         assert (
             catalog["constrained_upper_body_golfer"].verdict
-            == PromotionVerdict.PROMOTED
+            == PromotionVerdict.UNMEASURED
         )
+        # Performance economics must be unmeasured without benchmark receipt on disk
+        econ = catalog["driven_double_pendulum"].performance_economics
+        assert econ["speedup_factor"] is None
+        assert econ["verdict"] == "UNMEASURED"
 
     def test_research_models_classification(self) -> None:
         catalog = {c.model_id: c for c in build_reproduction_catalog()}
@@ -248,18 +253,19 @@ class TestReproductionCatalog:
         card_file = tmp_path / "driven_double_pendulum_reproduction_card.json"
         loaded_card = load_reproduction_card(card_file)
         assert loaded_card.model_id == "driven_double_pendulum"
-        assert loaded_card.verdict == PromotionVerdict.PROMOTED
+        assert loaded_card.verdict == PromotionVerdict.UNMEASURED
 
 
 class TestEndToEndFlowVerification:
     """Validate 5-step end-to-end user flow execution."""
 
-    def test_promoted_model_flow_succeeds(self) -> None:
+    def test_unpromoted_model_flow_fails_without_receipt(self) -> None:
         report = verify_end_to_end_flow("driven_double_pendulum")
         assert isinstance(report, EndToEndFlowReport)
         assert report.model_id == "driven_double_pendulum"
-        assert report.overall_success is True
-        assert report.verdict == PromotionVerdict.PROMOTED
+        assert report.overall_success is False
+        assert report.verdict != PromotionVerdict.PROMOTED
+        assert report.verdict == PromotionVerdict.UNMEASURED
         assert len(report.steps) == 5
 
         step_names = [s.step_name for s in report.steps]
@@ -270,8 +276,15 @@ class TestEndToEndFlowVerification:
             "OBSERVED_MOTION_MATCHING",
             "PHYSICAL_REPLAY",
         ]
-        for step in report.steps:
-            assert step.status == FlowStepStatus.PASSED
+        # Step 4 (OBSERVED_MOTION_MATCHING) must not pass without real VerifiedInferenceOrchestrator run
+        step4 = report.steps[3]
+        assert step4.step_name == "OBSERVED_MOTION_MATCHING"
+        assert step4.status in (FlowStepStatus.SKIPPED, FlowStepStatus.FAILED)
+
+        # Step 5 (PHYSICAL_REPLAY) fails closed without trained checkpoint rollout
+        step5 = report.steps[4]
+        assert step5.step_name == "PHYSICAL_REPLAY"
+        assert step5.status == FlowStepStatus.FAILED
 
     def test_blocked_prerequisite_flow(self) -> None:
         report = verify_end_to_end_flow("full_body_simscape")
@@ -292,3 +305,40 @@ class TestEndToEndFlowVerification:
         assert report.overall_success is False
         assert report.steps[0].status == FlowStepStatus.FAILED
         assert "not found" in report.steps[0].message
+
+    def test_observed_motion_matching_requires_verified_orchestrator(self) -> None:
+        from unittest.mock import MagicMock
+        from src.shared.python.neural_motion.inference import (
+            InferenceStatus,
+            VerifiedInferenceOrchestrator,
+            VerifiedInferenceReport,
+        )
+        from src.shared.python.neural_motion.turnover.reproduce import (
+            _verify_inference_step,
+        )
+
+        # Without orchestrator -> SKIPPED with reason
+        outcome_skipped = _verify_inference_step("driven_double_pendulum")
+        assert outcome_skipped.status == FlowStepStatus.SKIPPED
+        assert "not executed" in outcome_skipped.message
+
+        # With orchestrator returning NEURAL_ACCEPTED -> PASSED
+        mock_orch = MagicMock(spec=VerifiedInferenceOrchestrator)
+        mock_report = MagicMock(spec=VerifiedInferenceReport)
+        mock_report.status = InferenceStatus.NEURAL_ACCEPTED
+        mock_orch.orchestrate.return_value = mock_report
+
+        outcome_passed = _verify_inference_step(
+            "driven_double_pendulum", orchestrator=mock_orch, target={}
+        )
+        assert outcome_passed.status == FlowStepStatus.PASSED
+
+        # With orchestrator returning REJECTED -> FAILED
+        mock_report_rejected = MagicMock(spec=VerifiedInferenceReport)
+        mock_report_rejected.status = InferenceStatus.REJECTED
+        mock_orch.orchestrate.return_value = mock_report_rejected
+
+        outcome_failed = _verify_inference_step(
+            "driven_double_pendulum", orchestrator=mock_orch, target={}
+        )
+        assert outcome_failed.status == FlowStepStatus.FAILED

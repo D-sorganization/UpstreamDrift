@@ -122,6 +122,7 @@ def test_simulate_full_body_forward_short() -> None:
     assert result.contact_audit.max_penetration_m >= 0.0
 
     # Five shared metrics verification
+    assert result.shared_metrics is not None
     assert result.shared_metrics.whole_marker_rmse_m > 0.0
     assert result.shared_metrics.early_marker_rmse_m > 0.0
     assert result.shared_metrics.terminal_marker_rmse_m > 0.0
@@ -233,6 +234,81 @@ def test_rollout_acceptance_rejection_of_failed_or_zero_filled() -> None:
     )
 
 
+def test_failed_rollout_sets_none_contact_audit_and_shared_metrics() -> None:
+    """Issue #10960 P1-9: failed rollout must set contact_audit=None and shared_metrics=None."""
+    from src.shared.python.motion_matching.full_body_forward_dynamics import (
+        _build_failed_rollout,
+    )
+    from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+
+    capture = TourCapture(
+        time_s=np.array([0.0, 0.01]),
+        labels=("Head",),
+        points_m=np.zeros((2, 1, 3)),
+        valid=np.ones((2, 1), dtype=bool),
+        source_sha256="test",
+    )
+    failed = _build_failed_rollout(
+        times=capture.time_s,
+        n_coords=41,
+        capture=capture,
+        marker_offsets={"Head": {"body": "Head", "offset_m": np.zeros(3)}},
+        status="failed",
+    )
+    assert failed.status == "failed"
+    assert failed.contact_audit is None
+    assert failed.shared_metrics is None
+
+    as_dict = failed.as_dict()
+    assert as_dict["contact_audit"] is None
+    assert as_dict["shared_metrics"] is None
+
+
+def test_failed_rollout_receipt_in_acceptance_evaluate_yields_missing_gates() -> None:
+    """Issue #10960 P1-9: receipt built from failed rollout yields MISSING force/penetration gates."""
+    from src.shared.python.motion_matching.acceptance import (
+        GateStatus,
+        Horizon,
+        evaluate,
+    )
+    from src.shared.python.motion_matching.full_body_forward_dynamics import (
+        _build_failed_rollout,
+    )
+    from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+
+    capture = TourCapture(
+        time_s=np.array([0.0, 0.01]),
+        labels=("Head",),
+        points_m=np.zeros((2, 1, 3)),
+        valid=np.ones((2, 1), dtype=bool),
+        source_sha256="test",
+    )
+    failed = _build_failed_rollout(
+        times=capture.time_s,
+        n_coords=41,
+        capture=capture,
+        marker_offsets={"Head": {"body": "Head", "offset_m": np.zeros(3)}},
+        status="failed",
+    )
+
+    receipt = {
+        "engine": "mujoco",
+        "status": failed.status,
+        "forward_rollout": failed.as_dict(),
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    assert verdict.is_physically_accepted is False
+
+    gate_by_name = {g.name: g for g in verdict.gates}
+    assert "max_normal_force_n" in gate_by_name
+    assert gate_by_name["max_normal_force_n"].status == GateStatus.MISSING
+    assert gate_by_name["max_normal_force_n"].status != GateStatus.PASSED
+
+    # Penetration gate must not be passed (must not pass on a failed rollout)
+    passed_gate_names = {g.name for g in verdict.gates if g.status == GateStatus.PASSED}
+    assert "max_penetration_m" not in passed_gate_names
+
+
 def _make_valid_rollout(
     *,
     n_frames: int = 3,
@@ -249,7 +325,7 @@ def _make_valid_rollout(
         compute_shared_metrics,
     )
 
-    times = np.linspace(0.0, 0.02, n_frames)
+    times = np.linspace(0.0, 0.02, n_frames, dtype=np.float64)
     q = np.ones((n_frames, n_coords), dtype=np.float64) * 0.1
     qd = np.zeros((n_frames, n_coords), dtype=np.float64)
     pred_markers = np.ones((n_frames, 1, 3), dtype=np.float64)
@@ -560,6 +636,8 @@ def test_nan_propagation_to_explicit_invalid_status_in_simulation() -> None:
 
     assert result.status == "invalid"
     assert not result.is_accepted()
+    assert result.contact_audit is None
+    assert result.shared_metrics is None
 
 
 def test_simulate_euler_audits_terminal_state() -> None:

@@ -74,7 +74,7 @@ class MovingHubMotion:
     positions: np.ndarray
     velocity: np.ndarray
     power_watts: np.ndarray
-    total_work_joules: float
+    total_work_joules: float | None
     is_moving_hub: bool
 
 
