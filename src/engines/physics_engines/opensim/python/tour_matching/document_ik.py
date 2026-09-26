@@ -37,9 +37,11 @@ from src.shared.python.motion_matching.candidate import (
 )
 from src.shared.python.motion_matching.candidate_io import save_candidate
 from src.shared.python.motion_matching.pipeline.dynamics import segment_rms
-from src.shared.python.motion_matching.pipeline.receipt_schema import validate_receipt
 
 logger = logging.getLogger(__name__)
+
+# IK-only receipt: not a ground-support receipt (no ground/address/dynamics stages).
+OPENSIM_IK_RECEIPT_SCHEMA = "opensim-document-ik/v1"
 
 _REPO_ROOT = Path(__file__).resolve().parents[6]
 
@@ -200,46 +202,39 @@ def _build_receipt_dict(
     whole_rmse: float,
     seg_rms_dict: Mapping[str, float],
     elapsed_sec: float,
+    frames: int,
+    canonical_receipt_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Assemble execution receipt dictionary matching Receipt schema."""
-    base_doc: dict[str, Any] = {}
-    for candidate_loc in [
-        CANONICAL_RECEIPT_PATH,
-        Path(
-            "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json"
-        ),
-        _REPO_ROOT
-        / "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
-    ]:
-        if candidate_loc.exists():
-            base_doc = json.loads(candidate_loc.read_text(encoding="utf-8"))
-            break
+    """Assemble execution receipt dictionary with only OpenSim-computed fields (DbC).
 
-    receipt: dict[str, Any] = dict(base_doc)
-    receipt["backend"] = "opensim"
-    receipt["engine"] = "opensim"
-    receipt["base_spec_sha256"] = _compute_sha256(spec_path)
-    receipt["base_spec_file"] = spec_path.name
-    receipt["spec_file"] = spec_path.name
-    receipt["hipcal_spec_file"] = spec_path.name
-    receipt["spec_sha256"] = _compute_sha256(spec_path)
-    receipt["candidate_sha256"] = _compute_sha256(candidate_path)
-    receipt["capture_sha256"] = _compute_sha256(trc_path)
-    receipt["labels"] = list(labels)
-    receipt["elapsed_s"] = float(elapsed_sec)
-    receipt["qualification"] = (
-        "OpenSim full-body IK milestone on shared anthropometric document model "
-        "(MS-41 #10340); IK-only, dynamics not_run: use moco"
-    )
+    Preconditions:
+        - spec_path, candidate_path, trc_path are existing files.
+        - canonical_receipt_path (or CANONICAL_RECEIPT_PATH) exists and contains valid IK RMSE.
+        - frames >= 0.
 
-    ik_dict = dict(receipt.get("ik", {}))
-    ik_dict["marker_rms_m"] = float(whole_rmse)
-    ik_dict["segment_rms_m"] = {k: float(v) for k, v in seg_rms_dict.items()}
-    ik_dict["frames"] = 654
-    receipt["ik"] = ik_dict
+    Postconditions:
+        - Receipt excludes inherited MuJoCo stages (dynamics, address, hip_calibration, ground).
+        - Frames matches computed frame count.
+        - is_physically_accepted is False since dynamics was not run.
+    """
+    if frames < 0:
+        raise ValueError(f"frames must be non-negative, got {frames}")
 
-    # Acceptance gate evaluation (MS-100)
-    canonical_whole_rmse = float(base_doc.get("ik", {}).get("marker_rms_m", 0.052266))
+    canonical_path = canonical_receipt_path or CANONICAL_RECEIPT_PATH
+    if not canonical_path.is_file():
+        raise FileNotFoundError(
+            f"Canonical MuJoCo receipt not found at {canonical_path}. "
+            "Required for IK parity comparison delta."
+        )
+
+    canonical_doc = json.loads(canonical_path.read_text(encoding="utf-8"))
+    canonical_ik = canonical_doc.get("ik")
+    if not isinstance(canonical_ik, dict) or "marker_rms_m" not in canonical_ik:
+        raise ValueError(
+            f"Canonical receipt at {canonical_path} missing 'ik.marker_rms_m'"
+        )
+    canonical_whole_rmse = float(canonical_ik["marker_rms_m"])
+
     diff_from_canonical_m = abs(whole_rmse - canonical_whole_rmse)
     ik_within_5mm = diff_from_canonical_m <= 0.005
 
@@ -266,16 +261,42 @@ def _build_receipt_dict(
         },
     ]
 
-    receipt["acceptance"] = {
-        "horizon": "G1",
-        "is_physically_accepted": ik_within_5mm,
-        "status": "QUALIFIED" if ik_within_5mm else "REJECTED",
-        "gates": gates,
-        "qualification_note": (
-            "OpenSim IK on shared document matches MuJoCo canonical within 5 mm"
-            if ik_within_5mm
-            else "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical"
+    receipt: dict[str, Any] = {
+        "schema_version": OPENSIM_IK_RECEIPT_SCHEMA,
+        "backend": "opensim",
+        "engine": "opensim",
+        "base_spec_file": spec_path.name,
+        "base_spec_sha256": _compute_sha256(spec_path),
+        "spec_file": spec_path.name,
+        "spec_sha256": _compute_sha256(spec_path),
+        "candidate_sha256": _compute_sha256(candidate_path),
+        "capture_sha256": _compute_sha256(trc_path),
+        "labels": list(labels),
+        "elapsed_s": float(elapsed_sec),
+        "qualification": (
+            "OpenSim full-body IK milestone on shared anthropometric document model "
+            "(MS-41 #10340); IK-only, dynamics not_run: use moco"
         ),
+        "canonical_reference": {
+            "receipt_path": str(canonical_path),
+            "whole_marker_rmse_m": canonical_whole_rmse,
+        },
+        "ik": {
+            "frames": int(frames),
+            "marker_rms_m": float(whole_rmse),
+            "segment_rms_m": {k: float(v) for k, v in seg_rms_dict.items()},
+        },
+        "acceptance": {
+            "horizon": "G1",
+            "is_physically_accepted": False,
+            "status": "IK_PARITY_ONLY" if ik_within_5mm else "REJECTED",
+            "gates": gates,
+            "qualification_note": (
+                "OpenSim IK on shared document matches MuJoCo canonical within 5 mm"
+                if ik_within_5mm
+                else "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical"
+            ),
+        },
     }
     return receipt
 
@@ -371,6 +392,7 @@ def run_document_ik(
     spec_path: Path | None = None,
     stride: int = 1,
     max_frames: int | None = None,
+    canonical_receipt_path: Path | None = None,
 ) -> dict[str, Any]:
     """Execute OpenSim InverseKinematicsTool on document model with MS-04 weights."""
     import opensim  # type: ignore[import-not-found]
@@ -424,15 +446,16 @@ def run_document_ik(
         whole_rmse,
         seg_rms_dict,
         time.monotonic() - t_start,
+        frames=n_calc,
+        canonical_receipt_path=canonical_receipt_path,
     )
-    validate_receipt(receipt_dict)
 
     receipt_path = out_dir / "receipt.json"
     with open(receipt_path, "w", encoding="utf-8") as f:
         json.dump(receipt_dict, f, indent=2)
 
     logger.info(
-        "OpenSim IK complete: whole RMSE = %.4f m, validated receipt -> %s",
+        "OpenSim IK complete: whole RMSE = %.4f m, receipt -> %s",
         whole_rmse,
         receipt_path,
     )
