@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 26 | 53 | 15 | 18 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 239 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 241 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `neural_motion` | 0 | 0 | 0 | 59 | 0 | 0 |
@@ -88,7 +88,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `pendulum_simulator` | 0 | 0 | 0 | 79 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
-| `physics` | 0 | 0 | 0 | 71 | 0 | 0 |
+| `physics` | 0 | 0 | 0 | 74 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `plot_engine` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **429** | **282** | **124** | **1511** | **738** | **711** |
+| **Total** | **429** | **282** | **124** | **1516** | **738** | **711** |
 
 ## Diverged Files by Package
 
@@ -150,7 +150,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/access_policy.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/__init__.py` | +36 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/anthropic_adapter.py` | -356 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-18 |
-| `ai/adapters/base.py` | +20 | yes | d-sorgcodexagent 2026-09-25 | Dieter Olson 2026-09-25 |
+| `ai/adapters/base.py` | +20 | yes | Dieter Olson 2026-09-25 | Dieter Olson 2026-09-25 |
 | `ai/adapters/bitnet_adapter.py` | -2079 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `ai/adapters/claude_code_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/cli_provider_setup.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -173,13 +173,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/gui/_input_area.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/_message_display.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/_panel_header.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `ai/gui/_panel_tools.py` | +8 | yes | d-sorgcodexagent 2026-09-25 | Dieter Olson 2026-09-25 |
+| `ai/gui/_panel_tools.py` | +8 | yes | Dieter Olson 2026-09-25 | Dieter Olson 2026-09-25 |
 | `ai/gui/_provider_config_registry.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/_provider_config_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/_provider_registry_data.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/_providers_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-21 |
 | `ai/gui/_rag_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `ai/gui/assistant_panel.py` | -5944 |  | d-sorgcodexagent 2026-09-25 | Dieter Olson 2026-09-25 |
+| `ai/gui/assistant_panel.py` | -5944 |  | Dieter Olson 2026-09-04 | Dieter Olson 2026-09-25 |
 | `ai/gui/assistant_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/history_sidebar.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/gui/session_manager.py` | -207 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
@@ -205,7 +205,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/memory_manager.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/peer_review/coordinator.py` | -15 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-08-25 |
 | `ai/peer_review/gui.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `ai/rag/context_provider.py` | +4 | yes | d-sorgcodexagent 2026-09-25 | Dieter Olson 2026-09-25 |
+| `ai/rag/context_provider.py` | +4 | yes | Dieter Olson 2026-09-25 | Dieter Olson 2026-09-25 |
 | `ai/rag/indexer_worker.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/rag/simple_rag.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/sample_tools.py` | +36 | yes | d-sorgclaudeagent[bot] 2026-09-04 | d-sorgclaudeagent[bot] 2026-09-03 |
@@ -217,7 +217,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/tools/codemap_tools.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/tools/file_ops.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/tools/sidekick_analytics.py` | +293 | yes | d-sorgclaudeagent[bot] 2026-09-04 | d-sorgclaudeagent[bot] 2026-09-03 |
-| `ai/wizards.py` | +12 | yes | d-sorgcodexagent 2026-09-25 | Dieter Olson 2026-09-25 |
+| `ai/wizards.py` | +12 | yes | Dieter Olson 2026-09-25 | Dieter Olson 2026-09-25 |
 
 ### Package `calc_backend` (14 Diverged Files)
 

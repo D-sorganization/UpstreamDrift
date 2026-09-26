@@ -1,0 +1,78 @@
+{
+  "schema": "matched-swing-reevaluation/v1",
+  "source_receipt": "evidence/matched/driver_g1_drake/receipt.json",
+  "evaluated_by": "src/shared/python/motion_matching/acceptance.py",
+  "horizon": "G1",
+  "note": "Retracted: the PASSED verdict came from a hard-coded physical audit, target markers copied as the fit (RMSE 0 by construction), a silent warm-start fallback when the Drake plant failed, and an all-zero capture hash. Void under MS-100; see #10363.",
+  "inputs": {
+    "whole_marker_rmse_m": 0.0,
+    "early_marker_rmse_m": 0.0,
+    "terminal_marker_rmse_m": 0.0,
+    "club_marker_rmse_m": 0.0,
+    "pelvis_yaw_rmse_rad": 0.0
+  },
+  "verdict": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "capture_provenance",
+        "status": "failed",
+        "threshold": 1.0,
+        "measured": 0.0,
+        "unit": "hash",
+        "reason": "placeholder capture hash"
+      },
+      {
+        "name": "nonzero_residual_evidence",
+        "status": "failed",
+        "threshold": 0.0,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": "identically-zero residuals without replay evidence"
+      },
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.025,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.012,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.035,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.06,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "passed",
+        "threshold": 0.05236,
+        "measured": 0.0,
+        "unit": "rad",
+        "reason": ""
+      }
+    ],
+    "qualification_note": "Physical or kinematic thresholds violated"
+  }
+}

@@ -471,7 +471,7 @@ class ClubDataLoader:
         if time_col is None:
             raise ValueError("No time column found in trajectory data")
 
-        time_series = df[time_col].values.astype(float)
+        time_series = df[time_col].to_numpy(dtype=float)
 
         # Find position columns
         positions = None

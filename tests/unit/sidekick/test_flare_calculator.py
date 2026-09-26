@@ -68,19 +68,19 @@ class TestCalculateFlareSize:
         assert result.heat_release == 0.0
 
     def test_zero_flow_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"total_flow must be positive"):
             self._CALC.calculate_flare_size(0.0, _SYNGAS, 400.0, 1.0)
 
     def test_negative_flow_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"total_flow must be positive"):
             self._CALC.calculate_flare_size(-100.0, _SYNGAS, 400.0, 1.0)
 
     def test_flare_calculator_negative_temperature_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"temperature must be positive \(K\)"):
             self._CALC.calculate_flare_size(1000.0, _SYNGAS, -10.0, 1.0)
 
     def test_empty_composition_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"gas_composition must not be empty"):
             self._CALC.calculate_flare_size(1000.0, {}, 400.0, 1.0)
 
 
