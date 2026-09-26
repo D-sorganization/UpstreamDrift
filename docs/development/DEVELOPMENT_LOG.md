@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10965 · Coverage Gate Checker Reads the Budget File and Maps Cobertura Sources
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10965
+- **PR:** draft PR from `agy/ud-10965-coverage-gates`
+- **Branch:** `agy/ud-10965-coverage-gates`
+- **Paths:** `scripts/check_coverage_gates.py`, `tests/unit/scripts/test_check_coverage_gates.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — 23/23 checker and budget tests pass; checker run on a measured unit-lane report (OG, 2026-09-26) maps all six gates (5 below the 30% floor, see PR body); ruff clean; architecture budget OK.
+- **Summary:** `check_coverage_gates.py` now takes its gates from `coverage_gates` in `scripts/config/mypy_exclusion_budget.json` (hard-coded COVERAGE_GATES/MODULE_PATTERNS were never enforced and are gone), reads Cobertura XML or coverage.py JSON, resolves XML filenames through `<sources>` against the repo root, and treats a gate with no matching files or an unmappable source as exit 2. Not wired into CI yet; the ratchet dates cannot move before 2026-10-01 because of the #8731 pin.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review

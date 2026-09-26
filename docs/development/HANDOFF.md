@@ -1,37 +1,35 @@
-# Implementation Handoff - Drift Wizard Sidekick Product Knowledge Pack (#10943)
+# Implementation Handoff - Coverage Gate Checker Reads the Budget File and Maps Cobertura Sources (#10965)
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-10943`
-- Branch: `agy/issue-10943`
-- Baseline commit: `2d5830d18642c46d915f7639f0f996f995b149ad` (origin/main)
-- Implementation commit: `3c4c3940f`
-- Pull request: #10968
-- Governing issue: #10943
-- Lease session: `antigravity-ud-10943`
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-ud-10965-coverage-gates`
+- Branch: `agy/ud-10965-coverage-gates`
+- Baseline commit: `28b37bd47eb85d977e530e60659c6f54ca0a1a2b` (origin/main)
+- Pull request: draft, opened from `agy/ud-10965-coverage-gates`
+- Governing issue: #10965 (development log DL-#10965)
+- Lease session: `claude-deskcomputer-20260925-ud`
 
 ## Objective and Status
 
-- Objective: Give UpstreamDrift its Wizard ("Drift Wizard"): a product expert in the Sidekick chat that is always current. Add `knowledge/wizard.yml`, `knowledge/pack.yml`, CI pack rebuild workflow, standalone packaging embedding, and comprehensive unit tests.
-- Status: Ready for PR (TDD Green verified)
+- Objective: Make the budget file's coverage gates measured and enforceable (#10965).
+- Status: in_review (draft PR)
 - Completed:
-  1. Verified prerequisites Tools K0 and K3a are pinned in `vendor/ud-tools` (`2d5830d18`).
-  2. Created worktree `agy-10943` and claimed issue #10943 under lease `antigravity-ud-10943`.
-  3. Authored comprehensive test suite `tests/unit/ai/test_drift_wizard.py` covering manifest loading, source glob resolution, fixture retrieval, context rendering, stale banner, and sidekick glue integration.
-  4. Executed pytest and confirmed all 7 tests fail cleanly on missing manifest (TDD Red phase, commit `b6af32afb`).
-  5. Authored `knowledge/wizard.yml` (`key: upstream_drift`, `name: Drift Wizard`) and `knowledge/pack.yml` (product documentation & reference source catalog).
-  6. Updated `sidekick.spec` to bundle `.knowledge/` and `knowledge/` in standalone PyInstaller builds.
-  7. Updated `scripts/packaging/build_sidekick_binary.py` to compile knowledge pack before running PyInstaller.
-  8. Authored `.github/workflows/wizard-pack.yml` and registered in `.github/WORKFLOWS.md`.
-  9. Added `.knowledge/` to `.gitignore`.
-  10. Added Change Log row to `SPEC.md`.
-  11. Verified all 7 tests in `tests/unit/ai/test_drift_wizard.py` and 30 tests in child copy and divergence test suites pass cleanly.
-  12. Verified `scripts/check_workflow_inventory.py`, `scripts/check_spec_paths.py`, and local-only workflow audits pass.
-  13. Reverted child-copy `src/shared/python/ai/knowledge/wizard.py` to match `origin/main` to honor child-copy immutability, baselined LOD finding in `scripts/ci/lod_baseline.txt`, and verified repo-wide `check_lod.py` clean scan.
-  14. Switched build script packaging to direct Python `build_pack` API to prevent mock interference in PyInstaller tests.
+  1. agy (Gemini 3.8 Flash) on OG Laptop: single gate authority, XML+JSON loaders, DbC budget validation, unit tests.
+  2. Orchestrator review: agy's `"src/" in path` heuristic mapped nothing on a real `--cov=src` report (all six gates MISCONFIGURED); replaced by `<source>` resolution with tests written first (3 red -> green), plus `--repo-root`.
+  3. Measured the unit lane on OG (`pytest -m unit -n 8 --cov=src`); three xdist workers crashed, so the report undercounts.
+
+## Validation
+
+- `pytest tests/unit/scripts/test_check_coverage_gates.py tests/unit/scripts/test_check_mypy_exclusion_budget.py` -> 23 passed.
+- `python scripts/check_coverage_gates.py --report coverage_measured.xml` -> exit 1 with the per-gate table in the PR body.
+- `python scripts/check_mypy_exclusion_budget.py --today 2026-10-02` still fails: mypy exclusion expiries are handled by #10969/#10973, coverage ratchet dates are blocked until 2026-10-01 by the #8731 pin.
 
 ## Next Steps
 
-1. Monitor CI checks on PR #10968 until auto-merge squashes cleanly into main.
-2. Release lease on #10943, close issue, and clean up worktree/branch.
+1. On or after 2026-10-01, re-date the six ratchets to 2027-01-01 with an owner decision on the gates measured below their floor, then wire the checker after the ci-standard `--cov=src` step.
+2. Owner decision: five gates measure below their 30% floor on the unit lane; either add tests or lower a floor with a `Tolerance-Change-Evidence:` trailer - never silently.
+
+## Change Log
+
+- `SELF` — Coverage Gate Checker Reads the Budget File and Maps Cobertura Sources (#10965, DL-#10965).
