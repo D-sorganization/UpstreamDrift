@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9406 · Retire UpstreamDrift Copies of Tools-Owned Sidekick Modules
+
+- **State:** in_review
+- **Owner:** claude (agy executor)
+- **Issue:** #9406
+- **PR:** draft PR from `claude/ud-9406-sidekick-shadow-retire`
+- **Branch:** `claude/ud-9406-sidekick-shadow-retire`
+- **Paths:** `src/shared/python/sidekick/standalone/`, `src/shared/python/sidekick/persistence/`, `src/shared/python/sidekick/__main__.py`, `src/shared/python/sidekick/ui/tools_sidebar/default_tabs.py`, `src/launchers/embedded_tool_bootstrap.py`, `sidekick.spec`, `scripts/config/unit_gate_quarantine.json`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — 14 target quarantine IDs pass with `-n 6 --tools-mode vendored`; affected suites (sidekick, launcher, launchers, packaging, repo_hygiene, integration/sidekick, c3d_viewer) show no new failure against the same run on `b8c27a7d2`; contract passes (141 IDs).
+- **Summary:** Delete the downstream `sidekick` standalone, persistence, `__main__` and default-tabs copies so they resolve from the pinned Tools tree; put the vendored/explicit Tools paths ahead of UpstreamDrift's own in the embedded-tool bootstrap; take the Windows icon from the pinned Tools assets; retarget three tests to the vendor API.
+- **Next step:** get `quality-gate` green on the draft PR and arm it through `automerge_guard.py`.
+
 ### DL-#1755 · Retire the Review-Comment-to-Issue Converter
 
 - **State:** in_review
