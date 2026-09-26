@@ -75,3 +75,12 @@
 ## Blockers and Risks
 
 - None. Ready for draft PR review.
+
+## Next Steps
+
+1. Owner review: this bump mirrors the new Tools `ai/knowledge` package into `src/shared/python/ai/` (divergence inventory updated). Whether UD keeps a mirror or imports from the vendored package is the owner's call, so the PR stays draft until then.
+2. After merge: K3b (#10943) wires the Sidekick Wizards into UD's assistant panel.
+
+## Change Log
+
+- `SELF` — Bump `vendor/ud-tools` to Tools `95ed6b478` with K0 (knowledge-pack engine) and K3a (Sidekick Wizards) (#10944).
