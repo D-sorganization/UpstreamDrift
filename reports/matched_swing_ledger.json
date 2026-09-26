@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T18:14:33Z",
+  "generated_at": "2026-09-26T08:16:33Z",
   "rows": [
     {
       "acceptance": null,
@@ -137,7 +137,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/contact_id/receipt.json",
-      "sha256": "9bbe5fc4e2fef05d0160af03f1214cc2768068fe0c6f3c71e9cae11c4a7e9556"
+      "sha256": "f78b231c767efca9e90f03bc4da38c827c4b05590c254074a317027c737586da"
     },
     {
       "acceptance": null,
@@ -160,7 +160,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb3_drake/receipt.json",
-      "sha256": "967e4824e00049fcfcf51926ea89c660db4ab5927a478655e3aed301cc2433ec"
+      "sha256": "ecee15964a26149cbabdd2b19985b1ce159a6125d6290147b2257f8dbaddaa11"
     },
     {
       "acceptance": null,
@@ -183,7 +183,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json",
-      "sha256": "e07d075dd02d110f1ee5df2311ed07618032cd71043652e6ae2b48605e6bd641"
+      "sha256": "5035019bb8f6b4538800f6a7edb07e85eab8346e2dc8c050ce6b02dc23862595"
     },
     {
       "acceptance": null,
@@ -206,7 +206,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/drake/receipt.json",
-      "sha256": "7aa54f6857d911392159149d234820e59e8029cbcb170466de56da80a61ee3ac"
+      "sha256": "0e0d10eb06a2f95259fb7ca432e70440feafe71790a79bdc882c818c48187d2d"
     },
     {
       "acceptance": null,
@@ -229,7 +229,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/historical/receipt.json",
-      "sha256": "efb0490fb5c5e1fe8af80ac5492791b7ce55bd2260588071ed6609f40d2f8e7f"
+      "sha256": "f3e34b0619a73f8a1a06a950dd19c8e644f809ef80a1682b4c9f0f81fbc25a7e"
     },
     {
       "acceptance": null,
@@ -252,7 +252,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/receipt.json",
-      "sha256": "e380321b0002a05aa6873822eb89f261c4ccb6b902e4e4dfb5c6788983c48054"
+      "sha256": "20925c2d281f90865b0b110d7c04cdf966f845e6fb413ffe32d0eca599f21a32"
     },
     {
       "acceptance": null,
@@ -275,7 +275,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/pinocchio/receipt.json",
-      "sha256": "dae8efc8450097f4980d4d4c6d50e8f7a2fbbf34e74c2a0adc250c854a0299e4"
+      "sha256": "2469677a90e2427db52174b6e2e53ab697793a19f2ea43b776e590bcde4a4213"
     },
     {
       "acceptance": null,
@@ -298,7 +298,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb5_matching/receipt_mujoco.json",
-      "sha256": "551a65e9cbe9ed570c01ebe0bf7c6711e053722bba444288d1d35d24e30f4cca"
+      "sha256": "a99cc066d94b7f6f240b5bd6f1bc9fe1808078a4525ae25bc40365bcde0aec5e"
     },
     {
       "acceptance": null,
@@ -321,7 +321,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_drake.json",
-      "sha256": "809c675dd63beb4cd33ffd3b5f99e82628e19bfa233dc3df59e44790da4eb1cc"
+      "sha256": "15c4c2fc3d2c2388578fac4dcdfa089ac325dc334c32167e970c358a4d695ecb"
     },
     {
       "acceptance": null,
@@ -344,7 +344,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_mujoco.json",
-      "sha256": "ef350f1a46291503456d025670357259f75e2fcfd6892188956d6a5bf0545746"
+      "sha256": "2eb45578bb46bfcce717832ef9d44f439e257e0dfb144291f4cd97aaf443ee85"
     },
     {
       "acceptance": null,
@@ -367,7 +367,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_pinocchio.json",
-      "sha256": "f9818382a0d298ff13306d62cdbe4513a9bcbc2f1357b848e9f1fc8d8cf70942"
+      "sha256": "435bef946064921f2b58ac7cee08a08ec542031d93fba327f4b650bc0bb9531e"
     },
     {
       "acceptance": null,
@@ -379,7 +379,7 @@
       "candidate_sha": null,
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 1533.4,
+      "horizon_s": null,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
@@ -679,8 +679,9 @@
         ],
         "horizon": "G1",
         "is_physically_accepted": false,
+        "note": "Relabelled under #10960 P1-8: dropped inherited MuJoCo fields (dynamics, address, ground, hip_calibration, club, grip_rotation, wrists_bounded, posture_top_of_backswing, and IK closure/attachments). Historical diagnostic evidence.",
         "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical",
-        "status": "REJECTED"
+        "status": "DIAGNOSTIC"
       },
       "artefacts": {
         "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik_playback.gif",
@@ -690,18 +691,18 @@
       "candidate_sha": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
       "capture": "driver",
       "engine": "opensim",
-      "horizon_s": 1.8138888888888889,
+      "horizon_s": null,
       "lane": "ground_support",
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.08913317524057322
+        "whole_marker_rmse_m": 0.26215802208491734
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/receipt.json",
-      "sha256": "3f1bb4e335b40ebfa2b90ae59db518b9d28a927fc5076e7e2127926a2d313fc5"
+      "sha256": "7ead262cfd27377ec22e72715b5d853b3f25e164dcf87c90d9e39000001759de"
     },
     {
       "acceptance": null,
@@ -1191,7 +1192,7 @@
       "candidate_sha": "dfafdff1cdec1a7fa15c41a34d41f054ef45d8a7df0a1faf8fab7898ab855776",
       "capture": "driver",
       "engine": "pinocchio",
-      "horizon_s": 1565.9189033969888,
+      "horizon_s": null,
       "lane": "replays",
       "metrics": {
         "club_marker_rmse_m": 0.023535569477815654,
@@ -2465,7 +2466,7 @@
       "candidate_sha": "34a500da34b51a8ea110c2199dfee512aa390be68439131c16ba757947fe6126",
       "capture": "driver",
       "engine": "simscape",
-      "horizon_s": 6583.167656179008,
+      "horizon_s": null,
       "lane": "native",
       "metrics": {
         "club_marker_rmse_m": 0.00871531504251686,
@@ -2488,7 +2489,7 @@
       "candidate_sha": "b505d8b6bd93bd84fb7aad5d5a0e3df257ebb37827a6ce7c7a93333f367bd7db",
       "capture": "driver",
       "engine": "simscape",
-      "horizon_s": 4433.757425961001,
+      "horizon_s": null,
       "lane": "native",
       "metrics": {
         "club_marker_rmse_m": 0.008727543584364457,
@@ -2574,7 +2575,7 @@
       "candidate_sha": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
       "capture": "driver",
       "engine": "simscape",
-      "horizon_s": 2357.8735069689974,
+      "horizon_s": null,
       "lane": "native",
       "metrics": {
         "club_marker_rmse_m": 0.008424186734364101,
@@ -3048,7 +3049,7 @@
       "candidate_sha": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 349.3019893000019,
+      "horizon_s": null,
       "lane": "matched",
       "metrics": {
         "club_marker_rmse_m": 1.5473104591894296,
@@ -3523,7 +3524,7 @@
       "candidate_sha": "77376d5fc4b2c7f9694749b3da5bc14366cb78bdd086b5ec1cafbc42e910cfc7",
       "capture": "driver",
       "engine": "mujoco",
-      "horizon_s": 74.41558822401566,
+      "horizon_s": null,
       "lane": "matched",
       "metrics": {
         "club_marker_rmse_m": 0.46492214197469106,
@@ -3727,7 +3728,7 @@
       "candidate_sha": "7b55ffa8b05edb8c843fdc6c30b7ed57056b0f9e4b90dd672f9d03b0bf4310ad",
       "capture": "driver",
       "engine": "myosuite",
-      "horizon_s": 7.412800099991728,
+      "horizon_s": null,
       "lane": "matched",
       "metrics": {
         "club_marker_rmse_m": 0.0,
@@ -3919,7 +3920,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_pinocchio/receipt.json",
-      "sha256": "9bbca5abbd0eb97bd0a063994934bc69a1708d2d0ee07266c50ed6775a5fa317"
+      "sha256": "82252363193aa970a72302da89085d94e84ee40017faab54b438e283193ec442"
     },
     {
       "acceptance": null,

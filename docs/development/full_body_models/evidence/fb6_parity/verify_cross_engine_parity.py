@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import logging
+from collections.abc import Mapping
 import os
 from pathlib import Path
 import platform
@@ -25,6 +26,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from docs.development.full_body_models.evidence._gates import (
+    FB6_PARITY_THRESHOLDS,
+    evaluate_gates,
+)
 
 from src.shared.python.motion_matching.cross_engine_replay import (
     CrossEngineComparisonReport,
@@ -176,6 +182,11 @@ def _measure_step_size_convergence(
     return conv_result
 
 
+def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
+    """Evaluate FB-6 cross-engine parity metrics against documented thresholds (#10960 P0-9)."""
+    return evaluate_gates(metrics, FB6_PARITY_THRESHOLDS)
+
+
 def _write_receipt(
     engine: str,
     output_dir: Path,
@@ -187,12 +198,34 @@ def _write_receipt(
 ) -> Path:
     """Serialize and write reproducible engine execution receipt."""
     integ_mode = "rk45" if engine == "mujoco" else "euler"
+
+    # A failed rollout has no audit or metrics (#10960 P1-9): None fails its gate.
+    contact_dict = (
+        rollout_res.contact_audit.as_dict()
+        if rollout_res.contact_audit is not None
+        else {}
+    )
+    shared = rollout_res.shared_metrics
+    whole_rmse = shared.whole_marker_rmse_m if shared is not None else None
+    gate_metrics = {
+        "whole_marker_rmse_m": whole_rmse,
+        "max_normal_force_n": contact_dict.get("max_normal_force_n"),
+        "max_penetration_m": contact_dict.get("max_penetration_m"),
+        "max_closure_residual_m": float(rollout_res.max_closure_residual_m),
+        "max_q_difference": float(conv_result.max_q_difference),
+    }
+    status_eval = build_status_from_metrics(gate_metrics)
+
     receipt = {
         "work_package": "FB-6",
         "issue": "#10070",
         "epic": "#10062",
         "engine": engine,
-        "status": "PASSED" if rollout_res.status == "success" else "FAILED",
+        "status": status_eval["status"]
+        if rollout_res.status == "success"
+        else "FAILED",
+        "gate_evaluation": status_eval,
+        "thresholds": dict(FB6_PARITY_THRESHOLDS),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": sys.version,

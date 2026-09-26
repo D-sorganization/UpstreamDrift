@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from docs.development.full_body_models.evidence._gates import (
+    FB5_MATCHING_THRESHOLDS,
+    evaluate_gates,
+)
 
 from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
@@ -323,6 +329,11 @@ def _execute_forward_rollout(ctx: MatchingContext) -> Any:
     return rollout
 
 
+def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
+    """Evaluate FB-5 forward-dynamics matching metrics against documented thresholds (#10960 P0-9)."""
+    return evaluate_gates(metrics, FB5_MATCHING_THRESHOLDS)
+
+
 def _archive_artifacts_and_receipt(
     ctx: MatchingContext,
     deriv_res: Any,
@@ -342,12 +353,28 @@ def _archive_artifacts_and_receipt(
     )
     traj_sha256 = sha256_file(traj_path)
 
+    # A failed rollout has no audit or metrics (#10960 P1-9): None fails its gate.
+    contact_dict = (
+        rollout.contact_audit.as_dict() if rollout.contact_audit is not None else {}
+    )
+    shared = rollout.shared_metrics
+    gate_metrics = {
+        "whole_marker_rmse_m": shared.whole_marker_rmse_m if shared else None,
+        "max_normal_force_n": contact_dict.get("max_normal_force_n"),
+        "max_penetration_m": contact_dict.get("max_penetration_m"),
+        "max_closure_residual_m": float(rollout.max_closure_residual_m),
+        "max_defect_norm": float(ms_fit_result.max_defect_norm),
+    }
+    status_eval = build_status_from_metrics(gate_metrics)
+
     receipt = {
         "work_package": "FB-5",
         "issue": "#10069",
         "epic": "#10062",
         "engine": ctx.engine,
-        "status": "PASSED" if rollout.status == "success" else "FAILED",
+        "status": status_eval["status"] if rollout.status == "success" else "FAILED",
+        "gate_evaluation": status_eval,
+        "thresholds": dict(FB5_MATCHING_THRESHOLDS),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": sys.version,

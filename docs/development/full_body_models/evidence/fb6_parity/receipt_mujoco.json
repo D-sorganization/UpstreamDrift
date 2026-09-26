@@ -3,7 +3,8 @@
   "issue": "#10070",
   "epic": "#10062",
   "engine": "mujoco",
-  "status": "PASSED",
+  "status": "REJECTED",
+  "note": "relabelled #10960 P0-9: whole_marker_rmse_m 2.74 m > 0.06 m, max_normal_force_n 45.09 kN > 2.35 kN, max_penetration_m 8.30 cm > 1.00 cm, max_closure_residual_m 2.68 m > 0.005 m",
   "timestamp_utc": "2026-09-14T08:50:54.853452+00:00",
   "environment": {
     "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",

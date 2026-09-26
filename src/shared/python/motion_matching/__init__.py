@@ -28,7 +28,6 @@ if TYPE_CHECKING:
         StageState,
         StrategyComparisonService,
         StrategyPreset,
-        create_sample_strategy_package,
     )
     from .align_to_simulation_grid import (
         AlignedTrajectory,
@@ -107,7 +106,6 @@ __all__ = [
     "CandidateStrategyPackage",
     "ContactReactionHistory",
     "ControllerSpecification",
-    "create_sample_strategy_package",
     "MatchingStrategyContract",
     "QualificationStage",
     "StageQualificationMatrix",
@@ -173,7 +171,6 @@ _LAZY_EXPORTS = {
     "CandidateStrategyPackage": ".matching_strategy",
     "ContactReactionHistory": ".matching_strategy",
     "ControllerSpecification": ".matching_strategy",
-    "create_sample_strategy_package": ".matching_strategy",
     "MatchingStrategyContract": ".matching_strategy",
     "QualificationStage": ".matching_strategy",
     "StageQualificationMatrix": ".matching_strategy",
