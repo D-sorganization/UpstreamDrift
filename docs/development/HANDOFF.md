@@ -1,58 +1,64 @@
-# Implementation Handoff — Desktop Shortcuts Review Feedback & Handoff Governance
+# Implementation Handoff — Versioned Pre-Impact Bundle (IA-U2)
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/fix-10921-review-feedback`
-- Branch: `fix/10921-shortcuts-feedback`
-- Baseline commit: `73185d259`
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/strong-9703`
+- Branch: `feat/9703-pre-impact-bundle`
+- Baseline commit: `ff9fbee62`
 - Implementation commit: `SELF`
-- Pull request: #10923
-- Governing issue: #10921 (companion #10918, #10919, #10920)
-- Session: `44d3df2b-c188-4439-b2fd-1a5a2ea5a5f6`
+- Pull request: draft, opened from this branch (number recorded in DL-#9703 on the next commit)
+- Governing issue: #9703 (IA-U2, parent #9700)
+- Development log entry: DL-#9703
 
 ## Objective and Status
 
-- Objective: Address review feedback from PR #10909:
-  1. Enforce that `install_desktop_and_start_menu_shortcuts` requires both Desktop and Start Menu destinations to succeed (`#10921`).
-  2. Add unit test coverage in `tests/unit/launchers/test_desktop_shortcuts.py` verifying partial installation fails.
-  3. Register PR #10909 in Section 12 Change Log of `SPEC.md` (`#10919`).
-  4. Synchronize canonical handoff documentation in `docs/development/HANDOFF.md` and `docs/development/DEVELOPMENT_LOG.md` (`#10920`).
-- Status: Complete / ready for PR
-- Completed:
-  1. Updated `src/launchers/desktop_shortcuts.py` to check that both destinations succeed.
-  2. Added test `test_install_shortcuts_fails_if_either_destination_fails` in `tests/unit/launchers/test_desktop_shortcuts.py`.
-  3. Updated `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, and this handoff.
-- Remaining: Commit, push branch, open PR with auto-merge, verify CI green.
+- Objective: slices 1–3 of #9703 — decide placement, implement a versioned
+  immutable `PreImpactBundle` with fail-closed contracts, and test it first.
+- Status: implementation complete, draft PR under review. Engine adapters and
+  installed-wheel fixtures are out of scope and remain open under #9703.
 
 ## Files and Decisions
 
-- Files changed:
-  - `src/launchers/desktop_shortcuts.py`: Require both `desktop_shortcut` and `start_menu_shortcut` to be in created/updated for `result.success`.
-  - `tests/unit/launchers/test_desktop_shortcuts.py`: Added regression test verifying failure if either destination fails.
-  - `SPEC.md`: Added change log entry for #10923.
-  - `docs/development/DEVELOPMENT_LOG.md`: Added DL-#10921 entry and marked DL-#10487 shipped.
-  - `docs/development/HANDOFF.md`: Updated handoff document.
+- `src/shared/python/physics/pre_impact_bundle.py`: bundle records, wire
+  mapping (`to_dict`/`from_dict`/JSON, version 1 only), `project_onto_basis`,
+  `grip_pose_from_delivery_sample`.
+- `src/shared/python/physics/_pre_impact_contracts.py`: classified
+  `PreImpactBundleError`/`AbsentFieldError`, `FieldOrigin`, `Quantity`,
+  explicit-raise validators (survive `python -O`).
+- `src/shared/python/physics/_pre_impact_frames.py`: `Pose` and
+  power-consistent twist/wrench transforms reusing `spatial_algebra.transforms`.
+- `tests/shared_contracts/test_pre_impact_bundle.py`: 48 tests.
+- `docs/development/impact_acoustics_program.md`: "Pre-Impact Bundle Version 1
+  — Placement" decision.
+- Decision: consumer-side record in UpstreamDrift composing Tools conventions;
+  no Tools import in the module. Bundle, modal-state record, origin enum and
+  hand-wrench record should be upstreamed to Tools, as should public rotation
+  and inertia validators.
 
 ## Validation
 
-- `pytest tests/unit/launchers/test_desktop_shortcuts.py` — passed (9/9).
-- `python scripts/ci/check_spec_changelog_duplicates.py` — passed.
-- `ruff check src/launchers/desktop_shortcuts.py tests/unit/launchers/test_desktop_shortcuts.py` — passed.
-- `black --check src/launchers/desktop_shortcuts.py tests/unit/launchers/test_desktop_shortcuts.py` — passed.
+- `QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg python -m pytest tests/shared_contracts/test_pre_impact_bundle.py -q -p no:cacheprovider` — 48 passed.
+- `python -m pytest tests/shared_contracts -q -p no:cacheprovider` — 85 collected: 84 passed, 1 skipped, 0 failed.
+- `ruff check` / `ruff format --check` on the four new files — pass.
+- `mypy` on the three new modules — no issues.
+- `shared_scripts/development_log.py` — no DL-#9703 findings; pre-existing
+  WIP/size-ceiling findings on main are unchanged.
 
 ## Blockers and Risks
 
-- Blockers: None
-- Risks/assumptions: None
+- Tools has no public modal energy/projection API; the bundle declares its own
+  quadratic form. Revisit when Tools exposes one.
+- Quaternion unit tolerance (1e-10) is stricter than the Tools delivery wire
+  (1e-6); such samples are refused, not normalized.
 
 ## Next Steps
 
-1. Commit and push branch to origin.
-2. Open PR with `agent:local` label and auto-merge enabled.
-3. Monitor CI, verify merge, and verify green main.
-4. Close feedback issues #10918, #10919, #10920, #10921, #10924, #10925.
+1. Review the draft PR; record its number in DL-#9703.
+2. Implement the first engine adapter producing a `PreImpactBundle`.
+3. Add installed-wheel fixtures at the reviewed Tools pin.
+4. File the Tools upstreaming issue for the bundle wire and public validators.
 
 ## Change Log
 
-- `SELF` — Migrate ActuatorPanel and SimulationToolbar to shared usePolling hook (#8941).
+- `SELF` — Versioned PreImpactBundle v1 with fail-closed contracts (#9703).
