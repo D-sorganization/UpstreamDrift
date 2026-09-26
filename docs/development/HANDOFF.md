@@ -1,89 +1,52 @@
-# Implementation Handoff — Bump `vendor/ud-tools` to Tools Main With K0 + K3a (#10944)
+# Implementation Handoff — Exploratory GS3DX Simscape Model (#10950)
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-10944`
-- Branch: `agy/issue-10944`
-- Baseline commit: `4e97be41b10355b3f61ce67aeffec7bc990ad864` (origin/main)
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-simscape-gs3dx`
+- Branch: `feat/simscape-gs3dx-exploratory`
+- Baseline commit: `2d5830d18` (origin/main)
 - Implementation commit: `SELF`
-- Pull request: #10944
-- Governing issue: #10944 (prereq for #10943)
-- Lease session: `antigravity-deskcomputer-20260925-10944`
+- Pull request: not created
+- Governing issue/epic: #10950 (children #10951–#10959)
+- Lease session: `claude-deskcomputer-20260926-gs3dx`
+- Development log: `DL-#10950`
 
 ## Objective and Status
 
-- Objective: Advance the `vendor/ud-tools` gitlink from `a9ed0e7c` to Tools `main` commit `95ed6b47857e9a47211ab1973d02b28beae718bc` containing K0 (Tools#5348, knowledge-pack engine) and K3a (Tools#5350, Sidekick Wizards). Synchronize the child copy of `src/shared/python/ai/`.
-- Status: Complete / ready for draft PR
+- Objective: build agent-editable `GS3DX_` clones of `GolfSwing3D_Kinetic.slx` in
+  `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`,
+  move shoulders and hip to quaternion joints, and grow to a full-body model under
+  the 1,000 non-virtual-block Home-license limit, without touching the originals.
+- Status: GS3DX-1 (#10951) scaffold done.
 - Completed:
-  1. Verified upstream Tools commit `95ed6b47857e9a47211ab1973d02b28beae718bc` is on Tools `main` via GitHub compare API.
-  2. Checked out and staged `vendor/ud-tools` at `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-  3. Synchronized child copy of `src/shared/python/ai/` from pinned vendor:
-     - Added `src/shared/python/ai/knowledge/` package (K0 engine: chunking, manifest, pack, sources, wizard).
-     - Added `src/shared/python/ai/wizards.py` (K3a glue: `wizard_for`, `knowledge_for_context`).
-     - Updated `src/shared/python/ai/adapters/base.py` to inject Wizard knowledge context.
-     - Updated `src/shared/python/ai/gui/_panel_tools.py` to support `project_root` parameter and query Wizard before RAG store.
-     - Preserved `src/shared/python/ai/gui/assistant_panel.py` without branch divergence to satisfy Tools child-copy contract.
-     - Updated `src/shared/python/ai/rag/context_provider.py` and `tests/test_rag_context_provider.py` with deprecation notices.
-  4. Synchronized Rust kernel and pip package pins:
-     - `Cargo.toml`: `tools-core` rev -> `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-     - `requirements-tools.txt`: `ud-tools` git pin -> `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-     - `src/config/impact_acceptance.json`: `reconciled_against.tools` -> `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-     - `src/shared/python/tour_baselines/reconciliation.py`: `pinned_commit_sha` -> `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-     - `tests/unit/tour_baselines/test_reconciliation.py`: updated expected sha -> `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-  5. Regenerated divergence inventory and agent context views:
-     - `docs/shared_tools/divergence_inventory.v1.json` and `.md`.
-     - `docs/agent_context/README.md` and `docs/agent_context/index.html`.
-  6. Added TDD test: `tests/unit/ai/test_knowledge_and_wizards.py`.
-  7. Added Section 12 Change Log row in `SPEC.md` and `DL-#10944` entry in `docs/development/DEVELOPMENT_LOG.md`.
+  1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
+     `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
+     `gs3dx_original_manifest`, `gs3dx_clone_baseline`.
+  2. `models/GS3DX_Baseline.slx` + `GS3DX_KD_{Gimbal,Revolute,Universal}.slx` generated
+     headlessly in R2025b; 12 `ReferencedSubsystem` blocks re-pointed.
+  3. `tests/test_gs3dx_safety.m` 5/5 pass.
 
 ## Files and Decisions
 
-- Files changed:
-  - `Cargo.toml`: bumped `tools-core` git revision to `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-  - `requirements-tools.txt`: bumped `ud-tools` pip pin to `95ed6b47857e9a47211ab1973d02b28beae718bc`.
-  - `src/config/impact_acceptance.json`: bumped `reconciled_against.tools` sha and date.
-  - `src/shared/python/ai/knowledge/`: imported K0 knowledge-pack engine from vendor.
-  - `src/shared/python/ai/wizards.py`: imported K3a Sidekick Wizards glue from vendor with `src.shared.python` imports.
-  - `src/shared/python/ai/adapters/base.py`: integrated Wizard knowledge context into `build_prompt_context`.
-  - `src/shared/python/ai/gui/_panel_tools.py`: registered Wizard knowledge query in `search_knowledge_base`.
-  - `src/shared/python/ai/rag/context_provider.py`: added deprecation warning per Tools#5346.
-  - `src/shared/python/ai/tests/test_rag_context_provider.py`: added deprecation warning test.
-  - `src/shared/python/tour_baselines/reconciliation.py`: bumped `_TOOLS_REVISION.pinned_commit_sha`.
-  - `tests/unit/tour_baselines/test_reconciliation.py`: updated test assertion to match new pin.
-  - `tests/unit/ai/test_knowledge_and_wizards.py`: TDD acceptance tests for K0 and K3a.
-  - `docs/shared_tools/divergence_inventory.v1.json` & `.md`: regenerated divergence ledger.
-  - `docs/agent_context/README.md` & `docs/agent_context/index.html`: re-rendered agent context views.
-  - `SPEC.md`: registered #10944 change log row.
-  - `docs/development/DEVELOPMENT_LOG.md`: added `DL-#10944` active entry.
-  - `vendor/ud-tools`: submodule gitlink bumped to `95ed6b47857e9a47211ab1973d02b28beae718bc`.
+- The originals are only `copyfile`d, never loaded or saved, so R2025b cannot re-save them
+  (the original .slx was last saved in R2025a).
+- The exploratory folder sits outside `matlab/src/`, so `setup_matlab_environment`'s
+  `genpath(src)` never adds it to the path.
+- Shadowing risk is real: during the probe, a same-named scratch copy won `which()`.
 
 ## Validation
 
-- `check_tools_pins.py`: PASSED (gitlink, Cargo.toml, requirements-tools.txt consistent).
-- `check_seam_drift.py`: PASSED (14 notes, 0 errors).
-- `divergence_inventory.py --check`: PASSED (inventory is current).
-- `agent_context --root . check`: PASSED (clean, 0 errors).
-- `test_companion_catalog.py`: PASSED (40/40 passed).
-- `test_tools_child_copy_contract.py`: PASSED (20/20 passed, including diff convergence).
-- `test_impact_acceptance_matrix.py`: PASSED (27/27 passed).
-- `test_reconciliation.py`: PASSED (3/3 passed).
-- `test_divergence_inventory.py`: PASSED (10/10 passed).
-- `test_check_seam_drift.py` + `test_check_tools_pins.py`: PASSED (18/18 passed).
-- `test_check_spec_changelog_duplicates.py` + `test_spec_changelog_integrity.py`: PASSED (18/18 passed).
-- `test_knowledge_and_wizards.py`: PASSED (3/3 passed).
-- `test_rag_context_provider.py`: PASSED (24/24 passed).
-- AI test suite (`tests/ai`, `tests/unit/ai`, `tests/unit/shared_python/ai`): Exactly 14 pre-existing failures matching stock main baseline (0 new failures, 0 regressions).
+- `matlab.exe -batch "cd('.../exploratory_gs3dx'); info=gs3dx_setup(); runtests('tests/test_gs3dx_safety.m')"`
+  → 5 passed, 0 failed.
+- The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
 ## Blockers and Risks
 
-- None. Ready for review and merge.
+- MATLAB tests need a licensed R2025b; they are not part of the Python CI.
 
 ## Next Steps
 
-1. PR review & CI verification: ensure all quality gates pass.
-2. After merge: K3b (#10943) wires the Sidekick Wizards into UD's assistant panel.
-
-## Change Log
-
-- `SELF` — Reconcile child-copy convergence, divergence inventory, and agent context views (#10944).
+1. #10952 regression harness: `gs3dx_simulate` + `gs3dx_compare`, baseline capture, clone equivalence.
+2. #10953 block budget + license probe (agy).
+3. #10954 slim, then #10955/#10956 quaternion joints, then #10957/#10958 lower body.
