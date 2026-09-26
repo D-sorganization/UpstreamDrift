@@ -167,3 +167,7 @@
 ## 2024-05-23 - Revert Full-Array Masking for np.linalg.norm Optimization
 **Learning:** An attempt was made to optimize `np.linalg.norm(..., axis=1)` when calculating errors with a boolean mask by doing full-array `np.einsum("ijk,ijk->ij")` *before* indexing the valid elements. However, doing so loses the dimension-agnostic flattening behavior of the original boolean mask indexing, leading to crashes if arrays are not exactly 3D. Moreover, computing the difference on unobserved values (which might contain non-finite numbers like `Inf`) can trigger `RuntimeWarning`s, and creates *more* computational work if the data is sparse.
 **Action:** When replacing `np.linalg.norm(..., axis=1)` where a boolean mask is used, always apply the mask *before* the `np.einsum` to retain the 2D flattened dimensionality and safely skip non-finite values (e.g., `diff = replay[observed] - measured[observed]` followed by `np.sqrt(np.einsum("ij,ij->i", diff, diff))`).
+
+## 2026-09-26 - Repairing SPEC.md Duplicate Inserts
+**Learning:** During previous automated steps, changelog records were erroneously inserted multiple times in `SPEC.md`, sometimes outside of "Section 12. Change Log". This causes `test_changelog_rows_are_not_duplicated_across_specification` and `test_no_changelog_rows_outside_section_12` to fail in CI.
+**Action:** Always ensure you remove duplicate rows and lines outside the exact Change Log bounds when repairing `SPEC.md` integrity tests.
