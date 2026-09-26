@@ -7,7 +7,7 @@
 - Branch: `feat/simscape-gs3dx-exploratory`
 - Baseline commit: `2d5830d18` (origin/main)
 - Implementation commit: `SELF`
-- Pull request: not created
+- Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
 - Governing issue/epic: #10950 (children #10951–#10959)
 - Lease session: `claude-deskcomputer-20260926-gs3dx`
 - Development log: `DL-#10950`
@@ -18,8 +18,8 @@
   `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`,
   move shoulders and hip to quaternion joints, and grow to a full-body model under
   the 1,000 non-virtual-block Home-license limit, without touching the originals.
-- Status: GS3DX-1 (#10951) scaffold, GS3DX-2 (#10952) regression harness and GS3DX-3
-  (#10953) block budget done.
+- Status: GS3DX-1 (#10951) scaffold, GS3DX-2 (#10952) regression harness, GS3DX-3
+  (#10953) block budget and GS3DX-4 (#10954) `GS3DX_Slim` done.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -29,12 +29,21 @@
   3. `tests/test_gs3dx_safety.m` 5/5 pass.
   4. #10952: `gs3dx_simulate`, `gs3dx_flatten_bus` (1 kHz grid), `gs3dx_compare`
      (`max_abs <= atol + rtol*range`, atol 1e-6, rtol 1e-3) and
-     `gs3dx_capture_original_baseline`; `baselines/original_GolfSwing3D_Kinetic_0p3S.mat`
-     (double precision, 413 signals, 4,236 steps). GS3DX_Baseline matches it on all 413
-     signals with an identical step count.
+     `gs3dx_capture_original_baseline`. Baselines per drive (`gs3dx_drive`,
+     `gs3dx_baseline_file`): `original_GolfSwing3D_Kinetic_impact_0p3S.mat` (regression
+     drive, 344 steps) and `..._persisted_0p3S.mat` (model's saved inputs, 4,236 steps).
+     GS3DX_Baseline matches both on all 413 signals with identical step counts.
   5. #10953 (agy draft, reviewed and corrected): `gs3dx_block_budget`,
      `gs3dx_license_limit_probe`, `docs/BLOCK_BUDGET_FINDINGS.md`. Limit verified exactly:
      1,000 non-virtual blocks simulate, 1,001 fail at compile.
+  6. #10954: `gs3dx_build_slim` copies Baseline/KD to `GS3DX_Slim`/`GS3DX_KDS_*` and
+     `gs3dx_direct_torque_drive` rewires each torque axis converter -> joint InputTorque
+     (drops Ideal Torque Source, Rotational Multibody Interface, Reference). 672 -> 609
+     non-virtual blocks (63 saved). Slim matches the original on the impact drive
+     (413/413 signals, 344 steps, clubhead max diff 6e-14 m).
+  7. Found the persisted drive is ill-conditioned (clubhead > 4 km/s by 0.3 s; a 1e-9
+     RelTol change moves the clubhead 2.4 m), so it cannot prove any restructuring;
+     the impact drive is the regression drive. `docs/SENSITIVITY_FINDINGS.md`.
 
 ## Files and Decisions
 
@@ -51,11 +60,16 @@
   Revolute 21 (13). Each torque axis uses Simulink-PS -> Ideal Torque Source ->
   Rotational Multibody Interface + Reference (4 blocks) although the joint axis is
   already `InputTorque`; a direct PS torque input saves 3 blocks per axis (63 total).
+- Simulink physical lines: a branched net lists its segments only on the trunk
+  (`LineChildren`, which includes the trunk itself); branch segments report no parent or
+  end ports. `gs3dx_direct_torque_drive` finds nets by union-find over all segments.
+- Count blocks on a freshly loaded model: after a simulation in the same session
+  `find_system` counts differ (+101 on Slim).
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 21 passed, 0 failed (clone equivalence test ~150 s; exclude with `'ExcludeTag','Simulation'`).
+  → 32 passed, 0 failed, 177 s (exclude simulations with `'ExcludeTag','Simulation'`).
 - The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
 ## Blockers and Risks
@@ -64,7 +78,8 @@
 
 ## Next Steps
 
-1. Push and open a draft PR; remove agy worktree `../agy-gs3dx-10953`.
-2. #10954 `GS3DX_Slim`: direct `InputTorque` drive (drop Ideal Torque Source, Interface,
-   Reference per axis), collapse World Frames; must pass the harness.
-3. #10955/#10956 quaternion shoulders and hip, then #10957/#10958 lower body.
+1. #10955 `GS3DX_KD_Spherical` + `GS3DX_Quat` shoulders (Spherical joint, 3-vector
+   torque in the follower frame, Euler outputs for the bus), built on `GS3DX_Slim`;
+   compare on the impact drive, with steps and wall time.
+2. #10956 quaternion hip, then #10957/#10958 lower body under the budget with >= 10%
+   margin; #10959 Sonnet visual QA.

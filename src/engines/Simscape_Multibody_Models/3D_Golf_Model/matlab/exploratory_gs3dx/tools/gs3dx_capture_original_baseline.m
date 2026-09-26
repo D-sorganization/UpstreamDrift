@@ -2,9 +2,10 @@ function file = gs3dx_capture_original_baseline(info, opts)
 %GS3DX_CAPTURE_ORIGINAL_BASELINE  Record the hand-built model's reference run.
 %
 %   FILE = GS3DX_CAPTURE_ORIGINAL_BASELINE(INFO) simulates the original
-%   GolfSwing3D_Kinetic for the 0.3 s window and saves the flattened
-%   CombinedSignalBus (double precision, 1 kHz) to
-%   INFO.baselines_dir/original_GolfSwing3D_Kinetic_0p3s.mat.
+%   GolfSwing3D_Kinetic for the 0.3 s window under the "impact" regression
+%   drive (GS3DX_DRIVE) and saves the flattened CombinedSignalBus (double
+%   precision, 1 kHz) to GS3DX_BASELINE_FILE(INFO, drive, stop_time).
+%   Pass drive="persisted" for the model's saved inputs.
 %
 %   Safety: the original folder goes on the path only for this call (an
 %   onCleanup removes it), and the model is always closed with
@@ -14,6 +15,7 @@ function file = gs3dx_capture_original_baseline(info, opts)
     arguments
         info (1,1) struct
         opts.stop_time (1,1) double {mustBePositive} = 0.3
+        opts.drive (1,1) string = "impact"
     end
     names = gs3dx_names();
     mdl = char(names.original_model);
@@ -24,15 +26,16 @@ function file = gs3dx_capture_original_baseline(info, opts)
     assert(strcmpi(fileparts(which(mdl)), info.original_model_dir), 'gs3dx:baseline', ...
         'Precondition: %s resolves to %s, not the original folder', mdl, which(mdl));
 
-    run = gs3dx_simulate(mdl, stop_time = opts.stop_time);
+    run = gs3dx_simulate(mdl, stop_time = opts.stop_time, ...
+        variables = gs3dx_drive(info, opts.drive, mdl));
     assert(run.status == "success", 'gs3dx:baseline', 'Original run failed: %s', run.message);
 
     baseline = run;                 % double precision: float32 rounding alone
                                     % exceeded atol on constant signals (#10952)
     baseline.captured_on = string(datetime('now', 'TimeZone', 'UTC', 'Format', 'yyyy-MM-dd''T''HH:mm:ss''Z'''));
     baseline.source_sha256 = before(1).sha256;
-    file = fullfile(info.baselines_dir, sprintf('original_%s_%sS.mat', mdl, ...
-        strrep(num2str(opts.stop_time), '.', 'p')));
+    baseline.drive = opts.drive;
+    file = gs3dx_baseline_file(info, opts.drive, opts.stop_time);
     save(file, 'baseline', '-v7');
 
     clear restore
