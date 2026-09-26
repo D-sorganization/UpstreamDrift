@@ -14,7 +14,8 @@ function repointed = gs3dx_repoint_references(mdl, mapping)
         mapping containers.Map
     end
     blocks = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
-        'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+        'MatchFilter', @Simulink.match.allVariants, 'LookInsideSubsystemReference', 'off', ...
+        'BlockType', 'SubSystem');
     repointed = {};
     for k = 1:numel(blocks)
         ref = get_param(blocks{k}, 'ReferencedSubsystem');

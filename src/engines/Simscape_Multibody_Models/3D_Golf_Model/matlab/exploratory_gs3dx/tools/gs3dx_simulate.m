@@ -16,6 +16,7 @@ function run = gs3dx_simulate(mdl, opts)
 %     sample_rate      (default 1000 Hz) for the comparison grid
 %     model_parameters struct of set_param overrides (e.g. Solver, MaxStep)
 %     variables        struct of model-workspace variable overrides
+%     block_parameters (:,3) cell of {block path, parameter, value} overrides
 %
 %   The model is simulated through Simulink.SimulationInput, so nothing is
 %   written back to the .slx file.
@@ -26,6 +27,7 @@ function run = gs3dx_simulate(mdl, opts)
         opts.sample_rate (1,1) double {mustBePositive} = 1000
         opts.model_parameters (1,1) struct = struct()
         opts.variables        (1,1) struct = struct()
+        opts.block_parameters (:,3) cell = cell(0, 3)
     end
 
     if ~bdIsLoaded(mdl)
@@ -41,6 +43,10 @@ function run = gs3dx_simulate(mdl, opts)
     v = fieldnames(opts.variables);
     for k = 1:numel(v)
         in = in.setVariable(v{k}, opts.variables.(v{k}), 'Workspace', mdl);
+    end
+
+    for k = 1:size(opts.block_parameters, 1)
+        in = in.setBlockParameter(opts.block_parameters{k, :});
     end
 
     run = struct('model', mdl, 'release', version('-release'), 'wall_s', NaN, ...

@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — GS3DX_Slim (#10954) saves 63 blocks (672 → 609) and matches the original on the impact regression drive (413/413 signals, 344 steps); persisted drive shown ill-conditioned; 32/32 MATLAB tests pass.
+- **Last verified:** 2026-09-26 — GS3DX_Quat (#10955) quaternion shoulders: 599 blocks (609 → 599); joint rig matches the Gimbal to ≤ 2e-7 of peak; full model converges to GS3DX_Slim as RelTol tightens (clubhead 13.9 → 0.54 → 0.039 mm) with 7–9% fewer steps; MATLAB suite 47/47 pass.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Build GS3DX_Quat shoulders (#10955) on GS3DX_Slim with a Spherical-joint subsystem and prove it on the impact drive.
+- **Next step:** Replace the hip Bushing in GS3DX_Quat with a quaternion joint (#10956) and prove it with the joint rig and the convergence test.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

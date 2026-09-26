@@ -15,10 +15,8 @@ function removed = gs3dx_direct_torque_drive(mdl)
 %   joint is unchanged; each axis saves three non-virtual blocks.  Returns
 %   the number of axes rewired.  The caller saves.
 %
-%   Physical nets are found as connected components of all line segments:
-%   a branched net lists its segments only on the trunk (LineChildren), and
-%   branch segments report no parent or end ports, so walking from a port's
-%   own segment is not enough.
+%   Nets are found with GS3DX_PHYSICAL_GRAPH and redrawn with
+%   GS3DX_REDRAW_NETS.
 %
 %   Preconditions (checked before anything is edited):
 %     - equal numbers of interfaces, sources and references;
@@ -48,7 +46,7 @@ function removed = gs3dx_direct_torque_drive(mdl)
         'gs3dx:directDrive', 'Precondition: %d interfaces, %d sources, %d references in %s', ...
         numel(interfaces), numel(sources), numel(references), mdl);
     one_d = handles([interfaces; sources; references]);
-    g = local_graph(mdl);
+    g = gs3dx_physical_graph(mdl);
 
     % Plan: (converter port, joint port) per axis.
     pairs = zeros(numel(interfaces), 2);
@@ -66,93 +64,11 @@ function removed = gs3dx_direct_torque_drive(mdl)
         pairs(k, :) = [conv_port, joint_port];
     end
 
-    % Expected connectivity of every kept port on a touched net.
-    nets = unique(g.net(ismember(g.owner, one_d) & g.net > 0));
-    expected = containers.Map('KeyType', 'double', 'ValueType', 'any');
-    reconnect = {};
-    for n = nets
-        kept = g.port(g.net == n & ~ismember(g.owner, one_d));
-        for q = kept
-            expected(q) = setdiff(kept, q);
-        end
-        if numel(kept) > 1
-            reconnect{end+1} = kept; %#ok<AGROW>
-        end
-    end
-    for k = 1:size(pairs, 1)
-        for side = [1 2; 2 1].'
-            q = pairs(k, side(1));
-            expected(q) = union(expected(q), pairs(k, side(2)));
-        end
-    end
-
-    % Delete every touched net and the 1-D blocks, then redraw.
-    for x = g.line(ismember(g.line_net, nets))
-        if ishandle(x)
-            delete_line(x);
-        end
-    end
-    arrayfun(@delete_block, one_d);
-    for k = 1:numel(reconnect)
-        for q = reconnect{k}(2:end)
-            add_line(mdl, reconnect{k}(1), q, 'autorouting', 'on');
-        end
-    end
-    for k = 1:size(pairs, 1)
-        add_line(mdl, pairs(k, 1), pairs(k, 2), 'autorouting', 'on');
-    end
+    gs3dx_redraw_nets(mdl, one_d, pairs);
     removed = size(pairs, 1);
-
     for ref = {lib.interface, lib.source, lib.reference}
         assert(isempty(find_ref(ref{1})), 'gs3dx:directDrive', ...
             'Postcondition: %s still contains %s', mdl, ref{1});
-    end
-    g = local_graph(mdl);
-    for q = cell2mat(keys(expected))
-        actual = sort(reshape(local_partners(g, q, []), 1, []));
-        want   = sort(reshape(expected(q), 1, []));
-        assert(isequal(actual, want) || (isempty(actual) && isempty(want)), 'gs3dx:directDrive', ...
-            'Postcondition: port on %s now reaches [%s], expected [%s]', get_param(q, 'Parent'), ...
-            local_names(actual), local_names(want));
-    end
-end
-
-function g = local_graph(mdl)
-% Physical ports of MDL's top-level blocks with their owning block and net id
-% (0 = unconnected), plus every line segment and its net id.
-    g.line = reshape(find_system(mdl, 'FindAll', 'on', 'SearchDepth', 1, 'Type', 'line'), 1, []);
-    parent = 1:numel(g.line);                     % union-find over segments
-    function r = root(i)
-        r = i;
-        while parent(r) ~= r
-            r = parent(r);
-        end
-    end
-    for i = 1:numel(g.line)
-        kids = get_param(g.line(i), 'LineChildren');
-        for c = reshape(kids, 1, [])
-            j = find(g.line == c, 1);
-            if ~isempty(j)
-                parent(root(j)) = root(i);
-            end
-        end
-    end
-    g.line_net = arrayfun(@(i) g.line(root(i)), 1:numel(g.line));
-
-    blocks = find_system(mdl, 'SearchDepth', 1, 'Type', 'Block');
-    g.port = []; g.owner = []; g.net = [];
-    for k = 1:numel(blocks)
-        ph = get_param(blocks{k}, 'PortHandles');
-        for q = [ph.LConn ph.RConn]
-            l = get_param(q, 'Line');
-            n = 0;
-            if l > 0
-                n = g.line_net(g.line == l);
-            end
-            g.port(end+1)  = q;
-            g.owner(end+1) = get_param(blocks{k}, 'Handle');
-            g.net(end+1)   = n;
-        end
     end
 end
 
@@ -176,11 +92,6 @@ function far = local_point_to_point(g, blk, candidates)
             far(end+1) = g.port(on_net & g.owner ~= me); %#ok<AGROW>
         end
     end
-end
-
-function s = local_names(ports)
-    s = strjoin(arrayfun(@(x) strrep(get_param(get_param(x, 'Parent'), 'Name'), newline, ' '), ...
-        ports, 'UniformOutput', false), ', ');
 end
 
 function ref = local_ref(blk)
