@@ -31,25 +31,27 @@ from src.shared.python.ai.wizards import (
     wizard_for,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
 
 @pytest.mark.unit
 def test_wizard_config_loads() -> None:
     """Verify that knowledge/wizard.yml exists and loads as a valid WizardConfig."""
-    wizard_path = Path("knowledge/wizard.yml")
+    wizard_path = REPO_ROOT / "knowledge/wizard.yml"
     assert wizard_path.is_file(), "knowledge/wizard.yml must exist"
-    config = load_wizard_config(Path("."))
+    config = load_wizard_config(REPO_ROOT)
     assert isinstance(config, WizardConfig)
     assert config.key == "upstream_drift"
     assert config.name == "Drift Wizard"
-    assert config.manifest.resolve() == (Path(".") / "knowledge/pack.yml").resolve()
-    assert config.pack.resolve() == (Path(".") / ".knowledge/pack.sqlite").resolve()
+    assert config.manifest.resolve() == (REPO_ROOT / "knowledge/pack.yml").resolve()
+    assert config.pack.resolve() == (REPO_ROOT / ".knowledge/pack.sqlite").resolve()
     assert bool(config.capabilities)
 
 
 @pytest.mark.unit
 def test_manifest_loads() -> None:
     """Verify knowledge/pack.yml loads and includes required sources."""
-    manifest_path = Path("knowledge/pack.yml")
+    manifest_path = REPO_ROOT / "knowledge/pack.yml"
     assert manifest_path.is_file(), "knowledge/pack.yml must exist"
     manifest = load_manifest(manifest_path)
     assert isinstance(manifest, PackManifest)
@@ -63,11 +65,11 @@ def test_manifest_loads() -> None:
 @pytest.mark.unit
 def test_every_include_glob_matches_at_least_one_file() -> None:
     """Every glob pattern in knowledge/pack.yml must match at least one file."""
-    manifest_path = Path("knowledge/pack.yml")
+    manifest_path = REPO_ROOT / "knowledge/pack.yml"
     assert manifest_path.is_file(), "knowledge/pack.yml must exist"
     manifest = load_manifest(manifest_path)
 
-    repo_files = list_repo_files(Path("."))
+    repo_files = list_repo_files(REPO_ROOT)
     for source in manifest.sources:
         for glob_pattern in source.include:
             pattern = _glob_re(glob_pattern)
@@ -80,15 +82,15 @@ def test_every_include_glob_matches_at_least_one_file() -> None:
 @pytest.mark.unit
 def test_fixture_question_retrieves_passage_from_expected_doc(tmp_path: Path) -> None:
     """Build a temporary pack and ensure a user question retrieves relevant doc passages."""
-    manifest_path = Path("knowledge/pack.yml")
+    manifest_path = REPO_ROOT / "knowledge/pack.yml"
     assert manifest_path.is_file(), "knowledge/pack.yml must exist"
     manifest = load_manifest(manifest_path)
 
     pack_path = tmp_path / "test_pack.sqlite"
     build_pack(
         manifest=manifest,
-        repos={"UpstreamDrift": Path(".")},
-        out_path=pack_path,
+        roots={"UpstreamDrift": REPO_ROOT},
+        out=pack_path,
     )
 
     pack = KnowledgePack.open(pack_path)
@@ -106,15 +108,15 @@ def test_fixture_question_retrieves_passage_from_expected_doc(tmp_path: Path) ->
 @pytest.mark.unit
 def test_wizard_provides_context_for_sidekick(tmp_path: Path) -> None:
     """WizardKnowledge produces KnowledgeContext with citations and app name."""
-    manifest_path = Path("knowledge/pack.yml")
+    manifest_path = REPO_ROOT / "knowledge/pack.yml"
     assert manifest_path.is_file(), "knowledge/pack.yml must exist"
     manifest = load_manifest(manifest_path)
 
     pack_path = tmp_path / "test_pack.sqlite"
     build_pack(
         manifest=manifest,
-        repos={"UpstreamDrift": Path(".")},
-        out_path=pack_path,
+        roots={"UpstreamDrift": REPO_ROOT},
+        out=pack_path,
     )
 
     config = WizardConfig(
@@ -125,7 +127,7 @@ def test_wizard_provides_context_for_sidekick(tmp_path: Path) -> None:
         manifest=manifest_path,
         pack=pack_path,
         k=5,
-        roots={"UpstreamDrift": Path(".")},
+        roots={"UpstreamDrift": REPO_ROOT},
     )
     wizard = WizardKnowledge(config)
     ctx = wizard.context_for("How do I configure biomechanical simulation?")
@@ -143,14 +145,14 @@ def test_wizard_provides_context_for_sidekick(tmp_path: Path) -> None:
 @pytest.mark.unit
 def test_wizard_stale_pack_shows_banner(tmp_path: Path) -> None:
     """When a pack is stale, the rendered context must include the stale banner."""
-    manifest_path = Path("knowledge/pack.yml")
+    manifest_path = REPO_ROOT / "knowledge/pack.yml"
     assert manifest_path.is_file(), "knowledge/pack.yml must exist"
     pack_path = tmp_path / "test_pack.sqlite"
 
     build_pack(
         manifest=load_manifest(manifest_path),
-        repos={"UpstreamDrift": Path(".")},
-        out_path=pack_path,
+        roots={"UpstreamDrift": REPO_ROOT},
+        out=pack_path,
     )
 
     config = WizardConfig(
@@ -161,7 +163,7 @@ def test_wizard_stale_pack_shows_banner(tmp_path: Path) -> None:
         manifest=manifest_path,
         pack=pack_path,
         k=5,
-        roots={"UpstreamDrift": Path(".")},
+        roots={"UpstreamDrift": REPO_ROOT},
     )
     wizard = WizardKnowledge(config)
     with patch.object(wizard, "is_stale", return_value=True):
@@ -175,14 +177,14 @@ def test_wizard_stale_pack_shows_banner(tmp_path: Path) -> None:
 def test_sidekick_wizards_glue_integration(tmp_path: Path) -> None:
     """Verify sidekick.wizards glue resolves the Drift Wizard from project_root."""
     reset_wizards()
-    wizard = wizard_for(Path("."))
+    wizard = wizard_for(REPO_ROOT)
     assert wizard is not None
     assert wizard.config.key == "upstream_drift"
     assert wizard.config.name == "Drift Wizard"
 
     ctx = ConversationContext(
         messages=[Message(role="user", content="How do I get started?")],
-        metadata={"project_root": str(Path.cwd())},
+        metadata={"project_root": str(REPO_ROOT)},
     )
     kctx = knowledge_for_context(ctx)
     assert isinstance(kctx, KnowledgeContext)

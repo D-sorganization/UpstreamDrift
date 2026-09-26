@@ -126,6 +126,26 @@ def main() -> int:
 
     env = {**os.environ, "SKIP_UI_BUILD": "1"}
 
+    # Build product knowledge pack for Drift Wizard (#10943) if manifest exists
+    manifest_file = REPOSITORY_ROOT / "knowledge" / "pack.yml"
+    pack_file = REPOSITORY_ROOT / ".knowledge" / "pack.sqlite"
+    if manifest_file.is_file() and not pack_file.is_file():
+        pack_file.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "src.shared.python.ai.knowledge",
+                "build",
+                str(manifest_file),
+                "--root",
+                f"UpstreamDrift={REPOSITORY_ROOT}",
+                "--out",
+                str(pack_file),
+            ],
+            check=False,
+        )
+
     result = subprocess.run(
         [
             sys.executable,

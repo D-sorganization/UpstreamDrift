@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
+### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #10943
+- **PR:** #10946
+- **Branch:** `agy/issue-10943`
+- **Paths:** `knowledge/pack.yml`, `knowledge/wizard.yml`, `sidekick.spec`, `scripts/packaging/build_sidekick_binary.py`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `tests/unit/ai/test_drift_wizard.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 7/7 tests pass in test_drift_wizard.py; 3/3 tests pass in test_knowledge_and_wizards.py; workflow inventory and check scripts pass.
+- **Summary:** Define source catalog knowledge/pack.yml and wizard configuration knowledge/wizard.yml for UpstreamDrift product documentation and reference. Wire Sidekick packaging to compile and bundle the SQLite knowledge pack. Add wizard-pack CI workflow and test suite.
+- **Next step:** Pass all quality gates and squash-merge PR.
+
+### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
+
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #10944
 - **PR:** #10945
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-25
 - **Last verified:** 2026-09-25 — 40/40 companion tests pass, 20/20 child-copy contract tests pass, 10/10 divergence inventory tests pass, 18/18 spec changelog tests pass, 18/18 seam/pin tests pass, 3/3 knowledge/wizard tests pass, 27/27 impact acceptance tests pass, 3/3 reconciliation tests pass, agent-context check clean.
 - **Summary:** Advance vendor/ud-tools submodule gitlink to 95ed6b47857e9a47211ab1973d02b28beae718bc on Tools main incorporating K0 (Tools#5348) and K3a (Tools#5350). Synchronize child copy of src/shared/python/ai/ (knowledge package, wizards.py, base adapter, panel tools, RAG deprecation). Advance Cargo.toml, requirements-tools.txt, impact_acceptance.json, reconciliation.py, regenerate divergence inventory, and render agent context.
-- **Next step:** Pass all quality gates and squash-merge PR #10945.
+- **Next step:** Shipped in PR #10945 (commit 2d5830d18).
 
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
