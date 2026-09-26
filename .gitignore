@@ -287,3 +287,7 @@ test_event_filter.py
 
 # WSL GUI test lane (scripts/dev/wsl_qt_tests.sh)
 .wsl-venv/
+
+# Drift Wizard knowledge pack SQLite database (#10943)
+.knowledge/
+

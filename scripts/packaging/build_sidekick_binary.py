@@ -91,6 +91,21 @@ def _native_platform_name() -> str:
         raise RuntimeError(f"Unsupported build platform: {sys.platform}") from error
 
 
+def _build_knowledge_pack_if_present() -> None:
+    """Build product knowledge pack for Drift Wizard (#10943) if manifest exists."""
+    manifest_file = SPEC_FILE.parent / "knowledge" / "pack.yml"
+    pack_file = SPEC_FILE.parent / ".knowledge" / "pack.sqlite"
+    if manifest_file.is_file() and not pack_file.is_file():
+        try:
+            from src.shared.python.ai.knowledge import build_pack, load_manifest
+
+            manifest = load_manifest(manifest_file)
+            roots = {"UpstreamDrift": SPEC_FILE.parent}
+            build_pack(manifest, roots, pack_file)
+        except (OSError, ValueError, KeyError) as exc:
+            print(f"::warning::Failed to build knowledge pack: {exc}", file=sys.stderr)
+
+
 def main() -> int:
     args = _parse_args()
 
@@ -125,6 +140,8 @@ def main() -> int:
         return 1
 
     env = {**os.environ, "SKIP_UI_BUILD": "1"}
+
+    _build_knowledge_pack_if_present()
 
     result = subprocess.run(
         [
