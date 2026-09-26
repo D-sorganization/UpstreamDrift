@@ -15,7 +15,7 @@ Reference:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -35,6 +35,58 @@ except ImportError:
     HAS_RUST_BACKEND = False
 
 
+def _to_rust_muscle(muscle: Any) -> Any:
+    """Return the ``upstream_muscle`` equivalent of *muscle*, or None if it has none.
+
+    Only an ``upstream_muscle.HillMuscleModel`` or a Python ``HillMuscleModel``
+    whose ``compute_force`` is not overridden can be mirrored in Rust; anything
+    else (subclasses with custom physics, test doubles) keeps the group on the
+    pure-Python path so both paths always compute the same thing (#10946).
+    """
+    if not HAS_RUST_BACKEND:
+        return None
+    if isinstance(muscle, upstream_muscle.HillMuscleModel):
+        return muscle
+    from src.shared.python.biomechanics.hill_muscle import HillMuscleModel
+
+    if not isinstance(muscle, HillMuscleModel) or (
+        type(muscle).compute_force is not HillMuscleModel.compute_force
+    ):
+        return None
+    p = muscle.params
+    rust_params = upstream_muscle.MuscleParameters(
+        float(p.F_max),
+        float(p.l_opt),
+        float(p.l_slack),
+        float(p.v_max),
+        float(p.pennation_angle),
+        float(p.damping),
+    )
+    return upstream_muscle.HillMuscleModel(
+        rust_params, float(muscle._force_length_width)
+    )
+
+
+def _validate_activations(
+    activations: dict[str, float], arg_name: str = "activations"
+) -> None:
+    """Validate activation dictionary preconditions.
+
+    Design by Contract:
+        Preconditions:
+            - activations must be provided
+            - all activation values in [0, 1] and finite
+    """
+    if activations is None:
+        raise ValueError(f"{arg_name} must be provided")
+    for mname, act_val in activations.items():
+        require(
+            act_val is not None and np.isfinite(act_val) and 0.0 <= act_val <= 1.0,
+            f"activation for '{mname}' must be in [0, 1]",
+            act_val,
+        )
+
+
 @dataclass
 class MuscleAttachment:
     """Defines how a muscle attaches to a joint (moment arm)."""
@@ -47,20 +99,22 @@ class MuscleAttachment:
 class MuscleGroup:
     """A group of muscles acting on a single joint."""
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, enable_rust: bool = True) -> None:
         """Initialize muscle group.
 
         Args:
             name: Group name (e.g., "Elbow Flexors")
+            enable_rust: Whether to enable Rust backend acceleration if available.
         """
         if name is None:
             raise ValueError("name must be provided")
         self.name = name
+        self.enable_rust = enable_rust
         self.muscles: dict[str, HillMuscleModel] = {}
         self.attachments: dict[str, MuscleAttachment] = {}
 
         self._rust_backend = None
-        if HAS_RUST_BACKEND:
+        if enable_rust and HAS_RUST_BACKEND:
             self._rust_backend = upstream_muscle.MuscleGroup(name)
 
     def add_muscle(self, name: str, muscle: HillMuscleModel, moment_arm: float) -> None:
@@ -83,12 +137,12 @@ class MuscleGroup:
         self.muscles[name] = muscle
         self.attachments[name] = MuscleAttachment(name, moment_arm)
 
-        if (
-            self._rust_backend is not None
-            and hasattr(muscle, "_rust_backend")
-            and muscle._rust_backend is not None
-        ):
-            self._rust_backend.add_muscle(name, muscle._rust_backend, moment_arm)
+        if self._rust_backend is not None:
+            rust_muscle = _to_rust_muscle(muscle)
+            if rust_muscle is not None:
+                self._rust_backend.add_muscle(name, rust_muscle, moment_arm)
+            else:
+                self._rust_backend = None
 
     def compute_net_torque(
         self,
@@ -110,18 +164,17 @@ class MuscleGroup:
         Returns:
             Net joint torque [N·m]
         """
-        if activations is None:
-            raise ValueError("activations must be provided")
-        for mname, act_val in activations.items():
-            require(
-                0.0 <= act_val <= 1.0,
-                f"activation for '{mname}' must be in [0, 1]",
-                act_val,
-            )
+        _validate_activations(activations, "activations")
+        if muscle_states is None:
+            raise ValueError("muscle_states must be provided")
 
         if self._rust_backend is not None:
             try:
-                return self._rust_backend.compute_net_torque(activations, muscle_states)
+                result = float(
+                    self._rust_backend.compute_net_torque(activations, muscle_states)
+                )
+                ensure(np.isfinite(result), "net torque must be finite", result)
+                return result
             except RuntimeError as e:
                 logger.warning(
                     f"Rust MuscleGroup compute_net_torque failed, falling back to Python: {e}"
@@ -162,27 +215,45 @@ class MuscleGroup:
 class AntagonistPair:
     """A pair of agonist/antagonist muscle groups (e.g., Biceps/Triceps)."""
 
-    def __init__(self, agonist: MuscleGroup, antagonist: MuscleGroup) -> None:
+    def __init__(
+        self,
+        agonist: MuscleGroup,
+        antagonist: MuscleGroup,
+        enable_rust: bool = True,
+    ) -> None:
         """Initialize antagonist pair.
 
         Args:
             agonist: MuscleGroup for positive torque (Flexors)
             antagonist: MuscleGroup for negative torque (Extensors)
+            enable_rust: Whether to enable Rust backend acceleration if available.
         """
         if agonist is None:
             raise ValueError("agonist must be provided")
+        if antagonist is None:
+            raise ValueError("antagonist must be provided")
         self.agonist = agonist
         self.antagonist = antagonist
+        self.enable_rust = enable_rust
 
         self._rust_backend = None
         if (
-            HAS_RUST_BACKEND
-            and agonist._rust_backend is not None
-            and antagonist._rust_backend is not None
+            enable_rust
+            and HAS_RUST_BACKEND
+            and getattr(agonist, "_rust_backend", None) is not None
+            and getattr(antagonist, "_rust_backend", None) is not None
         ):
             self._rust_backend = upstream_muscle.AntagonistPair(
                 agonist._rust_backend, antagonist._rust_backend
             )
+
+    def _current_rust_pair(self) -> Any:
+        """Rust pair built from the groups' current backends, or None if either is Python-only."""
+        ag_rb = self.agonist._rust_backend
+        ant_rb = self.antagonist._rust_backend
+        if ag_rb is None or ant_rb is None:
+            return None
+        return upstream_muscle.AntagonistPair(ag_rb, ant_rb)
 
     def compute_net_torque(
         self,
@@ -203,14 +274,27 @@ class AntagonistPair:
         Returns:
             Net torque [N·m]
         """
-        if agonist_activations is None:
-            raise ValueError("agonist_activations must be provided")
+        _validate_activations(agonist_activations, "agonist_activations")
+        _validate_activations(antagonist_activations, "antagonist_activations")
+        if muscle_states is None:
+            raise ValueError("muscle_states must be provided")
 
         if self._rust_backend is not None:
+            # Groups may have gained muscles (or dropped to Python) since construction.
+            self._rust_backend = self._current_rust_pair()
+        if self._rust_backend is not None:
             try:
-                return self._rust_backend.compute_net_torque(
-                    agonist_activations, antagonist_activations, muscle_states
+                result = float(
+                    self._rust_backend.compute_net_torque(
+                        agonist_activations, antagonist_activations, muscle_states
+                    )
                 )
+                ensure(
+                    np.isfinite(result),
+                    "antagonist pair net torque must be finite",
+                    result,
+                )
+                return result
             except RuntimeError as e:
                 logger.warning(
                     f"Rust AntagonistPair compute_net_torque failed, falling back to Python: {e}"
@@ -236,8 +320,11 @@ class AntagonistPair:
         return list(self.agonist.muscles.keys()) + list(self.antagonist.muscles.keys())
 
 
-def create_elbow_muscle_system() -> AntagonistPair:
+def create_elbow_muscle_system(enable_rust: bool = True) -> AntagonistPair:
     """Factory function to create a simplified elbow muscle system.
+
+    Args:
+        enable_rust: Whether to enable Rust backend acceleration if available.
 
     Returns:
         AntagonistPair with Biceps (flexor) and Triceps (extensor)
@@ -248,7 +335,7 @@ def create_elbow_muscle_system() -> AntagonistPair:
     )
 
     # Flexors (Biceps)
-    flexors = MuscleGroup("Elbow Flexors")
+    flexors = MuscleGroup("Elbow Flexors", enable_rust=enable_rust)
     biceps_params = MuscleParameters(F_max=1000.0, l_opt=0.15, l_slack=0.20)
     flexors.add_muscle("biceps", HillMuscleModel(biceps_params), moment_arm=0.04)
 
@@ -259,11 +346,11 @@ def create_elbow_muscle_system() -> AntagonistPair:
     )
 
     # Extensors (Triceps)
-    extensors = MuscleGroup("Elbow Extensors")
+    extensors = MuscleGroup("Elbow Extensors", enable_rust=enable_rust)
     triceps_params = MuscleParameters(F_max=1200.0, l_opt=0.18, l_slack=0.22)
     extensors.add_muscle("triceps", HillMuscleModel(triceps_params), moment_arm=-0.035)
 
-    return AntagonistPair(flexors, extensors)
+    return AntagonistPair(flexors, extensors, enable_rust=enable_rust)
 
 
 # Example usage
