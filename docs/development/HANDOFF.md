@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-bolt-consol`
 - Branch: `claude/ud-bolt-consolidated-20260926` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: not created at commit time; supersedes #10983 and #10984 (both conflicted on their SPEC rows)
+- Pull request: #10993 (draft); supersedes #10983 and #10984 (both conflicted on their SPEC rows)
 - Issue: none (Bolt performance PRs). No material development-log change — two behaviour-preserving single-expression rewrites.
 - Built: `fit_pipeline._quality` computes landmark distances as `sqrt(einsum)` (#10984); `shot._rotation_increment` computes the angular-velocity norm once with `math.sqrt(np.vdot)` and reuses it for the axis (#10983). Inline comments shortened to the 88-column limit; the Bolt journal entry is kept with its date corrected to 2026-09-26.
 - Validation: `pytest tests/motion_capture/test_reference_fit_pipeline.py tests/motion_capture/test_reference_fit_preview.py tests/bunkershot3d/solvers/test_shot.py` -> 45 passed; ruff check/format clean.
