@@ -34,7 +34,7 @@ SIBLINGS = [
     ("opensim_models", "OpenSim_Models", "opensim_models", "OPENSIM_MODELS_HOME"),
     (
         "movement_optimizer",
-        "Movement-Optimizer",
+        "Movement_Optimizer",
         "movement_optimizer",
         "MOVEMENT_OPTIMIZER_HOME",
     ),

@@ -49,15 +49,13 @@ def test_trajectory_funnel_reward() -> None:
 
 def test_simulate_agent_training() -> None:
     bench_setpoint = TrajectoryFunnelBenchmark("setpoint")
-    res1 = bench_setpoint.simulate_agent_training(n_episodes=5, n_steps=8, state_dim=2)
+    res1 = bench_setpoint.train_agent(n_iterations=5, n_steps=8, state_dim=2)
     assert res1["mode"] == "setpoint"
-    assert res1["convergence_epochs"] == 40
-    assert res1["terminal_variance"] == pytest.approx(0.9969827482730124)
+    assert res1["convergence_iteration"] == 5
+    assert res1["terminal_return_std"] == pytest.approx(3.64634939698881e-05)
 
     bench_transverse = TrajectoryFunnelBenchmark("transverse")
-    res2 = bench_transverse.simulate_agent_training(
-        n_episodes=5, n_steps=8, state_dim=2
-    )
+    res2 = bench_transverse.train_agent(n_iterations=5, n_steps=8, state_dim=2)
     assert res2["mode"] == "transverse"
-    assert res2["convergence_epochs"] == 40
-    assert res2["terminal_variance"] == pytest.approx(0.8784258509118879)
+    assert res2["convergence_iteration"] == 5
+    assert res2["terminal_return_std"] == pytest.approx(0.16946357019103891)

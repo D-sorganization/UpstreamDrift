@@ -32,8 +32,8 @@ import matplotlib  # noqa: E402
 
 matplotlib.use("Agg")
 
-from motion_matching import FitResult, write_leaderboard_entry  # noqa: E402
-from motion_matching.leaderboard_writer import SCHEMA_KEYS  # noqa: E402
+from motion_matching import write_leaderboard_entry  # noqa: E402
+from motion_matching.leaderboard_writer import FitResult, SCHEMA_KEYS  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Fixtures

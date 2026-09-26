@@ -723,7 +723,7 @@ def _read_models_root_from_manifest(manifest_path: Path) -> Path | None:
     manifest does not declare a usable ``models_root``.
     """
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
     except ImportError:
         logger.debug("PyYAML missing — cannot parse %s", manifest_path)
         return None
