@@ -52,6 +52,9 @@
   behaviour: `test_calibration_provenance` asserted the FB4 MuJoCo receipt `PASSED` (P0-9
   honestly relabelled it `REJECTED`, 138 mm RMS > 60 mm), and the tour-viewer compare test ran
   without the now-mandatory seed (P1-4). Tests updated to the new contract; 11 passed locally.
+- CI round 5: `unit-test-gate` 1 failed / 19110 passed. `test_acceptance_gate_honesty_10960`
+  patched dotted-string targets, which resolve through `src.shared.python` attributes that another
+  test rebinds under xdist. It now patches the imported module objects; 9 passed locally.
 
 ## Blockers and Risks
 
