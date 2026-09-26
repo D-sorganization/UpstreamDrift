@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9688 · Bunker P1: Decide and Benchmark a Genuine 3D Sand-Motion Tier
+
+- **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #9688
+- **PR:** draft PR from `agy/ud-9688-capability-register`
+- **Branch:** `agy/ud-9688-capability-register`
+- **Paths:** `src/bunkershot3d/solvers/capability.py`, `src/bunkershot3d/solvers/exceptions.py`, `src/bunkershot3d/solvers/__init__.py`, `docs/adr/0044-out-of-plane-fidelity-for-bunkershot3d.md`, `tests/bunkershot3d/solvers/test_capability_9688.py`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 18 unit tests pass in test_capability_9688.py verifying fail-closed sand-motion capability register
+- **Summary:** Added fail-closed sand-motion capability register (SandMotionKind, SandMotionCapability, register mapping, and require\_\* guards) in bunkershot3d.solvers to prevent presenting F0/F1/proxy/tracer outputs as genuine 3-D individual-grain trajectories or spherical ball spin.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress
