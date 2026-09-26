@@ -110,7 +110,7 @@ def test_hub_variants_have_distinct_ids_and_work_accounting() -> None:
         hub_mode=HubMode.FIXED_PIVOT,
     )
     assert fixed_work.is_moving_hub is False
-    assert fixed_work.total_work_joules == 0.0
+    assert fixed_work.total_work_joules is None
 
     moving_pos = np.array([[0.0, 0.0], [0.01, 0.0], [0.02, 0.0]])
     forces = np.array([[10.0, 0.0], [10.0, 0.0], [10.0, 0.0]])

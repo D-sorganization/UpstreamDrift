@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from docs.development.full_body_models.evidence._gates import (
+    FB5_MATCHING_THRESHOLDS,
+    evaluate_gates,
+)
 
 from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
@@ -305,18 +311,63 @@ def _execute_forward_rollout(ctx: MatchingContext) -> Any:
     c = rollout.contact_audit
     logger.info("Forward Simulation Results:")
     logger.info("  Status: %s", rollout.status)
-    logger.info("  Whole marker RMSE: %.2f mm", m.whole_marker_rmse_m * 1000.0)
-    logger.info("  Early marker RMSE: %.2f mm", m.early_marker_rmse_m * 1000.0)
-    logger.info("  Terminal marker RMSE: %.2f mm", m.terminal_marker_rmse_m * 1000.0)
-    logger.info("  Club marker RMSE: %.2f mm", m.club_marker_rmse_m * 1000.0)
-    logger.info("  Pelvis yaw RMSE: %.4f rad", m.pelvis_yaw_rmse_rad)
-    logger.info("  Max normal ground force: %.2f N", c.max_normal_force_n)
-    logger.info("  Max friction ground force: %.2f N", c.max_friction_force_n)
-    logger.info("  Max penetration: %.2f mm", c.max_penetration_m * 1000.0)
+    if m is not None:
+        logger.info("  Whole marker RMSE: %.2f mm", m.whole_marker_rmse_m * 1000.0)
+        logger.info("  Early marker RMSE: %.2f mm", m.early_marker_rmse_m * 1000.0)
+        logger.info(
+            "  Terminal marker RMSE: %.2f mm", m.terminal_marker_rmse_m * 1000.0
+        )
+        logger.info("  Club marker RMSE: %.2f mm", m.club_marker_rmse_m * 1000.0)
+        logger.info("  Pelvis yaw RMSE: %.4f rad", m.pelvis_yaw_rmse_rad)
+    if c is not None:
+        logger.info("  Max normal ground force: %.2f N", c.max_normal_force_n)
+        logger.info("  Max friction ground force: %.2f N", c.max_friction_force_n)
+        logger.info("  Max penetration: %.2f mm", c.max_penetration_m * 1000.0)
     logger.info(
         "  Max closure residual: %.2f mm", rollout.max_closure_residual_m * 1000.0
     )
     return rollout
+
+
+def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
+    """Evaluate FB-5 forward-dynamics matching metrics against documented thresholds (#10960 P0-9)."""
+    return evaluate_gates(metrics, FB5_MATCHING_THRESHOLDS)
+
+
+def _receipt_inputs(ctx: MatchingContext) -> dict[str, str]:
+    """SHA-256 of every input the FB-5 receipt depends on."""
+    return {
+        "full_body_spec_v1.json": sha256_file(SPEC_PATH),
+        "calibrated_offsets.json": sha256_file(ctx.offsets_path),
+        "ik_trajectory.npz": sha256_file(ctx.ik_path),
+        "returned-candidate.json": sha256_file(CANDIDATE_PATH),
+        "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
+        "derivative_resolution.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/derivative_resolution.py"
+        ),
+        "multi_shooting_fit.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/multi_shooting_fit.py"
+        ),
+        "full_body_forward_dynamics.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/full_body_forward_dynamics.py"
+        ),
+        "tour_metrics.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/tour_metrics.py"
+        ),
+    }
+
+
+def _shared_metrics_dict(shared: Any) -> dict[str, float] | None:
+    """Shared tour metrics as a dict, or None when the rollout produced none (#10960 P1-9)."""
+    if shared is None:
+        return None
+    return {
+        "whole_marker_rmse_m": shared.whole_marker_rmse_m,
+        "early_marker_rmse_m": shared.early_marker_rmse_m,
+        "terminal_marker_rmse_m": shared.terminal_marker_rmse_m,
+        "club_marker_rmse_m": shared.club_marker_rmse_m,
+        "pelvis_yaw_rmse_rad": shared.pelvis_yaw_rmse_rad,
+    }
 
 
 def _archive_artifacts_and_receipt(
@@ -338,12 +389,28 @@ def _archive_artifacts_and_receipt(
     )
     traj_sha256 = sha256_file(traj_path)
 
+    # A failed rollout has no audit or metrics (#10960 P1-9): None fails its gate.
+    contact_dict = (
+        rollout.contact_audit.as_dict() if rollout.contact_audit is not None else {}
+    )
+    shared = rollout.shared_metrics
+    gate_metrics = {
+        "whole_marker_rmse_m": shared.whole_marker_rmse_m if shared else None,
+        "max_normal_force_n": contact_dict.get("max_normal_force_n"),
+        "max_penetration_m": contact_dict.get("max_penetration_m"),
+        "max_closure_residual_m": float(rollout.max_closure_residual_m),
+        "max_defect_norm": float(ms_fit_result.max_defect_norm),
+    }
+    status_eval = build_status_from_metrics(gate_metrics)
+
     receipt = {
         "work_package": "FB-5",
         "issue": "#10069",
         "epic": "#10062",
         "engine": ctx.engine,
-        "status": "PASSED" if rollout.status == "success" else "FAILED",
+        "status": status_eval["status"] if rollout.status == "success" else "FAILED",
+        "gate_evaluation": status_eval,
+        "thresholds": dict(FB5_MATCHING_THRESHOLDS),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": sys.version,
@@ -351,25 +418,7 @@ def _archive_artifacts_and_receipt(
             "executable": sys.executable,
             f"{ctx.engine}_version": get_engine_version(ctx.engine),
         },
-        "inputs": {
-            "full_body_spec_v1.json": sha256_file(SPEC_PATH),
-            "calibrated_offsets.json": sha256_file(ctx.offsets_path),
-            "ik_trajectory.npz": sha256_file(ctx.ik_path),
-            "returned-candidate.json": sha256_file(CANDIDATE_PATH),
-            "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
-            "derivative_resolution.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/derivative_resolution.py"
-            ),
-            "multi_shooting_fit.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/multi_shooting_fit.py"
-            ),
-            "full_body_forward_dynamics.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/full_body_forward_dynamics.py"
-            ),
-            "tour_metrics.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/tour_metrics.py"
-            ),
-        },
+        "inputs": _receipt_inputs(ctx),
         "derivative_resolution": {
             "optimal_step": deriv_res.optimal_step,
             "noise_floor": deriv_res.noise_floor,
@@ -394,14 +443,10 @@ def _archive_artifacts_and_receipt(
             "duration_s": float(ctx.time_grid[-1]),
             "ground_height_m": ctx.ground_height_m,
             "max_closure_residual_m": rollout.max_closure_residual_m,
-            "shared_metrics": {
-                "whole_marker_rmse_m": rollout.shared_metrics.whole_marker_rmse_m,
-                "early_marker_rmse_m": rollout.shared_metrics.early_marker_rmse_m,
-                "terminal_marker_rmse_m": rollout.shared_metrics.terminal_marker_rmse_m,
-                "club_marker_rmse_m": rollout.shared_metrics.club_marker_rmse_m,
-                "pelvis_yaw_rmse_rad": rollout.shared_metrics.pelvis_yaw_rmse_rad,
-            },
-            "contact_audit": rollout.contact_audit.as_dict(),
+            "shared_metrics": _shared_metrics_dict(shared),
+            "contact_audit": (
+                contact_dict if rollout.contact_audit is not None else None
+            ),
         },
         "artifacts": {
             f"forward_trajectory_{ctx.engine}_sha256": traj_sha256,

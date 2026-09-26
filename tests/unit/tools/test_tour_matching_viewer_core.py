@@ -199,19 +199,24 @@ def test_club_only_compare_view_separates_observed_and_inferred() -> None:
     )
     from src.shared.python.motion_matching.club_only.ui_integration import (
         ObservationRole,
+        _synthetic_seed,
         create_club_only_session,
         run_club_only_ui_match,
     )
     from src.tools.tour_matching_viewer.core import club_only_compare_from_ui_result
 
     observation = build_calibrated_observation_fixture("TW_wiffle")
+    session = create_club_only_session(
+        trial_id=observation.trial_id,
+        model_id="double_pendulum",
+        preset=MatchPreset.FAST_PREVIEW,
+    )
     result = run_club_only_ui_match(
-        create_club_only_session(
-            trial_id=observation.trial_id,
-            model_id="double_pendulum",
-            preset=MatchPreset.FAST_PREVIEW,
-        ),
+        session,
         observation=observation,
+        # #10960 P1-4: a seed is mandatory; the preview seed keeps the view
+        # unqualified, which is what this compare contract asserts.
+        seed=_synthetic_seed(observation, session.model_id),
     )
     compare = club_only_compare_from_ui_result(result)
     assert compare.trial_clock_hz == pytest.approx(240.0)

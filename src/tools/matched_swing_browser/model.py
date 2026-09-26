@@ -174,6 +174,10 @@ class MatchedSwingBrowserModel:
             rel_str = row.receipt_path
         elif artifact_type == "parity":
             receipt_file = (self._repo_root / row.receipt_path).resolve()
+            # A reevaluation verdict supersedes the parity file beside it (#10960 P0-9).
+            candidate_reeval = receipt_file.parent / "reevaluation.json"
+            if candidate_reeval.is_file():
+                return candidate_reeval
             candidate_parity = receipt_file.parent / "parity_vs_mujoco.json"
             if candidate_parity.is_file():
                 return candidate_parity

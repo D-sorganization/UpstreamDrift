@@ -294,49 +294,12 @@ def run_constrained_ik_seeds(
             backend=backend,
         )
 
-    q0 = _warm_start_q(observation)
-    branches = generate_posture_branches(q0, n_branches=n_branches, amplitude_rad=0.04)
-    grip = np.asarray(observation.mid_hands_xyz, dtype=np.float64)
-    face = np.asarray(observation.face_xyz, dtype=np.float64)
-    residual = float(np.mean(np.linalg.norm(grip - face, axis=1))) * 0.01
-    if not np.isfinite(residual):
-        raise ValueError("observed residual must be finite")
-
-    seeds: list[CandidateSeed] = []
-    for index, q in enumerate(branches):
-        seeds.append(
-            CandidateSeed(
-                seed_id=(
-                    f"constrained_ik:{observation.trial_id}:{backend.value}:{index}"
-                ),
-                trial_id=observation.trial_id,
-                model_id=profile.model_id,
-                source="constrained_ik",
-                q=q,
-                body_configuration_hash=_body_hash(q),
-                observed_residual_m=residual + 0.001 * index,
-                prior_score=float(max(0.0, min(1.0, 0.8 - 0.05 * index))),
-                feasibility_reasons=(
-                    "hard_grip",
-                    "stance",
-                    "orientation_task",
-                    f"backend:{backend.value}",
-                    f"lead:{hand_offsets.lead_frame_name}",
-                    f"trail:{hand_offsets.trail_frame_name}",
-                ),
-                timestamps_s=np.asarray(observation.native_time_s, dtype=np.float64),
-                geometry_hash=geometry_hash,
-                profile_hash=profile_hash,
-                body_is_prior=True,
-                placement=None,
-                claims_torque=False,
-                claims_physiological_inference=False,
-                is_kinematic_preview=True,
-            )
-        )
+    # Fail closed: club_only has no integrated Pink/DLS solver.
+    # No solve has run, so seeds cannot be returned with fabricated residuals
+    # or unearned constraint claims (CO-03 #10607 / #10960 P1-1).
     return ConstrainedIkResult(
-        seeds=tuple(seeds),
-        failure_reason=None,
+        seeds=(),
+        failure_reason=IkFailureReason.MISSING_SOLVER,
         is_kinematic_preview=True,
         backend=backend,
     )

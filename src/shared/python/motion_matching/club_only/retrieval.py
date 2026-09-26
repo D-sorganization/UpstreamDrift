@@ -24,6 +24,7 @@ __all__ = [
     "RigidPlacement",
     "build_observable_descriptor",
     "retrieve_starting_seeds",
+    "validate_library_not_query_trial",
 ]
 
 
@@ -196,6 +197,25 @@ def _body_hash(q: NDArray[np.floating]) -> str:
     return hashlib.sha256(np.asarray(q, dtype=np.float64).tobytes()).hexdigest()
 
 
+def validate_library_not_query_trial(
+    library: Sequence[LibraryEntry],
+    query_trial_id: str,
+) -> None:
+    """Raise ``ValueError`` if any library entry was built from the query trial.
+
+    A seed retrieved from the query's own descriptor is the target copied as a
+    fit (#10960 P1-2), so every retrieval entry point calls this first.
+    """
+    if not query_trial_id:
+        raise ValueError("query trial_id must be non-empty")
+    for entry in library:
+        if entry.descriptor.trial_id == query_trial_id:
+            raise ValueError(
+                f"library entry {entry.reference_id!r} was built from the query "
+                f"trial {query_trial_id!r} (trial leakage)"
+            )
+
+
 @precondition(
     lambda observation, profile, library, geometry_hash, profile_hash, max_seeds=2: (
         isinstance(observation, ClubObservation)
@@ -223,6 +243,7 @@ def retrieve_starting_seeds(
 
     if not library:
         raise ValueError("library must be non-empty")
+    validate_library_not_query_trial(library, observation.trial_id)
     query = build_observable_descriptor(
         observation,
         model_id=profile.model_id,

@@ -3,7 +3,8 @@
   "issue": "#10068",
   "epic": "#10062",
   "engine": "mujoco",
-  "status": "PASSED",
+  "status": "REJECTED",
+  "note": "relabelled #10960 P0-9: total_rms_m 138.09 mm > 60.00 mm threshold, closure_max_error_m 16.70 mm > 5.00 mm threshold",
   "timestamp_utc": "2026-09-15T05:25:39.742372+00:00",
   "environment": {
     "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",

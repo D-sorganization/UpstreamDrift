@@ -85,6 +85,8 @@ class MujocoFitSwingProvider:
                 or carries a non-:class:`ClubTarget` payload.
             TypeError: when ``opts.engine_options`` is supplied but is not
                 a :class:`MujocoFitOptions`.
+            NotImplementedError: when ``target`` carries a body target, as the
+                body-target fit lane is not wired (#10960 P0-1).
         """
         if has_body_target(target):
             return execute_body_fit(

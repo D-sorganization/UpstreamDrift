@@ -124,6 +124,12 @@ class FullSwingTrajectory:
     ground_normal_force_n: Array | None = None
     ground_penetration_m: Array | None = None
     support_polygon_fraction: float | None = None
+    per_frame_errors_m: Array | None = None
+    integration_drift_m: float | None = None
+    root_residual_rms: float | None = None
+    marker_coverage_ratio: float | None = None
+    dynamics: Mapping[str, Any] | None = None
+    solution: Any | None = None
 
 
 @dataclass(frozen=True)
@@ -133,15 +139,15 @@ class DynamicTrackingReceipt:
     schema_version: str
     stage: str
     horizon: Horizon
-    solver_convergence_status: str
+    solver_convergence_status: str | None
     ik_playback_status: str
-    objective_value: float
-    num_iterations: int
-    solve_duration_s: float
+    objective_value: float | None
+    num_iterations: int | None
+    solve_duration_s: float | None
     shared_metrics: dict[str, float]
-    per_frame_max_error_m: float
-    root_residual_rms: float
-    marker_coverage_ratio: float
+    per_frame_max_error_m: float | None
+    root_residual_rms: float | None
+    marker_coverage_ratio: float | None
     model_sha256: str
     capture_sha256: str
     retained_markers: list[str]
@@ -177,10 +183,10 @@ class ForwardReplayReceipt:
     replay_acceptance_status: str
     replay_success: bool
     final_time_s: float
-    integration_drift_m: float
-    max_ground_penetration_m: float
-    max_normal_force_bw: float
-    inside_support_polygon_fraction: float
+    integration_drift_m: float | None
+    max_ground_penetration_m: float | None
+    max_normal_force_bw: float | None
+    inside_support_polygon_fraction: float | None
     timestamp_utc: str
     failure_reason: str = ""
 
@@ -211,7 +217,7 @@ class FullSwingQualificationResult:
     acceptance_verdict: AcceptanceVerdict
     is_qualified: bool
     ik_playback_status: str
-    solver_convergence_status: str
+    solver_convergence_status: str | None
     replay_acceptance_status: str
     failure_reasons: tuple[str, ...]
 
@@ -465,6 +471,57 @@ def reinitialize_tracking_from_address(
     return q0, fixed_offsets
 
 
+SOLVE_SUCCEEDED = "Solve_Succeeded"
+# Shared marker metrics are scored against the capture itself: there are no
+# model marker predictions yet, so the residuals are not evidence of a fit and
+# this lane can never qualify (#10363, #10960 P0-8).
+MARKER_RESIDUALS_SELF_SCORED = True
+
+
+def _opt_float(value: Any) -> float | None:
+    """Return ``float(value)``, or None when the value was not recorded."""
+    return None if value is None else float(value)
+
+
+def _opt_max(values: Array | None) -> float | None:
+    """Return the maximum of a recorded series, or None when absent or empty."""
+    if values is None:
+        return None
+    arr = np.asarray(values, dtype=np.float64)
+    return float(np.max(arr)) if arr.size else None
+
+
+def _extract_solution_metrics(
+    solution: Any,
+) -> tuple[str | None, int | None, float | None, float | None]:
+    """Read solver status, iterations, duration and objective from a solve result.
+
+    Accepts an ``opensim.MocoSolution`` (``getStatus``, ``getNumIterations``,
+    ``getSolverDuration``, ``getObjective``) or a Mapping keyed by the receipt
+    field names. Anything not recorded is None; nothing is defaulted (#10960 P0-8).
+
+    Returns:
+        ``(solver_convergence_status, num_iterations, solve_duration_s, objective_value)``
+    """
+    if solution is None:
+        return None, None, None, None
+    if isinstance(solution, Mapping):
+        status = solution.get("solver_convergence_status")
+        iterations = solution.get("num_iterations")
+        return (
+            None if status is None else str(status),
+            None if iterations is None else int(iterations),
+            _opt_float(solution.get("solve_duration_s")),
+            _opt_float(solution.get("objective_value")),
+        )
+    return (
+        str(solution.getStatus()),
+        int(solution.getNumIterations()),
+        float(solution.getSolverDuration()),
+        float(solution.getObjective()),
+    )
+
+
 def qualify_full_swing_tracking(
     model_path: Path | str,
     trajectory: FullSwingTrajectory,
@@ -524,24 +581,36 @@ def qualify_full_swing_tracking(
             f"Coordinate limit violations in joints: {list(violations.keys())}"
         )
 
+    (
+        solver_status,
+        num_iterations,
+        solve_duration_s,
+        obj_val,
+    ) = _extract_solution_metrics(trajectory.solution)
+
     # Build tracking receipt
     horizon = stage.horizon
     metrics_dict = shared_metrics.as_dict()
+
+    per_frame_max_error_m = _opt_max(trajectory.per_frame_errors_m)
+    root_residual_rms = _opt_float(trajectory.root_residual_rms)
+    marker_coverage_ratio = _opt_float(trajectory.marker_coverage_ratio)
+
     tracking_receipt = DynamicTrackingReceipt(
         schema_version="1.0.0",
         stage=stage.value,
         horizon=horizon,
-        solver_convergence_status="Solve_Succeeded",
+        solver_convergence_status=solver_status,
         ik_playback_status=(
             "Playback_Succeeded" if not failure_reasons else "Playback_Failed"
         ),
-        objective_value=float(metrics_dict["whole_marker_rmse_m"]),
-        num_iterations=25,
-        solve_duration_s=12.5,
+        objective_value=obj_val,
+        num_iterations=num_iterations,
+        solve_duration_s=solve_duration_s,
         shared_metrics=metrics_dict,
-        per_frame_max_error_m=float(metrics_dict["whole_marker_rmse_m"]) * 1.5,
-        root_residual_rms=0.001,
-        marker_coverage_ratio=1.0,
+        per_frame_max_error_m=per_frame_max_error_m,
+        root_residual_rms=root_residual_rms,
+        marker_coverage_ratio=marker_coverage_ratio,
         model_sha256=model_digest,
         capture_sha256=capture_digest,
         retained_markers=list(capture.labels),
@@ -549,44 +618,32 @@ def qualify_full_swing_tracking(
     )
 
     # Evaluate ground contact & dynamics for forward replay receipt
-    max_pen_m = (
-        float(np.max(trajectory.ground_penetration_m))
-        if trajectory.ground_penetration_m is not None
-        else 0.0
+    max_pen_m = _opt_max(trajectory.ground_penetration_m)
+    max_normal_force_n = _opt_max(trajectory.ground_normal_force_n)
+    bw_mult = (
+        None
+        if max_normal_force_n is None
+        else max_normal_force_n / (gates.nominal_body_mass_kg * gates.gravity_m_s2)
     )
-    normal_forces = (
-        trajectory.ground_normal_force_n
-        if trajectory.ground_normal_force_n is not None
-        else np.full(len(trajectory.time_s), 784.8)
-    )
-    bw_mult = float(
-        np.max(normal_forces) / (gates.nominal_body_mass_kg * gates.gravity_m_s2)
-    )
-    supp_poly = (
-        trajectory.support_polygon_fraction
-        if trajectory.support_polygon_fraction is not None
-        else 1.0
-    )
+    supp_poly = _opt_float(trajectory.support_polygon_fraction)
 
     replay_success = (
-        max_pen_m <= gates.max_penetration_m
+        max_pen_m is not None
+        and bw_mult is not None
+        and supp_poly is not None
+        and max_pen_m <= gates.max_penetration_m
         and bw_mult <= gates.max_normal_force_bw_multiplier
         and supp_poly >= gates.min_inside_support_polygon_fraction
     )
 
-    replay_receipt = ForwardReplayReceipt(
-        schema_version="1.0.0",
-        horizon=horizon,
-        replay_acceptance_status="Accepted" if replay_success else "Rejected",
-        replay_success=replay_success,
-        final_time_s=float(trajectory.time_s[-1]),
-        integration_drift_m=0.002,
-        max_ground_penetration_m=max_pen_m,
-        max_normal_force_bw=bw_mult,
-        inside_support_polygon_fraction=supp_poly,
-        timestamp_utc=datetime.now(timezone.utc).isoformat(),
-        failure_reason="" if replay_success else "Contact semantics violated",
-    )
+    integration_drift_m = _opt_float(trajectory.integration_drift_m)
+
+    if replay_success:
+        replay_failure_reason = ""
+    elif max_pen_m is None or bw_mult is None or supp_poly is None:
+        replay_failure_reason = "Missing ground contact or dynamic metrics"
+    else:
+        replay_failure_reason = "Contact semantics violated"
 
     # Acceptance verdict via MS-100 / MS-104 acceptance engine
     acceptance_input: dict[str, Any] = {
@@ -597,21 +654,60 @@ def qualify_full_swing_tracking(
         "club_marker_rmse_m": metrics_dict["club_marker_rmse_m"],
         "pelvis_yaw_rmse_rad": metrics_dict["pelvis_yaw_rmse_rad"],
         "max_closure_residual_m": max_grip_m,
-        "contact_audit": {
-            "max_normal_force_n": float(np.max(normal_forces)),
-            "max_penetration_m": max_pen_m,
-            "min_support_polygon_fraction": supp_poly,
-        },
-        "dynamics": {
-            "weight_fraction": {"min": 0.5, "max": 2.2},
-            "max_root_force_n": 0.0,
-            "delta_tau_root_max_n": 0.0,
-        },
     }
 
+    if max_normal_force_n is not None:
+        contact_audit: dict[str, Any] = {
+            "max_normal_force_n": max_normal_force_n,
+        }
+        if max_pen_m is not None:
+            contact_audit["max_penetration_m"] = max_pen_m
+        if supp_poly is not None:
+            contact_audit["min_support_polygon_fraction"] = supp_poly
+        acceptance_input["contact_audit"] = contact_audit
+    elif max_pen_m is not None:
+        acceptance_input["max_penetration_m"] = max_pen_m
+
+    traj_dyn = trajectory.dynamics
+    if isinstance(traj_dyn, Mapping):
+        acceptance_input["dynamics"] = dict(traj_dyn)
+    elif root_residual_rms is not None:
+        acceptance_input["dynamics"] = {"max_root_residual_n_m": root_residual_rms}
+
+    if integration_drift_m is not None:
+        acceptance_input["open_loop_replay"] = {
+            "drift_m": integration_drift_m,
+        }
+
+    if marker_coverage_ratio is not None:
+        acceptance_input["coverage"] = {
+            "club_marker_coverage_fraction": marker_coverage_ratio,
+        }
+
     verdict = evaluate(acceptance_input, horizon=horizon, gates=gates)
-    is_qual = (
-        verdict.is_physically_accepted and replay_success and (not failure_reasons)
+    replay_accepted = bool(replay_success and verdict.is_physically_accepted)
+    replay_status_str = "Accepted" if replay_accepted else "Rejected"
+
+    is_qual = bool(
+        verdict.is_physically_accepted
+        and replay_success
+        and (not failure_reasons)
+        and solver_status == SOLVE_SUCCEEDED
+        and not MARKER_RESIDUALS_SELF_SCORED
+    )
+
+    replay_receipt = ForwardReplayReceipt(
+        schema_version="1.0.0",
+        horizon=horizon,
+        replay_acceptance_status=replay_status_str,
+        replay_success=replay_success,
+        final_time_s=float(trajectory.time_s[-1]),
+        integration_drift_m=integration_drift_m,
+        max_ground_penetration_m=max_pen_m,
+        max_normal_force_bw=bw_mult,
+        inside_support_polygon_fraction=supp_poly,
+        timestamp_utc=datetime.now(timezone.utc).isoformat(),
+        failure_reason=replay_failure_reason,
     )
 
     return FullSwingQualificationResult(
@@ -624,7 +720,7 @@ def qualify_full_swing_tracking(
         ik_playback_status=(
             "Playback_Succeeded" if not failure_reasons else "Playback_Failed"
         ),
-        solver_convergence_status="Solve_Succeeded",
-        replay_acceptance_status="Accepted" if replay_success else "Rejected",
+        solver_convergence_status=solver_status,
+        replay_acceptance_status=replay_status_str,
         failure_reasons=tuple(failure_reasons),
     )

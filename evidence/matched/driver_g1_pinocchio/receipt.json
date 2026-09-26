@@ -4,7 +4,8 @@
   "epic": "#10363",
   "engine": "pinocchio",
   "solver": "crocoddyl_fddp",
-  "status": "PASSED",
+  "status": "REJECTED",
+  "note": "relabelled #10960 P0-9: whole_marker_rmse_m 2.76 m > 0.025 m threshold",
   "timestamp_utc": "2026-09-17T21:00:00+00:00",
   "receipt": {
     "status": "terminal",

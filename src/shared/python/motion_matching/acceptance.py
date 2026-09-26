@@ -6,7 +6,7 @@ engines and horizons (G1, G2, G3) under the Matched Swing Program.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import enum
 import math
@@ -29,6 +29,17 @@ class GateStatus(enum.Enum):
     PASSED = "passed"
     FAILED = "failed"
     MISSING = "missing"
+    NOT_APPLICABLE = "not_applicable"
+    DISCLOSED = "disclosed"
+
+
+# Kinematic native-fit lanes carry no contact audit; matched exactly, never by substring.
+NATIVE_FIT_LANES: frozenset[str] = frozenset(
+    {"native", "drake_native_fit", "crocoddyl_native_fit"}
+)
+ACCEPTABLE_GATE_STATUSES: frozenset[GateStatus] = frozenset(
+    {GateStatus.PASSED, GateStatus.DISCLOSED, GateStatus.NOT_APPLICABLE}
+)
 
 
 @dataclass(frozen=True)
@@ -51,6 +62,15 @@ class GateResult:
             "unit": self.unit,
             "reason": self.reason,
         }
+
+
+def is_verdict_accepted(gate_results: Sequence[GateResult]) -> bool:
+    """Return True iff at least one gate passed and all gates are acceptable."""
+    return (
+        len(gate_results) > 0
+        and any(g.status == GateStatus.PASSED for g in gate_results)
+        and all(g.status in ACCEPTABLE_GATE_STATUSES for g in gate_results)
+    )
 
 
 @dataclass(frozen=True)
@@ -370,11 +390,18 @@ def _evaluate_normal_contact_force(
     if val_force is None:
         val_force = _extract_metric(receipt, "max_normal_force_n")
 
-    is_native_crossval = "native" in str(
-        receipt.get("lane", "")
-    ) or "two_window_fit" in str(receipt)
-    if val_force is None:
-        if not is_native_crossval and "contact_audit" in receipt:
+    if receipt.get("lane") in NATIVE_FIT_LANES:
+        results.append(
+            GateResult(
+                name="max_normal_force_n",
+                status=GateStatus.NOT_APPLICABLE,
+                threshold=thresh_max_force,
+                unit="N",
+                reason="native kinematic-fit lane has no contact audit",
+            )
+        )
+    elif val_force is None:
+        if "contact_audit" in receipt:
             results.append(
                 GateResult(
                     name="max_normal_force_n",
@@ -384,7 +411,7 @@ def _evaluate_normal_contact_force(
                     reason="missing max normal force in contact audit",
                 )
             )
-        elif not is_native_crossval:
+        else:
             dyn = receipt.get("dynamics")
             if isinstance(dyn, Mapping) and "controller" in dyn:
                 results.append(
@@ -1287,10 +1314,11 @@ def _evaluate_dual_terminal_disclosure(
     return [
         GateResult(
             name="dual_terminal_disclosure",
-            status=GateStatus.PASSED,
+            status=GateStatus.DISCLOSED,
             threshold=1.0,
-            measured=1.0,
+            measured=None,
             unit="match",
+            reason="terminal full/body/head metrics disclosed",
         )
     ]
 
@@ -1349,9 +1377,7 @@ def evaluate(
     gate_results.extend(_evaluate_dual_terminal_disclosure(receipt))
 
     # Overall verdict
-    is_accepted = len(gate_results) > 0 and all(
-        g.status == GateStatus.PASSED for g in gate_results
-    )
+    is_accepted = is_verdict_accepted(gate_results)
     status_str = "PASSED" if is_accepted else "REJECTED"
 
     return AcceptanceVerdict(

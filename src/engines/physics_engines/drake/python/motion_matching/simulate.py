@@ -351,7 +351,7 @@ class SimOut:
 
         grip_mat = grip if grip is not None else grip_position
         if grip_mat is None:
-            grip_mat = np.zeros((n, 3), dtype=np.float64)
+            grip_mat = np.full((n, 3), np.nan, dtype=np.float64)
         else:
             grip_mat = np.asarray(grip_mat, dtype=np.float64)
 
@@ -360,11 +360,11 @@ class SimOut:
         elif grip_rotation is not None:
             g_quat = rotmat_to_quat(np.asarray(grip_rotation, dtype=np.float64))
         else:
-            g_quat = np.zeros((n, 4), dtype=np.float64)
+            g_quat = np.full((n, 4), np.nan, dtype=np.float64)
 
         head_mat = clubhead if clubhead is not None else clubhead_position
         if head_mat is None:
-            head_mat = np.zeros((n, 3), dtype=np.float64)
+            head_mat = np.full((n, 3), np.nan, dtype=np.float64)
         else:
             head_mat = np.asarray(head_mat, dtype=np.float64)
 
@@ -373,7 +373,7 @@ class SimOut:
         elif clubhead_rotation is not None:
             c_quat = rotmat_to_quat(np.asarray(clubhead_rotation, dtype=np.float64))
         else:
-            c_quat = np.zeros((n, 4), dtype=np.float64)
+            c_quat = np.full((n, 4), np.nan, dtype=np.float64)
 
         for name, arr, cols in [
             ("q", q_mat, None),
@@ -392,9 +392,9 @@ class SimOut:
                 msg = f"SimOut.{name} must have shape (N, {cols}); got {arr.shape}"
                 raise ValueError(msg)
 
-        if solver_status not in {"success", "warning", "failed"}:
+        if solver_status not in {"success", "warning", "failed", "partial"}:
             msg = (
-                "SimOut.solver_status must be 'success' / 'warning' / 'failed'; "
+                "SimOut.solver_status must be 'success' / 'warning' / 'failed' / 'partial'; "
                 f"got {solver_status!r}"
             )
             raise ValueError(msg)
@@ -402,7 +402,7 @@ class SimOut:
         def _as_1d_energy(val: Any) -> NDArray[np.float64]:
             if val is not None:
                 return np.asarray(val, dtype=np.float64)
-            return np.zeros(n, dtype=np.float64)
+            return np.full(n, np.nan, dtype=np.float64)
 
         ke_vec = _as_1d_energy(kinetic_energy)
         pe_vec = _as_1d_energy(potential_energy)
@@ -651,6 +651,7 @@ def _record_rollout(
         if n_actuators > 0
         else np.zeros((0, COEFFS_PER_JOINT), dtype=np.float64)
     )
+    has_partial = False
     for idx, t_target in enumerate(grid):
         if t_target > 0.0:
             try:
@@ -682,25 +683,48 @@ def _record_rollout(
         grip_pose = _resolve_world_pose(plant, plant_ctx, grip_body_name)
         if grip_pose is not None:
             logs.grip[idx, :], logs.grip_quat[idx, :] = grip_pose
+        else:
+            has_partial = True
+
         club_pose = _resolve_world_pose(plant, plant_ctx, clubhead_body_name)
         if club_pose is not None:
             logs.clubhead[idx, :], logs.club_quat[idx, :] = club_pose
+        else:
+            has_partial = True
 
         if compute_energy:
             if hasattr(plant, "CalcKineticEnergy"):
                 try:
-                    logs.kinetic_energy[idx] = float(plant.CalcKineticEnergy(plant_ctx))
+                    val = float(plant.CalcKineticEnergy(plant_ctx))
+                    if np.isfinite(val):
+                        logs.kinetic_energy[idx] = val
+                    else:
+                        logs.kinetic_energy[idx] = np.nan
+                        has_partial = True
                 except (TypeError, ValueError):
-                    logs.kinetic_energy[idx] = 0.0
+                    logs.kinetic_energy[idx] = np.nan
+                    has_partial = True
+            else:
+                logs.kinetic_energy[idx] = np.nan
+                has_partial = True
+
             if hasattr(plant, "CalcPotentialEnergy"):
                 try:
-                    logs.potential_energy[idx] = float(
-                        plant.CalcPotentialEnergy(plant_ctx)
-                    )
+                    val = float(plant.CalcPotentialEnergy(plant_ctx))
+                    if np.isfinite(val):
+                        logs.potential_energy[idx] = val
+                    else:
+                        logs.potential_energy[idx] = np.nan
+                        has_partial = True
                 except (TypeError, ValueError):
-                    logs.potential_energy[idx] = 0.0
+                    logs.potential_energy[idx] = np.nan
+                    has_partial = True
+            else:
+                logs.potential_energy[idx] = np.nan
+                has_partial = True
 
-    return _RolloutResult(solver_status="success", error=None)
+    solver_status = "partial" if has_partial else "success"
+    return _RolloutResult(solver_status=solver_status, error=None)
 
 
 # ---------------------------------------------------------------------------
@@ -744,7 +768,9 @@ def _record_rollout(
     "time not monotonic or does not start at 0",
 )
 @postcondition(
-    lambda result: bool(result.solver_status in ("success", "warning", "failed")),
+    lambda result: bool(
+        result.solver_status in ("success", "warning", "failed", "partial")
+    ),
     "invalid solver_status",
 )
 def simulate_with_coefficients(  # noqa: C901
@@ -897,8 +923,8 @@ def simulate_with_coefficients(  # noqa: C901
         grip_quat=np.full((n_t, 4), np.nan, dtype=np.float64),
         clubhead=np.full((n_t, 3), np.nan, dtype=np.float64),
         club_quat=np.full((n_t, 4), np.nan, dtype=np.float64),
-        kinetic_energy=np.zeros(n_t, dtype=np.float64),
-        potential_energy=np.zeros(n_t, dtype=np.float64),
+        kinetic_energy=np.full(n_t, np.nan, dtype=np.float64),
+        potential_energy=np.full(n_t, np.nan, dtype=np.float64),
     )
 
     rollout = _record_rollout(

@@ -1,5 +1,7 @@
 {
   "schema": "neural-checkpoint-matrix-receipt/1.0.0",
+  "status": "DIAGNOSTIC",
+  "note": "Relabelled under #10960 fabricated-evidence audit: native replay and qualified_native statuses were simulated/lookup without physical trained checkpoints or ODE rollouts on disk.",
   "governing_issue": 10624,
   "parent_epic": 10603,
   "matrix_schema": "neural-checkpoint-matrix/1.0.0",

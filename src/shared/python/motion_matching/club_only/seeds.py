@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping, Sequence
 
 import numpy as np
 
@@ -19,6 +19,7 @@ from src.shared.python.motion_matching.club_only.hand_geometry import (
     resolve_hand_frame_offsets,
 )
 from src.shared.python.motion_matching.club_only.observation import (
+    ClubObservation,
     build_calibrated_observation_fixture,
     require_strictly_increasing_timestamps,
 )
@@ -30,20 +31,43 @@ from src.shared.python.motion_matching.club_only.workbook_identity import (
     CANONICAL_TRIAL_SHEETS,
 )
 
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.club_only.retrieval import LibraryEntry
+
 SEED_SCHEMA = "club-starting-guesses/1.0.0"
+# Seed sources produced by a real CO-03 retrieval or IK step; ``ui_synthetic`` is not one.
+VERIFIED_SEED_SOURCES = frozenset({"retrieval", "constrained_ik"})
+# Hand-made seeds (GUI preview, CO-05 preview); never evidence of a fit.
+SYNTHETIC_SEED_SOURCES = frozenset({"ui_synthetic", "synthetic"})
+NO_VERIFIED_SEED_MESSAGE = (
+    "no verified seed: matching requires a verified seed from CO-03 retrieval "
+    "or constrained_ik"
+)
 _GOVERNING_ISSUE = 10607
 
 __all__ = [
+    "NO_VERIFIED_SEED_MESSAGE",
     "SEED_SCHEMA",
+    "SYNTHETIC_SEED_SOURCES",
+    "VERIFIED_SEED_SOURCES",
     "CandidateSeed",
     "SeedCache",
     "StartingGuessReport",
     "build_starting_guess_report",
     "evidence_payload",
     "geometry_content_hash",
+    "is_verified_seed",
     "profile_content_hash",
     "starting_guess_evidence_payload",
 ]
+
+
+def is_verified_seed(seed: Any) -> bool:
+    """Return True only for a seed produced by a real retrieval or IK step (#10960).
+
+    ``None`` and synthetic or unknown sources are never verified.
+    """
+    return seed is not None and getattr(seed, "source", None) in VERIFIED_SEED_SOURCES
 
 
 @dataclass(frozen=True)
@@ -72,7 +96,7 @@ class CandidateSeed:
     def __post_init__(self) -> None:
         if not self.seed_id or not self.trial_id or not self.model_id:
             raise ValueError("seed_id, trial_id, and model_id required")
-        if self.source not in {"retrieval", "constrained_ik"}:
+        if self.source not in VERIFIED_SEED_SOURCES | SYNTHETIC_SEED_SOURCES:
             raise ValueError(f"unsupported seed source: {self.source!r}")
         q = np.asarray(self.q, dtype=np.float64)
         if q.ndim != 1 or q.size < 1 or not np.all(np.isfinite(q)):
@@ -200,27 +224,60 @@ def profile_content_hash(profile: ClubOnlyProfile) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def _library_for_observation(obs, profile: ClubOnlyProfile, geometry_hash: str):
-    """Build a small prior library keyed to the observation clock/geometry."""
+def _library_for_observation(
+    obs: ClubObservation,
+    profile: ClubOnlyProfile,
+    geometry_hash: str,
+    other_observations: Sequence[ClubObservation] | None = None,
+) -> tuple[LibraryEntry, ...]:
+    """Build a small prior library from other trials' descriptors only (CO-03 #10607, #10960).
+
+    Never self-copies the query observation; returns an empty library if no other-trial
+    source is available, allowing retrieval to fail closed.
+    """
     from src.shared.python.motion_matching.club_only.retrieval import (
         LibraryEntry,
         RigidPlacement,
         build_observable_descriptor,
     )
 
-    desc = build_observable_descriptor(
-        obs, model_id=profile.model_id, geometry_hash=geometry_hash
-    )
+    if other_observations is not None:
+        candidate_sources = [
+            o for o in other_observations if o.trial_id != obs.trial_id
+        ]
+    elif obs.trial_id in CANONICAL_TRIAL_SHEETS:
+        candidate_sources = [
+            build_calibrated_observation_fixture(t)
+            for t in CANONICAL_TRIAL_SHEETS
+            if t != obs.trial_id
+        ]
+    else:
+        candidate_sources = []
+
+    if not candidate_sources:
+        return ()
+
     entries: list[LibraryEntry] = []
-    for index, amp in enumerate((0.0, 0.03, -0.02)):
+    amplitudes = (0.0, 0.03, -0.02)
+    for index, source_obs in enumerate(candidate_sources):
+        if source_obs.native_time_s.shape != obs.native_time_s.shape:
+            continue
+        if not np.allclose(source_obs.native_time_s, obs.native_time_s):
+            continue
+        desc = build_observable_descriptor(
+            source_obs,
+            model_id=profile.model_id,
+            geometry_hash=geometry_hash,
+        )
+        amp = amplitudes[index % len(amplitudes)]
         q0 = np.array([amp, 0.05 - amp, -0.02 + 0.5 * amp, 0.01 * index])
         entries.append(
             LibraryEntry(
-                reference_id=f"tour-prior-{obs.trial_id}-{index}",
+                reference_id=f"tour-prior-{source_obs.trial_id}-{index}",
                 descriptor=desc,
                 body_q0=q0,
                 rigid_placement=RigidPlacement.identity(),
-                source_clock_times_s=obs.native_time_s.copy(),
+                source_clock_times_s=source_obs.native_time_s.copy(),
                 body_is_prior=True,
             )
         )
@@ -284,8 +341,16 @@ def build_starting_guess_report(
             backend=IkSolverKind.PINK_NATIVE,
             n_branches=max_seeds_per_source,
         )
-        if not retrieval or not ik.seeds:
-            raise ValueError(f"failed to produce baselines for {trial_id}")
+        if not retrieval:
+            raise ValueError(f"failed to produce retrieval baselines for {trial_id}")
+        ik_baseline: dict[str, Any] = {
+            "seed_ids": [s.seed_id for s in ik.seeds],
+            "is_kinematic_preview": True,
+            "backend": ik.backend.value,
+            "seeds": [s.as_dict() for s in ik.seeds],
+        }
+        if ik.failure_reason is not None:
+            ik_baseline["failure_reason"] = ik.failure_reason.value
         trials[trial_id] = {
             "trial_id": trial_id,
             "geometry_hash": g_hash,
@@ -299,12 +364,7 @@ def build_starting_guess_report(
                     "is_kinematic_preview": True,
                     "seeds": [s.as_dict() for s in retrieval],
                 },
-                "constrained_ik": {
-                    "seed_ids": [s.seed_id for s in ik.seeds],
-                    "is_kinematic_preview": True,
-                    "backend": ik.backend.value,
-                    "seeds": [s.as_dict() for s in ik.seeds],
-                },
+                "constrained_ik": ik_baseline,
             },
         }
 

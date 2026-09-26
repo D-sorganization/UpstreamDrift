@@ -39,6 +39,7 @@ from src.shared.python.motion_matching.club_only.observation import (
 )
 from src.shared.python.motion_matching.club_only.profiles import get_club_only_profile
 from src.shared.python.motion_matching.club_only.seeds import (
+    VERIFIED_SEED_SOURCES,
     CandidateSeed,
     geometry_content_hash,
     profile_content_hash,
@@ -221,6 +222,7 @@ class ClubOnlyUiResult:
     match: FastMatchResult
     observation: ClubObservation
     checkpoint: MatchCheckpoint | None
+    seed: CandidateSeed | None = None
 
 
 @dataclass(frozen=True)
@@ -259,6 +261,8 @@ class ResultViewModel:
     prior_choices: Mapping[str, Any]
     geometry_choices: Mapping[str, Any]
     schema_version: str = UI_SCHEMA
+    seed_source: str | None = None
+    is_synthetic_seed: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -460,7 +464,7 @@ def _synthetic_seed(observation: ClubObservation, model_id: str) -> CandidateSee
         seed_id=f"ui-{observation.trial_id}-{model_id}",
         trial_id=observation.trial_id,
         model_id=model_id,
-        source="retrieval",
+        source="ui_synthetic",
         q=q,
         body_configuration_hash=hashlib.sha256(q.tobytes()).hexdigest(),
         observed_residual_m=0.05,
@@ -486,11 +490,23 @@ def run_club_only_ui_match(
     """Run preview/verified fit through existing fast-match orchestration."""
     if not isinstance(session, ClubOnlyUiSession):
         raise TypeError("session must be ClubOnlyUiSession")
-    obs = observation or build_calibrated_observation_fixture(session.trial_id)
-    if obs.trial_id != session.trial_id:
+    if observation is None:
+        raise ValueError(
+            "observation is required; silent fixture fallback is prohibited"
+        )
+    if not isinstance(observation, ClubObservation):
+        raise TypeError("observation must be ClubObservation")
+    if observation.trial_id != session.trial_id:
         raise ValueError("observation.trial_id must match session.trial_id")
+    if seed is None:
+        raise ValueError(
+            "seed is required; must come from CO-03 retrieval or constrained_ik sources (got None)"
+        )
+    if not isinstance(seed, CandidateSeed):
+        raise TypeError("seed must be CandidateSeed")
+    obs = observation
     profile = get_club_only_profile(session.model_id)
-    seed_obj = seed if seed is not None else _synthetic_seed(obs, session.model_id)
+    seed_obj = seed
     geom_hash = seed_obj.geometry_hash
     prof_hash = seed_obj.profile_hash
     provider = neural_provider or EmptyNeuralProposalProvider()
@@ -515,6 +531,7 @@ def run_club_only_ui_match(
         match=match,
         observation=obs,
         checkpoint=match.checkpoint,
+        seed=seed_obj,
     )
 
 
@@ -523,9 +540,15 @@ def build_club_only_result_view(result: ClubOnlyUiResult) -> ResultViewModel:
     if not isinstance(result, ClubOnlyUiResult):
         raise TypeError("result must be ClubOnlyUiResult")
     native_pass = bool(result.match.native_g1_pass)
-    blockers = tuple(result.match.qualification_blockers) or _DEFAULT_BLOCKERS
+    blockers = list(result.match.qualification_blockers) or list(_DEFAULT_BLOCKERS)
+    seed = result.seed
+    is_synthetic = seed is None or seed.source not in VERIFIED_SEED_SOURCES
+    if is_synthetic:
+        blockers.append("synthetic_seed_unqualified_for_verified_fit")
     if result.session.preset is MatchPreset.FAST_PREVIEW:
         status = VerificationDisplayStatus.PREVIEW
+    elif is_synthetic:
+        status = VerificationDisplayStatus.UNQUALIFIED
     elif native_pass and not blockers:
         status = VerificationDisplayStatus.NATIVE_VERIFIED
     else:
@@ -534,7 +557,11 @@ def build_club_only_result_view(result: ClubOnlyUiResult) -> ResultViewModel:
         status = VerificationDisplayStatus.UNQUALIFIED
     tradeoffs = tuple(
         {
-            "club_fit": float(sample.best_observation_fit_m),
+            "club_fit": (
+                float(sample.best_observation_fit_m)
+                if sample.best_observation_fit_m is not None
+                else float("nan")
+            ),
             "plausibility": float(sample.failed_attempts),
             "runtime_s": float(sample.wall_s),
             "evaluations": float(sample.evaluations),
@@ -563,7 +590,7 @@ def build_club_only_result_view(result: ClubOnlyUiResult) -> ResultViewModel:
         preset=result.session.preset,
         display_status=status,
         native_g1_pass=native_pass,
-        qualification_blockers=blockers,
+        qualification_blockers=tuple(blockers),
         trial_clock_hz=float(NATIVE_SAMPLE_RATE_HZ),
         native_time_s=np.asarray(result.observation.native_time_s, dtype=np.float64),
         body_motion_disclaimer=result.session.body_motion_disclaimer,
@@ -572,6 +599,8 @@ def build_club_only_result_view(result: ClubOnlyUiResult) -> ResultViewModel:
         infeasible_models=infeasible,
         prior_choices=dict(result.session.prior_choices),
         geometry_choices=dict(result.session.geometry_choices),
+        seed_source=seed.source if seed is not None else None,
+        is_synthetic_seed=is_synthetic,
     )
     assert_unqualified_cannot_appear_verified(view)
     return view
@@ -665,6 +694,11 @@ def publish_club_only_ledger_row(
     """Publish a ledger row whose sha256 matches the receipt file bytes."""
     if not isinstance(view, ResultViewModel):
         raise TypeError("view must be ResultViewModel")
+    if view.is_synthetic_seed:
+        raise ValueError(
+            "cannot publish or append ledger row for synthetic seed; "
+            "must come from verified CO-03 sources ('retrieval' or 'constrained_ik')"
+        )
     path = Path(receipt_path)
     if not str(path):
         raise ValueError("receipt_path must be non-empty")
@@ -725,7 +759,8 @@ def ui_integration_evidence_payload(repo_root: Path | str) -> dict[str, Any]:
         geometry_choices={"handedness": "right"},
     )
     observation = build_calibrated_observation_fixture("TW_wiffle")
-    result = run_club_only_ui_match(session, observation=observation)
+    seed = _synthetic_seed(observation, session.model_id)
+    result = run_club_only_ui_match(session, observation=observation, seed=seed)
     view = build_club_only_result_view(result)
     return {
         "schema_version": UI_SCHEMA,

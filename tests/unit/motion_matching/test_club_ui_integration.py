@@ -13,7 +13,23 @@ from src.shared.python.motion_matching.club_only.fast_matching import (
     MatchPreset,
 )
 from src.shared.python.motion_matching.club_only.observation import (
+    ClubObservation,
     build_calibrated_observation_fixture,
+)
+from src.shared.python.motion_matching.club_only.profiles import (
+    get_club_only_profile,
+)
+from src.shared.python.motion_matching.club_only.ui_integration import (
+    resolve_club_only_model_id,
+)
+from src.shared.python.motion_matching.club_only.retrieval import (
+    retrieve_starting_seeds,
+)
+from src.shared.python.motion_matching.club_only.seeds import (
+    CandidateSeed,
+    _library_for_observation,
+    geometry_content_hash,
+    profile_content_hash,
 )
 from src.shared.python.motion_matching.club_only.ui_integration import (
     UI_SCHEMA,
@@ -51,6 +67,26 @@ EVIDENCE = (
     / "evidence"
     / "club_ui_integration.json"
 )
+
+
+def _retrieval_seed(
+    observation: ClubObservation, model_id: str = "double_pendulum"
+) -> CandidateSeed:
+    """A real CO-03 retrieval seed from other trials' descriptors (#10960 P1-4)."""
+    profile = get_club_only_profile(resolve_club_only_model_id(model_id))
+    geometry_hash = geometry_content_hash(
+        club_type=observation.club_type,
+        catalog_length_m=observation.catalog_length_m,
+        tool_to_model_residual_m=0.0,
+    )
+    seeds = retrieve_starting_seeds(
+        observation=observation,
+        profile=profile,
+        library=_library_for_observation(observation, profile, geometry_hash),
+        geometry_hash=geometry_hash,
+        profile_hash=profile_content_hash(profile),
+    )
+    return seeds[0]
 
 
 def test_source_kinds_include_club_only_excel() -> None:
@@ -137,6 +173,7 @@ def test_preview_and_verified_display_status_are_honest() -> None:
             preset=MatchPreset.FAST_PREVIEW,
         ),
         observation=observation,
+        seed=_retrieval_seed(observation),
     )
     verified_attempt = run_club_only_ui_match(
         create_club_only_session(
@@ -145,6 +182,7 @@ def test_preview_and_verified_display_status_are_honest() -> None:
             preset=MatchPreset.VERIFIED_FIT,
         ),
         observation=observation,
+        seed=_retrieval_seed(observation),
     )
     preview_view = build_club_only_result_view(preview)
     verified_view = build_club_only_result_view(verified_attempt)
@@ -179,6 +217,7 @@ def test_observed_versus_inferred_legend_and_trial_clock() -> None:
             preset=MatchPreset.FAST_PREVIEW,
         ),
         observation=observation,
+        seed=_retrieval_seed(observation),
     )
     view = build_club_only_result_view(result)
     legend = build_observed_inferred_legend(view)
@@ -206,13 +245,21 @@ def test_cancel_and_resume_hooks() -> None:
         return True
 
     with pytest.raises(MatchCancelledError):
-        run_club_only_ui_match(session, observation=observation, cancel_hook=_cancel)
+        run_club_only_ui_match(
+            session,
+            observation=observation,
+            seed=_retrieval_seed(observation),
+            cancel_hook=_cancel,
+        )
 
-    first = run_club_only_ui_match(session, observation=observation)
+    first = run_club_only_ui_match(
+        session, observation=observation, seed=_retrieval_seed(observation)
+    )
     assert first.checkpoint is not None
     resumed = run_club_only_ui_match(
         session,
         observation=observation,
+        seed=_retrieval_seed(observation),
         resume_checkpoint=first.checkpoint,
     )
     assert resumed.checkpoint is not None
@@ -242,6 +289,7 @@ def test_ledger_row_uses_club_only_lane_and_named_blockers(tmp_path: Path) -> No
             preset=MatchPreset.FAST_PREVIEW,
         ),
         observation=observation,
+        seed=_retrieval_seed(observation),
     )
     view = build_club_only_result_view(result)
     receipt = tmp_path / "ledger_receipt.json"
@@ -289,11 +337,13 @@ def test_pipeline_club_only_request_binds_existing_facades() -> None:
     session = req.to_session()
     assert isinstance(session, ClubOnlyUiSession)
     assert session.preset is MatchPreset.FAST_PREVIEW
+    wiffle = build_calibrated_observation_fixture("TW_wiffle")
     summary = pipeline.summarize_club_only_result(
         build_club_only_result_view(
             run_club_only_ui_match(
                 session,
-                observation=build_calibrated_observation_fixture("TW_wiffle"),
+                observation=wiffle,
+                seed=_retrieval_seed(wiffle),
             )
         )
     )
@@ -326,6 +376,7 @@ def test_ledger_row_hashes_receipt_file_bytes(tmp_path: Path) -> None:
             preset=MatchPreset.FAST_PREVIEW,
         ),
         observation=observation,
+        seed=_retrieval_seed(observation),
     )
     view = build_club_only_result_view(result)
     receipt = tmp_path / "club_only_receipt.json"

@@ -18,18 +18,34 @@ from .reproduce import generate_reproduction_commands
 from .types import ModelReproductionCard, PromotionVerdict
 
 
+def _load_benchmark_receipt(model_id: str) -> dict[str, Any] | None:
+    """Load benchmark receipt from disk if a sha256-referenced receipt exists."""
+    receipt_path = Path("artifacts/benchmarks") / model_id / "receipt.json"
+    if receipt_path.is_file():
+        try:
+            data = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if data.get("sha256") or data.get("receipt_sha256"):
+                return data
+        except (json.JSONDecodeError, OSError):
+            return None
+    return None
+
+
 def _resolve_verdict(identity: GolfModelIdentity) -> PromotionVerdict:
     """Determine promotion verdict based on architectural qualification and topology."""
     if identity.topology == ModelTopology.FULL_BODY_MULTIBODY:
         return PromotionVerdict.BLOCKED_PREREQUISITE
     if identity.topology == ModelTopology.KINEMATIC_RECONSTRUCTION:
         return PromotionVerdict.RESEARCH_ONLY
-    if identity.topology in (
-        ModelTopology.PLANAR_DRIVEN_PENDULUM,
-        ModelTopology.CONSTRAINED_UPPER_BODY,
-    ):
+    if identity.topology == ModelTopology.REFERENCE_CATALOG_URDF:
+        return PromotionVerdict.REFERENCE_ONLY
+
+    # Candidate models are only PROMOTED if a sha256-verified benchmark receipt exists on disk
+    receipt = _load_benchmark_receipt(identity.model_id)
+    if receipt is not None:
         return PromotionVerdict.PROMOTED
-    return PromotionVerdict.REFERENCE_ONLY
+
+    return PromotionVerdict.UNMEASURED
 
 
 def _build_intended_task(identity: GolfModelIdentity) -> str:
@@ -103,10 +119,14 @@ def _build_native_validation(identity: GolfModelIdentity) -> dict[str, Any]:
     receipt = card.native_replay_receipt
     return {
         "status": card.status.value,
-        "is_valid": receipt.is_valid,
-        "replay_rmse_m": receipt.replay_rmse,
-        "max_constraint_violation": receipt.max_constraint_violation,
-        "engine_version": receipt.native_engine_version,
+        "is_valid": receipt.is_valid if receipt is not None else False,
+        "replay_rmse_m": receipt.replay_rmse if receipt is not None else None,
+        "max_constraint_violation": (
+            receipt.max_constraint_violation if receipt is not None else None
+        ),
+        "engine_version": (
+            receipt.native_engine_version if receipt is not None else "unmeasured"
+        ),
         "blockers": list(card.blockers),
     }
 
@@ -114,22 +134,6 @@ def _build_native_validation(identity: GolfModelIdentity) -> dict[str, Any]:
 def _build_performance_economics(identity: GolfModelIdentity) -> dict[str, Any]:
     """Calculate inference speedup, latency, and query break-even economics."""
     verdict = _resolve_verdict(identity)
-    if verdict == PromotionVerdict.PROMOTED:
-        return {
-            "neural_latency_ms": 1.25,
-            "classical_latency_ms": 15.4,
-            "speedup_factor": 12.32,
-            "break_even_queries": 15,
-            "verdict": "favorable_speedup",
-        }
-    if verdict == PromotionVerdict.RESEARCH_ONLY:
-        return {
-            "neural_latency_ms": 0.85,
-            "classical_latency_ms": 3.2,
-            "speedup_factor": 3.76,
-            "break_even_queries": 50,
-            "verdict": "research_kinematics",
-        }
     if verdict == PromotionVerdict.BLOCKED_PREREQUISITE:
         return {
             "neural_latency_ms": None,
@@ -138,12 +142,23 @@ def _build_performance_economics(identity: GolfModelIdentity) -> dict[str, Any]:
             "break_even_queries": None,
             "verdict": "blocked_uninstalled_runtime",
         }
+
+    receipt = _load_benchmark_receipt(identity.model_id)
+    if receipt is not None:
+        return {
+            "neural_latency_ms": receipt.get("neural_latency_ms"),
+            "classical_latency_ms": receipt.get("classical_latency_ms"),
+            "speedup_factor": receipt.get("speedup_factor"),
+            "break_even_queries": receipt.get("break_even_queries"),
+            "verdict": str(receipt.get("verdict", "favorable_speedup")),
+        }
+
     return {
-        "neural_latency_ms": 2.1,
-        "classical_latency_ms": 5.0,
-        "speedup_factor": 2.38,
-        "break_even_queries": 80,
-        "verdict": "reference_baseline",
+        "neural_latency_ms": None,
+        "classical_latency_ms": None,
+        "speedup_factor": None,
+        "break_even_queries": None,
+        "verdict": "UNMEASURED",
     }
 
 

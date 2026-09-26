@@ -152,24 +152,28 @@ class UnifiedParityReport:
     reference_engine: str = "pinocchio"
     reference_model_sha256: str = ""
     created_at: str = ""
-    is_physically_accepted: bool = False
+    is_parity_accepted: bool = False
     status: str = "PARTIAL"  # "PASSED" | "REJECTED" | "PARTIAL"
     engine_rows: dict[str, EngineParityRow] = field(default_factory=dict)
     pairwise_comparisons: dict[str, Any] = field(default_factory=dict)
+    note: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "schema_version": self.schema_version,
             "candidate_id": self.candidate_id,
             "candidate_sha256": self.candidate_sha256,
             "reference_engine": self.reference_engine,
             "reference_model_sha256": self.reference_model_sha256,
             "created_at": self.created_at,
-            "is_physically_accepted": self.is_physically_accepted,
+            "is_parity_accepted": self.is_parity_accepted,
             "status": self.status,
             "engine_rows": {k: v.to_dict() for k, v in self.engine_rows.items()},
             "pairwise_comparisons": self.pairwise_comparisons,
         }
+        if self.note:
+            d["note"] = self.note
+        return d
 
     def to_json(self, indent: int = 2) -> str:
         return json.dumps(self.to_dict(), indent=indent, sort_keys=False)
@@ -180,6 +184,9 @@ class UnifiedParityReport:
             k: EngineParityRow.from_dict(v)
             for k, v in data.get("engine_rows", {}).items()
         }
+        is_accepted = bool(
+            data.get("is_parity_accepted", data.get("is_physically_accepted", False))
+        )
         return cls(
             schema_version=str(
                 data.get("schema_version", PARITY_REPORT_SCHEMA_VERSION)
@@ -189,10 +196,11 @@ class UnifiedParityReport:
             reference_engine=str(data.get("reference_engine", "pinocchio")),
             reference_model_sha256=str(data.get("reference_model_sha256", "")),
             created_at=str(data.get("created_at", "")),
-            is_physically_accepted=bool(data.get("is_physically_accepted", False)),
+            is_parity_accepted=is_accepted,
             status=str(data.get("status", "PARTIAL")),
             engine_rows=rows,
             pairwise_comparisons=dict(data.get("pairwise_comparisons", {})),
+            note=str(data.get("note", "")),
         )
 
     def render_markdown(self) -> str:

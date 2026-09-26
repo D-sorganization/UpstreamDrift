@@ -181,7 +181,7 @@ def test_simulate_contract_drake_happy_path_returns_canonical_simout(
             assert arr.shape[1] == cols
     # tau is finite by construction (poly evaluated by simulate).
     assert np.all(np.isfinite(out.tau))
-    assert out.solver_status in {"success", "warning", "failed"}
+    assert out.solver_status in {"success", "warning", "failed", "partial"}
 
 
 # --------------------------------------------------------------------------- #

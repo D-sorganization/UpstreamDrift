@@ -142,8 +142,8 @@ class EngineReplayOutcome:
 
     engine: str
     status: str
-    shared_metrics: SharedMetrics
-    contact_audit: ContactAuditResult
+    shared_metrics: SharedMetrics | None
+    contact_audit: ContactAuditResult | None
     convergence: StepSizeConvergenceResult
     max_closure_residual_m: float
     max_closure_translation_m: float | None = None
@@ -178,8 +178,14 @@ class EngineReplayOutcome:
         return {
             "engine": self.engine,
             "status": self.status,
-            "shared_metrics": self.shared_metrics.as_dict(),
-            "contact_audit": self.contact_audit.as_dict(),
+            "shared_metrics": (
+                self.shared_metrics.as_dict()
+                if self.shared_metrics is not None
+                else None
+            ),
+            "contact_audit": (
+                self.contact_audit.as_dict() if self.contact_audit is not None else None
+            ),
             "convergence": self.convergence.as_dict(),
             "max_closure_residual_m": self.max_closure_residual_m,
             "max_closure_translation_m": self.max_closure_translation_m,
@@ -237,7 +243,11 @@ class CrossEngineComparisonReport:
                 if eng in {"mujoco", "drake", "pinocchio"}
                 else ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
             )
-            metrics = outcome.shared_metrics.as_dict()
+            metrics = (
+                outcome.shared_metrics.as_dict()
+                if outcome.shared_metrics is not None
+                else None
+            )
             pt_diffs: dict[str, PointwiseDifference] = {}
             for pair_key, diffs in self.pairwise_metric_diffs.items():
                 if eng in pair_key:
@@ -270,7 +280,7 @@ class CrossEngineComparisonReport:
             candidate_id="cross_engine_replay",
             reference_engine=ref_engine,
             status=self.status,
-            is_physically_accepted=self.is_physically_accepted,
+            is_parity_accepted=self.is_physically_accepted,
             engine_rows=rows,
             pairwise_comparisons=self.pairwise_metric_diffs,
         )
@@ -295,6 +305,8 @@ def _compute_pairwise_diffs(
             a = outcomes[i]
             b = outcomes[j]
             pair_key = f"{a.engine}_vs_{b.engine}"
+            if a.shared_metrics is None or b.shared_metrics is None:
+                continue
             dict_a = a.shared_metrics.as_dict()
             dict_b = b.shared_metrics.as_dict()
             pair_diffs: dict[str, float] = {}
