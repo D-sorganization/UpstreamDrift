@@ -13,31 +13,33 @@ pytestmark = pytest.mark.unit
 
 
 def test_registry_subscribe_fires_on_set_variable() -> None:
-    """Precondition: subscribe returns Subscription; fires on set_variable."""
+    """Precondition: subscribe returns Subscription; fires on set."""
     registry = WorkspaceRegistry()
-    fired: list[tuple[str, object]] = []
-    registry.subscribe(lambda name, value: fired.append((name, value)))
-    registry.set_variable("x", 42)
-    assert fired == [("x", 42)]
+    fired: list[tuple[str, str]] = []
+    registry.subscribe(lambda event, name: fired.append((event, name)))
+    registry.set("x", 42)
+    assert fired == [("set", "x")]
+    assert registry.get("x") == 42
 
 
 def test_registry_subscribe_fires_on_delete_variable() -> None:
-    """Subscriber fires on delete_variable with value=None."""
+    """Subscriber fires on remove."""
     registry = WorkspaceRegistry()
-    registry.set_variable("x", 10)
-    events: list[tuple[str, object]] = []
-    registry.subscribe(lambda name, value: events.append((name, value)))
-    registry.delete_variable("x")
-    assert ("x", None) in events
+    registry.set("x", 10)
+    events: list[tuple[str, str]] = []
+    registry.subscribe(lambda event, name: events.append((event, name)))
+    registry.remove("x")
+    assert ("remove", "x") in events
+    assert registry.get("x") is None
 
 
 def test_registry_unsubscribe_stops_firing() -> None:
-    """Postcondition: Subscription.dispose() removes the callback."""
+    """Postcondition: Subscription.unsubscribe() removes the callback."""
     registry = WorkspaceRegistry()
     fired: list[str] = []
-    sub = registry.subscribe(lambda n, v: fired.append(n))
-    sub.dispose()
-    registry.set_variable("x", 1)
+    sub = registry.subscribe(lambda event, name: fired.append(name))
+    sub.unsubscribe()
+    registry.set("x", 1)
     assert fired == []
 
 
@@ -46,9 +48,9 @@ def test_registry_subscribe_multiple_callbacks() -> None:
     registry = WorkspaceRegistry()
     a: list[str] = []
     b: list[str] = []
-    registry.subscribe(lambda n, v: a.append(n))
-    registry.subscribe(lambda n, v: b.append(n))
-    registry.set_variable("y", 2)
+    registry.subscribe(lambda event, name: a.append(name))
+    registry.subscribe(lambda event, name: b.append(name))
+    registry.set("y", 2)
     assert a == ["y"]
     assert b == ["y"]
 
@@ -66,32 +68,33 @@ def test_subscribe_non_callable_raises_type_error() -> None:
 
 
 def test_set_variable_forwards_to_registry_set() -> None:
-    """set_variable stores the value in the registry."""
+    """set stores the value in the registry."""
     registry = WorkspaceRegistry()
-    registry.set_variable("z", 99)
-    assert registry.get_variable("z") == 99
+    registry.set("z", 99)
+    assert registry.get("z") == 99
 
 
 def test_get_variable_returns_default_when_absent() -> None:
-    """get_variable returns None when name not set."""
+    """get returns default when name not set."""
     registry = WorkspaceRegistry()
-    assert registry.get_variable("missing") is None
+    assert registry.get("missing") is None
+    assert registry.get("missing", 123) == 123
 
 
 def test_no_reentrancy_loop_on_subscribe_firing() -> None:
-    """Invariant: set_variable from inside a callback does not loop infinitely."""
+    """Invariant: set from inside a callback does not loop infinitely."""
     registry = WorkspaceRegistry()
     call_count = 0
 
-    def callback(name: str, value: object) -> None:
+    def callback(event: str, name: str) -> None:
         nonlocal call_count
         call_count += 1
         if call_count == 1:
-            # Second set_variable from within callback
-            registry.set_variable("inner", 0)
+            # Second set from within callback
+            registry.set("inner", 0)
 
     registry.subscribe(callback)
-    registry.set_variable("outer", 1)
+    registry.set("outer", 1)
     # callback fires for "outer" (count=1) then for "inner" (count=2)
     # it must not recurse indefinitely
     assert call_count == 2  # noqa: PLR2004

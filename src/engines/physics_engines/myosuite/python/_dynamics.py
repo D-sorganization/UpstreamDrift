@@ -15,6 +15,7 @@ class DynamicsMixin:
     if TYPE_CHECKING:
         sim: Any
 
+        # is_initialized: property provided by EngineInitMixin
         @property
         def is_initialized(self) -> bool: ...
 
