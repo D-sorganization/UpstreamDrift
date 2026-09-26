@@ -252,6 +252,7 @@ def test_xml_source_outside_repo_root_is_config_error(tmp_path: Path) -> None:
     assert checker.main([*argv, "--repo-root", str(repo)]) == 2
 
 
+@pytest.mark.unit
 def test_xml_entity_expansion_is_rejected(tmp_path: Path) -> None:
     """Coverage XML is parsed XXE-safe: entity declarations are refused (#10989)."""
     report = tmp_path / "coverage.xml"
