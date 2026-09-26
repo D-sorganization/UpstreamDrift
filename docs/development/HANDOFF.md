@@ -1,3 +1,11 @@
+# Implementation Handoff - Rust Multi-Muscle Parity (#10946)
+
+- Repository: D-sorganization/UpstreamDrift; worktree `UpstreamDrift-worktrees/agy-ud-10946-rust-muscle-parity`
+- Branch `agy/ud-10946-rust-muscle-parity`, baseline `28b37bd47`, commit `SELF`, PR: draft (see DL-#10946)
+- Done: `multi_muscle.py` forwards Python Hill muscles to `upstream_muscle` (root cause of 0.0 net torque), single activation validation before backend choice, antagonist pair rebuilt from current group backends; parity test `tests/unit/biomechanics/test_multi_muscle_rust_parity.py` (skips without the wheel).
+- Validation: 85/85 with wheel, 26 + 1 skipped module without; `cargo test` green in `rust_core/upstream-muscle`.
+- Next: CI green, review, merge; afterwards the pre-push Rust-hiding workaround (#10946) can be dropped.
+
 # Implementation Handoff - Drift Wizard Sidekick Product Knowledge Pack (#10943)
 
 ## Identity

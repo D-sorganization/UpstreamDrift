@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10946 · Keep Multi-Muscle Contracts and Torque Identical on the Rust Backend
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10946
+- **PR:** draft PR from `agy/ud-10946-rust-muscle-parity`
+- **Branch:** `agy/ud-10946-rust-muscle-parity`
+- **Paths:** `src/shared/python/biomechanics/multi_muscle.py`, `tests/unit/biomechanics/test_multi_muscle_rust_parity.py`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — 85/85 multi-muscle + DbC + parity tests with the `upstream_muscle` wheel; 26 pass + parity module skipped with it hidden; `cargo test` 32/32.
+- **Summary:** Python `HillMuscleModel`s were never forwarded to the Rust `MuscleGroup` (it summed zero muscles, so net torque was always 0.0) and the Rust path skipped the activation precondition. Muscles are now converted to their Rust equivalent (or the group drops to pure Python when a muscle has custom physics), activations are validated once before backend choice, the antagonist pair is rebuilt from the groups' current backends, and a parity test pins Rust == Python.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review
