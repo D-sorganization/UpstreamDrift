@@ -1,3 +1,19 @@
+## Drift Wizard Knowledge Pack for Sidekick (#10943)
+
+Implements the product knowledge pack and standalone packaging integration for the Drift Wizard in Sidekick:
+- **Knowledge Catalog & Wizard Implementation (`knowledge/pack.yml`, `knowledge/wizard.yml`, `scripts/ci/lod_baseline.txt`)**:
+  - Defines the source catalog with `product` authority covering user documentation, tutorials, troubleshooting, and `README.md`, and `reference` authority covering ADRs, API references, and architecture maps.
+  - Excludes volatile developer notes, planning handoffs, and generated artifacts to maintain pack hygiene.
+  - Configures `upstream_drift` Drift Wizard identity with retrieval-augmented generation (RAG) capabilities, manifest pointer, and top-k context limits.
+  - Baselines child-copy LOD finding in `scripts/ci/lod_baseline.txt` to maintain child-copy immutability contract.
+- **Sidekick Packaging & Binary Bundling (`sidekick.spec`, `scripts/packaging/build_sidekick_binary.py`)**:
+  - Updates PyInstaller spec to conditionally embed `.knowledge/` and `knowledge/` directories into standalone binaries when available.
+  - Automates pre-build pack compilation via `src.shared.python.ai.knowledge.pack.build_pack` inside `build_sidekick_binary.py` prior to PyInstaller invocation.
+- **Workflow Automation & Artifact Publication (`.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`)**:
+  - Adds dedicated CI workflow to build the Drift Wizard SQLite knowledge pack on documentation and knowledge changes, verifying pack invariants and uploading the compiled pack as a workflow artifact.
+- **Verification & Testing (`tests/unit/ai/test_drift_wizard.py`)**:
+  - Adds unit test suite validating catalog syntax, wizard configuration invariants, pack compilation output, chunking coverage, retrieval queries, and standalone packaging bundling.
+
 ## Hardened Review Comments to Issues Converter and Ephemeral State Protection (#10931)
 
 Evaluates, hardens, and fixes the PR review comments to GitHub issue converter workflow (`.github/workflows/Comment-to-Issue-Converter.yml`) to eliminate duplicate issue generation cascades, review bot ingestion, and lost tracking state:

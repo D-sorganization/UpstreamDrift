@@ -60,6 +60,9 @@ a = Analysis(  # noqa: F821
     datas=[
         # Theme assets
         (str(root / "src" / "shared" / "python" / "theme"), "theme"),
+        # Knowledge pack for Drift Wizard (#10943)
+        *((str(root / ".knowledge"), ".knowledge") for _ in [1] if (root / ".knowledge").is_dir()),
+        *((str(root / "knowledge"), "knowledge") for _ in [1] if (root / "knowledge").is_dir()),
     ],
     hiddenimports=[
         "sidekick",

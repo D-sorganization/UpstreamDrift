@@ -173,6 +173,7 @@ src/shared/python/ai/gui/settings_dialog.py	self._rag_tab.auto_index_check.isChe
 src/shared/python/ai/gui/settings_dialog.py	self._rag_tab.auto_index_check.setChecked	1
 src/shared/python/ai/gui/settings_dialog.py	self._rag_tab.rag_enabled_check.isChecked	1
 src/shared/python/ai/gui/settings_dialog.py	self._rag_tab.rag_enabled_check.setChecked	1
+src/shared/python/ai/knowledge/wizard.py	self.config.pack.is_file	1
 src/shared/python/ai/mcp/client.py	self._process.stdin.drain	1
 src/shared/python/ai/mcp/client.py	self._process.stdin.write	1
 src/shared/python/ai/mcp/client.py	self._process.stdout.readline	1

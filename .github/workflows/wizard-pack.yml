@@ -1,0 +1,67 @@
+name: Build Wizard Knowledge Pack
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "knowledge/**"
+      - ".github/workflows/wizard-pack.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-pack:
+    name: Build Knowledge Pack
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
+      - name: Purge pip cache
+        run: python3 -m pip cache purge || true
+
+      - name: Install PyYAML
+        run: python3 -m pip install pyyaml
+
+      - name: Build Knowledge Pack
+        env:
+          PYTHONPATH: .:vendor/ud-tools/src
+        run: |
+          python3 -m src.shared.python.ai.knowledge build knowledge/pack.yml --root UpstreamDrift=. --out .knowledge/pack.sqlite
+
+      - name: Upload Wizard Pack Artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: wizard-pack
+          path: .knowledge/pack.sqlite
+          if-no-files-found: error
