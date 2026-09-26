@@ -376,6 +376,32 @@ def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
     return evaluate_gates(metrics, FB3_DRAKE_THRESHOLDS)
 
 
+def _group_status(eval_gates: Mapping[str, Any], *gate_names: str) -> str:
+    """PASSED only if every named gate passed in the recorded evaluation."""
+    passed = all(eval_gates[name]["passed"] for name in gate_names)
+    return "PASSED" if passed else "FAILED"
+
+
+def _receipt_provenance(drake_version: str) -> dict[str, Any]:
+    """Environment and input-file hashes recorded on every FB-3 receipt."""
+    return {
+        "environment": {
+            "python": sys.version,
+            "platform": platform.platform(),
+            "executable": sys.executable,
+            "drake_version": drake_version,
+        },
+        "inputs": {
+            "full_body_spec_v1.json": sha256_file(FULL_BODY_SPEC_PATH),
+            "native_geometry_spec_9967.json": sha256_file(UPPER_SPEC_PATH),
+            "full_body_urdf.py": sha256_file(FULL_BODY_URDF_PATH),
+            "full_body_model.py": sha256_file(FULL_BODY_MODEL_PATH),
+            "contact_law.py": sha256_file(CONTACT_LAW_PATH),
+            "full_body_spec.py": sha256_file(FULL_BODY_SPEC_PY_PATH),
+        },
+    }
+
+
 def _assemble_receipt(
     drake_version: str,
     num_states: int,
@@ -406,26 +432,6 @@ def _assemble_receipt(
     status_eval = build_status_from_metrics(gate_metrics)
     eval_gates = status_eval["gates"]
 
-    gate_a_ok = (
-        eval_gates["gate_a_fk_diff_m"]["passed"]
-        and eval_gates["gate_a_mass_matrix_diff"]["passed"]
-    )
-    gate_b_ok = eval_gates["gate_b_fk_diff_m"]["passed"]
-    gate_c_ok = (
-        eval_gates["gate_c_normal_force_diff_n"]["passed"]
-        and eval_gates["gate_c_friction_force_diff_n"]["passed"]
-        and eval_gates["gate_c_penetration_diff_m"]["passed"]
-    )
-    gate_d_ok = (
-        eval_gates["gate_d_position_residual_diff"]["passed"]
-        and eval_gates["gate_d_velocity_residual_diff"]["passed"]
-    )
-    acc_ok = (
-        eval_gates["accelerations_all_finite"]["passed"]
-        and eval_gates["max_closure_pos_error"]["passed"]
-        and eval_gates["max_closure_vel_error"]["passed"]
-    )
-
     return {
         "work_package": "FB-3-D",
         "issue": "#10067",
@@ -434,36 +440,30 @@ def _assemble_receipt(
         "status": status_eval["status"],
         "gate_evaluation": status_eval,
         "thresholds": dict(FB3_DRAKE_THRESHOLDS),
-        "environment": {
-            "python": sys.version,
-            "platform": platform.platform(),
-            "executable": sys.executable,
-            "drake_version": drake_version,
-        },
-        "inputs": {
-            "full_body_spec_v1.json": sha256_file(FULL_BODY_SPEC_PATH),
-            "native_geometry_spec_9967.json": sha256_file(UPPER_SPEC_PATH),
-            "full_body_urdf.py": sha256_file(FULL_BODY_URDF_PATH),
-            "full_body_model.py": sha256_file(FULL_BODY_MODEL_PATH),
-            "contact_law.py": sha256_file(CONTACT_LAW_PATH),
-            "full_body_spec.py": sha256_file(FULL_BODY_SPEC_PY_PATH),
-        },
+        **_receipt_provenance(drake_version),
         "gates": {
             "gate_a_upper_body_slice_parity": {
-                "status": "PASSED" if gate_a_ok else "FAILED",
+                "status": _group_status(
+                    eval_gates, "gate_a_fk_diff_m", "gate_a_mass_matrix_diff"
+                ),
                 "random_states_tested": num_states,
                 "max_fk_diff_m": gate_a_fk,
                 "max_mass_matrix_diff": gate_a_mass,
                 "tolerance": 1e-12,
             },
             "gate_b_full_body_fk": {
-                "status": "PASSED" if gate_b_ok else "FAILED",
+                "status": _group_status(eval_gates, "gate_b_fk_diff_m"),
                 "random_states_tested": num_states,
                 "max_fk_diff_m": gate_b_fk,
                 "tolerance": 1e-12,
             },
             "gate_c_contact_force_parity": {
-                "status": "PASSED" if gate_c_ok else "FAILED",
+                "status": _group_status(
+                    eval_gates,
+                    "gate_c_normal_force_diff_n",
+                    "gate_c_friction_force_diff_n",
+                    "gate_c_penetration_diff_m",
+                ),
                 "num_contact_spheres": 4,
                 "penetrating_spheres_tested": pen_count,
                 "max_normal_force_diff_n": gate_c_fn,
@@ -472,7 +472,11 @@ def _assemble_receipt(
                 "tolerance": 1e-12,
             },
             "gate_d_closure_residual_parity": {
-                "status": "PASSED" if gate_d_ok else "FAILED",
+                "status": _group_status(
+                    eval_gates,
+                    "gate_d_position_residual_diff",
+                    "gate_d_velocity_residual_diff",
+                ),
                 "random_states_tested": num_states,
                 "max_position_residual_diff": gate_d_pos,
                 "max_velocity_residual_diff": gate_d_vel,
@@ -480,7 +484,12 @@ def _assemble_receipt(
             },
         },
         "accelerations": {
-            "status": "PASSED" if acc_ok else "FAILED",
+            "status": _group_status(
+                eval_gates,
+                "accelerations_all_finite",
+                "max_closure_pos_error",
+                "max_closure_vel_error",
+            ),
             "num_coordinates": num_coords,
             "all_finite": acc_finite,
             "max_closure_pos_error": max_cp,

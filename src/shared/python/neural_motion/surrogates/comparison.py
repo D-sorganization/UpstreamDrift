@@ -35,7 +35,7 @@ def _unwired_evaluator(
             raise TypeError(
                 f"expected SurrogateComparisonConfig, got {type(config).__name__}"
             )
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10960 P0-3
             f"surrogate evaluation for {kind.value!r} is not wired (#10960 P0-3)"
         )
 
@@ -101,7 +101,7 @@ def compare_surrogates_and_alternatives(
         Pre-registered configuration for forward surrogate and alternative comparison.
     evaluators : Mapping[str, Callable[[SurrogateComparisonConfig], SurrogateAblationResult]] | None
         Optional mapping from candidate kind string to an evaluator callable.
-        Defaults to DEFAULT_EVALUATORS, whose members raise NotImplementedError until wired.
+        Defaults to DEFAULT_EVALUATORS, whose members raise NotImplementedError until wired (#10960 P0-3).
 
     Returns
     -------

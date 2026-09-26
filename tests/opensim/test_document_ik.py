@@ -18,6 +18,7 @@ import pytest
 
 from src.engines.physics_engines.opensim.python.tour_matching import marker_map
 from src.engines.physics_engines.opensim.python.tour_matching.document_ik import (
+    IkMeasurement,
     _build_receipt_dict,
     run_document_ik,
 )
@@ -163,14 +164,15 @@ def test_build_receipt_dict_excludes_inherited_sections(tmp_path: Path) -> None:
     spec, osim, cand, trc, canonical = _make_dummy_files(tmp_path)
     receipt = _build_receipt_dict(
         spec_path=spec,
-        osim_path=osim,
         candidate_path=cand,
         trc_path=trc,
-        labels=["HeadTop", "WaistLeft"],
-        whole_rmse=0.053,
-        seg_rms_dict={"head": 0.04, "trunk": 0.05},
-        elapsed_sec=1.23,
-        frames=42,
+        measurement=IkMeasurement(
+            labels=["HeadTop", "WaistLeft"],
+            whole_rmse=0.053,
+            seg_rms_dict={"head": 0.04, "trunk": 0.05},
+            elapsed_sec=1.23,
+            frames=42,
+        ),
         canonical_receipt_path=canonical,
     )
 
@@ -213,14 +215,15 @@ def test_build_receipt_dict_accepted_is_false_even_with_ik_delta_under_5mm(
     # canonical is 0.0520; delta is 0.001 m <= 0.005 m
     receipt = _build_receipt_dict(
         spec_path=spec,
-        osim_path=osim,
         candidate_path=cand,
         trc_path=trc,
-        labels=["HeadTop"],
-        whole_rmse=0.053,
-        seg_rms_dict={"head": 0.053},
-        elapsed_sec=1.0,
-        frames=10,
+        measurement=IkMeasurement(
+            labels=["HeadTop"],
+            whole_rmse=0.053,
+            seg_rms_dict={"head": 0.053},
+            elapsed_sec=1.0,
+            frames=10,
+        ),
         canonical_receipt_path=canonical,
     )
     acceptance = receipt["acceptance"]
@@ -238,14 +241,15 @@ def test_build_receipt_dict_rejected_when_ik_delta_exceeds_5mm(tmp_path: Path) -
     # canonical is 0.0520; whole_rmse is 0.070 (delta = 0.018 > 0.005)
     receipt = _build_receipt_dict(
         spec_path=spec,
-        osim_path=osim,
         candidate_path=cand,
         trc_path=trc,
-        labels=["HeadTop"],
-        whole_rmse=0.070,
-        seg_rms_dict={"head": 0.070},
-        elapsed_sec=1.0,
-        frames=10,
+        measurement=IkMeasurement(
+            labels=["HeadTop"],
+            whole_rmse=0.070,
+            seg_rms_dict={"head": 0.070},
+            elapsed_sec=1.0,
+            frames=10,
+        ),
         canonical_receipt_path=canonical,
     )
     acceptance = receipt["acceptance"]
@@ -264,14 +268,15 @@ def test_build_receipt_dict_missing_canonical_raises_file_not_found(
     with pytest.raises(FileNotFoundError, match="Canonical MuJoCo receipt not found"):
         _build_receipt_dict(
             spec_path=spec,
-            osim_path=osim,
             candidate_path=cand,
             trc_path=trc,
-            labels=["HeadTop"],
-            whole_rmse=0.053,
-            seg_rms_dict={"head": 0.053},
-            elapsed_sec=1.0,
-            frames=10,
+            measurement=IkMeasurement(
+                labels=["HeadTop"],
+                whole_rmse=0.053,
+                seg_rms_dict={"head": 0.053},
+                elapsed_sec=1.0,
+                frames=10,
+            ),
             canonical_receipt_path=nonexistent,
         )
 
@@ -286,14 +291,15 @@ def test_build_receipt_dict_canonical_missing_rmse_raises_value_error(
     with pytest.raises(ValueError, match="missing 'ik.marker_rms_m'"):
         _build_receipt_dict(
             spec_path=spec,
-            osim_path=osim,
             candidate_path=cand,
             trc_path=trc,
-            labels=["HeadTop"],
-            whole_rmse=0.053,
-            seg_rms_dict={"head": 0.053},
-            elapsed_sec=1.0,
-            frames=10,
+            measurement=IkMeasurement(
+                labels=["HeadTop"],
+                whole_rmse=0.053,
+                seg_rms_dict={"head": 0.053},
+                elapsed_sec=1.0,
+                frames=10,
+            ),
             canonical_receipt_path=canonical,
         )
 
@@ -307,14 +313,15 @@ def test_build_receipt_dict_frames_equals_computed_input_length(
     for frame_count in (1, 17, 100):
         receipt = _build_receipt_dict(
             spec_path=spec,
-            osim_path=osim,
             candidate_path=cand,
             trc_path=trc,
-            labels=["HeadTop"],
-            whole_rmse=0.053,
-            seg_rms_dict={"head": 0.053},
-            elapsed_sec=1.0,
-            frames=frame_count,
+            measurement=IkMeasurement(
+                labels=["HeadTop"],
+                whole_rmse=0.053,
+                seg_rms_dict={"head": 0.053},
+                elapsed_sec=1.0,
+                frames=frame_count,
+            ),
             canonical_receipt_path=canonical,
         )
         assert receipt["ik"]["frames"] == frame_count
@@ -395,3 +402,16 @@ def test_run_document_ik_monkeypatched_synthetic_end_to_end(tmp_path: Path) -> N
         assert "address" not in receipt
         assert "hip_calibration" not in receipt
         assert receipt["acceptance"]["is_physically_accepted"] is False
+
+
+@pytest.mark.unit
+def test_ik_measurement_rejects_negative_frames() -> None:
+    """IkMeasurement enforces frames >= 0 at construction (DbC)."""
+    with pytest.raises(ValueError, match="frames must be non-negative"):
+        IkMeasurement(
+            labels=["HeadTop"],
+            whole_rmse=0.053,
+            seg_rms_dict={"head": 0.053},
+            elapsed_sec=1.0,
+            frames=-1,
+        )

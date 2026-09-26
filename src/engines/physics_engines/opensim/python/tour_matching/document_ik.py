@@ -8,6 +8,7 @@ exports candidate NPZ and IK motion, and produces a validated ground-support rec
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import dataclasses
 import hashlib
 import json
 import logging
@@ -193,48 +194,42 @@ def _forward_marker_positions(
     return predicted
 
 
-def _build_receipt_dict(
-    spec_path: Path,
-    osim_path: Path,
-    candidate_path: Path,
-    trc_path: Path,
-    labels: Sequence[str],
-    whole_rmse: float,
-    seg_rms_dict: Mapping[str, float],
-    elapsed_sec: float,
-    frames: int,
-    canonical_receipt_path: Path | None = None,
-) -> dict[str, Any]:
-    """Assemble execution receipt dictionary with only OpenSim-computed fields (DbC).
+@dataclasses.dataclass(frozen=True)
+class IkMeasurement:
+    """OpenSim-computed IK results recorded on the receipt (#10960 P1-8).
 
-    Preconditions:
-        - spec_path, candidate_path, trc_path are existing files.
-        - canonical_receipt_path (or CANONICAL_RECEIPT_PATH) exists and contains valid IK RMSE.
-        - frames >= 0.
-
-    Postconditions:
-        - Receipt excludes inherited MuJoCo stages (dynamics, address, hip_calibration, ground).
-        - Frames matches computed frame count.
-        - is_physically_accepted is False since dynamics was not run.
+    Precondition: ``frames >= 0``.
     """
-    if frames < 0:
-        raise ValueError(f"frames must be non-negative, got {frames}")
 
-    canonical_path = canonical_receipt_path or CANONICAL_RECEIPT_PATH
+    labels: Sequence[str]
+    whole_rmse: float
+    seg_rms_dict: Mapping[str, float]
+    elapsed_sec: float
+    frames: int
+
+    def __post_init__(self) -> None:
+        if self.frames < 0:
+            raise ValueError(f"frames must be non-negative, got {self.frames}")
+
+
+def _load_canonical_whole_rmse(canonical_path: Path) -> float:
+    """Read the MuJoCo canonical IK RMSE; raise rather than fall back (DbC)."""
     if not canonical_path.is_file():
         raise FileNotFoundError(
             f"Canonical MuJoCo receipt not found at {canonical_path}. "
             "Required for IK parity comparison delta."
         )
-
     canonical_doc = json.loads(canonical_path.read_text(encoding="utf-8"))
     canonical_ik = canonical_doc.get("ik")
     if not isinstance(canonical_ik, dict) or "marker_rms_m" not in canonical_ik:
         raise ValueError(
             f"Canonical receipt at {canonical_path} missing 'ik.marker_rms_m'"
         )
-    canonical_whole_rmse = float(canonical_ik["marker_rms_m"])
+    return float(canonical_ik["marker_rms_m"])
 
+
+def _ik_acceptance(whole_rmse: float, canonical_whole_rmse: float) -> dict[str, Any]:
+    """IK parity gate plus a not_run dynamics gate; never physically accepted."""
     diff_from_canonical_m = abs(whole_rmse - canonical_whole_rmse)
     ik_within_5mm = diff_from_canonical_m <= 0.005
 
@@ -261,6 +256,41 @@ def _build_receipt_dict(
         },
     ]
 
+    return {
+        "horizon": "G1",
+        "is_physically_accepted": False,
+        "status": "IK_PARITY_ONLY" if ik_within_5mm else "REJECTED",
+        "gates": gates,
+        "qualification_note": (
+            "OpenSim IK on shared document matches MuJoCo canonical within 5 mm"
+            if ik_within_5mm
+            else "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical"
+        ),
+    }
+
+
+def _build_receipt_dict(
+    spec_path: Path,
+    candidate_path: Path,
+    trc_path: Path,
+    measurement: IkMeasurement,
+    canonical_receipt_path: Path | None = None,
+) -> dict[str, Any]:
+    """Assemble execution receipt dictionary with only OpenSim-computed fields (DbC).
+
+    Preconditions:
+        - spec_path, candidate_path, trc_path are existing files.
+        - canonical_receipt_path (or CANONICAL_RECEIPT_PATH) exists and contains valid IK RMSE.
+
+    Postconditions:
+        - Receipt excludes inherited MuJoCo stages (dynamics, address, hip_calibration, ground).
+        - Frames matches computed frame count.
+        - is_physically_accepted is False since dynamics was not run.
+    """
+    canonical_path = canonical_receipt_path or CANONICAL_RECEIPT_PATH
+    canonical_whole_rmse = _load_canonical_whole_rmse(canonical_path)
+    whole_rmse = measurement.whole_rmse
+
     receipt: dict[str, Any] = {
         "schema_version": OPENSIM_IK_RECEIPT_SCHEMA,
         "backend": "opensim",
@@ -271,8 +301,8 @@ def _build_receipt_dict(
         "spec_sha256": _compute_sha256(spec_path),
         "candidate_sha256": _compute_sha256(candidate_path),
         "capture_sha256": _compute_sha256(trc_path),
-        "labels": list(labels),
-        "elapsed_s": float(elapsed_sec),
+        "labels": list(measurement.labels),
+        "elapsed_s": float(measurement.elapsed_sec),
         "qualification": (
             "OpenSim full-body IK milestone on shared anthropometric document model "
             "(MS-41 #10340); IK-only, dynamics not_run: use moco"
@@ -282,21 +312,11 @@ def _build_receipt_dict(
             "whole_marker_rmse_m": canonical_whole_rmse,
         },
         "ik": {
-            "frames": int(frames),
+            "frames": int(measurement.frames),
             "marker_rms_m": float(whole_rmse),
-            "segment_rms_m": {k: float(v) for k, v in seg_rms_dict.items()},
+            "segment_rms_m": {k: float(v) for k, v in measurement.seg_rms_dict.items()},
         },
-        "acceptance": {
-            "horizon": "G1",
-            "is_physically_accepted": False,
-            "status": "IK_PARITY_ONLY" if ik_within_5mm else "REJECTED",
-            "gates": gates,
-            "qualification_note": (
-                "OpenSim IK on shared document matches MuJoCo canonical within 5 mm"
-                if ik_within_5mm
-                else "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical"
-            ),
-        },
+        "acceptance": _ik_acceptance(whole_rmse, canonical_whole_rmse),
     }
     return receipt
 
@@ -439,14 +459,15 @@ def run_document_ik(
 
     receipt_dict = _build_receipt_dict(
         spec_file,
-        model_path,
         candidate_path,
         trc_path,
-        cap.labels,
-        whole_rmse,
-        seg_rms_dict,
-        time.monotonic() - t_start,
-        frames=n_calc,
+        IkMeasurement(
+            labels=cap.labels,
+            whole_rmse=whole_rmse,
+            seg_rms_dict=seg_rms_dict,
+            elapsed_sec=time.monotonic() - t_start,
+            frames=n_calc,
+        ),
         canonical_receipt_path=canonical_receipt_path,
     )
 

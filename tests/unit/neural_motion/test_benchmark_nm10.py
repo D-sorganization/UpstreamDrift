@@ -20,6 +20,7 @@ from src.shared.python.neural_motion.benchmark.types import (
     DataEfficiencyCurve,
     BreakEvenReceipt,
     PromotionDecision,
+    MeasuredBaseline,
     ModelBenchmarkCard,
 )
 from src.shared.python.neural_motion.benchmark.economics import (
@@ -357,21 +358,16 @@ def test_runner_without_measured_baseline_or_costs_raises() -> None:
             metrics=metrics,
         )
 
-    # Calling with any cost parameter as None also raises ValueError
+    # A baseline with any unmeasured cost also raises ValueError
     with pytest.raises(
         ValueError,
         match=r"baseline must be measured, not derived from the candidate \(#10960 P0-5\)",
     ):
-        run_model_comparative_benchmark(
-            model_id="pendulum_2dof",
-            method=BenchmarkMethod.LEARNED_PROPOSAL_POLISH,
-            interactive_samples_s=samples,
-            timing_breakdown=timing,
-            metrics=metrics,
-            baseline_latency=base_lat,
-            baseline_metrics=base_met,
+        MeasuredBaseline(
+            latency=base_lat,
+            metrics=base_met,
             training_wall_time_s=1800.0,
-            training_cost_usd=None,
+            training_cost_usd=None,  # type: ignore[arg-type]
             baseline_query_cost_usd=0.002,
             candidate_query_cost_usd=0.0005,
         )
@@ -392,12 +388,14 @@ def test_runner_with_measured_baseline_and_costs_succeeds() -> None:
         interactive_samples_s=samples,
         timing_breakdown=timing,
         metrics=metrics,
-        baseline_latency=base_lat,
-        baseline_metrics=base_met,
-        training_wall_time_s=1800.0,
-        training_cost_usd=10.0,
-        baseline_query_cost_usd=0.002,
-        candidate_query_cost_usd=0.0005,
+        baseline=MeasuredBaseline(
+            latency=base_lat,
+            metrics=base_met,
+            training_wall_time_s=1800.0,
+            training_cost_usd=10.0,
+            baseline_query_cost_usd=0.002,
+            candidate_query_cost_usd=0.0005,
+        ),
     )
     assert card.model_id == "pendulum_2dof"
     assert card.promotion == PromotionDecision.PROMOTED

@@ -42,5 +42,6 @@
 
 ## Change Log
 
-- `SELF` — #10960 P0 batch: fail-closed receipts for body fit, NM-07/08/09/10/12, MS-20 contact id and OpenSim full swing (DL-#10960).
+- `SELF` — #10960 CI gates: issue refs on fail-closed `NotImplementedError` stubs, one LOD chain removed, and seven over-budget functions split (`MeasuredBaseline`, `IkMeasurement`, per-gate helpers) with no exceptions added.
+- `1b9ae9a1e` — #10960 P0 batch: fail-closed receipts for body fit, NM-07/08/09/10/12, MS-20 contact id and OpenSim full swing (DL-#10960).
 - `SELF` — Reconcile child-copy convergence, divergence inventory, and agent context views (#10944).
