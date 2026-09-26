@@ -86,4 +86,5 @@
 
 ## Change Log
 
+- `SELF` — #10602 C1/C2: club-only matrix scores only complete recorded fit outcomes; no synthetic package or defaulted metrics (DL-#10602).
 - `SELF` — Reconcile child-copy convergence, divergence inventory, and agent context views (#10944).

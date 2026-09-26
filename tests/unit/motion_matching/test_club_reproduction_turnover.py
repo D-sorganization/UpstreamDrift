@@ -9,6 +9,8 @@ import pytest
 
 from src.shared.python.motion_matching.club_only.matrix_qualification import (
     MATRIX_SCHEMA,
+    MatrixCellResult,
+    MatrixQualificationReport,
     build_matrix_qualification_report,
 )
 from src.shared.python.motion_matching.club_only.reproduction import (
@@ -154,10 +156,28 @@ def test_matrix_blockers_reconciled_with_next_step_prompts() -> None:
             or "desk" in cell.next_step_prompt.lower()
         )
     scored = [cell for cell in reconciled if cell.status == "scored"]
-    assert scored
     for cell in scored:
         assert cell.evidence_kind == "software_contract"
         assert cell.claims_native is False
+
+    mock_report = MatrixQualificationReport(
+        schema=report.schema,
+        governing_issue=report.governing_issue,
+        cells=(
+            MatrixCellResult(
+                model_id="driven_double_pendulum",
+                trial_id="TW_wiffle",
+                status="scored",
+                original_3d_rmse_m=0.03,
+            ),
+        ),
+        limitations=report.limitations,
+        profile_gate_freeze_hash=report.profile_gate_freeze_hash,
+        qualification_blockers=report.qualification_blockers,
+    )
+    mock_reconciled = reconcile_matrix_blockers(mock_report)
+    assert mock_reconciled[0].evidence_kind == "software_contract"
+    assert mock_reconciled[0].claims_native is False
 
 
 def test_missing_qualification_blocks_promotion_and_epic_closure() -> None:
