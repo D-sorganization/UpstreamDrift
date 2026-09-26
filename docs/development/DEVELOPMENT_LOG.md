@@ -981,16 +981,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10602 · Club-Only Motion Matching Plan
 
-- **State:** proposed
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #10602
-- **Branch:** docs/club-neural-matching-plans-20260920
-- **PR:** #10628
-- **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
+- **Branch:** `agy/ud-10602-real-matrix`
+- **PR:** draft PR from `agy/ud-10602-real-matrix`
+- **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/; src/shared/python/motion_matching/club_only/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-22 — CO-03/#10678, CO-05/#10681, NM-02/#10679, MS-61/#10676 shipped; CO-04 pendulum club match in review on feat/issue-10608-co04-pendulum-club-match (PR #10680)
+- **Last verified:** 2026-09-25 — CO-08 matrix scores only complete recorded CO-04/CO-05 fit outcomes (fit_outcomes.py); 0/80 cells scored, 24 unqualified with named missing metrics; 276 club tests pass.
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land PR #10680 for #10608 (CO-04), then dispatch #10610 (CO-06) per dependency order.
+- **Next step:** CI green, review, merge.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
