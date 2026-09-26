@@ -1,11 +1,10 @@
-"""
-Humanoid Character Builder - Standalone URDF Generation Module.
+"""Humanoid Character Builder — anthropometric domain layer built on model_generation.
 
-A self-contained, decoupled module for generating humanoid URDF models
-with video game-style character customization.
+Humanoid Character Builder provides high-level anthropometric modeling
+and character customization layered on model_generation.
 
 This module is designed to:
-- Be completely standalone with no dependencies on other Golf Modeling Suite modules
+- Depend only on model_generation, not on other Golf Modeling Suite modules
 - Provide clean, well-defined interfaces for integration
 - Support parallel development without merge conflicts
 - Be easily relocatable to shared tool repositories
@@ -45,17 +44,17 @@ __version__ = "0.1.0"
 __author__ = "Golf Modeling Suite Contributors"
 
 # Core types - always available
-from src.shared.python.humanoid_character_builder.core.anthropometry import (
+from shared.python.humanoid_character_builder.core.anthropometry import (
     AnthropometryData,
     get_segment_length_ratio,
     get_segment_mass_ratio,
 )
-from src.shared.python.humanoid_character_builder.core.body_parameters import (
+from shared.python.humanoid_character_builder.core.body_parameters import (
     AppearanceParameters,
     BodyParameters,
     SegmentParameters,
 )
-from src.shared.python.humanoid_character_builder.core.segment_definitions import (
+from shared.python.humanoid_character_builder.core.segment_definitions import (
     HUMANOID_JOINTS,
     HUMANOID_SEGMENTS,
     JointDefinition,
@@ -63,24 +62,24 @@ from src.shared.python.humanoid_character_builder.core.segment_definitions impor
 )
 
 # Generators
-from src.shared.python.humanoid_character_builder.generators.urdf_generator import (
+from shared.python.humanoid_character_builder.generators.urdf_generator import (
     HumanoidURDFGenerator,
     URDFGeneratorConfig,
 )
 
 # Main API
-from src.shared.python.humanoid_character_builder.interfaces.api import (
+from shared.python.humanoid_character_builder.interfaces.api import (
     CharacterBuilder,
     CharacterBuildResult,
 )
 
 # Inertia calculation
-from src.shared.python.humanoid_character_builder.mesh.inertia_calculator import (
+from shared.python.humanoid_character_builder.mesh.inertia_calculator import (
     InertiaMode,
     InertiaResult,
     MeshInertiaCalculator,
 )
-from src.shared.python.humanoid_character_builder.mesh.primitive_inertia import (
+from shared.python.humanoid_character_builder.mesh.primitive_inertia import (
     PrimitiveInertiaCalculator,
     PrimitiveShape,
 )

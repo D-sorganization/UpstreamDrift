@@ -1,4 +1,13 @@
-# Current Handoff — Consolidated Bolt Norm Micro-Optimizations (#10983, #10984)
+# Current Handoff — Bump `vendor/ud-tools` to Tools Main `3678409fc` (#9411)
+
+- **Branch:** `claude/ud-9411-vendor-bump-safe-eval`; PR #10995, pairs with Tools#5364 (`UD-PAIR`).
+- **Change:** gitlink 95ed6b478 → 3678409fc; `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, `reconciliation.py` and its test aligned; converged child copies in `src/shared/python/` on canonical Tools; retired 10 quarantined tests in `scripts/config/unit_gate_quarantine.json` (ratchet 155 -> 145 node IDs); divergence inventory and agent context regenerated.
+- **Validation:** companion (143 passed), reconciliation (3 passed), 10 un-quarantined tests passed, child-copy contract (20 passed), quarantine ratchet (145 IDs in 10 clusters), divergence inventory and `agent_context check` clean.
+- **Next:** verify pre-push checks, push, run CI Standard, verify quality gate, and arm auto-merge.
+
+---
+
+# Past Handoff — Consolidated Bolt Norm Micro-Optimizations (#10983, #10984)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-bolt-consol`
