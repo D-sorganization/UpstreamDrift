@@ -40,6 +40,7 @@
   Rajagopal asset x1, artifact_audit x2 (the 10k corpus exists on this host).
 - `tests/opensim/test_moco_g1_ladder.py` and the full-swing tests: 27 passed.
 - `tests/unit/motion_matching/test_ledger.py`: 11 passed after regeneration.
+- `control_replay.py`: explicit None check on the tighter-step residual (pre-push mypy); control_replay tests pass.
 
 ## Blockers and Risks
 
