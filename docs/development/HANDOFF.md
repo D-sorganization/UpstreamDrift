@@ -1,4 +1,12 @@
-# Current Handoff — Retire the Review-Comment-to-Issue Converter (RM#1755, Third Attempt)
+# Current Handoff — Bump `vendor/ud-tools` to Tools Main `855a10cda` (#9411)
+
+- **Branch:** `claude/ud-9411-vendor-bump-safe-eval`; draft PR, pairs with Tools#5364 (`UD-PAIR`).
+- **Change:** gitlink 95ed6b478 → 855a10cda; `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, `reconciliation.py` and its test aligned; divergence inventory and agent context regenerated.
+- **Validation:** companion/reconciliation/safe_eval 217 pass, 5 fail (already-quarantined safe_eval IDs); child-copy, impact-acceptance, divergence and spec-changelog tests 75/75; `agent_context check` clean.
+- **Risk:** the 5 `test_safe_eval` IDs encode a UD-only contract (base-magnitude bound, `*args`, no `eval`); Tools #5361 bounds integer power results differently. They stay quarantined pending a contract decision.
+- **Next:** after Tools#5364 merges, re-point this PR to that SHA and retire the IDs it fixes.
+
+# Past Handoff — Retire the Review-Comment-to-Issue Converter (RM#1755, Third Attempt)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-10978-v3`

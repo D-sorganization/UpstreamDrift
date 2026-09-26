@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9411-Pin · Bump `vendor/ud-tools` to Tools Main `855a10cda`
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9411
+- **PR:** pending
+- **Branch:** `claude/ud-9411-vendor-bump-safe-eval`
+- **Paths:** `vendor/ud-tools`, `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, `src/shared/python/tour_baselines/reconciliation.py`, `tests/unit/tour_baselines/test_reconciliation.py`, `docs/shared_tools/`, `docs/agent_context/`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — companion + reconciliation + safe_eval 217 passed / 5 failed (the 5 quarantined safe_eval IDs; unchanged), child-copy/impact-acceptance/divergence/spec-changelog 75/75, agent-context check clean.
+- **Summary:** Advance the gitlink from 95ed6b478 to 855a10cda and align every pin string. The 5 quarantined `tests/unit/test_safe_eval.py` IDs stay quarantined: they assert a UD-only contract (base-magnitude bound, `*args` support, no `eval`) that the canonical Tools `safe_eval` does not implement — reconciling that is contract work, not a pin bump.
+- **Next step:** Re-point to the Tools main SHA after Tools#5364 merges and retire the IDs it fixes.
+
 ### DL-#1755 · Retire the Review-Comment-to-Issue Converter
 
 - **State:** in_review

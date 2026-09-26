@@ -7048,6 +7048,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | n/a | Bump vendor/ud-tools to Tools main 855a10cda (safe_eval runtime power bound #5361, knowledge-pack eval #5351, rate-of-closure perf #5355); pins, divergence inventory and agent context aligned (#9411). |
 | 2026-09-26 | #10992 | Retire the review-comment-to-issue converter workflow and processor (RM#1755); supersedes #10978. |
 | 2026-09-26 | #9191 | Verify Companion Screenshot Bytes and Pixel Dimensions. |
 | 2026-09-26 | #10965 | Make Coverage Gates Read the Budget File and Resolve Cobertura Sources. |
