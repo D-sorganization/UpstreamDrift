@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10286 · Native Swing ZTCF/ZVCF Fail-Closed Dynamics and DTACK Semantics
+
+- **State:** in_review
+- **Owner:** claude (agy executor)
+- **Issue:** #10286
+- **PR:** draft PR from `agy/ud-10286-fail-closed`
+- **Branch:** `agy/ud-10286-fail-closed`
+- **Paths:** `src/engines/physics_engines/myosuite/python/_drift_control.py`, `src/engines/physics_engines/pendulum/python/golf_swing_physics_engine.py`, `src/engines/physics_engines/pinocchio/python/dtack/gui/main_window.py`, `src/engines/physics_engines/pinocchio/python/dtack/sim/dynamics.py`, `tests/engines/physics_engines/test_golf_swing_pendulum.py`, `tests/engines/physics_engines/test_myosuite_engine.py`, `tests/unit/engines/pinocchio/dtack/sim/test_dynamics.py`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 98/98 unit tests pass across test_myosuite_engine.py, test_golf_swing_pendulum.py, and test_dynamics.py (1 Pinocchio integration test cleanly skipped); ruff check and format clean; mypy clean.
+- **Summary:** Remove success-shaped empty/zero array returns from uninitialized ZTCF/ZVCF counterfactual methods (raising StateError and ValueError for invalid dimensions), update dtack compute_zvcf to canonical (v=0, tau=0) semantics, add compute_zero_velocity_controlled for control-preserved dynamics, and update GUI caller and button label to "Zero-velocity (control kept)".
+- **Next step:** CI green, review, merge.
+
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
 - **State:** in_review
