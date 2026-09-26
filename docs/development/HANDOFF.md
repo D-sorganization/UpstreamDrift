@@ -29,6 +29,7 @@
 ## Key Findings
 
 Three High-severity weaknesses in the neural-motion checkpoint pipeline:
+
 1. `matrix/builder.py:_make_evidence()` — synthetic three-seed evidence.
 2. `matrix/builder.py:_build_card_for_model()` — model-ID-derived hashes.
 3. `benchmark/runner.py:run_model_comparative_benchmark()` — self-referential
@@ -43,6 +44,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
 - `docs/critiques/2026-09-25/summary.md` — executive summary
 - `docs/critiques/2026-09-25/weaknesses.md` — 6-finding weakness catalog
 - `docs/development/HANDOFF.md` — this file
+- `docs/index.md` — catalog row for the new `docs/critiques/` directory (doc-catalog gate)
 
 ## Validation
 
