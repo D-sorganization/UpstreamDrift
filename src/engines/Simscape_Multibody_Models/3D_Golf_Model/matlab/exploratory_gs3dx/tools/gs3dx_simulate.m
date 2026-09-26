@@ -8,6 +8,7 @@ function run = gs3dx_simulate(mdl, opts)
 %     .wall_s       wall-clock seconds for sim()
 %     .n_steps      number of solver output steps (numel(tout))
 %     .flat         GS3DX_FLATTEN_BUS of CombinedSignalBus on a 1 kHz grid
+%     .logsout      signal-logging Dataset (empty when nothing is logged)
 %     .status       "success" | "failed"
 %     .message      error text when status == "failed"
 %
@@ -50,7 +51,7 @@ function run = gs3dx_simulate(mdl, opts)
     end
 
     run = struct('model', mdl, 'release', version('-release'), 'wall_s', NaN, ...
-        'n_steps', NaN, 'flat', [], 'status', "failed", 'message', "");
+        'n_steps', NaN, 'flat', [], 'logsout', [], 'status', "failed", 'message', "");
     grid = (0:1/opts.sample_rate:opts.stop_time).';
     t0 = tic;
     try
@@ -67,5 +68,8 @@ function run = gs3dx_simulate(mdl, opts)
     end
     run.n_steps = numel(out.tout);
     run.flat    = gs3dx_flatten_bus(out.CombinedSignalBus, grid);
+    if any(strcmp(out.who, 'logsout'))
+        run.logsout = out.logsout;
+    end
     run.status  = "success";
 end

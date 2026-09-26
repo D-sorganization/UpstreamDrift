@@ -35,7 +35,7 @@ function out = gs3dx_hip_rig(mdl, opts)
     new_system(rig);
     cleanup = onCleanup(@() close_system(rig, 0));
     hip = add_block(source, [rig '/Hip'], 'Position', [200 180 300 280]);
-    gs3dx_rig_scaffold(rig, local_pm_port(hip, 'Base'), local_pm_port(hip, 'Hips'));
+    gs3dx_rig_scaffold(rig, gs3dx_pm_port(hip, 'Base'), gs3dx_pm_port(hip, 'Hips'));
 
     xyz = 'XYZ';
     feeds = {'RVectorHipJointBasetoGlobal', 'eye(3)'; 'HipGlobalPosition', 'zeros(3, 1)'; ...
@@ -75,20 +75,6 @@ function local_goto(rig, src, tag)
     g = add_block('simulink/Signal Routing/Goto', [rig '/Goto ' tag], 'GotoTag', tag, ...
         'TagVisibility', 'global', 'Position', pos + [80 0 120 0]);
     add_line(rig, local_port(src, 'Outport', 1), local_port(g, 'Inport', 1), 'autorouting', 'on');
-end
-
-function p = local_pm_port(blk, name)
-% Physical port of subsystem BLK for its PMIOPort NAME (ordered per side).
-    pm = find_system(blk, 'SearchDepth', 1, 'BlockType', 'PMIOPort');
-    side = get_param(pm, 'Side');
-    mine = find(strcmp(get_param(pm, 'Name'), name));
-    assert(isscalar(mine), 'gs3dx:rig', 'No PMIOPort %s in %s', name, getfullname(blk));
-    same = find(strcmp(side, side{mine}));
-    order = str2double(get_param(pm(same), 'Port'));
-    [~, rank] = sort(order);
-    idx = find(same(rank) == mine);
-    ph = get_param(blk, 'PortHandles');
-    p = ph.([side{mine}(1) 'Conn'])(idx);
 end
 
 function p = local_port(h, kind, n)

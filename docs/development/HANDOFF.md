@@ -20,7 +20,8 @@
   the 1,000 non-virtual-block Home-license limit, without touching the originals.
 - Status: GS3DX-1 (#10951) scaffold, GS3DX-2 (#10952) regression harness, GS3DX-3
   (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim`, GS3DX-5 (#10955) `GS3DX_Quat`
-  quaternion shoulders and GS3DX-6 (#10956) quaternion hip done.
+  quaternion shoulders, GS3DX-6 (#10956) quaternion hip, GS3DX-7 (#10957) lower body and
+  GS3DX-8 (#10958) weld stance + integration run done; GS3DX-9 (#10959) visual QA in progress.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -65,6 +66,14 @@
       `GS3DX_Quat` is 594 blocks (15 below Slim). `gs3dx_hip_rig` (+ `gs3dx_rig_scaffold`,
       `gs3dx_rig_simulate`, shared with the refactored joint rig): all 30 HipLogs signals match
       the Bushing to <= 1.9e-6 of peak. Convergence with the hip: 14.8 / 0.61 mm at 1e-3 / 1e-5.
+  11. #10957/#10958: `gs3dx_build_lower_body` copies Quat to `GS3DX_FullBody` and adds a
+      `Lower Body` subsystem from `gs3dx_leg_table` (de Leva anthropometry; Spherical hip,
+      Revolute knee, Universal ankle KDS). `gs3dx_stance_frames` measures pelvis/shoulder frames
+      on Quat at t0 (unsaved) to lay out a leg frame; feet are framed rigidly to World (weld).
+      751 blocks (cap 900). Starts in Quat's exact state, knees assemble at -28.14 deg, 0.3 s
+      impact window completes (348 steps); passive legs make the pelvis diverge and the right
+      knee hyperextend (+67 deg). `gs3dx_contact_trial`: contact = +2 blocks, 1.8x wall time.
+      `docs/FULL_BODY.md`. `gs3dx_layout_qa` renders diagrams to `docs/screenshots/` (0 overlaps).
 
 ## Files and Decisions
 
@@ -101,11 +110,20 @@ Creator` (newline); find it by BlockType.
 - Rig constant signals are logged once; `gs3dx_rig_simulate` expands them to the output grid.
 - The hip rig's default torques keep the Bushing's Y angle within -72..62°; 6x larger
   torques reach 84° (near singular, 1.8e4 deg/s).
+- Welded legs close a loop through the pelvis joint: Simscape ignores targets when every joint
+  in a loop has one, so the leg hips have no target (knee/ankle Low pick the branch).
+- A freshly added Subsystem Reference does not list its contents to `find_system`; resolve
+  ports from the referenced file (`gs3dx_port_source`).
+- Infinite Plane ports: frame on the left, geometry on the right; a Brick with exported
+  geometry is the other way round.
+- `*.png` is git-ignored outside the root `docs/`; the exploratory screenshots are force-added.
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 49 passed, 0 failed, 481 s (2026-09-26; the Simulation-tagged tests take most of the time;
+  → 55 tests: full suite 54 passed / 1 failed (the new knee-start check, bound 1e-6 deg vs a
+  Low target that assembles 1e-3 deg away); after setting it to 0.01 deg `test_gs3dx_fullbody`
+  re-ran 6/6 (2026-09-26; the Simulation-tagged tests take most of the time;
   select `~HasTag('Simulation')` for the structural tests).
 - The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
@@ -115,6 +133,7 @@ Creator` (newline); find it by BlockType.
 
 ## Next Steps
 
-1. #10957 lower body: design pelvis/legs (hips, knees, ankles) on `GS3DX_Quat` with
-   quaternion hips/ankles from `gs3dx_quaternion_swap`, <= 900 non-virtual blocks.
-2. #10958 feet/ground and full-body integration; #10959 Sonnet visual QA.
+1. #10959: finish visual QA from `docs/screenshots/` (Sonnet review); a GUI open-check via
+   computer use needs the owner to grant app access interactively.
+2. Follow-up (new issue): fit leg torques / refit pelvis inputs with legs attached, add an
+   energy audit (`docs/FULL_BODY.md` next steps).

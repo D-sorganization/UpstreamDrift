@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — GS3DX_Quat now has quaternion shoulders (#10955) and a 6-DOF quaternion hip (#10956): 594 blocks (609 → 594); hip rig matches the Bushing to ≤ 1.9e-6 of peak; full model still converges to GS3DX_Slim (clubhead 14.8 → 0.61 mm at RelTol 1e-3 → 1e-5); MATLAB suite 49/49 pass.
+- **Last verified:** 2026-09-26 — GS3DX_FullBody (#10957/#10958): legs with welded feet, 751 blocks (cap 900); starts in GS3DX_Quat's exact state and completes the 0.3 s impact window (348 steps); passive legs make the pelvis diverge (documented); foot contact costs +2 blocks and 1.8× wall time; diagrams render with 0 block overlaps; MATLAB suite 54/55 then the fixed full-body test file 6/6.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Design the #10957 lower-body builder on GS3DX_Quat (pelvis, quaternion hips, knees, ankles) within 900 non-virtual blocks.
+- **Next step:** Close #10959 from the Sonnet review of `docs/screenshots/`, then file the leg-torque fitting follow-up.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
