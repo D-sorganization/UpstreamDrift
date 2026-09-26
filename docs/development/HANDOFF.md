@@ -12,10 +12,6 @@
 
 ---
 
-# Past Handoff — Retire the Review-Comment-to-Issue Converter (RM#1755, Third Attempt)
-
----
-
 # Past Handoff — Main Red on Bandit B314 in the Coverage Gate Checker (#10989)
 
 - Repository: D-sorganization/UpstreamDrift
