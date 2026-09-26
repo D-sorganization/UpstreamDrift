@@ -9,13 +9,13 @@ from typing import Any
 
 import pytest
 
+from src.shared.python.motion_matching.evidence_integrity import is_real_sha256
 from src.shared.python.motion_matching.acceptance import (
     AcceptanceGates,
     AcceptanceVerdict,
     GateStatus,
     Horizon,
     evaluate,
-    is_real_sha256,
 )
 
 pytestmark = [pytest.mark.unit]

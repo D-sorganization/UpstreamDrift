@@ -25,6 +25,11 @@
   repairs: ADR README log for ADR-0041/0044, regenerated engine matrix, monolith
   register and divergence inventory, LOD fix in `pre_impact_bundle.py`, and the rig
   CLI split (`rig/_cli_parsers.py`) under the 1200-line budget.
+- CI round 2 (`b17ce4a66`): `_measured_package` was 102 lines, so its fixed orientation
+  claims and phase coverage became module constants; #10961's evidence-integrity gate moved
+  from `acceptance.py` to `motion_matching/evidence_integrity.py` (+5 lines net on main
+  instead of +73), and the module-size reason now records 1427 lines. Motion-matching and
+  shared-contract tests: 16 failures, all identical on main.
 - Next: CI green on the consolidated PR, arm via `scripts/automerge_guard.py`,
   then close the nine originals as superseded.
 
