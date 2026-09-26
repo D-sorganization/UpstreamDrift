@@ -34,8 +34,8 @@ def gen() -> NoiseGenerator:
 class TestNoiseGenerator:
     """Tests for NoiseGenerator class."""
 
-    def test_none_time_array_raises_type_error(self, gen: NoiseGenerator) -> None:
-        with pytest.raises(TypeError, match="t must be provided"):
+    def test_none_time_array_raises_value_error(self, gen: NoiseGenerator) -> None:
+        with pytest.raises(ValueError, match="time array must be provided"):
             gen.generate(None)  # type: ignore[arg-type]
 
     def test_white_noise(self, gen: NoiseGenerator, t: np.ndarray) -> None:
@@ -103,8 +103,8 @@ class TestNoiseGenerator:
 class TestAddNoiseToSignal:
     """Tests for add_noise_to_signal function."""
 
-    def test_none_signal_raises_type_error(self) -> None:
-        with pytest.raises(TypeError, match="signal must be provided"):
+    def test_none_signal_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="signal must be provided"):
             add_noise_to_signal(None)  # type: ignore[arg-type]
 
     def test_add_noise_snr(self, sine_signal: Signal) -> None:
@@ -135,8 +135,8 @@ class TestAddNoiseToSignal:
 class TestGenerateDisturbanceProfile:
     """Tests for generate_disturbance_profile function."""
 
-    def test_none_time_array_raises_type_error(self) -> None:
-        with pytest.raises(TypeError, match="t must be provided"):
+    def test_none_time_array_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="time array must be provided"):
             generate_disturbance_profile(None)  # type: ignore[arg-type]
 
     def test_step_disturbance(self, t: np.ndarray) -> None:
@@ -229,7 +229,7 @@ class TestDisturbanceSimulator:
         result = sim.generate(t)
         assert np.all(result.values == 0.0)
 
-    def test_apply_to_none_signal_raises_type_error(self) -> None:
+    def test_apply_to_none_signal_raises_value_error(self) -> None:
         sim = DisturbanceSimulator()
-        with pytest.raises(TypeError, match="signal must be provided"):
+        with pytest.raises(ValueError, match="signal must be provided"):
             sim.apply_to_signal(None)  # type: ignore[arg-type]

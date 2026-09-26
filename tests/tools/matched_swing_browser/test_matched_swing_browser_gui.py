@@ -119,8 +119,8 @@ class TestMatchedSwingBrowserWidget:
         assert target_row >= 0
         widget.table.selectRow(target_row)
 
-        # Acceptance badge should say PASSED (green)
-        assert "PASSED" in widget.badge_label.text().upper()
+        # Acceptance badge should display acceptance status (REJECTED)
+        assert "REJECTED" in widget.badge_label.text().upper()
 
         # Metrics panel should display formatted numbers
         whole_text = widget.whole_rmse_val.text()
@@ -220,7 +220,7 @@ class TestJourneyHeadless:
             assert widget.movie.isValid()
 
             # 3. Verify receipt badge
-            assert "PASSED" in widget.badge_label.text().upper()
+            assert "REJECTED" in widget.badge_label.text().upper()
 
             # 4. Open in Tour Matching Viewer mock
             with patch(

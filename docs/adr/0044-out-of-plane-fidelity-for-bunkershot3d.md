@@ -333,3 +333,13 @@ gate today. What it commits the project to verifying, going forward:
   sensitivity result that triggered it in its description; a PR that adds
   such capability without that citation should be read as reopening this
   ADR without the evidence it requires, and reviewed accordingly.
+
+## Capability Register (#9688, Interim)
+
+An interim machine-checkable sand-motion capability register is implemented in
+`src/bunkershot3d/solvers/capability.py` (issue #9688). It makes explicit that no
+current pathway delivers genuine 3-D individual-grain trajectories or spherical
+ball spin: F0 is DRFT with no transported sand, F1 is 2-D plane strain, extruded
+slices add no resolved dimension, and Chrono/MuJoCo backend drivers are debt or
+proxies. This ADR remains **Proposed**; the register enforces fail-closed
+truth at runtime while 3-D backend evaluation proceeds under #9688.

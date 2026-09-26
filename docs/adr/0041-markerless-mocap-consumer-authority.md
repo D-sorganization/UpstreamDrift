@@ -2,7 +2,7 @@
 
 - **Status:** Accepted for consumer-boundary implementation
 - **Date:** 2026-08-25
-- **Issues:** #9063, #9065, #9069; Tools #4706, #4708, #4710
+- **Issues:** #9063, #9065, #9069, #9630, #9619; Tools #4706, #4708, #4710
 - **Validation:** `tests/architecture/test_markerless_mocap_authority.py`
 
 ## Context
@@ -23,18 +23,38 @@ capture. The two programs must not share issue status or qualification claims.
 
 One repository owns each responsibility.
 
-| Authority     | Owned Responsibilities                                                                                                                                                                                                           |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tools         | MIT vendor-neutral camera and capture contracts, time and synchronization evidence, calibration records, 2-D observations, 3-D reconstruction records and reference algorithms, session interchange, and C3D exchange contracts. |
-| UpstreamDrift | Session orchestration, project persistence, operator workflows, APIs, PyQt6 and React/Tauri UX, units and theme presentation, contextual help, biomechanics and motion-matching adapters, and C3D workflow integration.          |
-| AffineDrift   | Sanitized evidence publication, validation dossiers, pedagogical workbenches, and immutable public projections.                                                                                                                  |
-| Tools_Private | Private operational tools only; it is not part of the public runtime and cannot be required by an open markerless-mocap installation.                                                                                            |
+| Authority     | Owned Responsibilities                                                                                                                                                                                                                                                                                               |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tools         | MIT vendor-neutral camera and capture contracts, time and synchronization evidence, calibration records, 2-D observations, 3-D reconstruction records and vendor-neutral reference geometry, session interchange, and C3D exchange contracts.                                                                        |
+| UpstreamDrift | Session orchestration, project persistence, operator workflows, APIs, PyQt6 and React/Tauri UX, units and theme presentation, contextual help, biomechanics and motion-matching adapters, consumer-side self-calibration fitters (`src/motion_capture/reconstruct/`, see Amendment 1), and C3D workflow integration. |
+| AffineDrift   | Sanitized evidence publication, validation dossiers, pedagogical workbenches, and immutable public projections.                                                                                                                                                                                                      |
+| Tools_Private | Private operational tools only; it is not part of the public runtime and cannot be required by an open markerless-mocap installation.                                                                                                                                                                                |
 
 UpstreamDrift will consume the public `sidekick.lab.mocap` boundary after the
 Tools candidate is protected-merged and `vendor/ud-tools` is pinned to that
 merge. No feature-branch Tools commit is release authority. The first product
 adapter belongs to UpstreamDrift #9069 and must reject an absent or incompatible
 schema instead of copying Tools-owned source below `src/shared/python`.
+
+## Amendment 1 (2026-09-25): Consumer-Side Fitters (#9630)
+
+ADR-0041's record authority remains strictly with Tools. Under this amendment,
+consumer-side fitters — algorithms whose unknowns include the consumer's own
+subject model (such as bone lengths, joint angles, and swing dynamics priors) —
+live in the consumer repository (UpstreamDrift,
+`src/motion_capture/reconstruct/`). Tools ships the vendor-neutral reference
+geometry (intrinsics solve, essential-matrix RANSAC, DLT triangulation, and
+bundle-adjustment core), eventually as `sidekick.lab.mocap.algorithms`.
+
+The rationale is architectural: markerless self-calibration is formulated as a
+single joint least-squares problem over camera placements and the subject's
+skeleton simultaneously. Splitting the solver at the camera/skeleton boundary
+would force either an undesirable duplicate skeleton model in Tools or an
+inappropriate duplicate camera and calibration model in UpstreamDrift.
+
+When Tools' reference geometry ships at a reviewed pin in `vendor/ud-tools`,
+UpstreamDrift must consume it rather than keep parallel generic implementations
+(preserving DRY with no duplicate copies under `src/shared/python`).
 
 ## Coordinate and Timing Boundary
 
