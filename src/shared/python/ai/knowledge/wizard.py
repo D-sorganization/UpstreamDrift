@@ -163,8 +163,7 @@ class WizardKnowledge:
 
     @property
     def available(self) -> bool:
-        pack = self.config.pack
-        return pack.is_file()
+        return self.config.pack.is_file()
 
     def search(self, query: str, k: int | None = None) -> list[Passage]:
         """Current passages for ``query``; empty when the pack is unusable."""

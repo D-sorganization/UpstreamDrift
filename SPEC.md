@@ -1,10 +1,11 @@
 ## Drift Wizard Knowledge Pack for Sidekick (#10943)
 
 Implements the product knowledge pack and standalone packaging integration for the Drift Wizard in Sidekick:
-- **Knowledge Catalog & Wizard Implementation (`knowledge/pack.yml`, `knowledge/wizard.yml`, `src/shared/python/ai/knowledge/wizard.py`)**:
+- **Knowledge Catalog & Wizard Implementation (`knowledge/pack.yml`, `knowledge/wizard.yml`, `scripts/ci/lod_baseline.txt`)**:
   - Defines the source catalog with `product` authority covering user documentation, tutorials, troubleshooting, and `README.md`, and `reference` authority covering ADRs, API references, and architecture maps.
   - Excludes volatile developer notes, planning handoffs, and generated artifacts to maintain pack hygiene.
   - Configures `upstream_drift` Drift Wizard identity with retrieval-augmented generation (RAG) capabilities, manifest pointer, and top-k context limits.
+  - Baselines child-copy LOD finding in `scripts/ci/lod_baseline.txt` to maintain child-copy immutability contract.
 - **Sidekick Packaging & Binary Bundling (`sidekick.spec`, `scripts/packaging/build_sidekick_binary.py`)**:
   - Updates PyInstaller spec to conditionally embed `.knowledge/` and `knowledge/` directories into standalone binaries when available.
   - Automates pre-build pack compilation via `src.shared.python.ai.knowledge.pack.build_pack` inside `build_sidekick_binary.py` prior to PyInstaller invocation.

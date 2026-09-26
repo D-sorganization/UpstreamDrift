@@ -96,21 +96,14 @@ def _build_knowledge_pack_if_present() -> None:
     manifest_file = REPOSITORY_ROOT / "knowledge" / "pack.yml"
     pack_file = REPOSITORY_ROOT / ".knowledge" / "pack.sqlite"
     if manifest_file.is_file() and not pack_file.is_file():
-        pack_file.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "src.shared.python.ai.knowledge",
-                "build",
-                str(manifest_file),
-                "--root",
-                f"UpstreamDrift={REPOSITORY_ROOT}",
-                "--out",
-                str(pack_file),
-            ],
-            check=False,
-        )
+        try:
+            from src.shared.python.ai.knowledge import build_pack, load_manifest
+
+            manifest = load_manifest(manifest_file)
+            roots = {"UpstreamDrift": REPOSITORY_ROOT}
+            build_pack(manifest, roots, pack_file)
+        except (OSError, ValueError, KeyError) as exc:
+            print(f"::warning::Failed to build knowledge pack: {exc}", file=sys.stderr)
 
 
 def main() -> int:

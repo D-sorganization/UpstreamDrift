@@ -26,9 +26,10 @@
   8. Authored `.github/workflows/wizard-pack.yml` and registered in `.github/WORKFLOWS.md`.
   9. Added `.knowledge/` to `.gitignore`.
   10. Added Change Log row to `SPEC.md`.
-  11. Verified all 7 tests in `tests/unit/ai/test_drift_wizard.py` and 3 tests in `tests/unit/ai/test_knowledge_and_wizards.py` pass cleanly (TDD Green phase).
+  11. Verified all 7 tests in `tests/unit/ai/test_drift_wizard.py` and 30 tests in child copy and divergence test suites pass cleanly.
   12. Verified `scripts/check_workflow_inventory.py`, `scripts/check_spec_paths.py`, and local-only workflow audits pass.
-  13. Broken LOD chain in `Wizard.available` (`src/shared/python/ai/knowledge/wizard.py`) and verified repo-wide `check_lod.py` passes cleanly.
+  13. Reverted child-copy `src/shared/python/ai/knowledge/wizard.py` to match `origin/main` to honor child-copy immutability, baselined LOD finding in `scripts/ci/lod_baseline.txt`, and verified repo-wide `check_lod.py` clean scan.
+  14. Switched build script packaging to direct Python `build_pack` API to prevent mock interference in PyInstaller tests.
 
 ## Next Steps
 

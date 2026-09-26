@@ -174,7 +174,7 @@ def test_wizard_stale_pack_shows_banner(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_sidekick_wizards_glue_integration(tmp_path: Path) -> None:
+def test_sidekick_wizards_glue_integration() -> None:
     """Verify sidekick.wizards glue resolves the Drift Wizard from project_root."""
     reset_wizards()
     wizard = wizard_for(REPO_ROOT)
@@ -182,9 +182,21 @@ def test_sidekick_wizards_glue_integration(tmp_path: Path) -> None:
     assert wizard.config.key == "upstream_drift"
     assert wizard.config.name == "Drift Wizard"
 
-    ctx = ConversationContext(
-        messages=[Message(role="user", content="How do I get started?")],
-        metadata={"project_root": str(REPO_ROOT)},
-    )
-    kctx = knowledge_for_context(ctx)
-    assert isinstance(kctx, KnowledgeContext)
+    pack_path = wizard.config.pack
+    pack_existed = pack_path.is_file()
+    if not pack_existed:
+        build_pack(
+            manifest=load_manifest(wizard.config.manifest),
+            roots={"UpstreamDrift": REPO_ROOT},
+            out=pack_path,
+        )
+    try:
+        ctx = ConversationContext(
+            messages=[Message(role="user", content="How do I get started?")],
+            metadata={"project_root": str(REPO_ROOT)},
+        )
+        kctx = knowledge_for_context(ctx)
+        assert isinstance(kctx, KnowledgeContext)
+    finally:
+        if not pack_existed:
+            pack_path.unlink(missing_ok=True)
