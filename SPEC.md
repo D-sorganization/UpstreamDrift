@@ -7064,6 +7064,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2024-05-23 | n/a | Optimize `marker_replay_report` errors with `np.einsum` (spec-exempt: micro-optimization) |
 | 2026-09-26 | #10946 | Keep Multi-Muscle Contracts and Torque Identical on the Rust Backend. |
 | 2026-09-25 | #10944 | Bump vendor/ud-tools to Tools main with K0 + K3a (prereq for #10943). |
 | 2024-05-22 | n/a | Micro-optimization: use np.sqrt(np.einsum) instead of np.linalg.norm(..., axis=-1) in distribution.py (spec-exempt: micro-optimization) |
