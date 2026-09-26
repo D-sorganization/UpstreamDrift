@@ -85,62 +85,22 @@ class NeuralCheckpointMatrix:
         }
 
 
-def _make_evidence(seed_loss_base: float) -> ThreeSeedEvidence:
-    return ThreeSeedEvidence(
-        seed_losses=(
-            (11, round(seed_loss_base, 5)),
-            (22, round(seed_loss_base * 0.98, 5)),
-            (33, round(seed_loss_base * 1.03, 5)),
-        ),
-        mean_loss=round(seed_loss_base * 1.0033, 5),
-        std_loss=round(seed_loss_base * 0.021, 5),
-        converged=True,
-    )
-
-
-def _make_receipt(
-    model_id: str,
-    backend: str,
-    replay_rmse: float,
-    max_constraint: float,
-) -> NativeReplayReceipt:
-    payload = {
-        "model_id": model_id,
-        "backend": backend,
-        "replay_rmse": replay_rmse,
-        "max_constraint": max_constraint,
-    }
-    digest = hashlib.sha256(
-        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()[:16]
-    return NativeReplayReceipt(
-        is_valid=True,
-        replay_rmse=replay_rmse,
-        max_constraint_violation=max_constraint,
-        horizon_s=0.6,
-        time_step_s=0.01,
-        backend=backend,
-        native_engine_version=f"{backend}_v1",
-        receipt_digest=digest,
-    )
-
-
 def _classify_model(
     identity: GolfModelIdentity,
-) -> tuple[ModelCheckpointStatus, str, tuple[str, ...], float, float]:
-    """Classify model status, control basis, blockers, and expected errors."""
+) -> tuple[ModelCheckpointStatus, str, tuple[str, ...]]:
+    """Classify model status, control basis, and blockers."""
     mid = identity.model_id
-    if mid == "driven_double_pendulum":
-        return (ModelCheckpointStatus.QUALIFIED_NATIVE, "joint_torque", (), 0.012, 0.0)
-    if mid == "driven_triple_pendulum":
-        return (ModelCheckpointStatus.QUALIFIED_NATIVE, "joint_torque", (), 0.018, 0.0)
-    if mid == "constrained_upper_body_golfer":
+    if mid in (
+        "driven_double_pendulum",
+        "driven_triple_pendulum",
+        "constrained_upper_body_golfer",
+    ):
         return (
-            ModelCheckpointStatus.QUALIFIED_NATIVE,
+            ModelCheckpointStatus.UNQUALIFIED,
             "joint_torque",
-            (),
-            0.024,
-            4.2e-5,
+            (
+                "unqualified: no trained checkpoint or native replay receipt (#10960 P0-2/P0-4)",
+            ),
         )
 
     if identity.topology == ModelTopology.KINEMATIC_RECONSTRUCTION:
@@ -148,8 +108,6 @@ def _classify_model(
             ModelCheckpointStatus.KINEMATIC_PROPOSAL,
             "kinematic_joint_angle",
             ("kinematic reconstruction models lack torque-driven supervision",),
-            0.008,
-            0.0,
         )
 
     if identity.topology == ModelTopology.REFERENCE_CATALOG_URDF:
@@ -157,8 +115,6 @@ def _classify_model(
             ModelCheckpointStatus.REFERENCE_ONLY,
             "generalized_force",
             ("reference catalog URDF is not a pilot neural training target",),
-            0.05,
-            0.0,
         )
 
     # Full-body multibody models
@@ -167,7 +123,7 @@ def _classify_model(
 
 def _classify_full_body_model(
     mid: str,
-) -> tuple[ModelCheckpointStatus, str, tuple[str, ...], float, float]:
+) -> tuple[ModelCheckpointStatus, str, tuple[str, ...]]:
     """Classify full-body models with exact runtime availability blockers."""
     if "simscape" in mid:
         return (
@@ -176,8 +132,6 @@ def _classify_full_body_model(
             (
                 "missing_simscape_runtime: requires MATLAB R2025b and Simscape Multibody license (#9921)",
             ),
-            0.04,
-            1e-4,
         )
     if "myosuite" in mid:
         return (
@@ -186,8 +140,6 @@ def _classify_full_body_model(
             (
                 "fail_closed_myosuite: fail-closed per MS-50 pending muscle retarget (#9478)",
             ),
-            0.04,
-            1e-4,
         )
     if "opensim" in mid and not is_runtime_available_for_model(mid):
         return (
@@ -196,8 +148,6 @@ def _classify_full_body_model(
             (
                 "missing_opensim_runtime: OpenSim Moco runtime unavailable (#10376, #10414)",
             ),
-            0.04,
-            1e-4,
         )
     if "drake" in mid and not is_runtime_available_for_model(mid):
         return (
@@ -206,36 +156,27 @@ def _classify_full_body_model(
             (
                 "missing_drake_runtime: pydrake not available in local environment (#10375)",
             ),
-            0.04,
-            1e-4,
         )
 
-    # Runtimes present or software-contract surrogate
     return (
-        ModelCheckpointStatus.TRAINED_SURROGATE,
+        ModelCheckpointStatus.BLOCKED_PREREQUISITE,
         "generalized_force",
-        (),
-        0.035,
-        1.5e-4,
+        (
+            f"unqualified_full_body: {mid} lacks verified trained checkpoint and native replay receipt on disk",
+        ),
     )
 
 
 def _build_card_for_model(identity: GolfModelIdentity) -> ModelCheckpointCard:
-    status, control_basis, blockers, rmse, max_c = _classify_model(identity)
+    status, control_basis, blockers = _classify_model(identity)
     mid = identity.model_id
-    mid_hash = hashlib.sha256(mid.encode("utf-8")).hexdigest()
-
-    dataset_hash = f"data_{mid_hash[:12]}"
-    split_hash = f"split_{mid_hash[12:24]}"
-    weight_digest = f"weight_{mid_hash[24:36]}"
-
-    evidence = _make_evidence(0.04 + 0.002 * (identity.dof % 5))
-    receipt = _make_receipt(mid, identity.backend.value, rmse, max_c)
+    # No training or native-replay pipeline produces checkpoints yet, so every
+    # identity, digest, seed and benefit field stays unmeasured (#10960 P0-2/P0-4).
     benefit = BenefitResult(
-        speedup_factor=3.5 if "driven" in mid else 1.2,
-        loss_reduction_pct=14.0 if "driven" in mid else 5.0,
-        break_even_queries=15 if "driven" in mid else 40,
-        verdict="favorable_speedup" if "driven" in mid else "marginal",
+        speedup_factor=None,
+        loss_reduction_pct=None,
+        break_even_queries=None,
+        verdict="unmeasured",
     )
 
     return ModelCheckpointCard(
@@ -250,11 +191,11 @@ def _build_card_for_model(identity: GolfModelIdentity) -> ModelCheckpointCard:
         control_basis=control_basis,
         conditioning_schema=f"conditioning_{identity.topology.value}/1.0",
         generator_adapter=f"adapter_{identity.topology.value}",
-        dataset_hash=dataset_hash,
-        split_hash=split_hash,
-        weight_digest=weight_digest,
-        three_seed_evidence=evidence,
-        native_replay_receipt=receipt,
+        dataset_hash=None,
+        split_hash=None,
+        weight_digest=None,
+        three_seed_evidence=None,
+        native_replay_receipt=None,
         benefit_result=benefit,
         status=status,
         blockers=blockers,

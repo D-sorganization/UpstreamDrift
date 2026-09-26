@@ -333,3 +333,72 @@ def test_performance_baseline_integration() -> None:
     assert record["model_id"] == "pendulum_2dof"
     assert record["speedup"] > 1.0
     assert record["status"] == "PROMOTED"
+
+
+@pytest.mark.unit
+def test_runner_without_measured_baseline_or_costs_raises() -> None:
+    """Runner must reject missing/derived baselines and unmeasured costs (#10960 P0-5)."""
+    samples = [0.01, 0.02, 0.03]
+    timing = TimingBreakdown(0.001, 0.002, 0.003, 0.0, 0.004, 0.002, 0.001)
+    metrics = AcceptedMatchMetrics(90, 10, 0.001, 0.002, 0.95, 2.0, 100.0)
+    base_lat = LatencySummary(0.05, 0.10, 0.02, 0.15, 0.06, 0.01, 50)
+    base_met = AcceptedMatchMetrics(80, 20, 0.002, 0.004, 0.90, 3.0, 110.0)
+
+    # Calling with no baseline latency/metrics/costs raises ValueError
+    with pytest.raises(
+        ValueError,
+        match=r"baseline must be measured, not derived from the candidate \(#10960 P0-5\)",
+    ):
+        run_model_comparative_benchmark(
+            model_id="pendulum_2dof",
+            method=BenchmarkMethod.LEARNED_PROPOSAL_POLISH,
+            interactive_samples_s=samples,
+            timing_breakdown=timing,
+            metrics=metrics,
+        )
+
+    # Calling with any cost parameter as None also raises ValueError
+    with pytest.raises(
+        ValueError,
+        match=r"baseline must be measured, not derived from the candidate \(#10960 P0-5\)",
+    ):
+        run_model_comparative_benchmark(
+            model_id="pendulum_2dof",
+            method=BenchmarkMethod.LEARNED_PROPOSAL_POLISH,
+            interactive_samples_s=samples,
+            timing_breakdown=timing,
+            metrics=metrics,
+            baseline_latency=base_lat,
+            baseline_metrics=base_met,
+            training_wall_time_s=1800.0,
+            training_cost_usd=None,
+            baseline_query_cost_usd=0.002,
+            candidate_query_cost_usd=0.0005,
+        )
+
+
+@pytest.mark.unit
+def test_runner_with_measured_baseline_and_costs_succeeds() -> None:
+    """Runner constructs valid ModelBenchmarkCard with measured baseline and costs."""
+    samples = [0.05, 0.05, 0.05]
+    timing = TimingBreakdown(0.001, 0.002, 0.003, 0.0, 0.004, 0.002, 0.001)
+    metrics = AcceptedMatchMetrics(90, 10, 0.0005, 0.001, 0.98, 2.0, 100.0)
+    base_lat = LatencySummary(0.20, 0.40, 0.10, 0.60, 0.22, 0.05, 50)
+    base_met = AcceptedMatchMetrics(70, 30, 0.001, 0.002, 0.90, 4.0, 120.0)
+
+    card = run_model_comparative_benchmark(
+        model_id="pendulum_2dof",
+        method=BenchmarkMethod.LEARNED_PROPOSAL_POLISH,
+        interactive_samples_s=samples,
+        timing_breakdown=timing,
+        metrics=metrics,
+        baseline_latency=base_lat,
+        baseline_metrics=base_met,
+        training_wall_time_s=1800.0,
+        training_cost_usd=10.0,
+        baseline_query_cost_usd=0.002,
+        candidate_query_cost_usd=0.0005,
+    )
+    assert card.model_id == "pendulum_2dof"
+    assert card.promotion == PromotionDecision.PROMOTED
+    assert card.break_even.has_break_even is True

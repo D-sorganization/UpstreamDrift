@@ -1,37 +1,45 @@
-# Implementation Handoff - Drift Wizard Sidekick Product Knowledge Pack (#10943)
+# Implementation Handoff — Fabricated-Evidence Audit P0 Batch (#10960)
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/agy-10943`
-- Branch: `agy/issue-10943`
-- Baseline commit: `2d5830d18642c46d915f7639f0f996f995b149ad` (origin/main)
-- Implementation commit: `3c4c3940f`
-- Pull request: #10968
-- Governing issue: #10943
-- Lease session: `antigravity-ud-10943`
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-10960-p0-batch`
+- Branch: `claude/ud-10960-p0-batch`
+- Baseline commit: origin/main at branch creation
+- Implementation commit: `SELF`
+- Pull request: draft, opened from this branch
+- Governing issue: #10960 (development log DL-#10960)
+- Lease session: `claude-deskcomputer-20260925-ud`
 
 ## Objective and Status
 
-- Objective: Give UpstreamDrift its Wizard ("Drift Wizard"): a product expert in the Sidekick chat that is always current. Add `knowledge/wizard.yml`, `knowledge/pack.yml`, CI pack rebuild workflow, standalone packaging embedding, and comprehensive unit tests.
-- Status: Ready for PR (TDD Green verified)
-- Completed:
-  1. Verified prerequisites Tools K0 and K3a are pinned in `vendor/ud-tools` (`2d5830d18`).
-  2. Created worktree `agy-10943` and claimed issue #10943 under lease `antigravity-ud-10943`.
-  3. Authored comprehensive test suite `tests/unit/ai/test_drift_wizard.py` covering manifest loading, source glob resolution, fixture retrieval, context rendering, stale banner, and sidekick glue integration.
-  4. Executed pytest and confirmed all 7 tests fail cleanly on missing manifest (TDD Red phase, commit `b6af32afb`).
-  5. Authored `knowledge/wizard.yml` (`key: upstream_drift`, `name: Drift Wizard`) and `knowledge/pack.yml` (product documentation & reference source catalog).
-  6. Updated `sidekick.spec` to bundle `.knowledge/` and `knowledge/` in standalone PyInstaller builds.
-  7. Updated `scripts/packaging/build_sidekick_binary.py` to compile knowledge pack before running PyInstaller.
-  8. Authored `.github/workflows/wizard-pack.yml` and registered in `.github/WORKFLOWS.md`.
-  9. Added `.knowledge/` to `.gitignore`.
-  10. Added Change Log row to `SPEC.md`.
-  11. Verified all 7 tests in `tests/unit/ai/test_drift_wizard.py` and 30 tests in child copy and divergence test suites pass cleanly.
-  12. Verified `scripts/check_workflow_inventory.py`, `scripts/check_spec_paths.py`, and local-only workflow audits pass.
-  13. Reverted child-copy `src/shared/python/ai/knowledge/wizard.py` to match `origin/main` to honor child-copy immutability, baselined LOD finding in `scripts/ci/lod_baseline.txt`, and verified repo-wide `check_lod.py` clean scan.
-  14. Switched build script packaging to direct Python `build_pack` API to prevent mock interference in PyInstaller tests.
+- Objective: remove literal success values from seven P0 findings of the #10960 audit (P0-1, P0-3, P0-5/6, P0-7, P0-8, P0-24).
+- Status: slices executed by agy (Gemini 3.8 Flash) in isolated worktrees; orchestrator review removed
+  a new self-qualifying checkpoint loader (P0-24), a summed-units selection score (P0-3), speculative Moco
+  adapters (P0-8), zero-cost defaults (P0-6), and duplicated guards (DRY).
+
+## Files and Decisions
+
+- See DL-#10960 Paths. Decisions: unmeasured -> None/UNQUALIFIED/"unmeasured" or NotImplementedError; surrogate
+  selection is lexicographic on measured errors (no invented weights); contact receipts versioned
+  `matched-swing-contact-id/v2` with `kind` synthetic vs measured.
+
+## Validation
+
+- 113/113 tests pass in the nine touched test files (junit). artifact_audit x2 and event_alignment x8 fail
+  identically on origin/main. OpenSim capability test needs the OpenSim runtime (absent locally).
+
+## Blockers and Risks
+
+- No training / native-replay / measured-GRF pipeline exists, so the affected matrices now report
+  unqualified everywhere. This is intended, but downstream dashboards will show fewer "passing" cells.
 
 ## Next Steps
 
-1. Monitor CI checks on PR #10968 until auto-merge squashes cleanly into main.
-2. Release lease on #10943, close issue, and clean up worktree/branch.
+1. CI green on the draft PR; review; merge.
+2. Remaining #10960 findings (P1 list in the audit) as follow-up slices.
+
+## Change Log
+
+- `SELF` — #10960 P0 batch: fail-closed receipts for body fit, NM-07/08/09/10/12, MS-20 contact id and OpenSim full swing (DL-#10960).
+- `SELF` — Reconcile child-copy convergence, divergence inventory, and agent context views (#10944).

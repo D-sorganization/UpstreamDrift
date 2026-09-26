@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10960 · Fabricated-Evidence Audit: Fail-Closed Remediation of Literal Receipts and Self-Scored Fits
+
+- **State:** in_review
+- **Owner:** claude (agy executors on DeskComputer and OG Laptop)
+- **Issue:** #10960
+- **PR:** draft PR from `claude/ud-10960-p0-batch`
+- **Branch:** `claude/ud-10960-p0-batch`
+- **Paths:** `src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/*/python/motion_matching/provider.py`, `src/shared/python/neural_motion/surrogates/`, `src/shared/python/neural_motion/matrix/`, `src/shared/python/neural_motion/turnover/`, `src/shared/python/neural_motion/benchmark/runner.py`, `src/shared/python/neural_motion/inference/orchestration.py`, `src/shared/python/motion_matching/contact_identification.py`, `src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py`, `docs/plans/neural_motion_matching/evidence/`, `docs/development/full_body_models/evidence/contact_id/receipt.json`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-26 — 113/113 tests pass across the nine touched test files (junit count); remaining neural_motion/motion_matching failures (artifact_audit x2, event_alignment x8) are identical on origin/main.
+- **Summary:** P0 slices 1, 3, 5-6, 7, 8, 24: body-target fits, NM-07 surrogate ablation, NM-09/NM-12 checkpoint matrix and turnover, NM-10 benchmark baselines, NM-08 orchestration verdicts, MS-20 contact identification and OpenSim full-swing receipts no longer emit literal success values; unmeasured fields are None/UNQUALIFIED/unmeasured or the call raises NotImplementedError.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review

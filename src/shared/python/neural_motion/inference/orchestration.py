@@ -36,6 +36,25 @@ PolishFn = Callable[[Any, np.ndarray], dict[str, Any]]
 ClassicalFn = Callable[[Any, float], dict[str, Any]]
 
 
+def _proposal_rejected(
+    controls: np.ndarray | None, t0: float, reason: str
+) -> tuple[AttemptRecord, bool, None]:
+    """Rejected neural-proposal attempt: no cost, no replay, no verdict (#10960 P0-6)."""
+    return (
+        AttemptRecord(
+            phase="neural_proposal",
+            controls=controls,
+            cost=None,
+            independent_replay=False,
+            acceptance_status="rejected",
+            duration_s=time.perf_counter() - t0,
+            rejection_reason=reason,
+        ),
+        False,
+        None,
+    )
+
+
 class VerifiedInferenceOrchestrator:
     """Orchestrates neural proposal -> refinement -> acceptance with classical fallback."""
 
@@ -77,7 +96,7 @@ class VerifiedInferenceOrchestrator:
                 target, budget, attempts, domain_check, is_preview
             )
 
-        neural_att, neural_ok = self._try_neural_pipeline(
+        neural_att, neural_ok, neural_verdict = self._try_neural_pipeline(
             target, budget, require_independent_replay
         )
         attempts.append(neural_att)
@@ -90,7 +109,7 @@ class VerifiedInferenceOrchestrator:
                 selected_controls=neural_att.controls,
                 attempts=tuple(attempts),
                 domain_check=domain_check,
-                acceptance_verdict={"is_physically_accepted": True, "status": "PASSED"},
+                acceptance_verdict=neural_verdict,
                 is_preview_only=is_preview,
                 duration_s=budget.elapsed_s(),
             )
@@ -117,18 +136,12 @@ class VerifiedInferenceOrchestrator:
         target: Any,
         budget: InferenceBudget,
         require_replay: bool,
-    ) -> tuple[AttemptRecord, bool]:
+    ) -> tuple[AttemptRecord, bool, dict[str, Any] | None]:
         t0 = time.perf_counter()
         if self._proposal_fn is None:
-            return AttemptRecord(
-                phase="neural_proposal",
-                controls=None,
-                cost=None,
-                independent_replay=False,
-                acceptance_status="rejected",
-                duration_s=time.perf_counter() - t0,
-                rejection_reason="Missing checkpoint / proposal function",
-            ), False
+            return _proposal_rejected(
+                None, t0, "Missing checkpoint / proposal function"
+            )
 
         if self._expected_contract is not None and self._loaded_contract is not None:
             from src.shared.python.motion_matching.hybrid import (
@@ -141,57 +154,31 @@ class VerifiedInferenceOrchestrator:
                     loaded=self._loaded_contract,
                 )
             except ValueError as err:
-                return AttemptRecord(
-                    phase="neural_proposal",
-                    controls=None,
-                    cost=None,
-                    independent_replay=False,
-                    acceptance_status="rejected",
-                    duration_s=time.perf_counter() - t0,
-                    rejection_reason=f"Incompatible checkpoint contract: {err}",
-                ), False
+                return _proposal_rejected(
+                    None, t0, f"Incompatible checkpoint contract: {err}"
+                )
 
         try:
             raw_controls = self._proposal_fn(target)
             controls = np.asarray(raw_controls, dtype=np.float64).reshape(-1)
         except Exception as err:
-            return AttemptRecord(
-                phase="neural_proposal",
-                controls=None,
-                cost=None,
-                independent_replay=False,
-                acceptance_status="rejected",
-                duration_s=time.perf_counter() - t0,
-                rejection_reason=f"Proposal generation error: {err}",
-            ), False
+            return _proposal_rejected(None, t0, f"Proposal generation error: {err}")
 
         if controls.size == 0 or not np.all(np.isfinite(controls)):
-            return AttemptRecord(
-                phase="neural_proposal",
-                controls=controls,
-                cost=None,
-                independent_replay=False,
-                acceptance_status="rejected",
-                duration_s=time.perf_counter() - t0,
-                rejection_reason="Proposal returned non-finite / NaN controls",
-            ), False
+            return _proposal_rejected(
+                controls, t0, "Proposal returned non-finite / NaN controls"
+            )
 
         if (
             self._expected_contract
             and controls.size != self._expected_contract.control_dim
         ):
-            return AttemptRecord(
-                phase="neural_proposal",
-                controls=controls,
-                cost=None,
-                independent_replay=False,
-                acceptance_status="rejected",
-                duration_s=time.perf_counter() - t0,
-                rejection_reason=(
-                    f"Dimension mismatch: expected {self._expected_contract.control_dim}, "
-                    f"got {controls.size}"
-                ),
-            ), False
+            return _proposal_rejected(
+                controls,
+                t0,
+                f"Dimension mismatch: expected {self._expected_contract.control_dim}, "
+                f"got {controls.size}",
+            )
 
         return self._evaluate_neural_polish(target, controls, t0, require_replay)
 
@@ -201,55 +188,77 @@ class VerifiedInferenceOrchestrator:
         controls: np.ndarray,
         t0: float,
         require_replay: bool,
-    ) -> tuple[AttemptRecord, bool]:
+    ) -> tuple[AttemptRecord, bool, dict[str, Any] | None]:
         if self._polish_fn is None:
-            return AttemptRecord(
-                phase="neural_proposal",
-                controls=controls,
-                cost=0.0,
-                independent_replay=False,
-                acceptance_status="passed",
-                duration_s=time.perf_counter() - t0,
-            ), True
+            if require_replay:
+                return _proposal_rejected(controls, t0, "no native polish/replay")
+            return (
+                AttemptRecord(
+                    phase="neural_proposal",
+                    controls=controls,
+                    cost=None,
+                    independent_replay=False,
+                    acceptance_status="passed",
+                    duration_s=time.perf_counter() - t0,
+                ),
+                True,
+                None,
+            )
 
         polish_res = self._polish_fn(target, controls)
         pol_controls = polish_res.get("controls", controls)
         independent = bool(polish_res.get("independent_replay", False))
-        cost = float(polish_res.get("final_loss", 0.0))
-        acc = polish_res.get("acceptance", {})
-        acc_passed = bool(acc.get("is_physically_accepted", True))
+        raw_loss = polish_res.get("final_loss")
+        cost = None if raw_loss is None else float(raw_loss)
+        raw_acc = polish_res.get("acceptance", {})
+        acc = raw_acc if isinstance(raw_acc, dict) else {}
+        acc_passed = bool(acc.get("is_physically_accepted", False))
         acc_reason = str(acc.get("reason", ""))
 
         if require_replay and not independent:
-            return AttemptRecord(
-                phase="neural_refined",
-                controls=pol_controls,
-                cost=cost,
-                independent_replay=False,
-                acceptance_status="failed",
-                duration_s=time.perf_counter() - t0,
-                rejection_reason="Missing independent forward replay",
-            ), False
+            return (
+                AttemptRecord(
+                    phase="neural_refined",
+                    controls=pol_controls,
+                    cost=cost,
+                    independent_replay=False,
+                    acceptance_status="failed",
+                    duration_s=time.perf_counter() - t0,
+                    rejection_reason="Missing independent forward replay",
+                ),
+                False,
+                acc,
+            )
 
         if not acc_passed:
-            return AttemptRecord(
+            return (
+                AttemptRecord(
+                    phase="neural_refined",
+                    controls=pol_controls,
+                    cost=cost,
+                    independent_replay=independent,
+                    acceptance_status="failed",
+                    duration_s=time.perf_counter() - t0,
+                    rejection_reason=f"Physical acceptance failed: {acc_reason}"
+                    if acc_reason
+                    else "Physical acceptance failed",
+                ),
+                False,
+                acc,
+            )
+
+        return (
+            AttemptRecord(
                 phase="neural_refined",
                 controls=pol_controls,
                 cost=cost,
                 independent_replay=independent,
-                acceptance_status="failed",
+                acceptance_status="passed",
                 duration_s=time.perf_counter() - t0,
-                rejection_reason=f"Physical acceptance failed: {acc_reason}",
-            ), False
-
-        return AttemptRecord(
-            phase="neural_refined",
-            controls=pol_controls,
-            cost=cost,
-            independent_replay=independent,
-            acceptance_status="passed",
-            duration_s=time.perf_counter() - t0,
-        ), True
+            ),
+            True,
+            acc,
+        )
 
     def _fallback_or_reject(
         self,
@@ -288,8 +297,9 @@ class VerifiedInferenceOrchestrator:
         c_controls = c_res.get("controls")
         c_ind = bool(c_res.get("independent_replay", False))
         c_cost = float(c_res.get("final_loss", 0.0))
-        c_acc = c_res.get("acceptance", {})
-        c_passed = bool(c_acc.get("is_physically_accepted", True))
+        raw_c_acc = c_res.get("acceptance", {})
+        c_acc = raw_c_acc if isinstance(raw_c_acc, dict) else {}
+        c_passed = bool(c_acc.get("is_physically_accepted", False))
 
         attempts.append(
             AttemptRecord(

@@ -31,7 +31,89 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
 
 logger = logging.getLogger(__name__)
 
-RECEIPT_SCHEMA = "matched-swing-contact-id/v1"
+RECEIPT_SCHEMA = "matched-swing-contact-id/v2"
+SYNTHETIC_SWEEP_KIND = "synthetic-contact-sweep"
+
+MAX_CONDITION_NUMBER: float = 1e4
+"""Maximum condition number threshold for numerical identifiability in contact calibration."""
+
+STATUS_CALIBRATED_IDENTIFIABLE = "CALIBRATED_IDENTIFIABLE"
+STATUS_SYNTHETIC_SENSITIVITY_ONLY = "SYNTHETIC_SENSITIVITY_ONLY"
+STATUS_RANK_DEFICIENT = "RANK_DEFICIENT"
+STATUS_ILL_CONDITIONED = "ILL_CONDITIONED"
+
+
+def classify_identifiability(
+    rank: int,
+    n_params: int,
+    condition_number: float,
+    measured: bool = False,
+    *,
+    condition_limit: float = MAX_CONDITION_NUMBER,
+) -> str:
+    """Classify parameter identifiability status under physical and numerical constraints.
+
+    Args:
+        rank: Number of identifiable parameters determined by SVD/FIM rank analysis.
+        n_params: Total number of parameters in the estimation set.
+        condition_number: Condition number of the information matrix or Jacobian.
+        measured: True if identification was conducted on measured experimental data;
+            False if generated via synthetic sensitivity simulation.
+        condition_limit: Upper limit on condition number for numerical identifiability.
+
+    Returns:
+        Status string classifying identifiability:
+        - SYNTHETIC_SENSITIVITY_ONLY: if measured is False.
+        - RANK_DEFICIENT: if measured is True and rank < n_params.
+        - ILL_CONDITIONED: if measured is True, rank == n_params, and condition_number >= condition_limit.
+        - CALIBRATED_IDENTIFIABLE: if measured is True, rank == n_params, and condition_number < condition_limit.
+    """
+    require(
+        isinstance(rank, (int, np.integer)) and rank >= 0,
+        "rank must be a non-negative integer",
+        rank,
+    )
+    require(
+        isinstance(n_params, (int, np.integer)) and n_params > 0,
+        "n_params must be a positive integer",
+        n_params,
+    )
+    require(rank <= n_params, f"rank cannot exceed n_params: {rank} vs {n_params}")
+    require(
+        isinstance(condition_number, (float, int, np.floating, np.integer))
+        and condition_number >= 0.0,
+        "condition_number must be non-negative",
+        condition_number,
+    )
+    require(isinstance(measured, bool), "measured must be a boolean", measured)
+    require(
+        isinstance(condition_limit, (float, int, np.floating, np.integer))
+        and condition_limit > 0.0,
+        "condition_limit must be positive",
+        condition_limit,
+    )
+
+    if not measured:
+        status = STATUS_SYNTHETIC_SENSITIVITY_ONLY
+    elif rank < n_params:
+        status = STATUS_RANK_DEFICIENT
+    elif condition_number >= condition_limit or not np.isfinite(condition_number):
+        status = STATUS_ILL_CONDITIONED
+    else:
+        status = STATUS_CALIBRATED_IDENTIFIABLE
+
+    ensure(
+        status
+        in (
+            STATUS_CALIBRATED_IDENTIFIABLE,
+            STATUS_SYNTHETIC_SENSITIVITY_ONLY,
+            STATUS_RANK_DEFICIENT,
+            STATUS_ILL_CONDITIONED,
+        ),
+        "status must be a recognized identifiability status",
+        status,
+    )
+    return status
 
 
 @dataclass(frozen=True)
@@ -181,7 +263,7 @@ def analyze_identifiability(
 
     # Identify non-identifiable / poorly conditioned directions from smallest singular vectors
     non_identifiable: list[str] = []
-    if rank < n_params or cond > 1e4:
+    if rank < n_params or cond > MAX_CONDITION_NUMBER:
         for k in range(rank, n_params):
             vec = Vh[k]
             dominant_idx = int(np.argmax(np.abs(vec)))
@@ -476,21 +558,36 @@ def _emit_evidence_receipt(
     records: list[dict[str, Any]],
     best_candidate: ContactParameters,
     best_eval: CandidateEvaluation,
+    *,
+    measured: bool = False,
 ) -> dict[str, Any]:
     """Write parameter sweep parquet and emit receipt JSON."""
+    parquet_path = out_dir / "sweep.parquet"
     try:
         import pyarrow as pa
         import pyarrow.parquet as pq
 
         table = pa.Table.from_pylist(records)
-        pq.write_table(table, out_dir / "sweep.parquet")
-        logger.info("Wrote %d records to %s", len(records), out_dir / "sweep.parquet")
+        pq.write_table(table, parquet_path)
+        logger.info("Wrote %d records to %s", len(records), parquet_path)
     except Exception as exc:
         logger.warning("Could not write parquet table via pyarrow: %s", exc)
 
     ident = best_eval.identifiability
+    status = classify_identifiability(
+        rank=ident.identifiable_rank,
+        n_params=len(ident.parameter_names),
+        condition_number=ident.condition_number,
+        measured=measured,
+    )
+
+    evidence_files: dict[str, str] = {"receipt_json": "receipt.json"}
+    if parquet_path.exists():
+        evidence_files["sweep_parquet"] = "sweep.parquet"
+
     receipt = {
         "schema_version": RECEIPT_SCHEMA,
+        "kind": "measured-contact-id" if measured else SYNTHETIC_SWEEP_KIND,
         "grid_name": config.name,
         "grid_config_path": grid_config_path.as_posix(),
         "total_evaluated_candidates": len(records),
@@ -506,15 +603,17 @@ def _emit_evidence_receipt(
             "sensitivities": ident.sensitivities,
         },
         "phase_breakdown": {k: v.to_dict() for k, v in best_eval.phase_metrics.items()},
-        "evidence_files": {
-            "sweep_parquet": "sweep.parquet",
-            "receipt_json": "receipt.json",
-        },
-        "status": "CALIBRATED_IDENTIFIABLE",
+        "evidence_files": evidence_files,
+        "status": status,
     }
+    if not measured:
+        receipt["notes"] = (
+            "Synthetic sensitivity sweep only; not calibrated to measured data "
+            "(#10960 P0-7)"
+        )
 
     receipt_path = out_dir / "receipt.json"
-    receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     logger.info("Emitted identification receipt to %s", receipt_path)
     return receipt
 
@@ -526,7 +625,23 @@ def run_contact_identification(
     run_dir: Path | None = None,
     quick: bool = False,
 ) -> dict[str, Any]:
-    """Execute contact parameter grid sweep, identifiability analysis, and evidence generation."""
+    """Execute contact parameter grid sweep, identifiability analysis, and evidence generation.
+
+    Args:
+        grid_config_path: Path to contact grid configuration JSON.
+        out_dir: Output directory for receipt.json and sweep.parquet.
+        run_dir: Optional path to measured capture run directory. If provided, raises
+            NotImplementedError because measured contact calibration is not yet wired (#10960 P0-7).
+        quick: If True, evaluates only a minimal subset of grid candidates.
+
+    Raises:
+        NotImplementedError: If run_dir is provided, as measured contact calibration is not wired.
+    """
+    if run_dir is not None:
+        raise NotImplementedError(
+            "measured contact calibration not wired (#10960 P0-7)"
+        )
+
     config = ContactGridConfig.from_file(grid_config_path)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -562,6 +677,7 @@ def run_contact_identification(
         records=records,
         best_candidate=best_candidate,
         best_eval=best_eval,
+        measured=False,
     )
 
 
@@ -572,9 +688,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument(
         "--run",
-        type=str,
-        default="anthro_driver",
-        help="Target capture or run name to calibrate against",
+        type=Path,
+        default=None,
+        help="Target capture or run directory to calibrate against (measured data)",
+    )
+    parser.add_argument(
+        "--run-dir",
+        type=Path,
+        dest="run_dir",
+        default=None,
+        help="Target capture or run directory to calibrate against (alias for --run)",
     )
     parser.add_argument(
         "--grid",
@@ -597,10 +720,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    effective_run_dir = args.run_dir if args.run_dir is not None else args.run
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     run_contact_identification(
         grid_config_path=args.grid,
         out_dir=args.out,
+        run_dir=effective_run_dir,
         quick=args.quick,
     )
     return 0

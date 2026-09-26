@@ -24,17 +24,10 @@ Public API:
     available_engines -- list registered engine names.
 """
 
-from collections.abc import Mapping
-from datetime import datetime, timezone
-import hashlib
-import json
-import logging
-from pathlib import Path
-import threading
 from dataclasses import dataclass, field
+import logging
+import threading
 from typing import Any, Protocol, runtime_checkable
-
-import numpy as np
 
 from .club_ball_target import ClubBallTarget
 from .club_target import ClubTarget
@@ -381,26 +374,6 @@ def resolve_body_target(target: Any) -> Any:
     )
 
 
-def _resolve_receipt_out_dir(opts: Any, target: Any) -> Path:
-    """Determine destination directory for matching receipt JSON."""
-    engine_opts = getattr(opts, "engine_options", None)
-    if isinstance(engine_opts, Mapping):
-        out_dir_val = engine_opts.get("out_dir")
-        if out_dir_val:
-            return Path(out_dir_val)
-    elif engine_opts is not None and hasattr(engine_opts, "out_dir"):
-        out_dir_val = engine_opts.out_dir
-        if out_dir_val:
-            return Path(out_dir_val)
-
-    if hasattr(target, "metadata") and isinstance(target.metadata, Mapping):
-        out_dir_val = target.metadata.get("out_dir")
-        if out_dir_val:
-            return Path(out_dir_val)
-
-    return Path.cwd() / "reports" / "matched_swings"
-
-
 def execute_body_fit(
     engine_name: str,
     target: Any,
@@ -408,73 +381,28 @@ def execute_body_fit(
     *,
     engine_version: str = "unknown",
 ) -> CanonicalFitResult:
-    """Execute body target fitting via the matching pipeline and produce a receipt.
+    """Fail closed for unwired body-target fit lane (#10960 P0-1).
 
-    Returns a CanonicalFitResult whose receipt_path points to an on-disk JSON receipt.
+    Body-target fitting requires a real physical solve. Unwired lanes must
+    fail closed rather than returning fabricated success receipts or echoing
+    caller-supplied acceptance verdicts.
+
+    Args:
+        engine_name: Non-empty lowercase engine identifier.
+        target: Target containing a body target payload.
+        opts: Canonical fit options (unused while unwired).
+        engine_version: Engine version string (unused while unwired).
+
+    Returns:
+        Never returns; always raises.
+
+    Raises:
+        ValueError: If ``engine_name`` is empty or not a string, or if ``target.body`` is None.
+        TypeError: If ``target`` does not carry a body target attribute.
+        NotImplementedError: Always raised because the body-target fit lane is
+            not wired.
     """
-    body = resolve_body_target(target)
-    out_dir = _resolve_receipt_out_dir(opts, target)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
-    receipt_path = out_dir / f"receipt_{engine_name}_{ts}.json"
-
-    # Assemble receipt dictionary
-    receipt_data: dict[str, Any] = {
-        "schema": f"matched-swing-fit/{engine_name}-v1",
-        "engine": engine_name,
-        "backend": engine_name,
-        "status": "success",
-        "converged": True,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "metrics": {
-            "shared": {
-                "whole_marker_rmse_m": 0.015,
-                "early_marker_rmse_m": 0.010,
-                "terminal_marker_rmse_m": 0.020,
-                "club_marker_rmse_m": 0.035,
-                "pelvis_yaw_rmse_rad": 0.030,
-            },
-            "final_rmse_m": 0.015,
-            "final_cost": 0.02,
-        },
-        "acceptance": {
-            "status": "PASSED",
-            "is_physically_accepted": True,
-        },
-    }
-
-    if isinstance(body, Mapping):
-        if "schema" in body:
-            receipt_data["schema"] = body["schema"]
-        if "metrics" in body and isinstance(body["metrics"], Mapping):
-            receipt_data["metrics"].update(body["metrics"])
-        if "acceptance" in body and isinstance(body["acceptance"], Mapping):
-            receipt_data["acceptance"].update(body["acceptance"])
-
-    receipt_path.write_text(json.dumps(receipt_data, indent=2), encoding="utf-8")
-
-    body_bytes = str(body).encode("utf-8")
-    target_hash = hashlib.sha256(body_bytes).hexdigest()[:16]
-
-    final_rmse = float(receipt_data["metrics"].get("final_rmse_m", 0.015))
-    final_cost = float(receipt_data["metrics"].get("final_cost", 0.02))
-    maxiter = int(getattr(opts, "maxiter", 100))
-
-    return CanonicalFitResult(
-        theta_optimal=np.zeros(23, dtype=np.float64),
-        final_cost=final_cost,
-        final_rmse_m=final_rmse,
-        solver_status="success",
-        iterations=maxiter,
-        n_evaluations=maxiter,
-        wall_clock_s=0.05,
-        message=f"{engine_name} body target matching solve completed successfully",
-        history=(),
-        method=f"pipeline_matching_plant_{engine_name}",
-        git_commit="2715f5c87",
-        engine_version=engine_version,
-        target_hash=target_hash,
-        timestamp_utc=receipt_data["timestamp_utc"],
-        receipt_path=receipt_path,
-        meta={"receipt": receipt_data},
-    )
+    if not isinstance(engine_name, str) or not engine_name:
+        raise ValueError(f"engine_name must be a non-empty str, got {engine_name!r}")
+    resolve_body_target(target)
+    raise NotImplementedError("body-target fit lane is not wired (#10960 P0-1)")

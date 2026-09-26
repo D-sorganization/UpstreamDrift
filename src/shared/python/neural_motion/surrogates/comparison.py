@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 import datetime
-from typing import Any
 
 from .types import (
     SURROGATE_COMPARISON_SCHEMA,
@@ -13,141 +13,144 @@ from .types import (
     SurrogateComparisonReport,
 )
 
-__all__ = ["compare_surrogates_and_alternatives"]
+__all__ = [
+    "DEFAULT_EVALUATORS",
+    "compare_surrogates_and_alternatives",
+    "surrogate_passes_gates",
+    "surrogate_selection_key",
+]
 
 
-def _evaluate_forward_invert(
+def _unwired_evaluator(
+    kind: SurrogateCandidateKind,
+) -> Callable[[SurrogateComparisonConfig], SurrogateAblationResult]:
+    """Return an evaluator for ``kind`` that fails closed until it is wired (#10960 P0-3).
+
+    No candidate may report metrics it did not measure, so the default
+    evaluators validate their input and then raise instead of returning literals.
+    """
+
+    def evaluate(config: SurrogateComparisonConfig) -> SurrogateAblationResult:
+        if not isinstance(config, SurrogateComparisonConfig):
+            raise TypeError(
+                f"expected SurrogateComparisonConfig, got {type(config).__name__}"
+            )
+        raise NotImplementedError(
+            f"surrogate evaluation for {kind.value!r} is not wired (#10960 P0-3)"
+        )
+
+    return evaluate
+
+
+DEFAULT_EVALUATORS: dict[
+    str, Callable[[SurrogateComparisonConfig], SurrogateAblationResult]
+] = {kind.value: _unwired_evaluator(kind) for kind in SurrogateCandidateKind}
+
+
+def surrogate_passes_gates(
+    result: SurrogateAblationResult,
     config: SurrogateComparisonConfig,
-) -> SurrogateAblationResult:
-    """Evaluate pure forward surrogate with Adam inversion."""
-    return SurrogateAblationResult(
-        candidate_kind=SurrogateCandidateKind.FORWARD_SURROGATE_INVERT.value,
-        sample_efficiency=0.76,
-        accepted_query_latency_s=0.082,
-        clubhead_rmse_m=0.028,
-        butt_rmse_m=0.015,
-        orientation_rmse_rad=0.042,
-        trust_region_rejected=False,
-        gradient_fidelity_rejected=False,
-        contact_boundary_failure=False,
-        converged=True,
-        n_evaluations=45,
-        rejection_reason=None,
+) -> bool:
+    """Return True when ``result`` clears every pre-registered rejection gate.
+
+    A candidate is rejected when it did not converge, tripped the trust-region,
+    gradient-fidelity or contact-boundary check, carries a rejection reason, or
+    exceeds the configured latency, clubhead-RMSE or orientation-RMSE bound.
+    """
+    return not (
+        not result.converged
+        or result.trust_region_rejected
+        or result.gradient_fidelity_rejected
+        or result.contact_boundary_failure
+        or result.rejection_reason is not None
+        or result.accepted_query_latency_s > config.max_accepted_query_latency_s
+        or result.clubhead_rmse_m > config.max_clubhead_rmse_m
+        or result.orientation_rmse_rad > config.max_orientation_rmse_rad
     )
 
 
-def _evaluate_forward_polish(
-    config: SurrogateComparisonConfig,
-) -> SurrogateAblationResult:
-    """Evaluate forward surrogate warm start with constrained native polish."""
-    return SurrogateAblationResult(
-        candidate_kind=SurrogateCandidateKind.FORWARD_SURROGATE_POLISH.value,
-        sample_efficiency=0.88,
-        accepted_query_latency_s=0.145,
-        clubhead_rmse_m=0.011,
-        butt_rmse_m=0.007,
-        orientation_rmse_rad=0.018,
-        trust_region_rejected=False,
-        gradient_fidelity_rejected=False,
-        contact_boundary_failure=False,
-        converged=True,
-        n_evaluations=32,
-        rejection_reason=None,
-    )
+def surrogate_selection_key(
+    result: SurrogateAblationResult,
+) -> tuple[float, float, float, str]:
+    """Order gate-passing candidates by measured metrics (lower is better).
 
-
-def _evaluate_physics_structured(
-    config: SurrogateComparisonConfig,
-) -> SurrogateAblationResult:
-    """Evaluate analytical rigid prior + residual dynamics correction."""
-    return SurrogateAblationResult(
-        candidate_kind=SurrogateCandidateKind.PHYSICS_STRUCTURED_RESIDUAL.value,
-        sample_efficiency=0.92,
-        accepted_query_latency_s=0.038,
-        clubhead_rmse_m=0.019,
-        butt_rmse_m=0.010,
-        orientation_rmse_rad=0.024,
-        trust_region_rejected=False,
-        gradient_fidelity_rejected=False,
-        contact_boundary_failure=False,
-        converged=True,
-        n_evaluations=24,
-        rejection_reason=None,
-    )
-
-
-def _evaluate_masked_proposal(
-    config: SurrogateComparisonConfig,
-) -> SurrogateAblationResult:
-    """Evaluate direct trajectory-to-control proposal (NM-06 baseline)."""
-    return SurrogateAblationResult(
-        candidate_kind=SurrogateCandidateKind.MASKED_PROPOSAL.value,
-        sample_efficiency=0.80,
-        accepted_query_latency_s=0.012,
-        clubhead_rmse_m=0.034,
-        butt_rmse_m=0.021,
-        orientation_rmse_rad=0.058,
-        trust_region_rejected=False,
-        gradient_fidelity_rejected=False,
-        contact_boundary_failure=False,
-        converged=True,
-        n_evaluations=1,
-        rejection_reason=None,
-    )
-
-
-def _evaluate_diffusion_fallback(
-    config: SurrogateComparisonConfig,
-) -> SurrogateAblationResult:
-    """Evaluate multi-step diffusion alternative (bounded ablation)."""
-    return SurrogateAblationResult(
-        candidate_kind=SurrogateCandidateKind.DIFFUSION_FALLBACK.value,
-        sample_efficiency=0.28,
-        accepted_query_latency_s=0.820,
-        clubhead_rmse_m=0.048,
-        butt_rmse_m=0.032,
-        orientation_rmse_rad=0.075,
-        trust_region_rejected=True,
-        gradient_fidelity_rejected=False,
-        contact_boundary_failure=False,
-        converged=False,
-        n_evaluations=120,
-        rejection_reason=(
-            "Rejected: excessive iteration latency (820 ms > 500 ms target) "
-            "and diffusion multi-step overhead is not justified without "
-            "multimodal proposal ambiguity."
-        ),
+    Lexicographic: clubhead RMSE, then orientation RMSE, then accepted-query
+    latency, then candidate kind. Quantities with different units are never
+    summed, so no weighting has to be invented.
+    """
+    return (
+        result.clubhead_rmse_m,
+        result.orientation_rmse_rad,
+        result.accepted_query_latency_s,
+        result.candidate_kind,
     )
 
 
 def compare_surrogates_and_alternatives(
     config: SurrogateComparisonConfig,
+    evaluators: (
+        Mapping[str, Callable[[SurrogateComparisonConfig], SurrogateAblationResult]]
+        | None
+    ) = None,
 ) -> SurrogateComparisonReport:
-    """Run bounded ablation comparing forward surrogates and alternatives."""
-    candidates = {
-        SurrogateCandidateKind.FORWARD_SURROGATE_INVERT.value: _evaluate_forward_invert(
-            config
-        ),
-        SurrogateCandidateKind.FORWARD_SURROGATE_POLISH.value: _evaluate_forward_polish(
-            config
-        ),
-        SurrogateCandidateKind.PHYSICS_STRUCTURED_RESIDUAL.value: _evaluate_physics_structured(
-            config
-        ),
-        SurrogateCandidateKind.MASKED_PROPOSAL.value: _evaluate_masked_proposal(config),
-        SurrogateCandidateKind.DIFFUSION_FALLBACK.value: _evaluate_diffusion_fallback(
-            config
-        ),
-    }
+    """Run bounded ablation comparing forward surrogates and alternatives.
 
-    selected = SurrogateCandidateKind.PHYSICS_STRUCTURED_RESIDUAL.value
-    rationale = (
-        "Physics-structured residual surrogate provides the smallest useful "
-        "representation for smooth rigid models: combines an analytical prior "
-        "with residual neural correction, achieving highest sample efficiency (92%), "
-        "low query latency (38 ms), and guaranteed gradient fidelity (>0.9 cos sim) "
-        "within the trust region without black-box adversarial exploitation."
-    )
+    Parameters
+    ----------
+    config : SurrogateComparisonConfig
+        Pre-registered configuration for forward surrogate and alternative comparison.
+    evaluators : Mapping[str, Callable[[SurrogateComparisonConfig], SurrogateAblationResult]] | None
+        Optional mapping from candidate kind string to an evaluator callable.
+        Defaults to DEFAULT_EVALUATORS, whose members raise NotImplementedError until wired.
+
+    Returns
+    -------
+    SurrogateComparisonReport
+        Evidence bundle containing candidate ablation results and selected approach.
+
+    Raises
+    ------
+    TypeError
+        If config is not a SurrogateComparisonConfig.
+    NotImplementedError
+        If an unwired default evaluator is invoked (#10960 P0-3).
+    """
+    if not isinstance(config, SurrogateComparisonConfig):
+        raise TypeError(
+            f"expected SurrogateComparisonConfig, got {type(config).__name__}"
+        )
+
+    evaluator_map = DEFAULT_EVALUATORS if evaluators is None else evaluators
+
+    candidates: dict[str, SurrogateAblationResult] = {}
+    for kind, eval_fn in evaluator_map.items():
+        candidates[kind] = eval_fn(config)
+
+    qualified = [
+        (kind, res)
+        for kind, res in candidates.items()
+        if surrogate_passes_gates(res, config)
+    ]
+
+    if not qualified:
+        selected: str | None = None
+        rationale = (
+            "No candidate satisfied convergence and validation criteria "
+            "within configured tolerances."
+        )
+    else:
+        selected, best_res = min(
+            qualified, key=lambda item: surrogate_selection_key(item[1])
+        )
+        rationale = (
+            f"Selected approach '{selected}': lowest measured clubhead RMSE among "
+            f"gate-passing candidates (ties broken by orientation RMSE, then latency): "
+            f"clubhead_rmse_m={best_res.clubhead_rmse_m:.4f}, "
+            f"orientation_rmse_rad={best_res.orientation_rmse_rad:.4f}, "
+            f"accepted_query_latency_s={best_res.accepted_query_latency_s:.4f}, "
+            f"sample_efficiency={best_res.sample_efficiency:.4f}, "
+            f"converged={best_res.converged} over {best_res.n_evaluations} evaluations."
+        )
 
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
