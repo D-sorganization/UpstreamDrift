@@ -55,4 +55,5 @@
 
 ## Change Log
 
+- `SELF` — #9411 M-2: mypy exclusion budget fits the 2026-10-01 cap (35/36), tracked-file rule, remaining exclusions re-attested to 2027-01-01 (DL-#9411).
 - `SELF` — Migrate ActuatorPanel and SimulationToolbar to shared usePolling hook (#8941).

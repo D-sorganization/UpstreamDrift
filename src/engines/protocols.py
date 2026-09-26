@@ -15,8 +15,12 @@ class PhysicsEngineProtocol(Protocol):
     n_q: int
     n_v: int
 
-    def step(self) -> None:
-        """Advance simulation by one integration step."""
+    def step(self, dt: float | None = None) -> None:
+        """Advance simulation by one step (``dt=None`` uses the engine default).
+
+        Mirrors ``engine_core.sub_protocols.Steppable.step`` so callers may pass
+        an explicit timestep.
+        """
         ...
 
     def reset(self) -> None:
