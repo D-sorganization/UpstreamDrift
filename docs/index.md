@@ -162,6 +162,7 @@ repository, which made them effectively unreachable.
 | `config/`               | @platform-team        | draft     | Configuration and settings documentation (e.g. the pydantic-settings migration guide).                                              |
 | `conformance/`          | @physics-team         | stable    | Cross-engine conformance notes, divergence ledgers, and canonical-core parity records.                                              |
 | `conventions/`          | @architecture-team    | stable    | Cross-subsystem data contracts and naming conventions, including canonical pose/state interchange.                                  |
+| `critiques/`            | @quality-team         | stable    | Scheduled Fleet Critic reviews: dated weakness catalogs and summaries of recent changes.                                            |
 | `deployment/`           | @platform-team        | stable    | Deployment procedures, packaging notes, and release environment guidance.                                                           |
 | `design/`               | @architecture-team    | draft     | Feature design sketches and deeper design rationale before ADR promotion.                                                           |
 | `agent_context/`        | @engineering-team     | stable    | Verified module graphs, integration contracts, source evidence and agent navigation.                                                |
