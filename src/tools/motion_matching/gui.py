@@ -532,17 +532,12 @@ class MotionMatchingWidget(QWidget):
 
     def _verified_club_seed(self) -> Any:
         """Return the seed only when verified; otherwise log and return None (#10960)."""
-        from src.shared.python.motion_matching.club_only.seeds import (
-            VERIFIED_SEED_SOURCES,
-        )
+        from src.shared.python.motion_matching.club_only import seeds as club_seeds
 
-        seed = self._club_seed
-        if seed is not None and seed.source in VERIFIED_SEED_SOURCES:
-            return seed
+        if club_seeds.is_verified_seed(self._club_seed):
+            return self._club_seed
         self.club_seed_status.setText("no verified seed")
-        self.club_log.appendPlainText(
-            "no verified seed: matching requires a verified seed from CO-03 retrieval or constrained_ik"
-        )
+        self.club_log.appendPlainText(club_seeds.NO_VERIFIED_SEED_MESSAGE)
         return None
 
     def _club_only_request(self, preset: str) -> Any:

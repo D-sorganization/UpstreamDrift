@@ -39,9 +39,14 @@ SEED_SCHEMA = "club-starting-guesses/1.0.0"
 VERIFIED_SEED_SOURCES = frozenset({"retrieval", "constrained_ik"})
 # Hand-made seeds (GUI preview, CO-05 preview); never evidence of a fit.
 SYNTHETIC_SEED_SOURCES = frozenset({"ui_synthetic", "synthetic"})
+NO_VERIFIED_SEED_MESSAGE = (
+    "no verified seed: matching requires a verified seed from CO-03 retrieval "
+    "or constrained_ik"
+)
 _GOVERNING_ISSUE = 10607
 
 __all__ = [
+    "NO_VERIFIED_SEED_MESSAGE",
     "SEED_SCHEMA",
     "SYNTHETIC_SEED_SOURCES",
     "VERIFIED_SEED_SOURCES",
@@ -51,9 +56,18 @@ __all__ = [
     "build_starting_guess_report",
     "evidence_payload",
     "geometry_content_hash",
+    "is_verified_seed",
     "profile_content_hash",
     "starting_guess_evidence_payload",
 ]
+
+
+def is_verified_seed(seed: Any) -> bool:
+    """Return True only for a seed produced by a real retrieval or IK step (#10960).
+
+    ``None`` and synthetic or unknown sources are never verified.
+    """
+    return seed is not None and getattr(seed, "source", None) in VERIFIED_SEED_SOURCES
 
 
 @dataclass(frozen=True)

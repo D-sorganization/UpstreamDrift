@@ -45,6 +45,9 @@
   `_run_club_only_match` (114 lines). Split into `_read_body_target_payload`,
   `_build_source_provenance`, `_verified_club_seed` and `_club_only_request`; budget OK, and the
   body-JSON and GUI tests pass (37 passed, 10 skipped).
+- CI round 3: `check_file_size_budget.py` flagged `gui.py` at 1205/1200. Moved the verified-seed
+  predicate into `seeds.is_verified_seed` + `NO_VERIFIED_SEED_MESSAGE` (tested in
+  `test_ui_integration_seed_10960.py`); `gui.py` is 1200 lines; all 29 local repo-structure steps pass.
 
 ## Blockers and Risks
 

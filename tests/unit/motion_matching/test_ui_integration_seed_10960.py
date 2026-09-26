@@ -203,3 +203,28 @@ def test_gui_shows_no_verified_seed_status_when_seed_unavailable(
         assert "no verified seed" in log_text2
     finally:
         widget.cleanup()
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("retrieval", True),
+        ("constrained_ik", True),
+        ("ui_synthetic", False),
+        ("synthetic", False),
+    ],
+)
+def test_is_verified_seed_accepts_only_verified_sources(
+    source: str, expected: bool
+) -> None:
+    from types import SimpleNamespace
+
+    from src.shared.python.motion_matching.club_only.seeds import is_verified_seed
+
+    assert is_verified_seed(SimpleNamespace(source=source)) is expected
+
+
+def test_is_verified_seed_rejects_missing_seed() -> None:
+    from src.shared.python.motion_matching.club_only.seeds import is_verified_seed
+
+    assert is_verified_seed(None) is False
