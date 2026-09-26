@@ -25,6 +25,7 @@
     "tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_launches_package_main_module_for_sibling_tool",
     "tests/launchers/test_motion_match_preview_launch.py::test_motion_match_preview_uses_local_source_package_module",
     "tests/launchers/test_pose_studio_launch_containment.py::test_pose_studio_uses_a_child_package_module",
+    "tests/launchers/wave8_misc/test_embedded_tool_bootstrap.py::test_bootstrap_registers_all_first_party_tools",
     "tests/shared/wave10_contracts/test_level.py::TestResolveLevel::test_optimized_python_defaults_to_enforce_when_env_unset",
     "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
     "tests/test_model_source_providers.py::test_decorated_provider_returns_resolved_path[movement_optimizer_source-movement_optimizer]",
