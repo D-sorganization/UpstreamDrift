@@ -8,7 +8,8 @@
 - Also fixed: `tests/ci/test_ci_infrastructure.py::TestCIEnvironmentCompatibility::test_helper_workflows_use_pr_scoped_concurrency` referenced the deleted workflow file directly; dropped it from that test's workflow list so the test does not FileNotFoundError.
 - Superseding note: this re-lands #10941, whose branch conflicted with main after a merge-of-main push failed hooks; content is unchanged, branch is fresh off `origin/main`.
 - Validation: `py -3.12 <RM>/scripts/campaigns/review_comment_converter_retirement/retire_converter.py --repo . --check` -> exit 0 after `--apply`; `pytest tests/ci/test_ci_infrastructure.py -k helper_workflows_use_pr_scoped_concurrency` passes.
-- Next step: open the draft PR for review.
+- CI fix (PR #10978): repo-structure-gates failed because SPEC.md's #10931 section still named the deleted processor; the section is now a retirement note and `scripts/check_spec_paths.py` exits 0. The push hook ran in full (the earlier `SKIP=pytest-unit` push is superseded).
+- Next step: CI green on #10978, owner review, merge.
 
 ---
 
