@@ -30,4 +30,9 @@ function names = gs3dx_names()
         'slim',     "GS3DX_Slim", ...       % logging/frames slimmed (#10954)
         'quat',     "GS3DX_Quat", ...       % quaternion shoulders + hip (#10955/#10956)
         'fullbody', "GS3DX_FullBody");      % lower body added (#10957/#10958)
+
+    names.simscape_prefixes   = ["sm_lib", "fl_lib", "nesl_utility", "ee_lib"];
+    names.converter_refs      = ["nesl_utility/PS-Simulink Converter", ...
+                                 "nesl_utility/Simulink-PS Converter"];
+    names.license_block_limit = 1000;
 end

@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — GS3DX_Baseline cloned headlessly in R2025b; 12 subsystem references re-pointed; test_gs3dx_safety 5/5 pass (originals match git HEAD).
+- **Last verified:** 2026-09-26 — Regression harness (#10952) and block budget (#10953) landed; GS3DX_Baseline matches the original run on all 413 signals and 4,236 steps; 21/21 MATLAB tests pass.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Land the GS3DX-2 regression harness (#10952) proving GS3DX_Baseline matches the original trajectories.
+- **Next step:** Build GS3DX_Slim (#10954) by replacing each per-axis torque chain with the joint's direct InputTorque port and prove it with the harness.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

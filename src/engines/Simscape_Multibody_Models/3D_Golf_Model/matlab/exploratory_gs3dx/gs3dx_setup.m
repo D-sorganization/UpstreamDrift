@@ -8,7 +8,8 @@ function info = gs3dx_setup()
 %
 %   Safety contract (epic #10950):
 %     - Never calls SAVEPATH; the path change lasts for this session only.
-%     - Never adds the original model folder (matlab/src/model) to the path.
+%     - Never adds the original model folder (matlab/src/model) to the path;
+%       only matlab/src/functions (model-called MATLAB functions) is added.
 %     - Returns absolute folder locations so callers never hard-code paths.
 %
 %   Postconditions:
@@ -27,11 +28,17 @@ function info = gs3dx_setup()
     info.docs_dir           = fullfile(root, 'docs');
     info.original_model_dir = fullfile(fileparts(root), 'src', 'model');
     info.cache_dir          = fullfile(tempdir, 'gs3dx_slcache');
+    % MATLAB functions the model's Stateflow/MATLAB Function blocks call by
+    % name (HexPolyInputFunction).  Without it the Hip Torque Output chart
+    % fails to size its outputs at compile time.
+    info.dependency_dirs    = {fullfile(fileparts(root), 'src', 'functions')};
 
-    addpath(root, info.tools_dir, info.models_dir);
+    addpath(root, info.tools_dir, info.models_dir, info.dependency_dirs{:});
 
-    if ~isfolder(info.cache_dir)
-        mkdir(info.cache_dir);
+    for d = {info.cache_dir, info.baselines_dir, info.docs_dir}
+        if ~isfolder(d{1})
+            mkdir(d{1});
+        end
     end
     Simulink.fileGenControl('set', 'CacheFolder', info.cache_dir, ...
         'CodeGenFolder', info.cache_dir, 'createDir', true);
