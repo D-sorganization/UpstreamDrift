@@ -29,8 +29,12 @@ import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-import xml.etree.ElementTree as ET
+from typing import TYPE_CHECKING, Any
+
+import defusedxml.ElementTree as ET  # XXE-safe (bandit B314, #10989)
+
+if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element
 
 DEFAULT_BUDGET = Path("scripts/config/mypy_exclusion_budget.json")
 
@@ -141,7 +145,7 @@ def _source_prefix(source: str, repo_root: Path) -> str:
     return "" if prefix in ("", ".") else prefix + "/"
 
 
-def _xml_source_prefixes(root: ET.Element, repo_root: Path) -> list[str]:
+def _xml_source_prefixes(root: Element, repo_root: Path) -> list[str]:
     """Prefixes for every ``<source>``; no sources means names are already repo-relative."""
     sources = [s.text.strip() for s in root.findall("./sources/source") if s.text]
     if not sources:
