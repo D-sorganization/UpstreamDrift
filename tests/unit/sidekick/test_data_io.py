@@ -35,7 +35,7 @@ class TestFileFormatDetector:
         assert FileFormatDetector.detect_format(Path("data.npy")) == "numpy"
 
     def test_pickle_detected(self) -> None:
-        assert FileFormatDetector.detect_format(Path("data.pkl")) == "pickle"
+        assert FileFormatDetector.detect_format(Path("data.pkl")) is None
 
     def test_unknown_extension_returns_none(self) -> None:
         result = FileFormatDetector.detect_format(Path("data.xyz"))
@@ -96,7 +96,7 @@ class TestDataReaderCSV:
         with pytest.raises(
             ValueError, match="Pickle format is disabled for security reasons"
         ):
-            DataReader.read_file(p)
+            DataReader.read_file(p, format_type="pickle")
 
     def test_data_io_unsupported_format_raises(self, tmp_path: Path) -> None:
         p = tmp_path / "data.xyz"

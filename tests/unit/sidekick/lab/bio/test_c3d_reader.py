@@ -14,7 +14,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 from sidekick.lab.bio import _c3d_io as io_mod
-from sidekick.lab.bio._c3d_marker_set import MarkerSet
+from sidekick.lab.bio._c3d_marker_set import MarkerSet, detect_marker_set
 from sidekick.lab.bio.c3d_reader import C3DDataReader
 
 from ._synthetic import _synthetic_c3d_dict
@@ -137,7 +137,10 @@ def test_export_points_formats(tmp_path: Path, ext: str) -> None:
         assert "marker" in arr.files
 
 
-def test_export_points_explicit_format(tmp_path: Path) -> None:
+def test_export_points_explicit_format(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("C3D_ALLOW_ANY_EXPORT_PATH", "1")
     reader = _patched_reader(
         _synthetic_c3d_dict(n_frames=1, n_markers=1, marker_names=["A"]),
         tmp_path / "x.c3d",
@@ -253,9 +256,9 @@ def test_real_tour_average_driver_reader_sanity() -> None:
     assert metadata.units == "m"
     assert metadata.duration == pytest.approx(654 / 360.0)
     assert metadata.analog_count == 0
-    assert metadata.force_plates == ()
+    assert reader.get_force_plate_count() == 0
     assert metadata.events == []
-    assert metadata.marker_set is MarkerSet.GOLF_TOUR_AVERAGE_BODY
+    assert detect_marker_set(metadata.marker_labels) is MarkerSet.GOLF_TOUR_AVERAGE_BODY
     assert {"WaistLeft", "BackTop", "HeadTop", "LWristTop", "RAnkleOut"}.issubset(
         set(metadata.marker_labels)
     )
