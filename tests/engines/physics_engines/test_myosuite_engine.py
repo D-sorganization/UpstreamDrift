@@ -19,7 +19,7 @@ from src.engines.physics_engines.myosuite.python._engine_init import EngineInitM
 from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
     MyoSuitePhysicsEngine,
 )
-from src.shared.python.core.contracts.exceptions import PreconditionError
+from src.shared.python.core.contracts.exceptions import PreconditionError, StateError
 
 
 def _make_sim(nv: int = 2) -> MagicMock:
@@ -366,6 +366,14 @@ class TestDriftControlMixin:
     ) -> None:
         with pytest.raises(ValueError):
             loaded_engine.compute_zvcf(None)  # type: ignore[arg-type]
+
+    def test_compute_ztcf_uninit_raises(self, engine: MyoSuitePhysicsEngine) -> None:
+        with pytest.raises(StateError, match=r"compute_ztcf.*no simulation loaded"):
+            engine.compute_ztcf(np.array([1.0, 1.0]), np.array([0.5, 0.5]))
+
+    def test_compute_zvcf_uninit_raises(self, engine: MyoSuitePhysicsEngine) -> None:
+        with pytest.raises(StateError, match=r"compute_zvcf.*no simulation loaded"):
+            engine.compute_zvcf(np.array([0.5, 0.5]))
 
     def test_get_acceleration(self, loaded_engine: MyoSuitePhysicsEngine) -> None:
         loaded_engine.sim.data.qacc = np.array([1.0, 2.0])

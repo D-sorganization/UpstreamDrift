@@ -4,7 +4,12 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.shared.python.core.contracts import check_finite, postcondition, precondition
+from src.shared.python.core.contracts import (
+    StateError,
+    check_finite,
+    postcondition,
+    precondition,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -55,10 +60,10 @@ class DriftControlMixin:
         return a_control
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        if not self.sim:
+            raise StateError("compute_ztcf: no simulation loaded")
         if q is None:
             raise ValueError("q must be provided")
-        if not self.sim:
-            return np.array([])
 
         q_saved, v_saved = self.get_state()
         ctrl_saved = self.sim.data.ctrl.copy()
@@ -73,10 +78,10 @@ class DriftControlMixin:
         return a_ztcf
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        if not self.sim:
+            raise StateError("compute_zvcf: no simulation loaded")
         if q is None:
             raise ValueError("q must be provided")
-        if not self.sim:
-            return np.array([])
 
         q_saved, v_saved = self.get_state()
         ctrl_saved = self.sim.data.ctrl.copy()

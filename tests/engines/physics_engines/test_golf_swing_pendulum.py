@@ -14,6 +14,7 @@ import pytest
 from src.engines.physics_engines.pendulum.python.golf_swing_physics_engine import (
     GolfSwingPendulumEngine,
 )
+from src.shared.python.core.contracts import StateError
 
 
 @pytest.fixture
@@ -138,17 +139,14 @@ class TestUninitDefaults:
         assert uninitialized_engine.compute_jacobian("tip") is None
 
     def test_ztcf_zero(self, uninitialized_engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(
+        with pytest.raises(StateError, match=r"compute_ztcf.*engine not initialized"):
             uninitialized_engine.compute_ztcf(
                 np.array([0.1, 0.2]), np.array([0.0, 0.0])
-            ),
-            [0.0, 0.0],
-        )
+            )
 
     def test_zvcf_zero(self, uninitialized_engine: GolfSwingPendulumEngine) -> None:
-        assert np.allclose(
-            uninitialized_engine.compute_zvcf(np.array([0.1, 0.2])), [0.0, 0.0]
-        )
+        with pytest.raises(StateError, match=r"compute_zvcf.*engine not initialized"):
+            uninitialized_engine.compute_zvcf(np.array([0.1, 0.2]))
 
     def test_forward_kinematics_default(
         self, uninitialized_engine: GolfSwingPendulumEngine
@@ -200,6 +198,18 @@ class TestArgValidation:
     def test_zvcf_none_raises(self, engine: GolfSwingPendulumEngine) -> None:
         with pytest.raises(ValueError):
             engine.compute_zvcf(None)  # type: ignore[arg-type]
+
+    def test_ztcf_short_q_raises(self, engine: GolfSwingPendulumEngine) -> None:
+        with pytest.raises(ValueError, match=r"(?i)expected length 2"):
+            engine.compute_ztcf(np.array([1.0]), np.zeros(2))
+
+    def test_ztcf_short_v_raises(self, engine: GolfSwingPendulumEngine) -> None:
+        with pytest.raises(ValueError, match=r"(?i)expected length 2"):
+            engine.compute_ztcf(np.zeros(2), np.array([1.0]))
+
+    def test_zvcf_short_q_raises(self, engine: GolfSwingPendulumEngine) -> None:
+        with pytest.raises(ValueError, match=r"(?i)expected length 2"):
+            engine.compute_zvcf(np.array([1.0]))
 
 
 class TestCheckpoint:
