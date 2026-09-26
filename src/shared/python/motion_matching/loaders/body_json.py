@@ -109,6 +109,64 @@ def _resolve_source_format(
     )
 
 
+def _build_source_provenance(
+    raw_bytes: bytes, payload: dict[str, Any], path: Path
+) -> SourceProvenance:
+    """Build fail-closed source provenance from the payload's ``source`` record.
+
+    Raises:
+        ValueError: If ``source`` is not an object, or its format or digest
+            fails validation.
+    """
+    src = payload["source"]
+    if not isinstance(src, dict):
+        raise ValueError(
+            f"{path}: 'source' must be an object, got {type(src).__name__}"
+        )
+    return SourceProvenance(
+        filename=str(src.get("filename", path.name)),
+        format=_resolve_source_format(src, payload, path),
+        subject_id=str(src.get("subject_id", "")),
+        trial_id=str(src.get("trial_id", "")),
+        sha256=_resolve_source_sha256(raw_bytes, src, path),
+    )
+
+
+def _read_body_target_payload(path: Path) -> tuple[bytes, dict[str, Any]]:
+    """Read the raw bytes and validated top-level object of a body-target JSON.
+
+    Raises:
+        ValueError: If the payload is not an object, carries the wrong schema
+            tag, or is missing required keys.
+    """
+    raw_bytes = path.read_bytes()
+    payload = json.loads(raw_bytes.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(
+            f"{path}: body-target JSON must contain an object, got {type(payload).__name__}"
+        )
+    schema = payload.get("schema")
+    if schema != JSON_BODY_TARGET_SCHEMA:
+        raise ValueError(
+            f"{path}: unsupported body-target JSON schema {schema!r}, "
+            f"expected {JSON_BODY_TARGET_SCHEMA!r}"
+        )
+    required = {
+        "time_s",
+        "marker_names",
+        "marker_xyz",
+        "impact_idx",
+        "events",
+        "source",
+    }
+    missing = required - payload.keys()
+    if missing:
+        raise ValueError(
+            f"{path}: body-target JSON missing required keys: {sorted(missing)}"
+        )
+    return raw_bytes, payload
+
+
 def load_body_target_json(
     path: Path,
     opts: AlignOptions | None = None,  # noqa: ARG001 - dispatcher symmetry
@@ -143,31 +201,7 @@ def load_body_target_json(
         are not satisfied.
     """
     p = Path(path)
-    raw_bytes = p.read_bytes()
-    payload = json.loads(raw_bytes.decode("utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError(
-            f"{p}: body-target JSON must contain an object, got {type(payload).__name__}"
-        )
-    schema = payload.get("schema")
-    if schema != JSON_BODY_TARGET_SCHEMA:
-        raise ValueError(
-            f"{p}: unsupported body-target JSON schema {schema!r}, "
-            f"expected {JSON_BODY_TARGET_SCHEMA!r}"
-        )
-    required = {
-        "time_s",
-        "marker_names",
-        "marker_xyz",
-        "impact_idx",
-        "events",
-        "source",
-    }
-    missing = required - payload.keys()
-    if missing:
-        raise ValueError(
-            f"{p}: body-target JSON missing required keys: {sorted(missing)}"
-        )
+    raw_bytes, payload = _read_body_target_payload(p)
 
     time = np.asarray(payload["time_s"], dtype=float)
     marker_names = tuple(str(n) for n in payload["marker_names"])
@@ -207,16 +241,7 @@ def load_body_target_json(
         for ev in payload["events"]
     )
 
-    src = payload["source"]
-    if not isinstance(src, dict):
-        raise ValueError(f"{p}: 'source' must be an object, got {type(src).__name__}")
-    source = SourceProvenance(
-        filename=str(src.get("filename", p.name)),
-        format=_resolve_source_format(src, payload, p),
-        subject_id=str(src.get("subject_id", "")),
-        trial_id=str(src.get("trial_id", "")),
-        sha256=_resolve_source_sha256(raw_bytes, src, p),
-    )
+    source = _build_source_provenance(raw_bytes, payload, p)
 
     return BodyTarget(
         time=time,
