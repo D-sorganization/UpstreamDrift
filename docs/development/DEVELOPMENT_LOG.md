@@ -21,14 +21,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_review
 - **Owner:** claude
-- **Issue:** #10950 (children #10951–#10959)
+- **Issue:** #10950 (children #10951–#10959, #10985, #10986)
 - **PR:** #10963 (draft)
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — GS3DX_FullBody (#10957/#10958): legs with welded feet, 751 blocks (cap 900); starts in GS3DX_Quat's exact state and completes the 0.3 s impact window (348 steps); passive legs make the pelvis diverge (documented, follow-up #10979); foot contact costs +2 blocks and 1.8× wall time; #10959 visual QA fixed label collisions, 0 block overlaps; MATLAB suite 55/55.
+- **Last verified:** 2026-09-26 — #10985 data audit (capture has no GRF; trunk mass double-count; drive pelvis path out of reach of planted feet) and #10986 GS3DX_FullBodyContact (sole contacts, unactuated pelvis, stance-hold servo; stands from rest with 2 mm slip, Newton balance closes; impact drive tips it over); license counts compiled blocks (FullBody 945, Contact 967); MATLAB suite 70/70.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Owner reviews draft PR #10963 and marks it ready.
+- **Next step:** Owner reviews draft PR #10963 (incl. the trunk-mass decision in DATA_AUDIT.md) and marks it ready.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

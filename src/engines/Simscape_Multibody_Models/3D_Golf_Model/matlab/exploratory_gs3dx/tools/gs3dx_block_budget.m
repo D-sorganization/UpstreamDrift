@@ -18,6 +18,13 @@ function report = gs3dx_block_budget(mdl, opts)
 %   REPORT = GS3DX_BLOCK_BUDGET(MDL, json_path=PATH) additionally writes
 %   the report to PATH as formatted JSON.
 %
+%   REPORT = GS3DX_BLOCK_BUDGET(MDL, compiled=true) also compiles MDL
+%   (update diagram, nothing saved) and adds
+%     .compiled_total       the same count after compilation.
+%   That is the number the Home license limits: compiling adds Simscape's
+%   own blocks (GS3DX_Quat 594 -> 740, GS3DX_FullBody 751 -> 945).  A model
+%   over the limit fails to compile, which raises the license error here.
+%
 %   Preconditions:
 %     - MDL is a non-empty text scalar resolving to a Simulink model.
 %   Postconditions:
@@ -30,6 +37,7 @@ function report = gs3dx_block_budget(mdl, opts)
     arguments
         mdl {mustBeTextScalar}
         opts.json_path {mustBeTextScalar} = ''
+        opts.compiled (1,1) logical = false
     end
 
     mdl_str = char(mdl);
@@ -125,6 +133,13 @@ function report = gs3dx_block_budget(mdl, opts)
     report.converter_internal   = converter_internal;
     report.top_level_equivalent = top_level_equivalent;
     report.simscape_blocks      = simscape_blocks;
+    if opts.compiled
+        set_param(stem, 'SimulationCommand', 'update');
+        report.compiled_total = numel(find_system(stem, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
+            'MatchFilter', @Simulink.match.activeVariants, 'Type', 'Block', 'Virtual', 'off'));
+        assert(report.compiled_total >= report.nonvirtual_total, 'gs3dx:postcondition', ...
+            'Postcondition: compilation cannot remove nonvirtual blocks.');
+    end
 
     % Postconditions
     assert(report.nonvirtual_total >= 0, 'gs3dx:postcondition', ...

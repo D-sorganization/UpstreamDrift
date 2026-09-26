@@ -6,6 +6,23 @@ Exploratory Simscape workspace block-budget analysis and Home-license boundary v
 
 The MATLAB R2025b Home license allows **at most 1,000** nonvirtual blocks, counted exactly as `find_system(...,'Virtual','off')` counts them (each Simscape converter counts as one block). An orchestrator re-run on 2026-09-26 confirmed that 999 Gains + 1 Constant = 1,000 simulate and that 1,001 is rejected at compile time.
 
+> **Correction (2026-09-26, #10986): the license counts the compiled model.**
+> The count that matters is `find_system(...,'Virtual','off')` **after**
+> compilation (update diagram). Compiling adds Simscape's own blocks, so the
+> uncompiled count below understates the license count for Simscape-heavy
+> models:
+>
+> | Model                   | Uncompiled | Compiled | Headroom |
+> | ----------------------- | ---------- | -------- | -------- |
+> | `GS3DX_Quat`            | 594        | 740      | 260      |
+> | `GS3DX_FullBody`        | 751        | 945      | 55       |
+> | `GS3DX_FullBodyContact` | 773        | 967      | 33       |
+>
+> A filler probe agrees: `GS3DX_FullBody` compiles with 48 extra Gains plus a
+> Constant and fails with one more. Use `gs3dx_block_budget(mdl, compiled=true)`,
+> whose `.compiled_total` is the number to hold under 1,000. The 999-Gain probe
+> above is still right, because plain Simulink blocks add nothing when compiled.
+
 Key findings from empirical measurements on `GS3DX_Baseline`:
 
 - **Total Nonvirtual Blocks**: 672
