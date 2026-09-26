@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from src.shared.python.motion_matching import acceptance, full_marker_terminal
 from src.shared.python.motion_matching.acceptance import (
     AcceptanceGates,
     AcceptanceVerdict,
@@ -135,13 +136,13 @@ def test_evaluate_with_only_disclosed_or_not_applicable_not_accepted(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """End-to-end evaluate() with only DISCLOSED / NOT_APPLICABLE gates returns rejected verdict."""
+    # Patch the module objects, not dotted strings: a string target is resolved
+    # through ``src.shared.python`` attributes, which other tests can rebind.
+    monkeypatch.setattr(acceptance, "_evaluate_marker_rmse", lambda *a, **k: [])
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.acceptance._evaluate_marker_rmse",
-        lambda *args, **kwargs: [],
-    )
-    monkeypatch.setattr(
-        "src.shared.python.motion_matching.full_marker_terminal.evaluate_full_marker_terminal_disclosure",
-        lambda *args, **kwargs: [],
+        full_marker_terminal,
+        "evaluate_full_marker_terminal_disclosure",
+        lambda *a, **k: [],
     )
     receipt = {
         "lane": "native",
