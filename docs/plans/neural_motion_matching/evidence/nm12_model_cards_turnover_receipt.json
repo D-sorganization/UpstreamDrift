@@ -1,5 +1,7 @@
 {
   "schema": "neural-turnover-receipt/1.0.0",
+  "status": "DIAGNOSTIC",
+  "note": "Relabelled under #10960 fabricated-evidence audit: promoted_models and end-to-end passed steps were recorded without real trained checkpoint inference or ODE rollouts.",
   "governing_issue": 10627,
   "parent_epic": 10603,
   "card_catalog": {

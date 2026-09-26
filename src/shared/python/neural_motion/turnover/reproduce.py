@@ -108,6 +108,14 @@ def _verify_training_step(model_id: str) -> FlowStepOutcome:
             message=f"Checkpoint card missing for {model_id}",
             details={},
         )
+    if card.three_seed_evidence is None:
+        return FlowStepOutcome(
+            step_name="TRAINING_RUN",
+            status=FlowStepStatus.SKIPPED,
+            duration_s=time.perf_counter() - t0,
+            message=f"No multi-seed training evidence recorded for {model_id}",
+            details={"checkpoint_hash": card.checkpoint_hash()},
+        )
     return FlowStepOutcome(
         step_name="TRAINING_RUN",
         status=FlowStepStatus.PASSED,
@@ -169,7 +177,12 @@ def _verify_checkpoint_selection_step(model_id: str) -> FlowStepOutcome:
         )
 
 
-def _verify_inference_step(model_id: str) -> FlowStepOutcome:
+def _verify_inference_step(
+    model_id: str,
+    *,
+    orchestrator: Any | None = None,
+    target: Any | None = None,
+) -> FlowStepOutcome:
     """Step 4: Verify observed-motion matching and safe fallback."""
     t0 = time.perf_counter()
     try:
@@ -196,12 +209,46 @@ def _verify_inference_step(model_id: str) -> FlowStepOutcome:
             details={"blocked_runtime": identity.model_id},
         )
 
+    # OBSERVED_MOTION_MATCHING is PASSED only if it actually ran VerifiedInferenceOrchestrator.orchestrate and got NEURAL_ACCEPTED
+    if orchestrator is not None:
+        try:
+            from src.shared.python.neural_motion.inference import (
+                InferenceStatus,
+                VerifiedInferenceOrchestrator,
+            )
+
+            if isinstance(orchestrator, VerifiedInferenceOrchestrator):
+                report = orchestrator.orchestrate(target)
+                if report.status == InferenceStatus.NEURAL_ACCEPTED:
+                    return FlowStepOutcome(
+                        step_name="OBSERVED_MOTION_MATCHING",
+                        status=FlowStepStatus.PASSED,
+                        duration_s=time.perf_counter() - t0,
+                        message=f"Verified inference accepted proposal for {model_id}",
+                        details={"mode": "neural_verified", "fallback_available": True},
+                    )
+                return FlowStepOutcome(
+                    step_name="OBSERVED_MOTION_MATCHING",
+                    status=FlowStepStatus.FAILED,
+                    duration_s=time.perf_counter() - t0,
+                    message=f"Verified inference did not reach NEURAL_ACCEPTED status: {report.status.value}",
+                    details={"status": report.status.value, "neural_accepted": False},
+                )
+        except Exception as exc:
+            return FlowStepOutcome(
+                step_name="OBSERVED_MOTION_MATCHING",
+                status=FlowStepStatus.FAILED,
+                duration_s=time.perf_counter() - t0,
+                message=f"Inference orchestration failed: {exc}",
+                details={"error": str(exc)},
+            )
+
     return FlowStepOutcome(
         step_name="OBSERVED_MOTION_MATCHING",
-        status=FlowStepStatus.PASSED,
+        status=FlowStepStatus.SKIPPED,
         duration_s=time.perf_counter() - t0,
-        message=f"Verified inference and safe fallback verified for {model_id}",
-        details={"mode": "neural_verified", "fallback_available": True},
+        message=f"Inference orchestrator not executed for {model_id}: requires trained proposal network and VerifiedInferenceOrchestrator",
+        details={"mode": "unmeasured", "neural_accepted": False},
     )
 
 
@@ -259,13 +306,18 @@ def _verify_replay_step(model_id: str) -> FlowStepOutcome:
         )
 
 
-def verify_end_to_end_flow(model_id: str) -> EndToEndFlowReport:
+def verify_end_to_end_flow(
+    model_id: str,
+    *,
+    orchestrator: Any | None = None,
+    target: Any | None = None,
+) -> EndToEndFlowReport:
     """Execute complete 5-step user flow verification from registration to replay."""
     t0 = time.perf_counter()
     step1 = _verify_dataset_step(model_id)
     step2 = _verify_training_step(model_id)
     step3 = _verify_checkpoint_selection_step(model_id)
-    step4 = _verify_inference_step(model_id)
+    step4 = _verify_inference_step(model_id, orchestrator=orchestrator, target=target)
     step5 = _verify_replay_step(model_id)
 
     steps = (step1, step2, step3, step4, step5)
@@ -285,8 +337,10 @@ def verify_end_to_end_flow(model_id: str) -> EndToEndFlowReport:
         verdict = PromotionVerdict.PROMOTED
     elif identity and identity.topology == ModelTopology.KINEMATIC_RECONSTRUCTION:
         verdict = PromotionVerdict.RESEARCH_ONLY
-    else:
+    elif identity and identity.topology == ModelTopology.REFERENCE_CATALOG_URDF:
         verdict = PromotionVerdict.REFERENCE_ONLY
+    else:
+        verdict = PromotionVerdict.UNMEASURED
 
     commands = generate_reproduction_commands(model_id)
     repro_cmd = commands["evaluate"]

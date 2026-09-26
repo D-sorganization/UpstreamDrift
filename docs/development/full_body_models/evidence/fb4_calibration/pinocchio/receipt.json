@@ -3,7 +3,8 @@
   "issue": "#10068",
   "epic": "#10062",
   "engine": "pinocchio",
-  "status": "PASSED",
+  "status": "REJECTED",
+  "note": "relabelled #10960 P0-9: total_rms_m 178.52 mm > 60.00 mm threshold, closure_max_error_m 9.17 mm > 5.00 mm threshold",
   "timestamp_utc": "2026-09-14T03:53:48.673517+00:00",
   "environment": {
     "python": "3.10.12 (main, Jun 22 2026, 18:55:27) [GCC 11.4.0]",

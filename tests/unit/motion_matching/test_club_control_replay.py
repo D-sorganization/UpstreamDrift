@@ -11,6 +11,7 @@ import pytest
 
 from src.shared.python.motion_matching.club_only.control_replay import (
     CONTROL_REPLAY_SCHEMA,
+    STATUS_SOFTWARE_CONTRACT_CONSISTENT,
     ControlRecoveryRequest,
     ControlRecoveryResult,
     ImpactRegime,
@@ -88,6 +89,8 @@ def _request(
     n_contact_spheres: int = 0,
     force_infeasible_contact: bool = False,
     root_slack_override: float | None = None,
+    declared_interval_s: float | None = None,
+    is_circular_plant: bool | None = None,
 ) -> ControlRecoveryRequest:
     times = _times() if times is None else times
     if q is None or v is None or a is None or tau_truth is None:
@@ -109,6 +112,8 @@ def _request(
         measured_q_inject=measured_q_inject,
         force_infeasible_contact=force_infeasible_contact,
         root_slack_override=root_slack_override,
+        declared_interval_s=declared_interval_s,
+        is_circular_plant=is_circular_plant,
         kinematic_preview_ok=True,
         qualification_blockers=(
             "native_g1_qualification_requires_desk_native_receipt",
@@ -125,20 +130,35 @@ def test_known_torque_case_recovers_minimum_effort_allocation() -> None:
     np.testing.assert_allclose(
         result.policy.tau_actuated, result.policy.net_generalized_torque, atol=1e-6
     )
-    assert result.torque_replay_status in {"passed", "unevaluated", "rejected"}
+    assert result.torque_replay_status == STATUS_SOFTWARE_CONTRACT_CONSISTENT
+    assert result.replay is not None
+    assert result.replay.contact_feasible is None
 
 
 def test_forward_residual_independently_recomputed() -> None:
     times = _times()
     q, v, a, tau = _known_torque_trajectory(times)
-    req = _request(times=times, q=q, v=v, a=a, tau_truth=tau)
+    req = _request(times=times, q=q, v=v, a=a, tau_truth=tau, is_circular_plant=False)
     result = recover_feasible_controls(req)
     assert result.policy is not None
     replay = result.replay
     assert replay is not None
     # Claimed residual must not be trusted; recompute from policy + plant.
     recomputed = independent_forward_residual(result.policy, times=times, q_reference=q)
+    assert recomputed is not None
+    assert replay.forward_residual is not None
     assert abs(recomputed - replay.forward_residual) < 1e-9
+
+    # Circular replay marks residual unassessed rather than reporting 0.0
+    req_circ = _request(
+        times=times, q=q, v=v, a=a, tau_truth=tau, is_circular_plant=True
+    )
+    res_circ = recover_feasible_controls(req_circ)
+    replay_circ = res_circ.replay
+    assert replay_circ is not None
+    assert replay_circ.forward_residual is None
+    assert replay_circ.forward_residual_reason == "circular_plant"
+
     # Poisoned claimed residual cannot qualify — lie opposite of truth.
     lied = 0.0 if recomputed > 1e-6 else 1.0
     poisoned = IndependentReplayResult(
@@ -182,7 +202,7 @@ def test_tighter_step_sensitivity_flags_unstable_replay() -> None:
     a[5] *= 50.0
     tau = tau.copy()
     tau[5] *= 50.0
-    req = _request(times=times, q=q, v=v, a=a, tau_truth=tau)
+    req = _request(times=times, q=q, v=v, a=a, tau_truth=tau, is_circular_plant=False)
     result = recover_feasible_controls(req)
     assert result.replay is not None
     sens = evaluate_tighter_step_sensitivity(

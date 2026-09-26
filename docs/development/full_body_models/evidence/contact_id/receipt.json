@@ -1,5 +1,6 @@
 {
-  "schema_version": "matched-swing-contact-id/v1",
+  "schema_version": "matched-swing-contact-id/v2",
+  "kind": "synthetic-contact-sweep",
   "grid_name": "canonical_footwear_turf_grid",
   "grid_config_path": "docs/development/full_body_models/evidence/contact_id/contact_grid.json",
   "total_evaluated_candidates": 1152,
@@ -129,8 +130,9 @@
     }
   },
   "evidence_files": {
-    "sweep_parquet": "sweep.parquet",
-    "receipt_json": "receipt.json"
+    "receipt_json": "receipt.json",
+    "sweep_parquet": "sweep.parquet"
   },
-  "status": "CALIBRATED_IDENTIFIABLE"
+  "status": "SYNTHETIC_SENSITIVITY_ONLY",
+  "notes": "Synthetic sensitivity sweep only; not calibrated to measured data (#10960 P0-7)"
 }

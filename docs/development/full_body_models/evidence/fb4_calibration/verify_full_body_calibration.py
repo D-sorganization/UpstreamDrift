@@ -14,6 +14,7 @@ import os
 import platform
 import subprocess
 import sys
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
@@ -24,6 +25,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from docs.development.full_body_models.evidence._gates import (
+    FB4_CALIBRATION_THRESHOLDS,
+    evaluate_gates,
+)
 
 FULL_BODY_SPEC_PATH = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
 UPPER_SPEC_PATH = (
@@ -307,6 +313,11 @@ def _subsample_calibration(
     return calib_res, cap_sub, metrics
 
 
+def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
+    """Evaluate FB-4 calibration metrics against documented thresholds (#10960 P0-9)."""
+    return evaluate_gates(metrics, FB4_CALIBRATION_THRESHOLDS)
+
+
 def _build_receipt_dict(
     engine_name: str,
     calib_res: Any,
@@ -318,12 +329,20 @@ def _build_receipt_dict(
     sub_marker_rms = traj_metrics["sub_marker_rms"]
     full_frame_rms = traj_metrics["full_frame_rms"]
     q_full = traj_metrics["q_full"]
+    gate_metrics = {
+        "total_rms_m": float(traj_metrics["full_total_rms"]),
+        "closure_max_error_m": float(traj_metrics["max_closure_err"]),
+    }
+    status_eval = build_status_from_metrics(gate_metrics)
+
     return {
         "work_package": "FB-4",
         "issue": "#10068",
         "epic": "#10062",
         "engine": engine_name,
-        "status": "PASSED",
+        "status": status_eval["status"],
+        "gate_evaluation": status_eval,
+        "thresholds": dict(FB4_CALIBRATION_THRESHOLDS),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": sys.version,

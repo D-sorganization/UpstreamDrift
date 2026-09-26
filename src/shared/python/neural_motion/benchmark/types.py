@@ -230,6 +230,31 @@ class DataEfficiencyCurve:
     active_superiority_confirmed: bool
 
 
+UNMEASURED_BASELINE_MESSAGE: Final[str] = (
+    "baseline must be measured, not derived from the candidate (#10960 P0-5)"
+)
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class MeasuredBaseline:
+    """Measured baseline and cost inputs for a comparative benchmark (#10960 P0-5).
+
+    Precondition: every field is measured; ``None`` raises ``ValueError`` so a
+    baseline can never be derived from the candidate.
+    """
+
+    latency: LatencySummary
+    metrics: AcceptedMatchMetrics
+    training_wall_time_s: float
+    training_cost_usd: float
+    baseline_query_cost_usd: float
+    candidate_query_cost_usd: float
+
+    def __post_init__(self) -> None:
+        if any(getattr(self, f.name) is None for f in dataclasses.fields(self)):
+            raise ValueError(UNMEASURED_BASELINE_MESSAGE)
+
+
 @dataclasses.dataclass(frozen=True, slots=True)
 class ModelBenchmarkCard:
     """Comprehensive benchmark record for a specific model under NM-10."""

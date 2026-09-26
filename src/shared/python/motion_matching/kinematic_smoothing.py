@@ -47,6 +47,38 @@ class CutoffSensitivityReport:
     recommended_cutoff_hz: float
 
 
+@dataclass(frozen=True)
+class SmoothedTrajectory:
+    """Smoothed joint trajectory with analytical/numerical derivative compatibility.
+
+    Attributes
+    ----------
+    q:
+        Joint coordinate array matching input shape.
+    v:
+        Derivative-compatible joint velocities.
+    a:
+        Derivative-compatible joint accelerations.
+    smoothing_applied:
+        True if zero-phase Butterworth filter was successfully applied;
+        False if SciPy filtering failed and unsmoothed coordinates were retained.
+    """
+
+    q: Array
+    v: Array
+    a: Array
+    smoothing_applied: bool = True
+
+    def __iter__(self) -> Any:
+        return iter((self.q, self.v, self.a))
+
+    def __getitem__(self, idx: int) -> Array:
+        return (self.q, self.v, self.a)[idx]
+
+    def __len__(self) -> int:
+        return 3
+
+
 def smooth_kinematic_trajectory(
     time_s: Array,
     q: Array,
@@ -54,7 +86,7 @@ def smooth_kinematic_trajectory(
     cutoff_hz: float = 15.0,
     order: int = 4,
     padlen: int | None = None,
-) -> tuple[Array, Array, Array]:
+) -> SmoothedTrajectory:
     """Smooth joint trajectory q and compute derivative-compatible v and a.
 
     Parameters
@@ -72,8 +104,8 @@ def smooth_kinematic_trajectory(
 
     Returns
     -------
-    tuple[Array, Array, Array]:
-        (q_smooth, v_smooth, a_smooth) with matching shape to input q.
+    SmoothedTrajectory:
+        SmoothedTrajectory(q, v, a, smoothing_applied) with matching shape to input q.
     """
     t = np.asarray(time_s, dtype=np.float64)
     require(t.ndim == 1, "time_s must be a 1D array", t.shape)
@@ -106,6 +138,7 @@ def smooth_kinematic_trajectory(
     require(eff_cutoff > 0.0, "effective cutoff must be positive", eff_cutoff)
 
     # Filter with zero-phase Butterworth filter via SOS representation
+    smoothing_applied = True
     try:
         from scipy import signal
 
@@ -114,9 +147,10 @@ def smooth_kinematic_trajectory(
             min(n_nodes - 1, 24) if padlen is None else min(n_nodes - 1, padlen)
         )
         q_smooth_2d = signal.sosfiltfilt(sos, q_2d, axis=0, padlen=effective_padlen)
-    except Exception:
-        # Fallback if scipy signal is unavailable
+    except (ValueError, TypeError, ImportError):
+        # Fallback if scipy signal raises or is unavailable
         q_smooth_2d = q_2d.copy()
+        smoothing_applied = False
 
     # Compute derivative-compatible velocities and accelerations
     v_smooth_2d = np.gradient(q_smooth_2d, t, axis=0)
@@ -134,7 +168,12 @@ def smooth_kinematic_trajectory(
     ensure(q_out.shape == q_arr.shape, "q_out shape must match q shape")
     ensure(v_out.shape == q_arr.shape, "v_out shape must match q shape")
     ensure(a_out.shape == q_arr.shape, "a_out shape must match q shape")
-    return q_out, v_out, a_out
+    return SmoothedTrajectory(
+        q=q_out,
+        v=v_out,
+        a=a_out,
+        smoothing_applied=smoothing_applied,
+    )
 
 
 def audit_boundary_spikes(
@@ -221,7 +260,14 @@ def audit_cutoff_sensitivity(
     best_score = float("inf")
 
     for fc in cutoffs_hz:
-        q_s, v_s, a_s = smooth_kinematic_trajectory(time_s, q_arr, cutoff_hz=fc)
+        res = smooth_kinematic_trajectory(time_s, q_arr, cutoff_hz=fc)
+        if not res.smoothing_applied:
+            rmses.append(float("nan"))
+            max_accels.append(float("nan"))
+            boundary_jerks.append(float("nan"))
+            continue
+
+        q_s, v_s, a_s = res.q, res.v, res.a
         rmse = float(np.sqrt(np.mean((q_s - q_arr) ** 2)))
         max_a = float(np.max(np.abs(a_s)))
         audit = audit_boundary_spikes(

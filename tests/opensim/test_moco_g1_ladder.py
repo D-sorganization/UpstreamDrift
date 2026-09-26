@@ -218,6 +218,11 @@ def test_ladder_stages_and_distinct_receipt_statuses() -> None:
     grip_dist = np.full(n_frames, 0.003, dtype=np.float64)
     normal_force = np.full(n_frames, 784.8, dtype=np.float64)  # 1.0 BW
     penetration = np.zeros(n_frames, dtype=np.float64)
+    solution = {
+        "solver_convergence_status": "Solve_Succeeded",
+        "num_iterations": 25,
+        "solve_duration_s": 12.5,
+    }
 
     trajectory = FullSwingTrajectory(
         time_s=time_s,
@@ -230,6 +235,16 @@ def test_ladder_stages_and_distinct_receipt_statuses() -> None:
         ground_normal_force_n=normal_force,
         ground_penetration_m=penetration,
         support_polygon_fraction=0.95,
+        integration_drift_m=0.002,
+        per_frame_errors_m=np.zeros(n_frames, dtype=np.float64),
+        root_residual_rms=0.0,
+        marker_coverage_ratio=1.0,
+        dynamics={
+            "weight_fraction": {"min": 0.5, "max": 2.2},
+            "max_root_force_n": 0.0,
+            "delta_tau_root_max_n": 0.0,
+        },
+        solution=solution,
     )
 
     labels = ("WaistLeft", "WaistRight")
@@ -285,3 +300,253 @@ def test_real_tour_capture_full_swing_driver_events() -> None:
     assert 0.80 <= events.top_of_backswing_s <= 1.15
     assert 1.15 <= events.impact_s <= 1.30
     assert math.isclose(events.finish_s, (654 - 1) / 360.0, abs_tol=1e-3)
+
+
+def test_trajectory_missing_ground_normal_force_fails_with_missing_gate() -> None:
+    """When trajectory has ground_normal_force_n=None, qualification fails and max_normal_force_n gate is MISSING."""
+    n_frames = 100
+    time_s = np.linspace(0.0, 0.85, n_frames, dtype=np.float64)
+    coords = ("pelvis_tilt", "lumbar_extension")
+    q = np.zeros((n_frames, 2), dtype=np.float64)
+    controls = np.zeros((n_frames, 2), dtype=np.float64)
+
+    trajectory = FullSwingTrajectory(
+        time_s=time_s,
+        coordinate_names=coords,
+        q=q,
+        qdot=np.zeros_like(q),
+        control_names=coords,
+        controls=controls,
+        grip_closure_distances_m=np.full(n_frames, 0.003),
+        ground_normal_force_n=None,
+        ground_penetration_m=np.zeros(n_frames),
+        support_polygon_fraction=0.95,
+    )
+
+    labels = ("WaistLeft", "WaistRight")
+    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
+    valid = np.ones((n_frames, 2), dtype=bool)
+    capture = TourCapture(time_s, labels, pts, valid)
+
+    result = qualify_full_swing_tracking(
+        model_path=SCALED_MODEL_PATH,
+        trajectory=trajectory,
+        capture=capture,
+        stage=LadderStage.G1_BACKSWING,
+    )
+
+    assert result.is_qualified is False
+    assert result.replay_acceptance_status == "Rejected"
+    assert result.replay_receipt.replay_success is False
+    assert result.replay_receipt.max_normal_force_bw is None
+
+    # Gate max_normal_force_n must be MISSING, not PASSED
+    force_gates = [
+        g for g in result.acceptance_verdict.gates if g.name == "max_normal_force_n"
+    ]
+    assert len(force_gates) == 1
+    assert force_gates[0].status == GateStatus.MISSING
+
+
+def test_no_solution_object_gives_solver_status_none() -> None:
+    """When no solution object is provided, solver_convergence_status and iterations/duration are None."""
+    n_frames = 100
+    time_s = np.linspace(0.0, 0.85, n_frames, dtype=np.float64)
+    coords = ("pelvis_tilt", "lumbar_extension")
+    q = np.zeros((n_frames, 2), dtype=np.float64)
+
+    trajectory = FullSwingTrajectory(
+        time_s=time_s,
+        coordinate_names=coords,
+        q=q,
+        qdot=np.zeros_like(q),
+        control_names=coords,
+        controls=np.zeros((n_frames, 2)),
+        grip_closure_distances_m=np.full(n_frames, 0.003),
+        ground_normal_force_n=np.full(n_frames, 784.8),
+        ground_penetration_m=np.zeros(n_frames),
+        support_polygon_fraction=0.95,
+    )
+
+    labels = ("WaistLeft", "WaistRight")
+    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
+    valid = np.ones((n_frames, 2), dtype=bool)
+    capture = TourCapture(time_s, labels, pts, valid)
+
+    result = qualify_full_swing_tracking(
+        model_path=SCALED_MODEL_PATH,
+        trajectory=trajectory,
+        capture=capture,
+        stage=LadderStage.G1_BACKSWING,
+    )
+
+    assert result.solver_convergence_status is None
+    assert result.tracking_receipt.solver_convergence_status is None
+    assert result.tracking_receipt.num_iterations is None
+    assert result.tracking_receipt.solve_duration_s is None
+    assert result.is_qualified is False
+
+
+def test_missing_trajectory_fields_default_to_none_not_passing_values() -> None:
+    """Missing penetration, drift, residual, and coverage must be None, never literal success values."""
+    n_frames = 100
+    time_s = np.linspace(0.0, 0.85, n_frames, dtype=np.float64)
+    coords = ("pelvis_tilt", "lumbar_extension")
+    q = np.zeros((n_frames, 2), dtype=np.float64)
+
+    trajectory = FullSwingTrajectory(
+        time_s=time_s,
+        coordinate_names=coords,
+        q=q,
+        qdot=None,
+        control_names=coords,
+        controls=None,
+        grip_closure_distances_m=np.full(n_frames, 0.003),
+        ground_normal_force_n=None,
+        ground_penetration_m=None,
+        support_polygon_fraction=None,
+    )
+
+    labels = ("WaistLeft", "WaistRight")
+    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
+    valid = np.ones((n_frames, 2), dtype=bool)
+    capture = TourCapture(time_s, labels, pts, valid)
+
+    result = qualify_full_swing_tracking(
+        model_path=SCALED_MODEL_PATH,
+        trajectory=trajectory,
+        capture=capture,
+        stage=LadderStage.G1_BACKSWING,
+    )
+
+    # Tracking receipt must NOT have fabricated fallbacks
+    assert result.tracking_receipt.per_frame_max_error_m is None
+    assert result.tracking_receipt.root_residual_rms is None
+    assert result.tracking_receipt.marker_coverage_ratio is None
+    assert result.tracking_receipt.solver_convergence_status is None
+    assert result.tracking_receipt.num_iterations is None
+    assert result.tracking_receipt.solve_duration_s is None
+
+    # Replay receipt must NOT have fabricated fallbacks
+    assert result.replay_receipt.integration_drift_m is None
+    assert result.replay_receipt.max_ground_penetration_m is None
+    assert result.replay_receipt.max_normal_force_bw is None
+    assert result.replay_receipt.inside_support_polygon_fraction is None
+    assert result.replay_receipt.replay_success is False
+    assert result.replay_acceptance_status == "Rejected"
+    assert result.is_qualified is False
+
+
+def test_fully_populated_synthetic_trajectory_evaluates_real_numbers() -> None:
+    """A fully populated synthetic trajectory evaluates its real numbers and qualifies."""
+    n_frames = 100
+    time_s = np.linspace(0.0, 0.85, n_frames, dtype=np.float64)
+    coords = ("pelvis_tilt", "lumbar_extension")
+    q = np.zeros((n_frames, 2), dtype=np.float64)
+    controls = np.zeros((n_frames, 2), dtype=np.float64)
+    normal_forces = np.full(n_frames, 800.0, dtype=np.float64)
+    penetration = np.full(n_frames, 0.002, dtype=np.float64)
+    per_frame_errors = np.full(n_frames, 0.008, dtype=np.float64)
+
+    solution = {
+        "solver_convergence_status": "Solve_Succeeded",
+        "num_iterations": 42,
+        "solve_duration_s": 8.5,
+        "objective_value": 0.015,
+    }
+
+    trajectory = FullSwingTrajectory(
+        time_s=time_s,
+        coordinate_names=coords,
+        q=q,
+        qdot=np.zeros_like(q),
+        control_names=coords,
+        controls=controls,
+        grip_closure_distances_m=np.full(n_frames, 0.003),
+        ground_normal_force_n=normal_forces,
+        ground_penetration_m=penetration,
+        support_polygon_fraction=0.92,
+        per_frame_errors_m=per_frame_errors,
+        integration_drift_m=0.003,
+        root_residual_rms=0.0005,
+        marker_coverage_ratio=0.96,
+        dynamics={
+            "weight_fraction": {"min": 0.6, "max": 2.0},
+            "max_root_force_n": 0.0,
+            "delta_tau_root_max_n": 0.0,
+        },
+        solution=solution,
+    )
+
+    labels = ("WaistLeft", "WaistRight")
+    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
+    valid = np.ones((n_frames, 2), dtype=bool)
+    capture = TourCapture(time_s, labels, pts, valid)
+
+    result = qualify_full_swing_tracking(
+        model_path=SCALED_MODEL_PATH,
+        trajectory=trajectory,
+        capture=capture,
+        stage=LadderStage.G1_BACKSWING,
+    )
+
+    assert result.solver_convergence_status == "Solve_Succeeded"
+    assert result.tracking_receipt.num_iterations == 42
+    assert result.tracking_receipt.solve_duration_s == 8.5
+    assert result.tracking_receipt.objective_value == 0.015
+    assert result.tracking_receipt.per_frame_max_error_m == 0.008
+    assert result.tracking_receipt.root_residual_rms == 0.0005
+    assert result.tracking_receipt.marker_coverage_ratio == 0.96
+
+    assert result.replay_receipt.integration_drift_m == 0.003
+    assert result.replay_receipt.max_ground_penetration_m == 0.002
+    expected_bw = 800.0 / (80.0 * 9.81)
+    assert result.replay_receipt.max_normal_force_bw is not None
+    assert math.isclose(
+        result.replay_receipt.max_normal_force_bw, expected_bw, rel_tol=1e-3
+    )
+    assert result.replay_receipt.inside_support_polygon_fraction == 0.92
+    assert result.replay_receipt.replay_success is True
+    assert result.replay_acceptance_status == "Accepted"
+    # Real recorded numbers, but the marker residuals are still self-scored.
+    assert result.is_qualified is False
+
+
+class _StubMocoSolution:
+    """Carries only the four MocoSolution accessors the receipt reads."""
+
+    def getStatus(self) -> str:  # noqa: N802 - mirrors the OpenSim API
+        return "Solve_Succeeded"
+
+    def getNumIterations(self) -> int:  # noqa: N802
+        return 41
+
+    def getSolverDuration(self) -> float:  # noqa: N802
+        return 3.25
+
+    def getObjective(self) -> float:  # noqa: N802
+        return 0.125
+
+
+@pytest.mark.unit
+def test_solution_metrics_read_from_moco_solution_accessors() -> None:
+    """Receipt solver fields come from the solve result, never literals (#10960 P0-8)."""
+    from src.engines.physics_engines.opensim.python.tour_matching.full_swing_tracking import (
+        _extract_solution_metrics,
+    )
+
+    assert _extract_solution_metrics(_StubMocoSolution()) == (
+        "Solve_Succeeded",
+        41,
+        3.25,
+        0.125,
+    )
+
+
+@pytest.mark.unit
+def test_solution_mapping_missing_fields_stay_none() -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.full_swing_tracking import (
+        _extract_solution_metrics,
+    )
+
+    assert _extract_solution_metrics({"num_iterations": 7}) == (None, 7, None, None)

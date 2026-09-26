@@ -68,12 +68,14 @@ from .fast_matching import (
 )
 from .control_replay import (
     CONTROL_REPLAY_SCHEMA,
+    DEFAULT_INTERVAL_TIMING_TOLERANCE_S,
     ControlPolicy,
     ControlRecoveryRequest,
     ControlRecoveryResult,
     ControlReplayReport,
     ImpactRegime,
     IndependentReplayResult,
+    STATUS_SOFTWARE_CONTRACT_CONSISTENT,
     TighterStepSensitivity,
     control_replay_evidence_payload,
     detect_measured_state_resets,
@@ -81,6 +83,7 @@ from .control_replay import (
     independent_forward_residual,
     recover_and_replay_candidates,
     recover_feasible_controls,
+    verify_interval_timing,
 )
 from .hand_geometry import (
     GolferHandedness,
@@ -268,6 +271,7 @@ __all__ = [
     "ClubPendulumReplayPackage",
     "ClubWorkbookIdentity",
     "CONTROL_REPLAY_SCHEMA",
+    "DEFAULT_INTERVAL_TIMING_TOLERANCE_S",
     "ComponentMask",
     "ComponentStatus",
     "ConstrainedIkRequest",
@@ -276,6 +280,7 @@ __all__ = [
     "ControlRecoveryRequest",
     "ControlRecoveryResult",
     "ControlReplayReport",
+    "STATUS_SOFTWARE_CONTRACT_CONSISTENT",
     "DerivationMetadata",
     "BranchScore",
     "CacheKeyMismatchError",
@@ -460,6 +465,7 @@ __all__ = [
     "ui_integration_evidence_payload",
     "write_club_only_result_package",
     "validate_package_integrity",
+    "verify_interval_timing",
     "verify_workbook_hash",
 ]
 

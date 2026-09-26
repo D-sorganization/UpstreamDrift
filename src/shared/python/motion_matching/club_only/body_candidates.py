@@ -9,6 +9,7 @@ CO-06/08 and native owners — this module never claims G1/G3 acceptance.
 from __future__ import annotations
 
 import hashlib
+import json
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -39,6 +40,7 @@ from src.shared.python.motion_matching.club_only.profiles import (
     resolve_roster_matrix_scope,
 )
 from src.shared.python.motion_matching.club_only.seeds import (
+    VERIFIED_SEED_SOURCES,
     CandidateSeed,
     geometry_content_hash,
     profile_content_hash,
@@ -89,6 +91,7 @@ __all__ = [
     "build_body_candidate_report",
     "generate_plausible_body_candidates",
     "load_body_candidate_outcomes",
+    "write_body_candidate_evidence",
 ]
 
 
@@ -112,6 +115,9 @@ class RejectionReason(str, Enum):
     NONFINITE = "nonfinite"
     WRONG_DIMS = "wrong_dims"
     INCOMPATIBLE_CLOCK = "incompatible_clock"
+    OBSERVATION_FIT_NOT_COMPUTED = "observation_fit_not_computed"
+    SYNTHETIC_SEED = "synthetic_seed"
+    OBSERVATION_FIT_ABOVE_GATE = "observation_fit_above_gate"
 
 
 @dataclass(frozen=True)
@@ -127,19 +133,20 @@ class BodyCandidate:
     v: NDArray[np.float64]
     a: NDArray[np.float64]
     timestamps_s: NDArray[np.float64]
-    observation_fit_m: float
+    observation_fit_m: float | None
     plausibility_score: float
     contact_effort: float
     runtime_s: float | None
     prior_strength: float
     body_configuration_hash: str
-    closure_q_m: float
-    closure_v_m_s: float
-    closure_a_m_s2: float
+    closure_q_m: float | None
+    closure_v_m_s: float | None
+    closure_a_m_s2: float | None
     is_kinematic_preview: bool = True
+    derivatives_computed: bool = False
     claims_native_acceptance: bool = False
     claims_surrogate_as_native: bool = False
-    accepted: bool = True
+    accepted: bool = False
     rejection_reasons: tuple[str, ...] = ()
     prior_sensitivity: Mapping[str, float] | None = None
 
@@ -163,19 +170,26 @@ class BodyCandidate:
         ):
             raise ValueError("q, v, a must be finite")
         times = require_strictly_increasing_timestamps(times)
+        if self.observation_fit_m is not None:
+            if not np.isfinite(self.observation_fit_m) or self.observation_fit_m < 0.0:
+                raise ValueError("observation_fit_m must be finite and >= 0 when set")
         for name, value in (
-            ("observation_fit_m", self.observation_fit_m),
             ("plausibility_score", self.plausibility_score),
             ("contact_effort", self.contact_effort),
             ("prior_strength", self.prior_strength),
-            ("closure_q_m", self.closure_q_m),
-            ("closure_v_m_s", self.closure_v_m_s),
-            ("closure_a_m_s2", self.closure_a_m_s2),
         ):
             if not np.isfinite(value):
                 raise ValueError(f"{name} must be finite")
             if value < 0.0 and name != "plausibility_score":
                 raise ValueError(f"{name} must be >= 0")
+        for name, opt_val in (
+            ("closure_q_m", self.closure_q_m),
+            ("closure_v_m_s", self.closure_v_m_s),
+            ("closure_a_m_s2", self.closure_a_m_s2),
+        ):
+            if opt_val is not None:
+                if not np.isfinite(opt_val) or opt_val < 0.0:
+                    raise ValueError(f"{name} must be finite and >= 0 when set")
         if not 0.0 <= self.plausibility_score <= 1.0:
             raise ValueError("plausibility_score must be in [0, 1]")
         if self.runtime_s is not None and (
@@ -215,6 +229,7 @@ class BodyCandidate:
             "closure_v_m_s": self.closure_v_m_s,
             "closure_a_m_s2": self.closure_a_m_s2,
             "is_kinematic_preview": self.is_kinematic_preview,
+            "derivatives_computed": self.derivatives_computed,
             "claims_native_acceptance": self.claims_native_acceptance,
             "claims_surrogate_as_native": self.claims_surrogate_as_native,
             "accepted": self.accepted,
@@ -353,19 +368,6 @@ def _default_mapping(target_model_id: str) -> TopologyMapping:
     )
 
 
-def _closure_triplet(
-    q: NDArray[np.floating],
-    *,
-    grip_tol_m: float,
-) -> tuple[float, float, float]:
-    """Synthetic q/v/a closure residuals from configuration magnitude."""
-    mag = float(np.linalg.norm(q))
-    closure_q = min(grip_tol_m * 0.5, 1.0e-4 + 1.0e-3 * mag)
-    closure_v = 1.0e-3 * mag
-    closure_a = 1.0e-2 * mag
-    return closure_q, closure_v, closure_a
-
-
 def _plausibility(
     q: NDArray[np.floating],
     *,
@@ -401,11 +403,13 @@ def _rejected_candidate(
     profile: ClubOnlyProfile,
     q: NDArray[np.float64],
     prior_strength: float,
-    reason: RejectionReason,
+    reason: RejectionReason | str,
     runtime_s: float,
+    observation_fit_m: float | None = None,
 ) -> BodyCandidate:
     times = np.asarray(seed.timestamps_s, dtype=np.float64)
     zeros = np.zeros_like(q)
+    reason_val = reason.value if isinstance(reason, Enum) else str(reason)
     return BodyCandidate(
         candidate_id=candidate_id,
         trial_id=seed.trial_id,
@@ -413,20 +417,21 @@ def _rejected_candidate(
         topology=profile.topology,
         seed_id=seed.seed_id,
         q=q,
-        v=zeros,
-        a=zeros,
+        v=zeros,  # kinematic preview, not differentiated
+        a=zeros,  # kinematic preview, not differentiated
         timestamps_s=times,
-        observation_fit_m=float(seed.observed_residual_m),
+        observation_fit_m=observation_fit_m,
         plausibility_score=0.0,
         contact_effort=0.0,
         runtime_s=runtime_s,
         prior_strength=prior_strength,
         body_configuration_hash=_body_hash(q),
-        closure_q_m=float(profile.max_closure_residual_m() * 2.0),
-        closure_v_m_s=0.0,
-        closure_a_m_s2=0.0,
+        closure_q_m=None,
+        closure_v_m_s=None,
+        closure_a_m_s2=None,
+        derivatives_computed=False,
         accepted=False,
-        rejection_reasons=(reason.value,),
+        rejection_reasons=(reason_val,),
     )
 
 
@@ -438,6 +443,7 @@ class BodyCandidateOptions:
     runtime_available: bool = True
     runtime_blocker: str | None = None
     force_reject: RejectionReason | None = None
+    measured_observation_fit_m: float | None = None
 
 
 def _co05_limitations(profile: ClubOnlyProfile) -> list[str]:
@@ -520,21 +526,28 @@ def _build_accepted_proposal(
     q_prop: NDArray[np.float64],
     index: int,
 ) -> BodyCandidate:
-    closure_q, _, _ = _closure_triplet(q_prop, grip_tol_m=ctx.priors.grip_closure_tol_m)
-    q_proj = reproject_onto_closure(
-        q_prop,
-        closure_residual_m=closure_q,
-        tol_m=ctx.profile.max_closure_residual_m(),
-    )
-    closure_q, closure_v, closure_a = _closure_triplet(
-        q_proj, grip_tol_m=ctx.priors.grip_closure_tol_m
-    )
+    # Kinematic preview: pass through q without feeding an invented residual
+    q_proj = np.asarray(q_prop, dtype=np.float64).copy()
     plaus, sensitivity = _plausibility(
         q_proj,
         priors=ctx.priors,
         prior_strength=ctx.prior_strength,
         base_prior=float(seed.prior_score),
     )
+    obs_fit = ctx.options.measured_observation_fit_m
+    # LoD: read the observation gate via a local alias (same gate as score_branch).
+    observation_profile = ctx.profile.observation
+    gate = float(observation_profile.max_grip_position_rmse_m)
+    reasons: list[str] = []
+    if seed.source not in VERIFIED_SEED_SOURCES:
+        reasons.append(RejectionReason.SYNTHETIC_SEED.value)
+    if obs_fit is None:
+        reasons.append(RejectionReason.OBSERVATION_FIT_NOT_COMPUTED.value)
+    elif obs_fit > gate:
+        reasons.append(RejectionReason.OBSERVATION_FIT_ABOVE_GATE.value)
+
+    accepted = len(reasons) == 0
+    zeros = np.zeros_like(q_proj)
     return BodyCandidate(
         candidate_id=f"body:{ctx.profile.model_id}:{seed.seed_id}:{index}",
         trial_id=ctx.observation.trial_id,
@@ -542,19 +555,21 @@ def _build_accepted_proposal(
         topology=ctx.profile.topology,
         seed_id=seed.seed_id,
         q=q_proj,
-        v=np.zeros_like(q_proj),
-        a=np.zeros_like(q_proj),
+        v=zeros,  # kinematic preview, not differentiated
+        a=zeros,  # kinematic preview, not differentiated
         timestamps_s=np.asarray(ctx.observation.native_time_s, dtype=np.float64),
-        observation_fit_m=float(seed.observed_residual_m),
+        observation_fit_m=obs_fit,
         plausibility_score=plaus,
         contact_effort=_contact_effort(q_proj, prior_strength=ctx.prior_strength),
         runtime_s=float(time.perf_counter() - ctx.started),
         prior_strength=ctx.prior_strength,
         body_configuration_hash=_body_hash(q_proj),
-        closure_q_m=closure_q,
-        closure_v_m_s=closure_v,
-        closure_a_m_s2=closure_a,
-        accepted=True,
+        closure_q_m=None,
+        closure_v_m_s=None,
+        closure_a_m_s2=None,
+        derivatives_computed=False,
+        accepted=accepted,
+        rejection_reasons=tuple(reasons),
         prior_sensitivity=sensitivity,
     )
 
@@ -664,7 +679,11 @@ def generate_plausible_body_candidates(
         cell_status, cell_blocker = "generated", None
     else:
         cell_status = "rejected"
-        cell_blocker = "all proposals rejected (grip/contact/collision/singular)"
+        reasons = sorted({r for c in candidates for r in c.rejection_reasons if r})
+        if reasons:
+            cell_blocker = f"all proposals rejected ({', '.join(reasons)})"
+        else:
+            cell_blocker = "all proposals rejected (no accepted candidate)"
     cell = ModelTrialCell(
         model_id=profile.model_id,
         trial_id=observation.trial_id,
@@ -703,7 +722,7 @@ def _synthetic_seed_for(
         seed_id=f"co05-seed:{observation.trial_id}:{profile.model_id}",
         trial_id=observation.trial_id,
         model_id=profile.model_id,
-        source="constrained_ik",
+        source="synthetic",
         q=q,
         body_configuration_hash=_body_hash(q),
         observed_residual_m=0.01,
@@ -864,3 +883,21 @@ def body_candidate_evidence_payload(
             "Native qualification and continuous replay remain with CO-06/08.",
         ],
     }
+
+
+def write_body_candidate_evidence(
+    report: BodyCandidateReport | None = None,
+    path: Path | str | None = None,
+) -> Path:
+    """Serialize and write the CO-05 evidence receipt to disk."""
+    out_path = (
+        Path(path)
+        if path is not None
+        else get_repo_root() / _DEFAULT_BODY_CANDIDATE_EVIDENCE
+    )
+    payload = body_candidate_evidence_payload(report)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
+    return out_path

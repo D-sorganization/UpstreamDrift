@@ -107,7 +107,7 @@ class SurrogateComparisonReport:
     schema_version: str
     model_id: str
     candidates: dict[str, SurrogateAblationResult]
-    selected_approach: str
+    selected_approach: str | None
     selection_rationale: str
     timestamp: str
 

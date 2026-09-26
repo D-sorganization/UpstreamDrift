@@ -212,6 +212,8 @@ def test_pruning_rejects_attractive_infeasible_candidates() -> None:
             q=np.array([0.02, -0.01, 0.005]),
             seed_residual_m=0.02,
             profile=profile,
+            observation_fit_m=0.02,
+            closure_m=0.0001,
         ),
         score_branch(
             branch_id="attractive-infeasible",
@@ -219,8 +221,13 @@ def test_pruning_rejects_attractive_infeasible_candidates() -> None:
             q=np.array([3.0, 4.0, 0.0]),
             seed_residual_m=0.001,
             profile=profile,
+            observation_fit_m=0.01,
+            closure_m=max_closure + 0.001,
         ),
     )
+    assert branches[0].observation_fit_m is not None
+    assert branches[1].observation_fit_m is not None
+    assert branches[1].closure_m is not None
     assert branches[1].observation_fit_m < branches[0].observation_fit_m
     assert branches[1].closure_m > max_closure
     pareto, rejected = prune_and_select_pareto(
@@ -265,7 +272,8 @@ def test_neural_proposals_optional_without_weights() -> None:
         options=FastMatchOptions(neural_provider=provider),
     )
     assert result.neural_proposals_used == 0
-    assert result.pareto
+    assert not result.pareto
+    assert result.rejected
 
 
 def test_profiling_includes_verification_time() -> None:
@@ -340,7 +348,8 @@ def test_fast_match_evidence_fixture_roundtrip(tmp_path: Path) -> None:
     assert payload["governing_issue"] == 10611
     assert payload["claims_native_qualification"] is False
     assert payload["native_g1_pass"] is False
-    assert payload["pareto"]
+    assert payload["pareto"] == []
+    assert payload["rejected_count"] > 0
     assert payload["quality_vs_time"]
     assert payload["failed_attempts"] >= 0
     out_file = save_fast_match_evidence(result, evidence_dir=tmp_path)
