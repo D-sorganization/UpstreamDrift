@@ -55,23 +55,7 @@ function report = gs3dx_clone_baseline(info, opts)
     % copy.  Load without resolving them and re-point.
     load_system(fullfile(info.models_dir, [top '.slx']));
     cleanup = onCleanup(@() close_system(top, 0));
-    blocks = find_system(top, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
-        'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
-    report = struct('model', top, 'repointed', {{}});
     reverse = containers.Map(values(names.original_subsys), values(names.clone_subsys));
-    for k = 1:numel(blocks)
-        ref = get_param(blocks{k}, 'ReferencedSubsystem');
-        if isKey(reverse, ref)
-            set_param(blocks{k}, 'ReferencedSubsystem', reverse(ref));
-            report.repointed{end+1} = sprintf('%s: %s -> %s', blocks{k}, ref, reverse(ref));
-        end
-    end
+    report = struct('model', top, 'repointed', {gs3dx_repoint_references(top, reverse)});
     gs3dx_save_model(top, info);
-
-    % Postcondition: no remaining reference to an original subsystem.
-    for k = 1:numel(blocks)
-        ref = get_param(blocks{k}, 'ReferencedSubsystem');
-        assert(~isKey(reverse, ref), 'gs3dx:clone', ...
-            'Postcondition: %s still references original %s', blocks{k}, ref);
-    end
 end

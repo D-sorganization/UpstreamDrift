@@ -12,6 +12,10 @@ classdef test_gs3dx_harness < matlab.unittest.TestCase
         info struct
     end
 
+    properties (TestParameter)
+        drive = {"impact", "persisted"}
+    end
+
     methods (TestClassSetup)
         function setup(testCase)
             addpath(fileparts(fileparts(mfilename('fullpath'))));
@@ -90,8 +94,28 @@ classdef test_gs3dx_harness < matlab.unittest.TestCase
             testCase.verifyError(@() gs3dx_compare(ref, test), 'gs3dx:compare');
         end
 
-        function baseline_is_stored_in_double_precision(testCase)
-            b = local_load_baseline(testCase.info);
+        function persisted_drive_overrides_nothing(testCase)
+            names = gs3dx_names();
+            vars = gs3dx_drive(testCase.info, "persisted", char(names.variants.baseline));
+            testCase.verifyEmpty(fieldnames(vars));
+        end
+
+        function impact_drive_overrides_only_model_workspace_variables(testCase)
+            names = gs3dx_names();
+            mdl = char(names.variants.baseline);
+            vars = gs3dx_drive(testCase.info, "impact", mdl);
+            ws = get_param(mdl, 'ModelWorkspace');
+            testCase.verifyNotEmpty(fieldnames(vars));
+            testCase.verifyTrue(all(ismember(fieldnames(vars), {ws.whos.name})));
+        end
+
+        function unknown_drive_is_rejected(testCase)
+            testCase.verifyError(@() gs3dx_drive(testCase.info, "bogus", 'x'), ...
+                'MATLAB:validators:mustBeMember');
+        end
+
+        function baseline_is_stored_in_double_precision(testCase, drive)
+            b = local_load_baseline(testCase.info, drive);
             testCase.verifyTrue(all(cellfun(@(d) isa(d, 'double'), b.flat.data)));
             manifest = gs3dx_original_manifest(testCase.info);
             testCase.verifyEqual(b.source_sha256, manifest(1).sha256);
@@ -99,10 +123,12 @@ classdef test_gs3dx_harness < matlab.unittest.TestCase
     end
 
     methods (Test, TestTags = {'Simulation'})
-        function clone_reproduces_original(testCase)
+        function clone_reproduces_original(testCase, drive)
+            % The clone is the same model, so it must match on every drive.
             names = gs3dx_names();
-            ref = local_load_baseline(testCase.info);
-            run = gs3dx_simulate(char(names.variants.baseline));
+            mdl = char(names.variants.baseline);
+            ref = local_load_baseline(testCase.info, drive);
+            run = gs3dx_simulate(mdl, variables = gs3dx_drive(testCase.info, drive, mdl));
             testCase.assertEqual(run.status, "success", run.message);
             cmp = gs3dx_compare(ref, run);
             testCase.verifyEmpty(cmp.missing);
@@ -122,8 +148,7 @@ function flat = local_flat(names)
     end
 end
 
-function b = local_load_baseline(info)
-    names = gs3dx_names();
-    S = load(fullfile(info.baselines_dir, sprintf('original_%s_0p3S.mat', names.original_model)));
+function b = local_load_baseline(info, drive)
+    S = load(gs3dx_baseline_file(info, drive));
     b = S.baseline;
 end
