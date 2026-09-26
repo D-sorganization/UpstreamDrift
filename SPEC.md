@@ -4357,7 +4357,6 @@ inventory and reopen adjudication until every new candidate is reviewed.
 
 | Field                   | Value                                              |
 | ----------------------- | -------------------------------------------------- |
-| 2026-09-26 | n/a | Replaced np.linalg.norm with math.sqrt(np.vdot) in bunkershot3d _rotation_increment (spec-exempt: micro-optimization) |
 | **Repository Name**     | `UpstreamDrift`                                    |
 | **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift` |
 | **Owner**               | D-sorganization                                    |
@@ -7065,6 +7064,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | n/a | Replaced np.linalg.norm with math.sqrt(np.vdot) in bunkershot3d _rotation_increment (spec-exempt: micro-optimization) |
 | 2026-09-25 | #10944 | Bump vendor/ud-tools to Tools main with K0 + K3a (prereq for #10943). |
 | 2024-05-22 | n/a | Micro-optimization: use np.sqrt(np.einsum) instead of np.linalg.norm(..., axis=-1) in distribution.py (spec-exempt: micro-optimization) |
 | 2026-09-24 | n/a | Optimized small 1D array norm calculation by replacing `np.linalg.norm(force)` with `math.sqrt(np.vdot(force, force))` in `src/shared/python/physics/_shaft_model.py` for ~3x speedup. (spec-exempt: micro-optimization) |
