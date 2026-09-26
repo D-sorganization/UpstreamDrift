@@ -431,3 +431,107 @@ def test_real_budget_defines_production_coverage_gates() -> None:
         # reduction, so renewing a date cannot outrun the ratchet it tracks
         # (#8731).
         assert date.fromisoformat(gate["ratchet_on"]) <= next_cap_reduction
+
+
+def test_budget_fails_when_exclusion_matches_no_tracked_files() -> None:
+    """Every exclusion must match at least one tracked repository file."""
+    errors = checker.validate_budget(
+        pyproject_exclusions=["src/legacy/", "src/ghost.py"],
+        budget_entries=[
+            checker.BudgetEntry(
+                path="src/legacy/",
+                owner="@platform",
+                reason="legacy imports need incremental typing",
+                expires_on=date(2026, 8, 1),
+            ),
+            checker.BudgetEntry(
+                path="src/ghost.py",
+                owner="@platform",
+                reason="nonexistent file exclusion",
+                expires_on=date(2026, 8, 1),
+            ),
+        ],
+        schedule=[
+            checker.ScheduleEntry(
+                effective_on=date(2026, 1, 1),
+                max_exclusions=5,
+            )
+        ],
+        today=date(2026, 5, 3),
+        tracked_files={"src/legacy/mod.py"},
+    )
+
+    assert "src/ghost.py: exclusion matches no tracked files" in errors
+
+
+def test_main_fails_when_exclusion_matches_no_tracked_files_in_git(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The checker CLI rejects exclusions matching no files in a git repo."""
+    import subprocess
+
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    legacy_file = tmp_path / "src" / "legacy" / "mod.py"
+    legacy_file.parent.mkdir(parents=True, exist_ok=True)
+    legacy_file.write_text("# tracked\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "add", "src/legacy/mod.py"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+    pyproject = _pyproject(tmp_path, ["src/legacy/", "src/ghost.py"])
+    budget = _budget(
+        tmp_path,
+        [
+            {
+                "path": "src/legacy/",
+                "owner": "@platform",
+                "reason": "legacy imports need incremental typing",
+                "expires_on": "2026-08-01",
+            },
+            {
+                "path": "src/ghost.py",
+                "owner": "@platform",
+                "reason": "ghost file",
+                "expires_on": "2026-08-01",
+            },
+        ],
+    )
+
+    assert (
+        checker.main(
+            [
+                "--pyproject",
+                str(pyproject),
+                "--budget",
+                str(budget),
+                "--today",
+                "2026-05-03",
+                "--repo-root",
+                str(tmp_path),
+            ]
+        )
+        == 1
+    )
+    assert "src/ghost.py: exclusion matches no tracked files" in capsys.readouterr().err
+
+
+def test_real_budget_passes_at_october_ratchet() -> None:
+    """The real repository budget must pass cleanly at the 2026-10-01 ratchet."""
+    assert (
+        checker.main(
+            [
+                "--pyproject",
+                str(REPO_ROOT / "pyproject.toml"),
+                "--budget",
+                str(BUDGET_PATH),
+                "--today",
+                "2026-10-01",
+                "--repo-root",
+                str(REPO_ROOT),
+            ]
+        )
+        == 0
+    )

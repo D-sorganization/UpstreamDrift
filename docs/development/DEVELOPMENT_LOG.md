@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9411 · Keep MyPy Exclusion Budget Gate Green Through 2026-10-01 Ratchet
+
+- **State:** in_review
+- **Owner:** claude (agy executor)
+- **Issue:** #9411
+- **PR:** draft PR from `agy/ud-9411-mypy-budget`
+- **Branch:** `agy/ud-9411-mypy-budget`
+- **Paths:** `scripts/check_mypy_exclusion_budget.py`, `scripts/config/mypy_exclusion_budget.json`, `pyproject.toml`, `src/research/deformable/objects.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 14 unit tests pass in test_check_mypy_exclusion_budget.py; mypy and pytest pass on unexcluded files; budget passes on 2026-10-01 ratchet with 35 exclusions (cap 36)
+- **Summary:** Enforce tracked-file validation in check_mypy_exclusion_budget.py; deleted 3 dead exclusions (start_api_server.py, setup_golf_suite.py, shared/models/); resolved type errors and unexcluded 6 files (targets.py, marker_mapping.py, checkpoint.py, data_io export.py, common export.py, objects.py) bringing total to 35 (below 36 cap); fixed the imported-module type errors this exposed (engine protocol `step(dt)`, differentiable engine array annotations, club_data loader `to_numpy`); extended remaining expirations to 2027-01-01 with re-attestation.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress

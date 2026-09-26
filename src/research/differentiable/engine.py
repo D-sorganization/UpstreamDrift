@@ -505,7 +505,7 @@ class DifferentiableEngine:
         # Initialize controls
         if initial_state is None:
             raise ValueError("initial_state must be provided")
-        controls = np.zeros((horizon, self._n_u))
+        controls: NDArray[np.floating] = np.zeros((horizon, self._n_u))
 
         # Define loss function
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
@@ -628,7 +628,9 @@ class ContactDifferentiableEngine(DifferentiableEngine):
             Array of shape ``(n_steps, 1)`` so it broadcasts over controls.
         """
         if self.smoothing_schedule is None:
-            factors = np.full(n_steps, float(self.smoothing_factor))
+            factors: NDArray[np.floating] = np.full(
+                n_steps, float(self.smoothing_factor)
+            )
         else:
             schedule = np.asarray(self.smoothing_schedule, dtype=float)
             if schedule.shape[0] < n_steps:
