@@ -72,38 +72,38 @@ class TestPendulumParams:
         assert p.mu2 == 0.0
 
     def test_negative_m1_raises(self) -> None:
-        """Negative m1 raises AssertionError."""
+        """Negative m1 raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"m1 must be positive"):
             PendulumParams(m1=-1.0, m2=1.0, L1=1.0, L2=1.0)
 
     def test_negative_m2_raises(self) -> None:
-        """Negative m2 raises AssertionError."""
+        """Negative m2 raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"m2 must be positive"):
             PendulumParams(m1=1.0, m2=-0.1, L1=1.0, L2=1.0)
 
     def test_negative_L1_raises(self) -> None:
-        """Negative L1 raises AssertionError."""
+        """Negative L1 raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"L1 must be positive"):
             PendulumParams(m1=1.0, m2=1.0, L1=-0.5, L2=1.0)
 
     def test_negative_L2_raises(self) -> None:
-        """Negative L2 raises AssertionError."""
+        """Negative L2 raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"L2 must be positive"):
             PendulumParams(m1=1.0, m2=1.0, L1=1.0, L2=-1.0)
 
     def test_negative_mclub_raises(self) -> None:
-        """Negative mClub raises AssertionError."""
+        """Negative mClub raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"mClub must be non-negative"):
             PendulumParams(m1=1.0, m2=1.0, L1=1.0, L2=1.0, mClub=-0.1)
 
     def test_zero_mclub_allowed(self) -> None:
@@ -151,17 +151,17 @@ class TestJointLimits:
         assert limits.phi_max == 0.5
 
     def test_invalid_phi_range_raises(self) -> None:
-        """phi_min >= phi_max raises AssertionError."""
+        """phi_min >= phi_max raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import JointLimits
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"phi_min must be less than phi_max"):
             JointLimits(phi_min=1.0, phi_max=-1.0)
 
     def test_zero_stiffness_raises(self) -> None:
-        """Zero stiffness raises AssertionError."""
+        """Zero stiffness raises ValueError."""
         from src.shared.python.pendulum_simulator.physics import JointLimits
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match=r"stiffness must be positive"):
             JointLimits(stiffness=0.0)
 
 

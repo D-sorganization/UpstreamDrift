@@ -87,12 +87,32 @@ class DynamicsEngine:
         return q_next, v_next
 
     def compute_zvcf(
-        self, q: np.ndarray, tau: np.ndarray, dt: float, f_ext: list | None = None
+        self, q: np.ndarray, dt: float, f_ext: list | None = None
     ) -> tuple[np.ndarray, np.ndarray]:
         """Compute Zero Velocity Counterfactual (ZVCF).
 
-        Computes acceleration assuming v=0 (no Coriolis/Centrifugal/Damping).
-        Represents pure control authority + static gravity.
+        Computes acceleration assuming v=0 and tau=0 (static gravity/passive only).
+        Represents canonical zero-velocity counterfactual dynamics.
+
+        Returns:
+            (q_next, v_next) starting from v=0
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        v_zero = np.zeros(self.model.nv)
+        tau_zero = np.zeros(self.model.nv)
+        a = self.forward_dynamics(q, v_zero, tau_zero, f_ext=f_ext)
+
+        v_next = v_zero + a * dt
+        q_next = pin.integrate(self.model, q, v_next * dt)
+        return q_next, v_next
+
+    def compute_zero_velocity_controlled(
+        self, q: np.ndarray, tau: np.ndarray, dt: float, f_ext: list | None = None
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """zero-velocity, control-preserved response; NOT the canonical ZVCF.
+
+        Computes acceleration assuming v=0 while preserving applied control torque tau.
 
         Returns:
             (q_next, v_next) starting from v=0

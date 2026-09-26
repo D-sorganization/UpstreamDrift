@@ -253,7 +253,7 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         cf_layout = QtWidgets.QVBoxLayout()
 
         self.ztcf_btn = QtWidgets.QPushButton("Run Zero Torque Counterfactual (ZTCF)")
-        self.zvcf_btn = QtWidgets.QPushButton("Run Zero Velocity Counterfactual (ZVCF)")
+        self.zvcf_btn = QtWidgets.QPushButton("Zero-velocity (control kept)")
 
         cf_layout.addWidget(self.ztcf_btn)
         cf_layout.addWidget(self.zvcf_btn)
@@ -429,7 +429,9 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
                     if tau.size == 0:
                         tau = np.zeros(self.model.nv)
 
-                    q, _ = self.dynamics_engine.compute_zvcf(q, tau, dt)
+                    q, _ = self.dynamics_engine.compute_zero_velocity_controlled(
+                        q, tau, dt
+                    )
 
         # Update Plot
         self.cf_plot_canvas.fig.clear()

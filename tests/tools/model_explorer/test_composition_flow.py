@@ -239,8 +239,9 @@ def test_model_panel_facade_manages_selection_and_dirty_state(
 
 
 def test_frankenstein_editor_uses_model_panel_facade_for_panel_state() -> None:
-    editor_source = Path(
-        "src/tools/model_explorer/frankenstein_editor/editor.py"
+    repo_root = Path(__file__).resolve().parents[3]
+    editor_source = (
+        repo_root / "src/tools/model_explorer/frankenstein_editor/editor.py"
     ).read_text(encoding="utf-8")
 
     forbidden_panel_internals = (

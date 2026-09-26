@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
+from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -241,6 +243,7 @@ def validate_budget(
     schedule: list[ScheduleEntry],
     today: date,
     overrides: list[MypyOverride] | None = None,
+    tracked_files: Collection[str] | None = None,
 ) -> list[str]:
     """Return validation errors for mypy exclusion budget drift."""
     errors: list[str] = []
@@ -251,6 +254,8 @@ def validate_budget(
     errors.extend(_validate_no_ignore_errors(overrides or []))
     errors.extend(_validate_path_sets(pyproject_exclusions, budget_paths))
     errors.extend(_validate_schedule_ratchet(schedule))
+    if tracked_files is not None:
+        errors.extend(_validate_tracked_files(budget_paths, tracked_files))
     cap = active_cap(schedule, today)
     if len(budget_entries) > cap:
         errors.append(
@@ -342,11 +347,51 @@ def _validate_path_sets(
     return errors
 
 
+def _matches_tracked_file(path: str, tracked_files: Collection[str]) -> bool:
+    normalized = _normalize_path(path)
+    if normalized in tracked_files:
+        return True
+    prefix = normalized if normalized.endswith("/") else f"{normalized}/"
+    return any(f.startswith(prefix) for f in tracked_files)
+
+
+def _validate_tracked_files(
+    paths: list[str], tracked_files: Collection[str]
+) -> list[str]:
+    errors: list[str] = []
+    for path in sorted(paths):
+        if not _matches_tracked_file(path, tracked_files):
+            errors.append(f"{path}: exclusion matches no tracked files")
+    return errors
+
+
+def load_tracked_files(repo_root: Path) -> set[str] | None:
+    """Return the repository's tracked files via ``git ls-files``.
+
+    Returns None only when git itself is unavailable (not a checkout), in which
+    case the tracked-file rule cannot be evaluated and is skipped.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "ls-files"], cwd=repo_root, capture_output=True, text=True
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    return {
+        line.strip().replace("\\", "/")
+        for line in result.stdout.splitlines()
+        if line.strip()
+    }
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pyproject", default=str(DEFAULT_PYPROJECT))
     parser.add_argument("--budget", default=str(DEFAULT_BUDGET))
     parser.add_argument("--today", default=date.today().isoformat())
+    parser.add_argument("--repo-root", default=None)
     return parser
 
 
@@ -356,11 +401,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         today = _parse_iso_date(args.today, "today")
+        repo_root = (
+            Path(args.repo_root)
+            if args.repo_root
+            else Path(args.pyproject).resolve().parent
+        )
+        tracked_files = load_tracked_files(repo_root)
         exclusions = load_pyproject_exclusions(Path(args.pyproject))
         overrides = load_mypy_overrides(Path(args.pyproject))
         budget_entries, schedule = load_budget(Path(args.budget))
         coverage_gates = load_coverage_gates(Path(args.budget))
-        errors = validate_budget(exclusions, budget_entries, schedule, today, overrides)
+        errors = validate_budget(
+            exclusions,
+            budget_entries,
+            schedule,
+            today,
+            overrides,
+            tracked_files=tracked_files,
+        )
         errors.extend(validate_coverage_gates(coverage_gates, today))
     except (OSError, ValueError, tomllib.TOMLDecodeError, json.JSONDecodeError) as exc:
         sys.stderr.write(f"mypy exclusion budget failed: {exc}\n")

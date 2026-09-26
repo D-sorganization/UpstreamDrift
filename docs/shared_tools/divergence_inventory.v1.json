@@ -13,7 +13,7 @@
   "totals": {
     "identical": 429,
     "diverged": 282,
-    "ud-only": 1511,
+    "ud-only": 1516,
     "tools-only": 738,
     "spelling-only": 124
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 239,
+      "ud-only": 241,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -539,7 +539,7 @@
     "physics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 71,
+      "ud-only": 74,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -3815,7 +3815,7 @@
       "classification": "ud-only",
       "package": "biomechanics",
       "subpackage": "",
-      "ud_bytes": 10260,
+      "ud_bytes": 13733,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -5879,7 +5879,7 @@
       "classification": "ud-only",
       "package": "club_data",
       "subpackage": "",
-      "ud_bytes": 25148,
+      "ud_bytes": 25149,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12287,7 +12287,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 49220,
+      "ud_bytes": 49397,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12551,7 +12551,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 30336,
+      "ud_bytes": 31013,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12588,6 +12588,18 @@
       "package": "motion_matching",
       "subpackage": "club_only",
       "ud_bytes": 32080,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/club_only/fit_outcomes.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "club_only",
+      "ud_bytes": 2561,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12635,7 +12647,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 29564,
+      "ud_bytes": 34636,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12683,7 +12695,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 5023,
+      "ud_bytes": 5710,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12731,7 +12743,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "club_only",
-      "ud_bytes": 30293,
+      "ud_bytes": 32708,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13152,6 +13164,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 7303,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/evidence_integrity.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 3296,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -20167,6 +20191,30 @@
       "spelling_only": false
     },
     {
+      "path": "physics/_pre_impact_contracts.py",
+      "classification": "ud-only",
+      "package": "physics",
+      "subpackage": "",
+      "ud_bytes": 11086,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "physics/_pre_impact_frames.py",
+      "classification": "ud-only",
+      "package": "physics",
+      "subpackage": "",
+      "ud_bytes": 6125,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "physics/_shaft_data.py",
       "classification": "ud-only",
       "package": "physics",
@@ -20712,6 +20760,18 @@
       "package": "physics",
       "subpackage": "",
       "ud_bytes": 14001,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "physics/pre_impact_bundle.py",
+      "classification": "ud-only",
+      "package": "physics",
+      "subpackage": "",
+      "ud_bytes": 29811,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36436,9 +36496,9 @@
     {
       "path": "ai/adapters/base.py",
       "ud": {
-        "author": "d-sorgcodexagent",
+        "author": "Dieter Olson",
         "date": "2026-09-25",
-        "commit": "dcec43fb02a894b713aadc3e5980e1944e6c32d5"
+        "commit": "2d5830d18642c46d915f7639f0f996f995b149ad"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36735,9 +36795,9 @@
     {
       "path": "ai/gui/_panel_tools.py",
       "ud": {
-        "author": "d-sorgcodexagent",
+        "author": "Dieter Olson",
         "date": "2026-09-25",
-        "commit": "dcec43fb02a894b713aadc3e5980e1944e6c32d5"
+        "commit": "2d5830d18642c46d915f7639f0f996f995b149ad"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36813,9 +36873,9 @@
     {
       "path": "ai/gui/assistant_panel.py",
       "ud": {
-        "author": "d-sorgcodexagent",
-        "date": "2026-09-25",
-        "commit": "dcec43fb02a894b713aadc3e5980e1944e6c32d5"
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "b68d59642c9f18b3cd1a2185c867b617f624a555"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -37151,9 +37211,9 @@
     {
       "path": "ai/rag/context_provider.py",
       "ud": {
-        "author": "d-sorgcodexagent",
+        "author": "Dieter Olson",
         "date": "2026-09-25",
-        "commit": "dcec43fb02a894b713aadc3e5980e1944e6c32d5"
+        "commit": "2d5830d18642c46d915f7639f0f996f995b149ad"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -37307,9 +37367,9 @@
     {
       "path": "ai/wizards.py",
       "ud": {
-        "author": "d-sorgcodexagent",
+        "author": "Dieter Olson",
         "date": "2026-09-25",
-        "commit": "dcec43fb02a894b713aadc3e5980e1944e6c32d5"
+        "commit": "2d5830d18642c46d915f7639f0f996f995b149ad"
       },
       "tools": {
         "author": "Dieter Olson",

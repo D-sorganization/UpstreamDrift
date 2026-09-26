@@ -12,19 +12,30 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.motion_matching.club_only.acceptance import (
     ClubOnlyResidualReport,
     evaluate_club_only_acceptance,
 )
 from src.shared.python.motion_matching.club_only.ambiguity import CandidateScore
+from src.shared.python.motion_matching.club_only.fit_outcomes import (
+    missing_fit_metrics,
+)
+from src.shared.python.motion_matching.club_only.body_candidates import (
+    load_body_candidate_outcomes,
+)
 from src.shared.python.motion_matching.club_only.observation import (
     ComponentStatus,
     build_calibrated_observation_fixture,
+)
+from src.shared.python.motion_matching.club_only.pendulum_match import (
+    load_pendulum_match_outcomes,
 )
 from src.shared.python.motion_matching.club_only.profiles import (
     ClubOnlyProfile,
@@ -61,9 +72,11 @@ __all__ = [
     "build_matrix_qualification_report",
     "compare_common_observables",
     "evaluate_withheld_body_experiment",
+    "load_recorded_matrix_outcomes",
     "matrix_qualification_evidence_payload",
     "physical_overrides_visual",
     "validate_package_integrity",
+    "write_matrix_qualification_evidence",
 ]
 
 
@@ -562,78 +575,160 @@ def _cell_blocker_for(model_id: str, topology: str) -> tuple[str, str] | None:
     return None
 
 
-def _synthetic_package(
-    trial_id: str, profile: ClubOnlyProfile
+def load_recorded_matrix_outcomes(
+    evidence_dir: Path | str | None = None,
+) -> dict[tuple[str, str], dict[str, Any]]:
+    """Aggregate recorded fit outcomes from CO-04 and CO-05 evidence receipts."""
+    dir_path = (
+        Path(evidence_dir)
+        if evidence_dir is not None
+        else get_repo_root() / "docs" / "plans" / "club_only_matching" / "evidence"
+    )
+    outcomes: dict[tuple[str, str], dict[str, Any]] = {}
+    pendulum_path = dir_path / "club_pendulum_match.json"
+    body_path = dir_path / "club_body_candidates.json"
+    outcomes.update(load_pendulum_match_outcomes(pendulum_path))
+    outcomes.update(load_body_candidate_outcomes(body_path))
+    return outcomes
+
+
+def _optional_metric(outcome: Mapping[str, Any], name: str) -> float | None:
+    value = outcome.get(name)
+    return None if value is None else float(value)
+
+
+def _replay_initial_state(
+    outcome: Mapping[str, Any],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]] | None:
+    """Return the recorded ``(q0, v0)``; ``v0`` is zero only for a recorded cold start."""
+    replay = outcome.get("replay_inputs")
+    if not isinstance(replay, Mapping) or "q0" not in replay:
+        return None
+    q0 = np.asarray(replay["q0"], dtype=np.float64)
+    if "v0" in replay:
+        return q0, np.asarray(replay["v0"], dtype=np.float64)
+    if replay.get("selected_start") == "cold":
+        return q0, np.zeros_like(q0)
+    return None
+
+
+def _cell_outcome_blocker(outcome: Mapping[str, Any] | None, cell: str) -> str | None:
+    """Return why ``outcome`` cannot be scored, or None when it is complete."""
+    if outcome is None:
+        return f"no recorded fit outcome for {cell}"
+    missing = list(missing_fit_metrics(outcome))
+    if _replay_initial_state(outcome) is None:
+        missing.append("replay_inputs.q0/v0")
+    if missing:
+        return f"recorded fit outcome for {cell} lacks: {', '.join(missing)}"
+    return None
+
+
+# Orientation claims and phase coverage every recorded-outcome package declares.
+_MEASURED_ORIENTATION_CLAIMS = (
+    OrientationClaim(
+        component="mid_hands_orientation",
+        declared_status=ComponentStatus.MEASURED,
+        scored_as_measured=True,
+    ),
+    OrientationClaim(
+        component="face_orientation",
+        declared_status=ComponentStatus.DERIVED,
+        scored_as_measured=False,
+    ),
+)
+_FULL_PHASE_COVERAGE = PhaseCoverage(
+    address_present=True,
+    top_present=True,
+    impact_present=True,
+    finish_present=True,
+    phase_labels=("A", "T", "I", "F"),
+)
+
+
+def _measured_package(
+    trial_id: str,
+    profile: ClubOnlyProfile,
+    outcome: Mapping[str, Any],
 ) -> ExportedCandidatePackage:
+    """Build a package strictly from one complete recorded fit outcome.
+
+    Preconditions:
+        ``trial_id`` is non-empty and ``outcome`` passes ``_cell_outcome_blocker``
+        (every gated metric recorded; no value is defaulted).
+    """
+    if not trial_id:
+        raise ValueError("trial_id must be non-empty")
+    blocker = _cell_outcome_blocker(outcome, f"{profile.model_id}/{trial_id}")
+    if blocker is not None:
+        raise ValueError(blocker)
+    initial_state = _replay_initial_state(outcome)
+    if initial_state is None:  # pragma: no cover - excluded by the blocker check
+        raise ValueError("recorded outcome has no replay initial state")
+    q0, v0 = initial_state
+    orig_3d = float(outcome["original_3d_rmse_m"])
+    in_plane = float(outcome["in_plane_rmse_m"])
+    out_of_plane = _optional_metric(outcome, "out_of_plane_rmse_m")
+    if out_of_plane is None:
+        out_of_plane = math.sqrt(max(0.0, orig_3d**2 - in_plane**2))
+    blockers = outcome.get("qualification_blockers")
+    qual_blockers = (
+        tuple(str(b) for b in blockers)
+        if blockers is not None
+        else _DEFAULT_NATIVE_BLOCKERS
+    )
+    replay = outcome["replay_inputs"]
+    timestamps_override = replay.get("times_s")
+
     obs = build_calibrated_observation_fixture(trial_id)
     geo = geometry_content_hash(
         club_type=obs.club_type,
         catalog_length_m=obs.catalog_length_m,
         tool_to_model_residual_m=0.0,
     )
+
+    timestamps_s = (
+        np.asarray(timestamps_override, dtype=np.float64)
+        if timestamps_override is not None
+        else obs.native_time_s.copy()
+    )
+
     return ExportedCandidatePackage(
         candidate_id=f"co08:{trial_id}:{profile.model_id}",
         trial_id=trial_id,
         model_id=profile.model_id,
         geometry_hash=geo,
         profile_hash=profile_content_hash(profile),
-        timestamps_s=obs.native_time_s.copy(),
-        q0=np.zeros(4, dtype=np.float64),
-        v0=np.zeros(4, dtype=np.float64),
-        grip_position_rmse_m=min(
-            profile.observation.max_grip_position_rmse_m * 0.25, 0.02
+        timestamps_s=timestamps_s,
+        q0=q0,
+        v0=v0,
+        grip_position_rmse_m=float(outcome["grip_position_rmse_m"]),
+        face_position_rmse_m=float(outcome["face_position_rmse_m"]),
+        original_3d_rmse_m=orig_3d,
+        in_plane_rmse_m=in_plane,
+        out_of_plane_rmse_m=out_of_plane,
+        grip_orientation_rmse_rad=_optional_metric(
+            outcome, "grip_orientation_rmse_rad"
         ),
-        face_position_rmse_m=min(
-            profile.observation.max_face_position_rmse_m * 0.25, 0.025
+        face_orientation_rmse_rad=_optional_metric(
+            outcome, "face_orientation_rmse_rad"
         ),
-        original_3d_rmse_m=0.03,
-        in_plane_rmse_m=0.02,
-        out_of_plane_rmse_m=0.015,
-        grip_orientation_rmse_rad=(
-            0.05
-            if profile.observation.max_grip_orientation_rmse_rad is not None
-            else None
-        ),
-        face_orientation_rmse_rad=(
-            0.05
-            if profile.observation.max_face_orientation_rmse_rad is not None
-            else None
-        ),
-        native_coverage_fraction=max(
-            profile.observation.min_native_coverage_fraction, 0.95
-        ),
-        phase_error_s=0.01,
-        closure_residual_m=min(profile.physical.max_closure_residual_m * 0.2, 0.001),
-        contact_feasible=True,
+        native_coverage_fraction=float(outcome["coverage_fraction"]),
+        phase_error_s=_optional_metric(outcome, "phase_error_s"),
+        closure_residual_m=float(outcome["closure_residual_m"]),
+        contact_feasible=bool(outcome["contact_feasible"]),
         used_measured_state_reset=False,
         body_labels_hidden=False,
         body_marker_status="withheld",
-        orientation_claims=(
-            OrientationClaim(
-                component="mid_hands_orientation",
-                declared_status=ComponentStatus.MEASURED,
-                scored_as_measured=True,
-            ),
-            OrientationClaim(
-                component="face_orientation",
-                declared_status=ComponentStatus.DERIVED,
-                scored_as_measured=False,
-            ),
-        ),
-        phases=PhaseCoverage(
-            address_present=True,
-            top_present=True,
-            impact_present=True,
-            finish_present=True,
-            phase_labels=("A", "T", "I", "F"),
-        ),
+        orientation_claims=_MEASURED_ORIENTATION_CLAIMS,
+        phases=_FULL_PHASE_COVERAGE,
         fitting_prior_trial_ids=(),
         unsupported_components=frozenset(profile.observation.unsupported_components),
         supported_observables=frozenset(profile.observation.supported_observables),
         native_g1_pass=False,
         claims_native_qualification=False,
-        qualification_blockers=_DEFAULT_NATIVE_BLOCKERS,
-        visual_attractiveness=0.5,
+        qualification_blockers=qual_blockers,
+        visual_attractiveness=float(outcome.get("visual_attractiveness", 0.0)),
         physical_failed=False,
     )
 
@@ -659,9 +754,19 @@ def _score_matrix_cell(
     model_id: str,
     trial_id: str,
     profile: ClubOnlyProfile,
+    outcomes: Mapping[tuple[str, str], Mapping[str, Any]] | None = None,
 ) -> MatrixCellResult:
     """Score one model×trial cell under frozen CO-02 gates."""
-    package = _synthetic_package(trial_id, profile)
+    recorded = (outcomes or {}).get((model_id, trial_id))
+    blocker = _cell_outcome_blocker(recorded, f"{model_id}/{trial_id}")
+    if blocker is not None or recorded is None:
+        return MatrixCellResult(
+            model_id=model_id,
+            trial_id=trial_id,
+            status="unqualified",
+            blocker=blocker,
+        )
+    package = _measured_package(trial_id, profile, recorded)
     _assert_package_contracts(package, profile=profile)
     failures = _gate_failures_for(package, profile)
     unsupported = tuple(sorted(package.unsupported_components))
@@ -696,11 +801,14 @@ def build_matrix_qualification_report(
     *,
     model_ids: Sequence[str] | None = None,
     trial_ids: Sequence[str] | None = None,
+    outcomes: Mapping[tuple[str, str], Mapping[str, Any]] | None = None,
 ) -> MatrixQualificationReport:
     """Build the trial × roster matrix with frozen CO-02 gates."""
     roster, models, trials = resolve_roster_matrix_scope(
         model_ids=model_ids, trial_ids=trial_ids
     )
+    if outcomes is None:
+        outcomes = load_recorded_matrix_outcomes()
     freeze_payload = {
         model_id: roster[model_id].as_dict()
         for model_id in models
@@ -725,7 +833,10 @@ def build_matrix_qualification_report(
                 continue
             cells.append(
                 _score_matrix_cell(
-                    model_id=model_id, trial_id=trial_id, profile=profile
+                    model_id=model_id,
+                    trial_id=trial_id,
+                    profile=profile,
+                    outcomes=outcomes,
                 )
             )
     return MatrixQualificationReport(
@@ -782,3 +893,28 @@ def matrix_qualification_evidence_payload(
             "Synthetic fixtures validate software contracts only.",
         ],
     }
+
+
+def write_matrix_qualification_evidence(
+    report: MatrixQualificationReport | None = None,
+    path: Path | str | None = None,
+) -> Path:
+    """Serialize and write the CO-08 evidence receipt to disk."""
+    out_path = (
+        Path(path)
+        if path is not None
+        else get_repo_root()
+        / "docs"
+        / "plans"
+        / "club_only_matching"
+        / "evidence"
+        / "club_matrix_qualification.json"
+    )
+    payload = matrix_qualification_evidence_payload(report)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return out_path
+
+
+if __name__ == "__main__":
+    write_matrix_qualification_evidence()

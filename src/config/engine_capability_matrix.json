@@ -54,7 +54,7 @@
       "status": "qualification_failed",
       "is_qualified": false,
       "release_ready": false,
-      "horizon_coverage": ["G1"],
+      "horizon_coverage": [],
       "failure_reasons": ["missing_engine_receipt"],
       "conformance_checks": ["engine_name_known"],
       "capabilities": {
