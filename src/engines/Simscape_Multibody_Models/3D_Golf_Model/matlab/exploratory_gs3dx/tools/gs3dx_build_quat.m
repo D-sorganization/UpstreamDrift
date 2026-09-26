@@ -1,11 +1,12 @@
 function report = gs3dx_build_quat(info, opts)
-%GS3DX_BUILD_QUAT  Build GS3DX_Quat: GS3DX_Slim with quaternion (Spherical) shoulders.
+%GS3DX_BUILD_QUAT  Build GS3DX_Quat: GS3DX_Slim with quaternion shoulders and hip.
 %
 %   REPORT = GS3DX_BUILD_QUAT(INFO) copies GS3DX_Slim to GS3DX_Quat and
 %   GS3DX_KDS_Gimbal to GS3DX_KDS_Spherical, swaps the copy's Gimbal Joint
 %   for a Spherical Joint with GS3DX_GIMBAL_TO_SPHERICAL, re-points
-%   GS3DX_Quat's Gimbal references (the two shoulders) at it and saves
-%   through GS3DX_SAVE_MODEL (#10955).
+%   GS3DX_Quat's Gimbal references (the two shoulders) at it (#10955),
+%   swaps the inline hip Bushing Joint for a 6-DOF Joint with
+%   GS3DX_BUSHING_TO_6DOF (#10956) and saves through GS3DX_SAVE_MODEL.
 %
 %   GS3DX_Slim and GS3DX_KDS_Gimbal are only read with COPYFILE.  Existing
 %   quaternion files are never replaced unless overwrite=true.
@@ -33,5 +34,6 @@ function report = gs3dx_build_quat(info, opts)
     cleanup = onCleanup(@() close_system(quat, 0));
     report.repointed = gs3dx_repoint_references(quat, ...
         containers.Map({gimbal}, {names.spherical_subsys}));
+    gs3dx_bushing_to_6dof([quat '/Hips and Torso Inputs/Hip Kinetically Driven']);
     gs3dx_save_model(quat, info);
 end

@@ -1,6 +1,7 @@
-# Quaternion Shoulders (`GS3DX_Quat`)
+# Quaternion Shoulders and Hip (`GS3DX_Quat`)
 
-Issue [#10955](https://github.com/D-sorganization/UpstreamDrift/issues/10955),
+Issues [#10955](https://github.com/D-sorganization/UpstreamDrift/issues/10955)
+(shoulders) and [#10956](https://github.com/D-sorganization/UpstreamDrift/issues/10956) (hip),
 epic [#10950](https://github.com/D-sorganization/UpstreamDrift/issues/10950).
 MATLAB R2025b.
 
@@ -29,7 +30,8 @@ original left-shoulder X angle reaches -523°.
 Joint damping stays in Gimbal-axis terms (N·m per deg/s on q̇), so it keeps
 its meaning.
 
-**Block count:** 609 → 599 non-virtual (10 saved).
+**Block count:** 609 → 599 non-virtual for the shoulders (10 saved), and
+594 with the hip (15 saved in total).
 
 ## Equivalence
 
@@ -79,6 +81,35 @@ Gimbal's singularity. Near that angle the Euler-angle outputs of both models
 are ill-conditioned, which is why the left-shoulder acceleration signals
 have the largest differences at RelTol 1e-3.
 
+## Hip (#10956)
+
+The hip is an inline subsystem, `Hips and Torso Inputs/Hip Kinetically
+Driven`, around a Bushing Joint (three prismatics plus three Euler-angle
+revolutes). `gs3dx_bushing_to_6dof` replaces it with a 6-DOF Joint: the
+same three prismatics, with a quaternion spherical primitive for rotation.
+The rotation side is rewired exactly as for the shoulders. Both swaps use
+the same core, `gs3dx_quaternion_swap`, which takes a port map per joint
+type. The prismatic ports and settings are carried over unchanged, and
+the 30-element `HipLogs` bus keeps its names.
+
+**Equivalence (`gs3dx_hip_rig`).** The rig copies the hip subsystem, puts
+Base on the World frame and an offset brick on Hips under gravity, and
+drives all three torques and forces with sines. Solver: `ode15s` at
+RelTol = AbsTol = 1e-8. All 30 `HipLogs` signals match the Bushing to
+≤ 1.9e-6 of each signal's peak (test bound 1e-5). Warm wall time over
+1 s simulated: Bushing 3.0 s, 6-DOF 3.8 s.
+
+The default torque amplitudes are [0.1 -0.06 0.05] N·m. They keep the
+Bushing's middle (Y) angle between -72° and 62°. With six times larger
+torques the Bushing reached 84° and Euler rates of 1.8e4 deg/s, close to
+its singularity, although the signals still agreed to 3.6e-6. The test
+asserts the Y angle stays below 80°.
+
+**Full model with the hip swapped.** The convergence test still passes.
+The clubhead gap to `GS3DX_Slim` is 14.8 mm at RelTol 1e-3 and 0.61 mm at
+1e-5, and `GS3DX_Quat` takes 344 and 934 steps where Slim takes 367 and
+1,070 (13% fewer at 1e-5). The table above is the shoulders-only build.
+
 ## Limits and Follow-Up
 
 - A Spherical Joint has one position target and one velocity target. The
@@ -92,5 +123,9 @@ have the largest differences at RelTol 1e-3.
   `Angle Reference`.
 - Input-function mode sweep on the impact inputs: mode 3 is ill-conditioned
   (a 1e-9 RelTol change moves the clubhead 122 m), mode 2 is torqued but
-  reaches 1e8 N·m, and mode 1 stops at 35 ms with **hip gimbal lock**. That
-  lock is the case for the quaternion hip (#10956).
+  reaches 1e8 N·m, and mode 1 fails early. The earlier reading of the
+  mode-1 failure as hip gimbal lock was wrong. With the quaternion hip,
+  `GS3DX_Quat` still fails at 19.9 ms (`GS3DX_Slim` at 18.2 ms). At 19.5 ms
+  the hip Y angle is only 49°, but the mode-1 hip torque command has reached
+  about 2e7 N·m and the hip rate about 7e5 deg/s. The mode-1 drive blows
+  up; the joint representation is not the cause.
