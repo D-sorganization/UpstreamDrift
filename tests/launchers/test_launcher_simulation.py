@@ -323,11 +323,11 @@ def test_launch_generic_mjcf(launcher) -> None:
 
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
         launcher._launch_generic_mjcf(Path("test.xml"))
-        sys.modules["mujoco"].viewer.launch.assert_called_once()
+        sys.modules["mujoco"].viewer.launch_passive.assert_called_once()
 
     # Exception
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
-        sys.modules["mujoco"].viewer.launch.side_effect = RuntimeError("Crash")
+        sys.modules["mujoco"].viewer.launch_passive.side_effect = RuntimeError("Crash")
         with pytest.raises(RuntimeError):
             launcher._launch_generic_mjcf(Path("test.xml"))
 

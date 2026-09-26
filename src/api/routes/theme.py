@@ -10,6 +10,8 @@ import logging
 
 from typing import Any
 
+from fastapi import APIRouter
+
 from src.shared.python.theme.api import ThemeColors, create_theme_router
 from src.shared.python.theme.colors import BUILTIN_THEMES
 
@@ -92,4 +94,6 @@ theme_manager = _build_theme_manager()
 # Create the router using the shared factory
 # This will expose /themes/active, /themes/, /themes/builtin, /themes/custom endpoints
 # The /themes prefix ensures proper routing under /api/v1/themes when mounted
-router = create_theme_router(theme_manager)
+base_router = create_theme_router(theme_manager)
+router = APIRouter(prefix="/themes")
+router.include_router(base_router)

@@ -228,7 +228,7 @@ def test_force_plate_columns_static() -> None:
 def test_load_goes_through_ezc3d(tmp_path: Path) -> None:
     fake = _synthetic_c3d_dict()
     file_path = tmp_path / "x.c3d"
-    file_path.write_bytes(b"\x00")
+    file_path.write_bytes(bytes([1, 0x50]))
     reader = C3DDataReader(file_path)
     with patch.object(io_mod.ezc3d, "c3d", return_value=fake) as m:
         md = reader.get_metadata()

@@ -403,9 +403,11 @@ def test_no_duplicated_wgs_constants() -> None:
     ``process_calculators/constants.py``.
     """
     import re
-    from pathlib import Path as _Path
 
-    tools_root = _Path(os.environ.get("TOOLS_REPO_PATH", "vendor/ud-tools")).resolve()
+    repo_root = Path(__file__).resolve().parents[4]
+    tools_root = Path(
+        os.environ.get("TOOLS_REPO_PATH", repo_root / "vendor" / "ud-tools")
+    ).resolve()
     runner_src = (
         tools_root / "src/shared/python/sidekick/standalone/runner.py"
     ).read_text(encoding="utf-8")

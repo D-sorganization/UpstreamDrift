@@ -239,6 +239,7 @@ class TestSpecialAppHandler:
             module_name="movement_optimizer",
             cwd=optimizer_root.resolve(),
             extra_python_paths=((optimizer_root / "src").resolve(),),
+            keep_terminal_open=True,
         )
         process_manager.launch_script.assert_not_called()
 
@@ -291,7 +292,7 @@ class TestSpecialAppHandler:
             result = SpecialAppHandler().get_dockable_ui(model, tmp_path)
 
         assert result is widget
-        tool.create_main_widget.assert_called_once_with()
+        tool.create_main_widget.assert_called_once_with(None)
 
 
 # =============================================================================

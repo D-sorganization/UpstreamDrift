@@ -106,8 +106,8 @@ _CROSS_TIER_BUSY_BANNER = (
 )
 
 _IDLE_TEXT = (
-    "BunkerShot3D designer workbench\n"
-    "===============================\n\n"
+    "BunkerShot3D designer workbench (Preview)\n"
+    "=========================================\n\n"
     "Set the sole parameters, the playing condition and the delivery, then\n"
     "run design A or compare A against B.\n\n"
     "Every result carries a validity verdict. At greenside delivery speeds\n"

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -25,18 +26,35 @@ def processor_type() -> Any:
     tools_root = Path(
         os.environ.get("TOOLS_REPO_PATH", repo_root / "vendor" / "ud-tools")
     ).resolve()
+    manifest_path = (
+        repo_root / "scripts" / "config" / "shared_python_ownership_exceptions.yaml"
+    )
+    saved_modules = {
+        name: sys.modules[name]
+        for name in list(sys.modules)
+        if any(
+            name == prefix or name.startswith(f"{prefix}.")
+            for prefix in (
+                "sidekick.lab.bio",
+                "src.shared.python.sidekick.lab.bio",
+                "shared.python.sidekick.lab.bio",
+            )
+        )
+    }
+    for name in saved_modules:
+        sys.modules.pop(name, None)
+
     finder = install_manifest_gated_sidekick_extensions(
         local_python_root=repo_root / "src" / "shared" / "python",
         parent_python_root=tools_root / "src" / "shared" / "python",
-        manifest_path=(
-            repo_root / "scripts" / "config" / "shared_python_ownership_exceptions.yaml"
-        ),
+        manifest_path=manifest_path,
     )
     try:
         module = importlib.import_module("sidekick.lab.bio.force_plate_stitching")
         yield module.CombinedForcePlateProcessor
     finally:
         finder.uninstall()
+        sys.modules.update(saved_modules)
 
 
 def test_empty_dataframe(processor_type: Any) -> None:
