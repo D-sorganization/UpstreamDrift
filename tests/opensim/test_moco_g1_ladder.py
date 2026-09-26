@@ -252,7 +252,10 @@ def test_ladder_stages_and_distinct_receipt_statuses() -> None:
     assert result.ik_playback_status == "Playback_Succeeded"
     assert result.solver_convergence_status == "Solve_Succeeded"
     assert result.replay_acceptance_status == "Accepted"
-    assert result.is_qualified
+    # full_swing_tracking scores the capture against itself (predicted_points_m =
+    # capture.points_m), so every residual is identically zero with no replay
+    # evidence. The #10363 evidence-integrity gate must refuse that (#10960 P0-8).
+    assert not result.is_qualified
 
     # Separate receipts
     tracking_rcpt = result.tracking_receipt

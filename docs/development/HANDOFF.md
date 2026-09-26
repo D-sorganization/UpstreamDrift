@@ -55,4 +55,5 @@
 
 ## Change Log
 
+- `SELF` — Retract the fabricated Drake G1 PASS and add fail-closed evidence-integrity gates (#10363, DL-#10363; follow-ups #10960).
 - `SELF` — Migrate ActuatorPanel and SimulationToolbar to shared usePolling hook (#8941).

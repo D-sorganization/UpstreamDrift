@@ -692,5 +692,70 @@
     ],
     "qualification_note": "Barrier-reduced same-integrator G1 continuation (RK45 rtol 1e-6 solve and replay, range-barrier weight 100, trail-side effort bounds raised) from driver_g1_rtol6/stage_0.60s.npz: 0.85 s stage CONVERGED (99 iterations, cost 145.3) and rollout == replay at 46.8 mm whole. Still rejected at G1 (whole 46.8 > 25 mm, early 25.7 > 12, terminal 64.3 > 35, yaw 9.3 deg > 3, penetration 17.2 > 10 mm, weight fraction min 0). Best full-G1-horizon dynamic candidate to date; diagnostic evidence for MS-107.",
     "source": "evidence/matched/driver_g1_crocoddyl_rk45_b100/reevaluation.json"
+  },
+  "evidence/matched/driver_g1_drake/receipt.json": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "capture_provenance",
+        "status": "failed",
+        "threshold": 1.0,
+        "measured": 0.0,
+        "unit": "hash",
+        "reason": "placeholder capture hash"
+      },
+      {
+        "name": "nonzero_residual_evidence",
+        "status": "failed",
+        "threshold": 0.0,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": "identically-zero residuals without replay evidence"
+      },
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.025,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.012,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.035,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "passed",
+        "threshold": 0.06,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "passed",
+        "threshold": 0.05236,
+        "measured": 0.0,
+        "unit": "rad",
+        "reason": ""
+      }
+    ],
+    "qualification_note": "Retracted: the PASSED verdict came from a hard-coded physical audit, target markers copied as the fit (RMSE 0 by construction), a silent warm-start fallback when the Drake plant failed, and an all-zero capture hash. Void under MS-100; see #10363.",
+    "source": "evidence/matched/driver_g1_drake/reevaluation.json"
   }
 }

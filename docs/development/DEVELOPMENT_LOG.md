@@ -1176,19 +1176,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land the matrix, then start U1 (#9286) and U2 (#9542) with their RED tests and update their entries with merge SHAs.
 - **Evidence:** src/config/bunkershot3d_qualification.json; tests/config/bunkershot3d_qualification/test_bunkershot3d_qualification_ledger.py.
 
-### DL-#10363 · Matched Swing Continuation Review
+### DL-#10363 · Matched Swing Continuation Review & Drake G1 Retraction
 
 - **State:** in_review
-- **Owner:** codex (handoff review only; execution by next lease holder)
+- **Owner:** claude-deskcomputer-20260925-ud
 - **Issue:** #10363
-- **Branch:** docs/matching-agent-continuation
-- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10393
-- **Paths:** docs/development/HANDOFF.md; docs/development/matched_swing_program; docs/development/opensim_tour_matching/HANDOFF.md; docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md
+- **Branch:** agy/ud-10363-drake-retraction
+- **PR:** draft PR from `agy/ud-10363-drake-retraction`
+- **Paths:** docs/development/matched_swing_program; src/shared/python/motion_matching/acceptance.py; src/engines/physics_engines/drake/python/full_body_fit.py; evidence/matched/driver_g1_drake/reevaluation.json; docs/development/full_body_models/evidence/acceptance/verdicts_2026-09.json; reports/matched_swing_ledger.json
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 94d593cf1 (review base; SELF contains handoff; ControlTower process/artifact/source snapshot; 14 Pinocchio and 27 OpenSim focused tests passed)
-- **Summary:** Reviewed Claude native branches and deployed code; preserved checkpoint/source recovery evidence; documented active jobs, physical failures, source integration gaps and bounded cheaper-agent continuation. Expanded #10394 into nine bounded tasks after inspecting empty club geometry and inconsistent arm scaling; recorded future muscle/tendon contracts. No new native solve or physical acceptance claimed.
-- **Next step:** For existing fits inspect ControlTower jobs; for anatomical golf corrections start #10395 then #10397 under epic #10394. See EPIC_GOLF_MODEL.md and GOLF_MODEL_AGENT_PROMPT.md.
-- **Evidence:** docs/development/matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json; docs/development/matched_swing_program/AGENT_CONTINUATION_PROMPT.md.
+- **Last verified:** 2026-09-25 at ff9fbee62 (retracted Drake G1 fabricated PASS via reevaluation.json; closed synthesis paths in full_body_fit.py; added fail-closed integrity gates in acceptance.py; 0 PASSED rows in ledger; motion_matching/tour_baselines/opensim ladder/browser suites green except 13 pre-existing local failures)
+- **Summary:** 2026-09-18 continuation review (codex) preserved checkpoint/source recovery evidence and bounded the cheaper-agent continuation, with no physical acceptance claimed. Then: retracted the fabricated Drake G1 receipt (PR #10506) under MS-100; added fail-closed evidence integrity gates (\_evaluate_evidence_integrity) rejecting placeholder hashes and zero residuals without replay evidence; removed physical_audit numeric literals, np.zeros target fallback, and silent warm-start fallback in Drake full_body_fit.py; regenerated ledger and status matrices confirming 0 PASSED rows.
+- **Next step:** CI green, review, merge.
+- **Evidence:** docs/development/matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json; evidence/matched/driver_g1_drake/reevaluation.json; reports/matched_swing_ledger.json; tests/unit/motion_matching/test_acceptance.py; tests/unit/motion_matching/test_drake_full_body_fit.py.
 
 ### DL-#10432 · Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility
 
