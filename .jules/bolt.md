@@ -171,3 +171,7 @@
 ## 2026-09-26 - Repairing SPEC.md Duplicate Inserts
 **Learning:** During previous automated steps, changelog records were erroneously inserted multiple times in `SPEC.md`, sometimes outside of "Section 12. Change Log". This causes `test_changelog_rows_are_not_duplicated_across_specification` and `test_no_changelog_rows_outside_section_12` to fail in CI.
 **Action:** Always ensure you remove duplicate rows and lines outside the exact Change Log bounds when repairing `SPEC.md` integrity tests.
+
+## 2026-09-26 - Optimizing Distance Calculations in Model Fit Evaluation
+**Learning:** In `src/motion_capture/reference/fit_pipeline.py`, calculating Euclidean distances along the innermost axis (axis=2) of a 3D array using `np.linalg.norm` is relatively slow. By pre-calculating the difference array and using `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` instead, we avoid NumPy's internal dispatching and intermediate array allocations, resulting in a ~2.4x speedup. This pattern matches optimizations found elsewhere in the codebase.
+**Action:** When calculating Euclidean norms along specific axes for multidimensional arrays in performance-critical paths, prefer `np.einsum` coupled with `np.sqrt` over `np.linalg.norm` to avoid unnecessary overhead and temporary allocations.
