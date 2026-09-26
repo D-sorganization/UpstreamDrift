@@ -28,7 +28,6 @@ from numpy.typing import NDArray
 from src.shared.python.motion_matching.acceptance import (
     Horizon,
     evaluate,
-    is_real_sha256,
 )
 from src.shared.python.motion_matching.candidate import (
     CandidateMarkers,
@@ -40,6 +39,7 @@ from src.shared.python.motion_matching.candidate_io import (
     load_candidate,
     save_candidate,
 )
+from src.shared.python.motion_matching.evidence_integrity import is_real_sha256
 from src.shared.python.motion_matching.polynomial_torque import (
     evaluate_polynomial_torque,
 )

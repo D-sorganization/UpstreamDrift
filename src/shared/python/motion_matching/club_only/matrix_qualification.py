@@ -624,6 +624,28 @@ def _cell_outcome_blocker(outcome: Mapping[str, Any] | None, cell: str) -> str |
     return None
 
 
+# Orientation claims and phase coverage every recorded-outcome package declares.
+_MEASURED_ORIENTATION_CLAIMS = (
+    OrientationClaim(
+        component="mid_hands_orientation",
+        declared_status=ComponentStatus.MEASURED,
+        scored_as_measured=True,
+    ),
+    OrientationClaim(
+        component="face_orientation",
+        declared_status=ComponentStatus.DERIVED,
+        scored_as_measured=False,
+    ),
+)
+_FULL_PHASE_COVERAGE = PhaseCoverage(
+    address_present=True,
+    top_present=True,
+    impact_present=True,
+    finish_present=True,
+    phase_labels=("A", "T", "I", "F"),
+)
+
+
 def _measured_package(
     trial_id: str,
     profile: ClubOnlyProfile,
@@ -698,25 +720,8 @@ def _measured_package(
         used_measured_state_reset=False,
         body_labels_hidden=False,
         body_marker_status="withheld",
-        orientation_claims=(
-            OrientationClaim(
-                component="mid_hands_orientation",
-                declared_status=ComponentStatus.MEASURED,
-                scored_as_measured=True,
-            ),
-            OrientationClaim(
-                component="face_orientation",
-                declared_status=ComponentStatus.DERIVED,
-                scored_as_measured=False,
-            ),
-        ),
-        phases=PhaseCoverage(
-            address_present=True,
-            top_present=True,
-            impact_present=True,
-            finish_present=True,
-            phase_labels=("A", "T", "I", "F"),
-        ),
+        orientation_claims=_MEASURED_ORIENTATION_CLAIMS,
+        phases=_FULL_PHASE_COVERAGE,
         fitting_prior_trial_ids=(),
         unsupported_components=frozenset(profile.observation.unsupported_components),
         supported_observables=frozenset(profile.observation.supported_observables),
