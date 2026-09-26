@@ -530,34 +530,43 @@ class MotionMatchingWidget(QWidget):
         layout.addWidget(self.club_log)
         return widget
 
-    def _run_club_only_match(self, *, preset: str, resume: bool = False) -> None:
-        """Run club-only match off the GUI thread; persist results + ledger."""
-        if self._club_handle is not None and self._club_handle.is_running:
-            self.club_log.appendPlainText("Club-only match already running.")
-            return
-
+    def _verified_club_seed(self) -> Any:
+        """Return the seed only when verified; otherwise log and return None (#10960)."""
         from src.shared.python.motion_matching.club_only.seeds import (
             VERIFIED_SEED_SOURCES,
         )
 
         seed = self._club_seed
-        if seed is None or seed.source not in VERIFIED_SEED_SOURCES:
-            self.club_seed_status.setText("no verified seed")
-            self.club_log.appendPlainText(
-                "no verified seed: matching requires a verified seed from CO-03 retrieval or constrained_ik"
-            )
-            return
+        if seed is not None and seed.source in VERIFIED_SEED_SOURCES:
+            return seed
+        self.club_seed_status.setText("no verified seed")
+        self.club_log.appendPlainText(
+            "no verified seed: matching requires a verified seed from CO-03 retrieval or constrained_ik"
+        )
+        return None
 
+    def _club_only_request(self, preset: str) -> Any:
+        """Build the club-only match request from the current form selections."""
         trial_id = self.club_trial.currentData() or self.club_trial.currentText()
-        model_id = self.club_model.currentText()
-        req = pipeline.ClubOnlyMatchRequest(
+        return pipeline.ClubOnlyMatchRequest(
             trial_id=str(trial_id),
-            model_id=model_id,
+            model_id=self.club_model.currentText(),
             preset=preset,
             prior_choices={"pose_prior": "address_plausible"},
             geometry_choices={"handedness": "right"},
             user_edits=getattr(self, "_club_user_edits", {"notes": ""}),
         )
+
+    def _run_club_only_match(self, *, preset: str, resume: bool = False) -> None:
+        """Run club-only match off the GUI thread; persist results + ledger."""
+        if self._club_handle is not None and self._club_handle.is_running:
+            self.club_log.appendPlainText("Club-only match already running.")
+            return
+        seed = self._verified_club_seed()
+        if seed is None:
+            return
+
+        req = self._club_only_request(preset)
         resume_checkpoint = self._club_checkpoint if resume else None
         if resume and self._club_session is not None:
             preset = self._club_session.preset_name()
