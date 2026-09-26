@@ -61,4 +61,5 @@
 
 ## Change Log
 
-- `SELF` — Versioned PreImpactBundle v1 with fail-closed contracts (#9703).
+- `SELF` — Declare `FloatArray` as an explicit `TypeAlias` so the pre-push mypy hook (no numpy in its env) accepts it (#9703).
+- `6c80d5665` — Versioned PreImpactBundle v1 with fail-closed contracts (#9703).
