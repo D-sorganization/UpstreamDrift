@@ -347,9 +347,9 @@ class BranchScore:
     branch_id: str
     start_strategy: StartStrategy
     q: NDArray[np.float64]
-    observation_fit_m: float
+    observation_fit_m: float | None
     effort: float
-    closure_m: float
+    closure_m: float | None
     feasible: bool
     rejection_reasons: tuple[str, ...]
     configuration_hash: str
@@ -358,13 +358,16 @@ class BranchScore:
         q = np.asarray(self.q, dtype=np.float64)
         if q.ndim != 1 or q.size < 1 or not np.all(np.isfinite(q)):
             raise ValueError("q must be finite 1-D")
-        for name, value in (
-            ("observation_fit_m", self.observation_fit_m),
-            ("effort", self.effort),
-            ("closure_m", self.closure_m),
-        ):
-            if not np.isfinite(value) or value < 0.0:
-                raise ValueError(f"{name} must be finite and >= 0")
+        if not np.isfinite(self.effort) or self.effort < 0.0:
+            raise ValueError("effort must be finite and >= 0")
+        if self.observation_fit_m is not None:
+            if not np.isfinite(self.observation_fit_m) or self.observation_fit_m < 0.0:
+                raise ValueError("observation_fit_m must be finite and >= 0")
+        if self.closure_m is not None:
+            if not np.isfinite(self.closure_m) or self.closure_m < 0.0:
+                raise ValueError("closure_m must be finite and >= 0")
+        if (self.observation_fit_m is None or self.closure_m is None) and self.feasible:
+            raise ValueError("branch cannot be feasible when fit or closure is None")
         object.__setattr__(self, "q", q.copy())
         object.__setattr__(self, "rejection_reasons", tuple(self.rejection_reasons))
 
@@ -373,48 +376,54 @@ def _configuration_hash(q: NDArray[np.floating]) -> str:
     return hashlib.sha256(np.asarray(q, dtype=np.float64).tobytes()).hexdigest()
 
 
-def _closure_m(q: NDArray[np.floating]) -> float:
-    mag = float(np.linalg.norm(q))
-    return 1.0e-4 + 1.0e-3 * mag
-
-
 def score_branch(
     *,
     branch_id: str,
     start_strategy: StartStrategy,
     q: NDArray[np.floating],
-    seed_residual_m: float,
     profile: ClubOnlyProfile,
+    seed_residual_m: float = 0.0,
+    observation_fit_m: float | None = None,
+    closure_m: float | None = None,
 ) -> BranchScore:
     """Score one branch under observation and closure gates (software contract)."""
     if not branch_id:
         raise ValueError("branch_id required")
     if not np.isfinite(seed_residual_m) or seed_residual_m < 0.0:
         raise ValueError("seed_residual_m must be finite and >= 0")
+    if observation_fit_m is not None and (
+        not np.isfinite(observation_fit_m) or observation_fit_m < 0.0
+    ):
+        raise ValueError("observation_fit_m must be finite and >= 0")
+    if closure_m is not None and (not np.isfinite(closure_m) or closure_m < 0.0):
+        raise ValueError("closure_m must be finite and >= 0")
     q_arr = np.asarray(q, dtype=np.float64)
-    delta = float(np.linalg.norm(q_arr))
-    fit = float(seed_residual_m + 0.002 * delta)
-    effort = delta
-    closure = _closure_m(q_arr)
+    effort = float(np.linalg.norm(q_arr))
     max_closure = profile.max_closure_residual_m()
     # LoD: read observation thresholds via a local alias (no deep chains).
     observation_profile = profile.observation
     max_obs = float(observation_profile.max_grip_position_rmse_m)
     reasons: list[str] = []
     feasible = True
-    if closure > max_closure:
+    if closure_m is None:
+        feasible = False
+        reasons.append("closure_not_computed")
+    elif closure_m > max_closure:
         feasible = False
         reasons.append("closure_exceeds_profile")
-    if fit > max_obs:
+    if observation_fit_m is None:
+        feasible = False
+        reasons.append("observation_fit_not_computed")
+    elif observation_fit_m > max_obs:
         feasible = False
         reasons.append("observation_gate_exceeded")
     return BranchScore(
         branch_id=branch_id,
         start_strategy=start_strategy,
         q=q_arr,
-        observation_fit_m=fit,
+        observation_fit_m=observation_fit_m,
         effort=effort,
-        closure_m=closure,
+        closure_m=closure_m,
         feasible=feasible,
         rejection_reasons=tuple(reasons),
         configuration_hash=_configuration_hash(q_arr),
@@ -423,6 +432,8 @@ def score_branch(
 
 def _dominates(a: BranchScore, b: BranchScore) -> bool:
     """Pareto dominance on observation fit and effort (both minimized)."""
+    if a.observation_fit_m is None or b.observation_fit_m is None:
+        return False
     better_fit = a.observation_fit_m <= b.observation_fit_m
     better_effort = a.effort <= b.effort
     strictly = (a.observation_fit_m < b.observation_fit_m) or (a.effort < b.effort)
@@ -447,7 +458,13 @@ def prune_and_select_pareto(
     feasible = [b for b in branches if b.feasible]
     rejected = [b for b in branches if not b.feasible]
     pareto: list[BranchScore] = []
-    for candidate in sorted(feasible, key=lambda b: (b.observation_fit_m, b.effort)):
+    for candidate in sorted(
+        feasible,
+        key=lambda b: (
+            float("inf") if b.observation_fit_m is None else b.observation_fit_m,
+            b.effort,
+        ),
+    ):
         if any(_dominates(existing, candidate) for existing in pareto):
             continue
         pareto = [p for p in pareto if not _dominates(candidate, p)]
@@ -494,7 +511,7 @@ class QualityTimeSample:
 
     evaluations: int
     wall_s: float
-    best_observation_fit_m: float
+    best_observation_fit_m: float | None
     failed_attempts: int
 
     def __post_init__(self) -> None:
@@ -502,11 +519,12 @@ class QualityTimeSample:
             raise ValueError("evaluations and failed_attempts must be >= 0")
         if not np.isfinite(self.wall_s) or self.wall_s < 0.0:
             raise ValueError("wall_s must be finite and >= 0")
-        if (
-            not np.isfinite(self.best_observation_fit_m)
-            or self.best_observation_fit_m < 0.0
-        ):
-            raise ValueError("best_observation_fit_m must be finite and >= 0")
+        if self.best_observation_fit_m is not None:
+            if (
+                not np.isfinite(self.best_observation_fit_m)
+                or self.best_observation_fit_m < 0.0
+            ):
+                raise ValueError("best_observation_fit_m must be finite and >= 0")
 
 
 @dataclass(frozen=True)
@@ -676,22 +694,21 @@ def _score_branches_under_budget(
             q=q,
             seed_residual_m=float(ctx.seed.observed_residual_m),
             profile=ctx.profile,
+            observation_fit_m=None,
+            closure_m=None,
         )
         scored.append(scored_branch)
         used += 1
         if not scored_branch.feasible:
             failed_attempts += 1
-        if scored_branch.feasible and scored_branch.observation_fit_m < best_fit:
-            best_fit = scored_branch.observation_fit_m
+        if scored_branch.feasible and scored_branch.observation_fit_m is not None:
+            if scored_branch.observation_fit_m < best_fit:
+                best_fit = scored_branch.observation_fit_m
         quality_curve.append(
             QualityTimeSample(
                 evaluations=used,
                 wall_s=time.perf_counter() - ctx.t0,
-                best_observation_fit_m=(
-                    best_fit
-                    if np.isfinite(best_fit)
-                    else scored_branch.observation_fit_m
-                ),
+                best_observation_fit_m=(best_fit if np.isfinite(best_fit) else None),
                 failed_attempts=failed_attempts,
             )
         )
@@ -717,7 +734,7 @@ def _assemble_fast_match_result(
     t_verify = time.perf_counter()
     for member in pareto:
         _ = member.configuration_hash
-        if member.observation_fit_m < 0.0:
+        if member.observation_fit_m is None or member.observation_fit_m < 0.0:
             raise ValueError("verification found invalid observation fit")
     verification_s = time.perf_counter() - t_verify
 

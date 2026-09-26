@@ -31,6 +31,11 @@ ROOT = HERE.parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from docs.development.full_body_models.evidence._gates import (
+    FB3_DRAKE_THRESHOLDS,
+    evaluate_gates,
+)
+
 FULL_BODY_SPEC_PATH = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
 UPPER_SPEC_PATH = (
     ROOT
@@ -205,7 +210,9 @@ def _verify_gate_a(
         body_qual = qual_model.plant.GetBodyByName(
             qual_model.metadata["body_links"][b["name"]], qual_model._instance
         )
-        assert abs(body_full.default_mass() - body_qual.default_mass()) < 1e-12
+        diff_body = abs(body_full.default_mass() - body_qual.default_mass())
+        if diff_body > max_mass_diff:
+            max_mass_diff = diff_body
 
     for _ in range(num_states):
         q_up = {name: float(rng.uniform(-0.35, 0.35)) for name in upper_coords}
@@ -236,8 +243,6 @@ def _verify_gate_a(
         if diff_m > max_mass_diff:
             max_mass_diff = diff_m
 
-    assert max_fk_diff < 1e-12, f"Gate (a) FK diff: {max_fk_diff}"
-    assert max_mass_diff < 1e-12, f"Gate (a) Mass diff: {max_mass_diff}"
     return max_fk_diff, max_mass_diff
 
 
@@ -263,7 +268,6 @@ def _verify_gate_b(
             if diff > max_fk_diff:
                 max_fk_diff = diff
 
-    assert max_fk_diff < 1e-12, f"Gate (b) FK diff: {max_fk_diff}"
     return max_fk_diff
 
 
@@ -278,15 +282,21 @@ def _verify_gate_c(
     q_neutral = dict.fromkeys(coords, 0.0)
     v_neutral = dict.fromkeys(coords, 0.0)
     forces_neutral = full_model.contact_forces(q_neutral, v_neutral)
-    assert len(forces_neutral) == 4
+    if len(forces_neutral) != 4:
+        raise RuntimeError(
+            f"Gate (c) setup: expected 4 contacts, got {len(forces_neutral)}"
+        )
 
     q_pen = dict(q_neutral)
     q_pen["TranslationInputZ"] = -0.90
     v_moving = {name: (0.1 if "Translation" in name else 0.0) for name in coords}
     forces_pen = full_model.contact_forces(q_pen, v_moving)
-    assert len(forces_pen) == 4
     pen_count = sum(1 for s in forces_pen.values() if s.penetration_m > 0.0)
-    assert pen_count > 0
+    # Without a penetrating sphere gate (c) would compare zero forces (vacuous pass).
+    if len(forces_pen) != 4 or pen_count == 0:
+        raise RuntimeError(
+            f"Gate (c) setup: {len(forces_pen)} contacts, {pen_count} penetrating"
+        )
 
     max_fn = 0.0
     max_ff = 0.0
@@ -306,9 +316,6 @@ def _verify_gate_c(
         if diff_p > max_p:
             max_p = diff_p
 
-    assert max_fn < 1e-12, f"Gate (c) Normal force diff: {max_fn}"
-    assert max_ff < 1e-12, f"Gate (c) Friction force diff: {max_ff}"
-    assert max_p < 1e-12, f"Gate (c) Penetration diff: {max_p}"
     return pen_count, max_fn, max_ff, max_p
 
 
@@ -340,8 +347,6 @@ def _verify_gate_d(
         if diff_cv > max_vel:
             max_vel = diff_cv
 
-    assert max_pos < 1e-12, f"Gate (d) Pos diff: {max_pos}"
-    assert max_vel < 1e-12, f"Gate (d) Vel diff: {max_vel}"
     return max_pos, max_vel
 
 
@@ -366,25 +371,20 @@ def _verify_accelerations(
     return len(acc), all_finite, max_cp, max_cv
 
 
-def _assemble_receipt(
-    drake_version: str,
-    num_states: int,
-    gate_a: tuple[float, float],
-    gate_b_fk: float,
-    gate_c: tuple[int, float, float, float],
-    gate_d: tuple[float, float],
-    acc: tuple[int, bool, float, float],
-) -> dict[str, Any]:
-    gate_a_fk, gate_a_mass = gate_a
-    pen_count, gate_c_fn, gate_c_ff, gate_c_p = gate_c
-    gate_d_pos, gate_d_vel = gate_d
-    num_coords, acc_finite, max_cp, max_cv = acc
+def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
+    """Evaluate FB-3 Drake metrics against documented thresholds (#10960 P0-9)."""
+    return evaluate_gates(metrics, FB3_DRAKE_THRESHOLDS)
+
+
+def _group_status(eval_gates: Mapping[str, Any], *gate_names: str) -> str:
+    """PASSED only if every named gate passed in the recorded evaluation."""
+    passed = all(eval_gates[name]["passed"] for name in gate_names)
+    return "PASSED" if passed else "FAILED"
+
+
+def _receipt_provenance(drake_version: str) -> dict[str, Any]:
+    """Environment and input-file hashes recorded on every FB-3 receipt."""
     return {
-        "work_package": "FB-3-D",
-        "issue": "#10067",
-        "epic": "#10062",
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "status": "PASSED",
         "environment": {
             "python": sys.version,
             "platform": platform.platform(),
@@ -399,22 +399,71 @@ def _assemble_receipt(
             "contact_law.py": sha256_file(CONTACT_LAW_PATH),
             "full_body_spec.py": sha256_file(FULL_BODY_SPEC_PY_PATH),
         },
+    }
+
+
+def _assemble_receipt(
+    drake_version: str,
+    num_states: int,
+    gate_a: tuple[float, float],
+    gate_b_fk: float,
+    gate_c: tuple[int, float, float, float],
+    gate_d: tuple[float, float],
+    acc: tuple[int, bool, float, float],
+) -> dict[str, Any]:
+    gate_a_fk, gate_a_mass = gate_a
+    pen_count, gate_c_fn, gate_c_ff, gate_c_p = gate_c
+    gate_d_pos, gate_d_vel = gate_d
+    num_coords, acc_finite, max_cp, max_cv = acc
+
+    gate_metrics = {
+        "gate_a_fk_diff_m": float(gate_a_fk),
+        "gate_a_mass_matrix_diff": float(gate_a_mass),
+        "gate_b_fk_diff_m": float(gate_b_fk),
+        "gate_c_normal_force_diff_n": float(gate_c_fn),
+        "gate_c_friction_force_diff_n": float(gate_c_ff),
+        "gate_c_penetration_diff_m": float(gate_c_p),
+        "gate_d_position_residual_diff": float(gate_d_pos),
+        "gate_d_velocity_residual_diff": float(gate_d_vel),
+        "max_closure_pos_error": float(max_cp),
+        "max_closure_vel_error": float(max_cv),
+        "accelerations_all_finite": bool(acc_finite),
+    }
+    status_eval = build_status_from_metrics(gate_metrics)
+    eval_gates = status_eval["gates"]
+
+    return {
+        "work_package": "FB-3-D",
+        "issue": "#10067",
+        "epic": "#10062",
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "status": status_eval["status"],
+        "gate_evaluation": status_eval,
+        "thresholds": dict(FB3_DRAKE_THRESHOLDS),
+        **_receipt_provenance(drake_version),
         "gates": {
             "gate_a_upper_body_slice_parity": {
-                "status": "PASSED",
+                "status": _group_status(
+                    eval_gates, "gate_a_fk_diff_m", "gate_a_mass_matrix_diff"
+                ),
                 "random_states_tested": num_states,
                 "max_fk_diff_m": gate_a_fk,
                 "max_mass_matrix_diff": gate_a_mass,
                 "tolerance": 1e-12,
             },
             "gate_b_full_body_fk": {
-                "status": "PASSED",
+                "status": _group_status(eval_gates, "gate_b_fk_diff_m"),
                 "random_states_tested": num_states,
                 "max_fk_diff_m": gate_b_fk,
                 "tolerance": 1e-12,
             },
             "gate_c_contact_force_parity": {
-                "status": "PASSED",
+                "status": _group_status(
+                    eval_gates,
+                    "gate_c_normal_force_diff_n",
+                    "gate_c_friction_force_diff_n",
+                    "gate_c_penetration_diff_m",
+                ),
                 "num_contact_spheres": 4,
                 "penetrating_spheres_tested": pen_count,
                 "max_normal_force_diff_n": gate_c_fn,
@@ -423,7 +472,11 @@ def _assemble_receipt(
                 "tolerance": 1e-12,
             },
             "gate_d_closure_residual_parity": {
-                "status": "PASSED",
+                "status": _group_status(
+                    eval_gates,
+                    "gate_d_position_residual_diff",
+                    "gate_d_velocity_residual_diff",
+                ),
                 "random_states_tested": num_states,
                 "max_position_residual_diff": gate_d_pos,
                 "max_velocity_residual_diff": gate_d_vel,
@@ -431,11 +484,17 @@ def _assemble_receipt(
             },
         },
         "accelerations": {
-            "status": "PASSED",
+            "status": _group_status(
+                eval_gates,
+                "accelerations_all_finite",
+                "max_closure_pos_error",
+                "max_closure_vel_error",
+            ),
             "num_coordinates": num_coords,
             "all_finite": acc_finite,
             "max_closure_pos_error": max_cp,
             "max_closure_vel_error": max_cv,
+            "tolerance": FB3_DRAKE_THRESHOLDS["max_closure_pos_error"],
         },
     }
 

@@ -6,7 +6,7 @@
     "constrained_upper_body_golfer": {
       "model_id": "constrained_upper_body_golfer",
       "cell_count": 4,
-      "statuses": ["generated"]
+      "statuses": ["rejected"]
     },
     "driven_double_pendulum": {
       "model_id": "driven_double_pendulum",
@@ -21,12 +21,12 @@
     "full_body_drake": {
       "model_id": "full_body_drake",
       "cell_count": 4,
-      "statuses": ["generated"]
+      "statuses": ["rejected"]
     },
     "full_body_mujoco": {
       "model_id": "full_body_mujoco",
       "cell_count": 4,
-      "statuses": ["generated"]
+      "statuses": ["rejected"]
     },
     "full_body_myosuite": {
       "model_id": "full_body_myosuite",
@@ -41,7 +41,7 @@
     "full_body_pinocchio": {
       "model_id": "full_body_pinocchio",
       "cell_count": 4,
-      "statuses": ["generated"]
+      "statuses": ["rejected"]
     },
     "full_body_simscape": {
       "model_id": "full_body_simscape",
@@ -123,7 +123,7 @@
     }
   },
   "candidate_count": 32,
-  "accepted_candidate_count": 32,
+  "accepted_candidate_count": 0,
   "cell_count": 80,
   "topology_mappings": [
     {

@@ -224,10 +224,11 @@ def test_alternative_body_poses_preserved() -> None:
 
 def test_no_hidden_frame_alignment_or_time_warp() -> None:
     obs = build_calibrated_observation_fixture("GW_wiffle")
+    ref_obs = build_calibrated_observation_fixture("TW_wiffle")
     profile = get_club_only_profile("reconstruction_golfer")
     g_hash = _geometry_hash(obs)
     desc = build_observable_descriptor(
-        obs,
+        ref_obs,
         model_id=profile.model_id,
         geometry_hash=g_hash,
     )
@@ -238,7 +239,7 @@ def test_no_hidden_frame_alignment_or_time_warp() -> None:
         descriptor=desc,
         body_q0=np.array([0.0, 0.05, -0.02, 0.0]),
         rigid_placement=placement,
-        source_clock_times_s=obs.native_time_s.copy(),
+        source_clock_times_s=ref_obs.native_time_s.copy(),
         body_is_prior=True,
     )
     seeds = retrieve_starting_seeds(
@@ -291,7 +292,8 @@ def test_four_trial_bounded_seeds_retrieval_and_ik_baselines() -> None:
         retrieval = trial["baselines"]["retrieval"]
         ik = trial["baselines"]["constrained_ik"]
         assert 1 <= len(retrieval["seed_ids"]) <= 3
-        assert 1 <= len(ik["seed_ids"]) <= 3
+        assert len(ik["seed_ids"]) == 0
+        assert ik.get("failure_reason") == IkFailureReason.MISSING_SOLVER.value
         assert retrieval["is_kinematic_preview"] is True
         assert ik["is_kinematic_preview"] is True
         assert trial["claims_torque"] is False

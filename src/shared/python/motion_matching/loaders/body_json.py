@@ -26,10 +26,13 @@ and ignored.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
+import string
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -39,6 +42,71 @@ from ..club_target import AlignOptions, ClubTarget, SourceProvenance
 logger = logging.getLogger(__name__)
 
 JSON_BODY_TARGET_SCHEMA: str = "body_target_json_v1"
+_HEX_DIGITS: frozenset[str] = frozenset(string.hexdigits)
+_ZERO_SHA256: str = "0" * 64
+
+
+def _resolve_source_sha256(raw_bytes: bytes, src: dict[str, Any], path: Path) -> str:
+    """Validate declared sha256 or compute digest from loaded file bytes.
+
+    Preconditions:
+        raw_bytes: The exact bytes read from the file.
+        src: The parsed source dictionary.
+        path: Path to the loaded file.
+
+    Returns:
+        A 64-hex non-all-zero SHA-256 digest string.
+
+    Raises:
+        ValueError: If a declared sha256 is not a 64-hex string or is all zeros.
+    """
+    if "sha256" not in src or src["sha256"] is None:
+        return hashlib.sha256(raw_bytes).hexdigest()
+    declared = src["sha256"]
+    if not isinstance(declared, str):
+        raise ValueError(
+            f"{path}: sha256 digest must be a 64-hex string, got {type(declared).__name__}"
+        )
+    cleaned = declared.strip().lower()
+    if len(cleaned) != 64 or not all(c in _HEX_DIGITS for c in cleaned):
+        raise ValueError(
+            f"{path}: sha256 digest must be a 64-character hexadecimal string, got {declared!r}"
+        )
+    if cleaned == _ZERO_SHA256:
+        raise ValueError(f"{path}: all-zero placeholder sha256 digest is prohibited")
+    return cleaned
+
+
+def _resolve_source_format(
+    src: dict[str, Any], payload: dict[str, Any], path: Path
+) -> str:
+    """Resolve format from source or derive from schema; fail closed if absent.
+
+    Preconditions:
+        src: The parsed source dictionary.
+        payload: The top-level parsed JSON object.
+        path: Path to the loaded file.
+
+    Returns:
+        The format string.
+
+    Raises:
+        ValueError: If format is empty, or missing and cannot be derived.
+    """
+    raw_fmt = src.get("format")
+    if raw_fmt is not None:
+        fmt = str(raw_fmt).strip()
+        if fmt:
+            return fmt
+        raise ValueError(f"{path}: source record contains empty 'format'")
+
+    schema = payload.get("schema")
+    if isinstance(schema, str) and schema.strip():
+        return schema.strip()
+
+    raise ValueError(
+        f"{path}: body-target JSON source record missing required 'format'"
+    )
 
 
 def load_body_target_json(
@@ -75,7 +143,12 @@ def load_body_target_json(
         are not satisfied.
     """
     p = Path(path)
-    payload = json.loads(p.read_text(encoding="utf-8"))
+    raw_bytes = p.read_bytes()
+    payload = json.loads(raw_bytes.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(
+            f"{p}: body-target JSON must contain an object, got {type(payload).__name__}"
+        )
     schema = payload.get("schema")
     if schema != JSON_BODY_TARGET_SCHEMA:
         raise ValueError(
@@ -135,12 +208,14 @@ def load_body_target_json(
     )
 
     src = payload["source"]
+    if not isinstance(src, dict):
+        raise ValueError(f"{p}: 'source' must be an object, got {type(src).__name__}")
     source = SourceProvenance(
         filename=str(src.get("filename", p.name)),
-        format=str(src.get("format", "synthetic")),
+        format=_resolve_source_format(src, payload, p),
         subject_id=str(src.get("subject_id", "")),
         trial_id=str(src.get("trial_id", "")),
-        sha256=str(src.get("sha256", "0" * 64)),
+        sha256=_resolve_source_sha256(raw_bytes, src, p),
     )
 
     return BodyTarget(

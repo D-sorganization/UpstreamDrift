@@ -23,3 +23,6 @@ def test_surrogate_nm07_comparison_reexports_neural_motion_surface() -> None:
         nm07_comparison.PhysicsStructuredSurrogate
         is surrogates.PhysicsStructuredSurrogate
     )
+    assert nm07_comparison.DEFAULT_EVALUATORS is surrogates.DEFAULT_EVALUATORS
+    assert nm07_comparison.surrogate_passes_gates is surrogates.surrogate_passes_gates
+    assert nm07_comparison.surrogate_selection_key is surrogates.surrogate_selection_key

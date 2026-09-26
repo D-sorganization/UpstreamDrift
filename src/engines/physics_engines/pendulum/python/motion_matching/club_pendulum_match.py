@@ -366,8 +366,8 @@ def _triple_external_work(
     times: np.ndarray,
     grip: np.ndarray,
     hub_mode: HubMode,
-) -> float:
-    """Account prescribed moving-hub work; fixed pivot reports zero."""
+) -> float | None:
+    """Account prescribed moving-hub work; fixed pivot reports None."""
     n = len(times)
     hub_pos = np.zeros((n, 2), dtype=np.float64)
     forces = np.zeros_like(hub_pos)
@@ -382,7 +382,7 @@ def _triple_external_work(
         hub_reaction_forces=forces,
         hub_mode=hub_mode,
     )
-    return float(work.total_work_joules)
+    return work.total_work_joules
 
 
 def _fit_triple(
@@ -401,7 +401,7 @@ def _fit_triple(
     float,
     np.ndarray,
     float,
-    float,
+    float | None,
 ]:
     times = np.asarray(projected.time, dtype=np.float64)
     duration = float(times[-1] - times[0])
@@ -460,7 +460,7 @@ def _fit_attempt(
             projected, q0_override=q_override, max_nfev=request.max_nfev
         )
         l_hub = None
-        work = 0.0
+        work = None
     else:
         (
             theta,
@@ -565,7 +565,9 @@ def _build_match_result(
         cold_start_rmse_m=cold_rmse,
         retrieval_start_rmse_m=retrieval_rmse,
         selected_start=str(best["label"]),
-        external_work_joules=float(best["work"]),
+        external_work_joules=(
+            float(best["work"]) if best["work"] is not None else None
+        ),
         native_g1_pass=False,
         qualification_blockers=_qualification_blockers(request.model_id),
         claims_body_reconstruction_evidence=False,

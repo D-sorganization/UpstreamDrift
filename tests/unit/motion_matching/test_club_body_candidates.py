@@ -174,13 +174,21 @@ def test_nonunique_club_to_body_example_preserves_distinct_hashes() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=1.0,
-        options=BodyCandidateOptions(n_nullspace_proposals=3),
+        options=BodyCandidateOptions(
+            n_nullspace_proposals=3,
+            measured_observation_fit_m=0.01,
+        ),
     )
     accepted = [c for c in result.candidates if c.accepted]
     assert len(accepted) >= 2
     hashes = {c.body_configuration_hash for c in accepted}
-    assert len(hashes) >= 2
-    fits = {round(c.observation_fit_m, 6) for c in accepted}
+    for c in accepted:
+        assert c.observation_fit_m is not None
+    fits = {
+        round(c.observation_fit_m, 6)
+        for c in accepted
+        if c.observation_fit_m is not None
+    }
     assert len(fits) == 1
 
 
@@ -223,7 +231,10 @@ def test_native_closure_and_finite_qva() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=0.5,
-        options=BodyCandidateOptions(n_nullspace_proposals=2),
+        options=BodyCandidateOptions(
+            n_nullspace_proposals=2,
+            measured_observation_fit_m=0.01,
+        ),
     )
     accepted = [c for c in result.candidates if c.accepted]
     assert accepted
@@ -233,13 +244,15 @@ def test_native_closure_and_finite_qva() -> None:
         assert np.all(np.isfinite(cand.v))
         assert np.all(np.isfinite(cand.a))
         assert cand.q.shape == cand.v.shape == cand.a.shape
-        assert cand.closure_q_m <= profile.physical.max_closure_residual_m
-        assert cand.closure_v_m_s >= 0.0
-        assert cand.closure_a_m_s2 >= 0.0
+        assert cand.closure_q_m is None
+        assert cand.closure_v_m_s is None
+        assert cand.closure_a_m_s2 is None
+        assert cand.derivatives_computed is False
         assert cand.is_kinematic_preview is True
         assert cand.claims_native_acceptance is False
         assert cand.claims_surrogate_as_native is False
         # Separate score lanes — never collapsed into one scalar.
+        assert cand.observation_fit_m is not None
         assert np.isfinite(cand.observation_fit_m)
         assert np.isfinite(cand.plausibility_score)
         assert np.isfinite(cand.contact_effort)
@@ -366,7 +379,10 @@ def test_prior_strength_sensitivity_is_reported() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=0.25,
-        options=BodyCandidateOptions(n_nullspace_proposals=2),
+        options=BodyCandidateOptions(
+            n_nullspace_proposals=2,
+            measured_observation_fit_m=0.01,
+        ),
     )
     strong = generate_plausible_body_candidates(
         observation=obs,
@@ -374,7 +390,10 @@ def test_prior_strength_sensitivity_is_reported() -> None:
         seeds=(seed,),
         priors=GolfPlausibilityPriors.default(),
         prior_strength=2.0,
-        options=BodyCandidateOptions(n_nullspace_proposals=2),
+        options=BodyCandidateOptions(
+            n_nullspace_proposals=2,
+            measured_observation_fit_m=0.01,
+        ),
     )
     weak_acc = [c for c in weak.candidates if c.accepted]
     strong_acc = [c for c in strong.candidates if c.accepted]
@@ -417,10 +436,12 @@ def test_roster_matrix_accounts_for_all_model_trial_cells() -> None:
     actual_cells = {(c.model_id, c.trial_id) for c in report.cells}
     assert actual_cells == expected_cells
     statuses = {c.status for c in report.cells}
-    assert "generated" in statuses
-    # Unsupported / missing-runtime cells keep precise blockers, never silent omit.
+    assert "rejected" in statuses
+    assert "generated" not in statuses
+    # Unsupported / missing-runtime / rejected cells keep precise blockers, never silent omit.
     blocked = [c for c in report.cells if c.status != "generated"]
     assert blocked
+    assert len(blocked) == len(report.cells)
     assert all(c.blocker for c in blocked)
 
 

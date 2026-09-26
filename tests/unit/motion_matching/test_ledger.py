@@ -233,7 +233,8 @@ def test_extract_horizon_s_prefers_dynamics_duration_over_elapsed_s() -> None:
     }
     assert extract_horizon_s(payload) == 1.81
 
+    # Wall-clock time is never reported as a trajectory horizon (#10960 P1-8).
     payload_no_dynamics = {
         "elapsed_s": 326.2,
     }
-    assert extract_horizon_s(payload_no_dynamics) == 326.2
+    assert extract_horizon_s(payload_no_dynamics) is None

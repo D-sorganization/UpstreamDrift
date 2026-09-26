@@ -42,8 +42,8 @@ from src.shared.python.motion_matching.matching_strategy import (
     StageState,
     StrategyComparisonService,
     StrategyPreset,
-    create_sample_strategy_package,
 )
+from tests.fixtures.motion_matching_strategy import create_sample_strategy_package
 
 pytestmark = pytest.mark.unit
 
@@ -295,7 +295,9 @@ def test_strategy_comparison_service() -> None:
     # Tracking and closure errors extraction
     err_data = service.extract_tracking_and_closure_errors([p1, p2])
     assert "mujoco" in err_data
-    assert "whole_marker_rmse_mm" in err_data["mujoco"]
+    assert err_data["mujoco"]["whole_marker_rmse_mm"] == 15.0
+    assert err_data["mujoco"]["max_equilibrium_residual"] == 5e-5
+    assert err_data["mujoco"]["closure_residual_norm"] == 0.0
 
 
 def test_missing_sdk_invalidates_supported_state() -> None:
@@ -344,3 +346,44 @@ def test_all_six_engines_and_dual_club_coverage() -> None:
     assert len(packages) == 12
     comparison = service.compare_strategies(packages)
     assert len(comparison["comparison_table"]) == 12
+
+
+def test_create_sample_strategy_package_not_exported_from_motion_matching() -> None:
+    """create_sample_strategy_package is isolated from motion_matching public surface (#10960)."""
+    import src.shared.python.motion_matching as mm
+
+    assert "create_sample_strategy_package" not in mm.__all__
+    assert not hasattr(mm, "create_sample_strategy_package")
+    with pytest.raises(ImportError):
+        from src.shared.python.motion_matching import (  # type: ignore[attr-defined]
+            create_sample_strategy_package as _sample_pkg_1,  # noqa: F401
+        )
+    with pytest.raises(ImportError):
+        from src.shared.python.motion_matching.matching_strategy import (  # type: ignore[attr-defined]
+            create_sample_strategy_package as _sample_pkg_2,  # noqa: F401
+        )
+
+
+def test_extract_tracking_and_closure_errors_missing_metrics() -> None:
+    """extract_tracking_and_closure_errors extracts None for missing metrics (#10960)."""
+    cand = _create_test_candidate()
+    strat = MatchingStrategyContract(
+        strategy_id="strat-unmeasured",
+        engine="mujoco",
+        model_id="anthro_driver",
+        model_sha256="0" * 64,
+        capture_id="driver",
+    )
+    pkg = CandidateStrategyPackage(
+        candidate=cand,
+        strategy=strat,
+        reactions=None,
+    )
+    service = StrategyComparisonService()
+    err_data = service.extract_tracking_and_closure_errors([pkg])
+
+    assert "mujoco" in err_data
+    errors = err_data["mujoco"]
+    assert errors["whole_marker_rmse_mm"] is None
+    assert errors["max_equilibrium_residual"] is None
+    assert errors["closure_residual_norm"] is None

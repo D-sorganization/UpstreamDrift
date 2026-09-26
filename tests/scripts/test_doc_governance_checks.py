@@ -207,6 +207,8 @@ def test_docs_governance_rejects_duplicate_source_of_truth_headings(
         ],
     )
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+    monkeypatch.setattr(check_docs_governance, "_tracked_root_entries", list)
+    monkeypatch.setattr(check_docs_governance, "_load_root_allowlist", list)
 
     assert check_docs_governance.main() == 1
 
@@ -237,6 +239,8 @@ def test_docs_governance_rejects_duplicate_adr_numbers(
         ],
     )
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+    monkeypatch.setattr(check_docs_governance, "_tracked_root_entries", list)
+    monkeypatch.setattr(check_docs_governance, "_load_root_allowlist", list)
 
     assert check_docs_governance.main() == 1
     captured = capsys.readouterr()
@@ -272,6 +276,8 @@ def test_docs_governance_rejects_missing_examples_entries(
         ],
     )
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+    monkeypatch.setattr(check_docs_governance, "_tracked_root_entries", list)
+    monkeypatch.setattr(check_docs_governance, "_load_root_allowlist", list)
 
     assert check_docs_governance.main() == 1
 
@@ -300,6 +306,8 @@ def test_docs_governance_allows_unique_adr_numbers(tmp_path: Path, monkeypatch) 
         ],
     )
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+    monkeypatch.setattr(check_docs_governance, "_tracked_root_entries", list)
+    monkeypatch.setattr(check_docs_governance, "_load_root_allowlist", list)
 
     assert check_docs_governance.main() == 0
 
@@ -335,5 +343,7 @@ def test_docs_governance_accepts_examples_entries_with_backing_docs(
         ],
     )
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+    monkeypatch.setattr(check_docs_governance, "_tracked_root_entries", list)
+    monkeypatch.setattr(check_docs_governance, "_load_root_allowlist", list)
 
     assert check_docs_governance.main() == 0

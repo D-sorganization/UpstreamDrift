@@ -118,8 +118,8 @@ class CandidateSession:
     def rms_error(self) -> float:
         """Marker RMS error in meters if available, otherwise 0.0."""
         if self.receipt is not None:
-            shared = self.receipt.get("shared_metrics", {})
-            if "whole_marker_rmse_m" in shared:
+            shared = self.receipt.get("shared_metrics")
+            if isinstance(shared, Mapping) and "whole_marker_rmse_m" in shared:
                 return float(shared["whole_marker_rmse_m"])
         return 0.0
 

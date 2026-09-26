@@ -3,7 +3,8 @@
   "issue": "#10065",
   "epic": "#10062",
   "timestamp_utc": "2026-09-14T01:16:08.864712+00:00",
-  "status": "PASSED",
+  "status": "REJECTED",
+  "note": "relabelled #10960 P0-9: max_closure_pos_error 3.1416 rad > 0.05 rad threshold",
   "environment": {
     "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
     "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
@@ -49,7 +50,7 @@
     }
   },
   "accelerations": {
-    "status": "PASSED",
+    "status": "FAILED",
     "num_coordinates": 41,
     "all_finite": true,
     "max_closure_pos_error": 3.141592653589793,

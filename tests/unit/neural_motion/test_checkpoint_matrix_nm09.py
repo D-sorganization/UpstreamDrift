@@ -252,32 +252,39 @@ class TestNativeReplayVerification:
     def test_driven_double_pendulum_native_replay(self) -> None:
         matrix = build_checkpoint_matrix()
         card = matrix.get_card("driven_double_pendulum")
-        assert card.status == ModelCheckpointStatus.QUALIFIED_NATIVE
-        receipt = verify_checkpoint_native_replay(card)
-        assert receipt.is_valid
-        assert receipt.replay_rmse < 0.05
-        assert receipt.max_constraint_violation == 0.0  # unconstrained mechanism
+        assert card.status == ModelCheckpointStatus.UNQUALIFIED
+        assert card.status != ModelCheckpointStatus.QUALIFIED_NATIVE
+        assert card.dataset_hash is None
+        assert card.weight_digest is None
+        assert card.three_seed_evidence is None
+        assert card.native_replay_receipt is None
+        assert card.benefit_result.speedup_factor is None
+        assert card.benefit_result.verdict == "unmeasured"
+        with pytest.raises(NotImplementedError, match="checkpoint|rollout"):
+            verify_checkpoint_native_replay(card)
 
     def test_driven_triple_pendulum_native_replay(self) -> None:
         matrix = build_checkpoint_matrix()
         card = matrix.get_card("driven_triple_pendulum")
-        assert card.status == ModelCheckpointStatus.QUALIFIED_NATIVE
-        receipt = verify_checkpoint_native_replay(card)
-        assert receipt.is_valid
-        assert receipt.replay_rmse < 0.05
-        assert receipt.max_constraint_violation == 0.0
+        assert card.status == ModelCheckpointStatus.UNQUALIFIED
+        assert card.status != ModelCheckpointStatus.QUALIFIED_NATIVE
+        assert card.dataset_hash is None
+        assert card.weight_digest is None
+        assert card.three_seed_evidence is None
+        assert card.native_replay_receipt is None
+        with pytest.raises(NotImplementedError, match="checkpoint|rollout"):
+            verify_checkpoint_native_replay(card)
 
     def test_constrained_upper_body_native_replay_and_loop_closure(self) -> None:
         matrix = build_checkpoint_matrix()
         card = matrix.get_card("constrained_upper_body_golfer")
-        assert card.status in (
-            ModelCheckpointStatus.QUALIFIED_NATIVE,
-            ModelCheckpointStatus.TRAINED_SURROGATE,
-        )
+        assert card.status == ModelCheckpointStatus.UNQUALIFIED
+        assert card.status != ModelCheckpointStatus.QUALIFIED_NATIVE
         assert card.constraint_count == 4
-        receipt = verify_checkpoint_native_replay(card)
-        assert receipt.is_valid
-        assert receipt.max_constraint_violation < 1e-4
+        assert card.dataset_hash is None
+        assert card.weight_digest is None
+        with pytest.raises(NotImplementedError, match="checkpoint|rollout"):
+            verify_checkpoint_native_replay(card)
 
     def test_nonfinite_trajectory_fails_closed(self) -> None:
         bad_card = _dummy_card(
@@ -323,12 +330,15 @@ class TestOptionalRuntimeBlockers:
 
         card_double = resolve_model_checkpoint("double")
         assert card_double.model_id == "driven_double_pendulum"
-        assert card_double.status == ModelCheckpointStatus.QUALIFIED_NATIVE
+        assert card_double.status == ModelCheckpointStatus.UNQUALIFIED
+        assert card_double.status != ModelCheckpointStatus.QUALIFIED_NATIVE
 
         card_triple = resolve_model_checkpoint("triple")
         assert card_triple.model_id == "driven_triple_pendulum"
-        assert card_triple.status == ModelCheckpointStatus.QUALIFIED_NATIVE
+        assert card_triple.status == ModelCheckpointStatus.UNQUALIFIED
+        assert card_triple.status != ModelCheckpointStatus.QUALIFIED_NATIVE
 
         card_golfer = resolve_model_checkpoint("golfer")
         assert card_golfer.model_id == "constrained_upper_body_golfer"
-        assert card_golfer.status == ModelCheckpointStatus.QUALIFIED_NATIVE
+        assert card_golfer.status == ModelCheckpointStatus.UNQUALIFIED
+        assert card_golfer.status != ModelCheckpointStatus.QUALIFIED_NATIVE

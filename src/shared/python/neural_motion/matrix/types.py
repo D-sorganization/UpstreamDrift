@@ -35,6 +35,7 @@ class ModelCheckpointStatus(str, Enum):
     KINEMATIC_PROPOSAL = "kinematic_proposal"
     BLOCKED_PREREQUISITE = "blocked_prerequisite"
     REFERENCE_ONLY = "reference_only"
+    UNQUALIFIED = "unqualified"
 
 
 @dataclass(frozen=True)
@@ -116,24 +117,27 @@ class NativeReplayReceipt:
 class BenefitResult:
     """Measured acceleration and benefit over classical matching."""
 
-    speedup_factor: float
-    loss_reduction_pct: float
-    break_even_queries: int
-    verdict: str
+    speedup_factor: float | None = None
+    loss_reduction_pct: float | None = None
+    break_even_queries: int | None = None
+    verdict: str = "unmeasured"
 
     def __post_init__(self) -> None:
-        if not math.isfinite(self.speedup_factor) or self.speedup_factor < 0.0:
-            raise ValueError(
-                f"speedup_factor must be non-negative, got {self.speedup_factor}"
-            )
-        if not math.isfinite(self.loss_reduction_pct):
-            raise ValueError(
-                f"loss_reduction_pct must be finite, got {self.loss_reduction_pct}"
-            )
-        if self.break_even_queries < 0:
-            raise ValueError(
-                f"break_even_queries must be >= 0, got {self.break_even_queries}"
-            )
+        if self.speedup_factor is not None:
+            if not math.isfinite(self.speedup_factor) or self.speedup_factor < 0.0:
+                raise ValueError(
+                    f"speedup_factor must be non-negative, got {self.speedup_factor}"
+                )
+        if self.loss_reduction_pct is not None:
+            if not math.isfinite(self.loss_reduction_pct):
+                raise ValueError(
+                    f"loss_reduction_pct must be finite, got {self.loss_reduction_pct}"
+                )
+        if self.break_even_queries is not None:
+            if self.break_even_queries < 0:
+                raise ValueError(
+                    f"break_even_queries must be >= 0, got {self.break_even_queries}"
+                )
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -159,13 +163,13 @@ class ModelCheckpointCard:
     control_basis: str
     conditioning_schema: str
     generator_adapter: str
-    dataset_hash: str
-    split_hash: str
-    weight_digest: str
-    three_seed_evidence: ThreeSeedEvidence
-    native_replay_receipt: NativeReplayReceipt
-    benefit_result: BenefitResult
-    status: ModelCheckpointStatus
+    dataset_hash: str | None = None
+    split_hash: str | None = None
+    weight_digest: str | None = None
+    three_seed_evidence: ThreeSeedEvidence | None = None
+    native_replay_receipt: NativeReplayReceipt | None = None
+    benefit_result: BenefitResult = field(default_factory=BenefitResult)
+    status: ModelCheckpointStatus = ModelCheckpointStatus.UNQUALIFIED
     blockers: tuple[str, ...] = ()
     governing_issues: tuple[str, ...] = ("#10585", "#10624")
 
@@ -176,8 +180,11 @@ class ModelCheckpointCard:
             raise ValueError("q_dim and v_dim must be non-negative")
         if self.u_dim < 0 or self.constraint_count < 0:
             raise ValueError("u_dim and constraint_count must be non-negative")
-        if not self.dataset_hash or not self.weight_digest:
-            raise ValueError("dataset_hash and weight_digest must be non-empty")
+        if self.status == ModelCheckpointStatus.QUALIFIED_NATIVE:
+            if not self.dataset_hash or not self.weight_digest:
+                raise ValueError(
+                    "dataset_hash and weight_digest must be non-empty for QUALIFIED_NATIVE"
+                )
 
     def checkpoint_hash(self) -> str:
         """Cryptographic SHA-256 fingerprint binding all metadata and weights."""
@@ -200,8 +207,16 @@ class ModelCheckpointCard:
             "dataset_hash": self.dataset_hash,
             "split_hash": self.split_hash,
             "weight_digest": self.weight_digest,
-            "three_seed_evidence": self.three_seed_evidence.as_dict(),
-            "native_replay_receipt": self.native_replay_receipt.as_dict(),
+            "three_seed_evidence": (
+                self.three_seed_evidence.as_dict()
+                if self.three_seed_evidence is not None
+                else None
+            ),
+            "native_replay_receipt": (
+                self.native_replay_receipt.as_dict()
+                if self.native_replay_receipt is not None
+                else None
+            ),
             "benefit_result": self.benefit_result.as_dict(),
             "status": self.status.value,
             "blockers": list(self.blockers),

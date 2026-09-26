@@ -3,7 +3,8 @@
   "issue": "#10070",
   "epic": "#10062",
   "engine": "drake",
-  "status": "PASSED",
+  "status": "REJECTED",
+  "note": "relabelled #10960 P0-9: whole_marker_rmse_m 2.39 m > 0.06 m, max_normal_force_n 35.40 kN > 2.35 kN, max_penetration_m 9.42 cm > 1.00 cm, max_closure_residual_m 1.91 m > 0.005 m",
   "timestamp_utc": "2026-09-14T08:52:41.030265+00:00",
   "environment": {
     "python": "3.10.12 (main, Jun 22 2026, 18:55:27) [GCC 11.4.0]",

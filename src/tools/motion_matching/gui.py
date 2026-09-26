@@ -490,6 +490,9 @@ class MotionMatchingWidget(QWidget):
         form.addRow("Preset", self.club_preset)
         form.addRow("Disclaimer", self.club_disclaimer)
         form.addRow("Conflicts / coverage", self.club_conflicts)
+        self._club_seed: Any = None
+        self.club_seed_status = QLabel("no verified seed")
+        form.addRow("Seed status", self.club_seed_status)
         form.addRow("Keyboard", shortcuts)
 
         preview_btn = QPushButton("Run preview (P)")
@@ -532,6 +535,19 @@ class MotionMatchingWidget(QWidget):
         if self._club_handle is not None and self._club_handle.is_running:
             self.club_log.appendPlainText("Club-only match already running.")
             return
+
+        from src.shared.python.motion_matching.club_only.seeds import (
+            VERIFIED_SEED_SOURCES,
+        )
+
+        seed = self._club_seed
+        if seed is None or seed.source not in VERIFIED_SEED_SOURCES:
+            self.club_seed_status.setText("no verified seed")
+            self.club_log.appendPlainText(
+                "no verified seed: matching requires a verified seed from CO-03 retrieval or constrained_ik"
+            )
+            return
+
         trial_id = self.club_trial.currentData() or self.club_trial.currentText()
         model_id = self.club_model.currentText()
         req = pipeline.ClubOnlyMatchRequest(
@@ -579,6 +595,7 @@ class MotionMatchingWidget(QWidget):
                 result = run_club_only_ui_match(
                     session,
                     observation=observation,
+                    seed=seed,
                     cancel_hook=_cancel,
                     resume_checkpoint=resume_checkpoint,
                 )

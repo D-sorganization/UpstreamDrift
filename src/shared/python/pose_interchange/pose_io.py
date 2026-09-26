@@ -491,7 +491,6 @@ def save_motion_match_target(pose: CanonicalPose, output_path: Path | str) -> No
             "format": "synthetic",
             "subject_id": "canonical_pose",
             "trial_id": "single_frame",
-            "sha256": "0" * 64,
         },
         "coordinate_frame": "z_up_right_handed",
     }
