@@ -98,7 +98,10 @@ def test_active_calibration_receipt_metadata_and_hashes() -> None:
 
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     assert receipt["engine"] == "mujoco"
-    assert receipt["status"] == "PASSED"
+    # #10960 P0-9: the active fit misses its RMS and closure thresholds, so the
+    # receipt is honestly REJECTED and must say which threshold failed.
+    assert receipt["status"] == "REJECTED"
+    assert "threshold" in receipt["note"]
     assert receipt["full_trajectory"]["num_frames"] == 654
     assert receipt["full_trajectory"]["closure_max_error_m"] < 0.02
 

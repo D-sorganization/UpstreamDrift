@@ -48,6 +48,10 @@
 - CI round 3: `check_file_size_budget.py` flagged `gui.py` at 1205/1200. Moved the verified-seed
   predicate into `seeds.is_verified_seed` + `NO_VERIFIED_SEED_MESSAGE` (tested in
   `test_ui_integration_seed_10960.py`); `gui.py` is 1200 lines; all 29 local repo-structure steps pass.
+- CI round 4: `unit-test-gate` 2 failed / 19109 passed. Both were tests pinning pre-#10960
+  behaviour: `test_calibration_provenance` asserted the FB4 MuJoCo receipt `PASSED` (P0-9
+  honestly relabelled it `REJECTED`, 138 mm RMS > 60 mm), and the tour-viewer compare test ran
+  without the now-mandatory seed (P1-4). Tests updated to the new contract; 11 passed locally.
 
 ## Blockers and Risks
 
