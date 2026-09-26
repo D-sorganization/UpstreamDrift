@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9191 · Verify Companion Screenshot Bytes and Pixel Dimensions
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9191
+- **PR:** draft PR from `agy/ud-9191-screenshot-verifier`
+- **Branch:** `agy/ud-9191-screenshot-verifier`
+- **Paths:** `scripts/verify_companion_screenshots.py`, `tests/unit/scripts/test_verify_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — 57/57 pass across the verifier tests and tests/companion/test_companion_catalog.py; ruff clean; architecture budget OK.
+- **Summary:** `scripts/verify_companion_screenshots.py` recomputes SHA-256 and PNG IHDR pixel size for every captured screenshot record (path must resolve inside the repo, alt text required) and requires pending records to carry null asset fields plus a reason; the companion catalog tests run it on the exporter's real payload. Delivers the #9191 'SHA-256/dimension verification' item; the governed capture workflow, real assets and AffineDrift #4025 alignment remain.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review

@@ -578,6 +578,17 @@ def test_screenshots_payload_is_pending_metadata_only() -> None:
     assert payloads.catalog["screenshots"] == []
 
 
+def test_screenshots_payload_passes_screenshot_verifier() -> None:
+    from scripts import verify_companion_screenshots
+
+    companion_catalog = _catalog_module()
+    payloads = companion_catalog.build_payload_set(REPO_ROOT, require_clean=False)
+    violations = verify_companion_screenshots.verify_screenshot_records(
+        payloads.screenshots, REPO_ROOT
+    )
+    assert violations == []
+
+
 def test_screenshot_schema_encodes_pending_and_captured_conditions() -> None:
     schema = json.loads(SCREENSHOTS_SCHEMA_PATH.read_text(encoding="utf-8"))
     validator = jsonschema.Draft202012Validator(schema)
