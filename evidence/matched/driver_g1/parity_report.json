@@ -5,8 +5,9 @@
   "reference_engine": "pinocchio",
   "reference_model_sha256": "",
   "created_at": "2026-09-20T17:11:45Z",
-  "is_physically_accepted": false,
-  "status": "PARTIAL",
+  "is_parity_accepted": false,
+  "status": "DIAGNOSTIC",
+  "note": "Relabelled to DIAGNOSTIC per #10960 fabricated-evidence audit (schema update to is_parity_accepted and fail-closed parity gating).",
   "engine_rows": {
     "mujoco": {
       "engine": "mujoco",

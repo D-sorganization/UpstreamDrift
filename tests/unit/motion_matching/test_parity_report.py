@@ -58,11 +58,13 @@ class FakeMatchingPlant:
         marker_offset: float = 0.0,
         torque_multiplier: float = 1.0,
         divergent_trajectory: bool = False,
+        marker_count: int | None = None,
     ) -> None:
         self._name = name
         self._marker_offset = marker_offset
         self._torque_multiplier = torque_multiplier
         self._divergent_trajectory = divergent_trajectory
+        self._marker_count = marker_count
         self._ground_plane = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
 
     @property
@@ -82,7 +84,10 @@ class FakeMatchingPlant:
         return self._ground_plane
 
     def create_ik(
-        self, attachments: Mapping[str, tuple[str, Sequence[float]]]
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        *,
+        ik_backend: str = "lm",
     ) -> BaseFullBodyIK:
         raise NotImplementedError("Not needed for parity test")  # tracked: #10350
 
@@ -96,7 +101,10 @@ class FakeMatchingPlant:
     ) -> np.ndarray:
         # Base markers of shape (frames, markers, 3)
         n_frames = len(q)
-        n_markers = len(attachments) if attachments else 4
+        if self._marker_count is not None:
+            n_markers = self._marker_count
+        else:
+            n_markers = len(attachments) if attachments else 4
         markers = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
         if self._divergent_trajectory:
             # Alternate sign across frames so mean is 0 but distance is large
@@ -282,7 +290,7 @@ def test_parity_schema_serialization_round_trip() -> None:
         reference_engine="pinocchio",
         reference_model_sha256="pin-sha",
         created_at="2026-09-20T12:00:00Z",
-        is_physically_accepted=True,
+        is_parity_accepted=True,
         status="PASSED",
         engine_rows={"mujoco": row},
         pairwise_comparisons={},
@@ -291,14 +299,17 @@ def test_parity_schema_serialization_round_trip() -> None:
     d = report.to_dict()
     assert d["schema_version"] == PARITY_REPORT_SCHEMA_VERSION
     assert d["engine_rows"]["mujoco"]["engine"] == "mujoco"
+    assert d["is_parity_accepted"] is True
 
     json_str = report.to_json()
     assert "mujoco" in json_str
+    assert "is_parity_accepted" in json_str
 
     reloaded = UnifiedParityReport.from_dict(json.loads(json_str))
     assert reloaded.schema_version == PARITY_REPORT_SCHEMA_VERSION
     assert reloaded.engine_rows["mujoco"].engine == "mujoco"
     assert reloaded.engine_rows["mujoco"].total_work_J == 45.0
+    assert reloaded.is_parity_accepted is True
     assert (
         reloaded.engine_rows["mujoco"]
         .pointwise_differences["marker_pos_m"]
@@ -343,7 +354,7 @@ def test_markdown_rendering_contains_classes_and_rows() -> None:
         reference_engine="pinocchio",
         reference_model_sha256="sha-pin",
         created_at="2026-09-20T12:00:00Z",
-        is_physically_accepted=False,
+        is_parity_accepted=False,
         status="PARTIAL",
         engine_rows={"mujoco": row_same, "opensim": row_native},
     )
@@ -384,3 +395,112 @@ def test_cli_execution(tmp_path: Path) -> None:
     data = json.loads(json_path.read_text(encoding="utf-8"))
     assert data["schema_version"] == PARITY_REPORT_SCHEMA_VERSION
     assert "mujoco" in data["engine_rows"]
+
+
+def test_empty_row_set_overall_status_partial() -> None:
+    """Empty row set must evaluate to PARTIAL, never PASSED (P1-7, #10960)."""
+    from src.shared.python.motion_matching.parity_report import (
+        _determine_overall_status,
+    )
+
+    status = _determine_overall_status({})
+    assert status == "PARTIAL"
+
+
+def test_missing_reference_sets_unverified(tmp_path: Path) -> None:
+    """Missing reference engine markers -> row status 'unverified', never 'qualified' (P1-7, #10960)."""
+    cand_path = _make_sample_candidate(tmp_path)
+    plant_b = FakeMatchingPlant("fake_b", marker_offset=0.0)
+
+    report = build_parity_report(
+        candidate=cand_path,
+        plants={"fake_b": plant_b},
+        engines=("fake_b",),
+        reference_engine="missing_ref",
+    )
+
+    row_b = report.engine_rows["fake_b"]
+    assert row_b.status == "unverified"
+    assert "unavailable" in row_b.reason.lower() or "missing" in row_b.reason.lower()
+    assert report.is_parity_accepted is False
+
+
+def test_shape_mismatch_sets_unverified(tmp_path: Path) -> None:
+    """Shape mismatch against reference -> row status 'unverified', never 'qualified' (P1-7, #10960)."""
+    cand_path = _make_sample_candidate(tmp_path)
+    plant_ref = FakeMatchingPlant("fake_ref", marker_count=4)
+    plant_b = FakeMatchingPlant("fake_b", marker_count=6)
+
+    report = build_parity_report(
+        candidate=cand_path,
+        plants={"fake_ref": plant_ref, "fake_b": plant_b},
+        engines=("fake_ref", "fake_b"),
+        reference_engine="fake_ref",
+    )
+
+    row_b = report.engine_rows["fake_b"]
+    assert row_b.status == "unverified"
+    assert "shape mismatch" in row_b.reason.lower()
+    assert report.is_parity_accepted is False
+
+
+def test_ungated_engine_class_sets_unverified(tmp_path: Path) -> None:
+    """Native-model observable agreement engines are never gated -> 'unverified' (P1-7, #10960)."""
+    cand_path = _make_sample_candidate(tmp_path)
+    plant_ref = FakeMatchingPlant("fake_ref")
+    plant_native = FakeMatchingPlant("opensim")  # In NATIVE_MODEL_ENGINES
+
+    report = build_parity_report(
+        candidate=cand_path,
+        plants={"fake_ref": plant_ref, "opensim": plant_native},
+        engines=("fake_ref", "opensim"),
+        reference_engine="fake_ref",
+    )
+
+    row_native = report.engine_rows["opensim"]
+    assert row_native.status == "unverified"
+    assert (
+        "not gated" in row_native.reason.lower()
+        or "never gated" in row_native.reason.lower()
+    )
+
+
+def test_drop_model_markers_fallback_no_self_comparison(tmp_path: Path) -> None:
+    """Drop model_markers_m fallback: candidate markers must NOT serve as reference (P1-7, #10960)."""
+    cand_path = _make_sample_candidate(tmp_path)
+    plant_b = FakeMatchingPlant("fake_b")
+
+    # Candidate has model_markers_m populated, but reference_engine 'nonexistent' has no plant
+    report = build_parity_report(
+        candidate=cand_path,
+        plants={"fake_b": plant_b},
+        engines=("fake_b",),
+        reference_engine="nonexistent",
+    )
+
+    row_b = report.engine_rows["fake_b"]
+    assert row_b.status == "unverified"
+    assert "unavailable" in row_b.reason.lower() or "missing" in row_b.reason.lower()
+    assert report.is_parity_accepted is False
+
+
+def test_pass_all_gates_false_initially_and_diverged_rejected(tmp_path: Path) -> None:
+    """pass_all_gates starts False and diverged trajectory is rejected (P1-7, #10960)."""
+    cand_path = _make_sample_candidate(tmp_path)
+    plant_ref = FakeMatchingPlant("fake_ref")
+    plant_diverged = FakeMatchingPlant(
+        "fake_diverged", marker_offset=0.05
+    )  # 50 mm > 1 mm tolerance
+
+    report = build_parity_report(
+        candidate=cand_path,
+        plants={"fake_ref": plant_ref, "fake_diverged": plant_diverged},
+        engines=("fake_ref", "fake_diverged"),
+        reference_engine="fake_ref",
+    )
+
+    row_div = report.engine_rows["fake_diverged"]
+    assert row_div.status == "rejected"
+    assert "diverged" in row_div.reason.lower()
+    assert report.status == "REJECTED"
+    assert report.is_parity_accepted is False

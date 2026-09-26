@@ -13,7 +13,7 @@
 
 ## Objective and Status
 
-- Objective: remove literal success values from seven P0 findings of the #10960 audit (P0-1, P0-3, P0-5/6, P0-7, P0-8, P0-24).
+- Objective: remove literal success values from seven P0 findings of the #10960 audit (P0-1, P0-3, P0-5/6, P0-7, P0-8, P0-24) plus P1-7 (parity report) and P1-9 (failed rollout audit).
 - Status: slices executed by agy (Gemini 3.8 Flash) in isolated worktrees; orchestrator review removed
   a new self-qualifying checkpoint loader (P0-24), a summed-units selection score (P0-3), speculative Moco
   adapters (P0-8), zero-cost defaults (P0-6), and duplicated guards (DRY).
@@ -37,7 +37,8 @@
 ## Next Steps
 
 1. CI green on the draft PR; review; merge.
-2. Remaining #10960 findings (P1 list in the audit) as follow-up slices.
+2. Remaining #10960 findings as follow-up slices: P0-9 (OG, in flight), P1-8, P1-10 (OG, in flight); P0-10, P1-11 and P1-1..6 wait for #10973 (shared files).
+3. Follow-up: `CandidateSession.rms_error` returns 0.0 when no receipt metric exists (should be None).
 
 ## Change Log
 

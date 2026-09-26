@@ -334,9 +334,9 @@ def _evaluate_engine_row(
 ) -> tuple[EngineParityRow, np.ndarray | None]:
     """Evaluate one engine for trajectory parity and return row and evaluated markers."""
     comp_class = (
-        ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
-        if eng in SAME_MODEL_ENGINES
-        else ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
+        ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
+        if eng in NATIVE_MODEL_ENGINES
+        else ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
     )
     if plant is None:
         reason = (
@@ -371,20 +371,38 @@ def _evaluate_engine_row(
     wall_clock = time.perf_counter() - t0
 
     pt_diffs: dict[str, PointwiseDifference] = {}
-    pass_all_gates = True
+    pass_all_gates = False
+    comparisons_ran = 0
+    all_passed = True
+    unverified_reason = ""
 
-    if reference_engine in evaluated_markers:
+    if comp_class == ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT:
+        unverified_reason = "Native-model observable agreement is never gated"
+    elif reference_engine not in evaluated_markers:
+        unverified_reason = f"Reference markers for '{reference_engine}' unavailable"
+    else:
         ref_markers = evaluated_markers[reference_engine]
-        if ref_markers.shape == markers.shape:
+        if ref_markers.shape != markers.shape:
+            unverified_reason = (
+                f"Marker shape mismatch with reference '{reference_engine}': "
+                f"{markers.shape} != {ref_markers.shape}"
+            )
+        else:
             m_diff = evaluate_pointwise_trajectory_parity(
                 ref_markers, markers, tolerance_m=0.001
             )
             pt_diffs["marker_diff_m"] = m_diff
-            if (
-                not m_diff.pass_gate
-                and comp_class == ComparisonClass.SAME_MODEL_NUMERICAL_PARITY
-            ):
-                pass_all_gates = False
+            comparisons_ran += 1
+            if not m_diff.pass_gate:
+                all_passed = False
+
+    if comparisons_ran > 0:
+        pass_all_gates = all_passed
+        status = "qualified" if pass_all_gates else "rejected"
+        reason = "" if pass_all_gates else "Diverged beyond tolerance"
+    else:
+        status = "unverified"
+        reason = unverified_reason or "No comparisons ran"
 
     total_work = (
         float(cand.metadata.extra["total_work_j"])
@@ -394,7 +412,7 @@ def _evaluate_engine_row(
 
     row = EngineParityRow(
         engine=eng,
-        status="qualified" if pass_all_gates else "rejected",
+        status=status,
         comparison_class=comp_class,
         model_name=f"{eng}_model",
         model_sha256=getattr(plant, "plant_sha", ""),
@@ -405,13 +423,15 @@ def _evaluate_engine_row(
         pointwise_differences=pt_diffs,
         total_work_J=total_work,
         wall_clock_s=wall_clock,
-        reason="" if pass_all_gates else "Diverged beyond tolerance",
+        reason=reason,
     )
     return row, markers
 
 
 def _determine_overall_status(rows: Mapping[str, EngineParityRow]) -> str:
     """Aggregate row statuses into overall verdict."""
+    if not rows:
+        return "PARTIAL"
     statuses = [r.status for r in rows.values()]
     if all(s == "qualified" for s in statuses):
         return "PASSED"
@@ -466,8 +486,6 @@ def build_parity_report(
         evaluated_markers[reference_engine] = ref_plant.marker_positions(
             cand.q, resolved_attachments
         )
-    elif cand.markers.model_markers_m is not None:
-        evaluated_markers[reference_engine] = cand.markers.model_markers_m
 
     for eng in engine_list:
         plant = active_plants.get(eng)
@@ -500,7 +518,7 @@ def build_parity_report(
         reference_engine=reference_engine,
         reference_model_sha256=getattr(ref_plant, "plant_sha", ""),
         created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        is_physically_accepted=(overall_status == "PASSED"),
+        is_parity_accepted=(overall_status == "PASSED"),
         status=overall_status,
         engine_rows=rows,
     )
