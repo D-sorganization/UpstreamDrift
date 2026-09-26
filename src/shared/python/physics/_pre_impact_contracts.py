@@ -11,12 +11,12 @@ import enum
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, NoReturn, cast
+from typing import Any, NoReturn, TypeAlias, cast
 
 import numpy as np
 import numpy.typing as npt
 
-FloatArray = npt.NDArray[np.float64]
+FloatArray: TypeAlias = npt.NDArray[np.float64]
 
 #: Absolute orthonormality/determinant tolerance for a proper rotation.
 ROTATION_TOLERANCE = 1e-9
