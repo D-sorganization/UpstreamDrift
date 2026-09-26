@@ -7064,6 +7064,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2024-05-23 | n/a | Optimize `marker_replay_report` errors with `np.einsum` (spec-exempt: micro-optimization) |
 | 2026-09-26 | #10946 | Keep Multi-Muscle Contracts and Torque Identical on the Rust Backend. |
 | 2026-09-25 | #10973 | Consolidate nine session PRs (#10948, #10947, #10964, #10966, #10967, #10969, #10961, #10972, #10949) into one branch. |
 | 2026-09-25 | #10967 | ZTCF/ZVCF fail closed in MyoSuite, pendulum and DTACK; DTACK canonical ZVCF (v=0, tau=0) split from control-kept variant (#10286). |
