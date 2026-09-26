@@ -96,7 +96,7 @@ _RECONCILIATION_RECORDS: tuple[ReconciliationRecord, ...] = (
 
 _TOOLS_REVISION = ToolsRevisionStatus(
     vendor_submodule_path="vendor/ud-tools",
-    pinned_commit_sha="a9ed0e7c5c6905b1164082659051d6381068052d",
+    pinned_commit_sha="95ed6b47857e9a47211ab1973d02b28beae718bc",
     historical_review_gitlink="62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1",
     owned_package_name="double_pendulum_golf (Tools repo)",
     source_owner="Tools",
