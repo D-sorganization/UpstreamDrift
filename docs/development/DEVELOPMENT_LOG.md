@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9619 · Amend ADR-0041 to Record Consumer-Side Fitter Decision
+
+- **State:** in_review
+- **Owner:** local (session `claude-deskcomputer-20260925-ud`)
+- **Issue:** #9619 (companion #9630)
+- **Branch:** `agy/ud-9619-adr0041`
+- **Paths:** `docs/adr/0041-markerless-mocap-consumer-authority.md`, `tests/architecture/test_markerless_mocap_authority.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — test_adr_records_consumer_side_fitter_amendment passes in test_markerless_mocap_authority.py
+- **Summary:** Amended ADR-0041 to record that consumer-side self-calibration fitters live in UpstreamDrift (`src/motion_capture/reconstruct/`) while Tools maintains vendor-neutral reference geometry (#9630, #9619).
+- **Next step:** CI green, review, merge.
+
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress
