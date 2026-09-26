@@ -69,7 +69,7 @@ class TestIssue2502TempFileHandling:
 
         renderer = offscreen_renderer_class()
         with patch.dict(sys.modules, _make_qt_stubs()):
-            import src.tools.model_explorer.mujoco_viewer as mv
+            import src.tools.model_explorer._mujoco_viewer_backend as mv
 
             with (
                 patch.object(mv, "mujoco", self._mock_mujoco()),
@@ -97,7 +97,7 @@ class TestIssue2502TempFileHandling:
         mock_mujoco.MjModel.from_xml_path.side_effect = capture
 
         with patch.dict(sys.modules, _make_qt_stubs()):
-            import src.tools.model_explorer.mujoco_viewer as mv
+            import src.tools.model_explorer._mujoco_viewer_backend as mv
 
             with (
                 patch.object(mv, "mujoco", mock_mujoco),

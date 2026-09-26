@@ -99,13 +99,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor)
 - **Issue:** #9411
-- **PR:** draft PR from `agy/ud-9411-mypy-budget`
-- **Branch:** `agy/ud-9411-mypy-budget`
-- **Paths:** `scripts/check_mypy_exclusion_budget.py`, `scripts/config/mypy_exclusion_budget.json`, `pyproject.toml`, `src/research/deformable/objects.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`, `docs/development/DEVELOPMENT_LOG.md`, `scripts/config/unit_gate_quarantine.json`, quarantined unit test files (Q-2..Q-5)
+- **PR:** draft PR from `claude/ud-9411-unquarantine-passing`
+- **Branch:** `claude/ud-9411-unquarantine-passing`
+- **Paths:** `scripts/config/unit_gate_quarantine.json`, quarantined unit test files, `src/shared/python/validation_pkg/data_fitting.py`, `src/tools/model_explorer/mujoco_viewer.py`, `src/shared/python/ai/adapters/`, `src/api/routes/__init__.py`, `src/shared/python/physics/impact_model/utils.py`, `src/shared/python/pendulum_simulator/physics.py`
 - **Started:** 2026-09-25
-- **Last verified:** 2026-09-26 — budget: 14 unit tests pass, 35 exclusions under the 2026-10-01 cap of 36; quarantine: contract passes (155 IDs, 10 clusters), 43 retired IDs' tests pass, the 13 failures in the touched files are all still-quarantined IDs.
-- **Summary:** Enforce tracked-file validation in check_mypy_exclusion_budget.py; deleted 3 dead exclusions (start_api_server.py, setup_golf_suite.py, shared/models/); resolved type errors and unexcluded 6 files (targets.py, marker_mapping.py, checkpoint.py, data_io export.py, common export.py, objects.py) bringing total to 35 (below 36 cap); fixed the imported-module type errors this exposed (engine protocol `step(dt)`, differentiable engine array annotations, club_data loader `to_numpy`); extended remaining expirations to 2027-01-01 with re-attestation. Quarantine slice (Q-2..Q-5): repaired mechanical test drift (exception types, field names, CWD-relative paths, steam temperature in K) and retired 43 node IDs from the unit-gate quarantine without source changes.
-- **Next step:** CI green, review, merge.
+- **Last verified:** 2026-09-26 — CI on #10990 (Linux) failed 24 retired IDs that pass on Windows (GL-less mujoco, missing trimesh, bunker GUI carry, force-plate Sidekick ownership guard) and flagged the `ai/adapters` edits as Tools child-copy edits. Reverted `ai/adapters` and the gear-effect sign flip (it broke `test_impact_physics_value_assertions`: toe impact must give draw spin); 86 existing retired IDs rerun locally: 75 pass, 11 fail and are re-quarantined with the 24. Ledger 155 → 100 (55 retired); monolith register regenerated; child-copy, divergence, monolith and impact value tests pass.
+- **Summary:** Retire unit-gate quarantine IDs whose tests pass on the Linux CI lane after fixing real defects (shoulder FK origin), deduplicating the `data_fitting` and `mujoco_viewer` coordinators onto their existing helper modules, and retargeting stale tests. Tools-owned `ai` adapter changes and the gear-effect sign question are out of scope here (Tools#5362 / a physics-convention decision). Earlier slice (#10973) landed the mypy budget and 43 retirements.
+- **Next step:** get `quality-gate` green on #10990 (armed through `automerge_guard.py`).
 
 ### DL-#9703 · Versioned Pre-Impact Bundle for Tools Impact Kernels
 

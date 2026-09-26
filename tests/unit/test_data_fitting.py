@@ -145,7 +145,7 @@ class TestParameterEstimator:
         estimator = ParameterEstimator(anthropometric_model="dempster")
 
         assert estimator.anthropometric_model == "dempster"
-        assert "upper_arm" in estimator.theta_optimal
+        assert "upper_arm" in estimator.coefficients
 
     def test_init_winter(self) -> None:
         """Test initialization with Winter model."""

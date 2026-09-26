@@ -503,11 +503,11 @@ class TestBiomechanicsPhysicsRegressions:
         analyzer = BiomechanicalAnalyzer(model, data)
         mujoco.mj_forward(model, data)
 
+        expected_pe = 10.0 * 9.80665 * 2.0
         ke, pe, te = analyzer.compute_energies()
-        # A body at rest 2 m up: KE = 0, PE = m*g*h = 10 * 9.80665 * 2.
         assert ke == pytest.approx(0.0, abs=1e-9)
-        assert pe == pytest.approx(196.2, abs=1e-6)
-        assert te == pytest.approx(196.2, abs=1e-6)
+        assert pe == pytest.approx(expected_pe, abs=1e-6)
+        assert te == pytest.approx(expected_pe, abs=1e-6)
 
         data.qvel[0] = 5.0
         mujoco.mj_forward(model, data)
@@ -516,7 +516,7 @@ class TestBiomechanicsPhysicsRegressions:
         m_full = np.zeros((model.nv, model.nv))
         mujoco.mj_fullM(model, m_full, data.qM)
         assert ke == pytest.approx(0.5 * data.qvel @ m_full @ data.qvel, abs=1e-9)
-        assert pe == pytest.approx(196.2, abs=1e-6)
+        assert pe == pytest.approx(expected_pe, abs=1e-6)
 
     def test_ground_reaction_forces_are_world_frame_and_point_up(self) -> None:
         """#7991: GRF must be rotated to world frame with the correct sign."""
