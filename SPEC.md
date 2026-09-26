@@ -7066,7 +7066,12 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-09-26 | n/a | Micro-optimization: Use np.einsum for Euclidean distance calculation in fit_pipeline.py (spec-exempt: micro-optimization) |
 | 2026-09-26 | #10946 | Keep Multi-Muscle Contracts and Torque Identical on the Rust Backend. |
+| 2026-09-25 | #10973 | Consolidate nine session PRs (#10948, #10947, #10964, #10966, #10967, #10969, #10961, #10972, #10949) into one branch. |
+| 2026-09-25 | #10967 | ZTCF/ZVCF fail closed in MyoSuite, pendulum and DTACK; DTACK canonical ZVCF (v=0, tau=0) split from control-kept variant (#10286). |
+| 2026-09-25 | #10602 | Score the Club-Only Matrix Only From Complete Recorded Fit Outcomes. |
 | 2026-09-25 | #10944 | Bump vendor/ud-tools to Tools main with K0 + K3a (prereq for #10943). |
+| 2026-09-25 | #9411 | Fit MyPy Exclusion Budget Under the 2026-10-01 Cap and Re-Attest Remaining Entries. |
+| 2026-09-25 | #9703 | Versioned immutable PreImpactBundle v1 with fail-closed contracts, explicit absent fields, power-invariant frame transforms and energy-reporting modal projection (IA-U2, #9703). |
 | 2024-05-22 | n/a | Micro-optimization: use np.sqrt(np.einsum) instead of np.linalg.norm(..., axis=-1) in distribution.py (spec-exempt: micro-optimization) |
 | 2026-09-24 | n/a | Optimized small 1D array norm calculation by replacing `np.linalg.norm(force)` with `math.sqrt(np.vdot(force, force))` in `src/shared/python/physics/_shaft_model.py` for ~3x speedup. (spec-exempt: micro-optimization) |
 | 2026-09-24 | #10923 | Require both Desktop and Start Menu shortcut destinations to succeed and update handoff governance (#10918, #10919, #10920, #10921, #10924, #10925). |

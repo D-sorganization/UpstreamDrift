@@ -8,9 +8,12 @@ Commands:
 - ``capture --plan P --duration S --out DIR [--synthetic]``: open every planned
   camera, capture together, write ``session_manifest.json``. Exit 0 for
   ``supported``, 1 for ``degraded``/``blocked``, 2 for ``unavailable``.
-- ``record --plan P --duration S --out DIR [--dry-run] [--consent-recorded]``:
+- ``record --plan P --duration S --out DIR [--dry-run] [--consent-recorded] [--repeat N] [--pause S]``:
   stream-copy every planned camera's compressed video to disk and write a
   session bundle (``plan.json``, ``recordings.json``, ``session_manifest.json``).
+  When ``--repeat N`` is greater than 1, records N takes into ``<out>/take_01/`` ..
+  ``<out>/take_N/`` with ``--pause S`` seconds between takes and writes
+  ``<out>/soak_summary.json``. Exit code is the worst take's exit code.
   Same exit codes as ``capture``. ``--dry-run`` records nothing and exercises
   the bundle. Both commands also write ``mocap_session.json``, the session in
   the canonical Tools ``mocap-session`` contract, when the pinned Tools tree
@@ -49,6 +52,7 @@ import argparse
 import json
 import logging
 import sys
+import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -58,6 +62,11 @@ from src.motion_capture.provenance import write_stamped
 from src.motion_capture.variants import variant_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from ._cli_parsers import (
+    _add_coaching_parsers,
+    _add_model_parsers,
+    _add_variant_args,
+)
 from .bundle import MANIFEST_FILE, build_index, check_bundle, write_bundle
 from .plan import CameraControls, RigPlan, check_plan, parse_mode
 from .probe import RecordingProbe, probe_recording
@@ -72,6 +81,13 @@ from .recorder import (
     record_all,
 )
 from .session import CaptureOutcome, CaptureSession, CaptureTuning, SessionManifest
+from .soak import (
+    EXIT_BY_OUTCOME,
+    SOAK_SUMMARY_FILE,
+    TakeSummary,
+    build_soak_summary,
+    soak_exit_code,
+)
 from .sources import FrameSource, SyntheticFrameSource
 from .tools_bridge import RecordingTerms, export_to_bundle, probe_tools_schema
 from .topology import (
@@ -83,12 +99,7 @@ from .topology import (
 
 logger = get_logger(__name__)
 
-_EXIT_BY_OUTCOME = {
-    CaptureOutcome.SUPPORTED: 0,
-    CaptureOutcome.DEGRADED: 1,
-    CaptureOutcome.BLOCKED: 1,
-    CaptureOutcome.UNAVAILABLE: 2,
-}
+_EXIT_BY_OUTCOME = EXIT_BY_OUTCOME
 
 
 def _add_plan_args(parser: argparse.ArgumentParser) -> None:
@@ -136,161 +147,6 @@ def _load_plan(args: argparse.Namespace) -> RigPlan:
         views=views,
         controls=controls if controls.as_overrides() else None,
     )
-
-
-def _add_coaching_parsers(sub: Any) -> None:
-    """Printable boards, annotated clips and take comparison (#9679-#9681)."""
-    brd = sub.add_parser("board", help="write a printable ChArUco board image")
-    brd.add_argument("--board", default="charuco:7x5:0.04:0.03")
-    brd.add_argument("--width", type=int, default=2100, help="pixels (A4 @ 254 dpi)")
-    brd.add_argument("--out", type=Path, required=True)
-    clp = sub.add_parser("clip", help="trimmed clip with overlay and slow motion")
-    clp.add_argument("--session", type=Path, required=True)
-    clp.add_argument("--view", required=True)
-    clp.add_argument(
-        "--from", dest="start", default="address-30", metavar="EVENT|FRAME"
-    )
-    clp.add_argument("--to", dest="end", default="finish+30", metavar="EVENT|FRAME")
-    clp.add_argument("--speed", type=float, default=0.25, help="1 = real time")
-    clp.add_argument("--set", default=None, help="observation set for the overlay")
-    clp.add_argument("--out", type=Path, required=True)
-    cmt = sub.add_parser("compare-takes", help="two takes side by side on an event")
-    cmt.add_argument("--session", type=Path, required=True)
-    cmt.add_argument("--view", required=True)
-    cmt.add_argument("--other-session", type=Path, required=True)
-    cmt.add_argument("--other-view", required=True)
-    cmt.add_argument(
-        "--align", default="top", choices=("address", "top", "peak", "finish")
-    )
-    cmt.add_argument("--speed", type=float, default=0.5)
-    cmt.add_argument("--out", type=Path, required=True)
-    mp = sub.add_parser("multipicture", help="composite multiview video via a layout")
-    mp.add_argument("--session", type=Path, required=True)
-    mp.add_argument("--layout", required=True, help="preset, saved name or JSON path")
-    mp.add_argument("--variants", nargs="*", default=[], help="drawn on overlay tiles")
-    mp.add_argument("--set", default="observations", help="observation set to draw")
-    mp.add_argument("--from", dest="start", type=int, default=0, metavar="FRAME")
-    mp.add_argument("--to", dest="stop", type=int, default=None, metavar="FRAME")
-    mp.add_argument("--speed", type=float, default=1.0, help="1 = real time")
-    mp.add_argument("--size", default=None, metavar="WxH", help="canvas pixels")
-    mp.add_argument("--out", type=Path, required=True)
-
-
-def _add_model_parsers(sub: Any) -> None:
-    """Articulated-model fit, comparison and kinetics (#9709)."""
-    fm = sub.add_parser(
-        "fit-model", help="articulated golfer (scapula) fit, continuous"
-    )
-    fm.add_argument("--session", type=Path, required=True)
-    fm.add_argument(
-        "--sigma-accel",
-        type=float,
-        default=300.0,
-        help="acceleration prior on every joint angle, rad/s^2 (smaller = stiffer)",
-    )
-    fm.add_argument(
-        "--max-velocity",
-        type=float,
-        default=25.0,
-        help="report joint-angle speeds above this, rad/s",
-    )
-    fm.add_argument("--sigma-landmark", type=float, default=0.01, help="metres")
-    fm.add_argument("--model", default="golfer", help="registered model name")
-    fm.add_argument(
-        "--fit-lengths",
-        action="store_true",
-        help="learn the model's learnable segment lengths from the data",
-    )
-    fm.add_argument("--max-iterations", type=int, default=60, help="solver budget")
-    _add_variant_args(fm, observations=True)
-    fm.add_argument(
-        "--from-views",
-        default="",
-        metavar="a,b",
-        help="image-space fit to these views' 2-D keypoints (1..N), no triangulation",
-    )
-    fm.add_argument(
-        "--cameras-from",
-        default="",
-        metavar="VARIANT",
-        help="variant whose reconstruction supplies the cameras for --from-views",
-    )
-    fm.add_argument("--sigma-px", type=float, default=4.0, help="pixel noise")
-    cmm = sub.add_parser("compare-models", help="fit several models, rank them")
-    cmm.add_argument("--session", type=Path, required=True)
-    cmm.add_argument("--models", default=None, help="comma list; default: all")
-    cmm.add_argument("--fit-lengths", action="store_true")
-    cmm.add_argument("--sigma-accel", type=float, default=300.0)
-    cmm.add_argument("--max-iterations", type=int, default=60, help="solver budget")
-    _add_variant_args(cmm)
-    kin = sub.add_parser("kinetics", help="inverse dynamics + replay check of a fit")
-    kin.add_argument("--session", type=Path, required=True)
-    kin.add_argument("--model", default="golfer", help="registered model name")
-    kin.add_argument("--body-mass", type=float, required=True, help="kg")
-    _add_variant_args(kin)
-    _add_variant_tools_parsers(sub)
-    lin = sub.add_parser("lineage", help="provenance chain of a pipeline output")
-    lin.add_argument("--session", type=Path, required=True)
-    lin.add_argument("--path", type=Path, required=True, help="file inside the session")
-    lin.add_argument("--json", action="store_true", help="machine-readable")
-
-
-def _add_variant_tools_parsers(sub: Any) -> None:
-    """overlay, compare-variants, annotations-to-observations (#9795/#9796/#9801)."""
-    ov = sub.add_parser("overlay", help="draw variants' 3-D results on a view")
-    ov.add_argument("--session", type=Path, required=True)
-    ov.add_argument("--view", required=True)
-    ov.add_argument(
-        "--variant",
-        action="append",
-        default=[],
-        metavar="NAME",
-        help="variant to draw, repeatable (default: the session's default match)",
-    )
-    ov.add_argument("--out", type=Path, required=True, help="mp4 to write")
-    ov.add_argument("--from", dest="start", type=int, default=0, metavar="FRAME")
-    ov.add_argument("--to", dest="stop", type=int, default=None, metavar="FRAME")
-    ov.add_argument("--speed", type=float, default=1.0)
-    ov.add_argument("--observations", default="observations", metavar="SET")
-    ov.add_argument("--no-legend", action="store_true")
-    cv = sub.add_parser("compare-variants", help="held-out and 3-D error per variant")
-    cv.add_argument("--session", type=Path, required=True)
-    cv.add_argument("--reference", default="", metavar="NAME")
-    cv.add_argument("--observations", default="observations", metavar="SET")
-    a2o = sub.add_parser(
-        "annotations-to-observations",
-        help="manual clicks as an observation set (optionally over a detector set)",
-    )
-    a2o.add_argument("--session", type=Path, required=True)
-    a2o.add_argument("--view", action="append", default=[], help="repeatable")
-    a2o.add_argument("--merge-with", default="", metavar="SET")
-    a2o.add_argument("--out", default="", metavar="SET")
-
-
-def _add_variant_args(
-    parser: Any, *, observations: bool = False, views: bool = False
-) -> None:
-    """``--variant`` (and for reconstruct: ``--observations``, ``--views``), #9793."""
-    parser.add_argument(
-        "--variant",
-        default="",
-        metavar="NAME",
-        help="named match: outputs under variants/NAME/ (default: the session)",
-    )
-    if observations:
-        parser.add_argument(
-            "--observations",
-            default="observations",
-            metavar="SET",
-            help="observation-set directory to use (observations, observations_x)",
-        )
-    if views:
-        parser.add_argument(
-            "--views",
-            default="",
-            metavar="a,b",
-            help="subset and order of the cameras to use (default: all with cameras)",
-        )
 
 
 def _add_offline_parsers(sub: Any) -> None:
@@ -449,6 +305,18 @@ def _parser() -> argparse.ArgumentParser:
         help="the subject's consent to retain raw video is on record (ADR-0041); "
         "without it the canonical Tools session export is refused, not faked",
     )
+    rec.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="number of back-to-back takes to record (default 1)",
+    )
+    rec.add_argument(
+        "--pause",
+        type=float,
+        default=2.0,
+        help="seconds to pause between takes in repeat mode (default 2.0)",
+    )
     chk = sub.add_parser("session-check", help="validate a session bundle on disk")
     chk.add_argument("--session", type=Path, required=True)
     prx = sub.add_parser("proxy", help="write H.264 mp4 proxies beside the recordings")
@@ -558,8 +426,15 @@ def _dry_run_probe(path: Path) -> RecordingProbe:
     )
 
 
-def cmd_record(args: argparse.Namespace) -> int:
-    plan = _load_plan(args)
+def _record_one_take(
+    args: argparse.Namespace, plan: RigPlan, out_dir: Path
+) -> SessionManifest:
+    """Record one take into ``out_dir`` and return its session manifest.
+
+    Preconditions:
+    - ``plan`` is a loaded, realized rig plan
+    - ``out_dir`` is a target bundle directory
+    """
     started = datetime.now(UTC).isoformat(timespec="seconds")
     factory: Callable[[], Recorder]
     if args.dry_run:
@@ -576,16 +451,16 @@ def cmd_record(args: argparse.Namespace) -> int:
         factory = FfmpegStreamCopyRecorder
     live = LiveOptions(live_preview_dir=args.live_preview, stop_file=args.stop_file)
     results = record_all(
-        plan, refs, args.duration, args.out, factory, warmup_s=args.warmup, live=live
+        plan, refs, args.duration, out_dir, factory, warmup_s=args.warmup, live=live
     )
     prober = _dry_run_probe if args.dry_run else probe_recording
-    index = build_index(plan, results, args.duration, args.out, prober=prober)
-    manifest = write_bundle(args.out, plan, index, started_utc=started)
+    index = build_index(plan, results, args.duration, out_dir, prober=prober)
+    manifest = write_bundle(out_dir, plan, index, started_utc=started)
     terms = RecordingTerms(
         consent_recorded=args.consent_recorded, raw_video_retained=not args.dry_run
     )
-    manifest = _with_tools_export(manifest, plan, args.out, terms)
-    manifest.save(args.out / MANIFEST_FILE)
+    manifest = _with_tools_export(manifest, plan, out_dir, terms)
+    manifest.save(out_dir / MANIFEST_FILE)
     for entry in index.recordings:
         logger.info(
             "%s (%s): %s %d bytes rc=%s frames=%s duration=%s",
@@ -597,8 +472,54 @@ def cmd_record(args: argparse.Namespace) -> int:
             entry.frames,
             entry.duration_s,
         )
-    logger.info("outcome=%s bundle=%s", manifest.outcome.value, args.out)
-    return _EXIT_BY_OUTCOME[manifest.outcome]
+    logger.info("outcome=%s bundle=%s", manifest.outcome.value, out_dir)
+    return manifest
+
+
+def cmd_record(
+    args: argparse.Namespace,
+    *,
+    sleep: Callable[[float], None] = time.sleep,
+) -> int:
+    """Record one or more takes according to ``--repeat``.
+
+    Exit code rule:
+    - For single take (--repeat 1), returns the take exit code (0 for supported,
+      1 for degraded/blocked, 2 for unavailable).
+    - For repeat soak mode (--repeat N > 1), returns the worst (maximum numeric)
+      exit code across all takes.
+    """
+    if args.repeat < 1:
+        raise SystemExit(f"--repeat must be >= 1, got {args.repeat}")
+    if args.pause < 0:
+        raise SystemExit(f"--pause must be >= 0, got {args.pause}")
+
+    plan = _load_plan(args)
+    if args.repeat == 1:
+        manifest = _record_one_take(args, plan, args.out)
+        return _EXIT_BY_OUTCOME[manifest.outcome]
+
+    takes: list[TakeSummary] = []
+    for k in range(1, args.repeat + 1):
+        take_dir = args.out / f"take_{k:02d}"
+        manifest = _record_one_take(args, plan, take_dir)
+        takes.append(TakeSummary.from_bundle(k, take_dir, manifest))
+        if k < args.repeat:
+            sleep(args.pause)
+
+    summary = build_soak_summary(takes, repeat=args.repeat)
+    args.out.mkdir(parents=True, exist_ok=True)
+    summary_path = args.out / SOAK_SUMMARY_FILE
+    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    exit_code = soak_exit_code(takes)
+    logger.info(
+        "soak complete: %d takes, ok=%s, exit_code=%d, summary=%s",
+        args.repeat,
+        summary["ok"],
+        exit_code,
+        summary_path,
+    )
+    return exit_code
 
 
 def cmd_session_check(args: argparse.Namespace) -> int:

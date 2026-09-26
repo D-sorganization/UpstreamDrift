@@ -1318,6 +1318,11 @@ def evaluate(
 
     contact_audit = receipt.get("contact_audit")
     gate_results: list[GateResult] = []
+    from src.shared.python.motion_matching.evidence_integrity import (
+        evaluate_evidence_integrity,
+    )
+
+    gate_results.extend(evaluate_evidence_integrity(receipt))
     gate_results.extend(_evaluate_marker_rmse(receipt, horizon, gates))
     # MS-61 (#10348): never hide head-cluster terminal; body-only cannot pass full-body.
     from src.shared.python.motion_matching.full_marker_terminal import (

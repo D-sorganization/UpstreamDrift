@@ -22,7 +22,10 @@ def test_realtime_publish_default_allows_high_frequency() -> None:
     the hard-coded default is at least 6000/minute (100 msg/s) so 30–100 Hz realtime
     analysis feeds don't hit the rate-limiter under normal operation.
     """
-    realtime_src = Path("src/api/routes/realtime.py").read_text()
+    repo_root = Path(__file__).resolve().parents[3]
+    realtime_src = (repo_root / "src/api/routes/realtime.py").read_text(
+        encoding="utf-8"
+    )
 
     # Extract the default value from the get_limit call, e.g. "60/minute"
     match = re.search(

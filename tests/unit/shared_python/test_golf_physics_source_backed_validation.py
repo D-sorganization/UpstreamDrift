@@ -31,7 +31,10 @@ from src.shared.python.physics.impact_model import (
 
 pytestmark = pytest.mark.unit
 
-SOURCE_MAP = Path("docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md")
+SOURCE_MAP = (
+    Path(__file__).resolve().parents[3]
+    / "docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md"
+)
 
 
 def _driver_pre_impact(clubhead_speed: float = 45.0) -> PreImpactState:

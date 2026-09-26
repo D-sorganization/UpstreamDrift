@@ -62,6 +62,10 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-09-26:** ADR-0041 gains Amendment 1: consumer-side fitters (unknowns include the
+  subject model) live in UpstreamDrift; Tools keeps record authority and reference geometry (#9619, #9630).
+- **2026-09-26:** ADR-0044 records the interim fail-closed sand-motion capability register
+  (`src/bunkershot3d/solvers/capability.py`, #9688); the ADR stays Proposed.
 - **2026-09-17:** ADR-0043 adds documentation and engine capability evidence authority for the companion (#9193): hashed registries, immutable blob URLs, and test-node-verified evidence.
 - **2026-09-21:** ADR-0046's Stage 2 (G2) note is updated to record that
   module retirement onto the canonical layer landed across four waves
