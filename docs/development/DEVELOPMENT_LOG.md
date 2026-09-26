@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9415 · Repository Root Allowlist Check in Docs Governance
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9415
+- **PR:** draft PR from `agy/ud-9415-root-allowlist`
+- **Branch:** `agy/ud-9415-root-allowlist`
+- **Paths:** `scripts/check_docs_governance.py`, `scripts/config/root_allowlist.json`, `docs/governance/DOCS_GOVERNANCE.md`, `tests/scripts/test_doc_governance_checks.py`, `tests/unit/scripts/test_check_docs_governance_root_allowlist.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — `python scripts/check_docs_governance.py` exits 0; 26/26 docs-governance tests pass (junit count); new tests error on the base checker (red) and pass after; ruff clean; architecture budget OK.
+- **Summary:** Committed root entries (`git ls-tree --name-only HEAD`) must match `scripts/config/root_allowlist.json`; unlisted and stale entries both fail, and a failed git call or malformed config fails closed. Closes the last software checkbox of #9415; the history rewrite, Jules workflows and SPEC cap remain owner decisions.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
 - **State:** in_review
