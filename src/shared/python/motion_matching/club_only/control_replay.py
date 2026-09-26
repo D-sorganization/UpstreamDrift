@@ -599,6 +599,8 @@ def evaluate_tighter_step_sensitivity(
     tight = independent_forward_residual(
         dense_policy, times=dense_times, q_reference=ref_dense
     )
+    if tight is None:  # non-circular replay always yields a residual
+        raise ValueError("tighter-step replay produced no residual")
     ratio = (
         tight / coarse_residual
         if coarse_residual > 1e-12
