@@ -265,13 +265,21 @@ def test_launch_gui_delegates_to_launcher_factory(
 
     fake_store_module.StandaloneSessionStore = FakeStandaloneSessionStore
 
-    monkeypatch.setitem(sys.modules, "sidekick.launcher_factory", fake_launcher)
-    monkeypatch.setitem(sys.modules, "sidekick.standalone.window", fake_window_module)
-    monkeypatch.setitem(
-        sys.modules,
-        "sidekick.standalone.session_store",
-        fake_store_module,
-    )
+    for prefix in ("", "src.shared.python.", "shared.python."):
+        monkeypatch.setitem(
+            sys.modules, f"{prefix}sidekick.launcher_factory", fake_launcher
+        )
+        monkeypatch.setitem(
+            sys.modules, f"{prefix}sidekick.standalone.window", fake_window_module
+        )
+        monkeypatch.setitem(
+            sys.modules, f"{prefix}sidekick.standalone.session_store", fake_store_module
+        )
+    sidekick_pkg = sys.modules.get("sidekick")
+    if sidekick_pkg is not None:
+        monkeypatch.setattr(
+            sidekick_pkg, "launcher_factory", fake_launcher, raising=False
+        )
 
     args = cli.parse_cli_args(
         [
