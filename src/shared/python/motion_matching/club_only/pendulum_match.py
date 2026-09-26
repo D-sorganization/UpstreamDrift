@@ -9,9 +9,13 @@ so shared code does not import engines.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.motion_matching.club_only.fit_outcomes import load_fit_outcomes
 from src.shared.python.motion_matching.club_only.hub_accounting import HubMode
 from src.shared.python.motion_matching.club_only.observation import ClubObservation
 from src.shared.python.motion_matching.club_only.seeds import CandidateSeed
@@ -19,14 +23,31 @@ from src.shared.python.motion_matching.club_only.seeds import CandidateSeed
 __all__ = [
     "PendulumMatchRequest",
     "PendulumMatchResult",
+    "load_pendulum_match_outcomes",
     "map_seed_to_pendulum_q0",
     "reject_reconstruction_as_club_evidence",
 ]
 
+_DEFAULT_PENDULUM_EVIDENCE = (
+    Path("docs")
+    / "plans"
+    / "club_only_matching"
+    / "evidence"
+    / "club_pendulum_match.json"
+)
 _RECONSTRUCTION_PREFIX = "reconstruction_"
 _DRIVEN_DOUBLE = "driven_double_pendulum"
 _DRIVEN_TRIPLE = "driven_triple_pendulum"
 _DOF = {_DRIVEN_DOUBLE: 2, _DRIVEN_TRIPLE: 3}
+
+
+def load_pendulum_match_outcomes(
+    path: Path | str | None = None,
+) -> dict[tuple[str, str], dict[str, Any]]:
+    """Load recorded fit outcomes keyed by ``(model_id, trial_id)`` (#10602)."""
+    return load_fit_outcomes(
+        get_repo_root() / _DEFAULT_PENDULUM_EVIDENCE if path is None else path
+    )
 
 
 @dataclass(frozen=True)

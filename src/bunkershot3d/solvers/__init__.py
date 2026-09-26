@@ -45,6 +45,15 @@ all. Every result says so, in the verdict it carries.
 
 from __future__ import annotations
 
+from .capability import (
+    SAND_MOTION_CAPABILITIES,
+    SandMotionCapability,
+    SandMotionKind,
+    capability,
+    require_ball_spin_3d,
+    require_grain_trajectories_3d,
+    require_physical,
+)
 from .coefficients import (
     LAMBDA_BY_MOTION,
     PLATE_DRAG_LAMBDA,
@@ -81,6 +90,7 @@ from .envelope import (
 )
 from .exceptions import (
     CalibrationError,
+    CapabilityError,
     OutOfEnvelopeError,
     ShotTruncatedError,
     SolverError,
@@ -122,9 +132,11 @@ __all__ = [
     "RFT_INERTIAL_NUMBER_LIMIT",
     "RFT_POLYNOMIAL_COEFFICIENTS",
     "RFT_QUASI_STATIC_FROUDE_CEILING",
+    "SAND_MOTION_CAPABILITIES",
     "STANDING_CAVEATS",
     "VERTICAL_PLATE_ALPHA_Z",
     "CalibrationError",
+    "CapabilityError",
     "Caveat",
     "CrossoverSaturatingDepression",
     "DRFTSolver",
@@ -143,6 +155,8 @@ __all__ = [
     "RefusalPolicy",
     "RotationCoupling",
     "RotationMode",
+    "SandMotionCapability",
+    "SandMotionKind",
     "ShotResult",
     "ShotSettings",
     "ShotTruncatedError",
@@ -155,6 +169,7 @@ __all__ = [
     "WheelAnalogueDepression",
     "Wrench",
     "ZeroDepression",
+    "capability",
     "default_structural_correction",
     "dimensionless_groups",
     "evaluate_envelope",
@@ -162,6 +177,9 @@ __all__ = [
     "internal_friction_mu",
     "material_scaling_pa_per_m",
     "polynomial_terms",
+    "require_ball_spin_3d",
+    "require_grain_trajectories_3d",
+    "require_physical",
     "scaling_shape_function",
     "simulate_shot",
     "worst_of",

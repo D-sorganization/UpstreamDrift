@@ -530,27 +530,22 @@ def test_completed_terminal_state_feeds_canonical_flight_once() -> None:
             miss.to_post_impact_state()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Tools #4946 has not shipped the contact-interval phase in the canonical "
-        "rate_of_closure run record at provider pin "
-        f"{PINNED_PROVIDER_REVISION[:9]}: SimulationRun carries no interval "
-        "field and ImpactModelType has only RIGID_BODY, SPRING_DAMPER and "
-        "FINITE_TIME. UpstreamDrift #9549 adopts the workbench integration "
-        "through a reviewed pin bump, never through a local copy."
-    ),
-)
-def test_pinned_provider_run_record_carries_a_contact_interval_phase() -> None:
-    """Pin gate: fails (and must be adopted) once the provider ships the phase."""
+def test_provider_honours_interval_tab_ruling() -> None:
+    """Owner ruling guard: interval tab dropped, ImpactModelType unchanged.
+
+    Tools #4946 closed with an owner-ratified ruling (Tools PR #5289,
+    `docs/development/IMPACT_INTERVAL_TAB_RULING.md` in the Tools repo) and UD #9549:
+    the standalone contact-interval tab is DROPPED, ImpactModelType shall NOT gain an
+    INTERVAL member, and swing_sim/impact_interval/ stays a headless engine. The
+    interval solver is consumed headless via the facade tested earlier in the file.
+    """
     with _fresh_provider_import("rate_of_closure"):
-        records = importlib.import_module("rate_of_closure.simulation.records")
-        _assert_from_tools(Path(records.__file__))
         impact = importlib.import_module("shared.python.swing_sim.impact")
         _assert_from_tools(Path(impact.__file__))
-        run_fields = {field.name for field in dataclasses.fields(records.SimulationRun)}
         model_members = {member.name for member in impact.ImpactModelType}
-        assert model_members >= {"RIGID_BODY", "SPRING_DAMPER", "FINITE_TIME"}
-        assert any("interval" in name for name in run_fields), sorted(run_fields)
-        assert any("INTERVAL" in name for name in model_members), sorted(model_members)
+        assert model_members == {"RIGID_BODY", "SPRING_DAMPER", "FINITE_TIME"}
+        assert not any("INTERVAL" in name for name in model_members), (
+            "Tools #4946 / Tools PR #5289 (IMPACT_INTERVAL_TAB_RULING.md) and UD #9549 "
+            "ruling: ImpactModelType shall NOT gain an INTERVAL member; interval "
+            "solver remains headless."
+        )

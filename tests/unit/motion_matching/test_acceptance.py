@@ -15,6 +15,7 @@ from src.shared.python.motion_matching.acceptance import (
     GateStatus,
     Horizon,
     evaluate,
+    is_real_sha256,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -467,3 +468,115 @@ def test_qualify_tour_baseline_integration() -> None:
     verdict = qualify_tour_baseline(package)
     assert verdict is not None
     assert verdict.passed is True
+
+
+def test_evidence_integrity_zero_hash_is_rejected() -> None:
+    """Part A: all-zeros capture_sha256 trips capture_provenance gate and rejects receipt."""
+    receipt = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "capture_sha256": "0" * 64,
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    assert verdict.is_physically_accepted is False
+    assert verdict.status == "REJECTED"
+    gate_map = {g.name: g for g in verdict.gates}
+    assert "capture_provenance" in gate_map
+    assert gate_map["capture_provenance"].status == GateStatus.FAILED
+    assert "placeholder capture hash" in gate_map["capture_provenance"].reason
+
+
+def test_evidence_integrity_absent_hash_is_not_judged_here() -> None:
+    """An absent capture_sha256 adds no capture_provenance gate (only placeholders fail)."""
+    verdict = evaluate(
+        {"shared_metrics": {"whole_marker_rmse_m": 0.020}}, horizon=Horizon.G1
+    )
+    assert "capture_provenance" not in {g.name for g in verdict.gates}
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba", True),
+        ("545405CCDBAE87A297D16951487B501D5D76F5A2AB253CFC6D797744184943BA", True),
+        ("0" * 64, False),
+        ("0" * 63, False),
+        ("g" * 64, False),
+        ("", False),
+        (None, False),
+        (123, False),
+    ],
+)
+def test_is_real_sha256(value: object, expected: bool) -> None:
+    """is_real_sha256 accepts only a 64-hex non-placeholder digest."""
+    assert is_real_sha256(value) is expected
+
+
+def test_evidence_integrity_invalid_hex_or_length_hash_is_rejected() -> None:
+    """Part A: non-64 or non-hex capture_sha256 trips capture_provenance gate."""
+    for bad_hash in ("abc123", "g" * 64, "0" * 63, ""):
+        receipt = {
+            "shared_metrics": {"whole_marker_rmse_m": 0.020},
+            "capture_sha256": bad_hash,
+        }
+        verdict = evaluate(receipt, horizon=Horizon.G1)
+        assert verdict.is_physically_accepted is False
+        gate_map = {g.name: g for g in verdict.gates}
+        assert gate_map["capture_provenance"].status == GateStatus.FAILED
+
+
+def test_evidence_integrity_valid_hash_does_not_trip_gate() -> None:
+    """Part A: valid 64-hex capture_sha256 passes capture_provenance gate."""
+    valid_hash = "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
+    receipt = {
+        "shared_metrics": {"whole_marker_rmse_m": 0.020},
+        "capture_sha256": valid_hash,
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    gate_map = {g.name: g for g in verdict.gates}
+    assert "capture_provenance" in gate_map
+    assert gate_map["capture_provenance"].status == GateStatus.PASSED
+
+
+def test_evidence_integrity_zero_rmse_without_replay_is_rejected() -> None:
+    """Part A: identically-zero residuals without replay artefacts trips nonzero_residual_evidence gate."""
+    valid_hash = "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
+    receipt = {
+        "shared_metrics": {
+            "whole_marker_rmse_m": 0.0,
+            "early_marker_rmse_m": 0.0,
+            "terminal_marker_rmse_m": 0.0,
+            "club_marker_rmse_m": 0.0,
+        },
+        "capture_sha256": valid_hash,
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    assert verdict.is_physically_accepted is False
+    assert verdict.status == "REJECTED"
+    gate_map = {g.name: g for g in verdict.gates}
+    assert "nonzero_residual_evidence" in gate_map
+    assert gate_map["nonzero_residual_evidence"].status == GateStatus.FAILED
+    assert (
+        "identically-zero residuals without replay evidence"
+        in gate_map["nonzero_residual_evidence"].reason
+    )
+
+
+def test_evidence_integrity_zero_rmse_with_replay_not_rejected_by_nonzero_residual() -> (
+    None
+):
+    """Part A: zero RMSE with replay evidence does not trip nonzero_residual_evidence gate."""
+    valid_hash = "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
+    receipt = {
+        "shared_metrics": {
+            "whole_marker_rmse_m": 0.0,
+        },
+        "capture_sha256": valid_hash,
+        "open_loop_replay": {
+            "drift_m": 0.015,
+            "integrator": "rk45",
+            "rtol": 1e-6,
+        },
+    }
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    gate_map = {g.name: g for g in verdict.gates}
+    assert "nonzero_residual_evidence" not in gate_map
