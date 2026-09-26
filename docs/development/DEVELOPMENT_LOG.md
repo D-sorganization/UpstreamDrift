@@ -24,7 +24,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #10943
 - **PR:** #10968
 - **Branch:** `agy/issue-10943`
-- **Paths:** `knowledge/pack.yml`, `knowledge/wizard.yml`, `sidekick.spec`, `scripts/packaging/build_sidekick_binary.py`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `tests/unit/ai/test_drift_wizard.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Paths:** `src/shared/python/ai/knowledge/wizard.py`, `knowledge/pack.yml`, `knowledge/wizard.yml`, `sidekick.spec`, `scripts/packaging/build_sidekick_binary.py`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `tests/unit/ai/test_drift_wizard.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
 - **Started:** 2026-09-25
 - **Last verified:** 2026-09-25 — 7/7 tests pass in test_drift_wizard.py; 3/3 tests pass in test_knowledge_and_wizards.py; workflow inventory and check scripts pass.
 - **Summary:** Define source catalog knowledge/pack.yml and wizard configuration knowledge/wizard.yml for UpstreamDrift product documentation and reference. Wire Sidekick packaging to compile and bundle the SQLite knowledge pack. Add wizard-pack CI workflow and test suite.

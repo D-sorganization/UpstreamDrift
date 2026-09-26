@@ -28,11 +28,9 @@
   10. Added Change Log row to `SPEC.md`.
   11. Verified all 7 tests in `tests/unit/ai/test_drift_wizard.py` and 3 tests in `tests/unit/ai/test_knowledge_and_wizards.py` pass cleanly (TDD Green phase).
   12. Verified `scripts/check_workflow_inventory.py`, `scripts/check_spec_paths.py`, and local-only workflow audits pass.
+  13. Broken LOD chain in `Wizard.available` (`src/shared/python/ai/knowledge/wizard.py`) and verified repo-wide `check_lod.py` passes cleanly.
 
 ## Next Steps
 
-1. Commit Green implementation (`feat(ai): K3b Drift Wizard Sidekick knowledge pack (#10943)`).
-2. Push branch `agy/issue-10943` to `origin`.
-3. Open PR against `main` and arm auto-merge (`--strategy squash`).
-4. Monitor CI checks to merge cleanly without administrative bypass.
-5. Close issue #10943, release lease, and clean up worktree/branch.
+1. Monitor CI checks on PR #10968 until auto-merge squashes cleanly into main.
+2. Release lease on #10943, close issue, and clean up worktree/branch.
