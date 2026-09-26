@@ -1,15 +1,15 @@
-# Current Handoff — Retire the Review-Comment-to-Issue Converter (RM#1755, Third Attempt)
+# Current Handoff — Main Red on Bandit B314 in the Coverage Gate Checker (#10989)
 
 - Repository: D-sorganization/UpstreamDrift
-- Worktree: `UpstreamDrift-worktrees/claude-ud-10978-v3`
-- Branch: `chore/retire-comment-converter-v3` (baseline `b8c27a7d2`)
+- Worktree: `UpstreamDrift-worktrees/claude-ud-10989`
+- Branch: `fix/10989-coverage-gates-defusedxml` (baseline `84ac37579`)
 - Commit: `SELF`
-- Pull request: #10992 (draft), supersedes #10978 (which conflicted with main)
-- Issue: Repository_Management#1755; development-log entry DL-#1755
-- Removed: `.github/workflows/Comment-to-Issue-Converter.yml` and the review-comment processor script; the `.github/WORKFLOWS.md` row, the Nightly Doc Organizer bullet and the `ci_workflow_map.md` row. `tests/ci/test_process_review_comments.py` is now a retirement guard; `tests/ci/test_ci_infrastructure.py` no longer lists the deleted workflow. SPEC's #10931 section is a retirement note.
-- Validation: `pytest tests/ci/` 89 passed; `python scripts/check_spec_paths.py` exit 0.
-- Workflow change: this PR ships alone.
-- Next step: CI green, mark ready, arm via `automerge_guard.py`, close #10978 as superseded.
+- Pull request: #10994 (draft)
+- Issue: #10989 (fleet-main-health: CI Standard red on main); development-log entry DL-#10965
+- Cause: #10988 landed `scripts/check_coverage_gates.py` parsing Cobertura XML with `xml.etree.ElementTree.parse`; the push-lane full-tree `bandit -ll -ii` flags B314 and fails `security-scans`, which fails `quality-gate`.
+- Fix: parse with `defusedxml.ElementTree` (a core dependency, the convention in `scripts/config/coverage_enforcer.py`); `Element` imported under `TYPE_CHECKING` for the annotation. New test `test_xml_entity_expansion_is_rejected` was red on stdlib ET and is green now.
+- Validation: `pytest tests/unit/scripts/test_check_coverage_gates.py` -> 13 passed (new test carries `@pytest.mark.unit` for the suite-marker ratchet); `bandit -ll -ii scripts/check_coverage_gates.py` clean; ruff and mypy clean.
+- Next step: CI green, mark ready, arm via `automerge_guard.py`; #10989 closes itself when main's next CI Standard run succeeds.
 
 ---
 

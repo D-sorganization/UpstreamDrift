@@ -7048,6 +7048,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | #10994 | Coverage gate checker parses Cobertura XML with defusedxml, clearing the bandit B314 failure that turned main red (#10989). |
 | 2026-09-26 | #10992 | Retire the review-comment-to-issue converter workflow and processor (RM#1755); supersedes #10978. |
 | 2026-09-26 | #9191 | Verify Companion Screenshot Bytes and Pixel Dimensions. |
 | 2026-09-26 | #10965 | Make Coverage Gates Read the Budget File and Resolve Cobertura Sources. |
