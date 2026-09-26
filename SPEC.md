@@ -1,22 +1,6 @@
-## Hardened Review Comments to Issues Converter and Ephemeral State Protection (#10931)
+## Review Comments to Issues Converter — Retired (RM#1755)
 
-Evaluates, hardens, and fixes the PR review comments to GitHub issue converter workflow (`.github/workflows/Comment-to-Issue-Converter.yml`) to eliminate duplicate issue generation cascades, review bot ingestion, and lost tracking state:
-- **Trigger Scoping & Cascade Elimination (`.github/workflows/Comment-to-Issue-Converter.yml`)**:
-  - Restricts workflow triggers strictly to `pull_request_review_comment: [created]` and manual `workflow_dispatch`.
-  - Removes `pull_request: [opened, synchronize, closed]` to eliminate redundant executions on commit pushes and post-merge zombie issue creation.
-  - Adds actor exclusion filtering to ignore bot actors (`!endsWith(github.actor, '[bot]')`).
-- **Stateless Idempotency & Deduplication (`scripts/ci/process_review_comments.py`, `tests/ci/test_process_review_comments.py`)**:
-  - Replaces volatile file-only tracking with remote pre-creation GitHub CLI issue queries (`gh issue list --search "comment-to-issue: comment_id={comment_id}" --state all`).
-  - Embeds deterministic HTML tracking markers in issue bodies (`<!-- comment-to-issue: comment_id={comment_id} pr={pr_num} -->`).
-  - Maintains and updates local archive ledger (`docs/review_archive/comment_tracking.json`).
-- **Automated Bot Exclusion & Actionability Heuristics (`scripts/ci/process_review_comments.py`)**:
-  - Ignores automated review bots (`chatgpt-codex-connector`, `copilot-pull-request-reviewer`, `google-labs-jules`, `github-actions`, etc.) and any accounts with `user.type == "Bot"`.
-  - Replaces naive single-word keyword matching with structured action directives (` ```suggestion `, `TODO:`, `FIXME:`, `Action item:`, `/create-issue`).
-  - Enforces minimum substantive comment length (>= 20 characters) and rejects trivial acknowledgements (`LGTM`, `+1`, `thanks`, etc.).
-  - Verifies source PR is in `OPEN` state before generating issues.
-  - Enforces maximum issue creation rate limits per run.
-- **Verification & Testing (`tests/ci/test_process_review_comments.py`)**:
-  - Adds 12 automated unit tests covering all safety gates, deduplication, bot filtering, rate limits, and formatting.
+The PR review-comment-to-issue converter hardened in #10931 was retired fleet-wide under RM#1755 (#10941): its workflow, processor script and processor tests were removed. The historical test path now holds a retirement guard that fails if the converter workflow or processor is reintroduced or relisted in the workflow inventory.
 
 ## Stable PyQt Desktop Shortcuts and Consistent Taskbar and Favicon Identity (#10487)
 

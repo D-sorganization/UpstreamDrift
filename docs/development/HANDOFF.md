@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-retire-converter`
 - Branch: `chore/retire-comment-converter`
 - Issue: Repository_Management#1755
-- What was removed: `.github/workflows/Comment-to-Issue-Converter.yml`, `scripts/ci/process_review_comments.py`, `tests/ci/test_process_review_comments.py`.
+- What was removed: `.github/workflows/Comment-to-Issue-Converter.yml`, `scripts/ci/process_review_comments.py`, and the processor tests. `tests/ci/test_process_review_comments.py` now holds a retirement guard (the deleted-test gate has no acknowledgement path), and the `.github/WORKFLOWS.md` row and the #10931 SPEC section were retired with it.
 - Also fixed: `tests/ci/test_ci_infrastructure.py::TestCIEnvironmentCompatibility::test_helper_workflows_use_pr_scoped_concurrency` referenced the deleted workflow file directly; dropped it from that test's workflow list so the test does not FileNotFoundError.
 - Validation: `py -3.12 <RM>/scripts/campaigns/review_comment_converter_retirement/retire_converter.py --repo . --check` -> exit 0 after `--apply`; `pytest tests/ci/test_ci_infrastructure.py -k helper_workflows_use_pr_scoped_concurrency` passes.
 - Next step: open the draft PR for review.
