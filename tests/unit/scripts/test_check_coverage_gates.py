@@ -250,3 +250,16 @@ def test_xml_source_outside_repo_root_is_config_error(tmp_path: Path) -> None:
     budget, report = _ci_shaped_report(tmp_path, str(tmp_path / "elsewhere" / "src"))
     argv = ["--report", str(report), "--budget", str(budget)]
     assert checker.main([*argv, "--repo-root", str(repo)]) == 2
+
+
+def test_xml_entity_expansion_is_rejected(tmp_path: Path) -> None:
+    """Coverage XML is parsed XXE-safe: entity declarations are refused (#10989)."""
+    report = tmp_path / "coverage.xml"
+    report.write_text(
+        '<?xml version="1.0"?>\n'
+        '<!DOCTYPE coverage [<!ENTITY lol "lol">]>\n'
+        "<coverage><sources><source>&lol;</source></sources></coverage>\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError):
+        checker.load_coverage_xml(report, repo_root=tmp_path)
