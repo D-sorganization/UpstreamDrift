@@ -2936,7 +2936,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Paths:** docs/architecture/C4.md, scripts/architecture_map_contract.py
 - **Started:** 2026-09-10
 - **Last verified:** 2026-09-10 (`09f6d22da3`)
-- **Summary:** Baseline adoption of Mermaid C4 architecture maps in UpstreamDrift.
+
+### DL-#10943 · Drift Wizard Sidekick Product Knowledge Pack
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** `#10943`
+- **Branch:** `agy/issue-10943`
+- **PR:** not created
+- **Paths:** `knowledge/wizard.yml`, `knowledge/pack.yml`, `tests/unit/ai/test_drift_wizard.py`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `sidekick.spec`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 (`2d5830d18`)
+- **Summary:** Author product knowledge pack definition and CI packaging for Drift Wizard in Sidekick chat.
+- **Next step:** Author `knowledge/wizard.yml` and `knowledge/pack.yml` to make test suite green.
 
 ## Archive
 
