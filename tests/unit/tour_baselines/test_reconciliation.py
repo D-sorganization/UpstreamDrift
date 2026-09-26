@@ -51,8 +51,8 @@ def test_tools_revision_tracking():
     status = get_tools_revision_status()
 
     assert status.vendor_submodule_path == "vendor/ud-tools"
-    # Pinned commit in HEAD is 95ed6b47857e9a47211ab1973d02b28beae718bc
-    assert status.pinned_commit_sha == "95ed6b47857e9a47211ab1973d02b28beae718bc"
+    # Pinned commit in HEAD is 855a10cdaf09ca280d9b2e70b140c0790c0d66cf
+    assert status.pinned_commit_sha == "855a10cdaf09ca280d9b2e70b140c0790c0d66cf"
     assert (
         status.historical_review_gitlink == "62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1"
     )
