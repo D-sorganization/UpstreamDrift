@@ -112,7 +112,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 20 | 0 | 0 |
-| `sidekick` | 232 | 77 | 24 | 36 | 45 | 309 |
+| `sidekick` | 227 | 71 | 24 | 36 | 56 | 298 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **429** | **282** | **124** | **1516** | **738** | **711** |
+| **Total** | **424** | **276** | **124** | **1516** | **749** | **700** |
 
 ## Diverged Files by Package
 
@@ -410,11 +410,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-15 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### Package `sidekick` (77 Diverged Files)
+### Package `sidekick` (71 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `sidekick/__main__.py` | +32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/agent/action_service.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-06-15 |
 | `sidekick/calculators/electrical/glass_interface.py` | -9103 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-07 |
 | `sidekick/calculators/thermo/steam_engine.py` | -983 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -456,11 +455,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/process_calculators/water_vapor_pressure.py` | -176 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-24 |
 | `sidekick/process_calculators/wgs_reactor_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/selected_tab_panel.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/standalone/onboarding.py` | +19 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `sidekick/standalone/preferences.py` | +1466 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `sidekick/standalone/runner.py` | +42 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `sidekick/standalone/session_store.py` | +10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-| `sidekick/standalone/window.py` | -45 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/tab_context_menu.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/tests/calculators/conversion/test_conversion_accuracy_3384_3388_3389.py` | +2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-12 |
 | `sidekick/tests/calculators/electrical/test_electrical_model.py` | -809 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-09-09 |

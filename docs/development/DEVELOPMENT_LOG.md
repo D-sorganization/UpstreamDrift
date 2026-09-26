@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `claude/ud-9406-sidekick-shadow-retire`
 - **Paths:** `src/shared/python/sidekick/standalone/`, `src/shared/python/sidekick/persistence/`, `src/shared/python/sidekick/__main__.py`, `src/shared/python/sidekick/ui/tools_sidebar/default_tabs.py`, `src/launchers/embedded_tool_bootstrap.py`, `sidekick.spec`, `scripts/config/unit_gate_quarantine.json`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — 14 target quarantine IDs pass with `-n 6 --tools-mode vendored`; affected suites (sidekick, launcher, launchers, packaging, repo_hygiene, integration/sidekick, c3d_viewer) show no new failure against the same run on `b8c27a7d2`; contract passes (141 IDs).
+- **Last verified:** 2026-09-26 — Linux CI: `test_bootstrap_registers_all_first_party_tools` still fails there (11 first-party tools do not bootstrap headless), re-quarantined; divergence inventory regenerated for the retired `sidekick/__main__.py`. Earlier: 14 target quarantine IDs pass with `-n 6 --tools-mode vendored`; affected suites (sidekick, launcher, launchers, packaging, repo_hygiene, integration/sidekick, c3d_viewer) show no new failure against the same run on `b8c27a7d2`; contract passes (141 IDs).
 - **Summary:** Delete the downstream `sidekick` standalone, persistence, `__main__` and default-tabs copies so they resolve from the pinned Tools tree; put the vendored/explicit Tools paths ahead of UpstreamDrift's own in the embedded-tool bootstrap; take the Windows icon from the pinned Tools assets; retarget three tests to the vendor API.
 - **Next step:** get `quality-gate` green on the draft PR and arm it through `automerge_guard.py`.
 
