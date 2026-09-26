@@ -199,14 +199,17 @@ class TestArgValidation:
         with pytest.raises(ValueError):
             engine.compute_zvcf(None)  # type: ignore[arg-type]
 
+    @pytest.mark.unit
     def test_ztcf_short_q_raises(self, engine: GolfSwingPendulumEngine) -> None:
         with pytest.raises(ValueError, match=r"(?i)expected length 2"):
             engine.compute_ztcf(np.array([1.0]), np.zeros(2))
 
+    @pytest.mark.unit
     def test_ztcf_short_v_raises(self, engine: GolfSwingPendulumEngine) -> None:
         with pytest.raises(ValueError, match=r"(?i)expected length 2"):
             engine.compute_ztcf(np.zeros(2), np.array([1.0]))
 
+    @pytest.mark.unit
     def test_zvcf_short_q_raises(self, engine: GolfSwingPendulumEngine) -> None:
         with pytest.raises(ValueError, match=r"(?i)expected length 2"):
             engine.compute_zvcf(np.array([1.0]))

@@ -11,6 +11,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def dynamics_engine_cls() -> Generator[Any, None, None]:

@@ -87,4 +87,5 @@
 ## Change Log
 
 - `SELF` — #10286: ZTCF/ZVCF fail closed (StateError/ValueError) in MyoSuite, pendulum and DTACK; DTACK canonical ZVCF split from control-kept variant (DL-#10286).
+- `SELF` — #10286: add unit suite markers to new tests and SPEC change-log row (#10967 CI).
 - `SELF` — Reconcile child-copy convergence, divergence inventory, and agent context views (#10944).

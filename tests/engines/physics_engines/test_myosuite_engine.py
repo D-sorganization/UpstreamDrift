@@ -367,10 +367,12 @@ class TestDriftControlMixin:
         with pytest.raises(ValueError):
             loaded_engine.compute_zvcf(None)  # type: ignore[arg-type]
 
+    @pytest.mark.unit
     def test_compute_ztcf_uninit_raises(self, engine: MyoSuitePhysicsEngine) -> None:
         with pytest.raises(StateError, match=r"compute_ztcf.*no simulation loaded"):
             engine.compute_ztcf(np.array([1.0, 1.0]), np.array([0.5, 0.5]))
 
+    @pytest.mark.unit
     def test_compute_zvcf_uninit_raises(self, engine: MyoSuitePhysicsEngine) -> None:
         with pytest.raises(StateError, match=r"compute_zvcf.*no simulation loaded"):
             engine.compute_zvcf(np.array([0.5, 0.5]))
