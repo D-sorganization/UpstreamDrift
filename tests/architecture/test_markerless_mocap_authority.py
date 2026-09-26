@@ -102,3 +102,22 @@ def test_spec_and_handoff_point_to_the_current_program() -> None:
     assert "UpstreamDrift #9069" in handoff
     assert "no physical-lab qualification" in handoff
     assert len(handoff.splitlines()) <= 150
+
+
+def test_adr_records_consumer_side_fitter_amendment() -> None:
+    """Consumer-side fitters live in UpstreamDrift; Tools owns reference geometry."""
+    text = _text(ADR).casefold()
+    required = (
+        "consumer-side fitter",
+        "src/motion_capture/reconstruct",
+        "reference geometry",
+        "#9630",
+        "bundle-adjustment",
+    )
+    for phrase in required:
+        assert phrase in text
+
+    reconstruct_dir = ROOT / "src" / "motion_capture" / "reconstruct"
+    assert reconstruct_dir.exists(), (
+        f"missing reconstruct directory: {reconstruct_dir.relative_to(ROOT)}"
+    )
