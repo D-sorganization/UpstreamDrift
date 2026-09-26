@@ -129,11 +129,15 @@ function new_joint = gs3dx_quaternion_swap(sys, spec)
     tp = get_param(tconv, 'PortHandles');
     mux = add_block('simulink/Signal Routing/Mux', [sys '/Axis Torques'], 'Inputs', '3', ...
         'Position', place(-320, 100, 5, 60));
+    % Named actuator-torque signals come off the mux through a (virtual)
+    % Demux: a name on the input line would be drawn on every branch.
+    actuator = add_block('simulink/Signal Routing/Demux', [sys '/Actuator Torque'], 'Outputs', '3', ...
+        'Position', place(-260, 260, 5, 60));
     damping = add_block('simulink/Sources/Constant', [sys '/Axis Damping'], 'Value', rot.damping, ...
         'SampleTime', '0', ...                 % constant time would break input-function loops
         'Position', place(-320, 200, 60, 30));
     reference = add_block('simulink/Continuous/Integrator', [sys '/Angle Reference'], ...
-        'InitialCondition', rot.angle_ic, 'Position', place(420, 340, 30, 30));
+        'InitialCondition', rot.angle_ic, 'Position', place(300, 330, 30, 30));
     torque_fn = local_matlab_function(sys, 'XYZ Torque', place(-220, 100, 80, 90), { ...
         'function T = fcn(Q, w, tau, damping)', ...
         '% Axis torques -> follower-frame torque (gs3dx_xyz_map).', ...
@@ -153,7 +157,10 @@ function new_joint = gs3dx_quaternion_swap(sys, spec)
     arrayfun(@delete_line, old_lines);
     for a = 1:3
         add_line(sys, command(a), local_port(mux, 'Inport', a), 'autorouting', 'on');
-        local_feed(sys, command(a), consumers{a, 4}, names{a, 4});
+    end
+    add_line(sys, local_port(mux, 'Outport', 1), local_port(actuator, 'Inport', 1), 'autorouting', 'on');
+    for a = 1:3
+        local_feed(sys, local_port(actuator, 'Outport', a), consumers{a, 4}, names{a, 4});
     end
     add_line(sys, sense_port(1, 2), local_port(torque_fn, 'Inport', 1), 'autorouting', 'on');
     add_line(sys, sense_port(2, 2), local_port(torque_fn, 'Inport', 2), 'autorouting', 'on');
@@ -251,9 +258,11 @@ function keep = local_kept(g, ports, pairs)
 end
 
 function local_feed(sys, src, dst, name)
-    for d = dst
-        line = add_line(sys, src, d, 'autorouting', 'on');
-        if ~isempty(name)
+% Branches share one signal, so the name is set once (on the first branch);
+% naming every branch prints the label once per branch, on top of itself.
+    for k = 1:numel(dst)
+        line = add_line(sys, src, dst(k), 'autorouting', 'on');
+        if k == 1 && ~isempty(name)
             set_param(line, 'Name', name);
         end
     end
