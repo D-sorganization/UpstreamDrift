@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9613 · Rig Soak: Multi-Camera Repeat Record Mode
+
+- **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #9613
+- **PR:** draft PR from `agy/ud-9613-record-repeat`
+- **Branch:** `agy/ud-9613-record-repeat`
+- **Paths:** `src/motion_capture/rig/__main__.py`, `src/motion_capture/rig/soak.py`, `tests/motion_capture/rig/test_record_repeat.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 8 unit tests pass in test_record_repeat.py; full rig test suite clean (128 passed, 0 regressions)
+- **Summary:** Added `record --repeat N [--pause S]` soak mode to camera rig CLI, supporting N back-to-back takes in take subdirectories, machine-readable soak summary, and worst-take exit code.
+- **Next step:** CI green, review, merge.
+
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress

@@ -8,9 +8,12 @@ Commands:
 - ``capture --plan P --duration S --out DIR [--synthetic]``: open every planned
   camera, capture together, write ``session_manifest.json``. Exit 0 for
   ``supported``, 1 for ``degraded``/``blocked``, 2 for ``unavailable``.
-- ``record --plan P --duration S --out DIR [--dry-run] [--consent-recorded]``:
+- ``record --plan P --duration S --out DIR [--dry-run] [--consent-recorded] [--repeat N] [--pause S]``:
   stream-copy every planned camera's compressed video to disk and write a
   session bundle (``plan.json``, ``recordings.json``, ``session_manifest.json``).
+  When ``--repeat N`` is greater than 1, records N takes into ``<out>/take_01/`` ..
+  ``<out>/take_N/`` with ``--pause S`` seconds between takes and writes
+  ``<out>/soak_summary.json``. Exit code is the worst take's exit code.
   Same exit codes as ``capture``. ``--dry-run`` records nothing and exercises
   the bundle. Both commands also write ``mocap_session.json``, the session in
   the canonical Tools ``mocap-session`` contract, when the pinned Tools tree
@@ -49,6 +52,7 @@ import argparse
 import json
 import logging
 import sys
+import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -72,6 +76,13 @@ from .recorder import (
     record_all,
 )
 from .session import CaptureOutcome, CaptureSession, CaptureTuning, SessionManifest
+from .soak import (
+    EXIT_BY_OUTCOME,
+    SOAK_SUMMARY_FILE,
+    TakeSummary,
+    build_soak_summary,
+    soak_exit_code,
+)
 from .sources import FrameSource, SyntheticFrameSource
 from .tools_bridge import RecordingTerms, export_to_bundle, probe_tools_schema
 from .topology import (
@@ -83,12 +94,7 @@ from .topology import (
 
 logger = get_logger(__name__)
 
-_EXIT_BY_OUTCOME = {
-    CaptureOutcome.SUPPORTED: 0,
-    CaptureOutcome.DEGRADED: 1,
-    CaptureOutcome.BLOCKED: 1,
-    CaptureOutcome.UNAVAILABLE: 2,
-}
+_EXIT_BY_OUTCOME = EXIT_BY_OUTCOME
 
 
 def _add_plan_args(parser: argparse.ArgumentParser) -> None:
@@ -449,6 +455,18 @@ def _parser() -> argparse.ArgumentParser:
         help="the subject's consent to retain raw video is on record (ADR-0041); "
         "without it the canonical Tools session export is refused, not faked",
     )
+    rec.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="number of back-to-back takes to record (default 1)",
+    )
+    rec.add_argument(
+        "--pause",
+        type=float,
+        default=2.0,
+        help="seconds to pause between takes in repeat mode (default 2.0)",
+    )
     chk = sub.add_parser("session-check", help="validate a session bundle on disk")
     chk.add_argument("--session", type=Path, required=True)
     prx = sub.add_parser("proxy", help="write H.264 mp4 proxies beside the recordings")
@@ -558,8 +576,15 @@ def _dry_run_probe(path: Path) -> RecordingProbe:
     )
 
 
-def cmd_record(args: argparse.Namespace) -> int:
-    plan = _load_plan(args)
+def _record_one_take(
+    args: argparse.Namespace, plan: RigPlan, out_dir: Path
+) -> SessionManifest:
+    """Record one take into ``out_dir`` and return its session manifest.
+
+    Preconditions:
+    - ``plan`` is a loaded, realized rig plan
+    - ``out_dir`` is a target bundle directory
+    """
     started = datetime.now(UTC).isoformat(timespec="seconds")
     factory: Callable[[], Recorder]
     if args.dry_run:
@@ -576,16 +601,16 @@ def cmd_record(args: argparse.Namespace) -> int:
         factory = FfmpegStreamCopyRecorder
     live = LiveOptions(live_preview_dir=args.live_preview, stop_file=args.stop_file)
     results = record_all(
-        plan, refs, args.duration, args.out, factory, warmup_s=args.warmup, live=live
+        plan, refs, args.duration, out_dir, factory, warmup_s=args.warmup, live=live
     )
     prober = _dry_run_probe if args.dry_run else probe_recording
-    index = build_index(plan, results, args.duration, args.out, prober=prober)
-    manifest = write_bundle(args.out, plan, index, started_utc=started)
+    index = build_index(plan, results, args.duration, out_dir, prober=prober)
+    manifest = write_bundle(out_dir, plan, index, started_utc=started)
     terms = RecordingTerms(
         consent_recorded=args.consent_recorded, raw_video_retained=not args.dry_run
     )
-    manifest = _with_tools_export(manifest, plan, args.out, terms)
-    manifest.save(args.out / MANIFEST_FILE)
+    manifest = _with_tools_export(manifest, plan, out_dir, terms)
+    manifest.save(out_dir / MANIFEST_FILE)
     for entry in index.recordings:
         logger.info(
             "%s (%s): %s %d bytes rc=%s frames=%s duration=%s",
@@ -597,8 +622,54 @@ def cmd_record(args: argparse.Namespace) -> int:
             entry.frames,
             entry.duration_s,
         )
-    logger.info("outcome=%s bundle=%s", manifest.outcome.value, args.out)
-    return _EXIT_BY_OUTCOME[manifest.outcome]
+    logger.info("outcome=%s bundle=%s", manifest.outcome.value, out_dir)
+    return manifest
+
+
+def cmd_record(
+    args: argparse.Namespace,
+    *,
+    sleep: Callable[[float], None] = time.sleep,
+) -> int:
+    """Record one or more takes according to ``--repeat``.
+
+    Exit code rule:
+    - For single take (--repeat 1), returns the take exit code (0 for supported,
+      1 for degraded/blocked, 2 for unavailable).
+    - For repeat soak mode (--repeat N > 1), returns the worst (maximum numeric)
+      exit code across all takes.
+    """
+    if args.repeat < 1:
+        raise SystemExit(f"--repeat must be >= 1, got {args.repeat}")
+    if args.pause < 0:
+        raise SystemExit(f"--pause must be >= 0, got {args.pause}")
+
+    plan = _load_plan(args)
+    if args.repeat == 1:
+        manifest = _record_one_take(args, plan, args.out)
+        return _EXIT_BY_OUTCOME[manifest.outcome]
+
+    takes: list[TakeSummary] = []
+    for k in range(1, args.repeat + 1):
+        take_dir = args.out / f"take_{k:02d}"
+        manifest = _record_one_take(args, plan, take_dir)
+        takes.append(TakeSummary.from_bundle(k, take_dir, manifest))
+        if k < args.repeat:
+            sleep(args.pause)
+
+    summary = build_soak_summary(takes, repeat=args.repeat)
+    args.out.mkdir(parents=True, exist_ok=True)
+    summary_path = args.out / SOAK_SUMMARY_FILE
+    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    exit_code = soak_exit_code(takes)
+    logger.info(
+        "soak complete: %d takes, ok=%s, exit_code=%d, summary=%s",
+        args.repeat,
+        summary["ok"],
+        exit_code,
+        summary_path,
+    )
+    return exit_code
 
 
 def cmd_session_check(args: argparse.Namespace) -> int:
