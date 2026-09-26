@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9549 · Guard Contact-Interval Provider Contract for Interval Tab Owner Ruling
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9549 (epic #9546)
+- **PR:** draft PR from `agy/ud-9549-ruling-guard`
+- **Branch:** `agy/ud-9549-ruling-guard`
+- **Paths:** `tests/shared_contracts/test_impact_interval_provider.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 (`ff9fbee62`) — verified 11 contract tests pass in tests/shared_contracts/test_impact_interval_provider.py guarding owner interval-tab ruling
+- **Summary:** Replaced obsolete strict-xfail pin gate in test_impact_interval_provider.py with test_provider_honours_interval_tab_ruling guarding the owner ruling from Tools #4946 / Tools PR #5289 (IMPACT_INTERVAL_TAB_RULING.md): standalone interval tab dropped, ImpactModelType gains no INTERVAL member, and contact-interval solver remains headless (#9549).
+- **Next step:** CI green, review, merge.
+
 ### DL-#10921 · Require Both Desktop and Start Menu Destinations and Update Handoff Governance
 
 - **State:** in_progress
