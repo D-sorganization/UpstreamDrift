@@ -117,6 +117,13 @@ Tracked in [#10979](https://github.com/D-sorganization/UpstreamDrift/issues/1097
 4. Move to contact once the legs carry load, and tune the stiffness against
    the extra solver cost measured above.
 
+Update (#10985, #10986): contact and a stance-hold leg servo are in
+`GS3DX_FullBodyContact` (see [GROUND_CONTACT.md](GROUND_CONTACT.md)). It
+stands from rest, but the impact drive's start momentum tips it over. The
+data audit ([DATA_AUDIT.md](DATA_AUDIT.md)) shows that step 2 needs a
+capture-derived pelvis path, because the drive's pelvis path is out of reach
+of planted feet.
+
 ## Visual QA (#10959)
 
 `gs3dx_layout_qa` prints diagrams headlessly to `docs/screenshots/` and lists

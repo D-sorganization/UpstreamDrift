@@ -22,7 +22,8 @@
   (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim`, GS3DX-5 (#10955) `GS3DX_Quat`
   quaternion shoulders, GS3DX-6 (#10956) quaternion hip, GS3DX-7 (#10957) lower body and
   GS3DX-8 (#10958) weld stance + integration run and GS3DX-9 (#10959) visual QA done;
-  follow-up GS3DX-10 (#10979) drives the legs and refits the pelvis inputs.
+  follow-up GS3DX-10 (#10979) drives the legs and refits the pelvis inputs. GS3DX-11
+  (#10985) data audit and GS3DX-12 (#10986) ground contact done (`GS3DX_FullBodyContact`).
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -75,6 +76,21 @@
       impact window completes (348 steps); passive legs make the pelvis diverge and the right
       knee hyperextend (+67 deg). `gs3dx_contact_trial`: contact = +2 blocks, 1.8x wall time.
       `docs/FULL_BODY.md`. `gs3dx_layout_qa` renders diagrams to `docs/screenshots/` (0 overlaps).
+  12. #10985 data audit: `gs3dx_capture_stance` reads `data/C3D_TA_Driver.c3d` via pyenv ezc3d
+      (654 frames, 360 Hz, **no force plates / analog: no GRF data**); stance 0.65 m ankle width,
+      foot yaw -2.15/+8.15 deg -> `gs3dx_leg_table` `.stance`. Mass double-count (upper body 77.6 kg,
+      FullBody 109.4 kg), foot/thigh proxy conflicts, and the impact drive's pelvis path being out
+      of reach of planted feet: `docs/DATA_AUDIT.md` (owner decision on trunk mass pending).
+  13. #10986 ground contact: `gs3dx_leg_fk` (matches Simscape to 1e-9) and `gs3dx_leg_ik` (damped
+      Gauss-Newton); `gs3dx_build_contact` copies FullBody to `GS3DX_FullBodyContact`: welds removed,
+      3 sole spheres per foot on one Infinite Plane, pelvis joint unactuated (NoTorque, 4 converters
+      deleted), stance-hold leg servo (matrix Gain on [q; qd] + existing Constant), IK start angles and
+      rates (High). `gs3dx_contact_check`: Newton momentum balance, foot slip/lift, GRF. From rest it
+      stands (slip 2 mm, no lift, Newton 0.71/3.22 N*s); the impact drive tips it over the right foot
+      (131 N*s start momentum, gain-independent) -> needs the #10979 refit. `docs/GROUND_CONTACT.md`.
+  14. **Block budget correction:** the Home license counts the _compiled_ model; FullBody is 751
+      uncompiled but 945 compiled (Quat 594 -> 740). `gs3dx_block_budget(mdl, compiled=true)` adds
+      `.compiled_total`; FullBodyContact compiles to 967 with a 25-block validation reserve.
 
 ## Files and Decisions
 
@@ -120,13 +136,20 @@ Creator` (newline); find it by BlockType.
 - `*.png` is git-ignored outside the root `docs/`; the exploratory screenshots are force-added.
 - A name on a branched signal line is drawn on every branch; name signals on the outputs of
   a virtual Demux instead (`Actuator Torque` in the hip/shoulder subsystems).
+- The hip bus element is `AngularPosition Z` (space) in the bus; logged Datasets expose it as
+  `AngularPosition_Z`.
+- Deleting one line of a physical net deletes the whole net: removing the foot weld also cut
+  ankle Distal -> Foot COM, which `gs3dx_build_contact` redraws and asserts.
+- `gs3dx_stance_frames` closes the model it simulates: read model-workspace values first.
+- `gs3dx_build_lower_body`/FullBody tests still cap the _uncompiled_ count at 900; FullBody's
+  compiled count (945) would fail that cap. Left as is (existing test); flagged in the PR.
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 55 passed / 0 failed in 403 s (2026-09-26, after the #10959 layout fixes and a rebuild of
-  Quat/KDS_Spherical/FullBody; the Simulation-tagged tests take most of the time; select
-  `~HasTag('Simulation')` for the structural tests).
+  → 70 passed / 0 failed (2026-09-26, after #10985/#10986: capture 4, leg kinematics 4, contact 7
+  new; the FK test failed once on a closed-model handle, fixed and rerun 4/4). The capture tests
+  need MATLAB pyenv with ezc3d (they are skipped otherwise).
 - `gs3dx_layout_qa` on the rebuilt diagrams: 0 overlapping blocks.
 - The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
@@ -138,5 +161,7 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979: fit leg torques, refit the pelvis inputs with legs attached, and add an
-   energy audit (`docs/FULL_BODY.md` next steps).
+2. Owner decides the trunk mass (DATA_AUDIT.md) and whether GRF data can be obtained.
+3. #10979: derive a pelvis path from the capture, refit the upper-body inputs on
+   `GS3DX_FullBodyContact`, replace the stance-hold Constant with time-varying leg references
+   (no added blocks: 33 compiled blocks of headroom).
