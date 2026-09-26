@@ -9,13 +9,20 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.contact_identification import (
+    MAX_CONDITION_NUMBER,
+    STATUS_CALIBRATED_IDENTIFIABLE,
+    STATUS_ILL_CONDITIONED,
+    STATUS_RANK_DEFICIENT,
+    STATUS_SYNTHETIC_SENSITIVITY_ONLY,
     ContactGridConfig,
     ContactPrior,
     IdentifiabilityAnalysis,
     PhaseContactMetrics,
     analyze_identifiability,
+    classify_identifiability,
     compute_momentum_balance_residual,
     evaluate_contact_phases,
+    main,
     run_contact_identification,
 )
 from src.shared.python.motion_matching.contact_law import ContactParameters
@@ -246,13 +253,201 @@ def test_run_contact_identification_pipeline(tmp_path: Path) -> None:
     )
 
     assert result["calibrated_parameters"]["stiffness_n_m"] == pytest.approx(50000.0)
+    assert result["status"] == STATUS_SYNTHETIC_SENSITIVITY_ONLY
+    assert result["schema_version"] == "matched-swing-contact-id/v2"
+    assert result["kind"] == "synthetic-contact-sweep"
     assert (out_dir / "receipt.json").exists()
-    assert (out_dir / "sweep.parquet").exists()
 
-    # Verify parquet file is readable with pyarrow
-    import pyarrow.parquet as pq
+    # Verify parquet file is readable if pyarrow is installed
+    try:
+        import pyarrow.parquet as pq
 
-    table = pq.read_table(out_dir / "sweep.parquet")
-    assert table.num_rows >= 1
-    assert "stiffness_n_m" in table.column_names
-    assert "condition_number" in table.column_names
+        assert (out_dir / "sweep.parquet").exists()
+        table = pq.read_table(out_dir / "sweep.parquet")
+        assert table.num_rows >= 1
+        assert "stiffness_n_m" in table.column_names
+        assert "condition_number" in table.column_names
+    except ImportError:
+        pass
+
+
+@pytest.mark.unit
+def test_classify_identifiability_synthetic_gives_synthetic_sensitivity_only() -> None:
+    """Synthetic data (measured=False) must never be CALIBRATED_IDENTIFIABLE (#10960 P0-7)."""
+    # Even with full rank and low condition number, synthetic simulation yields SYNTHETIC_SENSITIVITY_ONLY
+    status = classify_identifiability(
+        rank=6,
+        n_params=6,
+        condition_number=10.0,
+        measured=False,
+    )
+    assert status == STATUS_SYNTHETIC_SENSITIVITY_ONLY
+    assert status != STATUS_CALIBRATED_IDENTIFIABLE
+
+
+@pytest.mark.unit
+def test_classify_identifiability_rank_deficient_is_not_calibrated_identifiable() -> (
+    None
+):
+    """Rank-deficient identification is not CALIBRATED_IDENTIFIABLE (#10960 P0-7)."""
+    status = classify_identifiability(
+        rank=4,
+        n_params=6,
+        condition_number=100.0,
+        measured=True,
+    )
+    assert status != STATUS_CALIBRATED_IDENTIFIABLE
+    assert status == STATUS_RANK_DEFICIENT
+
+
+@pytest.mark.unit
+def test_classify_identifiability_ill_conditioned_is_not_calibrated_identifiable() -> (
+    None
+):
+    """Ill-conditioned identification is not CALIBRATED_IDENTIFIABLE (#10960 P0-7)."""
+    # Above threshold limit
+    status_high = classify_identifiability(
+        rank=6,
+        n_params=6,
+        condition_number=MAX_CONDITION_NUMBER + 100.0,
+        measured=True,
+    )
+    assert status_high != STATUS_CALIBRATED_IDENTIFIABLE
+    assert status_high == STATUS_ILL_CONDITIONED
+
+    # Infinite condition number
+    status_inf = classify_identifiability(
+        rank=6,
+        n_params=6,
+        condition_number=float("inf"),
+        measured=True,
+    )
+    assert status_inf != STATUS_CALIBRATED_IDENTIFIABLE
+    assert status_inf == STATUS_ILL_CONDITIONED
+
+
+@pytest.mark.unit
+def test_classify_identifiability_measured_well_conditioned_is_calibrated_identifiable() -> (
+    None
+):
+    """Measured observations with full rank and well-conditioned FIM qualify as CALIBRATED_IDENTIFIABLE."""
+    status = classify_identifiability(
+        rank=6,
+        n_params=6,
+        condition_number=50.0,
+        measured=True,
+        condition_limit=MAX_CONDITION_NUMBER,
+    )
+    assert status == STATUS_CALIBRATED_IDENTIFIABLE
+
+
+@pytest.mark.unit
+def test_classify_identifiability_preconditions() -> None:
+    """DbC preconditions on classify_identifiability inputs."""
+    with pytest.raises(ValueError, match="rank must be a non-negative integer"):
+        classify_identifiability(
+            rank=-1, n_params=6, condition_number=10.0, measured=True
+        )
+
+    with pytest.raises(ValueError, match="n_params must be a positive integer"):
+        classify_identifiability(
+            rank=0, n_params=0, condition_number=10.0, measured=True
+        )
+
+    with pytest.raises(ValueError, match="rank cannot exceed n_params"):
+        classify_identifiability(
+            rank=7, n_params=6, condition_number=10.0, measured=True
+        )
+
+    with pytest.raises(ValueError, match="condition_number must be non-negative"):
+        classify_identifiability(
+            rank=6, n_params=6, condition_number=-1.0, measured=True
+        )
+
+    with pytest.raises(ValueError, match="condition_limit must be positive"):
+        classify_identifiability(
+            rank=6,
+            n_params=6,
+            condition_number=10.0,
+            measured=True,
+            condition_limit=-5.0,
+        )
+
+
+@pytest.mark.unit
+def test_run_contact_identification_run_dir_raises(tmp_path: Path) -> None:
+    """Providing run_dir must fail closed with NotImplementedError (#10960 P0-7)."""
+    config_path = tmp_path / "contact_grid.json"
+    grid_dict = {
+        "schema_version": "1.0.0",
+        "name": "mock_grid",
+        "priors": {
+            "stiffness_n_m": {
+                "nominal": 50000.0,
+                "min": 20000.0,
+                "max": 100000.0,
+                "unit": "N/m",
+            },
+            "dissipation_s_m": {"nominal": 2.0, "min": 0.5, "max": 4.0, "unit": "s/m"},
+            "static_friction": {
+                "nominal": 0.8,
+                "min": 0.4,
+                "max": 1.2,
+                "unit": "ratio",
+            },
+            "dynamic_friction": {
+                "nominal": 0.6,
+                "min": 0.3,
+                "max": 1.0,
+                "unit": "ratio",
+            },
+            "viscous_friction": {
+                "nominal": 0.05,
+                "min": 0.01,
+                "max": 0.2,
+                "unit": "s/m",
+            },
+            "transition_velocity_m_s": {
+                "nominal": 0.02,
+                "min": 0.01,
+                "max": 0.05,
+                "unit": "m/s",
+            },
+        },
+        "grid": {
+            "stiffness_n_m": [50000.0],
+            "dissipation_s_m": [2.0],
+            "static_friction": [0.8],
+            "dynamic_friction": [0.6],
+            "viscous_friction": [0.05],
+            "transition_velocity_m_s": [0.02],
+        },
+    }
+    config_path.write_text(json.dumps(grid_dict), encoding="utf-8")
+    out_dir = tmp_path / "out"
+
+    with pytest.raises(
+        NotImplementedError,
+        match=r"measured contact calibration not wired \(#10960 P0-7\)",
+    ):
+        run_contact_identification(
+            grid_config_path=config_path,
+            out_dir=out_dir,
+            run_dir=tmp_path / "measured_run",
+        )
+
+
+@pytest.mark.unit
+def test_cli_run_dir_flags_raise(tmp_path: Path) -> None:
+    """CLI flags --run and --run-dir must fail closed instead of silently ignoring (#10960 P0-7)."""
+    with pytest.raises(
+        NotImplementedError,
+        match=r"measured contact calibration not wired \(#10960 P0-7\)",
+    ):
+        main(["--run", "anthro_driver"])
+
+    with pytest.raises(
+        NotImplementedError,
+        match=r"measured contact calibration not wired \(#10960 P0-7\)",
+    ):
+        main(["--run-dir", str(tmp_path / "run_data")])

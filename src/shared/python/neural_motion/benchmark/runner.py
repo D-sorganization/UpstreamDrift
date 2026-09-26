@@ -57,43 +57,39 @@ def run_model_comparative_benchmark(
     metrics: AcceptedMatchMetrics,
     baseline_latency: LatencySummary | None = None,
     baseline_metrics: AcceptedMatchMetrics | None = None,
+    training_wall_time_s: float | None = None,
+    training_cost_usd: float | None = None,
+    baseline_query_cost_usd: float | None = None,
+    candidate_query_cost_usd: float | None = None,
 ) -> ModelBenchmarkCard:
     """Construct an auditable ModelBenchmarkCard evaluating speedup, quality, and break-even."""
+    if (
+        baseline_latency is None
+        or baseline_metrics is None
+        or training_wall_time_s is None
+        or training_cost_usd is None
+        or baseline_query_cost_usd is None
+        or candidate_query_cost_usd is None
+    ):
+        raise ValueError(
+            "baseline must be measured, not derived from the candidate (#10960 P0-5)"
+        )
+
     latency_summary = LatencySummary.from_samples(interactive_samples_s)
 
-    # Establish baseline for promotion comparison
-    effective_baseline_lat = baseline_latency or LatencySummary(
-        median_s=latency_summary.median_s * 2.5,
-        p95_s=latency_summary.p95_s * 2.0,
-        min_s=latency_summary.min_s * 2.0,
-        max_s=latency_summary.max_s * 2.0,
-        mean_s=latency_summary.mean_s * 2.5,
-        std_s=latency_summary.std_s,
-        sample_count=latency_summary.sample_count,
-    )
-    effective_baseline_metrics = baseline_metrics or AcceptedMatchMetrics(
-        accepted_count=int(metrics.accepted_count * 0.9),
-        rejected_count=int(metrics.rejected_count * 1.2),
-        mean_residual_norm=metrics.mean_residual_norm * 1.2,
-        p95_residual_norm=metrics.p95_residual_norm * 1.2,
-        coverage_ratio=max(0.0, metrics.coverage_ratio - 0.05),
-        native_calls_per_query=metrics.native_calls_per_query * 3.0,
-        peak_memory_mb=metrics.peak_memory_mb * 1.1,
-    )
-
     break_even = compute_break_even(
-        training_wall_time_s=3600.0,
-        training_cost_usd=12.00,
-        baseline_latency_s=effective_baseline_lat.median_s,
+        training_wall_time_s=training_wall_time_s,
+        training_cost_usd=training_cost_usd,
+        baseline_latency_s=baseline_latency.median_s,
         candidate_latency_s=latency_summary.median_s,
-        baseline_query_cost_usd=0.002,
-        candidate_query_cost_usd=0.0004,
+        baseline_query_cost_usd=baseline_query_cost_usd,
+        candidate_query_cost_usd=candidate_query_cost_usd,
     )
 
     promotion_gate = evaluate_promotion_gate(
-        baseline_latency=effective_baseline_lat,
+        baseline_latency=baseline_latency,
         candidate_latency=latency_summary,
-        baseline_metrics=effective_baseline_metrics,
+        baseline_metrics=baseline_metrics,
         candidate_metrics=metrics,
     )
 

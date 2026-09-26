@@ -1,21 +1,19 @@
-"""Unit tests for body target support across physics engine providers (MS-12 / #10331).
+"""Unit tests for body target support across physics engine providers (#10960 P0-1).
 
 Verifies:
-1. supports_body_target() returns True for engines with verified body-fitting routes
+1. supports_body_target() returns True for engines declaring body-fitting routes
    (mujoco, drake, pinocchio) and False for other engines (opensim, myosuite, pendulum).
-2. fit_swing with body target delegates to the pipeline, sets receipt_path on
-   CanonicalFitResult, and the receipt JSON exists on disk.
-3. Engines that do not support body targets fail closed with ValueError.
+2. fit_swing with body target fails closed with NotImplementedError for unwired body-fit lanes.
+3. execute_body_fit directly fails closed with NotImplementedError, writes no receipt file,
+   and ignores caller-injected acceptance/metrics payloads.
+4. Engines that do not support body targets fail closed with ValueError.
 """
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any
 import pytest
 
-from src.shared.python.motion_matching.fit_result import CanonicalFitResult
 from src.shared.python.motion_matching.provider import (
     FitOptions,
     MultiSourceTarget,
@@ -79,10 +77,10 @@ def test_has_and_resolve_body_target_helpers() -> None:
         (PinocchioFitSwingProvider, "pinocchio"),
     ],
 )
-def test_body_target_supported_where_lane_exists(
+def test_body_target_fails_closed_in_providers(
     provider_cls: type, engine_name: str, tmp_path: Path
 ) -> None:
-    """Mujoco, Drake, and Pinocchio delegate body targets and return valid receipts on disk."""
+    """Mujoco, Drake, and Pinocchio propagate fail-closed error on unwired body lanes (#10960 P0-1)."""
     provider = provider_cls()
     body_payload = {
         "capture": "driver",
@@ -92,21 +90,69 @@ def test_body_target_supported_where_lane_exists(
     target = MultiSourceTarget(body=body_payload, metadata={"out_dir": str(tmp_path)})
     opts = FitOptions(maxiter=50)
 
-    result = provider.fit_swing(target, opts)
+    with pytest.raises(NotImplementedError, match="body-target fit lane is not wired"):
+        provider.fit_swing(target, opts)
 
-    assert isinstance(result, CanonicalFitResult)
-    assert result.solver_status == "success"
-    assert result.receipt_path is not None
+    # Must write no receipt files
+    assert list(tmp_path.iterdir()) == []
 
-    receipt_path = Path(result.receipt_path)
-    assert receipt_path.is_file()
 
-    receipt_data = json.loads(receipt_path.read_text(encoding="utf-8"))
-    assert receipt_data["engine"] == engine_name
-    assert receipt_data["status"] == "success"
-    assert receipt_data["converged"] is True
-    assert "acceptance" in receipt_data
-    assert receipt_data["acceptance"]["is_physically_accepted"] is True
+@pytest.mark.unit
+def test_execute_body_fit_direct_fails_closed(tmp_path: Path) -> None:
+    """execute_body_fit raises NotImplementedError and writes no receipt file."""
+    target = MultiSourceTarget(
+        body={"capture": "driver"}, metadata={"out_dir": str(tmp_path)}
+    )
+    opts = FitOptions()
+
+    with pytest.raises(NotImplementedError, match="body-target fit lane is not wired"):
+        execute_body_fit("mujoco", target, opts)
+
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.unit
+def test_execute_body_fit_ignores_caller_acceptance_and_metrics(tmp_path: Path) -> None:
+    """Caller-supplied acceptance verdicts and metrics must never yield a PASSED result (#10960 P0-1)."""
+    fabricated_body = {
+        "capture": "driver",
+        "schema": "matched-swing-fit/injected-v1",
+        "metrics": {
+            "whole_marker_rmse_m": 0.001,
+            "final_rmse_m": 0.001,
+            "final_cost": 0.0001,
+        },
+        "acceptance": {
+            "status": "PASSED",
+            "is_physically_accepted": True,
+        },
+    }
+    target = MultiSourceTarget(
+        body=fabricated_body, metadata={"out_dir": str(tmp_path)}
+    )
+    opts = FitOptions()
+
+    # Direct invocation fails closed without returning accepted verdict
+    with pytest.raises(NotImplementedError, match="body-target fit lane is not wired"):
+        execute_body_fit("mujoco", target, opts)
+
+    # Provider invocation fails closed without returning accepted verdict
+    provider = MujocoFitSwingProvider()
+    with pytest.raises(NotImplementedError, match="body-target fit lane is not wired"):
+        provider.fit_swing(target, opts)
+
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.unit
+def test_execute_body_fit_preconditions() -> None:
+    """execute_body_fit enforces input validation DbC preconditions."""
+    valid_target = MultiSourceTarget(body={"capture": "driver"})
+    with pytest.raises(ValueError, match="engine_name"):
+        execute_body_fit("", valid_target)
+
+    with pytest.raises(TypeError, match="MultiSourceTarget"):
+        execute_body_fit("mujoco", "invalid_target")
 
 
 @pytest.mark.unit

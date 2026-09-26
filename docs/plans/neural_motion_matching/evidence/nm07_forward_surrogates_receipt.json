@@ -3,13 +3,15 @@
   "governing_issue": 10622,
   "parent_epic": 10603,
   "comparison_schema": "neural-surrogate-comparison/1.0.0",
+  "status": "DIAGNOSTIC",
+  "note": "Ablation results in NM-07 were based on hard-coded literals rather than measured evaluations (#10960 P0-3); relabelled as diagnostic pending real forward surrogate training/evaluation pipeline wiring.",
   "source_hashes": {
-    "src/shared/python/motion_matching/surrogate/validate.py": "c9432df71c155ecde54f60d27262a8cad630814f9aeb1e675ea09656a1bb8c8e",
-    "src/shared/python/motion_matching/surrogate/nm07_comparison.py": "d9370e5e7f5200278923a585df23cbedcf7b0bf60b43086b5951269a05cb110c",
-    "src/shared/python/neural_motion/surrogates/__init__.py": "f00c8686fb6f3bde2a4ce7f1ce57ea8bff5243576bc5caa24d4fa90609d72c42",
-    "src/shared/python/neural_motion/surrogates/types.py": "b2bc8b4400c4eaa1af09668c9ba4663b9a9b02c9d0078a3cacae14f78c182f03",
+    "src/shared/python/motion_matching/surrogate/validate.py": "40ffa563b482dd787864c1b487dc8b838c0832efae0832218906574bf6a5c920",
+    "src/shared/python/motion_matching/surrogate/nm07_comparison.py": "9df2c214d588ad846d5edcf83f53fad7a0f089da67da2f8fe0b2e003866f29bc",
+    "src/shared/python/neural_motion/surrogates/__init__.py": "f1d90b3a40ec859f3db346c0b5b836fa2011b9769547ef19279fa4aff9bc6a76",
+    "src/shared/python/neural_motion/surrogates/types.py": "6f73ff5aa5dee8188d4683db638cd420fb175f9580b759f0a1ee8c13e5a5c972",
     "src/shared/python/neural_motion/surrogates/physics_structured.py": "3be6b7aba1a890318fdcf45b1353bd3ba1b6ee4bbc5d3669d97f9b81be8e0140",
-    "src/shared/python/neural_motion/surrogates/comparison.py": "7da3691b4e3cb740be0afc15999322a7e2bb70a5f5b68871da0fbe365b95586a"
+    "src/shared/python/neural_motion/surrogates/comparison.py": "9f8dc5913329a980687b4423bb3ab49f25393e05e0c8bf92a3779a244a43e4f5"
   },
   "comparison_findings": {
     "forward_surrogate_inversion": "adversarial exploitation on native mechanics; unconstrained gradient search finds non-physical states; trust-region & gradient fidelity required",

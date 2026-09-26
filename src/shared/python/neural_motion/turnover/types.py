@@ -27,6 +27,7 @@ class PromotionVerdict(str, Enum):
     RESEARCH_ONLY = "RESEARCH_ONLY"
     BLOCKED_PREREQUISITE = "BLOCKED_PREREQUISITE"
     REFERENCE_ONLY = "REFERENCE_ONLY"
+    UNMEASURED = "UNMEASURED"
 
 
 @dataclass(frozen=True, slots=True)
