@@ -78,14 +78,13 @@ These workflows support repository operations. They can affect labels,
 publishing, or release artifacts, but they are not the first quality signal for
 ordinary PR review.
 
-| Workflow file                    | Purpose                                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------- |
-| `auto-update-prs.yml`            | Rebase/update open PRs after `main` changes.                                                |
-| `pr-auto-labeler.yml`            | Applies scope and size labels to PRs.                                                       |
-| `PR-Comment-Responder.yml`       | Collects PR comments for downstream processing.                                             |
-| `Comment-to-Issue-Converter.yml` | Converts actionable review comments into issues.                                            |
-| `release.yml`                    | Exact-main companion artifacts plus draft-first, attested tag releases and PyPI publishing. |
-| `tauri-build.yml`                | Desktop application build and release validation.                                           |
+| Workflow file              | Purpose                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `auto-update-prs.yml`      | Rebase/update open PRs after `main` changes.                                                |
+| `pr-auto-labeler.yml`      | Applies scope and size labels to PRs.                                                       |
+| `PR-Comment-Responder.yml` | Collects PR comments for downstream processing.                                             |
+| `release.yml`              | Exact-main companion artifacts plus draft-first, attested tag releases and PyPI publishing. |
+| `tauri-build.yml`          | Desktop application build and release validation.                                           |
 
 ## Agent And Remediation Workflows
 
@@ -116,7 +115,7 @@ Archived workflows are inert because they live under
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Archived/inert                      | `Jules-Auto-Rebase.yml`, `Jules-Auto-Refactor.yml`, `Jules-Cleaner.yml`, `Jules-Competitor-Analyst.yml`, `Jules-Curie.yml`, `Jules-DRY-Orthogonality.yml`, `Jules-Hypatia.yml`, `Jules-Ideas-Generator.yml`, `Jules-Patent-Reviewer.yml`, `Jules-Render-Healer.yml` |
 | Manual-only cost-reduced automation | `agent-metrics-dashboard.yml`, `ci-failure-digest.yml`, `Code-Metrics.yml`, `Nightly-Doc-Organizer.yml`                                                                                                                                                             |
-| Legacy naming or overlap candidates | `Bot-CI-Trigger.yml`, `Comment-to-Issue-Converter.yml`, `Maintenance-Global-Control.yml`, `Manual-Run-All.yml`, `PR-Comment-Responder.yml`                                                                                                                          |
+| Legacy naming or overlap candidates | `Bot-CI-Trigger.yml`, `Maintenance-Global-Control.yml`, `Manual-Run-All.yml`, `PR-Comment-Responder.yml`                                                                                                                                                            |
 
 The existing operations audit at
 [`docs/operations/workflow_inventory.md`](../operations/workflow_inventory.md)

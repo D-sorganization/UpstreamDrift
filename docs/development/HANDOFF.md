@@ -1,3 +1,18 @@
+# Current Handoff — Retire the Review-Comment-to-Issue Converter (RM#1755, Third Attempt)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-10978-v3`
+- Branch: `chore/retire-comment-converter-v3` (baseline `b8c27a7d2`)
+- Commit: `SELF`
+- Pull request: #10992 (draft), supersedes #10978 (which conflicted with main)
+- Issue: Repository_Management#1755; development-log entry DL-#1755
+- Removed: `.github/workflows/Comment-to-Issue-Converter.yml` and the review-comment processor script; the `.github/WORKFLOWS.md` row, the Nightly Doc Organizer bullet and the `ci_workflow_map.md` row. `tests/ci/test_process_review_comments.py` is now a retirement guard; `tests/ci/test_ci_infrastructure.py` no longer lists the deleted workflow. SPEC's #10931 section is a retirement note.
+- Validation: `pytest tests/ci/` 89 passed; `python scripts/check_spec_paths.py` exit 0.
+- Workflow change: this PR ships alone.
+- Next step: CI green, mark ready, arm via `automerge_guard.py`, close #10978 as superseded.
+
+---
+
 # Implementation Handoff — Consolidated #10960 Batch and Three CLI-Agent Slices 2026-09-26
 
 ## Identity

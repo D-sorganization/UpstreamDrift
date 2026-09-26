@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#1755 · Retire the Review-Comment-to-Issue Converter
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** Repository_Management#1755
+- **Branch:** `chore/retire-comment-converter-v3`
+- **PR:** draft PR from `chore/retire-comment-converter-v3` (supersedes #10978)
+- **Paths:** `.github/workflows/Comment-to-Issue-Converter.yml`, `scripts/ci/process_review_comments.py`, `tests/ci/test_process_review_comments.py`, `tests/ci/test_ci_infrastructure.py`, `.github/workflows/Nightly-Doc-Organizer.yml`, `docs/development/ci_workflow_map.md`, `docs/development/`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-26 — `tests/ci/` 89 passed; `check_spec_paths.py` exits 0 with the #10931 SPEC section collapsed to a retirement note.
+- **Summary:** Remove the retired Convert-Review-Comments-to-Issues workflow and its processor from this repository per the fleet-wide Repository_Management#1755 campaign, and drop the stale references in the Nightly Doc Organizer and the CI workflow map. Re-lands #10978 (itself superseding #10941) fresh off `origin/main` after its branch conflicted.
+- **Next step:** CI green on the v3 draft PR, then mark ready and arm auto-merge.
+
 ### DL-#10286 · Native Swing ZTCF/ZVCF Fail-Closed Dynamics and DTACK Semantics
 
 - **State:** in_review

@@ -74,7 +74,6 @@ jobs:
           - **Jules Tech Debt Assessor**: Identifies and categorizes technical debt.
 
           ## Review & Issue Management
-          - **Comment-to-Issue-Converter**: Converts PR review comments into actionable issues.
           - **PR-Comment-Responder**: Allows AI to respond to human feedback on PRs.
 
           ## How to Pause Workflows
