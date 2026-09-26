@@ -23,6 +23,16 @@ from src.shared.python.ai.rag.context_provider import (
 )
 from src.shared.python.ai.rag.simple_rag import SKLEARN_AVAILABLE
 
+# Deprecated in favour of product Wizards (Tools#5346); still tested until removed.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:RAGContextProvider is deprecated:DeprecationWarning"
+)
+
+
+def test_provider_warns_that_it_is_deprecated() -> None:
+    with pytest.warns(DeprecationWarning, match="Wizard"):
+        RAGContextProvider()
+
 
 @pytest.fixture
 def tmp_docs(tmp_path: Path) -> Path:

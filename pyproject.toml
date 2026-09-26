@@ -536,6 +536,7 @@ max-complexity = 10
 # except-Exception sites has to land in Tools first, then flow here via
 # a vendor/ud-tools pin bump. Issue #8813.
 "src/shared/python/**" = ["BLE001"]
+"src/shared/python/ai/knowledge/wizard.py" = ["C420"]
 
 
 [tool.mypy]
