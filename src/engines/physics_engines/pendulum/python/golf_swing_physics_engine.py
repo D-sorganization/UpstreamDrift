@@ -46,6 +46,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.contracts import StateError
 from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -58,9 +59,9 @@ logger = get_logger(__name__)
 
 _TOOLS_PENDULUM_AVAILABLE: bool | None = None
 # Resolve repo root: src/engines/physics_engines/pendulum/python/<this file>
-# seven levels up from this file reaches the repository root
+# six levels up from this file reaches the repository root
 _THIS_FILE = Path(__file__).resolve()
-_REPO_ROOT = _THIS_FILE.parents[6]
+_REPO_ROOT = _THIS_FILE.parents[5]
 _TOOLS_PACKAGE_ROOT = (
     _REPO_ROOT / "vendor" / "ud-tools" / "src" / "pendulum_simulator" / "src"
 )
@@ -453,10 +454,16 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-Torque Counterfactual at a given state (q, v)."""
+        if not self._is_initialized:
+            raise StateError("compute_ztcf: engine not initialized")
         if q is None:
             raise ValueError("q must be provided")
-        if not self._is_initialized or len(q) < 2 or len(v) < 2:
-            return np.zeros(2)
+        if v is None:
+            raise ValueError("v must be provided")
+        if len(q) < 2:
+            raise ValueError(f"Expected length 2 for q, got {len(q)}")
+        if len(v) < 2:
+            raise ValueError(f"Expected length 2 for v, got {len(v)}")
 
         orig = self._state.copy()
         try:
@@ -467,10 +474,12 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Canonical zero-velocity, zero-control acceleration at position q."""
+        if not self._is_initialized:
+            raise StateError("compute_zvcf: engine not initialized")
         if q is None:
             raise ValueError("q must be provided")
-        if not self._is_initialized or len(q) < 2:
-            return np.zeros(2)
+        if len(q) < 2:
+            raise ValueError(f"Expected length 2 for q, got {len(q)}")
 
         orig = self._state.copy()
         try:

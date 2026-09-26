@@ -17,6 +17,96 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10286 · Native Swing ZTCF/ZVCF Fail-Closed Dynamics and DTACK Semantics
+
+- **State:** in_review
+- **Owner:** claude (agy executor)
+- **Issue:** #10286
+- **PR:** draft PR from `agy/ud-10286-fail-closed`
+- **Branch:** `agy/ud-10286-fail-closed`
+- **Paths:** `src/engines/physics_engines/myosuite/python/_drift_control.py`, `src/engines/physics_engines/pendulum/python/golf_swing_physics_engine.py`, `src/engines/physics_engines/pinocchio/python/dtack/gui/main_window.py`, `src/engines/physics_engines/pinocchio/python/dtack/sim/dynamics.py`, `tests/engines/physics_engines/test_golf_swing_pendulum.py`, `tests/engines/physics_engines/test_myosuite_engine.py`, `tests/unit/engines/pinocchio/dtack/sim/test_dynamics.py`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 98/98 unit tests pass across test_myosuite_engine.py, test_golf_swing_pendulum.py, and test_dynamics.py (1 Pinocchio integration test cleanly skipped); ruff check and format clean; mypy clean.
+- **Summary:** Remove success-shaped empty/zero array returns from uninitialized ZTCF/ZVCF counterfactual methods (raising StateError and ValueError for invalid dimensions), update dtack compute_zvcf to canonical (v=0, tau=0) semantics, add compute_zero_velocity_controlled for control-preserved dynamics, and update GUI caller and button label to "Zero-velocity (control kept)".
+- **Next step:** CI green, review, merge.
+
+### DL-#9619 · Amend ADR-0041 to Record Consumer-Side Fitter Decision
+
+- **State:** in_review
+- **Owner:** local (session `claude-deskcomputer-20260925-ud`)
+- **Issue:** #9619 (companion #9630)
+- **Branch:** `agy/ud-9619-adr0041`
+- **Paths:** `docs/adr/0041-markerless-mocap-consumer-authority.md`, `tests/architecture/test_markerless_mocap_authority.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — test_adr_records_consumer_side_fitter_amendment passes in test_markerless_mocap_authority.py
+- **Summary:** Amended ADR-0041 to record that consumer-side self-calibration fitters live in UpstreamDrift (`src/motion_capture/reconstruct/`) while Tools maintains vendor-neutral reference geometry (#9630, #9619).
+- **Next step:** CI green, review, merge.
+
+### DL-#9549 · Guard Contact-Interval Provider Contract for Interval Tab Owner Ruling
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9549 (epic #9546)
+- **PR:** draft PR from `agy/ud-9549-ruling-guard`
+- **Branch:** `agy/ud-9549-ruling-guard`
+- **Paths:** `tests/shared_contracts/test_impact_interval_provider.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 (`ff9fbee62`) — verified 11 contract tests pass in tests/shared_contracts/test_impact_interval_provider.py guarding owner interval-tab ruling
+- **Summary:** Replaced obsolete strict-xfail pin gate in test_impact_interval_provider.py with test_provider_honours_interval_tab_ruling guarding the owner ruling from Tools #4946 / Tools PR #5289 (IMPACT_INTERVAL_TAB_RULING.md): standalone interval tab dropped, ImpactModelType gains no INTERVAL member, and contact-interval solver remains headless (#9549).
+- **Next step:** CI green, review, merge.
+
+### DL-#9688 · Bunker P1: Decide and Benchmark a Genuine 3D Sand-Motion Tier
+
+- **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #9688
+- **PR:** draft PR from `agy/ud-9688-capability-register`
+- **Branch:** `agy/ud-9688-capability-register`
+- **Paths:** `src/bunkershot3d/solvers/capability.py`, `src/bunkershot3d/solvers/exceptions.py`, `src/bunkershot3d/solvers/__init__.py`, `docs/adr/0044-out-of-plane-fidelity-for-bunkershot3d.md`, `tests/bunkershot3d/solvers/test_capability_9688.py`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 18 unit tests pass in test_capability_9688.py verifying fail-closed sand-motion capability register
+- **Summary:** Added fail-closed sand-motion capability register (SandMotionKind, SandMotionCapability, register mapping, and require\_\* guards) in bunkershot3d.solvers to prevent presenting F0/F1/proxy/tracer outputs as genuine 3-D individual-grain trajectories or spherical ball spin.
+- **Next step:** CI green, review, merge.
+
+### DL-#9613 · Rig Soak: Multi-Camera Repeat Record Mode
+
+- **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #9613
+- **PR:** draft PR from `agy/ud-9613-record-repeat`
+- **Branch:** `agy/ud-9613-record-repeat`
+- **Paths:** `src/motion_capture/rig/__main__.py`, `src/motion_capture/rig/soak.py`, `tests/motion_capture/rig/test_record_repeat.py`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 8 unit tests pass in test_record_repeat.py; full rig test suite clean (128 passed, 0 regressions)
+- **Summary:** Added `record --repeat N [--pause S]` soak mode to camera rig CLI, supporting N back-to-back takes in take subdirectories, machine-readable soak summary, and worst-take exit code.
+- **Next step:** CI green, review, merge.
+
+### DL-#9411 · Keep MyPy Exclusion Budget and Unit-Gate Quarantine Ratchets Green
+
+- **State:** in_review
+- **Owner:** claude (agy executor)
+- **Issue:** #9411
+- **PR:** draft PR from `agy/ud-9411-mypy-budget`
+- **Branch:** `agy/ud-9411-mypy-budget`
+- **Paths:** `scripts/check_mypy_exclusion_budget.py`, `scripts/config/mypy_exclusion_budget.json`, `pyproject.toml`, `src/research/deformable/objects.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`, `docs/development/DEVELOPMENT_LOG.md`, `scripts/config/unit_gate_quarantine.json`, quarantined unit test files (Q-2..Q-5)
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-26 — budget: 14 unit tests pass, 35 exclusions under the 2026-10-01 cap of 36; quarantine: contract passes (155 IDs, 10 clusters), 43 retired IDs' tests pass, the 13 failures in the touched files are all still-quarantined IDs.
+- **Summary:** Enforce tracked-file validation in check_mypy_exclusion_budget.py; deleted 3 dead exclusions (start_api_server.py, setup_golf_suite.py, shared/models/); resolved type errors and unexcluded 6 files (targets.py, marker_mapping.py, checkpoint.py, data_io export.py, common export.py, objects.py) bringing total to 35 (below 36 cap); fixed the imported-module type errors this exposed (engine protocol `step(dt)`, differentiable engine array annotations, club_data loader `to_numpy`); extended remaining expirations to 2027-01-01 with re-attestation. Quarantine slice (Q-2..Q-5): repaired mechanical test drift (exception types, field names, CWD-relative paths, steam temperature in K) and retired 43 node IDs from the unit-gate quarantine without source changes.
+- **Next step:** CI green, review, merge.
+
+### DL-#9703 · Versioned Pre-Impact Bundle for Tools Impact Kernels
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9703 (IA-U2; parent #9700)
+- **PR:** draft (see branch)
+- **Branch:** `feat/9703-pre-impact-bundle`
+- **Paths:** `src/shared/python/physics/pre_impact_bundle.py`, `src/shared/python/physics/_pre_impact_contracts.py`, `src/shared/python/physics/_pre_impact_frames.py`, `tests/shared_contracts/test_pre_impact_bundle.py`, `docs/development/impact_acoustics_program.md`
+- **Started:** 2026-09-25
+- **Last verified:** 2026-09-25 — 48/48 tests pass against vendor pin a9ed0e7c5 (incl. python -O); pre-push mypy and unit hooks pass (Rust wheel hidden, #10946)
+- **Summary:** Consumer-side PreImpactBundle v1 composing Tools conventions: provenance, bounded timebase, world/head/grip poses, head COM inertia and contact, ball, reduced shaft modal state and prestress field, per-hand wrench/impedance, per-field origin; absent fields raise; power-invariant transforms; energy-reporting modal projection. Engine adapters and installed-wheel fixtures remain.
+- **Next step:** Review the draft PR, then implement the first engine adapter against the bundle under #9703.
+
 ### DL-#10946 · Keep Multi-Muscle Contracts and Torque Identical on the Rust Backend
 
 - **State:** in_review
@@ -1007,16 +1097,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#10602 · Club-Only Motion Matching Plan
 
-- **State:** proposed
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #10602
-- **Branch:** docs/club-neural-matching-plans-20260920
-- **PR:** #10628
-- **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/
+- **Branch:** `agy/ud-10602-real-matrix`
+- **PR:** draft PR from `agy/ud-10602-real-matrix`
+- **Paths:** docs/plans/club_neural_review/; docs/plans/club_only_matching/; docs/plans/neural_motion_matching/; src/shared/python/motion_matching/club_only/
 - **Started:** 2026-09-20
-- **Last verified:** 2026-09-22 — CO-03/#10678, CO-05/#10681, NM-02/#10679, MS-61/#10676 shipped; CO-04 pendulum club match in review on feat/issue-10608-co04-pendulum-club-match (PR #10680)
+- **Last verified:** 2026-09-25 — CO-08 matrix scores only complete recorded CO-04/CO-05 fit outcomes (fit_outcomes.py); 0/80 cells scored, 24 unqualified with named missing metrics; 276 club tests pass.
 - **Summary:** Published bounded implementation issues with TDD/DbC/LoD/DRY prompts, dependency ordering, native validation gates and shared technical review. Planning artifacts do not qualify physical results or speedup.
-- **Next step:** Land PR #10680 for #10608 (CO-04), then dispatch #10610 (CO-06) per dependency order.
+- **Next step:** CI green, review, merge.
 - **Evidence:** docs/plans/club_neural_review/REVIEW.md; docs/plans/club_neural_review/excel_audit.json.
 
 ### DL-#10604 · CO-00 Freeze Club Workbook Identity
@@ -1215,19 +1305,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Land the matrix, then start U1 (#9286) and U2 (#9542) with their RED tests and update their entries with merge SHAs.
 - **Evidence:** src/config/bunkershot3d_qualification.json; tests/config/bunkershot3d_qualification/test_bunkershot3d_qualification_ledger.py.
 
-### DL-#10363 · Matched Swing Continuation Review
+### DL-#10363 · Matched Swing Continuation Review & Drake G1 Retraction
 
 - **State:** in_review
-- **Owner:** codex (handoff review only; execution by next lease holder)
+- **Owner:** claude-deskcomputer-20260925-ud
 - **Issue:** #10363
-- **Branch:** docs/matching-agent-continuation
-- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/10393
-- **Paths:** docs/development/HANDOFF.md; docs/development/matched_swing_program; docs/development/opensim_tour_matching/HANDOFF.md; docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md
+- **Branch:** agy/ud-10363-drake-retraction
+- **PR:** draft PR from `agy/ud-10363-drake-retraction`
+- **Paths:** docs/development/matched_swing_program; src/shared/python/motion_matching/acceptance.py; src/engines/physics_engines/drake/python/full_body_fit.py; evidence/matched/driver_g1_drake/reevaluation.json; docs/development/full_body_models/evidence/acceptance/verdicts_2026-09.json; reports/matched_swing_ledger.json
 - **Started:** 2026-09-18
-- **Last verified:** 2026-09-18 at 94d593cf1 (review base; SELF contains handoff; ControlTower process/artifact/source snapshot; 14 Pinocchio and 27 OpenSim focused tests passed)
-- **Summary:** Reviewed Claude native branches and deployed code; preserved checkpoint/source recovery evidence; documented active jobs, physical failures, source integration gaps and bounded cheaper-agent continuation. Expanded #10394 into nine bounded tasks after inspecting empty club geometry and inconsistent arm scaling; recorded future muscle/tendon contracts. No new native solve or physical acceptance claimed.
-- **Next step:** For existing fits inspect ControlTower jobs; for anatomical golf corrections start #10395 then #10397 under epic #10394. See EPIC_GOLF_MODEL.md and GOLF_MODEL_AGENT_PROMPT.md.
-- **Evidence:** docs/development/matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json; docs/development/matched_swing_program/AGENT_CONTINUATION_PROMPT.md.
+- **Last verified:** 2026-09-25 at ff9fbee62 (retracted Drake G1 fabricated PASS via reevaluation.json; closed synthesis paths in full_body_fit.py; added fail-closed integrity gates in acceptance.py; 0 PASSED rows in ledger; motion_matching/tour_baselines/opensim ladder/browser suites green except 13 pre-existing local failures)
+- **Summary:** 2026-09-18 continuation review (codex) preserved checkpoint/source recovery evidence and bounded the cheaper-agent continuation, with no physical acceptance claimed. Then: retracted the fabricated Drake G1 receipt (PR #10506) under MS-100; added fail-closed evidence integrity gates (\_evaluate_evidence_integrity) rejecting placeholder hashes and zero residuals without replay evidence; removed physical_audit numeric literals, np.zeros target fallback, and silent warm-start fallback in Drake full_body_fit.py; regenerated ledger and status matrices confirming 0 PASSED rows.
+- **Next step:** CI green, review, merge.
+- **Evidence:** docs/development/matched_swing_program/evidence/continuation_20260918/matching-handoff-snapshot.json; evidence/matched/driver_g1_drake/reevaluation.json; reports/matched_swing_ledger.json; tests/unit/motion_matching/test_acceptance.py; tests/unit/motion_matching/test_drake_full_body_fit.py.
 
 ### DL-#10432 · Calibrate and Smooth Full-Swing Pinocchio Kinematics With Exact Grip Compatibility
 

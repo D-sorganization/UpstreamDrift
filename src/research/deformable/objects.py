@@ -642,6 +642,8 @@ class Cloth(DeformableObject):
         self._height = height
 
         # Build spring connectivity
+        self._spring_i: np.ndarray
+        self._spring_j: np.ndarray
         self._springs = self._build_springs()
         self._build_spring_arrays()
 

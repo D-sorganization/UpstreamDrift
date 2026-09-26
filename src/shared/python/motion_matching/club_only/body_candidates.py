@@ -12,12 +12,15 @@ import hashlib
 import time
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.motion_matching.club_only.fit_outcomes import load_fit_outcomes
 from src.shared.python.motion_matching.club_only.nullspace_proposals import (
     analyze_grip_jacobian_nullspace,
     propose_nullspace_offsets,
@@ -66,6 +69,13 @@ _DEFAULT_MISSING_RUNTIME: frozenset[str] = frozenset(
         "myosuite_body",
     }
 )
+_DEFAULT_BODY_CANDIDATE_EVIDENCE = (
+    Path("docs")
+    / "plans"
+    / "club_only_matching"
+    / "evidence"
+    / "club_body_candidates.json"
+)
 
 __all__ = [
     "CANDIDATE_SCHEMA",
@@ -78,7 +88,17 @@ __all__ = [
     "body_candidate_evidence_payload",
     "build_body_candidate_report",
     "generate_plausible_body_candidates",
+    "load_body_candidate_outcomes",
 ]
+
+
+def load_body_candidate_outcomes(
+    path: Path | str | None = None,
+) -> dict[tuple[str, str], dict[str, Any]]:
+    """Load recorded fit outcomes keyed by ``(model_id, trial_id)`` (#10602)."""
+    return load_fit_outcomes(
+        get_repo_root() / _DEFAULT_BODY_CANDIDATE_EVIDENCE if path is None else path
+    )
 
 
 class RejectionReason(str, Enum):

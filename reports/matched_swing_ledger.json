@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T18:14:33Z",
+  "generated_at": "2026-09-26T01:18:20Z",
   "rows": [
     {
       "acceptance": null,
@@ -3628,6 +3628,22 @@
         "gates": [
           {
             "measured": 0.0,
+            "name": "capture_provenance",
+            "reason": "placeholder capture hash",
+            "status": "failed",
+            "threshold": 1.0,
+            "unit": "hash"
+          },
+          {
+            "measured": 0.0,
+            "name": "nonzero_residual_evidence",
+            "reason": "identically-zero residuals without replay evidence",
+            "status": "failed",
+            "threshold": 0.0,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
             "name": "whole_marker_rmse_m",
             "reason": "",
             "status": "passed",
@@ -3665,36 +3681,13 @@
             "status": "passed",
             "threshold": 0.05236,
             "unit": "rad"
-          },
-          {
-            "measured": 1200.0,
-            "name": "max_normal_force_n",
-            "reason": "",
-            "status": "passed",
-            "threshold": 2354.4,
-            "unit": "N"
-          },
-          {
-            "measured": 0.0035,
-            "name": "max_penetration_m",
-            "reason": "",
-            "status": "passed",
-            "threshold": 0.01,
-            "unit": "m"
-          },
-          {
-            "measured": 0.0001,
-            "name": "max_closure_residual_m",
-            "reason": "",
-            "status": "passed",
-            "threshold": 0.005,
-            "unit": "m"
           }
         ],
         "horizon": "G1",
-        "is_physically_accepted": true,
-        "qualification_note": "Physical acceptance criteria passed",
-        "status": "PASSED"
+        "is_physically_accepted": false,
+        "qualification_note": "Retracted: the PASSED verdict came from a hard-coded physical audit, target markers copied as the fit (RMSE 0 by construction), a silent warm-start fallback when the Drake plant failed, and an all-zero capture hash. Void under MS-100; see #10363.",
+        "source": "evidence/matched/driver_g1_drake/reevaluation.json",
+        "status": "REJECTED"
       },
       "artefacts": {
         "gif": "evidence/matched/driver_g1_drake/playback.gif",

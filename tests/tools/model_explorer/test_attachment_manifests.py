@@ -81,7 +81,8 @@ def test_missing_manifest_returns_empty_result(tmp_path: Path) -> None:
 
 
 def test_checked_in_json_schema_is_valid_json() -> None:
-    schema = Path("src/tools/model_explorer/attachment_manifest.schema.json")
+    repo_root = Path(__file__).resolve().parents[3]
+    schema = repo_root / "src/tools/model_explorer/attachment_manifest.schema.json"
 
     parsed = json.loads(schema.read_text(encoding="utf-8"))
 
