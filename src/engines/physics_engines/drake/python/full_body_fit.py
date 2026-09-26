@@ -28,6 +28,7 @@ from numpy.typing import NDArray
 from src.shared.python.motion_matching.acceptance import (
     Horizon,
     evaluate,
+    is_real_sha256,
 )
 from src.shared.python.motion_matching.candidate import (
     CandidateMarkers,
@@ -44,6 +45,9 @@ from src.shared.python.motion_matching.polynomial_torque import (
 )
 from src.shared.python.motion_matching.replay_metrics import (
     compute_replay_five_metrics,
+)
+from src.shared.python.simulation_backends.exceptions import (
+    BackendNotAvailableError,
 )
 
 Array: TypeAlias = NDArray[np.float64]
@@ -257,6 +261,23 @@ def _load_spec_dict(spec: Mapping[str, Any] | bytes | str | Path) -> dict[str, A
     return dict(spec)
 
 
+def _npz_capture_sha(raw_npz: Any) -> str:
+    """Return the capture digest recorded in a warm-start npz, or "" when absent."""
+    for key in ("source_c3d_sha256", "capture_sha256"):
+        if key in raw_npz:
+            return str(raw_npz[key]).strip()
+    return ""
+
+
+def _require_real_capture_sha(capture_sha: str) -> None:
+    """Refuse an unknown or placeholder source-capture digest (#10363)."""
+    if not is_real_sha256(capture_sha):
+        raise ValueError(
+            "Source C3D capture hash is unknown or invalid in warm-start "
+            f"candidate: {capture_sha!r}"
+        )
+
+
 def _load_warm_start(
     warm_start_path: Path | str | None,
     spec_dict: Mapping[str, Any],
@@ -267,40 +288,49 @@ def _load_warm_start(
             "A valid warm-start candidate or target trajectory is required for G1 fitting."
         )
 
-    capture_sha = "0" * 64
     ws_source_str = str(warm_start_path)
     try:
         ws_candidate = load_candidate(warm_start_path)
-        capture_sha = ws_candidate.metadata.source_c3d_sha256 or capture_sha
-        return ws_candidate, capture_sha, ws_source_str
-    except Exception:
-        raw_npz = np.load(warm_start_path)
-        t_s = raw_npz["time_s"]
-        u_arr = raw_npz.get("u")
-        tau_padded = (
-            np.vstack([u_arr, u_arr[-1:]])
-            if (u_arr is not None and u_arr.shape[0] == len(t_s) - 1)
-            else u_arr
-        )
-        meta = CandidateMetadata(
-            profile=CandidateProfile.DYNAMIC,
-            engine="warm_start",
-            coordinate_names=tuple(spec_dict["coordinate_order"]),
-            actuator_names=tuple(spec_dict["coordinate_order"][6:]),
-            marker_names=tuple(str(x) for x in raw_npz.get("labels", ())),
-        )
-        ws_cand = MatchedSwingCandidate(
-            metadata=meta,
-            time_s=t_s,
-            q=raw_npz["q"],
-            v=raw_npz.get("v"),
-            tau=tau_padded,
-            markers=CandidateMarkers(
-                target_markers_m=raw_npz.get("target_m"),
-                marker_validity=raw_npz.get("valid"),
-            ),
-        )
-        return ws_cand, capture_sha, ws_source_str
+        capture_sha = ws_candidate.metadata.source_c3d_sha256 or ""
+    except (ValueError, KeyError, TypeError, OSError):
+        with np.load(warm_start_path) as raw_npz:
+            capture_sha = _npz_capture_sha(raw_npz)
+            _require_real_capture_sha(capture_sha)
+            missing = [k for k in ("time_s", "q", "v", "u") if k not in raw_npz]
+            if missing:
+                raise ValueError(
+                    f"Warm-start npz {warm_start_path} lacks {missing}; refusing to "
+                    "invent a velocity or control history."
+                ) from None
+            t_s = np.asarray(raw_npz["time_s"])
+            u_arr = np.asarray(raw_npz["u"])
+            tau_padded = (
+                np.vstack([u_arr, u_arr[-1:]])
+                if u_arr.shape[0] == len(t_s) - 1
+                else u_arr
+            )
+            meta = CandidateMetadata(
+                profile=CandidateProfile.DYNAMIC,
+                engine="warm_start",
+                source_c3d_sha256=capture_sha,
+                coordinate_names=tuple(spec_dict["coordinate_order"]),
+                actuator_names=tuple(spec_dict["coordinate_order"][6:]),
+                marker_names=tuple(str(x) for x in raw_npz.get("labels", ())),
+            )
+            ws_candidate = MatchedSwingCandidate(
+                metadata=meta,
+                time_s=t_s,
+                q=np.asarray(raw_npz["q"]),
+                v=np.asarray(raw_npz["v"]),
+                tau=tau_padded,
+                markers=CandidateMarkers(
+                    target_markers_m=raw_npz.get("target_m"),
+                    marker_validity=raw_npz.get("valid"),
+                ),
+            )
+
+    _require_real_capture_sha(capture_sha)
+    return ws_candidate, capture_sha, ws_source_str
 
 
 def _optimize_controls(time_s: Array, tau_ws: Array, control_mode: str) -> Array:
@@ -315,30 +345,30 @@ def _optimize_controls(time_s: Array, tau_ws: Array, control_mode: str) -> Array
     return tau_ws.copy()
 
 
-def _simulate_drake_or_fallback(
+def _simulate_drake(
     spec_dict: Mapping[str, Any],
     q_ws: Array,
     v_ws: Array,
     time_s: Array,
     tau_optimized: Array,
 ) -> tuple[Array, Array, Array]:
-    """Simulate forward on Drake plant if available, else fallback to kinematics."""
+    """Simulate forward on Drake plant.
+
+    Raises:
+        BackendNotAvailableError: If pydrake or FullBodyDrakeModel is unavailable.
+    """
     try:
         from src.engines.physics_engines.drake.python.full_body_model import (
             FullBodyDrakeModel,
         )
 
         model = FullBodyDrakeModel(spec_dict)
-    except (ImportError, RuntimeError, Exception) as exc:
-        logger.warning(
-            "Drake plant initialization skipped (%s); using warm-start kinematics",
-            exc,
-        )
-        model = None
+    except ImportError as exc:
+        raise BackendNotAvailableError(
+            f"Drake plant initialization failed: {exc}"
+        ) from exc
 
-    if model is not None:
-        return _simulate_drake_forward(model, q_ws[0], v_ws[0], time_s, tau_optimized)
-    return q_ws.copy(), v_ws.copy(), tau_optimized.copy()
+    return _simulate_drake_forward(model, q_ws[0], v_ws[0], time_s, tau_optimized)
 
 
 def _extract_markers_and_metrics(
@@ -348,23 +378,24 @@ def _extract_markers_and_metrics(
     time_s: Array,
 ) -> tuple[Array, Array, NDArray[np.bool_], tuple[str, ...], Any, dict[str, float]]:
     """Extract marker arrays and compute replay 5 metrics."""
-    n_frames = len(time_s)
-    tgt = ws_candidate.target_markers_m
-    if tgt is None:
-        tgt = (
-            target_markers
-            if target_markers is not None
-            else np.zeros((n_frames, 44, 3))
-        )
-    fit = (
-        ws_candidate.model_markers_m
-        if ws_candidate.model_markers_m is not None
-        else tgt.copy()
+    tgt = (
+        ws_candidate.target_markers_m
+        if ws_candidate.target_markers_m is not None
+        else target_markers
     )
+    if tgt is None:
+        raise ValueError(
+            "Target markers are unavailable (neither in candidate nor provided as argument)"
+        )
+    if ws_candidate.model_markers_m is None:
+        raise ValueError(
+            "Candidate model markers unavailable; refusing to score target markers against themselves"
+        )
+    fit = ws_candidate.model_markers_m
     val = (
         ws_candidate.marker_validity
         if ws_candidate.marker_validity is not None
-        else np.ones((n_frames, tgt.shape[1]), dtype=bool)
+        else np.ones((len(time_s), tgt.shape[1]), dtype=bool)
     )
     if marker_labels is not None:
         lbls = tuple(marker_labels)
@@ -437,21 +468,19 @@ def fit_full_body_drake(
     )
 
     tau_opt = _optimize_controls(time_s, tau_ws, opts.control_mode)
-    q_fit, v_fit, tau_fit = _simulate_drake_or_fallback(
-        spec_dict, q_ws, v_ws, time_s, tau_opt
-    )
+    q_fit, v_fit, tau_fit = _simulate_drake(spec_dict, q_ws, v_ws, time_s, tau_opt)
 
     tgt_m, fit_m, val_m, lbls, five_m, shared = _extract_markers_and_metrics(
         ws_cand, target_markers, marker_labels, time_s
     )
 
     physical_audit = {
-        "max_normal_force_n": 1200.0,
-        "max_normal_force_body_weights": 1.53,
-        "max_penetration_m": 0.0035,
-        "closure_translation_error_max_m": 0.0001,
-        "closure_rotation_error_max_rad": 0.0005,
-        "weight_fraction": {"min": 0.35, "max": 2.10, "mean": 0.98},
+        "max_normal_force_n": None,
+        "max_normal_force_body_weights": None,
+        "max_penetration_m": None,
+        "closure_translation_error_max_m": None,
+        "closure_rotation_error_max_rad": None,
+        "weight_fraction": None,
         "peak_effort_n_m": float(np.max(np.abs(tau_fit))),
     }
 

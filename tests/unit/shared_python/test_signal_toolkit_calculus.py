@@ -52,9 +52,9 @@ def quadratic_signal() -> Signal:
 class TestDifferentiator:
     """Tests for the Differentiator class."""
 
-    def test_none_signal_raises_type_error(self) -> None:
+    def test_none_signal_raises_value_error(self) -> None:
         d = Differentiator()
-        with pytest.raises(TypeError, match="signal must be provided"):
+        with pytest.raises(ValueError, match="signal must be provided"):
             d.differentiate(None)  # type: ignore[arg-type]
 
     def test_forward_difference(self, linear_signal: Signal) -> None:
@@ -123,9 +123,9 @@ class TestDifferentiator:
 class TestIntegrator:
     """Tests for the Integrator class."""
 
-    def test_none_signal_raises_type_error(self) -> None:
+    def test_none_signal_raises_value_error(self) -> None:
         integ = Integrator()
-        with pytest.raises(TypeError, match="signal must be provided"):
+        with pytest.raises(ValueError, match="signal must be provided"):
             integ.integrate(None)  # type: ignore[arg-type]
 
     def test_trapezoid_constant(self) -> None:
@@ -177,12 +177,12 @@ class TestIntegrator:
 class TestStandaloneFunctions:
     """Tests for module-level calculus functions."""
 
-    def test_compute_derivative_none_signal_raises_type_error(self) -> None:
-        with pytest.raises(TypeError, match="signal must be provided"):
+    def test_compute_derivative_none_signal_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="signal must be provided"):
             compute_derivative(None)  # type: ignore[arg-type]
 
-    def test_compute_integral_none_signal_raises_type_error(self) -> None:
-        with pytest.raises(TypeError, match="signal must be provided"):
+    def test_compute_integral_none_signal_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="signal must be provided"):
             compute_integral(None)  # type: ignore[arg-type]
 
     def test_compute_derivative(self, linear_signal: Signal) -> None:

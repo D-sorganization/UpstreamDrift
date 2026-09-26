@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import hashlib
 import json
+import math
 from pathlib import Path
 
 import numpy as np
 import pytest
+
+from src.shared.python.motion_matching.club_only.reproduction import (
+    reconcile_matrix_blockers,
+)
 
 from src.shared.python.motion_matching.club_only.matrix_qualification import (
     MATRIX_SCHEMA,
@@ -387,3 +394,140 @@ def test_evidence_fixture_matches_schema_when_present() -> None:
     assert data["qualification_blockers"]
     assert "cells" in data or "models" in data
     assert data.get("comparison_rule") == "common_observables_not_weighted_objectives"
+
+
+def test_driven_double_pendulum_real_outcome_without_gate_metrics_is_unqualified() -> (
+    None
+):
+    init_default_registry()
+    pendulum_evidence = (
+        REPO_ROOT
+        / "docs"
+        / "plans"
+        / "club_only_matching"
+        / "evidence"
+        / "club_pendulum_match.json"
+    )
+    data = json.loads(pendulum_evidence.read_text(encoding="utf-8"))
+    recorded = next(
+        o
+        for o in data["outcomes"]
+        if o["model_id"] == "driven_double_pendulum" and o["trial_id"] == "TW_wiffle"
+    )
+    expected_rmse = recorded["original_3d_rmse_m"]
+    assert math.isclose(expected_rmse, 1.8140743416959684, rel_tol=1e-6)
+
+    report = build_matrix_qualification_report()
+    cell = next(
+        c
+        for c in report.cells
+        if c.model_id == "driven_double_pendulum" and c.trial_id == "TW_wiffle"
+    )
+    # The CO-04 receipt records the 1.814 m RMSE but no grip/face/closure or
+    # contact metrics, so the cell is unqualified rather than scored on defaults.
+    assert cell.status == "unqualified"
+    assert cell.original_3d_rmse_m is None
+    assert cell.blocker is not None
+    for metric in (
+        "grip_position_rmse_m",
+        "face_position_rmse_m",
+        "closure_residual_m",
+        "contact_feasible",
+    ):
+        assert metric in cell.blocker
+
+
+def test_model_with_no_recorded_outcome_is_unqualified() -> None:
+    init_default_registry()
+    report = build_matrix_qualification_report()
+    cell = next(
+        c
+        for c in report.cells
+        if c.model_id == "constrained_upper_body_golfer" and c.trial_id == "TW_wiffle"
+    )
+    assert cell.status == "unqualified"
+    assert (
+        cell.blocker
+        == "no recorded fit outcome for constrained_upper_body_golfer/TW_wiffle"
+    )
+    assert cell.original_3d_rmse_m is None
+
+
+def _complete_outcome(**overrides: object) -> dict[str, object]:
+    outcome: dict[str, object] = {
+        "model_id": "driven_double_pendulum",
+        "trial_id": "TW_wiffle",
+        "original_3d_rmse_m": 0.012,
+        "in_plane_rmse_m": 0.010,
+        "grip_position_rmse_m": 0.008,
+        "face_position_rmse_m": 0.009,
+        "coverage_fraction": 0.97,
+        "closure_residual_m": 0.0004,
+        "contact_feasible": True,
+        "replay_inputs": {"q0": [0.1, 0.2], "selected_start": "cold"},
+    }
+    outcome.update(overrides)
+    return outcome
+
+
+def _pendulum_cell(outcome: dict[str, object]) -> Any:
+    init_default_registry()
+    report = build_matrix_qualification_report(
+        model_ids=["driven_double_pendulum"],
+        trial_ids=["TW_wiffle"],
+        outcomes={("driven_double_pendulum", "TW_wiffle"): outcome},
+    )
+    return next(c for c in report.cells if c.model_id == "driven_double_pendulum")
+
+
+def test_complete_recorded_outcome_is_scored_from_its_own_metrics() -> None:
+    cell = _pendulum_cell(_complete_outcome())
+    assert cell.status != "unqualified", cell.blocker
+    assert math.isclose(cell.original_3d_rmse_m, 0.012)
+
+
+@pytest.mark.parametrize(
+    ("override", "missing"),
+    [
+        ({"closure_residual_m": None}, "closure_residual_m"),
+        ({"contact_feasible": None}, "contact_feasible"),
+        ({"contact_feasible": 1}, "contact_feasible"),
+        ({"face_position_rmse_m": float("nan")}, "face_position_rmse_m"),
+        ({"grip_position_rmse_m": True}, "grip_position_rmse_m"),
+        ({"coverage_fraction": 1.2}, "coverage_fraction"),
+        ({"replay_inputs": {"q0": [0.1, 0.2]}}, "replay_inputs.q0/v0"),
+    ],
+)
+def test_incomplete_recorded_outcome_is_never_scored_on_defaults(
+    override: dict[str, object], missing: str
+) -> None:
+    cell = _pendulum_cell(_complete_outcome(**override))
+    assert cell.status == "unqualified"
+    assert cell.blocker is not None and missing in cell.blocker
+
+
+def test_r2025b_appears_only_in_simscape_matlab_remediation_strings() -> None:
+    init_default_registry()
+    report = build_matrix_qualification_report()
+    cells = reconcile_matrix_blockers(report)
+    for cell in cells:
+        prompt = cell.next_step_prompt
+        if "R2025b" in prompt:
+            assert (
+                "simscape" in cell.model_id.lower() or "matlab" in cell.model_id.lower()
+            ), (
+                f"R2025b appeared in non-Simscape remediation for {cell.model_id}: {prompt}"
+            )
+
+    for model_id, expected_runtime in (
+        ("full_body_drake", "Drake"),
+        ("full_body_mujoco", "MuJoCo"),
+        ("full_body_pinocchio", "Pinocchio"),
+    ):
+        matching = [
+            c for c in cells if c.model_id == model_id and c.trial_id == "TW_wiffle"
+        ]
+        assert matching, f"missing cell for {model_id}"
+        cell = matching[0]
+        assert expected_runtime in cell.next_step_prompt
+        assert "R2025b" not in cell.next_step_prompt

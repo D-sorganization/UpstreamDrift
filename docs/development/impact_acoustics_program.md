@@ -98,6 +98,41 @@ Interpolate on a declared interval, not an unbounded extrapolation through
 contact. Exporting a reduced mode basis must preserve its represented energy
 and report projection residuals; do not reset shaft energy when changing solvers.
 
+### Pre-Impact Bundle Version 1 — Placement
+
+Decision (IA-U2, #9703): the versioned bundle lives in UpstreamDrift as a
+consumer-side export record,
+`src/shared/python/physics/pre_impact_bundle.py` (schema
+`upstreamdrift.pre_impact_bundle`, version 1), beside the existing
+`impact_interval_audit.py` consumer gate.
+
+- **Composed, not redefined.** The pinned Tools providers (vendor pin
+  `a9ed0e7c5`) already own the conventions the bundle adopts verbatim:
+  `golf_club.types.RigidTransform` (`p_to = R p_from + t`),
+  `swing_sim.delivery_interchange` (grip frame, `(w, x, y, z)` unit
+  quaternions), `golf_club.impact_mobility.RigidContactBody` (head mass, COM
+  inertia, contact offset in one frame) and `golf_club.grip_impedance` (twist
+  order linear then angular). Contract tests prove equivalence through those
+  public APIs rather than copying their laws.
+- **Why not in Tools yet.** Tools defines no pre-impact bundle, modal-state
+  record (basis identity, normalization, amplitudes, velocities), per-field
+  origin enum or per-hand applied-wrench record. These are shared wires and
+  should be upstreamed to Tools; until then the UpstreamDrift type stays minimal
+  and imports no Tools module, so it cannot silently diverge from a provider
+  law. Tools' strict rotation/inertia validators are private
+  (`golf_club._validation`), so the bundle carries small explicit-raise
+  equivalents; exposing them publicly in Tools would remove that duplication.
+- **Frame algebra is reused** from `spatial_algebra.transforms` (Featherstone
+  Plücker `X` and dual `X*`), so forces, moments and velocities always move
+  together and wrench power is invariant.
+- **Modal energy.** No pinned provider exposes a modal energy or projection API,
+  so the bundle declares the quadratic form `½ q̇ᵀ M_r q̇ + ½ qᵀ K_r q` and an
+  M-orthogonal projection that reports residuals and full versus represented
+  energy.
+- **Not yet done:** engine adapters and installed-wheel fixtures remain open
+  under #9703. The bundle is a software contract; it is not physical
+  qualification, and synthetic fixture values are labeled `synthetic`.
+
 ## Counterfactual Design
 
 Two distinct families are required:
