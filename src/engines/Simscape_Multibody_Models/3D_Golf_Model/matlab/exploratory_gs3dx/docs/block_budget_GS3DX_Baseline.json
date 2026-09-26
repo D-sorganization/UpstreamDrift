@@ -1,0 +1,194 @@
+{
+  "model": "GS3DX_Baseline",
+  "nonvirtual_total": 672,
+  "by_type": [
+    {
+      "BlockType": "PMIOPort",
+      "ReferenceBlock": "nesl_utility/PS-Simulink Converter/input",
+      "Count": 279
+    },
+    {
+      "BlockType": "PMIOPort",
+      "ReferenceBlock": "",
+      "Count": 93
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Frames and Transforms/Transform Sensor",
+      "Count": 28
+    },
+    {
+      "BlockType": "PMIOPort",
+      "ReferenceBlock": "nesl_utility/Simulink-PS Converter/output",
+      "Count": 27
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Body Elements/Cylindrical Solid",
+      "Count": 23
+    },
+    {
+      "BlockType": "SimscapeBlock",
+      "ReferenceBlock": "fl_lib/Mechanical/Mechanical Sources/Ideal Torque Source",
+      "Count": 21
+    },
+    {
+      "BlockType": "SimscapeBlock",
+      "ReferenceBlock": "fl_lib/Mechanical/Multibody Interfaces/Rotational Multibody Interface",
+      "Count": 21
+    },
+    {
+      "BlockType": "SimscapeBlock",
+      "ReferenceBlock": "fl_lib/Mechanical/Rotational Elements/Mechanical Rotational Reference",
+      "Count": 21
+    },
+    {
+      "BlockType": "Product",
+      "ReferenceBlock": "",
+      "Count": 20
+    },
+    {
+      "BlockType": "S-Function",
+      "ReferenceBlock": "",
+      "Count": 19
+    },
+    {
+      "BlockType": "SubSystem",
+      "ReferenceBlock": "",
+      "Count": 19
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Frames and Transforms/World Frame",
+      "Count": 16
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Body Elements/Inertia Sensor",
+      "Count": 14
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Frames and Transforms/Rigid Transform",
+      "Count": 13
+    },
+    {
+      "BlockType": "Integrator",
+      "ReferenceBlock": "",
+      "Count": 10
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Body Elements/Spherical Solid",
+      "Count": 8
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Joints/Revolute Joint",
+      "Count": 5
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Joints/Universal Joint",
+      "Count": 5
+    },
+    {
+      "BlockType": "Sum",
+      "ReferenceBlock": "",
+      "Count": 5
+    },
+    {
+      "BlockType": "Product",
+      "ReferenceBlock": "matrix_library/Cross Product/Element Product",
+      "Count": 3
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Joints/Weld Joint",
+      "Count": 3
+    },
+    {
+      "BlockType": "Sum",
+      "ReferenceBlock": "matrix_library/Cross Product/Sum",
+      "Count": 3
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Joints/Gimbal Joint",
+      "Count": 2
+    },
+    {
+      "BlockType": "Clock",
+      "ReferenceBlock": "",
+      "Count": 1
+    },
+    {
+      "BlockType": "Constant",
+      "ReferenceBlock": "",
+      "Count": 1
+    },
+    {
+      "BlockType": "Constant",
+      "ReferenceBlock": "simulink/Math Operations/MinMax Running Resettable/Subsystem/Initial Condition",
+      "Count": 1
+    },
+    {
+      "BlockType": "DataTypeDuplicate",
+      "ReferenceBlock": "simulink/Math Operations/MinMax Running Resettable/Data Type Duplicate",
+      "Count": 1
+    },
+    {
+      "BlockType": "DataTypeDuplicate",
+      "ReferenceBlock": "simulink/Math Operations/MinMax Running Resettable/Subsystem/FixPt Data Type Duplicate2",
+      "Count": 1
+    },
+    {
+      "BlockType": "Gain",
+      "ReferenceBlock": "",
+      "Count": 1
+    },
+    {
+      "BlockType": "Memory",
+      "ReferenceBlock": "simulink/Math Operations/MinMax Running Resettable/Subsystem/Memory",
+      "Count": 1
+    },
+    {
+      "BlockType": "MinMax",
+      "ReferenceBlock": "simulink/Math Operations/MinMax Running Resettable/MinMax",
+      "Count": 1
+    },
+    {
+      "BlockType": "PMIOPort",
+      "ReferenceBlock": "nesl_utility/Solver Configuration/port",
+      "Count": 1
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Joints/Bushing Joint",
+      "Count": 1
+    },
+    {
+      "BlockType": "SimscapeMultibodyBlock",
+      "ReferenceBlock": "sm_lib/Utilities/Mechanism Configuration",
+      "Count": 1
+    },
+    {
+      "BlockType": "Step",
+      "ReferenceBlock": "",
+      "Count": 1
+    },
+    {
+      "BlockType": "Switch",
+      "ReferenceBlock": "simulink/Math Operations/MinMax Running Resettable/Subsystem/Reset",
+      "Count": 1
+    },
+    {
+      "BlockType": "ToWorkspace",
+      "ReferenceBlock": "",
+      "Count": 1
+    }
+  ],
+  "converter_internal": 306,
+  "top_level_equivalent": 672,
+  "simscape_blocks": 489
+}
