@@ -68,7 +68,7 @@ function report = gs3dx_build_lower_body(info, opts)
     end
 
     hips = [full '/Hips and Torso Inputs'];
-    body = local_lower_body_subsystem(full);
+    body = local_lower_body_subsystem(full, hips);
     add_line(full, gs3dx_pm_port(hips, 'Lower Torso'), gs3dx_pm_port(body, 'Pelvis'), 'autorouting', 'on');
     add_line(full, gs3dx_pm_port(hips, 'GlobalReferenceFrame'), gs3dx_pm_port(body, 'World'), 'autorouting', 'on');
     sys = getfullname(body);
@@ -88,8 +88,17 @@ function report = gs3dx_build_lower_body(info, opts)
         report.budget.nonvirtual_total, 0.9 * names.license_block_limit);
 end
 
-function body = local_lower_body_subsystem(mdl)
-    body = add_block('simulink/Ports & Subsystems/Subsystem', [mdl '/Lower Body'], 'Position', [60 1400 220 1500]);
+function body = local_lower_body_subsystem(mdl, hips)
+% Placed below 'Hips and Torso Inputs', whose frames it uses, at the first
+% spot that overlaps no other top-level block.
+    at = get_param(hips, 'Position');
+    others = get_param(find_system(mdl, 'SearchDepth', 1, 'Type', 'Block'), 'Position');
+    others = vertcat(others{:});
+    pos = [at(1), at(4) + 60, at(1) + 160, at(4) + 160];
+    while any(pos(1) < others(:, 3) & others(:, 1) < pos(3) & pos(2) < others(:, 4) & others(:, 2) < pos(4))
+        pos = pos + [0 60 0 60];
+    end
+    body = add_block('simulink/Ports & Subsystems/Subsystem', [mdl '/Lower Body'], 'Position', pos);
     Simulink.SubSystem.deleteContents(body);
     sys = getfullname(body);
     add_block('nesl_utility/Connection Port', [sys '/Pelvis'], 'Side', 'Left', 'Position', [20 100 50 114]);

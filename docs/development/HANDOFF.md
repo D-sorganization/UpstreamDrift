@@ -21,7 +21,8 @@
 - Status: GS3DX-1 (#10951) scaffold, GS3DX-2 (#10952) regression harness, GS3DX-3
   (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim`, GS3DX-5 (#10955) `GS3DX_Quat`
   quaternion shoulders, GS3DX-6 (#10956) quaternion hip, GS3DX-7 (#10957) lower body and
-  GS3DX-8 (#10958) weld stance + integration run done; GS3DX-9 (#10959) visual QA in progress.
+  GS3DX-8 (#10958) weld stance + integration run and GS3DX-9 (#10959) visual QA done;
+  follow-up GS3DX-10 (#10979) drives the legs and refits the pelvis inputs.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -117,14 +118,16 @@ Creator` (newline); find it by BlockType.
 - Infinite Plane ports: frame on the left, geometry on the right; a Brick with exported
   geometry is the other way round.
 - `*.png` is git-ignored outside the root `docs/`; the exploratory screenshots are force-added.
+- A name on a branched signal line is drawn on every branch; name signals on the outputs of
+  a virtual Demux instead (`Actuator Torque` in the hip/shoulder subsystems).
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 55 tests: full suite 54 passed / 1 failed (the new knee-start check, bound 1e-6 deg vs a
-  Low target that assembles 1e-3 deg away); after setting it to 0.01 deg `test_gs3dx_fullbody`
-  re-ran 6/6 (2026-09-26; the Simulation-tagged tests take most of the time;
-  select `~HasTag('Simulation')` for the structural tests).
+  → 55 passed / 0 failed in 403 s (2026-09-26, after the #10959 layout fixes and a rebuild of
+  Quat/KDS_Spherical/FullBody; the Simulation-tagged tests take most of the time; select
+  `~HasTag('Simulation')` for the structural tests).
+- `gs3dx_layout_qa` on the rebuilt diagrams: 0 overlapping blocks.
 - The original model simulates headlessly (0.3 s of swing takes about 223 s cold); the model workspace is embedded (676 vars).
 
 ## Blockers and Risks
@@ -133,7 +136,7 @@ Creator` (newline); find it by BlockType.
 
 ## Next Steps
 
-1. #10959: finish visual QA from `docs/screenshots/` (Sonnet review); a GUI open-check via
-   computer use needs the owner to grant app access interactively.
-2. Follow-up (new issue): fit leg torques / refit pelvis inputs with legs attached, add an
+1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
+   computer use needs the owner to grant app access interactively).
+2. #10979: fit leg torques, refit the pelvis inputs with legs attached, and add an
    energy audit (`docs/FULL_BODY.md` next steps).
