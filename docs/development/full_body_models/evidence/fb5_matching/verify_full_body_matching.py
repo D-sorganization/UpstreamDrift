@@ -334,6 +334,42 @@ def build_status_from_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
     return evaluate_gates(metrics, FB5_MATCHING_THRESHOLDS)
 
 
+def _receipt_inputs(ctx: MatchingContext) -> dict[str, str]:
+    """SHA-256 of every input the FB-5 receipt depends on."""
+    return {
+        "full_body_spec_v1.json": sha256_file(SPEC_PATH),
+        "calibrated_offsets.json": sha256_file(ctx.offsets_path),
+        "ik_trajectory.npz": sha256_file(ctx.ik_path),
+        "returned-candidate.json": sha256_file(CANDIDATE_PATH),
+        "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
+        "derivative_resolution.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/derivative_resolution.py"
+        ),
+        "multi_shooting_fit.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/multi_shooting_fit.py"
+        ),
+        "full_body_forward_dynamics.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/full_body_forward_dynamics.py"
+        ),
+        "tour_metrics.py": sha256_file(
+            ROOT / "src/shared/python/motion_matching/tour_metrics.py"
+        ),
+    }
+
+
+def _shared_metrics_dict(shared: Any) -> dict[str, float] | None:
+    """Shared tour metrics as a dict, or None when the rollout produced none (#10960 P1-9)."""
+    if shared is None:
+        return None
+    return {
+        "whole_marker_rmse_m": shared.whole_marker_rmse_m,
+        "early_marker_rmse_m": shared.early_marker_rmse_m,
+        "terminal_marker_rmse_m": shared.terminal_marker_rmse_m,
+        "club_marker_rmse_m": shared.club_marker_rmse_m,
+        "pelvis_yaw_rmse_rad": shared.pelvis_yaw_rmse_rad,
+    }
+
+
 def _archive_artifacts_and_receipt(
     ctx: MatchingContext,
     deriv_res: Any,
@@ -382,25 +418,7 @@ def _archive_artifacts_and_receipt(
             "executable": sys.executable,
             f"{ctx.engine}_version": get_engine_version(ctx.engine),
         },
-        "inputs": {
-            "full_body_spec_v1.json": sha256_file(SPEC_PATH),
-            "calibrated_offsets.json": sha256_file(ctx.offsets_path),
-            "ik_trajectory.npz": sha256_file(ctx.ik_path),
-            "returned-candidate.json": sha256_file(CANDIDATE_PATH),
-            "C3D_TA_Driver.c3d": sha256_file(C3D_PATH),
-            "derivative_resolution.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/derivative_resolution.py"
-            ),
-            "multi_shooting_fit.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/multi_shooting_fit.py"
-            ),
-            "full_body_forward_dynamics.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/full_body_forward_dynamics.py"
-            ),
-            "tour_metrics.py": sha256_file(
-                ROOT / "src/shared/python/motion_matching/tour_metrics.py"
-            ),
-        },
+        "inputs": _receipt_inputs(ctx),
         "derivative_resolution": {
             "optimal_step": deriv_res.optimal_step,
             "noise_floor": deriv_res.noise_floor,
@@ -425,21 +443,9 @@ def _archive_artifacts_and_receipt(
             "duration_s": float(ctx.time_grid[-1]),
             "ground_height_m": ctx.ground_height_m,
             "max_closure_residual_m": rollout.max_closure_residual_m,
-            "shared_metrics": (
-                {
-                    "whole_marker_rmse_m": rollout.shared_metrics.whole_marker_rmse_m,
-                    "early_marker_rmse_m": rollout.shared_metrics.early_marker_rmse_m,
-                    "terminal_marker_rmse_m": rollout.shared_metrics.terminal_marker_rmse_m,
-                    "club_marker_rmse_m": rollout.shared_metrics.club_marker_rmse_m,
-                    "pelvis_yaw_rmse_rad": rollout.shared_metrics.pelvis_yaw_rmse_rad,
-                }
-                if rollout.shared_metrics is not None
-                else None
-            ),
+            "shared_metrics": _shared_metrics_dict(shared),
             "contact_audit": (
-                rollout.contact_audit.as_dict()
-                if rollout.contact_audit is not None
-                else None
+                contact_dict if rollout.contact_audit is not None else None
             ),
         },
         "artifacts": {

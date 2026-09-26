@@ -637,12 +637,10 @@ class StrategyComparisonService:
             force_report = qual.get_report(QualificationStage.FORCE_FEASIBLE)
 
             closure_res: float | None = None
-            if (
-                pkg.reactions is not None
-                and pkg.reactions.closure_wrench is not None
-                and pkg.reactions.closure_wrench.size > 0
-            ):
-                closure_res = float(np.max(np.abs(pkg.reactions.closure_wrench)))
+            reactions = pkg.reactions
+            closure = reactions.closure_wrench if reactions is not None else None
+            if closure is not None and closure.size > 0:
+                closure_res = float(np.max(np.abs(closure)))
 
             errors[key] = {
                 "strategy_id": pkg.strategy.strategy_id,

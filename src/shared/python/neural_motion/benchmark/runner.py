@@ -15,9 +15,11 @@ from .types import (
     AcceptedMatchMetrics,
     BenchmarkMethod,
     LatencySummary,
+    MeasuredBaseline,
     ModelBenchmarkCard,
     PromotionDecision,
     TimingBreakdown,
+    UNMEASURED_BASELINE_MESSAGE,
 )
 from .economics import compute_break_even
 from .gates import evaluate_promotion_gate
@@ -55,41 +57,31 @@ def run_model_comparative_benchmark(
     interactive_samples_s: Sequence[float],
     timing_breakdown: TimingBreakdown,
     metrics: AcceptedMatchMetrics,
-    baseline_latency: LatencySummary | None = None,
-    baseline_metrics: AcceptedMatchMetrics | None = None,
-    training_wall_time_s: float | None = None,
-    training_cost_usd: float | None = None,
-    baseline_query_cost_usd: float | None = None,
-    candidate_query_cost_usd: float | None = None,
+    baseline: MeasuredBaseline | None = None,
 ) -> ModelBenchmarkCard:
-    """Construct an auditable ModelBenchmarkCard evaluating speedup, quality, and break-even."""
-    if (
-        baseline_latency is None
-        or baseline_metrics is None
-        or training_wall_time_s is None
-        or training_cost_usd is None
-        or baseline_query_cost_usd is None
-        or candidate_query_cost_usd is None
-    ):
-        raise ValueError(
-            "baseline must be measured, not derived from the candidate (#10960 P0-5)"
-        )
+    """Construct an auditable ModelBenchmarkCard evaluating speedup, quality, and break-even.
+
+    Precondition: ``baseline`` is a ``MeasuredBaseline``; ``None`` raises
+    ``ValueError`` (#10960 P0-5).
+    """
+    if baseline is None:
+        raise ValueError(UNMEASURED_BASELINE_MESSAGE)
 
     latency_summary = LatencySummary.from_samples(interactive_samples_s)
 
     break_even = compute_break_even(
-        training_wall_time_s=training_wall_time_s,
-        training_cost_usd=training_cost_usd,
-        baseline_latency_s=baseline_latency.median_s,
+        training_wall_time_s=baseline.training_wall_time_s,
+        training_cost_usd=baseline.training_cost_usd,
+        baseline_latency_s=baseline.latency.median_s,
         candidate_latency_s=latency_summary.median_s,
-        baseline_query_cost_usd=baseline_query_cost_usd,
-        candidate_query_cost_usd=candidate_query_cost_usd,
+        baseline_query_cost_usd=baseline.baseline_query_cost_usd,
+        candidate_query_cost_usd=baseline.candidate_query_cost_usd,
     )
 
     promotion_gate = evaluate_promotion_gate(
-        baseline_latency=baseline_latency,
+        baseline_latency=baseline.latency,
         candidate_latency=latency_summary,
-        baseline_metrics=baseline_metrics,
+        baseline_metrics=baseline.metrics,
         candidate_metrics=metrics,
     )
 

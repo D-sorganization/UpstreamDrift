@@ -108,20 +108,9 @@ def evaluate_gates(
       otherwise "FAILED" with diagnostic reasons.
     - If `thresholds` is empty, returns "DIAGNOSTIC" with an explanatory note.
     """
-    valid_gates = known_gates if known_gates is not None else KNOWN_GATES
-
-    # Validate gate names and non-negative thresholds
-    for gate_name, thresh in thresholds.items():
-        if gate_name not in valid_gates:
-            raise ValueError(f"Unknown gate name in thresholds: {gate_name}")
-        if not isinstance(thresh, (int, float)) or thresh < 0.0:
-            raise ValueError(
-                f"Threshold for {gate_name} cannot be negative, got {thresh}"
-            )
-
-    for gate_name in metrics:
-        if gate_name not in valid_gates:
-            raise ValueError(f"Unknown gate name in metrics: {gate_name}")
+    _validate_gate_names(
+        metrics, thresholds, known_gates if known_gates is not None else KNOWN_GATES
+    )
 
     if not thresholds:
         return {
@@ -132,79 +121,11 @@ def evaluate_gates(
             "note": "No documented thresholds provided; status evaluated as DIAGNOSTIC (#10960)",
         }
 
-    per_gate: dict[str, dict[str, Any]] = {}
-    all_passed = True
-
-    for gate_name, thresh in thresholds.items():
-        threshold_float = float(thresh)
-        if gate_name not in metrics:
-            all_passed = False
-            per_gate[gate_name] = {
-                "value": None,
-                "threshold": threshold_float,
-                "passed": False,
-                "reason": f"missing metric: {gate_name}",
-            }
-            continue
-
-        raw_val = metrics[gate_name]
-        if raw_val is None:
-            all_passed = False
-            per_gate[gate_name] = {
-                "value": None,
-                "threshold": threshold_float,
-                "passed": False,
-                "reason": f"metric {gate_name} is None",
-            }
-            continue
-
-        if gate_name in BOOLEAN_GATES or isinstance(raw_val, bool):
-            gate_ok = raw_val is True
-            val_f = 1.0 if gate_ok else 0.0
-            if not gate_ok:
-                all_passed = False
-            per_gate[gate_name] = {
-                "value": val_f,
-                "threshold": threshold_float,
-                "passed": gate_ok,
-                **({} if gate_ok else {"reason": f"metric {gate_name} is not True"}),
-            }
-            continue
-
-        try:
-            val_f = float(raw_val)
-        except (ValueError, TypeError):
-            all_passed = False
-            per_gate[gate_name] = {
-                "value": None,
-                "threshold": threshold_float,
-                "passed": False,
-                "reason": f"metric {gate_name} is not numeric: {raw_val}",
-            }
-            continue
-
-        if not math.isfinite(val_f) or math.isnan(val_f):
-            all_passed = False
-            per_gate[gate_name] = {
-                "value": val_f,
-                "threshold": threshold_float,
-                "passed": False,
-                "reason": f"metric {gate_name} is non-finite: {val_f}",
-            }
-        elif val_f > threshold_float:
-            all_passed = False
-            per_gate[gate_name] = {
-                "value": val_f,
-                "threshold": threshold_float,
-                "passed": False,
-                "reason": f"{gate_name} {val_f} > threshold {threshold_float}",
-            }
-        else:
-            per_gate[gate_name] = {
-                "value": val_f,
-                "threshold": threshold_float,
-                "passed": True,
-            }
+    per_gate = {
+        gate_name: _evaluate_one_gate(gate_name, metrics, float(thresh))
+        for gate_name, thresh in thresholds.items()
+    }
+    all_passed = all(entry["passed"] for entry in per_gate.values())
 
     status = "PASSED" if all_passed else "FAILED"
     return {
@@ -213,3 +134,65 @@ def evaluate_gates(
         "gates": per_gate,
         "thresholds": dict(thresholds),
     }
+
+
+def _validate_gate_names(
+    metrics: Mapping[str, Any],
+    thresholds: Mapping[str, float],
+    valid_gates: Container[str],
+) -> None:
+    """Raise ``ValueError`` for unknown gate names or negative thresholds."""
+    for gate_name, thresh in thresholds.items():
+        if gate_name not in valid_gates:
+            raise ValueError(f"Unknown gate name in thresholds: {gate_name}")
+        if not isinstance(thresh, (int, float)) or thresh < 0.0:
+            raise ValueError(
+                f"Threshold for {gate_name} cannot be negative, got {thresh}"
+            )
+    for gate_name in metrics:
+        if gate_name not in valid_gates:
+            raise ValueError(f"Unknown gate name in metrics: {gate_name}")
+
+
+def _gate_entry(
+    value: float | None, threshold: float, reason: str | None
+) -> dict[str, Any]:
+    """One per-gate record; a gate passes exactly when no failure reason is given."""
+    entry: dict[str, Any] = {
+        "value": value,
+        "threshold": threshold,
+        "passed": reason is None,
+    }
+    if reason is not None:
+        entry["reason"] = reason
+    return entry
+
+
+def _evaluate_one_gate(
+    gate_name: str, metrics: Mapping[str, Any], threshold: float
+) -> dict[str, Any]:
+    """Evaluate one gate; anything not measured, non-numeric or non-finite fails."""
+    if gate_name not in metrics:
+        return _gate_entry(None, threshold, f"missing metric: {gate_name}")
+    raw_val = metrics[gate_name]
+    if raw_val is None:
+        return _gate_entry(None, threshold, f"metric {gate_name} is None")
+    if gate_name in BOOLEAN_GATES or isinstance(raw_val, bool):
+        gate_ok = raw_val is True
+        reason = None if gate_ok else f"metric {gate_name} is not True"
+        return _gate_entry(1.0 if gate_ok else 0.0, threshold, reason)
+    try:
+        val_f = float(raw_val)
+    except (ValueError, TypeError):
+        return _gate_entry(
+            None, threshold, f"metric {gate_name} is not numeric: {raw_val}"
+        )
+    if not math.isfinite(val_f):
+        return _gate_entry(
+            val_f, threshold, f"metric {gate_name} is non-finite: {val_f}"
+        )
+    if val_f > threshold:
+        return _gate_entry(
+            val_f, threshold, f"{gate_name} {val_f} > threshold {threshold}"
+        )
+    return _gate_entry(val_f, threshold, None)

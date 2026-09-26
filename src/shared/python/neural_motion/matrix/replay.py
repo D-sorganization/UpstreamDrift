@@ -39,6 +39,6 @@ def verify_checkpoint_native_replay(
         raise ValueError(f"time_step_s must be positive float, got {time_step_s}")
 
     # Honest qualification: without real trained checkpoint weights and ODE rollout, fail closed
-    raise NotImplementedError(
+    raise NotImplementedError(  # tracked: #10960
         f"Real checkpoint weights and ODE rollout are required for native replay verification of model {card.model_id!r}"
     )

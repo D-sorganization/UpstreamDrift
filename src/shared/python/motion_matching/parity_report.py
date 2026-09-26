@@ -323,6 +323,37 @@ def _resolve_spec_and_attachments(
     return resolved_spec, resolved_attachments
 
 
+def _compare_to_reference(
+    comp_class: ComparisonClass,
+    reference_engine: str,
+    evaluated_markers: Mapping[str, np.ndarray],
+    markers: np.ndarray,
+) -> tuple[dict[str, PointwiseDifference], str]:
+    """Run the reference comparison; an empty result carries the unverified reason."""
+    if comp_class == ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT:
+        return {}, "Native-model observable agreement is never gated"
+    if reference_engine not in evaluated_markers:
+        return {}, f"Reference markers for '{reference_engine}' unavailable"
+    ref_markers = evaluated_markers[reference_engine]
+    if ref_markers.shape != markers.shape:
+        return {}, (
+            f"Marker shape mismatch with reference '{reference_engine}': "
+            f"{markers.shape} != {ref_markers.shape}"
+        )
+    m_diff = evaluate_pointwise_trajectory_parity(
+        ref_markers, markers, tolerance_m=0.001
+    )
+    return {"marker_diff_m": m_diff}, ""
+
+
+def _total_work_j(cand: MatchedSwingCandidate) -> float | None:
+    """Recorded total work, or None when the candidate never measured it."""
+    metadata = cand.metadata
+    if not metadata or "total_work_j" not in metadata.extra:
+        return None
+    return float(metadata.extra["total_work_j"])
+
+
 def _evaluate_engine_row(
     eng: str,
     cand: MatchedSwingCandidate,
@@ -370,45 +401,16 @@ def _evaluate_engine_row(
         )
     wall_clock = time.perf_counter() - t0
 
-    pt_diffs: dict[str, PointwiseDifference] = {}
-    pass_all_gates = False
-    comparisons_ran = 0
-    all_passed = True
-    unverified_reason = ""
-
-    if comp_class == ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT:
-        unverified_reason = "Native-model observable agreement is never gated"
-    elif reference_engine not in evaluated_markers:
-        unverified_reason = f"Reference markers for '{reference_engine}' unavailable"
-    else:
-        ref_markers = evaluated_markers[reference_engine]
-        if ref_markers.shape != markers.shape:
-            unverified_reason = (
-                f"Marker shape mismatch with reference '{reference_engine}': "
-                f"{markers.shape} != {ref_markers.shape}"
-            )
-        else:
-            m_diff = evaluate_pointwise_trajectory_parity(
-                ref_markers, markers, tolerance_m=0.001
-            )
-            pt_diffs["marker_diff_m"] = m_diff
-            comparisons_ran += 1
-            if not m_diff.pass_gate:
-                all_passed = False
-
-    if comparisons_ran > 0:
-        pass_all_gates = all_passed
+    pt_diffs, unverified_reason = _compare_to_reference(
+        comp_class, reference_engine, evaluated_markers, markers
+    )
+    if pt_diffs:
+        pass_all_gates = all(d.pass_gate for d in pt_diffs.values())
         status = "qualified" if pass_all_gates else "rejected"
         reason = "" if pass_all_gates else "Diverged beyond tolerance"
     else:
         status = "unverified"
         reason = unverified_reason or "No comparisons ran"
-
-    total_work = (
-        float(cand.metadata.extra["total_work_j"])
-        if cand.metadata and "total_work_j" in cand.metadata.extra
-        else None
-    )
 
     row = EngineParityRow(
         engine=eng,
@@ -421,7 +423,7 @@ def _evaluate_engine_row(
             "has_contact": hasattr(plant, "contact_forces"),
         },
         pointwise_differences=pt_diffs,
-        total_work_J=total_work,
+        total_work_J=_total_work_j(cand),
         wall_clock_s=wall_clock,
         reason=reason,
     )

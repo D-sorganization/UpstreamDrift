@@ -638,7 +638,7 @@ def run_contact_identification(
         NotImplementedError: If run_dir is provided, as measured contact calibration is not wired.
     """
     if run_dir is not None:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10960 P0-7
             "measured contact calibration not wired (#10960 P0-7)"
         )
 
