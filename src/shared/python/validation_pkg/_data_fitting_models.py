@@ -104,6 +104,11 @@ class FitResult:
     iterations: int = 0
     message: str = ""
 
+    @property
+    def solver_status(self) -> str:
+        """Backward-compatible canonical solver status."""
+        return "success" if self.success else "failure"
+
 
 @dataclass
 class SensitivityResult:

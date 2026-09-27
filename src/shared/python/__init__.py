@@ -11,7 +11,7 @@ Available packages:
     - upstream_drift_tools: Process engineering calculators
     - signal_toolkit: Signal processing and analysis
     - humanoid_character_builder: URDF humanoid model generation
-    - model_generation: URDF/MJCF model building and conversion
+    - model_generation: canonical generic URDF/MJCF toolkit
 
 Preferred imports:
     from shared.python.theme import ThemeManager, get_theme_manager  # theme: keep prefix

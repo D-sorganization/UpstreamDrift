@@ -243,7 +243,7 @@ class PuttingGreenWidget(QWidget):
     def _build_results(self) -> QWidget:
         right = QWidget()
         right_layout = QVBoxLayout(right)
-        results_group = QGroupBox("Simulation Results")
+        results_group = QGroupBox("Simulation Results (Preview)")
         results_layout = QVBoxLayout(results_group)
 
         self._init_gl_view(results_layout)

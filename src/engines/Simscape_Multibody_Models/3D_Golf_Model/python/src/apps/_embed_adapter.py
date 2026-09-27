@@ -56,6 +56,7 @@ class _C3DViewerEmbedAdapter:
                 return
 
             w = self._widget
+            self._widget = None
             canvases = [
                 w.viewer3d_tab.canvas_3d,
                 w.marker_plot_tab.canvas_marker,
