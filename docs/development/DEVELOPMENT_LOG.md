@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11039 (epic #11006 package 2b)
-- **PR:** pending
+- **PR:** #11040
 - **Branch:** `claude/ud-11039-mjx-plant`
 - **Paths:** `src/shared/python/motion_matching/mjx_tracking_plant.py`, `tests/unit/motion_matching/test_mjx_tracking_plant.py`
 - **Started:** 2026-09-27
