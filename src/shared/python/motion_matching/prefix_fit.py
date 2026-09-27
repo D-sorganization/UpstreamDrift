@@ -18,8 +18,12 @@ from scipy.optimize import least_squares
 
 from typing import TypeAlias
 
-from .polynomial_torque import COEFFS_PER_JOINT
+from src.shared.python.estimation.fit_uncertainty import (
+    ParameterUncertainty,
+    fitted_uncertainty_or_none,
+)
 from src.shared.python.motion_matching.pelvis_yaw import compute_pelvis_yaw_metrics
+from .polynomial_torque import COEFFS_PER_JOINT
 from .residual_regularization import regularization_derivative, regularization_residual
 
 Array: TypeAlias = NDArray[np.float64]
@@ -282,7 +286,11 @@ class MarkerTarget:
 
 @dataclass(frozen=True)
 class PrefixStage:
-    """One independently evaluated optimizer candidate; errors are distances."""
+    """One independently evaluated optimizer candidate; errors are distances.
+
+    parameter_uncertainty is the Laplace approximation of the fitted objective,
+    including any regularization rows.
+    """
 
     end_s: float
     parameters: Array
@@ -296,6 +304,7 @@ class PrefixStage:
     terminal_max_m: float = 0.0
     pelvis_yaw_diff_deg: float = 0.0
     pelvis_yaw_error_pct: float = 0.0
+    parameter_uncertainty: ParameterUncertainty | None = None
 
 
 @dataclass(frozen=True)
@@ -543,6 +552,8 @@ def _run_prefix_stage(
         pelvis_yaw_diff_deg = yaw_m.yaw_diff_deg
         pelvis_yaw_error_pct = yaw_m.pelvis_yaw_error_pct
 
+    parameter_uncertainty = fitted_uncertainty_or_none(optimum)
+
     stage = PrefixStage(
         end_s=float(time[-1]),
         parameters=_readonly(new_values),
@@ -556,6 +567,7 @@ def _run_prefix_stage(
         terminal_max_m=terminal_max_m,
         pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
         pelvis_yaw_error_pct=pelvis_yaw_error_pct,
+        parameter_uncertainty=parameter_uncertainty,
     )
     return stage, new_values
 
