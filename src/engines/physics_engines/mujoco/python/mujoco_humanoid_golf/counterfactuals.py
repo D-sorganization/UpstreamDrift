@@ -18,6 +18,7 @@ import mujoco
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 logger = get_logger(__name__)
 
@@ -139,8 +140,7 @@ class CounterfactualAnalyzer:
         mujoco.mj_forward(self.model, self._data_observed)
 
         # Get mass matrix and forces
-        M_obs = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_obs, self._data_observed.qM)
+        M_obs = full_mass_matrix(mujoco, self.model, self._data_observed)
 
         bias_obs = self._data_observed.qfrc_bias.copy()
         tau_obs = self._data_observed.qfrc_actuator.copy()
@@ -155,8 +155,7 @@ class CounterfactualAnalyzer:
 
         mujoco.mj_forward(self.model, self._data_counterfactual)
 
-        M_cf = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_cf, self._data_counterfactual.qM)
+        M_cf = full_mass_matrix(mujoco, self.model, self._data_counterfactual)
 
         bias_cf = self._data_counterfactual.qfrc_bias.copy()
 
@@ -231,8 +230,7 @@ class CounterfactualAnalyzer:
 
         mujoco.mj_forward(self.model, self._data_observed)
 
-        M_obs = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_obs, self._data_observed.qM)
+        M_obs = full_mass_matrix(mujoco, self.model, self._data_observed)
 
         bias_obs = self._data_observed.qfrc_bias.copy()
 
@@ -245,8 +243,7 @@ class CounterfactualAnalyzer:
 
         mujoco.mj_forward(self.model, self._data_counterfactual)
 
-        M_cf = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_cf, self._data_counterfactual.qM)
+        M_cf = full_mass_matrix(mujoco, self.model, self._data_counterfactual)
 
         bias_cf = self._data_counterfactual.qfrc_bias.copy()
 

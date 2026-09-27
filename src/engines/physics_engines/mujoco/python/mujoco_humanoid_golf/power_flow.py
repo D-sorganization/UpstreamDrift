@@ -16,6 +16,7 @@ import numpy as np
 
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 if TYPE_CHECKING:
     import mujoco
@@ -227,7 +228,7 @@ class PowerFlowAnalyzer:
         import mujoco
 
         qm_full = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, qm_full, self._data.qM)
+        full_mass_matrix(mujoco, self.model, self._data, dst=qm_full)
         de_dt = float(qvel @ (qm_full @ np.asarray(qacc, dtype=np.float64)))
         de_dt += float(qvel @ np.asarray(self._data.qfrc_bias, dtype=np.float64))
 

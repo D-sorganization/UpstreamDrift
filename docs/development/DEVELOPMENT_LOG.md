@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11049 · MJX Knot Optimiser Core Moved From the Evidence CLI Into `src`
+### DL-#11055 · Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11055
+- **PR:** pending
+- **Branch:** `claude/ud-11055-fullm-helper`
+- **Paths:** `src/shared/python/simulation_backends/mujoco_compat.py`, `tests/unit/simulation_backends/test_mujoco_compat.py`, every `src` module that called `mj_fullM` with `data.qM`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — helper tests 12 passed on MuJoCo 3.13; 1967 passed on MuJoCo 3.4 across the 200 test files that reference a touched module, with no failure that is not also on `main` or order-dependent.
+- **Summary:** MuJoCo 3.13 (inside the declared range) removed `MjData.qM`; one helper selects the right `mj_fullM` signature and replaces every single-path and hand-written dual-path call.
+- **Next step:** CI green, mark ready and arm the PR for #11055.
+
+### DL-#11049 · MJX Knot Optimiser Core Moved From the Evidence CLI Into `src`
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11049 (epic #11006 package P3)
 - **PR:** #11054
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — `anthro_driver_seeds` `--iterations 3` receipt history identical to the #11046 CLI (0.0 relative at every iteration); 29 passed in `~/.venv-mjx`; ruff and mypy clean.
 - **Summary:** Loader, settings, knot-optimisation and diagnose logic move into a tested `src` module with validated inputs and no file or JAX-config side effects; the evidence script becomes a thin CLI over it.
-- **Next step:** CI green, mark ready and arm the PR for #11049.
+- **Next step:** None — merged as PR #11054.
 
 ### DL-#11046 · MJX Evidence Prototype Rewired Onto the Tested `src` Plant, Knots and Adam Driver
 

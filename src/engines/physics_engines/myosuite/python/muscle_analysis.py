@@ -13,6 +13,7 @@ import numpy as np
 
 from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 logger = get_logger(__name__)
 
@@ -364,12 +365,10 @@ class MyoSuiteMuscleAnalyzer:
         except (TypeError, ValueError):
             nv_int = 1  # Default fallback for completely mocked objects
 
-        M = np.zeros((nv_int, nv_int))
-
         # Try to call mj_fullM with proper error handling for mocks
         try:
-            mujoco.mj_fullM(self.model, M, self.data.qM)
-        except (TypeError, AttributeError):
+            M = full_mass_matrix(mujoco, self.model, self.data)
+        except (TypeError, AttributeError, ValueError):
             # Handle mocked objects - return identity matrix as fallback
             M = np.eye(nv_int)  # type: ignore[assignment]
 
