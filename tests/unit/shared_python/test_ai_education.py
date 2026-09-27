@@ -113,6 +113,14 @@ def test_education_system_add_entry() -> None:
 
 def test_load_data_file_entries(monkeypatch) -> None:
     # Coverage for the try-except logic
+    from src.shared.python.ai import glossary_data_core, glossary_data_extended
+
+    try:
+        import shared.python.ai.glossary_data_core as shared_core
+        import shared.python.ai.glossary_data_extended as shared_ext
+    except ImportError:
+        shared_core = None
+        shared_ext = None
 
     # We mock get_core_entries and get_extended_entries
     def mock_get_core() -> list[dict]:
@@ -122,15 +130,27 @@ def test_load_data_file_entries(monkeypatch) -> None:
         return [{"key": "ext_mock", "term": "Ext Mock", "cat": "test", "i": "int"}]
 
     monkeypatch.setattr(
-        "src.shared.python.ai.glossary_data_core.get_core_entries",
+        glossary_data_core,
+        "get_core_entries",
         mock_get_core,
-        raising=False,
     )
     monkeypatch.setattr(
-        "src.shared.python.ai.glossary_data_extended.get_extended_entries",
+        glossary_data_extended,
+        "get_extended_entries",
         mock_get_ext,
-        raising=False,
     )
+    if shared_core is not None:
+        monkeypatch.setattr(
+            shared_core,
+            "get_core_entries",
+            mock_get_core,
+        )
+    if shared_ext is not None:
+        monkeypatch.setattr(
+            shared_ext,
+            "get_extended_entries",
+            mock_get_ext,
+        )
 
     edu = EducationSystem()
     assert "core_mock" in edu
