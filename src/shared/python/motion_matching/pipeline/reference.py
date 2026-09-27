@@ -32,6 +32,9 @@ if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
+    from src.shared.python.estimation.kinematic_smoother import (
+        KinematicSmoothingResult,
+    )
     from src.shared.python.motion_matching.pipeline.lane import Lane
 
 IK_BACKENDS = frozenset({"lm", "mujoco-minimize"})
@@ -76,6 +79,42 @@ def smooth_reference(q: np.ndarray, rate_hz: float, cutoff_hz: float) -> np.ndar
     b, a = butter(4, cutoff_hz / nyquist)
     padlen = min(60, q.shape[0] - 1)
     return filtfilt(b, a, q, axis=0, padlen=padlen)
+
+
+def smooth_reference_bayesian(
+    q: np.ndarray,
+    rate_hz: float,
+    *,
+    jerk_psd: float | np.ndarray,
+    measurement_var: float | np.ndarray,
+    initial_mean: np.ndarray | None = None,
+    initial_covariance: np.ndarray | None = None,
+) -> KinematicSmoothingResult:
+    """Bayesian kinematic state estimation via white-jerk RTS smoother.
+
+    Args:
+        q: (N, nq) array of coordinate trajectories.
+        rate_hz: Sampling rate in Hz (> 0).
+        jerk_psd: Continuous jerk power spectral density (q_c > 0).
+        measurement_var: Measurement noise variance (r > 0).
+        initial_mean: Optional initial state mean of shape (nq, 3) or (3,).
+        initial_covariance: Optional initial state covariance of shape (nq, 3, 3) or (3, 3).
+
+    Returns:
+        KinematicSmoothingResult with smoothed kinematics and uncertainties.
+    """
+    from src.shared.python.estimation.kinematic_smoother import (
+        smooth_kinematic,
+    )
+
+    return smooth_kinematic(
+        q,
+        rate_hz,
+        jerk_psd=jerk_psd,
+        measurement_var=measurement_var,
+        initial_mean=initial_mean,
+        initial_covariance=initial_covariance,
+    )
 
 
 def marker_errors(

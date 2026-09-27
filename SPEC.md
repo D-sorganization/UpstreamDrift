@@ -7056,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-27 | #11031 | White-jerk RTS kinematic smoother (`estimation/kinematic_smoother.py`) with posterior sigma, NaN gaps as missing frames and ML noise fit; `smooth_reference_bayesian` added beside the unchanged `smooth_reference` (#11029, epic #11007). |
 | 2026-09-27 | #11025 | The physics-structured surrogate residual is fitted by STLSQ sparse regression (`surrogates/sparse_residual.py`) or refused; the hand-chosen tanh constant is removed (#11024, epic #11007). |
 | 2026-09-27 | #11023 | Prefix and multiple-shooting fits report the Gauss-Newton parameter covariance (marginal over shooting states, NaN at bounds, none when rank deficient) (#11021, RM#1793). |
 | 2026-09-27 | #11020 | One canonical swing event detector (`analysis/swing_events.py`): analytics, phase detection, swing-capture import and loader alignment delegate to it; parity test pins all four sites (#11014). |
