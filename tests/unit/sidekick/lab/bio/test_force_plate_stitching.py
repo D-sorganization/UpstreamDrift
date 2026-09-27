@@ -19,6 +19,33 @@ from src.launchers.sidekick_extension_overlay import (
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
+def _module_identity_report(module: Any, expected: Path) -> str:
+    """Describe which module object the import resolved to (#11034).
+
+    The fixture intermittently receives a module under the canonical name that
+    lacks the processor class; this report names its file, spec and the
+    finders and aliases in play so the polluting state can be identified.
+    """
+    related = {
+        name: getattr(loaded, "__file__", None)
+        for name, loaded in sorted(sys.modules.items())
+        if "force_plate_stitching" in name or name.endswith("lab.bio")
+    }
+    return "\n".join(
+        [
+            "Import resolved to a module without CombinedForcePlateProcessor (#11034).",
+            f"expected file: {expected}",
+            f"module file:   {getattr(module, '__file__', None)}",
+            f"module spec:   {getattr(module, '__spec__', None)!r}",
+            f"module names:  {sorted(vars(module))}",
+            "meta_path:",
+            *(f"  {finder!r}" for finder in sys.meta_path),
+            "related sys.modules entries:",
+            *(f"  {name} -> {origin}" for name, origin in related.items()),
+        ]
+    )
+
+
 @pytest.fixture(scope="module")
 def processor_type() -> Any:
     """Load the Upstream-only extension through the production ownership gate."""
@@ -57,6 +84,11 @@ def processor_type() -> Any:
     )
     try:
         module = importlib.import_module("sidekick.lab.bio.force_plate_stitching")
+        expected = (
+            repo_root / "src/shared/python/sidekick/lab/bio/force_plate_stitching.py"
+        ).resolve()
+        if not hasattr(module, "CombinedForcePlateProcessor"):
+            pytest.fail(_module_identity_report(module, expected))
         yield module.CombinedForcePlateProcessor
     finally:
         finder.uninstall()
