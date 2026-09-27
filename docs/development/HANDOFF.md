@@ -8,7 +8,7 @@
 - Baseline commit: `2d5830d18` (origin/main)
 - Implementation commit: `SELF`
 - Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
-- Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011)
+- Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979)
 - Lease session: `claude-deskcomputer-20260926-gs3dx`
 - Development log: `DL-#10950`
 
@@ -26,6 +26,8 @@
   (#10985) data audit and GS3DX-12 (#10986) ground contact done (`GS3DX_FullBodyContact`).
   #11011 typical segment masses done (`GS3DX_Golfer`, 80 kg de Leva) plus the force-plate-free
   total GRF from the capture (`gs3dx_kinematic_grf`); owner: no force plates will be captured.
+  #10979 in progress (owner: anthropometry unknown, match it to the data): `GS3DX_Fit` segment
+  lengths from the capture and a least-squares whole-body IK; hand-on-grip geometry not yet fitted.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -103,6 +105,20 @@
       with `gs3dx_capture_stance`); `gs3dx_kinematic_grf`: total GRF = sum m a - (M+m_club) g from
       the capture COM: address 1.001 BW, pre-impact peak 1.24-1.33 BW ~60 ms before impact (6-15 Hz),
       club must be included (+0.57 BW). Plan without force plates: `docs/ANTHROPOMETRY.md`.
+  16. #10979 anthropometry from the data (`docs/FIT.md`): `gs3dx_capture_joint_centres` (joint
+      centres + segment lengths from the markers; RShoulderTop rebuilt from RShoulderBack),
+      `gs3dx_fit_lengths` + `gs3dx_build_fit` -> `GS3DX_Fit` (11 upper-body cylinders re-pointed at
+      `Fit*` vars the drive file cannot overwrite, ThighLength/ShankLength set; block count unchanged,
+      967 compiled; KinematicsSolver FK: forearm 0.280, pelvis-hub 0.490 vs data 0.278/0.488).
+      `gs3dx_whole_body_ik`: KinematicsSolver refuses over-determined targets (status -3), so
+      lsqnonlin LM over 33 independent coordinates with the solver as FK (5 ms, right arm closed by
+      the grip weld loop); per-body marker offsets calibrated by alternation; forward+backward
+      tracking; gap-filled samples (`jc.gap`: club head 445, 519-551, 653-654) are dropped - fitting
+      them lost the whole follow-through (0.5 m). Whole trial (63 min): RMS 7.1 mm median, 20.3 mm
+      max. Out of sample (offsets from the backswing, fit the last 0.25 s): pelvis/legs/shoulders
+      within 1-3 cm, club head 40 mm, wrists 52/88 mm -> the model's hand-on-grip geometry (literal
+      grip cylinder lengths, hand sphere radius 2 in, standoffs) is the next thing to fit. Frame
+      `Rotation` outputs = intrinsic XYZ (verified 3e-16).
 
 ## Files and Decisions
 
@@ -162,7 +178,9 @@ Creator` (newline); find it by BlockType.
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 78 passed / 0 failed (2026-09-27, after #11011: golfer 6, capture +2 kinematic GRF; earlier 70 after #10985/#10986: capture 4, leg kinematics 4, contact 7
+  → 83 passed / 0 failed (2026-09-27, with test_gs3dx_fit 5; its 6th test, the gap mask, was added
+  after and passed on its own: fit class 6/6 over two runs; the out-of-sample IK test takes ~10 min).
+  Earlier 78 (after #11011: golfer 6, capture +2 kinematic GRF; earlier 70 after #10985/#10986: capture 4, leg kinematics 4, contact 7
   new; the FK test failed once on a closed-model handle, fixed and rerun 4/4). The capture tests
   need MATLAB pyenv with ezc3d (they are skipped otherwise).
 - `gs3dx_layout_qa` on the rebuilt diagrams: 0 overlapping blocks.
@@ -176,9 +194,9 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 on `GS3DX_Golfer` (plan in `docs/ANTHROPOMETRY.md`): pelvis 6-DOF path from the four
-   waist markers -> leg IK references (0 added blocks), refit the upper-body drive with the pelvis
-   still actuated and read its force as the residual, then compare the summed contact GRF with
-   `gs3dx_kinematic_grf` through the downswing (1.24-1.33 BW peak ~60 ms before impact).
-3. Optional owner inputs: the golfer's height/mass and tape-measured arm/shoulder lengths (model
-   forearm +28%, shoulder hubs ~+27% vs typical).
+2. #10979 on `GS3DX_Fit` (`docs/FIT.md`): fit the hand-on-grip geometry (hand positions along
+   the shaft, standoffs) with the same out-of-sample IK check; then smooth the tracked joint
+   angles into time-varying leg servo references and a prescribed upper-body motion (0 added
+   blocks), read the pelvis residual, and compare the summed contact GRF with
+   `gs3dx_kinematic_grf` (1.24-1.33 BW peak ~60 ms before impact).
+3. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
