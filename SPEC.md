@@ -7056,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-27 | #11048 | The MJX evidence prototype `mjx_trajectory_optimisation.py` is a thin CLI over `mjx_tracking_plant`, `jax_contact` and `knot_gradient_optimiser` (648 → 362 lines); the root vertical coordinate is read by name; measured parity on `anthro_driver_seeds` 5.6e-6 at the port check and 9.2e-4 at iteration 3 (#11046, epic #11006). |
 | 2026-09-27 | #11053 | CI: a PR-scoped pytest run that collects nothing (exit 5) with no changed `src` or dependency file reports "Core test suite NOT EXECUTED" and exits 0, instead of falling back to a whole-`src` coverage lane whose 75 % floor the dependency-light lane cannot reach (#11052). |
 | 2026-09-27 | #11050 | Canonical calibrated ground-support runs regenerated on current code (`anthro_driver_seeds` 7.9/34.1/84.5 mm, `anthro_iron_seeds_zmp` 6.6/31.6/88.6 mm); the pre-HO-8 receipts are history because `BOUND_WIDENING = 2.0` explains their lower IK and both record range-of-motion flags, so G1 is recorded as not met; measured bisect in `bisect_11044_receipt.json` (#11044). |
 | 2026-09-26 | #11012 | Ball-flight parity export writes to `tmp_path` by default; rewriting the committed `default_trajectory.json` golden requires `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A read-only contract test checks the fixture schema and its capability-migration path pin. |

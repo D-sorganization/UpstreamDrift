@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11052 · PR-Scoped Tests That All Skip Report Not Executed Instead of Failing Coverage
+### DL-#11046 · MJX Evidence Prototype Rewired Onto the Tested `src` Plant, Knots and Adam Driver
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11046 (epic #11006 package 2c)
+- **PR:** #11048
+- **Branch:** `claude/ud-11046-mjx-rewire`
+- **Paths:** `docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`, `tests/unit/engines/mujoco/test_mjx_evidence_cli.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — old vs rewired on `anthro_driver_seeds`: port check 65.16457 vs 65.16494 mm, iteration 3 50.249 vs 50.295 mm (9.2e-4 relative; float32 reordering differences grow per Adam step: 5.6e-6, 1.6e-5, 7.2e-5, 9.2e-4); CLI test passes in `~/.venv-mjx`.
+- **Summary:** The evidence prototype drops its private copies of the knot basis, Adam loop, contact law, weld and plant and calls the merged `src` modules; the root vertical coordinate is read by name.
+- **Next step:** CI green, mark ready and arm the PR for #11046.
+
+### DL-#11052 · PR-Scoped Tests That All Skip Report Not Executed Instead of Failing Coverage
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #11052
 - **PR:** #11053
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — `tests/ci/` 201 passed, 1 skipped; the new exit-5 contract test is red on `origin/main` and green here.
 - **Summary:** A PR-scoped pytest run that collects nothing (exit 5) with no changed `src` or dependency file now reports "Core test suite NOT EXECUTED" and exits 0, instead of falling back to a whole-`src` coverage lane whose 75 % floor the dependency-light lane cannot reach.
-- **Next step:** CI green, mark ready and arm the PR for #11052.
+- **Next step:** None — merged as PR #11053.
 
 ### DL-#11044 · Canonical Calibrated Runs Regenerated on Current Code
 
