@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11024 · Fit the Physics-Structured Surrogate Residual by Sparse Regression
+### DL-#11029 · White-Jerk RTS Kinematic Smoother With Posterior Uncertainty
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11029 (epic #11007 package 5)
+- **PR:** pending
+- **Branch:** `claude/ud-11029-rts-smoother`
+- **Paths:** `src/shared/python/estimation/kinematic_smoother.py`, `src/shared/python/motion_matching/pipeline/reference.py`, `src/shared/python/motion_matching/pipeline/__init__.py`, `tests/unit/estimation/test_kinematic_smoother.py`, `tests/unit/motion_matching/test_smooth_reference_bayesian_11029.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — the 12 new tests pass; tests/unit/estimation plus tests/unit/motion_matching 2169 passed, and the 18 failures there fail identically on clean origin/main; ruff, format and mypy clean.
+- **Summary:** State [q, q̇, q̈] under a white-jerk prior, discretised exactly; the RTS posterior matches an independently built dense-batch Gaussian posterior to 1e-8, 95% bands cover the truth at the nominal rate with the true noise, sigma widens inside NaN gaps, and the ML fit recovers r within 15% and q_c within a factor of 2 on seeded synthetic data. `smooth_reference` stays bit-for-bit unchanged.
+- **Next step:** CI green, mark ready and arm the PR for #11029.
+
+### DL-#11024 · Fit the Physics-Structured Surrogate Residual by Sparse Regression
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11024 (epic #11007 package 2, Board RM#1795)
 - **PR:** #11025
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — tests/unit/neural_motion (except test_artifact_audit) 161 passed; motion_matching -k surrogate 128 passed; the 6 failures elsewhere in both runs fail identically on clean origin/main; ruff, format and mypy clean.
 - **Summary:** STLSQ (Brunton, Proctor & Kutz 2016) over a polynomial plus optional sin/cos library recovers the damped-pendulum and Lorenz supports exactly on synthetic data; the physics-structured surrogate uses a fitted residual or refuses, replacing the invented constant.
-- **Next step:** CI green, mark ready and arm PR for #11024.
+- **Next step:** None — merged as PR #11025.
 
 ### DL-#11021 · Parameter Covariance on the Shared Least-Squares Motion-Matching Fits
 

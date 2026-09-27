@@ -82,6 +82,7 @@ from src.shared.python.motion_matching.pipeline.reference import (
     marker_errors,
     render_playback,
     smooth_reference,
+    smooth_reference_bayesian,
 )
 
 __all__ = [
@@ -145,6 +146,7 @@ __all__ = [
     "segment_rms",
     "shooting_fit",
     "smooth_reference",
+    "smooth_reference_bayesian",
     "solve_address_stage",
     "stance_spheres",
     "static_offsets",
