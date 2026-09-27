@@ -41,6 +41,9 @@ def processor_type() -> Any:
                 "chat",
                 "src.shared.python.chat",
                 "shared.python.chat",
+                "upstream_drift_tools",
+                "src.shared.python.upstream_drift_tools",
+                "shared.python.upstream_drift_tools",
             )
         )
     }

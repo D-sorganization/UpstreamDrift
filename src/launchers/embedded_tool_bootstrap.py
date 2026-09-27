@@ -14,7 +14,7 @@ import importlib.metadata
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from src.launchers.tools_repo_path import resolve_tools_source_root
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -75,6 +75,7 @@ FALLBACK_ADAPTER_MODULES = (
 _bootstrap_complete = False
 _registered_tools: list[str] = []
 _bootstrap_failures: list[tuple[str, str]] = []
+_module_registered_tools: dict[str, list[str]] = {}
 
 
 def _iter_entry_point_adapter_modules() -> list[str]:
@@ -128,6 +129,76 @@ def _prepend_python_paths(paths: list[str]) -> None:
         sys.path.insert(0, path)
 
 
+def _bootstrap_adapter_module(
+    module_path: str,
+    registry: dict[str, Any],
+) -> list[str]:
+    """Import or reload one adapter module and return newly attributed tool IDs."""
+    before = set(registry)
+    try:
+        # Import the module - it self-registers at module level
+        __import__(module_path)
+    except ImportError as e:
+        # Tools may have optional dependencies (PyQt6, etc.)
+        # Log but don't fail - the tool just won't be embeddable.
+        logger.warning(
+            "Failed to bootstrap embeddable-tool adapter %r: %s", module_path, e
+        )
+        _bootstrap_failures.append((module_path, repr(e)))
+        return []
+    except Exception as e:  # noqa: BLE001
+        # Catch any other unexpected errors during registration
+        logger.warning(
+            "Error bootstrapping embeddable-tool adapter %r: %s", module_path, e
+        )
+        _bootstrap_failures.append((module_path, repr(e)))
+        return []
+
+    new_ids = sorted(set(registry) - before)
+    reloadable = (
+        module_path.rsplit(".", 1)[-1] == "_embed_adapter"
+        or module_path == "src.launchers.adapters.simscape_embed"
+    )
+    if not new_ids and reloadable and module_path in sys.modules:
+        try:
+            importlib.reload(sys.modules[module_path])
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                "Failed to re-register embeddable-tool adapter %r: %s",
+                module_path,
+                e,
+            )
+            _bootstrap_failures.append((module_path, repr(e)))
+            return []
+        new_ids = sorted(set(registry) - before)
+
+    if not new_ids and module_path in _module_registered_tools:
+        new_ids = [
+            tid for tid in _module_registered_tools[module_path] if tid in registry
+        ]
+    elif not new_ids and module_path in sys.modules:
+        pkg_name = module_path.rsplit(".", 1)[0]
+        matched = [
+            tid
+            for tid, tool in registry.items()
+            if getattr(type(tool), "__module__", "") == module_path
+            or getattr(type(tool), "__module__", "").startswith(pkg_name)
+        ]
+        if matched:
+            new_ids = matched
+
+    if new_ids:
+        _module_registered_tools[module_path] = list(new_ids)
+        logger.debug(f"Bootstrapped embeddable tools: {new_ids}")
+    else:
+        logger.debug(
+            "Adapter module %s imported but registered no new tools "
+            "(already imported, or registration is conditional)",
+            module_path,
+        )
+    return new_ids
+
+
 def bootstrap_embeddable_tools() -> list[str]:
     """Import and register all embeddable tools.
 
@@ -152,66 +223,12 @@ def bootstrap_embeddable_tools() -> list[str]:
 
     from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
 
-    registered = []
+    registered: list[str] = []
     for module_path in _adapter_modules_for_bootstrap():
-        # Diff the registry around the import so we record the tool ids
-        # the adapter actually registered (an adapter may register zero,
-        # one, or several tools; ids need not match the module name).
-        before = set(EMBEDDABLE_TOOL_REGISTRY)
-        try:
-            # Import the module - it self-registers at module level
-            __import__(module_path)
-        except ImportError as e:
-            # Tools may have optional dependencies (PyQt6, etc.)
-            # Log but don't fail - the tool just won't be embeddable.
-            # Record the failure so callers (health panels, tests) can
-            # surface it instead of it vanishing into the log (#8856).
-            logger.warning(
-                "Failed to bootstrap embeddable-tool adapter %r: %s", module_path, e
-            )
-            _bootstrap_failures.append((module_path, repr(e)))
-            continue
-        except Exception as e:  # noqa: BLE001
-            # Catch any other unexpected errors during registration
-            logger.warning(
-                "Error bootstrapping embeddable-tool adapter %r: %s", module_path, e
-            )
-            _bootstrap_failures.append((module_path, repr(e)))
-            continue
-        new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
-        reloadable = (
-            module_path.rsplit(".", 1)[-1] == "_embed_adapter"
-            or module_path == "src.launchers.adapters.simscape_embed"
-        )
-        if not new_ids and reloadable and module_path in sys.modules:
-            # Adapters self-register at module import, so a cached import is
-            # a no-op. If the registry was cleared after the first import
-            # (test isolation resets it between sessions), the tool would
-            # otherwise stay unregistered forever; re-executing the module
-            # restores its registrations idempotently. Only thin adapter
-            # shims are re-executed: reloading a full tool GUI module (e.g.
-            # pose_studio.gui) would swap class identities under live
-            # objects.
-            try:
-                importlib.reload(sys.modules[module_path])
-            except Exception as e:  # noqa: BLE001
-                logger.warning(
-                    "Failed to re-register embeddable-tool adapter %r: %s",
-                    module_path,
-                    e,
-                )
-                _bootstrap_failures.append((module_path, repr(e)))
-                continue
-            new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
-        if new_ids:
-            registered.extend(new_ids)
-            logger.debug(f"Bootstrapped embeddable tools: {new_ids}")
-        else:
-            logger.debug(
-                "Adapter module %s imported but registered no new tools "
-                "(already imported, or registration is conditional)",
-                module_path,
-            )
+        tool_ids = _bootstrap_adapter_module(module_path, EMBEDDABLE_TOOL_REGISTRY)
+        for tid in tool_ids:
+            if tid not in registered:
+                registered.append(tid)
 
     _registered_tools = registered
     _bootstrap_complete = True
