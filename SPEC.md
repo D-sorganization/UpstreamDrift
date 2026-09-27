@@ -7057,6 +7057,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-26 | #11008 | Ball-flight parity export writes to `tmp_path` by default; rewriting the committed `default_trajectory.json` golden requires `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A read-only contract test checks the fixture schema and its capability-migration path pin. |
+| 2026-09-27 | #11038 | Differentiable JAX port of the shared sphere-ground contact law and grip weld (`motion_matching/jax_contact.py`, JAX-only, not imported by the package) with measured parity against `contact_law` (#11037, epic #11006). |
 | 2026-09-27 | #11035 | Numpy-only knot grid, hat basis, horizon mask and bias-corrected Adam driver for the gradient knot optimiser (`motion_matching/knot_gradient_optimiser.py`); the integer knot count removes the prototype's untouched trailing knot (#11032, epic #11006). |
 | 2026-09-27 | #11031 | White-jerk RTS kinematic smoother (`estimation/kinematic_smoother.py`) with posterior sigma, NaN gaps as missing frames and ML noise fit; `smooth_reference_bayesian` added beside the unchanged `smooth_reference` (#11029, epic #11007). |
 | 2026-09-27 | #11025 | The physics-structured surrogate residual is fitted by STLSQ sparse regression (`surrogates/sparse_residual.py`) or refused; the hand-chosen tanh constant is removed (#11024, epic #11007). |
