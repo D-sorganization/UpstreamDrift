@@ -7056,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | #11017 | NM-09 and NM-12 DIAGNOSTIC receipts qualify and promote no models (three listed as `unqualified` / `unmeasured_models`, end-to-end `not_verified`); a test fails closed on any DIAGNOSTIC receipt claiming a pass (#10960). |
 | 2026-09-26 | #11013 | Retire 1 passing test from unit-gate quarantine in mock scope hygiene (ratchet 55 -> 54) (#9411). |
 | 2026-09-26 | #10997 | unit-test-gate builds and installs the upstream-physics Rust kernel (maturin, fail-closed import probe) so strict-parity BunkerShot tests run on Linux; 12 workbench/GUI quarantine IDs retired (#9411). |
 | 2026-09-26 | #11010 | Restate the #9243 BunkerShot window-band and dominance claims under the corrected F0 model (#11003): target the nominal carry; dominates without swamping. |
