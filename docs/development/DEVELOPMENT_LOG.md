@@ -17,18 +17,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+### DL-#11001 · Fix Test_Start_Api_Server Module Monkeypatching in Unit Gate
 
 - **State:** in_progress
+- **Owner:** local
+- **Issue:** #11001
+- **PR:** #11009
+- **Branch:** `fix/11001-test-start-api-server-security-patch`
+- **Paths:** `tests/unit/test_start_api_server.py`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-26
+- **Last verified:** 170481160b — local pytest, ruff, black, and mypy pass.
+- **Summary:** Directly import and monkeypatch env_validator in test_start_api_server to resolve module traversal failure on distributed test workers.
+- **Next step:** Push branch, open PR with auto-merge, restore green main.
+
+### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #9411
 - **PR:** #10999
 - **Branch:** `feat/ud-9411-quarantine-burndown-batch1`
 - **Paths:** `scripts/config/unit_gate_quarantine.json`, `tests/unit/ui/dialogs/test_install_prompt.py`, `tests/unit/ui/test_window_icon.py`
 - **Started:** 2026-09-26
-- **Last verified:** 99553df90 — 6 retired tests verified green in CI Standard; unit gate quarantine contract passed (78 -> 72 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Last verified:** 170481160b — 6 retired tests verified green in CI Standard; unit gate quarantine contract passed; mypy, black, ruff, and file size budget pass.
 - **Summary:** Fix module monkeypatching and typing in `test_window_icon.py` and `test_install_prompt.py`; condense `test_install_prompt.py` to <= 500 LOC; retire 6 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 78 -> 72).
-- **Next step:** Push branch with force-with-lease, monitor CI Standard, verify auto-merge.
+- **Next step:** Shipped in #10999.
 
 ### DL-#9411-Pin · Bump `vendor/ud-tools` to Tools Main `3678409fc` and Retire 10 Quarantined Tests
 

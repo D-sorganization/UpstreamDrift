@@ -17,6 +17,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.shared.python.security import env_validator
+
 pytestmark = pytest.mark.unit
 
 _SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "ci" / "start_api_server.py"
@@ -40,11 +42,7 @@ start_api_server = _load_start_api_server()
 
 def test_validate_security_no_issues(monkeypatch) -> None:
     mock_validate = MagicMock(return_value={"critical_issues": [], "warnings": []})
-    monkeypatch.setattr(
-        "src.shared.python.security.env_validator.validate_environment",
-        mock_validate,
-        raising=False,
-    )
+    monkeypatch.setattr(env_validator, "validate_environment", mock_validate)
 
     # Needs to ensure it doesn't fail import
     assert start_api_server._validate_security() is True
@@ -54,11 +52,7 @@ def test_validate_security_with_critical(monkeypatch) -> None:
     mock_validate = MagicMock(
         return_value={"critical_issues": ["bad secret"], "warnings": []}
     )
-    monkeypatch.setattr(
-        "src.shared.python.security.env_validator.validate_environment",
-        mock_validate,
-        raising=False,
-    )
+    monkeypatch.setattr(env_validator, "validate_environment", mock_validate)
 
     with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
         assert start_api_server._validate_security() is False
