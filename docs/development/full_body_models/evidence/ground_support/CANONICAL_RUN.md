@@ -1,7 +1,7 @@
 # Canonical Ground-Support Reference Runs and Bisect Analysis
 
 **Author:** Dieter Olson (`agent:local`)  
-**Date:** 2026-09-17  
+**Date:** 2026-09-17 (canonical designation revised 2026-09-27, #11044)  
 **Issue:** MS-03 (#10324), Epic #10363 (Matched Swing Program)  
 **Related Issues:** #10108 (HO-8), #10250 (HO-11), #10258, #10271, #10322 (MS-01), #10374 (MS-100)
 
@@ -29,16 +29,27 @@ Per Owner-Authorized Contract Revision on #10324 and #10363:
 
 > "A canonical benchmark selection is not threshold relaxation. Preserve historical receipts; document calibration differences and regenerate evidence with exact source/model/capture/runtime hashes."
 
-We establish two explicit categories of ground-support evidence:
+We establish explicit categories of ground-support evidence:
 
 ### A. Canonical Calibrated Reference Runs (Tour Matched Accuracy)
 
 These runs employ full subject-specific static trial calibration (`--static-seeds`), which solves for individual upper-body marker attachments against the neutral static trial pose before solving the address frame and full-capture IK.
 
-| Capture    | Canonical Run Directory    | Receipt Path                                                                                      | Address RMS              | IK RMS                    | Dynamics RMS               | Configuration                                                                             |
-| ---------- | -------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| **Driver** | `anthro_driver_shoot_g025` | `docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json` | **5.1 mm** (`0.00507 m`) | **27.3 mm** (`0.02729 m`) | **74.6 mm** (`0.07458 m`)  | Static seeds calibration, contact-aware shooting fit ($g=0.25$), bounded wrists           |
-| **7-Iron** | `anthro_iron_zmp`          | `docs/development/full_body_models/evidence/ground_support/anthro_iron_zmp/receipt.json`          | **4.4 mm** (`0.00443 m`) | **28.6 mm** (`0.02858 m`) | **144.0 mm** (`0.14400 m`) | Static seeds calibration, dynamics ZMP filter inside foot support polygon, bounded wrists |
+| Capture    | Canonical Run Directory | Receipt Path                                                                                   | Address RMS              | IK RMS                    | Dynamics RMS              | Configuration                                                                                                                        |
+| ---------- | ----------------------- | ---------------------------------------------------------------------------------------------- | ------------------------ | ------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Driver** | `anthro_driver_seeds`   | `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json`   | **7.9 mm** (`0.00788 m`) | **34.1 mm** (`0.03405 m`) | **84.5 mm** (`0.08446 m`) | Static seeds calibration, anatomical leg bounds (`BOUND_WIDENING = 1.0`), hip zero-twist, bounded wrists; 0 IK range-of-motion flags |
+| **7-Iron** | `anthro_iron_seeds_zmp` | `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json` | **6.6 mm** (`0.00656 m`) | **31.6 mm** (`0.03165 m`) | **88.6 mm** (`0.08861 m`) | Static seeds calibration, dynamics ZMP filter, anatomical leg bounds, hip zero-twist, bounded wrists; 0 IK range-of-motion flags     |
+
+Both receipts were regenerated on `main` @ `3a11b5c07` (after #11047) with `--static-seeds` (driver) and `--static-seeds --zmp-filter` (7-iron). The final scaled specification is committed beside each receipt so the provenance chain (§4) is checked by `tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py`.
+
+### C. Historical Pre-HO-8 Calibrated Runs (Not Reproducible by Current Code)
+
+These were the canonical calibrated runs until 2026-09-27. They were produced with widened leg bounds (`BOUND_WIDENING = 2.0`), before hip zero-twist and on the pre-HO-11 base specification. Current code does not reproduce them (#11044), and their own receipts record IK range-of-motion violations, so they are kept as history only and must not be cited as current accuracy.
+
+| Capture    | Run Directory              | Receipt Path                                                                                      | Address RMS          | IK RMS                | Dynamics RMS           | IK range-of-motion flags                                        |
+| ---------- | -------------------------- | ------------------------------------------------------------------------------------------------- | -------------------- | --------------------- | ---------------------- | --------------------------------------------------------------- |
+| **Driver** | `anthro_driver_shoot_g025` | `docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json` | 5.1 mm (`0.00507 m`) | 27.3 mm (`0.02729 m`) | 74.6 mm (`0.07458 m`)  | 10 coordinates (e.g. right knee outside range on 47% of frames) |
+| **7-Iron** | `anthro_iron_zmp`          | `docs/development/full_body_models/evidence/ground_support/anthro_iron_zmp/receipt.json`          | 4.4 mm (`0.00443 m`) | 28.6 mm (`0.02858 m`) | 144.0 mm (`0.14400 m`) | 9 coordinates                                                   |
 
 ### B. Primary Uncalibrated Baselines (Nominal Geometry)
 
@@ -55,6 +66,21 @@ These runs evaluate model performance starting strictly from the nominal anthrop
 
 Detailed factor isolation reveals three distinct factors between the canonical calibrated runs and the primary baseline runs:
 
+### Measured Bisect on Current Code (#11044)
+
+Each row is a full pipeline regeneration of the driver with `--static-seeds` on `main` @ `3a11b5c07`, one factor reverted at a time in a scratch checkout. Raw numbers: [`bisect_11044_receipt.json`](bisect_11044_receipt.json).
+
+| Permutation                           | Address RMS | IK RMS  | Dynamics RMS | IK range-of-motion flags |
+| ------------------------------------- | ----------- | ------- | ------------ | ------------------------ |
+| Current code                          | 7.9 mm      | 34.1 mm | 84.5 mm      | 0                        |
+| Pre-HO-11 base specification          | 7.9 mm      | 34.1 mm | 84.5 mm      | 0                        |
+| `BOUND_WIDENING = 2.0`                | 6.3 mm      | 28.1 mm | 53.8 mm      | 10                       |
+| Hip zero-twist off                    | 6.0 mm      | 36.0 mm | 82.0 mm      | 0                        |
+| All three reverted                    | 4.9 mm      | 25.7 mm | 55.1 mm      | 9                        |
+| Historical `anthro_driver_shoot_g025` | 5.1 mm      | 27.3 mm | 74.6 mm      | 10                       |
+
+The widened leg bounds explain the gap: they account for 6.0 mm of IK RMS and 30.7 mm of dynamics RMS on the calibrated configuration, not the +0.5 mm estimated below (the 2026-09-17 bisect compared four existing receipts and had no isolated widening run). The base specification change has no effect because the anthropometric candidate rescales the document. Hip zero-twist costs 1.9 mm of IK RMS. With all three reverted, current code reaches 4.9 / 25.7 mm, within 1.6 mm of the historical receipt; dynamics is 19.5 mm lower than the historical run, so later dynamics fixes (including #11047) are not attributed here. The 7-iron shows the same pattern: `--static-seeds --zmp-filter` gives 6.6 / 31.6 / 88.6 mm with 0 IK range-of-motion flags, and 4.1 / 23.5 / 53.4 mm with 9 flags at `BOUND_WIDENING = 2.0`.
+
 ### Factor 1: Static-Seeds Trial Marker Calibration (Dominant Factor: $\Delta \approx +24.9$ mm IK RMS)
 
 - **Mechanism:** In `src/shared/python/motion_matching/pipeline/address.py`, when `static_seeds=True`, `lane.static_trial` solves for upper-body marker offsets using the subject's 24-frame neutral posture static trial.
@@ -64,7 +90,7 @@ Detailed factor isolation reveals three distinct factors between the canonical c
   - This initial 42.2 mm address offset propagates across all 654 frames, raising whole-swing IK RMS from 27.3 mm to 52.3 mm.
   - In HO-8 (`d05edafb0`), the regeneration command for `anthro_driver` inadvertently omitted `--static-seeds`.
 
-### Factor 2: Leg Bound Widening (`BOUND_WIDENING`: $2.0 \to 1.0$) ($\Delta \approx +0.5$ mm IK RMS, but Eliminates Joint Limit Violations)
+### Factor 2: Leg Bound Widening (`BOUND_WIDENING`: $2.0 \to 1.0$) (Estimated +0.5 mm IK RMS on 2026-09-17; Measured +6.0 mm With Static Seeds, #11044)
 
 - **Mechanism:** In pre-HO-8 runs, `pipeline/constants.py` had `BOUND_WIDENING = 2.0`, effectively doubling joint range margins on leg degrees of freedom (hip rotation, knee flexion, ankle subtalar). This yielded lower mathematical residuals (27.3 mm) at the expense of non-physiological joint angles (e.g. 71 frames of right hip rotation excess up to 24.3 deg).
 - **HO-8 Correction:** Clamping `BOUND_WIDENING = 1.0` restored strict anatomical joint bounds, eliminating all leg RoM flags on the IK reference trajectory.
@@ -117,5 +143,5 @@ re-execution was deferred on this workstation due to ~2 GB free disk.
 ## 5. Summary Policy for Program Documentation
 
 1. **Path-Anchored Metrics:** Every metric cited in documentation must use explicit path-anchored references: `path/to/receipt.json#field.path`.
-2. **Honest Distinctions:** When citing 5.1 mm / 27.3 mm / 74.6 mm, cite `anthro_driver_shoot_g025/receipt.json` as the calibrated tour match. When citing nominal baseline performance without static-trial calibration, cite `anthro_driver/receipt.json` (42.2 mm / 52.3 mm / 89.1 mm).
+2. **Honest Distinctions:** Cite `anthro_driver_seeds/receipt.json` (7.9 mm / 34.1 mm / 84.5 mm) and `anthro_iron_seeds_zmp/receipt.json` (6.6 mm / 31.6 mm / 88.6 mm) as the calibrated tour match. 5.1 mm / 27.3 mm / 74.6 mm (`anthro_driver_shoot_g025`) and 4.4 mm / 28.6 mm / 144.0 mm (`anthro_iron_zmp`) are pre-HO-8 numbers produced with widened leg bounds; cite them only as history. When citing nominal baseline performance without static-trial calibration, cite `anthro_driver/receipt.json` (42.2 mm / 52.3 mm / 89.1 mm).
 3. **Automated Enforcement:** Continuous validation is enforced by `tests/unit/motion_matching/test_handoff_numbers_match_receipts.py`.
