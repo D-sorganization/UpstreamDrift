@@ -1,4 +1,18 @@
-# Current Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008) 2026-09-27
+# Current Handoff — Canonical Calibrated Runs Regenerated on Current Code (#11044)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11044-canonical`
+- Branch: `claude/ud-11044-canonical` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11050; entry DL-#11044. Closes #11044.
+- Finding: the canonical calibrated runs (driver 5.1 / 27.3 / 74.6 mm, 7-iron 4.4 / 28.6 / 144.0 mm) were produced with `BOUND_WIDENING = 2.0`, and both receipts record IK range-of-motion flags (10 and 9 coordinates). Measured bisect on `main` @ `3a11b5c07`, driver `--static-seeds`: current 7.9 / 34.1 / 84.5 mm; pre-HO-11 base spec identical; `BOUND_WIDENING = 2.0` 6.3 / 28.1 / 53.8 mm with 10 flags; hip zero-twist off 6.0 / 36.0 / 82.0 mm; all three reverted 4.9 / 25.7 / 55.1 mm. 7-iron `--static-seeds --zmp-filter`: 6.6 / 31.6 / 88.6 mm, and 4.1 / 23.5 / 53.4 mm with 9 flags at 2.0.
+- Built: new canonical receipts `evidence/ground_support/anthro_driver_seeds` and `anthro_iron_seeds_zmp` (receipt plus final scaled spec, added to the provenance-chain test), `bisect_11044_receipt.json` generated from the run receipts, `CANONICAL_RUN.md` §2A/§2C/§3 revised, citations updated in `matched_swing_program/README.md`, `full_body_models/HANDOFF.md` and a correction note in `plans/tour_baselines/final_acceptance_report.md`; ledger and status section regenerated.
+- Gate consequence: G1 (whole-swing IK <= 30 mm, 0 RoM violations) is not met by any MuJoCo receipt; the README gate row and the generator's MuJoCo status now say so. `verdicts_2026-09.json` is a dated record and was not edited.
+- Next step: CI green, mark ready and arm the PR.
+
+---
+
+# Past Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008)
 
 ## Identity
 
@@ -6,7 +20,7 @@
 - Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
 - Branch: `fix/ball-flight-parity-fixture-opt-in` (kept current by merging `origin/main`)
 - Implementation commit: `SELF`
-- Pull request: #11012 — ready for review, auto-merge armed (squash) via `scripts/automerge_guard.py`
+- Pull request: #11012 — merged to `main` as PR #11012
 - Governing issue: #11008 (DL-#11008); SPEC row keyed by PR #11012
 
 ## Objective and Status
@@ -52,7 +66,7 @@
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11043-dls`
 - Branch: `claude/ud-11043-dls` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11047
 - Pull request: #11047; entry DL-#11043. Closes #11043.
 - Root cause: the KKT solve enforces the weld only at acceleration level (`J a = -J̇ q̇`), so it conserves the relative weld velocity it starts with. `replay` seeded `v0` with the one-sided finite difference of the smoothed reference, which violated the weld by 187 mm/s and 32.1 deg/s on the `--fit-closure` run (17.6 mm/s on `--static-seeds`). The grip opened linearly, gave the weld Jacobian nonzero root columns, and a controller direction crossed `MIN_SINGULAR_VALUE` at t = 0.333 s: 9.5 kN·m on `RScapInputY` in one step.
 - Built: `motion_matching/weld_manifold.py::project_onto_weld` (mass-weighted projection, the weld's own inelastic impulse), `FullBodySimulator.consistent_velocity`, with `_mass_and_weld` extracted from `affine_dynamics`. `pipeline/dynamics.replay` and `execution/downswing` now start from the projected velocity.
@@ -60,7 +74,7 @@
 - Tests: `tests/unit/motion_matching/test_weld_manifold.py` (6), plus `test_full_body_simulation.py`, `pipeline/test_dynamics.py` and the downswing tests: all pass. Reverting the `replay` line fails `test_replay_starts_on_the_weld`.
 - Not done: the committed evidence receipts were not regenerated; the pipeline still has no fail-closed guard on a diverged replay (the issue's fallback acceptance).
 - Pre-push mypy caught an un-annotated `Array` alias in `weld_manifold.py`; it is now `TypeAlias`.
-- Next step: CI green, mark ready and arm the PR.
+- Next step: none; merged as PR #11047.
 
 ---
 
