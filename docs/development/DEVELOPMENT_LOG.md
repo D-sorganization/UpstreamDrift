@@ -30,6 +30,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The evidence prototype drops its private copies of the knot basis, Adam loop, contact law, weld and plant and calls the merged `src` modules; the root vertical coordinate is read by name.
 - **Next step:** CI green, mark ready and arm the PR for #11046.
 
+### DL-#11052 · PR-Scoped Tests That All Skip Report Not Executed Instead of Failing Coverage
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #11052
+- **PR:** #11053
+- **Branch:** `claude/ud-11052-ci-exit5`
+- **Paths:** `.github/workflows/ci-standard.yml`, `tests/ci/test_ci_infrastructure.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — `tests/ci/` 201 passed, 1 skipped; the new exit-5 contract test is red on `origin/main` and green here.
+- **Summary:** A PR-scoped pytest run that collects nothing (exit 5) with no changed `src` or dependency file now reports "Core test suite NOT EXECUTED" and exits 0, instead of falling back to a whole-`src` coverage lane whose 75 % floor the dependency-light lane cannot reach.
+- **Next step:** None — merged as PR #11053.
+
 ### DL-#11044 · Canonical Calibrated Runs Regenerated on Current Code
 
 - **State:** shipped
