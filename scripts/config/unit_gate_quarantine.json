@@ -10,14 +10,11 @@
     "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
     "tests/tools/bunker_shot_gui/test_gui.py::TestRunningADesign::test_running_reports_the_real_solver_numbers",
     "tests/tools/bunker_shot_gui/test_gui.py::TestRunningADesign::test_the_maps_are_populated",
-    "tests/ui/c3d_viewer/test_embed_adapter.py::test_cleanup_closes_all_matplotlib_figures",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_chat_input_same_object",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_chat_input_still_importable",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_stream_worker_same_object",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_submodule_classes_are_same_objects",
-    "tests/unit/api/test_route_uniqueness.py::test_no_duplicate_method_path_pairs",
     "tests/unit/engines/simscape/three_d_gui/test_apps_coverage_4675_services.py::test_loader_thread_reports_invalid_csv_without_terminating",
-    "tests/unit/reinforcement_learning/test_trajectory_funnel_benchmark.py::test_simulate_agent_training",
     "tests/unit/repo_hygiene/test_no_duplicate_toplevel_packages.py::test_no_new_toplevel_package_name_collisions",
     "tests/unit/repo_hygiene/test_no_unflagged_shared_code.py::test_all_shared_files_have_warning_header",
     "tests/unit/repo_hygiene/test_optional_dependency_mock_scope.py::test_no_module_scope_optional_dependency_sys_modules_mocks",
@@ -65,8 +62,6 @@
     "tests/unit/test_safe_eval.py::TestSafeEval::test_safe_eval_does_not_call_python_eval",
     "tests/unit/test_safe_eval.py::TestSafeEval::test_safe_eval_supports_star_args_without_eval",
     "tests/unit/test_script_size_contracts_2515.py::TestSyngasCompressionCalculatorSize::test_loc_within_budget",
-    "tests/unit/test_start_api_server.py::test_validate_security_no_issues",
-    "tests/unit/test_start_api_server.py::test_validate_security_with_critical",
     "tests/unit/test_unreal_integration/test_mesh_loader.py::TestMeshLoaderGLTF::test_gltf_with_skeleton",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestCarryNeverTravelsWithoutItsVerdict::test_the_carry_carries_its_verdict",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestCarryNeverTravelsWithoutItsVerdict::test_the_carry_verdict_says_it_is_uncalibrated",
@@ -79,7 +74,6 @@
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_the_window_is_a_fraction_of_the_swept_domain",
     "tests/unit/tools/bunker_shot_gui/test_workbench_model.py::TestPlayabilityWindow::test_the_window_is_measured_on_attack_angle_and_firmness",
     "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_library_shapes_scrub_meets_30_fps",
-    "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_scrub_in_library_mode_updates_without_error",
-    "tests/unit/ui/dialogs/test_install_prompt.py::TestInstallWorker::test_worker_handles_unexpected_exception"
+    "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_scrub_in_library_mode_updates_without_error"
   ]
 }
