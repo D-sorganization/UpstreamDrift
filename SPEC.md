@@ -7056,7 +7056,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-27 | n/a | Replaced np.linalg.norm with math.sqrt(np.vdot) for faster 1D array magnitude in pendulum perturbation analyzer (spec-exempt: micro-optimization) |
+| 2026-09-27 | #11041 | Replaced np.linalg.norm with math.sqrt(np.vdot) for faster 1D array magnitude in pendulum perturbation analyzer |
+| 2026-09-27 | #11040 | MJX tracking plant with computed-torque control, JAX contact and grip-weld wrenches and a differentiable rollout (`physics_engines/mujoco/python/motion_matching/mjx_tracking_plant.py`, JAX-only, not imported by the package); grip closures require explicit weld gains and the caller's model is never mutated (#11039, epic #11006). |
 | 2026-09-27 | #11038 | Differentiable JAX port of the shared sphere-ground contact law and grip weld (`motion_matching/jax_contact.py`, JAX-only, not imported by the package) with measured parity against `contact_law` (#11037, epic #11006). |
 | 2026-09-27 | #11035 | Numpy-only knot grid, hat basis, horizon mask and bias-corrected Adam driver for the gradient knot optimiser (`motion_matching/knot_gradient_optimiser.py`); the integer knot count removes the prototype's untouched trailing knot (#11032, epic #11006). |
 | 2026-09-27 | #11031 | White-jerk RTS kinematic smoother (`estimation/kinematic_smoother.py`) with posterior sigma, NaN gaps as missing frames and ML noise fit; `smooth_reference_bayesian` added beside the unchanged `smooth_reference` (#11029, epic #11007). |
