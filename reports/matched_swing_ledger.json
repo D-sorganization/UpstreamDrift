@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-26T16:29:12Z",
+  "generated_at": "2026-09-27T18:33:08Z",
   "rows": [
     {
       "acceptance": null,
@@ -774,6 +774,108 @@
       "sha256": "7e3fcce68b67fdd2973109c491f6fc27a2f2618a0f8bccda1abc5a3d9504dbf9"
     },
     {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 1.0,
+            "name": "capture_provenance",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "hash"
+          },
+          {
+            "measured": 0.0844624120521208,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 84.46 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.003141789511362645,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 3.76] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          },
+          {
+            "measured": 1.8138888888888889,
+            "name": "horizon_truncation",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.8,
+            "unit": "s"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.0844624120521208
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json",
+      "sha256": "5e5d71cbe27b36e0b00b87b2db4a513bd0434a1090fb87a5e7c85074b10a1079"
+    },
+    {
       "acceptance": null,
       "artefacts": {
         "gif": null,
@@ -986,6 +1088,108 @@
       "acceptance": {
         "gates": [
           {
+            "measured": 1.0,
+            "name": "capture_provenance",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "hash"
+          },
+          {
+            "measured": 0.08860928312772964,
+            "name": "whole_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.095,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0019162281535644264,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 3.42] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          },
+          {
+            "measured": 1.8272980501392757,
+            "name": "horizon_truncation",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.8,
+            "unit": "s"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": 1.8272980501392757,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08860928312772964
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
+      "sha256": "2a39ffc1a114fd35483b457fb118840a4c3e555328a8e6a88b908568565004fb"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
             "measured": 0.11595556126394267,
             "name": "whole_marker_rmse_m",
             "reason": "whole RMSE 115.96 mm > 95.00 mm",
@@ -1066,6 +1270,29 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_zmp/receipt.json",
       "sha256": "679baee6f97e7af1dec92dd475a6b866bb8da1d4f99b1768316baefcfcaf46e5"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": "docs/development/full_body_models/evidence/ground_support/ik_playback.gif",
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/ground_support/anthro_driver_dynamics_candidate.npz"
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "ground_support",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/ground_support/bisect_11044_receipt.json",
+      "sha256": "46dfda3acbd47ddb715f52187765c9f4ddd72e028e7de6595768043a2b48280e"
     },
     {
       "acceptance": null,
@@ -4019,5 +4246,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 114
+  "total_receipts": 117
 }
