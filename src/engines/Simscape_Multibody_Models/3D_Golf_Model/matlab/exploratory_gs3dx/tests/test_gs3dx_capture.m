@@ -3,8 +3,9 @@ classdef test_gs3dx_capture < matlab.unittest.TestCase
 %
 %   Pins what the data audit found in data/C3D_TA_Driver.c3d (identity,
 %   rate, no force plates) and that GS3DX_LEG_TABLE's .stance is what
-%   GS3DX_CAPTURE_STANCE measures.  Skipped when MATLAB's Python has no
-%   ezc3d.
+%   GS3DX_CAPTURE_STANCE measures, and the force-plate-free total ground
+%   reaction force (GS3DX_KINEMATIC_GRF, #11011).  Skipped when MATLAB's
+%   Python has no ezc3d.
 
     properties
         cap struct
@@ -31,6 +32,27 @@ classdef test_gs3dx_capture < matlab.unittest.TestCase
             testCase.verifyEqual(c.sha256, '545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba');
             testCase.verifyEqual(c.n_frames, 654);
             testCase.verifyEqual(c.rate_hz, 360);
+        end
+
+        function kinematic_grf_carries_body_weight_at_address(testCase)
+            % Static equilibrium: a check of the segment table, the marker
+            % proxies and the axes together (#11011).
+            k = gs3dx_kinematic_grf();
+            still = k.t <= 0.1;
+            testCase.verifyEqual(k.address, 1, 'AbsTol', 0.02);
+            testCase.verifyLessThan(max(vecnorm(k.grf_bw(1:2, still))), 0.05, 'horizontal force at address');
+        end
+
+        function kinematic_grf_peaks_in_the_late_downswing(testCase)
+            % The vertical force peaks just before impact at every cutoff
+            % in the tested band; its level depends on the cutoff.
+            for fc = [6 10]
+                k = gs3dx_kinematic_grf(cutoff_hz=fc);
+                testCase.verifyGreaterThan(k.peak.vertical_bw, 1.15, sprintf('%d Hz', fc));
+                testCase.verifyLessThan(k.peak.vertical_bw, 1.7, sprintf('%d Hz', fc));
+                testCase.verifyGreaterThan(k.peak.time_to_impact, -0.15, sprintf('%d Hz', fc));
+                testCase.verifyLessThan(k.peak.time_to_impact, 0, sprintf('%d Hz', fc));
+            end
         end
 
         function capture_has_no_ground_reaction_data(testCase)

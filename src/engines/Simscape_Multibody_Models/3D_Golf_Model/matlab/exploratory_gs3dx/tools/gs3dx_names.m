@@ -36,7 +36,8 @@ function names = gs3dx_names()
         'slim',     "GS3DX_Slim", ...       % direct joint torque drive (#10954)
         'quat',     "GS3DX_Quat", ...       % quaternion shoulders + hip (#10955/#10956)
         'fullbody', "GS3DX_FullBody", ...   % lower body added (#10957/#10958)
-        'contact',  "GS3DX_FullBodyContact");   % foot-ground contact, leg-supported pelvis (#10986)
+        'contact',  "GS3DX_FullBodyContact", ...   % foot-ground contact, leg-supported pelvis (#10986)
+        'golfer',   "GS3DX_Golfer");   % contact model with de Leva segment masses (#11011)
 
     names.simscape_prefixes   = ["sm_lib", "fl_lib", "nesl_utility", "ee_lib"];
     names.converter_refs      = ["nesl_utility/PS-Simulink Converter", ...

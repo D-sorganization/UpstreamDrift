@@ -22,7 +22,8 @@ function check = gs3dx_contact_check(info, opts)
 %     .status, .message    of the simulation
 %
 %   Options: drive ("impact"), stop_time (0.3 s), variables (struct of
-%   model-workspace overrides applied after the drive), rest (false).
+%   model-workspace overrides applied after the drive), rest (false),
+%   model (GS3DX_FullBodyContact; any model built from it, e.g. GS3DX_Golfer).
 %   rest=true zeroes every *StartVelocity* variable, so the body starts
 %   still in the drive's pose: the standing test.  The impact drive alone
 %   starts mid-downswing with the whole-body momentum of a model whose
@@ -38,9 +39,9 @@ function check = gs3dx_contact_check(info, opts)
         opts.stop_time (1,1) double {mustBePositive} = 0.3
         opts.variables (1,1) struct = struct()
         opts.rest (1,1) logical = false
+        opts.model (1,1) string = gs3dx_names().variants.contact
     end
-    names = gs3dx_names();
-    mdl = char(names.variants.contact);
+    mdl = char(opts.model);
     load_system(mdl);
     cleanup = onCleanup(@() close_system(mdl, 0));
     vars = gs3dx_drive(info, opts.drive, mdl);

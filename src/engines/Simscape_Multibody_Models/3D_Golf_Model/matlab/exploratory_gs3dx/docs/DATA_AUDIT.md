@@ -66,6 +66,7 @@ model moves each ankle 0.035 m toward the midline (`leg.stance.inset`).
 | Ankle height                   | de Leva 0.070 m                       | 0.094 m         | marker on the malleolus, not the sole                        |
 | Thigh mass                     | de Leva 11.3 kg                       | —               | **conflict** with canonical spec 7.05 kg                     |
 | Upper-body masses              | literal values in the original solids | —               | **conflict**, see below                                      |
+| Upper-body masses (resolved)   | de Leva, 80 kg (`GS3DX_Golfer`)       | —               | typical values (owner, #11011)                               |
 | Joint stiffness and damping    | none                                  | —               | **missing**: no data                                         |
 | Leg joint torques              | `LegTorqueCommand` = 0                | —               | **missing**: servo holds the stance                          |
 | Foot–ground stiffness/friction | `leg.contact` (assumed)               | —               | **missing**: no GRF to fit                                   |
@@ -83,10 +84,11 @@ solids carry the mass of the whole trunk.
 - Adding de Leva legs makes GS3DX_FullBody 109.4 kg, well above the 80 kg the
   legs are scaled for.
 
-**Decision needed from the owner.** Either rescale the trunk so that
-trunk + legs is about 80 kg, or re-derive the leg masses from the golfer.
-The exploratory models leave the upper body unchanged, so every existing
-comparison against the original still holds.
+**Owner decision (2026-09-26, #11011): use typical values.**
+`GS3DX_Golfer` takes every segment mass from one de Leva table at 80 kg
+([ANTHROPOMETRY.md](ANTHROPOMETRY.md)). The earlier exploratory models keep
+the original upper body, so every existing comparison against the original
+still holds.
 
 ## Drive Versus Planted Feet
 
@@ -110,9 +112,11 @@ needs a pelvis path taken from the capture, not from the drive.
 
 ## What Is Needed Before a Validated Full-Body Swing
 
-1. Force-plate data (GRF per foot), or a published tour-average GRF
-   profile, to fit contact stiffness and friction and to validate.
-2. An owner decision on the trunk mass (above).
+1. Force-plate data (GRF per foot). The owner will not capture any
+   (2026-09-26). The total GRF now comes from the capture kinematics instead
+   (`gs3dx_kinematic_grf`, [ANTHROPOMETRY.md](ANTHROPOMETRY.md)). The split
+   between the feet stays unobserved.
+2. ~~An owner decision on the trunk mass~~: typical values, `GS3DX_Golfer`.
 3. A pelvis trajectory from the capture, in the model frame, for the #10979
    refit.
 4. Leg joint torques (inverse dynamics once 1–3 exist); the servo is a

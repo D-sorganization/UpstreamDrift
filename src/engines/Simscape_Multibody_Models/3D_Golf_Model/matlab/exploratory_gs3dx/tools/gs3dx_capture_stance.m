@@ -38,31 +38,17 @@ function cap = gs3dx_capture_stance(file)
 %   a proxy.  See docs/DATA_AUDIT.md.
 
     arguments
-        file (1,:) char = local_default_file()
+        file (1,:) char = ''
     end
-    assert(isfile(file), 'gs3dx:capture', 'Capture not found: %s', file);
-    try
-        ez = py.importlib.import_module('ezc3d');
-    catch err
-        error('gs3dx:capture', 'Python ezc3d is required (pyenv %s): %s', pyenv().Executable, err.message);
-    end
-    c = ez.c3d(file);
-    get = @(obj, key) py.operator.getitem(obj, key);
-    params = get(c, 'parameters');
-    pts = double(py.numpy.asarray(get(get(c, 'data'), 'points')));   % 4 x markers x frames
-    labels = string(cell(get(get(get(params, 'POINT'), 'LABELS'), 'value')));
-    rate = double(py.numpy.asarray(get(get(get(params, 'POINT'), 'RATE'), 'value')));
-    analogs = double(py.numpy.asarray(get(get(c, 'data'), 'analogs')));
+    raw = gs3dx_capture_markers(file);
+    marker = raw.marker;
+    cap.file = raw.file;
+    cap.sha256 = local_sha256(raw.file);
+    cap.rate_hz = raw.rate_hz;
+    cap.n_frames = raw.n_frames;
+    cap.force_plates_used = raw.force_plates_used;
+    cap.n_analog = raw.n_analog;
 
-    cap.file = file;
-    cap.sha256 = local_sha256(file);
-    cap.rate_hz = rate(1);
-    cap.n_frames = size(pts, 3);
-    cap.force_plates_used = double(py.numpy.asarray(get(get(get(params, 'FORCE_PLATFORM'), 'USED'), 'value')));
-    cap.n_analog = size(analogs, 2);
-
-    zup = cat(1, pts(1, :, :), -pts(3, :, :), pts(2, :, :));   % 3 x markers x frames
-    marker = @(name) squeeze(zup(:, local_index(labels, name), :));   % 3 x frames
     feet = ["LAnkleOut", "RAnkleOut", "LToeIn", "LToeOut", "RToeIn", "RToeOut"];
     legs = ["LKneeOut", "RKneeOut", feet];
     waist = ["WaistLeft", "WaistRight", "WaistLBack", "WaistRBack"];
@@ -77,16 +63,9 @@ function cap = gs3dx_capture_stance(file)
     assert(max(lowest(1:numel(feet))) < min(lowest(numel(feet) + 1:end)), 'gs3dx:capture', ...
         'Postcondition: foot markers are not the lowest at address; the axis conversion is wrong');
 
-    up = [0; 0; 1];
-    lateral = marker("LAnkleOut") - marker("RAnkleOut");
-    lateral = [lateral(1:2, a); 0];
-    lateral = lateral / norm(lateral);
-    facing = cross(lateral, up);
+    S = raw.target_frame;
     front = (marker("WaistLeft") + marker("WaistRight")) / 2;
     back = (marker("WaistLBack") + marker("WaistRBack")) / 2;
-    assert(dot(facing, front(:, a) - back(:, a)) > 0, 'gs3dx:capture', ...
-        'Postcondition: facing does not point from the back waist markers to the front');
-    S = [facing, lateral, up];
     centre = (front(:, a) + back(:, a)) / 2;
     local = @(p) S.' * (p(:, a) - centre);
 
@@ -115,42 +94,7 @@ function cap = gs3dx_capture_stance(file)
         h = vecnorm(m(1:2, :) - m(1:2, a));
         cap.excursion.(name) = [max(h, [], 'omitnan'), max(m(3, :), [], 'omitnan') - min(m(3, :), [], 'omitnan')];
     end
-    cap.impact_frame = local_impact_frame(zup, labels, marker);
-end
-
-function file = local_default_file()
-% data/C3D_TA_Driver.c3d in the nearest ancestor folder that has one.
-    d = fileparts(mfilename('fullpath'));
-    while true
-        file = fullfile(d, 'data', 'C3D_TA_Driver.c3d');
-        parent = fileparts(d);
-        if isfile(file) || strcmp(parent, d)
-            return;
-        end
-        d = parent;
-    end
-end
-
-function k = local_index(labels, name)
-    k = find(labels == name);
-    assert(isscalar(k), 'gs3dx:capture', 'Marker %s not found exactly once', name);
-end
-
-function f = local_impact_frame(zup, labels, marker)
-% Peak speed of the club marker cluster farther from the wrists at address.
-    wrists = (marker("LWristTop") + marker("RWristTop")) / 2;
-    best = -Inf;
-    for cluster = ["Marker_2:2:", "Marker_3:3:"]
-        idx = find(startsWith(labels, cluster));
-        centroid = squeeze(mean(zup(:, idx, :), 2));
-        away = norm(centroid(:, 1) - wrists(:, 1));
-        if away > best
-            best = away;
-            head = centroid;
-        end
-    end
-    speed = vecnorm(diff(head, 1, 2));
-    [~, f] = max(speed);
+    cap.impact_frame = raw.impact_frame;
 end
 
 function out = ternary(cond, a, b)

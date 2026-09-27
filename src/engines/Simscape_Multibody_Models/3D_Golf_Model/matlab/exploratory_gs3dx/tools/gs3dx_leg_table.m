@@ -37,18 +37,19 @@ function leg = gs3dx_leg_table()
 %   targets pick the bent-knee branch.
 
     H = 1.80;  M = 80;
+    mass = gs3dx_anthropometry(M).legs;
     p = struct();
     p.LegBodyHeight   = H;
     p.LegBodyMass     = M;
     p.ThighLength     = 0.2425 * H;
-    p.ThighMass       = 0.1416 * M;
+    p.ThighMass       = mass.ThighMass;
     p.ThighRadius     = 0.07;
     p.ShankLength     = 0.2465 * H;
-    p.ShankMass       = 0.0433 * M;
+    p.ShankMass       = mass.ShankMass;
     p.ShankRadius     = 0.05;
     p.FootLength      = 0.152 * H;
     p.FootWidth       = 0.10;
-    p.FootMass        = 0.0137 * M;
+    p.FootMass        = mass.FootMass;
     p.AnkleHeight     = 0.039 * H;
     p.FootHeelOffset  = 0.25;       % fraction of foot length behind the ankle
     p.HipJointSpacing = 0.10 * H;   % between hip joint centres
