@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11037 (epic #11006 package 2a)
-- **PR:** pending
+- **PR:** #11038
 - **Branch:** `claude/ud-11037-jax-contact`
 - **Paths:** `src/shared/python/motion_matching/jax_contact.py`, `tests/unit/motion_matching/test_jax_contact.py`
 - **Started:** 2026-09-27
