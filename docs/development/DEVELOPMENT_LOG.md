@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11032 · JAX-Free Knot Basis, Horizon Mask and Adam Driver for the MJX Solver
+### DL-#11037 · Differentiable JAX Contact Law and Grip Weld With Measured Parity
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11037 (epic #11006 package 2a)
+- **PR:** pending
+- **Branch:** `claude/ud-11037-jax-contact`
+- **Paths:** `src/shared/python/motion_matching/jax_contact.py`, `tests/unit/motion_matching/test_jax_contact.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — 8 passed in `~/.venv-mjx` (with and without conftest); skipped cleanly in Python312; ruff, format and mypy clean.
+- **Summary:** JAX port of the shared Hunt-Crossley plus regularised-Coulomb contact law and the spring-damper grip weld. Parity over 2000 seeded states is 0.0 N normal and 1.0e-11 N friction; normal-force gradients match central differences to 1e-6 relative and stay finite at zero tangential velocity; weld forces are equal and opposite and the net moment equals (p_b − p_a) × F_b exactly.
+- **Next step:** CI green, mark ready and arm the PR for #11037.
+
+### DL-#11032 · JAX-Free Knot Basis, Horizon Mask and Adam Driver for the MJX Solver
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11032 (epic #11006 package 1)
 - **PR:** #11035
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — 16 new tests pass; the module imports with JAX absent; ruff, format and mypy clean.
 - **Summary:** Knot grid with an integer knot count, vectorised hat basis that is exact at knots and refuses untouched knots, horizon mask, and a bias-corrected Adam loop generic over the array namespace that returns the best iterate by objective and stops on a non-finite cost or gradient. The first iterates match a hand-written Adam recurrence to 1e-12.
-- **Next step:** CI green, mark ready and arm the PR for #11032.
+- **Next step:** None — merged as PR #11035.
 
 ### DL-#11029 · White-Jerk RTS Kinematic Smoother With Posterior Uncertainty
 
