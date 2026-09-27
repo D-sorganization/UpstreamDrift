@@ -10,10 +10,12 @@ would apply: the admissible velocity nearest ``v`` in kinetic energy.
 
 from __future__ import annotations
 
+from typing import TypeAlias
+
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 
 def project_onto_weld(mass: Array, jac: Array, rates: Array) -> Array:
