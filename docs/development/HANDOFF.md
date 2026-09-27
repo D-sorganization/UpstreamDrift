@@ -46,19 +46,33 @@
 
 ---
 
+# Past Handoff — Force-Plate Fixture Reports Module Identity on the Intermittent Failure (#11034)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11034-fp`
+- Branch: `claude/ud-11034-force-plate-flake` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11042; entry DL-#11034. Refs #11034; the issue stays open for the root cause.
+- Built: `tests/unit/sidekick/lab/bio/test_force_plate_stitching.py` fails with `_module_identity_report` (resolved file and spec, module names, `sys.meta_path`, related `sys.modules` entries) instead of a bare `AttributeError` when the import resolves to a module without `CombinedForcePlateProcessor`.
+- Not reproduced locally (Windows, Python 3.12, CI `PYTHONPATH`): the file alone, after `test_sidekick_extension_overlay.py`, and pairwise after every test that rewires `sys.meta_path` or `shared.*`. Two re-runs of the Linux `unit-test-gate` on this PR passed, and `main` has been green since `c2e6fe878`.
+- Suspect: the overlay test's synthetic `force_plate_stitching` (canonical name, no class) combined with `SharedImportAliasFinder._find_canonical_spec` re-inserting itself at `meta_path[0]` and `_CanonicalAliasLoader` writing six alias spellings.
+- Next step: CI green, mark ready, arm; read the report from the next failing run on `main` and fix the pollution.
+
+---
+
 # Past Handoff — MJX Tracking Plant and Differentiable Rollout (#11039)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11039-plant`
 - Branch: `claude/ud-11039-mjx-plant` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11040
 - Pull request: #11040; entry DL-#11039. Package 2b of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
 - Built: `src/engines/physics_engines/mujoco/python/motion_matching/mjx_tracking_plant.py` (imports JAX and MJX; no `__init__` imports it): `TrackingPlantSpec` (explicit `root_vertical_index`, `validate_against_model` refuses equality constraints and out-of-range ids), computed-torque control over the reference, sphere-ground and grip-weld wrenches from `jax_contact`, substep/frame/rollout, and `initial_state` that seats the model at static penetration under `model.opt.gravity`.
 - Orchestrator changes on review: `from_package` now requires `substeps` and `root_vertical_index` (the heuristics were removed) and raises unconditionally when the package declares a grip closure without `weld_gains`; `build_tracking_plant` works on a copy, so the caller's `model.opt.timestep` is untouched; `rollout` reuses `rollout_diagnostic`.
 - Location: the engine package, not `src/shared/python/motion_matching/`, because the shared tree may not import `mujoco` (`test_import_graph_no_mujoco_in_shared_motion_matching`); the JAX contact laws it uses stay shared.
 - Measured in `~/.venv-mjx` on the toy model: computed-torque residual 7.1e-15, marker RMS 0.28 mm over 20 frames without contact, rollout gradient against central differences 2.2e-9 relative.
 - The evidence prototype is still untouched; package 3 benchmarks the plant on an exported `mjx_package.npz` and decides promotion.
-- Next step: CI green, mark ready, arm.
+- Next step: none; merged as PR #11040.
 
 ---
 

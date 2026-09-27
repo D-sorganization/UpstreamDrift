@@ -30,9 +30,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
 - **Next step:** Get `quality-gate` green on the draft PR and arm auto-merge via `scripts/automerge_guard.py`.
 
-### DL-#11039 · MJX Tracking Plant and Differentiable Rollout
+### DL-#11034 · Force-Plate Fixture Reports Module Identity on the Intermittent Failure
 
 - **State:** in_review
+- **Owner:** claude
+- **Issue:** #11034 (refs; stays open for the root cause)
+- **PR:** #11042
+- **Branch:** `claude/ud-11034-force-plate-flake`
+- **Paths:** `tests/unit/sidekick/lab/bio/test_force_plate_stitching.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — 5 passed locally; the report renders on a synthetic module; Linux `unit-test-gate` passed twice on the PR.
+- **Summary:** The intermittent `AttributeError` on `shared.python.sidekick.lab.bio.force_plate_stitching` now fails with the resolved file, spec, module names, meta path and related module entries, so the next occurrence names the polluting state. Local reproduction attempts (single file, overlay-first, pairwise with every import-rewiring test) did not fail.
+- **Next step:** CI green, mark ready and arm the PR for #11034; fix from the next captured report.
+
+### DL-#11039 · MJX Tracking Plant and Differentiable Rollout
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11039 (epic #11006 package 2b)
 - **PR:** #11040
@@ -41,7 +54,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — 11 passed in `~/.venv-mjx`; skipped cleanly in Python312; ruff, format and mypy clean on the module.
 - **Summary:** MJX tracking plant with computed-torque control, JAX contact and grip-weld wrenches, and a differentiable rollout. Measured on the toy model: torque residual 7.1e-15, marker RMS 0.28 mm without contact, rollout gradient 2.2e-9 relative to central differences. Packages with a grip closure must supply weld gains; the caller's model is never mutated.
-- **Next step:** CI green, mark ready and arm the PR for #11039.
+- **Next step:** None — merged as PR #11040.
 
 ### DL-#11037 · Differentiable JAX Contact Law and Grip Weld With Measured Parity
 
