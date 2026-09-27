@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11046-rewire`
 - Branch: `claude/ud-11046-mjx-rewire` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: see DL-#11046. Package 2c of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
+- Pull request: #11048; entry DL-#11046. Closes #11046. Package 2c of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
 - Built: `evidence/ground_support/mjx_trajectory_optimisation.py` is a thin CLI (648 → 362 lines) over `mjx_tracking_plant` (`TrackingPlantSpec.from_package`, `build_tracking_plant`, `reference_derivatives`, `substep_tables`), `jax_contact.WeldGains` and `knot_gradient_optimiser` (`knot_grid`, `knot_basis`, `horizon_knot_mask`, `AdamSettings`, `adam_minimise`). Every flag, output file and receipt key is kept.
 - Orchestrator changes on review: the root vertical coordinate is looked up by name (`TranslationInputZ`) instead of a heuristic, and the new CLI test used a coordinate name the documents do not have.
 - Measured parity on the regenerated `anthro_driver_seeds` package (`~/.venv-mjx`, float32), old prototype vs rewired: `--iterations 0` port check 65.16457 vs 65.16494 mm (5.6e-6 relative); `--iterations 3` best replay 50.249 vs 50.295 mm (9.2e-4 relative; float32 reordering differences grow per Adam step: 5.6e-6, 1.6e-5, 7.2e-5, 9.2e-4).
