@@ -218,7 +218,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         if not isinstance(scale, ForceColorScale):
             raise TypeError("scale must be ForceColorScale")
         self.axial_color_scale = scale
-        self.render()
+        self._render_once()
 
     @property
     def model(self) -> mujoco.MjModel | None:
