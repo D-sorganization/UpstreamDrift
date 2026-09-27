@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11046 (epic #11006 package 2c)
-- **PR:** pending
+- **PR:** #11048
 - **Branch:** `claude/ud-11046-mjx-rewire`
 - **Paths:** `docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`, `tests/unit/engines/mujoco/test_mjx_evidence_cli.py`
 - **Started:** 2026-09-27

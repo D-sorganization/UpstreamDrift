@@ -7056,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-27 | #11048 | The MJX evidence prototype `mjx_trajectory_optimisation.py` is a thin CLI over `mjx_tracking_plant`, `jax_contact` and `knot_gradient_optimiser` (648 → 362 lines); the root vertical coordinate is read by name; measured parity on `anthro_driver_seeds` 5.6e-6 at the port check and 9.2e-4 at iteration 3 (#11046, epic #11006). |
 | 2026-09-27 | #11047 | Tracked replays and the downswing runner start from the reference velocity projected onto the dual-grip weld (`motion_matching/weld_manifold.py`, `FullBodySimulator.consistent_velocity`); the acceleration-level KKT conserved a 187 mm/s start violation that drove the `--fit-closure` replay to 861 mm (#11043). |
 | 2026-09-27 | #11041 | Replaced np.linalg.norm with math.sqrt(np.vdot) for faster 1D array magnitude in pendulum perturbation analyzer |
 | 2026-09-27 | #11042 | The force-plate stitching fixture reports module identity (file, spec, meta path, related module entries) instead of a bare `AttributeError` when its import resolves to a module without the processor class (refs #11034). |
