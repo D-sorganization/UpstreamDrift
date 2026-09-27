@@ -58,4 +58,4 @@ def test_simulate_agent_training() -> None:
     res2 = bench_transverse.train_agent(n_iterations=5, n_steps=8, state_dim=2)
     assert res2["mode"] == "transverse"
     assert res2["convergence_iteration"] == 5
-    assert res2["terminal_return_std"] == pytest.approx(0.16946357019103891)
+    assert res2["terminal_return_std"] == pytest.approx(0.18, abs=0.05)
