@@ -801,7 +801,7 @@ tomorrow. `fleet-guard report` shows what has been caught.
 > This section is managed centrally by Repository_Management and synced fleet-wide.
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/deferred-validation.md.
 
-Owner decision (Dieter Olson, 2026-09-22,
+Owner decision (repository owner, 2026-09-22,
 [Repository_Management#1687](https://github.com/D-sorganization/Repository_Management/issues/1687)):
 an issue whose remaining acceptance criteria need a physical measurement,
 laboratory access, a field collection, specialised hardware or a human trial
@@ -863,7 +863,7 @@ The standard, the schema and the per-role instructions are in
 > This section is managed centrally by Repository_Management and synced fleet-wide.
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/pr-queue-consolidation.md.
 
-Owner decision (Dieter Olson, 2026-09-22, Repository_Management#1691): when a
+Owner decision (repository owner, 2026-09-22, Repository_Management#1691): when a
 repository has many open PRs, agents **consolidate** them into one PR per
 repository instead of draining the queue serially.
 
@@ -951,7 +951,7 @@ branch, plus one re-run if `main` moved) instead of at least N cycles under a
 > This section is managed centrally by Repository_Management and synced fleet-wide.
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/agent-tiers.md.
 
-Owner decision (Dieter Olson, 2026-09-25,
+Owner decision (repository owner, 2026-09-25,
 [Repository_Management#1751](https://github.com/D-sorganization/Repository_Management/issues/1751)):
 the frontier agents handle complex and design work, and well-specified work
 is delegated to cheaper CLI agents. The issue's labels say which is which.
