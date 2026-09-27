@@ -46,6 +46,21 @@
 
 ---
 
+# Past Handoff — Rust Kernel in the Linux Unit-Test Gate (#9411)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-gate-rust`
+- Branch: `claude/ud-unit-gate-rust-kernel` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #10997 (draft), workflow change shipping alone; entry DL-#9411.
+- Built: `ci-standard.yml` `unit-test-gate` installs the pinned Rust toolchain, caches the Cargo registry, maturin-builds only `rust_core/upstream-physics` into the unit-gate venv and runs the fail-closed `import_built_rust_wheels.py upstream_physics` probe before pytest; timeout 25 -> 35 min. The 12 BunkerShot workbench/GUI IDs leave `unit_gate_quarantine.json` (67 -> 55 on main after #11010) because `ball_simulator` raises without the kernel.
+- Validation: `pytest tests/ci/test_unit_gate_rust_kernel.py tests/ci/test_ci_infrastructure.py tests/unit/repo_hygiene/test_hygiene_guards_run_in_ci.py` -> 111 passed, 1 skipped (new file fails 3/3 against the old workflow); `tests/ci/test_unit_gate_quarantine_contract.py` -> 11 passed; the 12 retired tests pass locally with the kernel installed. Linux proof is this PR's unit-test-gate run.
+- First Linux run (0f01454cf): the kernel built and imported, and none of the 12 retired IDs failed. Six tests that the kernel un-skipped failed. Root `Cargo.lock` clutter came from this workflow and is fixed (the untracked lock is removed after the build). Rust vs enhanced carry and TrackMan windows = #11000, fixed in #11004. The degrees-regression test is updated in #11004. The two #9243 uncertainty claims = #11003 (tier:strong).
+- Unblocked: #11004 and #11010 (#11003) merged; replayed onto main d716c698f.
+- Next step: unit-test-gate green on the replay, then mark ready and arm via `automerge_guard.py`.
+
+---
+
 # Past Handoff — Restate the #9243 BunkerShot Uncertainty Claims (#11003)
 
 - Repository: D-sorganization/UpstreamDrift
