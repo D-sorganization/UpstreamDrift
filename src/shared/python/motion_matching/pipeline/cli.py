@@ -33,6 +33,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CANDIDATE,
     CAPTURES,
     CONSISTENCY_PRIOR,
+    DEFAULT_MJX_ITERATIONS,
     LEG_SEEDS,
     RATE_HZ,
     REFERENCE_CUTOFF_HZ,
@@ -40,6 +41,11 @@ from src.shared.python.motion_matching.pipeline.constants import (
     SPEC,
     TRACKING_CUTOFF_HZ,
     UPPER_SPEC,
+)
+from src.shared.python.motion_matching.pipeline.trajectory_optimiser import (
+    TRAJECTORY_OPTIMISERS,
+    run_trajectory_optimiser,
+    validate_trajectory_optimiser,
 )
 from src.shared.python.motion_matching.pipeline.dynamics import (
     DynamicsReportInputs,
@@ -74,6 +80,16 @@ from src.shared.python.motion_matching.pipeline.plant import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _positive_int(value: str) -> int:
+    try:
+        val = int(value)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(f"Invalid integer: {value!r}") from e
+    if val <= 0:
+        raise argparse.ArgumentTypeError(f"--mjx-iterations must be > 0, got {val}")
+    return val
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -188,6 +204,18 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["kkt", "mj-inverse"],
         default="kkt",
         help="computed-torque tracking backend (kkt or mj-inverse)",
+    )
+    parser.add_argument(
+        "--trajectory-optimiser",
+        choices=sorted(TRAJECTORY_OPTIMISERS),
+        default="none",
+        help="trajectory optimisation backend (none, mjx-knots)",
+    )
+    parser.add_argument(
+        "--mjx-iterations",
+        type=_positive_int,
+        default=DEFAULT_MJX_ITERATIONS,
+        help="number of Adam iterations for MJX knot optimisation (default: 40)",
     )
     return parser
 
@@ -647,6 +675,24 @@ def _simulate_and_receipt(
         )
     )
     receipt["engine"] = ctx.engine
+
+    trajectory_optimiser = validate_trajectory_optimiser(
+        getattr(args, "trajectory_optimiser", "none")
+    )
+    if trajectory_optimiser != "none":
+        # The MJX exporter reads receipt.json, so write it once before the
+        # stage and again with the stage summary.
+        (out_dir / "receipt.json").write_text(
+            json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
+        )
+        opt_summary = run_trajectory_optimiser(
+            trajectory_optimiser,
+            out_dir,
+            iterations=getattr(args, "mjx_iterations", DEFAULT_MJX_ITERATIONS),
+        )
+        if opt_summary is not None:
+            receipt["trajectory_optimiser"] = opt_summary
+
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
     )
