@@ -30,9 +30,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
 - **Next step:** Get `quality-gate` green on the draft PR and arm auto-merge via `scripts/automerge_guard.py`.
 
-### DL-#11014 · Consolidate the Swing Phase Detectors Into One Canonical Event Detector
+### DL-#11021 · Parameter Covariance on the Shared Least-Squares Motion-Matching Fits
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11021 (MS-101 #10375, Board RM#1793)
+- **PR:** #11023
+- **Branch:** `claude/ud-11021-fit-covariance`
+- **Paths:** `src/shared/python/estimation/fit_uncertainty.py`, `src/shared/python/motion_matching/prefix_fit.py`, `src/shared/python/motion_matching/multi_shooting_fit.py`, `src/shared/python/motion_matching/residual_regularization.py`, `tests/unit/estimation/test_fit_uncertainty.py`, `tests/unit/motion_matching/test_fit_uncertainty_wiring_11021.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — tests/unit/estimation plus the wiring tests 81 passed, 1 skipped; motion_matching prefix/shooting/multi tests 73 passed; tests/motion_matching prefix and regularization 37 passed; architecture budget OK.
+- **Summary:** `least_squares_parameter_uncertainty` gives the Gauss-Newton (Laplace) covariance of a `least_squares` optimum: σ̂² = 2·cost/(m − n_free); the requested block is the marginal taken from the full free-parameter covariance (Schur complement over nuisance variables such as shooting states); parameters held at an active bound get NaN; a rank-deficient Jacobian or m ≤ n_free returns no covariance at all rather than pinv errors. `PrefixStage.parameter_uncertainty` and `MultipleShootingFit.theta_uncertainty` carry it; the equality-constrained shooting path leaves it None, and a non-finite Jacobian yields None so a diverged fit still reports.
+- **Next step:** CI green, mark ready, arm; then IPOPT/Crocoddyl/fmincon fits (remaining RM#1793 scope under #10375).
+
+### DL-#11014 · Consolidate the Swing Phase Detectors Into One Canonical Event Detector
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11014
 - **PR:** #11020
@@ -41,7 +54,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — analysis, reconstruct analytics, swing-capture import, loaders-align, DbC swing-phase and shared-biomechanics tests: 374 passed, existing tests unedited.
 - **Summary:** New `swing_events.py` holds the single frame-rate-aware detector (`detect_swing_events`, quiet-window address, top within `max_downswing_s` before the peak, finish under `finish_fraction` or the quiet threshold) and `peak_speed_index`; `SwingEventFrames` enforces `0 <= address <= top <= peak <= finish` even with contracts OFF. `analytics.detect_events` delegates bit-identically; `PhaseDetectionMixin` derives fps from the median time step (keeps its 30 % finish threshold); `SwingCaptureImporter` uses the trajectory frame rate; `_align` uses `peak_speed_index`. The old `0.7 * impact` and `n_frames // 2` top searches depended on where the recording started and are gone. A parity test pins all four sites to the same peak/top/address on one fixture.
-- **Next step:** CI green, mark ready, arm; then file epic #11007 packages 2-5 as child issues.
+- **Next step:** None — merged as PR #11020; package 2 continues as #11024.
 
 ### DL-#11003 · Restate the #9243 BunkerShot Uncertainty Claims Under the Corrected F0 Model
 
