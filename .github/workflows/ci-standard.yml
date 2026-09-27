@@ -1054,7 +1054,11 @@ jobs:
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 25
+    # 25 min of pytest plus a cached-registry release build of one crate.
+    timeout-minutes: 35
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -1122,6 +1126,44 @@ jobs:
           python -m ensurepip --upgrade || true
           "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
           "$python" -c "import numpy, scipy; from scipy import signal; print(f'numpy={numpy.__version__} scipy={scipy.__version__} signal=ok')"
+      # The ball simulator enforces strict Rust parity (it raises when the
+      # upstream-physics kernel is missing), so without the wheel every
+      # BunkerShot workbench/GUI unit test failed on Linux and sat in the
+      # quarantine ledger (#9411). Build and install exactly that one crate
+      # into the unit-gate venv, mirroring rust-wheel-parity's toolchain,
+      # cache and maturin invocation.
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+      - name: Verify Rust toolchain
+        shell: bash
+        run: |
+          echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+          export PATH="$CARGO_HOME/bin:$PATH"
+          rustc --version
+          cargo --version
+      - name: Cache Cargo registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Build and install upstream-physics Rust kernel
+        # Fail closed: the import probe must load the installed wheel and
+        # exercise its bindings, or the job stops before pytest runs.
+        shell: bash
+        run: |
+          python="$RUNNER_TEMP/unit-gate-venv/bin/python"
+          "$python" -m pip install maturin
+          rm -f target/wheels/upstream_physics-*.whl
+          (cd rust_core/upstream-physics && "$python" -m maturin build --interpreter "$python" --features python --release)
+          "$python" -m pip install --force-reinstall --no-deps target/wheels/upstream_physics-*.whl
+          "$python" scripts/ci/import_built_rust_wheels.py upstream_physics
+          # cargo writes an untracked workspace Cargo.lock that the
+          # root-clutter gate (tests/ci) rightly rejects.
+          git ls-files --error-unmatch Cargo.lock >/dev/null 2>&1 || rm -f Cargo.lock
       - name: Run Green-Suite Unit Gate
         # No `|| true` / `continue-on-error`: any non-skip unit failure must
         # red this job and, via the `quality-gate` aggregate below, block merge.

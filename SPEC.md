@@ -7048,6 +7048,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | #10997 | unit-test-gate builds and installs the upstream-physics Rust kernel (maturin, fail-closed import probe) so strict-parity BunkerShot tests run on Linux; 12 workbench/GUI quarantine IDs retired (#9411). |
 | 2026-09-26 | #11010 | Restate the #9243 BunkerShot window-band and dominance claims under the corrected F0 model (#11003): target the nominal carry; dominates without swamping. |
 | 2026-09-26 | #11004 | Rust ball-flight kernel receives the Reynolds-curve base Cd (`GOLF_BALL_DRAG_COEFFICIENT`, 0.25) instead of the spin polynomial's `cd0` (0.21); TrackMan driver/7-iron carry now matches the enhanced engine (#11000). |
 | 2026-09-26 | #10999 | Expose ui in src.shared.python, fix module monkeypatching in test_window_icon and test_install_prompt on distributed test workers, and retire 11 passing tests from unit-gate quarantine (ratchet 78 -> 67). |
