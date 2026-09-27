@@ -1,14 +1,28 @@
-# Current Handoff — JAX-Free Knot Basis and Adam Driver for the MJX Solver (#11032)
+# Current Handoff — Differentiable JAX Contact Law and Grip Weld (#11037)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11037-contact`
+- Branch: `claude/ud-11037-jax-contact` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11038; entry DL-#11037. Package 2a of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
+- Built: `src/shared/python/motion_matching/jax_contact.py` (imports JAX; no `__init__` imports it): `sphere_ground_contact_jax` over the shared `ContactParameters`/`GroundPlane` with an explicit tangential-speed floor, and `weld_wrench_jax` with caller-supplied `WeldGains`.
+- Measured parity against `contact_law.sphere_ground_contact` on 2000 seeded states: normal 0.0 N, friction 1.0e-11 N maximum difference (float64).
+- The tests run only where JAX is installed: `~/.venv-mjx` from `scripts/setup_mjx_env.ps1` now exists on DeskComputer (jax 0.11.1, mujoco 3.13.0); the default env and CI skip them.
+- Next step: CI green, mark ready, arm; package 2b moves the plant and rollout and makes the evidence prototype import these laws.
+
+---
+
+# Past Handoff — JAX-Free Knot Basis and Adam Driver for the MJX Solver (#11032)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11032-knot`
 - Branch: `claude/ud-11032-knot-adam` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11035
 - Pull request: #11035; entry DL-#11032. Package 1 of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
 - Built: `src/shared/python/motion_matching/knot_gradient_optimiser.py` (numpy only): `knot_grid` (integer knot count, so no untouched trailing knot as the prototype's float `arange` could give), `knot_basis` (vectorised hat functions, refuses untouched knots), `horizon_knot_mask`, keyword-only `AdamSettings`, and `adam_minimise` over an array namespace `xp` with best-by-objective tracking and non-finite stops.
 - Orchestrator rewrite on review: `AdamSettings` was a hand-parsed `*args` initialiser and is now a keyword-only frozen dataclass; `adam_minimise` copied nothing, so freezing `best_x` could freeze the caller's `x0` (now copied, with a test).
 - The evidence prototype is untouched; package 2 (MJX plant adapter, needs `scripts/setup_mjx_env`) will reuse this driver.
-- Next step: CI green, mark ready, arm.
+- Next step: none; merged as PR #11035.
 
 ---
 
