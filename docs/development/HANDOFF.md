@@ -1,13 +1,13 @@
-# Current Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008) 2026-09-26
+# Current Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008) 2026-09-27
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
 - Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
-- Branch: `fix/ball-flight-parity-fixture-opt-in` (baseline `origin/main` 170481160)
+- Branch: `fix/ball-flight-parity-fixture-opt-in` (kept current by merging `origin/main`)
 - Implementation commit: `SELF`
-- Pull request: #11012 (draft)
-- Governing issue: #11008 (DL-#11008)
+- Pull request: #11012 — ready for review, auto-merge armed (squash) via `scripts/automerge_guard.py`
+- Governing issue: #11008 (DL-#11008); SPEC row keyed by PR #11012
 
 ## Objective and Status
 
@@ -18,7 +18,7 @@
   checked). The export test now writes to `tmp_path` and asserts that the committed bytes
   are unchanged. `test_regenerate_committed_fixture` rewrites the committed file only when
   `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1` (exactly `1`).
-- New `TestParityFixtureContract` (not Rust-gated): checks the opt-in switch semantics,
+- New `TestParityFixtureContract` (not Rust-gated, marked `unit`): checks the opt-in switch,
   the committed fixture's schema, the fixture path pinned in
   `src/config/capability_migration.json`, and that malformed vectors are rejected.
   `pytestmark` became a class-level `@requires_rust` so the contract tests run in every lane.
@@ -27,22 +27,23 @@
 ## Validation
 
 - `python -m pytest tests/parity/test_ball_flight_parity.py -o addopts=""` (Python 3.12, Rust
-  kernel available): 18 passed, 1 skipped (opt-in regen), 1 failed. The failure is
-  `test_default_trajectory_physics` (max height 60.8 m > 60 m), and it fails the same way on
-  unmodified main. `git status` stays clean after the run.
+  kernel available, main merged through #11045): 19 passed, 1 skipped (opt-in regen).
+  `git status` stays clean after the run.
 - With `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1 ... -k regenerate`: the fixture is rewritten (reverted).
-- `ruff check` / `ruff format --check` on the changed test: clean.
+- `ruff check` / `ruff format --check`, the suite-marker ratchet and the SPEC changelog check pass.
 
 ## Blockers and Risks
 
-- The committed golden is stale against the current model. Regenerating it changes ball
-  defaults (mass 0.0459→0.04593, cd1 0.05→0.25) and carry (187→243 m). #11004 owns that
-  regeneration and the sha256/size pin update. This PR does not touch the fixture.
+- The unit-test gate intermittently errors in `test_force_plate_stitching.py` (#11034, not
+  this change); #11042 added diagnostics, the fix is pending.
+- The committed golden is stale against the current model: #11004 (merged) did not regenerate
+  it, so it still records carry 187 m against 243 m from the current model. No test compares
+  values against it. Regenerating it and updating the sha256/size pin is a follow-up.
 
 ## Next Steps
 
-1. Get `quality-gate` green on draft PR #11012.
-2. Mark it ready and arm through `scripts/automerge_guard.py`.
+1. Keep the branch current with `origin/main` until auto-merge lands it.
+2. After merge, file or pick up the fixture regeneration follow-up.
 
 ---
 
