@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11055
-- **PR:** pending
+- **PR:** #11056
 - **Branch:** `claude/ud-11055-fullm-helper`
 - **Paths:** `src/shared/python/simulation_backends/mujoco_compat.py`, `tests/unit/simulation_backends/test_mujoco_compat.py`, every `src` module that called `mj_fullM` with `data.qM`
 - **Started:** 2026-09-27
