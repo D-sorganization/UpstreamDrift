@@ -62,7 +62,7 @@ def compute_gear_effect_spin(
     # Assuming clubface normal is approximately in X direction
     # Vertical axis is Z, horizontal axis perpendicular to both
     up = np.array([0.0, 0.0, 1.0])
-    horizontal_axis = np.cross(clubface_normal, up)
+    horizontal_axis = np.cross(up, clubface_normal)
     if math.sqrt(np.dot(horizontal_axis, horizontal_axis)) > 1e-6:  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
         horizontal_axis /= math.sqrt(np.dot(horizontal_axis, horizontal_axis))  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
     else:
