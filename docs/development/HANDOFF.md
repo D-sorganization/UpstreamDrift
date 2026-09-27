@@ -1,4 +1,52 @@
-# Current Handoff — #9411 Unit-Gate Quarantine Burn-Down (Slice 2) 2026-09-26
+# Current Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008) 2026-09-26
+
+## Identity
+
+- Repository: D-sorganization/UpstreamDrift
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
+- Branch: `fix/ball-flight-parity-fixture-opt-in` (baseline `origin/main` 170481160)
+- Implementation commit: `SELF`
+- Pull request: draft, opened after this commit
+- Governing issue: #11008 (DL-#11008)
+
+## Objective and Status
+
+- Objective: stop `test_export_reference_vectors` from rewriting the committed golden
+  `tests/parity_fixtures/ball_flight/default_trajectory.json` on every Rust-enabled run.
+- Done: vector construction is in `build_default_trajectory_vectors()`, the schema is in
+  `assert_vector_schema()`, and writing goes through `write_vectors()` (LF, round-trip
+  checked). The export test now writes to `tmp_path` and asserts that the committed bytes
+  are unchanged. `test_regenerate_committed_fixture` rewrites the committed file only when
+  `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1` (exactly `1`).
+- New `TestParityFixtureContract` (not Rust-gated): checks the opt-in switch semantics,
+  the committed fixture's schema, the fixture path pinned in
+  `src/config/capability_migration.json`, and that malformed vectors are rejected.
+  `pytestmark` became a class-level `@requires_rust` so the contract tests run in every lane.
+- The fixture bytes and the path are unchanged, so the sha256 pin stays valid.
+
+## Validation
+
+- `python -m pytest tests/parity/test_ball_flight_parity.py -o addopts=""` (Python 3.12, Rust
+  kernel available): 18 passed, 1 skipped (opt-in regen), 1 failed. The failure is
+  `test_default_trajectory_physics` (max height 60.8 m > 60 m), and it fails the same way on
+  unmodified main. `git status` stays clean after the run.
+- With `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1 ... -k regenerate`: the fixture is rewritten (reverted).
+- `ruff check` / `ruff format --check` on the changed test: clean.
+
+## Blockers and Risks
+
+- The committed golden is stale against the current model. Regenerating it changes ball
+  defaults (mass 0.0459→0.04593, cd1 0.05→0.25) and carry (187→243 m). #11004 owns that
+  regeneration and the sha256/size pin update. This PR does not touch the fixture.
+
+## Next Steps
+
+1. Open the draft PR (`Closes #11008`) and get `quality-gate` green.
+2. Mark it ready and arm through `scripts/automerge_guard.py`.
+
+---
+
+# Past Handoff — #9411 Unit-Gate Quarantine Burn-Down (Slice 2) 2026-09-26
 
 ## Identity
 
