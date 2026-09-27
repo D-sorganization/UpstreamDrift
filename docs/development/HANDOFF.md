@@ -6,7 +6,7 @@
 - Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
 - Branch: `fix/ball-flight-parity-fixture-opt-in` (baseline `origin/main` 170481160)
 - Implementation commit: `SELF`
-- Pull request: draft, opened after this commit
+- Pull request: #11012 (draft)
 - Governing issue: #11008 (DL-#11008)
 
 ## Objective and Status
@@ -41,7 +41,7 @@
 
 ## Next Steps
 
-1. Open the draft PR (`Closes #11008`) and get `quality-gate` green.
+1. Get `quality-gate` green on draft PR #11012.
 2. Mark it ready and arm through `scripts/automerge_guard.py`.
 
 ---
