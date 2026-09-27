@@ -34,6 +34,7 @@ from src.shared.python.motion_matching.tour_metrics import (
     SharedMetrics,
     compute_shared_metrics,
 )
+from src.shared.python.motion_matching.weld_manifold import project_onto_weld
 
 logger = logging.getLogger(__name__)
 
@@ -976,6 +977,44 @@ class FullBodySimulator:
         if hasattr(adapter, "affine_dynamics"):
             return adapter.affine_dynamics(q, v)
         bias, contact, _ = adapter.generalized_forces(self._map(q), self._map(v))
+        mass, jac, drift = self._mass_and_weld()
+        nv, m = mass.shape[0], jac.shape[0]
+        kkt = np.block([[mass, -jac.T], [jac, np.zeros((m, m))]])
+        rhs = np.zeros((nv + m, 1 + self.actuated.size))
+        rhs[:nv, 0] = contact - bias
+        rhs[nv:, 0] = -drift
+        rhs[self._dof[self.actuated], 1:] = np.eye(self.actuated.size)
+        try:
+            solution = np.linalg.solve(kkt, rhs)[:nv]
+        except np.linalg.LinAlgError:
+            solution = np.linalg.lstsq(kkt, rhs, rcond=1e-7)[0][:nv]
+        ordered = solution[self._dof]
+        return ordered[:, 1:], ordered[:, 0]
+
+    def consistent_velocity(self, q: Array, v: Array) -> Array:
+        """``v`` projected onto the dual-grip weld at ``q`` (spec order).
+
+        The KKT solve conserves any relative weld velocity it starts with, so
+        a run seeded with a violating velocity opens the grip linearly (#11043).
+        Adapters with their own ``affine_dynamics`` handle constraints
+        themselves and get ``v`` back unchanged.
+        Postcondition: the weld rate residual ``J(q) v`` is zero.
+        """
+        rates = np.asarray(v, dtype=float)
+        if rates.shape != (self.nv,) or not np.isfinite(rates).all():
+            raise ValueError("Velocity must be finite, one per coordinate")
+        if hasattr(self.adapter, "affine_dynamics"):
+            return rates.copy()
+        self.adapter.generalized_forces(self._map(q), self._map(rates))
+        mass, jac, _ = self._mass_and_weld()
+        mujoco_rates = np.empty(self.nv)
+        mujoco_rates[self._dof] = rates
+        return project_onto_weld(mass, jac, mujoco_rates)[self._dof]
+
+    def _mass_and_weld(self) -> tuple[Array, Array, Array]:
+        """Mass matrix, weld Jacobian and weld drift at the adapter's current
+        MuJoCo state, in MuJoCo DOF order."""
+        adapter = self.adapter
         mj, model, data = adapter._mj, adapter.model, adapter.data
         mass = np.zeros((model.nv, model.nv))
         mj.mj_fullM(model, mass, data.qM)
@@ -991,18 +1030,7 @@ class FullBodySimulator:
             )
 
             jac, drift = _evaluate_weld_closure(mj, model, data, adapter._closure)
-        m = jac.shape[0]
-        kkt = np.block([[mass, -jac.T], [jac, np.zeros((m, m))]])
-        rhs = np.zeros((model.nv + m, 1 + self.actuated.size))
-        rhs[: model.nv, 0] = contact - bias
-        rhs[model.nv :, 0] = -drift
-        rhs[self._dof[self.actuated], 1:] = np.eye(self.actuated.size)
-        try:
-            solution = np.linalg.solve(kkt, rhs)[: model.nv]
-        except np.linalg.LinAlgError:
-            solution = np.linalg.lstsq(kkt, rhs, rcond=1e-7)[0][: model.nv]
-        ordered = solution[self._dof]
-        return ordered[:, 1:], ordered[:, 0]
+        return mass, jac, drift
 
     def inverse_dynamics(self, q: Array, v: Array, joint_acceleration: Array) -> Array:
         """Torques giving the actuated joints exactly ``joint_acceleration``."""
