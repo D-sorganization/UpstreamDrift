@@ -110,7 +110,7 @@ def _calls_patch_dict_sys_modules(statement: ast.stmt) -> bool:
 
 
 def _candidate_python_files() -> list[Path]:
-    result = subprocess.run(  # nosec B603 - fixed args, no shell
+    result = subprocess.run(  # nosec B603 B607
         [
             "git",
             "grep",
@@ -121,7 +121,6 @@ def _candidate_python_files() -> list[Path]:
             "patch.dict",
             "--",
             "tests",
-            "*.py",
         ],
         cwd=_REPO_ROOT,
         check=False,

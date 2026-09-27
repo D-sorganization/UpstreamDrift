@@ -1,3 +1,11 @@
+## Unit-Gate Quarantine Ratchet Burndown - Batch 2 (#9411)
+
+Retires 1 passing test from `scripts/config/unit_gate_quarantine.json` (dropping ledger from 55 to 54 node IDs):
+- **Quarantine Burndown**:
+  - `tests/unit/repo_hygiene/test_optional_dependency_mock_scope.py::test_no_module_scope_optional_dependency_sys_modules_mocks`
+- **Repo Hygiene & Scoping Repairs**:
+  - `tests/unit/repo_hygiene/test_optional_dependency_mock_scope.py`: Narrowed git grep search pathspec from `tests *.py` to `tests` to eliminate unintended scanning of vendored shadow test files outside the `tests/` directory.
+
 ## Drift Wizard Knowledge Pack for Sidekick (#10943)
 
 Implements the product knowledge pack and standalone packaging integration for the Drift Wizard in Sidekick:
@@ -7048,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | #11013 | Retire 1 passing test from unit-gate quarantine in mock scope hygiene (ratchet 55 -> 54) (#9411). |
 | 2026-09-26 | #10997 | unit-test-gate builds and installs the upstream-physics Rust kernel (maturin, fail-closed import probe) so strict-parity BunkerShot tests run on Linux; 12 workbench/GUI quarantine IDs retired (#9411). |
 | 2026-09-26 | #11010 | Restate the #9243 BunkerShot window-band and dominance claims under the corrected F0 model (#11003): target the nominal carry; dominates without swamping. |
 | 2026-09-26 | #11004 | Rust ball-flight kernel receives the Reynolds-curve base Cd (`GOLF_BALL_DRAG_COEFFICIENT`, 0.25) instead of the spin polynomial's `cd0` (0.21); TrackMan driver/7-iron carry now matches the enhanced engine (#11000). |
