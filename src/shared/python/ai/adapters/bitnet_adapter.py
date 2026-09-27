@@ -43,6 +43,11 @@ class BitnetAdapter(BaseAgentAdapter):
     providing a seamless local LLM experience within the shared chat interface.
     """
 
+    #: Largest prompt, in UTF-8 bytes, that will be handed to ``llama-cli``.
+    #: The prompt travels as a single argv element, so an unbounded one risks
+    #: E2BIG or a truncated argument list.
+    _MAX_PROMPT_BYTES = 65_536
+
     def __init__(
         self,
         model: str | None = None,
@@ -106,7 +111,7 @@ class BitnetAdapter(BaseAgentAdapter):
 
     def thinking_capabilities(self):  # type: ignore[no-untyped-def]
         """BitNet local models do not expose reasoning budgets."""
-        from shared.python.chat_contracts.models import make_none_only_capabilities
+        from src.shared.python.chat_contracts.models import make_none_only_capabilities
 
         return make_none_only_capabilities(provider="bitnet")
 
@@ -146,7 +151,7 @@ class BitnetAdapter(BaseAgentAdapter):
             if result.returncode == 0 or "usage" in result.stdout.lower():
                 return True, f"Found {self.llama_cli}"
             return False, f"Executable failed: {result.stderr}"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - catch unexpected errors during executable validation
             return False, f"Failed to execute {self.llama_cli}: {e}"
 
     def _format_prompt(self, context: ConversationContext, message: str) -> str:
@@ -163,6 +168,42 @@ class BitnetAdapter(BaseAgentAdapter):
         prompt += f"User: {message}\nAssistant:"
         return prompt
 
+    def _build_validated_prompt(
+        self, context: ConversationContext, message: str
+    ) -> str:
+        """Format a prompt and enforce basic BitNet safety limits.
+
+        The prompt is passed to ``llama-cli`` as a single argv element, so it
+        must be encodable and bounded before any process is spawned. Text
+        arriving from a chat surface can carry lone surrogates (for example
+        from an undecodable upstream byte string), which raise deep inside
+        ``subprocess`` after the fork on some platforms and are impossible to
+        attribute from the resulting error.
+
+        Raises:
+            AIProviderError: If the prompt is not valid UTF-8, or exceeds
+                :attr:`_MAX_PROMPT_BYTES` once encoded.
+        """
+        prompt = self._format_prompt(context, message)
+        try:
+            prompt_bytes = prompt.encode("utf-8", errors="strict")
+        except UnicodeEncodeError as error:
+            raise AIProviderError(
+                "BitNet prompt must be valid UTF-8 text",
+                provider="bitnet",
+            ) from error
+
+        if len(prompt_bytes) > self._MAX_PROMPT_BYTES:
+            raise AIProviderError(
+                (
+                    "BitNet prompt exceeds the maximum size "
+                    f"({self._MAX_PROMPT_BYTES} bytes)"
+                ),
+                provider="bitnet",
+                details={"prompt_bytes": len(prompt_bytes)},
+            )
+        return prompt
+
     @precondition(
         lambda message: bool(message.strip()), "message must not be empty or blank"
     )
@@ -173,7 +214,7 @@ class BitnetAdapter(BaseAgentAdapter):
         tools: list[ToolDeclaration],
     ) -> AgentResponse:
         """Send a message synchronously."""
-        prompt = self._format_prompt(context, message)
+        prompt = self._build_validated_prompt(context, message)
 
         try:
             cmd = [
@@ -203,7 +244,7 @@ class BitnetAdapter(BaseAgentAdapter):
                 usage=self._normalize_token_counts({}),
                 metadata={"stdout": result.stdout},
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - adapter error boundary delegates to _handle_error
             logger.error("Failed to run BitNet: %s", e)
             return self._handle_error(e)
 
@@ -214,21 +255,24 @@ class BitnetAdapter(BaseAgentAdapter):
         tools: list[ToolDeclaration],
     ) -> Iterator[AgentChunk]:
         """Stream the response using subprocess."""
-        prompt = self._format_prompt(context, message)
-
-        cmd = [
-            self.llama_cli,
-            "-m",
-            self.model,
-            "-p",
-            prompt,
-            "-n",
-            "512",
-            "--log-disable",
-        ]
-
         process: subprocess.Popen | None = None
+        cmd: list[str] = []
         try:
+            # Validate before building the command, so a rejected prompt can
+            # never reach ``Popen``.
+            prompt = self._build_validated_prompt(context, message)
+
+            cmd = [
+                self.llama_cli,
+                "-m",
+                self.model,
+                "-p",
+                prompt,
+                "-n",
+                "512",
+                "--log-disable",
+            ]
+
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -287,7 +331,7 @@ class BitnetAdapter(BaseAgentAdapter):
                 content=f"\n[Error: BitNet stream timed out after {self.timeout}s]",
                 is_final=True,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - stream error boundary yields error chunk
             logger.error("Failed to stream BitNet: %s", e)
             self._terminate(process)
             yield AgentChunk(content=f"\n[Error: {e}]", is_final=True)

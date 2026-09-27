@@ -201,8 +201,8 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             with _CONFIGURE_LOCK:
                 self._with_configured_sdk()
-                chat = self._build_chat_session(context)
-                response = chat.send_message(message)
+                chat, effective_message = self._build_chat_session(context, message)
+                response = chat.send_message(effective_message)
             return AgentResponse(content=response.text, usage=canonical_usage)
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Gemini API error: {e}")
@@ -229,9 +229,9 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             with _CONFIGURE_LOCK:
                 self._with_configured_sdk()
-                chat = self._build_chat_session(context)
+                chat, effective_message = self._build_chat_session(context, message)
                 response: Iterator[GenerateContentResponse] = chat.send_message(
-                    message, stream=True
+                    effective_message, stream=True
                 )
 
                 index = 0
@@ -262,7 +262,7 @@ class GeminiAdapter(BaseAgentAdapter):
         does not currently translate :class:`ToolDeclaration` into Gemini's
         function-calling format. Tracked in issue #2764.
         """
-        from shared.python.ai.types import ProviderCapability
+        from src.shared.python.ai.types import ProviderCapability
 
         return ProviderCapabilities(
             supported=frozenset(
@@ -300,7 +300,7 @@ class GeminiAdapter(BaseAgentAdapter):
 
     def thinking_capabilities(self) -> Any:
         """Gemini does not currently expose user-controllable thinking budgets."""
-        from shared.python.chat_contracts.models import make_none_only_capabilities
+        from src.shared.python.chat_contracts.models import make_none_only_capabilities
 
         return make_none_only_capabilities(provider="google")
 
@@ -318,13 +318,38 @@ class GeminiAdapter(BaseAgentAdapter):
             logger.error(f"Gemini validation error: {e}")
             return False, f"Connection failed: {e}"
 
-    def _build_chat_session(self, context: ConversationContext) -> Any:
-        """Build a chat session with history."""
+    def _build_chat_session(
+        self, context: ConversationContext, current_message: str
+    ) -> tuple[Any, str]:
+        """Build a chat session with history, and resolve the message to send.
+
+        Gemini's ``start_chat(history=...)`` takes the prior turns and
+        ``chat.send_message(...)`` takes the new one, so the two must not
+        overlap. `chat_service` calls with ``current_message=""`` when the
+        turn the user just sent is already the tail of ``context.messages``;
+        the trailing user turn is therefore lifted out of the history and
+        returned as the effective message, instead of being replayed as
+        history *and* answered as if the user had said nothing.
+
+        Returns:
+            ``(chat_session, effective_message)``.
+        """
         if context is None:
             raise ValueError("context must be provided")
+
+        msg_list = list(context.messages)
+        effective_message = current_message
+        if not effective_message.strip() and msg_list:
+            for i in range(len(msg_list) - 1, -1, -1):
+                if msg_list[i].role == "user":
+                    effective_message = msg_list[i].content
+                    msg_list.pop(i)
+                    break
+
         history = []
-        for msg in context.messages:
+        for msg in msg_list:
             role = "user" if msg.role == "user" else "model"
             history.append({"role": role, "parts": [msg.content]})
 
-        return self._model.start_chat(history=history)
+        chat = self._model.start_chat(history=history)
+        return chat, effective_message
