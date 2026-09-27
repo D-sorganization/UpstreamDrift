@@ -30,9 +30,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
 - **Next step:** Get `quality-gate` green on the draft PR and arm auto-merge via `scripts/automerge_guard.py`.
 
-### DL-#11037 · Differentiable JAX Contact Law and Grip Weld With Measured Parity
+### DL-#11039 · MJX Tracking Plant and Differentiable Rollout
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11039 (epic #11006 package 2b)
+- **PR:** #11040
+- **Branch:** `claude/ud-11039-mjx-plant`
+- **Paths:** `src/engines/physics_engines/mujoco/python/motion_matching/mjx_tracking_plant.py`, `tests/unit/engines/mujoco/test_mjx_tracking_plant.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — 11 passed in `~/.venv-mjx`; skipped cleanly in Python312; ruff, format and mypy clean on the module.
+- **Summary:** MJX tracking plant with computed-torque control, JAX contact and grip-weld wrenches, and a differentiable rollout. Measured on the toy model: torque residual 7.1e-15, marker RMS 0.28 mm without contact, rollout gradient 2.2e-9 relative to central differences. Packages with a grip closure must supply weld gains; the caller's model is never mutated.
+- **Next step:** CI green, mark ready and arm the PR for #11039.
+
+### DL-#11037 · Differentiable JAX Contact Law and Grip Weld With Measured Parity
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11037 (epic #11006 package 2a)
 - **PR:** #11038
@@ -41,7 +54,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — 8 passed in `~/.venv-mjx` (with and without conftest); skipped cleanly in Python312; ruff, format and mypy clean.
 - **Summary:** JAX port of the shared Hunt-Crossley plus regularised-Coulomb contact law and the spring-damper grip weld. Parity over 2000 seeded states is 0.0 N normal and 1.0e-11 N friction; normal-force gradients match central differences to 1e-6 relative and stay finite at zero tangential velocity; weld forces are equal and opposite and the net moment equals (p_b − p_a) × F_b exactly.
-- **Next step:** CI green, mark ready and arm the PR for #11037.
+- **Next step:** None — merged as PR #11038.
 
 ### DL-#11032 · JAX-Free Knot Basis, Horizon Mask and Adam Driver for the MJX Solver
 
