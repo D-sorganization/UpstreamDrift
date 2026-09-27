@@ -20,6 +20,8 @@ import mujoco
 import numpy as np
 from scipy.linalg import null_space, pinv, svd
 
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+
 
 @dataclass
 class ManipulabilityMetrics:
@@ -603,8 +605,7 @@ class AdvancedKinematicsAnalyzer:
         # Get mass matrix
         if jacobian is None:
             raise ValueError("jacobian must be provided")
-        m_matrix = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
+        m_matrix = full_mass_matrix(mujoco, self.model, self.data)
 
         # Compute M^{-1}
         m_inv = np.linalg.inv(m_matrix)

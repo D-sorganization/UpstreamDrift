@@ -15,6 +15,7 @@ from src.engines.physics_engines.mujoco.python.replay_contract import ReplaySett
 from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 
 class AccelerationPlant(Protocol):
@@ -52,11 +53,7 @@ class ReplayPlant:
         self.adapter.generalized_forces(
             dict(zip(self.names, q, strict=True)), dict.fromkeys(self.names, 0.0)
         )
-        mass = np.zeros((model.nv, model.nv))
-        if hasattr(data, "qM"):
-            mujoco.mj_fullM(model, mass, data.qM)
-        else:
-            mujoco.mj_fullM(model, data, mass)
+        mass = full_mass_matrix(mujoco, model, data)
         return mass[np.ix_(self.indices, self.indices)]
 
     @precondition(

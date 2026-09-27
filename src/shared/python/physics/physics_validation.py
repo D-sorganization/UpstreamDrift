@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 if TYPE_CHECKING:
     import mujoco
@@ -148,8 +149,7 @@ class PhysicsValidator:
                 return kinetic_energy
 
         # Get mass matrix
-        M = np.zeros((self.model.nv, self.model.nv))
-        self._mujoco.mj_fullM(self.model, M, self._scratch_data.qM)
+        M = full_mass_matrix(self._mujoco, self.model, self._scratch_data)
 
         # KE = 0.5 * v^T * M * v
         qvel_vector = np.asarray(qvel, dtype=np.float64)

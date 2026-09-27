@@ -6,6 +6,7 @@ import numpy as np
 
 from src.shared.python.core.contracts import check_finite, postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 logger = get_logger(__name__)
 
@@ -36,11 +37,9 @@ class DynamicsMixin:
             else:
                 nv = 1
 
-            M = np.zeros((nv, nv))
-
             try:
-                mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)
-            except TypeError:
+                M = full_mass_matrix(mujoco, self.sim.model, self.sim.data)
+            except (TypeError, ValueError):
                 M = np.eye(nv)
 
             return M

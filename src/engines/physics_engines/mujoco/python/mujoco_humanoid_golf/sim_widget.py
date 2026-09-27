@@ -24,6 +24,7 @@ from src.shared.python.biomechanics.swing_plane_visualization import (
     SwingPlaneVisualizer,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
@@ -945,8 +946,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
         J = jacp
 
-        M = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M, self.data.qM)
+        M = full_mass_matrix(mujoco, self.model, self.data)
 
         try:
             Minv = np.linalg.inv(M)

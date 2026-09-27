@@ -13,6 +13,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.native_mjcf import export_native_mjcf
+from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 
 def _pack_vector(
@@ -208,8 +209,7 @@ class NativeMujocoModel:
         _prepare_forward_dynamics(
             mj, model, data, self._vector(coordinates), self._vector(rates)
         )
-        mass = np.zeros((model.nv, model.nv))
-        mj.mj_fullM(model, mass, data.qM)
+        mass = full_mass_matrix(mj, model, data)
         jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
         acceleration = _solve_kkt_dynamics(mass, effort - data.qfrc_bias, jac, drift)
         if not np.isfinite(acceleration).all():
