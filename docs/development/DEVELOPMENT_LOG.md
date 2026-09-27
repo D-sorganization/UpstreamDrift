@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11034 · Force-Plate Fixture Reports Module Identity on the Intermittent Failure
+### DL-#11043 · Replays Start on the Dual-Grip Weld
 
 - **State:** in_review
+- **Owner:** claude
+- **Issue:** #11043
+- **PR:** not created yet
+- **Branch:** `claude/ud-11043-dls`
+- **Paths:** `src/shared/python/motion_matching/weld_manifold.py`, `src/shared/python/motion_matching/full_body_forward_dynamics.py`, `src/shared/python/motion_matching/pipeline/dynamics.py`, `src/shared/python/motion_matching/execution/downswing.py`, `tests/unit/motion_matching/test_weld_manifold.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — full pipeline `--static-seeds --fit-closure` 861.2 → 83.0 mm dynamics RMS (weight fraction max 50.0 → 3.72); `--static-seeds` 83.0 → 84.5 mm; 41 targeted tests pass.
+- **Summary:** Tracked replays start from the reference velocity projected onto the weld (mass-weighted, the weld's inelastic impulse), because the acceleration-level KKT conserves any initial weld violation and the fitted closure's 187 mm/s start opened the grip and drove the controller through a truncated-SVD singularity.
+- **Next step:** CI green, mark ready and arm the PR for #11043.
+
+### DL-#11034 · Force-Plate Fixture Reports Module Identity on the Intermittent Failure
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #11034 (refs; stays open for the root cause)
 - **PR:** #11042
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — 5 passed locally; the report renders on a synthetic module; Linux `unit-test-gate` passed twice on the PR.
 - **Summary:** The intermittent `AttributeError` on `shared.python.sidekick.lab.bio.force_plate_stitching` now fails with the resolved file, spec, module names, meta path and related module entries, so the next occurrence names the polluting state. Local reproduction attempts (single file, overlay-first, pairwise with every import-rewiring test) did not fail.
-- **Next step:** CI green, mark ready and arm the PR for #11034; fix from the next captured report.
+- **Next step:** None — merged as PR #11042.
 
 ### DL-#11039 · MJX Tracking Plant and Differentiable Rollout
 
