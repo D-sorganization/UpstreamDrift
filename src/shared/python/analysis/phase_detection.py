@@ -6,6 +6,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 
 from src.shared.python.analysis.dataclasses import SummaryStatistics, SwingPhase
+from src.shared.python.analysis.swing_events import detect_swing_events
 from src.shared.python.core.contracts import ensure
 
 
@@ -33,9 +34,21 @@ class PhaseDetectionMixin:
         if club_head_speed is None or len(club_head_speed) < 20:
             return self._fallback_single_phase(times, duration)
 
+        if times is None or len(times) < 2:
+            return self._fallback_single_phase(times, duration)
+
+        diffs = np.diff(times)
+        if diffs.size == 0:
+            return self._fallback_single_phase(times, duration)
+        median_dt = float(np.median(diffs))
+        if not (median_dt > 0 and np.isfinite(median_dt)):
+            return self._fallback_single_phase(times, duration)
+        fps = 1.0 / median_dt
+
         smoothed_speed = self._smooth_speed(club_head_speed)
         impact_idx, transition_idx, takeaway_idx, finish_idx = self._find_key_events(
-            smoothed_speed
+            smoothed_speed,
+            fps,
         )
         phase_defs = self._build_phase_definitions(
             smoothed_speed,
@@ -105,34 +118,15 @@ class PhaseDetectionMixin:
     @staticmethod
     def _find_key_events(
         smoothed_speed: np.ndarray,
+        fps: float,
     ) -> tuple[int, int, int, int]:
         """Locate impact, transition, takeaway, and finish indices."""
-        impact_idx = int(np.argmax(smoothed_speed))
-
-        # Transition (top of backswing) - minimum speed before impact
-        search_end = int(impact_idx * 0.7)
-        if search_end > 5:
-            transition_idx = 5 + int(np.argmin(smoothed_speed[5:search_end]))
-        else:
-            transition_idx = impact_idx // 2
-
-        # Takeaway start (first significant movement)
-        speed_threshold = 0.1 * smoothed_speed[transition_idx]
-        takeaway_idx = 0
-        search_region = smoothed_speed[1:transition_idx]
-        mask = search_region > speed_threshold
-        if np.any(mask):
-            takeaway_idx = 1 + int(np.argmax(mask))
-
-        # Finish (speed drops after impact)
-        finish_threshold = 0.3 * smoothed_speed[impact_idx]
-        finish_idx = len(smoothed_speed) - 1
-        search_region_post = smoothed_speed[impact_idx + 1 :]
-        mask_post = search_region_post < finish_threshold
-        if np.any(mask_post):
-            finish_idx = int(impact_idx + 1 + np.argmax(mask_post))
-
-        return impact_idx, transition_idx, takeaway_idx, finish_idx
+        events = detect_swing_events(
+            smoothed_speed,
+            fps,
+            finish_fraction=0.3,
+        )
+        return events.peak, events.top, events.address, events.finish
 
     @staticmethod
     def _build_phase_definitions(
