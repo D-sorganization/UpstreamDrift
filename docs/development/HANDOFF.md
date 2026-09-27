@@ -1,10 +1,23 @@
-# Current Handoff — Retract the NM-09/NM-12 DIAGNOSTIC Receipt Claims (#10960)
+# Current Handoff — Canonical Swing Event Detector (#11014)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11014-events`
+- Branch: `claude/ud-11014-swing-events` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11020; entry DL-#11014. Package 1 of epic #11007. Executed by agy (Gemini 3.8 Flash), reviewed line by line and replayed into this worktree.
+- Built: `src/shared/python/analysis/swing_events.py` (one detector plus `peak_speed_index`); four call sites delegate to it; parity and contract tests added.
+- Validation: see DL-#11014 (374 passed; plus 188 passed across reconstruct, statistical-analysis, advanced-analysis and swing-comparison consumers).
+- Next step: CI green, mark ready, arm; file #11007 packages 2-5 after merge.
+
+---
+
+# Past Handoff — Retract the NM-09/NM-12 DIAGNOSTIC Receipt Claims (#10960)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-10960-receipts`
 - Branch: `claude/ud-10960-diagnostic-receipts` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: draft, opened from this branch; entry DL-#10960. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
+- Pull request: #11017 (merged); entry DL-#10960. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
 - Built: the committed NM-09 checkpoint-matrix receipt lists no `qualified_native` models (the three move to `unqualified`) and its limitation says native ODE replay is not verified; the NM-12 turnover receipt promotes no models (the three move to `unmeasured_models`), `end_to_end_verification.status` is `not_verified` and `all_issues_completed` is false. New `tests/unit/neural_motion/test_diagnostic_receipts_10960.py` fails on the old receipts: a DIAGNOSTIC receipt may not qualify or promote anything, and no nested status except `validation.outcome` may read `passed`.
 - Validation: `pytest tests/unit/neural_motion/ --deselect test_artifact_audit.py` -> 155 passed (the artifact audit times out locally on a 9.1 GB parquet on disk; CI runs it).
 - Next step: CI green, mark ready, arm; then close #10960 with evidence (all code slices already on main).

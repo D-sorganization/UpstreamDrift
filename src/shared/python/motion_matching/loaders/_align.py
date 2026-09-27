@@ -12,6 +12,7 @@ import math
 
 import numpy as np
 
+from src.shared.python.analysis.swing_events import peak_speed_index
 from .._series_interp import interp_xyz_series
 from ..club_target import AlignOptions
 from ._quaternion import slerp_series
@@ -52,7 +53,7 @@ def detect_impact_index(time: np.ndarray, clubhead: np.ndarray) -> int:
             # ⚡ Bolt: Using math.sqrt(np.vdot) avoids dispatch overhead and is ~1.5x faster than np.linalg.norm
             speeds[i] = float(math.sqrt(np.vdot(v, v)))
         speeds[-1] = speeds[-2]
-    return int(np.argmax(speeds))
+    return peak_speed_index(speeds)
 
 
 def resample_target(

@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11014 · Consolidate the Swing Phase Detectors Into One Canonical Event Detector
+
+- **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11014
+- **PR:** #11020
+- **Branch:** `claude/ud-11014-swing-events`
+- **Paths:** `src/shared/python/analysis/swing_events.py`, `src/motion_capture/reconstruct/analytics.py`, `src/shared/python/analysis/phase_detection.py`, `src/shared/python/data_io/swing_capture_import.py`, `src/shared/python/motion_matching/loaders/_align.py`, `tests/unit/analysis/test_swing_events.py`, `tests/unit/analysis/test_swing_event_parity_11014.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — analysis, reconstruct analytics, swing-capture import, loaders-align, DbC swing-phase and shared-biomechanics tests: 374 passed, existing tests unedited.
+- **Summary:** New `swing_events.py` holds the single frame-rate-aware detector (`detect_swing_events`, quiet-window address, top within `max_downswing_s` before the peak, finish under `finish_fraction` or the quiet threshold) and `peak_speed_index`; `SwingEventFrames` enforces `0 <= address <= top <= peak <= finish` even with contracts OFF. `analytics.detect_events` delegates bit-identically; `PhaseDetectionMixin` derives fps from the median time step (keeps its 30 % finish threshold); `SwingCaptureImporter` uses the trajectory frame rate; `_align` uses `peak_speed_index`. The old `0.7 * impact` and `n_frames // 2` top searches depended on where the recording started and are gone. A parity test pins all four sites to the same peak/top/address on one fixture.
+- **Next step:** CI green, mark ready, arm; then file epic #11007 packages 2-5 as child issues.
+
 ### DL-#11003 · Restate the #9243 BunkerShot Uncertainty Claims Under the Corrected F0 Model
 
 - **State:** in_review
