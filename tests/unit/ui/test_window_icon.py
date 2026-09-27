@@ -18,7 +18,7 @@ import pytest
 
 pytest.importorskip("PyQt6")
 
-from src.shared.python.ui import (  # noqa: E402
+from src.shared.python.ui import (  # type: ignore[attr-defined] # noqa: E402
     apply_window_icon,
     resolve_icon_path,
     set_app_user_model_id,
@@ -103,9 +103,16 @@ def test_apply_window_icon_declares_app_user_model_id(
     icon_file = tmp_path / "app.ico"
     icon_file.write_bytes(b"ico")
     called: list[str] = []
+
+    def _fake_set_app_user_model_id(app_id: str) -> bool:
+        called.append(app_id)
+        return True
+
+    window_icon_mod = sys.modules[apply_window_icon.__module__]
     monkeypatch.setattr(
-        "src.shared.python.ui.window_icon.set_app_user_model_id",
-        lambda app_id: called.append(app_id) or True,
+        window_icon_mod,
+        "set_app_user_model_id",
+        _fake_set_app_user_model_id,
     )
 
     apply_window_icon(
