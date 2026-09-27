@@ -56,18 +56,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** `BallFlightSimulator` handed the kernel `BallProperties.cd0` (0.21, the spin polynomial's constant) as the base of its Reynolds drag curve; it now passes `GOLF_BALL_DRAG_COEFFICIENT` (0.25), as the enhanced engine does. Driver carry 275.0 -> 248.3 yd, 7-iron 194.3 -> 179.8 yd, matching the enhanced engine within 0.3 %. The degrees-regression test asserts the launch contract's refusal. The exported parity fixture stays byte-pinned and untouched.
 - **Next step:** None; shipped. UD#10997 consumes the fix in the Linux unit gate.
 
+### DL-#9411-Burndown-Batch2 · Retire Passing Test in Hygiene Mock Scopes
+
+- **State:** in_review
+- **Owner:** antigravity
+- **Issue:** #9411
+- **PR:** #11013
+- **Branch:** `feat/ud-9411-quarantine-batch2`
+- **Paths:** `scripts/config/unit_gate_quarantine.json`, `tests/unit/repo_hygiene/test_optional_dependency_mock_scope.py`, `SPEC.md`
+- **Started:** 2026-09-26
+- **Last verified:** 20e4ef275 — verified quarantined test passes on Linux CI; unit gate quarantine contract passed (55 -> 54 node IDs across 10 clusters); ruff, black, and file size budget pass.
+- **Summary:** Retire verified-passing test in `scripts/config/unit_gate_quarantine.json` (ratchet 55 -> 54); narrow pathspec scoping in `test_optional_dependency_mock_scope.py`.
+- **Next step:** Push branch, update PR #11013, monitor CI Standard with squash auto-merge enabled.
+
 ### DL-#9411-AI-Adapters · Converge Gemini and BitNet Adapters on Canonical Tools and Retire 5 Tests
 
 - **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #9411
-- **PR:** #11005
+- **PR:** #11005 (merged)
 - **Branch:** `feat/ud-9411-ai-adapters-convergence`
 - **Paths:** `src/shared/python/ai/adapters/gemini_adapter.py`, `src/shared/python/ai/adapters/bitnet_adapter.py`, `scripts/config/unit_gate_quarantine.json`, `SPEC.md`
 - **Started:** 2026-09-26
-- **Last verified:** 170481160 — converged child copies from vendor/ud-tools pass child copy contract; 5 retired tests pass locally (16/16 green); unit gate quarantine contract passed (72 -> 67 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Last verified:** e9f72ac1f — merged via squash auto-merge with zero administrative bypasses; 5 retired tests green; ratchet at 67.
 - **Summary:** Converge Gemini and BitNet AI adapters on canonical Tools implementations; normalize seam imports; retire 5 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 72 -> 67).
-- **Next step:** Push branch, open PR with squash auto-merge, monitor CI Standard.
+- **Next step:** Shipped in PR #11005.
 
 ### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
 
