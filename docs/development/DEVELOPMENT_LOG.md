@@ -22,13 +22,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11008
-- **PR:** #11012 (draft)
+- **PR:** #11012 (ready; auto-merge armed)
 - **Branch:** `fix/ball-flight-parity-fixture-opt-in`
 - **Paths:** `tests/parity/test_ball_flight_parity.py`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 at 170481160 (baseline) — `tests/parity/test_ball_flight_parity.py`: 18 passed, 1 skipped (opt-in regen), 1 failure that also fails on main (`test_default_trajectory_physics`, 60.8 m > 60 m); committed fixture unchanged after the run.
+- **Last verified:** 2026-09-27 at f1625998c (main through #11045) — `tests/parity/test_ball_flight_parity.py`: 19 passed, 1 skipped (opt-in regen); committed fixture unchanged after the run.
 - **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
-- **Next step:** Get `quality-gate` green on the draft PR and arm auto-merge via `scripts/automerge_guard.py`.
+- **Next step:** Let the armed auto-merge land #11012, then mark this entry shipped.
 
 ### DL-#11043 · Replays Start on the Dual-Grip Weld
 
