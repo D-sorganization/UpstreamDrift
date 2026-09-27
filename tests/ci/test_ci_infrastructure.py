@@ -291,6 +291,31 @@ class TestCIEnvironmentCompatibility:
             workflow
         )
 
+    def test_all_skipped_selection_without_source_changes_is_not_executed(
+        self,
+    ) -> None:
+        """Exit 5 with no changed src must not fall back to whole-src coverage (#11052).
+
+        The dependency-light lane covers about 12 % of ``src``, so a fallback
+        with the global 75 % floor failed every PR whose scoped tests all
+        skip. The step must say loudly that the suite did not run instead.
+        """
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8",
+        )
+        exit5_start = workflow.index("elif [ $pytest_exit_code -eq 5 ]; then")
+        exit5_end = workflow.index(
+            "elif [ $pytest_exit_code -eq 1 ]; then", exit5_start
+        )
+        exit5_branch = workflow[exit5_start:exit5_end]
+
+        assert '[ "${#changed_coverage_targets[@]}" -eq 0 ]' in exit5_branch
+        assert "::warning::Core test suite NOT EXECUTED" in exit5_branch
+        assert 'echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"' in exit5_branch
+        assert 'echo "coverage_generated=false" >> "$GITHUB_OUTPUT"' in exit5_branch
+        assert "exit 0" in exit5_branch
+        assert "Falling back to full test suite" in exit5_branch
+
     def test_core_only_install_includes_pytest_asyncio_for_repo_config(self) -> None:
         """Core-only pytest must load plugins required by pyproject config."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
