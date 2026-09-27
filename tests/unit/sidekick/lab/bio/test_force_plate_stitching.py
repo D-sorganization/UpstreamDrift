@@ -35,9 +35,12 @@ def processor_type() -> Any:
         if any(
             name == prefix or name.startswith(f"{prefix}.")
             for prefix in (
-                "sidekick.lab.bio",
-                "src.shared.python.sidekick.lab.bio",
-                "shared.python.sidekick.lab.bio",
+                "sidekick",
+                "src.shared.python.sidekick",
+                "shared.python.sidekick",
+                "chat",
+                "src.shared.python.chat",
+                "shared.python.chat",
             )
         )
     }
