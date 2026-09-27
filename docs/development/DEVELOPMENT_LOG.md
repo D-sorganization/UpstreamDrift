@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11046 · MJX Evidence Prototype Rewired Onto the Tested `src` Plant, Knots and Adam Driver
+### DL-#11049 · MJX Knot Optimiser Core Moved From the Evidence CLI Into `src`
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11049 (epic #11006 package P3)
+- **PR:** #11054
+- **Branch:** `claude/ud-11049-mjx-optimiser`
+- **Paths:** `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`, `docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`, `tests/unit/engines/mujoco/test_mjx_knot_optimiser.py`, `tests/unit/engines/mujoco/mjx_toy_package.py`, `tests/unit/engines/mujoco/test_mjx_evidence_cli.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — `anthro_driver_seeds` `--iterations 3` receipt history identical to the #11046 CLI (0.0 relative at every iteration); 29 passed in `~/.venv-mjx`; ruff and mypy clean.
+- **Summary:** Loader, settings, knot-optimisation and diagnose logic move into a tested `src` module with validated inputs and no file or JAX-config side effects; the evidence script becomes a thin CLI over it.
+- **Next step:** CI green, mark ready and arm the PR for #11049.
+
+### DL-#11046 · MJX Evidence Prototype Rewired Onto the Tested `src` Plant, Knots and Adam Driver
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11046 (epic #11006 package 2c)
 - **PR:** #11048
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — old vs rewired on `anthro_driver_seeds`: port check 65.16457 vs 65.16494 mm, iteration 3 50.249 vs 50.295 mm (9.2e-4 relative; float32 reordering differences grow per Adam step: 5.6e-6, 1.6e-5, 7.2e-5, 9.2e-4); CLI test passes in `~/.venv-mjx`.
 - **Summary:** The evidence prototype drops its private copies of the knot basis, Adam loop, contact law, weld and plant and calls the merged `src` modules; the root vertical coordinate is read by name.
-- **Next step:** CI green, mark ready and arm the PR for #11046.
+- **Next step:** None — merged as PR #11048.
 
 ### DL-#11052 · PR-Scoped Tests That All Skip Report Not Executed Instead of Failing Coverage
 
