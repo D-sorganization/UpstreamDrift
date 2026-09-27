@@ -1,9 +1,24 @@
-# Current Handoff — Replays Start on the Dual-Grip Weld (#11043)
+# Current Handoff — MJX Evidence Prototype Rewired Onto the Tested `src` Plant (#11046)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11046-rewire`
+- Branch: `claude/ud-11046-mjx-rewire` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: see DL-#11046. Package 2c of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
+- Built: `evidence/ground_support/mjx_trajectory_optimisation.py` is a thin CLI (648 → 362 lines) over `mjx_tracking_plant` (`TrackingPlantSpec.from_package`, `build_tracking_plant`, `reference_derivatives`, `substep_tables`), `jax_contact.WeldGains` and `knot_gradient_optimiser` (`knot_grid`, `knot_basis`, `horizon_knot_mask`, `AdamSettings`, `adam_minimise`). Every flag, output file and receipt key is kept.
+- Orchestrator changes on review: the root vertical coordinate is looked up by name (`TranslationInputZ`) instead of a heuristic, and the new CLI test used a coordinate name the documents do not have.
+- Measured parity on the regenerated `anthro_driver_seeds` package (`~/.venv-mjx`, float32), old prototype vs rewired: `--iterations 0` port check 65.16457 vs 65.16494 mm (5.6e-6 relative); `--iterations 3` best replay 50.249 vs 50.295 mm (9.2e-4 relative; float32 reordering differences grow per Adam step: 5.6e-6, 1.6e-5, 7.2e-5, 9.2e-4).
+- Tests: `tests/unit/engines/mujoco/test_mjx_evidence_cli.py` (toy package, `--iterations 2`) passes in `~/.venv-mjx` and skips without JAX; ruff and format clean.
+- Next step: CI green, mark ready and arm the PR.
+
+---
+
+# Past Handoff — Replays Start on the Dual-Grip Weld (#11043)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11043-dls`
 - Branch: `claude/ud-11043-dls` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11047
 - Pull request: #11047; entry DL-#11043. Closes #11043.
 - Root cause: the KKT solve enforces the weld only at acceleration level (`J a = -J̇ q̇`), so it conserves the relative weld velocity it starts with. `replay` seeded `v0` with the one-sided finite difference of the smoothed reference, which violated the weld by 187 mm/s and 32.1 deg/s on the `--fit-closure` run (17.6 mm/s on `--static-seeds`). The grip opened linearly, gave the weld Jacobian nonzero root columns, and a controller direction crossed `MIN_SINGULAR_VALUE` at t = 0.333 s: 9.5 kN·m on `RScapInputY` in one step.
 - Built: `motion_matching/weld_manifold.py::project_onto_weld` (mass-weighted projection, the weld's own inelastic impulse), `FullBodySimulator.consistent_velocity`, with `_mass_and_weld` extracted from `affine_dynamics`. `pipeline/dynamics.replay` and `execution/downswing` now start from the projected velocity.
@@ -11,7 +26,7 @@
 - Tests: `tests/unit/motion_matching/test_weld_manifold.py` (6), plus `test_full_body_simulation.py`, `pipeline/test_dynamics.py` and the downswing tests: all pass. Reverting the `replay` line fails `test_replay_starts_on_the_weld`.
 - Not done: the committed evidence receipts were not regenerated; the pipeline still has no fail-closed guard on a diverged replay (the issue's fallback acceptance).
 - Pre-push mypy caught an un-annotated `Array` alias in `weld_manifold.py`; it is now `TypeAlias`.
-- Next step: CI green, mark ready and arm the PR.
+- Next step: none; merged as PR #11047.
 
 ---
 

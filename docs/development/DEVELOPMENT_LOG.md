@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11043 · Replays Start on the Dual-Grip Weld
+### DL-#11046 · MJX Evidence Prototype Rewired Onto the Tested `src` Plant, Knots and Adam Driver
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11046 (epic #11006 package 2c)
+- **PR:** pending
+- **Branch:** `claude/ud-11046-mjx-rewire`
+- **Paths:** `docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py`, `tests/unit/engines/mujoco/test_mjx_evidence_cli.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — old vs rewired on `anthro_driver_seeds`: port check 65.16457 vs 65.16494 mm, iteration 3 50.249 vs 50.295 mm (9.2e-4 relative; float32 reordering differences grow per Adam step: 5.6e-6, 1.6e-5, 7.2e-5, 9.2e-4); CLI test passes in `~/.venv-mjx`.
+- **Summary:** The evidence prototype drops its private copies of the knot basis, Adam loop, contact law, weld and plant and calls the merged `src` modules; the root vertical coordinate is read by name.
+- **Next step:** CI green, mark ready and arm the PR for #11046.
+
+### DL-#11043 · Replays Start on the Dual-Grip Weld
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #11043
 - **PR:** #11047
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — full pipeline `--static-seeds --fit-closure` 861.2 → 83.0 mm dynamics RMS (weight fraction max 50.0 → 3.72); `--static-seeds` 83.0 → 84.5 mm; 41 targeted tests pass.
 - **Summary:** Tracked replays start from the reference velocity projected onto the weld (mass-weighted, the weld's inelastic impulse), because the acceleration-level KKT conserves any initial weld violation and the fitted closure's 187 mm/s start opened the grip and drove the controller through a truncated-SVD singularity.
-- **Next step:** CI green, mark ready and arm the PR for #11043.
+- **Next step:** None — merged as PR #11047.
 
 ### DL-#11034 · Force-Plate Fixture Reports Module Identity on the Intermittent Failure
 
