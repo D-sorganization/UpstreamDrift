@@ -65,6 +65,7 @@ from src.engines.physics_engines.mujoco.python.motion_matching.mjx_knot_optimise
     diagnose_reference,
     load_mjx_package,
     optimise_reference,
+    optimisation_receipt,
 )
 
 LOG = logging.getLogger("mjx_opt")
@@ -238,20 +239,13 @@ def main(argv: Sequence[str] | None = None) -> None:
         knot_spacing_s=args.knot_spacing,
     )
 
-    receipt = {
-        "run": run.name,
-        "settings": vars(args) | {"run": str(run)},
-        "knots": result.knots,
-        "actuated_coordinates": result.actuated_coordinates,
-        "port_check_replay_marker_rms_m": result.port_check_replay_marker_rms_m,
-        "shared_simulator_replay_marker_rms_m": package.meta["baseline"][
-            "replay_marker_rms_m"
-        ],
-        "best_replay_marker_rms_m": result.best_replay_marker_rms_m,
-        "history": result.history,
-        "elapsed_s": round(time.perf_counter() - t0, 1),
-        "dtype": result.dtype,
-    }
+    receipt = optimisation_receipt(
+        result,
+        vars(args),
+        package=package,
+        run=run,
+        elapsed_s=round(time.perf_counter() - t0, 1),
+    )
     (run / "mjx_optimisation_receipt.json").write_text(
         json.dumps(receipt, indent=2) + "\n",
         encoding="utf-8",
