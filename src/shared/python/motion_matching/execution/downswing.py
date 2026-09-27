@@ -393,7 +393,7 @@ def run_downswing_experiment(args: argparse.Namespace) -> dict[str, Any]:
     )
     duration = float(args.duration or times[-1])
     q0 = fs.preload_feet(sim, reference[0])
-    v0 = v_ref[0]
+    v0 = sim.consistent_velocity(q0, v_ref[0])
 
     t0 = time.perf_counter()
     record = sim.run(
