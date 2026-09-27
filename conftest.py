@@ -2,7 +2,7 @@
 
 import contextlib
 
-with contextlib.suppress(ImportError):
+with contextlib.suppress(ImportError, AttributeError, OSError, RuntimeError):
     import mujoco  # noqa: F401
 
 # Import MuJoCo early to avoid Windows DLL initialization conflicts (Access Violation)
