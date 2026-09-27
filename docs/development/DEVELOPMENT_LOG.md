@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #9411
+- **PR:** #10999
+- **Branch:** `feat/ud-9411-quarantine-burndown-batch1`
+- **Paths:** `scripts/config/unit_gate_quarantine.json`, `tests/unit/ui/dialogs/test_install_prompt.py`, `tests/unit/ui/test_window_icon.py`
+- **Started:** 2026-09-26
+- **Last verified:** 99553df90 — 6 retired tests verified green in CI Standard; unit gate quarantine contract passed (78 -> 72 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Summary:** Fix module monkeypatching and typing in `test_window_icon.py` and `test_install_prompt.py`; condense `test_install_prompt.py` to <= 500 LOC; retire 6 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 78 -> 72).
+- **Next step:** Push branch with force-with-lease, monitor CI Standard, verify auto-merge.
+
 ### DL-#9411-Pin · Bump `vendor/ud-tools` to Tools Main `3678409fc` and Retire 10 Quarantined Tests
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #9411
 - **PR:** #10995
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-26
 - **Last verified:** 2026-09-26 — companion (143 passed), reconciliation (3 passed), 10 un-quarantined tests passed; child-copy contract (20 passed), quarantine ratchet (145 IDs in 10 clusters), divergence inventory and agent-context clean.
 - **Summary:** Advance the gitlink to Tools main 3678409fc (#5364 input contracts and #5361 safe_eval power bound) and align all pin strings. Converge child copies under `src/shared/python/` on canonical Tools and retire 10 quarantined tests in `scripts/config/unit_gate_quarantine.json` (ratchet 155 -> 145 node IDs).
-- **Next step:** Run CI standard, verify quality gate, arm auto-merge.
+- **Next step:** Shipped in #10995.
 
 ### DL-#9406 · Retire UpstreamDrift Copies of Tools-Owned Sidekick Modules
 

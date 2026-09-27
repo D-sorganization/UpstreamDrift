@@ -1,7 +1,7 @@
 """Unit tests for InstallPromptDialog (Phase 3 install-prompt UX).
 
 All tests are headless-safe: PyQt6 widgets are instantiated but never
-shown on screen.  The background ``_InstallWorker`` thread is always
+shown on screen. The background ``_InstallWorker`` thread is always
 patched out so no real subprocess runs.
 
 Coverage requirements (see issue #5768):
@@ -21,7 +21,6 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -34,13 +33,19 @@ pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 # Skip entire module if PyQt6 is unavailable.
 pytest.importorskip("PyQt6")
 
-if TYPE_CHECKING:
-    from src.shared.python.ui.dialogs.install_prompt import InstallPromptDialog
-
-
-# ---------------------------------------------------------------------------
-# Module-level Qt app (created once per test session)
-# ---------------------------------------------------------------------------
+import src.shared.python.ui.dialogs.install_prompt as install_prompt_module  # noqa: E402
+from src.core import capability_registry as shim_registry  # noqa: E402
+from src.shared.python.feature_registry import (  # noqa: E402
+    InstallResult,
+    get_registry as canonical_get_registry,
+)
+from src.shared.python.ui.dialogs.install_prompt import (  # noqa: E402
+    InstallPromptDialog,
+    InstallPromptResult,
+    _InstallWorker,
+    is_suppressed,
+    suppress_feature,
+)
 
 
 @pytest.fixture(scope="module")
@@ -55,114 +60,67 @@ def qt_app():
     yield app
 
 
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-
 @pytest.fixture()
 def tmp_prefs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Redirect the prefs file to a temporary directory."""
-    import src.shared.python.ui.dialogs.install_prompt as mod
-
     fake_dir = tmp_path / ".upstreamdrift"
     fake_file = fake_dir / "prefs.json"
-    monkeypatch.setattr(mod, "PREFS_DIR", fake_dir)
-    monkeypatch.setattr(mod, "PREFS_FILE", fake_file)
+    monkeypatch.setattr(install_prompt_module, "PREFS_DIR", fake_dir)
+    monkeypatch.setattr(install_prompt_module, "PREFS_FILE", fake_file)
     return fake_file
 
 
 @pytest.fixture()
 def dialog(qt_app, tmp_prefs: Path) -> InstallPromptDialog:
     """Return a fresh dialog instance with prefs in a temp location."""
-    from src.shared.python.ui.dialogs.install_prompt import InstallPromptDialog
-
     dlg = InstallPromptDialog(feature_name="mujoco", package_name="MuJoCo")
     # Prevent exec() from blocking the event loop.
-    dlg.exec = lambda: None  # type: ignore[method-assign]
+    dlg.exec = lambda: 0  # type: ignore[method-assign,assignment]
     return dlg
-
-
-# ---------------------------------------------------------------------------
-# Prefs helpers
-# ---------------------------------------------------------------------------
 
 
 class TestPrefsHelpers:
     def test_is_suppressed_false_when_no_prefs_file(self, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import is_suppressed
-
         assert is_suppressed("mujoco") is False
 
     def test_suppress_feature_writes_prefs(self, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import (
-            is_suppressed,
-            suppress_feature,
-        )
-
         suppress_feature("drake")
-
         assert tmp_prefs.exists()
         data = json.loads(tmp_prefs.read_text())
         assert "drake" in data.get("dont_ask_again_features", [])
         assert is_suppressed("drake") is True
 
     def test_suppress_feature_idempotent(self, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import suppress_feature
-
         suppress_feature("drake")
         suppress_feature("drake")  # second call must not duplicate
-
         data = json.loads(tmp_prefs.read_text())
         assert data["dont_ask_again_features"].count("drake") == 1
 
     def test_suppress_feature_raises_on_empty_name(self, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import suppress_feature
-
         with pytest.raises(ValueError):
             suppress_feature("")
 
     def test_is_suppressed_raises_on_empty_name(self, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import is_suppressed
-
         with pytest.raises(ValueError):
             is_suppressed("")
 
 
-# ---------------------------------------------------------------------------
-# InstallPromptResult enum
-# ---------------------------------------------------------------------------
-
-
 class TestInstallPromptResult:
     def test_all_members_present(self) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptResult
-
         names = {m.name for m in InstallPromptResult}
         assert names == {"YES", "NO", "DONT_ASK", "SUPPRESSED"}
 
 
-# ---------------------------------------------------------------------------
-# Dialog construction
-# ---------------------------------------------------------------------------
-
-
 class TestInstallPromptDialogConstruction:
     def test_valid_construction(self, qt_app, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptDialog
-
         dlg = InstallPromptDialog(feature_name="drake", package_name="Drake")
         assert dlg is not None
 
     def test_raises_on_empty_feature_name(self, qt_app, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptDialog
-
         with pytest.raises(ValueError, match="feature_name"):
             InstallPromptDialog(feature_name="", package_name="Drake")
 
     def test_raises_on_empty_package_name(self, qt_app, tmp_prefs: Path) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptDialog
-
         with pytest.raises(ValueError, match="package_name"):
             InstallPromptDialog(feature_name="drake", package_name="")
 
@@ -181,11 +139,6 @@ class TestInstallPromptDialogConstruction:
         assert dialog._progress.isHidden()
 
 
-# ---------------------------------------------------------------------------
-# Yes path
-# ---------------------------------------------------------------------------
-
-
 class TestYesPath:
     def _make_fake_worker(self) -> MagicMock:
         fake_worker = MagicMock()
@@ -199,11 +152,10 @@ class TestYesPath:
     def test_yes_sets_result(
         self, dialog: InstallPromptDialog, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.ui.dialogs import install_prompt as mod
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptResult
-
         monkeypatch.setattr(
-            mod, "_InstallWorker", lambda *a, **kw: self._make_fake_worker()
+            install_prompt_module,
+            "_InstallWorker",
+            lambda *a, **kw: self._make_fake_worker(),
         )
         dialog._on_yes()
         assert dialog._result == InstallPromptResult.YES
@@ -211,10 +163,10 @@ class TestYesPath:
     def test_yes_shows_progress_bar(
         self, dialog: InstallPromptDialog, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.ui.dialogs import install_prompt as mod
-
         monkeypatch.setattr(
-            mod, "_InstallWorker", lambda *a, **kw: self._make_fake_worker()
+            install_prompt_module,
+            "_InstallWorker",
+            lambda *a, **kw: self._make_fake_worker(),
         )
         dialog._on_yes()
         # isHidden() is used here because isVisible() returns False for widgets
@@ -224,13 +176,12 @@ class TestYesPath:
     def test_yes_disables_buttons(
         self, dialog: InstallPromptDialog, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.ui.dialogs import install_prompt as mod
-
         monkeypatch.setattr(
-            mod, "_InstallWorker", lambda *a, **kw: self._make_fake_worker()
+            install_prompt_module,
+            "_InstallWorker",
+            lambda *a, **kw: self._make_fake_worker(),
         )
         dialog._on_yes()
-
         assert not dialog._yes_btn.isEnabled()
         assert not dialog._no_btn.isEnabled()
         assert not dialog._dont_ask_btn.isEnabled()
@@ -238,26 +189,18 @@ class TestYesPath:
     def test_yes_starts_worker(
         self, dialog: InstallPromptDialog, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.ui.dialogs import install_prompt as mod
-
         fake = self._make_fake_worker()
-        monkeypatch.setattr(mod, "_InstallWorker", lambda *a, **kw: fake)
+        monkeypatch.setattr(
+            install_prompt_module, "_InstallWorker", lambda *a, **kw: fake
+        )
         dialog._on_yes()
         fake.start.assert_called_once()
 
 
-# ---------------------------------------------------------------------------
-# No path
-# ---------------------------------------------------------------------------
-
-
 class TestNoPath:
     def test_no_sets_result(self, dialog: InstallPromptDialog) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptResult
-
         with patch.object(dialog, "reject"):
             dialog._on_no()
-
         assert dialog._result == InstallPromptResult.NO
 
     def test_no_does_not_suppress(
@@ -265,34 +208,22 @@ class TestNoPath:
     ) -> None:
         with patch.object(dialog, "reject"):
             dialog._on_no()
-
         assert not tmp_prefs.exists()
-
-
-# ---------------------------------------------------------------------------
-# Don't-ask-again path
-# ---------------------------------------------------------------------------
 
 
 class TestDontAskPath:
     def test_dont_ask_sets_result(
         self, dialog: InstallPromptDialog, tmp_prefs: Path
     ) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import InstallPromptResult
-
         with patch.object(dialog, "reject"):
             dialog._on_dont_ask()
-
         assert dialog._result == InstallPromptResult.DONT_ASK
 
     def test_dont_ask_writes_suppression(
         self, dialog: InstallPromptDialog, tmp_prefs: Path
     ) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import is_suppressed
-
         with patch.object(dialog, "reject"):
             dialog._on_dont_ask()
-
         assert is_suppressed("mujoco")
 
     def test_dont_ask_rejects_dialog(
@@ -300,40 +231,27 @@ class TestDontAskPath:
     ) -> None:
         with patch.object(dialog, "reject") as mock_reject:
             dialog._on_dont_ask()
-
         mock_reject.assert_called_once()
-
-
-# ---------------------------------------------------------------------------
-# Suppressed feature — prompt() short-circuits
-# ---------------------------------------------------------------------------
 
 
 class TestSuppressedFeature:
     def test_prompt_returns_suppressed_without_exec(
         self, qt_app, tmp_prefs: Path
     ) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import (
-            InstallPromptDialog,
-            InstallPromptResult,
-            suppress_feature,
-        )
-
         suppress_feature("mujoco")
         dlg = InstallPromptDialog(feature_name="mujoco", package_name="MuJoCo")
 
         exec_called: list[bool] = []
-        dlg.exec = lambda: exec_called.append(True)  # type: ignore[method-assign]
+
+        def _fake_exec() -> int:
+            exec_called.append(True)
+            return 0
+
+        dlg.exec = _fake_exec  # type: ignore[method-assign,assignment]
 
         result = dlg.prompt()
-
         assert result == InstallPromptResult.SUPPRESSED
         assert not exec_called
-
-
-# ---------------------------------------------------------------------------
-# Async install callback + hot-refresh
-# ---------------------------------------------------------------------------
 
 
 class TestAsyncInstallCallback:
@@ -343,9 +261,7 @@ class TestAsyncInstallCallback:
 
         with (
             patch.object(dialog, "accept"),
-            patch(
-                "src.shared.python.ui.dialogs.install_prompt.refresh"
-            ) as mock_refresh,
+            patch.object(install_prompt_module, "refresh") as mock_refresh,
         ):
             dialog._on_worker_finished(True, "installed mujoco")
             mock_refresh.assert_called_once()
@@ -357,9 +273,7 @@ class TestAsyncInstallCallback:
     ) -> None:
         with (
             patch.object(dialog, "accept"),
-            patch(
-                "src.shared.python.ui.dialogs.install_prompt.refresh"
-            ) as mock_refresh,
+            patch.object(install_prompt_module, "refresh") as mock_refresh,
         ):
             dialog._on_worker_finished(True, "installed mujoco")
 
@@ -371,9 +285,7 @@ class TestAsyncInstallCallback:
         """refresh() must be called even when the install fails."""
         with (
             patch.object(dialog, "accept"),
-            patch(
-                "src.shared.python.ui.dialogs.install_prompt.refresh"
-            ) as mock_refresh,
+            patch.object(install_prompt_module, "refresh") as mock_refresh,
         ):
             dialog._on_worker_finished(False, "exit 1")
 
@@ -382,7 +294,7 @@ class TestAsyncInstallCallback:
     def test_worker_finished_accepts_dialog(self, dialog: InstallPromptDialog) -> None:
         with (
             patch.object(dialog, "accept") as mock_accept,
-            patch("src.shared.python.ui.dialogs.install_prompt.refresh"),
+            patch.object(install_prompt_module, "refresh"),
         ):
             dialog._on_worker_finished(True, "ok")
 
@@ -392,7 +304,7 @@ class TestAsyncInstallCallback:
         dialog._progress.show()
         with (
             patch.object(dialog, "accept"),
-            patch("src.shared.python.ui.dialogs.install_prompt.refresh"),
+            patch.object(install_prompt_module, "refresh"),
         ):
             dialog._on_worker_finished(True, "ok")
 
@@ -406,8 +318,9 @@ class TestAsyncInstallCallback:
 
         with (
             patch.object(dialog, "accept"),
-            patch(
-                "src.shared.python.ui.dialogs.install_prompt.refresh",
+            patch.object(
+                install_prompt_module,
+                "refresh",
                 side_effect=RuntimeError("registry boom"),
             ),
         ):
@@ -416,24 +329,14 @@ class TestAsyncInstallCallback:
         assert emitted == [(True, "installed")]
 
 
-# ---------------------------------------------------------------------------
-# _InstallWorker
-# ---------------------------------------------------------------------------
-
-
 class TestInstallWorker:
     def test_raises_on_empty_feature_name(self, qt_app) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import _InstallWorker
-
         with pytest.raises(ValueError, match="feature_name"):
             _InstallWorker("")
 
     def test_worker_emits_finished_on_success(
         self, qt_app, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.feature_registry import InstallResult
-        from src.shared.python.ui.dialogs.install_prompt import _InstallWorker
-
         fake_result = InstallResult(
             feature="mujoco",
             success=True,
@@ -444,7 +347,8 @@ class TestInstallWorker:
             reason="installed mujoco",
         )
         monkeypatch.setattr(
-            "src.shared.python.ui.dialogs.install_prompt.install_feature",
+            install_prompt_module,
+            "install_feature",
             lambda name: fake_result,
         )
 
@@ -458,9 +362,6 @@ class TestInstallWorker:
     def test_worker_emits_finished_on_failure(
         self, qt_app, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.feature_registry import InstallResult
-        from src.shared.python.ui.dialogs.install_prompt import _InstallWorker
-
         fake_result = InstallResult(
             feature="mujoco",
             success=False,
@@ -471,7 +372,8 @@ class TestInstallWorker:
             reason="install failed for mujoco (exit 1)",
         )
         monkeypatch.setattr(
-            "src.shared.python.ui.dialogs.install_prompt.install_feature",
+            install_prompt_module,
+            "install_feature",
             lambda name: fake_result,
         )
 
@@ -485,10 +387,9 @@ class TestInstallWorker:
     def test_worker_handles_unexpected_exception(
         self, qt_app, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        from src.shared.python.ui.dialogs.install_prompt import _InstallWorker
-
         monkeypatch.setattr(
-            "src.shared.python.ui.dialogs.install_prompt.install_feature",
+            install_prompt_module,
+            "install_feature",
             MagicMock(side_effect=RuntimeError("unexpected")),
         )
 
@@ -502,24 +403,12 @@ class TestInstallWorker:
         assert "unexpected" in received[0][1]
 
 
-# ---------------------------------------------------------------------------
-# src.core.capability_registry shim
-# ---------------------------------------------------------------------------
-
-
 class TestCapabilityRegistryShim:
     def test_shim_exports_get_registry(self) -> None:
-        from src.core.capability_registry import get_registry
-
-        assert callable(get_registry)
+        assert callable(shim_registry.get_registry)
 
     def test_shim_exports_refresh(self) -> None:
-        from src.core.capability_registry import refresh
-
-        assert callable(refresh)
+        assert callable(shim_registry.refresh)
 
     def test_shim_get_registry_returns_same_instance(self) -> None:
-        from src.core import capability_registry as shim
-        from src.shared.python.feature_registry import get_registry as canonical
-
-        assert shim.get_registry() is canonical()
+        assert shim_registry.get_registry() is canonical_get_registry()
