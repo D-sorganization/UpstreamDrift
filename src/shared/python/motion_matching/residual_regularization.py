@@ -1,11 +1,12 @@
 """Shared finite residual and derivative contracts for control penalties."""
 
 from collections.abc import Callable
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 Penalty = Callable[[Array], Array]
 
 
