@@ -6,7 +6,8 @@
   "parent_epic": 10603,
   "card_catalog": {
     "total_models": 20,
-    "promoted_models": [
+    "promoted_models": [],
+    "unmeasured_models": [
       "constrained_upper_body_golfer",
       "driven_double_pendulum",
       "driven_triple_pendulum"
@@ -48,12 +49,12 @@
     ],
     "test_suite": "tests/unit/neural_motion/test_turnover_nm12.py",
     "test_count": 16,
-    "status": "passed"
+    "status": "not_verified"
   },
   "epic_status": {
     "epic_id": 10603,
     "title": "Neural Motion Matching",
-    "all_issues_completed": true,
+    "all_issues_completed": false,
     "closing_issue": 10627,
     "recorded_at": "2026-09-23"
   }
