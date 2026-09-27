@@ -17,18 +17,30 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+### DL-#9411-AI-Adapters · Converge Gemini and BitNet Adapters on Canonical Tools and Retire 5 Tests
 
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #9411
-- **PR:** #10999
+- **PR:** #11005
+- **Branch:** `feat/ud-9411-ai-adapters-convergence`
+- **Paths:** `src/shared/python/ai/adapters/gemini_adapter.py`, `src/shared/python/ai/adapters/bitnet_adapter.py`, `scripts/config/unit_gate_quarantine.json`, `SPEC.md`
+- **Started:** 2026-09-26
+- **Last verified:** 170481160 — converged child copies from vendor/ud-tools pass child copy contract; 5 retired tests pass locally (16/16 green); unit gate quarantine contract passed (72 -> 67 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Summary:** Converge Gemini and BitNet AI adapters on canonical Tools implementations; normalize seam imports; retire 5 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 72 -> 67).
+- **Next step:** Push branch, open PR with squash auto-merge, monitor CI Standard.
+
+### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #9411
+- **PR:** #10999 (merged)
 - **Branch:** `feat/ud-9411-quarantine-burndown-batch1`
 - **Paths:** `scripts/config/unit_gate_quarantine.json`, `tests/unit/ui/dialogs/test_install_prompt.py`, `tests/unit/ui/test_window_icon.py`
 - **Started:** 2026-09-26
-- **Last verified:** 99553df90 — 6 retired tests verified green in CI Standard; unit gate quarantine contract passed (78 -> 72 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Last verified:** 170481160 — merged via squash auto-merge with zero administrative bypasses; 6 retired tests green; ratchet at 72.
 - **Summary:** Fix module monkeypatching and typing in `test_window_icon.py` and `test_install_prompt.py`; condense `test_install_prompt.py` to <= 500 LOC; retire 6 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 78 -> 72).
-- **Next step:** Push branch with force-with-lease, monitor CI Standard, verify auto-merge.
 
 ### DL-#9411-Pin · Bump `vendor/ud-tools` to Tools Main `3678409fc` and Retire 10 Quarantined Tests
 
