@@ -79,11 +79,14 @@ class TestContractLevelGetSet:
 
     def test_set_level_updates_module_alias(self) -> None:
         """After set_contract_level, the module-level DBC_LEVEL alias updates too."""
-        import src.shared.python.contracts as contracts_module
+        import sys
         from src.shared.python.contracts import ContractLevel, set_contract_level
 
         set_contract_level(ContractLevel.WARN)
-        assert contracts_module.DBC_LEVEL == ContractLevel.WARN
+        mod = sys.modules.get("shared.python.contracts") or sys.modules.get(
+            "src.shared.python.contracts"
+        )
+        assert mod is not None and mod.DBC_LEVEL == ContractLevel.WARN
 
 
 # ---------------------------------------------------------------------------

@@ -78,7 +78,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_generation` | 27 | 52 | 14 | 18 | 1 | 79 |
+| `model_generation` | 27 | 52 | 14 | 19 | 1 | 79 |
 | `motion_matching` | 0 | 0 | 0 | 243 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **421** | **279** | **124** | **1522** | **750** | **700** |
+| **Total** | **421** | **279** | **124** | **1523** | **750** | **700** |
 
 ## Diverged Files by Package
 
@@ -377,7 +377,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/export/__init__.py` | +438 |  | Dieter Olson 2026-09-19 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/humanoid/__init__.py` | +251 |  | Dieter Olson 2026-09-11 | Dieter Olson 2026-08-20 |
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/inertia/calculator.py` | -6 |  | Dieter Olson 2026-09-26 | Dieter Olson 2026-09-26 |
+| `model_generation/inertia/calculator.py` | -5849 |  | Dieter Olson 2026-09-26 | Dieter Olson 2026-09-26 |
 | `model_generation/inertia/primitives.py` | +317 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/library/_rate_limiter.py` | +604 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-08-20 |
