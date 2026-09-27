@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11008
-- **PR:** draft (opened after the first commit)
+- **PR:** #11012 (draft)
 - **Branch:** `fix/ball-flight-parity-fixture-opt-in`
 - **Paths:** `tests/parity/test_ball_flight_parity.py`
 - **Started:** 2026-09-26
