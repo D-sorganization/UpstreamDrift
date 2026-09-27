@@ -13,7 +13,7 @@
   "totals": {
     "identical": 421,
     "diverged": 279,
-    "ud-only": 1523,
+    "ud-only": 1522,
     "tools-only": 750,
     "spelling-only": 124
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 244,
+      "ud-only": 243,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -14124,18 +14124,6 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 7924,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "motion_matching/mjx_tracking_plant.py",
-      "classification": "ud-only",
-      "package": "motion_matching",
-      "subpackage": "",
-      "ud_bytes": 23958,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

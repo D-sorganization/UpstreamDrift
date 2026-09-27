@@ -28,7 +28,7 @@ from src.shared.python.motion_matching.knot_gradient_optimiser import (
     knot_basis,
     knot_grid,
 )
-from src.shared.python.motion_matching.mjx_tracking_plant import (
+from src.engines.physics_engines.mujoco.python.motion_matching.mjx_tracking_plant import (
     TrackingPlantSpec,
     build_tracking_plant,
     computed_torque,
