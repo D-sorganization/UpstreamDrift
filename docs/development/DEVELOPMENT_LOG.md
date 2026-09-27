@@ -30,9 +30,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
 - **Next step:** Get `quality-gate` green on the draft PR and arm auto-merge via `scripts/automerge_guard.py`.
 
-### DL-#11021 · Parameter Covariance on the Shared Least-Squares Motion-Matching Fits
+### DL-#11024 · Fit the Physics-Structured Surrogate Residual by Sparse Regression
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11024 (epic #11007 package 2, Board RM#1795)
+- **PR:** #11025
+- **Branch:** `claude/ud-11024-sparse-residual`
+- **Paths:** `src/shared/python/neural_motion/surrogates/sparse_residual.py`, `src/shared/python/neural_motion/surrogates/physics_structured.py`, `src/shared/python/neural_motion/surrogates/__init__.py`, `tests/unit/neural_motion/test_sparse_residual.py`, `tests/unit/neural_motion/test_forward_surrogates_nm07.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — tests/unit/neural_motion (except test_artifact_audit) 161 passed; motion_matching -k surrogate 128 passed; the 6 failures elsewhere in both runs fail identically on clean origin/main; ruff, format and mypy clean.
+- **Summary:** STLSQ (Brunton, Proctor & Kutz 2016) over a polynomial plus optional sin/cos library recovers the damped-pendulum and Lorenz supports exactly on synthetic data; the physics-structured surrogate uses a fitted residual or refuses, replacing the invented constant.
+- **Next step:** CI green, mark ready and arm PR for #11024.
+
+### DL-#11021 · Parameter Covariance on the Shared Least-Squares Motion-Matching Fits
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11021 (MS-101 #10375, Board RM#1793)
 - **PR:** #11023
@@ -41,7 +54,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — tests/unit/estimation plus the wiring tests 81 passed, 1 skipped; motion_matching prefix/shooting/multi tests 73 passed; tests/motion_matching prefix and regularization 37 passed; architecture budget OK.
 - **Summary:** `least_squares_parameter_uncertainty` gives the Gauss-Newton (Laplace) covariance of a `least_squares` optimum: σ̂² = 2·cost/(m − n_free); the requested block is the marginal taken from the full free-parameter covariance (Schur complement over nuisance variables such as shooting states); parameters held at an active bound get NaN; a rank-deficient Jacobian or m ≤ n_free returns no covariance at all rather than pinv errors. `PrefixStage.parameter_uncertainty` and `MultipleShootingFit.theta_uncertainty` carry it; the equality-constrained shooting path leaves it None, and a non-finite Jacobian yields None so a diverged fit still reports.
-- **Next step:** CI green, mark ready, arm; then IPOPT/Crocoddyl/fmincon fits (remaining RM#1793 scope under #10375).
+- **Next step:** None — merged as PR #11023.
 
 ### DL-#11014 · Consolidate the Swing Phase Detectors Into One Canonical Event Detector
 
