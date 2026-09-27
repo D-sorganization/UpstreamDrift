@@ -27,7 +27,8 @@
   #11011 typical segment masses done (`GS3DX_Golfer`, 80 kg de Leva) plus the force-plate-free
   total GRF from the capture (`gs3dx_kinematic_grf`); owner: no force plates will be captured.
   #10979 in progress (owner: anthropometry unknown, match it to the data): `GS3DX_Fit` segment
-  lengths from the capture and a least-squares whole-body IK; hand-on-grip geometry not yet fitted.
+  lengths from the capture, a least-squares whole-body IK, and the hand-on-grip geometry from the
+  capture (`gs3dx_fit_grip`; out-of-sample RMS max 32 -> 17 mm).
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -119,6 +120,17 @@
       within 1-3 cm, club head 40 mm, wrists 52/88 mm -> the model's hand-on-grip geometry (literal
       grip cylinder lengths, hand sphere radius 2 in, standoffs) is the next thing to fit. Frame
       `Rotation` outputs = intrinsic XYZ (verified 3e-16).
+  17. #10979 hand-on-grip geometry (`docs/FIT.md` section 4): `gs3dx_fit_grip` (Kabsch club pose
+      from the six club markers, sphere-fit functional wrist centres of WristTop in the club frame,
+      shaft axis from the IK model's hand-sphere centres). The original grip put both wrists 1 in to
+      the same side; the data has them 77 mm apart along the grip and 72-74 mm apart across it, on
+      opposite sides. The split across the shaft is not identifiable (the club-head marker offset
+      absorbs a sideways shaft shift), so it is split equally. `gs3dx_build_fit` re-points the 6 grip
+      solids at `FitButtToLeadHand` 3.08, `FitHandSpacing` 3.03, `FitGripToShaft` 4.39 (butt to
+      shaft stays 10.5), `FitLeft/RightWristStandoff` 1.46 in, and flips the lead standoff by swapping
+      its frames' end features (parameter-only, 967 compiled). Out of sample: wrists 88/52 -> 18/15 mm
+      median, club head 40 -> 29, RMS max 32 -> 17 mm, wrist marker offsets 6-7 -> 2.8 cm; the grip
+      estimate is a fixed point within 0.07 in. `ik.model` now records the fitted model.
 
 ## Files and Decisions
 
@@ -178,8 +190,8 @@ Creator` (newline); find it by BlockType.
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 83 passed / 0 failed (2026-09-27, with test_gs3dx_fit 5; its 6th test, the gap mask, was added
-  after and passed on its own: fit class 6/6 over two runs; the out-of-sample IK test takes ~10 min).
+  → 85 passed / 0 failed (2026-09-27, with test_gs3dx_fit 7/7 incl. the fitted-grip out-of-sample
+  IK and the grip fixed point; the IK test takes ~5 min). Earlier 83 (test_gs3dx_fit 5).
   Earlier 78 (after #11011: golfer 6, capture +2 kinematic GRF; earlier 70 after #10985/#10986: capture 4, leg kinematics 4, contact 7
   new; the FK test failed once on a closed-model handle, fixed and rerun 4/4). The capture tests
   need MATLAB pyenv with ezc3d (they are skipped otherwise).
@@ -194,9 +206,8 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 on `GS3DX_Fit` (`docs/FIT.md`): fit the hand-on-grip geometry (hand positions along
-   the shaft, standoffs) with the same out-of-sample IK check; then smooth the tracked joint
-   angles into time-varying leg servo references and a prescribed upper-body motion (0 added
+2. #10979 on `GS3DX_Fit` (`docs/FIT.md`): re-run the whole-trial IK on the fitted grip; then
+   smooth the tracked joint angles into time-varying leg servo references and a prescribed upper-body motion (0 added
    blocks), read the pelvis residual, and compare the summed contact GRF with
    `gs3dx_kinematic_grf` (1.24-1.33 BW peak ~60 ms before impact).
 3. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).

@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-27 — #10979 GS3DX_Fit: segment lengths from the capture joint centres (parameter-only, 967 compiled; FK forearm 0.280 / pelvis-hub 0.490 vs data 0.278 / 0.488); gs3dx_whole_body_ik (lsqnonlin over KinematicsSolver FK, grip loop closed, calibrated marker offsets): whole trial RMS 7.1 mm median / 20.3 mm max with gap-filled samples dropped; out of sample pelvis/legs/shoulders within 1–3 cm, hands 5–9 cm (grip geometry unfitted); suite 83/0 + gap test.
+- **Last verified:** 2026-09-27 — #10979 GS3DX_Fit: segment lengths and hand-on-grip geometry from the capture (parameter-only, 967 compiled); gs3dx_fit_grip: sphere-fit wrist centres in the club-marker frame, 77 mm along / 72–74 mm across the grip, lead standoff flipped; out-of-sample IK RMS max 32 → 17 mm, wrists 88/52 → 18/15 mm median, grip estimate a fixed point within 0.07 in; test_gs3dx_fit 7/7.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Fit GS3DX_Fit's hand-on-grip geometry (hand positions along the shaft, standoffs) to the capture and re-run the out-of-sample IK check in test_gs3dx_fit.
+- **Next step:** Re-run the whole-trial gs3dx_whole_body_ik on the fitted-grip GS3DX_Fit and smooth its joint angles into time-varying leg servo references.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
