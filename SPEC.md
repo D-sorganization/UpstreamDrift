@@ -8871,3 +8871,12 @@ Establishes the independent qualification service for candidate tour baseline pa
   - Mandatory disclosure that identified internal forces and torques are non-unique and model-dependent.
   - Issues signed, auditable `ExpertSignoff` receipts exportable to JSON.
 
+### AI Adapters Safety and Session History Specification (#9411)
+
+- **Gemini History & Message Resolution (`GeminiAdapter._build_chat_session`)**:
+  - Resolves conversation context history without duplicate turns; extracts trailing user turn when called with an empty current message to prevent redundant answer cycles.
+  - Generates `(chat_session, effective_message)` tuple aligning with `start_chat` history requirements.
+- **BitNet Bounded Safety and Encodability (`BitnetAdapter._build_validated_prompt`)**:
+  - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
+  - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
+
