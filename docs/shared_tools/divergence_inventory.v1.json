@@ -13,7 +13,7 @@
   "totals": {
     "identical": 421,
     "diverged": 279,
-    "ud-only": 1523,
+    "ud-only": 1524,
     "tools-only": 750,
     "spelling-only": 124
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 243,
+      "ud-only": 244,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11819,9 +11819,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "inertia",
-      "ud_bytes": 15113,
+      "ud_bytes": 15098,
       "tools_bytes": 20962,
-      "byte_delta": -5849,
+      "byte_delta": -5864,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -13271,7 +13271,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 14240,
+      "ud_bytes": 14269,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13391,7 +13391,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 56134,
+      "ud_bytes": 57532,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14339,7 +14339,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 23880,
+      "ud_bytes": 23909,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15192,6 +15192,18 @@
       "package": "motion_matching",
       "subpackage": "visualization",
       "ud_bytes": 15765,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/weld_manifold.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 1982,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -38894,8 +38906,8 @@
       "path": "model_generation/inertia/calculator.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-09-26",
-        "commit": "2d88ec694bdb2c5ed25b8010cdde7ac7f4ac88e7"
+        "date": "2026-09-27",
+        "commit": "ef31f2510fe1bc3f1d7981bad18c66974882d9cc"
       },
       "tools": {
         "author": "Dieter Olson",
