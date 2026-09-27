@@ -18,8 +18,6 @@
     "tests/unit/shared_python/ai/adapters/test_ollama_adapter.py::test_ollama_adapter_format_messages_empty_current_message",
     "tests/unit/shared_python/ai/adapters/test_ollama_adapter.py::test_send_message_errors",
     "tests/unit/shared_python/ai/adapters/test_openai_adapter.py::test_openai_adapter_format_messages_empty_current_message",
-    "tests/unit/shared_python/test_impact_model.py::test_gear_effect_spin",
-    "tests/unit/shared_python/test_impact_model.py::test_high_face_gear_effect_reduces_backspin",
     "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros((2, 2)), values=np.zeros(4))]",
     "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros((3, 2, 2)))]",
     "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros(3), values=np.zeros(4))]",
