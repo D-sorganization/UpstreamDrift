@@ -79,7 +79,12 @@ class NoiseGenerator:
 
         Returns:
             Signal containing the noise.
+
+        Raises:
+            ValueError: If amplitude is negative.
         """
+        if amplitude < 0:
+            raise ValueError(f"amplitude must be non-negative, got {amplitude}")
         t = _validate_time_array(t)
         n = len(t)
 

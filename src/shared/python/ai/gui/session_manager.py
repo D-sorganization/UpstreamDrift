@@ -2,14 +2,14 @@
 
 import json
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from src.shared.python.ai.types import ConversationContext, Message
-from src.shared.python.logging_pkg.logging_config import get_logger
+from shared.python.ai.types import ConversationContext, Message
+from shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -42,12 +42,11 @@ def _session_to_markdown(context: ConversationContext) -> str:
     title = str(context.metadata.get("title", context.session_id or "Chat Session"))
     lines: list[str] = [f"# {title}", ""]
     for msg in context.messages:
-        if not isinstance(msg, Message):
-            continue
-        lines.append(f"## {msg.role}")
-        lines.append("")
-        lines.append(msg.content)
-        lines.append("")
+        if isinstance(msg, Message):
+            lines.append(f"## {msg.role}")
+            lines.append("")
+            lines.append(msg.content)
+            lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -89,7 +88,7 @@ class ChatSessionManager(QObject):
                         context.metadata["archived"] = False
                         context.save_to_file(new_path)
                         logger.info(f"Migrated legacy chat to {new_path.name}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - defensive migration of legacy file
                 logger.warning(f"Failed to migrate legacy chat history: {e}")
 
     def list_sessions(self) -> list[dict[str, Any]]:
@@ -122,13 +121,16 @@ class ChatSessionManager(QObject):
                     timestamp_str = messages[-1].get("timestamp", "")
 
                 try:
-                    dt = (
-                        datetime.fromisoformat(timestamp_str)
-                        if timestamp_str
-                        else datetime.min
-                    )
+                    if timestamp_str:
+                        dt = datetime.fromisoformat(timestamp_str)
+                        if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+                            dt = dt.replace(tzinfo=UTC)
+                        else:
+                            dt = dt.astimezone(UTC)
+                    else:
+                        dt = datetime.min.replace(tzinfo=UTC)
                 except ValueError:
-                    dt = datetime.min
+                    dt = datetime.min.replace(tzinfo=UTC)
 
                 sessions.append(
                     {
@@ -140,7 +142,7 @@ class ChatSessionManager(QObject):
                         "file_path": file_path,
                     }
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - skip corrupted session files during listing
                 logger.warning(f"Failed to read session file {file_path}: {e}")
 
         # Sort by timestamp, newest first
@@ -169,7 +171,7 @@ class ChatSessionManager(QObject):
                 if emit:
                     self.session_loaded.emit(context)
                 return context
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - handle corrupted session file loading
                 logger.error(f"Failed to load session {session_id}: {e}")
         return None
 
@@ -195,7 +197,7 @@ class ChatSessionManager(QObject):
         try:
             context.save_to_file(file_path)
             self.sessions_updated.emit()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - handle disk or serialization failure
             logger.error(f"Failed to save session {context.session_id}: {e}")
 
     def archive_session(self, session_id: str, archived: bool = True) -> bool:
@@ -397,6 +399,6 @@ class ChatSessionManager(QObject):
                 file_path.unlink()
                 self.sessions_updated.emit()
                 return True
-            except Exception as e:
+            except OSError as e:
                 logger.error(f"Failed to delete session {session_id}: {e}")
         return False

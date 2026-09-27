@@ -11,6 +11,7 @@ from __future__ import annotations  # noqa: E402, F404
 from collections.abc import Callable  # noqa: E402
 from dataclasses import dataclass  # noqa: E402
 from enum import Enum  # noqa: E402
+from typing import cast  # noqa: E402
 
 import numpy as np  # noqa: E402
 from scipy import signal as scipy_signal  # noqa: E402
@@ -467,7 +468,7 @@ def create_savgol_filter(
     def apply(values: np.ndarray) -> np.ndarray:
         if len(values) < window_length:
             return values
-        return savgol_filter(values, window_length, polyorder)
+        return cast(np.ndarray, savgol_filter(values, window_length, polyorder))
 
     return apply
 
@@ -575,7 +576,12 @@ def apply_exponential_smoothing(
 
     Returns:
         Smoothed signal.
+
+    Raises:
+        ValueError: If alpha is outside (0, 1].
     """
+    if not (0.0 < alpha <= 1.0):
+        raise ValueError(f"alpha must be in (0, 1], got {alpha}")
     values = signal.values
     smoothed = np.zeros_like(values)
     smoothed[0] = values[0]
