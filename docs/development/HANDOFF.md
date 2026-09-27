@@ -46,6 +46,19 @@
 
 ---
 
+# Past Handoff — Retract the NM-09/NM-12 DIAGNOSTIC Receipt Claims (#10960)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-10960-receipts`
+- Branch: `claude/ud-10960-diagnostic-receipts` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: draft, opened from this branch; entry DL-#10960. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
+- Built: the committed NM-09 checkpoint-matrix receipt lists no `qualified_native` models (the three move to `unqualified`) and its limitation says native ODE replay is not verified; the NM-12 turnover receipt promotes no models (the three move to `unmeasured_models`), `end_to_end_verification.status` is `not_verified` and `all_issues_completed` is false. New `tests/unit/neural_motion/test_diagnostic_receipts_10960.py` fails on the old receipts: a DIAGNOSTIC receipt may not qualify or promote anything, and no nested status except `validation.outcome` may read `passed`.
+- Validation: `pytest tests/unit/neural_motion/ --deselect test_artifact_audit.py` -> 155 passed (the artifact audit times out locally on a 9.1 GB parquet on disk; CI runs it).
+- Next step: CI green, mark ready, arm; then close #10960 with evidence (all code slices already on main).
+
+---
+
 # Past Handoff — Rust Kernel in the Linux Unit-Test Gate (#9411)
 
 - Repository: D-sorganization/UpstreamDrift
