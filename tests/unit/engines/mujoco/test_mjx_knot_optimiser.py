@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-import xml.etree.ElementTree as ET
 
 import pytest
 
