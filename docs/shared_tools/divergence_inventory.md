@@ -25,7 +25,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `_contracts_validators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_seam_redirect.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `ai` | 52 | 75 | 58 | 20 | 1 | 127 |
-| `analysis` | 0 | 0 | 0 | 19 | 0 | 0 |
+| `analysis` | 0 | 0 | 0 | 20 | 0 | 0 |
 | `anthropometrics` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **421** | **279** | **124** | **1516** | **750** | **700** |
+| **Total** | **421** | **279** | **124** | **1517** | **750** | **700** |
 
 ## Diverged Files by Package
 
@@ -151,13 +151,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/adapters/__init__.py` | +36 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/anthropic_adapter.py` | -356 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-18 |
 | `ai/adapters/base.py` | +20 | yes | Dieter Olson 2026-09-25 | Dieter Olson 2026-09-25 |
-| `ai/adapters/bitnet_adapter.py` | +24 | yes | d-sorgcodexagent 2026-09-26 | Dieter Olson 2026-08-25 |
+| `ai/adapters/bitnet_adapter.py` | +24 | yes | Dieter Olson 2026-09-26 | Dieter Olson 2026-08-25 |
 | `ai/adapters/claude_code_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/cli_provider_setup.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/cline_adapter.py` | -42 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `ai/adapters/codex_cli_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/factory.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `ai/adapters/gemini_adapter.py` | +24 | yes | d-sorgcodexagent 2026-09-26 | Dieter Olson 2026-08-18 |
+| `ai/adapters/gemini_adapter.py` | +24 | yes | Dieter Olson 2026-09-26 | Dieter Olson 2026-08-18 |
 | `ai/adapters/gemini_cli_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/github_cli_provider.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/adapters/ollama_adapter.py` | -1852 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
