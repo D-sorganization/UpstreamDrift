@@ -30,6 +30,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The evidence prototype drops its private copies of the knot basis, Adam loop, contact law, weld and plant and calls the merged `src` modules; the root vertical coordinate is read by name.
 - **Next step:** CI green, mark ready and arm the PR for #11046.
 
+### DL-#11044 · Canonical Calibrated Runs Regenerated on Current Code
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #11044
+- **PR:** #11050
+- **Branch:** `claude/ud-11044-canonical`
+- **Paths:** `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/`, `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/`, `docs/development/full_body_models/evidence/ground_support/bisect_11044_receipt.json`, `docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md`, `docs/development/matched_swing_program/README.md`, `scripts/generate_matched_swing_status.py`, `reports/matched_swing_ledger.json`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — seven full pipeline regenerations; provenance-chain, handoff-number, ledger and status freshness tests pass.
+- **Summary:** The canonical calibrated runs are regenerated on current code (driver 7.9 / 34.1 / 84.5 mm, 7-iron 6.6 / 31.6 / 88.6 mm); the pre-HO-8 receipts are kept as history because widened leg bounds explain their lower IK and both record range-of-motion flags, so G1 is not met.
+- **Next step:** None — merged as PR #11050.
+
 ### DL-#11008 · Make Ball-Flight Parity Fixture Export Opt-In
 
 - **State:** in_review

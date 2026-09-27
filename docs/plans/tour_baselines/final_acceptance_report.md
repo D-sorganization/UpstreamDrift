@@ -45,6 +45,8 @@ The authoritative coverage matrix records the state of every registered model ac
 | `full_body_myosuite`            | Driver  | No        | UpstreamDrift | `UNAVAILABLE`         | Labeled placeholder; requires MyoSuite environment   | [#10378](https://github.com/D-sorganization/UpstreamDrift/issues/10378) |
 | `full_body_myosuite`            | 7-Iron  | No        | UpstreamDrift | `UNAVAILABLE`         | Labeled placeholder; requires MyoSuite environment   | [#10378](https://github.com/D-sorganization/UpstreamDrift/issues/10378) |
 
+> **Correction (2026-09-27, #11044):** the `full_body_mujoco` rows cite pre-HO-8 receipts produced with widened leg bounds (`BOUND_WIDENING = 2.0`). Both receipts record IK range-of-motion flags, so the driver row does not meet G1's "0 RoM violations" criterion. Current code with anatomical bounds gives 34.1 mm (driver, `anthro_driver_seeds`) and 31.6 mm (7-iron, `anthro_iron_seeds_zmp`) IK RMS, above G1's 30 mm. See `docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md`.
+
 ---
 
 ## 3. End-to-End Acceptance Test Outcomes
