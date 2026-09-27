@@ -10,8 +10,8 @@ from typing import Any
 import jax
 import jax.numpy as jnp
 import mujoco
-from mujoco import mjx
 import numpy as np
+from mujoco import mjx
 
 from src.shared.python.core.contracts import PreconditionError, require
 from src.shared.python.motion_matching.contact_law import (

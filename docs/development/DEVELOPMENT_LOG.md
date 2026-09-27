@@ -24,7 +24,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #11039 (epic #11006 package 2b)
 - **PR:** #11040
 - **Branch:** `claude/ud-11039-mjx-plant`
-- **Paths:** `src/shared/python/motion_matching/mjx_tracking_plant.py`, `tests/unit/motion_matching/test_mjx_tracking_plant.py`
+- **Paths:** `src/engines/physics_engines/mujoco/python/motion_matching/mjx_tracking_plant.py`, `tests/unit/engines/mujoco/test_mjx_tracking_plant.py`
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — 11 passed in `~/.venv-mjx`; skipped cleanly in Python312; ruff, format and mypy clean on the module.
 - **Summary:** MJX tracking plant with computed-torque control, JAX contact and grip-weld wrenches, and a differentiable rollout. Measured on the toy model: torque residual 7.1e-15, marker RMS 0.28 mm without contact, rollout gradient 2.2e-9 relative to central differences. Packages with a grip closure must supply weld gains; the caller's model is never mutated.
