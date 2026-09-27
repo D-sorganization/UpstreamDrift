@@ -12,6 +12,55 @@
 
 ---
 
+# Past Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008)
+
+## Identity
+
+- Repository: D-sorganization/UpstreamDrift
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-ud-parity-fixture-optin`
+- Branch: `fix/ball-flight-parity-fixture-opt-in` (kept current by merging `origin/main`)
+- Implementation commit: `SELF`
+- Pull request: #11012 — merged to `main` as PR #11012
+- Governing issue: #11008 (DL-#11008); SPEC row keyed by PR #11012
+
+## Objective and Status
+
+- Objective: stop `test_export_reference_vectors` from rewriting the committed golden
+  `tests/parity_fixtures/ball_flight/default_trajectory.json` on every Rust-enabled run.
+- Done: vector construction is in `build_default_trajectory_vectors()`, the schema is in
+  `assert_vector_schema()`, and writing goes through `write_vectors()` (LF, round-trip
+  checked). The export test now writes to `tmp_path` and asserts that the committed bytes
+  are unchanged. `test_regenerate_committed_fixture` rewrites the committed file only when
+  `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1` (exactly `1`).
+- New `TestParityFixtureContract` (not Rust-gated, marked `unit`): checks the opt-in switch,
+  the committed fixture's schema, the fixture path pinned in
+  `src/config/capability_migration.json`, and that malformed vectors are rejected.
+  `pytestmark` became a class-level `@requires_rust` so the contract tests run in every lane.
+- The fixture bytes and the path are unchanged, so the sha256 pin stays valid.
+
+## Validation
+
+- `python -m pytest tests/parity/test_ball_flight_parity.py -o addopts=""` (Python 3.12, Rust
+  kernel available, main merged through #11045): 19 passed, 1 skipped (opt-in regen).
+  `git status` stays clean after the run.
+- With `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1 ... -k regenerate`: the fixture is rewritten (reverted).
+- `ruff check` / `ruff format --check`, the suite-marker ratchet and the SPEC changelog check pass.
+
+## Blockers and Risks
+
+- The unit-test gate intermittently errors in `test_force_plate_stitching.py` (#11034, not
+  this change); #11042 added diagnostics, the fix is pending.
+- The committed golden is stale against the current model: #11004 (merged) did not regenerate
+  it, so it still records carry 187 m against 243 m from the current model. No test compares
+  values against it. Regenerating it and updating the sha256/size pin is a follow-up.
+
+## Next Steps
+
+1. Keep the branch current with `origin/main` until auto-merge lands it.
+2. After merge, file or pick up the fixture regeneration follow-up.
+
+---
+
 # Past Handoff — Replays Start on the Dual-Grip Weld (#11043)
 
 - Repository: D-sorganization/UpstreamDrift
