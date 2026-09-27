@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11032 (epic #11006 package 1)
-- **PR:** pending
+- **PR:** #11035
 - **Branch:** `claude/ud-11032-knot-adam`
 - **Paths:** `src/shared/python/motion_matching/knot_gradient_optimiser.py`, `tests/unit/motion_matching/test_knot_gradient_optimiser.py`
 - **Started:** 2026-09-27
