@@ -7056,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-27 | #11025 | The physics-structured surrogate residual is fitted by STLSQ sparse regression (`surrogates/sparse_residual.py`) or refused; the hand-chosen tanh constant is removed (#11024, epic #11007). |
 | 2026-09-27 | #11023 | Prefix and multiple-shooting fits report the Gauss-Newton parameter covariance (marginal over shooting states, NaN at bounds, none when rank deficient) (#11021, RM#1793). |
 | 2026-09-27 | #11020 | One canonical swing event detector (`analysis/swing_events.py`): analytics, phase detection, swing-capture import and loader alignment delegate to it; parity test pins all four sites (#11014). |
 | 2026-09-26 | #11017 | NM-09 and NM-12 DIAGNOSTIC receipts qualify and promote no models (three listed as `unqualified` / `unmeasured_models`, end-to-end `not_verified`); a test fails closed on any DIAGNOSTIC receipt claiming a pass (#10960). |
