@@ -31,6 +31,7 @@ docs/perturbation_analysis_parity_guidelines.md for the full protocol spec.
 from __future__ import annotations
 
 import logging
+import math
 import time
 from dataclasses import dataclass, field
 from typing import Any, cast
@@ -153,7 +154,7 @@ def _peak_tip_speed(result: SimulationResult) -> float:
             dt,
             1e-12,
         )
-        speeds.append(float(np.linalg.norm(tip_velocity)))
+        speeds.append(float(math.sqrt(np.vdot(tip_velocity, tip_velocity))))
     return float(max(speeds))
 
 
@@ -366,7 +367,7 @@ class PendulumPerturbationAnalyzer:
         last_idx = result.n_steps - 1
         joint_angles_final, joint_velocities_final = _final_joint_arrays(result)
         tip_pos_final, tip_vel_final = _final_tip_kinematics(result, last_idx)
-        tip_speed_final = float(np.linalg.norm(tip_vel_final))
+        tip_speed_final = float(math.sqrt(np.vdot(tip_vel_final, tip_vel_final)))
         peak_speed = _peak_tip_speed(result)
         total_energy_final = float(total_energy(result.states[last_idx], result.params))
         trajectory_rmse, trajectory_max_deviation = self._trajectory_deviation(result)
@@ -602,7 +603,7 @@ class PendulumPerturbationAnalyzer:
                 sim = self._simulate(perturbed)
                 value = self.extract_metrics(sim)[metric]
                 if isinstance(value, np.ndarray):
-                    value = float(np.linalg.norm(value))
+                    value = float(math.sqrt(np.vdot(value, value)))
                 values.append(float(value))
             except (
                 AssertionError,
