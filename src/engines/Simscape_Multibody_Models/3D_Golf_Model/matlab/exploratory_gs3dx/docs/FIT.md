@@ -160,8 +160,8 @@ whole follow-through. With the gaps dropped from the residual, it tracks.
 In sample, the whole-swing offsets absorb the grip mismatch (wrists 11 mm
 median, 34 mm max). Out of sample they do not, which is the table above.
 
-The whole-trial run above used the original grip. It has not been re-run
-with the fitted grip of section 4.
+The whole-trial run above used the original grip. Section 4 re-runs it with
+the fitted grip.
 
 ## 4. Hand-on-Grip Geometry: `gs3dx_fit_grip`
 
@@ -230,6 +230,21 @@ opposite-sides split). The equal split gives the same fit, as the
 identifiability argument predicts: RMS max 17.1 mm, wrists 26.7 mm max,
 club head 33.2 mm max.
 
+**Whole trial, fitted grip** (654 frames, 43 min): 7.0 mm RMS median,
+16.1 mm p95, 19.1 mm max per frame; no frame exceeds 30 mm.
+
+| In sample, whole trial | Original grip | Fitted grip |
+| ---------------------- | ------------- | ----------- |
+| Wrists (max)           | 34 / 37 mm    | 25 / 32 mm  |
+| Club head (median)     | 7 mm          | 12 mm       |
+| Follow-through RMS     | 11.4 mm       | 14.1 mm     |
+| Largest marker offset  | 70 mm         | 47 mm       |
+
+In sample, the original grip's oversized offsets absorbed part of the club
+error. With anatomical offsets that error shows, so the club head and
+follow-through read slightly worse. Out of sample, the fitted grip is
+better everywhere.
+
 - The wrist marker offsets fell from 6–7 cm to 2.8 cm, the expected depth of
   a dorsal wrist marker.
 - **Fixed point.** Re-estimating the grip from the rebuilt model's IK
@@ -244,8 +259,7 @@ club head 33.2 mm max.
 
 ## Next
 
-1. Re-run the whole-trial IK on the fitted grip. Then smooth the tracked
-   joint angles and use them as time-varying references:
+1. Smooth the whole-trial joint angles tracked on the fitted grip and use them as time-varying references:
    - the leg servo references;
    - the prescribed upper-body motion for inverse dynamics.
 2. Compare the summed contact GRF with `gs3dx_kinematic_grf` (1.24–1.33 BW

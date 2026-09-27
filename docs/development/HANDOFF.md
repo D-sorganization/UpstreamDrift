@@ -130,7 +130,9 @@
       shaft stays 10.5), `FitLeft/RightWristStandoff` 1.46 in, and flips the lead standoff by swapping
       its frames' end features (parameter-only, 967 compiled). Out of sample: wrists 88/52 -> 18/15 mm
       median, club head 40 -> 29, RMS max 32 -> 17 mm, wrist marker offsets 6-7 -> 2.8 cm; the grip
-      estimate is a fixed point within 0.07 in. `ik.model` now records the fitted model.
+      estimate is a fixed point within 0.07 in. `ik.model` now records the fitted model. Whole trial on
+      the fitted grip (43 min): RMS 7.0 median / 16.1 p95 / 19.1 mm max, offsets <= 47 mm (scratch
+      `ik_full_grip.mat`, not committed; regenerate with `gs3dx_whole_body_ik(jc, verbose=true)`).
 
 ## Files and Decisions
 
@@ -206,8 +208,7 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 on `GS3DX_Fit` (`docs/FIT.md`): re-run the whole-trial IK on the fitted grip; then
-   smooth the tracked joint angles into time-varying leg servo references and a prescribed upper-body motion (0 added
+2. #10979 on `GS3DX_Fit` (`docs/FIT.md`): smooth the whole-trial tracked joint angles into time-varying leg servo references and a prescribed upper-body motion (0 added
    blocks), read the pelvis residual, and compare the summed contact GRF with
    `gs3dx_kinematic_grf` (1.24-1.33 BW peak ~60 ms before impact).
 3. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
