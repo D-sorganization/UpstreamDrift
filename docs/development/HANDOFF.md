@@ -9,7 +9,20 @@
 - Orchestrator changes on review: the root vertical coordinate is looked up by name (`TranslationInputZ`) instead of a heuristic, and the new CLI test used a coordinate name the documents do not have.
 - Measured parity on the regenerated `anthro_driver_seeds` package (`~/.venv-mjx`, float32), old prototype vs rewired: `--iterations 0` port check 65.16457 vs 65.16494 mm (5.6e-6 relative); `--iterations 3` best replay 50.249 vs 50.295 mm (9.2e-4 relative; float32 reordering differences grow per Adam step: 5.6e-6, 1.6e-5, 7.2e-5, 9.2e-4).
 - Tests: `tests/unit/engines/mujoco/test_mjx_evidence_cli.py` (toy package, `--iterations 2`) passes in `~/.venv-mjx` and skips without JAX; ruff and format clean.
-- Next step: CI green, mark ready and arm the PR.
+
+---
+
+# Past Handoff — Canonical Calibrated Runs Regenerated on Current Code (#11044)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11044-canonical`
+- Branch: `claude/ud-11044-canonical` (baseline `origin/main`)
+- Commit: merged to `main` as PR #11050
+- Pull request: #11050 — merged to `main` as PR #11050
+- Finding: the canonical calibrated runs (driver 5.1 / 27.3 / 74.6 mm, 7-iron 4.4 / 28.6 / 144.0 mm) were produced with `BOUND_WIDENING = 2.0`, and both receipts record IK range-of-motion flags (10 and 9 coordinates). Measured bisect on `main` @ `3a11b5c07`, driver `--static-seeds`: current 7.9 / 34.1 / 84.5 mm; pre-HO-11 base spec identical; `BOUND_WIDENING = 2.0` 6.3 / 28.1 / 53.8 mm with 10 flags; hip zero-twist off 6.0 / 36.0 / 82.0 mm; all three reverted 4.9 / 25.7 / 55.1 mm. 7-iron `--static-seeds --zmp-filter`: 6.6 / 31.6 / 88.6 mm, and 4.1 / 23.5 / 53.4 mm with 9 flags at 2.0.
+- Built: new canonical receipts `evidence/ground_support/anthro_driver_seeds` and `anthro_iron_seeds_zmp` (receipt plus final scaled spec, added to the provenance-chain test), `bisect_11044_receipt.json` generated from the run receipts, `CANONICAL_RUN.md` §2A/§2C/§3 revised, citations updated in `matched_swing_program/README.md`, `full_body_models/HANDOFF.md` and a correction note in `plans/tour_baselines/final_acceptance_report.md`; ledger and status section regenerated.
+- Gate consequence: G1 (whole-swing IK <= 30 mm, 0 RoM violations) is not met by any MuJoCo receipt; the README gate row and the generator's MuJoCo status now say so. `verdicts_2026-09.json` is a dated record and was not edited.
+- Next step: none; merged as PR #11050.
 
 ---
 
