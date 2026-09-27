@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11052-ci`
 - Branch: `claude/ud-11052-ci-exit5` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: see DL-#11052. Closes #11052. Workflow-only change, so it ships alone.
+- Pull request: #11053; entry DL-#11052. Closes #11052. Workflow-only change, so it ships alone.
 - Cause: in `ci-standard.yml` (Run Core Test Suite), a PR-scoped pytest run that collects nothing (exit 5, e.g. a module-level `importorskip("jax")`) fell through to the dependency-light lane with whole-`src` coverage and the 75 % floor. That lane covers about 12 % of `src`, so it failed every such PR (#11048: 2562 passed, "Total coverage: 11.73%").
 - Built: when exit 5 happens and no `src`/dependency coverage target changed, the step now reports "Core test suite NOT EXECUTED" (warning plus step summary, the #8771 wording), sets `core_suite_executed=false` and `coverage_generated=false`, and exits 0. With changed source targets, the existing fallback is unchanged.
 - Tests: `tests/ci/test_ci_infrastructure.py::test_all_skipped_selection_without_source_changes_is_not_executed` (red before, green after); `tests/ci/` 201 passed, 1 skipped (`--tools-mode vendored`).

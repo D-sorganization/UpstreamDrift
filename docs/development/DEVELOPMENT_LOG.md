@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11052
-- **PR:** pending
+- **PR:** #11053
 - **Branch:** `claude/ud-11052-ci-exit5`
 - **Paths:** `.github/workflows/ci-standard.yml`, `tests/ci/test_ci_infrastructure.py`
 - **Started:** 2026-09-27
