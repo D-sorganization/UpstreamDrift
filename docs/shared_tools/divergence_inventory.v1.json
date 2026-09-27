@@ -15,7 +15,7 @@
     "diverged": 279,
     "ud-only": 1516,
     "tools-only": 750,
-    "spelling-only": 122
+    "spelling-only": 124
   },
   "packages": {
     "README.md": {
@@ -93,7 +93,7 @@
       "diverged": 75,
       "ud-only": 20,
       "tools-only": 1,
-      "spelling-only": 56
+      "spelling-only": 58
     },
     "analysis": {
       "identical": 0,
@@ -875,9 +875,9 @@
       "classification": "diverged",
       "package": "__init__.py",
       "subpackage": "",
-      "ud_bytes": 2300,
+      "ud_bytes": 2296,
       "tools_bytes": 1588,
-      "byte_delta": 712,
+      "byte_delta": 708,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -1055,12 +1055,12 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "adapters",
-      "ud_bytes": 11094,
+      "ud_bytes": 13197,
       "tools_bytes": 13173,
-      "byte_delta": -2079,
+      "byte_delta": 24,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/adapters/claude_code_adapter.py",
@@ -1127,12 +1127,12 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "adapters",
-      "ud_bytes": 13607,
+      "ud_bytes": 14756,
       "tools_bytes": 14732,
-      "byte_delta": -1125,
+      "byte_delta": 24,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/adapters/gemini_cli_adapter.py",
@@ -6191,7 +6191,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 30956,
+      "ud_bytes": 30924,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -6215,7 +6215,7 @@
       "classification": "ud-only",
       "package": "config",
       "subpackage": "",
-      "ud_bytes": 35112,
+      "ud_bytes": 35080,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -19727,7 +19727,7 @@
       "classification": "ud-only",
       "package": "pendulum_simulator",
       "subpackage": "",
-      "ud_bytes": 24640,
+      "ud_bytes": 24672,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36047,7 +36047,7 @@
       "classification": "ud-only",
       "package": "validation_pkg",
       "subpackage": "",
-      "ud_bytes": 4895,
+      "ud_bytes": 5061,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36095,7 +36095,7 @@
       "classification": "ud-only",
       "package": "validation_pkg",
       "subpackage": "",
-      "ud_bytes": 36687,
+      "ud_bytes": 15597,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36443,9 +36443,9 @@
     {
       "path": "__init__.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-09",
-        "commit": "dba24ceb7e66420e2bc173eed8fcc41607b6564f"
+        "author": "Dieter Olson",
+        "date": "2026-09-26",
+        "commit": "99553df908f47c8adf1df435a05dbc781c0a9e97"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -36521,9 +36521,9 @@
     {
       "path": "ai/adapters/bitnet_adapter.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgcodexagent",
+        "date": "2026-09-26",
+        "commit": "02f46a65530d353f4d93be24ef10888d8c95584e"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -36599,9 +36599,9 @@
     {
       "path": "ai/adapters/gemini_adapter.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgcodexagent",
+        "date": "2026-09-26",
+        "commit": "02f46a65530d353f4d93be24ef10888d8c95584e"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -37952,8 +37952,8 @@
       "path": "humanoid_character_builder/__init__.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-26",
+        "commit": "2d88ec694bdb2c5ed25b8010cdde7ac7f4ac88e7"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -38810,8 +38810,8 @@
       "path": "model_generation/inertia/calculator.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-26",
+        "commit": "2d88ec694bdb2c5ed25b8010cdde7ac7f4ac88e7"
       },
       "tools": {
         "author": "Dieter Olson",
