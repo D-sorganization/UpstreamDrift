@@ -86,8 +86,10 @@ with a capture-derived pelvis path. Tuning contact or gains will not fix it.
 
 ## Open Items
 
-- The trunk mass double-count (109.4 kg model) needs an owner decision.
-- There is no GRF data to fit or validate the contact parameters.
+- The trunk mass double-count (109.4 kg model) is resolved in
+  `GS3DX_Golfer` (80 kg, [ANTHROPOMETRY.md](ANTHROPOMETRY.md)).
+- There is no GRF data to fit the contact parameters. The total GRF from the
+  capture kinematics (`gs3dx_kinematic_grf`) is the validation reference.
 - The servo holds a constant stance. A swing needs time-varying leg
   references or torques from inverse dynamics, and at this budget they must
   replace the Constant rather than add blocks.

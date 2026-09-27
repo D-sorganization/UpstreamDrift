@@ -8,7 +8,7 @@
 - Baseline commit: `2d5830d18` (origin/main)
 - Implementation commit: `SELF`
 - Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
-- Governing issue/epic: #10950 (children #10951–#10959)
+- Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011)
 - Lease session: `claude-deskcomputer-20260926-gs3dx`
 - Development log: `DL-#10950`
 
@@ -24,6 +24,8 @@
   GS3DX-8 (#10958) weld stance + integration run and GS3DX-9 (#10959) visual QA done;
   follow-up GS3DX-10 (#10979) drives the legs and refits the pelvis inputs. GS3DX-11
   (#10985) data audit and GS3DX-12 (#10986) ground contact done (`GS3DX_FullBodyContact`).
+  #11011 typical segment masses done (`GS3DX_Golfer`, 80 kg de Leva) plus the force-plate-free
+  total GRF from the capture (`gs3dx_kinematic_grf`); owner: no force plates will be captured.
 - Completed:
   1. `gs3dx_setup` (session path, cache redirect, no `savepath`), `gs3dx_names`,
      `gs3dx_assert_no_shadowing`, `gs3dx_save_model` (write guard),
@@ -91,6 +93,16 @@
   14. **Block budget correction:** the Home license counts the _compiled_ model; FullBody is 751
       uncompiled but 945 compiled (Quat 594 -> 740). `gs3dx_block_budget(mdl, compiled=true)` adds
       `.compiled_total`; FullBodyContact compiles to 967 with a 25-block validation reserve.
+  15. #11011 typical masses: `gs3dx_anthropometry` (one de Leva table: masses + COM fractions;
+      `gs3dx_leg_table` now reads its leg masses from it, values unchanged); `gs3dx_build_golfer`
+      copies FullBodyContact to `GS3DX_Golfer`, sets 15 upper-body solids to `Golfer*` kg variables
+      (block count unchanged, 967 compiled). Sensed mass 80.393 kg = 80 + 0.393 equipment (was 109.4).
+      From rest it stands (Newton 0.46/2.37 N\*s, slip 1.4 mm, no lift); the impact drive still tips it
+      (start momentum, and the drive torques were fitted to the 77.6 kg upper body).
+      `gs3dx_capture_markers` (C3D loader, club clusters, impact frame, address target frame; shared
+      with `gs3dx_capture_stance`); `gs3dx_kinematic_grf`: total GRF = sum m a - (M+m_club) g from
+      the capture COM: address 1.001 BW, pre-impact peak 1.24-1.33 BW ~60 ms before impact (6-15 Hz),
+      club must be included (+0.57 BW). Plan without force plates: `docs/ANTHROPOMETRY.md`.
 
 ## Files and Decisions
 
@@ -141,13 +153,16 @@ Creator` (newline); find it by BlockType.
 - Deleting one line of a physical net deletes the whole net: removing the foot weld also cut
   ankle Distal -> Foot COM, which `gs3dx_build_contact` redraws and asserts.
 - `gs3dx_stance_frames` closes the model it simulates: read model-workspace values first.
+- The impact drive file sets `LowerTorsoMass`, `UpperTorsoMass`, `*ShoulderMass`, `*ArmMass` (unused
+  by any solid); the new masses use `Golfer*` names so a drive can never overwrite them.
+- A scratch `poly.m` in the MATLAB run folder shadowed the built-in (broke `butter`); renamed.
 - `gs3dx_build_lower_body`/FullBody tests still cap the _uncompiled_ count at 900; FullBody's
   compiled count (945) would fail that cap. Left as is (existing test); flagged in the PR.
 
 ## Validation
 
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
-  → 70 passed / 0 failed (2026-09-26, after #10985/#10986: capture 4, leg kinematics 4, contact 7
+  → 78 passed / 0 failed (2026-09-27, after #11011: golfer 6, capture +2 kinematic GRF; earlier 70 after #10985/#10986: capture 4, leg kinematics 4, contact 7
   new; the FK test failed once on a closed-model handle, fixed and rerun 4/4). The capture tests
   need MATLAB pyenv with ezc3d (they are skipped otherwise).
 - `gs3dx_layout_qa` on the rebuilt diagrams: 0 overlapping blocks.
@@ -161,7 +176,9 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. Owner decides the trunk mass (DATA_AUDIT.md) and whether GRF data can be obtained.
-3. #10979: derive a pelvis path from the capture, refit the upper-body inputs on
-   `GS3DX_FullBodyContact`, replace the stance-hold Constant with time-varying leg references
-   (no added blocks: 33 compiled blocks of headroom).
+2. #10979 on `GS3DX_Golfer` (plan in `docs/ANTHROPOMETRY.md`): pelvis 6-DOF path from the four
+   waist markers -> leg IK references (0 added blocks), refit the upper-body drive with the pelvis
+   still actuated and read its force as the residual, then compare the summed contact GRF with
+   `gs3dx_kinematic_grf` through the downswing (1.24-1.33 BW peak ~60 ms before impact).
+3. Optional owner inputs: the golfer's height/mass and tape-measured arm/shoulder lengths (model
+   forearm +28%, shoulder hubs ~+27% vs typical).
