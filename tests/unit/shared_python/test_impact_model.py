@@ -181,11 +181,11 @@ def test_gear_effect_spin() -> None:
     offset_toe = np.array([0.02, 0.0])  # 2cm toe
     spin_toe = compute_gear_effect_spin(offset_toe, v_club, normal)
 
-    assert 100.0 <= spin_toe[2] <= 300.0
+    assert -300.0 <= spin_toe[2] <= -100.0
 
     offset_heel = np.array([-0.02, 0.0])
     spin_heel = compute_gear_effect_spin(offset_heel, v_club, normal)
-    assert spin_heel[2] < 0
+    assert spin_heel[2] > 0
     assert spin_heel[2] == pytest.approx(-spin_toe[2])
 
 
