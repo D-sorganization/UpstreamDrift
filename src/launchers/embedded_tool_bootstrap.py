@@ -75,6 +75,7 @@ FALLBACK_ADAPTER_MODULES = (
 _bootstrap_complete = False
 _registered_tools: list[str] = []
 _bootstrap_failures: list[tuple[str, str]] = []
+_module_registered_tools: dict[str, list[str]] = {}
 
 
 def _iter_entry_point_adapter_modules() -> list[str]:
@@ -203,8 +204,27 @@ def bootstrap_embeddable_tools() -> list[str]:
                 _bootstrap_failures.append((module_path, repr(e)))
                 continue
             new_ids = sorted(set(EMBEDDABLE_TOOL_REGISTRY) - before)
+        if not new_ids and module_path in _module_registered_tools:
+            new_ids = [
+                tid
+                for tid in _module_registered_tools[module_path]
+                if tid in EMBEDDABLE_TOOL_REGISTRY
+            ]
+        elif not new_ids and module_path in sys.modules:
+            pkg_name = module_path.rsplit(".", 1)[0]
+            matched = [
+                tid
+                for tid, tool in EMBEDDABLE_TOOL_REGISTRY.items()
+                if getattr(type(tool), "__module__", "") == module_path
+                or getattr(type(tool), "__module__", "").startswith(pkg_name)
+            ]
+            if matched:
+                new_ids = matched
         if new_ids:
-            registered.extend(new_ids)
+            _module_registered_tools[module_path] = list(new_ids)
+            for tid in new_ids:
+                if tid not in registered:
+                    registered.append(tid)
             logger.debug(f"Bootstrapped embeddable tools: {new_ids}")
         else:
             logger.debug(
