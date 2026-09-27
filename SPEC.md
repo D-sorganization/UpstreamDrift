@@ -7057,6 +7057,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-27 | #11047 | Tracked replays and the downswing runner start from the reference velocity projected onto the dual-grip weld (`motion_matching/weld_manifold.py`, `FullBodySimulator.consistent_velocity`); the acceleration-level KKT conserved a 187 mm/s start violation that drove the `--fit-closure` replay to 861 mm (#11043). |
+| 2026-09-27 | #11041 | Replaced np.linalg.norm with math.sqrt(np.vdot) for faster 1D array magnitude in pendulum perturbation analyzer |
 | 2026-09-27 | #11042 | The force-plate stitching fixture reports module identity (file, spec, meta path, related module entries) instead of a bare `AttributeError` when its import resolves to a module without the processor class (refs #11034). |
 | 2026-09-27 | #11040 | MJX tracking plant with computed-torque control, JAX contact and grip-weld wrenches and a differentiable rollout (`physics_engines/mujoco/python/motion_matching/mjx_tracking_plant.py`, JAX-only, not imported by the package); grip closures require explicit weld gains and the caller's model is never mutated (#11039, epic #11006). |
 | 2026-09-27 | #11038 | Differentiable JAX port of the shared sphere-ground contact law and grip weld (`motion_matching/jax_contact.py`, JAX-only, not imported by the package) with measured parity against `contact_law` (#11037, epic #11006). |
