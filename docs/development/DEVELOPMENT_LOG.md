@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-27 — #10979 GS3DX_Fit: segment lengths and hand-on-grip geometry from the capture (parameter-only, 967 compiled); gs3dx_fit_grip: sphere-fit wrist centres in the club-marker frame, 77 mm along / 72–74 mm across the grip, lead standoff flipped; out-of-sample IK RMS max 32 → 17 mm, wrists 88/52 → 18/15 mm median, grip estimate a fixed point within 0.07 in; test_gs3dx_fit 7/7; whole trial on the fitted grip RMS 7.0 median / 19.1 mm max.
+- **Last verified:** 2026-09-27 — #10979 leg servo references: gs3dx_leg_reference (IK pelvis path, measured levelled foot path, constant foot torsion, exact leg IK; knees 19/20 mm median to impact) and GS3DX_FitLegs (From Workspace servo feedforward, one block for one, 967 compiled) standing from rest with slip ≤ 1.8 mm, no lift, Newton closed.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Smooth the fitted-grip whole-trial IK leg angles into a time-varying LegAngleReference for GS3DX_Fit's leg servo (From Workspace in place of the Leg Torque Commands Constant).
+- **Next step:** Compute inverse-dynamics joint torques of the whole-trial IK upper-body motion on GS3DX_FitLegs and play them with PD tracking in place of the passive impact drive.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

@@ -257,10 +257,106 @@ better everywhere.
 - marker offsets under 6 cm (tightened from 12 cm);
 - the grip fixed point within 0.25 in.
 
+## 5. Leg Servo References: `gs3dx_leg_reference`, `GS3DX_FitLegs`
+
+`gs3dx_leg_reference(ik, jc, cap)` turns the whole-trial IK on the fitted
+grip into the 12 angles the leg servo tracks
+(`[L hip X Y Z, knee, ankle X Y, then R]`, in degrees) and their rates, on
+the capture's time base.
+
+- **Pelvis path.** The model's own pelvis frame (the follower of the pelvis
+  joint, `Lower Torso`) at every IK frame. It is also returned in
+  pelvis-joint coordinates for the start state.
+- **Foot path.** The feet are not planted. The trail heel is already 36 mm
+  up at impact, and a planted trail foot went out of reach 8 frames later.
+  Each foot follows the ankle joint centre. Its orientation is the address
+  foot frame, carried by the rotation of the (ankle, ToeIn, ToeOut) triad
+  since address.
+- **Floor.** The right ankle-centre proxy sat 18.5 mm above the left at
+  address, which left the right foot hanging above the ground. Each foot
+  path is shifted by a constant (±9.3 mm) so both address soles sit on
+  their mean height.
+- **Filtering.** Positions and quaternions are filtered with a 4th-order
+  zero-phase Butterworth at 10 Hz.
+- **Torsion.** The model ankle is a universal joint, with no rotation about
+  the shank. A foot pose therefore fixes the knee's swivel about the
+  hip-ankle line. Two alternatives were tried and rejected:
+
+  - prescribing the measured foot yaw put the knees 4–5 cm from the capture
+    (p95 8–9 cm);
+  - a free yaw matched the knees but spun the lead foot by up to 99° once
+    the knee straightened.
+
+  So one constant yaw offset per foot is fitted over the still address
+  frames, weighing the knee centre, ankle position and sole normal. The
+  offsets are +24.0° (lead) and −17.9° (trail).
+
+- **Leg angles.** `gs3dx_leg_ik` solves exactly (six angles for six
+  foot-pose numbers) for every filtered pelvis pose.
+- **Reach.** Where the hip-to-ankle distance exceeds 0.999 of the leg
+  length, the ankle target moves toward the hip onto it. This is at most
+  1.5 mm, only after impact (from frame 506).
+
+| Whole trial (654 frames)         | Lead         | Trail        |
+| -------------------------------- | ------------ | ------------ |
+| Knee vs capture, to impact       | 19 mm median | 20 mm median |
+| Knee vs capture, to impact (p95) | 56 mm        | 49 mm        |
+| Knee vs capture at impact        | 48 mm        | 55 mm        |
+| Address torsion fit, knee        | 14 mm        | 13 mm        |
+| Peak knee rate to impact         | 634 deg/s    | 480 deg/s    |
+
+The knees drift from the capture through the downswing because the real
+shank rotates over the foot, which the model's ankle cannot do. A
+three-axis ankle would remove this. It is a model change, left for a later
+variant. The pelvis path and the foot path are met exactly.
+
+`gs3dx_build_fit_legs(info, ref)` builds `GS3DX_FitLegs` from `GS3DX_Fit`:
+
+- **Servo.** The `Lower Body/Leg Torque Commands` Constant becomes a
+  From Workspace block of the same name. It plays
+  `LegTorqueCommand + Kp .* LegReferenceAngle + Kd .* LegReferenceRate` on
+  `LegReferenceTime`, so the servo torque is
+  `LegTorqueCommand + Kp (q_ref − q) + Kd (qd_ref − qd)`. It is one block for
+  one (773 nonvirtual, 967 compiled).
+- **Start state.** The legs and the pelvis start on the reference. The
+  start variables are also saved as the struct `LegReferenceStart`. The
+  drive file overrides two of them, so the caller passes the struct after
+  the drive:
+  - the pelvis start;
+  - `PlaneTilt`, the tilt of the pelvis joint base about World X. The drive
+    file sets 22.5°; the saved model, the IK and the reference use 30°.
+    This mismatch first tilted the start pelvis by 7.5° and drove the feet
+    13 BW into the ground.
+- **Ground.** The capture frame is the model World, so `GroundRotation` is
+  the identity and `GroundOffset` lies under the start feet.
+
+Standing from rest at address (the `GS3DX_Golfer` standing test, same
+bounds):
+
+| Model                  | Slip L / R   | Lift L / R   | Support (BW) | Pelvis travel |
+| ---------------------- | ------------ | ------------ | ------------ | ------------- |
+| `GS3DX_Golfer`         | 1.3 / 1.4 mm | 0 / 0 mm     | 0 – 1.14     | 29 mm         |
+| `GS3DX_Fit` (stale q0) | 1.5 / 1.5 mm | 2.8 / 3.0 mm | 0.44 – 3.07  | 33 mm         |
+| `GS3DX_FitLegs`        | 1.8 / 1.5 mm | 0 / 0 mm     | 0.24 – 1.06  | 38 mm         |
+
+`GS3DX_Fit` still holds the stance angles computed for the old leg lengths,
+and it lifts its feet. The pelvis travel in every row comes from the
+upper-body drive. The impact drive is passive (`ModelingMode` 0: every
+upper-body joint torque is zero), and it starts mid-downswing, so it is not
+synchronized with the capture.
+
+`test_gs3dx_fit_legs` checks the following on an IK of every 18th frame to
+impact:
+
+- the reference against the foot path (1e-6);
+- the clamp, levelling, torsion and knee bounds;
+- the servo block and the start variables;
+- the standing test.
+
 ## Next
 
-1. Smooth the whole-trial joint angles tracked on the fitted grip and use them as time-varying references:
-   - the leg servo references;
-   - the prescribed upper-body motion for inverse dynamics.
+1. Upper-body drive: inverse dynamics of the whole-trial IK motion as
+   feedforward torques, plus PD tracking of the IK joint angles, in place
+   of the passive impact drive.
 2. Compare the summed contact GRF with `gs3dx_kinematic_grf` (1.24–1.33 BW
    peak about 60 ms before impact) and read the pelvis residual.

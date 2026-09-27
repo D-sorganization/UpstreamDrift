@@ -133,6 +133,17 @@
       estimate is a fixed point within 0.07 in. `ik.model` now records the fitted model. Whole trial on
       the fitted grip (43 min): RMS 7.0 median / 16.1 p95 / 19.1 mm max, offsets <= 47 mm (scratch
       `ik_full_grip.mat`, not committed; regenerate with `gs3dx_whole_body_ik(jc, verbose=true)`).
+  18. #10979 leg servo references (`docs/FIT.md` section 5): `gs3dx_leg_reference(ik, jc, cap)` -> 12
+      servo angles/rates from the IK pelvis path (joint j1 follower = 'Lower Torso') and the measured
+      foot path (ankle centre + ankle/ToeIn/ToeOut triad rotation; not planted: trail heel +36 mm at
+      impact), feet levelled +-9.3 mm, 10 Hz Butterworth, a constant torsion per foot (+24.0/-17.9 deg,
+      the universal ankle has no axial DOF), exact `gs3dx_leg_ik`, reach clamp <= 1.5 mm (post impact).
+      Knees vs capture to impact 19/20 mm median, 48/55 mm at impact (the missing ankle axial DOF).
+      `gs3dx_build_fit_legs` -> `GS3DX_FitLegs`: Leg Torque Commands Constant -> From Workspace
+      (one for one, 967 compiled), start state + `LegReferenceStart` struct (pass it after the drive:
+      the drive file sets PlaneTilt 22.5 vs the saved 30 deg, which tilted the start pelvis 7.5 deg),
+      ground under the start feet (capture frame = World). Standing from rest: slip 1.8/1.5 mm, lift 0,
+      Newton pass. The impact drive is PASSIVE (ModelingMode 0 zeroes every upper-body torque).
 
 ## Files and Decisions
 
@@ -194,6 +205,9 @@ Creator` (newline); find it by BlockType.
 - From an empty cwd: `matlab.exe -batch "addpath('<exploratory_gs3dx>'); info=gs3dx_setup(); runtests(fullfile(info.root,'tests'))"`
   → 85 passed / 0 failed (2026-09-27, with test_gs3dx_fit 7/7 incl. the fitted-grip out-of-sample
   IK and the grip fixed point; the IK test takes ~5 min). Earlier 83 (test_gs3dx_fit 5).
+  Plus `runtests('test_gs3dx_fit_legs')` → 4 passed / 0 failed (2026-09-27; setup runs a
+  whole-body IK, 11–25 min; clamp 0.0 mm, knee median 25/31 mm, p95 58/61 mm; standing slip
+  1.8/1.5 mm, lift 0).
   Earlier 78 (after #11011: golfer 6, capture +2 kinematic GRF; earlier 70 after #10985/#10986: capture 4, leg kinematics 4, contact 7
   new; the FK test failed once on a closed-model handle, fixed and rerun 4/4). The capture tests
   need MATLAB pyenv with ezc3d (they are skipped otherwise).
@@ -208,7 +222,8 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 on `GS3DX_Fit` (`docs/FIT.md`): smooth the whole-trial tracked joint angles into time-varying leg servo references and a prescribed upper-body motion (0 added
-   blocks), read the pelvis residual, and compare the summed contact GRF with
-   `gs3dx_kinematic_grf` (1.24-1.33 BW peak ~60 ms before impact).
+2. #10979 upper-body drive (owner: inverse dynamics plus PD tracking): inverse dynamics of the
+   whole-trial IK motion as feedforward joint torques plus PD tracking of the IK joint angles on
+   `GS3DX_FitLegs`, in place of the passive impact drive; then read the pelvis residual and compare
+   the summed contact GRF with `gs3dx_kinematic_grf` (1.24-1.33 BW peak ~60 ms before impact).
 3. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
