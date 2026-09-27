@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-27 — #10979 GS3DX_Fit: segment lengths and hand-on-grip geometry from the capture (parameter-only, 967 compiled); gs3dx_fit_grip: sphere-fit wrist centres in the club-marker frame, 77 mm along / 72–74 mm across the grip, lead standoff flipped; out-of-sample IK RMS max 32 → 17 mm, wrists 88/52 → 18/15 mm median, grip estimate a fixed point within 0.07 in; test_gs3dx_fit 7/7.
+- **Last verified:** 2026-09-27 — #10979 GS3DX_Fit: segment lengths and hand-on-grip geometry from the capture (parameter-only, 967 compiled); gs3dx_fit_grip: sphere-fit wrist centres in the club-marker frame, 77 mm along / 72–74 mm across the grip, lead standoff flipped; out-of-sample IK RMS max 32 → 17 mm, wrists 88/52 → 18/15 mm median, grip estimate a fixed point within 0.07 in; test_gs3dx_fit 7/7; whole trial on the fitted grip RMS 7.0 median / 19.1 mm max.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Re-run the whole-trial gs3dx_whole_body_ik on the fitted-grip GS3DX_Fit and smooth its joint angles into time-varying leg servo references.
+- **Next step:** Smooth the fitted-grip whole-trial IK leg angles into a time-varying LegAngleReference for GS3DX_Fit's leg servo (From Workspace in place of the Leg Torque Commands Constant).
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
