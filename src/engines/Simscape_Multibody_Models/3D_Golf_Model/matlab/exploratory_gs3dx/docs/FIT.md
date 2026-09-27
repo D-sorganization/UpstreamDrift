@@ -160,24 +160,93 @@ whole follow-through. With the gaps dropped from the residual, it tracks.
 In sample, the whole-swing offsets absorb the grip mismatch (wrists 11 mm
 median, 34 mm max). Out of sample they do not, which is the table above.
 
-**The body is matched; the hands are not.**
+The whole-trial run above used the original grip. It has not been re-run
+with the fitted grip of section 4.
 
-- The pelvis, legs, shoulders and lead arm generalize to within 1–3 cm.
-- The hand and club errors are constant through the downswing, not noise.
-- In the data the hands are rigid: wrist-to-wrist spacing is
-  0.147 ± 0.009 m, and grip to head is 0.787 ± 0.005 m.
+## 4. Hand-on-Grip Geometry: `gs3dx_fit_grip`
 
-What does not match is **where the model's hands sit on the grip**: each
-hand's position along the shaft and its standoff. Those are fixed grip
-parameters from the original model. A forearm-frame marker offset cannot
-absorb them in every pose.
+With the original grip, the pelvis, legs and shoulders generalized to 1–3 cm,
+but the hands and club did not. What was wrong is **where the model's hands
+sit on the grip**. `GS3DX_Golfer` puts both wrist joint centres 1 in to the
+same side of the grip axis, 3 in apart along it. Those are literal lengths
+in the original model.
+
+`gs3dx_fit_grip(cap, ik)` measures the golfer's grip from the capture:
+
+1. **Club pose.** The two three-marker club clusters are rigid (pairwise
+   distances within 4 mm). Each frame's club pose is the least-squares
+   rigid fit of the six markers.
+2. **Wrist centres.** Both hands are welded to the club in the model, so
+   each wrist joint centre is a fixed point in the club frame. The
+   `WristTop` marker (forearm side of the joint) moves on a sphere about it.
+   A sphere fit of each `WristTop` trajectory in the club frame gives the
+   functional wrist centre (radius 34 / 50 mm, fit RMS 11 / 6 mm).
+3. **Shaft axis.** The model's two hand-sphere centres lie on the grip axis.
+   From the IK, they are carried into the club-marker frame and averaged
+   (spread 0.5–2°). Only the axis is used, not the model's roll of the club
+   about it.
+4. **Mapping.** The wrist centres' positions along the axis give the lead
+   hand position and the hand spacing.
+
+**Only the separation across the shaft is identifiable.** Moving the shaft
+sideways relative to both wrists moves the club head in the club frame, and
+the IK's club-head marker offset absorbs that. No marker sits on the shaft
+axis. Two estimates, from two model grips, agreed on the separation (72 and
+74 mm) but not on its split between the hands (53/19 mm on opposite sides,
+then 87/21 mm on the same side).
+
+The separation is therefore split equally: one standoff on each side, as
+the palms face each other across the grip.
+
+| Variable (in)           | GS3DX_Golfer   | GS3DX_Fit (from the capture) |
+| ----------------------- | -------------- | ---------------------------- |
+| `FitButtToLeadHand`     | 2.5            | 3.08                         |
+| `FitHandSpacing`        | 3.0            | 3.03 (77 mm)                 |
+| `FitGripToShaft`        | 5.0            | 4.39 (butt to shaft 10.5 in) |
+| `FitLeftWristStandoff`  | 1.0, same side | 1.46, **flipped**            |
+| `FitRightWristStandoff` | 1.0            | 1.46                         |
+
+`gs3dx_build_fit` re-points the six grip solids at these variables. It also
+swaps the end features of the lead standoff's two frames: the wrist frame
+moves to the bottom curve and the grip frame to the top. That reverses the
+standoff direction without changing either frame's axes. The edit is
+parameter-only: the block count is unchanged and the model still compiles
+to 967 blocks.
+
+**Out of sample** (the same backswing calibration and downswing tracking as
+section 3; the fitted grip tracked every 6th frame):
+
+| Target                | Original grip | Fitted grip |
+| --------------------- | ------------- | ----------- |
+| Lead wrist (median)   | 88 mm         | 18 mm       |
+| Trail wrist (median)  | 52 mm         | 15 mm       |
+| Trail elbow (median)  | 30 mm         | 16 mm       |
+| Club head (median)    | 40 mm         | 29 mm       |
+| RMS per frame (max)   | 32 mm         | 17 mm       |
+| Largest marker offset | 68 mm         | 46 mm       |
+
+The per-target medians come from the first-pass trial (a 53/19 mm
+opposite-sides split). The equal split gives the same fit, as the
+identifiability argument predicts: RMS max 17.1 mm, wrists 26.7 mm max,
+club head 33.2 mm max.
+
+- The wrist marker offsets fell from 6–7 cm to 2.8 cm, the expected depth of
+  a dorsal wrist marker.
+- **Fixed point.** Re-estimating the grip from the rebuilt model's IK
+  returns its own values within 0.07 in.
+
+`test_gs3dx_fit` pins all of this:
+
+- wrists under 35 mm and the club head under 40 mm out of sample;
+- RMS under 25 mm (tightened from 35 mm);
+- marker offsets under 6 cm (tightened from 12 cm);
+- the grip fixed point within 0.25 in.
 
 ## Next
 
-1. Fit the hand-on-grip geometry to the data (both hands' positions along
-   the shaft and the standoffs), with the same out-of-sample check.
-2. Smooth the tracked joint angles and use them as time-varying references:
+1. Re-run the whole-trial IK on the fitted grip. Then smooth the tracked
+   joint angles and use them as time-varying references:
    - the leg servo references;
    - the prescribed upper-body motion for inverse dynamics.
-3. Compare the summed contact GRF with `gs3dx_kinematic_grf` (1.24–1.33 BW
+2. Compare the summed contact GRF with `gs3dx_kinematic_grf` (1.24–1.33 BW
    peak about 60 ms before impact) and read the pelvis residual.

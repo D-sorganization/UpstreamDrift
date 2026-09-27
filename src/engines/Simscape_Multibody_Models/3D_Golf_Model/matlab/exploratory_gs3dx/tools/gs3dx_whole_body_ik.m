@@ -42,6 +42,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %     verbose             (false) print every frame fit
 %
 %   IK fields:
+%     .model       the model fitted
 %     .names       target names; .offsets (struct, m, body frame)
 %     .frames      tracked frames; .t (s)
 %     .joint_ids   KinematicsSolver joint position variables; .joint
@@ -99,6 +100,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     n = numel(opts.frames);
     best = local_track(s, opts.frames, p, g, off, data, valid, lm);
 
+    ik.model = opts.model;
     ik.names = s.names;
     ik.offsets = cell2struct(num2cell(off, 1).', s.names, 1);
     ik.frames = opts.frames;
