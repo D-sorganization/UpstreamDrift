@@ -7056,6 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-27 | #11050 | Canonical calibrated ground-support runs regenerated on current code (`anthro_driver_seeds` 7.9/34.1/84.5 mm, `anthro_iron_seeds_zmp` 6.6/31.6/88.6 mm); the pre-HO-8 receipts are history because `BOUND_WIDENING = 2.0` explains their lower IK and both record range-of-motion flags, so G1 is recorded as not met; measured bisect in `bisect_11044_receipt.json` (#11044). |
 | 2026-09-27 | #11047 | Tracked replays and the downswing runner start from the reference velocity projected onto the dual-grip weld (`motion_matching/weld_manifold.py`, `FullBodySimulator.consistent_velocity`); the acceleration-level KKT conserved a 187 mm/s start violation that drove the `--fit-closure` replay to 861 mm (#11043). |
 | 2026-09-27 | #11041 | Replaced np.linalg.norm with math.sqrt(np.vdot) for faster 1D array magnitude in pendulum perturbation analyzer |
 | 2026-09-27 | #11042 | The force-plate stitching fixture reports module identity (file, spec, meta path, related module entries) instead of a bare `AttributeError` when its import resolves to a module without the processor class (refs #11034). |

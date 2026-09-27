@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11044-canonical`
 - Branch: `claude/ud-11044-canonical` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: see DL-#11044. Closes #11044.
+- Pull request: #11050; entry DL-#11044. Closes #11044.
 - Finding: the canonical calibrated runs (driver 5.1 / 27.3 / 74.6 mm, 7-iron 4.4 / 28.6 / 144.0 mm) were produced with `BOUND_WIDENING = 2.0`, and both receipts record IK range-of-motion flags (10 and 9 coordinates). Measured bisect on `main` @ `3a11b5c07`, driver `--static-seeds`: current 7.9 / 34.1 / 84.5 mm; pre-HO-11 base spec identical; `BOUND_WIDENING = 2.0` 6.3 / 28.1 / 53.8 mm with 10 flags; hip zero-twist off 6.0 / 36.0 / 82.0 mm; all three reverted 4.9 / 25.7 / 55.1 mm. 7-iron `--static-seeds --zmp-filter`: 6.6 / 31.6 / 88.6 mm, and 4.1 / 23.5 / 53.4 mm with 9 flags at 2.0.
 - Built: new canonical receipts `evidence/ground_support/anthro_driver_seeds` and `anthro_iron_seeds_zmp` (receipt plus final scaled spec, added to the provenance-chain test), `bisect_11044_receipt.json` generated from the run receipts, `CANONICAL_RUN.md` §2A/§2C/§3 revised, citations updated in `matched_swing_program/README.md`, `full_body_models/HANDOFF.md` and a correction note in `plans/tour_baselines/final_acceptance_report.md`; ledger and status section regenerated.
 - Gate consequence: G1 (whole-swing IK <= 30 mm, 0 RoM violations) is not met by any MuJoCo receipt; the README gate row and the generator's MuJoCo status now say so. `verdicts_2026-09.json` is a dated record and was not edited.
