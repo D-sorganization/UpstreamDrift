@@ -36,6 +36,16 @@ CURRENT_BASELINE_CAPTURES = (
         DOCS / "full_body_spec_anthro_iron7.json",
         EVIDENCE / "anthro_iron",
     ),
+    (
+        "anthro_driver_seeds",
+        DOCS / "full_body_spec_anthro_driver.json",
+        EVIDENCE / "anthro_driver_seeds",
+    ),
+    (
+        "anthro_iron_seeds_zmp",
+        DOCS / "full_body_spec_anthro_iron7.json",
+        EVIDENCE / "anthro_iron_seeds_zmp",
+    ),
 )
 
 

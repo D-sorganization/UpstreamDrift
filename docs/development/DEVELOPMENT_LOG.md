@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11043 · Replays Start on the Dual-Grip Weld
+### DL-#11044 · Canonical Calibrated Runs Regenerated on Current Code
 
 - **State:** in_review
+- **Owner:** claude
+- **Issue:** #11044
+- **PR:** pending
+- **Branch:** `claude/ud-11044-canonical`
+- **Paths:** `docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/`, `docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/`, `docs/development/full_body_models/evidence/ground_support/bisect_11044_receipt.json`, `docs/development/full_body_models/evidence/ground_support/CANONICAL_RUN.md`, `docs/development/matched_swing_program/README.md`, `scripts/generate_matched_swing_status.py`, `reports/matched_swing_ledger.json`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — seven full pipeline regenerations; provenance-chain, handoff-number, ledger and status freshness tests pass.
+- **Summary:** The canonical calibrated runs are regenerated on current code (driver 7.9 / 34.1 / 84.5 mm, 7-iron 6.6 / 31.6 / 88.6 mm); the pre-HO-8 receipts are kept as history because widened leg bounds explain their lower IK and both record range-of-motion flags, so G1 is not met.
+- **Next step:** CI green, mark ready and arm the PR for #11044.
+
+### DL-#11043 · Replays Start on the Dual-Grip Weld
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #11043
 - **PR:** #11047
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — full pipeline `--static-seeds --fit-closure` 861.2 → 83.0 mm dynamics RMS (weight fraction max 50.0 → 3.72); `--static-seeds` 83.0 → 84.5 mm; 41 targeted tests pass.
 - **Summary:** Tracked replays start from the reference velocity projected onto the weld (mass-weighted, the weld's inelastic impulse), because the acceleration-level KKT conserves any initial weld violation and the fitted closure's 187 mm/s start opened the grip and drove the controller through a truncated-SVD singularity.
-- **Next step:** CI green, mark ready and arm the PR for #11043.
+- **Next step:** None — merged as PR #11047.
 
 ### DL-#11034 · Force-Plate Fixture Reports Module Identity on the Intermittent Failure
 
