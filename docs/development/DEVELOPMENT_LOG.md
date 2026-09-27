@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11029 (epic #11007 package 5)
-- **PR:** pending
+- **PR:** #11031
 - **Branch:** `claude/ud-11029-rts-smoother`
 - **Paths:** `src/shared/python/estimation/kinematic_smoother.py`, `src/shared/python/motion_matching/pipeline/reference.py`, `src/shared/python/motion_matching/pipeline/__init__.py`, `tests/unit/estimation/test_kinematic_smoother.py`, `tests/unit/motion_matching/test_smooth_reference_bayesian_11029.py`
 - **Started:** 2026-09-27
