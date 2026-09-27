@@ -17,18 +17,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9406 · Retire UpstreamDrift Copies of Tools-Owned Sidekick Modules
+### DL-#9411-Pin · Bump `vendor/ud-tools` to Tools Main `3678409fc` and Retire 10 Quarantined Tests
 
 - **State:** in_review
+- **Owner:** claude
+- **Issue:** #9411
+- **PR:** #10995
+- **Branch:** `claude/ud-9411-vendor-bump-safe-eval`
+- **Paths:** `vendor/ud-tools`, `Cargo.toml`, `requirements-tools.txt`, `src/config/impact_acceptance.json`, `src/shared/python/tour_baselines/reconciliation.py`, `tests/unit/tour_baselines/test_reconciliation.py`, `scripts/config/unit_gate_quarantine.json`, `src/shared/python/`, `docs/shared_tools/`, `docs/agent_context/`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — companion (143 passed), reconciliation (3 passed), 10 un-quarantined tests passed; child-copy contract (20 passed), quarantine ratchet (145 IDs in 10 clusters), divergence inventory and agent-context clean.
+- **Summary:** Advance the gitlink to Tools main 3678409fc (#5364 input contracts and #5361 safe_eval power bound) and align all pin strings. Converge child copies under `src/shared/python/` on canonical Tools and retire 10 quarantined tests in `scripts/config/unit_gate_quarantine.json` (ratchet 155 -> 145 node IDs).
+- **Next step:** Run CI standard, verify quality gate, arm auto-merge.
+
+### DL-#9406 · Retire UpstreamDrift Copies of Tools-Owned Sidekick Modules
+
+- **State:** shipped
 - **Owner:** claude (agy executor)
 - **Issue:** #9406
-- **PR:** draft PR from `claude/ud-9406-sidekick-shadow-retire`
+- **PR:** #10991
 - **Branch:** `claude/ud-9406-sidekick-shadow-retire`
 - **Paths:** `src/shared/python/sidekick/standalone/`, `src/shared/python/sidekick/persistence/`, `src/shared/python/sidekick/__main__.py`, `src/shared/python/sidekick/ui/tools_sidebar/default_tabs.py`, `src/launchers/embedded_tool_bootstrap.py`, `sidekick.spec`, `scripts/config/unit_gate_quarantine.json`
 - **Started:** 2026-09-26
 - **Last verified:** 2026-09-26 — Linux CI: `test_bootstrap_registers_all_first_party_tools` still fails there (11 first-party tools do not bootstrap headless), re-quarantined; divergence inventory regenerated for the retired `sidekick/__main__.py`. Earlier: 14 target quarantine IDs pass with `-n 6 --tools-mode vendored`; affected suites (sidekick, launcher, launchers, packaging, repo_hygiene, integration/sidekick, c3d_viewer) show no new failure against the same run on `b8c27a7d2`; contract passes (141 IDs).
 - **Summary:** Delete the downstream `sidekick` standalone, persistence, `__main__` and default-tabs copies so they resolve from the pinned Tools tree; put the vendored/explicit Tools paths ahead of UpstreamDrift's own in the embedded-tool bootstrap; take the Windows icon from the pinned Tools assets; retarget three tests to the vendor API.
-- **Next step:** get `quality-gate` green on the draft PR and arm it through `automerge_guard.py`.
+- **Next step:** Shipped in #10991.
 
 ### DL-#1755 · Retire the Review-Comment-to-Issue Converter
 
@@ -1751,7 +1764,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** local
 - **Issue:** #10355 (MS-82, closes #10106 gap)
 - **Branch:** feat/10355-motion-matching-tile-playback
-- **PR:** pending
+- **PR:** #10995
 - **Paths:** src/tools/motion_matching/gui.py; src/tools/motion_matching/pipeline.py; src/config/feature_parity.json; docs/development/feature_parity_matrix.md; tests/tools/motion_matching/test_motion_matching_gui.py
 - **Started:** 2026-09-20
 - **Last verified:** 2026-09-20 at HEAD (18 unit tests pass in tests/tools/motion_matching/; 39 parity tests pass in tests/config/feature_parity/; ruff check & format clean).

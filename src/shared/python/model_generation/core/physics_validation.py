@@ -26,7 +26,8 @@ from typing import TYPE_CHECKING  # noqa: E402
 
 import numpy as np  # noqa: E402
 
-from src.shared.python.model_generation.core.validation import (  # noqa: E402
+from shared.python.model_generation.core.constants import GRAVITY_M_S2  # noqa: E402
+from shared.python.model_generation.core.validation import (  # noqa: E402
     ValidationResult,
     Validator,
 )
@@ -104,9 +105,11 @@ class PhysicsValidator:
         """Initialize physics validator.
 
         Args:
-            gravity: Gravity vector [m/s²] (default: [0, 0, -9.81])
+            gravity: Gravity vector [m/s²] (default: [0, 0, -GRAVITY_M_S2])
         """
-        self.gravity = gravity if gravity is not None else np.array([0.0, 0.0, -9.81])
+        self.gravity = (
+            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY_M_S2])
+        )
         self._validator = Validator()
 
     def validate_inertia_tensor(

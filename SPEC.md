@@ -7048,6 +7048,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-26 | #10995 | Bump vendor/ud-tools to Tools main 3678409fc (#5364 input contracts, #5361 safe_eval power bound, #5351 knowledge-pack eval, #5355 rate-of-closure perf); align pins, converge child copies, and retire 10 quarantined tests in unit_gate_quarantine.json (#9411). |
 | 2026-09-26 | #10991 | Retire downstream sidekick shadow modules (#9406): standalone, persistence, __main__ and default-tabs copies resolve from the pinned Tools tree; bootstrap orders vendored Tools paths first; 14 quarantine IDs retired. |
 | 2026-09-26 | #10993 | Bolt norm micro-optimizations: `sqrt(einsum)` landmark distances in fit_pipeline and a single angular-velocity norm in `_rotation_increment` (supersedes #10983, #10984). |
 | 2026-09-26 | #10994 | Coverage gate checker parses Cobertura XML with defusedxml, clearing the bandit B314 failure that turned main red (#10989). |
