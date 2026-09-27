@@ -19,6 +19,10 @@ from numpy.typing import NDArray
 from scipy.linalg import block_diag
 from scipy.optimize import least_squares
 
+from src.shared.python.estimation.fit_uncertainty import (
+    ParameterUncertainty,
+    fitted_uncertainty_or_none,
+)
 from src.shared.python.motion_matching.equality_least_squares import (
     solve_equality_least_squares,
 )
@@ -166,6 +170,10 @@ class MultipleShootingFit:
     infinity means a nonfinite observed endpoint. It is diagnostic, not a gate.
     optimality is None for SLSQP: its result has no comparable scaled
     least_squares optimality measure. Full physical defects still gate acceptance.
+    theta_uncertainty is the Laplace approximation of the fitted objective for theta,
+    including any regularization rows. It is left as None on the
+    solve_equality_least_squares path because an equality-constrained optimum is not
+    an unconstrained Gauss-Newton optimum.
     """
 
     theta: Array
@@ -183,6 +191,7 @@ class MultipleShootingFit:
     terminal_replay_gap_m: float | None = None
     pelvis_yaw_diff_deg: float = 0.0
     pelvis_yaw_error_pct: float = 0.0
+    theta_uncertainty: ParameterUncertainty | None = None
 
 
 def fit_multiple_shooting(
@@ -586,6 +595,7 @@ def fit_multiple_shooting(
             constraint_tolerance=options.equality_tolerance,
             variable_scales=options.variable_scales,
         )
+        theta_uncertainty = None
     else:
         optimum = least_squares(
             residual,
@@ -598,6 +608,9 @@ def fit_multiple_shooting(
             gtol=1e-8,
             x_scale="jac",
             diff_step=diff_step,
+        )
+        theta_uncertainty = fitted_uncertainty_or_none(
+            optimum, parameter_indices=range(theta_dim)
         )
 
     opt_theta = optimum.x[:theta_dim].copy()
@@ -697,6 +710,7 @@ def fit_multiple_shooting(
         terminal_replay_gap_m=terminal_replay_gap,
         pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
         pelvis_yaw_error_pct=pelvis_yaw_error_pct,
+        theta_uncertainty=theta_uncertainty,
     )
 
 
