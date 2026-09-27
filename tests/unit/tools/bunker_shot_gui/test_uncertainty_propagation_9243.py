@@ -243,15 +243,19 @@ class TestPlayabilityWindowCarriesABand:
     """The headline playability number is banded too, and cheaply."""
 
     @pytest.fixture(scope="class")
-    def reachable(self, banded_model: WorkbenchModel) -> PlayabilityOutcome:
-        """A sweep against a target the model can actually reach.
+    def reachable(self, nominal_shot: ShotOutcome) -> PlayabilityOutcome:
+        """A sweep aimed at the carry the model itself gives the nominal shot.
 
-        At the shipped 12 m target every carry is far outside the acceptance
-        band and the window is empty for all three grids, which would make the
-        band trivially a point and prove nothing.
+        A target the model cannot reach makes the window empty on every grid,
+        so the band collapses to a point and the claims below prove nothing.
+        A fixed 2 m target did exactly that once the F0 delivery-frame and
+        bounce corrections brought the grid carries down to 0.05-0.66 m
+        (#11003). Aiming at the nominal carry keeps the premise true by
+        construction, and the premise is asserted, not assumed.
         """
+        target = float(nominal_shot.carry_m)
         outcome = WorkbenchModel(
-            replace(_SEPARATING_SETTINGS, target_carry_m=2.0)
+            replace(_SEPARATING_SETTINGS, target_carry_m=target)
         ).playability(
             WedgeDesign(name="nominal").geometry(), SandCondition(), SwingSetup()
         )
@@ -259,6 +263,9 @@ class TestPlayabilityWindowCarriesABand:
             pytest.skip(
                 f"no playability window is available: {outcome.unavailable_reason}"
             )
+        assert outcome.window.area > 0.0, (
+            f"a {target:.3f} m target should leave a non-empty window"
+        )
         return outcome
 
     def test_the_window_carries_an_area_band(
@@ -280,8 +287,10 @@ class TestPlayabilityWindowCarriesABand:
     def test_the_area_band_is_not_decorative(
         self, reachable: PlayabilityOutcome
     ) -> None:
-        """The mass interval moves the window between empty and several times
-        the central area, which is the number a designer would read as exact."""
+        """The mass interval moves the window between empty and about twice
+        the central area, which is the number a designer would read as exact.
+
+        Measured (#11003): ConsistencyBand(0.0, 1.141, 2.282) in rad*kPa."""
         band = reachable.window_area_band
         assert band is not None
         assert band.width > band.central
@@ -391,13 +400,21 @@ class TestWhatDominates:
         assert "accelerated sand mass" in dominant.term.name
         assert dominant.term.uncertainty_class is UncertaintyClass.MODEL_FORM
 
-    def test_the_mass_interval_swamps_the_budget(
+    def test_the_mass_interval_is_most_but_not_all_of_the_budget(
         self, comparison: WorkbenchComparison
     ) -> None:
-        """Past the dominance threshold, the ranking is about one assumption."""
+        """The mass interval is the majority of the budget, short of swamping it.
+
+        The claim first written here was that it swamps (share >= 0.75). Under
+        the corrected F0 model it measures 0.676 (#11003): the grid sampling
+        term is still a third of the width, so the ranking is not about one
+        assumption alone. The threshold stays where it is; the claim moved.
+        """
         assert comparison.banded is not None
-        assert comparison.banded.dominant is not None
-        assert comparison.banded.dominant.swamps
+        dominant = comparison.banded.dominant
+        assert dominant is not None
+        assert dominant.share > 0.5
+        assert not dominant.swamps
 
     def test_the_classes_are_reported_apart(
         self, comparison: WorkbenchComparison

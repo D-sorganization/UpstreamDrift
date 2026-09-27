@@ -17,22 +17,35 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11000 · Pass the Reynolds-Curve Base Cd to the Rust Ball-Flight Kernel
+### DL-#11003 · Restate the #9243 BunkerShot Uncertainty Claims Under the Corrected F0 Model
 
 - **State:** in_review
 - **Owner:** claude
+- **Issue:** #11003
+- **PR:** #11010
+- **Branch:** `claude/ud-9243-claims-restated`
+- **Paths:** `tests/unit/tools/bunker_shot_gui/test_uncertainty_propagation_9243.py`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — test_uncertainty_propagation_9243.py 30 passed with upstream-physics 2.1.3 (source build) and with 2.1.0.
+- **Summary:** Two #9243 claims went stale while the kernel-less gate skipped them. The window-band fixture now aims at the nominal shot's carry (0.690 m) instead of an unreachable 2 m and asserts a non-empty window; band (0.0, 1.141, 2.282). The mass interval's share is 0.676, so the test now says it dominates without swamping; `DOMINANCE_SHARE` stays 0.75.
+- **Next step:** Let the armed auto-merge land it, then replay UD#10997 onto main.
+
+### DL-#11000 · Pass the Reynolds-Curve Base Cd to the Rust Ball-Flight Kernel
+
+- **State:** shipped
+- **Owner:** claude
 - **Issue:** #11000
-- **PR:** #11004
+- **PR:** #11004 (merged 642729daa)
 - **Branch:** `claude/ud-rust-drag-base-cd`
 - **Paths:** `src/shared/python/physics/ball_simulator.py`, `tests/unit/physics/test_rust_drag_base_coefficient.py`, `tests/unit/physics/test_launch_conditions_units_7223.py`
 - **Started:** 2026-09-26
 - **Last verified:** 2026-09-26 — with upstream-physics 2.1.3 built from source: trackman + launch-units + new boundary test 25 passed; tests/unit/physics + ball-flight suites 1041 passed (remaining failures identical with and without the fix, or local-environment only); parity + rust_bindings ball/aero 41 passed.
 - **Summary:** `BallFlightSimulator` handed the kernel `BallProperties.cd0` (0.21, the spin polynomial's constant) as the base of its Reynolds drag curve; it now passes `GOLF_BALL_DRAG_COEFFICIENT` (0.25), as the enhanced engine does. Driver carry 275.0 -> 248.3 yd, 7-iron 194.3 -> 179.8 yd, matching the enhanced engine within 0.3 %. The degrees-regression test asserts the launch contract's refusal. The exported parity fixture stays byte-pinned and untouched.
-- **Next step:** CI green, mark ready, arm via `automerge_guard.py`, then rebase UD#10997 onto it.
+- **Next step:** None; shipped. UD#10997 consumes the fix in the Linux unit gate.
 
 ### DL-#9411-AI-Adapters · Converge Gemini and BitNet Adapters on Canonical Tools and Retire 5 Tests
 
-- **State:** in_progress
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #9411
 - **PR:** #11005
