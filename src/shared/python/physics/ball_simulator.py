@@ -19,6 +19,7 @@ import math
 import numpy as np
 
 from src.shared.python.core.contracts import invariant, postcondition, precondition
+from src.shared.python.core.physics_constants import GOLF_BALL_DRAG_COEFFICIENT
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.ball_launch_conditions import (
     EnvironmentalConditions,
@@ -100,7 +101,11 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         ball_props = upstream_physics.AeroBallProperties(
             mass=self.ball.mass,
             radius=self.ball.radius,
-            drag_coefficient=self.ball.cd0,
+            # The kernel scales its Reynolds drag-crisis curve by this base
+            # Cd, exactly as the enhanced engine scales cd_dimpled_sphere.
+            # ball.cd0 is the spin polynomial's constant term, a different
+            # model; passing it under-predicted drag by ~16 %.
+            drag_coefficient=float(GOLF_BALL_DRAG_COEFFICIENT),
             spin_decay_rate=self.ball.spin_decay_rate,
         )
 

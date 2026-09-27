@@ -85,11 +85,12 @@ class TestTourDriverCarryIsPhysical:
         assert 180.0 < carry < 320.0, f"unphysical carry {carry:.1f} m"
         assert 20.0 < max_h < 120.0, f"unphysical apex {max_h:.1f} m"
 
-    def test_raw_degrees_would_collapse_carry(self) -> None:
-        # Documents the bug: passing degrees as raw radians collapses carry.
+    def test_raw_degrees_are_refused_before_they_collapse_carry(self) -> None:
+        # The bug fed degrees where radians were expected and collapsed carry
+        # to ~0. The simulator's launch contract now refuses the input at the
+        # Rust boundary instead of returning a silently wrong trajectory.
         from src.shared.python.physics.ball_simulator import BallFlightSimulator
 
         broken = LaunchConditions(velocity=75.0, launch_angle=11.0, spin_rate=283.0)
-        traj = BallFlightSimulator().simulate_trajectory(broken, max_time=12.0, dt=0.01)
-        carry = float(np.hypot(traj[-1].position[0], traj[-1].position[1]))
-        assert carry < 10.0  # the old (wrong) behaviour
+        with pytest.raises(ValueError, match="did you pass degrees"):
+            BallFlightSimulator().simulate_trajectory(broken, max_time=12.0, dt=0.01)

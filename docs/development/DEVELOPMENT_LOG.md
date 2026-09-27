@@ -30,18 +30,56 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** The export test writes to `tmp_path` and asserts the vector schema. It rewrites the committed golden only when `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A new test checks read-only that the committed fixture has the schema and the path pinned in `src/config/capability_migration.json`.
 - **Next step:** Get `quality-gate` green on the draft PR and arm auto-merge via `scripts/automerge_guard.py`.
 
-### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+### DL-#11003 · Restate the #9243 BunkerShot Uncertainty Claims Under the Corrected F0 Model
 
-- **State:** in_progress
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11003
+- **PR:** #11010
+- **Branch:** `claude/ud-9243-claims-restated`
+- **Paths:** `tests/unit/tools/bunker_shot_gui/test_uncertainty_propagation_9243.py`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — test_uncertainty_propagation_9243.py 30 passed with upstream-physics 2.1.3 (source build) and with 2.1.0.
+- **Summary:** Two #9243 claims went stale while the kernel-less gate skipped them. The window-band fixture now aims at the nominal shot's carry (0.690 m) instead of an unreachable 2 m and asserts a non-empty window; band (0.0, 1.141, 2.282). The mass interval's share is 0.676, so the test now says it dominates without swamping; `DOMINANCE_SHARE` stays 0.75.
+- **Next step:** Let the armed auto-merge land it, then replay UD#10997 onto main.
+
+### DL-#11000 · Pass the Reynolds-Curve Base Cd to the Rust Ball-Flight Kernel
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #11000
+- **PR:** #11004 (merged 642729daa)
+- **Branch:** `claude/ud-rust-drag-base-cd`
+- **Paths:** `src/shared/python/physics/ball_simulator.py`, `tests/unit/physics/test_rust_drag_base_coefficient.py`, `tests/unit/physics/test_launch_conditions_units_7223.py`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-09-26 — with upstream-physics 2.1.3 built from source: trackman + launch-units + new boundary test 25 passed; tests/unit/physics + ball-flight suites 1041 passed (remaining failures identical with and without the fix, or local-environment only); parity + rust_bindings ball/aero 41 passed.
+- **Summary:** `BallFlightSimulator` handed the kernel `BallProperties.cd0` (0.21, the spin polynomial's constant) as the base of its Reynolds drag curve; it now passes `GOLF_BALL_DRAG_COEFFICIENT` (0.25), as the enhanced engine does. Driver carry 275.0 -> 248.3 yd, 7-iron 194.3 -> 179.8 yd, matching the enhanced engine within 0.3 %. The degrees-regression test asserts the launch contract's refusal. The exported parity fixture stays byte-pinned and untouched.
+- **Next step:** None; shipped. UD#10997 consumes the fix in the Linux unit gate.
+
+### DL-#9411-AI-Adapters · Converge Gemini and BitNet Adapters on Canonical Tools and Retire 5 Tests
+
+- **State:** shipped
 - **Owner:** antigravity
 - **Issue:** #9411
-- **PR:** #10999
+- **PR:** #11005
+- **Branch:** `feat/ud-9411-ai-adapters-convergence`
+- **Paths:** `src/shared/python/ai/adapters/gemini_adapter.py`, `src/shared/python/ai/adapters/bitnet_adapter.py`, `scripts/config/unit_gate_quarantine.json`, `SPEC.md`
+- **Started:** 2026-09-26
+- **Last verified:** 170481160 — converged child copies from vendor/ud-tools pass child copy contract; 5 retired tests pass locally (16/16 green); unit gate quarantine contract passed (72 -> 67 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Summary:** Converge Gemini and BitNet AI adapters on canonical Tools implementations; normalize seam imports; retire 5 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 72 -> 67).
+- **Next step:** Push branch, open PR with squash auto-merge, monitor CI Standard.
+
+### DL-#9411-Burndown-Batch1 · Fix UI Module Monkeypatch Invariants and Retire 6 Quarantined Tests
+
+- **State:** shipped
+- **Owner:** antigravity
+- **Issue:** #9411
+- **PR:** #10999 (merged)
 - **Branch:** `feat/ud-9411-quarantine-burndown-batch1`
 - **Paths:** `scripts/config/unit_gate_quarantine.json`, `tests/unit/ui/dialogs/test_install_prompt.py`, `tests/unit/ui/test_window_icon.py`
 - **Started:** 2026-09-26
-- **Last verified:** 99553df90 — 6 retired tests verified green in CI Standard; unit gate quarantine contract passed (78 -> 72 node IDs across 10 clusters); mypy, black, ruff, and file size budget pass.
+- **Last verified:** 170481160 — merged via squash auto-merge with zero administrative bypasses; 6 retired tests green; ratchet at 72.
 - **Summary:** Fix module monkeypatching and typing in `test_window_icon.py` and `test_install_prompt.py`; condense `test_install_prompt.py` to <= 500 LOC; retire 6 verified-passing tests in `scripts/config/unit_gate_quarantine.json` (ratchet 78 -> 72).
-- **Next step:** Push branch with force-with-lease, monitor CI Standard, verify auto-merge.
 
 ### DL-#9411-Pin · Bump `vendor/ud-tools` to Tools Main `3678409fc` and Retire 10 Quarantined Tests
 

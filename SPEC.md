@@ -7049,6 +7049,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-26 | #11008 | Ball-flight parity export writes to `tmp_path` by default; rewriting the committed `default_trajectory.json` golden requires `UPSTREAMDRIFT_REGENERATE_PARITY_FIXTURES=1`. A read-only contract test checks the fixture schema and its capability-migration path pin. |
+| 2026-09-26 | #11010 | Restate the #9243 BunkerShot window-band and dominance claims under the corrected F0 model (#11003): target the nominal carry; dominates without swamping. |
+| 2026-09-26 | #11004 | Rust ball-flight kernel receives the Reynolds-curve base Cd (`GOLF_BALL_DRAG_COEFFICIENT`, 0.25) instead of the spin polynomial's `cd0` (0.21); TrackMan driver/7-iron carry now matches the enhanced engine (#11000). |
 | 2026-09-26 | #10999 | Expose ui in src.shared.python, fix module monkeypatching in test_window_icon and test_install_prompt on distributed test workers, and retire 11 passing tests from unit-gate quarantine (ratchet 78 -> 67). |
 | 2026-09-26 | #10990 | Retire 54 unit-gate quarantine IDs (#9411 slice 2): data-fitting and MuJoCo-viewer coordinator deduplication, shoulder FK origin fix and stale-test retargets; Linux-only failures and IDs that depended on Tools-owned `ai` adapter edits stay quarantined. |
 | 2026-09-26 | #10995 | Bump vendor/ud-tools to Tools main 3678409fc (#5364 input contracts, #5361 safe_eval power bound, #5351 knowledge-pack eval, #5355 rate-of-closure perf); align pins, converge child copies, and retire 10 quarantined tests in unit_gate_quarantine.json (#9411). |
@@ -8871,4 +8873,13 @@ Establishes the independent qualification service for candidate tour baseline pa
 - **Auditability and Identifiability Disclaimers (`ExpertSignoff`, `ForceIdentifiabilityDisclaimer`)**:
   - Mandatory disclosure that identified internal forces and torques are non-unique and model-dependent.
   - Issues signed, auditable `ExpertSignoff` receipts exportable to JSON.
+
+### AI Adapters Safety and Session History Specification (#9411)
+
+- **Gemini History & Message Resolution (`GeminiAdapter._build_chat_session`)**:
+  - Resolves conversation context history without duplicate turns; extracts trailing user turn when called with an empty current message to prevent redundant answer cycles.
+  - Generates `(chat_session, effective_message)` tuple aligning with `start_chat` history requirements.
+- **BitNet Bounded Safety and Encodability (`BitnetAdapter._build_validated_prompt`)**:
+  - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
+  - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
 

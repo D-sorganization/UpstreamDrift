@@ -218,6 +218,7 @@ class TestPythonBallFlightBaseline:
         assert_vector_schema(json.loads(out.read_text()))
         assert DEFAULT_TRAJECTORY_FIXTURE.read_bytes() == committed_before
 
+    @pytest.mark.unit
     @pytest.mark.skipif(
         not regeneration_requested(),
         reason=f"set {REGENERATE_ENV_VAR}=1 to rewrite the committed fixture",
@@ -284,6 +285,7 @@ class TestRustPythonParity:
         assert "2500" in repr(rust_lc)
 
 
+@pytest.mark.unit
 class TestParityFixtureContract:
     """The committed golden fixture is read-only unless regeneration is opted into."""
 
