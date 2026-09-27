@@ -30,6 +30,7 @@ import numpy as np
 import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.shared.python.analysis.swing_events import detect_swing_events
 from src.shared.python.core.contracts import require
 
 from .skeleton import JOINT_NAMES
@@ -268,30 +269,20 @@ def detect_events(
     than local minima: at 100+ fps a real profile has a minimum every few
     frames. Every event is a frame index; nothing is interpolated.
     """
-    require(fps > 0, "fps must be positive", fps)
-    speed = np.asarray(series.hand_speed_mps, dtype=float)
-    peak = int(np.argmax(speed))
-    quiet = quiet_fraction * speed[peak]
-    window = max(int(round(quiet_s * fps)), 1)
-    address = 0
-    run = 0
-    for t in range(peak - 1, -1, -1):
-        run = run + 1 if speed[t] < quiet else 0
-        if run >= window:
-            address = t + window - 1
-            break
-    lookback = max(int(round(max_downswing_s * fps)), 2)
-    start = max(address + 1, peak - lookback)
-    top = start + int(np.argmin(speed[start:peak])) if start < peak else address
-    after = np.flatnonzero(speed[peak:] < quiet)
-    finish = int(peak + after[0]) if after.size else int(speed.size - 1)
-    backswing = (top - address) / fps
-    downswing = (peak - top) / fps
+    frames = detect_swing_events(
+        series.hand_speed_mps,
+        fps,
+        quiet_fraction=quiet_fraction,
+        quiet_s=quiet_s,
+        max_downswing_s=max_downswing_s,
+    )
+    backswing = (frames.top - frames.address) / fps
+    downswing = (frames.peak - frames.top) / fps
     return SwingEvents(
-        address_frame=address,
-        top_frame=top,
-        peak_speed_frame=peak,
-        finish_frame=finish,
+        address_frame=frames.address,
+        top_frame=frames.top,
+        peak_speed_frame=frames.peak,
+        finish_frame=frames.finish,
         backswing_s=backswing,
         downswing_s=downswing,
         tempo_ratio=(backswing / downswing) if downswing > 0 else None,

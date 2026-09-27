@@ -37,6 +37,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.analysis.swing_events import detect_swing_events
 from src.shared.python.core.contracts import precondition
 from src.shared.python.data_io._schemas import validate_trajectory_array
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -604,35 +605,21 @@ class SwingCaptureImporter:
 
         n_frames = trajectory.n_frames
 
-        # Find impact (peak velocity)
-        impact_idx = int(np.argmax(total_velocity))
+        fps = float(trajectory.frame_rate)
+        if not (fps > 0 and np.isfinite(fps)):
+            raise ValueError(
+                f"trajectory frame_rate must be positive and finite, got {trajectory.frame_rate}"
+            )
 
-        # Find top of backswing (local minimum before impact)
-        search_start = max(0, impact_idx - n_frames // 2)
-        pre_impact = total_velocity[search_start:impact_idx]
-        if len(pre_impact) > 0:
-            top_idx = search_start + int(np.argmin(pre_impact))
-        else:
-            top_idx = impact_idx // 2
-
-        # Address is the start
-        address_idx = 0
-
-        # Backswing starts after address (first significant motion)
-        threshold = np.mean(total_velocity[:top_idx]) * 0.1 if top_idx > 0 else 0
-        backswing_indices = np.where(total_velocity[:top_idx] > threshold)[0]
-        backswing_start = int(backswing_indices[0]) if len(backswing_indices) > 0 else 0
-
-        # Follow-through end
-        follow_end = n_frames - 1
+        events = detect_swing_events(total_velocity, fps)
 
         return SwingPhaseLabels(
-            address=address_idx,
-            backswing_start=backswing_start,
-            top_of_backswing=top_idx,
-            downswing_start=top_idx,
-            impact=impact_idx,
-            follow_through_end=follow_end,
+            address=0,
+            backswing_start=events.address,
+            top_of_backswing=events.top,
+            downswing_start=events.top,
+            impact=events.peak,
+            follow_through_end=n_frames - 1,
         )
 
     @precondition(
