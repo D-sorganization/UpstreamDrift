@@ -38,17 +38,24 @@ def test_surrogate_comparison_config_dbc() -> None:
 
 
 def test_physics_structured_surrogate_prior_and_residual() -> None:
-    """PhysicsStructuredSurrogate combines analytical rigid prior with neural residual."""
+    """PhysicsStructuredSurrogate evaluates analytical prior and refuses without fitted residual."""
     import numpy as np
 
     model = PhysicsStructuredSurrogate(n_dof=2, n_coeffs=7)
     coeffs = np.zeros(14)
     timegrid = np.linspace(0.0, 0.3, 30)
 
-    # Rollout produces trajectory shape (T, dof)
-    traj = model.forward_trajectory(coeffs, timegrid)
-    assert traj.shape == (30, 2)
-    assert np.all(np.isfinite(traj))
+    # Analytical prior produces trajectory shape (T, dof)
+    prior = model.analytical_prior(coeffs, timegrid)
+    assert prior.shape == (30, 2)
+    assert np.all(np.isfinite(prior))
+
+    # Refusal without fitted residual (#11007)
+    with pytest.raises(NotImplementedError, match="11007"):
+        model.residual_correction(prior)
+
+    with pytest.raises(NotImplementedError, match="11007"):
+        model.forward_trajectory(coeffs, timegrid)
 
 
 def test_compare_surrogates_config_reaches_evaluators() -> None:
