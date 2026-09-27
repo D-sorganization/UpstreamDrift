@@ -156,7 +156,7 @@ def replay(
 
     tracking_backend = validate_tracking_backend(tracking_backend)
     q0 = fs.preload_feet(sim, q_track[0])
-    v0 = np.gradient(q_track, lane.times, axis=0)[0]
+    v0 = sim.consistent_velocity(q0, np.gradient(q_track, lane.times, axis=0)[0])
     controller = build_tracking_controller(
         sim,
         lane.times,
