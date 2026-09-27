@@ -59,7 +59,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `engine_core` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `estimation` | 0 | 0 | 0 | 8 | 0 | 0 |
+| `estimation` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |

@@ -27,7 +27,6 @@
     "tests/unit/shared_python/model_generation/test_inertia_calculator.py::TestValidity::test_nan_breaks_positive_definite",
     "tests/unit/shared_python/model_generation/test_inertia_calculator.py::TestValidity::test_triangle_inequality_violation_is_invalid",
     "tests/unit/shared_python/model_generation/test_inertia_calculator.py::TestValidity::test_valid_diagonal_inertia",
-    "tests/unit/shared_python/test_ai_education.py::test_load_data_file_entries",
     "tests/unit/shared_python/test_impact_model.py::test_gear_effect_spin",
     "tests/unit/shared_python/test_impact_model.py::test_high_face_gear_effect_reduces_backspin",
     "tests/unit/shared_python/test_signal_toolkit_core.py::TestSignal::test_structural_invariants_enforced_under_O[Signal(time=np.zeros((2, 2)), values=np.zeros(4))]",

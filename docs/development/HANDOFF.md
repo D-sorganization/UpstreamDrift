@@ -46,16 +46,30 @@
 
 ---
 
+# Past Handoff — Parameter Covariance on the Shared Least-Squares Fits (#11021)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11021-covariance`
+- Branch: `claude/ud-11021-fit-covariance` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11023; entry DL-#11021. Child of MS-101 #10375 (Board RM#1793). Executed by agy (Gemini 3.8 Flash), reviewed line by line; the orchestrator replaced the duplicated call-site guard with one tested helper (`fitted_uncertainty_or_none`).
+- Built: `src/shared/python/estimation/fit_uncertainty.py`; prefix and multiple-shooting fits report parameter uncertainty.
+- Validation: see DL-#11021. `residual_regularization.Array` is now a declared `TypeAlias`: the pre-push mypy env has no numpy, and the bare alias failed as `Array?` in any change to `multi_shooting_fit.py`.
+- CI `repo-structure-gates` flagged `least_squares_parameter_uncertainty` at 182 lines (budget 100). It is now split into single-purpose helpers (`_validated_jacobian`, `_requested_indices`, `_free_mask`, `_rank_and_condition`, `_free_covariance`, `_marginal_statistics`) with unchanged behaviour: the 81 estimation tests and the wiring tests pass unmodified, and `check_architecture_budget.py` is OK.
+- Next step: CI green, mark ready, arm; the IPOPT/Crocoddyl/fmincon fits are the remaining RM#1793 scope.
+
+---
+
 # Past Handoff — Canonical Swing Event Detector (#11014)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11014-events`
 - Branch: `claude/ud-11014-swing-events` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11020
 - Pull request: #11020; entry DL-#11014. Package 1 of epic #11007. Executed by agy (Gemini 3.8 Flash), reviewed line by line and replayed into this worktree.
 - Built: `src/shared/python/analysis/swing_events.py` (one detector plus `peak_speed_index`); four call sites delegate to it; parity and contract tests added.
 - Validation: see DL-#11014 (374 passed; plus 188 passed across reconstruct, statistical-analysis, advanced-analysis and swing-comparison consumers).
-- Next step: CI green, mark ready, arm; file #11007 packages 2-5 after merge.
+- Next step: none; merged as PR #11020. Package 2 is #11024.
 
 ---
 
