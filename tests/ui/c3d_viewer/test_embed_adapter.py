@@ -103,22 +103,33 @@ def test_create_main_widget_returns_qwidget(qapp, adapter) -> None:
 
 
 @pytest.mark.unit
-def test_cleanup_closes_all_matplotlib_figures(adapter) -> None:
-    """``cleanup`` releases every open matplotlib figure."""
+def test_cleanup_closes_all_matplotlib_figures(qapp, adapter) -> None:
+    """``cleanup`` releases every open matplotlib figure belonging to the viewer."""
     import matplotlib
 
     matplotlib.use("Agg", force=True)
     import matplotlib.pyplot as plt
 
-    plt.close("all")
-    plt.figure()
-    plt.figure()
-    plt.figure()
-    assert len(plt.get_fignums()) == 3
+    widget = adapter.create_main_widget(None)
+    try:
+        canvases = [
+            widget.viewer3d_tab.canvas_3d,
+            widget.marker_plot_tab.canvas_marker,
+            widget.analog_plot_tab.canvas_analog,
+            widget.analysis_tab.canvas_analysis,
+            widget.force_plot_tab.time_series_canvas,
+            widget.force_plot_tab.cop_canvas,
+        ]
+        for c in canvases:
+            assert getattr(c, "_canvas_closed", False) is False
 
-    adapter.cleanup()
+        adapter.cleanup()
 
-    assert len(plt.get_fignums()) == 0
+        for c in canvases:
+            assert getattr(c, "_canvas_closed", False) is True
+        assert adapter._widget is None
+    finally:
+        widget.deleteLater()
 
 
 @pytest.mark.unit

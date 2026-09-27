@@ -334,11 +334,22 @@ def test_import_does_not_load_pinocchio() -> None:
     # it in sys.modules. The module should defer the import to call time.
     assert "pinocchio" not in sys.modules or sys.modules["pinocchio"] is not None
     # The check that matters: synthesize.py itself does not import pinocchio
-    # at module load. Re-import in a clean state to verify.
-    import importlib as _il
+    # at module load. Inspect its top-level statements instead of reloading
+    # it: a reload rebinds every function and breaks identity checks in
+    # other tests (e.g. the pinocchio_golf facade delegation test).
+    import ast
+    import inspect
 
-    _il.reload(synthesize_mod)
-    # If pinocchio is not on the system, it must still not be required.
-    # Conversely, if it *is* installed, this assertion still holds: we
-    # only assert that the synthesize *module* did not import it.
+    tree = ast.parse(inspect.getsource(synthesize_mod))
+    top_level_imports = {
+        alias.name.split(".")[0]
+        for node in tree.body
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    } | {
+        (node.module or "").split(".")[0]
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom)
+    }
+    assert "pinocchio" not in top_level_imports
     assert "pinocchio" not in synthesize_mod.__dict__

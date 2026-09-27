@@ -453,6 +453,7 @@ def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dic
 
     return {
         "hub": (0.0, 0.0),
+        "shoulder": (0.0, 0.0),
         "wrist": (wx, wy),
         "tip": (tx, ty),
     }
