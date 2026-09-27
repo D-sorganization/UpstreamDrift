@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import math
-import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -144,7 +143,7 @@ def load_mjx_package(run: Path) -> MjxPackage:
     root = DET.fromstring(xml_path.read_text(encoding="utf-8"))
     for equality in root.findall("equality"):
         root.remove(equality)
-    model = mujoco.MjModel.from_xml_string(ET.tostring(root, encoding="unicode"))
+    model = mujoco.MjModel.from_xml_string(DET.tostring(root, encoding="unicode"))
     # The rigid weld of the shared simulator couples the near-massless hand
     # standoff to the club; with a spring weld those dofs need an armature
     # (rotor inertia) floor or they explode. Applied to every dof.
