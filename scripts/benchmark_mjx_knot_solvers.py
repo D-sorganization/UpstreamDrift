@@ -63,8 +63,9 @@ SOLVER_NOTES = (
     "`ipopt` has no pipeline stage; it is recorded as unavailable with the "
     "interpreter's binding status.",
     "Promotion needs the candidate's replay RMS <= shooting fit on every "
-    "capture, a finite stop inside the iteration budget and a downswing weight "
-    "fraction above zero.",
+    "capture, a `converged` stop inside the iteration budget (Adam has no "
+    "convergence test, so it can only stop on the budget) and a downswing "
+    "weight fraction above zero. Each MJX method is judged separately.",
 )
 
 
@@ -157,22 +158,26 @@ def load_row(capture: str, solver: str, evidence: Path) -> dict[str, Any]:
     )
 
 
-def render(evidence: Path) -> dict[str, Any]:
+def render(evidence: Path) -> list[dict[str, Any]]:
     provenance = json.loads((evidence / "provenance.json").read_text(encoding="utf-8"))
     rows = [
         load_row(capture, solver, evidence)
         for capture in provenance["captures"]
         for solver in provenance["solvers"]
     ]
-    decision = promotion_decision(rows)
+    decisions = [
+        promotion_decision(rows, candidate=solver)
+        for solver in sorted(MJX_SOLVERS)
+        if solver in provenance["solvers"]
+    ]
     (evidence / "rows.json").write_text(
-        json.dumps({"rows": rows, "decision": decision}, indent=2) + "\n",
+        json.dumps({"rows": rows, "decisions": decisions}, indent=2) + "\n",
         encoding="utf-8",
     )
     (evidence / "REPORT.md").write_text(
-        render_report(rows, decision, provenance), encoding="utf-8"
+        render_report(rows, decisions, provenance), encoding="utf-8"
     )
-    return decision
+    return decisions
 
 
 def _git_head() -> str:
@@ -235,8 +240,8 @@ def main(argv: list[str] | None = None) -> int:
                     )
                     continue
                 run_case(capture, solver, args)
-    decision = render(evidence)
-    print(json.dumps(decision, indent=2))  # noqa: T201 - CLI output
+    decisions = render(evidence)
+    print(json.dumps(decisions, indent=2))  # noqa: T201 - CLI output
     return 0
 
 

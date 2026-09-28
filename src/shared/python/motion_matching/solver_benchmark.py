@@ -100,9 +100,10 @@ def promotion_decision(
     """Promote ``candidate`` only with parity on every capture.
 
     Parity per capture: both rows ran, the candidate's replay marker RMS is no
-    worse than the incumbent's, it did not stop on a non-finite value, and its
-    downswing weight fraction stays above zero (it did not win by leaving the
-    ground). Any failed check keeps the current default.
+    worse than the incumbent's, it stopped because it converged (not on the
+    iteration budget or a non-finite value), and its downswing weight fraction
+    stays above zero (it did not win by leaving the ground). Any failed check
+    keeps the current default.
     """
     by_key = {(r["capture"], r["solver"]): r for r in rows}
     captures = sorted({r["capture"] for r in rows})
@@ -118,8 +119,11 @@ def promotion_decision(
                 f"{capture}: {candidate} {cand['replay_marker_rms_m'] * 1e3:.1f} mm "
                 f"> {incumbent} {inc['replay_marker_rms_m'] * 1e3:.1f} mm"
             )
-        if str(cand["stop_reason"]).startswith("non_finite"):
-            reasons.append(f"{capture}: {candidate} stopped on {cand['stop_reason']}")
+        if cand["stop_reason"] != "converged":
+            reasons.append(
+                f"{capture}: {candidate} stopped on {cand['stop_reason']}, "
+                "not converged within the budget"
+            )
         wf = cand["downswing_weight_fraction_min"]
         if wf is None or wf <= 0.0:
             reasons.append(
@@ -139,10 +143,10 @@ def _mm(value: float | None) -> str:
 
 def render_report(
     rows: Sequence[Mapping[str, Any]],
-    decision: Mapping[str, Any],
+    decisions: Sequence[Mapping[str, Any]],
     provenance: Mapping[str, Any],
 ) -> str:
-    """Markdown report built only from ``rows``, ``decision`` and ``provenance``."""
+    """Markdown report built only from ``rows``, ``decisions`` and ``provenance``."""
     lines = [
         "# MJX Knot Optimiser Head-to-Head Benchmark (#11058)",
         "",
@@ -185,16 +189,16 @@ def render_report(
             f"| {r['evaluations'] if r['evaluations'] is not None else '-'} "
             f"| {r['stop_reason']} | {r['wall_clock_s']:.0f} |"
         )
-    verdict = "promote" if decision["promote"] else "keep the current default"
-    lines += [
-        "",
-        "## Promotion Decision",
-        "",
-        f"Candidate `{decision['candidate']}` against incumbent "
-        f"`{decision['incumbent']}`: **{verdict}**.",
-        "",
-    ]
-    lines += [f"- {reason}" for reason in decision["reasons"]] or [
-        "- Parity held on every capture."
-    ]
+    lines += ["", "## Promotion Decision"]
+    for decision in decisions:
+        verdict = "promote" if decision["promote"] else "keep the current default"
+        lines += [
+            "",
+            f"Candidate `{decision['candidate']}` against incumbent "
+            f"`{decision['incumbent']}`: **{verdict}**.",
+            "",
+        ]
+        lines += [f"- {reason}" for reason in decision["reasons"]] or [
+            "- Parity held on every capture."
+        ]
     return "\n".join(lines) + "\n"
