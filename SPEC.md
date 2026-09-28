@@ -7086,7 +7086,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-28 | #PRNUM | MJX knot optimiser benchmark (#11058): `--mjx-method lbfgs`, shared-simulator rescoring of MJX references, and `scripts/benchmark_mjx_knot_solvers.py` with committed receipts and report. Promotion decision: keep `none` as the default. |
+| 2026-09-28 | #11072 | MJX knot optimiser benchmark (#11058): `--mjx-method lbfgs`, shared-simulator rescoring of MJX references, and `scripts/benchmark_mjx_knot_solvers.py` with committed receipts and report. Promotion decision: keep `none` as the default. |
 | 2026-09-27 | #11060 | `shooting_fit` imports `full_body_forward_dynamics` at run time, so `--shooting-fit N` no longer raises `NameError` before its first pass (#11059). |
 | 2026-09-27 | #11057 | `--trajectory-optimiser {none,mjx-knots}` (default `none`) adds the MJX knot optimiser as an opt-in matching-pipeline stage that writes `mjx_optimised_reference.npz` and a receipt; missing JAX/MJX is a named error (#11051). |
 | 2026-09-27 | #11056 | `full_mass_matrix` in `engine_core/mujoco_compat.py` selects the `mj_fullM` signature at run time, because MuJoCo 3.13 (inside `mujoco>=3.6,<4`) removed `MjData.qM`; every `src` call site uses it (#11055). |
