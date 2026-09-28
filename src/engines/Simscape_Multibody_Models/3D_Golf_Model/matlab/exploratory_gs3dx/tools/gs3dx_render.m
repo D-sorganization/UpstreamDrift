@@ -8,7 +8,9 @@ function out = gs3dx_render(mdl, q, opts)
 %   Poses Q:
 %     - KinematicsSolver target matrix or IK struct (such as produced by
 %       GS3DX_WHOLE_BODY_IK: struct with .joint_ids and .joint, and optional
-%       .frames and .t).
+%       .frames and .t).  An IK solved on another variant (.model) is
+%       matched to MDL's joints by block path (GS3DX_JOINT_KEYS), as are
+%       rows named by an optional .joint_keys; joints it lacks are at 0.
 %     - Numeric matrix of joint positions (joint_ids x frames).
 %
 %   Geometry:
@@ -80,10 +82,10 @@ function out = gs3dx_render(mdl, q, opts)
     end
 
     % Set up KinematicsSolver with frame variables
-    [ks, closed, tv, ids] = local_build_ks(mdl, solids);
+    [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids);
 
     % Parse poses Q and resolve per-frame joint positions
-    [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, closed, tv, opts.time);
+    [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, keys, mdl, closed, tv, opts.time);
 
     % Frame selection for rendering
     if isempty(opts.stills) && isempty(opts.video)
@@ -286,7 +288,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Build KinematicsSolver with solid frame variables
 % -------------------------------------------------------------------------
-function [ks, closed, tv, ids] = local_build_ks(mdl, solids)
+function [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids)
     wf = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
         'ReferenceBlock', 'sm_lib/Frames and Transforms/World Frame');
     assert(~isempty(wf), 'gs3dx:render', 'World Frame not found in %s', mdl);
@@ -294,7 +296,7 @@ function [ks, closed, tv, ids] = local_build_ks(mdl, solids)
 
     ks = simscape.multibody.KinematicsSolver(mdl);
     jp = ks.jointPositionVariables;
-    ids = string(jp.ID);
+    [keys, ids] = gs3dx_joint_keys(mdl, jp);
 
     for i = 1:numel(solids)
         s_port = [solids(i).block '/R'];
@@ -305,8 +307,9 @@ function [ks, closed, tv, ids] = local_build_ks(mdl, solids)
         addFrameVariables(ks, sprintf('r%d', i), 'Rotation', world, s_port);
     end
 
-    % Grip loop closed joints (right elbow, shoulder, wrist)
-    closed = startsWith(ids, ["j15.", "j18.", "j19."]);
+    % Grip loop closed joints (right elbow, shoulder, wrist), by block path:
+    % a joint added to a variant renumbers the IDs after it
+    closed = startsWith(keys, ["Right Elbow Joint/" "Right Shoulder Joint/" "Right Wrist and Hand/"]);
     tv = ids(~closed);
 
     addTargetVariables(ks, tv);
@@ -321,7 +324,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Parse pose inputs (ik struct or matrix)
 % -------------------------------------------------------------------------
-function [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, closed, tv, user_time)
+function [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, keys, mdl, closed, tv, user_time)
     t_vec = user_time;
     if isempty(q)
         % Target-free identity/zero pose
@@ -336,7 +339,21 @@ function [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, closed, tv, user_t
     if isstruct(q) && isfield(q, 'joint') && isfield(q, 'joint_ids')
         % IK struct
         ik_ids = string(q.joint_ids);
-        if isequal(ik_ids, ids)
+        if isfield(q, 'joint_keys') || (isfield(q, 'model') && ~strcmp(q.model, mdl) && ~isequal(ik_ids, ids))
+            % Rows named by GS3DX_JOINT_KEYS, or solved on another variant:
+            % match joints by block path; joints the IK does not have stay at 0
+            if isfield(q, 'joint_keys')
+                ik_keys = string(q.joint_keys);
+            else
+                [src_keys, src_ids] = gs3dx_joint_keys(char(q.model));
+                [ok, r] = ismember(ik_ids, src_ids);
+                assert(all(ok), 'gs3dx:render', 'IK joint IDs are not those of %s', q.model);
+                ik_keys = src_keys(r);
+            end
+            [found, at] = ismember(keys, ik_keys);
+            q_mat = zeros(numel(ids), size(q.joint, 2));
+            q_mat(found, :) = q.joint(at(found), :);
+        elseif isequal(ik_ids, ids)
             q_mat = q.joint;
         else
             % Reorder to match model IDs
