@@ -17,7 +17,8 @@ import numpy as np
 import pytest
 
 from src.shared.python.workspace.installed_journeys import DependencyUnavailableError
-from src.shared.python.motion_matching.pipeline import cli
+from src.shared.python.motion_matching import full_body_forward_dynamics
+from src.shared.python.motion_matching.pipeline import cli, dynamics
 from src.shared.python.motion_matching.pipeline.cli import (
     PipelineContext,
     _apply_trajectory_optimiser,
@@ -344,7 +345,8 @@ def test_trajectory_optimiser_shared_simulator_rescoring(
         lambda *a, **k: None,
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.full_body_forward_dynamics.reference_zmp",
+        full_body_forward_dynamics,
+        "reference_zmp",
         lambda *a, **k: None,
     )
 
@@ -466,15 +468,18 @@ def test_score_reference_and_shooting_fit_agree(
     fake_errors = np.full((n_frames, 2), 0.02)
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.dynamics.replay",
+        dynamics,
+        "replay",
         lambda *a, **kw: (fake_record, fake_sim_q),
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.dynamics.marker_errors",
+        dynamics,
+        "marker_errors",
         lambda *a, **kw: fake_errors,
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.full_body_forward_dynamics.reference_zmp",
+        full_body_forward_dynamics,
+        "reference_zmp",
         lambda *a, **kw: {
             "outside_m": np.zeros(n_frames),
             "unloaded": np.zeros(n_frames),
