@@ -19,6 +19,7 @@ function check = gs3dx_contact_check(info, opts)
 %                 .lift (max vertical ankle rise, m) from the ankle joint
 %                 GlobalPosition, relative to t = 0
 %     .pelvis     max distance of the pelvis frame from its t = 0 position (m)
+%     .pelvis_p   pelvis frame origin (3xN, World, m) on the grid of .t
 %     .status, .message    of the simulation
 %
 %   Options: drive ("impact"), stop_time (0.3 s), variables (struct of
@@ -99,6 +100,7 @@ function check = gs3dx_contact_check(info, opts)
         check.feet.(P) = struct('slip', max(vecnorm(horiz)), 'lift', max(vert));
     end
     check.pelvis = max(vecnorm(s.pelvis_p - s.pelvis_p(:, 1)));
+    check.pelvis_p = at(s.t, s.pelvis_p);
     check.status = "success";
     check.message = "";
 end
