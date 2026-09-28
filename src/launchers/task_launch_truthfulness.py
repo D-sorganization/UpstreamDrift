@@ -132,10 +132,12 @@ AUDITED_CAPABILITIES: dict[str, AuditEntry] = {
         label="Physics-Informed Pure Rigid (Library Only)",
         explanation=(
             "Pinocchio inverse dynamics PINN mode is a library-only component "
-            "(src/shared/python/physics_informed/); no interactive UI has been built."
+            "(src/shared/python/physics_informed/) wired to motion matching in "
+            "shadow observation mode; full PINN hybrid residual training is "
+            "blocked on measured residual dataset availability (issue #11028)."
         ),
-        next_action="Import PhysicsMode.PURE_RIGID from library; track UI under #7984 and epic #5419.",
-        tracking_issue="#7984, #5419",
+        next_action="Import PhysicsMode.PURE_RIGID from library; track under issue #11028.",
+        tracking_issue="#11028",
     ),
     "pinn_hybrid": AuditEntry(
         capability_id="pinn_hybrid",
@@ -143,10 +145,11 @@ AUDITED_CAPABILITIES: dict[str, AuditEntry] = {
         label="PINN Hybrid (Library Only)",
         explanation=(
             "Rigid body + JAX residual torque MLP is a library-only component "
-            "(src/shared/python/physics_informed/); no interactive UI has been built."
+            "(src/shared/python/physics_informed/); MLP residual training is blocked "
+            "on measured residual-torque dataset availability (issue #11028)."
         ),
-        next_action="Import PhysicsMode.PINN_HYBRID from library; track UI under #7984 and epic #5419.",
-        tracking_issue="#7984, #5419",
+        next_action="Import PhysicsMode.PINN_HYBRID from library; track under issue #11028.",
+        tracking_issue="#11028",
     ),
     "video_analyzer": AuditEntry(
         capability_id="video_analyzer",
