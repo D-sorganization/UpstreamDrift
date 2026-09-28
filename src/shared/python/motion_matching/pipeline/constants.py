@@ -139,6 +139,7 @@ RATE_HZ: float = 360.0
 PLAYBACK_STRIDE: int = 6
 PRIOR: float = 1e-3
 CONTACT_STIFFNESS_N_M: float = 2.0e5
+DEFAULT_MJX_ITERATIONS: int = 40
 
 IK_UNBOUNDED: frozenset[str] = frozenset(
     {"LWInputX", "RWInputX", "LWInputY", "RWInputY", "LFInput", "RFInput"}
