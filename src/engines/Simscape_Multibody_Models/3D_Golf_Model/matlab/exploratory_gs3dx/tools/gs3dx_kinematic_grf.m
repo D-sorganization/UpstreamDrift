@@ -18,7 +18,9 @@ function k = gs3dx_kinematic_grf(opts)
 %   Segments (proximal -> distal marker proxies, COM at the de Leva
 %   fraction .com from the proximal end):
 %     head       mean of HeadTop/HeadFront/HeadSide (the COM itself)
-%     trunk      BackTop (C7) -> waist centre lowered by hip_drop
+%     trunk      BackTop (C7) -> waist centre lowered by hip_drop, or
+%                with trunk = "joint_centres" the shoulder-centre midpoint
+%                -> hip-centre midpoint of GS3DX_CAPTURE_JOINT_CENTRES
 %     upper arm  LShoulderTop / RShoulderBack -> ElbowOut
 %                (RShoulderTop is missing in 80% of frames)
 %     forearm    ElbowOut -> WristTop
@@ -36,10 +38,17 @@ function k = gs3dx_kinematic_grf(opts)
 %   Gaps are filled linearly, the COM is low-pass filtered (zero-lag 4th
 %   order Butterworth at cutoff_hz) and differentiated twice.
 %
+%   The C7 marker is on the back.  When the inclined trunk turns, a point
+%   on that surface rises and falls where the trunk's centre of mass near
+%   its axis does not: the joint-centre trunk agrees with the GS3DX
+%   model's to 3.4 mm RMS of whole-body height, the C7 trunk to 10.3 mm,
+%   and it moves the peak from 1.27 to 1.85 BW (docs/SHAPE.md).
+%
 %   Options: file ('' = data/C3D_TA_Driver.c3d), body_mass (80 kg),
 %   cutoff_hz (8), hip_drop (0.08 m, waist markers above the hip centres),
 %   club_head_mass (0.25 kg) and club_rest_mass (0.137 kg: the GS3DX
-%   model's shaft, grip parts and hand standoffs).
+%   model's shaft, grip parts and hand standoffs), trunk ("c7" or
+%   "joint_centres").
 %
 %   K fields: .t (s, 0 at the first frame), .com (3xN, m), .grf (3xN, N)
 %   and .grf_bw (3xN, in body weights), all in the address target frame
@@ -58,6 +67,7 @@ function k = gs3dx_kinematic_grf(opts)
         opts.hip_drop (1,1) double {mustBeNonnegative} = 0.08
         opts.club_head_mass (1,1) double {mustBeNonnegative} = 0.25
         opts.club_rest_mass (1,1) double {mustBeNonnegative} = 0.137
+        opts.trunk (1,1) string {mustBeMember(opts.trunk, ["c7" "joint_centres"])} = "c7"
     end
     cap = gs3dx_capture_markers(opts.file);
     a = gs3dx_anthropometry(opts.body_mass);
@@ -69,9 +79,16 @@ function k = gs3dx_kinematic_grf(opts)
     drop = [0; 0; opts.hip_drop];
 
     waist = (m("WaistLeft") + m("WaistRight") + m("WaistLBack") + m("WaistRBack")) / 4;
+    if opts.trunk == "c7"
+        trunk = along(m("BackTop"), waist - drop, c.trunk);
+    else
+        jc = gs3dx_capture_joint_centres(cap);
+        back = @(p) cap.target_frame * p + waist(:, 1);   % jc: target axes, address waist origin
+        trunk = along(back((jc.shoulder_L + jc.shoulder_R) / 2), back((jc.hip_L + jc.hip_R) / 2), c.trunk);
+    end
     parts = {
         f.head,  (m("HeadTop") + m("HeadFront") + m("HeadSide")) / 3
-        f.trunk, along(m("BackTop"), waist - drop, c.trunk)
+        f.trunk, trunk
         };
     shoulder = struct('L', "LShoulderTop", 'R', "RShoulderBack");
     hip = struct('L', "WaistLeft", 'R', "WaistRight");

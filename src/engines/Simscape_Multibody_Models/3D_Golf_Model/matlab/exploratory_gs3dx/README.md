@@ -73,19 +73,19 @@ Agent-editable exploratory copies of the hand-built 3D kinetic golf model
 
 ## Model Lineage
 
-| Model                   | Built by                  | Change                                                                         |
-| ----------------------- | ------------------------- | ------------------------------------------------------------------------------ |
-| `GS3DX_Baseline`        | `gs3dx_clone_baseline`    | Verbatim renamed clone, with subsystem references re-pointed                   |
-| `GS3DX_Slim`            | `gs3dx_build_slim`        | Direct joint `InputTorque` drive: 63 fewer blocks (672 → 609)                  |
-| `GS3DX_Quat`            | `gs3dx_build_quat`        | Quaternion shoulders and hip: 15 fewer blocks (609 → 594)                      |
-| `GS3DX_FullBody`        | `gs3dx_build_lower_body`  | Legs and welded feet: 157 more blocks (594 → 751, cap 900)                     |
-| `GS3DX_FullBodyContact` | `gs3dx_build_contact`     | Feet on the ground, unactuated pelvis, leg servo (773; **967 compiled**)       |
-| `GS3DX_Golfer`          | `gs3dx_build_golfer`      | Contact model with de Leva masses, 80 kg (parameters only; 967)                |
-| `GS3DX_Fit`             | `gs3dx_build_fit`         | Golfer with segment lengths and grip from the capture (parameters; 967)        |
-| `GS3DX_FitLegs`         | `gs3dx_build_fit_legs`    | Fit with time-varying leg servo references from the capture (one for one; 967) |
-| `GS3DX_FitTrack`        | `gs3dx_build_fit_track`   | FitLegs with the upper body tracking the capture, learned feedforward (967)    |
-| `GS3DX_FitBalance`      | `gs3dx_build_fit_balance` | FitTrack with centre-of-mass and foot feedback into the leg servo (973)        |
-| `GS3DX_Shape`           | `gs3dx_build_shape`       | FitBalance with de Leva inertia, ellipsoid legs, hands and head (973)          |
+| Model                   | Built by                  | Change                                                                                                                       |
+| ----------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `GS3DX_Baseline`        | `gs3dx_clone_baseline`    | Verbatim renamed clone, with subsystem references re-pointed                                                                 |
+| `GS3DX_Slim`            | `gs3dx_build_slim`        | Direct joint `InputTorque` drive: 63 fewer blocks (672 → 609)                                                                |
+| `GS3DX_Quat`            | `gs3dx_build_quat`        | Quaternion shoulders and hip: 15 fewer blocks (609 → 594)                                                                    |
+| `GS3DX_FullBody`        | `gs3dx_build_lower_body`  | Legs and welded feet: 157 more blocks (594 → 751, cap 900)                                                                   |
+| `GS3DX_FullBodyContact` | `gs3dx_build_contact`     | Feet on the ground, unactuated pelvis, leg servo (773; **967 compiled**)                                                     |
+| `GS3DX_Golfer`          | `gs3dx_build_golfer`      | Contact model with de Leva masses, 80 kg (parameters only; 967)                                                              |
+| `GS3DX_Fit`             | `gs3dx_build_fit`         | Golfer with segment lengths and grip from the capture (parameters; 967)                                                      |
+| `GS3DX_FitLegs`         | `gs3dx_build_fit_legs`    | Fit with time-varying leg servo references from the capture (one for one; 967)                                               |
+| `GS3DX_FitTrack`        | `gs3dx_build_fit_track`   | FitLegs with the upper body tracking the capture, learned feedforward (967)                                                  |
+| `GS3DX_FitBalance`      | `gs3dx_build_fit_balance` | FitTrack with centre-of-mass and foot feedback into the leg servo (973)                                                      |
+| `GS3DX_Shape`           | `gs3dx_build_shape`       | FitBalance with de Leva inertia, ellipsoid legs, hands and head, balanced on the capture's joint-centre centre of mass (973) |
 
 The license counts compiled blocks (FullBody compiles to 945 of 1,000), see
 `docs/BLOCK_BUDGET_FINDINGS.md`. Data sources and gaps are in

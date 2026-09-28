@@ -201,6 +201,15 @@
       "down-the-line" drew face-on from behind; now face-on = camera on +X (az 90), down-the-line =
       camera on -Y (az 0), unknown views error, `out.view` reported and tested. All
       `docs/screenshots/GS3DX_*` stills re-rendered.
+  24. #10979 impact spike resolved (2026-09-28): per-segment vertical COM, model (regularised IK,
+      `gs3dx_render` poses) vs capture, agrees to 1 mm for legs/arms/club; the 12.9 mm RMS is the
+      trunk (10.3) and head (3.5). The trunk part is the capture's C7-skin proxy: with the
+      shoulder-centre -> hip-centre trunk (`gs3dx_kinematic_grf(trunk="joint_centres")`) the
+      capture matches the model to 4.0 mm RMS. As balance reference it gives 1.77 BW peak (vs
+      2.64 offset / 1.44 C7), pelvis 22 mm RMS, COM vert 2.9 mm, slip 38/16 mm: best run, and
+      `GS3DX_Shape` is saved on it (`docs/SHAPE.md`). The head is rigid with the upper trunk
+      (no neck joint, no head IK target) and rises ~50 mm in the downswing; a driven neck needs
+      ~10 compiled blocks and Shape has 2 under the 975 cap.
 
 ## Files and Decisions
 
@@ -288,9 +297,9 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 impact spike: segment inertia is ruled out (`docs/SHAPE.md`); compare the model's and
-   the capture's centre of mass per segment along the swing (trunk first) to find what in the
-   tracked pose leaves 12 mm RMS vertically, then compare the support with `gs3dx_kinematic_grf`.
+2. #10979 head: measure what removing the four zero-mass joint spheres (elbows, shoulders; ~7
+   compiled blocks each) frees, and whether a motion-driven neck gimbal tracking the head
+   markers fits in it (`docs/SHAPE.md`, "Where the Remaining 12 mm Comes From").
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).

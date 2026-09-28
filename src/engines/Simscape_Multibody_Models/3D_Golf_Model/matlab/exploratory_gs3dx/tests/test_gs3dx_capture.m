@@ -55,6 +55,18 @@ classdef test_gs3dx_capture < matlab.unittest.TestCase
             end
         end
 
+        function joint_centre_trunk_moves_only_the_trunk(testCase)
+            % The trunk proxy alone moves the peak (docs/SHAPE.md): the
+            % address equilibrium holds with either, the peak rises.
+            k = gs3dx_kinematic_grf();
+            kj = gs3dx_kinematic_grf(trunk="joint_centres");
+            testCase.verifyEqual(kj.mass, k.mass);
+            testCase.verifyEqual(kj.address, 1, 'AbsTol', 0.02);
+            testCase.verifyEqual(k.peak.vertical_bw, 1.27, 'AbsTol', 0.01);
+            testCase.verifyEqual(kj.peak.vertical_bw, 1.85, 'AbsTol', 0.01);
+            testCase.verifyError(@() gs3dx_kinematic_grf(trunk="sternum"), 'MATLAB:validators:mustBeMember');
+        end
+
         function capture_has_no_ground_reaction_data(testCase)
             testCase.verifyEqual(testCase.cap.force_plates_used, 0);
             testCase.verifyEqual(testCase.cap.n_analog, 0);
