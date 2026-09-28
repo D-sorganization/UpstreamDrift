@@ -138,11 +138,11 @@ Rules restated: a ledger row is accepted only by `acceptance.py` (non-empty `gat
 
 ### 1. Cross-Engine Engineering Progress Matrix
 
-Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 129 committed receipts scanned).
+Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 133 committed receipts scanned).
 
 | Engine        | Candidate Lanes                                                                                                                              | Evaluated Captures | Best IK RMS | Best Dyn RMS | Receipts | Engine Status                                                       |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ----------- | ------------ | -------- | ------------------------------------------------------------------- |
-| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, unclassified, viewer, visual_layer | driver, iron       | —           | —            | 45       | ⚙️ Engineering Milestone (G1 IK not met: 34.1 mm > 30 mm, #11044)   |
+| **Mujoco**    | anthropometry, fb4_calibration, fb5_matching, fb6_parity, ground_support, matched, replays, setup_parity, unclassified, viewer, visual_layer | driver, iron       | —           | —            | 47       | ⚙️ Engineering Milestone (G1 IK not met: 34.1 mm > 30 mm, #11044)   |
 | **Pinocchio** | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                                | driver, iron       | —           | —            | 11       | ⚙️ Kinematic Milestone (Pink QP active; Crocoddyl lift in progress) |
 | **Drake**     | fb3_kinematics, fb4_calibration, fb6_parity, ground_support, matched, replays                                                                | driver             | —           | —            | 6        | ⚙️ IK 47 mm / tracking 382 mm REJECTED                              |
 | **Opensim**   | ground_support, matched, tour_matching                                                                                                       | driver             | —           | —            | 11       | ⚠️ Staged (Moco track problem under MS-102)                         |

@@ -4,7 +4,9 @@ Run as ``python -m scripts.benchmark_mjx_knot_solvers --work <scratch>`` with
 the JAX/MJX interpreter, so every solver runs on the same MuJoCo build. Each
 (capture, solver) is one full pipeline run; its ``receipt.json`` (and the MJX
 receipt) is copied under ``--evidence`` with a ``run.json`` of the command,
-exit code and wall clock. ``--render-only`` rebuilds ``rows.json`` and
+exit code and wall clock. A case directory holding only ``reuse.json``
+(``{"from": "<relative path>"}``) scores an earlier run's receipts instead.
+``--render-only`` rebuilds ``rows.json`` and
 ``REPORT.md`` from the committed receipts without running anything.
 """
 
@@ -133,8 +135,23 @@ def run_case(capture: str, solver: str, args: argparse.Namespace) -> None:
     (dest / "run.json").write_text(json.dumps(run, indent=2) + "\n", encoding="utf-8")
 
 
+def _resolve_case(case: Path) -> Path:
+    """Follow a ``reuse.json`` pointer to an earlier run's committed receipts.
+
+    A re-run that changes only one solver reuses the other solvers' receipts
+    by reference, so the ledger does not count the same run twice.
+    """
+    pointer = case / "reuse.json"
+    if not pointer.is_file():
+        return case
+    target = (case / json.loads(pointer.read_text(encoding="utf-8"))["from"]).resolve()
+    if not (target / "run.json").is_file():
+        raise FileNotFoundError(f"reuse pointer {pointer} names no run: {target}")
+    return target
+
+
 def load_row(capture: str, solver: str, evidence: Path) -> dict[str, Any]:
-    case = evidence / f"{capture}_{solver}"
+    case = _resolve_case(evidence / f"{capture}_{solver}")
     if solver == "ipopt":
         note = case / "unavailable.json"
         reason = json.loads(note.read_text(encoding="utf-8"))["reason"]

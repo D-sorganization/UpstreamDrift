@@ -1,0 +1,99 @@
+{
+  "rows": [
+    {
+      "capture": "driver",
+      "solver": "none",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08446241181803726,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13634404003218112,
+      "downswing_weight_fraction_min": 0.4032028887521252,
+      "iterations": 0,
+      "evaluations": 1,
+      "stop_reason": "not_applicable",
+      "wall_clock_s": 1113.0240020999918
+    },
+    {
+      "capture": "driver",
+      "solver": "shooting",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08446241181803726,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13634404003218112,
+      "downswing_weight_fraction_min": 0.4032028887521252,
+      "iterations": 8,
+      "evaluations": 9,
+      "stop_reason": "fixed_passes",
+      "wall_clock_s": 1679.4626357000088
+    },
+    {
+      "capture": "driver",
+      "solver": "mjx-lbfgs",
+      "status": "ok",
+      "replay_marker_rms_m": 0.040762654470167005,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.05367958570674293,
+      "downswing_weight_fraction_min": 0.3071104826611398,
+      "iterations": 60,
+      "evaluations": 70,
+      "stop_reason": "max_iterations",
+      "wall_clock_s": 6216.541887799976
+    },
+    {
+      "capture": "iron",
+      "solver": "none",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08860926039813796,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13295040855992307,
+      "downswing_weight_fraction_min": 0.345892516128067,
+      "iterations": 0,
+      "evaluations": 1,
+      "stop_reason": "not_applicable",
+      "wall_clock_s": 890.2890473000007
+    },
+    {
+      "capture": "iron",
+      "solver": "shooting",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08860926039813796,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13295040855992307,
+      "downswing_weight_fraction_min": 0.345892516128067,
+      "iterations": 8,
+      "evaluations": 9,
+      "stop_reason": "fixed_passes",
+      "wall_clock_s": 1846.4802958000218
+    },
+    {
+      "capture": "iron",
+      "solver": "mjx-lbfgs",
+      "status": "ok",
+      "replay_marker_rms_m": 0.042567157857146216,
+      "g1_met": false,
+      "worst_segment": "left_arm",
+      "worst_segment_rms_m": 0.050117446762807744,
+      "downswing_weight_fraction_min": 0.28839035976687755,
+      "iterations": 60,
+      "evaluations": 70,
+      "stop_reason": "max_iterations",
+      "wall_clock_s": 5097.419849600061
+    }
+  ],
+  "decisions": [
+    {
+      "candidate": "mjx-lbfgs",
+      "incumbent": "shooting",
+      "promote": false,
+      "reasons": [
+        "driver: mjx-lbfgs stopped on max_iterations, not converged within the budget",
+        "iron: mjx-lbfgs stopped on max_iterations, not converged within the budget"
+      ]
+    }
+  ]
+}
