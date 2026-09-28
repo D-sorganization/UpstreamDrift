@@ -572,8 +572,11 @@ Tried and not kept (whole body to impact, Kp 1):
 
 ## Next
 
-1. Impact spike: find which part of the tracked pose moves the model's
-   centre of mass away from the capture's (12 mm RMS vertically on both
-   models): compare the two per segment along the swing, trunk first.
+1. Impact spike: resolved in `GS3DX_Shape` (docs/SHAPE.md, "Where the
+   Remaining 12 mm Comes From"). The 12 mm RMS was the capture's C7 trunk
+   proxy; with a joint-centre trunk the capture agrees with the model to
+   4 mm and, as the balance reference, gives a 1.77 BW peak and the best
+   pelvis, centre-of-mass and slip tracking yet. What remains of the
+   model's side is the head, rigid with the upper trunk.
 2. Learning drift: record the PD torque per joint over more iterations and
    add a forgetting factor, or leave the loop joints to the PD alone.
