@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -46,16 +46,19 @@ class SwingPhase(Enum):
 
 @dataclass
 class ShadowReport:
-    """Container for peak residual torques recorded during shadow observation.
+    """Container for peak residual and rigid torques recorded during shadow observation.
 
     Attributes:
         peak_residuals: Mapping from :attr:`SwingPhase.value` string to the
             peak (max abs) residual torque magnitude recorded in that phase.
             Empty when no frames were observed or when optional dependencies
             are unavailable.
+        peak_rigid_torques: Mapping from :attr:`SwingPhase.value` string to the
+            peak (max abs) rigid-body torque magnitude recorded in that phase.
     """
 
     peak_residuals: dict[str, float] = field(default_factory=dict)
+    peak_rigid_torques: dict[str, float] = field(default_factory=dict)
 
 
 # =============================================================================
@@ -180,15 +183,18 @@ class ShadowModel:
             return ShadowReport()
 
         phase_peaks: dict[str, float] = {}
+        rigid_peaks: dict[str, float] = {}
 
         try:
             total = len(frames)
             for idx, frame in enumerate(frames):
                 phase = _classify_phase(idx, total)
-                peak = self._compute_frame_peak(frame)
+                rigid_peak, mlp_peak = self._compute_frame_peaks(frame)
                 key = phase.value
-                if key not in phase_peaks or peak > phase_peaks[key]:
-                    phase_peaks[key] = peak
+                if key not in phase_peaks or mlp_peak > phase_peaks[key]:
+                    phase_peaks[key] = mlp_peak
+                if key not in rigid_peaks or rigid_peak > rigid_peaks[key]:
+                    rigid_peaks[key] = rigid_peak
 
         except ImportError as exc:
             logger.warning(
@@ -199,43 +205,90 @@ class ShadowModel:
             return ShadowReport()
 
         logger.debug(
-            "ShadowModel.observe: %d frames -> peak_residuals=%s",
+            "ShadowModel.observe: %d frames -> peak_residuals=%s, peak_rigid=%s",
             len(frames),
             phase_peaks,
+            rigid_peaks,
         )
-        return ShadowReport(peak_residuals=phase_peaks)
+        return ShadowReport(
+            peak_residuals=phase_peaks,
+            peak_rigid_torques=rigid_peaks,
+        )
+
+    def observe_motion_matching(self, reference: Any) -> ShadowReport:
+        """Observe motion-matching trajectory in observation mode.
+
+        Extracts (q, dq, ddq) from a JointTrajectory reference and executes
+        shadow observation without changing any trajectory or solver state.
+
+        Args:
+            reference: JointTrajectory with frames containing q.
+
+        Returns:
+            ShadowReport with peak_rigid_torques and peak_residuals per phase.
+        """
+        frames_list = getattr(reference, "frames", None)
+        if not frames_list:
+            return ShadowReport()
+
+        times = np.asarray([float(f.timestamp) for f in frames_list], dtype=np.float64)
+        q = np.asarray([list(f.q) for f in frames_list], dtype=np.float64)
+
+        have_qdot = all(getattr(f, "qdot", None) is not None for f in frames_list)
+        have_qddot = all(getattr(f, "qddot", None) is not None for f in frames_list)
+
+        if have_qdot:
+            qdot = np.asarray([list(f.qdot) for f in frames_list], dtype=np.float64)
+        else:
+            qdot = np.gradient(q, times, axis=0) if len(times) > 1 else np.zeros_like(q)
+
+        if have_qddot:
+            qddot = np.asarray([list(f.qddot) for f in frames_list], dtype=np.float64)
+        else:
+            qddot = (
+                np.gradient(qdot, times, axis=0) if len(times) > 1 else np.zeros_like(q)
+            )
+
+        frames = [
+            {"q": q[i], "dq": qdot[i], "ddq": qddot[i]} for i in range(len(frames_list))
+        ]
+        return self.observe(frames)
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _compute_frame_peak(self, frame: dict) -> float:
-        """Compute max(abs(mlp_residual)) for a single frame.
-
-        The MLP receives concat([q, dq, ddq]) and produces a residual torque
-        vector.  We then call rigid_core.compute_torques to ensure correctness
-        (e.g. raise ImportError early if Pinocchio is missing).
+    def _compute_frame_peaks(self, frame: dict) -> tuple[float, float]:
+        """Compute max(abs(rigid_torque)) and max(abs(mlp_residual)) for a frame.
 
         Args:
             frame: Dict with keys ``q``, ``dq``, ``ddq``.
 
         Returns:
-            Scalar peak residual magnitude.
-
-        Raises:
-            ImportError: Propagated from rigid_core or mlp_residual if
-                optional dependencies are missing.
+            Tuple of (rigid_peak, mlp_peak).
         """
         q = np.asarray(frame["q"], dtype=np.float64)
         dq = np.asarray(frame["dq"], dtype=np.float64)
         ddq = np.asarray(frame["ddq"], dtype=np.float64)
 
-        # Compute rigid torques to surface any ImportError early
-        self._rigid.compute_torques(q, dq, ddq)
+        rigid_torques = self._rigid.compute_torques(q, dq, ddq)
+        rigid_peak = (
+            float(np.max(np.abs(rigid_torques)))
+            if rigid_torques is not None and len(rigid_torques) > 0
+            else 0.0
+        )
 
-        # MLP residual: predict what rigid misses
         x = np.concatenate([q, dq, ddq])
         mlp_out = self._mlp(x)
         residuals = np.asarray(mlp_out, dtype=np.float64)
+        mlp_peak = (
+            float(np.max(np.abs(residuals)))
+            if residuals is not None and len(residuals) > 0
+            else 0.0
+        )
+        return rigid_peak, mlp_peak
 
-        return float(np.max(np.abs(residuals)))
+    def _compute_frame_peak(self, frame: dict) -> float:
+        """Compute max(abs(mlp_residual)) for a single frame (legacy compatibility)."""
+        _, mlp_peak = self._compute_frame_peaks(frame)
+        return mlp_peak
