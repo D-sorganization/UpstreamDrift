@@ -20,6 +20,7 @@ from src.shared.python.workspace.installed_journeys import DependencyUnavailable
 from src.shared.python.motion_matching.pipeline import cli
 from src.shared.python.motion_matching.pipeline.cli import (
     PipelineContext,
+    _apply_trajectory_optimiser,
     _simulate_and_receipt,
     build_parser,
 )
@@ -176,10 +177,20 @@ def test_receipt_absent_for_none_and_present_for_stubbed_optimiser(
         "stop_reason": "completed",
         "receipt": "mjx_optimisation_receipt.json",
     }
+
+    def stub_run_opt(backend: str, out_dir: Path, **kw: Any) -> dict[str, Any]:
+        np.savez(out_dir / "mjx_optimised_reference.npz", q=np.zeros((2, 1)))
+        return stub_summary
+
     monkeypatch.setattr(
         cli,
         "run_trajectory_optimiser",
-        lambda *a, **kw: stub_summary,
+        stub_run_opt,
+    )
+    monkeypatch.setattr(
+        cli,
+        "score_reference",
+        lambda *a, **kw: {"replay_marker_rms_m": 0.05},
     )
 
     # 1. Run with trajectory_optimiser = "none"
@@ -265,3 +276,225 @@ def test_receipt_absent_for_none_and_present_for_stubbed_optimiser(
         (out_dir_mjx / "receipt.json").read_text(encoding="utf-8")
     )
     assert receipt_file_mjx["trajectory_optimiser"] == stub_summary
+
+
+def test_mjx_method_default_and_rejection() -> None:
+    """--mjx-method defaults to 'adam' and rejects invalid choices."""
+    parser = build_parser()
+    args = parser.parse_args([])
+    assert args.mjx_method == "adam"
+
+    args_lbfgs = parser.parse_args(["--mjx-method", "lbfgs"])
+    assert args_lbfgs.mjx_method == "lbfgs"
+
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--mjx-method", "unknown_method"])
+
+
+def test_trajectory_optimiser_shared_simulator_rescoring(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When mjx_optimised_reference.npz exists, shared_simulator_replay is added to summary."""
+    log = logging.getLogger("test_rescoring")
+    lane = MagicMock()
+    lane.times = np.array([0.0, 0.05])
+    lane.points = np.zeros((2, 1, 3))
+    lane.ground = MagicMock()
+
+    kin = MagicMock()
+    kin.coordinate_order = ["j1"]
+
+    sim = MagicMock()
+    adapter = MagicMock()
+    labels = ("M1",)
+    q_ref = np.zeros((2, 1))
+
+    cal_res = MagicMock()
+    cal_res.qualification_note = "ok"
+    cal_res.spec_bytes = b"{}"
+    cal_res.hip_report = {}
+    cal_res.calibration = {}
+    cal_res.calibration2 = {}
+    cal_res.address_report = {}
+
+    monkeypatch.setattr(
+        cli,
+        "replay",
+        lambda *a, **k: (MagicMock(), np.zeros((2, 1))),
+    )
+    monkeypatch.setattr(
+        cli,
+        "build_dynamics_report",
+        lambda *a, **k: ({}, np.zeros((2, 1))),
+    )
+    monkeypatch.setattr(
+        cli,
+        "_persist_dynamics_artifacts",
+        lambda *a, **k: None,
+    )
+    monkeypatch.setattr(
+        cli,
+        "build_ground_support_receipt",
+        lambda *a, **k: {"base_key": "base_val"},
+    )
+    monkeypatch.setattr(
+        cli,
+        "log_pipeline_summary",
+        lambda *a, **k: None,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching.full_body_forward_dynamics.reference_zmp",
+        lambda *a, **k: None,
+    )
+
+    fake_rescore = {
+        "replay_marker_rms_m": 0.024,
+        "replay_segment_rms_m": {"torso": 0.012},
+        "weight_fraction_min": 0.88,
+    }
+    monkeypatch.setattr(
+        cli,
+        "score_reference",
+        lambda *a, **kw: fake_rescore,
+    )
+
+    def stub_run_opt(backend: str, out_dir: Path, **kw: Any) -> dict[str, Any]:
+        np.savez(out_dir / "mjx_optimised_reference.npz", q=np.zeros((2, 1)))
+        return {
+            "name": backend,
+            "method": "lbfgs",
+            "iterations": 3,
+            "port_check_replay_marker_rms_m": 0.05,
+            "best_replay_marker_rms_m": 0.03,
+            "stop_reason": "converged",
+            "receipt": "mjx_optimisation_receipt.json",
+        }
+
+    monkeypatch.setattr(
+        cli,
+        "run_trajectory_optimiser",
+        stub_run_opt,
+    )
+
+    out_dir = tmp_path / "run_rescore"
+    out_dir.mkdir()
+    args = argparse.Namespace(
+        trajectory_optimiser="mjx-knots",
+        mjx_iterations=3,
+        mjx_method="lbfgs",
+        zmp_filter=False,
+        shooting_fit=0,
+        tracking="kkt",
+        backend="mujoco",
+        spec="dummy.json",
+        recalibrate_upper=False,
+        anthropometric=None,
+        capture="driver",
+    )
+    ctx = PipelineContext(
+        args=args,
+        out_dir=out_dir,
+        c3d_path=Path("dummy.c3d"),
+        engine="mujoco",
+        log=log,
+        t_start=0.0,
+    )
+
+    receipt = _simulate_and_receipt(
+        ctx,
+        lane,
+        kin,
+        sim,
+        adapter,
+        labels,
+        q_ref,
+        cal_res,
+        {},
+        {},
+    )
+    opt_dict = receipt["trajectory_optimiser"]
+    assert "shared_simulator_replay" in opt_dict
+    assert opt_dict["shared_simulator_replay"] == fake_rescore
+
+
+def test_trajectory_optimiser_without_reference_is_an_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A stage summary with no optimised reference to rescore fails loudly."""
+    monkeypatch.setattr(
+        cli,
+        "run_trajectory_optimiser",
+        lambda backend, out_dir, **kw: {"name": backend},
+    )
+    args = argparse.Namespace(trajectory_optimiser="mjx-knots", mjx_iterations=1)
+    with pytest.raises(FileNotFoundError, match="mjx_optimised_reference.npz"):
+        _apply_trajectory_optimiser(
+            args, tmp_path, {}, lane=MagicMock(), kin=MagicMock(), sim=MagicMock()
+        )
+
+
+def test_score_reference_and_shooting_fit_agree(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """score_reference and shooting_fit produce identical shared replay scores."""
+    from src.shared.python.motion_matching.pipeline.constants import SHOOTING_LOCKED
+    from src.shared.python.motion_matching.pipeline.dynamics import (
+        ShootingFitConfig,
+        score_reference,
+        shooting_fit,
+    )
+
+    n_frames = 600
+    lane = MagicMock()
+    lane.times = np.linspace(0.0, 2.0, n_frames)
+    lane.points = np.ones((n_frames, 2, 3))
+    lane.valid = np.ones((n_frames, 2), dtype=bool)
+    lane.labels = ("head", "pelvis")
+    lane.ground = MagicMock()
+
+    kin = MagicMock()
+    kin.coordinate_order = list(SHOOTING_LOCKED) + [f"j{i}" for i in range(10)]
+    nq = len(kin.coordinate_order)
+
+    sim = MagicMock()
+    fake_record = MagicMock()
+    fake_record.weight_fraction = np.full(n_frames, 0.95)
+
+    fake_sim_q = np.full((n_frames, nq), 0.5)
+    fake_errors = np.full((n_frames, 2), 0.02)
+
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching.pipeline.dynamics.replay",
+        lambda *a, **kw: (fake_record, fake_sim_q),
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching.pipeline.dynamics.marker_errors",
+        lambda *a, **kw: fake_errors,
+    )
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching.full_body_forward_dynamics.reference_zmp",
+        lambda *a, **kw: {
+            "outside_m": np.zeros(n_frames),
+            "unloaded": np.zeros(n_frames),
+        },
+    )
+
+    q_track = np.zeros((n_frames, nq))
+    q_ref = np.zeros((n_frames, nq))
+
+    direct_score = score_reference(lane, kin, sim, q_track, tracking_backend="kkt")
+
+    log = logging.getLogger("test_agree")
+    config = ShootingFitConfig(iterations=0, gain=0.1, tracking_backend="kkt")
+    _, _, report = shooting_fit(lane, kin, sim, q_track, q_ref, log, config)
+
+    history_row = report["iterations"][0]
+    assert np.isclose(
+        direct_score["replay_marker_rms_m"], history_row["replay_marker_rms_m"]
+    )
+    assert direct_score["replay_segment_rms_m"] == history_row["replay_segment_rms_m"]
+    assert np.isclose(
+        direct_score["weight_fraction_min"], history_row["weight_fraction_min"]
+    )

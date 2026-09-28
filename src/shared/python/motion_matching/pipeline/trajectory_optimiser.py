@@ -12,7 +12,7 @@ import importlib
 import json
 from pathlib import Path
 import time
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 
@@ -45,6 +45,7 @@ def run_trajectory_optimiser(
     out_dir: Path,
     *,
     iterations: int = DEFAULT_MJX_ITERATIONS,
+    method: Literal["adam", "lbfgs"] = "adam",
 ) -> dict[str, Any] | None:
     """Run the selected trajectory optimiser on a pipeline output directory.
 
@@ -82,7 +83,7 @@ def run_trajectory_optimiser(
     run = Path(out_dir)
     export_mjx_package(run)
     package = load_mjx_package(run)
-    settings = KnotOptimisationSettings(iterations=iterations)
+    settings = KnotOptimisationSettings(iterations=iterations, method=method)
     t0 = time.perf_counter()
     result = optimise_reference(package, settings)
     np.savez(
@@ -103,6 +104,7 @@ def run_trajectory_optimiser(
     )
     return {
         "name": backend,
+        "method": settings.method,
         "iterations": iterations,
         "port_check_replay_marker_rms_m": result.port_check_replay_marker_rms_m,
         "best_replay_marker_rms_m": result.best_replay_marker_rms_m,
