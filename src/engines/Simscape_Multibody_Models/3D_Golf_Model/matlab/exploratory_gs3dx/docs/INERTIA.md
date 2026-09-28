@@ -72,8 +72,12 @@ Left and right are identical.
    A uniform cylinder keeps its mass out to the distal joint, where a limb
    tapers.
 
-3. **The lower trunk is half as inert as de Leva's pelvis-abdomen segment**
-   (0.53 / 0.57): a 6 in radius is narrow for the pelvis.
+3. **The lower-trunk ratios (0.53 / 0.57) are not a finding.** They apply
+   de Leva's lower-trunk radii of gyration, fractions of his pelvis segment
+   (about 0.145 m), to the model's 0.244 m `LowerTorso`, which also carries
+   half the middle trunk. Setting `LowerTorso` to that reference on
+   `GS3DX_Shape` took the whole-trunk longitudinal ratio from 1.34 to 1.85,
+   so the trunk is compared as a whole only, and left as it is.
 4. **Head and hand** are spheres: the head is 1.6 times too inert about its
    long axis, and the hand has 0.42 of its bending inertia.
 5. **The foot is close** (1.08 longitudinal, 1.45 transverse): a brick is a
@@ -82,11 +86,12 @@ Left and right are identical.
 The moments are not the only error. The centres of mass also sit at the
 middle of each solid rather than at de Leva's fractions (for example, the
 thigh at 0.41 of its length from the hip). That shifts the whole-body centre
-of mass along the tracked pose. The balance reference built from it moves
-40 mm vertically before impact where the capture's moves 19 mm, and demands
-a 2.6 BW support peak (docs/FIT.md, section 7). `GS3DX_Shape`
-(`docs/SHAPE.md`) replaces the body solids with ellipsoids that carry
-custom de Leva inertia and centres of mass.
+of mass along the tracked pose. `GS3DX_Shape` (`docs/SHAPE.md`) gives the
+limbs and head de Leva moments and centres of mass (every limb ratio 1.00) and
+draws the thighs, shanks, hands and head as ellipsoids. Its centre-of-mass
+reference is within 1 mm RMS of the cylinder model's (12.4 against 12.9 mm
+from the capture's), so the balance reference's error is not a segment
+inertia error.
 
 ## Tests
 

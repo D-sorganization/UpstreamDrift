@@ -62,30 +62,11 @@ function report = gs3dx_build_fit_balance(info, ref, opts)
         'gs3dx:fitbalance', ...
         'REF is not the leg reference of %s', src);
 
-    report.on = ~isempty(opts.com_offset) || ~isempty(opts.com_ref);
-    if ~isempty(opts.com_ref)
-        assert(isequal(size(opts.com_ref), [3 n]) && all(isfinite(opts.com_ref), 'all'), 'gs3dx:fitbalance', ...
-            'COM_REF must be finite, 3 x %d', n);
-        com = opts.com_ref;
-    else
-        offset = zeros(3, n);
-        if report.on
-            assert(isequal(size(opts.com_offset), [3 n]), 'gs3dx:fitbalance', 'COM_OFFSET must be 3 x %d', n);
-            offset = opts.com_offset;
-        end
-        com = ref.pelvis_p + squeeze(pagemtimes(ref.pelvis_R, reshape(offset, 3, 1, n)));
-    end
-    assignin(ws, 'BalanceOn', double(report.on));
+    report.on = gs3dx_balance_reference(ws, ref, opts.com_offset, opts.com_ref, 'gs3dx:fitbalance');
     assignin(ws, 'BalanceKp', opts.gains(1));
     assignin(ws, 'BalanceKd', opts.gains(2));
     assignin(ws, 'BalanceLimit', opts.limit);
     assignin(ws, 'BalanceCOMTau', opts.tau);
-    assignin(ws, 'BalanceCOMRef', com);
-    rate = zeros(3, n);
-    for r = 1:3
-        rate(r, :) = gradient(com(r, :), T(:).');
-    end
-    assignin(ws, 'BalanceCOMRate', rate);
     assignin(ws, 'BalanceGain', gs3dx_balance_gain(ref, ws, axes=opts.axes));
     assignin(ws, 'BalanceFootKp', opts.foot_gain);
     assignin(ws, 'BalanceFootRef', [ref.feet.L.p; ref.feet.R.p]);

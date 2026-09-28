@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-28 — #10979: tracking the capture's own centre of mass (`com_ref`, `gs3dx_capture_com_reference`) drops the pre-impact support peak from 2.63 to 1.44 BW (capture 1.27) at a pelvis cost (42 vs 27 mm RMS), confirming the reference causes the spike; `gs3dx_inertia_audit` (docs/INERTIA.md) shows limb longitudinal inertia at 0.43–0.65 of de Leva. test_gs3dx_inertia 7/7, test_gs3dx_capture_com_reference 2/2, test_gs3dx_fit_balance 7/7.
+- **Last verified:** 2026-09-28 — #10979: `GS3DX_Shape` (de Leva limb/head inertia, ellipsoid thighs/shanks/hands/head, 973 compiled) and headless `gs3dx_render`; Shape's centre-of-mass reference is within 1 mm RMS of FitBalance's and its balance runs repeat FitBalance (2.64 / 1.44 BW), so segment inertia does not cause the impact spike. Tests: shape 6/6, render 3/3, inertia 7/7, fit_balance 7/7 (R2025b).
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Build GS3DX_Shape (ellipsoid segments with de Leva inertia and centres of mass) and run its balance-off offset reference against the capture's centre of mass.
+- **Next step:** Compare the model's and the capture's centre of mass per segment along the swing, trunk first, to find what leaves 12 mm RMS vertically in the balance reference.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

@@ -186,6 +186,17 @@
       0.43-0.65 of de Leva, lower trunk 0.53, foot close (1.08). Agents (agy, uncommitted worktrees
       `agy-gs3dx-{shape,render}`): GS3DX_Shape (ellipsoid solids with custom de Leva inertia/COM)
       and `gs3dx_render` (headless KinematicsSolver + MATLAB graphics) in progress.
+  22. #10979 shape and rendering (2026-09-28): `gs3dx_render` (headless stills/video from a
+      KinematicsSolver pose of every Solid; `docs/RENDERING.md`; stills in
+      `docs/screenshots/GS3DX_{FitBalance,Shape}_*.png`). `gs3dx_build_shape` -> `GS3DX_Shape`:
+      custom de Leva moments on limbs and head (audit 1.00), de Leva centres of mass on thighs,
+      shanks, upper arms and forearm halves (joints measured on each solid's z axis, proximal +z),
+      ellipsoids for thighs/shanks/hands/head via `PortConnectivity` rewiring; 973 compiled (one
+      extra visual solid costs 7). `gs3dx_balance_reference` shared with FitBalance. Finding: the
+      Shape COM reference is within 1 mm RMS of FitBalance's (12.4 vs 12.9 mm from the capture's)
+      and balance runs repeat it (2.64 BW offset, 1.44 BW capture COM): segment inertia does not
+      cause the impact spike (`docs/SHAPE.md`). The earlier lower-trunk 0.53 ratio was an audit
+      length artifact (`docs/INERTIA.md`).
 
 ## Files and Decisions
 
@@ -273,9 +284,9 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 impact spike: stop the trail foot unloading before impact (higher or vertical-only foot
-   gain, or toe contact: heel up, toe down as captured), then compare the support with
-   `gs3dx_kinematic_grf` (1.27 BW peak 55 ms before impact).
+2. #10979 impact spike: segment inertia is ruled out (`docs/SHAPE.md`); compare the model's and
+   the capture's centre of mass per segment along the swing (trunk first) to find what in the
+   tracked pose leaves 12 mm RMS vertically, then compare the support with `gs3dx_kinematic_grf`.
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
