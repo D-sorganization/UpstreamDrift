@@ -11,10 +11,12 @@ from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.motion_matching.knot_gradient_optimiser import (
     AdamSettings,
     KnotOptimisationResult,
+    LbfgsSettings,
     adam_minimise,
     horizon_knot_mask,
     knot_basis,
     knot_grid,
+    lbfgs_minimise,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -373,3 +375,111 @@ def test_adam_minimise_does_not_freeze_or_alias_caller_x0() -> None:
     assert result.best_x is not x0
     x0[0] = 5.0
     assert result.best_x[0] == 1.0
+
+
+# ---------------------------------------------------------------------------
+# LbfgsSettings and lbfgs_minimise tests
+# ---------------------------------------------------------------------------
+
+
+def test_lbfgs_settings_contracts() -> None:
+    settings = LbfgsSettings(max_iterations=10)
+    assert settings.max_iterations == 10
+    assert settings.max_evaluations is None
+
+    settings_eval = LbfgsSettings(max_iterations=10, max_evaluations=25)
+    assert settings_eval.max_evaluations == 25
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=0)
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=-5)
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=10, max_evaluations=0)
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=10, max_evaluations=-1)
+
+
+def test_lbfgs_converges_on_convex_quadratic() -> None:
+    mat_a = np.array([[3.0, 1.0], [1.0, 2.0]])
+    vec_b = np.array([2.0, -1.0])
+    x_star = np.linalg.solve(mat_a, vec_b)
+    x0 = np.zeros(2)
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        residual = mat_a @ x - vec_b
+        cost = 0.5 * float(np.sum(residual**2))
+        grad = mat_a.T @ residual
+        return (cost, cost), grad
+
+    settings = LbfgsSettings(max_iterations=50)
+    result = lbfgs_minimise(val_and_grad, x0, settings)
+
+    assert np.allclose(result.best_x, x_star, atol=1e-5)
+    assert result.best_objective < 1e-10
+    assert result.stop_reason == "converged"
+    assert not result.best_x.flags.writeable
+
+
+def test_lbfgs_history_zero_is_x0() -> None:
+    x0 = np.array([2.5, -1.5])
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        cost = float(np.sum(x**2))
+        return (cost + 1.0, cost), 2.0 * x
+
+    iterates: list[np.ndarray] = []
+
+    def on_iter(_k: int, x: np.ndarray, _total: float, _obj: float) -> None:
+        iterates.append(x.copy())
+
+    settings = LbfgsSettings(max_iterations=10)
+    result = lbfgs_minimise(val_and_grad, x0, settings, on_iteration=on_iter)
+
+    assert result.history[0]["iteration"] == 0
+    assert np.isclose(result.history[0]["objective"], float(np.sum(x0**2)))
+    assert np.isclose(result.history[0]["total"], float(np.sum(x0**2)) + 1.0)
+    assert np.isclose(result.history[0]["max_abs_x"], 2.5)
+    assert np.allclose(iterates[0], x0)
+
+
+def test_lbfgs_best_kept_under_non_finite_cost() -> None:
+    call_count = 0
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        nonlocal call_count
+        call_count += 1
+        if call_count >= 3:
+            return (np.nan, np.nan), np.array([0.1, 0.1])
+        cost = float(np.sum(x**2))
+        return (cost, cost), 2.0 * x
+
+    x0 = np.array([1.0, 1.0])
+    settings = LbfgsSettings(max_iterations=10)
+    result = lbfgs_minimise(val_and_grad, x0, settings)
+
+    assert result.stop_reason == "non_finite_cost"
+    assert np.isfinite(result.best_objective)
+    assert result.best_iteration < 2
+    assert not result.best_x.flags.writeable
+
+
+def test_lbfgs_max_evaluations_honoured() -> None:
+    call_count = 0
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        nonlocal call_count
+        call_count += 1
+        cost = float(np.sum(x**2))
+        return (cost, cost), 2.0 * x
+
+    x0 = np.array([10.0, 10.0])
+    settings = LbfgsSettings(max_iterations=100, max_evaluations=3)
+    result = lbfgs_minimise(val_and_grad, x0, settings)
+
+    assert result.stop_reason == "max_evaluations"
+    assert len(result.history) <= 4
+    assert call_count <= 4

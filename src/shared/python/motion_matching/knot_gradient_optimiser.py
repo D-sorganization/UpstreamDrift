@@ -9,8 +9,10 @@ Exported symbols:
     - knot_basis: Linear hat-function basis matrix.
     - horizon_knot_mask: Active-knot mask for cost horizon truncation.
     - AdamSettings: Hyperparameter configuration for Adam.
+    - LbfgsSettings: Hyperparameter configuration for L-BFGS-B.
     - KnotOptimisationResult: Optimisation result container.
     - adam_minimise: Bias-corrected Adam minimiser loop.
+    - lbfgs_minimise: SciPy L-BFGS-B minimiser wrapper.
 """
 
 from __future__ import annotations
@@ -146,12 +148,39 @@ class AdamSettings:
         )
 
 
-StopReason = Literal["max_iterations", "non_finite_cost", "non_finite_gradient"]
+@dataclass(frozen=True, kw_only=True)
+class LbfgsSettings:
+    """Configuration settings for the L-BFGS-B optimiser (keyword-only)."""
+
+    max_iterations: int
+    max_evaluations: int | None = None
+
+    def __post_init__(self) -> None:
+        require(
+            self.max_iterations > 0,
+            "max_iterations must be positive",
+            self.max_iterations,
+        )
+        if self.max_evaluations is not None:
+            require(
+                self.max_evaluations > 0,
+                "max_evaluations must be positive",
+                self.max_evaluations,
+            )
+
+
+StopReason = Literal[
+    "max_iterations",
+    "non_finite_cost",
+    "non_finite_gradient",
+    "converged",
+    "max_evaluations",
+]
 
 
 @dataclass(frozen=True)
 class KnotOptimisationResult:
-    """Result of knot gradient optimisation via Adam."""
+    """Result of knot gradient optimisation (Adam or L-BFGS-B)."""
 
     best_x: Any
     best_objective: float
@@ -252,4 +281,83 @@ def adam_minimise(
         best_iteration=best_iteration,
         history=tuple(history),
         stop_reason=stop,
+    )
+
+
+def lbfgs_minimise(
+    value_and_grad: ValueAndGrad,
+    x0: Any,
+    settings: LbfgsSettings,
+    *,
+    on_iteration: Callable[[int, Any, float, float], None] | None = None,
+) -> KnotOptimisationResult:
+    """Minimise an objective with SciPy's L-BFGS-B, keeping the best iterate.
+
+    ``value_and_grad(x)`` returns ``((total, objective), grad)``. Every function
+    evaluation is recorded as a history row with keys produced by ``_evaluate``
+    (iteration index starting at 0, total, objective, max_abs_x). ``history[0]``
+    is the evaluation at ``x0``. A non-finite cost returns infinity and zero
+    gradient to SciPy and ends with ``stop_reason="non_finite_cost"``.
+    """
+    require(callable(value_and_grad), "value_and_grad must be callable")
+    require(isinstance(settings, LbfgsSettings), "settings must be LbfgsSettings")
+    require(bool(np.all(np.isfinite(x0))), "x0 must be finite")
+    if on_iteration is not None:
+        require(callable(on_iteration), "on_iteration must be callable")
+
+    import scipy.optimize
+
+    shape = np.shape(x0)
+    x0_arr = np.asarray(x0, dtype=np.float64)
+    x0_flat = x0_arr.ravel().copy()
+
+    history: list[dict[str, float]] = []
+    best_x = x0_arr.copy()
+    best_objective = float("inf")
+    best_iteration = 0
+    non_finite_encountered = False
+
+    def fun(x_flat: np.ndarray) -> tuple[float, np.ndarray]:
+        nonlocal best_x, best_objective, best_iteration, non_finite_encountered
+        k = len(history)
+        x = x_flat.reshape(shape)
+        row, grad, cost_ok, _grad_ok = _evaluate(value_and_grad, x, k, np)
+        history.append(row)
+        if on_iteration is not None:
+            on_iteration(k, x, row["total"], row["objective"])
+        if not cost_ok:
+            non_finite_encountered = True
+            return float("inf"), np.zeros_like(x_flat, dtype=np.float64)
+        if not non_finite_encountered and row["objective"] < best_objective:
+            best_x = x.copy()
+            best_objective = row["objective"]
+            best_iteration = k
+        return float(row["total"]), np.asarray(grad, dtype=np.float64).ravel()
+
+    # 15000 is SciPy's own L-BFGS-B ``maxfun`` default.
+    max_fun = 15000 if settings.max_evaluations is None else settings.max_evaluations
+
+    res = scipy.optimize.minimize(
+        fun,
+        x0_flat,
+        jac=True,
+        method="L-BFGS-B",
+        options={"maxiter": settings.max_iterations, "maxfun": max_fun},
+    )
+
+    stop: StopReason
+    if non_finite_encountered:
+        stop = "non_finite_cost"
+    elif res.success:
+        stop = "converged"
+    elif "EVALUATION" in str(res.message).upper() or (
+        settings.max_evaluations is not None
+        and len(history) >= settings.max_evaluations
+    ):
+        stop = "max_evaluations"
+    else:
+        stop = "max_iterations"
+
+    return KnotOptimisationResult(
+        best_x, best_objective, best_iteration, tuple(history), stop
     )

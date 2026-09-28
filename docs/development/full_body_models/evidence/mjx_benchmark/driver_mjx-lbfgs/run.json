@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "src.shared.python.motion_matching.pipeline.cli",
+    "--spec",
+    "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "--capture",
+    "driver",
+    "--static-seeds",
+    "--out",
+    "<work>",
+    "--trajectory-optimiser",
+    "mjx-knots",
+    "--mjx-method",
+    "lbfgs",
+    "--mjx-iterations",
+    "10"
+  ],
+  "returncode": 0,
+  "wall_clock_s": 1607.5830990999239
+}

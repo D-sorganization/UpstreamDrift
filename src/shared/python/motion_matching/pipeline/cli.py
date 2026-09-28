@@ -8,7 +8,7 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 
@@ -52,6 +52,7 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     ShootingFitConfig,
     build_dynamics_report,
     replay,
+    score_reference,
     shooting_fit,
     zmp_filter,
 )
@@ -216,6 +217,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=_positive_int,
         default=DEFAULT_MJX_ITERATIONS,
         help="number of Adam iterations for MJX knot optimisation (default: 40)",
+    )
+    parser.add_argument(
+        "--mjx-method",
+        choices=["adam", "lbfgs"],
+        default="adam",
+        help="optimisation algorithm for MJX knot optimisation (adam or lbfgs)",
     )
     return parser
 
@@ -598,9 +605,20 @@ def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
 
 
 def _apply_trajectory_optimiser(
-    args: argparse.Namespace, out_dir: Path, receipt: dict[str, Any]
+    args: argparse.Namespace,
+    out_dir: Path,
+    receipt: dict[str, Any],
+    *,
+    lane: Lane,
+    kin: Any,
+    sim: Any,
 ) -> None:
-    """Run the selected trajectory optimiser and record its summary in ``receipt``."""
+    """Run the selected trajectory optimiser and record its summary in ``receipt``.
+
+    An optimised reference is rescored through the shared ``sim`` so its
+    numbers are comparable with the unoptimised and shooting runs; a stage
+    that reports success without writing the reference is an error.
+    """
     trajectory_optimiser = validate_trajectory_optimiser(
         getattr(args, "trajectory_optimiser", "none")
     )
@@ -609,12 +627,22 @@ def _apply_trajectory_optimiser(
     # The MJX exporter reads receipt.json, so write it once before the stage;
     # the caller writes it again with the stage summary.
     _write_receipt(out_dir, receipt)
+    raw_method = getattr(args, "mjx_method", "adam")
+    method: Literal["adam", "lbfgs"] = "lbfgs" if raw_method == "lbfgs" else "adam"
     opt_summary = run_trajectory_optimiser(
         trajectory_optimiser,
         out_dir,
         iterations=getattr(args, "mjx_iterations", DEFAULT_MJX_ITERATIONS),
+        method=method,
     )
     if opt_summary is not None:
+        npz_path = out_dir / "mjx_optimised_reference.npz"
+        if not npz_path.is_file():
+            raise FileNotFoundError(f"optimiser wrote no reference: {npz_path}")
+        q_opt = np.load(npz_path)["q"]
+        opt_summary["shared_simulator_replay"] = score_reference(
+            lane, kin, sim, q_opt, tracking_backend=getattr(args, "tracking", "kkt")
+        )
         receipt["trajectory_optimiser"] = opt_summary
 
 
@@ -702,7 +730,7 @@ def _simulate_and_receipt(
         )
     )
     receipt["engine"] = ctx.engine
-    _apply_trajectory_optimiser(args, out_dir, receipt)
+    _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(
         log, receipt, ik_report, cal_res.calibration, cal_res.calibration2

@@ -1,0 +1,10 @@
+{
+  "commit": "fee18106063dd8890db581bd6fa4b0289c1a51e7",
+  "python": "3.12.10",
+  "mujoco": "3.13.0",
+  "host": "DeskComputer",
+  "captures": ["driver", "iron"],
+  "solvers": ["none", "shooting", "mjx-adam", "mjx-lbfgs", "ipopt"],
+  "shooting_passes": 8,
+  "mjx_iterations": 10
+}
