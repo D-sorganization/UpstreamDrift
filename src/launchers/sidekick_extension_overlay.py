@@ -133,6 +133,14 @@ class ManifestGatedSidekickFinder(MetaPathFinder):
                     continue
                 if loaded_path == expected_path:
                     sys.modules.pop(alias, None)
+                    parent_name, _, attr_name = alias.rpartition(".")
+                    if parent_name and parent_name in sys.modules:
+                        parent_module = sys.modules[parent_name]
+                        if getattr(parent_module, attr_name, None) is module:
+                            try:
+                                delattr(parent_module, attr_name)
+                            except (AttributeError, TypeError):
+                                pass
 
 
 def _load_manifest_owners(manifest_path: Path) -> dict[str, str]:

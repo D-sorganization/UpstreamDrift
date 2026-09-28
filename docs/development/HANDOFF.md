@@ -1,4 +1,18 @@
-# Current Handoff — Shooting Fit No Longer Crashes on an Unimported `fs` (#11059)
+# Current Handoff — Force-Plate Stitching Tests Canonical Import and Overlay Cleanup (#11034)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `fix/force-plate-test-module-identity-11034` (baseline `origin/main`)
+- Pull request: closes #11034.
+- Problem: In `unit-test-gate` under `pytest -n auto`, `test_force_plate_stitching.py` intermittently failed with `AttributeError: module 'shared.python.sidekick.lab.bio.force_plate_stitching' has no attribute 'CombinedForcePlateProcessor'` due to in-test manipulation of `sys.modules` and overlay reinstallation resolving against stale parent module attributes.
+- Fix:
+  1. `test_force_plate_stitching.py`: import canonical `CombinedForcePlateProcessor` directly via `from src.shared.python.sidekick.lab.bio.force_plate_stitching import CombinedForcePlateProcessor`.
+  2. `sidekick_extension_overlay.py`: when uninstalling loaded extension modules, cleanly `delattr` the attribute from the parent module in `sys.modules` if present to prevent attribute pollution.
+- Tests: `pytest tests/unit/sidekick/lab/bio/test_force_plate_stitching.py tests/unit/launcher/test_sidekick_extension_overlay.py` and `pytest -n 2 ...` pass (13 passed).
+- Next step: CI green, auto-merge squash to main.
+
+---
+
+# Past Handoff — Shooting Fit No Longer Crashes on an Unimported `fs` (#11059)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11059-shooting`
