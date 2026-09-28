@@ -7,6 +7,8 @@ import typing
 import mujoco
 import numpy as np
 
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+
 
 class InducedAccelerationResult(typing.TypedDict):
     """Dictionary containing induced acceleration components."""
@@ -64,9 +66,7 @@ class MuJoCoInducedAccelerationAnalyzer:
         nv = self.model.nv
 
         # 1. Mass Matrix M
-        M = np.zeros((nv, nv))
-        # Ensure inertia is updated
-        mujoco.mj_fullM(self.model, M, self.data.qM)
+        M = full_mass_matrix(mujoco, self.model, self.data)
 
         # 2. Compute G(q) (Gravity Force vector)
         # In MuJoCo qfrc_bias = C + G.

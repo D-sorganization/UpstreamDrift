@@ -25,6 +25,7 @@ from src.engines.physics_engines.mujoco.python.native_model import (
     _prepare_forward_dynamics,
     _solve_kkt_dynamics,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
@@ -188,11 +189,7 @@ class NativeMujocoFullBodyModel:
         effort = self._vector(primitive_efforts)
         bias, tau_contact, _ = self.generalized_forces(coordinates, rates)
 
-        mass = np.zeros((model.nv, model.nv))
-        if hasattr(data, "qM"):
-            mj.mj_fullM(model, mass, data.qM)
-        else:
-            mj.mj_fullM(model, data, mass)
+        mass = full_mass_matrix(mj, model, data)
 
         jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
         total_effort = effort + tau_contact - bias

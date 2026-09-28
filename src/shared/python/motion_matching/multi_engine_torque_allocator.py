@@ -32,6 +32,7 @@ from src.shared.python.motion_matching.contact_force_allocator import (
     ContactForceAllocation,
     ContactForceAllocator,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 logger = logging.getLogger(__name__)
 
@@ -217,8 +218,7 @@ class MujocoForceAdapter:
     def _mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
         self._prepare_state(q, v)
         model, data = self._model.model, self._model.data
-        mass = np.zeros((self._nv, self._nv), dtype=np.float64)
-        self._mj.mj_fullM(model, mass, data.qM)
+        mass = full_mass_matrix(self._mj, model, data)
         return mass, data.qfrc_bias.copy()
 
     def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:

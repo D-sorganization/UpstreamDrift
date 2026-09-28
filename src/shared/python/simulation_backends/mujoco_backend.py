@@ -35,6 +35,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .capabilities import require_mujoco
 from .mjcf import params_to_mjcf
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from .protocol import BackendCapabilities, SimState, Trace
 
 if TYPE_CHECKING:
@@ -128,9 +129,7 @@ class MuJoCoBackend:
         d.qpos[:] = q_arr
         d.qvel[:] = 0.0
         self._mujoco.mj_forward(self._model, d)
-        m = np.zeros((self._model.nv, self._model.nv), dtype=float)
-        self._mujoco.mj_fullM(self._model, m, d.qM)
-        return m
+        return full_mass_matrix(self._mujoco, self._model, d)
 
     def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Return bias forces ``C(q,v) v + g(q) (+ damping)``.

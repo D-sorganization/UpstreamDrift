@@ -57,7 +57,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `deprecation.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `diagnostics` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `engine_core` | 0 | 0 | 0 | 22 | 0 | 0 |
+| `engine_core` | 0 | 0 | 0 | 23 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `estimation` | 0 | 0 | 0 | 10 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **421** | **279** | **124** | **1524** | **750** | **700** |
+| **Total** | **421** | **279** | **124** | **1525** | **750** | **700** |
 
 ## Diverged Files by Package
 

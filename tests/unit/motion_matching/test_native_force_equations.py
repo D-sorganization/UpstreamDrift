@@ -8,6 +8,7 @@ import pytest
 from src.shared.python.motion_matching.multi_engine_torque_allocator import (
     MujocoForceAdapter,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 pytestmark = [pytest.mark.live_simulation, pytest.mark.requires_mujoco]
 
@@ -35,8 +36,7 @@ def _reference(native_pair, q, v):
     data.qvel[:] = v
     mj.mj_fwdPosition(model, data)
     mj.mj_fwdVelocity(model, data)
-    mass = np.zeros((model.nv, model.nv))
-    mj.mj_fullM(model, mass, data.qM)
+    mass = full_mass_matrix(mj, model, data)
     return mass, data.qfrc_bias.copy()
 
 

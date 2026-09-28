@@ -33,6 +33,7 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -417,12 +418,10 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         v = self.data.qvel.copy()
         t = float(self.data.time)
 
-        # Compute mass matrix (reuse qM that's already populated)
-        nv = self.model.nv
-        M = np.zeros((nv, nv), dtype=np.float64)
+        # Compute mass matrix
         if hasattr(mujoco, "mj_makeInertia"):
             mujoco.mj_makeInertia(self.model, self.data)
-        mujoco.mj_fullM(self.model, M, self.data.qM)
+        M = full_mass_matrix(mujoco, self.model, self.data)
 
         return {"q": q, "v": v, "t": t, "M": M}
 
@@ -435,15 +434,11 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        nv = self.model.nv
-        M = np.zeros((nv, nv), dtype=np.float64)
-
         # Ensure qM is updated
         if hasattr(mujoco, "mj_makeInertia"):
             mujoco.mj_makeInertia(self.model, self.data)
 
-        mujoco.mj_fullM(self.model, M, self.data.qM)
-        return M
+        return full_mass_matrix(mujoco, self.model, self.data)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
