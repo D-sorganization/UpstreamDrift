@@ -51,6 +51,21 @@ CAPTURES: dict[str, list[str]] = {
     ],
 }
 SOLVER_ORDER = ("none", "shooting", "mjx-adam", "mjx-lbfgs", "ipopt")
+# Where the benchmark departs from the #11058 solver list, and why.
+SOLVER_NOTES = (
+    "SciPy arm: `mjx-lbfgs` runs L-BFGS-B over the same `delta_knots` on the "
+    "exact JAX gradient instead of `least_squares` (trf) with a finite-difference "
+    "Jacobian through the shared simulator; one FD Jacobian needs one full "
+    "shared-simulator replay per knot parameter, so that arm was not run.",
+    "Every optimised reference is rescored through the shared "
+    "`FullBodySimulator` (`shared_simulator_replay`); the MJX plant's own RMS "
+    "is not used for any comparison.",
+    "`ipopt` has no pipeline stage; it is recorded as unavailable with the "
+    "interpreter's binding status.",
+    "Promotion needs the candidate's replay RMS <= shooting fit on every "
+    "capture, a finite stop inside the iteration budget and a downswing weight "
+    "fraction above zero.",
+)
 
 
 def solver_args(solver: str, *, shooting_passes: int, mjx_iterations: int) -> list[str]:
@@ -201,6 +216,7 @@ def main(argv: list[str] | None = None) -> int:
             "solvers": args.solvers,
             "shooting_passes": args.shooting_passes,
             "mjx_iterations": args.mjx_iterations,
+            "notes": list(SOLVER_NOTES),
         }
         (evidence / "provenance.json").write_text(
             json.dumps(provenance, indent=2) + "\n", encoding="utf-8"
