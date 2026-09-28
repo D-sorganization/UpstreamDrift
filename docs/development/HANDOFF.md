@@ -1,4 +1,25 @@
-# Current Handoff — Force-Plate Stitching Tests Canonical Import and Overlay Cleanup (#11034)
+# Current Handoff — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision (#11058)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11058-benchmark`
+- Branch: `claude/ud-11058-benchmark` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11072. Closes #11058 (epic #11006 P5).
+- Done:
+  - `knot_gradient_optimiser.lbfgs_minimise` runs SciPy L-BFGS-B on the same JAX gradient as Adam; `--mjx-method {adam,lbfgs}`.
+  - Every MJX reference is rescored through the shared `FullBodySimulator` (`trajectory_optimiser.shared_simulator_replay`, via `pipeline.dynamics.score_reference`). A stage that writes no reference is an error.
+  - `weight_fraction_report` gives receipts a per-phase weight fraction.
+  - `solver_benchmark.py` scores the receipts and makes the promotion decision; `scripts/benchmark_mjx_knot_solvers.py` runs the benchmark or re-renders it (`--render-only`).
+- Evidence: the receipts, `rows.json` and `REPORT.md` are in `docs/development/full_body_models/evidence/mjx_benchmark`. The runs used the MJX interpreter (Python 3.12.10, MuJoCo 3.13.0) on DeskComputer at commit `fee18106`, with shooting at 8 passes and MJX at 10 iterations, one run at a time.
+- Result (replay RMS, driver / iron): none 84.5 / 88.6 mm; shooting 84.5 / 88.6 mm (never beats its start); mjx-adam 62.4 / 55.7 mm, but it **loses iron downswing contact** (weight fraction min 0.00); mjx-lbfgs 47.2 / 52.9 mm (weight fraction min 0.33 / 0.17). No arm reaches G1 (25 mm). IPOPT is unavailable: no cyipopt or pydrake binding.
+- Decision: keep `none` as the default. Both MJX methods stopped on the iteration budget, not on convergence. Follow-up #11071 runs L-BFGS to convergence.
+- Deviation: the issue's `least_squares` FD arm was not run, because one Jacobian means 47 knots × 38 actuated coordinates = 1786 shared replays. L-BFGS-B on the exact gradient replaces it; the report says so.
+- Tests: `tests/unit/motion_matching/` (solver benchmark, trajectory optimiser selection, knot gradient optimiser, MJX optimisation, pipeline) pass in Python312 and the MJX environment.
+- Next step: CI green, then ready and arm the PR.
+
+---
+
+# Past Handoff — Force-Plate Stitching Tests Canonical Import and Overlay Cleanup (#11034)
 
 - Repository: D-sorganization/UpstreamDrift
 - Branch: `fix/force-plate-test-module-identity-11034` (baseline `origin/main`)
@@ -8,7 +29,7 @@
   1. `test_force_plate_stitching.py`: import canonical `CombinedForcePlateProcessor` directly via `from src.shared.python.sidekick.lab.bio.force_plate_stitching import CombinedForcePlateProcessor`.
   2. `sidekick_extension_overlay.py`: when uninstalling loaded extension modules, cleanly `delattr` the attribute from the parent module in `sys.modules` if present to prevent attribute pollution.
 - Tests: `pytest tests/unit/sidekick/lab/bio/test_force_plate_stitching.py tests/unit/launcher/test_sidekick_extension_overlay.py` and `pytest -n 2 ...` pass (13 passed).
-- Next step: CI green, auto-merge squash to main.
+- Next step: none; merged as PR #11069.
 
 ---
 

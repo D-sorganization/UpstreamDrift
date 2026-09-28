@@ -1,0 +1,23 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "src.shared.python.motion_matching.pipeline.cli",
+    "--spec",
+    "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+    "--capture",
+    "iron",
+    "--static-seeds",
+    "--zmp-filter",
+    "--out",
+    "<work>",
+    "--trajectory-optimiser",
+    "mjx-knots",
+    "--mjx-method",
+    "adam",
+    "--mjx-iterations",
+    "10"
+  ],
+  "returncode": 0,
+  "wall_clock_s": 2887.7977528999327
+}
