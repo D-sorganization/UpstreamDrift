@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import Any
 
 import numpy as np
 
@@ -51,20 +52,45 @@ class RigidCore:
         If ``urdf_path`` does not point to an existing file.
     """
 
-    def __init__(self, urdf_path: str) -> None:
-        """Load URDF into a Pinocchio model.
+    def __init__(
+        self,
+        urdf_path: str | None = None,
+        *,
+        model: Any = None,
+        data: Any = None,
+    ) -> None:
+        """Load URDF into a Pinocchio model or wrap an existing model.
 
         DbC preconditions:
-        - ``urdf_path`` must be a non-empty string.
-        - The file must exist on disk.
+        - Either ``urdf_path`` or ``model`` must be provided.
+        - If ``urdf_path`` is given, it must be a non-empty string pointing to an existing file.
+        - If ``model`` is given, it must not be None.
 
         Args:
             urdf_path: Path to a URDF file.
+            model:     Optional existing Pinocchio model (or duck-typed equivalent).
+            data:      Optional Pinocchio data container for the model.
 
         Raises:
-            ImportError: If Pinocchio is not installed.
-            ValueError: If ``urdf_path`` is empty or the file does not exist.
+            ImportError: If Pinocchio is not installed when loading from URDF.
+            ValueError: If neither argument is provided or urdf_path is invalid.
         """
+        if model is not None:
+            self._model = model
+            if data is not None:
+                self._data = data
+            elif hasattr(model, "createData"):
+                self._data = model.createData()
+            else:
+                self._data = None
+            logger.info(
+                "RigidCore loaded from in-memory model: %s (nq=%d, nv=%d)",
+                getattr(model, "name", "custom"),
+                getattr(model, "nq", 0),
+                getattr(model, "nv", 0),
+            )
+            return
+
         if not _PINOCCHIO_AVAILABLE:
             raise ImportError(
                 "pinocchio not available; install with: "
@@ -139,8 +165,31 @@ class RigidCore:
 
         self._validate_shapes(q_arr, dq_arr, ddq_arr)
 
-        tau = pin.rnea(self._model, self._data, q_arr, dq_arr, ddq_arr)
-        result: np.ndarray = np.array(tau, dtype=np.float64)
+        current_pin = pin
+        if current_pin is None:
+            import sys
+
+            current_pin = sys.modules.get("pinocchio")
+
+        logger.debug(
+            "compute_torques: current_pin=%s, hasattr model rnea=%s",
+            current_pin,
+            hasattr(self._model, "rnea"),
+        )
+        if hasattr(self._model, "rnea"):
+            tau = self._model.rnea(self._model, self._data, q_arr, dq_arr, ddq_arr)
+        elif hasattr(self._model, "compute_torques"):
+            tau = self._model.compute_torques(q_arr, dq_arr, ddq_arr)
+        elif current_pin is not None and hasattr(current_pin, "rnea"):
+            tau = current_pin.rnea(self._model, self._data, q_arr, dq_arr, ddq_arr)
+        else:
+            raise ImportError(
+                "pinocchio not available; install with: "
+                "pip install upstream-drift[pinocchio]"
+            )
+        result: np.ndarray = np.atleast_1d(
+            np.asarray(tau, dtype=np.float64).reshape(-1)
+        )
 
         assert result.shape == (self.nv,), (
             f"Postcondition violated: expected shape ({self.nv},), got {result.shape}"
