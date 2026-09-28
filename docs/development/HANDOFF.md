@@ -210,6 +210,16 @@
       `GS3DX_Shape` is saved on it (`docs/SHAPE.md`). The head is rigid with the upper trunk
       (no neck joint, no head IK target) and rises ~50 mm in the downswing; a driven neck needs
       ~10 compiled blocks and Shape has 2 under the 975 cap.
+  25. #10979 neck (2026-09-28): `GS3DX_Neck` (`gs3dx_build_neck`, `docs/NECK.md`) = Shape + a
+      Universal Joint between Rigid Transform5 and the Neck's "Bottom of Neck" frame (the neck
+      base), both axes input motion from `NeckReference` (capture head frame relative to the model
+      upper trunk; axial turn dropped). 6 blocks, paid by deleting the 4 massless elbow/shoulder
+      spheres (1 compiled block each, not ~7): 975. Head vertical travel to impact 213 -> 113 mm
+      (capture 55), vertical error 52 -> 37 mm RMS; facing error is the trunk's. Adding a joint
+      renumbers KinematicsSolver IDs (block-path order), so `gs3dx_render` now matches joints by
+      `gs3dx_joint_keys` (block path + primitive); IK/fit helpers still hard-code j15/j18/j19 and
+      are only used on neck-free variants. agy's `gs3dx_capture_head_frame` +
+      `gs3dx_capture_address_transform` ported (reviewed).
 
 ## Files and Decisions
 
@@ -297,9 +307,8 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 head: measure what removing the four zero-mass joint spheres (elbows, shoulders; ~7
-   compiled blocks each) frees, and whether a motion-driven neck gimbal tracking the head
-   markers fits in it (`docs/SHAPE.md`, "Where the Remaining 12 mm Comes From").
+2. #10979 neck: balance run of `GS3DX_Neck` on the joint-centre reference, compared with
+   Shape's (1.77 BW, pelvis 22 mm RMS); the neck moves 4.7 kg of head.
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).

@@ -48,14 +48,11 @@ function jc = gs3dx_capture_joint_centres(cap, opts)
         opts.ankle_inset (1,1) double {mustBeNonnegative} = 0.035
         opts.shoulder_drop (1,1) double {mustBeNonnegative} = 0.04
     end
-    S = cap.target_frame;
+    tf = gs3dx_capture_address_transform(cap);
     n = cap.n_frames;
-    fill = @(x) fillmissing(x, 'linear', 2, 'EndValues', 'nearest');
-    raw = @(name) fill(cap.marker(name));
-    waist = (raw("WaistLeft") + raw("WaistRight") + raw("WaistLBack") + raw("WaistRBack")) / 4;
-    origin = waist(:, 1);
-    local = @(p) S.' * (p - origin);   % capture axes -> address target frame
-    m = @(name) local(raw(name));
+    fill = tf.fill;
+    local = tf.local;
+    m = tf.m;
 
     front = (m("WaistLeft") + m("WaistRight")) / 2;
     back = (m("WaistLBack") + m("WaistRBack")) / 2;
