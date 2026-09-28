@@ -1,4 +1,21 @@
-# Current Handoff — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision (#11058)
+# Current Handoff — Run the MJX L-BFGS Arm Toward Convergence (#11071)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11071-lbfgs`
+- Branch: `claude/ud-11071-lbfgs-converge` (baseline `origin/main` d4286fbf)
+- Commit: `SELF`
+- Pull request: not created yet; closes #11071 (follow-up to #11058, epic #11006).
+- Done: re-ran only `mjx-lbfgs` at `--mjx-iterations 60` with the MJX interpreter (Python 3.12.10, MuJoCo 3.13.0, DeskComputer, commit ec249edf, whose `src/` and `scripts/` match main d4286fbf). `none` and `shooting` do not read `--mjx-iterations`, and only `knot_gradient_optimiser.py` changed since their #11058 runs, so their cases hold a `reuse.json` pointer to `../mjx_benchmark` instead of copies; the ledger therefore does not count them twice. `load_row` follows the pointer and rejects a dangling one (`tests/unit/motion_matching/test_benchmark_mjx_knot_solvers_script.py`).
+- Budget choice: the #11058 L-BFGS runs took about 1.6-2.8 ks for 10 iterations. 60 iterations took 6217 s (driver) and 5097 s (iron), 70 evaluations each.
+- Result (replay RMS through the shared simulator, driver / iron): 40.8 / 42.6 mm, down from 47.2 / 52.9 mm at 10 iterations; shooting stays 84.5 / 88.6 mm. Downswing weight fraction min 0.31 / 0.29, so the iron did **not** lose contact (it rose from 0.17). Both runs stopped on `max_iterations`.
+- Trend: the MJX-plant RMS in the optimiser history went 37.6 → 28.2 mm (driver) and 34.5 → 27.3 mm (iron) between evaluations 10 and 69, about 0.05 mm per evaluation at the end. The shared-simulator replay stays 12-15 mm above the MJX plant, so more iterations mostly shrink the plant number, not the scored one.
+- Decision: keep `none` as the default (the promotion rule needs a `converged` stop). 60 iterations (about 1.5 h per capture) is the practical budget reached.
+- Evidence: `docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/` (receipts, `provenance.json`, `rows.json`, `REPORT.md`); ledger 133 receipts.
+- Next step: CI green, then ready and arm the PR.
+
+---
+
+# Past Handoff — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision (#11058)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11058-benchmark`
@@ -15,7 +32,7 @@
 - Decision: keep `none` as the default. Both MJX methods stopped on the iteration budget, not on convergence. Follow-up #11071 runs L-BFGS to convergence.
 - Deviation: the issue's `least_squares` FD arm was not run, because one Jacobian means 47 knots × 38 actuated coordinates = 1786 shared replays. L-BFGS-B on the exact gradient replaces it; the report says so.
 - Tests: `tests/unit/motion_matching/` (solver benchmark, trajectory optimiser selection, knot gradient optimiser, MJX optimisation, pipeline) pass in Python312 and the MJX environment.
-- Next step: CI green, then ready and arm the PR.
+- Next step: none; merged as PR #11072.
 
 ---
 
