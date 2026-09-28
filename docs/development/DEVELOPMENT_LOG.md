@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11034 · Canonical Force-Plate Import and Extension Overlay Parent Attribute Cleanup
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11034
+- **PR:** #11069
+- **Branch:** `fix/force-plate-test-module-identity-11034`
+- **Paths:** `src/launchers/sidekick_extension_overlay.py`, `tests/unit/launcher/test_sidekick_extension_overlay.py`, `tests/unit/sidekick/lab/bio/test_force_plate_stitching.py`
+- **Started:** 2026-09-28
+- **Last verified:** 2026-09-28 — 13 passed in test_force_plate_stitching.py and test_sidekick_extension_overlay.py (single and pytest -n 2); ruff, black, and file size checks clean.
+- **Summary:** test_force_plate_stitching imports the canonical CombinedForcePlateProcessor directly instead of reinstalling the extension overlay in-test. Additionally, ManifestGatedSidekickFinder.uninstall() cleanly detaches uninstalled modules from parent package attributes in sys.modules to prevent attribute pollution.
+- **Next step:** CI green, auto-merge squash to main.
+
 ### DL-#11059 — Shooting Fit No Longer Crashes on an Unimported `fs`
 
 - **State:** in_review

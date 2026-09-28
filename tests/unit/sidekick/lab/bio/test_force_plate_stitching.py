@@ -2,97 +2,23 @@
 
 from __future__ import annotations
 
-import importlib
-import os
-import sys
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from src.launchers.sidekick_extension_overlay import (
-    install_manifest_gated_sidekick_extensions,
+from src.shared.python.sidekick.lab.bio.force_plate_stitching import (
+    CombinedForcePlateProcessor,
 )
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
-def _module_identity_report(module: Any, expected: Path) -> str:
-    """Describe which module object the import resolved to (#11034).
-
-    The fixture intermittently receives a module under the canonical name that
-    lacks the processor class; this report names its file, spec and the
-    finders and aliases in play so the polluting state can be identified.
-    """
-    related = {
-        name: getattr(loaded, "__file__", None)
-        for name, loaded in sorted(sys.modules.items())
-        if "force_plate_stitching" in name or name.endswith("lab.bio")
-    }
-    return "\n".join(
-        [
-            "Import resolved to a module without CombinedForcePlateProcessor (#11034).",
-            f"expected file: {expected}",
-            f"module file:   {getattr(module, '__file__', None)}",
-            f"module spec:   {getattr(module, '__spec__', None)!r}",
-            f"module names:  {sorted(vars(module))}",
-            "meta_path:",
-            *(f"  {finder!r}" for finder in sys.meta_path),
-            "related sys.modules entries:",
-            *(f"  {name} -> {origin}" for name, origin in related.items()),
-        ]
-    )
-
-
-@pytest.fixture(scope="module")
-def processor_type() -> Any:
-    """Load the Upstream-only extension through the production ownership gate."""
-    repo_root = Path(__file__).resolve().parents[5]
-    tools_root = Path(
-        os.environ.get("TOOLS_REPO_PATH", repo_root / "vendor" / "ud-tools")
-    ).resolve()
-    manifest_path = (
-        repo_root / "scripts" / "config" / "shared_python_ownership_exceptions.yaml"
-    )
-    saved_modules = {
-        name: sys.modules[name]
-        for name in list(sys.modules)
-        if any(
-            name == prefix or name.startswith(f"{prefix}.")
-            for prefix in (
-                "sidekick",
-                "src.shared.python.sidekick",
-                "shared.python.sidekick",
-                "chat",
-                "src.shared.python.chat",
-                "shared.python.chat",
-                "upstream_drift_tools",
-                "src.shared.python.upstream_drift_tools",
-                "shared.python.upstream_drift_tools",
-            )
-        )
-    }
-    for name in saved_modules:
-        sys.modules.pop(name, None)
-
-    finder = install_manifest_gated_sidekick_extensions(
-        local_python_root=repo_root / "src" / "shared" / "python",
-        parent_python_root=tools_root / "src" / "shared" / "python",
-        manifest_path=manifest_path,
-    )
-    try:
-        module = importlib.import_module("sidekick.lab.bio.force_plate_stitching")
-        expected = (
-            repo_root / "src/shared/python/sidekick/lab/bio/force_plate_stitching.py"
-        ).resolve()
-        if not hasattr(module, "CombinedForcePlateProcessor"):
-            pytest.fail(_module_identity_report(module, expected))
-        yield module.CombinedForcePlateProcessor
-    finally:
-        finder.uninstall()
-        sys.modules.update(saved_modules)
+@pytest.fixture
+def processor_type() -> type[CombinedForcePlateProcessor]:
+    """Provide the canonical CombinedForcePlateProcessor class (#11034)."""
+    return CombinedForcePlateProcessor
 
 
 def test_empty_dataframe(processor_type: Any) -> None:

@@ -1,3 +1,14 @@
+## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
+
+Resolves test-order and module-identity pollution in `test_force_plate_stitching.py` under parallel execution:
+- **Canonical Import in Tests (`tests/unit/sidekick/lab/bio/test_force_plate_stitching.py`)**:
+  - Replaces dynamic overlay reinstallation and module-popping fixture with direct import of canonical `CombinedForcePlateProcessor` from `src.shared.python.sidekick.lab.bio.force_plate_stitching`.
+  - Eliminates test setup flakiness where dummy `force_plate_stitching` modules from preceding tests polluted module identity.
+- **Overlay Extension Uninstallation Cleanup (`src/launchers/sidekick_extension_overlay.py`)**:
+  - Updates `ManifestGatedSidekickFinder.uninstall()` to cleanly `delattr` uninstalled modules from their parent package in `sys.modules` if present.
+- **Verification (`tests/unit/launcher/test_sidekick_extension_overlay.py`)**:
+  - Adds regression assertion confirming uninstalled extension module is detached from parent package attribute upon uninstallation.
+
 ## Physics-Informed Shadow Observation Consumer for Motion Matching (#11028)
 
 Wires `ShadowModel` in observation mode on motion-matching inverse-dynamics output and updates launcher truthfulness audit:
