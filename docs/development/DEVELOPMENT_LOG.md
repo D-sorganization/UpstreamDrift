@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `docs/product-review-20260928`
 - **Paths:** `docs/development/2026-09-28-product-review-board-proposals.md`
 - **Started:** 2026-09-28
-- **Last verified:** 2026-09-28 — 108 focused tests and safe counterexample probes; Ruff lint/format and documentation hooks passed.
+- **Last verified:** 2026-09-28 at 599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309 — 108 focused tests and safe counterexample probes; Ruff lint/format and documentation hooks passed.
 - **Summary:** Twelve prioritized proposals across UI/UX, error handling, performance, scientific validity and shared Tools wiring, with bounded evidence, acceptance criteria and current backlog reconciliation. Product code and qualification status are unchanged.
 - **Next step:** Review R01–R12 using the report's RunnerDashboard panel brief.
 

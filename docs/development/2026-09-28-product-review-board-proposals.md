@@ -372,6 +372,8 @@ Runner_Dashboard's current `PanelCreateRequest` supports 3–4 read-only experts
 
 ### Executed Checks
 
+Governance follow-up: the central development-log validator reports pre-existing duplicate entries, missing metadata and size/WIP ceiling violations on the reviewed base. The new PR #11080 entry adds no entry-level validator finding; existing unrelated entries were preserved. SPEC changelog validation and the repository documentation hooks passed.
+
 The following checks ran in the isolated review worktree at the UpstreamDrift revision above and exact initialized Tools pin:
 
 ```powershell
