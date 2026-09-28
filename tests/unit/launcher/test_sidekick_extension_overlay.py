@@ -113,6 +113,10 @@ def test_exact_approved_extension_loads_after_canonical_parent(
     assert "sidekick.lab.bio.force_plate_stitching" not in sys.modules
     assert "shared.python.sidekick.lab.bio.force_plate_stitching" not in sys.modules
     assert "src.shared.python.sidekick.lab.bio.force_plate_stitching" not in sys.modules
+    assert (
+        getattr(sys.modules.get("sidekick.lab.bio"), "force_plate_stitching", None)
+        is None
+    )
 
 
 def test_local_only_package_supports_exact_approved_relative_imports(
