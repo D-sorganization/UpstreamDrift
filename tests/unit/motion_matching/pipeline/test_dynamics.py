@@ -203,7 +203,7 @@ def test_shooting_fit_runs_a_pass(monkeypatch: pytest.MonkeyPatch) -> None:
     kin = SimpleNamespace(
         coordinate_order=(*SHOOTING_LOCKED, *(f"q{i}" for i in range(n_q)))[:n_q]
     )
-    record = SimpleNamespace(weight_fraction=np.full(frames, 0.9))
+    record = SimpleNamespace(time_s=lane.times, weight_fraction=np.full(frames, 0.9))
     monkeypatch.setattr(dynamics, "replay", lambda *a, **k: (record, q))
     monkeypatch.setattr(
         dynamics, "marker_errors", lambda *a: np.full((frames, 2), 0.01)

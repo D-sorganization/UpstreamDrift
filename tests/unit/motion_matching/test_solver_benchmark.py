@@ -135,3 +135,11 @@ def test_report_lists_every_row_and_the_decision() -> None:
     assert "| driver | mjx-adam | ok | 70.0 |" in text
     assert "unavailable: no binding" in text
     assert "**keep the current default**" in text
+
+
+def test_report_lists_solver_choices_outside_provenance() -> None:
+    rows = _rows(0.05, 0.06)
+    provenance = {"commit": "abc", "notes": ["L-BFGS-B replaces least_squares"]}
+    text = render_report(rows, promotion_decision(rows), provenance)
+    assert "## Solver Choices\n\n- L-BFGS-B replaces least_squares" in text
+    assert "- notes:" not in text

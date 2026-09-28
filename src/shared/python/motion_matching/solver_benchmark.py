@@ -152,7 +152,12 @@ def render_report(
         "## Provenance",
         "",
     ]
-    lines += [f"- {key}: `{value}`" for key, value in provenance.items()]
+    lines += [
+        f"- {key}: `{value}`" for key, value in provenance.items() if key != "notes"
+    ]
+    if provenance.get("notes"):
+        lines += ["", "## Solver Choices", ""]
+        lines += [f"- {note}" for note in provenance["notes"]]
     lines += [
         "",
         "## Results",
