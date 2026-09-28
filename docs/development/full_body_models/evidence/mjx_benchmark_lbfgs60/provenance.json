@@ -1,0 +1,12 @@
+{
+  "commit": "ec249edfde74ecd3961d07c0c742ea154cb69d4d",
+  "python": "3.12.10",
+  "mujoco": "3.13.0",
+  "host": "DeskComputer",
+  "captures": ["driver", "iron"],
+  "solvers": ["none", "shooting", "mjx-lbfgs"],
+  "shooting_passes": 8,
+  "mjx_iterations": 60,
+  "incumbent_receipts": "none and shooting reused by reuse.json from ../mjx_benchmark (commit fee18106); only knot_gradient_optimiser.py changed since, and those runs do not read --mjx-iterations",
+  "source_tree": "ec249edf matches main d4286fbf under src/ and scripts/"
+}
