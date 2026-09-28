@@ -285,7 +285,9 @@ def _library_for_observation(
 
 
 @precondition(
-    lambda model_id="full_body_pinocchio", handedness=GolferHandedness.RIGHT, max_seeds_per_source=3: (
+    lambda model_id="full_body_pinocchio",
+    handedness=GolferHandedness.RIGHT,
+    max_seeds_per_source=3: (
         isinstance(model_id, str)
         and bool(model_id)
         and isinstance(handedness, GolferHandedness)

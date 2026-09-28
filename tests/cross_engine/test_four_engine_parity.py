@@ -185,7 +185,13 @@ def compute_trajectory_rmse(
 
 
 @precondition(
-    lambda engine_name, sim_grip, ref_grip, sim_clubhead, ref_clubhead, *args, **kwargs: (
+    lambda engine_name,
+    sim_grip,
+    ref_grip,
+    sim_clubhead,
+    ref_clubhead,
+    *args,
+    **kwargs: (
         bool(
             len(engine_name) > 0
             and sim_grip.shape == ref_grip.shape

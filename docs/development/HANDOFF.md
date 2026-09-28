@@ -1,15 +1,30 @@
-# Current Handoff — Shooting Fit No Longer Crashes on an Unimported `fs` (#11059)
+# Current Handoff — Overnight Night Watch: Ruff Format Drift Fixed
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: this checkout (`staff/night-watch-task-210ec5`)
+- Branch: `staff/night-watch-task-210ec5` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: not created yet (opened in this session as a draft).
+- Problem: `python3 -m ruff format --check .` reported 6 files with formatting drift (`src/shared/python/data_io/export.py`, `src/shared/python/motion_matching/candidate.py`, `src/shared/python/motion_matching/club_only/constrained_ik.py`, `src/shared/python/motion_matching/club_only/seeds.py`, `tests/bunkershot3d/test_units_8608.py`, `tests/cross_engine/test_four_engine_parity.py`), which is a separate required CI step from `ruff check`.
+- Fix: ran `python3 -m ruff format` on exactly those six files; no other files or code paths touched. All changes are whitespace/line-wrap only (multi-line lambda arguments in `@precondition` decorators, one blank-line removal).
+- Tests: `python3 -m ruff format --check .` and `python3 -m ruff check .` both pass clean after the change; no source logic changed.
+- Acceptance: `ruff format --check .` reports `8227 files already formatted` with zero files needing reformatting.
+- Next step: open the draft PR and let CI confirm; no follow-up work required beyond that.
+
+---
+
+# Past Handoff — Shooting Fit No Longer Crashes on an Unimported `fs` (#11059)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11059-shooting`
 - Branch: `claude/ud-11059-shooting-fs` (baseline `origin/main`)
-- Commit: `SELF`
-- Pull request: #11060 (draft → ready). Closes #11059.
+- Commit: merged to `main` as PR #11060
+- Pull request: #11060 (https://github.com/D-sorganization/UpstreamDrift/pull/11060). Closes #11059.
 - Problem: `pipeline/dynamics.py` imports `full_body_forward_dynamics as fs` only under `TYPE_CHECKING`; `build_tracking_controller`, `replay` and `zmp_filter` import it locally, but `shooting_fit` did not, so `--shooting-fit N` raised `NameError: name 'fs' is not defined` before its first pass.
 - Fix: the same local import in `shooting_fit`.
 - Tests: `test_shooting_fit_runs_a_pass` runs one pass with stubbed replay and marker errors; it fails on `main` with the production `NameError` and passes with the fix. `tests/unit/motion_matching/pipeline/`: 77 passed, 10 skipped.
 - Acceptance: the driver run `--static-seeds --shooting-fit 8` that crashed on `main` completes (rc 0, 1123 s). Pass 0 replays at 84.5 mm, matching the canonical `anthro_driver_seeds` receipt. Passes 1-8 score 108.6, 121.3, 122.0, 114.5, 118.8, 111.1, 96.3 and 95.9 mm, so the fit keeps pass 0 (`best_iteration` 0) and the final dynamics replay is 84.5 mm.
-- Next step: CI green, mark ready and arm the PR.
+- Next step: none; merged as PR #11060.
 
 ---
 
