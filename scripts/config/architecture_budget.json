@@ -1007,6 +1007,15 @@
       "issue": 10783,
       "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
       "expires_on": "2026-10-23"
+    },
+    {
+      "path": "src/shared/python/sidekick/calculators/electrical/electrical_model.py",
+      "symbol": "ThreePhaseElectricalModelEnhanced.calculate_system_state",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: Needs 9 parameters to calculate complete electrical system state with new path model",
+      "expires_on": "2026-11-30"
     }
   ]
 }
