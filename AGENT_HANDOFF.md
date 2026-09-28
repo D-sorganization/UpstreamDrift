@@ -2,7 +2,7 @@
 
 ## Product Review for Expert Panel — 2026-09-28
 
-- Branch: `docs/product-review-20260928`; documentation-only owner request; PR pending publication.
+- Branch: `docs/product-review-20260928`; documentation-only owner request; PR #11080.
 - Report: `docs/development/2026-09-28-product-review-board-proposals.md` — 12 prioritized issue briefs, source permalinks, executable counterexamples, dependencies and RunnerDashboard panel prompt.
 - Reviewed UpstreamDrift `599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309` and Tools `3678409fc51024150ab28970b72e3b468935f345`; implementation and vendor pin unchanged.
 - Validation: 108 focused tests passed; report title case and full Ruff lint passed. Native engine, physical and human usability qualification were not performed.

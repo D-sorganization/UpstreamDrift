@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11080 · Product Review for the Expert Panel
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11080 (owner-requested documentation review tracked by this PR)
+- **PR:** #11080
+- **Branch:** `docs/product-review-20260928`
+- **Paths:** `docs/development/2026-09-28-product-review-board-proposals.md`
+- **Started:** 2026-09-28
+- **Last verified:** 2026-09-28 — 108 focused tests and safe counterexample probes; Ruff lint/format and documentation hooks passed.
+- **Summary:** Twelve prioritized proposals across UI/UX, error handling, performance, scientific validity and shared Tools wiring, with bounded evidence, acceptance criteria and current backlog reconciliation. Product code and qualification status are unchanged.
+- **Next step:** Review R01–R12 using the report's RunnerDashboard panel brief.
+
 ### DL-#11071 — Run the MJX L-BFGS Arm Toward Convergence
 
 - **State:** in_review
