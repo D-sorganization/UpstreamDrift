@@ -255,9 +255,7 @@ def _check_identifiability(
     names: tuple[str, ...],
     strokes: tuple[MeasuredStroke, ...],
 ) -> tuple[FitOutcome | None, float]:
-    scale = np.sqrt(
-        np.einsum("ij,ij->j", jacobian, jacobian)
-    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=0)
+    scale = np.linalg.norm(jacobian, axis=0)
     if np.any(scale == 0.0):
         inert = [n for n, s in zip(names, scale, strict=True) if s == 0.0]
         return (

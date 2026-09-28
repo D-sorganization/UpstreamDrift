@@ -183,7 +183,3 @@
 ## 2024-09-28 - Optimizing np.linalg.norm computations on innermost axis
 **Learning:** `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=-1)` on small innermost axes in NumPy has a very high dispatch and reduction overhead. Computing `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.einsum('...i,...i->...', diff, diff))` directly avoids temporary array allocations and is ~2.4x to ~3x faster. This is particularly noticeable in hot paths like inverse kinematics and forward simulation scoring inside the motion matching module.
 **Action:** Always replace `np.linalg.norm(..., axis=1)` with the `np.sqrt(np.einsum('ij,ij->i', diff, diff))` pattern when computing distances or magnitudes over N-dimensional arrays in performance-critical sections.
-
-## 2024-09-28 - Optimizing np.linalg.norm computations on innermost axis
-**Learning:** `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=-1)` on small innermost axes in NumPy has a very high dispatch and reduction overhead. Computing `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.einsum('...i,...i->...', diff, diff))` directly avoids temporary array allocations and is ~2.4x to ~3x faster. This is particularly noticeable in hot paths like inverse kinematics and forward simulation scoring inside the motion matching module.
-**Action:** Always replace `np.linalg.norm(..., axis=1)` with the `np.sqrt(np.einsum('ij,ij->i', diff, diff))` pattern when computing distances or magnitudes over N-dimensional arrays in performance-critical sections.

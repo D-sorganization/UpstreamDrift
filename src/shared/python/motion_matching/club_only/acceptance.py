@@ -130,9 +130,7 @@ def normalized_position_error(
         raise ValueError("position arrays must be non-empty")
     if not np.all(np.isfinite(pred)) or not np.all(np.isfinite(meas)):
         raise ValueError("position arrays must be finite")
-    norms = np.sqrt(
-        np.einsum("ij,ij->i", diff := pred - meas, diff)
-    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1) / sigma_m
+    norms = np.linalg.norm(pred - meas, axis=1) / sigma_m
     return float(np.sqrt(np.mean(np.square(norms))))
 
 
