@@ -1,9 +1,24 @@
-# Current Handoff — Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper (#11055)
+# Current Handoff — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline (#11051)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11051-pipeline`
+- Branch: `claude/ud-11051-mjx-pipeline` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: see DL-#11051. Closes #11051 (epic #11006 package P4). Executed by agy (Gemini 3.8 Flash), reviewed and reworked by the orchestrator.
+- Built: `pipeline/trajectory_optimiser.py` (`TRAJECTORY_OPTIMISERS = {none, mjx-knots}`, `run_trajectory_optimiser`) and the CLI flags `--trajectory-optimiser` (default `none`) and `--mjx-iterations` (default 40, `DEFAULT_MJX_ITERATIONS`). With `mjx-knots` the stage exports the MJX package, runs the #11049 knot optimiser, and writes `mjx_optimised_reference.npz` and `mjx_optimisation_receipt.json`; `receipt.json` gains a `trajectory_optimiser` summary. The receipt builder is shared with the #11046 evidence CLI (`optimisation_receipt`).
+- Decision: when JAX or `mujoco.mjx` is missing, selecting `mjx-knots` raises `DependencyUnavailableError` naming the module and `--trajectory-optimiser none`. The epic's "falls back cleanly" is read as a clear error, not a silent fallback, because the default stays `none` and a silent skip would hide that the requested stage never ran.
+- Tests: the six prototype tests in `test_mjx_optimisation.py` loaded private copies from the evidence script that #11046 replaced; they duplicated `test_knot_gradient_optimiser`, `test_jax_contact` and `test_mjx_tracking_plant`, so they were replaced by a constant-parity test and a toy-package stage test. `test_trajectory_optimiser_selection.py` covers parser defaults and rejections, the `none` no-op, both missing-dependency errors and the receipt key. 29 passed in `~/.venv-mjx` (MuJoCo 3.13); pipeline tests 76 passed, 10 skipped in default Python.
+- Acceptance: `--trajectory-optimiser mjx-knots --mjx-iterations 3` on the static-seeds run: port check 0.06516 m, best 0.05029 m (47 knots, 38 actuated coordinates, float32); the evidence CLI on a copy of the same package gives an identical history. Default run on branch vs `main`: identical file set, `receipt.json` differs only in `elapsed_s` and has no `trajectory_optimiser` key.
+- Next step: CI green, mark ready and arm the PR.
+
+---
+
+# Past Handoff — Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper (#11055)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11055-fullm`
 - Branch: `claude/ud-11055-fullm-helper` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11056
 - Pull request: #11056; entry DL-#11055. Closes #11055. Executed by agy (Gemini 3.8 Flash), reviewed by the orchestrator.
 - Problem: `pyproject.toml` allows `mujoco>=3.6,<4`, but MuJoCo 3.13 removed `MjData.qM` and changed `mj_fullM(model, dst, data.qM)` to `mj_fullM(model, data, dst)`; measured in `~/.venv-mjx` (3.13.0) the old form raises `AttributeError`, which stopped the matching pipeline there.
 - Built: `src/shared/python/engine_core/mujoco_compat.py::full_mass_matrix(mj, model, data, dst=None)` picks the signature at run time and imports no `mujoco` at module level; every `src` call site (mujoco engine, myosuite engine, motion matching, simulation backends, physics validation), including the two existing hand-written dual paths, now calls it. `src/engines/physics_engines/mujoco/docker/` keeps its own pinned MuJoCo and is untouched.
@@ -12,7 +27,7 @@
 - DRY ratchet: shortening the four `mj_fullM` call sites in `counterfactuals.py` made the ZTCF/ZVCF blocks hash-identical, so the state-load, forward, mass-matrix and solve sequence is one `_forward_acceleration` helper; ZTCF and ZVCF outputs on a two-link model match `main` exactly.
 - Changed-file gates surfaced existing debt in touched files, fixed rather than excepted: `advanced_kinematics.solve_inverse_kinematics` (111 > 100 lines) has its damped-least-squares and nullspace step extracted to `_dls_step`, same arithmetic; `sim_widget.set_axial_color_scale` calls `_render_once()` (what the mixin's `render()` does) because mypy resolves `self.render()` to `QWidget.render`, which needs an argument; the divergence inventory records `mujoco_compat.py` as `ud-only`.
 - Tests: `tests/unit/engine_core/test_mujoco_compat.py` (analytic hinge, preallocated `dst`, both branches with fakes, three preconditions) plus `test_native_force_equations.py`: 12 passed on MuJoCo 3.13. The 200 test files that reference a touched module, in default Python (MuJoCo 3.4): 1967 passed; the 31 failures are 19 that fail identically on `main` and 12 that pass when run alone (batch-order pollution).
-- Next step: CI green, mark ready and arm the PR.
+- Next step: none; merged as PR #11056.
 
 ---
 

@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 19 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 244 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 245 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `neural_motion` | 0 | 0 | 0 | 60 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **421** | **279** | **124** | **1525** | **750** | **700** |
+| **Total** | **421** | **279** | **124** | **1526** | **750** | **700** |
 
 ## Diverged Files by Package
 

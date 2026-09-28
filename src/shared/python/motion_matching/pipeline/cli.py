@@ -591,6 +591,33 @@ def _persist_dynamics_artifacts(
     )
 
 
+def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
+    (out_dir / "receipt.json").write_text(
+        json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
+    )
+
+
+def _apply_trajectory_optimiser(
+    args: argparse.Namespace, out_dir: Path, receipt: dict[str, Any]
+) -> None:
+    """Run the selected trajectory optimiser and record its summary in ``receipt``."""
+    trajectory_optimiser = validate_trajectory_optimiser(
+        getattr(args, "trajectory_optimiser", "none")
+    )
+    if trajectory_optimiser == "none":
+        return
+    # The MJX exporter reads receipt.json, so write it once before the stage;
+    # the caller writes it again with the stage summary.
+    _write_receipt(out_dir, receipt)
+    opt_summary = run_trajectory_optimiser(
+        trajectory_optimiser,
+        out_dir,
+        iterations=getattr(args, "mjx_iterations", DEFAULT_MJX_ITERATIONS),
+    )
+    if opt_summary is not None:
+        receipt["trajectory_optimiser"] = opt_summary
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -675,27 +702,8 @@ def _simulate_and_receipt(
         )
     )
     receipt["engine"] = ctx.engine
-
-    trajectory_optimiser = validate_trajectory_optimiser(
-        getattr(args, "trajectory_optimiser", "none")
-    )
-    if trajectory_optimiser != "none":
-        # The MJX exporter reads receipt.json, so write it once before the
-        # stage and again with the stage summary.
-        (out_dir / "receipt.json").write_text(
-            json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
-        )
-        opt_summary = run_trajectory_optimiser(
-            trajectory_optimiser,
-            out_dir,
-            iterations=getattr(args, "mjx_iterations", DEFAULT_MJX_ITERATIONS),
-        )
-        if opt_summary is not None:
-            receipt["trajectory_optimiser"] = opt_summary
-
-    (out_dir / "receipt.json").write_text(
-        json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
-    )
+    _apply_trajectory_optimiser(args, out_dir, receipt)
+    _write_receipt(out_dir, receipt)
     log_pipeline_summary(
         log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
     )
