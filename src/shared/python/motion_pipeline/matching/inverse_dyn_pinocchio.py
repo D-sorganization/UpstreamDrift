@@ -18,7 +18,7 @@ from src.shared.python.engine_core.finite_difference import (
     require_enough_frames_for_finite_diff as _require_enough_frames_for_finite_diff,
 )
 
-from ..contracts import JointTrajectory, SkeletonRig, TorqueFrame
+from ..contracts import JointTrajectory, SkeletonRig, TorqueFrame, TorqueTrajectory
 from .base import (
     BaseMotionMatchingSolver,
     CostWeights,
@@ -419,7 +419,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
     def _package_result(
         request_id: str,
         reference: JointTrajectory,
-        torque_traj: JointTrajectory,
+        torque_traj: TorqueTrajectory,
         residual_report: Any,
         rmse: float,
         solve_time: float,
