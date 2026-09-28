@@ -26,6 +26,11 @@ classdef test_gs3dx_fit_balance < matlab.unittest.TestCase
     end
 
     methods (Test)
+        function reference_is_an_offset_or_a_path_not_both(testCase)
+            testCase.verifyError(@() gs3dx_build_fit_balance(testCase.info, struct(), ...
+                com_offset=zeros(3, 2), com_ref=zeros(3, 2)), 'gs3dx:fitbalance');
+        end
+
         function balance_off_is_the_leg_servo(testCase)
             [T, C0, Kp, Kd, A, R, Cref, Vref, Fref, G] = local_command_data();
             [cmd, shift] = gs3dx_balance_command(0.5, [0.3; -0.2; 1], [1; 1; 0], ones(6, 1), T, C0, Kp, Kd, ...

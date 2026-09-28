@@ -177,6 +177,15 @@
       kept in the session scratchpad only). The model is built with axes 3, gains [3 0.4], foot 1.
       Earlier "zero logged samples" errors were very likely a FULL C: DRIVE (Simulink turns off
       recording under low disk space), not only concurrency.
+  21. #10979 references and inertia (2026-09-28): `com_ref` option of `gs3dx_build_fit_balance`
+      (World path, exclusive with `com_offset`) + `gs3dx_capture_com_reference` (capture COM from
+      `gs3dx_kinematic_grf`, translated to the model's at address). Trial, not saved: support peak
+      1.44 BW (was 2.63; capture 1.27), slip 44/53 mm (58/88), pelvis 42/72 mm (27/73) - the spike
+      is the reference, confirmed. `gs3dx_inertia_audit` + `gs3dx_segment_inertia` + de Leva
+      `.gyration`/`.length` in `gs3dx_anthropometry`; `docs/INERTIA.md`: limb longitudinal inertia
+      0.43-0.65 of de Leva, lower trunk 0.53, foot close (1.08). Agents (agy, uncommitted worktrees
+      `agy-gs3dx-{shape,render}`): GS3DX_Shape (ellipsoid solids with custom de Leva inertia/COM)
+      and `gs3dx_render` (headless KinematicsSolver + MATLAB graphics) in progress.
 
 ## Files and Decisions
 

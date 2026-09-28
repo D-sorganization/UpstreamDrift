@@ -19,10 +19,12 @@ function report = gs3dx_build_fit_balance(info, ref, opts)
 %     GS3DX_FitLegs command.
 %   * Reference.  The centre-of-mass reference is the reference pelvis pose
 %     carrying COM_OFFSET (3 x frames, the centre of mass in the pelvis
-%     frame, m; GS3DX_BALANCE_COM_OFFSET of a run whose joints track).
-%     Without it, BalanceOn is 0.  The foot reference is REF.feet.
+%     frame, m; GS3DX_BALANCE_COM_OFFSET of a run whose joints track), or
+%     COM_REF (3 x frames, World, m) given directly, such as the capture's
+%     own centre of mass (GS3DX_CAPTURE_COM_REFERENCE).  Without either,
+%     BalanceOn is 0.  The foot reference is REF.feet.
 %
-%   Options: overwrite (false), com_offset ([]), gains ([BalanceKp BalanceKd],
+%   Options: overwrite (false), com_offset ([]), com_ref ([]), gains ([BalanceKp BalanceKd],
 %   [3 0.4]: m/m and s; a pelvis shift moves the whole-body centre of mass
 %   by only part of the shift, so Kp 1 left a standing error, docs/FIT.md),
 %   limit (0.1 m, the largest pelvis shift), tau
@@ -35,12 +37,15 @@ function report = gs3dx_build_fit_balance(info, ref, opts)
         ref (1,1) struct
         opts.overwrite (1,1) logical = false
         opts.com_offset double = []
+        opts.com_ref double = []
         opts.gains (1,2) double {mustBeNonnegative} = [3 0.4]
         opts.limit (1,1) double {mustBePositive} = 0.1
         opts.tau (1,1) double {mustBePositive} = 0.01
         opts.axes (1,1) double {mustBeMember(opts.axes, [2 3])} = 3
         opts.foot_gain (1,1) double {mustBeNonnegative} = 1
     end
+    assert(isempty(opts.com_offset) || isempty(opts.com_ref), 'gs3dx:fitbalance', ...
+        'Give COM_OFFSET or COM_REF, not both');
     names = gs3dx_names();
     src = char(names.variants.fit_track);
     mdl = char(names.variants.fit_balance);
@@ -57,13 +62,19 @@ function report = gs3dx_build_fit_balance(info, ref, opts)
         'gs3dx:fitbalance', ...
         'REF is not the leg reference of %s', src);
 
-    report.on = ~isempty(opts.com_offset);
-    offset = zeros(3, n);
-    if report.on
-        assert(isequal(size(opts.com_offset), [3 n]), 'gs3dx:fitbalance', 'COM_OFFSET must be 3 x %d', n);
-        offset = opts.com_offset;
+    report.on = ~isempty(opts.com_offset) || ~isempty(opts.com_ref);
+    if ~isempty(opts.com_ref)
+        assert(isequal(size(opts.com_ref), [3 n]) && all(isfinite(opts.com_ref), 'all'), 'gs3dx:fitbalance', ...
+            'COM_REF must be finite, 3 x %d', n);
+        com = opts.com_ref;
+    else
+        offset = zeros(3, n);
+        if report.on
+            assert(isequal(size(opts.com_offset), [3 n]), 'gs3dx:fitbalance', 'COM_OFFSET must be 3 x %d', n);
+            offset = opts.com_offset;
+        end
+        com = ref.pelvis_p + squeeze(pagemtimes(ref.pelvis_R, reshape(offset, 3, 1, n)));
     end
-    com = ref.pelvis_p + squeeze(pagemtimes(ref.pelvis_R, reshape(offset, 3, 1, n)));
     assignin(ws, 'BalanceOn', double(report.on));
     assignin(ws, 'BalanceKp', opts.gains(1));
     assignin(ws, 'BalanceKd', opts.gains(2));

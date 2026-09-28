@@ -28,6 +28,13 @@ function a = gs3dx_anthropometry(body_mass)
 %     .com        de Leva centre-of-mass position as a fraction of the
 %                 segment length from its proximal end (head from the
 %                 vertex, trunk from C7 toward the mid-hip point)
+%     .gyration   de Leva principal radii of gyration about the segment
+%                 centre of mass, [sagittal transverse longitudinal] as
+%                 fractions of the segment length, per segment key of
+%                 .fraction (Table 4, males; percent / 100)
+%     .length     de Leva segment lengths (m) of the reference male, for
+%                 when a model length is not known: head, trunk,
+%                 upper_arm, forearm, hand, thigh, shank, foot
 %
 %   The model's trunk has no pelvis/abdomen/thorax split and its shoulder
 %   hubs have no de Leva counterpart, so neck_share (0.15) and
@@ -73,6 +80,14 @@ function a = gs3dx_anthropometry(body_mass)
 
     com = struct('head', 0.5976, 'trunk', 0.4486, 'upper_arm', 0.5772, 'forearm', 0.4574, ...
         'hand', 0.7900, 'thigh', 0.4095, 'shank', 0.4459, 'foot', 0.4415);
+    gyration = struct('head', [0.362 0.376 0.312], 'trunk', [0.372 0.347 0.191], ...
+        'upper_trunk', [0.505 0.320 0.465], 'middle_trunk', [0.482 0.383 0.468], ...
+        'lower_trunk', [0.615 0.551 0.587], 'upper_arm', [0.285 0.269 0.158], ...
+        'forearm', [0.276 0.265 0.121], 'hand', [0.628 0.513 0.401], ...
+        'thigh', [0.329 0.329 0.149], 'shank', [0.255 0.249 0.103], 'foot', [0.257 0.245 0.124]);
+    len = struct('head', 0.2033, 'trunk', 0.5319, 'upper_arm', 0.2817, 'forearm', 0.2689, ...
+        'hand', 0.0862, 'thigh', 0.4222, 'shank', 0.4395, 'foot', 0.2581);
     a = struct('fraction', f, 'vars', v, 'legs', legs, 'com', com, ...
+        'gyration', gyration, 'length', len, ...
         'neck_share', neck_share, 'shoulder_share', shoulder_share);
 end
