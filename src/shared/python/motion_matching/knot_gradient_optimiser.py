@@ -334,16 +334,15 @@ def lbfgs_minimise(
             best_iteration = k
         return float(row["total"]), np.asarray(grad, dtype=np.float64).ravel()
 
-    options: dict[str, Any] = {"maxiter": settings.max_iterations}
-    if settings.max_evaluations is not None:
-        options["maxfun"] = settings.max_evaluations
+    # 15000 is SciPy's own L-BFGS-B ``maxfun`` default.
+    max_fun = 15000 if settings.max_evaluations is None else settings.max_evaluations
 
     res = scipy.optimize.minimize(
         fun,
         x0_flat,
         jac=True,
         method="L-BFGS-B",
-        options=options,
+        options={"maxiter": settings.max_iterations, "maxfun": max_fun},
     )
 
     stop: StopReason
