@@ -31,6 +31,17 @@ classdef test_gs3dx_render < matlab.unittest.TestCase
     end
 
     methods (Test)
+        function named_views_place_the_camera(testCase)
+            % World is [facing, toward target, up]: face-on looks at the
+            % golfer's front from +X, down-the-line from behind (-Y).
+            cam = @(v) [sind(v(1)) * cosd(v(2)), -cosd(v(1)) * cosd(v(2)), sind(v(2))];
+            fo = gs3dx_render(testCase.mdl, testCase.ik, view="face-on");
+            dtl = gs3dx_render(testCase.mdl, testCase.ik, view="down-the-line");
+            testCase.verifyGreaterThan(cam(fo.view) * [1; 0; 0], 0.99);
+            testCase.verifyGreaterThan(cam(dtl.view) * [0; -1; 0], 0.99);
+            testCase.verifyError(@() gs3dx_render(testCase.mdl, testCase.ik, view="sideways"), 'gs3dx:render');
+        end
+
         function renders_one_pose_to_temp_folder(testCase)
             temp_dir = tempname;
             mkdir(temp_dir);

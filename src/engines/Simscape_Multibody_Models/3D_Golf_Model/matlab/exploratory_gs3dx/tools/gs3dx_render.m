@@ -27,7 +27,9 @@ function out = gs3dx_render(mdl, q, opts)
 %     video         (1,:) char output video file (.mp4)
 %     fps           (1,1) double video playback frame rate (default 30)
 %     view          (1,:) char, string, or 1x2 double camera view
-%                   ("face-on", "down-the-line", or [azimuth, elevation])
+%                   ("face-on": camera on +X, the facing axis; "down-the-line":
+%                   camera on -Y, behind the golfer looking at the target;
+%                   "top"; or [azimuth, elevation] as for VIEW)
 %     markers       (:,:,:) double capture markers or joint centres (Nx3xF or
 %                   3xNxF, World frame, m) for overlay dots
 %     time          (1,:) double timestamps (s) per frame for labels
@@ -40,6 +42,7 @@ function out = gs3dx_render(mdl, q, opts)
 %     .files        string array of written image and video file paths
 %     .solids       struct array of parsed solids with local and World geometry
 %     .frames       frame indices rendered
+%     .view         [azimuth elevation] of the camera (degrees)
 %     .status       "success"
 %
 %   See also GS3DX_WHOLE_BODY_IK, GS3DX_TRACK_LEARN.
@@ -153,6 +156,7 @@ function out = gs3dx_render(mdl, q, opts)
     out.files = written_files;
     out.solids = solids;
     out.frames = frames_to_solve;
+    out.view = [az el];
     out.status = "success";
 end
 
@@ -492,19 +496,19 @@ function [az, el] = local_parse_view(view_opt)
         v = lower(strtrim(string(view_opt)));
         switch v
             case {"face-on", "fo"}
-                az = 0; el = 5;
+                az = 90; el = 5;    % camera on +X, in front of the golfer
             case {"down-the-line", "dtl"}
-                az = -90; el = 5;
+                az = 0; el = 5;     % camera on -Y, behind the golfer looking at the target
             case {"top", "overhead"}
                 az = 0; el = 90;
             otherwise
-                az = 0; el = 5;
+                error('gs3dx:render', 'Unknown view "%s"', v);
         end
     elseif isnumeric(view_opt) && numel(view_opt) == 2
         az = double(view_opt(1));
         el = double(view_opt(2));
     else
-        az = 0; el = 5;
+        error('gs3dx:render', 'VIEW must be a view name or [azimuth elevation]');
     end
 end
 

@@ -197,6 +197,10 @@
       and balance runs repeat it (2.64 BW offset, 1.44 BW capture COM): segment inertia does not
       cause the impact spike (`docs/SHAPE.md`). The earlier lower-trunk 0.53 ratio was an audit
       length artifact (`docs/INERTIA.md`).
+  23. #10979 render views (2026-09-28): `gs3dx_render`'s "face-on" drew down the line and
+      "down-the-line" drew face-on from behind; now face-on = camera on +X (az 90), down-the-line =
+      camera on -Y (az 0), unknown views error, `out.view` reported and tested. All
+      `docs/screenshots/GS3DX_*` stills re-rendered.
 
 ## Files and Decisions
 

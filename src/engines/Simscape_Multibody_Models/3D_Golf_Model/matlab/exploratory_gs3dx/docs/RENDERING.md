@@ -32,12 +32,18 @@ out = gs3dx_render('GS3DX_FitBalance', ik, stills=[1 320 jc.impact_frame], ...
 ```
 
 Poses are an IK struct (`.joint_ids`, `.joint`, optional `.t`) or a joint
-matrix. Views are `"face-on"`, `"down-the-line"` or `[azimuth elevation]`.
+matrix. Views are `"face-on"` (camera on +X, the way the golfer faces),
+`"down-the-line"` (camera on −Y, behind the golfer looking at the target),
+`"top"` or `[azimuth elevation]` as for `view`; `out.view` is the camera used.
+Before 2026-09-28 the two names were swapped (face-on drew down the line, and
+down-the-line drew a face-on view from behind the golfer).
 
 ## Tests
 
-`tests/test_gs3dx_render.m` (3 tests):
+`tests/test_gs3dx_render.m` (4 tests):
 
+- face-on puts the camera on +X and down-the-line on −Y, and an unknown view
+  is an error;
 - one pose renders headless to a PNG that is not a single colour;
 - the drawn `L Thigh` cylinder is its solver pose applied to its dimensions,
   to 1e-9 m;
