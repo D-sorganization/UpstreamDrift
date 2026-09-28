@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-28 — #10979 balance: GS3DX_FitBalance (973 compiled) feeds the 3-axis centre-of-mass error and each foot's position error back into the leg servo through a foot-fixed inverse leg Jacobian; to impact the pelvis stays within 81 mm of the capture (was 503 mm) with 52 mm max COM error, but the trail foot re-lands just before impact (support 2.37 BW vs the capture's 1.25). test_gs3dx_fit_balance 6/6.
+- **Last verified:** 2026-09-28 — #10979 balance: GS3DX_FitBalance (973 compiled) feeds the 3-axis centre-of-mass error and each foot's position error back into the leg servo; balance gains raised to Kp 3 / Kd 0.4 (COM error to impact 17.9 RMS / 25.7 max mm, was 38.5 / 52.0; pelvis 27 / 73 mm). The 2.6 BW pre-impact support peak is demanded by the COM reference itself (implies 2.31 BW vs the capture's 1.27; 40 mm vertical range vs 19), not a foot defect. test_gs3dx_fit_balance 6/6.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Stop GS3DX_FitBalance's trail foot unloading before impact (vertical-only or higher foot gain, or heel-up toe contact) and compare the support with gs3dx_kinematic_grf.
+- **Next step:** Rebuild the balance COM reference on GS3DX_Shape (ellipsoid segments, de Leva inertia) and compare its vertical range and implied support with the capture's; else use the capture's COM as the reference.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

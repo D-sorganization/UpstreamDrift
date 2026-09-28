@@ -496,16 +496,47 @@ within 81 mm of the capture at impact instead of 503 mm. In the last row,
 the vertical centre-of-mass error is 6.3 mm RMS; the feet slip 51 / 74 mm
 and lift 40 / 50 mm (L / R).
 
+**Gain.** With Kp 1 the centre-of-mass error grew through the backswing
+(7 mm at 0.1 s to 47 mm at 0.8 s) and stayed there: a pelvis shift moves
+the whole-body centre of mass by only part of the shift, so a proportional
+loop of gain 1 leaves a standing error. Kp 3, Kd 0.4 (now the default)
+halves it:
+
+| Run (three axes, foot feedback 1) | Pelvis RMS / at impact | COM error RMS / max | Support (BW) |
+| --------------------------------- | ---------------------- | ------------------- | ------------ |
+| Kp 1, Kd 0.2                      | 44 / 81 mm             | 38.5 / 52.0 mm      | 0.104–2.37   |
+| Kp 2, Kd 0.3                      | 30 / 72 mm             | 23.6 / 30.9 mm      | 0.079–2.62   |
+| Kp 3, Kd 0.4                      | 27 / 73 mm             | 17.9 / 25.7 mm      | 0.056–2.63   |
+
 **Impact spike.** Every balanced run shows a support peak of 2.4–2.7 BW
 just before impact, where the capture's kinematic GRF (`gs3dx_kinematic_grf`)
-stays at 1.05–1.25 BW. The spike is the trail foot landing again: it
-unloads from 1.20 s, lands at 1.28 s and reaches 1.66 BW alone. In the
-capture the trail heel rises only 36 mm and the foot never leaves the
-ground. The knee is not singular (|G| ≈ 70 deg/m) and the shift is not
-limited. Foot feedback cuts the unloaded time from about 60 ms to 24 ms and
-the peak from 2.56 to 2.37 BW, and raises the minimum support after 0.1 s
-from 0.10 to 0.61 BW, but the spike remains and the pelvis error grows
-slightly.
+peaks at 1.27 BW. It is not a foot landing: the per-contact forces
+(`gs3dx_contact_check` `.contacts`) show a broad rise from 0.6 BW at 1.23 s
+to 2.3–2.6 BW at 1.31 s, with the trail foot on its inner toe sphere and
+the heel up throughout, while the model's centre of mass stays within 6 mm
+of its reference vertically. The brief trail-foot unloading before it
+(1.22–1.25 s, total support 0.6 BW) is the same reference dipping at
+−0.3 g. The reference asks for both. Aligned at address, the
+centre-of-mass reference (reference pelvis carrying the balance-off
+offset) differs from the capture's own centre of mass by up to 34 / 31 /
+24 mm (x / y / z) before impact; it moves 40 mm vertically where the
+capture's moves 19 mm, and its vertical acceleration alone (8 Hz) implies
+a 2.31 BW peak. The offset is the model's own mass distribution carried
+along the tracked pose: its segments are uniform cylinders with the centre
+of mass at their middle, not at the de Leva positions the capture's
+estimate uses. The ellipsoid model with de Leva inertia (`GS3DX_Shape`,
+docs/SHAPE.md) is the fix to try first.
+
+Tried and not kept (whole body to impact, Kp 1):
+
+- Softer ankles (servo 10 N·m/deg instead of 50, near a human ankle's
+  quasi-stiffness): the balance loop needs the stiff ankle; the pelvis ends
+  906 mm from the capture at impact.
+- Levelling the feet: an ankle offset against each foot's measured tilt
+  from its reference orientation (the ankle log's `Rotation Transform`;
+  zero at t0 to 1e-12 deg) kept the feet within 7.6° but moved the centre
+  of pressure the ankles balance with: COM error 49.2 / 75.1 mm, pelvis
+  53 / 103 mm.
 
 `test_gs3dx_fit_balance` checks:
 
@@ -517,14 +548,15 @@ slightly.
   case is vertical, on the lead leg at frame 545, where the knee is nearly
   straight;
 - the wiring and data of the saved model;
-- a 0.3 s run: centre-of-mass error 14.6 mm RMS, 24.9 mm max, bounded at
-  26 mm.
+- the saved gains (Kp 3, Kd 0.4) and a 0.3 s run: centre-of-mass error
+  10.1 mm RMS, 16.5 mm max, bounded at 17.5 mm (Kp 1: 14.6 / 24.9 mm).
 
 ## Next
 
-1. Impact spike: stop the trail foot unloading before impact, for example
-   with a higher or vertical-only foot gain, or by modelling the toe
-   contact the capture shows (heel up, toe down); then compare the support
-   with `gs3dx_kinematic_grf` again.
+1. Impact spike: rebuild the balance reference on `GS3DX_Shape` (de Leva
+   centres of mass) with a new balance-off offset, and compare its
+   vertical range and implied support with the capture's (19 mm,
+   1.27 BW); if it stays far off, use the capture's centre of mass
+   (`gs3dx_kinematic_grf`, aligned at address) as the reference instead.
 2. Learning drift: record the PD torque per joint over more iterations and
    add a forgetting factor, or leave the loop joints to the PD alone.

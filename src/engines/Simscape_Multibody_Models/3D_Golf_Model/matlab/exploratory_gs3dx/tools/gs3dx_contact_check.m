@@ -17,15 +17,21 @@ function check = gs3dx_contact_check(info, opts)
 %     .support    min and max of GRF.up / (M*|g|) over the run
 %     .feet       per side: .slip (max horizontal ankle travel, m),
 %                 .lift (max vertical ankle rise, m) from the ankle joint
-%                 GlobalPosition, relative to t = 0
+%                 GlobalPosition, relative to t = 0, and .p (3xN, World,
+%                 m) the ankle position itself
+%     .contacts   per-contact forces (3 x contacts x N, World axes, N) in
+%                 the order of 'FootContactForces' (left contacts first)
 %     .pelvis     max distance of the pelvis frame from its t = 0 position (m)
 %     .pelvis_p   pelvis frame origin (3xN, World, m) on the grid of .t
 %     .pelvis_R   pelvis frame orientation (3x3xN, World) on the grid of .t
+%     .signals    struct of the logged signals named in option SIGNALS
+%                 (width x N on the grid of .t)
 %     .status, .message    of the simulation
 %
 %   Options: drive ("impact"), stop_time (0.3 s), variables (struct of
 %   model-workspace overrides applied after the drive), rest (false),
-%   model (GS3DX_FullBodyContact; any model built from it, e.g. GS3DX_Golfer).
+%   model (GS3DX_FullBodyContact; any model built from it, e.g. GS3DX_Golfer),
+%   signals (string array of logged signal names to return, default none).
 %   rest=true zeroes every *StartVelocity* variable, so the body starts
 %   still in the drive's pose: the standing test.  The impact drive alone
 %   starts mid-downswing with the whole-body momentum of a model whose
@@ -42,6 +48,7 @@ function check = gs3dx_contact_check(info, opts)
         opts.variables (1,1) struct = struct()
         opts.rest (1,1) logical = false
         opts.model (1,1) string = gs3dx_names().variants.contact
+        opts.signals (1,:) string = strings(1, 0)
     end
     mdl = char(opts.model);
     load_system(mdl);
@@ -77,6 +84,7 @@ function check = gs3dx_contact_check(info, opts)
     check.grf_L = world(sum(per(:, 1:half, :), 2));
     check.grf_R = world(sum(per(:, half + 1:end, :), 2));
     check.grf = check.grf_L + check.grf_R;
+    check.contacts = reshape(world(per), 3, n_contacts, []);
     check.t = grid;
     check.com = at(s.t, s.com);
     check.mass = s.mass;
@@ -98,7 +106,12 @@ function check = gs3dx_contact_check(info, opts)
         d = a - a(:, 1);
         vert = up.' * d;
         horiz = d - up * vert;
-        check.feet.(P) = struct('slip', max(vecnorm(horiz)), 'lift', max(vert));
+        check.feet.(P) = struct('slip', max(vecnorm(horiz)), 'lift', max(vert), 'p', a);
+    end
+    check.signals = struct();
+    for name = opts.signals
+        [tn, xn] = local_signal(logs, char(name));
+        check.signals.(char(name)) = at(tn, xn);
     end
     check.pelvis = max(vecnorm(s.pelvis_p - s.pelvis_p(:, 1)));
     check.pelvis_p = at(s.t, s.pelvis_p);

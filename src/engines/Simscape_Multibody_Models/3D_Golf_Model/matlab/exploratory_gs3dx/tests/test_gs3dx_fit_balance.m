@@ -115,6 +115,7 @@ classdef test_gs3dx_fit_balance < matlab.unittest.TestCase
             testCase.verifySubstring(chart.Script, 'gs3dx_balance_command');
             testCase.verifyEqual(get_param([m '/GS3DX Balance COM Goto'], 'GotoTag'), 'GS3DXBalanceCOM');
             testCase.verifyEqual(ws.getVariable('BalanceOn'), 1);
+            testCase.verifyEqual([ws.getVariable('BalanceKp') ws.getVariable('BalanceKd')], [3 0.4]);
             n = numel(ws.getVariable('LegReferenceTime'));
             testCase.verifySize(ws.getVariable('BalanceCOMRef'), [3 n]);
             testCase.verifySize(ws.getVariable('BalanceGain'), [12 3 n]);
@@ -140,8 +141,8 @@ classdef test_gs3dx_fit_balance < matlab.unittest.TestCase
                 1000 * [c.feet.L.slip c.feet.R.slip c.feet.L.lift c.feet.R.lift], mat2str(c.support, 3));
             testCase.verifyEqual(string(c.status), "success");
             testCase.verifyTrue(c.newton.pass, 'contacts and gravity are the only external forces');
-            % 2026-09-28: RMS 14.6 mm, max 24.9 mm.
-            testCase.verifyLessThan(max(e), 0.026, 'centre-of-mass error');
+            % 2026-09-28, Kp 3 / Kd 0.4: RMS 10.1 mm, max 16.5 mm (Kp 1: 14.6 / 24.9 mm).
+            testCase.verifyLessThan(max(e), 0.0175, 'centre-of-mass error');
         end
     end
 end
