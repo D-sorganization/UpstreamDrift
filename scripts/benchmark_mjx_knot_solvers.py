@@ -159,7 +159,9 @@ def load_row(capture: str, solver: str, evidence: Path) -> dict[str, Any]:
 
 
 def render(evidence: Path) -> list[dict[str, Any]]:
-    provenance = json.loads((evidence / "provenance.json").read_text(encoding="utf-8"))
+    run = json.loads((evidence / "provenance.json").read_text(encoding="utf-8"))
+    # The notes describe the method, not the run, so they come from this file.
+    provenance = {**run, "notes": list(SOLVER_NOTES)}
     rows = [
         load_row(capture, solver, evidence)
         for capture in provenance["captures"]
@@ -221,7 +223,6 @@ def main(argv: list[str] | None = None) -> int:
             "solvers": args.solvers,
             "shooting_passes": args.shooting_passes,
             "mjx_iterations": args.mjx_iterations,
-            "notes": list(SOLVER_NOTES),
         }
         (evidence / "provenance.json").write_text(
             json.dumps(provenance, indent=2) + "\n", encoding="utf-8"

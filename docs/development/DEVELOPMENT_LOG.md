@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11058 — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11058
+- **PR:** pending
+- **Branch:** `claude/ud-11058-benchmark`
+- **Paths:** `src/shared/python/motion_matching/solver_benchmark.py`, `scripts/benchmark_mjx_knot_solvers.py`, `src/shared/python/motion_matching/knot_gradient_optimiser.py`, `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`, `src/shared/python/motion_matching/pipeline/`, `docs/development/full_body_models/evidence/mjx_benchmark/`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-28 — full benchmark: 8 pipeline runs with rc 0; the report is regenerated from the committed receipts.
+- **Summary:** Head-to-head of shooting fit, MJX Adam and MJX L-BFGS-B, each scored through the shared simulator, with promotion gated on accuracy parity, convergence and ground contact. Decision: keep `none` as the default. No MJX run converged in 10 iterations, and Adam loses iron downswing contact. L-BFGS is the most accurate opt-in (47.2 / 52.9 mm).
+- **Next step:** CI green, then ready and arm the PR for #11058.
+
 ### DL-#11034 · Canonical Force-Plate Import and Extension Overlay Parent Attribute Cleanup
 
 - **State:** in_review
@@ -32,7 +45,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11059 — Shooting Fit No Longer Crashes on an Unimported `fs`
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #11059
 - **PR:** #11060
@@ -41,7 +54,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — the new test fails on `main` with the `NameError` and passes with the fix; a real `--shooting-fit 8` driver run completes.
 - **Summary:** `shooting_fit` used `fs` at run time without importing it, so every `--shooting-fit` run crashed; it now imports it like its sibling functions.
-- **Next step:** CI green, mark ready and arm the PR for #11059.
+- **Next step:** None — merged as PR #11060.
 
 ### DL-#11051 — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline
 

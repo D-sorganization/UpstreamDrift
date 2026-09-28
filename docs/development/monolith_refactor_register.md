@@ -144,6 +144,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  836 | `src/shared/python/perturbation/cross_engine_runner.py`                                                                                                                       |
 |  835 | `src/api/routes/simulation_ws.py`                                                                                                                                             |
 |  834 | `src/shared/python/engine_core/engine_probes.py`                                                                                                                              |
+|  833 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 |  833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py`                                                                                                                  |
 |  831 | `src/bunkershot3d/solvers/mpm/constitutive.py`                                                                                                                                |
 |  831 | `src/shared/python/signal_toolkit/widget_processing.py`                                                                                                                       |
@@ -167,7 +168,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py`                                                                           |
 |  806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py`           |
 |  806 | `src/launchers/_launcher_navigation_ui.py`                                                                                                                                    |
-|  805 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 |  803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py`                                                                                                          |
 |  802 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py`                                                                                                            |
 |  801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py`                                                                                                   |
