@@ -302,9 +302,7 @@ class ThreePhaseElectricalModelEnhanced:
 
         # Section widths: distance from wall to tip at each segment
         # Shape: (num_segments,)
-        section_widths = np.sqrt(
-            np.einsum("ij,ij->i", diff := tip_positions - wall_positions, diff)
-        )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+        section_widths = np.linalg.norm(tip_positions - wall_positions, axis=1)
 
         # Cross-sectional areas in m²
         cross_section_areas_m2 = section_widths * effective_height * 0.00064516
