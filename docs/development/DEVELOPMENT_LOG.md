@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11058 — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision
+### DL-#11071 — Run the MJX L-BFGS Arm Toward Convergence
 
 - **State:** in_review
+- **Owner:** claude
+- **Issue:** #11071
+- **PR:** #11075
+- **Branch:** `claude/ud-11071-lbfgs-converge`
+- **Paths:** `scripts/benchmark_mjx_knot_solvers.py`, `docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/`
+- **Started:** 2026-09-28
+- **Last verified:** 2026-09-28 — 60-iteration L-BFGS runs (rc 0) committed; report regenerated from receipts.
+- **Summary:** Re-runs only `mjx-lbfgs` at 60 iterations against the #11058 incumbents. Replay RMS falls to 40.8 / 42.6 mm (driver / iron) and the iron downswing weight fraction rises to 0.29, but neither capture converges, so `none` stays the default.
+- **Next step:** CI green, then ready and arm the #11071 PR.
+
+### DL-#11058 — MJX Knot Optimiser Head-to-Head Benchmark and Promotion Decision
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #11058
 - **PR:** #11072
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-28 — full benchmark: 8 pipeline runs with rc 0; the report is regenerated from the committed receipts.
 - **Summary:** Head-to-head of shooting fit, MJX Adam and MJX L-BFGS-B, each scored through the shared simulator, with promotion gated on accuracy parity, convergence and ground contact. Decision: keep `none` as the default. No MJX run converged in 10 iterations, and Adam loses iron downswing contact. L-BFGS is the most accurate opt-in (47.2 / 52.9 mm).
-- **Next step:** CI green, then ready and arm the PR for #11058.
+- **Next step:** none; merged as PR #11072 (follow-up DL-#11071).
 
 ### DL-#11034 · Canonical Force-Plate Import and Extension Overlay Parent Attribute Cleanup
 
