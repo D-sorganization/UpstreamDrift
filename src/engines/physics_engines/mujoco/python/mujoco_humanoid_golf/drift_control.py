@@ -14,6 +14,7 @@ from dataclasses import dataclass
 import mujoco
 import numpy as np
 
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -106,8 +107,7 @@ class DriftControlDecomposer:
         mujoco.mj_forward(self.model, self._data_full)
         mujoco.mj_inverse(self.model, self._data_full)
 
-        M = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M, self._data_full.qM)
+        M = full_mass_matrix(mujoco, self.model, self._data_full)
 
         bias = self._data_full.qfrc_bias.copy()
         tau = self._data_full.qfrc_actuator.copy()
@@ -126,8 +126,7 @@ class DriftControlDecomposer:
 
         mujoco.mj_forward(self.model, self._data_drift)
 
-        M_drift = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_drift, self._data_drift.qM)
+        M_drift = full_mass_matrix(mujoco, self.model, self._data_drift)
 
         bias_drift = self._data_drift.qfrc_bias.copy()
         qacc_drift = np.linalg.solve(M_drift, -bias_drift)

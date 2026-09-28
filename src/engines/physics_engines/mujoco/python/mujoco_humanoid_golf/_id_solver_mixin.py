@@ -7,6 +7,7 @@ import numpy as np
 from scipy.linalg import lstsq
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ._id_models import (
@@ -393,8 +394,7 @@ class _InverseDynamicsSolverMixin:
             mujoco.mj_forward(self.model, self.data)
 
             # Get resulting acceleration
-            m_matrix = np.zeros((self.model.nv, self.model.nv))
-            mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
+            m_matrix = full_mass_matrix(mujoco, self.model, self.data)
 
             # Acceleration from dynamics: M^{-1}(τ - C q̇ - g)
             coriolis = self.kinematic_analyzer.compute_coriolis_forces(qpos, qvel)

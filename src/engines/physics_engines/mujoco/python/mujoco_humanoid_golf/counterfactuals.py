@@ -17,6 +17,7 @@ from typing import Literal
 import mujoco
 import numpy as np
 
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -98,6 +99,30 @@ class CounterfactualAnalyzer:
         self._data_observed = mujoco.MjData(model)
         self._data_counterfactual = mujoco.MjData(model)
 
+    def _forward_acceleration(
+        self,
+        data: mujoco.MjData,
+        qpos: np.ndarray,
+        qvel: np.ndarray | float,
+        ctrl: np.ndarray | float,
+        *,
+        include_actuation: bool,
+    ) -> np.ndarray:
+        """Load ``(qpos, qvel, ctrl)`` into ``data`` and solve M qacc = f.
+
+        ``f`` is ``qfrc_actuator - qfrc_bias`` when ``include_actuation`` and
+        ``-qfrc_bias`` otherwise.
+        """
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        data.ctrl[:] = ctrl
+        mujoco.mj_forward(self.model, data)
+        mass = full_mass_matrix(mujoco, self.model, data)
+        force = -data.qfrc_bias
+        if include_actuation:
+            force = data.qfrc_actuator - data.qfrc_bias
+        return np.linalg.solve(mass, force)
+
     def ztcf(
         self,
         qpos: np.ndarray,
@@ -132,36 +157,16 @@ class CounterfactualAnalyzer:
             raise ValueError("qpos must be provided")
         if len(ctrl) != self.model.nu:
             raise ValueError(f"ctrl must have length {self.model.nu}, got {len(ctrl)}")
-        self._data_observed.qpos[:] = qpos
-        self._data_observed.qvel[:] = qvel
-        self._data_observed.ctrl[:] = ctrl
-
-        mujoco.mj_forward(self.model, self._data_observed)
-
-        # Get mass matrix and forces
-        M_obs = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_obs, self._data_observed.qM)
-
-        bias_obs = self._data_observed.qfrc_bias.copy()
-        tau_obs = self._data_observed.qfrc_actuator.copy()
-
         # Observed acceleration: M * qacc = tau - bias
-        qacc_observed = np.linalg.solve(M_obs, tau_obs - bias_obs)
+        qacc_observed = self._forward_acceleration(
+            self._data_observed, qpos, qvel, ctrl, include_actuation=True
+        )
 
         # 2. Compute COUNTERFACTUAL acceleration (zero control)
-        self._data_counterfactual.qpos[:] = qpos
-        self._data_counterfactual.qvel[:] = qvel
-        self._data_counterfactual.ctrl[:] = 0  # ZERO TORQUE
-
-        mujoco.mj_forward(self.model, self._data_counterfactual)
-
-        M_cf = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_cf, self._data_counterfactual.qM)
-
-        bias_cf = self._data_counterfactual.qfrc_bias.copy()
-
-        # Counterfactual acceleration: M * qacc = -bias (no actuation)
-        qacc_counterfactual = np.linalg.solve(M_cf, -bias_cf)
+        # Counterfactual acceleration: M * qacc = -bias (ZERO TORQUE)
+        qacc_counterfactual = self._forward_acceleration(
+            self._data_counterfactual, qpos, qvel, 0, include_actuation=False
+        )
 
         # 3. Compute DELTA (causal attribution to torques)
         delta_qacc = qacc_observed - qacc_counterfactual
@@ -225,32 +230,16 @@ class CounterfactualAnalyzer:
         # 1. Compute OBSERVED acceleration (with velocity)
         if qpos is None:
             raise ValueError("qpos must be provided")
-        self._data_observed.qpos[:] = qpos
-        self._data_observed.qvel[:] = qvel
-        self._data_observed.ctrl[:] = 0  # No control for clean comparison
-
-        mujoco.mj_forward(self.model, self._data_observed)
-
-        M_obs = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_obs, self._data_observed.qM)
-
-        bias_obs = self._data_observed.qfrc_bias.copy()
-
-        qacc_observed = np.linalg.solve(M_obs, -bias_obs)
+        # No control for clean comparison
+        qacc_observed = self._forward_acceleration(
+            self._data_observed, qpos, qvel, 0, include_actuation=False
+        )
 
         # 2. Compute COUNTERFACTUAL acceleration (zero velocity)
-        self._data_counterfactual.qpos[:] = qpos
-        self._data_counterfactual.qvel[:] = 0  # ZERO VELOCITY
-        self._data_counterfactual.ctrl[:] = 0
-
-        mujoco.mj_forward(self.model, self._data_counterfactual)
-
-        M_cf = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M_cf, self._data_counterfactual.qM)
-
-        bias_cf = self._data_counterfactual.qfrc_bias.copy()
-
-        qacc_counterfactual = np.linalg.solve(M_cf, -bias_cf)
+        # ZERO VELOCITY
+        qacc_counterfactual = self._forward_acceleration(
+            self._data_counterfactual, qpos, 0, 0, include_actuation=False
+        )
 
         # 3. Compute DELTA (causal attribution to velocity)
         delta_qacc = qacc_observed - qacc_counterfactual

@@ -22,6 +22,7 @@ from src.shared.python.core.numerical_constants import (
     EPSILON_FINITE_DIFF_JACOBIAN,
     EPSILON_SINGULARITY_DETECTION,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 from ._effective_mass_kernel import compute_effective_mass_from_solve
 
@@ -103,10 +104,7 @@ def compute_mass_matrix(
     perturb_data.qpos[:] = qpos
     mujoco.mj_forward(model, perturb_data)
 
-    M = np.zeros((model.nv, model.nv))
-    mujoco.mj_fullM(model, M, perturb_data.qM)
-
-    return M
+    return full_mass_matrix(mujoco, model, perturb_data)
 
 
 def compute_coriolis_matrix(

@@ -35,6 +35,7 @@ from src.shared.python.motion_matching.tour_metrics import (
     compute_shared_metrics,
 )
 from src.shared.python.motion_matching.weld_manifold import project_onto_weld
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 logger = logging.getLogger(__name__)
 
@@ -1016,8 +1017,7 @@ class FullBodySimulator:
         MuJoCo state, in MuJoCo DOF order."""
         adapter = self.adapter
         mj, model, data = adapter._mj, adapter.model, adapter.data
-        mass = np.zeros((model.nv, model.nv))
-        mj.mj_fullM(model, mass, data.qM)
+        mass = full_mass_matrix(mj, model, data)
         if hasattr(adapter, "evaluate_weld_closure"):
             jac, drift = adapter.evaluate_weld_closure()
         elif hasattr(adapter, "_evaluate_weld_closure"):

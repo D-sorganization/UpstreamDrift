@@ -20,6 +20,8 @@ import mujoco
 import numpy as np
 from scipy.linalg import null_space, pinv, svd
 
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+
 
 @dataclass
 class ManipulabilityMetrics:
@@ -311,7 +313,6 @@ class AdvancedKinematicsAnalyzer:
 
         # Target task
         use_orientation = target_orientation is not None
-        task_dim = 6 if use_orientation else 3
 
         # Iterative solver
         for iteration in range(self.ik_max_iterations):
@@ -346,28 +347,7 @@ class AdvancedKinematicsAnalyzer:
 
             J = np.vstack([jacp, jacr]) if use_orientation else jacp
 
-            # Damped least-squares inverse
-            # dq = J^T (J J^T + λ^2 I)^{-1} e
-            damping_matrix = self.ik_damping**2 * np.eye(task_dim)
-            j_damped = J.T @ np.linalg.solve(J @ J.T + damping_matrix, task_error)
-
-            # Nullspace projection for redundancy resolution
-            # Add nullspace motion toward desired configuration
-            # Use rtol for numerical stability (scipy >= 1.7.0)
-            j_pinv = pinv(J, rtol=self.ik_damping)
-            nullspace_proj = np.eye(self.model.nv) - j_pinv @ J
-            # The nullspace objective lives in qpos space (nq); the projector acts
-            # on tangent space (nv). mj_differentiatePos maps the configuration
-            # difference onto the tangent manifold, which also handles quaternions.
-            posture_error = np.zeros(self.model.nv)
-            mujoco.mj_differentiatePos(
-                self.model, posture_error, 1.0, q, nullspace_objective
-            )
-            nullspace_motion = nullspace_proj @ posture_error
-
-            # Combined motion (tangent space, length nv)
-            alpha_nullspace = 0.1  # Nullspace gain
-            dq = j_damped + alpha_nullspace * nullspace_motion
+            dq = self._dls_step(J, task_error, q, nullspace_objective)
 
             # Update on the configuration manifold. qpos has length nq, which
             # differs from nv for free (7/6) and ball (4/3) joints, so the tangent
@@ -383,6 +363,39 @@ class AdvancedKinematicsAnalyzer:
 
         # Did not converge
         return q, False, self.ik_max_iterations
+
+    def _dls_step(
+        self,
+        J: np.ndarray,
+        task_error: np.ndarray,
+        q: np.ndarray,
+        nullspace_objective: np.ndarray,
+    ) -> np.ndarray:
+        """Tangent-space IK step (length nv): damped least-squares task motion
+        plus nullspace motion toward ``nullspace_objective``."""
+        # Damped least-squares inverse
+        # dq = J^T (J J^T + λ^2 I)^{-1} e
+        damping_matrix = self.ik_damping**2 * np.eye(J.shape[0])
+        j_damped = J.T @ np.linalg.solve(J @ J.T + damping_matrix, task_error)
+
+        # Nullspace projection for redundancy resolution
+        # Add nullspace motion toward desired configuration
+        # Use rtol for numerical stability (scipy >= 1.7.0)
+        j_pinv = pinv(J, rtol=self.ik_damping)
+        nullspace_proj = np.eye(self.model.nv) - j_pinv @ J
+        # The nullspace objective lives in qpos space (nq); the projector acts
+        # on tangent space (nv). mj_differentiatePos maps the configuration
+        # difference onto the tangent manifold, which also handles quaternions.
+        posture_error = np.zeros(self.model.nv)
+        mujoco.mj_differentiatePos(
+            self.model, posture_error, 1.0, q, nullspace_objective
+        )
+        nullspace_motion = nullspace_proj @ posture_error
+
+        # Combined motion (tangent space, length nv)
+        alpha_nullspace = 0.1  # Nullspace gain
+        dq = j_damped + alpha_nullspace * nullspace_motion
+        return dq
 
     def _compute_orientation_error(
         self,
@@ -603,8 +616,7 @@ class AdvancedKinematicsAnalyzer:
         # Get mass matrix
         if jacobian is None:
             raise ValueError("jacobian must be provided")
-        m_matrix = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
+        m_matrix = full_mass_matrix(mujoco, self.model, self.data)
 
         # Compute M^{-1}
         m_inv = np.linalg.inv(m_matrix)
