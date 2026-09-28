@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -375,3 +375,34 @@ def optimise_reference(
         actuated_coordinates=expected_shape[1],
         dtype=str(jnp.array(1.0).dtype),
     )
+
+
+def optimisation_receipt(
+    result: KnotOptimisationResult,
+    settings: Mapping[str, Any],
+    *,
+    package: MjxPackage,
+    run: Path,
+    elapsed_s: float,
+) -> dict[str, Any]:
+    """Receipt for one knot optimisation of ``package`` found at ``run``.
+
+    The single source of the receipt schema, shared by the evidence CLI and
+    the matching pipeline. ``settings`` is recorded with ``run`` set to the
+    package directory. Raises KeyError when the package metadata has no
+    ``baseline.replay_marker_rms_m``.
+    """
+    return {
+        "run": run.name,
+        "settings": dict(settings) | {"run": str(run)},
+        "knots": result.knots,
+        "actuated_coordinates": result.actuated_coordinates,
+        "port_check_replay_marker_rms_m": result.port_check_replay_marker_rms_m,
+        "shared_simulator_replay_marker_rms_m": package.meta["baseline"][
+            "replay_marker_rms_m"
+        ],
+        "best_replay_marker_rms_m": result.best_replay_marker_rms_m,
+        "history": result.history,
+        "elapsed_s": elapsed_s,
+        "dtype": result.dtype,
+    }

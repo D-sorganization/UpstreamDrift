@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11055 · Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper
+### DL-#11051 — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline
 
 - **State:** in_review
+- **Owner:** claude (agy executor, Gemini 3.8 Flash)
+- **Issue:** #11051
+- **PR:** #11057
+- **Branch:** `claude/ud-11051-mjx-pipeline`
+- **Paths:** `src/shared/python/motion_matching/pipeline/trajectory_optimiser.py`, `src/shared/python/motion_matching/pipeline/cli.py`, `src/shared/python/motion_matching/pipeline/constants.py`, `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`, `tests/unit/motion_matching/test_trajectory_optimiser_selection.py`, `tests/unit/motion_matching/test_mjx_optimisation.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — 29 passed in the MJX env; pipeline tests 76 passed, 10 skipped; a 3-iteration pipeline run improved marker RMS 0.0652 → 0.0503 m and the default run is unchanged apart from `elapsed_s`.
+- **Summary:** The matching pipeline can select the MJX knot optimiser as an opt-in trajectory stage; the default `none` leaves the pipeline output unchanged, and a missing JAX/MJX install is a named error.
+- **Next step:** CI green, mark ready and arm the PR for #11051.
+
+### DL-#11055 · Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11055
 - **PR:** #11056
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — helper tests 12 passed on MuJoCo 3.13; 1967 passed on MuJoCo 3.4 across the 200 test files that reference a touched module, with no failure that is not also on `main` or order-dependent.
 - **Summary:** MuJoCo 3.13 (inside the declared range) removed `MjData.qM`; one helper selects the right `mj_fullM` signature and replaces every single-path and hand-written dual-path call.
-- **Next step:** CI green, mark ready and arm the PR for #11055.
+- **Next step:** None — merged as PR #11056.
 
 ### DL-#11049 · MJX Knot Optimiser Core Moved From the Evidence CLI Into `src`
 
