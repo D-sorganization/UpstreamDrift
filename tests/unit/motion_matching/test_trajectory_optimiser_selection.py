@@ -17,6 +17,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.workspace.installed_journeys import DependencyUnavailableError
+from src.shared.python.motion_matching.pipeline import cli
 from src.shared.python.motion_matching.pipeline.cli import (
     PipelineContext,
     _simulate_and_receipt,
@@ -137,27 +138,33 @@ def test_receipt_absent_for_none_and_present_for_stubbed_optimiser(
     cal_res.address_report = {}
 
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.cli.replay",
+        cli,
+        "replay",
         lambda *a, **k: (MagicMock(), np.zeros((2, 1))),
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.cli.build_dynamics_report",
+        cli,
+        "build_dynamics_report",
         lambda *a, **k: ({}, np.zeros((2, 1))),
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.cli._persist_dynamics_artifacts",
+        cli,
+        "_persist_dynamics_artifacts",
         lambda *a, **k: None,
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.cli.build_ground_support_receipt",
+        cli,
+        "build_ground_support_receipt",
         lambda *a, **k: {"base_key": "base_val"},
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.cli.log_pipeline_summary",
+        cli,
+        "log_pipeline_summary",
         lambda *a, **k: None,
     )
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.full_body_forward_dynamics.reference_zmp",
+        cli.fs,
+        "reference_zmp",
         lambda *a, **k: None,
     )
 
@@ -170,7 +177,8 @@ def test_receipt_absent_for_none_and_present_for_stubbed_optimiser(
         "receipt": "mjx_optimisation_receipt.json",
     }
     monkeypatch.setattr(
-        "src.shared.python.motion_matching.pipeline.cli.run_trajectory_optimiser",
+        cli,
+        "run_trajectory_optimiser",
         lambda *a, **kw: stub_summary,
     )
 

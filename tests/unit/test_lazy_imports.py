@@ -63,6 +63,9 @@ class TestGracefulDegradation:
                 raise ImportError("No module named 'mujoco' (simulated)")
             return real_import(name, *args, **kwargs)
 
+        old_shared = sys.modules.get("src.shared.python")
+        parent = sys.modules.get("src.shared")
+        old_parent_attr = getattr(parent, "python", None) if parent else None
         preserved = {
             key: value
             for key, value in sys.modules.items()
@@ -79,6 +82,12 @@ class TestGracefulDegradation:
         finally:
             builtins.__import__ = real_import
             sys.modules.update(preserved)
+            if old_shared is not None:
+                sys.modules["src.shared.python"] = old_shared
+            else:
+                sys.modules.pop("src.shared.python", None)
+            if parent is not None and old_parent_attr is not None:
+                setattr(parent, "python", old_parent_attr)  # noqa: B010
 
     def test_clear_error_messages(self) -> None:
         """Verify error messages are clear and helpful."""
