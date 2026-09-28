@@ -502,7 +502,7 @@ All code links below are fixed to reviewed commits. Symbols and line anchors ide
 [ud-flight-api]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/api/routes/ball_flight.py#L48-L235
 [ud-flight]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/shared/python/physics/flight_models.py#L315-L395
 [tools-flight]: https://github.com/D-sorganization/Tools/blob/3678409fc51024150ab28970b72e3b468935f345/src/shared/python/swing_sim/flight/models.py#L144-L237
-[ud-promotion]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/shared/python/neural_motion/benchmark/gates.py#L20-L91
+[ud-promotion]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/shared/python/neural_motion/benchmark/gates.py#L20-L88
 [ud-benchmark-types]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/shared/python/neural_motion/benchmark/types.py#L147-L257
 [ud-matcher]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/tools/motion_matching/gui.py
 [ud-match-request]: https://github.com/D-sorganization/UpstreamDrift/blob/599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309/src/tools/motion_matching/pipeline.py
