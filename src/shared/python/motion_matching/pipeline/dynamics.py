@@ -231,6 +231,8 @@ def shooting_fit(
     Returns:
         (best_q, zmp, report): optimized reference, ZMP result, and iteration history.
     """
+    from src.shared.python.motion_matching import full_body_forward_dynamics as fs
+
     iterations = config.iterations
     gain = config.gain
     tracking_backend = config.tracking_backend

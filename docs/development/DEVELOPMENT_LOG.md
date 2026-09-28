@@ -17,9 +17,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11051 — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline
+### DL-#11059 — Shooting Fit No Longer Crashes on an Unimported `fs`
 
 - **State:** in_review
+- **Owner:** claude
+- **Issue:** #11059
+- **PR:** pending
+- **Branch:** `claude/ud-11059-shooting-fs`
+- **Paths:** `src/shared/python/motion_matching/pipeline/dynamics.py`, `tests/unit/motion_matching/pipeline/test_dynamics.py`
+- **Started:** 2026-09-27
+- **Last verified:** 2026-09-27 — the new test fails on `main` with the `NameError` and passes with the fix; a real `--shooting-fit 8` driver run completes.
+- **Summary:** `shooting_fit` used `fs` at run time without importing it, so every `--shooting-fit` run crashed; it now imports it like its sibling functions.
+- **Next step:** CI green, mark ready and arm the PR for #11059.
+
+### DL-#11051 — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline
+
+- **State:** shipped
 - **Owner:** claude (agy executor, Gemini 3.8 Flash)
 - **Issue:** #11051
 - **PR:** #11057
@@ -28,7 +41,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — 29 passed in the MJX env; pipeline tests 76 passed, 10 skipped; a 3-iteration pipeline run improved marker RMS 0.0652 → 0.0503 m and the default run is unchanged apart from `elapsed_s`.
 - **Summary:** The matching pipeline can select the MJX knot optimiser as an opt-in trajectory stage; the default `none` leaves the pipeline output unchanged, and a missing JAX/MJX install is a named error.
-- **Next step:** CI green, mark ready and arm the PR for #11051.
+- **Next step:** None — merged as PR #11057.
 
 ### DL-#11055 · Every `mj_fullM` Call Routed Through One MuJoCo 3.13-Safe Helper
 
