@@ -24,7 +24,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #11055
 - **PR:** #11056
 - **Branch:** `claude/ud-11055-fullm-helper`
-- **Paths:** `src/shared/python/simulation_backends/mujoco_compat.py`, `tests/unit/simulation_backends/test_mujoco_compat.py`, every `src` module that called `mj_fullM` with `data.qM`
+- **Paths:** `src/shared/python/engine_core/mujoco_compat.py`, `tests/unit/engine_core/test_mujoco_compat.py`, every `src` module that called `mj_fullM` with `data.qM`
 - **Started:** 2026-09-27
 - **Last verified:** 2026-09-27 — helper tests 12 passed on MuJoCo 3.13; 1967 passed on MuJoCo 3.4 across the 200 test files that reference a touched module, with no failure that is not also on `main` or order-dependent.
 - **Summary:** MuJoCo 3.13 (inside the declared range) removed `MjData.qM`; one helper selects the right `mj_fullM` signature and replaces every single-path and hand-written dual-path call.

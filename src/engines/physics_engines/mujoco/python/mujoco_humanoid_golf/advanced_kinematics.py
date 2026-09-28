@@ -20,7 +20,7 @@ import mujoco
 import numpy as np
 from scipy.linalg import null_space, pinv, svd
 
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 
 @dataclass

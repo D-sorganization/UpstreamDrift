@@ -8,7 +8,7 @@ import pytest
 from src.shared.python.motion_matching.multi_engine_torque_allocator import (
     MujocoForceAdapter,
 )
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 pytestmark = [pytest.mark.live_simulation, pytest.mark.requires_mujoco]
 

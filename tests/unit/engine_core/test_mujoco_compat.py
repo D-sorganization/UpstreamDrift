@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.simulation_backends import has_mujoco
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 pytestmark = pytest.mark.unit
 

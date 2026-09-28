@@ -7,7 +7,7 @@ import typing
 import mujoco
 import numpy as np
 
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 
 class InducedAccelerationResult(typing.TypedDict):

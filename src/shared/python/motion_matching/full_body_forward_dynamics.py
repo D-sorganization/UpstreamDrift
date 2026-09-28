@@ -35,7 +35,7 @@ from src.shared.python.motion_matching.tour_metrics import (
     compute_shared_metrics,
 )
 from src.shared.python.motion_matching.weld_manifold import project_onto_weld
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 logger = logging.getLogger(__name__)
 

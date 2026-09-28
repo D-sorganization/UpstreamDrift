@@ -25,13 +25,13 @@ from src.engines.physics_engines.mujoco.python.native_model import (
     _prepare_forward_dynamics,
     _solve_kkt_dynamics,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
 )
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 
 class NativeMujocoFullBodyModel:
