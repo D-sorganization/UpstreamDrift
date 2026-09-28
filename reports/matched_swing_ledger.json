@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T08:51:17Z",
+  "generated_at": "2026-09-28T12:23:00Z",
   "rows": [
     {
       "acceptance": null,
@@ -2270,6 +2270,256 @@
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/iron_shooting/receipt.json",
       "sha256": "ed0eaa7ca694b1a2bd1590d654703f88e79be9814987a413f48bcd00aafb6a70"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/driver_mjx-lbfgs/mjx_optimisation_receipt.json",
+      "sha256": "023f57b1f5a8f1d4c0465756e1e57454800e2a3c2817e91226f1897360ed1bb0"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 1.0,
+            "name": "capture_provenance",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "hash"
+          },
+          {
+            "measured": 0.08446241181803726,
+            "name": "whole_marker_rmse_m",
+            "reason": "whole RMSE 84.46 mm > 60.00 mm",
+            "status": "failed",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0031417895114628012,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 3.76] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          },
+          {
+            "measured": 1.8138888888888889,
+            "name": "horizon_truncation",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.8,
+            "unit": "s"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "driver",
+      "engine": "mujoco",
+      "horizon_s": 1.8138888888888889,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08446241181803726
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/driver_mjx-lbfgs/receipt.json",
+      "sha256": "ab3bdb44af1ad8a53e0e4654018b647167d6cffa6457ef6a13e425974addc8b6"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/iron_mjx-lbfgs/mjx_optimisation_receipt.json",
+      "sha256": "9fd22b673d770c7daa9e8a6b515ba4d7c7b2601969a9b29f43402f9243f18ab2"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 1.0,
+            "name": "capture_provenance",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.0,
+            "unit": "hash"
+          },
+          {
+            "measured": 0.08860926039813796,
+            "name": "whole_marker_rmse_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.095,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "max_normal_force_n",
+            "reason": "missing contact forces in dynamics receipt",
+            "status": "failed",
+            "threshold": 2354.4,
+            "unit": "N"
+          },
+          {
+            "measured": 0.0019162280350979244,
+            "name": "max_closure_residual_m",
+            "reason": "",
+            "status": "passed",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": 0.0,
+            "name": "weight_fraction",
+            "reason": "weight fraction range [0.00, 3.42] outside [0.2, 3.0]",
+            "status": "failed",
+            "threshold": 0.2,
+            "unit": "BW"
+          },
+          {
+            "measured": null,
+            "name": "open_loop_replay",
+            "reason": "missing open-loop replay artifact",
+            "status": "missing",
+            "threshold": 0.06,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "collocation_defect",
+            "reason": "missing per-node collocation defect artifact",
+            "status": "missing",
+            "threshold": 0.005,
+            "unit": "m"
+          },
+          {
+            "measured": null,
+            "name": "stabilized_replay",
+            "reason": "missing stabilized replay artifact",
+            "status": "missing",
+            "threshold": 0.04,
+            "unit": "m"
+          },
+          {
+            "measured": 1.8272980501392757,
+            "name": "horizon_truncation",
+            "reason": "",
+            "status": "passed",
+            "threshold": 1.8,
+            "unit": "s"
+          }
+        ],
+        "horizon": "G3",
+        "is_physically_accepted": false,
+        "qualification_note": "Physical or kinematic thresholds violated",
+        "status": "REJECTED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad",
+      "capture": "iron",
+      "engine": "mujoco",
+      "horizon_s": 1.8272980501392757,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": 0.08860926039813796
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/iron_mjx-lbfgs/receipt.json",
+      "sha256": "7f0c2c2fbe3fa223585071e33dd0a55a2c24e58bdcb19973c1fd52a1eb6b31b3"
     },
     {
       "acceptance": null,
@@ -5154,5 +5404,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 129
+  "total_receipts": 133
 }
