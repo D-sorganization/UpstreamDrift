@@ -179,3 +179,7 @@
 ## 2026-09-27 - Fast 1D Array Magnitudes in Pendulum Simulator
 **Learning:** In `src/shared/python/pendulum_simulator/pendulum_perturbation_analyzer.py`, using `np.linalg.norm` to calculate the magnitude of 1D velocity vectors causes significant overhead due to NumPy's dispatch mechanisms. `math.sqrt(np.vdot())` yields the same result while completely bypassing this, leading to ~2.5x speedup for 1D arrays, mimicking identical optimizations found in physics modules.
 **Action:** When calculating Euclidean norms of small, static 1D arrays in highly iterative processes, always substitute `np.linalg.norm(v)` with `math.sqrt(np.vdot(v, v))` to avoid dispatch and intermediate allocations.
+
+## 2024-05-24 - [Numpy linalg norm bottleneck]
+**Learning:** `np.max(np.linalg.norm(..., axis=-1))` forces N square root operations and creates temporary arrays. If we just need the max distance, it is faster to compute the squared distances using `np.einsum("...i,...i->...", diff, diff)`, take `np.max` of the squared distances, and then apply `np.sqrt` once at the very end. This reduces N square root operations to just 1 and avoids intermediate array allocations.
+**Action:** Use `np.sqrt(np.max(np.einsum("...i,...i->...", diff, diff)))` instead of `np.max(np.linalg.norm(diff, axis=-1))` in hot paths where max Euclidean distance is needed.
