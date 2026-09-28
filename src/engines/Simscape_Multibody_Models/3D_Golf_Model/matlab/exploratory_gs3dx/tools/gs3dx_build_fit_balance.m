@@ -23,7 +23,9 @@ function report = gs3dx_build_fit_balance(info, ref, opts)
 %     Without it, BalanceOn is 0.  The foot reference is REF.feet.
 %
 %   Options: overwrite (false), com_offset ([]), gains ([BalanceKp BalanceKd],
-%   [1 0.2]: m/m and s), limit (0.1 m, the largest pelvis shift), tau
+%   [3 0.4]: m/m and s; a pelvis shift moves the whole-body centre of mass
+%   by only part of the shift, so Kp 1 left a standing error, docs/FIT.md),
+%   limit (0.1 m, the largest pelvis shift), tau
 %   (0.01 s), axes (3: the error along World x, y and z; 2: horizontal
 %   only), foot_gain (1 m/m, BalanceFootKp).  REPORT fields: .on, .gains,
 %   .budget.
@@ -33,7 +35,7 @@ function report = gs3dx_build_fit_balance(info, ref, opts)
         ref (1,1) struct
         opts.overwrite (1,1) logical = false
         opts.com_offset double = []
-        opts.gains (1,2) double {mustBeNonnegative} = [1 0.2]
+        opts.gains (1,2) double {mustBeNonnegative} = [3 0.4]
         opts.limit (1,1) double {mustBePositive} = 0.1
         opts.tau (1,1) double {mustBePositive} = 0.01
         opts.axes (1,1) double {mustBeMember(opts.axes, [2 3])} = 3

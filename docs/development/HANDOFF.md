@@ -167,10 +167,14 @@
       angle + G(t) shift (shift = -Kp e - Kd de, 3-axis COM error, limit 0.1 m) + per-leg G(t) kf
       e_foot (ankle GlobalPosition via Bus Selectors vs `ref.feet`). `gs3dx_balance_gain` = foot-fixed
       damped inverse leg Jacobian (12 x 3 x frames). To impact: pelvis off the capture at impact 503 -> 62-81 mm (FIT.md
-      table; 3-axis + foot gain 1: pelvis 44 RMS / 81 mm at impact, COM 38.5/52.0 mm). Support spike
-      2.37-2.65 BW just before impact (capture 1.05-1.25) = trail foot re-landing (unloaded
-      1.20-1.26 s in the model; capture heel rises 36 mm, never leaves); foot feedback shortens it
-      60 -> 24 ms but does not remove it. The model is built with axes 3, gains [1 0.2], foot 1.
+      table; 3-axis + foot gain 1: pelvis 44 RMS / 81 mm at impact, COM 38.5/52.0 mm). Gains raised
+      to Kp 3 / Kd 0.4 (builder default): COM 17.9/25.7 mm, pelvis 27/73 mm. Support peak 2.4-2.7 BW
+      just before impact (capture 1.27) is DEMANDED BY THE COM REFERENCE (pelvis ref + balance-off
+      offset implies 2.31 BW; 40 mm vertical range vs capture 19 mm; model COM within 6 mm of it) -
+      not a foot defect: per-contact forces (`gs3dx_contact_check` `.contacts`) show a broad hump
+      1.23-1.31 s, trail foot on its inner toe sphere. Rejected: ankle servo 10 N\*m/deg (falls, pelvis
+      906 mm at impact); foot-tilt feedback via ankle `Rotation Transform` (worse COM 49/75 mm; patch
+      kept in the session scratchpad only). The model is built with axes 3, gains [3 0.4], foot 1.
       Earlier "zero logged samples" errors were very likely a FULL C: DRIVE (Simulink turns off
       recording under low disk space), not only concurrency.
 
