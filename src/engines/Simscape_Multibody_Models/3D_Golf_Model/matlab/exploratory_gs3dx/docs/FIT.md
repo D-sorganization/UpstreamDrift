@@ -524,8 +524,25 @@ capture's moves 19 mm, and its vertical acceleration alone (8 Hz) implies
 a 2.31 BW peak. The offset is the model's own mass distribution carried
 along the tracked pose: its segments are uniform cylinders with the centre
 of mass at their middle, not at the de Leva positions the capture's
-estimate uses. The ellipsoid model with de Leva inertia (`GS3DX_Shape`,
-docs/SHAPE.md) is the fix to try first.
+estimate uses (docs/INERTIA.md).
+
+Tracking the capture's own centre of mass instead confirms it. Here
+`com_ref` of `gs3dx_build_fit_balance` is set from
+`gs3dx_capture_com_reference`: `gs3dx_kinematic_grf`'s centre of mass,
+translated to the model's at address. Kp 3 / Kd 0.4, to impact:
+
+| Reference                      | Late support peak  | Support (BW) | Pelvis RMS / at impact | COM error RMS / max | Slip L / R |
+| ------------------------------ | ------------------ | ------------ | ---------------------- | ------------------- | ---------- |
+| Model offset (balance-off run) | 2.63 BW at 1.312 s | 0.056–2.63   | 27 / 73 mm             | 17.9 / 25.7 mm      | 58 / 88 mm |
+| Capture centre of mass         | 1.44 BW at 1.319 s | 0.36–1.81    | 42 / 72 mm             | 14.1 / 36.1 mm      | 44 / 53 mm |
+
+The capture's kinematic GRF peaks at 1.27 BW. The support is now close to
+it and the feet slip less. The pelvis pays: the model's mass
+distribution puts its centre of mass elsewhere for the same pose, so the
+pelvis moves to put it on the capture's. Both references disagree with the
+capture through the model's centres of mass. The ellipsoid model with de
+Leva centres of mass (`GS3DX_Shape`, docs/SHAPE.md) should close that gap
+from the model side.
 
 Tried and not kept (whole body to impact, Kp 1):
 
@@ -547,16 +564,15 @@ Tried and not kept (whole body to impact, Kp 1):
   0.975 of the shift (median 0.303), bounded at 0.98 and 0.31. The worst
   case is vertical, on the lead leg at frame 545, where the knee is nearly
   straight;
-- the wiring and data of the saved model;
+- the wiring and data of the saved model, and that the builder takes a
+  centre-of-mass offset or a reference path, not both;
 - the saved gains (Kp 3, Kd 0.4) and a 0.3 s run: centre-of-mass error
   10.1 mm RMS, 16.5 mm max, bounded at 17.5 mm (Kp 1: 14.6 / 24.9 mm).
 
 ## Next
 
-1. Impact spike: rebuild the balance reference on `GS3DX_Shape` (de Leva
-   centres of mass) with a new balance-off offset, and compare its
-   vertical range and implied support with the capture's (19 mm,
-   1.27 BW); if it stays far off, use the capture's centre of mass
-   (`gs3dx_kinematic_grf`, aligned at address) as the reference instead.
+1. Impact spike: on `GS3DX_Shape` (de Leva centres of mass), compare the
+   balance-off offset reference with the capture's centre of mass (19 mm
+   vertical range, 1.27 BW), and run both references as above.
 2. Learning drift: record the PD torque per joint over more iterations and
    add a forgetting factor, or leave the loop joints to the PD alone.

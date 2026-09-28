@@ -90,8 +90,9 @@ The license counts compiled blocks (FullBody compiles to 945 of 1,000), see
 `docs/BLOCK_BUDGET_FINDINGS.md`. Data sources and gaps are in
 `docs/DATA_AUDIT.md`; ground contact is in `docs/GROUND_CONTACT.md`; segment
 masses, the force-plate-free GRF and the swing plan are in
-`docs/ANTHROPOMETRY.md`; segment lengths and the whole-body IK fitted to the
-capture are in `docs/FIT.md`.
+`docs/ANTHROPOMETRY.md`; segment inertia against de Leva is in
+`docs/INERTIA.md`; segment lengths, the whole-body IK fitted to the capture and
+balance are in `docs/FIT.md`.
 
 ## Regression Drive
 
