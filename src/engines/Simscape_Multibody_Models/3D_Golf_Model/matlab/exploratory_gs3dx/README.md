@@ -85,14 +85,17 @@ Agent-editable exploratory copies of the hand-built 3D kinetic golf model
 | `GS3DX_FitLegs`         | `gs3dx_build_fit_legs`    | Fit with time-varying leg servo references from the capture (one for one; 967) |
 | `GS3DX_FitTrack`        | `gs3dx_build_fit_track`   | FitLegs with the upper body tracking the capture, learned feedforward (967)    |
 | `GS3DX_FitBalance`      | `gs3dx_build_fit_balance` | FitTrack with centre-of-mass and foot feedback into the leg servo (973)        |
+| `GS3DX_Shape`           | `gs3dx_build_shape`       | FitBalance with de Leva inertia, ellipsoid legs, hands and head (973)          |
 
 The license counts compiled blocks (FullBody compiles to 945 of 1,000), see
 `docs/BLOCK_BUDGET_FINDINGS.md`. Data sources and gaps are in
 `docs/DATA_AUDIT.md`; ground contact is in `docs/GROUND_CONTACT.md`; segment
 masses, the force-plate-free GRF and the swing plan are in
 `docs/ANTHROPOMETRY.md`; segment inertia against de Leva is in
-`docs/INERTIA.md`; segment lengths, the whole-body IK fitted to the capture and
-balance are in `docs/FIT.md`.
+`docs/INERTIA.md` and the de Leva inertia and ellipsoid model in
+`docs/SHAPE.md`; segment lengths, the whole-body IK fitted to the capture and
+balance are in `docs/FIT.md`; headless stills and video are in
+`docs/RENDERING.md`.
 
 ## Regression Drive
 

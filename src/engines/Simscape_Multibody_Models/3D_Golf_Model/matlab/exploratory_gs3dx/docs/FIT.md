@@ -521,10 +521,11 @@ centre-of-mass reference (reference pelvis carrying the balance-off
 offset) differs from the capture's own centre of mass by up to 34 / 31 /
 24 mm (x / y / z) before impact; it moves 40 mm vertically where the
 capture's moves 19 mm, and its vertical acceleration alone (8 Hz) implies
-a 2.31 BW peak. The offset is the model's own mass distribution carried
-along the tracked pose: its segments are uniform cylinders with the centre
-of mass at their middle, not at the de Leva positions the capture's
-estimate uses (docs/INERTIA.md).
+a 2.31 BW peak. It is not the segment inertia: `GS3DX_Shape`, with de Leva
+moments and centres of mass on the limbs and head, gives a reference within
+1 mm RMS of this one and the same 2.64 BW peak (docs/SHAPE.md). What remains
+is the tracked pose itself: segment lengths, the trunk's mass split and the
+IK.
 
 Tracking the capture's own centre of mass instead confirms it. Here
 `com_ref` of `gs3dx_build_fit_balance` is set from
@@ -571,8 +572,8 @@ Tried and not kept (whole body to impact, Kp 1):
 
 ## Next
 
-1. Impact spike: on `GS3DX_Shape` (de Leva centres of mass), compare the
-   balance-off offset reference with the capture's centre of mass (19 mm
-   vertical range, 1.27 BW), and run both references as above.
+1. Impact spike: find which part of the tracked pose moves the model's
+   centre of mass away from the capture's (12 mm RMS vertically on both
+   models): compare the two per segment along the swing, trunk first.
 2. Learning drift: record the PD torque per joint over more iterations and
    add a forgetting factor, or leave the loop joints to the PD alone.
