@@ -1,0 +1,149 @@
+{
+  "rows": [
+    {
+      "capture": "driver",
+      "solver": "none",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08446241181803726,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13634404003218112,
+      "downswing_weight_fraction_min": 0.4032028887521252,
+      "iterations": 0,
+      "evaluations": 1,
+      "stop_reason": "not_applicable",
+      "wall_clock_s": 1113.0240020999918
+    },
+    {
+      "capture": "driver",
+      "solver": "shooting",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08446241181803726,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13634404003218112,
+      "downswing_weight_fraction_min": 0.4032028887521252,
+      "iterations": 8,
+      "evaluations": 9,
+      "stop_reason": "fixed_passes",
+      "wall_clock_s": 1679.4626357000088
+    },
+    {
+      "capture": "driver",
+      "solver": "mjx-adam",
+      "status": "ok",
+      "replay_marker_rms_m": 0.06241582943051083,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.08155375234030732,
+      "downswing_weight_fraction_min": 0.35609541004284473,
+      "iterations": 10,
+      "evaluations": 11,
+      "stop_reason": "max_iterations",
+      "wall_clock_s": 2325.837040000013
+    },
+    {
+      "capture": "driver",
+      "solver": "mjx-lbfgs",
+      "status": "ok",
+      "replay_marker_rms_m": 0.04719240584679884,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.06562102600531865,
+      "downswing_weight_fraction_min": 0.3297360948033092,
+      "iterations": 10,
+      "evaluations": 12,
+      "stop_reason": "max_iterations",
+      "wall_clock_s": 1607.5830990999239
+    },
+    {
+      "capture": "driver",
+      "solver": "ipopt",
+      "status": "unavailable",
+      "reason": "no IPOPT binding (cyipopt or pydrake) importable in Python 3.12.10 on Windows"
+    },
+    {
+      "capture": "iron",
+      "solver": "none",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08860926039813796,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13295040855992307,
+      "downswing_weight_fraction_min": 0.345892516128067,
+      "iterations": 0,
+      "evaluations": 1,
+      "stop_reason": "not_applicable",
+      "wall_clock_s": 890.2890473000007
+    },
+    {
+      "capture": "iron",
+      "solver": "shooting",
+      "status": "ok",
+      "replay_marker_rms_m": 0.08860926039813796,
+      "g1_met": false,
+      "worst_segment": "club",
+      "worst_segment_rms_m": 0.13295040855992307,
+      "downswing_weight_fraction_min": 0.345892516128067,
+      "iterations": 8,
+      "evaluations": 9,
+      "stop_reason": "fixed_passes",
+      "wall_clock_s": 1846.4802958000218
+    },
+    {
+      "capture": "iron",
+      "solver": "mjx-adam",
+      "status": "ok",
+      "replay_marker_rms_m": 0.05569159552561883,
+      "g1_met": false,
+      "worst_segment": "left_arm",
+      "worst_segment_rms_m": 0.06568397198662343,
+      "downswing_weight_fraction_min": 0.0,
+      "iterations": 10,
+      "evaluations": 11,
+      "stop_reason": "max_iterations",
+      "wall_clock_s": 2887.7977528999327
+    },
+    {
+      "capture": "iron",
+      "solver": "mjx-lbfgs",
+      "status": "ok",
+      "replay_marker_rms_m": 0.05290768311313991,
+      "g1_met": false,
+      "worst_segment": "left_arm",
+      "worst_segment_rms_m": 0.06200090913582154,
+      "downswing_weight_fraction_min": 0.16996361895336107,
+      "iterations": 10,
+      "evaluations": 14,
+      "stop_reason": "max_iterations",
+      "wall_clock_s": 2816.765675099916
+    },
+    {
+      "capture": "iron",
+      "solver": "ipopt",
+      "status": "unavailable",
+      "reason": "no IPOPT binding (cyipopt or pydrake) importable in Python 3.12.10 on Windows"
+    }
+  ],
+  "decisions": [
+    {
+      "candidate": "mjx-adam",
+      "incumbent": "shooting",
+      "promote": false,
+      "reasons": [
+        "driver: mjx-adam stopped on max_iterations, not converged within the budget",
+        "iron: mjx-adam stopped on max_iterations, not converged within the budget",
+        "iron: mjx-adam loses ground contact in the downswing"
+      ]
+    },
+    {
+      "candidate": "mjx-lbfgs",
+      "incumbent": "shooting",
+      "promote": false,
+      "reasons": [
+        "driver: mjx-lbfgs stopped on max_iterations, not converged within the budget",
+        "iron: mjx-lbfgs stopped on max_iterations, not converged within the budget"
+      ]
+    }
+  ]
+}

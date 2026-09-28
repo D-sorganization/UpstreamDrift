@@ -1,0 +1,89 @@
+{
+  "run": "driver_mjx-adam",
+  "settings": {
+    "method": "adam",
+    "iterations": 10,
+    "substeps": 6,
+    "knot_spacing_s": 0.04,
+    "learning_rate": 0.002,
+    "regularisation": 0.001,
+    "horizon_s": 1.65,
+    "weld_stiffness": 200000.0,
+    "weld_damping": 400.0,
+    "run": "C:\\Users\\diete\\AppData\\Local\\Temp\\claude\\C--Users-diete-Repositories\\3b2df4af-b4a6-4806-b7cf-2c6990c4d236\\scratchpad\\p5bench\\driver_mjx-adam"
+  },
+  "knots": 47,
+  "actuated_coordinates": 38,
+  "port_check_replay_marker_rms_m": 0.0651646734242648,
+  "shared_simulator_replay_marker_rms_m": 0.08446241181803726,
+  "best_replay_marker_rms_m": 0.03873110958450257,
+  "history": [
+    {
+      "iteration": 0,
+      "replay_marker_rms_m": 0.0651646734242648,
+      "total_cost": 0.004246434662491083
+    },
+    {
+      "iteration": 1,
+      "replay_marker_rms_m": 0.05273424696023726,
+      "total_cost": 0.002780904294922948,
+      "delta_max_rad": 0.001999999862164259
+    },
+    {
+      "iteration": 2,
+      "replay_marker_rms_m": 0.05464533261564989,
+      "total_cost": 0.002986121689900756,
+      "delta_max_rad": 0.004002709407359362
+    },
+    {
+      "iteration": 3,
+      "replay_marker_rms_m": 0.050292903937140615,
+      "total_cost": 0.0025293913204222918,
+      "delta_max_rad": 0.006002575159072876
+    },
+    {
+      "iteration": 4,
+      "replay_marker_rms_m": 0.048229720651539375,
+      "total_cost": 0.002326127141714096,
+      "delta_max_rad": 0.008010610938072205
+    },
+    {
+      "iteration": 5,
+      "replay_marker_rms_m": 0.04253935842700098,
+      "total_cost": 0.001809624140150845,
+      "delta_max_rad": 0.010021708905696869
+    },
+    {
+      "iteration": 6,
+      "replay_marker_rms_m": 0.03873110958450257,
+      "total_cost": 0.001500132493674755,
+      "delta_max_rad": 0.011928796768188477
+    },
+    {
+      "iteration": 7,
+      "replay_marker_rms_m": 0.04179601534734822,
+      "total_cost": 0.001746947062201798,
+      "delta_max_rad": 0.01384772639721632
+    },
+    {
+      "iteration": 8,
+      "replay_marker_rms_m": 0.0570984274101024,
+      "total_cost": 0.0032602762803435326,
+      "delta_max_rad": 0.0158676914870739
+    },
+    {
+      "iteration": 9,
+      "replay_marker_rms_m": 0.0707898789266017,
+      "total_cost": 0.00501125818118453,
+      "delta_max_rad": 0.01790528930723667
+    },
+    {
+      "iteration": 10,
+      "replay_marker_rms_m": 0.06511978518379637,
+      "total_cost": 0.004240641836076975,
+      "delta_max_rad": 0.019792482256889343
+    }
+  ],
+  "elapsed_s": 1414.7,
+  "dtype": "float32"
+}
