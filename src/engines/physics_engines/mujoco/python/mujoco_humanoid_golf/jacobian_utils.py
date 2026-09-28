@@ -22,7 +22,7 @@ from src.shared.python.core.numerical_constants import (
     EPSILON_FINITE_DIFF_JACOBIAN,
     EPSILON_SINGULARITY_DETECTION,
 )
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 from ._effective_mass_kernel import compute_effective_mass_from_solve
 

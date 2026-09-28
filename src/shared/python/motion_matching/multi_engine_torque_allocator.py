@@ -32,7 +32,7 @@ from src.shared.python.motion_matching.contact_force_allocator import (
     ContactForceAllocation,
     ContactForceAllocator,
 )
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 
 logger = logging.getLogger(__name__)
 

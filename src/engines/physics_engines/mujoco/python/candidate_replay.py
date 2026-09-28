@@ -13,9 +13,9 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 )
 from src.engines.physics_engines.mujoco.python.replay_contract import ReplaySettings
 from src.shared.python.contracts import precondition
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.polynomial_actuation import ROOT_COORDINATES
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 
 class AccelerationPlant(Protocol):

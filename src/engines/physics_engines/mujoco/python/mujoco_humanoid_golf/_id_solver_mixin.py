@@ -7,8 +7,8 @@ import numpy as np
 from scipy.linalg import lstsq
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 from ._id_models import (
     ForceDecomposition,

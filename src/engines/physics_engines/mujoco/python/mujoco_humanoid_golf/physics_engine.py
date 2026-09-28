@@ -33,8 +33,8 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.simulation_backends.mujoco_compat import full_mass_matrix
 
 logger = get_logger(__name__)
 

@@ -35,7 +35,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .capabilities import require_mujoco
 from .mjcf import params_to_mjcf
-from .mujoco_compat import full_mass_matrix
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from .protocol import BackendCapabilities, SimState, Trace
 
 if TYPE_CHECKING:
