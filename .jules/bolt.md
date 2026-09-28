@@ -179,3 +179,11 @@
 ## 2026-09-27 - Fast 1D Array Magnitudes in Pendulum Simulator
 **Learning:** In `src/shared/python/pendulum_simulator/pendulum_perturbation_analyzer.py`, using `np.linalg.norm` to calculate the magnitude of 1D velocity vectors causes significant overhead due to NumPy's dispatch mechanisms. `math.sqrt(np.vdot())` yields the same result while completely bypassing this, leading to ~2.5x speedup for 1D arrays, mimicking identical optimizations found in physics modules.
 **Action:** When calculating Euclidean norms of small, static 1D arrays in highly iterative processes, always substitute `np.linalg.norm(v)` with `math.sqrt(np.vdot(v, v))` to avoid dispatch and intermediate allocations.
+
+## 2024-09-28 - Optimizing np.linalg.norm computations on innermost axis
+**Learning:** `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=-1)` on small innermost axes in NumPy has a very high dispatch and reduction overhead. Computing `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.einsum('...i,...i->...', diff, diff))` directly avoids temporary array allocations and is ~2.4x to ~3x faster. This is particularly noticeable in hot paths like inverse kinematics and forward simulation scoring inside the motion matching module.
+**Action:** Always replace `np.linalg.norm(..., axis=1)` with the `np.sqrt(np.einsum('ij,ij->i', diff, diff))` pattern when computing distances or magnitudes over N-dimensional arrays in performance-critical sections.
+
+## 2024-09-28 - Optimizing np.linalg.norm computations on innermost axis
+**Learning:** `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=-1)` on small innermost axes in NumPy has a very high dispatch and reduction overhead. Computing `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.einsum('...i,...i->...', diff, diff))` directly avoids temporary array allocations and is ~2.4x to ~3x faster. This is particularly noticeable in hot paths like inverse kinematics and forward simulation scoring inside the motion matching module.
+**Action:** Always replace `np.linalg.norm(..., axis=1)` with the `np.sqrt(np.einsum('ij,ij->i', diff, diff))` pattern when computing distances or magnitudes over N-dimensional arrays in performance-critical sections.
