@@ -7056,7 +7056,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-27 | #PRNUM | `shooting_fit` imports `full_body_forward_dynamics` at run time, so `--shooting-fit N` no longer raises `NameError` before its first pass (#11059). |
+| 2026-09-27 | #11060 | `shooting_fit` imports `full_body_forward_dynamics` at run time, so `--shooting-fit N` no longer raises `NameError` before its first pass (#11059). |
 | 2026-09-27 | #11057 | `--trajectory-optimiser {none,mjx-knots}` (default `none`) adds the MJX knot optimiser as an opt-in matching-pipeline stage that writes `mjx_optimised_reference.npz` and a receipt; missing JAX/MJX is a named error (#11051). |
 | 2026-09-27 | #11056 | `full_mass_matrix` in `engine_core/mujoco_compat.py` selects the `mj_fullM` signature at run time, because MuJoCo 3.13 (inside `mujoco>=3.6,<4`) removed `MjData.qM`; every `src` call site uses it (#11055). |
 | 2026-09-27 | #11054 | The MJX knot optimiser core (`load_mjx_package`, `KnotOptimisationSettings`, `optimise_reference`, `diagnose_reference`) moves from the evidence CLI into `src/engines/physics_engines/mujoco/python/motion_matching/mjx_knot_optimiser.py`; the CLI is a thin wrapper (362 → 268 lines) with identical receipt history on `anthro_driver_seeds` (#11049, epic #11006). |

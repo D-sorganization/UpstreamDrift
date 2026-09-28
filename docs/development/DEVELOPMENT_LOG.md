@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11059
-- **PR:** pending
+- **PR:** #11060
 - **Branch:** `claude/ud-11059-shooting-fs`
 - **Paths:** `src/shared/python/motion_matching/pipeline/dynamics.py`, `tests/unit/motion_matching/pipeline/test_dynamics.py`
 - **Started:** 2026-09-27
