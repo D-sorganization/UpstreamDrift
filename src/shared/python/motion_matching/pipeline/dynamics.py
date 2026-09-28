@@ -211,6 +211,48 @@ class ShootingFitConfig:
     tracking_backend: str = "kkt"
 
 
+def weight_fraction_report(lane: Lane, record: fs.SimulationRecord) -> dict[str, Any]:
+    """Whole-run and per-phase ground-reaction weight fraction of a replay."""
+    return {
+        "min": float(record.weight_fraction.min()),
+        "max": float(record.weight_fraction.max()),
+        "mean": float(record.weight_fraction.mean()),
+        "by_phase": compute_phase_weight_fractions(
+            lane.times, record.time_s, record.weight_fraction
+        ),
+    }
+
+
+def score_reference(
+    lane: Lane,
+    kin: FullBodyMarkerKinematics,
+    sim: fs.FullBodySimulator,
+    q: np.ndarray,
+    tracking_backend: str = "kkt",
+    *,
+    record: fs.SimulationRecord | None = None,
+    sim_q: np.ndarray | None = None,
+) -> dict[str, Any]:
+    """Score a reference trajectory against markers in the shared simulator.
+
+    Replays ``q`` through ``sim`` (unless precomputed ``record`` and ``sim_q``
+    are provided) and calculates marker RMS over ``lane.valid``, segment RMS,
+    and the ground-contact weight fraction (whole-run minimum and the
+    per-phase block of the dynamics report).
+    """
+    tracking_backend = validate_tracking_backend(tracking_backend)
+    if record is None or sim_q is None:
+        record, sim_q = replay(sim, lane, q, tracking_backend=tracking_backend)
+    errors = marker_errors(kin, sim_q, lane.points)
+    rms = float(np.sqrt(np.mean(errors[lane.valid] ** 2)))
+    return {
+        "replay_marker_rms_m": rms,
+        "replay_segment_rms_m": segment_rms(lane.labels, errors, lane.valid),
+        "weight_fraction_min": float(record.weight_fraction.min()),
+        "weight_fraction": weight_fraction_report(lane, record),
+    }
+
+
 def shooting_fit(
     lane: Lane,
     kin: FullBodyMarkerKinematics,
@@ -243,8 +285,16 @@ def shooting_fit(
     best_q, best_rms = q_track, np.inf
     for k in range(iterations + 1):
         record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking_backend)
-        errors = marker_errors(kin, sim_q, lane.points)
-        rms = float(np.sqrt(np.mean(errors[lane.valid] ** 2)))
+        scores = score_reference(
+            lane,
+            kin,
+            sim,
+            q_track,
+            tracking_backend=tracking_backend,
+            record=record,
+            sim_q=sim_q,
+        )
+        rms = scores["replay_marker_rms_m"]
         diff = sim_q[:, :3] - q_ref[:, :3]
         root_err = np.sqrt(
             np.einsum("ij,ij->i", diff, diff)
@@ -254,10 +304,10 @@ def shooting_fit(
             {
                 "iteration": k,
                 "replay_marker_rms_m": rms,
-                "replay_segment_rms_m": segment_rms(lane.labels, errors, lane.valid),
+                "replay_segment_rms_m": scores["replay_segment_rms_m"],
                 "root_error_max_m": float(root_err.max()),
                 "root_error_1_4s_m": float(root_err[int(round(1.4 * RATE_HZ))]),
-                "weight_fraction_min": float(record.weight_fraction.min()),
+                "weight_fraction_min": scores["weight_fraction_min"],
                 "reference_marker_rms_m": float(
                     np.sqrt(
                         np.mean(
@@ -639,14 +689,7 @@ def build_dynamics_report(
         "root_tracking_rms_m": float(
             np.sqrt(np.mean((sim_q[:, :3] - q_ref[:, :3]) ** 2))
         ),
-        "weight_fraction": {
-            "min": float(record.weight_fraction.min()),
-            "max": float(record.weight_fraction.max()),
-            "mean": float(record.weight_fraction.mean()),
-            "by_phase": compute_phase_weight_fractions(
-                lane.times, record.time_s, record.weight_fraction
-            ),
-        },
+        "weight_fraction": weight_fraction_report(lane, record),
         "inside_support_polygon_fraction": float(record.inside_support_polygon.mean()),
         "range_of_motion_flags": rom_flags(sim_q, kin.coordinate_order),
         "root_error_timeline_m": {

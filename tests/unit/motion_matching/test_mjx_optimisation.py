@@ -56,3 +56,47 @@ def test_pipeline_mjx_knots_stage_on_toy_package(
     assert (
         summary["best_replay_marker_rms_m"] <= summary["port_check_replay_marker_rms_m"]
     )
+
+
+def test_knot_optimisation_settings_method_validation() -> None:
+    """method must be 'adam' or 'lbfgs'."""
+    settings = KnotOptimisationSettings(method="adam")
+    assert settings.method == "adam"
+    settings_lbfgs = KnotOptimisationSettings(method="lbfgs")
+    assert settings_lbfgs.method == "lbfgs"
+    with pytest.raises(ValueError, match="method must be 'adam' or 'lbfgs'"):
+        KnotOptimisationSettings(method="invalid")  # type: ignore[arg-type]
+
+
+@pytest.mark.timeout(900)
+def test_pipeline_mjx_knots_lbfgs_on_toy_package(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """method='lbfgs' with iterations=2 has history[0] == Adam's history[0] and best <= port check."""
+    import numpy as np
+
+    write_toy_package(tmp_path)
+    monkeypatch.setattr(
+        "src.shared.python.motion_matching.execution.mjx_export.export_mjx_package",
+        lambda run: {},
+    )
+
+    adam_summary = run_trajectory_optimiser(
+        "mjx-knots", tmp_path, iterations=1, method="adam"
+    )
+    lbfgs_summary = run_trajectory_optimiser(
+        "mjx-knots", tmp_path, iterations=2, method="lbfgs"
+    )
+
+    assert adam_summary is not None
+    assert lbfgs_summary is not None
+    assert lbfgs_summary["method"] == "lbfgs"
+    assert lbfgs_summary["iterations"] == 2
+    assert np.isclose(
+        lbfgs_summary["port_check_replay_marker_rms_m"],
+        adam_summary["port_check_replay_marker_rms_m"],
+    )
+    assert (
+        lbfgs_summary["best_replay_marker_rms_m"]
+        <= lbfgs_summary["port_check_replay_marker_rms_m"]
+    )

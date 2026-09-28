@@ -11,7 +11,7 @@ import math
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import defusedxml.ElementTree as DET
 import jax
@@ -28,10 +28,12 @@ from src.engines.physics_engines.mujoco.python.motion_matching.mjx_tracking_plan
 from src.shared.python.motion_matching.jax_contact import WeldGains
 from src.shared.python.motion_matching.knot_gradient_optimiser import (
     AdamSettings,
+    LbfgsSettings,
     adam_minimise,
     horizon_knot_mask,
     knot_basis,
     knot_grid,
+    lbfgs_minimise,
 )
 
 ARMATURE_KG_M2: float = 5e-3
@@ -54,8 +56,12 @@ class MjxPackage:
 
 @dataclass(frozen=True, kw_only=True)
 class KnotOptimisationSettings:
-    """Settings governing the MJX trajectory knot optimisation."""
+    """Settings governing the MJX trajectory knot optimisation.
 
+    ``learning_rate`` is ignored when ``method == "lbfgs"``.
+    """
+
+    method: Literal["adam", "lbfgs"] = "adam"
     iterations: int = 40
     substeps: int = 6
     knot_spacing_s: float = 0.04
@@ -66,6 +72,8 @@ class KnotOptimisationSettings:
     weld_damping: float = WELD_DAMPING_N_S_M
 
     def __post_init__(self) -> None:
+        if self.method not in ("adam", "lbfgs"):
+            raise ValueError(f"method must be 'adam' or 'lbfgs', got {self.method!r}")
         if self.iterations < 0:
             raise ValueError(f"iterations must be >= 0, got {self.iterations}")
         if self.substeps < 1:
@@ -310,13 +318,13 @@ def optimise_reference(
     on_iteration: Callable[[int, np.ndarray, float, float, np.ndarray], None]
     | None = None,
 ) -> KnotOptimisationResult:
-    """Optimise knot corrections on the tracked reference with Adam.
+    """Optimise knot corrections on the tracked reference with Adam or L-BFGS.
 
     ``init_delta`` must have shape (knots, actuated coordinates) or ValueError
     is raised. ``on_iteration(k, delta, total, objective, q)`` is called once
-    per evaluated iterate. Writes no files and does not change JAX config; the
-    result records the dtype it ran in. ``history[0]`` is the port check of
-    the starting reference.
+    per evaluated iterate. ``learning_rate`` is ignored when ``method == "lbfgs"``.
+    Writes no files and does not change JAX config; the result records the dtype
+    it ran in. ``history[0]`` is the port check of the starting reference.
     """
     problem = _prepare(package, settings)
     expected_shape = problem.delta_shape
@@ -340,18 +348,29 @@ def optimise_reference(
 
     value_and_grad = jax.jit(jax.value_and_grad(cost, has_aux=True))
 
-    result = adam_minimise(
-        value_and_grad,
-        delta,
-        AdamSettings(
-            learning_rate=settings.learning_rate,
-            max_iterations=settings.iterations,
-        ),
-        xp=jnp,
-        on_iteration=(
-            None if on_iteration is None else _forward_iterate(problem, on_iteration)
-        ),
+    forward_callback = (
+        None if on_iteration is None else _forward_iterate(problem, on_iteration)
     )
+    if settings.method == "adam":
+        result = adam_minimise(
+            value_and_grad,
+            delta,
+            AdamSettings(
+                learning_rate=settings.learning_rate,
+                max_iterations=settings.iterations,
+            ),
+            xp=jnp,
+            on_iteration=forward_callback,
+        )
+    elif settings.method == "lbfgs":
+        result = lbfgs_minimise(
+            value_and_grad,
+            delta,
+            LbfgsSettings(max_iterations=settings.iterations),
+            on_iteration=forward_callback,
+        )
+    else:
+        raise ValueError(f"Unsupported optimisation method: {settings.method!r}")
 
     history: list[dict[str, Any]] = []
     for row in result.history:
