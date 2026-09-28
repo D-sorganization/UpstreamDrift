@@ -20,11 +20,7 @@ from src.shared.python.engine_core.finite_difference import (
     require_enough_frames_for_finite_diff as _require_enough_frames_for_finite_diff,
 )
 
-from ..contracts import (
-    JointTrajectory,
-    SkeletonRig,
-    TorqueFrame,
-)
+from ..contracts import JointTrajectory, SkeletonRig, TorqueFrame
 from .base import (
     BaseMotionMatchingSolver,
     CostWeights,
@@ -90,7 +86,8 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         if self.urdf_path is not None:
             if not self.urdf_path.exists():
                 raise ValueError(f"URDF path does not exist: {self.urdf_path}")
-            if not self.urdf_path.is_file() or self.urdf_path.suffix.lower() != ".urdf":
+            suffix = self.urdf_path.suffix
+            if not self.urdf_path.is_file() or suffix.lower() != ".urdf":
                 raise ValueError(f"URDF path must be a .urdf file: {self.urdf_path}")
 
     # ------------------------------------------------------------------
