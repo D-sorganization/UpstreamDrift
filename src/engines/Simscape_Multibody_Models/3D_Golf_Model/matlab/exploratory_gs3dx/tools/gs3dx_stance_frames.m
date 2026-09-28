@@ -16,12 +16,16 @@ function frames = gs3dx_stance_frames(mdl, vars, opts)
 %                mass=true, .mass and .com (3xN, whole mechanism, World),
 %                and FRAMES.out is the SimulationOutput (#10986).
 %     mass       (default false) add a whole-mechanism Inertia Sensor.
+%     shoulders  (default true) sense the shoulder origins; false leaves
+%                out their six blocks (FRAMES then has no *_shoulder_p),
+%                for models near the license limit (GS3DX_CONTACT_CHECK).
 
     arguments
         mdl (1,:) char
         vars (1,1) struct = struct()
         opts.stop_time (1,1) double {mustBeNonnegative} = 0
         opts.mass (1,1) logical = false
+        opts.shoulders (1,1) logical = true
     end
     if ~bdIsLoaded(mdl)
         load_system(mdl);
@@ -33,6 +37,9 @@ function frames = gs3dx_stance_frames(mdl, vars, opts)
                'pelvis_p', gs3dx_pm_port(hips, 'Lower Torso'), 'SenseXYZ', 'm'; ...
                'left_shoulder_p', gs3dx_pm_port([mdl '/Left Shoulder Joint'], 'Left Shoulder'), 'SenseXYZ', 'm'; ...
                'right_shoulder_p', gs3dx_pm_port([mdl '/Right Shoulder Joint'], 'Right Shoulder'), 'SenseXYZ', 'm'};
+    if ~opts.shoulders
+        targets = targets(1:2, :);
+    end
     for k = 1:size(targets, 1)
         y = 2000 + 80 * k;
         s = add_block('sm_lib/Frames and Transforms/Transform Sensor', sprintf('%s/GS3DX Stance Sensor %d', mdl, k), ...

@@ -40,7 +40,8 @@ function names = gs3dx_names()
         'golfer',   "GS3DX_Golfer", ...   % contact model with de Leva segment masses (#11011)
         'fit',      "GS3DX_Fit", ...   % golfer with segment lengths from the capture (#10979)
         'fit_legs', "GS3DX_FitLegs", ...   % fit with leg servo references from the capture (#10979)
-        'fit_track', "GS3DX_FitTrack");   % fit legs with the upper body tracking the capture (#10979)
+        'fit_track', "GS3DX_FitTrack", ...   % fit legs with the upper body tracking the capture (#10979)
+        'fit_balance', "GS3DX_FitBalance");   % fit track with centre-of-mass feedback into the legs (#10979)
 
     names.simscape_prefixes   = ["sm_lib", "fl_lib", "nesl_utility", "ee_lib"];
     names.converter_refs      = ["nesl_utility/PS-Simulink Converter", ...
