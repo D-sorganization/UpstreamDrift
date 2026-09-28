@@ -1,15 +1,30 @@
-# Current Handoff — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline (#11051)
+# Current Handoff — Shooting Fit No Longer Crashes on an Unimported `fs` (#11059)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-11059-shooting`
+- Branch: `claude/ud-11059-shooting-fs` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: #11060 (draft → ready). Closes #11059.
+- Problem: `pipeline/dynamics.py` imports `full_body_forward_dynamics as fs` only under `TYPE_CHECKING`; `build_tracking_controller`, `replay` and `zmp_filter` import it locally, but `shooting_fit` did not, so `--shooting-fit N` raised `NameError: name 'fs' is not defined` before its first pass.
+- Fix: the same local import in `shooting_fit`.
+- Tests: `test_shooting_fit_runs_a_pass` runs one pass with stubbed replay and marker errors; it fails on `main` with the production `NameError` and passes with the fix. `tests/unit/motion_matching/pipeline/`: 77 passed, 10 skipped.
+- Acceptance: the driver run `--static-seeds --shooting-fit 8` that crashed on `main` completes (rc 0, 1123 s). Pass 0 replays at 84.5 mm, matching the canonical `anthro_driver_seeds` receipt. Passes 1-8 score 108.6, 121.3, 122.0, 114.5, 118.8, 111.1, 96.3 and 95.9 mm, so the fit keeps pass 0 (`best_iteration` 0) and the final dynamics replay is 84.5 mm.
+- Next step: CI green, mark ready and arm the PR.
+
+---
+
+# Past Handoff — Opt-In MJX Knot Trajectory Optimiser Stage in the Matching Pipeline (#11051)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11051-pipeline`
 - Branch: `claude/ud-11051-mjx-pipeline` (baseline `origin/main`)
-- Commit: `SELF`
+- Commit: merged to `main` as PR #11057
 - Pull request: #11057 (https://github.com/D-sorganization/UpstreamDrift/pull/11057). Closes #11051 (epic #11006 package P4). Executed by agy (Gemini 3.8 Flash), reviewed and reworked by the orchestrator.
 - Built: `pipeline/trajectory_optimiser.py` (`TRAJECTORY_OPTIMISERS = {none, mjx-knots}`, `run_trajectory_optimiser`) and the CLI flags `--trajectory-optimiser` (default `none`) and `--mjx-iterations` (default 40, `DEFAULT_MJX_ITERATIONS`). With `mjx-knots` the stage exports the MJX package, runs the #11049 knot optimiser, and writes `mjx_optimised_reference.npz` and `mjx_optimisation_receipt.json`; `receipt.json` gains a `trajectory_optimiser` summary. The receipt builder is shared with the #11046 evidence CLI (`optimisation_receipt`).
 - Decision: when JAX or `mujoco.mjx` is missing, selecting `mjx-knots` raises `DependencyUnavailableError` naming the module and `--trajectory-optimiser none`. The epic's "falls back cleanly" is read as a clear error, not a silent fallback, because the default stays `none` and a silent skip would hide that the requested stage never ran.
 - Tests: the six prototype tests in `test_mjx_optimisation.py` loaded private copies from the evidence script that #11046 replaced; they duplicated `test_knot_gradient_optimiser`, `test_jax_contact` and `test_mjx_tracking_plant`, so they were replaced by a constant-parity test and a toy-package stage test. `test_trajectory_optimiser_selection.py` covers parser defaults and rejections, the `none` no-op, both missing-dependency errors and the receipt key. 29 passed in `~/.venv-mjx` (MuJoCo 3.13); pipeline tests 76 passed, 10 skipped in default Python.
 - Acceptance: `--trajectory-optimiser mjx-knots --mjx-iterations 3` on the static-seeds run: port check 0.06516 m, best 0.05029 m (47 knots, 38 actuated coordinates, float32); the evidence CLI on a copy of the same package gives an identical history. Default run on branch vs `main`: identical file set, `receipt.json` differs only in `elapsed_s` and has no `trajectory_optimiser` key.
-- Next step: CI green, mark ready and arm the PR.
+- Next step: none; merged as PR #11057.
 
 ---
 

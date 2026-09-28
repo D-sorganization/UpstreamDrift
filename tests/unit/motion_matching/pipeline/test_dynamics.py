@@ -179,3 +179,48 @@ def test_compute_phase_weight_fractions() -> None:
 
     assert result["address"]["min"] == pytest.approx(1.0)
     assert result["impact"]["max"] == pytest.approx(1.8)
+
+
+@pytest.mark.unit
+def test_shooting_fit_runs_a_pass(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``shooting_fit`` resolves ``fs`` at run time (#11059)."""
+    import logging
+    from types import SimpleNamespace
+
+    from src.shared.python.motion_matching import full_body_forward_dynamics
+    from src.shared.python.motion_matching.pipeline import dynamics
+    from src.shared.python.motion_matching.pipeline.constants import SHOOTING_LOCKED
+
+    frames, n_q, labels = 600, 8, ("WaistLeft", "Other")
+    q = np.zeros((frames, n_q))
+    lane = SimpleNamespace(
+        points=np.zeros((frames, 2, 3)),
+        valid=np.ones((frames, 2), dtype=bool),
+        times=np.arange(frames) / 360.0,
+        ground=None,
+        labels=labels,
+    )
+    kin = SimpleNamespace(
+        coordinate_order=(*SHOOTING_LOCKED, *(f"q{i}" for i in range(n_q)))[:n_q]
+    )
+    record = SimpleNamespace(weight_fraction=np.full(frames, 0.9))
+    monkeypatch.setattr(dynamics, "replay", lambda *a, **k: (record, q))
+    monkeypatch.setattr(
+        dynamics, "marker_errors", lambda *a: np.full((frames, 2), 0.01)
+    )
+    zmp = {"outside_m": np.zeros(frames), "unloaded": np.zeros(frames, dtype=bool)}
+    monkeypatch.setattr(full_body_forward_dynamics, "reference_zmp", lambda *a: zmp)
+
+    best_q, out_zmp, report = dynamics.shooting_fit(
+        lane,
+        kin,
+        object(),
+        q,
+        q,
+        logging.getLogger("test"),
+        dynamics.ShootingFitConfig(iterations=0, gain=0.5, tracking_backend="kkt"),
+    )
+
+    assert best_q is q and out_zmp is zmp
+    assert report["best_iteration"] == 0
+    assert report["iterations"][0]["replay_marker_rms_m"] == pytest.approx(0.01)
