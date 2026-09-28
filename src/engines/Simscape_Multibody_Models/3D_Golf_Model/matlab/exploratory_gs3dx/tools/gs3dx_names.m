@@ -43,7 +43,8 @@ function names = gs3dx_names()
         'fit_track', "GS3DX_FitTrack", ...   % fit legs with the upper body tracking the capture (#10979)
         'fit_balance', "GS3DX_FitBalance", ...   % fit track with centre-of-mass feedback into the legs (#10979)
         'shape', "GS3DX_Shape", ...   % fit balance with de Leva limb inertia and ellipsoid segments (#10979)
-        'neck', "GS3DX_Neck");   % shape with a motion-driven two-axis neck (#10979)
+        'neck', "GS3DX_Neck", ...   % shape with a motion-driven two-axis neck (#10979)
+        'human', "GS3DX_Human");   % neck with an ellipsoid body shape, square face and jointed feet (#10979)
 
     names.simscape_prefixes   = ["sm_lib", "fl_lib", "nesl_utility", "ee_lib"];
     names.converter_refs      = ["nesl_utility/PS-Simulink Converter", ...
