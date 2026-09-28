@@ -10,6 +10,7 @@ of the Project Design Guidelines.
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from src.shared.python.engine_core.cross_engine_validator import CrossEngineValidator
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -158,3 +159,15 @@ class TestCrossEngineValidator:
         passed, severity = validator._classify_severity(1e-3, 1e-6)  # 1000x tolerance
         assert not passed
         assert severity == "BLOCKER"
+
+    @pytest.mark.integration
+    def test_cross_engine_validator_plugin_autoload_independence(self) -> None:
+        """Verify validator operates deterministically without external plugin hooks (#10998)."""
+        validator = CrossEngineValidator()
+        state1 = np.array([0.0, 0.0, 0.0])
+        state2 = np.array([0.0, 0.0, 0.0])
+        result = validator.compare_states(
+            "MuJoCo", state1, "Drake", state2, metric="position"
+        )
+        assert result.passed
+        assert result.severity == "PASSED"
