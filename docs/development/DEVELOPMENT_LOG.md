@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11071
-- **PR:** not created
+- **PR:** #11075
 - **Branch:** `claude/ud-11071-lbfgs-converge`
 - **Paths:** `scripts/benchmark_mjx_knot_solvers.py`, `docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/`
 - **Started:** 2026-09-28
@@ -2792,7 +2792,7 @@ open. Preserve explicit ground configuration in independent replay.
 
 - **Issue:** #9349 (ADR-0046 Stage 2; module retirement landed under #9348)
 - **Branch:** conductor/issue-9349
-- **PR:** not created
+- **PR:** #11075
 - **Paths:** src/config/launcher_manifest.json, src/config/models.yaml, tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py, docs/adr/0046-launch-monitor-analytics-single-model-layer.md, ui/public/capability-atlas, docs/architecture/CAPABILITY_ATLAS.md
 - **Started:** 2026-09-14
 - **Last verified:** 2026-09-14 (SELF; new manifest test 4 pass; test_canonical_layer_parity.py and tests/ui/tools/launch_monitor pass against the vendored canonical layer at pin e83bd2e4; capability atlas regenerated)
@@ -3474,7 +3474,7 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** antigravity
 - **Issue:** `#10943`
 - **Branch:** `agy/issue-10943`
-- **PR:** not created
+- **PR:** #11075
 - **Paths:** `knowledge/wizard.yml`, `knowledge/pack.yml`, `tests/unit/ai/test_drift_wizard.py`, `.github/workflows/wizard-pack.yml`, `.github/WORKFLOWS.md`, `sidekick.spec`
 - **Started:** 2026-09-26
 - **Last verified:** 2026-09-26 (`2d5830d18`)
