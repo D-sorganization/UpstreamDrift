@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-28 — #10979: `GS3DX_Shape` (de Leva limb/head inertia, ellipsoid thighs/shanks/hands/head, 973 compiled) and headless `gs3dx_render`; Shape's centre-of-mass reference is within 1 mm RMS of FitBalance's and its balance runs repeat FitBalance (2.64 / 1.44 BW), so segment inertia does not cause the impact spike. Tests: shape 6/6, render 3/3, inertia 7/7, fit_balance 7/7 (R2025b).
+- **Last verified:** 2026-09-28 — #10979: `GS3DX_Shape` (de Leva limb/head inertia, ellipsoid thighs/shanks/hands/head, 973 compiled) and headless `gs3dx_render`; Shape's centre-of-mass reference is within 1 mm RMS of FitBalance's and its balance runs repeat FitBalance (2.64 / 1.44 BW), so segment inertia does not cause the impact spike. `gs3dx_render` face-on/down-the-line views corrected (they were swapped) and stills re-rendered. Tests: shape 6/6, render 4/4, inertia 7/7, fit_balance 7/7 (R2025b).
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
 - **Next step:** Compare the model's and the capture's centre of mass per segment along the swing, trunk first, to find what leaves 12 mm RMS vertically in the balance reference.
 
