@@ -1,15 +1,13 @@
-"""
-Pinocchio RNEA-based inverse-dynamics motion matching.
+"""Pinocchio RNEA-based inverse-dynamics motion matching (issue #4568).
 
-Part of issue #4568. Computes joint torques required to reproduce a
-reference kinematic trajectory using Pinocchio's recursive Newton-Euler
-algorithm. Pinocchio is imported lazily inside :meth:`match` so that the
-module can be imported on systems without it.
+Computes joint torques required to reproduce a reference kinematic trajectory
+using Pinocchio RNEA. Pinocchio is imported lazily inside :meth:`match`.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import time
 from pathlib import Path
 from typing import Any
@@ -31,10 +29,7 @@ from .base import (
 
 logger = logging.getLogger(__name__)
 
-# Optional Rust acceleration (issue #5218). The Rust extension moves the
-# finite-difference + per-frame driver loop into native code; the inner
-# `pin.rnea` call is still made via a Python callback so we don't need the
-# Pinocchio C++ dev libraries on the build host.
+# Optional Rust acceleration (issue #5218). Moves driver loop into native code.
 try:  # pragma: no cover - exercised conditionally
     import upstream_pinocchio_id as _rust_pin_id  # type: ignore[import-not-found]
 
@@ -42,8 +37,6 @@ try:  # pragma: no cover - exercised conditionally
 except Exception:  # pragma: no cover - fallback path  # noqa: BLE001
     _rust_pin_id = None  # type: ignore[assignment]
     _HAVE_RUST_PIN_ID = False
-
-import os
 
 
 def _use_rust_outer_loop() -> bool:
@@ -211,13 +204,14 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
     def _rig_dof_names(rig: SkeletonRig) -> list[str]:
         names: list[str] = []
         for jname, jdef in rig.joints.items():
-            if len(jdef.axes) == 1:
-                names.append(jname)
-            else:
-                names.extend(
+            names.extend(
+                [jname]
+                if len(jdef.axes) == 1
+                else [
                     f"{jname}_{a.replace('+', '').replace('-', 'neg')}"
                     for a in jdef.axes
-                )
+                ]
+            )
         return names
 
     @staticmethod
@@ -253,16 +247,14 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
 
     @staticmethod
     def _reorder_tau_to_rig_order(
-        torque_frames: list[TorqueFrame],
-        permutation: list[int],
+        frames: list[TorqueFrame], perm: list[int]
     ) -> list[TorqueFrame]:
-        inverse = np.argsort(np.asarray(permutation, dtype=int))
+        inv = np.argsort(np.asarray(perm, dtype=int))
         return [
             TorqueFrame(
-                timestamp=f.timestamp,
-                tau=np.asarray(f.tau, dtype=float)[inverse].tolist(),
+                timestamp=f.timestamp, tau=np.asarray(f.tau, dtype=float)[inv].tolist()
             )
-            for f in torque_frames
+            for f in frames
         ]
 
     @staticmethod
@@ -280,8 +272,7 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         tau_all = np.empty((n_frames, q_arr.shape[1]), dtype=np.float64)
         for i in range(n_frames):
             tau_all[i] = np.asarray(
-                rnea(model, data, q_arr[i], v_arr[i], a_arr[i]),
-                dtype=np.float64,
+                rnea(model, data, q_arr[i], v_arr[i], a_arr[i]), dtype=np.float64
             ).flatten()
         if not np.all(np.isfinite(tau_all)):
             bad = int(np.argmax(~np.all(np.isfinite(tau_all), axis=1)))
@@ -303,21 +294,19 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         qddot_all: np.ndarray,
     ) -> list[TorqueFrame]:
         """Run the per-frame pin.rnea driver loop (Rust or Python fallback)."""
+        q_c, v_c, a_c = q_all, qdot_all, qddot_all
         if _use_rust_outer_loop():
             try:
                 assert _rust_pin_id is not None
                 q_c = np.ascontiguousarray(q_all, dtype=np.float64)
                 v_c = np.ascontiguousarray(qdot_all, dtype=np.float64)
                 a_c = np.ascontiguousarray(qddot_all, dtype=np.float64)
-                return PinocchioInverseDynMatchingSolver._execute_rnea_loop(
-                    model, data, pin, times, q_c, v_c, a_c
-                )
             except Exception as exc:  # pragma: no cover
                 logger.warning(
                     "upstream_pinocchio_id rust path failed (%s); fallback", exc
                 )
         return PinocchioInverseDynMatchingSolver._execute_rnea_loop(
-            model, data, pin, times, q_all, qdot_all, qddot_all
+            model, data, pin, times, q_c, v_c, a_c
         )
 
     # ------------------------------------------------------------------
@@ -330,13 +319,10 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
         rig: SkeletonRig,
         request: MotionMatchingRequest | None = None,
     ) -> MotionMatchingResult:
-        """
-        Solve inverse dynamics for the reference trajectory.
+        """Solve inverse dynamics for the reference trajectory.
 
         Returns:
-            ``MotionMatchingResult`` whose ``tracked_trajectory`` is the
-            input reference and whose ``torque_trajectory`` carries
-            per-frame generalized forces.
+            ``MotionMatchingResult`` with tracked trajectory and computed torques.
 
         Raises:
             RuntimeError: If Pinocchio is unavailable.
@@ -354,25 +340,15 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
 
         request_id = request.id if request is not None else f"pin-rnea-{reference.id}"
         t_start = time.perf_counter()
-
-        if self.urdf_path is not None:
-            model = pin.buildModelFromUrdf(str(self.urdf_path))
-            data = model.createData()
-            model_source = "urdf"
-            model_fidelity = "production_urdf"
-            production_ready = True
-        else:
-            model, data = self._build_model_from_rig(rig, pin)
-            model_source = "synthetic_rig"
-            model_fidelity = "synthetic_point_mass"
-            production_ready = False
+        model, data, model_source, model_fidelity, production_ready = (
+            self._resolve_model(pin, rig)
+        )
 
         times, q_all, qdot_all, qddot_all = self._finite_difference(reference)
         n_dof_traj = q_all.shape[1]
         if model.nq != n_dof_traj:
             raise ValueError(
-                f"Pinocchio model nq={model.nq} does not match "
-                f"trajectory DOFs={n_dof_traj}"
+                f"Pinocchio model nq={model.nq} does not match trajectory DOFs={n_dof_traj}"
             )
         if self.urdf_path is not None:
             q_all, qdot_all, qddot_all, permutation = (
@@ -400,48 +376,74 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
             torque_frames = self._reorder_tau_to_rig_order(torque_frames, permutation)
 
         torque_traj = self._build_torque_trajectory(reference, rig, torque_frames)
-
         residual_report = self._compute_residual_report(reference, reference)
         rmse = self._compute_rmse(reference, reference)
         solve_time = time.perf_counter() - t_start
 
         shadow_report = self._run_shadow_observation(
-            model=model,
-            data=data,
-            q_all=q_all,
-            qdot_all=qdot_all,
-            qddot_all=qddot_all,
+            model=model, data=data, q_all=q_all, qdot_all=qdot_all, qddot_all=qddot_all
         )
-
-        result = MotionMatchingResult(
-            request_id=request_id,
-            success=production_ready,
-            tracked_trajectory=reference,
-            torque_trajectory=torque_traj,
-            residual_report=residual_report,
-            fit_metrics={"rmse": float(rmse), "max_error": 0.0},
-            solve_time=float(solve_time),
-            message=(
-                "Pinocchio RNEA inverse-dynamics solve OK"
-                if production_ready
-                else (
-                    "Pinocchio synthetic point-mass rig model is diagnostic-only; "
-                    "provide matching_model_urdf for production inverse dynamics"
-                )
-            ),
-            metadata={
-                "backend": MatchingBackendType.INVERSE_DYN_PINOCCHIO.value,
-                "n_frames": len(times),
-                "n_dof": n_dof_traj,
-                "model_source": model_source,
-                "model_fidelity": model_fidelity,
-                "production_ready": production_ready,
-                "urdf_path": str(self.urdf_path) if self.urdf_path else None,
-                "shadow_report": shadow_report,
-            },
+        metadata = {
+            "backend": MatchingBackendType.INVERSE_DYN_PINOCCHIO.value,
+            "n_frames": len(times),
+            "n_dof": n_dof_traj,
+            "model_source": model_source,
+            "model_fidelity": model_fidelity,
+            "production_ready": production_ready,
+            "urdf_path": str(self.urdf_path) if self.urdf_path else None,
+            "shadow_report": shadow_report,
+        }
+        result = self._package_result(
+            request_id,
+            reference,
+            torque_traj,
+            residual_report,
+            rmse,
+            solve_time,
+            production_ready,
+            metadata,
         )
         self._validate_result(reference, result)
         return result
+
+    def _resolve_model(
+        self, pin: Any, rig: SkeletonRig
+    ) -> tuple[Any, Any, str, str, bool]:
+        if self.urdf_path is not None:
+            m = pin.buildModelFromUrdf(str(self.urdf_path))
+            return m, m.createData(), "urdf", "production_urdf", True
+        m, d = self._build_model_from_rig(rig, pin)
+        return m, d, "synthetic_rig", "synthetic_point_mass", False
+
+    @staticmethod
+    def _package_result(
+        request_id: str,
+        reference: JointTrajectory,
+        torque_traj: JointTrajectory,
+        residual_report: Any,
+        rmse: float,
+        solve_time: float,
+        prod_ready: bool,
+        metadata: dict[str, Any],
+    ) -> MotionMatchingResult:
+        diag = (
+            "Pinocchio synthetic point-mass rig model is diagnostic-only; "
+            "provide matching_model_urdf for production inverse dynamics"
+        )
+        msg = "Pinocchio RNEA inverse-dynamics solve OK" if prod_ready else diag
+        fit = {"rmse": float(rmse), "max_error": 0.0}
+        return MotionMatchingResult(
+            request_id,
+            prod_ready,
+            reference,
+            torque_traj,
+            None,
+            residual_report,
+            fit,
+            float(solve_time),
+            msg,
+            metadata,
+        )
 
     def _run_shadow_observation(
         self,
@@ -479,13 +481,13 @@ class PinocchioInverseDynMatchingSolver(BaseMotionMatchingSolver):
 
             shadow = ShadowModel(core, mlp)
             frames = [
-                {"q": q_all[i], "dq": qdot_all[i], "ddq": qddot_all[i]}
-                for i in range(len(q_all))
+                {"q": q, "dq": dq, "ddq": ddq}
+                for q, dq, ddq in zip(q_all, qdot_all, qddot_all, strict=True)
             ]
-            report = shadow.observe(frames)
+            rep = shadow.observe(frames)
             return {
-                "peak_rigid_torques": report.peak_rigid_torques,
-                "peak_residuals": report.peak_residuals,
+                "peak_rigid_torques": rep.peak_rigid_torques,
+                "peak_residuals": rep.peak_residuals,
             }
         except Exception as exc:
             logger.debug("Shadow observation skipped or failed: %s", exc)
