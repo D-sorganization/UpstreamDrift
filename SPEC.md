@@ -1,3 +1,22 @@
+## Physics-Informed Shadow Observation Consumer for Motion Matching (#11028)
+
+Wires `ShadowModel` in observation mode on motion-matching inverse-dynamics output and updates launcher truthfulness audit:
+- **ShadowModel Observation Enhancement (`src/shared/python/physics_informed/shadow_model.py`)**:
+  - Extends `ShadowReport` to hold `peak_rigid_torques: dict[str, float]` alongside `peak_residuals`.
+  - Updates `ShadowModel.observe` and `_compute_frame_peaks` to track and report peak rigid-body torques across swing phases (`transition`, `impact`, `follow_through`).
+  - Implements `observe_motion_matching` for read-only trajectory observation without modifying trajectory state.
+- **In-Memory & Duck-Typed RigidCore (`src/shared/python/physics_informed/rigid_core.py`)**:
+  - Adds support for in-memory model instantiation (`RigidCore(model=..., data=...)`) enabling programmatic, mock, and test models without URDF filesystem paths.
+  - Prioritizes model methods before global `pin` dispatch to support duck-typed models cleanly.
+- **Motion-Matching Solver Wiring (`src/shared/python/motion_pipeline/matching/inverse_dyn_pinocchio.py`)**:
+  - Adds `enable_shadow: bool = True` configuration option to `PinocchioInverseDynMatchingSolver`.
+  - Runs shadow observation during `match()` and records `shadow_report` under `result.metadata["shadow_report"]`.
+  - Guarantees zero state mutation and identical solving output whether shadow observation is enabled or disabled.
+- **Launcher Truthfulness Audits (`src/launchers/task_launch_truthfulness.py`)**:
+  - Updates `pinn_pure_rigid` and `pinn_hybrid` audit entries to point to active issue `#11028` and explains the measured residual dataset blocker.
+- **Verification & Testing (`tests/unit/motion_matching/test_pinn_shadow_consumer.py`)**:
+  - Adds unit test suite validating `ShadowReport` field defaults, phase peak torque calculations, in-memory `RigidCore`, zero-mutation trajectory invariants, solver metadata integration, and truthfulness audit issue references.
+
 ## Unit-Gate Quarantine Ratchet Burndown - Batch 2 (#9411)
 
 Retires 1 passing test from `scripts/config/unit_gate_quarantine.json` (dropping ledger from 55 to 54 node IDs):
