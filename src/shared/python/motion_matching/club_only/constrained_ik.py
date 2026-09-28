@@ -236,7 +236,14 @@ def _warm_start_q(observation: ClubObservation, nq: int = 4) -> np.ndarray:
 
 
 @precondition(
-    lambda observation, profile, hand_offsets, geometry_hash, profile_hash, backend, simulate_failure=None, n_branches=3: (  # noqa: E501
+    lambda observation,
+    profile,
+    hand_offsets,
+    geometry_hash,
+    profile_hash,
+    backend,
+    simulate_failure=None,
+    n_branches=3: (  # noqa: E501
         isinstance(observation, ClubObservation)
         and isinstance(profile, ClubOnlyProfile)
         and isinstance(hand_offsets, ModelHandFrameOffsets)

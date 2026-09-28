@@ -477,9 +477,11 @@ class MatchedSwingCandidate:
 
 
 @precondition(
-    lambda generalized_velocity, generalized_effort, actuator_transmission, actuator_effort, tolerance=1e-6: (
-        isinstance(tolerance, float) and tolerance > 0.0
-    ),
+    lambda generalized_velocity,
+    generalized_effort,
+    actuator_transmission,
+    actuator_effort,
+    tolerance=1e-6: (isinstance(tolerance, float) and tolerance > 0.0),
     "tolerance must be strictly positive float",
 )
 def check_virtual_work_consistency(

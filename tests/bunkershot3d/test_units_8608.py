@@ -209,7 +209,6 @@ _VALUE_OBJECTS = (
 def test_every_domain_field_is_dimensionless_or_unit_suffixed(
     value_object: type,
 ) -> None:
-
     for field in dataclasses.fields(value_object):
         if field.name in DIMENSIONLESS_FIELDS:
             continue

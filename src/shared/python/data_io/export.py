@@ -271,15 +271,19 @@ def _write_hdf5_subgroup(
 
 
 @precondition(
-    lambda output_path, data_dict, compress=True, return_outcome=False, provenance=None: (
-        output_path is not None and len(output_path) > 0
-    ),
+    lambda output_path,
+    data_dict,
+    compress=True,
+    return_outcome=False,
+    provenance=None: (output_path is not None and len(output_path) > 0),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, data_dict, compress=True, return_outcome=False, provenance=None: (
-        data_dict is not None
-    ),
+    lambda output_path,
+    data_dict,
+    compress=True,
+    return_outcome=False,
+    provenance=None: (data_dict is not None),
     "Data dictionary must not be None",
 )
 def export_to_matlab(
@@ -335,15 +339,19 @@ def export_to_matlab(
 
 
 @precondition(
-    lambda output_path, data_dict, compression="gzip", return_outcome=False, provenance=None: (
-        output_path is not None and len(output_path) > 0
-    ),
+    lambda output_path,
+    data_dict,
+    compression="gzip",
+    return_outcome=False,
+    provenance=None: (output_path is not None and len(output_path) > 0),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, data_dict, compression="gzip", return_outcome=False, provenance=None: (
-        data_dict is not None
-    ),
+    lambda output_path,
+    data_dict,
+    compression="gzip",
+    return_outcome=False,
+    provenance=None: (data_dict is not None),
     "Data dictionary must not be None",
 )
 def export_to_hdf5(
