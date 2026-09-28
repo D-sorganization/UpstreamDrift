@@ -111,8 +111,8 @@ def _rows(adam: float, shooting: float, **mjx: Any) -> list[dict[str, Any]]:
 
 
 def test_promotion_requires_parity() -> None:
-    assert promotion_decision(_rows(0.05, 0.06))["promote"] is True
-    worse = promotion_decision(_rows(0.07, 0.06))
+    assert promotion_decision(_rows(0.05, 0.06, stop="converged"))["promote"] is True
+    worse = promotion_decision(_rows(0.07, 0.06, stop="converged"))
     assert (
         worse["promote"] is False
         and "70.0 mm > shooting 60.0 mm" in worse["reasons"][0]
@@ -124,6 +124,21 @@ def test_promotion_refuses_non_finite_stop_and_lost_contact() -> None:
     assert not promotion_decision(_rows(0.05, 0.06, wf=0.0))["promote"]
 
 
+def test_promotion_refuses_a_run_stopped_by_the_budget() -> None:
+    decision = promotion_decision(_rows(0.05, 0.06, stop="max_iterations"))
+    assert decision["promote"] is False
+    assert decision["reasons"] == [
+        "driver: mjx-adam stopped on max_iterations, not converged within the budget"
+    ]
+
+
+def test_promotion_names_the_candidate() -> None:
+    rows = _rows(0.05, 0.06, stop="converged")
+    rows[-1] = {**rows[-1], "solver": "mjx-lbfgs"}
+    assert promotion_decision(rows, candidate="mjx-lbfgs")["promote"] is True
+    assert promotion_decision(rows)["promote"] is False  # no mjx-adam row
+
+
 def test_promotion_refuses_missing_solver() -> None:
     rows = _rows(0.05, 0.06)[:1] + [unavailable_row("driver", "mjx-adam", "no jax")]
     assert promotion_decision(rows)["promote"] is False
@@ -131,7 +146,7 @@ def test_promotion_refuses_missing_solver() -> None:
 
 def test_report_lists_every_row_and_the_decision() -> None:
     rows = _rows(0.07, 0.06) + [unavailable_row("driver", "ipopt", "no binding")]
-    text = render_report(rows, promotion_decision(rows), {"commit": "abc"})
+    text = render_report(rows, [promotion_decision(rows)], {"commit": "abc"})
     assert "| driver | mjx-adam | ok | 70.0 |" in text
     assert "unavailable: no binding" in text
     assert "**keep the current default**" in text
@@ -140,6 +155,6 @@ def test_report_lists_every_row_and_the_decision() -> None:
 def test_report_lists_solver_choices_outside_provenance() -> None:
     rows = _rows(0.05, 0.06)
     provenance = {"commit": "abc", "notes": ["L-BFGS-B replaces least_squares"]}
-    text = render_report(rows, promotion_decision(rows), provenance)
+    text = render_report(rows, [promotion_decision(rows)], provenance)
     assert "## Solver Choices\n\n- L-BFGS-B replaces least_squares" in text
     assert "- notes:" not in text
