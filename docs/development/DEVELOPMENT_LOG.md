@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-27 — #10979 leg servo references: gs3dx_leg_reference (IK pelvis path, measured levelled foot path, constant foot torsion, exact leg IK; knees 19/20 mm median to impact) and GS3DX_FitLegs (From Workspace servo feedforward, one block for one, 967 compiled) standing from rest with slip ≤ 1.8 mm, no lift, Newton closed.
+- **Last verified:** 2026-09-27 — #10979 upper-body tracking: regularized whole-body IK (6.3 mm RMS median, continuous trunk), GS3DX_FitLegs rebuilt from it, and GS3DX_FitTrack (upper-body charts rewired to their own joints, feedforward plus PD, learned feedforward, 967 compiled) tracks the capture to 0.25 deg RMS; the whole body tips over its feet (pelvis 502 mm off at impact), so the pelvis cannot be released on joint tracking alone.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Compute inverse-dynamics joint torques of the whole-trial IK upper-body motion on GS3DX_FitLegs and play them with PD tracking in place of the passive impact drive.
+- **Next step:** Add a balance term to GS3DX_FitTrack (centre-of-mass feedback into the leg references, or an explicit reported pelvis residual force) and reread the pelvis residual and GRF to impact.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

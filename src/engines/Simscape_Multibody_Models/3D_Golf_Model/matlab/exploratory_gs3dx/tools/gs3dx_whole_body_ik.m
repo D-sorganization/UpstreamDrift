@@ -16,9 +16,10 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %   every evaluation.  Spherical joints are parameterized by rotation
 %   vectors.
 %
-%   Gap-filled data (JC.gap) are not fitted: a target is dropped from a
-%   frame's residual, and from the offset calibration, where its markers
-%   were missing (the club-head cluster drops out after impact).
+%   Gap-filled data (JC.gap) are not fitted by default: a target is
+%   dropped from a frame's residual (unless gap_weight > 0), and always
+%   from the offset calibration, where its markers were missing (the
+%   club-head cluster drops out after impact).
 %
 %   Each target point is the model joint centre plus a constant offset in
 %   the frame of the body that carries the marker (skin markers sit off the
@@ -40,6 +41,27 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %     offsets             struct of 3x1 offsets (m) per target: skips the
 %                         calibration when given
 %     verbose             (false) print every frame fit
+%     posture_weight      (0, m/rad) pull the redundant trunk coordinates
+%                         (spine tilt, torso twist, both scapulae) toward
+%                         zero: the shoulder centres fix only part of these
+%                         seven angles, and without the pull the fit may sit
+%                         anywhere in the rest (torso twisted 100 deg at
+%                         address, 90-260 deg steps between frames); the
+%                         trunk then also starts at zero
+%     smooth_weight       (0, m/rad) penalize each frame's change of every
+%                         rotation coordinate from its warm start (the
+%                         neighbour frame)
+%     gap_weight          (0) residual weight of gap-filled targets; 0
+%                         drops them.  Where the pelvis markers drop out
+%                         (frames 447-451 of the trial: pelvis, hips and
+%                         knees gap-filled) nothing else fixes the pelvis
+%                         translation, and the fit wanders 15-36 cm; the
+%                         interpolated targets hold it.  The offset
+%                         calibration uses measured samples only.
+%     backward            (true) also track backward and keep the lower cost
+%                         per frame; with the weights above, false keeps one
+%                         continuous forward solution (the lower-cost frame
+%                         of either pass may sit on another branch)
 %
 %   IK fields:
 %     .model       the model fitted
@@ -50,6 +72,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %     .residual    targets x frames distance (m), NaN where gap-filled;
 %                  .rms (1 x frames, m, over the measured targets)
 %     .status      KinematicsSolver status per frame (1 = loop closed)
+%     .regularization  struct of posture_weight, smooth_weight, backward,
+%                  gap_weight
 
     arguments
         jc (1,1) struct
@@ -59,17 +83,27 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.calibration_rounds (1,1) double {mustBeInteger, mustBeNonnegative} = 3
         opts.offsets struct = struct([])
         opts.verbose (1,1) logical = false
+        opts.posture_weight (1,1) double {mustBeNonnegative} = 0
+        opts.smooth_weight (1,1) double {mustBeNonnegative} = 0
+        opts.backward (1,1) logical = true
+        opts.gap_weight (1,1) double {mustBeInRange(opts.gap_weight, 0, 1)} = 0
     end
     s = local_setup(opts.model);
     s.verbose = opts.verbose;
+    s.backward = opts.backward;
+    s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
     nt = numel(s.names);
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
+    weight = @(f) valid(f) + opts.gap_weight * ~valid(f);   % residual weight per target
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
 
-    [p, g] = local_seed(s, jc.pelvis(:, opts.frames(1)));
+    % With the posture pull, the seed has the trunk at zero: (a, b) and
+    % (a + 180, 180 - b) of a universal joint place its distal point alike,
+    % and the local fit stays on the branch it starts from.
+    [p, g] = local_seed(s, jc.pelvis(:, opts.frames(1)), opts.posture_weight > 0);
     if isempty(opts.offsets)
         cal = opts.calibration_frames;
         if isempty(cal)
@@ -77,7 +111,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         end
         off = zeros(3, nt);
         for round = 1:opts.calibration_rounds
-            best = local_track(s, cal, p, g, off, data, valid, lm);
+            best = local_track(s, cal, p, g, off, data, weight, lm);
             acc = zeros(3, nt);
             cnt = zeros(1, nt);
             for i = 1:numel(cal)
@@ -98,7 +132,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     end
 
     n = numel(opts.frames);
-    best = local_track(s, opts.frames, p, g, off, data, valid, lm);
+    best = local_track(s, opts.frames, p, g, off, data, weight, lm);
 
     ik.model = opts.model;
     ik.names = s.names;
@@ -119,20 +153,38 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         ik.status(i) = st;
     end
     ik.rms = sqrt(mean(ik.residual .^ 2, 1, 'omitnan'));
+    ik.regularization = struct('posture_weight', opts.posture_weight, ...
+        'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight);
 end
 
-function best = local_track(s, frames, p, g, off, data, valid, lm)
+function reg = local_regularization(s, posture, smooth)
+% Weights per coordinate of the parameter vector: the posture pull on the
+% redundant trunk coordinates, the smoothing on every rotation coordinate.
+    keys = repelem(string({s.layout.key}), [s.layout.n]);
+    trunk = startsWith(keys, ["j2.", "j3.", "j6.", "j17."]);   % spine, torso, scapulae
+    assert(nnz(trunk) == 7, 'gs3dx:ik', 'Expected 7 trunk coordinates, found %d', nnz(trunk));
+    reg.posture = posture * double(trunk(:));
+    reg.smooth = smooth * double(~endsWith(keys(:), [".Px", ".Py", ".Pz"]));
+    reg.on = posture > 0 || smooth > 0;
+    reg.wrap = ~endsWith(keys(:), [".Px", ".Py", ".Pz"]) & ~contains(keys(:), ".S");   % single angles
+end
+
+function best = local_track(s, frames, p, g, off, data, weight, lm)
 % Forward then backward over FRAMES, each fit warm-started from its
 % neighbour; the lower cost per frame is kept.
     n = numel(frames);
     best = struct('p', cell(1, n), 'g', cell(1, n), 'cost', num2cell(inf(1, n)));
-    for order = {1:n, n:-1:1}
+    orders = {1:n, n:-1:1};
+    if ~s.backward
+        orders = orders(1);
+    end
+    for order = orders
         for i = order{1}
             t0 = tic;
-            [p, g, cost, iters] = local_fit(s, p, g, off, data(frames(i)), valid(frames(i)), lm);
+            [p, g, cost, iters] = local_fit(s, p, g, off, data(frames(i)), weight(frames(i)), lm);
             if s.verbose
                 fprintf('ik frame %d: rms %.1f mm, %d iterations, %.1f s\n', frames(i), ...
-                    1000 * sqrt(cost / nnz(valid(frames(i)))), iters, toc(t0));
+                    1000 * sqrt(cost / nnz(weight(frames(i)))), iters, toc(t0));
             end
             if cost < best(i).cost
                 best(i) = struct('p', p, 'g', g, 'cost', cost);
@@ -197,11 +249,17 @@ function s = local_setup(mdl)
     assert(sum([s.layout.n]) == 33, 'gs3dx:ik', 'Expected 33 independent coordinates, found %d', sum([s.layout.n]));
 end
 
-function [p, g] = local_seed(s, pelvis)
+function [p, g] = local_seed(s, pelvis, trunk_zero)
 % A pose that closes the grip loop (a target-free solve), moved onto PELVIS.
     ks0 = simscape.multibody.KinematicsSolver(s.ks.ModelName);
     addOutputVariables(ks0, s.ids);
-    [q, st] = solve(ks0, [], []);
+    trunk = s.ids(startsWith(s.ids, ["j2.", "j3.", "j6.", "j17."]));
+    zero = [];
+    if trunk_zero
+        addTargetVariables(ks0, trunk);
+        zero = zeros(numel(trunk), 1);
+    end
+    [q, st] = solve(ks0, zero, []);
     assert(st == 1, 'gs3dx:ik', 'The target-free solve did not close the loop (status %d)', st);
     p = zeros(sum([s.layout.n]), 1);
     si = @(vid) q(s.ids == vid) * (1 + (pi / 180 - 1) * s.isdeg(char(vid)));
@@ -222,20 +280,27 @@ function [p, g] = local_seed(s, pelvis)
 end
 
 function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, lm)
-    r = @(pp) local_residual(s, pp, g, off, d, w);
+    if s.reg.on   % the same pose, each single angle on (-pi, pi]: the branch the posture pull sees
+        p(s.reg.wrap) = p(s.reg.wrap) - 2 * pi * round(p(s.reg.wrap) / (2 * pi));
+    end
+    p0 = p;   % the warm start: the neighbour frame's solution
+    r = @(pp) local_residual(s, pp, g, off, d, w, p0);
     [p, cost, ~, ~, out] = lsqnonlin(r, p, [], [], lm);
     iters = out.iterations;
     [~, ~, ~, g] = local_fk(s, p, g);
 end
 
-function r = local_residual(s, p, g, off, d, w)
+function r = local_residual(s, p, g, off, d, w, p0)
     [P, R, st] = local_fk(s, p, g);
     if st < 1
-        r = 10 * ones(3 * s.nt, 1);   % loop not closed: reject the step
+        r = 10 * ones(3 * s.nt + 2 * numel(p) * s.reg.on, 1);   % loop not closed: reject the step
         return;
     end
     pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, s.nt)), 3, s.nt);
     r = reshape((pts - d) .* w, [], 1);
+    if s.reg.on
+        r = [r; s.reg.posture .* p; s.reg.smooth .* (p - p0)];
+    end
 end
 
 function [P, R, st, g] = local_fk(s, p, g)

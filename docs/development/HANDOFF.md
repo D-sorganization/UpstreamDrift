@@ -144,6 +144,23 @@
       the drive file sets PlaneTilt 22.5 vs the saved 30 deg, which tilted the start pelvis 7.5 deg),
       ground under the start feet (capture frame = World). Standing from rest: slip 1.8/1.5 mm, lift 0,
       Newton pass. The impact drive is PASSIVE (ModelingMode 0 zeroes every upper-body torque).
+  19. #10979 upper-body tracking (`docs/FIT.md` sections 3 and 6). Regularized whole-body IK options
+      (`posture_weight`, `smooth_weight`, `backward`, `gap_weight`; defaults off, test_gs3dx_fit 7/7):
+      the unregularized trunk jumped branches (torso 464 deg range); with 0.01/0.02/false/0.5 the whole
+      trial fits 6.3 mm RMS median (25.2 p95), pelvis step <= 1.3 mm to impact (scratch
+      `ik_full_reg.mat`, ~1 h). `GS3DX_FitLegs` REBUILT from it (torsion +23.7/-16.8, clamp 1.6 mm,
+      knees 27/32 mm median). `gs3dx_upper_body_reference` -> 12 chart references (12 Hz).
+      `gs3dx_build_fit_track` -> `GS3DX_FitTrack`: each upper-body chart gets feedforward + PD
+      (`gs3dx_track_torque`, `UpperBodyTracking`, ModelingMode stays 0 = free pelvis), inertia-scaled
+      gains (`gs3dx_track_gains`, 6 Hz, zeta 1), and REWIRED inputs: the original LW chart reads the
+      LEFT SCAPULA angles and LE/LF/RF/RW read tags no Goto writes (wrists ran away 14,800 deg). No
+      block added (967). `gs3dx_track_learn` (ILC from the Simscape log; signal logging passes the
+      license limit): full swing to impact angle RMS 0.96 -> 0.25 deg in one update, but PD RMS
+      22.1/10.3/14.7/20.7 N*m grows from iteration 3 (Q-filtering all of F did not help; torso keeps
+      34 N*m at 0.19 deg); the model holds the iteration-2 feedforward. Whole body to impact: pelvis
+      206 mm RMS / 502 mm at impact off the capture (steady X drift, feet slide 8 cm, lift 9/20 cm:
+      the body TIPS OVER ITS FEET - joint tracking alone does not balance); vertical GRF 0.20 BW RMS
+      from the capture, peak 1.43 BW is the landing at 0.05 s. 17 min per full-swing simulation.
 
 ## Files and Decisions
 
@@ -208,6 +225,12 @@ Creator` (newline); find it by BlockType.
   Plus `runtests('test_gs3dx_fit_legs')` → 4 passed / 0 failed (2026-09-27; setup runs a
   whole-body IK, 11–25 min; clamp 0.0 mm, knee median 25/31 mm, p95 58/61 mm; standing slip
   1.8/1.5 mm, lift 0).
+  Plus `runtests('test_gs3dx_fit_track')` -> 5 passed / 0 failed (2026-09-27; 0.3 s replay 0.283 deg,
+  worst joint 0.491 deg, PD 16.7 N\*m) and, after the FitLegs rebuild, `test_gs3dx_fit_legs` 3/4 + the
+  standing test rerun alone 1/1 (slip 1.4/0.9 mm, lift 0, pelvis 28 mm). Run alongside another
+  MATLAB simulation the standing test errored (zero logged samples in `gs3dx_stance_frames`):
+  do not run GS3DX simulations in parallel processes (shared cache). test_gs3dx_fit 7/7 after
+  the IK options. The full suite was not rerun.
   Earlier 78 (after #11011: golfer 6, capture +2 kinematic GRF; earlier 70 after #10985/#10986: capture 4, leg kinematics 4, contact 7
   new; the FK test failed once on a closed-model handle, fixed and rerun 4/4). The capture tests
   need MATLAB pyenv with ezc3d (they are skipped otherwise).
@@ -222,8 +245,10 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 upper-body drive (owner: inverse dynamics plus PD tracking): inverse dynamics of the
-   whole-trial IK motion as feedforward joint torques plus PD tracking of the IK joint angles on
-   `GS3DX_FitLegs`, in place of the passive impact drive; then read the pelvis residual and compare
-   the summed contact GRF with `gs3dx_kinematic_grf` (1.24-1.33 BW peak ~60 ms before impact).
-3. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
+2. #10979 balance (owner decision needed): the pelvis cannot be released on joint tracking alone.
+   Either feed the centre-of-mass error back into the leg references (ankle/hip strategy) or apply
+   the pelvis residual as an explicit, reported force; then reread the residual and the GRF against
+   `gs3dx_kinematic_grf` (1.27 BW peak 55 ms before impact).
+3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
+   forgetting factor or PD-only loop joints.
+4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).

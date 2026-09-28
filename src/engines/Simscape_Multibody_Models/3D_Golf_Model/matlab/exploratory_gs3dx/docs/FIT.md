@@ -163,6 +163,30 @@ median, 34 mm max). Out of sample they do not, which is the table above.
 The whole-trial run above used the original grip. Section 4 re-runs it with
 the fitted grip.
 
+**Regularized IK for joint references.** Fitting 14 points does not pin
+every joint. The spine (2), torso (1) and scapulae (2 + 2) give 7 degrees
+of freedom to place two shoulders, and a universal joint places its distal
+point the same at (a, b) and (a + 180°, 180° − b). The unregularized whole
+trial jumped between those branches: a 464° torso range and 90–260° steps
+between frames. That is harmless for marker fitting but unusable as a
+joint reference. Four options (all off by default) fix it:
+
+- `posture_weight` (m/rad) pulls the trunk coordinates toward zero; the
+  target-free seed solve also holds them there, so the grip loop still
+  closes (zeroing them directly left it open: status −1);
+- `smooth_weight` (m/rad) pulls every angle toward the previous frame;
+- `backward=false` tracks forward only (the min-cost-per-frame merge of
+  the two passes mixed branches);
+- `gap_weight` keeps gap-filled samples at that weight instead of dropping
+  them. Without them the pelvis wandered 15–36 cm over the gap at frames
+  447–451.
+
+With `posture_weight=0.01, smooth_weight=0.02, backward=false,
+gap_weight=0.5` the whole trial fits to 6.3 mm RMS median (25.2 mm p95,
+26.3 mm max), the trunk angles are continuous, and the pelvis moves at most
+1.3 mm per frame up to impact. The references of sections 5 and 6 come
+from this run.
+
 ## 4. Hand-on-Grip Geometry: `gs3dx_fit_grip`
 
 With the original grip, the pelvis, legs and shoulders generalized to 1–3 cm,
@@ -289,21 +313,24 @@ the capture's time base.
 
   So one constant yaw offset per foot is fitted over the still address
   frames, weighing the knee centre, ankle position and sole normal. The
-  offsets are +24.0° (lead) and −17.9° (trail).
+  offsets are +23.7° (lead) and −16.8° (trail).
 
 - **Leg angles.** `gs3dx_leg_ik` solves exactly (six angles for six
   foot-pose numbers) for every filtered pelvis pose.
 - **Reach.** Where the hip-to-ankle distance exceeds 0.999 of the leg
   length, the ankle target moves toward the hip onto it. This is at most
-  1.5 mm, only after impact (from frame 506).
+  1.6 mm, only after impact (from frame 504).
+
+On the regularized whole-trial IK (section 3):
 
 | Whole trial (654 frames)         | Lead         | Trail        |
 | -------------------------------- | ------------ | ------------ |
-| Knee vs capture, to impact       | 19 mm median | 20 mm median |
-| Knee vs capture, to impact (p95) | 56 mm        | 49 mm        |
-| Knee vs capture at impact        | 48 mm        | 55 mm        |
-| Address torsion fit, knee        | 14 mm        | 13 mm        |
-| Peak knee rate to impact         | 634 deg/s    | 480 deg/s    |
+| Knee vs capture, to impact       | 27 mm median | 32 mm median |
+| Knee vs capture, to impact (p95) | 54 mm        | 58 mm        |
+| Knee vs capture at impact        | 48 mm        | 63 mm        |
+
+The unregularized IK put the knees 19/20 mm (median) from the capture; the
+trunk regularization moves the pelvis slightly, and the legs follow it.
 
 The knees drift from the capture through the downswing because the real
 shank rotates over the foot, which the model's ankle cannot do. A
@@ -337,7 +364,7 @@ bounds):
 | ---------------------- | ------------ | ------------ | ------------ | ------------- |
 | `GS3DX_Golfer`         | 1.3 / 1.4 mm | 0 / 0 mm     | 0 – 1.14     | 29 mm         |
 | `GS3DX_Fit` (stale q0) | 1.5 / 1.5 mm | 2.8 / 3.0 mm | 0.44 – 3.07  | 33 mm         |
-| `GS3DX_FitLegs`        | 1.8 / 1.5 mm | 0 / 0 mm     | 0.24 – 1.06  | 38 mm         |
+| `GS3DX_FitLegs`        | 1.4 / 0.9 mm | 0 / 0 mm     | 0.24 – 0.98  | 28 mm         |
 
 `GS3DX_Fit` still holds the stance angles computed for the old leg lengths,
 and it lifts its feet. The pelvis travel in every row comes from the
@@ -353,10 +380,84 @@ impact:
 - the servo block and the start variables;
 - the standing test.
 
+## 6. Upper-Body Tracking: `GS3DX_FitTrack`
+
+The impact drive leaves the upper body passive. `GS3DX_FitTrack` drives its
+twelve upper-body joints toward the capture instead:
+
+- **Reference.** `gs3dx_upper_body_reference(ik)` reads the chart angles
+  from the regularized whole-trial IK: revolute and universal angles
+  unwrapped to one branch, shoulders as intrinsic X-Y-Z angles
+  (`gs3dx_xyz_map`), all filtered at 12 Hz and differentiated.
+- **Charts.** `gs3dx_build_fit_track(info, ref)` copies `GS3DX_FitLegs` and
+  edits each `<J> Input Function` chart: when `UpperBodyTracking` is set,
+  the joint torque is `gs3dx_track_torque`, a feedforward plus PD,
+  `F(t) + Kp (A(t) − q) + Kd (R(t) − qd)`. `ModelingMode` stays 0, so the
+  pelvis joint is free and the legs and the ground carry the body. No block
+  is added (967 compiled).
+- **Wiring.** The original model feeds the LW chart the **left scapula's**
+  angles, and the LE, LF, RF and RW charts read tags no Goto writes. With
+  tracking on, the wrists ran away by 14,800° and the solver stopped at
+  0.24 s. The builder points every chart input at its own joint's Goto
+  (`<J>AngularPosition/Velocity[axis]`), changing only From tags.
+- **Gains.** `gs3dx_track_gains`: each joint is a critically damped 6 Hz
+  servo on the inertia it carries (estimates for an 80 kg body with the
+  club, 0.02–3 kg·m²). Kp runs from 0.5 N·m/deg (forearm) to 74 (spine).
+- **Feedforward.** `gs3dx_track_learn` learns F by iterative learning
+  control, reading the joint states from the Simscape log (signal logging
+  would pass the block limit): `F ← lowpass(F + (Kp e + Kd ė))`. It
+  returns the iteration with the least PD torque.
+
+Learning over the full swing to impact (1.319 s, 17 minutes per
+iteration):
+
+| Iteration | Angle RMS | PD RMS   |
+| --------- | --------- | -------- |
+| 1 (F = 0) | 0.96°     | 22.1 N·m |
+| 2         | 0.25°     | 10.3 N·m |
+| 3         | 0.25°     | 14.7 N·m |
+| 4         | 0.27°     | 20.7 N·m |
+
+The angles converge in one update, but the PD torque grows from the third
+iteration on. Filtering the whole of F instead of only the update did not
+change it. The torso keeps 34 N·m of PD torque at 0.19° of error, so the
+drift is likely torque the angle error cannot see, such as torso and spine,
+or the arms closed through the club, working against each other. The model
+saves the iteration-2 feedforward.
+
+**Whole body to impact** (`gs3dx_contact_check` from the reference start,
+with the iteration-2 feedforward):
+
+| Quantity                   | Result                                     |
+| -------------------------- | ------------------------------------------ |
+| Newton balance             | closed                                     |
+| Pelvis vs the capture      | 206 mm RMS, 502 mm at impact               |
+| Feet                       | slip 76 / 85 mm, lift 91 / 198 mm (L / R)  |
+| Vertical GRF               | 0.28–1.43 BW; 0.20 BW RMS from the capture |
+| Horizontal GRF (magnitude) | peak 0.82 BW vs 0.32; 0.12 BW RMS          |
+
+The pelvis leaves the capture steadily along X: 26 mm at 0.2 s, 247 mm at
+1.0 s and 501 mm at impact. The feet slide only 8 cm, so the body tips
+over its feet. The joints follow the capture, but nothing holds the centre
+of mass over the support: open-loop joint tracking of a free-standing body
+does not balance. **The pelvis cannot be released on joint tracking
+alone.** The vertical GRF peak (1.43 BW at 0.05 s) is the landing from
+rest, not the downswing peak the capture shows (1.27 BW at 1.264 s).
+
+`test_gs3dx_fit_track` checks the following on the saved model:
+
+- `gs3dx_track_torque` interpolation and hold;
+- the gains' damping ratio;
+- that every chart input reads its own joint;
+- the tracking data and learned feedforward, with no block added;
+- a 0.3 s replay: 0.283° RMS (worst joint 0.491°), 16.7 N·m PD, bounded
+  at 0.35°, 0.6° and 20 N·m.
+
 ## Next
 
-1. Upper-body drive: inverse dynamics of the whole-trial IK motion as
-   feedforward torques, plus PD tracking of the IK joint angles, in place
-   of the passive impact drive.
-2. Compare the summed contact GRF with `gs3dx_kinematic_grf` (1.24–1.33 BW
-   peak about 60 ms before impact) and read the pelvis residual.
+1. Balance: feed the centre-of-mass error back into the leg (ankle and hip)
+   references, or apply the pelvis residual force as an explicit, reported
+   term, so the body stays over its feet; then read the residual and the
+   GRF again.
+2. Learning drift: record the PD torque per joint over more iterations and
+   add a forgetting factor, or leave the loop joints to the PD alone.
