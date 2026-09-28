@@ -453,11 +453,78 @@ rest, not the downswing peak the capture shows (1.27 BW at 1.264 s).
 - a 0.3 s replay: 0.283° RMS (worst joint 0.491°), 16.7 N·m PD, bounded
   at 0.35°, 0.6° and 20 N·m.
 
+## 7. Balance: `GS3DX_FitBalance`
+
+`GS3DX_FitBalance` is `GS3DX_FitTrack` with a balance loop through the leg
+servo (`gs3dx_build_fit_balance`):
+
+- **Sensing.** A whole-mechanism Inertia Sensor gives the centre of mass in
+  World. A global Goto carries it into `Lower Body`, where a first-order
+  State-Space filter differentiates it (`BalanceCOMTau`, 0.01 s). Bus
+  Selectors take each ankle's `GlobalPosition` from its `<P>AnkleLogs` bus.
+- **Reference.** The centre-of-mass reference is the reference pelvis pose
+  carrying the centre of mass in the pelvis frame
+  (`gs3dx_balance_com_offset`) from a balance-off run whose joints track.
+  The foot reference is the leg reference's measured foot path
+  (`ref.feet`), which matches the logged ankle positions at t0.
+- **Gain.** `gs3dx_balance_gain` is the damped least-squares, foot-fixed
+  inverse Jacobian of each leg: the leg angle change (12 × 3 per frame,
+  deg/m) that moves the pelvis by a unit shift over fixed feet.
+- **Command.** `Leg Torque Commands` becomes a MATLAB Function calling
+  `gs3dx_balance_command`. The servo reference angle gains
+  `G(t) · shift` with `shift = −Kp e − Kd ė`, where e is the centre-of-mass
+  error along World x, y and z, limited to 0.1 m. Each leg also gains
+  `G(t) · kf e_foot`, since a foot moved by −x relative to the pelvis is
+  the pelvis moved by x. With `BalanceOn = 0` it plays exactly the
+  `GS3DX_FitLegs` command.
+
+The model compiles to 973 blocks. `gs3dx_contact_check` adds sensors that
+compile to 10 more (983), inside the 25-block reserve.
+
+Whole body to impact (same start and feedforward as section 6):
+
+| Run                          | Pelvis RMS / at impact | COM error RMS / max | Support (BW) |
+| ---------------------------- | ---------------------- | ------------------- | ------------ |
+| Balance off                  | 206 / 503 mm           | —                   | peak 1.39    |
+| Horizontal, Kp 1, Kd 0.2     | 38 / 62 mm             | 35 / 45 mm          | peak 2.65    |
+| Horizontal, Kd 0.05          | 65 / 103 mm            | 66 / 94 mm          | peak 2.13    |
+| Three axes, Kp 1, Kd 0.2     | 39 / 70 mm             | 37 / 48 mm          | 0.103–2.56   |
+| Three axes + foot feedback 1 | 44 / 81 mm             | 38.5 / 52.0 mm      | 0.104–2.37   |
+
+Centre-of-mass feedback holds the body over its feet: the pelvis stays
+within 81 mm of the capture at impact instead of 503 mm. In the last row,
+the vertical centre-of-mass error is 6.3 mm RMS; the feet slip 51 / 74 mm
+and lift 40 / 50 mm (L / R).
+
+**Impact spike.** Every balanced run shows a support peak of 2.4–2.7 BW
+just before impact, where the capture's kinematic GRF (`gs3dx_kinematic_grf`)
+stays at 1.05–1.25 BW. The spike is the trail foot landing again: it
+unloads from 1.20 s, lands at 1.28 s and reaches 1.66 BW alone. In the
+capture the trail heel rises only 36 mm and the foot never leaves the
+ground. The knee is not singular (|G| ≈ 70 deg/m) and the shift is not
+limited. Foot feedback cuts the unloaded time from about 60 ms to 24 ms and
+the peak from 2.56 to 2.37 BW, and raises the minimum support after 0.1 s
+from 0.10 to 0.61 BW, but the spike remains and the pelvis error grows
+slightly.
+
+`test_gs3dx_fit_balance` checks:
+
+- that `gs3dx_balance_command` reduces to the leg servo with balance off,
+  shifts against the error up to the limit (horizontal and three-axis
+  gains), and moves each foot back on its own leg only;
+- that the gain holds the feet: a pelvis shift moves a foot by at most
+  0.975 of the shift (median 0.303), bounded at 0.98 and 0.31. The worst
+  case is vertical, on the lead leg at frame 545, where the knee is nearly
+  straight;
+- the wiring and data of the saved model;
+- a 0.3 s run: centre-of-mass error 14.6 mm RMS, 24.9 mm max, bounded at
+  26 mm.
+
 ## Next
 
-1. Balance: feed the centre-of-mass error back into the leg (ankle and hip)
-   references, or apply the pelvis residual force as an explicit, reported
-   term, so the body stays over its feet; then read the residual and the
-   GRF again.
+1. Impact spike: stop the trail foot unloading before impact, for example
+   with a higher or vertical-only foot gain, or by modelling the toe
+   contact the capture shows (heel up, toe down); then compare the support
+   with `gs3dx_kinematic_grf` again.
 2. Learning drift: record the PD torque per joint over more iterations and
    add a forgetting factor, or leave the loop joints to the PD alone.

@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-27 — #10979 upper-body tracking: regularized whole-body IK (6.3 mm RMS median, continuous trunk), GS3DX_FitLegs rebuilt from it, and GS3DX_FitTrack (upper-body charts rewired to their own joints, feedforward plus PD, learned feedforward, 967 compiled) tracks the capture to 0.25 deg RMS; the whole body tips over its feet (pelvis 502 mm off at impact), so the pelvis cannot be released on joint tracking alone.
+- **Last verified:** 2026-09-28 — #10979 balance: GS3DX_FitBalance (973 compiled) feeds the 3-axis centre-of-mass error and each foot's position error back into the leg servo through a foot-fixed inverse leg Jacobian; to impact the pelvis stays within 81 mm of the capture (was 503 mm) with 52 mm max COM error, but the trail foot re-lands just before impact (support 2.37 BW vs the capture's 1.25). test_gs3dx_fit_balance 6/6.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Add a balance term to GS3DX_FitTrack (centre-of-mass feedback into the leg references, or an explicit reported pelvis residual force) and reread the pelvis residual and GRF to impact.
+- **Next step:** Stop GS3DX_FitBalance's trail foot unloading before impact (vertical-only or higher foot gain, or heel-up toe contact) and compare the support with gs3dx_kinematic_grf.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

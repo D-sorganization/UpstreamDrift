@@ -20,6 +20,7 @@ function check = gs3dx_contact_check(info, opts)
 %                 GlobalPosition, relative to t = 0
 %     .pelvis     max distance of the pelvis frame from its t = 0 position (m)
 %     .pelvis_p   pelvis frame origin (3xN, World, m) on the grid of .t
+%     .pelvis_R   pelvis frame orientation (3x3xN, World) on the grid of .t
 %     .status, .message    of the simulation
 %
 %   Options: drive ("impact"), stop_time (0.3 s), variables (struct of
@@ -59,7 +60,7 @@ function check = gs3dx_contact_check(info, opts)
     ground_R = ws.getVariable('GroundRotation');
     g = str2num(get_param([mdl '/Hips and Torso Inputs/Mechanism Configuration'], 'GravityVector')); %#ok<ST2NM> vector literal
     g = g(:);
-    frames = gs3dx_stance_frames(mdl, vars, stop_time=opts.stop_time, mass=true);
+    frames = gs3dx_stance_frames(mdl, vars, stop_time=opts.stop_time, mass=true, shoulders=false);
     s = frames.series;
     logs = frames.out.logsout;
     assert(norm(-g / norm(g) - frames.up) < 1e-12, 'gs3dx:contact_check', 'Gravity and up disagree');
@@ -101,6 +102,7 @@ function check = gs3dx_contact_check(info, opts)
     end
     check.pelvis = max(vecnorm(s.pelvis_p - s.pelvis_p(:, 1)));
     check.pelvis_p = at(s.t, s.pelvis_p);
+    check.pelvis_R = reshape(at(s.t, reshape(s.pelvis_R, 9, [])), 3, 3, []);
     check.status = "success";
     check.message = "";
 end

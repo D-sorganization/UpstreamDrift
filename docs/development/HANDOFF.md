@@ -22,7 +22,7 @@
   (#10953) block budget, GS3DX-4 (#10954) `GS3DX_Slim`, GS3DX-5 (#10955) `GS3DX_Quat`
   quaternion shoulders, GS3DX-6 (#10956) quaternion hip, GS3DX-7 (#10957) lower body and
   GS3DX-8 (#10958) weld stance + integration run and GS3DX-9 (#10959) visual QA done;
-  follow-up GS3DX-10 (#10979) drives the legs and refits the pelvis inputs. GS3DX-11
+  follow-up GS3DX-10 (#10979) drives the legs and refits the pelvis inputs; balance through the leg servo holds the body over its feet (section 7 of `docs/FIT.md`). GS3DX-11
   (#10985) data audit and GS3DX-12 (#10986) ground contact done (`GS3DX_FullBodyContact`).
   #11011 typical segment masses done (`GS3DX_Golfer`, 80 kg de Leva) plus the force-plate-free
   total GRF from the capture (`gs3dx_kinematic_grf`); owner: no force plates will be captured.
@@ -161,6 +161,18 @@
       206 mm RMS / 502 mm at impact off the capture (steady X drift, feet slide 8 cm, lift 9/20 cm:
       the body TIPS OVER ITS FEET - joint tracking alone does not balance); vertical GRF 0.20 BW RMS
       from the capture, peak 1.43 BW is the landing at 0.05 s. 17 min per full-swing simulation.
+  20. #10979 balance (`docs/FIT.md` section 7): `gs3dx_build_fit_balance` -> `GS3DX_FitBalance`
+      (973 compiled; contact-check sensors +10 = 983). Whole-mechanism Inertia Sensor -> Goto ->
+      State-Space rate; `Leg Torque Commands` -> MATLAB Function `gs3dx_balance_command`: servo
+      angle + G(t) shift (shift = -Kp e - Kd de, 3-axis COM error, limit 0.1 m) + per-leg G(t) kf
+      e_foot (ankle GlobalPosition via Bus Selectors vs `ref.feet`). `gs3dx_balance_gain` = foot-fixed
+      damped inverse leg Jacobian (12 x 3 x frames). To impact: pelvis off the capture at impact 503 -> 62-81 mm (FIT.md
+      table; 3-axis + foot gain 1: pelvis 44 RMS / 81 mm at impact, COM 38.5/52.0 mm). Support spike
+      2.37-2.65 BW just before impact (capture 1.05-1.25) = trail foot re-landing (unloaded
+      1.20-1.26 s in the model; capture heel rises 36 mm, never leaves); foot feedback shortens it
+      60 -> 24 ms but does not remove it. The model is built with axes 3, gains [1 0.2], foot 1.
+      Earlier "zero logged samples" errors were very likely a FULL C: DRIVE (Simulink turns off
+      recording under low disk space), not only concurrency.
 
 ## Files and Decisions
 
@@ -225,6 +237,9 @@ Creator` (newline); find it by BlockType.
   Plus `runtests('test_gs3dx_fit_legs')` → 4 passed / 0 failed (2026-09-27; setup runs a
   whole-body IK, 11–25 min; clamp 0.0 mm, knee median 25/31 mm, p95 58/61 mm; standing slip
   1.8/1.5 mm, lift 0).
+  Plus (2026-09-28, one MATLAB process) `test_gs3dx_fit_balance` 6/6 (leak max 0.975 / median
+  0.303, bounds 0.98 / 0.31; 0.3 s COM error 14.6 RMS / 24.9 max mm, bound 26 mm),
+  `test_gs3dx_fit_track` 5/5, `test_gs3dx_leg_kinematics` 4/4, `test_gs3dx_contact` 7/7.
   Plus `runtests('test_gs3dx_fit_track')` -> 5 passed / 0 failed (2026-09-27; 0.3 s replay 0.283 deg,
   worst joint 0.491 deg, PD 16.7 N\*m) and, after the FitLegs rebuild, `test_gs3dx_fit_legs` 3/4 + the
   standing test rerun alone 1/1 (slip 1.4/0.9 mm, lift 0, pelvis 28 mm). Run alongside another
@@ -245,9 +260,8 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 balance (owner decision needed): the pelvis cannot be released on joint tracking alone.
-   Either feed the centre-of-mass error back into the leg references (ankle/hip strategy) or apply
-   the pelvis residual as an explicit, reported force; then reread the residual and the GRF against
+2. #10979 impact spike: stop the trail foot unloading before impact (higher or vertical-only foot
+   gain, or toe contact: heel up, toe down as captured), then compare the support with
    `gs3dx_kinematic_grf` (1.27 BW peak 55 ms before impact).
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
