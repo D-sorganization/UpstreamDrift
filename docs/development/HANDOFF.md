@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11058-benchmark`
 - Branch: `claude/ud-11058-benchmark` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: see DL-#11058. Closes #11058 (epic #11006 P5).
+- Pull request: #11072. Closes #11058 (epic #11006 P5).
 - Done:
   - `knot_gradient_optimiser.lbfgs_minimise` runs SciPy L-BFGS-B on the same JAX gradient as Adam; `--mjx-method {adam,lbfgs}`.
   - Every MJX reference is rescored through the shared `FullBodySimulator` (`trajectory_optimiser.shared_simulator_replay`, via `pipeline.dynamics.score_reference`). A stage that writes no reference is an error.
