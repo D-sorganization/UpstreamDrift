@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11059-shooting`
 - Branch: `claude/ud-11059-shooting-fs` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: see DL-#11059. Closes #11059.
+- Pull request: #11060 (draft → ready). Closes #11059.
 - Problem: `pipeline/dynamics.py` imports `full_body_forward_dynamics as fs` only under `TYPE_CHECKING`; `build_tracking_controller`, `replay` and `zmp_filter` import it locally, but `shooting_fit` did not, so `--shooting-fit N` raised `NameError: name 'fs' is not defined` before its first pass.
 - Fix: the same local import in `shooting_fit`.
 - Tests: `test_shooting_fit_runs_a_pass` runs one pass with stubbed replay and marker errors; it fails on `main` with the production `NameError` and passes with the fix. `tests/unit/motion_matching/pipeline/`: 77 passed, 10 skipped.
