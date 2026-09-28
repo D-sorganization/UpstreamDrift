@@ -87,6 +87,7 @@ Agent-editable exploratory copies of the hand-built 3D kinetic golf model
 | `GS3DX_FitBalance`      | `gs3dx_build_fit_balance` | FitTrack with centre-of-mass and foot feedback into the leg servo (973)                                                      |
 | `GS3DX_Shape`           | `gs3dx_build_shape`       | FitBalance with de Leva inertia, ellipsoid legs, hands and head, balanced on the capture's joint-centre centre of mass (973) |
 | `GS3DX_Neck`            | `gs3dx_build_neck`        | Shape with a two-axis neck driven by the capture's head markers; joint spheres removed (975, `docs/NECK.md`)                 |
+| `GS3DX_Human`           | `gs3dx_build_human`       | Neck drawn with ellipsoids, square face, head aimed at address, sprung midfoot joints (942, `docs/HUMAN.md`)                 |
 
 The license counts compiled blocks (FullBody compiles to 945 of 1,000), see
 `docs/BLOCK_BUDGET_FINDINGS.md`. Data sources and gaps are in

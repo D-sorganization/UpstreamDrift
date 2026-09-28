@@ -220,6 +220,17 @@
       `gs3dx_joint_keys` (block path + primitive); IK/fit helpers still hard-code j15/j18/j19 and
       are only used on neck-free variants. agy's `gs3dx_capture_head_frame` +
       `gs3dx_capture_address_transform` ported (reviewed).
+  26. #10979 human shape (2026-09-28): `GS3DX_Human` (`gs3dx_build_human`, `docs/HUMAN.md`,
+      942 compiled) = Neck with: the unused "Inertia Sensor" subsystem removed (-75); trunk,
+      neck, shoulder, arm, forearm cylinders and the misaligned `ZeroMassHipReference` bar hidden
+      (inertia kept) and massless ellipsoids drawn on each parent's exposed reference frame (a
+      cylinder with custom frames shows only its end frames); head radii 90x90x105 mm;
+      `NeckAddress` (-24.2, -7.0 deg) aims the neck at the capture head (address error 126 ->
+      40 mm); `FaceSquareRoll` -20.73 deg squares the face at address (driver-head visual,
+      10.5 deg loft; still 14 deg open at impact from the posed hands); sprung revolute
+      midfoot (MTP) joints with a 0.25 kg forefoot carrying the toe contact spheres, foot COM
+      preserved. `gs3dx_reference_pose` renders with the servo leg reference (IK feet were
+      reversed: no toe target). Tests: human 5/5, neck 5/5, render 4/4.
 
 ## Files and Decisions
 
@@ -307,8 +318,8 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 neck: balance run of `GS3DX_Neck` on the joint-centre reference, compared with
-   Shape's (1.77 BW, pelvis 22 mm RMS); the neck moves 4.7 kg of head.
+2. #10979 human: record the `GS3DX_Human` balance run (midfoot joints) in `docs/HUMAN.md`
+   against Neck's (2.03 BW peak, pelvis 21 mm RMS, COM 12.9 mm).
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
