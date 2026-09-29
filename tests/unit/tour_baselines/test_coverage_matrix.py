@@ -147,3 +147,34 @@ def test_upper_body_planarity_receipts_reject_both_captures() -> None:
         assert f"tb06_{cell.capture}_planarity_receipt.json" in cell.existing_artifact
         assert cell.blocked_reason is not None
         assert "cannot attain" in cell.blocked_reason
+
+
+def test_disqualified_driven_triple_receipts_are_not_promoted() -> None:
+    """TB-05 receipts marked disqualified must remain rejected in the matrix."""
+    matrix = generate_coverage_matrix()
+    triple_cells = [
+        cell for cell in matrix if cell.model_id == "driven_triple_pendulum"
+    ]
+
+    assert {cell.capture for cell in triple_cells} == {"driver", "iron"}
+    for cell in triple_cells:
+        receipt_name = f"tb05_{cell.capture}_qualification_receipt.json"
+        receipt_path = (
+            Path(__file__).parents[3]
+            / "docs"
+            / "plans"
+            / "tour_baselines"
+            / "evidence"
+            / receipt_name
+        )
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        statuses = receipt["statuses"]
+
+        assert statuses["scientific_qualification"] == "disqualified"
+        assert statuses["kinematic_accuracy"] == "exceeds_threshold"
+        assert statuses["solver_convergence"] == "max_iterations"
+        assert cell.evidence_status is EvidenceStatus.REJECTED
+        assert cell.existing_artifact is not None
+        assert receipt_name in cell.existing_artifact
+        assert "DISQUALIFIED" in cell.existing_artifact
+        assert cell.blocked_reason is not None
