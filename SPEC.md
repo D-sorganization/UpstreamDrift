@@ -12,6 +12,41 @@ Resolves the split-brain coverage gates by making the budget JSON the single gat
 - **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
   - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
 
+## Fail-Closed Disqualified Tour Baseline Receipts in Motion Matching Ledger and Tracker (#11085)
+
+Implements [MMR-01] fail-closed qualification and rejection propagation across the motion-matching ledger, coverage matrix, and status tracking documents:
+- **TB-05 Driven Triple Pendulum Disqualification (`src/shared/python/tour_baselines/coverage.py`)**:
+  - Registers `_DRIVEN_TRIPLE_RECEIPTS` and `_DRIVEN_TRIPLE_REJECTION`.
+  - Updates `_cell_driven` so `driven_triple_pendulum` returns `EvidenceStatus.REJECTED` for both driver and 7-iron captures instead of `UNQUALIFIED`.
+  - Updates `docs/plans/tour_baselines/coverage_matrix.md` lines 25-26 to display `❌ Rejected`.
+- **Ledger Accuracy & Fail-Closed Gates (`src/shared/python/motion_matching/ledger.py`)**:
+  - `_extract_metric_value`: Adds traversal of the `"metrics"` mapping, correctly extracting `whole_marker_rmse_m` (415–567 mm) from `tb04_` and `tb05_` qualification receipts.
+  - `extract_candidate_sha`: Adds inspection of `identity_hash` and nested `identity` mapping.
+  - `extract_acceptance`: Hardens gate evaluation: physical and numerical gate results supersede self-reported success strings (PASSED/ACCEPTED with a failed or rejected gate fails closed to `status: "REJECTED"` and `is_physically_accepted: False`); the override is confined to success claims, so historical `DIAGNOSTIC` verdicts are preserved verbatim.
+- **Status Document Generator Hardening (`scripts/generate_matched_swing_status.py`)**:
+  - Configures `sys.stdout` and `sys.stderr` to UTF-8 on Windows to prevent `UnicodeEncodeError` when rendering emoji badges.
+  - Adds `_normalize_markdown` comparison in `--check` mode to ensure resilient whitespace handling across formatting variations.
+- **Ledger & Status Synchronization**:
+  - Re-indexes all receipts with `python -m src.shared.python.motion_matching ledger --write` (`reports/matched_swing_ledger.json`).
+  - Synchronizes tracker documentation with `python scripts/generate_matched_swing_status.py --write` (`docs/development/matched_swing_program/README.md`).
+- **TDD Test Coverage**:
+  - `tests/unit/tour_baselines/test_coverage_matrix.py`: Adds `test_disqualified_driven_triple_receipts_are_not_promoted`.
+  - `tests/unit/motion_matching/test_ledger.py`: Adds `test_disqualified_tour_baseline_receipts_are_indexed_as_rejected` and `test_contradictory_status_strings_fail_closed_to_rejected`.
+## Shadow State, Camera, and Renderer Boundary Verification (#11110)
+
+Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
+- **No-Evidence Abstention & State Convention Support (`src/shared/python/shadow_tracker/initialization.py`)**:
+  - Updates `fit_initial_state_multiview` to enforce no-evidence abstention: when observations have zero valid pixels or all empty foreground masks, `best_hypothesis` returns `None` rather than selecting an ungrounded candidate. Winner scoring is seeded below the minimum observed score so a valid all-zero-IoU candidate set with real evidence still selects the first candidate, and candidate-poses inference uses an explicit length check so 2-D NumPy input matrices no longer raise a truthiness `ValueError`.
+  - Adds explicit `state_convention` parameter to `fit_initial_state_multiview`, inferring `canonical_articulated_v1` for 37/27-element kinematic states and `point_landmarks` for legacy states.
+- **Comprehensive Boundary Contract Suite (`tests/unit/shadow_tracker/test_boundary_contracts.py`)**:
+  - **No-Evidence Abstention**: Verifies empty masks and zero-valid-pixel observations abstain from selecting a winning hypothesis.
+  - **Geometric Sensitivity**: Proves joint angle modifications (shoulder, elbow, wrist) move expected geometry in `ArticulatedSilhouetteRenderer` and alter body/club masks without cross-channel contamination.
+  - **Offscreen & Near-Plane Clipping**: Validates partial silhouettes extending beyond image borders, completely out-of-frame positions (zero pixels, no crashes), and near-plane depth clipping ($z \le 0$).
+  - **Anamorphic Camera Fidelity**: Confirms $f_x \neq f_y$ generates elliptical projections and round-trips through `camera_bridge` without focal length coercion; the rendering check now asserts real axis scaling by comparing the anamorphic span against an isotropic reference (horizontal ~2x, vertical unchanged).
+  - **SE(3) & Distortion Consistency**: Tests 3D camera rotation inversion ($R_{cw} = R_{wc}^T$, $t_{cw} = -R_{wc}^T t_{wc}$) and distortion expansion (0, 4, 5 coefficients) with strict rejection of invalid lengths.
+  - **Dimension & Finite Checks**: Enforces fail-closed rejection on mismatched dimensions and non-finite coordinates.
+  - **Quaternion Normalization & Round-Trip**: Verifies unit quaternion normalization, non-unit normalization, zero-norm quaternion rejection, and machine-precision $q/v$ round-trip between native and canonical layouts.
+
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
 Resolves test-order and module-identity pollution in `test_force_plate_stitching.py` under parallel execution:
@@ -7103,6 +7138,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |
+| 2026-09-29 | #11117 | [MMR-01] Fail-closed matching-ledger and status gates for #11085: metrics-map traversal for `whole_marker_rmse_m`, candidate-SHA identity inspection, TB-05 driven triple pendulum disqualified everywhere, contradictory-status override confined to success claims (historical DIAGNOSTIC verdicts preserved, red/green tested). |
+| 2026-09-29 | #11120 | [MMR-14] Review fixes for shadow-tracker boundary tests (#11110): initialization seeding below the minimum winner score so valid all-zero-IoU candidates win with real evidence, explicit length check for NumPy candidate matrices (no truthiness ValueError), and a real fx/fy scaling assertion comparing anamorphic vs isotropic rendering spans. |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-29 | #11112 | Row/column norms switched to `sqrt(einsum)` at the residual bolt sites across `motion_matching` (multi-shooting rollout distances, club calibration lengths and shaft norms, dynamics-filter hull edges, hip sphere fit, downswing root/marker tracking, reference marker errors, club-only acceptance and control-replay deltas), `bunkershot3d` qualification identifiability scale (identity proven by a NaN/Inf parametrized equivalence test). The `sidekick` electrical model section-widths site is excluded: `electrical_model.py` is a Tools-owned child copy (change moves to D-sorganization/Tools with a vendor/ud-tools pin bump). |
