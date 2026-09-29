@@ -1,3 +1,7 @@
+## 2026-09-29 - [Optimize Unit-Quaternion/Unit-Vector Norm Checks (#11119)]
+**Learning:** `float(np.linalg.norm(v))` on tiny (1x3 / 1x4) arrays pays multiple dispatch checks and temporary allocations on every call. `math.sqrt(np.vdot(v, v))` (or plain comparison `np.vdot(v, v) > 0.0` where only positivity matters) bypasses that overhead (~2x faster for small 1D arrays) with identical results.
+**Action:** In `src/shared/python/physics/_pre_impact_contracts.py`, `unit_quaternion` and `unit_vector` now compute norms via `math.sqrt(np.vdot(...))`.
+
 ## 2026-09-09 - [Optimize Python List and Array Reduction Overheads]
 **Learning:** Using `np.sum()` on a standard Python list introduces significant overhead because NumPy must first implicitly convert the list into a temporary ndarray. This overhead is heavily pronounced when the list contains NumPy scalars, as opposed to raw Python floats. Python's built-in `sum()` is ~10x faster for such lists. Similarly, evaluating `np.count_nonzero()` on boolean arrays is ~30% faster than `np.sum()` because it counts directly at the C-level without engaging the full summation machinery.
 **Action:** Replace `np.sum()` with the built-in `sum()` for python lists, and use `np.count_nonzero()` for boolean arrays. Additionally, replace module-level `np.sum(array)` with the array method `.sum()` when applicable.
