@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-29 — #10979: `GS3DX_Human` balances to impact (pelvis 21.9 mm RMS vs `GS3DX_Neck` 18.0, `GS3DX_Shape` 21.6) after the toe contacts were moved under the toe tip (Big Toe, Lesser Toes on the forefoot) and `MidfootStiffness` set to 2,000 N·m/rad; 965 compiled; test_gs3dx_human 9/9, test_gs3dx_render 5/5; run through the finish (1.81 s): trail toe roll and lead outside-edge roll work, weight falls back onto the trail toe after 1.35 s
+- **Last verified:** 2026-09-29 — #10979: `GS3DX_Human` balances to impact (pelvis 21.9 mm RMS vs `GS3DX_Neck` 18.0, `GS3DX_Shape` 21.6) after the toe contacts were moved under the toe tip (Big Toe, Lesser Toes on the forefoot) and `MidfootStiffness` set to 2,000 N·m/rad; 965 compiled; test_gs3dx_human 9/9, test_gs3dx_render 5/5; run through the finish (1.81 s): trail toe roll and lead outside-edge roll work, the trail foot overshoots its pivot and takes the load at 1.55 s (COM itself matches the capture)
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Find why `GS3DX_Human` leans back onto the trail toe after 1.35 s in the finish run (lead foot unloaded, then slides 234 mm) by logging the balance command and COM error past impact.
+- **Next step:** Test whether the stiff midfoot makes the trail foot pivot on its toe tip and overshoot its reference in the finish (`human/fin6.m`: MidfootStiffness 300 vs 1e4 to 1.81 s).
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 

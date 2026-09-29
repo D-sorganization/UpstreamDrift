@@ -353,13 +353,17 @@ Creator` (newline); find it by BlockType.
    - **Finish (2026-09-29, scratch `human/fin1.m`, `fin2.m`):** all workspace references
      span 654 frames (1.814 s), so `gs3dx_contact_check(..., stop_time=1.809)` runs through
      the finish. Trail heel up onto Big Toe then Lesser Toes (ankle rise 142 mm vs capture
-     129), lead foot onto its outside edge: works. OPEN: from 1.35 s the golfer leans back
-     onto the trail toe (0.73-0.83 BW at 1.55-1.6 s, lead foot 0) and the unloaded lead
-     foot slides 234 mm (capture 36 mm, turns 30 deg in place); pelvis 56.6 mm RMS after
-     impact. Suspects, in order: `BalanceGain` (inverse Jacobian) assumes planted feet, so
-     it is wrong once the trail heel is up; the lead foot's 30 deg turn fought by contact
-     friction; COM reference past impact. Next: log the balance command and COM error after
-     1.3 s and compare with the COM over the lead foot.
+     129), lead foot onto its outside edge: works. OPEN: at 1.55-1.6 s the trail toe carries 0.73-0.83 BW with the lead foot
+     at 0, and the unloaded lead foot slides 234 mm (capture 36 mm, turns 30 deg in place);
+     pelvis 56.6 mm RMS after impact. NOT the COM: along trail ankle (0) -> lead ankle (1)
+     the model COM ends at 0.60, its reference 0.58, the capture's 0.54 (scratch
+     `human/fin5.m`; TRAP: `gs3dx_kinematic_grf` .com is in target axes with the LAB
+     origin: subtract `tf.S.' * tf.origin` (`gs3dx_capture_address_transform`) before
+     comparing with joint centres, which use the address-waist origin). Neck and Shape do
+     the same and worse (support 0 near 1.4 s, trail slide 0.55 m; scratch `fin4.m`). The
+     trail foot runs 60-105 mm ahead of its reference from 1.45 s. Hypothesis: the stiff
+     midfoot makes the foot pivot on the toe tip instead of hinging at the ball; running
+     `human/fin6.m` (MidfootStiffness 300 vs 1e4 through the finish) to test it.
 
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
