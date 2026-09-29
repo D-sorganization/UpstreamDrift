@@ -19,15 +19,15 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11094 — Qualify Drake Native Dual-Club Dynamics and Replay
 
-- **State:** in_progress
-- **Owner:** local
+- **State:** in_review
+- **Owner:** UDFixTrio10x
 - **Issue:** #11094
 - **Branch:** `feat/mmr-10d-drake-dual-club-11094`
 - **Paths:** `src/engines/physics_engines/drake/python/native_qualification.py`, `tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`, `tests/scripts/test_run_native_engine_lane.py`, `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json`, `docs/development/matched_swing_program/evidence/drake/`
 - **Started:** 2026-09-29
-- **Last verified:** 2026-09-29 — 30 focused tests passed in test_drake_dual_club_qualification.py, test_run_native_engine_lane.py, and test_native_lane_freshness.py; ruff check and format clean; dry duplication, hardcoded style ratchet, and architecture budgets pass.
-- **Summary:** Implements [MMR-10D] native dual-club dynamic qualification and automated nightly lane integration for Drake. Enforces fail-closed rejection of copied state trajectories, FK-only playbacks without dynamic simulation, and zero native test runs on pinned host. Implements independent derivative consistency and energy balance accounting, honest disclosure of engine limitations, and host runtime detection (UNAVAILABLE). Adds drake to nightly lane runner and provides dual-club evidence package (driver and 7-iron).
-- **Next step:** Push branch, open PR with `Closes #11094`, and release lease.
+- **Last verified:** 2026-09-29 at 3b23bd41502a7b7d028f291564997b6460f14cbc — 36 focused tests passed (test_drake_dual_club_qualification.py 16, test_run_native_engine_lane.py + test_native_lane_freshness.py 20); red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native Drake qualification NOT achieved: pydrake unavailable on all reachable hosts.
+- **Summary:** Fail-closed conversion of the [MMR-10D] dual-club Drake qualification (review audit follow-up): receipts now carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite energy all reject); fabricated marker metrics (scaled early/terminal/clubhead RMS, hardcoded pelvis_yaw_error_pct) and placeholder sha256 receipts (`c0ffee…`/`deadbeef…`) removed and replaced with honest fail-closed UNAVAILABLE evidence records. Adds drake to the nightly lane runner. Real qualification still requires pydrake on a pinned host via the native lane.
+- **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
