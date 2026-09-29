@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+import hashlib
+import json
 import math
 
 from ._validation import (
@@ -106,6 +108,38 @@ class PinholeCameraModel:
                 and 0 <= min_y < max_y <= self.height_px
             ):
                 raise ValueError(f"Invalid crop_box boundaries: {self.crop_box}")
+
+
+_CAMERA_CALIBRATION_FIELDS = (
+    "camera_id",
+    "width_px",
+    "height_px",
+    "fx",
+    "fy",
+    "cx",
+    "cy",
+    "k1",
+    "k2",
+    "p1",
+    "p2",
+    "k3",
+    "rotation_world_to_camera",
+    "translation_world_to_camera",
+    "crop_box",
+    "is_mirrored",
+)
+
+
+def camera_calibration_fingerprint(camera: PinholeCameraModel) -> str:
+    """Deterministic SHA-256 fingerprint over the full immutable camera calibration.
+
+    Two cameras commonly recalibrated under one ``camera_id`` (focal length, distortion,
+    pose, crop, or mirroring changes) produce different fingerprints, so checkpoints can
+    detect recalibration beyond the logical ID.
+    """
+    payload = {field: getattr(camera, field) for field in _CAMERA_CALIBRATION_FIELDS}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def project_point_to_pixel(
@@ -279,6 +313,16 @@ class AnalyticSilhouetteRenderer:
     @property
     def club_radius_m(self) -> float:
         return self._club_radius_m
+
+    def update_camera(self, camera: PinholeCameraModel) -> None:
+        """Replace this renderer's calibration for ``camera.camera_id`` in place.
+
+        Keeps recalibrated cameras (same ID, new intrinsics) and newly configured
+        camera IDs renderable without rebuilding the renderer.
+        """
+        if not isinstance(camera, PinholeCameraModel):
+            raise TypeError(f"Expected PinholeCameraModel, got {type(camera).__name__}")
+        self._cameras[camera.camera_id] = camera
 
     _rasterize_ellipse = staticmethod(_rasterize_ellipse)
 

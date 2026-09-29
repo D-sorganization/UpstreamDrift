@@ -10,9 +10,28 @@ Resolves the split-brain coverage gates by making the budget JSON the single gat
   - The `tests` job emits `--cov-report=json:coverage.json` alongside the XML report, and a new `Enforce Budget Package Coverage Gates` step runs `python3 scripts/check_coverage_gates.py --report coverage.json --strict` after the per-package threshold enforcer.
 - **Measured floors** (`min_coverage` set to measurement rounded DOWN to 0.1, `ratchet_on` 2027-01-01): api-routes 84.3% (5221 stmts), data-io 50.1% (2891), execution-checkpointing 22.4% (2521), deployment 48.4% (1362), optimization 49.9% (2815), engine-adapters 7.1% (51393; optional-engine packages only covered when their backend is installed).
 - **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
-  - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
+  - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0).
 
 ## Shadow State, Camera, and Renderer Boundary Verification (#11110)
+
+## Fail-Closed Fitting Capabilities and Recoverable Cancellation (#11111)
+
+Implements fail-closed capability checks, cancellation recovery semantics, and architecture budget decomposition for shadow tracking:
+- **Capability Validation & Fail-Closed Semantics (`src/shared/python/shadow_tracker/service.py`)**:
+  - Implements `_validate_fit_capabilities` enforcing backend availability, requested engine capabilities, and scientific release qualification prior to trajectory fitting, failing closed on unsupported setups.
+  - `fit` honours the requested `time_window_start_pts`/`time_window_end_pts` PTS window, failing closed when the window is empty, when a windowed frame lacks a manual mask (observations, times and masks are always emitted as aligned tuples), and when `physical_time_s` is unknown instead of fabricating a timestamp.
+- **Recoverable Cancellation Accounting**:
+  - Implements `_build_cancelled_bundle` cleanly segregating aborted fits (`cancelled=True`, empty candidates) from uncalibrated failures or convergence faults.
+  - Distinguishes user cancellation from physical tracking faults in result telemetry; the optimizer's non-success `execution_status` is propagated into the returned `ResultBundle` and service lifecycle for synthetic and non-synthetic backends.
+- **Stale Checkpoint Invalidation**:
+  - `OptimizationCheckpoint` records mask revision IDs and a deterministic SHA-256 fingerprint of the full camera calibration; manual mask corrections (`update_mask`) and camera updates (`update_camera`, which also refreshes the registered silhouette renderer's camera map) invalidate active fits and checkpoints, and resume verification compares both the camera ID and the calibration fingerprint.
+- **Atomic Bundle Persistence (`src/shared/python/shadow_tracker/artifacts.py`)**:
+  - `save_bundle` stages the replacement bundle outside the target and publishes with a single atomic directory operation (RENAME_EXCHANGE swap on Linux, backup-rollback rename fallback elsewhere), so an interrupted save never leaves a partially written or missing target.
+- **Architecture Decomposition**:
+  - Decomposes monolithic `DefaultShadowTrackerService.fit()` into modular helpers (`_validate_fit_capabilities`, `_build_cancelled_bundle`, `_assemble_fit_result`), reducing cyclomatic complexity and satisfying the repository 100-line function architecture budget.
+- **Verification & Testing (`tests/unit/shadow_tracker/test_fail_closed_fitting.py`)**:
+  - Unit tests verifying capability validation, PTS-window and aligned-coverage fail-closed gates, unknown-frame-timing refusal, execution-status propagation, camera calibration staleness, renderer calibration sync, atomic publish and rollback, and cancellation recovery.
+
 
 Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
 - **No-Evidence Abstention & State Convention Support (`src/shared/python/shadow_tracker/initialization.py`)**:
@@ -45,6 +64,44 @@ Implements rigid attachment transform diagnostics and orientation residual repor
   - Validates grip/clubface calibration transform frame endpoints against the declared lead/trail hand, grip, and face frames, and freezes `marker_residuals_mm` into an immutable mapping at construction.
 - **Verification & Testing (`tests/unit/motion_matching/test_observability_diagnostics.py`)**:
   - Unit tests covering axial turn invariance, fail-closed comparisons, frame conventions, and receipt serialization round-trips.
+
+## Motion Matching Ground-Truth Observation Manifest and Error Metrics (#11105)
+
+Establishes the authoritative marker observation manifest schema, holdout frame protection, and mathematically sound error metric calculation for tour baselines:
+- **Observation Manifest Schema (`src/shared/python/tour_baselines/observation_manifest.py`)**:
+  - Defines `MarkerObservationSpec` and `ObservationManifest` enforcing SI metre units, per-club frame counts and sampling rates (Driver: 654 frames @ 360 Hz; Iron: 657 frames @ 359 Hz), and strictly disjoint calibration vs. holdout frame intervals.
+  - Freezes per-marker frame-level validity (missing spans derived from the sha-verified canonical captures) and reconstructs the frame-by-marker mask via `ObservationManifest.frame_validity()` in sorted marker column order; `ObservationManifest.require_frozen_validity()` is the public contract binding metric evaluation to that frozen mask.
+  - Normalizes the `markers` field to an immutable mapping at construction so serialized benchmark evidence cannot mutate after construction.
+  - Implements JSON round-trip serialization and deserialization (`to_json`, `from_json`) with comprehensive validation.
+  - Exposes `build_frozen_observation_manifest(club)` constructing authoritative frozen manifests for Tour baseline trials (`C3D_TA_Driver.c3d`, `C3D_TA_Iron.c3d`).
+- **Mathematically Sound Metric Aggregation**:
+  - Implements `compute_pooled_rmse` computing exact Euclidean root-mean-square error $\sqrt{\sum_{\text{valid}} \|p - o\|^2 / N_{\text{valid}}}$. Rejects zero valid observations (fail-closed), validates non-finite coordinates at valid locations, and safely ignores masked NaNs.
+  - Implements `compute_frame_wise_rms` returning per-frame RMS and median frame RMS, mathematically distinct from pooled Euclidean RMSE across frames with non-uniform marker visibility or error distribution.
+  - When a manifest is bound, both metric functions verify the caller-supplied mask bit-for-bit against the frozen frame-level validity before producing a number, so gap-filled or residual-invalid samples can never become measured evidence.
+- **Holdout Frame Inviolability & Calibration Protection**:
+  - Binds `calibrate_with_manifest_protection` to the real calibration entry point `calibrate_fixed_geometry(..., manifest=...)`: the trajectories must cover the manifest's frame count and only `manifest.calibration_frames` rows reach the estimator, so holdout observations cannot update calibrated parameters regardless of caller discipline.
+  - Holds out from the frozen top-of-backswing event of each club - driver frame 397 of 654, iron frame 394 of 657 - covering downswing, impact and follow-through; the earlier flat frame-251 boundary mis-described late-backswing frames (146 driver / 143 iron) as held-out swing phases.
+- **Verification (`tests/unit/tour_baselines/test_observation_manifest.py`)**:
+  - 17 unit tests covering schema validation, holdout disjointness, frozen manifest conformance (frames, rate, SHA, per-marker frame-level validity), pooled vs. median RMS divergence, masked NaN handling, fail-closed non-finite coordinate rejection, frozen-validity metric binding, calibration entry-point slicing invariants, and the event-based holdout boundary.
+
+## Named-State and Torque-Transfer Conformance (#11109)
+
+Implements named-state coordinate validation, double-cover invariant angular velocity mapping, and virtual work duality verification:
+- **Named-State Schema & Validation (`src/shared/python/motion_matching/named_state.py`)**:
+  - Implements `NamedStateManifest` under schema `named-state-conformance/1.0.0` validating coordinate names, velocity names, control names, armature identifiers, and capture provenance. Rejects unknown names, missing names, and non-finite values.
+  - Freezes `armature` and `interpolation` into read-only mappings at construction so the manifest contents and its recorded SHA cannot be mutated underneath recorded identities.
+  - Enforces deterministic, key-order invariant state vector packing preventing forward kinematics drift under dictionary permutations.
+- **Quaternion Angular Velocity Mapping (`QuaternionVelocityMap`)**:
+  - Implements continuous angular velocity extraction using the SO(3) logarithmic map over the shortest geodesic arc.
+  - Enforces antipodal double-cover sign invariance: $q$ and $-q$ evaluate to identical continuous angular velocities.
+- **Virtual Work & Small-Body Mechanics (`SmallBodyVirtualWorkOracle`)**:
+  - Verifies exact torque-force duality ($\tau = J^T F_{\text{tip}}$) and virtual work equality ($\tau^T \delta q = F^T \delta x$) across arbitrary generalized coordinate permutations.
+- **Cross-Club & Capture Replay Invariants (`CaptureAttachmentDeclaration`)**:
+  - Validates capture provenance, comparing the full attachment identity (club, document ID, document SHA-256, calibration hash, grip frame ID), strictly failing closed if iron capture runs attempt to reuse driver attachment receipts, and enforcing integrator tolerance fidelity between solve and replay.
+- **Full-Body Fit Integration (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Integrates club-type attachment declarations and solver tolerance validation into `load_inputs`; the cross-club check parses nested club objects (`{"name": ...}`) and normalises iron variants (`iron7` -> `iron`) before comparing, so standard calibrated fits no longer raise false contamination errors.
+- **Verification & Testing (`tests/unit/motion_matching/test_named_state_conformance.py`)**:
+  - Unit tests covering key-order invariant packing, double-cover invariance, torque-force virtual work duality, fail-closed cross-club validations, full attachment identity, manifest mapping immutability, and the curated facade exports.
 
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
@@ -7134,6 +7191,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
 | 2026-09-29 | #11138 | Consolidate Bolt micro-optimisation PRs #11112, #11128, #11129: row/column norms switched to `sqrt(einsum)` (bunkershot3d qualification-fit scale, motion-matching club calibration/hull/hip/downswing/reference/multi-shooting/club-only), and small fixed-size vectors switched to `math.sqrt(np.vdot)` (pink_tasks weld/marker residuals, physics_validation Jacobian error). Numerically identical results; new identity test `tests/unit/motion_matching/test_row_norm_einsum_identity.py` covers axis=0/1/2, keepdims, empty, NaN/Inf. |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
@@ -7141,6 +7199,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11117 | [MMR-01] Fail-closed matching-ledger and status gates for #11085: metrics-map traversal for `whole_marker_rmse_m`, candidate-SHA identity inspection, TB-05 driven triple pendulum disqualified everywhere, contradictory-status override confined to success claims (historical DIAGNOSTIC verdicts preserved, red/green tested). |
 | 2026-09-29 | #11120 | [MMR-14] Review fixes for shadow-tracker boundary tests (#11110): initialization seeding below the minimum winner score so valid all-zero-IoU candidates win with real evidence, explicit length check for NumPy candidate matrices (no truthiness ValueError), and a real fx/fy scaling assertion comparing anamorphic vs isotropic rendering spans. |
 | 2026-09-29 | #11123 | Head/trunk/grip diagnostic receipts (#11106, first tranche): compose the calibrated attachment rotation into the observed SO(3) orientation residual before evaluation, require `receipt_sha256` on schema-1.0 receipt load, validate grip/clubface calibration frame endpoints, and freeze `marker_residuals_mm` receipts against post-construction mutation. |
+| 2026-09-29 | #11118 | Tour-baseline observation manifests (#11105): freeze per-marker frame-level validity spans derived from the sha-verified canonical captures, bind metric evaluation to the frozen frame-by-marker mask through a public manifest contract, enforce holdout protection inside the real calibration entry points by slicing manifest calibration frames, start the holdout at the recorded top-of-backswing event (driver frame 397, iron 394), make `markers` immutable, and regenerate the shared Tools divergence inventory from a full clone. |
+| 2026-09-29 | #11121 | Shadow Tracker fits fail closed on unavailable or unqualified backends, empty PTS windows, incomplete mask coverage and unknown frame timing; optimizer execution status propagates into result bundles; checkpoints fingerprint full camera calibration and invalidate on mask or camera edits (registered renderers refresh their camera maps); bundle replacement publishes through a single atomic directory swap (#11111). |
+| 2026-09-29 | #11122 | Named-state conformance: capture attachment identity checks compare document SHA-256 and grip frame ID, `NamedStateManifest` freezes `armature`/`interpolation` mappings at construction, the seven facade symbols join `motion_matching.__all__`, and `load_inputs` parses nested club objects and normalises `iron7` to `iron` so standard calibrated fits no longer raise false cross-club contamination errors (#11109). |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |
