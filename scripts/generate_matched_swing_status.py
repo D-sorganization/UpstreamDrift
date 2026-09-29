@@ -272,7 +272,32 @@ def update_tracker_document(doc_path: Path, new_section: str) -> bool:
     return True
 
 
+def _normalize_markdown(text: str) -> str:
+    """Normalize markdown table padding and trailing whitespace for comparison."""
+    lines = []
+    for raw_line in text.strip().splitlines():
+        line = raw_line.strip()
+        if line.startswith("|") and line.endswith("|"):
+            cells = [c.strip() for c in line.split("|")[1:-1]]
+            if all(c.replace("-", "").replace(":", "") == "" for c in cells if c):
+                lines.append("|" + "|".join("---" for _ in cells) + "|")
+            else:
+                lines.append("| " + " | ".join(cells) + " |")
+        else:
+            lines.append(line)
+    return "\n".join(lines)
+
+
 def main() -> None:
+    if sys.platform == "win32":
+        for stream_name in ("stdout", "stderr"):
+            stream = getattr(sys, stream_name, None)
+            if stream is not None and hasattr(stream, "reconfigure"):
+                try:
+                    stream.reconfigure(encoding="utf-8")
+                except (AttributeError, ValueError):
+                    pass
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--write",
@@ -316,7 +341,9 @@ def main() -> None:
         start_idx = tracker_text.index(FENCE_START) + len(FENCE_START)
         end_idx = tracker_text.index(FENCE_END)
         current_content = tracker_text[start_idx:end_idx].strip()
-        if current_content != rendered.strip():
+        if _normalize_markdown(current_content) != _normalize_markdown(
+            rendered.strip()
+        ):
             print(
                 f"FAIL: {args.tracker} is stale compared to {args.ledger}",
                 file=sys.stderr,
