@@ -11,7 +11,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
 import numpy as np
+
+if TYPE_CHECKING:
+    from src.shared.python.tour_baselines.observation_manifest import (
+        ObservationManifest,
+    )
 
 
 @dataclass(frozen=True)
@@ -106,12 +113,45 @@ def _extract_median_length(pts_a: np.ndarray, pts_b: np.ndarray) -> float:
     return float(np.median(dists))
 
 
+def _slice_calibration_frames(
+    manifest: ObservationManifest,
+    trajectories: tuple[np.ndarray, np.ndarray, np.ndarray],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Select manifest.calibration_frames rows from full-capture trajectories.
+
+    Fails closed unless every trajectory covers exactly manifest.frame_count rows, so
+    holdout rows are dropped here and cannot leak into the estimator.
+    """
+    sliced: list[np.ndarray] = []
+    for traj in trajectories:
+        arr = np.asarray(traj, dtype=float)
+        if arr.ndim < 2 or arr.shape[0] != manifest.frame_count:
+            raise ValueError(
+                f"Trajectory shape {arr.shape} must cover all {manifest.frame_count} "
+                f"rows (manifest.frame_count) for manifest-bound calibration"
+            )
+        sliced.append(arr[list(manifest.calibration_frames)])
+    return sliced[0], sliced[1], sliced[2]
+
+
 def calibrate_fixed_geometry(
     shoulder_pts: np.ndarray,
     grip_pts: np.ndarray,
     clubhead_pts: np.ndarray,
+    *,
+    manifest: ObservationManifest | None = None,
 ) -> GeometryCalibrationResult:
-    """Calibrate positive bounded link lengths and report parameter identifiability."""
+    """Calibrate positive bounded link lengths and report parameter identifiability.
+
+    When a manifest is bound, the trajectories must cover all manifest.frame_count
+    rows and only the manifest's calibration frames reach the estimator: holdout
+    protection is enforced inside this entry point, independent of the caller.
+    """
+    if manifest is not None:
+        shoulder_pts, grip_pts, clubhead_pts = _slice_calibration_frames(
+            manifest, (shoulder_pts, grip_pts, clubhead_pts)
+        )
+
     l1_measured = _extract_median_length(shoulder_pts, grip_pts)
     l2_measured = _extract_median_length(grip_pts, clubhead_pts)
 
