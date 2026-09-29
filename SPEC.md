@@ -12,6 +12,7 @@ Resolves the split-brain coverage gates by making the budget JSON the single gat
 - **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
   - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
 
+<<<<<<< HEAD
 ## Fail-Closed Disqualified Tour Baseline Receipts in Motion Matching Ledger and Tracker (#11085)
 
 Implements [MMR-01] fail-closed qualification and rejection propagation across the motion-matching ledger, coverage matrix, and status tracking documents:
@@ -32,6 +33,20 @@ Implements [MMR-01] fail-closed qualification and rejection propagation across t
 - **TDD Test Coverage**:
   - `tests/unit/tour_baselines/test_coverage_matrix.py`: Adds `test_disqualified_driven_triple_receipts_are_not_promoted`.
   - `tests/unit/motion_matching/test_ledger.py`: Adds `test_disqualified_tour_baseline_receipts_are_indexed_as_rejected` and `test_contradictory_status_strings_fail_closed_to_rejected`.
+## Shadow State, Camera, and Renderer Boundary Verification (#11110)
+
+Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
+- **No-Evidence Abstention & State Convention Support (`src/shared/python/shadow_tracker/initialization.py`)**:
+  - Updates `fit_initial_state_multiview` to enforce no-evidence abstention: when observations have zero valid pixels or all empty foreground masks, `best_hypothesis` returns `None` rather than selecting an ungrounded candidate.
+  - Adds explicit `state_convention` parameter to `fit_initial_state_multiview`, inferring `canonical_articulated_v1` for 37/27-element kinematic states and `point_landmarks` for legacy states.
+- **Comprehensive Boundary Contract Suite (`tests/unit/shadow_tracker/test_boundary_contracts.py`)**:
+  - **No-Evidence Abstention**: Verifies empty masks and zero-valid-pixel observations abstain from selecting a winning hypothesis.
+  - **Geometric Sensitivity**: Proves joint angle modifications (shoulder, elbow, wrist) move expected geometry in `ArticulatedSilhouetteRenderer` and alter body/club masks without cross-channel contamination.
+  - **Offscreen & Near-Plane Clipping**: Validates partial silhouettes extending beyond image borders, completely out-of-frame positions (zero pixels, no crashes), and near-plane depth clipping ($z \le 0$).
+  - **Anamorphic Camera Fidelity**: Confirms $f_x \neq f_y$ generates elliptical projections and round-trips through `camera_bridge` without focal length coercion.
+  - **SE(3) & Distortion Consistency**: Tests 3D camera rotation inversion ($R_{cw} = R_{wc}^T$, $t_{cw} = -R_{wc}^T t_{wc}$) and distortion expansion (0, 4, 5 coefficients) with strict rejection of invalid lengths.
+  - **Dimension & Finite Checks**: Enforces fail-closed rejection on mismatched dimensions and non-finite coordinates.
+  - **Quaternion Normalization & Round-Trip**: Verifies unit quaternion normalization, non-unit normalization, zero-norm quaternion rejection, and machine-precision $q/v$ round-trip between native and canonical layouts.
 
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
