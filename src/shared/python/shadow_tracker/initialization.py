@@ -10,7 +10,13 @@ from typing import Any, Literal
 
 
 from ._validation import check_id, check_pos_float, check_str
-from .contracts import Handedness, RenderRequest, SubjectModelBinding
+from .contracts import (
+    CANONICAL_ARTICULATED_CONVENTION,
+    Handedness,
+    POINT_LANDMARKS_CONVENTION,
+    RenderRequest,
+    SubjectModelBinding,
+)
 from .mask_records import MaskFrame
 from .projection import (
     PinholeCameraModel,
@@ -253,14 +259,36 @@ def fit_initial_state_multiview(
     candidate_poses: Sequence[Sequence[float]],
     subject_binding: SubjectModelBinding,
     renderer: SilhouetteRenderer,
+    state_convention: str | None = None,
 ) -> MultiviewFitResult:
-    """Fit initial state across calibrated multi-view silhouettes via objective evaluation."""
+    """Fit initial state across calibrated multi-view silhouettes via objective evaluation.
+
+    Preconditions:
+        - len(cameras) == len(observed_masks)
+        - Empty masks or zero-valid-pixel observations abstain (best_hypothesis is None).
+    """
     if len(cameras) != len(observed_masks):
         raise ValueError("length mismatch between cameras and observed_masks")
 
+    # Inferred convention if not explicitly passed
+    if state_convention is None:
+        # Explicit length check: `if candidate_poses` raises a truthiness
+        # ValueError for 2-D NumPy candidate matrices.
+        if len(candidate_poses) > 0 and len(candidate_poses[0]) in (37, 27):
+            state_convention = CANONICAL_ARTICULATED_CONVENTION
+        else:
+            state_convention = POINT_LANDMARKS_CONVENTION
+
+    # No-evidence check: observations with no valid pixels or all empty foreground cannot yield a winner
+    has_valid_pixels = any(m.valid.count(1) > 0 for m in observed_masks)
+    has_foreground_pixels = any(
+        m.body.count(1) > 0 or m.club.count(1) > 0 for m in observed_masks
+    )
+    has_evidence = has_valid_pixels and has_foreground_pixels
+
     evaluated_candidates: list[InitialHypothesis] = []
     best_hyp: InitialHypothesis | None = None
-    best_score = -1.0
+    best_score = float("-inf")
 
     for i, pose in enumerate(candidate_poses):
         scores: list[float] = []
@@ -270,6 +298,7 @@ def fit_initial_state_multiview(
                 camera_id=cam.camera_id,
                 state=tuple(float(x) for x in pose),
                 image_size_px=(cam.width_px, cam.height_px),
+                state_convention=state_convention,
             )
             rendered = renderer.render(req)
             loss = compute_silhouette_loss(
@@ -304,7 +333,7 @@ def fit_initial_state_multiview(
             provenance="multiview_residual_search",
         )
         evaluated_candidates.append(hyp)
-        if agg_score > best_score:
+        if has_evidence and agg_score > best_score:
             best_score = agg_score
             best_hyp = hyp
 
