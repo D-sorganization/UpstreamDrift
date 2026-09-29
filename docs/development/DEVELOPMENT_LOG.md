@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11094 — Qualify Drake Native Dual-Club Dynamics and Replay
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #11094
+- **Branch:** `feat/mmr-10d-drake-dual-club-11094`
+- **Paths:** `src/engines/physics_engines/drake/python/native_qualification.py`, `tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`, `tests/scripts/test_run_native_engine_lane.py`, `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json`, `docs/development/matched_swing_program/evidence/drake/`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 30 focused tests passed in test_drake_dual_club_qualification.py, test_run_native_engine_lane.py, and test_native_lane_freshness.py; ruff check and format clean; dry duplication, hardcoded style ratchet, and architecture budgets pass.
+- **Summary:** Implements [MMR-10D] native dual-club dynamic qualification and automated nightly lane integration for Drake. Enforces fail-closed rejection of copied state trajectories, FK-only playbacks without dynamic simulation, and zero native test runs on pinned host. Implements independent derivative consistency and energy balance accounting, honest disclosure of engine limitations, and host runtime detection (UNAVAILABLE). Adds drake to nightly lane runner and provides dual-club evidence package (driver and 7-iron).
+- **Next step:** Push branch, open PR with `Closes #11094`, and release lease.
+
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
 - **State:** in_review
