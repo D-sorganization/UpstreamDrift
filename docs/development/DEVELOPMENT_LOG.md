@@ -3541,3 +3541,4 @@ Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 
 Never place credentials, tokens, or customer data in a development log.
 No material development-log change — Bolt `np.linalg.norm` → `einsum` consolidation (#11073, #11074, #11076) is a behaviour-preserving micro-optimisation with no feature entry.
+No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/`math.sqrt(np.vdot)` consolidation (#11112, #11128, #11129) is a behaviour-preserving micro-optimisation with no feature entry.
