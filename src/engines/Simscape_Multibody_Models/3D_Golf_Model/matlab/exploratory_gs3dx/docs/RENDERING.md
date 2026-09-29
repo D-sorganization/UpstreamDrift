@@ -14,7 +14,9 @@ graphics in an invisible figure instead, and writes PNG stills
 1. Every Solid block of the model (`sm_lib/Body Elements/* Solid`, except
    `GraphicType = None`) is read: cylinder, sphere, brick or ellipsoid
    dimensions, evaluated in the model workspace and converted to metres, and
-   its diffuse colour and opacity.
+   its diffuse colour and opacity. A File Solid is read from its STL (found
+   on the MATLAB path, scaled by its `ExtGeomFileUnits`), with coincident
+   vertices merged so the facets shade smoothly.
 2. Each solid's reference frame port is exposed in memory (the model is
    closed without saving) and a `KinematicsSolver` gets a World translation
    and rotation variable for every solid.
@@ -35,18 +37,29 @@ Poses are an IK struct (`.joint_ids`, `.joint`, optional `.t`) or a joint
 matrix. Views are `"face-on"` (camera on +X, the way the golfer faces),
 `"down-the-line"` (camera on −Y, behind the golfer looking at the target),
 `"top"` or `[azimuth elevation]` as for `view`; `out.view` is the camera used.
+`focus` gives a close-up: a solid's name (the view follows it, for example
+`focus="Driver Head"`) or a fixed point `[x y z]`, with half-width
+`focus_width` (0.2 m); `out.focus` holds the centres used.
+
+```matlab
+gs3dx_render('GS3DX_Human', pose, stills=1, view="down-the-line", focus="Driver Head", focus_width=0.15);
+```
+
 Before 2026-09-28 the two names were swapped (face-on drew down the line, and
 down-the-line drew a face-on view from behind the golfer).
 
 ## Tests
 
-`tests/test_gs3dx_render.m` (4 tests):
+`tests/test_gs3dx_render.m` (5 tests):
 
 - face-on puts the camera on +X and down-the-line on −Y, and an unknown view
   is an error;
 - one pose renders headless to a PNG that is not a single colour;
 - the drawn `L Thigh` cylinder is its solver pose applied to its dimensions,
   to 1e-9 m;
-- the same for the `L Foot` brick.
+- the same for the `L Foot` brick;
+- `GS3DX_Human`'s driver head (a File Solid, STL in mm) is drawn from the
+  file with the file's extent, in its solver pose to 1e-9 m, and `focus`
+  centres the close-up on it; an unknown focus solid is an error.
 
 The ellipsoid path is checked on `GS3DX_Shape` (`tests/test_gs3dx_shape.m`).

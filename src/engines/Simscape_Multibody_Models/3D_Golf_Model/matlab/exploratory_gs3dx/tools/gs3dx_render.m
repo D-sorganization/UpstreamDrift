@@ -20,6 +20,8 @@ function out = gs3dx_render(mdl, q, opts)
 %     - Spherical Solid: SphereRadius
 %     - Brick Solid: BrickDimensions
 %     - Ellipsoidal Solid: EllipsoidRadii
+%     - File Solid: an STL (ExtGeomFileName, found on the path;
+%       ExtGeomFileUnits), shared vertices merged so it shades smoothly
 %     Expressions are evaluated in the model workspace with slResolve and
 %     converted to SI metres. Diffuse color and opacity are respected.
 %
@@ -39,12 +41,18 @@ function out = gs3dx_render(mdl, q, opts)
 %     ground        (1,1) logical whether to draw a ground plane (default true)
 %     title         (1,:) char title annotation on frames (default '')
 %     visible       (1,1) logical figure visibility (default false)
+%     focus         close-up: a solid's name suffix (string, e.g. "Driver
+%                   Head") the view follows, or a fixed centre [x y z] (m);
+%                   empty (default) frames the whole golfer
+%     focus_width   (1,1) double half-width of the close-up (m, default 0.2)
 %
 %   Output OUT:
 %     .files        string array of written image and video file paths
 %     .solids       struct array of parsed solids with local and World geometry
 %     .frames       frame indices rendered
 %     .view         [azimuth elevation] of the camera (degrees)
+%     .focus        close-up centre per frame (3 x frames, m); [] without
+%                   FOCUS
 %     .status       "success"
 %
 %   See also GS3DX_WHOLE_BODY_IK, GS3DX_TRACK_LEARN.
@@ -63,6 +71,8 @@ function out = gs3dx_render(mdl, q, opts)
         opts.ground (1,1) logical = true
         opts.title (1,:) char = ''
         opts.visible (1,1) logical = false
+        opts.focus = []
+        opts.focus_width (1,1) double {mustBePositive} = 0.2
     end
 
     % Preconditions
@@ -104,6 +114,7 @@ function out = gs3dx_render(mdl, q, opts)
 
     % Format camera view
     [az, el] = local_parse_view(opts.view);
+    focus = local_focus(solids, opts.focus, opts.focus_width);
 
     % Render figures / export files
     written_files = string.empty;
@@ -118,7 +129,7 @@ function out = gs3dx_render(mdl, q, opts)
             video_path = fullfile(opts.output_dir, video_path);
         end
         v_written = local_render_video(solids, frames_to_solve, t_vec, az, el, ...
-            opts.markers, opts.ground, opts.title, opts.fps, video_path, opts.visible);
+            opts.markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus);
         if ~isempty(v_written)
             written_files(end+1) = string(v_written);
         end
@@ -148,7 +159,7 @@ function out = gs3dx_render(mdl, q, opts)
             end
 
             local_render_still(solids, f_num, t_val, az, el, ...
-                opts.markers, opts.ground, opts.title, s_path, opts.visible);
+                opts.markers, opts.ground, opts.title, s_path, opts.visible, focus);
             written_files(end+1) = string(s_path);
         end
     end
@@ -159,6 +170,10 @@ function out = gs3dx_render(mdl, q, opts)
     out.solids = solids;
     out.frames = frames_to_solve;
     out.view = [az el];
+    out.focus = [];
+    if ~isempty(focus)
+        out.focus = cell2mat(arrayfun(focus.centre, frames_to_solve(:).', 'UniformOutput', false));
+    end
     out.status = "success";
 end
 
@@ -169,7 +184,8 @@ function solids = local_discover_solids(mdl)
     ref_types = {'sm_lib/Body Elements/Brick Solid', ...
                  'sm_lib/Body Elements/Cylindrical Solid', ...
                  'sm_lib/Body Elements/Spherical Solid', ...
-                 'sm_lib/Body Elements/Ellipsoidal Solid'};
+                 'sm_lib/Body Elements/Ellipsoidal Solid', ...
+                 'sm_lib/Body Elements/File Solid'};
     all_blocks = {};
     for r = 1:numel(ref_types)
         blks = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
@@ -240,6 +256,12 @@ function solids = local_discover_solids(mdl)
                 r_u = get_param(b, 'EllipsoidRadiiUnits');
                 p.radii = local_to_meters(r_val, r_u);
                 [V_loc, F_loc] = local_ellipsoid_geometry(p.radii);
+
+            case 'sm_lib/Body Elements/File Solid'
+                shape = "Mesh";
+                p.file = string(which(get_param(b, 'ExtGeomFileName')));
+                assert(p.file ~= "", 'gs3dx:render', '%s: %s is not on the path', b, get_param(b, 'ExtGeomFileName'));
+                [V_loc, F_loc] = local_mesh_geometry(p.file, local_to_meters(1, get_param(b, 'ExtGeomFileUnits')));
 
             otherwise
                 continue;
@@ -497,6 +519,15 @@ function [V, F] = local_brick_geometry(dims)
     ];
 end
 
+function [V, F] = local_mesh_geometry(file, scale)
+% STL triangles (file units times SCALE, m), with coincident vertices
+% merged so neighbouring facets share normals.
+    tr = stlread(file);
+    [V, ~, k] = unique(round(tr.Points * scale, 9), 'rows');
+    F = reshape(k(tr.ConnectivityList), [], 3);
+    V = V.';
+end
+
 function [V, F] = local_ellipsoid_geometry(radii)
     % Ellipsoidal Solid: radii [rx, ry, rz] centered at origin
     rx = radii(1); ry = radii(2); rz = radii(3);
@@ -530,9 +561,29 @@ function [az, el] = local_parse_view(view_opt)
 end
 
 % -------------------------------------------------------------------------
+% Helper: close-up centre per frame (a solid's position, or a fixed point)
+% -------------------------------------------------------------------------
+function focus = local_focus(solids, spec, width)
+    focus = [];
+    if isempty(spec)
+        return
+    end
+    if isnumeric(spec)
+        assert(numel(spec) == 3, 'gs3dx:render', 'FOCUS must be a solid name or [x y z]');
+        p = double(spec(:));
+        focus = struct('centre', @(f) p, 'width', width);
+        return
+    end
+    k = find(endsWith([solids.name], "/" + string(spec)), 1);
+    assert(~isempty(k), 'gs3dx:render', 'No drawn solid named %s to focus on', spec);
+    P = solids(k).pose.P;
+    focus = struct('centre', @(f) P(:, f), 'width', width);
+end
+
+% -------------------------------------------------------------------------
 % Helper: Draw scene for frame f into given axes
 % -------------------------------------------------------------------------
-function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title)
+function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus)
     cla(ax);
     hold(ax, 'on');
 
@@ -576,9 +627,17 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
 
     % Scene bounds and appearance
     axis(ax, 'equal');
-    xlim(ax, [-0.6 1.4]);
-    ylim(ax, [-1.2 1.2]);
-    zlim(ax, [-1.15 1.15]);
+    if isempty(focus)
+        xlim(ax, [-0.6 1.4]);
+        ylim(ax, [-1.2 1.2]);
+        zlim(ax, [-1.15 1.15]);
+    else
+        c = focus.centre(f);
+        w = focus.width;
+        xlim(ax, c(1) + [-w w]);
+        ylim(ax, c(2) + [-w w]);
+        zlim(ax, c(3) + [-w w]);
+    end
     grid(ax, 'on');
     set(ax, 'GridColor', [0.7 0.7 0.7], 'GridAlpha', 0.3);
     set(ax, 'Color', [0.96 0.97 0.98]);
@@ -612,7 +671,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Render single still image
 % -------------------------------------------------------------------------
-function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scene_title, outfile, is_vis)
+function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scene_title, outfile, is_vis, focus)
     vis_str = 'off';
     if is_vis
         vis_str = 'on';
@@ -620,7 +679,7 @@ function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scen
     fig = figure('Visible', vis_str, 'Color', 'w', 'Position', [100 100 1024 768]);
     ax = axes('Parent', fig);
     
-    local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title);
+    local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
     
     exportgraphics(fig, outfile, 'Resolution', 120);
     close(fig);
@@ -630,7 +689,7 @@ end
 % Helper: Render swing video (MP4 or GIF fallback)
 % -------------------------------------------------------------------------
 function video_file = local_render_video(solids, frames, t_vec, az, el, ...
-    markers, draw_ground, scene_title, fps, outfile, is_vis)
+    markers, draw_ground, scene_title, fps, outfile, is_vis, focus)
 
     vis_str = 'off';
     if is_vis
@@ -666,7 +725,7 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         if ~isempty(t_vec) && f <= numel(t_vec)
             t_val = t_vec(f);
         end
-        local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title);
+        local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
         drawnow;
         frame_data = getframe(fig);
 
