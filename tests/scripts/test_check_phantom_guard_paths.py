@@ -86,6 +86,39 @@ def test_issue_referenced_paths_extracts_unique_sorted() -> None:
     assert mod._issue_referenced_paths(body) == ["api/x.py", "src/x.py"]
 
 
+def test_issue_referenced_paths_extracts_scripts_and_workflows() -> None:
+    body = (
+        "Check scripts/check_coverage_gates.py, scripts/config/mypy_exclusion_budget.json, "
+        "and .github/workflows/ci-standard.yml"
+    )
+    assert mod._issue_referenced_paths(body) == [
+        ".github/workflows/ci-standard.yml",
+        "scripts/check_coverage_gates.py",
+        "scripts/config/mypy_exclusion_budget.json",
+    ]
+
+
+def test_issue_referenced_paths_drops_parenthetical_prose_fragments() -> None:
+    body = (
+        "- scripts/check_coverage_gates.py has its own separate hard-coded gates "
+        "(engines/api/core/shared/robotics)."
+    )
+    assert mod._issue_referenced_paths(body) == ["scripts/check_coverage_gates.py"]
+
+
+def test_issue_referenced_paths_drops_parenthetical_slash_alternatives() -> None:
+    body = "Gates list (api/core/shared/robotics) is hardcoded."
+    assert mod._issue_referenced_paths(body) == []
+
+
+def test_issue_referenced_paths_keeps_parenthetical_valid_paths() -> None:
+    body = "See fixes in (scripts/check_lod.py, tests/scripts/test_check_phantom_guard_paths.py)"
+    assert mod._issue_referenced_paths(body) == [
+        "scripts/check_lod.py",
+        "tests/scripts/test_check_phantom_guard_paths.py",
+    ]
+
+
 def test_issue_referenced_paths_ignores_unprefixed_paths() -> None:
     assert mod._issue_referenced_paths("docs/other.py and random.txt") == []
 
@@ -205,6 +238,35 @@ def test_evaluate_fails_when_list_lacks_referenced_paths() -> None:
     assert len(failures) == 1
     assert "#9091" in failures[0]
     assert "none of the paths" in failures[0]
+
+
+def test_evaluate_rule3_issue_10965_regression() -> None:
+    """Regression test for UD #11124: issue #10965 with scripts/ and parenthetical."""
+    issue_body = (
+        "`scripts/config/mypy_exclusion_budget.json` declares six `coverage_gates`.\n"
+        "`scripts/check_mypy_exclusion_budget.py` checks only the metadata.\n"
+        "- `scripts/check_coverage_gates.py` has its own separate hard-coded gates "
+        "(engines/api/core/shared/robotics).\n"
+    )
+    pr_body = "Closes #10965"
+    changed = [
+        "scripts/check_coverage_gates.py",
+        "scripts/check_mypy_exclusion_budget.py",
+        ".github/workflows/ci-standard.yml",
+    ]
+    failures = mod._evaluate_rule3(
+        pr_body, changed, _stub_loader({"10965": issue_body})
+    )
+    assert failures == []
+
+    # If the diff only touches unrelated files, failures must only list the real scripts/ files,
+    # not the parenthetical 'api/core/shared/robotics'.
+    unrelated_failures = mod._evaluate_rule3(
+        pr_body, ["docs/readme.md"], _stub_loader({"10965": issue_body})
+    )
+    assert len(unrelated_failures) == 1
+    assert "api/core/shared/robotics" not in unrelated_failures[0]
+    assert "scripts/check_coverage_gates.py" in unrelated_failures[0]
 
 
 def test_evaluate_skips_issue_without_path_references() -> None:

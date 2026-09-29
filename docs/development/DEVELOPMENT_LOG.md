@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11124
+- **Branch:** `fix/phantom-guard-scripts-paths-11124`
+- **Paths:** `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 27 focused unit tests pass in `test_check_phantom_guard_paths.py`; ruff, black, architecture budget, and LOD clean.
+- **Summary:** Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.
+- **Next step:** Submit PR for review and release lease.
+
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
 - **State:** in_review
