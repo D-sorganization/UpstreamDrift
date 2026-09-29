@@ -86,7 +86,14 @@ def test_engine_specific_limitations_declared() -> None:
     assert any("hunt-crossley" in s.lower() for s in MYOSUITE_ENGINE_LIMITATIONS)
 
 
-def test_committed_dual_club_evidence_receipts_load_and_validate() -> None:
+def test_committed_dual_club_evidence_receipts_are_fail_closed() -> None:
+    """Committed club receipts must honestly record unavailable engines.
+
+    No native MyoSuite execution exists for these clubs on any available host,
+    so the only honest receipt is UNAVAILABLE with empty evidence fields,
+    recorded missing evidence, and a resolvable remedy. Placeholder shas or
+    invented metrics (previous content of these files) must never return.
+    """
     driver_path = EVIDENCE_DIR / "driver_receipt.json"
     iron_path = EVIDENCE_DIR / "iron_receipt.json"
 
@@ -96,30 +103,118 @@ def test_committed_dual_club_evidence_receipts_load_and_validate() -> None:
     driver_receipt = MyoSuiteQualificationReceipt.load(driver_path)
     assert driver_receipt.engine == "myosuite"
     assert driver_receipt.club == "driver"
-    assert driver_receipt.status == MyoSuiteQualificationStatus.QUALIFIED
-    assert driver_receipt.model_sha256 == DRIVER_MODEL_HASH
-    assert driver_receipt.is_fresh_simulation is True
-    assert driver_receipt.derivatives_consistent is True
+    assert driver_receipt.status == MyoSuiteQualificationStatus.UNAVAILABLE
+    assert driver_receipt.runtime_available is False
+    assert driver_receipt.candidate_sha256 == ""
+    assert driver_receipt.model_sha256 == ""
+    assert driver_receipt.capture_sha256 == ""
+    assert driver_receipt.is_fresh_simulation is False
+    assert driver_receipt.derivatives_consistent is False
+    assert driver_receipt.marker_metrics == {}
+    assert driver_receipt.muscle_metrics == {}
+    assert driver_receipt.missing_evidence
+    assert any("marker" in ev for ev in driver_receipt.missing_evidence)
+    assert "myosuite" in driver_receipt.remedy.lower()
 
     iron_receipt = MyoSuiteQualificationReceipt.load(iron_path)
     assert iron_receipt.engine == "myosuite"
     assert iron_receipt.club == "iron_7"
-    assert iron_receipt.status == MyoSuiteQualificationStatus.QUALIFIED
-    assert iron_receipt.model_sha256 == IRON_MODEL_HASH
-    assert iron_receipt.is_fresh_simulation is True
-    assert iron_receipt.derivatives_consistent is True
+    assert iron_receipt.status == MyoSuiteQualificationStatus.UNAVAILABLE
+    assert iron_receipt.runtime_available is False
+    assert iron_receipt.candidate_sha256 == ""
+    assert iron_receipt.missing_evidence
+    assert iron_receipt.remedy
+
+
+def test_missing_native_test_count_does_not_qualify() -> None:
+    """An unrecorded native test count cannot be assumed nonzero (fail-closed)."""
+    cand = _synthetic_candidate()
+    replay = _synthetic_valid_replay()
+    receipt = validate_myosuite_candidate_replay(cand, replay)
+    assert receipt.status == MyoSuiteQualificationStatus.REJECTED
+    assert any("native test count" in r.lower() for r in receipt.rejection_reasons)
+    assert any("native test" in ev for ev in receipt.missing_evidence)
+    assert receipt.remedy
+
+
+def test_unavailable_runtime_fails_closed_even_with_replay_payload() -> None:
+    """A replay payload cannot produce QUALIFIED while myosuite is unavailable."""
+    cand = _synthetic_candidate()
+    replay = _synthetic_valid_replay()
+    receipt = validate_myosuite_candidate_replay(cand, replay, myosuite_available=False)
+    assert receipt.status == MyoSuiteQualificationStatus.UNAVAILABLE
+    assert receipt.runtime_available is False
+    assert receipt.missing_evidence
+    assert receipt.remedy
+
+
+def test_missing_marker_observations_do_not_qualify() -> None:
+    """Replays without aligned marker observations must not qualify."""
+    cand = _synthetic_candidate()
+    replay = _synthetic_valid_replay()
+    replay.pop("markers_m")
+    replay.pop("target_m")
+    receipt = validate_myosuite_candidate_replay(
+        cand, replay, native_tests_executed=10, myosuite_available=True
+    )
+    assert receipt.status == MyoSuiteQualificationStatus.REJECTED
+    assert receipt.marker_metrics == {}
+    assert any("marker" in ev for ev in receipt.missing_evidence)
+
+
+def test_missing_rollout_data_does_not_qualify() -> None:
+    """Replays without native state/time data must not qualify."""
+    cand = _synthetic_candidate()
+    replay = _synthetic_valid_replay()
+    replay.pop("native_state")
+    receipt = validate_myosuite_candidate_replay(
+        cand, replay, native_tests_executed=10, myosuite_available=True
+    )
+    assert receipt.status == MyoSuiteQualificationStatus.REJECTED
+    assert receipt.derivatives_consistent is False
+    assert receipt.energy_balance_checked is False
+    assert "native_state/time_s dynamic rollout" in receipt.missing_evidence
+
+
+def test_derivatives_mismatch_rejects() -> None:
+    """Joint velocities inconsistent with dq/dt must not qualify."""
+    cand = _synthetic_candidate()
+    replay = _synthetic_valid_replay()
+    state = np.asarray(replay["native_state"])
+    half = state.shape[1] // 2
+    state[:, half:] = state[:, half:] + 1.0
+    receipt = validate_myosuite_candidate_replay(
+        cand, replay, native_tests_executed=10, myosuite_available=True
+    )
+    assert receipt.status == MyoSuiteQualificationStatus.REJECTED
+    assert receipt.derivatives_consistent is False
+
+
+def test_marker_metrics_are_computed_not_invented() -> None:
+    """Only metrics derived from the recorded observations may appear."""
+    cand = _synthetic_candidate()
+    replay = _synthetic_valid_replay()
+    receipt = validate_myosuite_candidate_replay(
+        cand, replay, native_tests_executed=10, myosuite_available=True
+    )
+    assert set(receipt.marker_metrics) <= {"whole_rms_m"}
+    assert "pelvis_yaw_error_pct" not in receipt.marker_metrics
 
 
 def test_dual_club_support_driver_and_7iron() -> None:
     cand_driver = _synthetic_candidate("driver", DRIVER_MODEL_HASH)
     replay_driver = _synthetic_valid_replay()
-    receipt_driver = validate_myosuite_candidate_replay(cand_driver, replay_driver)
+    receipt_driver = validate_myosuite_candidate_replay(
+        cand_driver, replay_driver, native_tests_executed=10
+    )
     assert receipt_driver.status == MyoSuiteQualificationStatus.QUALIFIED
     assert receipt_driver.club == "driver"
 
     cand_iron = _synthetic_candidate("iron_7", IRON_MODEL_HASH)
     replay_iron = _synthetic_valid_replay()
-    receipt_iron = validate_myosuite_candidate_replay(cand_iron, replay_iron)
+    receipt_iron = validate_myosuite_candidate_replay(
+        cand_iron, replay_iron, native_tests_executed=10
+    )
     assert receipt_iron.status == MyoSuiteQualificationStatus.QUALIFIED
     assert receipt_iron.club == "iron_7"
 
@@ -208,7 +303,7 @@ def test_derivative_and_energy_balance_checks() -> None:
     cand = _synthetic_candidate()
     replay = _synthetic_valid_replay()
 
-    receipt = validate_myosuite_candidate_replay(cand, replay)
+    receipt = validate_myosuite_candidate_replay(cand, replay, native_tests_executed=10)
     assert receipt.status == MyoSuiteQualificationStatus.QUALIFIED
     assert receipt.derivatives_consistent is True
     assert receipt.energy_balance_checked is True
@@ -226,7 +321,7 @@ def test_missing_myosuite_runtime_reports_unavailable() -> None:
 def test_receipt_serialization_round_trip(tmp_path: Path) -> None:
     cand = _synthetic_candidate()
     replay = _synthetic_valid_replay()
-    receipt = validate_myosuite_candidate_replay(cand, replay)
+    receipt = validate_myosuite_candidate_replay(cand, replay, native_tests_executed=10)
 
     out_file = tmp_path / "receipt.json"
     receipt.save(out_file)

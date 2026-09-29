@@ -8,6 +8,7 @@ and unphysiological muscle activations.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from pathlib import Path
@@ -23,6 +24,12 @@ MYOSUITE_ENGINE_LIMITATIONS: tuple[str, ...] = (
     "Dual-grip weld constraint kinematics coupling hands to club shaft",
     "Four-foot Hunt-Crossley contact spheres with normal compliance and friction cone limits",
     "Absence of native joint-torque inverse dynamics (forward muscle excitation driven only)",
+)
+
+MYOSUITE_UNAVAILABLE_REMEDY: str = (
+    "Install the myosuite/MuJoCo stack on the pinned host and re-run "
+    "scripts/ci/run_native_engine_lane.sh --engine myosuite so native rollouts "
+    "and club receipts are regenerated from real execution."
 )
 
 
@@ -54,6 +61,8 @@ class MyoSuiteQualificationReceipt:
     muscle_metrics: dict[str, float] = field(default_factory=dict)
     declared_limitations: list[str] = field(default_factory=list)
     rejection_reasons: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    remedy: str = ""
     diagnostic_message: str = ""
 
     def as_dict(self) -> dict[str, Any]:
@@ -131,6 +140,30 @@ def validate_myosuite_candidate_replay(
 ) -> MyoSuiteQualificationReceipt:
     """Validate a candidate and its MyoSuite dynamic replay against acceptance criteria."""
     rejection_reasons: list[str] = []
+    missing_evidence: list[str] = []
+
+    # Fail-closed: without the myosuite/MuJoCo runtime on host no native dynamic
+    # replay can be produced, so a QUALIFIED outcome is impossible regardless of payload.
+    if not myosuite_available:
+        missing_evidence.append("native MyoSuite rollout (myosuite/MuJoCo runtime)")
+        return MyoSuiteQualificationReceipt(
+            schema_version=1,
+            engine="myosuite",
+            club=str(candidate.get("club") or "driver"),
+            status=MyoSuiteQualificationStatus.UNAVAILABLE,
+            candidate_sha256=str(candidate.get("source_sha256") or ""),
+            model_sha256=str(candidate.get("model_sha256") or ""),
+            capture_sha256=str(candidate.get("capture_sha256") or ""),
+            runtime_available=False,
+            is_fresh_simulation=False,
+            derivatives_consistent=False,
+            energy_balance_checked=False,
+            declared_limitations=list(MYOSUITE_ENGINE_LIMITATIONS),
+            rejection_reasons=["MyoSuite runtime is not installed on host"],
+            missing_evidence=missing_evidence,
+            remedy=MYOSUITE_UNAVAILABLE_REMEDY,
+            diagnostic_message="MyoSuite runtime is not installed on host: live dynamic simulation unavailable.",
+        )
 
     club = str(candidate.get("club") or "driver")
     cand_sha = str(candidate.get("source_sha256") or "")
@@ -143,33 +176,50 @@ def validate_myosuite_candidate_replay(
             f"model_sha256 mismatch: expected {expected_model_sha}, got {model_sha}"
         )
 
-    # 1. Copied state trajectory detection
-    is_fresh = bool(replay.get("is_fresh_simulation", True))
-    if replay.get("copied_from_reference") or not is_fresh:
-        is_fresh = False
+    # 1. Copied state trajectory detection. Absent flags are treated as
+    # unverified (fail-closed), not assumed fresh.
+    is_fresh = replay.get("is_fresh_simulation") is True
+    if not replay.get("is_fresh_simulation") or replay.get("copied_from_reference"):
+        if replay.get("is_fresh_simulation") is None:
+            missing_evidence.append("is_fresh_simulation flag")
         rejection_reasons.append(
             "Copied state trajectory detected: saved controls must drive fresh native simulation"
         )
 
-    # 2. FK-only playback detection
-    if not replay.get("actuation_applied", True):
+    # 2. FK-only playback detection. Absent flag is treated as unverified.
+    if replay.get("actuation_applied") is not True:
+        if replay.get("actuation_applied") is None:
+            missing_evidence.append("actuation_applied flag")
         rejection_reasons.append(
             "FK-only playback detected without native dynamic simulation or muscle excitation"
         )
 
-    # 3. Nonzero native test count check
-    if native_tests_executed is not None and native_tests_executed <= 0:
+    # 3. Nonzero native test count check. An unknown count cannot be assumed
+    # nonzero; it is missing evidence and blocks qualification.
+    if native_tests_executed is None:
+        missing_evidence.append("native test count (native_tests_executed)")
+        rejection_reasons.append(
+            "Native test count not recorded: nonzero native execution on "
+            "pinned host cannot be confirmed"
+        )
+    elif native_tests_executed <= 0:
         rejection_reasons.append(
             f"Zero collected native tests: qualification requires nonzero native execution on pinned host (got {native_tests_executed})"
         )
 
-    # 4. Derivative and energy balance checks
+    # 4. Derivative and energy balance checks. Missing rollout data is fail-closed.
     native_state = replay.get("native_state")
     time_s = replay.get("time_s")
     derivatives_ok = False
     energy_summary: dict[str, float] = {}
 
-    if native_state is not None and time_s is not None:
+    if native_state is None or time_s is None:
+        missing_evidence.append("native_state/time_s dynamic rollout")
+        rejection_reasons.append(
+            "Native dynamic rollout data missing: no native_state/time_s "
+            "trajectory to verify derivative and energy contracts"
+        )
+    else:
         state_arr = np.asarray(native_state)
         time_arr = np.asarray(time_s)
 
@@ -188,6 +238,11 @@ def validate_myosuite_candidate_replay(
                 )
 
             derivatives_ok = _check_derivatives_consistency(time_arr, q, v)
+            if not derivatives_ok:
+                rejection_reasons.append(
+                    "Reported joint velocities inconsistent with dq/dt central "
+                    "differences (independent derivative check failed)"
+                )
             ke = 0.5 * np.sum(v**2, axis=1)
             pe = (
                 9.81 * np.sum(q[:, :3], axis=1)
@@ -200,6 +255,10 @@ def validate_myosuite_candidate_replay(
                 "potential_energy_j": float(np.mean(pe)),
                 "energy_conservation_error": float(np.std(ke + pe)),
             }
+            if not all(math.isfinite(value) for value in energy_summary.values()):
+                rejection_reasons.append(
+                    "Non-finite values detected in energy balance summary"
+                )
 
     # 5. Muscle activation bounds
     activations = replay.get("activations")
@@ -209,22 +268,30 @@ def validate_myosuite_candidate_replay(
             f"Muscle activation exceeds physiological bounds [0, 1]: max={muscle_metrics.get('max_activation')}"
         )
 
-    # 6. Marker metrics
+    # 6. Marker metrics. Only metrics computed from the recorded observations
+    # are emitted; no synthesized, scaled, or copied values are fabricated here.
     markers = replay.get("markers_m")
     target = replay.get("target_m")
     marker_metrics: dict[str, float] = {}
-    if markers is not None and target is not None:
+    if markers is None or target is None:
+        missing_evidence.append(
+            "aligned common-marker observations (markers_m/target_m)"
+        )
+        rejection_reasons.append(
+            "Aligned common-marker metrics unavailable: replay is missing "
+            "markers_m/target_m from a native rollout against the same observations"
+        )
+    else:
         m_arr = np.asarray(markers)
         t_arr = np.asarray(target)
         if np.all(np.isfinite(m_arr)) and np.all(np.isfinite(t_arr)):
             diff = m_arr - t_arr
             sq_err = np.sum(diff**2, axis=-1)
-            rms = float(np.sqrt(np.mean(sq_err)))
-            marker_metrics["whole_rms_m"] = rms
-            marker_metrics["early_rms_m"] = rms * 0.8
-            marker_metrics["terminal_rms_m"] = rms * 1.2
-            marker_metrics["clubhead_rms_m"] = rms * 0.95
-            marker_metrics["pelvis_yaw_error_pct"] = 8.5
+            marker_metrics["whole_rms_m"] = float(np.sqrt(np.mean(sq_err)))
+        else:
+            rejection_reasons.append(
+                "Non-finite values detected in marker alignment observations"
+            )
 
     status = (
         MyoSuiteQualificationStatus.QUALIFIED
@@ -249,6 +316,8 @@ def validate_myosuite_candidate_replay(
         muscle_metrics=muscle_metrics,
         declared_limitations=list(MYOSUITE_ENGINE_LIMITATIONS),
         rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        remedy=MYOSUITE_UNAVAILABLE_REMEDY if rejection_reasons else "",
         diagnostic_message="All qualification checks passed."
         if not rejection_reasons
         else "; ".join(rejection_reasons),
@@ -292,6 +361,16 @@ def assess_myosuite_qualification(
             energy_balance_checked=False,
             declared_limitations=list(MYOSUITE_ENGINE_LIMITATIONS),
             rejection_reasons=["MyoSuite runtime is not installed on host"],
+            missing_evidence=[
+                "native MyoSuite rollout (myosuite/MuJoCo runtime)",
+                "candidate_sha256",
+                "model_sha256",
+                "capture_sha256",
+                "native_state/time_s dynamic rollout",
+                "aligned common-marker observations (markers_m/target_m)",
+                "native test count (native_tests_executed)",
+            ],
+            remedy=MYOSUITE_UNAVAILABLE_REMEDY,
             diagnostic_message="MyoSuite runtime is not installed on host: live simulation unavailable.",
         )
 
@@ -310,6 +389,16 @@ def assess_myosuite_qualification(
             energy_balance_checked=False,
             declared_limitations=list(MYOSUITE_ENGINE_LIMITATIONS),
             rejection_reasons=["Replay data is missing"],
+            missing_evidence=[
+                "native_state/time_s dynamic rollout",
+                "aligned common-marker observations (markers_m/target_m)",
+                "native test count (native_tests_executed)",
+            ],
+            remedy=(
+                "Run the native MyoSuite replay on a pinned host with the "
+                "myosuite/MuJoCo stack installed (scripts/ci/run_native_engine_lane.sh "
+                "--engine myosuite) and re-assess with the recorded rollout payload."
+            ),
             diagnostic_message="Replay data is missing: cannot evaluate dynamic rollout.",
         )
 
