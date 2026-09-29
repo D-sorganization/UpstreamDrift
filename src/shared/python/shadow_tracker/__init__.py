@@ -103,6 +103,7 @@ if TYPE_CHECKING:
     )
     from .service import (
         DefaultShadowTrackerService,
+        StaleCheckpointError,
         UnavailableBackendError,
         WorstFrameMetric,
         WorstFrameReport,
@@ -204,6 +205,7 @@ _LAZY_EXPORTS: dict[str, str] = {
     "ForwardModel": ".contracts",
     "ShadowTrackerService": ".contracts",
     "DefaultShadowTrackerService": ".service",
+    "StaleCheckpointError": ".service",
     "UnavailableBackendError": ".service",
     "WorstFrameReport": ".service",
     "ShadowTrackerBundle": ".artifacts",
@@ -417,6 +419,7 @@ __all__ = [
     "SilhouetteRenderer",
     "SourceAsset",
     "SourceCatalog",
+    "StaleCheckpointError",
     "SubjectModelBinding",
     "SubjectMorphology",
     "SuitabilityGrade",
