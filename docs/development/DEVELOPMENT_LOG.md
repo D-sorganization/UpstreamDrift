@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11096 — Qualify MyoSuite Native Dual-Club Dynamics and Replay
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11096
+- **Branch:** `feat/mmr-10m-myosuite-dual-club-11096`
+- **Paths:** `src/engines/physics_engines/myosuite/python/native_qualification.py`, `tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/myosuite/`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 13 unit tests passed; Ruff check and format clean; committed dual-club driver and 7-iron receipts validated.
+- **Summary:** Qualified MyoSuite native dual-club dynamics and replay verification. Implemented native qualification receipt schema, engine-specific biomechanical limitations (excitation-activation dynamics, Hill-type force-velocity-length multipliers, free-joint quaternion normalization, dual-grip welds, four-foot contact spheres), state-trajectory replay validation rejecting FK-only playback and identical candidate-reference clones, energy balance and kinematic derivative checks, and committed dual-club evidence receipts with cryptographic SHA-256 model provenance.
+- **Next step:** PR green and merged into main.
+
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
 - **State:** in_review
