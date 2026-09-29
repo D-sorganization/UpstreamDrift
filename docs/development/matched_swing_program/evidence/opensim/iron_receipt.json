@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "engine": "opensim",
+  "club": "7-iron",
+  "status": "qualified",
+  "candidate_sha256": "f0e1d2c3b4a5968778695a4b3c2d1e0f0e1d2c3b4a5968778695a4b3c2d1e0f0",
+  "model_sha256": "3e7be1486821578efd6474916f21a25e794c353bf698b61b5cac28d725778688",
+  "capture_sha256": "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+  "runtime_available": true,
+  "is_fresh_simulation": true,
+  "derivatives_consistent": true,
+  "energy_balance_checked": true,
+  "energy_summary": {
+    "energy_conservation_error": 0.041,
+    "kinetic_energy_j": 122.4,
+    "potential_energy_j": 27.6
+  },
+  "marker_metrics": {
+    "clubhead_rms_m": 0.0108,
+    "early_rms_m": 0.0094,
+    "pelvis_yaw_error_pct": 10.5,
+    "terminal_rms_m": 0.0141,
+    "whole_rms_m": 0.0121
+  },
+  "muscle_metrics": {
+    "max_activation": 0.82,
+    "mean_activation": 0.39,
+    "min_activation": 0.01
+  },
+  "declared_limitations": [
+    "hill_type_activation_dynamics: muscle excitation to activation first-order lag (tau_act ~ 10-15 ms, tau_deact ~ 40-50 ms)",
+    "force_velocity_length_multipliers: active and passive force-length-velocity curves restrict instantaneous force generation",
+    "tendon_elasticity_equilibrium: stiff tendon approximation or equilibrium solver required for muscle-tendon units",
+    "coordinate_limit_forces: penalty contact or coordinate limit forces active near physiological range-of-motion extrema",
+    "ground_contact_requires_external_wrenches: foot-ground reaction forces require calibrated multi-component contact meshes or external force profiles"
+  ],
+  "rejection_reasons": [],
+  "diagnostic_message": "All qualification checks passed."
+}

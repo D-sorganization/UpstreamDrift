@@ -1,3 +1,19 @@
+## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095)
+
+Specifies the native OpenSim qualification pipeline and receipt verification for Driver and 7-Iron models:
+- **Native OpenSim Qualification Module (`src/engines/physics_engines/opensim/python/native_qualification.py`)**:
+  - `OPENSIM_ENGINE_LIMITATIONS`: documents Hill-type activation dynamics, force-velocity-length multipliers, tendon elasticity equilibrium, coordinate limit forces, and ground contact external wrenches.
+  - `OpenSimQualificationStatus`: enum (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`).
+  - `OpenSimQualificationReceipt`: dataclass with serialization (`as_dict()`, `save()`, `load()`).
+  - `validate_opensim_candidate_replay`: verifies candidate simulation trajectories, rejecting identical trajectory replays (copied candidate vs reference state trajectory), rejecting zero forward simulated dynamics (FK-only replays), requiring non-zero native test counts, checking kinematic derivative consistency ($dq/dt \approx v$) and energy balance ($| \Delta E | \le 5.0$ J), validating physiological muscle activation bounds ($a \in [0.0, 1.0]$), and enforcing marker RMSE tolerances (`whole_rms_m` $\le 0.05$ m, `clubhead_rms_m` $\le 0.08$ m, `pelvis_yaw_error_pct` $\le 10\%$).
+  - `assess_opensim_qualification`: detects host `opensim` runtime; returns `UNAVAILABLE` when missing without crashing headless test runners.
+- **Evidence Package (`docs/development/matched_swing_program/evidence/opensim/`)**:
+  - `driver_receipt.json`: Driver receipt with SHA-256 model hash `6fa980a3ccda49b1051c55fb025da596c9a7b66e1687a4b3254df19d49536a21`.
+  - `iron_receipt.json`: 7-Iron receipt with SHA-256 model hash `3e7be1486821578efd6474916f21a25e794c353bf698b61b5cac28d725778688`.
+  - `README.md`: documents model topology, Hill-type muscle models, coordinate limits, and replay verification procedure.
+- **Test Suite (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`)**:
+  - 11 unit tests verifying schema adherence, valid driver & iron qualification, rejection of identical/copied trajectories, rejection of zero native tests, rejection of non-finite state data, rejection of FK-only playback, rejection of unphysiological muscle activations, receipt serialization round-trips, and missing-opensim runtime status handling.
+
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 Resolves the split-brain coverage gates by making the budget JSON the single gate authority:

@@ -1,4 +1,21 @@
-# Current Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+# Current Handoff — Qualify OpenSim Native Dual-Club Dynamics and Replay (#11095)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-10o-opensim-dual-club-11095`
+- Commit: `SELF`
+- Pull request: closes #11095.
+- Done:
+  - Implemented OpenSim native dual-club qualification schema and evaluation pipeline in `src/engines/physics_engines/opensim/python/native_qualification.py`.
+  - Modeled engine limitations: Hill-type muscle activation dynamics, force-velocity-length multipliers, tendon elasticity equilibrium, coordinate limit forces, and ground contact external wrenches.
+  - Implemented replay validation: enforces non-zero native tests, rejects FK-only playback without dynamic actuation, rejects copied/cloned candidate-reference state trajectories, verifies derivative consistency ($dq/dt \approx v$) and energy balance, and checks muscle activation physiological bounds ($a \in [0, 1]$).
+  - Committed verified dual-club driver and 7-iron evidence receipts in `docs/development/matched_swing_program/evidence/opensim/`.
+  - Added unit test suite in `tests/unit/engines/opensim/test_opensim_dual_club_qualification.py` (11 tests, all passing).
+- Tests: 11 passed in 4s; Ruff format and check clean.
+- Next step: CI green, then merge PR.
+
+---
+
+# Past Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `/tmp/ud-wt-10965` (baseline `origin/main` 64962e8d6)
