@@ -17,7 +17,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-<<<<<<< origin/main
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
 - **State:** in_review
@@ -29,7 +28,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 — 27 focused unit tests pass in `test_check_phantom_guard_paths.py`; ruff, black, architecture budget, and LOD clean.
 - **Summary:** Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.
 - **Next step:** Submit PR for review and release lease.
-=======
 ### DL-#11141 — Vendor Pin Bump for the Excluded Electrical Einsum Site (#11112 / Tools #5379)
 
 - **State:** in_review
@@ -41,7 +39,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 95800a5647603bf1211a98b0899674540cc16151 — 30 passed (`test_tools_child_copy_contract.py`, `test_divergence_inventory.py`); electrical suites green inside the updated submodule (equivalence 8, calculators 47); inventory `--check` current; Ruff clean.
 - **Summary:** `vendor/ud-tools` gitlink bumped to Tools main `95800a5647` (Tools#5379) so the `sqrt(einsum)` row-norm change lands through the vendor channel; the UD child copy of `electrical_model.py` converges to the canonical bytes. Closes the section-widths site #11112 had to exclude from its Bolt rollout because the file is a Tools-owned child copy.
 - **Next step:** CI green, then merge; the SPEC row is recorded.
->>>>>>> 935dd56816
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
