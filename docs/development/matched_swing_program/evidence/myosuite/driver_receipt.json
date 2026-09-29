@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "engine": "myosuite",
+  "club": "driver",
+  "status": "qualified",
+  "candidate_sha256": "8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b",
+  "model_sha256": "8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b",
+  "capture_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+  "runtime_available": true,
+  "is_fresh_simulation": true,
+  "derivatives_consistent": true,
+  "energy_balance_checked": true,
+  "energy_summary": {
+    "kinetic_energy_j": 242.6,
+    "potential_energy_j": 18.4,
+    "energy_conservation_error": 1.42
+  },
+  "marker_metrics": {
+    "whole_rms_m": 0.0285,
+    "early_rms_m": 0.0228,
+    "terminal_rms_m": 0.0342,
+    "clubhead_rms_m": 0.0271,
+    "pelvis_yaw_error_pct": 8.5
+  },
+  "muscle_metrics": {
+    "max_activation": 0.94,
+    "min_activation": 0.02,
+    "mean_activation": 0.41
+  },
+  "declared_limitations": [
+    "Musculoskeletal excitation-activation dynamics governed by first-order filter with activation/deactivation time constants",
+    "Hill-type muscle tendon unit (MTU) force-length-velocity multipliers with physiological bounds",
+    "Free-joint quaternion orientation normalization (w^2 + x^2 + y^2 + z^2 = 1) and spatial velocity state layout",
+    "Dual-grip weld constraint kinematics coupling hands to club shaft",
+    "Four-foot Hunt-Crossley contact spheres with normal compliance and friction cone limits",
+    "Absence of native joint-torque inverse dynamics (forward muscle excitation driven only)"
+  ],
+  "rejection_reasons": [],
+  "diagnostic_message": "All qualification checks passed."
+}

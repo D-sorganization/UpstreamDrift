@@ -1,3 +1,19 @@
+## Qualify MyoSuite Native Dual-Club Dynamics and Replay (MMR-10M, #11096)
+
+Specifies the native MyoSuite qualification pipeline and receipt verification for Driver and 7-Iron models:
+- **Native MyoSuite Qualification Module (`src/engines/physics_engines/myosuite/python/native_qualification.py`)**:
+  - `MYOSUITE_ENGINE_LIMITATIONS`: documents musculoskeletal excitation-activation dynamics, Hill-type force-length-velocity multipliers, free-joint quaternion orientation normalization ($w^2 + x^2 + y^2 + z^2 = 1$), dual-grip weld constraints, four-foot Hunt-Crossley contact spheres, and absence of native joint-torque inverse dynamics.
+  - `MyoSuiteQualificationStatus`: enum (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`).
+  - `MyoSuiteQualificationReceipt`: dataclass with serialization (`as_dict()`, `save()`, `load()`).
+  - `validate_myosuite_candidate_replay`: verifies candidate simulation trajectories, rejecting identical trajectory replays (copied candidate vs reference state trajectory), rejecting zero forward simulated dynamics (FK-only replays), requiring non-zero native test counts, checking kinematic derivative consistency ($dq/dt \approx v$) and energy balance ($| \Delta E | \le 5.0$ J), validating root quaternion unit normalization, validating physiological muscle activation bounds ($a \in [0.0, 1.0]$), and enforcing marker RMSE tolerances (`whole_rms_m` $\le 0.05$ m, `clubhead_rms_m` $\le 0.08$ m, `pelvis_yaw_error_pct` $\le 10\%$).
+  - `assess_myosuite_qualification`: detects host `myosuite` runtime; returns `UNAVAILABLE` when missing without crashing headless test runners.
+- **Evidence Package (`docs/development/matched_swing_program/evidence/myosuite/`)**:
+  - `driver_receipt.json`: Driver receipt with SHA-256 model hash `8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b`.
+  - `iron_receipt.json`: 7-Iron receipt with SHA-256 model hash `ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086`.
+  - `README.md`: documents model topology, muscle excitation-activation dynamics, coordinate limits, and replay verification procedure.
+- **Test Suite (`tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`)**:
+  - 12 unit tests verifying schema adherence, valid driver & iron qualification, rejection of identical/copied trajectories, rejection of zero native tests, rejection of non-finite state data, rejection of FK-only playback, rejection of unphysiological muscle activations, rejection of unnormalized root quaternions, receipt serialization round-trips, and missing-myosuite runtime status handling.
+
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
