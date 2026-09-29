@@ -1,3 +1,20 @@
+## Clean-Host End-to-End and Native Release Gates (#11103)
+
+Implements [MMR-17] clean-host end-to-end lifecycle verification and native release gate evaluation:
+- **Motion Matching Release Gate Evaluation (`src/shared/python/motion_matching/release_gates.py`)**:
+  - Implements 4-state test matrix reporting (`passed`, `failed`, `skipped`, `unavailable`).
+  - Enforces fail-closed evaluation: mandatory engines (MuJoCo, Drake, Pinocchio) marked skipped or with zero executed native tests fail release (`RELEASE_BLOCKED`).
+  - Validates dual-club (driver and 7-iron) real-data paths across advertised engines (Simscape, MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite).
+  - Actionable diagnostics for adverse conditions (`TAMPERED_PACKAGE`, `MISSING_ENGINE`, `UNSUPPORTED_MODEL`, `CORRUPT_CAPTURE`).
+  - Enforces mock detection preventing synthetic stubs from satisfying physical or scientific release gates.
+  - Validates numerical agreement between UI presentation metrics and CLI output within 0.1 mm tolerance.
+  - Audits full clean-host lifecycle journey (install -> C3D load -> calibrate -> fit -> cancel/resume -> replay -> compare -> export/import -> reopen -> uninstall/upgrade) and cancellation SLA (< 500 ms).
+- **Release Audit CLI (`scripts/ci/check_motion_matching_release_gates.py`)**:
+  - Ingests committed native lane receipts and dual-club evidence packages, evaluates release matrix, and emits machine-readable JSON (`--matrix-out`).
+  - Supports `--audit-only` for non-blocking status inspection.
+- **TDD Test Coverage (`tests/acceptance/test_clean_host_release_gates.py`, `tests/scripts/test_check_motion_matching_release_gates.py`)**:
+  - 14 acceptance and script tests validating matrix classification, adverse rejections, mock gating, E2E journey stages, cancellation budgets, and CLI behavior.
+
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
