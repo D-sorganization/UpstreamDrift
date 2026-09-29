@@ -2,31 +2,17 @@
   "schema_version": 1,
   "engine": "opensim",
   "club": "driver",
-  "status": "qualified",
-  "candidate_sha256": "a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
-  "model_sha256": "6fa980a3ccda49b1051c55fb025da596c9a7b66e1687a4b3254df19d49536a21",
-  "capture_sha256": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-  "runtime_available": true,
-  "is_fresh_simulation": true,
-  "derivatives_consistent": true,
-  "energy_balance_checked": true,
-  "energy_summary": {
-    "energy_conservation_error": 0.048,
-    "kinetic_energy_j": 135.2,
-    "potential_energy_j": 29.8
-  },
-  "marker_metrics": {
-    "clubhead_rms_m": 0.0115,
-    "early_rms_m": 0.0102,
-    "pelvis_yaw_error_pct": 11.2,
-    "terminal_rms_m": 0.0152,
-    "whole_rms_m": 0.0127
-  },
-  "muscle_metrics": {
-    "max_activation": 0.88,
-    "mean_activation": 0.42,
-    "min_activation": 0.02
-  },
+  "status": "unavailable",
+  "candidate_sha256": "",
+  "model_sha256": "",
+  "capture_sha256": "",
+  "runtime_available": false,
+  "is_fresh_simulation": false,
+  "derivatives_consistent": false,
+  "energy_balance_checked": false,
+  "energy_summary": {},
+  "marker_metrics": {},
+  "muscle_metrics": {},
   "declared_limitations": [
     "hill_type_activation_dynamics: muscle excitation to activation first-order lag (tau_act ~ 10-15 ms, tau_deact ~ 40-50 ms)",
     "force_velocity_length_multipliers: active and passive force-length-velocity curves restrict instantaneous force generation",
@@ -34,6 +20,18 @@
     "coordinate_limit_forces: penalty contact or coordinate limit forces active near physiological range-of-motion extrema",
     "ground_contact_requires_external_wrenches: foot-ground reaction forces require calibrated multi-component contact meshes or external force profiles"
   ],
-  "rejection_reasons": [],
-  "diagnostic_message": "All qualification checks passed."
+  "rejection_reasons": [
+    "OpenSim runtime is not installed on pinned host: no native musculoskeletal simulation was executed"
+  ],
+  "missing_evidence": [
+    "native OpenSim rollout (opensim runtime)",
+    "candidate_sha256",
+    "model_sha256",
+    "capture_sha256",
+    "native_state/time_s dynamic rollout",
+    "aligned common-marker observations (markers_m/target_m)",
+    "native test count (native_tests_executed)"
+  ],
+  "remedy": "Install the OpenSim Python bindings on the pinned host and re-run scripts/ci/run_native_engine_lane.sh --engine opensim so native rollouts and club receipts are regenerated from real execution.",
+  "diagnostic_message": "OpenSim runtime is not installed on host: live simulation unavailable. No previous native dynamic qualification existed for this club; all numeric fields previously recorded here were fabricated placeholders and were removed."
 }
