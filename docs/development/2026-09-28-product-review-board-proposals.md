@@ -8,9 +8,9 @@
 
 ## Decision Brief
 
-The highest priority is trustworthy results. A professional interface must not report a successful simulation with no recorded samples, a landing before ground contact, or a verified neural result without verification evidence. These defects deserve attention before cosmetic redesign or speculative acceleration.
+The highest priority is trustworthy results: a professional interface must not report a successful simulation with no recorded samples, a landing before ground contact, or a verified neural result without verification evidence. Address these defects before cosmetic redesign or speculative acceleration.
 
-This review proposes **12 bounded issue briefs**, with one immediate P0 candidate. Several should extend existing issues rather than create duplicates. It also identifies two existing programs that the Board should retain: installed-product acceptance and independent physical validation. The Board should approve scope, owners, and acceptance criteria before implementation agents claim work.
+This review proposes **12 bounded issue briefs**, with one immediate P0 candidate, extending existing issues where appropriate and retaining two existing programs: installed-product acceptance and independent physical validation. The Board should approve scope, owners, and acceptance criteria before implementation agents claim work.
 
 | ID  | Priority | Proposed GitHub Issue Title                                                      | Primary Owner                                 | Evidence                                | Disposition                                              |
 | --- | -------- | -------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------- | -------------------------------------------------------- |
@@ -27,7 +27,7 @@ This review proposes **12 bounded issue briefs**, with one immediate P0 candidat
 | R11 | P1       | Report the Actual Integrated Horizon Consistently Across REST and WebSocket Runs | UpstreamDrift simulation                      | Exact arithmetic and source trace       | New candidate                                            |
 | R12 | P2       | Define and Validate Neural Data-Efficiency Claims Statistically                  | UpstreamDrift neural motion                   | Executed counterexample                 | Follow-up to #10625 / #10960                             |
 
-Priority means impact, not an assertion that every deployment exposes every path. P0 is an ordinary supported workflow returning materially false success. P1 covers result integrity, failure recovery, and resource exhaustion. P2 covers a misleading secondary research metric. Confidence is separate from priority; the briefs identify what was executed and what still needs native or human validation.
+Priority reflects impact: P0 indicates an ordinary supported workflow returning materially false success; P1 covers result integrity, failure recovery, and resource exhaustion; P2 covers a misleading secondary research metric. Confidence is tracked separately, distinguishing executed checks from unperformed native or human validation.
 
 ## Review Boundary and Reproducibility
 
@@ -39,11 +39,11 @@ Priority means impact, not an assertion that every deployment exposes every path
 | Runner_Dashboard       | `49fc655681e7e8017412ea49a349c80a8b2830d4` | Local expert-panel contract and presets                      |
 | Review Branch          | `docs/product-review-20260928`             | Documentation only; implementation unchanged                 |
 
-The sibling Tools comparison showed no differences from the consumed pin in `swing_sim/flight/{models,types,registry}.py` or the reviewed `impact_interval` tree. R04 is therefore not merely a stale consumer pin relative to that sibling checkout. Fix shared provider code in Tools, then consume a reviewed published pin in UpstreamDrift; do not patch the vendor tree.
+The sibling Tools comparison showed no differences from the consumed pin in `swing_sim/flight/{models,types,registry}.py` or the reviewed `impact_interval` tree, confirming R04 is not merely a stale consumer pin relative to that sibling checkout. Fix shared provider code in Tools, then consume a reviewed published pin in UpstreamDrift; do not patch the vendor tree.
 
-`agent_context status` reported a matched Tools runtime and checkout, five current registered boundary reviews, and 52 registered source files across 12 components. That is useful integrity evidence, but it does not cover every runtime path. The feature-parity registry has 46 entries; its tests passed. Neither fact proves controls execute their advertised behavior.
+`agent_context status` reported a matched Tools runtime and checkout, five current registered boundary reviews, and 52 registered source files across 12 components. The feature-parity registry has 46 entries with passing tests. Neither fact proves controls execute their advertised behavior across every runtime path.
 
-This is a broad, risk-based source and executable-contract assessment, not exhaustive verification of every engine or a visual usability certification. Windows Python 3.13 was available for the probes; the documented release profiles are Python 3.11/3.12. No MATLAB, native full-swing engine qualification, GPU benchmark, camera trial, packaged desktop journey, screen-reader trial, or measured athlete validation was performed. MATLAB acceptance must use **R2025b** per repository policy. The initial direct imports lacked the source-layout `PYTHONPATH`; the successful probes used the paths shown below. That setup failure is not presented as a product defect.
+This risk-based source and executable-contract assessment is not exhaustive engine verification or visual usability certification. Probes used Windows Python 3.13; documented release profiles are Python 3.11/3.12. No MATLAB, native full-swing engine qualification, GPU benchmark, camera trial, packaged desktop journey, screen-reader trial, or measured athlete validation was performed; MATLAB acceptance must use **R2025b** per repository policy. Initial direct imports lacked source-layout `PYTHONPATH`; the successful probes used the paths shown below, and that setup failure is not presented as a product defect.
 
 ### Coverage and Existing Strengths
 
@@ -58,19 +58,19 @@ This is a broad, risk-based source and executable-contract assessment, not exhau
 | Shared Tools        | Gitlink/Python/Rust pins, agent-context boundary, public flight facade, ODE result/metrics, impact-interval termination | Pin checks passed; R04 crosses the actual provider/consumer boundary      |
 | Wiring and Release  | UI → request → service → result; feature registry; readiness ledger and installed-product blocker                       | Registrations exist; R01/R07 show why behavior must be tested             |
 
-Do not re-file the old missing-vendor-init finding (#9407), lazy engine-discovery finding (#8934), or WebSocket per-step event-loop finding (#8936) as if unchanged. The current source initializes the vendor in the documented install path, discovers engine availability through metadata, and batches WebSocket physics in `anyio.to_thread.run_sync`. Route splitting and error boundaries also exist. The flight families intentionally retain different coefficient models under ADR-0047; merging them is not the proposed fix.
+Do not re-file the old missing-vendor-init finding (#9407), lazy engine-discovery finding (#8934), or WebSocket per-step event-loop finding (#8936) as if unchanged. Current source initializes the vendor in the documented install path, discovers engine availability through metadata, and batches WebSocket physics in `anyio.to_thread.run_sync`. Route splitting and error boundaries exist. Flight families intentionally retain different coefficient models under ADR-0047; merging them is not the proposed fix.
 
 ### Backlog Reconciliation
 
-Local authorities consulted: `docs/audits/2026-08-21-adversarial-integration-review.md`, `docs/audits/2026-08-21-uiux-performance-review.md`, `src/config/industrial_readiness.json`, `src/config/feature_parity.json`, `docs/development/DEVELOPMENT_LOG.md`, and `docs/development/planning/catalog.json`. The local `issues.json` and `open_issues.json` snapshots cover much older issue numbers and cannot establish current absence of duplicates.
+Local authorities consulted: `docs/audits/2026-08-21-adversarial-integration-review.md`, `docs/audits/2026-08-21-uiux-performance-review.md`, `src/config/industrial_readiness.json`, `src/config/feature_parity.json`, `docs/development/DEVELOPMENT_LOG.md`, and `docs/development/planning/catalog.json`. Local `issues.json` and `open_issues.json` snapshots cover much older issue numbers and cannot establish current duplicate absence.
 
-Live GitHub reads were restored by selecting the valid stored account after initial CLI authentication failures. On 2026-09-28, all 42 open UpstreamDrift issue titles and seven open PR titles were reviewed; #10960 was confirmed closed on 2026-09-27. Its remediation is already reflected in the reviewed source. R05/R06/R12 are follow-up counterexamples, not a request to repeat the closed audit. The open Fleet Critic PR [#10977](https://github.com/D-sorganization/UpstreamDrift/pull/10977) discusses related neural evidence; reconcile its older observations against this snapshot before combining recommendations.
+Live GitHub reads were restored after initial CLI authentication failures. On 2026-09-28, all 42 open UpstreamDrift issue titles and seven open PR titles were reviewed; #10960 was confirmed closed on 2026-09-27 and reflected in reviewed source. R05/R06/R12 are follow-up counterexamples rather than a request to repeat the closed audit. Reconcile older observations in open Fleet Critic PR [#10977](https://github.com/D-sorganization/UpstreamDrift/pull/10977) before combining recommendations.
 
-Existing open authorities include UpstreamDrift #10380 (professional release), #10375 (independent validation), #10382 (observable outputs), and #9417 (artifacts). A focused Tools open-issue search identified [#4260](https://github.com/D-sorganization/Tools/issues/4260) (flight contract) and [#4267](https://github.com/D-sorganization/Tools/issues/4267) (landing/bounce/roll) as parent programs for R04. This bounded title/body reconciliation is not an exhaustive search of every historical issue or active branch. **“New candidate” still requires a current implementation-issue and lease check before filing.** This review changes documentation only and claims none of those implementation issues.
+Existing open authorities include UpstreamDrift #10380 (professional release), #10375 (independent validation), #10382 (observable outputs), and #9417 (artifacts). Tools open issues [#4260](https://github.com/D-sorganization/Tools/issues/4260) (flight contract) and [#4267](https://github.com/D-sorganization/Tools/issues/4267) (landing/bounce/roll) serve as parent programs for R04. This bounded reconciliation is not exhaustive. **“New candidate” still requires a current implementation-issue and lease check before filing.** This review changes documentation only and claims none of those implementation issues.
 
 ## Issue Briefs
 
-Each brief can become an issue body after the disposition is confirmed. Suggested common classification: `panel-review`, `tier:strong`; use repository-supported priority/domain labels rather than assuming new labels exist. Delegate small implementation slices only after the design and acceptance contract are agreed.
+Each brief can become an issue body after disposition is confirmed. Suggested classification: `panel-review`, `tier:strong`; use supported repository labels rather than assuming new labels exist. Delegate small implementation slices only after design and acceptance contracts are agreed.
 
 ### R01 — Start the REST Simulation Recorder and Reject Empty Successful Results
 
@@ -86,7 +86,7 @@ Each brief can become an issue body after the disposition is confirmed. Suggeste
 success=True; frames=3; times=[]; engine_reads=0; recorded=0
 ```
 
-This is a broken execution-to-analysis/export connection, not merely a missing display field. The 82-test service/parity batch passed; recorder mocks in `tests/unit/api/test_simulation_service.py` do not expose this lifecycle mismatch.
+This breaks the execution-to-analysis/export connection rather than merely omitting a display field. The 82-test service/parity batch passed; recorder mocks in `tests/unit/api/test_simulation_service.py` do not expose this lifecycle mismatch.
 
 **Proposed Work:** Start and stop recording in a guaranteed lifecycle; define whether frames includes the initial sample; validate required channels and aligned nonempty time/state arrays before success. Preserve actual control inputs in the recording rather than relying on the recorder's default zero control. Surface truncation when capacity is reached.
 
@@ -109,7 +109,7 @@ This is a broken execution-to-analysis/export connection, not merely a missing d
 
 **Problem and Evidence:** The server places one simulation service and engine manager in app state. [`_prepare_engine`][ud-simulation] loads through that mutable manager and then reads its active engine. Concurrent `anyio` worker calls have no per-run ownership guard. The [manager][ud-engine] resets and replaces `active_physics_engine`. A barrier-backed test manager makes the interleaving explicit: requests for `mujoco` and `drake` both received the `drake` engine. Shared `_stats`, `_active_recorder`, `_last_recorder`, and biomechanics bindings also carry last-writer state. WebSocket speed/stats use the same service state. `TaskManager.engine_semaphore` is declared but has no caller in `src/api` beyond its definition.
 
-**Proposed Work:** Choose an explicit ownership contract. A single-active-run desktop API with busy/queued responses is a valid first containment option. Multi-run support requires per-run engine instances and immutable run-addressed recorders/results. Do not “fix” this by only adding a four-slot semaphore around the same mutable manager.
+**Proposed Work:** Choose an explicit ownership contract: either a single-active-run desktop API with busy/queued responses, or multi-run support with per-run engine instances and immutable run-addressed recorders/results. Do not merely add a four-slot semaphore around the mutable manager.
 
 **Acceptance Criteria:**
 
@@ -158,7 +158,7 @@ reported carry = 6.575110473940198 m
 reported landing angle = -17.4520240434372 deg
 ```
 
-The ball is airborne and ascending. These are partial-trajectory quantities being named as landing metrics. Source inspection also shows a failed solver's partial output can reach the same metric builder; solver-failure injection remains a required regression test. SciPy distinguishes interval completion, event completion and integration failure; `success=True` alone does not establish landing. See the [SciPy result contract](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html).
+The ball is airborne and ascending; partial-trajectory quantities are misreported as landing metrics. Failed solver output can also reach the same metric builder; solver-failure injection remains a required regression test. SciPy distinguishes interval completion, event completion, and integration failure; `success=True` alone does not establish landing. See the [SciPy result contract](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html).
 
 **Proposed Work:** Return explicit `landed`, `time_limit`, `solver_failed`, and `cancelled` semantics with terminal-event evidence and actual horizon. Keep useful partial trajectories; make carry/landing metrics unavailable unless their defining event occurred. Preserve these states in trajectory interchange, imports, inverse-solver objectives, and UI exports.
 
@@ -169,7 +169,7 @@ The ball is airborne and ascending. These are partial-trajectory quantities bein
 - The consumed Tools facade and UD API preserve the same termination meaning without forcing their aerodynamic coefficients to be identical.
 - Tools provider PR lands first; UpstreamDrift pins the published revision and runs an actual provider-to-API-to-viewer contract test.
 
-**Board Decision:** Approve coordinated provider/consumer work. Reuse the fail-closed termination pattern already present in Tools `impact_interval`; do not claim all Tools physics lacks termination handling.
+**Board Decision:** Approve coordinated provider/consumer work. Reuse the fail-closed termination pattern in Tools `impact_interval`; do not claim all Tools physics lacks termination handling.
 
 ### R05 — Refuse Neural Promotion Without Sufficient Comparable Evidence
 
@@ -179,7 +179,7 @@ The ball is airborne and ascending. These are partial-trajectory quantities bein
 
 **Disposition:** Create a bounded follow-up linked to closed #10960 and the #10625 benchmark program; reconcile with open critic PR #10977.
 
-**Problem and Evidence:** [The promotion gate][ud-promotion] requires speedup and non-regression in p95 latency and acceptance rate. It does not require any attempted or accepted validation examples. With one latency sample for each method (1.0 s versus 0.1 s) and `AcceptedMatchMetrics(0,0,0,0,0,0,0)` for both, it returns `PromotionDecision.PROMOTED` and a production-qualification recommendation. [MeasuredBaseline][ud-benchmark-types] checks fields for `None`, not measurement ancestry or comparability. This is not the older candidate-derived baseline defect: the current runner already requires an explicit baseline.
+**Problem and Evidence:** [The promotion gate][ud-promotion] requires speedup and non-regression in p95 latency and acceptance rate, but no attempted or accepted validation examples. With one latency sample for each method (1.0 s versus 0.1 s) and `AcceptedMatchMetrics(0,0,0,0,0,0,0)` for both, it returns `PromotionDecision.PROMOTED` and a production-qualification recommendation. While the current runner requires an explicit baseline, [MeasuredBaseline][ud-benchmark-types] only checks fields for `None` rather than measurement ancestry or comparability.
 
 **Proposed Work:** Separate “comparison arithmetic computed” from “promotion eligible.” Require nonempty measured validation, sufficient independent trials under a predeclared policy, matching model/task/quality tolerances, data/split/checkpoint identities, native replay evidence and hardware/runtime provenance. Insufficient evidence should be `UNQUALIFIED`/`RESEARCH_ONLY`, not a vacuous pass.
 
@@ -281,7 +281,7 @@ Qt provides a specific failed-start error signal; see the [QProcess contract](ht
 
 **Related Work:** #7456, #8978, #9352; depend on R04 terminal-result schema.
 
-**Problem and Evidence:** [BallFlight][ud-ballflight-ui] stores editable inputs separately from results and replaces results only after a successful request. Old results remain when inputs change or a later request fails, with no committed input snapshot or result-staleness state in this path. The result interface omits the coefficient metadata returned by the API. Imported curves do carry family/digest provenance; computed curves need equivalent inspectable identity. A professional scientific interface must make clear which inputs produced the visible numbers.
+**Problem and Evidence:** [BallFlight][ud-ballflight-ui] stores editable inputs separately from results and replaces results only after a successful request. Stale results remain when inputs change or later requests fail, with no committed input snapshot or staleness state. The interface omits coefficient metadata returned by the API. While imported curves carry family/digest provenance, computed curves need equivalent inspectable identity. A professional scientific interface must make clear which inputs produced the visible numbers.
 
 **Proposed Work:** Preserve prior results as useful history, labeled with their immutable submitted input/model/version/units snapshot. Indicate changed inputs and “previous result” on failure; distinguish queued/running/complete/partial/cancelled. Display or expose coefficient-set and qualification metadata. Make status changes available to assistive technology, not only color/spinners.
 
