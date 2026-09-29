@@ -26,12 +26,17 @@ function check = gs3dx_contact_check(info, opts)
 %     .pelvis_R   pelvis frame orientation (3x3xN, World) on the grid of .t
 %     .signals    struct of the logged signals named in option SIGNALS
 %                 (width x N on the grid of .t)
+%     .joints     with JOINTS > 0: the simulated joint positions every
+%                 JOINTS seconds (GS3DX_SIMLOG_JOINTS), a pose that
+%                 GS3DX_RENDER draws; the Simscape log keeps every 10th
+%                 solver step
 %     .status, .message    of the simulation
 %
 %   Options: drive ("impact"), stop_time (0.3 s), variables (struct of
 %   model-workspace overrides applied after the drive), rest (false),
 %   model (GS3DX_FullBodyContact; any model built from it, e.g. GS3DX_Golfer),
-%   signals (string array of logged signal names to return, default none).
+%   signals (string array of logged signal names to return, default none),
+%   joints (0: pose sample interval in s for .joints, 0 = none).
 %   rest=true zeroes every *StartVelocity* variable, so the body starts
 %   still in the drive's pose: the standing test.  The impact drive alone
 %   starts mid-downswing with the whole-body momentum of a model whose
@@ -49,6 +54,7 @@ function check = gs3dx_contact_check(info, opts)
         opts.rest (1,1) logical = false
         opts.model (1,1) string = gs3dx_names().variants.contact
         opts.signals (1,:) string = strings(1, 0)
+        opts.joints (1,1) double {mustBeNonnegative} = 0
     end
     mdl = char(opts.model);
     load_system(mdl);
@@ -67,7 +73,12 @@ function check = gs3dx_contact_check(info, opts)
     ground_R = ws.getVariable('GroundRotation');
     g = str2num(get_param([mdl '/Hips and Torso Inputs/Mechanism Configuration'], 'GravityVector')); %#ok<ST2NM> vector literal
     g = g(:);
-    frames = gs3dx_stance_frames(mdl, vars, stop_time=opts.stop_time, mass=true, shoulders=false);
+    if opts.joints > 0
+        % before the sensors go in; the joints are the same with them
+        jp = simscape.multibody.KinematicsSolver(mdl).jointPositionVariables;
+    end
+    frames = gs3dx_stance_frames(mdl, vars, stop_time=opts.stop_time, mass=true, shoulders=false, ...
+        simscape_log=10 * (opts.joints > 0));
     s = frames.series;
     logs = frames.out.logsout;
     assert(norm(-g / norm(g) - frames.up) < 1e-12, 'gs3dx:contact_check', 'Gravity and up disagree');
@@ -112,6 +123,9 @@ function check = gs3dx_contact_check(info, opts)
     for name = opts.signals
         [tn, xn] = local_signal(logs, char(name));
         check.signals.(char(name)) = at(tn, xn);
+    end
+    if opts.joints > 0
+        check.joints = gs3dx_simlog_joints(frames.out.simlog, mdl, jp, 0:opts.joints:opts.stop_time);
     end
     check.pelvis = max(vecnorm(s.pelvis_p - s.pelvis_p(:, 1)));
     check.pelvis_p = at(s.t, s.pelvis_p);

@@ -187,6 +187,35 @@ classdef test_gs3dx_human < matlab.unittest.TestCase
             nr = @(m) get_param(m, 'ModelWorkspace').getVariable('NeckReference');
             testCase.verifyEqual(nr(testCase.mdl), nr(testCase.base), 'NeckReference is GS3DX_Neck''s');
         end
+
+        function simulated_joints_render_the_simulated_body(testCase)
+            % .joints from the Simscape log, drawn by gs3dx_render, carries
+            % the pelvis solid with the simulated pelvis frame: its pose in
+            % the logged pelvis frame stays fixed (0.12 mm over the full
+            % 1.8 s swing).  The pelvis is the free 6-DOF root, so this
+            % reads the prismatic and spherical log variables.
+            ws = get_param(testCase.mdl, 'ModelWorkspace');
+            start = ws.getVariable('TrackStart');
+            c = gs3dx_contact_check(testCase.info, model=testCase.mdl, rest=true, stop_time=0.06, ...
+                variables=start, joints=0.02);
+            % only the frames it draws are solved
+            o = gs3dx_render(testCase.mdl, c.joints, stills=1:numel(c.joints.t), output_dir=tempdir);
+            load_system(testCase.mdl);
+            k = round(c.joints.t / 1e-3) + 1;   % c.t is a 1 ms grid
+            s = o.solids(endsWith([o.solids.name], "/Hips and Torso Inputs/Pelvis")).pose;
+            testCase.assertNotEmpty(s, 'No drawn pelvis solid');
+            for j = 1:numel(k)
+                Rp = c.pelvis_R(:, :, k(j));
+                off(:, j) = Rp.' * (s.P(:, j) - c.pelvis_p(:, k(j))); %#ok<AGROW>
+                rel(:, :, j) = Rp.' * s.R(:, :, j); %#ok<AGROW>
+            end
+            testCase.verifyLessThan(max(vecnorm(off - off(:, 1))), 5e-4, ...
+                'Pelvis solid moves in the simulated pelvis frame (m)');
+            testCase.verifyEqual(rel, repmat(rel(:, :, 1), 1, 1, numel(k)), 'AbsTol', 1e-3, ...
+                'Pelvis solid turns in the simulated pelvis frame');
+            testCase.verifyGreaterThan(norm(c.pelvis_p(:, k(end)) - c.pelvis_p(:, 1)), 1e-3, ...
+                'The pelvis moves, so the check is not vacuous (m)');
+        end
     end
 
     methods
