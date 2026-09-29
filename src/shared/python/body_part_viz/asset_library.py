@@ -71,11 +71,7 @@ def _default_asset_root() -> Path:
             except (FileNotFoundError, OSError):
                 pass
 
-    # Final fallback: source-checkout layout (search parent directories to handle submodules/vendoring).
-    for parent in Path(__file__).resolve().parents:
-        candidate = parent / "assets" / "body_part_shapes" / "default"
-        if candidate.is_dir():
-            return candidate
+    # Final fallback: source-checkout layout.
     return (
         Path(__file__).resolve().parents[4] / "assets" / "body_part_shapes" / "default"
     )
