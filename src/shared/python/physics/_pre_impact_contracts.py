@@ -8,6 +8,7 @@ float arrays; strings and booleans are never coerced into numbers.
 from __future__ import annotations
 
 import enum
+import math
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -127,7 +128,7 @@ def proper_rotation(value: object, name: str) -> FloatArray:
 def unit_quaternion(value: object, name: str) -> FloatArray:
     """Return a read-only (w, x, y, z) quaternion already of unit norm."""
     quaternion = finite_array(value, (4,), name)
-    norm = float(np.linalg.norm(quaternion))
+    norm = math.sqrt(np.vdot(quaternion, quaternion))
     if abs(norm - 1.0) > QUATERNION_TOLERANCE:
         fail("non_unit_quaternion", f"{name} must be unit length (|q|={norm:.12g})")
     return quaternion
@@ -136,7 +137,7 @@ def unit_quaternion(value: object, name: str) -> FloatArray:
 def unit_vector(value: object, name: str) -> FloatArray:
     """Return a read-only finite unit three-vector (never normalized)."""
     vector = finite_array(value, (3,), name)
-    if abs(float(np.linalg.norm(vector)) - 1.0) > UNIT_VECTOR_TOLERANCE:
+    if abs(math.sqrt(np.vdot(vector, vector)) - 1.0) > UNIT_VECTOR_TOLERANCE:
         fail("non_unit_vector", f"{name} must be a unit vector")
     return vector
 
