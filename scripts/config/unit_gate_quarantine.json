@@ -4,9 +4,7 @@
   "ratchet": "Entries may only be removed, never added.",
   "node_ids": [
     "tests/ci/test_ci_infrastructure.py::TestCIEnvironmentCompatibility::test_physics_validation_script_targets_collect_tests",
-    "tests/launchers/test_launcher_model_sources.py::test_movement_optimizer_targets_sibling_public_entry_point",
     "tests/shared/wave10_contracts/test_level.py::TestResolveLevel::test_optimized_python_defaults_to_enforce_when_env_unset",
-    "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_chat_input_same_object",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_chat_input_still_importable",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_stream_worker_same_object",
