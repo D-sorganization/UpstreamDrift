@@ -20,14 +20,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ### DL-#11095 — Qualify OpenSim Native Dual-Club Dynamics and Replay
 
 - **State:** in_review
-- **Owner:** local
+- **Owner:** UDFixTrio10x
 - **Issue:** #11095
 - **Branch:** `feat/mmr-10o-opensim-dual-club-11095`
 - **Paths:** `src/engines/physics_engines/opensim/python/native_qualification.py`, `tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/opensim/`
 - **Started:** 2026-09-29
-- **Last verified:** 2026-09-29 — 11 unit tests passed; Ruff check and format clean; committed dual-club driver and 7-iron receipts validated.
-- **Summary:** Qualified OpenSim native dual-club dynamics and replay verification. Implemented native qualification receipt schema, engine-specific biomechanical limitations (Hill-type muscle model, coordinate limit forces, ground contact wrenches), state-trajectory replay validation rejecting FK-only playback and identical candidate-reference clones, energy balance and kinematic derivative checks, and committed dual-club evidence receipts with cryptographic SHA-256 model provenance.
-- **Next step:** PR green and merged into main.
+- **Last verified:** 2026-09-29 at d5dd606ffa6dafc11408614676a2576764a5e092 — 17 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native OpenSim qualification NOT achieved: opensim bindings unavailable on all reachable hosts.
+- **Summary:** Fail-closed conversion of the [MMR-10O] dual-club OpenSim qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite values all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records. Real qualification still requires the opensim bindings on a pinned host via the native lane.
+- **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
