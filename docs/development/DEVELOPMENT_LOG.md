@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11124 — Phantom-Guard Rule 3 Recognizes scripts/ and Workflow Paths
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11124
+- **Branch:** `bot/issue-11124-guard-scripts-paths`
+- **Paths:** `scripts/ci/check_phantom_guard_paths.py`, `tests/ci/test_check_phantom_guard_paths.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 7 unit tests passed (red first with the pre-fix extractor, including an issue-#10965-body fixture reproducing the false positive); `uvx ruff check` clean; smoke `_evaluate_rule3` run passes a diff touching `scripts/check_mypy_exclusion_budget.py`.
+- **Summary:** Rule 3 path extraction extends `ISSUE_PATH_PATTERN` to `scripts/` and `.github/workflows/` and strips prose parenthetical fragments before matching, so `engines/api/core/shared/robotics` in a parenthetical no longer masquerades as the sole referenced path while inline-code scripts/ references match the PR diff.
+- **Next step:** CI green on the PR, then ready and arm.
+
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
 - **State:** in_review
@@ -546,7 +558,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-26 — `python scripts/check_docs_governance.py` exits 0; 26/26 docs-governance tests pass (junit count); new tests error on the base checker (red) and pass after; ruff clean; architecture budget OK.
 - **Summary:** Committed root entries (`git ls-tree --name-only HEAD`) must match `scripts/config/root_allowlist.json`; unlisted and stale entries both fail, and a failed git call or malformed config fails closed. Closes the last software checkbox of #9415; the history rewrite, Jules workflows and SPEC cap remain owner decisions.
 - **Next step:** CI green, review, merge.
-
 ### DL-#10965 · Coverage Gate Checker Reads the Budget File and Maps Cobertura Sources
 
 - **State:** in_review

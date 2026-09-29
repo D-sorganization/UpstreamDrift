@@ -1,4 +1,17 @@
-# Current Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+# Current Handoff — Phantom-Guard Rule 3 Recognizes scripts/ and Workflow Paths (#11124)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `/tmp/ud-wt-11124` (baseline `origin/main` 332b48dc13)
+- Branch: `bot/issue-11124-guard-scripts-paths`
+- Commit: `SELF`
+- Pull request: closes #11124.
+- Done: `scripts/ci/check_phantom_guard_paths.py` rule-3 path extraction (`ISSUE_PATH_PATTERN`) now recognizes `scripts/` and `.github/workflows/` references, and `_issue_referenced_paths` strips prose parenthetical fragments before matching — the `(engines/api/core/shared/robotics)` parenthetical from issue #10965's body no longer masquerades as the sole referenced path (the false positive seen on PR #11113, CI run 36530347610). Existing src/tests/rust_core/api matching is unchanged; the rule stays non-required with `phantom-guard-override` untouched.
+- Tests: TDD — new `tests/ci/test_check_phantom_guard_paths.py` red against the pre-fix extractor (including an issue-#10965-body fixture reproducing the false positive), green after the fix; 7 passed. `uvx ruff check` clean on both files. Smoke `_evaluate_rule3` run: diff touching `scripts/check_mypy_exclusion_budget.py` passes against the fixture body.
+- Next step: CI green on the PR, then ready and arm.
+
+---
+
+# Past Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `/tmp/ud-wt-10965` (baseline `origin/main` 64962e8d6)
