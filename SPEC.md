@@ -7134,6 +7134,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | #99999 | Consolidate Bolt micro-optimisation PRs #11112, #11128, #11129: row/column norms switched to `sqrt(einsum)` (bunkershot3d qualification-fit scale, motion-matching club calibration/hull/hip/downswing/reference/multi-shooting/club-only), and small fixed-size vectors switched to `math.sqrt(np.vdot)` (pink_tasks weld/marker residuals, physics_validation Jacobian error). Numerically identical results; new identity test `tests/unit/motion_matching/test_row_norm_einsum_identity.py` covers axis=0/1/2, keepdims, empty, NaN/Inf. |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |

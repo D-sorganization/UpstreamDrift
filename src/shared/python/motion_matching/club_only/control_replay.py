@@ -473,7 +473,8 @@ def detect_measured_state_resets(
         "states must be finite",
     )
     require(np.isfinite(atol) and atol >= 0.0, "atol must be finite and >= 0", atol)
-    deltas = np.linalg.norm(claimed - open_loop, axis=1)
+    delta_diff = claimed - open_loop
+    deltas = np.sqrt(np.einsum("ij,ij->i", delta_diff, delta_diff))
     return deltas > atol
 
 
