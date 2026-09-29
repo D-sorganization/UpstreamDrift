@@ -8,6 +8,7 @@ Defines the durable bundle structure linking:
 
 from __future__ import annotations
 
+import ctypes
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -15,8 +16,11 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import platform
+import shutil
+import sys
 import tempfile
-from typing import Any
+from typing import Any, Final
 
 from ._validation import (
     check_id,
@@ -81,6 +85,85 @@ class ShadowTrackerBundle:
         object.__setattr__(self, "assumptions", tuple(str(a) for a in self.assumptions))
 
 
+_RENAME_EXCHANGE_FLAG: Final[int] = 2  # renameat2(2) RENAME_EXCHANGE (Linux)
+_AT_FDCWD: Final[int] = -100  # renameat2(2): path is relative to the CWD
+_RENAMEAT2_SYSCALL: Final[dict[str, int]] = {
+    "x86_64": 316,
+    "aarch64": 276,
+    "riscv64": 276,
+    "ppc64le": 357,
+    "s390x": 347,
+}
+
+
+def _rename_exchange(src: Path, dst: Path) -> bool:
+    """Atomically swap two existing directory paths via renameat2(RENAME_EXCHANGE).
+
+    Returns True when the kernel performed the single-operation swap; False when the
+    platform cannot provide it (the caller falls back to backup-and-rollback renames).
+    """
+    number = _RENAMEAT2_SYSCALL.get(platform.machine())
+    if number is None or not sys.platform.startswith("linux"):
+        return False
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        syscall = libc.syscall
+        syscall.restype = ctypes.c_long
+        syscall.argtypes = [
+            ctypes.c_long,
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_uint,
+        ]
+        result = syscall(
+            number,
+            _AT_FDCWD,
+            os.fsencode(src),
+            _AT_FDCWD,
+            os.fsencode(dst),
+            _RENAME_EXCHANGE_FLAG,
+        )
+    except (AttributeError, OSError):
+        return False
+    return result == 0
+
+
+def publish_directory(staged: Path, target: Path) -> None:
+    """Publish a fully staged bundle directory as the live target.
+
+    The publish is a single atomic kernel operation on Linux (RENAME_EXCHANGE when
+    replacing, a plain rename when creating), so readers always observe either the
+    previous or the new bundle and never a partially written or missing target.
+    On platforms without ``renameat2``, replacement falls back to a backup rename
+    with restore-on-failure.
+    """
+    if not target.exists():
+        # First publication: a single rename is already atomic.
+        staged.rename(target)
+        return
+
+    if _rename_exchange(staged, target):
+        # `staged` now holds the replaced (previous) bundle; the caller cleans it up.
+        return
+
+    # renameat2 unavailable: two-rename fallback with backup rollback.
+    backup_dir = Path(tempfile.mkdtemp(prefix=".tmp_stbackup_", dir=target.parent))
+    saved = backup_dir / "saved"
+    target.rename(saved)
+    try:
+        staged.rename(target)
+    except BaseException:
+        # Restore the original bundle untouched, then re-raise.
+        if target.exists():
+            shutil.rmtree(target, ignore_errors=True)
+        saved.rename(target)
+        shutil.rmtree(backup_dir, ignore_errors=True)
+        raise
+    shutil.rmtree(backup_dir, ignore_errors=True)
+
+
 def save_bundle(bundle: ShadowTrackerBundle, target_path: Path | str) -> None:
     """Atomically save a ShadowTrackerBundle to a directory bundle.
 
@@ -136,17 +219,11 @@ def save_bundle(bundle: ShadowTrackerBundle, target_path: Path | str) -> None:
         (temp_dir / "masks.json").write_bytes(masks_bytes)
         (temp_dir / "manifest.json").write_bytes(manifest_bytes)
 
-        if target_dir.exists():
-            # Atomically replace or merge directory
-            for f in temp_dir.iterdir():
-                dest = target_dir / f.name
-                dest.write_bytes(f.read_bytes())
-        else:
-            temp_dir.replace(target_dir)
+        publish_directory(temp_dir, target_dir)
     finally:
+        # After a successful exchange `temp_dir` holds the replaced bundle; after a
+        # staged-write failure it holds the aborted copy. Never leak either.
         if temp_dir.exists():
-            import shutil
-
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 
