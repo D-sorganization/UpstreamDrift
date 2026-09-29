@@ -1,0 +1,1070 @@
+{
+  "registry_id": "upstreamdrift-companion-workflows",
+  "version": "1.0.0",
+  "workflows": [
+    {
+      "id": "companion-export",
+      "title": "Export the Exact-Revision Companion Manifest",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_catalog",
+        "--output",
+        "dist/companion-workflows/artifacts/companion-export/upstreamdrift-companion.v1.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/companion-export/upstreamdrift-companion.v1.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        },
+        {
+          "path": "dist/companion-workflows/artifacts/companion-export/upstreamdrift-companion.v1.json.sha256",
+          "type": "sha256",
+          "required": true,
+          "verification": {
+            "method": "sha256-sidecar",
+            "minimum_bytes": 70
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/adr/0043-companion-manifest-provider-authority.md",
+        "docs/operations/companion-publication.md"
+      ],
+      "program_ids": ["project_map"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "repository",
+        "fixture_paths": [
+          "docs/api/contracts/upstreamdrift-companion-v1.schema.json"
+        ],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The manifest exports software facts and does not qualify calculations, engines, or biomechanics claims."
+      ]
+    },
+    {
+      "id": "installation-verification",
+      "title": "Verify the Core Provider Installation Contract",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "installation-verification",
+        "--output",
+        "dist/companion-workflows/artifacts/installation-verification/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/installation-verification/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/user_guide/installation.md",
+        "docs/troubleshooting/installation.md"
+      ],
+      "program_ids": ["project_map"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "This CI record checks the Python floor and provider-authority imports; optional GUI and engine extras remain outside its scope."
+      ]
+    },
+    {
+      "id": "model-launch-resolution",
+      "title": "Resolve a Registered Model Launch",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "model-launch-resolution",
+        "--output",
+        "dist/companion-workflows/artifacts/model-launch-resolution/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/model-launch-resolution/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": ["docs/model_explorer/attachment-manifests.md"],
+      "program_ids": ["model_explorer"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "repository",
+        "fixture_paths": ["src/config/models.yaml"],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "Provider CI resolves the launch command headlessly and does not claim that a graphical window was visually inspected."
+      ]
+    },
+    {
+      "id": "reference-double-pendulum-simulation",
+      "title": "Run a Reference Double-Pendulum Simulation",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "reference-simulation",
+        "--output",
+        "dist/companion-workflows/artifacts/reference-double-pendulum-simulation/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/reference-double-pendulum-simulation/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": ["docs/engines/pendulum.md"],
+      "program_ids": ["pendulum_simulator"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 1e-9,
+        "relative_tolerance": 1e-9
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The short synthetic trajectory is a deterministic software example, not a fitted or validated golfer motion."
+      ]
+    },
+    {
+      "id": "reference-double-pendulum-analysis",
+      "title": "Analyze a Reference Double-Pendulum Trace",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "reference-analysis",
+        "--output",
+        "dist/companion-workflows/artifacts/reference-double-pendulum-analysis/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/reference-double-pendulum-analysis/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": ["docs/engines/pendulum.md"],
+      "program_ids": ["pendulum_simulator"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 1e-9,
+        "relative_tolerance": 1e-9
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "Tip speed and mechanical-energy change are model outputs, not independent measurements or causal evidence."
+      ]
+    },
+    {
+      "id": "launch-monitor-import-export",
+      "title": "Import and Export Canonical Launch-Monitor Data",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "launch-monitor-roundtrip",
+        "--output",
+        "dist/companion-workflows/artifacts/launch-monitor-import-export/result.json",
+        "--csv-output",
+        "dist/companion-workflows/artifacts/launch-monitor-import-export/canonical-shots.csv"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/launch-monitor-import-export/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        },
+        {
+          "path": "dist/companion-workflows/artifacts/launch-monitor-import-export/canonical-shots.csv",
+          "type": "csv",
+          "required": true,
+          "verification": {
+            "method": "csv-header",
+            "minimum_bytes": 20,
+            "required_columns": [
+              "shot_id",
+              "club_speed",
+              "ball_speed",
+              "launch_angle",
+              "spin_rate",
+              "carry_distance"
+            ]
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/user_guide/launch_monitor_analytics.md",
+        "docs/adr/0031-launch-monitor-canonical-shot-schema.md"
+      ],
+      "program_ids": ["launch_monitor_analytics"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "repository",
+        "fixture_paths": ["tests/fixtures/launch_monitor/trackman.csv"],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The two-row synthetic fixture verifies mapping and round-trip mechanics; it is not monitor calibration or population evidence."
+      ]
+    },
+    {
+      "id": "program-catalog-export",
+      "title": "Export a Program Catalog Slice",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "program-catalog-export",
+        "--output",
+        "dist/companion-workflows/artifacts/program-catalog-export/programs.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/program-catalog-export/programs.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/adr/0043-companion-manifest-provider-authority.md"
+      ],
+      "program_ids": ["project_map"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "This is a software-discovery projection and does not qualify the listed programs or their scientific outputs."
+      ]
+    },
+    {
+      "id": "zero-torque-counterfactual",
+      "title": "Evaluate the Instantaneous Zero-Torque Counterfactual",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "zero-torque-counterfactual",
+        "--output",
+        "dist/companion-workflows/artifacts/zero-torque-counterfactual/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/zero-torque-counterfactual/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch04_counterfactuals.qmd",
+        "docs/engines/pendulum.md"
+      ],
+      "program_ids": ["pendulum_simulator"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 1e-9,
+        "relative_tolerance": 1e-9
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "This is an instantaneous model intervention at a fixed state, not an experimentally observed no-torque swing or a full alternative trajectory."
+      ]
+    },
+    {
+      "id": "reference-simulation-report",
+      "title": "Generate a Reference Simulation Report",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "reference-report",
+        "--output",
+        "dist/companion-workflows/artifacts/reference-simulation-report/report.md"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/reference-simulation-report/report.md",
+          "type": "markdown",
+          "required": true,
+          "verification": {
+            "method": "non-empty",
+            "minimum_bytes": 80
+          }
+        }
+      ],
+      "documentation_paths": ["docs/engines/pendulum.md"],
+      "program_ids": ["pendulum_simulator"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 1e-9,
+        "relative_tolerance": 1e-9
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The generated Markdown reports only the governed synthetic fixture and is not a scientific publication or design authority."
+      ]
+    },
+    {
+      "id": "reference-simulation-plot",
+      "title": "Generate a Reference Simulation Plot",
+      "kind": "workflow",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "reference-plot",
+        "--output",
+        "dist/companion-workflows/artifacts/reference-simulation-plot/tip-speed.png"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/reference-simulation-plot/tip-speed.png",
+          "type": "png",
+          "required": true,
+          "verification": {
+            "method": "png-signature",
+            "minimum_bytes": 1000
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/engines/pendulum.md",
+        "docs/adr/0011-plot-style-toolkit.md"
+      ],
+      "program_ids": ["pendulum_simulator"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Matplotlib with the headless Agg backend",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 1e-9,
+        "relative_tolerance": 1e-9
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The plot is a deterministic software illustration of a synthetic trace and has no subject-level inferential authority."
+      ]
+    },
+    {
+      "id": "failure-unsupported-dependency",
+      "title": "Reject an Unsupported Dependency",
+      "kind": "failure-fixture",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "unsupported-dependency",
+        "--output",
+        "dist/companion-workflows/artifacts/failure-unsupported-dependency/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 20,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/failure-unsupported-dependency/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/user_guide/installing_optional_features.md"
+      ],
+      "program_ids": ["opensim_golf"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The reserved missing package is a deterministic conformance fixture and does not report the installation state of any real optional dependency."
+      ],
+      "failure_class": "unsupported-dependency"
+    },
+    {
+      "id": "failure-bad-input",
+      "title": "Reject Invalid Pendulum Parameters",
+      "kind": "failure-fixture",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "bad-input",
+        "--output",
+        "dist/companion-workflows/artifacts/failure-bad-input/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 21,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/failure-bad-input/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": ["docs/engines/pendulum.md"],
+      "program_ids": ["pendulum_simulator"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The fixture verifies a precondition failure only and does not bound all invalid physical inputs."
+      ],
+      "failure_class": "bad-input"
+    },
+    {
+      "id": "failure-unavailable-engine",
+      "title": "Reject an Unavailable Engine Fixture",
+      "kind": "failure-fixture",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "unavailable-engine",
+        "--output",
+        "dist/companion-workflows/artifacts/failure-unavailable-engine/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 22,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/failure-unavailable-engine/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": [
+        "docs/user_guide/installing_optional_features.md"
+      ],
+      "program_ids": ["opensim_golf"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "inline",
+        "fixture_paths": [],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The reserved engine identifier is a deterministic fail-closed fixture and does not assert that a named production engine is unavailable."
+      ],
+      "failure_class": "unavailable-engine"
+    },
+    {
+      "id": "failure-stale-version",
+      "title": "Reject a Stale Companion Compatibility Version",
+      "kind": "failure-fixture",
+      "executor": "python-module",
+      "argv": [
+        "scripts.companion_workflow_tasks",
+        "stale-version",
+        "--output",
+        "dist/companion-workflows/artifacts/failure-stale-version/result.json"
+      ],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": 23,
+      "expected_artifacts": [
+        {
+          "path": "dist/companion-workflows/artifacts/failure-stale-version/result.json",
+          "type": "json",
+          "required": true,
+          "verification": {
+            "method": "json-object",
+            "minimum_bytes": 3
+          }
+        }
+      ],
+      "documentation_paths": ["docs/operations/companion-publication.md"],
+      "program_ids": ["project_map"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "supported",
+      "availability": {
+        "state": "available",
+        "reason": null
+      },
+      "determinism": {
+        "fixture_kind": "repository",
+        "fixture_paths": [
+          "docs/api/contracts/upstreamdrift-companion-compatibility-v1.json"
+        ],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "The fixture proves compatibility-policy refusal and does not declare a real historical schema version."
+      ],
+      "failure_class": "stale-version"
+    },
+    {
+      "id": "opensim-native-gui-launch",
+      "title": "Launch the Native OpenSim GUI",
+      "kind": "workflow",
+      "executor": null,
+      "argv": [],
+      "cwd": ".",
+      "environment": {
+        "inherit": [
+          "COMSPEC",
+          "HOME",
+          "LANG",
+          "LC_ALL",
+          "PATH",
+          "PATHEXT",
+          "SYSTEMROOT",
+          "TEMP",
+          "TMP",
+          "USERPROFILE",
+          "WINDIR"
+        ],
+        "fixed": {
+          "MPLBACKEND": "Agg",
+          "PYTHONHASHSEED": "0",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUTF8": "1"
+        },
+        "python_paths": [".", "src", "src/shared/python"]
+      },
+      "expected_exit_code": null,
+      "expected_artifacts": [],
+      "documentation_paths": [
+        "docs/user_guide/installing_optional_features.md"
+      ],
+      "program_ids": ["opensim_golf"],
+      "prerequisites": [
+        "Python 3.11 or 3.12",
+        "Repository checkout at the declared source commit"
+      ],
+      "support_tier": "experimental",
+      "availability": {
+        "state": "unavailable",
+        "reason": "Core provider CI does not install or visually qualify the optional native OpenSim GUI runtime."
+      },
+      "determinism": {
+        "fixture_kind": "repository",
+        "fixture_paths": ["src/config/models.yaml"],
+        "absolute_tolerance": 0,
+        "relative_tolerance": 0
+      },
+      "verification_method": "Exact exit code plus declared artifact type, size, and SHA-256 evidence",
+      "scientific_limitations": [
+        "This record is deliberately non-executable until a separately qualified optional-runtime workflow and visual evidence authority exist."
+      ]
+    }
+  ]
+}

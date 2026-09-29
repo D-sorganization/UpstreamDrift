@@ -1,0 +1,336 @@
+{
+  "schema_version": "proximal-distal-phase-event-stability/v1",
+  "model_tier": "analytical_double_pendulum",
+  "registration": {
+    "control_program": {
+      "onset_s": 0.1,
+      "shoulder_torque_nm": 60.0,
+      "wrist_drive_nm": 15.0,
+      "wrist_restrain_nm": 10.0
+    },
+    "analysis_dt_s": 0.000125,
+    "analysis_horizon_steps": 7200,
+    "source_reference_dt_s": 0.001,
+    "source_reference_horizon_steps": 900,
+    "initial_state": [
+      -2.2,
+      -1.57,
+      0.0,
+      0.0
+    ],
+    "state_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad",
+      "shoulder_rate_rad_s",
+      "wrist_relative_rate_rad_s"
+    ],
+    "state_scales": [
+      3.14159,
+      3.14159,
+      13.5215,
+      28.2684
+    ],
+    "state_steps": [
+      1e-06,
+      1e-06,
+      1e-05,
+      1e-05
+    ],
+    "state_step_multipliers": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "refinement_residual_gate": 1e-05,
+    "refinement_residual_reporting_significant_digits": 2,
+    "direct_transition_residual_gate": 0.0001,
+    "direct_transition_residual_reporting_significant_digits": 1,
+    "equivalent_unit_residual_gate": 1e-12,
+    "equivalent_unit_residual_reporting_policy": "upper_power_of_ten",
+    "direct_perturbation_scales": [
+      5e-07,
+      1e-06,
+      2e-06
+    ],
+    "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
+    "transversality_threshold_per_s": 1e-06,
+    "periodicity_tolerance": 1e-06
+  },
+  "reference_event": {
+    "crossing_count": 1,
+    "sample_index_before_crossing": 2794,
+    "interpolation_fraction": 0.0492733,
+    "time_s": 0.349256,
+    "state": [
+      0.765808,
+      -0.765808,
+      6.78505,
+      28.2407
+    ],
+    "flow": [
+      6.78505,
+      28.2407,
+      -108.821,
+      232.994
+    ]
+  },
+  "finite_time_analysis": {
+    "interpretation": "local finite-window amplification on a nonperiodic trajectory",
+    "event_transition_matrix_scaled": [
+      [
+        0.844383,
+        -0.241073,
+        0.235983,
+        -1.61835
+      ],
+      [
+        0.690343,
+        0.508698,
+        3.10467,
+        4.3384
+      ],
+      [
+        -0.823352,
+        -0.256835,
+        -2.53153,
+        -3.22231
+      ],
+      [
+        0.368326,
+        -0.0176231,
+        2.34255,
+        1.91685
+      ]
+    ],
+    "phase_checkpoints": [
+      {
+        "finite_time_exponents_per_s": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "maximum_amplification": 1.0,
+        "minimum_amplification": 1.0,
+        "phase_fraction": 0.0,
+        "singular_values": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "time_s": 0.0
+      },
+      {
+        "finite_time_exponents_per_s": [
+          3.64333,
+          1.12152,
+          -2.23348,
+          -3.82258
+        ],
+        "maximum_amplification": 1.37453,
+        "minimum_amplification": 0.716222,
+        "phase_fraction": 0.25,
+        "singular_values": [
+          1.37453,
+          1.10288,
+          0.822823,
+          0.716222
+        ],
+        "time_s": 0.087314
+      },
+      {
+        "finite_time_exponents_per_s": [
+          3.63333,
+          2.02356,
+          -2.07663,
+          -4.57201
+        ],
+        "maximum_amplification": 1.88604,
+        "minimum_amplification": 0.450048,
+        "phase_fraction": 0.5,
+        "singular_values": [
+          1.88604,
+          1.42386,
+          0.695839,
+          0.450048
+        ],
+        "time_s": 0.174628
+      },
+      {
+        "finite_time_exponents_per_s": [
+          5.51703,
+          1.83102,
+          -2.10305,
+          -6.45223
+        ],
+        "maximum_amplification": 4.24246,
+        "minimum_amplification": 0.184499,
+        "phase_fraction": 0.75,
+        "singular_values": [
+          4.24246,
+          1.61546,
+          0.576444,
+          0.184499
+        ],
+        "time_s": 0.261942
+      },
+      {
+        "finite_time_exponents_per_s": [
+          5.77393,
+          1.45501,
+          -1.91176,
+          -6.57166
+        ],
+        "maximum_amplification": 7.5126,
+        "minimum_amplification": 0.100742,
+        "phase_fraction": 1.0,
+        "singular_values": [
+          7.5126,
+          1.66225,
+          0.512889,
+          0.100742
+        ],
+        "time_s": 0.349256
+      }
+    ],
+    "maximum_observed_amplification": 8.33244,
+    "minimum_observed_amplification": 0.093456
+  },
+  "step_refinement": [
+    {
+      "event_transition_max_abs_residual_from_nominal": 6.9e-06,
+      "state_step_multiplier": 0.1
+    },
+    {
+      "event_transition_max_abs_residual_from_nominal": 0.0,
+      "state_step_multiplier": 1.0
+    },
+    {
+      "event_transition_max_abs_residual_from_nominal": 8.8e-07,
+      "state_step_multiplier": 10.0
+    }
+  ],
+  "direct_transition_controls": [
+    {
+      "maximum_abs_residual": 4e-07,
+      "perturbation_scale": 5e-07
+    },
+    {
+      "maximum_abs_residual": 4e-07,
+      "perturbation_scale": 1e-06
+    },
+    {
+      "maximum_abs_residual": 4e-07,
+      "perturbation_scale": 2e-06
+    }
+  ],
+  "event_time_sensitivity": {
+    "implicit": {
+      "status": "transverse",
+      "transversality_per_s": 35.0258,
+      "derivative_s_per_scaled_state": [
+        -0.137655,
+        -0.0240043,
+        -0.299636,
+        -0.243972
+      ]
+    },
+    "direct_trials": [
+      {
+        "crossing_statuses": [
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate"
+        ],
+        "derivative_s_per_scaled_state": [
+          -0.137628,
+          -0.0239995,
+          -0.299576,
+          -0.243923
+        ],
+        "status": "available_transverse_candidates",
+        "perturbation_scale": 5e-07,
+        "maximum_abs_residual_from_implicit_s": 5.98012e-05
+      },
+      {
+        "crossing_statuses": [
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate"
+        ],
+        "derivative_s_per_scaled_state": [
+          -0.137628,
+          -0.0239995,
+          -0.299576,
+          -0.243923
+        ],
+        "status": "available_transverse_candidates",
+        "perturbation_scale": 1e-06,
+        "maximum_abs_residual_from_implicit_s": 5.98006e-05
+      },
+      {
+        "crossing_statuses": [
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate",
+          "transverse_candidate"
+        ],
+        "derivative_s_per_scaled_state": [
+          -0.137628,
+          -0.0239995,
+          -0.299576,
+          -0.243923
+        ],
+        "status": "available_transverse_candidates",
+        "perturbation_scale": 2e-06,
+        "maximum_abs_residual_from_implicit_s": 5.98005e-05
+      }
+    ],
+    "constructed_near_grazing_control": {
+      "status": "near_grazing",
+      "transversality_per_s": 0.0,
+      "derivative_s_per_scaled_state": null,
+      "construction": "configuration guard normal orthogonal to event configuration velocity"
+    }
+  },
+  "saltation_controls": {
+    "time_guard_identity_reset_max_abs_residual": 0.0,
+    "corrupted_reset_diagonal": 0.95,
+    "corrupted_reset_max_abs_deviation_from_identity": 0.05
+  },
+  "equivalent_unit_controls": {
+    "radian_to_degree_scaled_transition_max_abs_residual": 1e-15,
+    "second_to_millisecond_exponent_roundtrip_max_abs_residual_per_s": 1e-15
+  },
+  "periodicity_gate": {
+    "normalized_residual": 1.48546,
+    "tolerance": 1e-06,
+    "periodic": false,
+    "floquet_eligible": false,
+    "floquet_multipliers": null,
+    "reason": "suppressed because the registered trajectory does not close in scaled state"
+  },
+  "inference_boundary": "This is a local finite-window diagnostic on one synthetic, open-loop, nonperiodic analytical trajectory. Finite-time amplification is not asymptotic or global stability; event sensitivity is not neural timing demand; and neither result establishes anatomy, passive negative torque, participant robustness, human strategy, or coaching guidance.",
+  "limitations": [
+    "The state-transition map is a local derivative of the registered RK4 trajectory, not an independent physics engine.",
+    "Direct perturbation controls share the same equations and integration family; they verify implementation, not model validity.",
+    "The club-vertical guard is a geometric delivery countermodel, not measured club-ball impact.",
+    "No periodic orbit is registered, so Floquet multipliers, orbital stability, and basins are unavailable.",
+    "No participant data, actuator delay, state-estimation error, fatigue, muscle dynamics, or bilateral wrench data enter this slice."
+  ]
+}

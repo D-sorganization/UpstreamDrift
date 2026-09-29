@@ -1,0 +1,849 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
+"""Visualization tab for the MuJoCo humanoid golf GUI.
+
+Provides controls for camera, rendering options, and visual overlays
+used during humanoid golf simulations.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from PyQt6 import QtCore, QtGui, QtWidgets
+
+from src.shared.python.core.contracts import require
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
+
+if TYPE_CHECKING:
+    from ...sim_widget import MuJoCoSimWidget
+
+logger = get_logger(__name__)
+
+
+class VisualizationTab(QtWidgets.QWidget):
+    """Tab for visualization settings and camera controls."""
+
+    def __init__(
+        self,
+        sim_widget: MuJoCoSimWidget,
+        parent: QtWidgets.QWidget | None = None,
+    ) -> None:
+        if sim_widget is None:
+            raise ValueError("sim_widget must be provided")
+        super().__init__(parent)
+        self.sim_widget = sim_widget
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
+        """Create the visualization settings UI."""
+        viz_layout = QtWidgets.QVBoxLayout(self)
+        viz_layout.setContentsMargins(8, 8, 8, 8)
+
+        viz_layout.addWidget(self._setup_camera_controls())
+        viz_layout.addWidget(self._setup_background_controls())
+        viz_layout.addWidget(self._setup_meshcat_controls())
+        viz_layout.addWidget(self._setup_swing_plane_controls())
+        viz_layout.addWidget(self._setup_live_kinematics_controls())
+        force_group, ellipsoid_group = self._setup_force_torque_controls()
+        viz_layout.addWidget(ellipsoid_group)
+        viz_layout.addWidget(force_group)
+        viz_layout.addWidget(self._setup_matrix_analysis())
+        viz_layout.addWidget(self._setup_body_appearance())
+
+        viz_layout.addStretch(1)
+
+    def _setup_camera_controls(self) -> QtWidgets.QGroupBox:
+        """Create camera view preset and advanced camera controls."""
+        camera_group = QtWidgets.QGroupBox("Camera View")
+        camera_layout = QtWidgets.QVBoxLayout(camera_group)
+
+        self._create_camera_presets(camera_layout)
+        self._create_reset_camera_button(camera_layout)
+
+        advanced_cam_group = QtWidgets.QGroupBox("Advanced Camera Controls")
+        advanced_cam_layout = QtWidgets.QFormLayout(advanced_cam_group)
+
+        self._create_camera_sliders(advanced_cam_layout)
+        self._create_lookat_controls(advanced_cam_layout)
+        self._create_mouse_info(advanced_cam_layout)
+
+        camera_layout.addWidget(advanced_cam_group)
+        return camera_group
+
+    def _create_camera_presets(self, camera_layout: QtWidgets.QVBoxLayout) -> None:
+        if camera_layout is None:
+            raise ValueError("camera_layout must be provided")
+        preset_layout = QtWidgets.QHBoxLayout()
+        preset_layout.addWidget(QtWidgets.QLabel("Preset:"))
+        self.camera_combo = QtWidgets.QComboBox()
+        self.camera_combo.addItems(["side", "front", "top", "follow", "down-the-line"])
+        self.camera_combo.currentTextChanged.connect(self.on_camera_changed)
+        preset_layout.addWidget(self.camera_combo)
+        camera_layout.addLayout(preset_layout)
+
+    def _create_reset_camera_button(self, camera_layout: QtWidgets.QVBoxLayout) -> None:
+        if camera_layout is None:
+            raise ValueError("camera_layout must be provided")
+        reset_cam_btn = QtWidgets.QPushButton("Reset Camera")
+        style = self.style()
+        if style:
+            reset_cam_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
+            )
+        reset_cam_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        reset_cam_btn.clicked.connect(self.on_reset_camera)
+        camera_layout.addWidget(reset_cam_btn)
+
+    def _create_camera_sliders(
+        self, advanced_cam_layout: QtWidgets.QFormLayout
+    ) -> None:
+        if advanced_cam_layout is None:
+            raise ValueError("advanced_cam_layout must be provided")
+        self.azimuth_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.azimuth_slider.setMinimum(0)
+        self.azimuth_slider.setMaximum(360)
+        self.azimuth_slider.setValue(90)
+        self.azimuth_slider.setToolTip(
+            "Rotate camera around the vertical axis (0-360\u00b0)"
+        )  # noqa: E501
+        self.azimuth_slider.setAccessibleName("Camera Azimuth")
+        self.azimuth_slider.valueChanged.connect(self.on_azimuth_changed)
+        self.azimuth_label = QtWidgets.QLabel("90\u00b0")
+        advanced_cam_layout.addRow("Azimuth:", self.azimuth_slider)
+        advanced_cam_layout.addRow("", self.azimuth_label)
+
+        self.elevation_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.elevation_slider.setMinimum(-90)
+        self.elevation_slider.setMaximum(90)
+        self.elevation_slider.setValue(-20)
+        self.elevation_slider.setToolTip(
+            "Adjust camera vertical angle (-90\u00b0 to 90\u00b0)"
+        )  # noqa: E501
+        self.elevation_slider.setAccessibleName("Camera Elevation")
+        self.elevation_slider.valueChanged.connect(self.on_elevation_changed)
+        self.elevation_label = QtWidgets.QLabel("-20\u00b0")
+        advanced_cam_layout.addRow("Elevation:", self.elevation_slider)
+        advanced_cam_layout.addRow("", self.elevation_label)
+
+        self.distance_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.distance_slider.setMinimum(1)
+        self.distance_slider.setMaximum(500)
+        self.distance_slider.setValue(30)
+        self.distance_slider.setToolTip("Zoom camera in/out")
+        self.distance_slider.setAccessibleName("Camera Distance")
+        self.distance_slider.valueChanged.connect(self.on_distance_changed)
+        self.distance_label = QtWidgets.QLabel("3.0")
+        advanced_cam_layout.addRow("Distance:", self.distance_slider)
+        advanced_cam_layout.addRow("", self.distance_label)
+
+    def _create_lookat_controls(
+        self, advanced_cam_layout: QtWidgets.QFormLayout
+    ) -> None:
+        if advanced_cam_layout is None:
+            raise ValueError("advanced_cam_layout must be provided")
+        lookat_layout = QtWidgets.QHBoxLayout()
+        self.lookat_x_spin = QtWidgets.QDoubleSpinBox()
+        self.lookat_x_spin.setRange(-10.0, 10.0)
+        self.lookat_x_spin.setSingleStep(0.1)
+        self.lookat_x_spin.setValue(0.0)
+        self.lookat_x_spin.setToolTip("Camera target X coordinate")
+        self.lookat_x_spin.setAccessibleName("Lookat X")
+        self.lookat_x_spin.valueChanged.connect(self.on_lookat_changed)
+        lookat_layout.addWidget(QtWidgets.QLabel("X:"))
+        lookat_layout.addWidget(self.lookat_x_spin)
+
+        self.lookat_y_spin = QtWidgets.QDoubleSpinBox()
+        self.lookat_y_spin.setRange(-10.0, 10.0)
+        self.lookat_y_spin.setSingleStep(0.1)
+        self.lookat_y_spin.setValue(0.0)
+        self.lookat_y_spin.setToolTip("Camera target Y coordinate")
+        self.lookat_y_spin.setAccessibleName("Lookat Y")
+        self.lookat_y_spin.valueChanged.connect(self.on_lookat_changed)
+        lookat_layout.addWidget(QtWidgets.QLabel("Y:"))
+        lookat_layout.addWidget(self.lookat_y_spin)
+
+        self.lookat_z_spin = QtWidgets.QDoubleSpinBox()
+        self.lookat_z_spin.setRange(-10.0, 10.0)
+        self.lookat_z_spin.setSingleStep(0.1)
+        self.lookat_z_spin.setValue(1.0)
+        self.lookat_z_spin.setToolTip("Camera target Z coordinate")
+        self.lookat_z_spin.setAccessibleName("Lookat Z")
+        self.lookat_z_spin.valueChanged.connect(self.on_lookat_changed)
+        lookat_layout.addWidget(QtWidgets.QLabel("Z:"))
+        lookat_layout.addWidget(self.lookat_z_spin)
+
+        advanced_cam_layout.addRow("Lookat:", lookat_layout)
+
+    @staticmethod
+    def _create_mouse_info(advanced_cam_layout: QtWidgets.QFormLayout) -> None:
+        mouse_info = QtWidgets.QLabel(
+            "Mouse Controls:\n"
+            "\u2022 Left Drag: Rotate camera\n"
+            "\u2022 Right/Ctrl+Left: Rotate camera\n"
+            "\u2022 Middle/Shift+Left: Pan camera\n"
+            "\u2022 Wheel: Zoom",
+        )
+        mouse_info.setWordWrap(True)
+        mouse_info.setObjectName("helpLabel")
+        advanced_cam_layout.addRow("", mouse_info)
+
+    def _setup_background_controls(self) -> QtWidgets.QGroupBox:
+        """Create background color controls for sky and ground."""
+        bg_group = QtWidgets.QGroupBox("Background Color")
+        bg_layout = QtWidgets.QVBoxLayout(bg_group)
+
+        # Sky color
+        sky_layout = QtWidgets.QHBoxLayout()
+        sky_layout.addWidget(QtWidgets.QLabel("Sky Color:"))
+        self.sky_color_btn = QtWidgets.QPushButton()
+        self.sky_color_btn.setMinimumSize(60, 30)
+        self.sky_color_btn.setStyleSheet(Styles.SWATCH_SKY_DEFAULT)
+        self.sky_color_btn.setToolTip("Click to change sky color")
+        self.sky_color_btn.setAccessibleName("Sky Color")
+        self.sky_color_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        self.sky_color_btn.clicked.connect(self.on_sky_color_clicked)
+        sky_layout.addWidget(self.sky_color_btn)
+        sky_layout.addStretch()
+        bg_layout.addLayout(sky_layout)
+
+        # Ground color
+        ground_layout = QtWidgets.QHBoxLayout()
+        ground_layout.addWidget(QtWidgets.QLabel("Ground Color:"))
+        self.ground_color_btn = QtWidgets.QPushButton()
+        self.ground_color_btn.setMinimumSize(60, 30)
+        self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
+        self.ground_color_btn.setToolTip("Click to change ground color")
+        self.ground_color_btn.setAccessibleName("Ground Color")
+        self.ground_color_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        self.ground_color_btn.clicked.connect(self.on_ground_color_clicked)
+        ground_layout.addWidget(self.ground_color_btn)
+        ground_layout.addStretch()
+        bg_layout.addLayout(ground_layout)
+
+        # Reset to defaults button
+        reset_bg_btn = QtWidgets.QPushButton("Reset to Defaults")
+        reset_bg_btn.clicked.connect(self.on_reset_background)
+        bg_layout.addWidget(reset_bg_btn)
+
+        return bg_group
+
+    def _setup_meshcat_controls(self) -> QtWidgets.QGroupBox:
+        """Create Meshcat web visualization controls."""
+        meshcat_group = QtWidgets.QGroupBox("Web Visualization (Meshcat)")
+        meshcat_layout = QtWidgets.QVBoxLayout(meshcat_group)
+
+        btn_meshcat = QtWidgets.QPushButton("Open Web Visualizer")
+        style = self.style()
+        if style:
+            btn_meshcat.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ComputerIcon)
+            )
+        btn_meshcat.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        btn_meshcat.setToolTip("Open the scene in your default web browser")
+        btn_meshcat.clicked.connect(self.on_open_meshcat)
+        meshcat_layout.addWidget(btn_meshcat)
+
+        return meshcat_group
+
+    def _setup_swing_plane_controls(self) -> QtWidgets.QGroupBox:
+        """Create swing plane and trajectory visualization controls."""
+        swing_group = QtWidgets.QGroupBox("Swing Plane & Trajectory")
+        swing_layout = QtWidgets.QVBoxLayout(swing_group)
+
+        self.show_swing_plane_cb = QtWidgets.QCheckBox("Show Instantaneous Swing Plane")
+        self.show_swing_plane_cb.setToolTip(
+            "Display the real-time swing plane fitted from clubhead trajectory (Blue)"
+        )
+        self.show_swing_plane_cb.stateChanged.connect(self.on_swing_plane_changed)
+        swing_layout.addWidget(self.show_swing_plane_cb)
+
+        self.show_club_trajectory_cb = QtWidgets.QCheckBox("Show Club Trajectory Path")
+        self.show_club_trajectory_cb.setToolTip(
+            "Display the recorded clubhead trajectory as a 3D polyline (Green)"
+        )
+        self.show_club_trajectory_cb.stateChanged.connect(self.on_swing_plane_changed)
+        swing_layout.addWidget(self.show_club_trajectory_cb)
+
+        self.show_reference_trajectory_cb = QtWidgets.QCheckBox(
+            "Show Reference/Desired Trajectory"
+        )  # noqa: E501
+        self.show_reference_trajectory_cb.setToolTip(
+            "Overlay a reference trajectory for comparison (Orange)"
+        )
+        self.show_reference_trajectory_cb.stateChanged.connect(
+            self.on_swing_plane_changed
+        )
+        swing_layout.addWidget(self.show_reference_trajectory_cb)
+
+        # Tracked body selector
+        body_track_layout = QtWidgets.QHBoxLayout()
+        body_track_layout.addWidget(QtWidgets.QLabel("Track Body:"))
+        self.tracked_body_combo = QtWidgets.QComboBox()
+        self.tracked_body_combo.setEditable(True)
+        self.tracked_body_combo.addItems(["clubhead", "club_face", "right_hand"])
+        self.tracked_body_combo.setToolTip(
+            "Body name to track for trajectory and swing plane"
+        )  # noqa: E501
+        self.tracked_body_combo.currentTextChanged.connect(self.on_tracked_body_changed)
+        body_track_layout.addWidget(self.tracked_body_combo, stretch=1)
+        swing_layout.addLayout(body_track_layout)
+
+        # Reset trajectory button
+        reset_traj_btn = QtWidgets.QPushButton("Clear Trajectory")
+        reset_traj_btn.setToolTip("Reset recorded trajectory data")
+        reset_traj_btn.clicked.connect(self.on_reset_trajectory)
+        swing_layout.addWidget(reset_traj_btn)
+
+        return swing_group
+
+    def _setup_live_kinematics_controls(self) -> QtWidgets.QGroupBox:
+        group = QtWidgets.QGroupBox("Live Kinematics (Right-Click a Body)")
+        layout = QtWidgets.QVBoxLayout(group)
+
+        self.show_live_euler_cb = QtWidgets.QCheckBox("Show Euler Angles (XYZ)")
+        self.show_live_euler_cb.stateChanged.connect(self.on_live_kinematics_changed)
+        layout.addWidget(self.show_live_euler_cb)
+
+        self.show_live_quat_cb = QtWidgets.QCheckBox("Show Quaternions (WXYZ)")
+        self.show_live_quat_cb.stateChanged.connect(self.on_live_kinematics_changed)
+        layout.addWidget(self.show_live_quat_cb)
+
+        self.show_live_screw_cb = QtWidgets.QCheckBox("Show Screw Axis Motion")
+        self.show_live_screw_cb.stateChanged.connect(self.on_live_kinematics_changed)
+        layout.addWidget(self.show_live_screw_cb)
+
+        return group
+
+    def _setup_force_torque_controls(
+        self,
+    ) -> tuple[QtWidgets.QGroupBox, QtWidgets.QGroupBox]:
+        """Create force, torque, and vector visualization controls.
+
+        Returns a tuple of (force_group, ellipsoid_group) so the caller
+        can place them in the desired layout order.
+        """
+        force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
+        force_layout = QtWidgets.QVBoxLayout(force_group)
+
+        self._create_force_checkboxes(force_layout)
+        self._create_torque_scale_controls(force_layout)
+        self._create_force_scale_controls(force_layout)
+        self._create_advanced_vector_overlays(force_layout)
+
+        self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
+        self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
+        force_layout.addWidget(self.show_contacts_cb)
+
+        ellipsoid_group = self._create_ellipsoid_group()
+
+        return force_group, ellipsoid_group
+
+    def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        self.isolate_forces_cb = QtWidgets.QCheckBox("Isolate to Selected Body")
+        self.isolate_forces_cb.setToolTip(
+            "Only show forces/torques for the currently selected body (via Right-Click)"
+        )
+        self.isolate_forces_cb.stateChanged.connect(self.on_isolate_forces_changed)
+        force_layout.addWidget(self.isolate_forces_cb)
+
+        self.show_torques_cb = QtWidgets.QCheckBox("Show Joint Torque Vectors")
+        self.show_torques_cb.stateChanged.connect(self.on_show_torques_changed)
+        force_layout.addWidget(self.show_torques_cb)
+
+    def _create_torque_scale_controls(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        torque_scale_layout = QtWidgets.QFormLayout()
+        self.torque_scale_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.torque_scale_slider.setMinimum(1)
+        self.torque_scale_slider.setMaximum(100)
+        self.torque_scale_slider.setValue(10)
+        self.torque_scale_slider.setToolTip(
+            "Adjust the visual length of torque vectors"
+        )  # noqa: E501
+        self.torque_scale_slider.setAccessibleName("Torque Scale")
+        self.torque_scale_slider.valueChanged.connect(self.on_torque_scale_changed)
+        self.torque_scale_label = QtWidgets.QLabel("1.0%")
+        torque_scale_layout.addRow("Torque Scale:", self.torque_scale_slider)
+        torque_scale_layout.addRow("", self.torque_scale_label)
+        force_layout.addLayout(torque_scale_layout)
+
+    def _create_force_scale_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        self.show_forces_cb = QtWidgets.QCheckBox("Show Constraint Forces")
+        self.show_forces_cb.stateChanged.connect(self.on_show_forces_changed)
+        force_layout.addWidget(self.show_forces_cb)
+
+        force_scale_layout = QtWidgets.QFormLayout()
+        self.force_scale_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.force_scale_slider.setMinimum(1)
+        self.force_scale_slider.setMaximum(100)
+        self.force_scale_slider.setValue(10)
+        self.force_scale_slider.setToolTip("Adjust the visual length of force vectors")
+        self.force_scale_slider.setAccessibleName("Force Scale")
+        self.force_scale_slider.valueChanged.connect(self.on_force_scale_changed)
+        self.force_scale_label = QtWidgets.QLabel("10%")
+        force_scale_layout.addRow("Force Scale:", self.force_scale_slider)
+        force_scale_layout.addRow("", self.force_scale_label)
+        force_layout.addLayout(force_scale_layout)
+
+    def _create_advanced_vector_overlays(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        advanced_vector_group = QtWidgets.QGroupBox("Advanced Vector Overlays")
+        av_layout = QtWidgets.QFormLayout(advanced_vector_group)
+
+        self.show_induced_cb = QtWidgets.QCheckBox("Show Induced Acceleration")
+        self.show_induced_cb.setToolTip(
+            "Show acceleration vectors induced by a specific source (Magenta)"
+        )
+        self.show_induced_cb.stateChanged.connect(self.on_advanced_vector_changed)
+
+        self.induced_source_combo = QtWidgets.QComboBox()
+        self.induced_source_combo.setEditable(True)
+        self.induced_source_combo.addItems(["gravity", "velocity", "total"])
+        self.induced_source_combo.setToolTip(
+            "Select source or type specific actuator name"
+        )  # noqa: E501
+        self.induced_source_combo.currentTextChanged.connect(
+            self.on_advanced_vector_changed
+        )
+
+        self.show_cf_cb = QtWidgets.QCheckBox("Show Counterfactuals")
+        self.show_cf_cb.setToolTip(
+            "Show Counterfactual vectors like ZTCF accel or ZVCF torque (Yellow)"
+        )
+        self.show_cf_cb.stateChanged.connect(self.on_advanced_vector_changed)
+
+        self.cf_type_combo = QtWidgets.QComboBox()
+        self.cf_type_combo.addItems(["ztcf_accel", "zvcf_torque"])
+        self.cf_type_combo.currentTextChanged.connect(self.on_advanced_vector_changed)
+
+        av_layout.addRow(self.show_induced_cb, self.induced_source_combo)
+        av_layout.addRow(self.show_cf_cb, self.cf_type_combo)
+
+        force_layout.addWidget(advanced_vector_group)
+
+    def _create_ellipsoid_group(self) -> QtWidgets.QGroupBox:
+        ellipsoid_group = QtWidgets.QGroupBox("Ellipsoids")
+        ellipsoid_layout = QtWidgets.QVBoxLayout(ellipsoid_group)
+        self.show_mobility_ellipsoid_cb = QtWidgets.QCheckBox(
+            "Show Mobility Ellipsoid (Green)"
+        )  # noqa: E501
+        self.show_mobility_ellipsoid_cb.stateChanged.connect(
+            self.on_ellipsoid_visualization_changed
+        )
+        ellipsoid_layout.addWidget(self.show_mobility_ellipsoid_cb)
+
+        self.show_force_ellipsoid_cb = QtWidgets.QCheckBox("Show Force Ellipsoid (Red)")
+        self.show_force_ellipsoid_cb.stateChanged.connect(
+            self.on_ellipsoid_visualization_changed
+        )
+        ellipsoid_layout.addWidget(self.show_force_ellipsoid_cb)
+
+        return ellipsoid_group
+
+    def _setup_matrix_analysis(self) -> QtWidgets.QGroupBox:
+        """Create matrix analysis display labels."""
+        matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
+        matrix_layout = QtWidgets.QFormLayout(matrix_group)
+        self.jacobian_cond_label = QtWidgets.QLabel("Condition: --")
+        self.constraint_rank_label = QtWidgets.QLabel("Rank: --")
+        self.nefc_label = QtWidgets.QLabel("Constraints: --")
+
+        matrix_layout.addRow("Jacobian Cond:", self.jacobian_cond_label)
+        matrix_layout.addRow("Constraint Rank:", self.constraint_rank_label)
+        matrix_layout.addRow("Active Constraints:", self.nefc_label)
+        return matrix_group
+
+    def _setup_body_appearance(self) -> QtWidgets.QGroupBox:
+        """Create body appearance color controls."""
+        appearance_group = QtWidgets.QGroupBox("Body Appearance")
+        appearance_layout = QtWidgets.QVBoxLayout(appearance_group)
+
+        # Body selector
+        body_sel_layout = QtWidgets.QHBoxLayout()
+        body_sel_layout.addWidget(QtWidgets.QLabel("Body:"))
+        self.viz_body_combo = QtWidgets.QComboBox()
+        self.viz_body_combo.setMinimumWidth(150)
+        body_sel_layout.addWidget(self.viz_body_combo, stretch=1)
+        appearance_layout.addLayout(body_sel_layout)
+
+        # Color picker
+        color_layout = QtWidgets.QHBoxLayout()
+        self.viz_color_btn = QtWidgets.QPushButton("Change Color")
+        self.viz_color_btn.clicked.connect(self.on_change_body_color)
+        color_layout.addWidget(self.viz_color_btn)
+
+        self.viz_reset_color_btn = QtWidgets.QPushButton("Reset Color")
+        self.viz_reset_color_btn.clicked.connect(self.on_reset_body_color)
+        color_layout.addWidget(self.viz_reset_color_btn)
+
+        appearance_layout.addLayout(color_layout)
+        return appearance_group
+
+    # -------- Callbacks --------
+
+    def on_camera_changed(self, camera_name: str) -> None:
+        if camera_name is None:
+            raise ValueError("camera_name must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle camera view change."""
+        self.sim_widget.set_camera(camera_name)
+        # Update sliders to match camera preset
+        self.update_camera_sliders()
+
+    def update_camera_sliders(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Update camera control sliders to match current camera state."""
+        if self.sim_widget.camera is not None:
+            # Update azimuth (0-360)
+            az = self.sim_widget.get_camera_azimuth() % 360
+            self.azimuth_slider.setValue(int(az))
+            self.azimuth_label.setText(f"{az:.1f}\u00b0")
+
+            # Update elevation
+            el = self.sim_widget.get_camera_elevation()
+            self.elevation_slider.setValue(int(el))
+            self.elevation_label.setText(f"{el:.1f}\u00b0")
+
+            # Update distance (convert to slider scale: 1-500 represents 0.1-50.0)
+            dist = self.sim_widget.get_camera_distance()
+            slider_val = int((dist - 0.1) / (50.0 - 0.1) * 499) + 1
+            self.distance_slider.setValue(slider_val)
+            self.distance_label.setText(f"{dist:.2f}")
+
+            # Update lookat
+            lookat = self.sim_widget.get_camera_lookat()
+            self.lookat_x_spin.setValue(lookat[0])
+            self.lookat_y_spin.setValue(lookat[1])
+            self.lookat_z_spin.setValue(lookat[2])
+
+    def on_azimuth_changed(self, value: int) -> None:
+        if value is None:
+            raise ValueError("value must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle azimuth slider change."""
+        self.sim_widget.set_camera_azimuth(float(value))
+        self.azimuth_label.setText(f"{value}\u00b0")
+
+    def on_elevation_changed(self, value: int) -> None:
+        if value is None:
+            raise ValueError("value must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle elevation slider change."""
+        self.sim_widget.set_camera_elevation(float(value))
+        self.elevation_label.setText(f"{value}\u00b0")
+
+    def on_distance_changed(self, value: int) -> None:
+        if value is None:
+            raise ValueError("value must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle distance slider change."""
+        # Convert slider value (1-500) to distance (0.1-50.0)
+        distance = 0.1 + (value - 1) / 499.0 * (50.0 - 0.1)
+        self.sim_widget.set_camera_distance(distance)
+        self.distance_label.setText(f"{distance:.2f}")
+
+    def on_lookat_changed(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle lookat position change."""
+        x = self.lookat_x_spin.value()
+        y = self.lookat_y_spin.value()
+        z = self.lookat_z_spin.value()
+        self.sim_widget.set_camera_lookat(x, y, z)
+
+    def on_reset_camera(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Reset camera to default position."""
+        self.sim_widget.reset_camera()
+        self.update_camera_sliders()
+
+    def on_sky_color_clicked(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle sky color button click - open color picker."""
+        current_color = QtGui.QColor(
+            int(self.sim_widget.sky_color[0] * 255),
+            int(self.sim_widget.sky_color[1] * 255),
+            int(self.sim_widget.sky_color[2] * 255),
+        )
+        color = QtWidgets.QColorDialog.getColor(current_color, self, "Select Sky Color")
+        if color.isValid():
+            rgba = [
+                color.red() / 255.0,
+                color.green() / 255.0,
+                color.blue() / 255.0,
+                1.0,
+            ]
+            self.sim_widget.set_background_color(sky_color=rgba)
+            # Update button color
+            self.sky_color_btn.setStyleSheet(
+                f"background-color: rgb({color.red()}, {color.green()}, "
+                f"{color.blue()});",  # noqa: E501
+            )
+
+    def on_ground_color_clicked(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle ground color button click - open color picker."""
+        current_color = QtGui.QColor(
+            int(self.sim_widget.ground_color[0] * 255),
+            int(self.sim_widget.ground_color[1] * 255),
+            int(self.sim_widget.ground_color[2] * 255),
+        )
+        color = QtWidgets.QColorDialog.getColor(
+            current_color,
+            self,
+            "Select Ground Color",
+        )
+        if color.isValid():
+            rgba = [
+                color.red() / 255.0,
+                color.green() / 255.0,
+                color.blue() / 255.0,
+                1.0,
+            ]
+            self.sim_widget.set_background_color(ground_color=rgba)
+            # Update button color
+            self.ground_color_btn.setStyleSheet(
+                f"background-color: rgb({color.red()}, {color.green()}, "
+                f"{color.blue()});",  # noqa: E501
+            )
+
+    def on_reset_background(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Reset background colors to defaults."""
+        default_sky = [0.2, 0.3, 0.4, 1.0]
+        default_ground = [0.2, 0.2, 0.2, 1.0]
+        self.sim_widget.set_background_color(
+            sky_color=default_sky,
+            ground_color=default_ground,
+        )
+        # Update button colors
+        self.sky_color_btn.setStyleSheet(Styles.SWATCH_SKY_DEFAULT)
+        self.ground_color_btn.setStyleSheet(Styles.SWATCH_GROUND_DEFAULT)
+
+    def on_live_kinematics_changed(self, state: int = 0) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle live kinematics visualization toggle."""
+        self.sim_widget.set_live_kinematics_visualization(
+            euler=self.show_live_euler_cb.isChecked(),
+            quat=self.show_live_quat_cb.isChecked(),
+            screw=self.show_live_screw_cb.isChecked(),
+        )
+
+    def on_open_meshcat(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Open the Meshcat visualizer in the default browser."""
+        if (
+            hasattr(self.sim_widget, "meshcat_adapter")
+            and self.sim_widget.meshcat_adapter
+        ):  # noqa: E501
+            self.sim_widget.open_meshcat_browser()
+        else:
+            QtWidgets.QMessageBox.warning(
+                self, "Meshcat", "Meshcat adapter not initialized or not available."
+            )
+
+    def on_show_torques_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle torque visualization toggle."""
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        self.sim_widget.set_torque_visualization(enabled)
+
+    def on_torque_scale_changed(self, value: int) -> None:
+        if value is None:
+            raise ValueError("value must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle torque scale slider change."""
+        scale = value / 100.0  # Convert to 0.01 - 1.0
+        self.torque_scale_label.setText(f"{scale:.2f}%")
+        self.sim_widget.set_torque_visualization(
+            self.show_torques_cb.isChecked(),
+            scale * 0.01,
+        )
+
+    def on_show_forces_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle force visualization toggle."""
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        self.sim_widget.set_force_visualization(enabled)
+
+    def on_force_scale_changed(self, value: int) -> None:
+        if value is None:
+            raise ValueError("value must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle force scale slider change."""
+        scale = value / 10.0
+        self.force_scale_label.setText(f"{scale:.1f}%")
+        self.sim_widget.set_force_visualization(
+            self.show_forces_cb.isChecked(),
+            scale * 0.1,
+        )
+
+    def on_isolate_forces_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle isolate forces toggle."""
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        if hasattr(self.sim_widget, "set_isolate_forces_visualization"):
+            self.sim_widget.set_isolate_forces_visualization(enabled)
+
+    def on_advanced_vector_changed(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle advanced vector visualization changes."""
+        self.sim_widget.set_advanced_vector_visualization(
+            self.show_induced_cb.isChecked(),
+            self.induced_source_combo.currentText(),
+            self.show_cf_cb.isChecked(),
+            self.cf_type_combo.currentText(),
+        )
+
+    def on_show_contacts_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle contact force visualization toggle."""
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        self.sim_widget.set_contact_force_visualization(enabled)
+
+    def on_ellipsoid_visualization_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle ellipsoid visualization toggle."""
+        show_mobility = self.show_mobility_ellipsoid_cb.isChecked()
+        show_force = self.show_force_ellipsoid_cb.isChecked()
+        self.sim_widget.set_ellipsoid_visualization(show_mobility, show_force)
+
+    def on_swing_plane_changed(self, state: int = 0) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle swing plane / trajectory visualization toggle."""
+        self.sim_widget.set_swing_plane_visualization(
+            show_plane=self.show_swing_plane_cb.isChecked(),
+            show_trajectory=self.show_club_trajectory_cb.isChecked(),
+            show_reference=self.show_reference_trajectory_cb.isChecked(),
+        )
+
+    def on_tracked_body_changed(self, body_name: str) -> None:
+        if body_name is None:
+            raise ValueError("body_name must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle tracked body change for trajectory recording."""
+        if body_name:
+            self.sim_widget.swing_plane_body_name = body_name
+
+    def on_reset_trajectory(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Reset recorded trajectory and swing plane data."""
+        self.sim_widget.reset_swing_plane()
+
+    def on_change_body_color(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle body color change."""
+        body_name = self.viz_body_combo.currentText()
+        if not body_name:
+            return
+
+        # Split ID from name if needed (format "ID: Name")
+        if ": " in body_name:
+            body_name = body_name.split(": ", 1)[1]
+
+        color = QtWidgets.QColorDialog.getColor(
+            QtCore.Qt.GlobalColor.white,
+            self,
+            f"Select Color for {body_name}",
+        )
+        if color.isValid():
+            rgba = [
+                color.red() / 255.0,
+                color.green() / 255.0,
+                color.blue() / 255.0,
+                1.0,
+            ]
+            self.sim_widget.set_body_color(body_name, rgba)
+
+    def on_reset_body_color(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Handle body color reset."""
+        body_name = self.viz_body_combo.currentText()
+        if not body_name:
+            return
+        if ": " in body_name:
+            body_name = body_name.split(": ", 1)[1]
+
+        self.sim_widget.reset_body_color(body_name)
+
+    def update_matrix_metrics(
+        self,
+        cond: float | str,
+        rank: int | str,
+        nefc: int | str,
+    ) -> None:
+        if cond is None:
+            raise ValueError("cond must be provided")
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Update matrix analysis labels."""
+        self.jacobian_cond_label.setText(f"Condition: {cond}")
+        self.constraint_rank_label.setText(f"Rank: {rank}")
+        self.nefc_label.setText(f"Constraints: {nefc}")
+
+    def update_body_list(self) -> None:
+        require("sim_widget is set", lambda: self.sim_widget is not None)
+        """Update body selection list and actuator list."""
+        if not self.sim_widget.has_model():
+            return
+
+        # Update Bodies
+        self.viz_body_combo.clear()
+        for body_id in range(1, self.sim_widget.get_num_bodies()):
+            body_name = self.sim_widget.get_body_name(body_id)
+            if body_name:
+                self.viz_body_combo.addItem(f"{body_id}: {body_name}")
+
+        # Update Actuators in induced source combo
+        # Keep standard items
+        standard_items = ["gravity", "velocity", "total"]
+        current_text = self.induced_source_combo.currentText()
+
+        self.induced_source_combo.clear()
+        self.induced_source_combo.addItems(standard_items)
+
+        for i in range(self.sim_widget.get_num_actuators()):
+            # Actuator name
+            act_name = self.sim_widget.get_actuator_name(i)
+            if not act_name:
+                act_name = f"actuator_{i}"
+            self.induced_source_combo.addItem(act_name)
+
+        if current_text:
+            self.induced_source_combo.setCurrentText(current_text)
+
+        # Update tracked body combo for swing plane
+        current_tracked = self.tracked_body_combo.currentText()
+        self.tracked_body_combo.clear()
+        for body_id in range(1, self.sim_widget.get_num_bodies()):
+            body_name = self.sim_widget.get_body_name(body_id)
+            if body_name:
+                self.tracked_body_combo.addItem(body_name)
+        if current_tracked:
+            self.tracked_body_combo.setCurrentText(current_tracked)

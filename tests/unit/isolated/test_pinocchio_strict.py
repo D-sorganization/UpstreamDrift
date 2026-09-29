@@ -1,0 +1,145 @@
+"""Unit tests for the Pinocchio adapter using isolated subprocess execution."""
+
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest  # noqa: F401 - required for pytestmark
+from src.shared.python.engine_core.engine_availability import (
+    skip_if_unavailable,
+)
+
+# Skip entire module if Pinocchio is not installed - mocking pinocchio at module level
+# is unreliable and leads to AttributeError on patched module globals
+pytestmark = skip_if_unavailable("pinocchio")
+
+# --- Global Mocking Setup (Duplicated for Isolation) ---
+mock_pinocchio = MagicMock()
+
+# Setup patches
+module_patches = {
+    "pinocchio": mock_pinocchio,
+}
+
+
+class TestPinocchioStrict:
+    def setup_method(self) -> None:
+        """Inject mock pinocchio into the module namespace."""
+        self.patcher = patch.dict("sys.modules", module_patches)
+        self.patcher.start()
+
+        import engines.physics_engines.pinocchio.python.pinocchio_physics_engine as mod
+
+        self.mod = mod
+        self.PinocchioPhysicsEngine = mod.PinocchioPhysicsEngine
+
+        # Test Constants
+        self.TEST_LINEAR_VAL = 1.0
+        self.TEST_ANGULAR_VAL = 2.0
+
+    def teardown_method(self) -> None:
+        self.patcher.stop()
+
+    def test_pinocchio_strict_jacobian_standardization_mocked(self) -> None:
+        engine = self.PinocchioPhysicsEngine()
+        engine.model = MagicMock()
+        engine.data = MagicMock()
+
+        # Mock frame lookup success
+        engine.model.existFrame.return_value = True
+        engine.model.getFrameId.return_value = 1
+
+        # Pinocchio returns [Linear; Angular] natively from getFrameJacobian
+        J_native = np.zeros((6, 2))
+        J_native[:3, :] = self.TEST_LINEAR_VAL  # Linear (top)
+        J_native[3:, :] = self.TEST_ANGULAR_VAL  # Angular (bottom)
+
+        mock_pinocchio.getFrameJacobian.return_value = J_native
+
+        jac = engine.compute_jacobian("foo")
+        assert jac is not None
+
+        # We upgraded Pinocchio to re-stack to [Angular; Linear] (MuJoCo/Drake standard)
+        spatial = jac["spatial"]
+        # Top 3 should now be Angular (2.0)
+        np.testing.assert_allclose(
+            spatial[:3, :],
+            self.TEST_ANGULAR_VAL,
+            err_msg="Pinocchio spatial top should be re-stacked to Angular",
+        )
+        # Bottom 3 should now be Linear (1.0)
+        np.testing.assert_allclose(
+            spatial[3:, :],
+            self.TEST_LINEAR_VAL,
+            err_msg="Pinocchio spatial bottom should be re-stacked to Linear",
+        )
+
+    def test_compute_jacobian_missing_frame_and_body(self) -> None:
+        """Test behavior when neither frame nor body exists."""
+        engine = self.make_engine()
+        engine.model.existFrame.return_value = False
+        engine.model.existBodyName.return_value = False
+
+        jac = engine.compute_jacobian("missing_link")
+        assert jac is None
+
+    def test_set_control_rejects_invalid_length_without_mutating_tau(self):
+        engine = self.make_engine()
+        engine.tau = np.array([0.25, -0.5])
+
+        with pytest.raises(
+            ValueError, match=r"u dimension mismatch: expected length 2, got 1"
+        ):
+            engine.set_control(np.array([1.0]))
+
+        np.testing.assert_allclose(engine.tau, np.array([0.25, -0.5]))
+
+    def test_compute_control_acceleration_rejects_invalid_length_before_solve(self):
+        engine = self.make_engine()
+        engine.compute_mass_matrix = MagicMock(
+            side_effect=AssertionError("compute_mass_matrix should not be called")
+        )
+
+        with pytest.raises(
+            ValueError, match=r"tau dimension mismatch: expected length 2, got 1"
+        ):
+            engine.compute_control_acceleration(np.array([1.0]))
+
+        engine.compute_mass_matrix.assert_not_called()
+
+    @pytest.mark.parametrize(
+        ("q", "v", "match"),
+        [
+            (
+                np.array([1.0]),
+                np.array([0.0, 0.0]),
+                r"q dimension mismatch: expected length 2, got 1",
+            ),
+            (
+                np.array([0.0, 0.0]),
+                np.array([1.0]),
+                r"v dimension mismatch: expected length 2, got 1",
+            ),
+        ],
+    )
+    def test_compute_ztcf_rejects_invalid_dimensions(self, q, v, match) -> None:
+        engine = self.make_engine()
+        self.mod.pin.aba = MagicMock(
+            side_effect=AssertionError("pin.aba should not be called")
+        )
+
+        with pytest.raises(ValueError, match=match):
+            engine.compute_ztcf(q, v)
+
+    def test_compute_zvcf_rejects_invalid_length_before_reusing_tau(self):
+        engine = self.make_engine()
+        engine.tau = np.array([1.0, 2.0])
+        self.mod.pin.aba = MagicMock(
+            side_effect=AssertionError("pin.aba should not be called")
+        )
+
+        with pytest.raises(
+            ValueError, match=r"q dimension mismatch: expected length 2, got 1"
+        ):
+            engine.compute_zvcf(np.array([1.0]))
+
+        np.testing.assert_allclose(engine.tau, np.array([1.0, 2.0]))

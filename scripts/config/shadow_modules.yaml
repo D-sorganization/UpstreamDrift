@@ -1,0 +1,143 @@
+# Shadow-module ledger — grandfathered debt, enforced as a no-growth ratchet.
+#
+# BACKGROUND
+# ----------
+# Tools (D-sorganization/Tools) is the source of truth for shared modules under
+# `src/shared/python/`. UpstreamDrift consumes them through the
+# `vendor/ud-tools` submodule. A UD-side module with the same name as a vendor
+# module silently *shadows* the vendored copy: imports resolve to the UD copy,
+# the two diverge, and work is lost on the next vendor bump.
+#
+# HOW THIS FILE IS ENFORCED
+# -------------------------
+# `tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py` enumerates every
+# top-level entry under `vendor/ud-tools/src/shared/python/` and fails if a
+# same-named entry exists under `src/shared/python/` and is NOT listed here.
+#
+# This is a RATCHET, not an amnesty:
+#   * Entries may be REMOVED (the shadow was resolved). That is the goal.
+#   * Entries may NOT be ADDED without a deliberate policy exception — a new
+#     shadow means new divergence and must be justified in review.
+#   * Every entry MUST carry a positive-int `tracking_issue` and a parseable
+#     ISO `sunset_date`. Once a sunset date passes the guard fails, forcing the
+#     shadow to be resolved or the deadline to be renegotiated in the open.
+#
+# The correct way to clear an entry is to move the canonical implementation
+# into Tools, land it there, bump the `vendor/ud-tools` pin, delete the UD-side
+# copy, and drop the line below.
+#
+# HISTORY — why every vendor module is listed
+# -------------------------------------------
+# The guard and its ledger were introduced 2026-05-16 (UD #5623, PR #5625) and
+# hardened the same day (PR #5652). On 2026-08-01 the consolidation commit
+# 0575fb4b8 ("chore: consolidate overlapping UpstreamDrift PR backlog", #8322)
+# replaced the 28-entry ledger with a bare `allowed_shadows: []`, downgraded
+# both hygiene tests to stubs that skip when the submodule is absent, closed
+# #5623 as resolved, and in the same commit introduced four NEW shadows. The
+# guard therefore never blocked anything. This file restores the ledger and
+# records the four regressions explicitly rather than laundering them.
+#
+# This coarse top-level ledger has 18 named overlaps after the explicit
+# realtime exception below. Cleaned split roots can still contain UD-only
+# files. The ledger moved 33 -> 17 on 2026-09-03 (UD #9406 PR-3:
+# logging_pkg, notes, plot_theme, chat_contracts, file_watcher, scripting,
+# safe_eval.py, safe_pandas_eval.py, deprecation.py, cors.py deleted; their
+# src.shared.python.* spellings resolve to the pinned Tools tree through
+# src/shared/python/_seam_redirect.py). Before that it moved 34 -> 33 on 2026-09-02, when
+# ADR-0048's Option 1 moved UpstreamDrift's transitional launch-monitor copy
+# out of this namespace — see the note at the end of this file.
+
+schema_version: 1
+
+shadows:
+  # ── Original #5623 baseline (28 entries, recorded 2026-05-16) ──────────────
+  ai:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  calc_backend:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  chat:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  config:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  contracts.py:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  data_processing:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  gui_launcher:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  humanoid_character_builder:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  model_generation:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  reporting:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  sidekick:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  signal_toolkit:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  theme:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+  ui:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+
+  # ── Regressions introduced by #8322 while the guard was disabled ───────────
+  # These four UD-side copies were added by commit 0575fb4b8 on 2026-08-01,
+  # the same commit that emptied this ledger. They are recorded here so the
+  # ratchet has a truthful starting point, NOT because they are approved.
+  # They are the first entries that should be paid down.
+  data_processor_io:
+    tracking_issue: 8322
+    sunset_date: "2026-12-31"
+  import_aliases.py:
+    tracking_issue: 8322
+    sunset_date: "2026-12-31"
+
+  # ── Pre-existing UD package surfaced by the Tools #4872 pin ───────────────
+  # UpstreamDrift's plotting package predates the provider package added to
+  # Tools. The pin reveals the overlap; it does not introduce another UD copy.
+  # Keep the debt explicit under the original shared-module migration issue.
+  plotting:
+    tracking_issue: 5623
+    sunset_date: "2026-12-31"
+
+  # Explicit provider-migration exception for review in #9916. UD's seven-file
+  # realtime facade predates the two-file Tools provider added in #5090;
+  # deleting it would remove publish/subscribe and registry APIs. No new UD
+  # source copy is added. Keep the split/pending-cleanup ruling and #8942
+  # migration visible; this entry does not claim the overlap is resolved.
+  realtime:
+    tracking_issue: 8942
+    sunset_date: "2026-10-09"
+
+  # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
+  #
+  # The `launch_monitor` entry that stood here is gone, and this note records
+  # how, because it is the first entry in this ledger to be cleared by a move
+  # rather than by a port. The Tools#4899-#4907 ladder built the canonical
+  # layer at vendor/ud-tools/src/shared/python/launch_monitor/ (ADR-0046
+  # Stage 1, pinned by UD#9400), but UpstreamDrift's transitional copy still
+  # sat at src/shared/python/launch_monitor/ and won `shared.python.__path__`
+  # outright, so the Stage 2 import rewrite ADR-0048 prescribes resolved back
+  # to the module it was meant to replace. ADR-0048 "Stage 2 Blocker (G2)"
+  # Option 1 moved that copy out of the shared.python namespace to
+  # src/tools/launch_monitor_model/ — beside the workbench that consumes it —
+  # which is a rename, not a retirement: all thirty modules still exist and
+  # UpstreamDrift still runs its own code. What changed is that no UD entry
+  # named `launch_monitor` remains under src/shared/python/, so the guard
+  # above no longer sees a shadow and `shared.python.launch_monitor` now
+  # resolves to the vendored canonical package. The port-up debt itself lives
+  # on in ADR-0048's port order (#9348), not here.

@@ -1,0 +1,41 @@
+"""Shared Qt widgets for MCP and integration preferences.
+
+This package is the canonical home for any MCP-related UI surface that
+ships in more than one consumer (UpstreamDrift launcher,
+Gasification_Model preferences, future apps). Local copies in consumer
+repos are explicitly disallowed — extract here instead.
+
+Public widgets:
+    * :class:`McpServersPrefsWidget` — preferences pane that lets the
+      user add / edit / remove MCP servers.
+    * :class:`IntegrationsHealthDashboardWidget` — live dashboard of
+      every configured integration's health.
+    * :func:`health_query_api.list_all_integrations` — pure-data
+      counterpart for non-GUI callers.
+"""
+
+from __future__ import annotations
+
+from src.shared.python.ai.mcp.widgets.health_query_api import (
+    IntegrationStatus,
+    IntegrationStatusLevel,
+    list_all_integrations,
+    query_integration_status,
+)
+from src.shared.python.ai.mcp.widgets.integrations_health_dashboard_widget import (
+    IntegrationsHealthDashboardWidget,
+)
+from src.shared.python.ai.mcp.widgets.mcp_servers_prefs_widget import (
+    McpServerEditDialog,
+    McpServersPrefsWidget,
+)
+
+__all__ = [
+    "IntegrationStatus",
+    "IntegrationStatusLevel",
+    "IntegrationsHealthDashboardWidget",
+    "McpServerEditDialog",
+    "McpServersPrefsWidget",
+    "list_all_integrations",
+    "query_integration_status",
+]

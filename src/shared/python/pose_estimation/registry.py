@@ -1,0 +1,357 @@
+"""Pose estimator registry — the single seam for runtime estimators.
+
+Part of epic #8390 (C2/#8402). Previously, adding an estimator required
+coordinated edits in ~5 places (the ``VideoPosePipeline._load_estimator``
+if/elif, the API's ``VALID_ESTIMATOR_TYPES``, the motion-capture route's
+skeleton/availability tables, the UI option list, and the availability
+probes) — which is how ``movenet``/``blazepose`` drifted into existence
+without implementations (#8392). This registry mirrors the
+``motion_pipeline.sources`` adapter-registry pattern for runtime
+estimators: one entry per estimator carrying its lazy factory,
+availability probe, install hint, and skeleton template. Consumers
+derive their tables from here.
+
+Deliberately dependency-light at import time: factories import their
+estimator modules lazily, and the estimator interface is imported only
+for type checking.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from importlib.util import find_spec
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from src.shared.python.pose_estimation.interface import PoseEstimator
+
+__all__ = [
+    "EstimatorInfo",
+    "create_estimator",
+    "estimator_availability",
+    "get_estimator_info",
+    "implemented_estimator_types",
+    "list_estimators",
+    "register_estimator",
+    "unregister_estimator",
+]
+
+
+@dataclass(frozen=True)
+class EstimatorInfo:
+    """Registered runtime pose estimator.
+
+    Attributes:
+        name: Stable identifier (API value, pipeline config value).
+        display_name: Human-readable name for UIs.
+        description: One-line description for source listings.
+        probe_module: Module whose importability gates availability.
+        install_hint: Human-readable remedy when unavailable.
+        skeleton: Joint template as ``(name, parent)`` mappings, in order.
+        factory: Lazy constructor; receives keyword options (e.g.
+            ``min_confidence``) and returns a ``PoseEstimator``. Must not
+            import heavy dependencies until called.
+        capture_source: Whether the estimator is offered as a live capture
+            source to the web and desktop front ends (#7454 parity). Offline
+            comparison estimators register with ``False`` and stay reachable
+            through the registry for ingest and scripts.
+    """
+
+    name: str
+    display_name: str
+    description: str
+    probe_module: str
+    install_hint: str
+    skeleton: tuple[dict[str, Any], ...] = field(default_factory=tuple)
+    factory: Callable[..., PoseEstimator] | None = None
+    capture_source: bool = True
+
+    def __post_init__(self) -> None:
+        if not self.name or not self.name.strip():
+            raise ValueError("estimator name must be non-empty")
+        if not self.probe_module:
+            raise ValueError("probe_module must be non-empty")
+
+
+_REGISTRY: dict[str, EstimatorInfo] = {}
+
+
+def register_estimator(info: EstimatorInfo) -> EstimatorInfo:
+    """Register an estimator; rejects duplicate names."""
+    if info.name in _REGISTRY:
+        raise ValueError(f"estimator {info.name!r} is already registered")
+    _REGISTRY[info.name] = info
+    return info
+
+
+def unregister_estimator(name: str) -> None:
+    """Remove an estimator (test hygiene; missing names are a no-op)."""
+    _REGISTRY.pop(name, None)
+
+
+def capture_source_estimators() -> tuple[EstimatorInfo, ...]:
+    """Registered estimators offered as capture sources, in registration order."""
+    return tuple(info for info in list_estimators() if info.capture_source)
+
+
+def list_estimators() -> tuple[EstimatorInfo, ...]:
+    """All registered estimators in registration order."""
+    return tuple(_REGISTRY.values())
+
+
+def implemented_estimator_types() -> frozenset[str]:
+    """Names of every registered estimator."""
+    return frozenset(_REGISTRY)
+
+
+def get_estimator_info(name: str) -> EstimatorInfo:
+    """Look up a registered estimator.
+
+    Raises:
+        ValueError: For unknown names (message lists valid ones).
+    """
+    try:
+        return _REGISTRY[name]
+    except KeyError:
+        valid = ", ".join(sorted(_REGISTRY)) or "<none>"
+        raise ValueError(
+            f"Unknown estimator type: {name}. Registered: {valid}"
+        ) from None
+
+
+def estimator_availability(name: str) -> tuple[bool, str | None]:
+    """Probe availability of a registered estimator.
+
+    Returns ``(available, reason)``; ``reason`` is ``None`` when
+    available. Spec-less mock modules count as unavailable.
+    """
+    info = get_estimator_info(name)
+    try:
+        if find_spec(info.probe_module) is not None:
+            return True, None
+    except (ImportError, ValueError, ModuleNotFoundError):
+        pass
+    return False, info.install_hint
+
+
+def create_estimator(name: str, **options: Any) -> PoseEstimator:
+    """Construct a registered estimator via its lazy factory.
+
+    Args:
+        name: Registered estimator name.
+        **options: Forwarded to the factory (unknown keys are the
+            factory's concern).
+
+    Raises:
+        ValueError: Unknown name, or entry without a factory.
+    """
+    info = get_estimator_info(name)
+    if info.factory is None:
+        raise ValueError(f"estimator {name!r} has no runtime factory")
+    return info.factory(**options)
+
+
+# ---------------------------------------------------------------------------
+# Built-in estimators
+# ---------------------------------------------------------------------------
+
+_MEDIAPIPE_SKELETON: tuple[dict[str, Any], ...] = (
+    {"name": "nose", "parent": None},
+    {"name": "left_eye", "parent": "nose"},
+    {"name": "right_eye", "parent": "nose"},
+    {"name": "left_ear", "parent": "left_eye"},
+    {"name": "right_ear", "parent": "right_eye"},
+    {"name": "left_shoulder", "parent": "nose"},
+    {"name": "right_shoulder", "parent": "nose"},
+    {"name": "left_elbow", "parent": "left_shoulder"},
+    {"name": "right_elbow", "parent": "right_shoulder"},
+    {"name": "left_wrist", "parent": "left_elbow"},
+    {"name": "right_wrist", "parent": "right_elbow"},
+    {"name": "left_hip", "parent": "left_shoulder"},
+    {"name": "right_hip", "parent": "right_shoulder"},
+    {"name": "left_knee", "parent": "left_hip"},
+    {"name": "right_knee", "parent": "right_hip"},
+    {"name": "left_ankle", "parent": "left_knee"},
+    {"name": "right_ankle", "parent": "right_knee"},
+)
+
+_OPENPOSE_SKELETON: tuple[dict[str, Any], ...] = (
+    {"name": "head", "parent": None},
+    {"name": "neck", "parent": "head"},
+    {"name": "right_shoulder", "parent": "neck"},
+    {"name": "right_elbow", "parent": "right_shoulder"},
+    {"name": "right_wrist", "parent": "right_elbow"},
+    {"name": "left_shoulder", "parent": "neck"},
+    {"name": "left_elbow", "parent": "left_shoulder"},
+    {"name": "left_wrist", "parent": "left_elbow"},
+    {"name": "mid_hip", "parent": "neck"},
+    {"name": "right_hip", "parent": "mid_hip"},
+    {"name": "right_knee", "parent": "right_hip"},
+    {"name": "right_ankle", "parent": "right_knee"},
+    {"name": "left_hip", "parent": "mid_hip"},
+    {"name": "left_knee", "parent": "left_hip"},
+    {"name": "left_ankle", "parent": "left_knee"},
+)
+
+
+_BODY25_PARENTS: tuple[tuple[str, str | None], ...] = (
+    ("nose", None),
+    ("neck", "nose"),
+    ("right_shoulder", "neck"),
+    ("right_elbow", "right_shoulder"),
+    ("right_wrist", "right_elbow"),
+    ("left_shoulder", "neck"),
+    ("left_elbow", "left_shoulder"),
+    ("left_wrist", "left_elbow"),
+    ("mid_hip", "neck"),
+    ("right_hip", "mid_hip"),
+    ("right_knee", "right_hip"),
+    ("right_ankle", "right_knee"),
+    ("left_hip", "mid_hip"),
+    ("left_knee", "left_hip"),
+    ("left_ankle", "left_knee"),
+    ("right_eye", "nose"),
+    ("left_eye", "nose"),
+    ("right_ear", "right_eye"),
+    ("left_ear", "left_eye"),
+    ("left_big_toe", "left_ankle"),
+    ("left_small_toe", "left_big_toe"),
+    ("left_heel", "left_ankle"),
+    ("right_big_toe", "right_ankle"),
+    ("right_small_toe", "right_big_toe"),
+    ("right_heel", "right_ankle"),
+)
+_OPENPOSE_DNN_SKELETON: tuple[dict[str, Any], ...] = tuple(
+    {"name": name, "parent": parent} for name, parent in _BODY25_PARENTS
+)
+_COCO17_PARENTS: tuple[tuple[str, str | None], ...] = (
+    ("nose", None),
+    ("left_eye", "nose"),
+    ("right_eye", "nose"),
+    ("left_ear", "left_eye"),
+    ("right_ear", "right_eye"),
+    ("left_shoulder", "nose"),
+    ("right_shoulder", "nose"),
+    ("left_elbow", "left_shoulder"),
+    ("right_elbow", "right_shoulder"),
+    ("left_wrist", "left_elbow"),
+    ("right_wrist", "right_elbow"),
+    ("left_hip", "left_shoulder"),
+    ("right_hip", "right_shoulder"),
+    ("left_knee", "left_hip"),
+    ("right_knee", "right_hip"),
+    ("left_ankle", "left_knee"),
+    ("right_ankle", "right_knee"),
+)
+_RTMPOSE_COCO17_SKELETON: tuple[dict[str, Any], ...] = tuple(
+    {"name": name, "parent": parent} for name, parent in _COCO17_PARENTS
+)
+
+
+def _make_mediapipe(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.mediapipe_estimator import (
+        MediaPipeEstimator,
+    )
+
+    min_confidence = float(options.get("min_confidence", 0.5))
+    return MediaPipeEstimator(
+        min_detection_confidence=min_confidence,
+        min_tracking_confidence=min_confidence,
+        enable_temporal_smoothing=bool(options.get("enable_temporal_smoothing", True)),
+    )
+
+
+def _make_openpose(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.openpose_estimator import (
+        OpenPoseEstimator,
+    )
+
+    return OpenPoseEstimator()
+
+
+def _make_openpose_dnn(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.openpose_dnn_estimator import (
+        OpenPoseDnnEstimator,
+    )
+
+    return OpenPoseDnnEstimator(
+        input_height=int(options.get("input_height", 368)),
+        min_peak=float(options.get("min_peak", 0.05)),
+    )
+
+
+def _make_rtmpose_onnx(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.rtmpose_onnx_estimator import (
+        RtmposeOnnxEstimator,
+    )
+
+    kwargs: dict[str, Any] = {
+        "keypoint_set": str(options.get("keypoint_set", "coco17")),
+        "min_score": float(options.get("min_score", 0.3)),
+    }
+    if "session_factory" in options:
+        kwargs["session_factory"] = options["session_factory"]
+    return RtmposeOnnxEstimator(**kwargs)
+
+
+register_estimator(
+    EstimatorInfo(
+        name="mediapipe",
+        display_name="MediaPipe Pose",
+        description="Real-time pose estimation using Google MediaPipe",
+        probe_module="mediapipe",
+        install_hint=(
+            "MediaPipe (>=0.10, Tasks API) is not installed on the server "
+            "(pip install mediapipe); fetch the pose model with "
+            "python3 -m src.shared.python.pose_estimation.mediapipe_models"
+        ),
+        skeleton=_MEDIAPIPE_SKELETON,
+        factory=_make_mediapipe,
+    )
+)
+register_estimator(
+    EstimatorInfo(
+        name="openpose",
+        display_name="OpenPose",
+        description="Multi-person pose estimation using OpenPose",
+        probe_module="pyopenpose",
+        install_hint="OpenPose Python bindings are not installed on the server",
+        skeleton=_OPENPOSE_SKELETON,
+        factory=_make_openpose,
+    )
+)
+register_estimator(
+    EstimatorInfo(
+        name="openpose_dnn",
+        display_name="OpenPose BODY_25 (OpenCV DNN, CPU)",
+        description="OpenPose BODY_25 Caffe network run through cv2.dnn",
+        probe_module="cv2",
+        install_hint=(
+            "OpenCV is not installed; fetch the BODY_25 model with "
+            "python3 -m src.shared.python.pose_estimation.openpose_models"
+        ),
+        skeleton=_OPENPOSE_DNN_SKELETON,
+        factory=_make_openpose_dnn,
+        capture_source=False,  # offline comparison detector (#9628), CPU-only
+    )
+)
+
+
+register_estimator(
+    EstimatorInfo(
+        name="rtmpose_onnx",
+        display_name="RTMPose (ONNX Runtime, CPU)",
+        description="RTMPose SimCC body pose via onnxruntime (COCO-17/Halpe-26)",
+        probe_module="onnxruntime",
+        install_hint=(
+            "onnxruntime is not installed; install it with "
+            "`pip install onnxruntime` (extra `pose-onnx`); fetch the pinned "
+            "RTMPose model with "
+            "python3 -m src.shared.python.pose_estimation.rtmpose_models"
+        ),
+        skeleton=_RTMPOSE_COCO17_SKELETON,
+        factory=_make_rtmpose_onnx,
+        capture_source=False,  # #9648: not qualified until real takes
+    )
+)

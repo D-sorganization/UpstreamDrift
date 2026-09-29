@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/biomech/model_pack_v1.json",
+  "title": "Biomech model_pack / tool_pack manifest (v1)",
+  "description": "Shared manifest schema used by every sibling biomech repo to describe the contents of its repository to UpstreamDrift's discovery layer. See docs/adr/0014-shared-biomech-models.md and UpstreamDrift#5184.",
+  "type": "object",
+  "required": ["schema", "repo", "package"],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "enum": ["model_pack/v1", "tool_pack/v1"],
+      "description": "Discriminator selecting the model-pack or tool-pack variant."
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-friendly repository name (e.g. 'MuJoCo_Models')."
+    },
+    "package": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z_][a-z0-9_]*$",
+      "description": "Importable Python package name (e.g. 'mujoco_models')."
+    }
+  },
+  "oneOf": [{ "$ref": "#/$defs/modelPack" }, { "$ref": "#/$defs/toolPack" }],
+  "$defs": {
+    "exercise": {
+      "type": "object",
+      "required": ["id", "path"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to the exercise asset, relative to the repo root."
+        }
+      },
+      "additionalProperties": true
+    },
+    "modelPack": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "model_pack/v1" },
+        "engine": {
+          "type": "string",
+          "enum": ["mujoco", "drake", "pinocchio", "opensim"]
+        },
+        "engine_version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "PEP 440 / semver-style version specifier accepted by the engine."
+        },
+        "anthropometrics": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier for the anthropometric provenance (e.g. 'winter_2009')."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["mjcf", "sdf", "urdf", "osim"]
+        },
+        "axis_convention": {
+          "type": "string",
+          "enum": ["x_forward_z_up", "y_up_z_forward", "z_up_y_forward"],
+          "description": "Optional. Coordinate convention of the published assets."
+        },
+        "addons": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "models_root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to the models tree, relative to the repo root."
+        },
+        "exercises": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/exercise" }
+        }
+      },
+      "required": [
+        "engine",
+        "engine_version",
+        "anthropometrics",
+        "format",
+        "models_root",
+        "exercises"
+      ]
+    },
+    "toolPack": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "tool_pack/v1" },
+        "role": {
+          "type": "string",
+          "enum": ["optimizer", "analyzer", "viewer", "controller"]
+        },
+        "formulation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "muscle_model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plane": {
+          "type": "string",
+          "enum": ["sagittal", "frontal", "transverse", "spatial"]
+        },
+        "links": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "anthropometrics": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supported_exercises": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true
+        },
+        "consumes_models_from": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z_][a-z0-9_]*$"
+          },
+          "uniqueItems": true
+        },
+        "produces": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "role",
+        "formulation",
+        "supported_exercises",
+        "consumes_models_from",
+        "produces"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,413 @@
+"""
+FastAPI API endpoint for MotionPipeline.
+
+Part of issue #4569. Provides REST API for motion capture pipeline.
+
+Usage:
+    from motion_pipeline.api import create_app
+
+    app = create_app()
+    # Run with: uvicorn motion_pipeline.api:app --host 0.0.0.0 --port 8000
+"""
+
+from __future__ import annotations
+
+import logging
+import tempfile
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, File, HTTPException, UploadFile, status, Form
+from pydantic import BaseModel, Field, ValidationError
+
+from .contracts import MotionMatchingResult
+from .orchestrator import (
+    AdapterOverride,
+    MotionPipeline,
+    PipelineConfig,
+    PreprocessingStep,
+)
+
+logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# API Models
+# =============================================================================
+
+
+class PipelineRequest(BaseModel):
+    """
+    Pydantic-validated request model for motion pipeline API.
+
+    Matches the PipelineConfig from orchestrator with additional file handling.
+    """
+
+    # Adapter configuration
+    source_format: str = Field(
+        ...,
+        description=(
+            "Source format (alphapose_json, bvh, c3d, csv, deeplabcut, hmr2, "
+            "hrnet_json, mediapipe_json, opencap_session, openpose_json, "
+            "opensim_sto_mot, trc, auto, passthrough)"
+        ),
+    )
+    adapter_options: dict[str, Any] = Field(
+        default_factory=dict, description="Format-specific adapter options"
+    )
+
+    # Preprocessing steps
+    preprocessing: list[dict[str, Any]] = Field(
+        default_factory=list, description="Ordered list of preprocessing steps"
+    )
+
+    # Scaling configuration
+    scaling: dict[str, Any] = Field(
+        default_factory=dict, description="Scaling marker map and options"
+    )
+
+    # Backend selection
+    ik_backend: str = Field(
+        default="geometric",
+        description="IK backend (geometric, mujoco, drake, pinocchio, opensim)",
+    )
+    matching_backend: str = Field(
+        default="mujoco", description="Motion matching backend"
+    )
+    matching_model_urdf: str | None = Field(
+        default=None,
+        description="Production URDF path for matching backends that require one",
+    )
+
+    # Cost weights
+    cost_weights: dict[str, float] = Field(
+        default_factory=dict, description="Cost function weights"
+    )
+
+    class Config:
+        """Pydantic config."""
+
+        arbitrary_types_allowed = True
+
+    def to_pipeline_config(self) -> PipelineConfig:
+        """Convert to PipelineConfig for orchestrator."""
+        return PipelineConfig(
+            adapter=AdapterOverride(
+                format=self.source_format, options=self.adapter_options
+            ),
+            preprocessing=[
+                PreprocessingStep(
+                    name=str(step.get("name", "")),
+                    enabled=step.get("enabled", True),
+                    params=dict(step.get("params", {})),
+                )
+                for step in self.preprocessing
+            ],
+            scaling=self.scaling,
+            ik_backend=self.ik_backend,
+            matching_backend=self.matching_backend,
+            matching_model_urdf=self.matching_model_urdf,
+            cost_weights=self.cost_weights,
+        )
+
+
+class PipelineResponse(BaseModel):
+    """
+    Response model for motion pipeline API.
+
+    Wraps MotionMatchingResult with additional metadata.
+    """
+
+    request_id: str = Field(..., description="Associated request identifier")
+    success: bool = Field(..., description="Whether processing succeeded")
+    result: dict[str, Any] | None = Field(
+        default=None, description="Matched trajectory and metrics (if success)"
+    )
+    error: str | None = Field(default=None, description="Error message (if failed)")
+    audit_log: list[dict[str, Any]] = Field(
+        default_factory=list, description="Per-stage audit log for provenance"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
+
+    @classmethod
+    def from_result(
+        cls, result: MotionMatchingResult, audit_log: list[dict[str, Any]]
+    ) -> PipelineResponse:
+        """Create response from MotionMatchingResult."""
+        return cls(
+            request_id=result.request_id,
+            success=result.success,
+            result=result.model_dump() if result.success else None,
+            error=result.message if not result.success else None,
+            audit_log=audit_log,
+            metadata=result.metadata,
+        )
+
+    @classmethod
+    def from_error(cls, request_id: str, error: str) -> PipelineResponse:
+        """Create error response."""
+        return cls(request_id=request_id, success=False, error=error, audit_log=[])
+
+
+# =============================================================================
+# FastAPI Application
+# =============================================================================
+
+
+def _validate_source_format(source_format: str) -> None:
+    """Reject a source_format that matches no registered adapter.
+
+    ``auto``/``passthrough`` route to content auto-detection and are always
+    accepted. Any other value must name a registered adapter, otherwise a
+    400 is raised rather than silently auto-detecting (issue #6930).
+    """
+    from .sources.registry import registered_adapters
+
+    if source_format.lower() in ("auto", "passthrough"):
+        return
+    known = {cls.format_name.lower() for cls in registered_adapters()}
+    if source_format.lower() not in known:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Unknown source_format {source_format!r}. "
+                f"Known formats: {sorted(known)}"
+            ),
+        )
+
+
+def create_app() -> FastAPI:
+    """
+    Create FastAPI application with motion pipeline endpoints.
+
+    Returns:
+        FastAPI application
+    """
+    app = FastAPI(
+        title="Motion Capture Pipeline API",
+        description="REST API for motion capture processing",
+        version="1.0.0",
+    )
+
+    @app.get("/health")
+    async def health_check() -> dict[str, str]:
+        """Health check endpoint."""
+        return {"status": "healthy"}
+
+    @app.post(
+        "/api/v1/motion-pipeline/run",
+        response_model=PipelineResponse,
+        status_code=status.HTTP_200_OK,
+        summary="Run motion pipeline",
+        description="""
+Process motion capture data through the full pipeline:
+adapter → preprocessing → scaling → IK → motion-matching
+
+Accepts file uploads in registered mocap source formats or with auto-detection.
+Returns MotionMatchingResult with matched trajectory and error metrics.
+        """,
+        responses={
+            200: {"description": "Processing completed", "model": PipelineResponse},
+            400: {"description": "Invalid input or configuration"},
+            422: {"description": "Validation error"},
+            500: {"description": "Internal server error"},
+        },
+    )
+    async def run_pipeline(
+        file: UploadFile = File(..., description="Motion capture file"),
+        source_format: str = Form(
+            ...,
+            description=(
+                "Source format (alphapose_json, bvh, c3d, csv, deeplabcut, hmr2, "
+                "hrnet_json, mediapipe_json, opencap_session, openpose_json, "
+                "opensim_sto_mot, trc, auto, passthrough)"
+            ),
+        ),
+        ik_backend: str = Form(default="geometric", description="IK backend"),
+        matching_backend: str = Form(default="mujoco", description="Matching backend"),
+        matching_model_urdf: str | None = Form(
+            default=None,
+            description="Production URDF path for matching backends that require one",
+        ),
+    ) -> PipelineResponse:
+        """
+        Run motion pipeline on uploaded file.
+
+        Args:
+            file: Uploaded motion capture file
+            source_format: Format of the source file
+            ik_backend: IK backend to use
+            matching_backend: Motion matching backend to use
+
+        Returns:
+            PipelineResponse with results or error
+        """
+        import uuid
+
+        request_id = f"req-{uuid.uuid4().hex[:12]}"
+        logger.info(f"Received pipeline request {request_id} for {file.filename}")
+
+        # Validate file
+        if not file.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No filename provided"
+            )
+
+        # Validate source_format against the adapter registry up front so a
+        # typo-d/unknown format is rejected with 400 rather than silently
+        # auto-detected (issue #6930).
+        _validate_source_format(source_format)
+
+        # Save uploaded file temporarily
+        try:
+            tmp_path = None
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=Path(file.filename).suffix
+            ) as tmp:
+                content = await file.read()
+                tmp.write(content)
+                tmp_path = Path(tmp.name)
+
+            try:
+                # Configure pipeline
+                config = PipelineConfig(
+                    adapter=AdapterOverride(format=source_format),
+                    ik_backend=ik_backend,
+                    matching_backend=matching_backend,
+                    matching_model_urdf=matching_model_urdf,
+                )
+
+                # Create and run pipeline
+                pipeline = MotionPipeline(config)
+
+                # Add logging hook
+                def log_hook(payload) -> None:
+                    logger.info(
+                        f"Request {request_id}: Stage {payload.stage.value} completed"
+                    )
+
+                from .orchestrator import Stage
+
+                for stage in Stage:
+                    pipeline.add_hook(stage, log_hook)
+
+                # Run pipeline
+                result = pipeline.run(tmp_path)
+                audit_log = pipeline.get_audit_log()
+            finally:
+                # Clean up temp file
+                if tmp_path:
+                    tmp_path.unlink(missing_ok=True)
+
+            logger.info(
+                f"Request {request_id}: Pipeline completed success={result.success}"
+            )
+
+            return PipelineResponse.from_result(result, audit_log)
+
+        except ValueError as e:
+            # Caller contract violation (InvalidInputError is a ValueError):
+            # map to 400 so clients can distinguish bad input from a bug.
+            logger.info(f"Request {request_id}: invalid input: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            ) from e
+        except RuntimeError as e:
+            logger.exception(f"Request {request_id}: internal pipeline error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
+
+    @app.post(
+        "/api/v1/motion-pipeline/run-config",
+        response_model=PipelineResponse,
+        status_code=status.HTTP_200_OK,
+        summary="Run motion pipeline with full config",
+        description="""
+Run motion pipeline with full configuration control.
+Accepts JSON config body plus file upload.
+        """,
+    )
+    async def run_pipeline_with_config(
+        file: UploadFile = File(..., description="Motion capture file"),
+        config: str = Form(..., description="Pipeline configuration (JSON string)"),
+    ) -> PipelineResponse:
+        """
+        Run motion pipeline with full configuration.
+
+        Args:
+            file: Uploaded motion capture file
+            config: Pipeline configuration JSON string
+
+        Returns:
+            PipelineResponse with results or error
+        """
+        import uuid
+
+        request_id = f"req-{uuid.uuid4().hex[:12]}"
+        logger.info(f"Received pipeline request {request_id} with config")
+
+        # Parse config from JSON string (malformed config -> 422).
+        try:
+            parsed_config = PipelineRequest.model_validate_json(config)
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+            ) from e
+
+        # Reject an unknown source_format up front (issue #6930).
+        _validate_source_format(parsed_config.source_format)
+
+        try:
+            tmp_path = None
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=Path(file.filename).suffix if file.filename else ".tmp",
+            ) as tmp:
+                content = await file.read()
+                tmp.write(content)
+                tmp_path = Path(tmp.name)
+
+            try:
+                # Convert config and run pipeline
+                pipeline_config = parsed_config.to_pipeline_config()
+                pipeline = MotionPipeline(pipeline_config)
+
+                result = pipeline.run(tmp_path)
+                audit_log = pipeline.get_audit_log()
+            finally:
+                if tmp_path:
+                    tmp_path.unlink(missing_ok=True)
+
+            return PipelineResponse.from_result(result, audit_log)
+
+        except ValueError as e:
+            logger.info(f"Request {request_id}: invalid input: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            ) from e
+        except RuntimeError as e:
+            logger.exception(f"Request {request_id}: internal pipeline error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
+
+    return app
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    app = create_app()
+    # nosec B104 - dev-only convenience entrypoint (``python -m ...api``);
+    # binding all interfaces is intentional for local container/dev use and
+    # this block never runs under the production ASGI server.
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104

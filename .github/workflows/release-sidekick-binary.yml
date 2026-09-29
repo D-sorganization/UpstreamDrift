@@ -1,0 +1,126 @@
+name: Release Sidekick Binary
+
+# Produces a native Linux one-file Sidekick binary via PyInstaller.
+# Issue: #5985 (T7).
+#
+# Triggers:
+#   - workflow_dispatch (manual)
+#   - tags matching sidekick-v*  (e.g. sidekick-v0.2.0)
+#
+# The fleet currently exposes a Linux Docker runner for this repository.
+# PyInstaller does not cross-compile; macOS and Windows artifacts require
+# separate native runners and must be added as distinct jobs when available.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "sidekick-v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-linux:
+    name: Build binary (Linux)
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+
+      - name: Purge pip cache
+        run: python3 -m pip cache purge
+      # Guard against stale sparse vendor/ud-tools clones in reused
+      # workspaces failing the build hook's pinned-roots check (see
+      # .github/actions/fetch-pinned-tools).
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install dependencies
+        shell: bash
+        run: |
+          SKIP_UI_BUILD=1 python3 -m pip install ".[gui-tools]" pyinstaller
+
+      - name: Build binary
+        shell: bash
+        run: |
+          python3 scripts/packaging/build_sidekick_binary.py \
+            --expected-platform linux \
+            --max-mb 250 \
+            --output-dir dist/
+
+      - name: Smoke test — --help (< 5 s)
+        shell: bash
+        run: timeout 5 dist/sidekick --help
+
+      - name: Smoke test — run
+        shell: bash
+        run: |
+          dist/sidekick run \
+            --calculator wgs_reactor \
+            --inputs tests/fixtures/wgs.json
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sidekick-linux
+          path: dist/sidekick
+          if-no-files-found: error
+
+  attach-to-release:
+    name: Attach binaries to GitHub Release
+    needs: [build-linux]
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 10
+    if: startsWith(github.ref, 'refs/tags/sidekick-v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: binaries/
+
+      - name: Display downloaded files
+        run: find binaries/ -type f -ls
+
+      - name: Write workflow summary
+        run: |
+          echo "## Sidekick Binary Release" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Platform | File | Size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----------|------|------|" >> "$GITHUB_STEP_SUMMARY"
+          for f in binaries/**/*; do
+            if [ -f "$f" ]; then
+              size=$(du -h "$f" | cut -f1)
+              echo "| $(dirname "$f" | xargs basename) | $(basename "$f") | $size |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Attach to GitHub Release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: binaries/**/*
+          generate_release_notes: false

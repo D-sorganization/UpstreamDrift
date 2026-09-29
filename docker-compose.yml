@@ -1,0 +1,118 @@
+# WARNING: LOCAL DEVELOPMENT ONLY
+# This compose file is intended for local developer workflows only.
+# Policy reference: docker/README.md and docs/adr/0021-container-strategy.md
+# Before using in any shared or internet-facing environment:
+#   - Change port bindings from 127.0.0.1 to an appropriate reverse-proxy.
+#   - Remove or set GOLF_AUTH_DISABLED=false if present in your .env.
+#   - Remove --reload from the uvicorn command.
+version: "3.8"
+
+services:
+  # Backend API server with all physics engines
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: upstream-drift:runtime
+    container_name: upstream-drift-backend
+    ports:
+      # Bind to loopback only — not exposed on all host interfaces.
+      - "127.0.0.1:8001:8001"
+    volumes:
+      - .:/workspace:delegated
+      - ./data:/workspace/data
+    environment:
+      - PYTHONPATH=/workspace
+      - PATH=/home/golfer/.local/bin:/opt/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - DATABASE_URL=sqlite:////workspace/golf_modeling_suite.db
+      - API_HOST=0.0.0.0
+      - API_PORT=8001
+      - ENVIRONMENT=development
+      - MUJOCO_GL=${MUJOCO_GL:-osmesa}
+    # Override the image ENTRYPOINT (the prod uvicorn wrapper, #7129) so this
+    # dev `command` with --reload is run directly rather than passed as args.
+    entrypoint: []
+    command: python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001 --reload
+    restart: unless-stopped
+    working_dir: /workspace
+    healthcheck:
+      # Python one-liner (issue #7161 D3) — no curl dependency; python is always
+      # present in the venv. Matches the image HEALTHCHECK in Dockerfile.
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8001/health', timeout=5).status==200 else 1)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - upstream-drift
+
+  # Frontend UI (optional — can also run locally outside Docker).
+  # node_modules are cached in a named volume so `npm install` does not re-run
+  # on every `docker compose up`. `npm ci` runs only when the volume is empty
+  # (first boot / after `docker compose down -v`) or when package-lock.json is
+  # newer than the cached lockfile snapshot (`node_modules/.package-lock.json`),
+  # which npm writes after every successful install. This preserves cache hits
+  # across restarts and keeps startup fast and offline-capable once populated.
+  frontend:
+    image: node:20-alpine
+    container_name: upstream-drift-frontend
+    ports:
+      - "127.0.0.1:5180:5180"
+    volumes:
+      - ./ui:/app:delegated
+      # Named volume so npm install is not repeated on every start.
+      - frontend_node_modules:/app/node_modules
+    working_dir: /app
+    command: >-
+      sh -c "if [ ! -f node_modules/.package-lock.json ] ||
+               [ package-lock.json -nt node_modules/.package-lock.json ]; then
+               echo '[frontend] installing dependencies (first boot or lockfile changed)';
+               npm ci;
+             else
+               echo '[frontend] node_modules cache is up-to-date, skipping npm ci';
+             fi &&
+             npm run dev -- --host 0.0.0.0"
+    environment:
+      - VITE_API_URL=http://backend:8001
+    depends_on:
+      # Wait for the backend to be HEALTHY, not merely started (issue #7161 D3),
+      # so `docker compose up` from cold start brings up a working frontend with
+      # no manual retry.
+      backend:
+        condition: service_healthy
+    networks:
+      - upstream-drift
+
+  # Training stage for advanced ML workflows
+  training:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: training
+    image: upstream-drift:training
+    container_name: upstream-drift-training
+    volumes:
+      - .:/workspace:delegated
+      - ./data:/workspace/data
+    environment:
+      - PYTHONPATH=/workspace
+      - MUJOCO_GL=${MUJOCO_GL:-osmesa}
+    working_dir: /workspace
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    networks:
+      - upstream-drift
+
+networks:
+  upstream-drift:
+    driver: bridge
+
+volumes:
+  # Cached node_modules for the frontend service.  Reset: docker compose down -v
+  frontend_node_modules:

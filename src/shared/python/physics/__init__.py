@@ -1,0 +1,58 @@
+"""Physics engines, aerodynamics, terrain, and impact models."""
+
+from src.shared.python.physics.contact_reaction_decomposition import (
+    ContactReactionDecomposition,
+    ContactReactionInputs,
+    ReactionPredictionMetrics,
+    decompose_contact_reaction,
+    evaluate_reaction_prediction,
+)
+from src.shared.python.physics.dimple_geometry import DimpleGeometry, dimple_adjusted_cd
+from src.shared.python.physics.mud_ball import (
+    MudBallAdjustment,
+    mud_ball_aero_adjustments,
+)
+from src.shared.python.physics.swing_ball_flight_pipeline import (
+    FlightSimulatorProtocol,
+    PipelineResult,
+    SwingBallFlightPipeline,
+    SwingState,
+)
+from src.shared.python.physics.swing_optimizer import (
+    ClubPreset,
+    FlightTarget,
+    OptimizationControls,
+    SwingOptimizationDiagnostics,
+    SwingOptimizationResult,
+    SwingOptimizer,
+)
+from src.shared.python.physics.water_hazard import (
+    WaterEntryResult,
+    water_entry_kinematics,
+)
+
+__all__: list[str] = [
+    "ContactReactionDecomposition",
+    "ContactReactionInputs",
+    "ReactionPredictionMetrics",
+    "decompose_contact_reaction",
+    "evaluate_reaction_prediction",
+    "mud_ball_aero_adjustments",
+    "MudBallAdjustment",
+    "water_entry_kinematics",
+    "WaterEntryResult",
+    "DimpleGeometry",
+    "dimple_adjusted_cd",
+    # Swing-to-flight pipeline (Issue #5337)
+    "FlightSimulatorProtocol",
+    "PipelineResult",
+    "SwingBallFlightPipeline",
+    "SwingState",
+    # Inverse swing optimization (Issue #7220)
+    "ClubPreset",
+    "FlightTarget",
+    "OptimizationControls",
+    "SwingOptimizationDiagnostics",
+    "SwingOptimizationResult",
+    "SwingOptimizer",
+]

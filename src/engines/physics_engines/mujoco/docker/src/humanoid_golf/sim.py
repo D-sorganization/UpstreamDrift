@@ -1,0 +1,709 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
+"""MuJoCo humanoid-golf simulation core (Docker backend).
+
+Implements the main simulation loop, state management, and trajectory
+recording for the humanoid golf swing in the Docker-hosted MuJoCo
+environment.  Supports headless rendering for CI and batch processing.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import csv
+import json
+import logging
+import os
+import typing
+
+import imageio
+import numpy as np
+
+from . import iaa_helper, utils
+
+logger = logging.getLogger(__name__)
+
+# Check for viewer support
+try:
+    from dm_control import viewer
+
+    HAS_VIEWER = True
+except ImportError:
+    HAS_VIEWER = False
+
+
+# Target Pose: Address Position
+TARGET_POSE = {
+    "lowerbackrx": 0.35,
+    "upperbackrx": 0.15,
+    "rtibiarx": 0.1,
+    "ltibiarx": 0.1,
+    "rfemurrx": -0.2,
+    "lfemurrx": -0.2,
+    "rfootrx": -0.05,
+    "lfootrx": -0.05,
+    "rhumerusrx": -0.4,
+    "lhumerusrx": -0.4,
+    "rhumerusrz": -0.4,
+    "lhumerusrz": 0.4,
+    "rhumerusry": -0.2,
+    "lhumerusry": 0.2,
+    "rradiusrx": 0.5,
+    "lradiusrx": 0.5,
+}
+
+
+def np_encoder(object: typing.Any) -> int | float | list:
+    """JSON encoder for NumPy types."""
+    if isinstance(object, np.generic):
+        return object.item()
+    if isinstance(object, np.ndarray):
+        return object.tolist()
+    raise TypeError(f"Object of type {type(object).__name__} is not JSON serializable")
+
+
+class BaseController:
+    def get_action(self, physics: typing.Any) -> np.ndarray:
+        """Get the control action."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        return np.zeros(physics.model.nu)
+
+
+class PDController(BaseController):
+    def __init__(
+        self,
+        actuators: dict[str, int],
+        target_pose: dict[str, float],
+        kp: float = 60.0,
+        kd: float = 6.0,
+    ) -> None:
+        """Initialize PD Controller."""
+        if actuators is None:
+            raise ValueError("actuators must be provided")
+        self.actuators = actuators
+        self.target_pose = target_pose
+        self.kp = kp
+        self.kd = kd
+
+    def get_action(self, physics: typing.Any) -> np.ndarray:
+        """Calculate PD control action."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        action = np.zeros(physics.model.nu)
+        for joint_name, target_angle in self.target_pose.items():
+            try:
+                current_q = physics.named.data.qpos[joint_name]
+                current_v = physics.named.data.qvel[joint_name]
+                error = target_angle - current_q
+                torque = (self.kp * error) - (self.kd * current_v)
+                if joint_name in self.actuators:
+                    # Fix deprecation warning for 0-d array to scalar conversion
+                    # Ensure torque is a scalar value
+                    scalar_torque = (
+                        torque.item() if isinstance(torque, np.ndarray) else torque
+                    )  # noqa: E501
+                    action[self.actuators[joint_name]] = scalar_torque
+            except (ValueError, TypeError, RuntimeError) as exc:
+                logger.debug("Could not map joint torque command: %s", exc)
+        return action
+
+
+class PolynomialController(BaseController):
+    def __init__(self, physics: typing.Any) -> None:
+        """Initialize Polynomial Controller."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        self.nu = physics.model.nu
+        # 6th order coeffs: c0 + c1*t + ... + c6*t^6
+        self.coeffs = np.zeros((self.nu, 7))
+
+        # Example: Add a swing-like torque profile to right shoulder
+        # u(t) ~ sin(t) approximated
+        try:
+            # Try to find actuator index for right shoulder
+            # Note: Actuator names might differ from joint names, but usually related.
+            # Using utils to find index
+            act_idx = -1
+            for i in range(self.nu):
+                name = physics.model.id2name(i, "actuator")
+                if name == "rhumerusrx":
+                    act_idx = i
+                    break
+
+            if act_idx >= 0:
+                # Use 60*t - 20*t^3 (truncated Taylor series for sin(t)) to
+                # approximate a swing-like torque profile.
+                # Coefficients chosen to mimic sine wave amplitude/timing
+                # for a golf swing.
+                self.coeffs[act_idx, 1] = 60.0
+                self.coeffs[act_idx, 3] = -20.0
+        except ImportError as exc:
+            logger.debug(
+                "Optional polynomial controller dependency not available: %s", exc
+            )  # noqa: E501
+
+    def get_action(self, physics: typing.Any) -> np.ndarray:
+        """Calculate polynomial control action."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        t = physics.data.time
+        action = np.zeros(self.nu)
+        for i in range(self.nu):
+            poly = np.poly1d(self.coeffs[i][::-1])
+            action[i] = poly(t)
+        return np.clip(action, -100, 100)
+
+
+class LQRController(BaseController):
+    def __init__(
+        self,
+        physics: typing.Any,
+        target_pose: dict[str, float],
+        actuators: dict[str, int],
+        height_scale: float = 1.0,
+    ) -> None:
+        """Initialize LQR Controller."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        self.actuators = actuators
+        self.target_pose = target_pose
+        self.K = None
+
+        # Store vector targets for LQR regulation
+        # We need to temporarily set the pose to capture the full qpos vector
+        # (including root position/orientation which might be 0 or offset)
+        with physics.reset_context():
+            # Apply offsets same as reset
+            physics.data.qpos[2] = 1.1 * height_scale  # Approx height
+            for joint, angle in self.target_pose.items():
+                try:
+                    if joint in physics.named.data.qpos:
+                        physics.named.data.qpos[joint] = angle
+                except KeyError:
+                    logger.debug("Joint %r not found in qpos, skipping", joint)
+
+            self.qpos_targ = physics.data.qpos.copy()
+            self.qvel_targ = np.zeros(physics.model.nv)
+
+        logger.info("Computing LQR Gains...")
+        # Note: Full-body linearization for Humanoid with Quaternions (root)
+        # is complex and prone to singularity without careful handling.
+        # We use a robust fallback (High-Gain Matrix) that satisfies the LQR structure
+        # (u = Kx) but is computed via decoupling assumption.
+        self.K = self._compute_gains(physics, fallback=True)
+        logger.info("LQR Gains initialized.")
+
+    def _compute_gains(self, physics: typing.Any, fallback: bool = False) -> np.ndarray:
+        """Compute LQR gain matrix."""
+        # Fallback: Diagonal PD matrix embedded in K
+        if physics is None:
+            raise ValueError("physics must be provided")
+        nu = physics.model.nu
+        nq = physics.model.nq
+        nv = physics.model.nv
+        nx = nq + nv
+        K = np.zeros((nu, nx))
+
+        kp = 100.0
+        kd = 10.0
+
+        for i in range(nu):
+            try:
+                # Map actuator to joint
+                joint_id = physics.model.actuator_trnid[i, 0]
+                qpos_adr = physics.model.jnt_qposadr[joint_id]
+                dof_adr = physics.model.jnt_dofadr[joint_id]
+
+                # P gain (on position error)
+                K[i, qpos_adr] = kp
+                # D gain (on velocity error)
+                K[i, nq + dof_adr] = kd
+            except (RuntimeError, ValueError, AttributeError) as exc:
+                logger.debug("Could not set LQR gain for joint index %d: %s", i, exc)
+        return K
+
+    def get_action(self, physics: typing.Any) -> np.ndarray:
+        """Calculate LQR control action."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        if self.K is None:
+            return np.zeros(physics.model.nu)
+
+        x_curr = np.concatenate([physics.data.qpos, physics.data.qvel])
+        x_targ = np.concatenate([self.qpos_targ, self.qvel_targ])
+
+        # Simple error
+        # WARNING: Quaternion subtraction (x_targ - x_curr) is not
+        # mathematically correct for 3D rotations
+        # (orientation differences should be computed via quaternion
+        # multiplication/inverse).
+        # This linear approximation is only stable for small deviations
+        # near the target pose.
+        # For large deviations, this approach may cause instability or
+        # incorrect behavior.
+        # NOTE: Implement proper quaternion error computation
+        # (e.g. via scipy.spatial.transform.Rotation).
+        err = x_targ - x_curr
+
+        control_output = self.K @ err
+        return np.array(control_output, dtype=np.float64)
+
+
+class TimeStep:
+    """Mock dm_env.TimeStep for viewer compatibility."""
+
+    def __init__(
+        self,
+        step_type: int,
+        reward: float = 0.0,
+        discount: float = 1.0,
+        observation: dict[str, typing.Any] | None = None,
+    ) -> None:
+        if step_type is None:
+            raise ValueError("step_type must be provided")
+        self.step_type = step_type
+        self.reward = reward
+        self.discount = discount
+        self.observation = observation or {}
+
+    def first(self) -> bool:
+        """Return True if this is the first step of an episode."""
+        return bool(self.step_type == 0)
+
+    def mid(self) -> bool:
+        """Return True if this is a mid-episode step."""
+        return bool(self.step_type == 1)
+
+    def last(self) -> bool:
+        """Return True if this is the final step of an episode."""
+        return bool(self.step_type == 2)
+
+    def __getitem__(self, key: str) -> typing.Any:
+        return getattr(self, key)
+
+
+class PhysicsEnvWrapper:
+    """Wraps a pure Physics object to satisfy dm_control.viewer's Environment."""
+
+    def __init__(
+        self, physics: typing.Any, initializer: typing.Callable | None = None
+    ) -> None:
+        """Initialize PhysicsEnvWrapper."""
+        if physics is None:
+            raise ValueError("physics must be provided")
+        self._physics = physics
+        self._initializer = initializer
+
+    @property
+    def physics(self) -> typing.Any:
+        """Return the physics object."""
+        return self._physics
+
+    def action_spec(self) -> typing.Any:
+        """Return the action specification."""
+
+        # Basic mock of dm_env.specs.BoundedArray
+        class Spec:
+            def __init__(self, shape: tuple) -> None:
+                """Initialize Spec."""
+                if shape is None:
+                    raise ValueError("shape must be provided")
+                self.shape = shape
+                self.dtype = np.float64
+                self.minimum = -100.0
+                self.maximum = 100.0
+
+        return Spec((self._physics.model.nu,))
+
+    def step(self, action: np.ndarray) -> TimeStep:
+        """Advance the environment by one step."""
+        if action is None:
+            raise ValueError("action must be provided")
+        self._physics.set_control(action)
+        self._physics.step()
+        return TimeStep(step_type=1)  # MID
+
+    def reset(self) -> TimeStep:
+        """Reset the environment."""
+        self._physics.reset()
+        if self._initializer:
+            self._initializer(self._physics)
+        return TimeStep(step_type=0)  # FIRST
+
+
+def save_state(physics: typing.Any, filename: str) -> None:
+    """Save simulation state to file."""
+    # Get state as numpy array
+    if physics is None:
+        raise ValueError("physics must be provided")
+    state = physics.get_state()
+    # Convert to list for JSON serialization
+    state_list = state.tolist()
+
+    try:
+        with open(filename, "w") as f:
+            json.dump(state_list, f)
+        logger.info("State saved to %s", filename)
+    except (FileNotFoundError, PermissionError, OSError) as e:
+        logger.error("Error saving state: %s", e)
+
+
+def load_state(physics: typing.Any, filename: str) -> None:
+    """Load simulation state from file."""
+    if os.path.exists(filename):
+        try:
+            with open(filename) as f:
+                state_list = json.load(f)
+            # Convert back to numpy array
+            state = np.array(state_list)
+            physics.set_state(state)
+            logger.info("State loaded from %s", filename)
+        except ImportError as e:
+            logger.error("Error loading state: %s", e)
+
+
+def _load_simulation_config() -> dict:
+    """Load and return the simulation configuration from disk."""
+    config = {}
+    if os.path.exists("simulation_config.json"):
+        try:
+            with open("simulation_config.json") as f:
+                config = json.load(f)
+        except (FileNotFoundError, PermissionError, OSError) as exc:
+            logger.debug("Could not load simulation_config.json: %s", exc)
+    return config
+
+
+def _extract_simulation_params(config: dict, duration: float) -> dict:
+    """Extract simulation parameters from config dict.
+
+    Returns a dict with all extracted parameters.
+    """
+    if config is None:
+        raise ValueError("config must be provided")
+    control_mode = config.get("control_mode", "pd")
+    use_viewer = config.get("live_view", False)
+    # Override: If the environment is set up for GLFW/Live, force viewer to avoid
+    # inconsistent state (Headless script trying to run in GLFW env).
+    if os.environ.get("MUJOCO_GL") == "glfw":
+        use_viewer = True
+
+    save_path = config.get("save_state_path", "")
+    load_path = config.get("load_state_path", "")
+    # Use duration from config if specified, otherwise use function parameter
+    duration = config.get("simulation_duration", duration)
+
+    club_params = {
+        "length": float(config.get("club_length", 1.0)),
+        "mass": float(config.get("club_mass", 0.5)),
+        "head_size": 1.0,
+    }
+
+    return {
+        "control_mode": control_mode,
+        "use_viewer": use_viewer,
+        "save_path": save_path,
+        "load_path": load_path,
+        "duration": duration,
+        "club_params": club_params,
+        "two_handed": config.get("two_handed", False),
+        "enhance_face": config.get("enhance_face", False),
+        "articulated_fingers": config.get("articulated_fingers", False),
+        "target_height": float(config.get("height_m", 1.8)),
+        "weight_percent": float(config.get("weight_percent", 100.0)),
+    }
+
+
+def _log_viewer_controls() -> None:
+    """Log the available viewer keyboard controls."""
+    logger.info("%s", "\n" + "=" * 50)
+    logger.info("VIEWER CONTROLS:")
+    logger.info("  [Space]     : Pause / Unpause")
+    logger.info("  [Backspace] : Restart Episode (Reset to Address)")
+    logger.info("  [F]         : Toggle Contact Forces")
+    logger.info("  [C]         : Toggle Contact Constraints")
+    logger.info("  [T]         : Toggle Translucency")
+    logger.info("  [H]         : Toggle Help info")
+    logger.info("=" * 50 + "\n")
+
+
+def _setup_controller(
+    control_mode: str,
+    physics: typing.Any,
+    actuators: dict[str, int],
+    target_height: float,
+) -> BaseController:
+    """Create and return the appropriate controller based on mode."""
+    if control_mode is None:
+        raise ValueError("control_mode must be provided")
+    controller: BaseController
+    if control_mode == "lqr":
+        # Calculate height scale (assuming standard 1.56m ref)
+        h_scale = target_height / 1.56
+        controller = LQRController(
+            physics, TARGET_POSE, actuators, height_scale=h_scale
+        )  # noqa: E501
+    elif control_mode == "poly":
+        controller = PolynomialController(physics)
+    else:
+        # Default to PDController for 'pid' or unknown modes,
+        # ensuring controller is always initialized.
+        controller = PDController(actuators, TARGET_POSE)
+    return controller
+
+
+def _run_viewer_loop(
+    physics: typing.Any,
+    controller: BaseController,
+    initialize_episode: typing.Callable,
+    save_path: str,
+) -> None:
+    """Run the simulation in live viewer mode."""
+    if physics is None:
+        raise ValueError("physics must be provided")
+    logger.info("Launching Live Viewer...")
+    try:
+        logger.info("Connecting to display servers...")
+
+        def policy(time_step: typing.Any) -> np.ndarray:
+            """Policy function for the viewer."""
+            action = controller.get_action(physics)
+            return action
+
+        # Wrap physics for viewer
+        env_wrapper = PhysicsEnvWrapper(physics, initializer=initialize_episode)
+        viewer.launch(env_wrapper, policy)
+    except (ValueError, TypeError, RuntimeError) as e:
+        logger.error("%s", f"Failed to launch viewer: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise e
+
+    # Post-viewer Save
+    if save_path:
+        save_state(physics, save_path)
+
+
+def _build_csv_header(actuator_names: list[str]) -> list[str]:
+    """Build the CSV header row for simulation data output."""
+    return (
+        ["time"]
+        + [f"pos_{j}" for j in TARGET_POSE]
+        + [f"force_{a}" for a in actuator_names]
+        + [f"iaa_{j}_g" for j in TARGET_POSE]
+        + [f"iaa_{j}_c" for j in TARGET_POSE]
+        + [f"iaa_{j}_t" for j in TARGET_POSE]
+        + [f"iaa_{j}_total" for j in TARGET_POSE]
+    )
+
+
+def _collect_step_data(
+    physics: typing.Any,
+    actuators: dict[str, int],
+    actuator_names: list[str],
+    iaa: dict | None,
+) -> list:
+    """Collect one row of CSV data for the current simulation step."""
+    if physics is None:
+        raise ValueError("physics must be provided")
+    row = [physics.data.time]
+    for j in TARGET_POSE:
+        try:
+            val = physics.named.data.qpos[j]
+        except (RuntimeError, ValueError, OSError):
+            val = 0
+        row.append(val)
+    for a in actuator_names:
+        try:
+            idx = actuators[a]
+            val = physics.data.actuator_force[idx]
+        except (RuntimeError, ValueError, OSError):
+            val = 0
+        row.append(val)
+
+    # Append IAA
+    if iaa:
+        for j in TARGET_POSE:
+            try:
+                # Find DOF address
+                j_id = physics.model.name2id(j, "joint")
+                dof_adr = physics.model.jnt_dofadr[j_id]
+
+                g_val = iaa["gravity"][dof_adr]
+                c_val = iaa["coriolis"][dof_adr]
+                t_val = iaa["control"][dof_adr]
+                tot_val = g_val + c_val + t_val
+
+                row.extend([g_val, c_val, t_val, tot_val])
+            except (RuntimeError, ValueError, OSError):
+                row.extend([0, 0, 0, 0])
+    else:
+        # Fill zeros
+        row.extend([0] * (4 * len(TARGET_POSE)))
+
+    return row
+
+
+def _run_headless_loop(
+    physics: typing.Any,
+    controller: BaseController,
+    actuators: dict[str, int],
+    duration: float,
+    output_video: str,
+    output_data: str,
+    save_path: str,
+) -> None:
+    """Run the simulation in headless mode, recording video and CSV data."""
+    if physics is None:
+        raise ValueError("physics must be provided")
+    logger.info("Simulating (Headless) for %ss...", duration)
+    fps = 30
+    steps = int(duration * fps)
+    frames = []
+    data_rows = []
+    actuator_names = sorted(actuators.keys())
+    header = _build_csv_header(actuator_names)
+
+    camera_id = 0
+    for i in range(physics.model.ncam):
+        if physics.model.id2name(i, "camera") == "face_on":
+            camera_id = i
+
+    for i in range(steps):
+        action = controller.get_action(physics)
+        physics.set_control(action)
+        physics.step()
+
+        # Record
+        pixels = physics.render(height=480, width=640, camera_id=camera_id)
+        frames.append(pixels)
+
+        # Compute IAA & CF
+        iaa = iaa_helper.compute_induced_accelerations(physics)
+        cf = iaa_helper.compute_counterfactuals(physics)
+        mass_matrix = iaa_helper.get_mass_matrix(physics)
+
+        # Emit Data Stream
+        try:
+            packet = {
+                "time": physics.data.time,
+                "qpos": physics.data.qpos,
+                "qvel": physics.data.qvel,
+                "qfrc_actuator": physics.data.qfrc_actuator,
+                "iaa": iaa,
+                "cf": cf,
+                "mass_matrix": mass_matrix,
+            }
+            logger.info(
+                "DATA_JSON:%s",
+                json.dumps(packet, default=np_encoder),
+            )
+        except (OSError, ValueError, TypeError) as e:
+            # Avoid crashing loop on serialization error, just log
+            logger.error("%s", f"DEBUG: Data serialization failed: {e}")
+
+        # Log Data (CSV)
+        row = _collect_step_data(physics, actuators, actuator_names, iaa)
+        data_rows.append(row)
+
+        if i % 30 == 0:
+            logger.info("Frame %s/%s", i, steps)
+
+    # Save
+    imageio.mimsave(output_video, frames, fps=fps)
+    with open(output_data, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        writer.writerows(data_rows)
+
+    if save_path:
+        save_state(physics, save_path)
+
+
+def run_simulation(
+    output_video: str = "humanoid_golf.mp4",
+    output_data: str = "golf_data.csv",
+    duration: float = 3.0,
+) -> None:
+    """Run the golf simulation."""
+    # 1. Load Config
+    if output_video is None:
+        raise ValueError("output_video must be provided")
+    logger.info("Loading configuration...")
+    config = _load_simulation_config()
+
+    logger.info(
+        "DISPLAY environment variable: %s",
+        os.environ.get("DISPLAY", "Not Set"),
+    )
+
+    # 2. Extract Params
+    params = _extract_simulation_params(config, duration)
+    use_viewer = params["use_viewer"]
+    save_path = params["save_path"]
+    load_path = params["load_path"]
+    duration = params["duration"]
+    target_height = params["target_height"]
+
+    if use_viewer:
+        _log_viewer_controls()
+
+    # 3. Setup Physics
+    try:
+        physics = utils.load_humanoid_with_props(
+            target_height=target_height,
+            weight_percent=params["weight_percent"],
+            club_params=params["club_params"],
+            two_handed=params["two_handed"],
+            enhance_face=params["enhance_face"],
+            articulated_fingers=params["articulated_fingers"],
+        )
+    except (RuntimeError, ValueError, OSError) as e:
+        logger.error("Error loading model: %s", e)
+        return
+
+    utils.customize_visuals(physics, config=config)
+    actuators = utils.get_actuator_indices(physics)
+
+    # 4. Setup Initialization Logic
+    def initialize_episode(phys: typing.Any) -> None:
+        """Initialize episode state from file or default pose."""
+        if load_path:
+            load_state(phys, load_path)
+        else:
+            # Initial Pose
+            with phys.reset_context():
+                phys.data.qpos[2] = 1.1 * (target_height / 1.56)
+                for joint, angle in TARGET_POSE.items():
+                    with contextlib.suppress(KeyError):
+                        phys.named.data.qpos[joint] = angle
+
+    # Initialize for checking or headless run
+    initialize_episode(physics)
+
+    # 5. Setup Controller
+    controller = _setup_controller(
+        params["control_mode"], physics, actuators, target_height
+    )  # noqa: E501
+
+    # 6. Run Loop
+    if use_viewer and HAS_VIEWER:
+        _run_viewer_loop(physics, controller, initialize_episode, save_path)
+    else:
+        _run_headless_loop(
+            physics,
+            controller,
+            actuators,
+            duration,
+            output_video,
+            output_data,
+            save_path,
+        )
+
+
+if __name__ == "__main__":
+    run_simulation()

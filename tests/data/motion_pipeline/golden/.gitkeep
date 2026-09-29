@@ -1,0 +1,11 @@
+# Placeholder file to create directory structure
+# Golden fixtures for motion pipeline tests
+# 
+# Expected files (≤ 1 MB each):
+# - c3d_vicon_driver.c3d - C3D from a Vicon-style capture
+# - openpose_swing.json - OpenPose JSON
+# - mediapipe_swing.json - MediaPipe JSON  
+# - trc_opencap.trc - TRC from OpenCap
+# - bvh_moveai.bvh - BVH from Move.ai-style export
+#
+# These should be anonymized motion capture data suitable for CI testing.

@@ -1,0 +1,71 @@
+# Motion Pipeline — User Workflow Guide
+
+> Part of epic #4558. Make the new pipeline immediately usable by anyone joining the project.
+
+## Processing Motion Capture via REST API
+
+The motion pipeline is exposed as a FastAPI REST service. You can run the server and send motion files (like C3D) directly to it.
+
+### Step 1: Start the API Server
+
+```bash
+python -m uvicorn src.shared.python.motion_pipeline.api:create_app --factory --host 0.0.0.0 --port 8000
+```
+
+### Step 2: Run the Pipeline
+
+You can process a file by sending a `POST` request to `/api/v1/motion-pipeline/run`:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/motion-pipeline/run \
+  -F "file=@your_motion_data.c3d" \
+  -F "source_format=c3d" \
+  -F "ik_backend=mujoco" \
+  -F "matching_backend=pinocchio"
+```
+
+This will return a JSON response containing the solved kinematics and motion matching metrics.
+
+The MuJoCo motion-matching backend is reserved for real-model integration work.
+If selected without a real dynamics model, the API returns a 400-class
+configuration error instead of reporting placeholder zero torques as a
+successful solve.
+
+The production motion-matching factory currently exposes only implemented
+solver surfaces. OpenSim CMC, OpenSim RRA, and Drake trajectory optimization
+remain experimental backend-development classes until they produce real solves;
+they are not available through the default factory path.
+
+### Uploading C3D From the Motion Capture Tool
+
+The web Motion Capture page uploads C3D files through
+`POST /api/v1/tools/motion-capture/upload-c3d`. That route parses the file
+with the same `C3DAdapter` the pipeline uses (issue #8865), so both paths share
+one reader and one set of format quirks. By default the upload registers a
+playback-only recording; add `?run_pipeline=true` (optionally with
+`ik_backend`, `matching_backend`, `matching_model_urdf`) to also hand the
+parsed trajectory to the pipeline and receive the tracked-motion result in
+the response's `pipeline` field alongside the recording.
+
+---
+
+## When to Choose Each Engine
+
+| Use Case                                                 | Recommended Engine | Why                                                                      |
+| -------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
+| **Contact-rich dynamics** (ground reaction, ball impact) | MuJoCo             | Best contact handling, day-to-day development                            |
+| **Trajectory optimization** (finding optimal swing)      | Drake              | Engine capability; motion-matching trajopt is not production-exposed yet |
+| **Fast IK solutions** (real-time retargeting)            | Pinocchio          | Optimized rigid-body algorithms                                          |
+| **Biomechanics validation**                              | OpenSim            | Gold-standard musculoskeletal models                                     |
+| **Muscle dynamics**                                      | MyoSuite           | Detailed muscle activation modeling                                      |
+
+---
+
+## Next Steps
+
+- [Format Matrix](formats.md) — Auto-generated support matrix for each mocap source
+- [Canonical Observations](canonical_observations.md) — Multi-camera markerless keypoints, calibration, and confidence schema
+- [Pose2Sim Ingestion](pose2sim.md) — Local multi-camera Pose2Sim outputs to canonical CIR observations
+- [Troubleshooting](troubleshooting.md) — Common failure modes and fixes
+- [Architecture ADR](../adr/0007-motion-pipeline-architecture.md) — Design decisions and alternatives
+- [Biomech Workspace Setup](../architecture/biomech_workspace.md) — Wire up the five sibling biomechanics repos as the source of truth for models (ADR-0014)

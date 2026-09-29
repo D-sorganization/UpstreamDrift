@@ -1,0 +1,2310 @@
+[
+  {
+    "key": "drift_metric",
+    "term": "Drift Metric",
+    "cat": "analysis",
+    "b": "A number showing how much of a movement happens passively without muscle effort.",
+    "i": "Magnitude of the drift (gravity + velocity-dependent) acceleration component in the drift-control decomposition.",
+    "r": ["control_metric", "drift_control_decomposition"]
+  },
+  {
+    "key": "control_metric",
+    "term": "Control Metric",
+    "cat": "analysis",
+    "b": "A number showing how much active muscle effort drives a movement.",
+    "i": "Magnitude of the active control acceleration in the drift-control decomposition. High values indicate muscle-dominated motion.",
+    "r": ["drift_metric", "drift_control_decomposition"]
+  },
+  {
+    "key": "zero_torque_configuration",
+    "term": "Zero-Torque Configuration",
+    "cat": "analysis",
+    "b": "A body position where gravity is perfectly balanced and no muscle effort is needed to stay still.",
+    "i": "Configuration q where g(q) = 0, requiring no joint torques for static equilibrium. Rare in practice but useful as a reference.",
+    "r": ["equilibrium", "gravity_vector"]
+  },
+  {
+    "key": "zero_velocity_curve",
+    "term": "Zero-Velocity Curve",
+    "cat": "analysis",
+    "b": "A boundary in motion analysis separating regions where the system can and cannot reach.",
+    "i": "Locus of points in configuration space where kinetic energy equals zero for a given total energy. Defines motion boundaries.",
+    "r": ["phase_space", "kinetic_energy"]
+  },
+  {
+    "key": "manipulability_ellipsoid",
+    "term": "Manipulability Ellipsoid",
+    "cat": "analysis",
+    "b": "A shape showing how easily the body can move in different directions from a given posture.",
+    "i": "Ellipsoid defined by J(q)J(q)^T mapping joint velocities to task-space velocities. Axes indicate ease of motion in each direction.",
+    "f": "w = sqrt(det(JJ^T))",
+    "r": ["jacobian_matrix", "condition_number"]
+  },
+  {
+    "key": "condition_number",
+    "term": "Condition Number",
+    "cat": "analysis",
+    "b": "A number indicating how sensitive a calculation is to small errors in the input data.",
+    "i": "Ratio of largest to smallest singular value: kappa = sigma_max/sigma_min. High values indicate near-singular or ill-conditioned systems.",
+    "r": ["singularity", "singular_value_decomposition"]
+  },
+  {
+    "key": "numerical_rank",
+    "term": "Numerical Rank",
+    "cat": "analysis",
+    "b": "The effective number of independent directions a system can move, accounting for numerical precision.",
+    "i": "Number of singular values above a threshold tolerance. May differ from algebraic rank due to floating-point precision.",
+    "r": ["singular_value_decomposition", "condition_number"]
+  },
+  {
+    "key": "singular_value_decomposition",
+    "term": "Singular Value Decomposition (SVD)",
+    "cat": "analysis",
+    "b": "A way to break down any matrix into simpler components revealing its most important features.",
+    "i": "Factorization A = U*Sigma*V^T where Sigma contains singular values. Reveals rank, null space, and best low-rank approximations.",
+    "r": ["eigenvalue", "numerical_rank", "principal_component_analysis"]
+  },
+  {
+    "key": "eigenvalue",
+    "term": "Eigenvalue",
+    "cat": "analysis",
+    "b": "A special number associated with a matrix that describes a natural mode or scale of the system.",
+    "i": "Scalar lambda satisfying Ax = lambda*x. Eigenvalues of the mass matrix relate to natural frequencies; of covariance to principal components.",
+    "r": ["eigenvector", "singular_value_decomposition"]
+  },
+  {
+    "key": "eigenvector",
+    "term": "Eigenvector",
+    "cat": "analysis",
+    "b": "A special direction associated with a matrix that only gets scaled, not rotated, when the matrix is applied.",
+    "i": "Vector x satisfying Ax = lambda*x. Eigenvectors of the inertia tensor define principal axes of rotation.",
+    "r": ["eigenvalue"]
+  },
+  {
+    "key": "principal_component_analysis",
+    "term": "Principal Component Analysis (PCA)",
+    "cat": "analysis",
+    "b": "A technique for finding the most important patterns in movement data by reducing complexity.",
+    "i": "Eigendecomposition of the covariance matrix to find orthogonal directions of maximum variance. Used to identify dominant movement patterns.",
+    "r": ["singular_value_decomposition", "eigenvalue"]
+  },
+  {
+    "key": "fourier_transform",
+    "term": "Fourier Transform",
+    "cat": "analysis",
+    "b": "A method to break down a signal into its frequency components, like separating musical notes from a chord.",
+    "i": "Transforms time-domain signal to frequency domain: F(w) = integral of f(t)e^(-jwt) dt. Reveals periodic components in motion data.",
+    "r": ["power_spectrum", "frequency_analysis"]
+  },
+  {
+    "key": "wavelet_transform",
+    "term": "Wavelet Transform",
+    "cat": "analysis",
+    "b": "A way to analyze signals that captures both when and at what frequency events occur.",
+    "i": "Time-frequency decomposition using scaled/shifted wavelets. Better than Fourier for non-stationary biomechanical signals.",
+    "r": ["fourier_transform", "time_frequency_analysis"]
+  },
+  {
+    "key": "power_spectrum",
+    "term": "Power Spectrum",
+    "cat": "analysis",
+    "b": "A plot showing how much energy is at each frequency in a signal.",
+    "i": "Squared magnitude of the Fourier transform: P(f) = |F(f)|^2. Identifies dominant frequencies in force plate or EMG data.",
+    "r": ["fourier_transform", "frequency_analysis"]
+  },
+  {
+    "key": "frequency_analysis",
+    "term": "Frequency Analysis",
+    "cat": "analysis",
+    "b": "Examining the repetitive patterns in movement data to understand oscillations and vibrations.",
+    "i": "Study of signal frequency content using FFT, power spectra, or wavelets. Used for filtering decisions and vibration characterization.",
+    "r": ["fourier_transform", "sampling_rate"]
+  },
+  {
+    "key": "time_frequency_analysis",
+    "term": "Time-Frequency Analysis",
+    "cat": "analysis",
+    "b": "Analyzing how frequency content of a signal changes over time during a movement.",
+    "i": "Joint time-frequency representations (STFT, wavelets, Wigner-Ville) showing spectral evolution of non-stationary biomechanical signals.",
+    "r": ["wavelet_transform", "fourier_transform"]
+  },
+  {
+    "key": "signal_filtering",
+    "term": "Signal Filtering",
+    "cat": "analysis",
+    "b": "Cleaning up noisy measurement data to reveal the true underlying movement pattern.",
+    "i": "Removing unwanted frequency components from signals. Critical preprocessing step for motion capture and force plate data.",
+    "r": ["low_pass_filter", "butterworth_filter"]
+  },
+  {
+    "key": "low_pass_filter",
+    "term": "Low-Pass Filter",
+    "cat": "analysis",
+    "b": "A filter that removes high-frequency noise while keeping the smooth movement signal.",
+    "i": "Passes frequencies below the cutoff and attenuates higher frequencies. Standard for biomechanical data: 6-15 Hz cutoff for kinematics.",
+    "r": ["butterworth_filter", "cutoff_frequency"]
+  },
+  {
+    "key": "butterworth_filter",
+    "term": "Butterworth Filter",
+    "cat": "analysis",
+    "b": "A commonly used smooth filter for cleaning biomechanical data.",
+    "i": "Maximally flat magnitude response filter. Applied bidirectionally (filtfilt) for zero phase shift. Standard in biomechanics data processing.",
+    "r": ["low_pass_filter", "cutoff_frequency"]
+  },
+  {
+    "key": "cutoff_frequency",
+    "term": "Cutoff Frequency",
+    "cat": "analysis",
+    "b": "The frequency threshold that separates signal from noise in filtered data.",
+    "i": "Frequency at which filter attenuation reaches -3 dB. Determined via residual analysis or power spectral analysis of the signal.",
+    "u": "Hz",
+    "r": ["low_pass_filter", "nyquist_frequency"]
+  },
+  {
+    "key": "sampling_rate",
+    "term": "Sampling Rate",
+    "cat": "analysis",
+    "b": "How many measurements per second a sensor takes, like frames per second in a camera.",
+    "i": "Number of samples acquired per second. Must satisfy Nyquist criterion (>2x highest frequency). Motion capture: 100-500 Hz; EMG: 1000-2000 Hz.",
+    "u": "Hz",
+    "r": ["nyquist_frequency", "aliasing"]
+  },
+  {
+    "key": "nyquist_frequency",
+    "term": "Nyquist Frequency",
+    "cat": "analysis",
+    "b": "The highest frequency that can be accurately captured at a given sampling rate (half the sampling rate).",
+    "i": "Maximum resolvable frequency: f_Nyquist = f_sample/2. Frequencies above this alias to lower frequencies, corrupting the signal.",
+    "f": "f_N = f_s/2",
+    "r": ["sampling_rate", "aliasing"]
+  },
+  {
+    "key": "aliasing",
+    "term": "Aliasing",
+    "cat": "analysis",
+    "b": "When a signal is sampled too slowly, making high-frequency content appear as false low-frequency patterns.",
+    "i": "Frequency folding artifact when sampling below the Nyquist rate. Prevented by anti-aliasing filters before digitization.",
+    "r": ["nyquist_frequency", "sampling_rate"]
+  },
+  {
+    "key": "residual_analysis",
+    "term": "Residual Analysis",
+    "cat": "analysis",
+    "b": "A method for choosing the best filter settings by examining the difference between raw and filtered data.",
+    "i": "Comparing filtered signal residuals across cutoff frequencies to find the optimal balance between noise removal and signal distortion.",
+    "r": ["butterworth_filter", "cutoff_frequency"]
+  },
+  {
+    "key": "cross_correlation",
+    "term": "Cross-Correlation",
+    "cat": "analysis",
+    "b": "Measuring how similar two signals are and how much one lags behind the other.",
+    "i": "R_xy(tau) measures similarity between signals x(t) and y(t+tau). Peak location indicates time delay between kinetic chain segments.",
+    "r": ["autocorrelation", "kinetic_chain"]
+  },
+  {
+    "key": "autocorrelation",
+    "term": "Autocorrelation",
+    "cat": "analysis",
+    "b": "Measuring how similar a signal is to a delayed version of itself, revealing repetitive patterns.",
+    "i": "Cross-correlation of a signal with itself. Identifies periodicity and persistence in biomechanical time series.",
+    "r": ["cross_correlation"]
+  },
+  {
+    "key": "coherence_analysis",
+    "term": "Coherence",
+    "cat": "analysis",
+    "b": "Measuring how strongly two signals are related at each frequency.",
+    "i": "Frequency-domain correlation measure (0-1) between two signals. Identifies frequency bands of neuromuscular coupling.",
+    "r": ["cross_correlation", "power_spectrum"]
+  },
+  {
+    "key": "transfer_function",
+    "term": "Transfer Function",
+    "cat": "analysis",
+    "b": "A description of how a system transforms input signals into output signals.",
+    "i": "Frequency-domain ratio of output to input: H(s) = Y(s)/X(s). Characterizes system dynamics in the Laplace or frequency domain.",
+    "r": ["impulse_response", "frequency_analysis"]
+  },
+  {
+    "key": "impulse_response",
+    "term": "Impulse Response",
+    "cat": "analysis",
+    "b": "How a system reacts to a brief, sharp input, revealing its fundamental dynamic behavior.",
+    "i": "Time-domain output h(t) when input is a Dirac delta. Complete characterization of a linear time-invariant system.",
+    "r": ["transfer_function", "step_response"]
+  },
+  {
+    "key": "step_response",
+    "term": "Step Response",
+    "cat": "analysis",
+    "b": "How a system responds to a sudden change in input, showing settling time and overshoot.",
+    "i": "System output when input changes from 0 to 1 instantaneously. Integral of impulse response. Reveals damping and natural frequency.",
+    "r": ["impulse_response", "transfer_function"]
+  },
+  {
+    "key": "benchmark",
+    "term": "Benchmark",
+    "cat": "validation",
+    "b": "A standard test used to compare performance or accuracy across different methods.",
+    "i": "Reference problem or dataset with known solutions for evaluating algorithm accuracy and computational performance."
+  },
+  {
+    "key": "ground_truth",
+    "term": "Ground Truth",
+    "cat": "validation",
+    "b": "The known correct answer used to check if a measurement or calculation is accurate.",
+    "i": "Reference data considered accurate enough to validate measurements. Often from gold-standard instruments or manual annotation."
+  },
+  {
+    "key": "gold_standard",
+    "term": "Gold Standard",
+    "cat": "validation",
+    "b": "The most accurate measurement method available, used as the reference for validating other methods.",
+    "i": "Best available measurement technique for a given quantity. Optical motion capture is the gold standard for 3D kinematics."
+  },
+  {
+    "key": "inter_rater_reliability",
+    "term": "Inter-Rater Reliability",
+    "cat": "validation",
+    "b": "How much different people agree when measuring the same thing.",
+    "i": "Agreement between measurements by different observers/raters. Assessed via ICC, Cohen's kappa, or Bland-Altman analysis."
+  },
+  {
+    "key": "intra_rater_reliability",
+    "term": "Intra-Rater Reliability",
+    "cat": "validation",
+    "b": "How consistent one person is when measuring the same thing multiple times.",
+    "i": "Agreement between repeated measurements by the same observer. Typically higher than inter-rater reliability."
+  },
+  {
+    "key": "bland_altman_analysis",
+    "term": "Bland-Altman Analysis",
+    "cat": "validation",
+    "b": "A plotting method that shows how well two measurement methods agree with each other.",
+    "i": "Plots difference vs mean of two methods, showing bias and 95% limits of agreement. Standard for method comparison studies."
+  },
+  {
+    "key": "root_mean_square_error",
+    "term": "Root Mean Square Error (RMSE)",
+    "cat": "validation",
+    "b": "A single number summarizing how far off predictions are from actual values.",
+    "i": "RMSE = sqrt(mean((predicted - actual)^2)). Penalizes large errors more than MAE. Common metric for motion tracking accuracy.",
+    "f": "RMSE = sqrt(mean((y-y_hat)^2))",
+    "r": ["mean_absolute_error"]
+  },
+  {
+    "key": "mean_absolute_error",
+    "term": "Mean Absolute Error (MAE)",
+    "cat": "validation",
+    "b": "The average size of prediction errors, ignoring whether they are too high or too low.",
+    "i": "MAE = mean(|predicted - actual|). More robust to outliers than RMSE. Reports error in original units.",
+    "f": "MAE = mean(|y-y_hat|)",
+    "r": ["root_mean_square_error"]
+  },
+  {
+    "key": "r_squared",
+    "term": "R-Squared",
+    "cat": "validation",
+    "b": "A number from 0 to 1 showing how well a model explains the variation in data.",
+    "i": "Coefficient of determination: R^2 = 1 - SS_res/SS_tot. Value of 1.0 means perfect prediction; 0 means no better than the mean.",
+    "f": "R^2 = 1 - SS_res/SS_tot"
+  },
+  {
+    "key": "coefficient_of_variation",
+    "term": "Coefficient of Variation (CV)",
+    "cat": "validation",
+    "b": "A measure of variability expressed as a percentage of the average, useful for comparing consistency.",
+    "i": "CV = (std/mean)*100%. Expresses variability relative to the mean. Used to assess movement consistency across trials.",
+    "f": "CV = (sigma/mu)*100%"
+  },
+  {
+    "key": "standard_error_measurement",
+    "term": "Standard Error of Measurement",
+    "cat": "validation",
+    "b": "The expected amount of error in any single measurement.",
+    "i": "SEM = SD*sqrt(1-ICC). Estimates measurement precision. Used to define minimal detectable change thresholds.",
+    "f": "SEM = SD*sqrt(1-ICC)"
+  },
+  {
+    "key": "confidence_interval",
+    "term": "Confidence Interval",
+    "cat": "validation",
+    "b": "A range of values likely to contain the true value with a stated probability (usually 95%).",
+    "i": "Range [mean +/- z*SE] expected to contain the population parameter. Wider intervals indicate greater uncertainty."
+  },
+  {
+    "key": "p_value",
+    "term": "P-Value",
+    "cat": "validation",
+    "b": "The probability that observed results could occur by chance if there is no real effect.",
+    "i": "Probability of observing data as extreme as measured under the null hypothesis. p < 0.05 is conventional significance threshold."
+  },
+  {
+    "key": "statistical_significance",
+    "term": "Statistical Significance",
+    "cat": "validation",
+    "b": "When results are unlikely to have occurred by chance alone, suggesting a real effect exists.",
+    "i": "Outcome where p-value falls below the chosen alpha level (typically 0.05). Does not imply practical significance or effect size."
+  },
+  {
+    "key": "effect_size",
+    "term": "Effect Size",
+    "cat": "validation",
+    "b": "How big a difference or relationship actually is, beyond just whether it is statistically significant.",
+    "i": "Standardized measure of magnitude: Cohen's d, eta-squared, or r. Small (0.2), medium (0.5), large (0.8) benchmarks."
+  },
+  {
+    "key": "sensitivity_analysis",
+    "term": "Sensitivity Analysis",
+    "cat": "validation",
+    "b": "Testing how much results change when input assumptions are varied.",
+    "i": "Systematic variation of input parameters to assess output sensitivity. Identifies which parameters most influence model predictions."
+  },
+  {
+    "key": "specificity",
+    "term": "Specificity",
+    "cat": "validation",
+    "b": "How well a test correctly identifies negative cases (no problem when there is none).",
+    "i": "True negative rate: TN/(TN+FP). Proportion of actual negatives correctly identified. Trades off with sensitivity."
+  },
+  {
+    "key": "precision_metric",
+    "term": "Precision",
+    "cat": "validation",
+    "b": "Of all the things flagged as positive, how many actually are positive.",
+    "i": "Positive predictive value: TP/(TP+FP). Important when false positives are costly. Trades off with recall.",
+    "r": ["recall_metric", "f1_score"]
+  },
+  {
+    "key": "recall_metric",
+    "term": "Recall",
+    "cat": "validation",
+    "b": "Of all actual positive cases, how many were correctly identified.",
+    "i": "True positive rate / sensitivity: TP/(TP+FN). Important when missing positives is costly.",
+    "r": ["precision_metric", "f1_score"]
+  },
+  {
+    "key": "f1_score",
+    "term": "F1 Score",
+    "cat": "validation",
+    "b": "A balanced score combining precision and recall into one number.",
+    "i": "Harmonic mean of precision and recall: F1 = 2*P*R/(P+R). Ranges 0-1 with 1 being perfect.",
+    "f": "F1 = 2PR/(P+R)",
+    "r": ["precision_metric", "recall_metric"]
+  },
+  {
+    "key": "pid_controller",
+    "term": "PID Controller",
+    "cat": "control",
+    "b": "A common control method using three terms to smoothly drive a system to a target value.",
+    "i": "Proportional-Integral-Derivative controller: u = Kp*e + Ki*integral(e) + Kd*de/dt. Widely used for joint position/force tracking.",
+    "f": "u = Kp*e + Ki*int(e) + Kd*de/dt"
+  },
+  {
+    "key": "feedforward_control",
+    "term": "Feedforward Control",
+    "cat": "control",
+    "b": "Planning the control action in advance based on what you expect to happen, without waiting for errors.",
+    "i": "Open-loop control using an inverse model to predict required inputs. Faster than feedback but sensitive to model errors.",
+    "r": ["feedback_control"]
+  },
+  {
+    "key": "feedback_control",
+    "term": "Feedback Control",
+    "cat": "control",
+    "b": "Adjusting actions based on the difference between desired and actual outcomes.",
+    "i": "Closed-loop control measuring output error and adjusting input to minimize it. Robust to disturbances but introduces latency.",
+    "r": ["feedforward_control", "pid_controller"]
+  },
+  {
+    "key": "state_feedback",
+    "term": "State Feedback",
+    "cat": "control",
+    "b": "Using all available information about the system's current state to compute the best control action.",
+    "i": "Control law u = -Kx using full state measurement. Pole placement or LQR used to design gain matrix K.",
+    "r": ["lqr_controller", "state_estimation"]
+  },
+  {
+    "key": "output_feedback",
+    "term": "Output Feedback",
+    "cat": "control",
+    "b": "Controlling a system using only its measured outputs rather than the full internal state.",
+    "i": "Control using measured outputs y = Cx when full state is unavailable. Often combined with state observer for estimated state feedback.",
+    "r": ["state_observer", "state_feedback"]
+  },
+  {
+    "key": "state_observer",
+    "term": "State Observer",
+    "cat": "control",
+    "b": "An algorithm that estimates the full internal state of a system from partial measurements.",
+    "i": "Dynamical system that estimates unmeasured states: x_hat_dot = Ax_hat + Bu + L(y - Cx_hat). Luenberger observer or Kalman filter.",
+    "r": ["kalman_filter", "state_estimation"]
+  },
+  {
+    "key": "kalman_filter",
+    "term": "Kalman Filter",
+    "cat": "control",
+    "b": "A mathematical method for combining noisy sensor measurements to get the best estimate of true values.",
+    "i": "Optimal recursive state estimator for linear Gaussian systems. Minimizes mean squared error. Extended (EKF) and Unscented (UKF) for nonlinear.",
+    "r": ["state_observer", "state_estimation", "sensor_fusion"]
+  },
+  {
+    "key": "lqr_controller",
+    "term": "LQR Controller",
+    "cat": "control",
+    "b": "An optimal controller that balances tracking accuracy against control effort.",
+    "i": "Linear-Quadratic Regulator minimizing J = integral(x^TQx + u^TRu). Gain K = R^-1 B^T P from algebraic Riccati equation.",
+    "r": ["optimal_control", "state_feedback"]
+  },
+  {
+    "key": "optimal_control",
+    "term": "Optimal Control",
+    "cat": "control",
+    "b": "Finding the best possible control strategy that minimizes some cost while achieving a goal.",
+    "i": "Framework for finding control inputs minimizing a cost functional subject to system dynamics constraints. Includes LQR, MPC, and trajectory optimization.",
+    "r": ["lqr_controller", "trajectory_optimization"]
+  },
+  {
+    "key": "trajectory_optimization",
+    "term": "Trajectory Optimization",
+    "cat": "control",
+    "b": "Computing the ideal movement path that minimizes effort or time while satisfying physical constraints.",
+    "i": "Finding optimal state and control trajectories minimizing a cost functional. Methods: direct collocation, shooting, dynamic programming.",
+    "r": ["direct_collocation", "shooting_method", "optimal_control"]
+  },
+  {
+    "key": "direct_collocation",
+    "term": "Direct Collocation",
+    "cat": "control",
+    "b": "A method for solving trajectory optimization by discretizing the problem into a large system of equations.",
+    "i": "Transcribes continuous OCP into NLP by discretizing states and controls at collocation points. Enables efficient use of sparse NLP solvers.",
+    "r": ["trajectory_optimization", "shooting_method"]
+  },
+  {
+    "key": "shooting_method",
+    "term": "Shooting Method",
+    "cat": "control",
+    "b": "A trajectory optimization approach that simulates forward and adjusts initial conditions to hit the target.",
+    "i": "Parameterizes controls, integrates dynamics forward, and optimizes parameters to satisfy boundary conditions. Single vs multiple shooting.",
+    "r": ["direct_collocation", "trajectory_optimization"]
+  },
+  {
+    "key": "pontryagin_principle",
+    "term": "Pontryagin's Principle",
+    "cat": "control",
+    "b": "A mathematical rule providing necessary conditions for an optimal control solution.",
+    "i": "Maximum principle: optimal control maximizes the Hamiltonian H(x,u,lambda). Provides necessary conditions via costate equations.",
+    "r": ["optimal_control", "bellman_equation"]
+  },
+  {
+    "key": "bellman_equation",
+    "term": "Bellman Equation",
+    "cat": "control",
+    "b": "A recursive formula expressing that the best strategy from any point depends only on the current state.",
+    "i": "V(x) = min_u {L(x,u) + V(f(x,u))}. Foundation of dynamic programming. Discrete version leads to value iteration algorithms.",
+    "r": ["dynamic_programming", "value_function"]
+  },
+  {
+    "key": "dynamic_programming",
+    "term": "Dynamic Programming",
+    "cat": "control",
+    "b": "Solving complex optimization problems by breaking them into simpler overlapping subproblems.",
+    "i": "Backward recursion solving Bellman equation from final time to initial time. Optimal but suffers curse of dimensionality.",
+    "r": ["bellman_equation", "optimal_control"]
+  },
+  {
+    "key": "reinforcement_learning",
+    "term": "Reinforcement Learning",
+    "cat": "control",
+    "b": "Training an agent to make decisions by rewarding good outcomes and penalizing bad ones.",
+    "i": "Learning optimal policies through trial-and-error interaction with an environment. Model-free alternative to model-based optimal control.",
+    "r": ["policy_gradient", "actor_critic", "reward_function"]
+  },
+  {
+    "key": "policy_gradient",
+    "term": "Policy Gradient",
+    "cat": "control",
+    "b": "A reinforcement learning method that directly improves the decision-making policy using gradients.",
+    "i": "Optimizes parameterized policy by estimating gradient of expected return. Methods: REINFORCE, PPO, TRPO.",
+    "r": ["reinforcement_learning", "actor_critic"]
+  },
+  {
+    "key": "actor_critic",
+    "term": "Actor-Critic",
+    "cat": "control",
+    "b": "A reinforcement learning architecture with a policy (actor) and a value estimator (critic) working together.",
+    "i": "Combines policy gradient (actor) with value function approximation (critic) for reduced variance. Basis for SAC, A3C, PPO.",
+    "r": ["policy_gradient", "value_function"]
+  },
+  {
+    "key": "reward_function",
+    "term": "Reward Function",
+    "cat": "control",
+    "b": "A function that assigns scores to actions, guiding a learning agent toward desired behavior.",
+    "i": "Scalar signal r(s,a) evaluating state-action pairs. Design is critical and domain-specific. Sparse vs dense reward tradeoffs.",
+    "r": ["reinforcement_learning", "value_function"]
+  },
+  {
+    "key": "value_function",
+    "term": "Value Function",
+    "cat": "control",
+    "b": "An estimate of total future reward from a given state, guiding optimal decision-making.",
+    "i": "V(s) = E[sum of future rewards from state s]. State-value V(s) and action-value Q(s,a) functions. Learned via temporal difference methods.",
+    "r": ["bellman_equation", "reward_function"]
+  },
+  {
+    "key": "state_estimation",
+    "term": "State Estimation",
+    "cat": "control",
+    "b": "Inferring the true state of a system from noisy, incomplete sensor measurements.",
+    "i": "Combining sensor data with dynamic models to estimate unmeasured states. Methods: Kalman filter, particle filter, complementary filter.",
+    "r": ["kalman_filter", "sensor_fusion"]
+  },
+  {
+    "key": "motor_control",
+    "term": "Motor Control",
+    "cat": "control",
+    "b": "How the nervous system coordinates muscles to produce smooth, accurate movements.",
+    "i": "Neural processes for planning and executing movement. Involves feedforward planning, feedback corrections, and internal models.",
+    "r": ["motor_learning", "proprioception"]
+  },
+  {
+    "key": "impedance_control",
+    "term": "Impedance Control",
+    "cat": "control",
+    "b": "Controlling how a robot or limb responds to external forces, like adjusting stiffness.",
+    "i": "Regulating the dynamic relationship between motion and force: F = M*x_dd + B*x_d + K*x. Adjusts apparent mass, damping, stiffness.",
+    "r": ["admittance_control", "compliance_control"]
+  },
+  {
+    "key": "admittance_control",
+    "term": "Admittance Control",
+    "cat": "control",
+    "b": "Controlling motion in response to measured forces, the complement of impedance control.",
+    "i": "Reads force sensor input and computes position response. Suitable for position-controlled robots interacting with the environment.",
+    "r": ["impedance_control"]
+  },
+  {
+    "key": "compliance_control",
+    "term": "Compliance Control",
+    "cat": "control",
+    "b": "Making a robot or system appropriately flexible when interacting with its environment.",
+    "i": "Adjusting effective stiffness for safe interaction. Active compliance uses force feedback; passive uses mechanical elements.",
+    "r": ["impedance_control"]
+  },
+  {
+    "key": "end_effector",
+    "term": "End Effector",
+    "cat": "robotics",
+    "b": "The tool or hand at the end of a robotic arm; in golf biomechanics, analogous to the club head.",
+    "i": "Terminal link of a kinematic chain. Its pose is the primary task-space variable controlled via inverse kinematics.",
+    "r": ["forward_kinematics_robot", "jacobian_matrix"]
+  },
+  {
+    "key": "robotic_manipulator",
+    "term": "Robotic Manipulator",
+    "cat": "robotics",
+    "b": "A robot arm with joints that can be positioned to perform tasks, similar to a human arm model.",
+    "i": "Serial or parallel linkage mechanism with actuated joints. The human arm is modeled as a 7-DOF redundant manipulator.",
+    "r": ["serial_chain", "end_effector"]
+  },
+  {
+    "key": "serial_chain",
+    "term": "Serial Chain",
+    "cat": "robotics",
+    "b": "A sequence of linked segments connected end-to-end, like a chain of body segments from torso to hand.",
+    "i": "Open kinematic chain where each link connects to at most two others. Human limbs are serial chains. Simple kinematics but error accumulates.",
+    "r": ["parallel_mechanism", "denavit_hartenberg"]
+  },
+  {
+    "key": "parallel_mechanism",
+    "term": "Parallel Mechanism",
+    "cat": "robotics",
+    "b": "A structure with multiple chains connecting a base to an end platform, providing stability and strength.",
+    "i": "Closed-loop kinematic structure with multiple serial chains acting in parallel. Higher stiffness and precision than serial chains.",
+    "r": ["serial_chain"]
+  },
+  {
+    "key": "kinematic_redundancy",
+    "term": "Kinematic Redundancy",
+    "cat": "robotics",
+    "b": "Having more joint degrees of freedom than needed for a task, allowing multiple ways to reach the same position.",
+    "i": "When DOF exceeds task-space dimension (n > m). The human arm (7 DOF) is redundant for 6-DOF positioning. Nullspace motions available.",
+    "r": ["degrees_of_freedom", "jacobian_matrix"]
+  },
+  {
+    "key": "dexterous_workspace",
+    "term": "Dexterous Workspace",
+    "cat": "robotics",
+    "b": "The region where the arm can reach with full control over both position and orientation.",
+    "i": "Subset of reachable workspace where full orientation control is achievable. Smaller than the reachable workspace.",
+    "r": ["reachable_workspace", "workspace"]
+  },
+  {
+    "key": "reachable_workspace",
+    "term": "Reachable Workspace",
+    "cat": "robotics",
+    "b": "All positions the end effector can physically reach, regardless of orientation.",
+    "i": "Set of all achievable end-effector positions considering joint limits. Defines the operational boundary of the system.",
+    "r": ["dexterous_workspace", "joint_limit"]
+  },
+  {
+    "key": "joint_limit",
+    "term": "Joint Limit",
+    "cat": "robotics",
+    "b": "The physical boundary of how far a joint can move, set by anatomy or mechanical stops.",
+    "i": "Angular bounds on joint motion. In biomechanics, determined by bone geometry, ligaments, and soft tissue. Must be enforced in simulation.",
+    "u": "degrees",
+    "r": ["range_of_motion"]
+  },
+  {
+    "key": "actuator",
+    "term": "Actuator",
+    "cat": "robotics",
+    "b": "A device that produces motion, like a motor in a robot or a muscle in the human body.",
+    "i": "Device converting energy to mechanical motion. Muscles are biological actuators. Robot actuators include motors, pneumatics, and hydraulics."
+  },
+  {
+    "key": "servo_motor",
+    "term": "Servo Motor",
+    "cat": "robotics",
+    "b": "A motor with built-in position feedback for precise movement control.",
+    "i": "Motor with integrated encoder and control loop for accurate position/velocity tracking. Used in robotic joints and motion platforms."
+  },
+  {
+    "key": "rotary_encoder",
+    "term": "Rotary Encoder",
+    "cat": "robotics",
+    "b": "A sensor that measures how much a shaft has rotated, providing joint angle feedback.",
+    "i": "Sensor converting angular position to digital signal. Incremental (relative) or absolute (unique code per position). Resolution in counts/revolution."
+  },
+  {
+    "key": "inertial_measurement_unit",
+    "term": "Inertial Measurement Unit (IMU)",
+    "cat": "robotics",
+    "b": "A small sensor combining accelerometer, gyroscope, and sometimes magnetometer for tracking orientation and motion.",
+    "i": "MEMS sensor package measuring 3D acceleration and angular velocity. Used for wearable motion tracking in golf swing analysis.",
+    "r": ["sensor_fusion", "imu_data"]
+  },
+  {
+    "key": "force_torque_sensor",
+    "term": "Force/Torque Sensor",
+    "cat": "robotics",
+    "b": "A sensor that measures forces and torques at a specific point, like a grip force sensor on a golf club.",
+    "i": "Six-axis sensor measuring 3D force and 3D torque. Strain gauge or piezoelectric based. Used for ground reaction and grip force measurement.",
+    "r": ["force_plate"]
+  },
+  {
+    "key": "tactile_sensor",
+    "term": "Tactile Sensor",
+    "cat": "robotics",
+    "b": "A sensor that measures pressure distribution over a surface, like a pressure-sensitive grip.",
+    "i": "Array sensor measuring contact pressure distribution. Used in grip analysis and plantar pressure mapping.",
+    "r": ["force_torque_sensor", "pressure"]
+  },
+  {
+    "key": "urdf_format",
+    "term": "URDF",
+    "cat": "robotics",
+    "b": "A standard file format for describing a robot or body model's structure in simulation.",
+    "i": "Unified Robot Description Format. XML specification for kinematic tree, geometry, inertia, and joint properties. ROS standard.",
+    "r": ["sdf_format", "mjcf_format"]
+  },
+  {
+    "key": "sdf_format",
+    "term": "SDF",
+    "cat": "robotics",
+    "b": "A simulation description format supporting more features than URDF, used by Gazebo and Drake.",
+    "i": "Simulation Description Format. XML format supporting closed-loop mechanisms, sensors, and world properties. Used by Drake and Gazebo.",
+    "r": ["urdf_format", "mjcf_format"]
+  },
+  {
+    "key": "mjcf_format",
+    "term": "MJCF",
+    "cat": "robotics",
+    "b": "MuJoCo's native file format for defining simulation models with contact and muscle properties.",
+    "i": "MuJoCo XML format. Supports tendons, actuators, contacts, and sensors natively. More expressive than URDF for biomechanical models.",
+    "r": ["urdf_format", "mujoco"]
+  },
+  {
+    "key": "ros_framework",
+    "term": "ROS",
+    "cat": "robotics",
+    "b": "A software framework for building robot applications with standardized communication between components.",
+    "i": "Robot Operating System. Middleware providing message-passing, hardware abstraction, and tool ecosystem for robotics development."
+  },
+  {
+    "key": "sensor_fusion",
+    "term": "Sensor Fusion",
+    "cat": "robotics",
+    "b": "Combining data from multiple sensors to get a more accurate picture than any single sensor provides.",
+    "i": "Combining complementary sensor data (IMU + optical, force + EMG) for improved state estimation. Methods: Kalman, complementary, particle filters.",
+    "r": ["kalman_filter", "inertial_measurement_unit"]
+  },
+  {
+    "key": "slam_algorithm",
+    "term": "SLAM",
+    "cat": "robotics",
+    "b": "Simultaneous Localization And Mapping: building a map of the environment while tracking your position in it.",
+    "i": "Simultaneous Localization and Mapping. Estimates sensor pose while building environment map. Used for autonomous navigation."
+  },
+  {
+    "key": "matrix_algebra",
+    "term": "Matrix",
+    "cat": "math",
+    "b": "A rectangular grid of numbers used to organize and compute transformations and relationships.",
+    "i": "2D array of elements supporting addition, multiplication, and inversion. Foundation of linear algebra for dynamics computations."
+  },
+  {
+    "key": "vector_space",
+    "term": "Vector Space",
+    "cat": "math",
+    "b": "A mathematical space where vectors can be added and scaled following specific rules.",
+    "i": "Set with vector addition and scalar multiplication satisfying linearity axioms. R^n is the standard finite-dimensional vector space."
+  },
+  {
+    "key": "scalar_quantity",
+    "term": "Scalar",
+    "cat": "math",
+    "b": "A single number representing magnitude only, like mass, temperature, or energy.",
+    "i": "Quantity with magnitude but no direction. Rank-0 tensor. Examples: kinetic energy, mass, temperature."
+  },
+  {
+    "key": "tensor",
+    "term": "Tensor",
+    "cat": "math",
+    "b": "A mathematical object generalizing scalars, vectors, and matrices to higher dimensions.",
+    "i": "Multi-dimensional array transforming according to specific rules under coordinate changes. Stress and inertia are rank-2 tensors.",
+    "r": ["inertia_tensor"]
+  },
+  {
+    "key": "dot_product",
+    "term": "Dot Product",
+    "cat": "math",
+    "b": "A way to multiply two vectors that gives a single number indicating how aligned they are.",
+    "i": "a . b = |a||b|cos(theta) = sum(a_i*b_i). Measures projection of one vector onto another. Zero for perpendicular vectors.",
+    "f": "a . b = sum(a_i*b_i)"
+  },
+  {
+    "key": "cross_product",
+    "term": "Cross Product",
+    "cat": "math",
+    "b": "A way to multiply two vectors that gives a new vector perpendicular to both, used for torque calculations.",
+    "i": "a x b = |a||b|sin(theta)*n. Produces vector perpendicular to both inputs. Torque: tau = r x F.",
+    "f": "a x b = |a||b|sin(theta)*n_hat",
+    "r": ["torque_force"]
+  },
+  {
+    "key": "vector_norm",
+    "term": "Vector Norm",
+    "cat": "math",
+    "b": "The length or magnitude of a vector.",
+    "i": "||v|| = sqrt(sum(v_i^2)) for Euclidean (L2) norm. Other norms: L1 (sum of absolutes), L-inf (max element).",
+    "f": "||v||_2 = sqrt(sum(v_i^2))"
+  },
+  {
+    "key": "determinant",
+    "term": "Determinant",
+    "cat": "math",
+    "b": "A single number computed from a square matrix indicating if it can be inverted and how it scales volumes.",
+    "i": "Scalar det(A) measuring signed volume scaling under transformation A. Zero determinant means singular (non-invertible) matrix."
+  },
+  {
+    "key": "matrix_inverse",
+    "term": "Matrix Inverse",
+    "cat": "math",
+    "b": "A matrix that undoes the effect of another matrix, like division for matrices.",
+    "i": "A^-1 such that AA^-1 = I. Exists only for square, non-singular matrices. Used to solve M(q)q_dd = tau for accelerations.",
+    "r": ["determinant", "cholesky_decomposition"]
+  },
+  {
+    "key": "matrix_transpose",
+    "term": "Matrix Transpose",
+    "cat": "math",
+    "b": "Flipping a matrix along its diagonal, swapping rows and columns.",
+    "i": "A^T where (A^T)_ij = A_ji. For orthogonal matrices (rotations), the transpose equals the inverse."
+  },
+  {
+    "key": "symmetric_matrix",
+    "term": "Symmetric Matrix",
+    "cat": "math",
+    "b": "A matrix that is equal to its transpose, common in physics for mass and stiffness matrices.",
+    "i": "A = A^T. Has real eigenvalues and orthogonal eigenvectors. Mass matrix and stiffness matrix are symmetric positive definite.",
+    "r": ["positive_definite_matrix"]
+  },
+  {
+    "key": "positive_definite_matrix",
+    "term": "Positive Definite Matrix",
+    "cat": "math",
+    "b": "A matrix that always produces positive results when multiplied, ensuring physical quantities like energy stay positive.",
+    "i": "Symmetric matrix where x^TAx > 0 for all nonzero x. Mass matrix must be positive definite (energy > 0).",
+    "r": ["symmetric_matrix", "cholesky_decomposition"]
+  },
+  {
+    "key": "cholesky_decomposition",
+    "term": "Cholesky Decomposition",
+    "cat": "math",
+    "b": "An efficient way to factor a positive definite matrix, used to solve dynamics equations quickly.",
+    "i": "A = LL^T where L is lower triangular. O(n^3/3) complexity. Used for efficiently solving Mx = b in forward dynamics.",
+    "r": ["positive_definite_matrix", "lu_decomposition"]
+  },
+  {
+    "key": "lu_decomposition",
+    "term": "LU Decomposition",
+    "cat": "math",
+    "b": "Breaking a matrix into lower and upper triangular parts for efficient equation solving.",
+    "i": "A = LU factorization for general square matrices. Enables O(n^2) back-substitution after O(n^3) factorization.",
+    "r": ["cholesky_decomposition", "qr_decomposition"]
+  },
+  {
+    "key": "qr_decomposition",
+    "term": "QR Decomposition",
+    "cat": "math",
+    "b": "Breaking a matrix into an orthogonal and an upper triangular part, useful for least-squares problems.",
+    "i": "A = QR where Q is orthogonal and R is upper triangular. Numerically stable method for least squares and eigenvalue computation.",
+    "r": ["least_squares_method"]
+  },
+  {
+    "key": "least_squares_method",
+    "term": "Least Squares",
+    "cat": "math",
+    "b": "Finding the best-fit solution that minimizes the sum of squared differences between predicted and observed values.",
+    "i": "Minimizes ||Ax - b||^2. Solution: x = (A^TA)^-1 A^Tb or via QR/SVD. Standard for overdetermined systems in data fitting.",
+    "f": "x = (A^T A)^-1 A^T b",
+    "r": ["moore_penrose_pseudoinverse"]
+  },
+  {
+    "key": "moore_penrose_pseudoinverse",
+    "term": "Moore-Penrose Pseudoinverse",
+    "cat": "math",
+    "b": "A generalization of matrix inverse that works even when the regular inverse doesn't exist.",
+    "i": "A^+ = V*Sigma^+*U^T from SVD. Gives minimum-norm least-squares solution. Used for inverse kinematics of redundant systems.",
+    "r": ["singular_value_decomposition", "inverse_kinematics"]
+  },
+  {
+    "key": "gradient_vector",
+    "term": "Gradient",
+    "cat": "math",
+    "b": "A vector pointing in the direction of steepest increase of a function.",
+    "i": "Vector of partial derivatives: grad(f) = (df/dx_1, ..., df/dx_n). Points uphill; negative gradient is the steepest descent direction.",
+    "r": ["hessian_matrix", "gradient_descent"]
+  },
+  {
+    "key": "hessian_matrix",
+    "term": "Hessian Matrix",
+    "cat": "math",
+    "b": "A matrix of second derivatives describing how a function curves in all directions.",
+    "i": "H_ij = d^2f/(dx_i dx_j). Positive definite Hessian indicates a local minimum. Used in Newton's method for optimization.",
+    "r": ["gradient_vector", "newton_optimization"]
+  },
+  {
+    "key": "divergence_operator",
+    "term": "Divergence",
+    "cat": "math",
+    "b": "A measure of how much a vector field spreads out from a point.",
+    "i": "div(F) = dF_x/dx + dF_y/dy + dF_z/dz. Scalar field measuring net outward flux density.",
+    "r": ["curl_operator"]
+  },
+  {
+    "key": "curl_operator",
+    "term": "Curl",
+    "cat": "math",
+    "b": "A measure of how much a vector field rotates around a point.",
+    "i": "curl(F) = nabla x F. Vector field measuring local rotation. Zero curl indicates irrotational (conservative) field.",
+    "r": ["divergence_operator"]
+  },
+  {
+    "key": "lie_group",
+    "term": "Lie Group",
+    "cat": "math",
+    "b": "A mathematical group of smooth transformations, like all possible rotations in 3D space.",
+    "i": "Smooth manifold with compatible group structure. SO(3) (rotations) and SE(3) (rigid motions) are the key Lie groups in robotics.",
+    "r": ["lie_algebra", "so3_group", "se3_group"]
+  },
+  {
+    "key": "lie_algebra",
+    "term": "Lie Algebra",
+    "cat": "math",
+    "b": "The tangent space of a Lie group, representing infinitesimal transformations like angular velocities.",
+    "i": "Tangent space at the identity of a Lie group. so(3) contains angular velocity vectors; se(3) contains twists.",
+    "r": ["lie_group", "exponential_map"]
+  },
+  {
+    "key": "so3_group",
+    "term": "SO(3)",
+    "cat": "math",
+    "b": "The mathematical group of all 3D rotations, used to describe body segment orientations.",
+    "i": "Special Orthogonal group in 3D: set of 3x3 rotation matrices with det = 1. 3-dimensional Lie group parameterizing orientations.",
+    "r": ["se3_group", "rotation_matrix"]
+  },
+  {
+    "key": "se3_group",
+    "term": "SE(3)",
+    "cat": "math",
+    "b": "The mathematical group of all 3D rigid motions combining rotation and translation.",
+    "i": "Special Euclidean group in 3D: set of 4x4 homogeneous transforms. 6-dimensional Lie group parameterizing rigid body poses.",
+    "r": ["so3_group", "homogeneous_transform", "pose"]
+  },
+  {
+    "key": "exponential_map",
+    "term": "Exponential Map",
+    "cat": "math",
+    "b": "A function converting infinitesimal motions (like angular velocity) to finite transformations (like rotations).",
+    "i": "Maps Lie algebra to Lie group: exp: so(3)->SO(3). Converts rotation vector to rotation matrix via Rodrigues' formula.",
+    "r": ["logarithmic_map", "rodrigues_formula"]
+  },
+  {
+    "key": "logarithmic_map",
+    "term": "Logarithmic Map",
+    "cat": "math",
+    "b": "The inverse of the exponential map, extracting the rotation axis and angle from a rotation matrix.",
+    "i": "Maps Lie group to Lie algebra: log: SO(3)->so(3). Extracts rotation vector from rotation matrix. Inverse of exponential map.",
+    "r": ["exponential_map"]
+  },
+  {
+    "key": "adjoint_representation",
+    "term": "Adjoint Representation",
+    "cat": "math",
+    "b": "A way to transform twists and wrenches between different reference frames.",
+    "i": "Ad_T maps twists between frames: V_s = Ad_T * V_b. Essential for multi-body dynamics where quantities are expressed in different frames.",
+    "r": ["lie_group", "twist_velocity"]
+  },
+  {
+    "key": "dual_quaternion",
+    "term": "Dual Quaternion",
+    "cat": "math",
+    "b": "An 8-number representation of rigid body pose combining rotation and translation in a single object.",
+    "i": "Extension of quaternions to SE(3): q = q_r + epsilon*q_d. Enables smooth interpolation (ScLERP) for rigid body motion.",
+    "r": ["quaternion", "se3_group"]
+  },
+  {
+    "key": "rodrigues_formula",
+    "term": "Rodrigues' Formula",
+    "cat": "math",
+    "b": "A compact formula for computing a rotation matrix from a rotation axis and angle.",
+    "i": "R = I + sin(theta)*K + (1-cos(theta))*K^2, where K is the skew-symmetric matrix of the axis. Efficient SO(3) exponential map.",
+    "f": "R = I + sin(t)K + (1-cos(t))K^2",
+    "r": ["exponential_map", "rotation_matrix"]
+  },
+  {
+    "key": "motion_capture_system",
+    "term": "Motion Capture System",
+    "cat": "data",
+    "b": "A system of cameras and markers that records 3D body movement with high precision.",
+    "i": "Optical (Vicon, OptiTrack) or inertial (Xsens) system tracking body motion. Optical: sub-mm accuracy at 100-500 Hz.",
+    "r": ["vicon_system", "optitrack_system", "marker"]
+  },
+  {
+    "key": "vicon_system",
+    "term": "Vicon",
+    "cat": "data",
+    "b": "A leading brand of optical motion capture system using infrared cameras and reflective markers.",
+    "i": "High-precision optical MoCap system. Sub-mm accuracy, up to 2000 Hz sampling. Industry standard for biomechanics research.",
+    "r": ["motion_capture_system", "optitrack_system"]
+  },
+  {
+    "key": "optitrack_system",
+    "term": "OptiTrack",
+    "cat": "data",
+    "b": "A cost-effective optical motion capture system popular in sports biomechanics and gaming.",
+    "i": "Optical MoCap system offering high performance at lower cost than Vicon. Popular for sports analysis and VR applications.",
+    "r": ["motion_capture_system", "vicon_system"]
+  },
+  {
+    "key": "xsens_system",
+    "term": "Xsens",
+    "cat": "data",
+    "b": "A wearable motion capture system using small sensors on the body instead of cameras.",
+    "i": "IMU-based motion capture using body-worn sensors with sensor fusion algorithms. Portable and suitable for on-course golf analysis.",
+    "r": ["motion_capture_system", "inertial_measurement_unit"]
+  },
+  {
+    "key": "imu_data",
+    "term": "IMU Data",
+    "cat": "data",
+    "b": "Acceleration and rotation data from small wearable sensors attached to body segments or the golf club.",
+    "i": "3-axis acceleration + 3-axis angular velocity data from inertial sensors. Requires integration and drift correction for position estimates.",
+    "r": ["inertial_measurement_unit", "sensor_fusion"]
+  },
+  {
+    "key": "force_plate_data",
+    "term": "Force Plate Data",
+    "cat": "data",
+    "b": "The forces, moments, and center of pressure measured by force plates embedded in the floor.",
+    "i": "6-component data (Fx,Fy,Fz,Mx,My,Mz) at 1000-2000 Hz sampling rate. Raw analog signals require calibration and coordinate transformation.",
+    "r": ["force_plate", "ground_reaction_force"]
+  },
+  {
+    "key": "analog_signal_data",
+    "term": "Analog Signal",
+    "cat": "data",
+    "b": "Continuous electrical signals from sensors like force plates and EMG electrodes before being digitized.",
+    "i": "Continuous-time electrical signal from transducers. Requires A/D conversion at sufficient sampling rate with anti-aliasing filtering."
+  },
+  {
+    "key": "digital_signal_data",
+    "term": "Digital Signal",
+    "cat": "data",
+    "b": "Sensor data after being converted to discrete numbers that a computer can process.",
+    "i": "Discrete-time, quantized representation of analog signals. Characterized by sampling rate and bit depth."
+  },
+  {
+    "key": "sampling_frequency",
+    "term": "Sampling Frequency",
+    "cat": "data",
+    "b": "How many measurements per second a sensor records.",
+    "i": "Rate of A/D conversion. Must exceed 2x the highest signal frequency (Nyquist). MoCap: 100-500 Hz; Force: 1000-2000 Hz; EMG: 1000+ Hz.",
+    "u": "Hz",
+    "r": ["sampling_rate", "nyquist_frequency"]
+  },
+  {
+    "key": "anti_aliasing_filter",
+    "term": "Anti-Aliasing Filter",
+    "cat": "data",
+    "b": "A hardware filter applied before digitization to prevent high-frequency signals from causing errors.",
+    "i": "Analog low-pass filter with cutoff below Nyquist frequency. Applied before A/D conversion to prevent aliasing artifacts.",
+    "r": ["aliasing", "nyquist_frequency"]
+  },
+  {
+    "key": "data_acquisition",
+    "term": "Data Acquisition (DAQ)",
+    "cat": "data",
+    "b": "The process and hardware for collecting sensor measurements into a computer.",
+    "i": "System for sampling, digitizing, and storing sensor data. Includes A/D converters, signal conditioning, and synchronization hardware."
+  },
+  {
+    "key": "calibration_procedure",
+    "term": "Calibration",
+    "cat": "data",
+    "b": "The process of adjusting measurement equipment to ensure accurate readings.",
+    "i": "Establishing the relationship between sensor output and physical quantity. Static (known loads) or dynamic (reference motion) calibration."
+  },
+  {
+    "key": "coordinate_system",
+    "term": "Coordinate System",
+    "cat": "data",
+    "b": "A reference framework defining directions (X, Y, Z) for measuring positions and forces.",
+    "i": "Ordered set of axes defining a spatial reference. Right-hand convention standard. Lab, body, and anatomical frames serve different analysis needs.",
+    "r": ["global_reference_frame", "local_reference_frame"]
+  },
+  {
+    "key": "global_reference_frame",
+    "term": "Global Reference Frame",
+    "cat": "data",
+    "b": "The fixed lab coordinate system that doesn't move during the experiment.",
+    "i": "Earth-fixed inertial frame for absolute position and orientation. Usually Z-up with origin at a lab-defined point.",
+    "r": ["local_reference_frame", "world_frame"]
+  },
+  {
+    "key": "local_reference_frame",
+    "term": "Local Reference Frame",
+    "cat": "data",
+    "b": "A coordinate system attached to a specific body segment that moves with it.",
+    "i": "Body-fixed frame defined by anatomical landmarks or tracking markers. Moves and rotates with the segment.",
+    "r": ["global_reference_frame", "body_frame"]
+  },
+  {
+    "key": "anatomical_reference_frame",
+    "term": "Anatomical Reference Frame",
+    "cat": "data",
+    "b": "A coordinate system defined by bony landmarks on a body segment for standardized measurements.",
+    "i": "Frame defined by palpable anatomical landmarks (ISB recommendations). Enables standardized joint angle definitions across studies.",
+    "r": ["technical_reference_frame"]
+  },
+  {
+    "key": "technical_reference_frame",
+    "term": "Technical Reference Frame",
+    "cat": "data",
+    "b": "A coordinate system defined by tracking markers rather than anatomical landmarks.",
+    "i": "Frame defined by non-collinear marker clusters on a segment. Related to anatomical frame via static calibration trial.",
+    "r": ["anatomical_reference_frame", "virtual_marker"]
+  },
+  {
+    "key": "virtual_marker",
+    "term": "Virtual Marker",
+    "cat": "data",
+    "b": "A computed marker position derived from other markers, useful when direct placement is not possible.",
+    "i": "Marker position calculated from a cluster of tracking markers and a calibration relationship. Reduces soft tissue artifact.",
+    "r": ["marker", "gap_filling"]
+  },
+  {
+    "key": "gap_filling",
+    "term": "Gap Filling",
+    "cat": "data",
+    "b": "Filling in missing data points when markers are temporarily hidden from cameras.",
+    "i": "Interpolating or predicting missing marker positions using splines, rigid body fill, pattern matching, or Kalman filtering.",
+    "r": ["spline_interpolation", "data_smoothing"]
+  },
+  {
+    "key": "data_smoothing",
+    "term": "Data Smoothing",
+    "cat": "data",
+    "b": "Reducing noise in measurement data to reveal the underlying smooth movement patterns.",
+    "i": "Filtering or curve-fitting to reduce measurement noise. Methods: Butterworth filter, splines, Savitzky-Golay, moving average.",
+    "r": ["butterworth_filter", "savitzky_golay_filter"]
+  },
+  {
+    "key": "neural_network",
+    "term": "Neural Network",
+    "cat": "ai",
+    "b": "A computer system inspired by the brain that learns patterns from data.",
+    "i": "Computational graph of interconnected nodes (neurons) with learnable weights. Universal function approximator via nonlinear activation functions.",
+    "r": ["deep_learning", "backpropagation"]
+  },
+  {
+    "key": "deep_learning",
+    "term": "Deep Learning",
+    "cat": "ai",
+    "b": "Using neural networks with many layers to learn complex patterns from large amounts of data.",
+    "i": "Neural networks with multiple hidden layers learning hierarchical feature representations. Enabled by GPUs and large datasets.",
+    "r": ["neural_network", "convolutional_neural_network"]
+  },
+  {
+    "key": "convolutional_neural_network",
+    "term": "Convolutional Neural Network (CNN)",
+    "cat": "ai",
+    "b": "A neural network especially good at recognizing patterns in images and spatial data.",
+    "i": "Network using learnable convolutional filters for translation-invariant feature extraction. Used for pose estimation from video.",
+    "r": ["deep_learning"]
+  },
+  {
+    "key": "recurrent_neural_network",
+    "term": "Recurrent Neural Network (RNN)",
+    "cat": "ai",
+    "b": "A neural network with memory that processes sequential data like time-series movements.",
+    "i": "Network with feedback connections maintaining hidden state across time steps. LSTM and GRU variants solve vanishing gradient issues.",
+    "r": ["transformer_architecture"]
+  },
+  {
+    "key": "transformer_architecture",
+    "term": "Transformer",
+    "cat": "ai",
+    "b": "A powerful neural network architecture using attention to process sequences, powering modern AI language models.",
+    "i": "Architecture using self-attention for parallel sequence processing. O(n^2) complexity but highly parallelizable. Foundation of LLMs.",
+    "r": ["attention_mechanism", "large_language_model"]
+  },
+  {
+    "key": "attention_mechanism",
+    "term": "Attention Mechanism",
+    "cat": "ai",
+    "b": "A technique that allows neural networks to focus on the most relevant parts of the input.",
+    "i": "Learned weighted combination of values based on query-key similarity: Attention(Q,K,V) = softmax(QK^T/sqrt(d))V.",
+    "r": ["transformer_architecture"]
+  },
+  {
+    "key": "transfer_learning",
+    "term": "Transfer Learning",
+    "cat": "ai",
+    "b": "Using knowledge learned from one task to improve performance on a different but related task.",
+    "i": "Reusing pre-trained model features for a new domain. Fine-tuning pre-trained models on small domain-specific datasets.",
+    "r": ["fine_tuning"]
+  },
+  {
+    "key": "fine_tuning",
+    "term": "Fine-Tuning",
+    "cat": "ai",
+    "b": "Adapting a pre-trained model to a specific task by continuing training on task-specific data.",
+    "i": "Training a pre-trained model on domain data with lower learning rate. Adapts general features to specific applications.",
+    "r": ["transfer_learning"]
+  },
+  {
+    "key": "embedding_vector",
+    "term": "Embedding",
+    "cat": "ai",
+    "b": "Converting words or data into a list of numbers that captures meaning and relationships.",
+    "i": "Dense vector representation mapping discrete tokens to continuous space. Learned representations capture semantic similarity."
+  },
+  {
+    "key": "tokenization",
+    "term": "Tokenization",
+    "cat": "ai",
+    "b": "Breaking text into smaller pieces (tokens) that a language model can process.",
+    "i": "Splitting input into sub-word units using BPE, WordPiece, or SentencePiece. Vocabulary size trades expressiveness vs efficiency."
+  },
+  {
+    "key": "prompt_engineering",
+    "term": "Prompt Engineering",
+    "cat": "ai",
+    "b": "Crafting the input text to get the best possible response from a language model.",
+    "i": "Designing input context and instructions to elicit desired model behavior. Includes system prompts, few-shot examples, and chain-of-thought."
+  },
+  {
+    "key": "few_shot_learning",
+    "term": "Few-Shot Learning",
+    "cat": "ai",
+    "b": "Teaching a model to perform a task by showing it just a few examples.",
+    "i": "Learning from very few examples (1-10). In-context learning in LLMs provides examples in the prompt without gradient updates."
+  },
+  {
+    "key": "zero_shot_learning",
+    "term": "Zero-Shot Learning",
+    "cat": "ai",
+    "b": "A model performing a task it has never seen examples of, using only its general knowledge.",
+    "i": "Performing tasks without task-specific examples. Relies on pre-trained knowledge and instruction following capabilities."
+  },
+  {
+    "key": "chain_of_thought",
+    "term": "Chain of Thought",
+    "cat": "ai",
+    "b": "Having an AI explain its reasoning step by step, improving accuracy on complex problems.",
+    "i": "Prompting technique where the model generates intermediate reasoning steps before the final answer. Improves multi-step problem solving."
+  },
+  {
+    "key": "retrieval_augmented_generation",
+    "term": "Retrieval-Augmented Generation (RAG)",
+    "cat": "ai",
+    "b": "Combining a language model with a search system to provide accurate, up-to-date information.",
+    "i": "Architecture retrieving relevant documents from a knowledge base to augment LLM context. Reduces hallucination and enables domain-specific answers."
+  },
+  {
+    "key": "large_language_model",
+    "term": "Large Language Model (LLM)",
+    "cat": "ai",
+    "b": "A very large AI model trained on text data that can understand and generate human-like language.",
+    "i": "Transformer-based model with billions of parameters trained on internet-scale text corpora. Exhibits emergent reasoning capabilities.",
+    "r": ["transformer_architecture"]
+  },
+  {
+    "key": "diffusion_model",
+    "term": "Diffusion Model",
+    "cat": "ai",
+    "b": "A generative AI that creates data by gradually removing noise, used for image and motion generation.",
+    "i": "Generative model learning to reverse a gradual noising process. State-of-the-art for motion synthesis and image generation."
+  },
+  {
+    "key": "generative_adversarial_network",
+    "term": "Generative Adversarial Network (GAN)",
+    "cat": "ai",
+    "b": "Two neural networks competing against each other, one generating and one judging, to create realistic data.",
+    "i": "Minimax game between generator G and discriminator D. G generates samples; D distinguishes real from fake. Equilibrium: G generates realistic data.",
+    "r": ["autoencoder"]
+  },
+  {
+    "key": "autoencoder",
+    "term": "Autoencoder",
+    "cat": "ai",
+    "b": "A neural network that compresses data into a compact code and reconstructs it, learning efficient representations.",
+    "i": "Encoder-decoder architecture learning compressed latent representation. Used for dimensionality reduction and anomaly detection.",
+    "r": ["variational_autoencoder"]
+  },
+  {
+    "key": "variational_autoencoder",
+    "term": "Variational Autoencoder (VAE)",
+    "cat": "ai",
+    "b": "An autoencoder that learns a smooth, structured latent space for generating new data.",
+    "i": "Probabilistic autoencoder learning latent distribution. Enables sampling and interpolation in latent space for motion generation.",
+    "r": ["autoencoder"]
+  },
+  {
+    "key": "bayesian_inference",
+    "term": "Bayesian Inference",
+    "cat": "ai",
+    "b": "Updating beliefs about unknown quantities as new evidence is observed.",
+    "i": "Computing posterior P(theta|data) from prior P(theta) and likelihood P(data|theta) via Bayes' theorem. Foundation for uncertainty quantification.",
+    "f": "P(A|B) = P(B|A)*P(A)/P(B)"
+  },
+  {
+    "key": "monte_carlo_method",
+    "term": "Monte Carlo Method",
+    "cat": "ai",
+    "b": "Using random sampling to approximate complex calculations that are hard to solve exactly.",
+    "i": "Stochastic sampling methods for numerical integration, optimization, and inference. MCMC samples from posterior distributions."
+  },
+  {
+    "key": "markov_chain",
+    "term": "Markov Chain",
+    "cat": "ai",
+    "b": "A sequence of states where the next state depends only on the current state, not the history.",
+    "i": "Stochastic process with memoryless property: P(X_n+1|X_n,...,X_0) = P(X_n+1|X_n). Foundation for MCMC and HMMs."
+  },
+  {
+    "key": "gradient_descent",
+    "term": "Gradient Descent",
+    "cat": "ai",
+    "b": "An optimization method that iteratively moves in the direction of steepest improvement.",
+    "i": "Iterative optimization: theta = theta - alpha*grad(L). Variants: SGD, Adam, RMSProp. Learning rate alpha is critical hyperparameter.",
+    "r": ["backpropagation", "gradient_vector"]
+  },
+  {
+    "key": "backpropagation",
+    "term": "Backpropagation",
+    "cat": "ai",
+    "b": "The algorithm that teaches neural networks by computing how each weight contributes to errors.",
+    "i": "Efficient gradient computation via chain rule through the computational graph. Enables gradient-based training of deep networks.",
+    "r": ["gradient_descent", "neural_network"]
+  },
+  {
+    "key": "three_d_rendering",
+    "term": "3D Rendering",
+    "cat": "visualization",
+    "b": "Creating a visual image of a 3D model on screen, showing body segments and the golf club.",
+    "i": "Computing 2D images from 3D scene descriptions using rasterization or ray tracing. Real-time rendering uses GPU acceleration."
+  },
+  {
+    "key": "real_time_visualization",
+    "term": "Real-Time Visualization",
+    "cat": "visualization",
+    "b": "Displaying simulation or motion data as it happens, at interactive frame rates.",
+    "i": "Rendering at 30-60+ FPS synchronized with simulation. Requires efficient GPU pipelines and level-of-detail management."
+  },
+  {
+    "key": "mesh_rendering",
+    "term": "Mesh Rendering",
+    "cat": "visualization",
+    "b": "Displaying 3D models as solid surfaces made of small triangles.",
+    "i": "Rendering triangle/polygon meshes with lighting, shading, and texturing. Convex decomposition used for collision geometry."
+  },
+  {
+    "key": "wireframe_display",
+    "term": "Wireframe Display",
+    "cat": "visualization",
+    "b": "Showing 3D objects as transparent outlines made of edges, revealing internal structure.",
+    "i": "Rendering only edges of mesh polygons. Useful for visualizing joint axes, constraint geometry, and internal structure."
+  },
+  {
+    "key": "skeleton_visualization",
+    "term": "Skeleton Visualization",
+    "cat": "visualization",
+    "b": "Showing the body as connected sticks representing bones and joints for clear movement analysis.",
+    "i": "Rendering kinematic chain as line segments connecting joint centers. Standard for motion capture playback and swing analysis."
+  },
+  {
+    "key": "heatmap",
+    "term": "Heatmap",
+    "cat": "visualization",
+    "b": "A color-coded display where colors represent values, like pressure distribution under feet.",
+    "i": "2D color-mapped representation of scalar field. Used for pressure distribution, joint torque patterns, and muscle activation maps."
+  },
+  {
+    "key": "vector_field_plot",
+    "term": "Vector Field Plot",
+    "cat": "visualization",
+    "b": "Displaying force or velocity directions as arrows at many points, showing flow patterns.",
+    "i": "Visualization of vector-valued functions using arrows at grid points. Arrow length and color encode magnitude."
+  },
+  {
+    "key": "phase_portrait",
+    "term": "Phase Portrait",
+    "cat": "visualization",
+    "b": "A plot showing how position and velocity relate, revealing the overall behavior of a dynamic system.",
+    "i": "Plot of trajectories in phase space (q vs q_dot). Reveals attractors, limit cycles, and stability regions.",
+    "r": ["phase_space"]
+  },
+  {
+    "key": "force_vector_display",
+    "term": "Force Vector Display",
+    "cat": "visualization",
+    "b": "Showing forces as arrows overlaid on a body model, with arrow length indicating force magnitude.",
+    "i": "3D arrows representing forces at their application points. Color and length encode magnitude. Standard for GRF visualization."
+  },
+  {
+    "key": "trajectory_visualization",
+    "term": "Trajectory Visualization",
+    "cat": "visualization",
+    "b": "Drawing the path that a body part or club follows through space over time.",
+    "i": "Rendering 3D curves of marker or joint trajectories. Color-coding by time or velocity reveals swing dynamics."
+  },
+  {
+    "key": "time_series_plot",
+    "term": "Time Series Plot",
+    "cat": "visualization",
+    "b": "A graph showing how a measurement changes over time, like joint angle during a swing.",
+    "i": "Standard x-y plot with time on x-axis. Multiple traces for comparison. Event markers for swing phases."
+  },
+  {
+    "key": "polar_plot",
+    "term": "Polar Plot",
+    "cat": "visualization",
+    "b": "A circular graph useful for displaying rotational data like joint angles or swing patterns.",
+    "i": "Data plotted in polar coordinates (r, theta). Useful for angular quantities, directional distributions, and cyclic patterns."
+  },
+  {
+    "key": "animation_playback",
+    "term": "Animation Playback",
+    "cat": "visualization",
+    "b": "Playing back recorded or simulated motion at various speeds for detailed analysis.",
+    "i": "Frame-by-frame rendering of motion data with playback controls (speed, scrubbing, loop). Synchronized with time-series data."
+  },
+  {
+    "key": "keyframe_animation",
+    "term": "Keyframe Animation",
+    "cat": "visualization",
+    "b": "Defining key poses and letting the computer fill in smooth transitions between them.",
+    "i": "Animation technique defining poses at key times with interpolation between. Used for reference motion generation in simulation."
+  },
+  {
+    "key": "color_mapping",
+    "term": "Color Mapping",
+    "cat": "visualization",
+    "b": "Assigning colors to numerical values for intuitive visualization of data patterns.",
+    "i": "Mapping scalar values to color via transfer functions (colormaps). Perceptually uniform maps (viridis) preferred for quantitative data."
+  },
+  {
+    "key": "bone_tissue",
+    "term": "Bone",
+    "cat": "materials",
+    "b": "The hard tissue forming the skeleton, providing structural support and protection.",
+    "i": "Composite material of collagen and hydroxyapatite. Cortical (dense) and cancellous (spongy) types. E ~17 GPa for cortical bone.",
+    "u": "GPa (modulus)"
+  },
+  {
+    "key": "cartilage",
+    "term": "Cartilage",
+    "cat": "materials",
+    "b": "Smooth, slippery tissue covering joint surfaces that reduces friction and absorbs shock.",
+    "i": "Avascular connective tissue. Articular cartilage: 1-5 mm thick, biphasic (solid + fluid), viscoelastic. Friction coefficient ~0.001-0.01."
+  },
+  {
+    "key": "ligament_tissue",
+    "term": "Ligament",
+    "cat": "materials",
+    "b": "Tough bands connecting bones at joints, providing stability and limiting excessive movement.",
+    "i": "Dense connective tissue (primarily collagen) connecting bone to bone. Nonlinear viscoelastic behavior with toe region and linear region."
+  },
+  {
+    "key": "tendon_tissue",
+    "term": "Tendon",
+    "cat": "materials",
+    "b": "Strong cords connecting muscles to bones, transmitting force and storing elastic energy.",
+    "i": "Dense connective tissue transmitting muscle force to bone. E ~1.5 GPa. Stores and releases elastic energy in stretch-shortening cycles.",
+    "r": ["muscle_tendon_unit"]
+  },
+  {
+    "key": "fascia",
+    "term": "Fascia",
+    "cat": "materials",
+    "b": "Sheets of connective tissue wrapping muscles and organs, transmitting force between structures.",
+    "i": "Dense connective tissue forming continuous sheets around muscles and organs. Transmits mechanical loads and contributes to force distribution."
+  },
+  {
+    "key": "muscle_tissue",
+    "term": "Muscle Tissue",
+    "cat": "materials",
+    "b": "Contractile tissue that generates force and produces movement when activated by nerves.",
+    "i": "Active tissue with force generation capability. Skeletal muscle: 20-40% of body mass. Peak stress ~300 kPa. Highly anisotropic."
+  },
+  {
+    "key": "viscoelastic_material",
+    "term": "Viscoelastic Material",
+    "cat": "materials",
+    "b": "A material that behaves partly like a solid and partly like a fluid, like most biological tissues.",
+    "i": "Material exhibiting both viscous and elastic behavior. Rate-dependent response with creep, relaxation, and hysteresis. Most biological tissues.",
+    "r": ["viscoelasticity"]
+  },
+  {
+    "key": "hyperelastic_material",
+    "term": "Hyperelastic Material",
+    "cat": "materials",
+    "b": "A material that can undergo large deformations and fully recover, like rubber or soft tissue.",
+    "i": "Material with strain energy function defining stress-strain relationship for large deformations. Models: Mooney-Rivlin, Neo-Hookean, Ogden."
+  },
+  {
+    "key": "anisotropic_material",
+    "term": "Anisotropic Material",
+    "cat": "materials",
+    "b": "A material with different properties in different directions, like wood or muscle fiber.",
+    "i": "Material with direction-dependent mechanical properties. Bone, tendon, and muscle are anisotropic due to aligned collagen/fiber architecture.",
+    "r": ["isotropic_material"]
+  },
+  {
+    "key": "isotropic_material",
+    "term": "Isotropic Material",
+    "cat": "materials",
+    "b": "A material with the same properties in all directions, a simplifying assumption often used in modeling.",
+    "i": "Material with identical properties regardless of direction. Described by two constants (E, nu). Simplifying assumption for some tissues.",
+    "r": ["anisotropic_material"]
+  },
+  {
+    "key": "composite_material",
+    "term": "Composite Material",
+    "cat": "materials",
+    "b": "A material made of two or more components with different properties, like bone or carbon fiber club shafts.",
+    "i": "Material combining distinct phases for superior properties. Bone (collagen + mineral), carbon fiber (fibers + resin) are composites."
+  },
+  {
+    "key": "strain_rate_dependent",
+    "term": "Strain Rate Dependent",
+    "cat": "materials",
+    "b": "Materials that behave differently when loaded quickly versus slowly.",
+    "i": "Material whose stress-strain response depends on loading rate. Biological tissues are generally stiffer and stronger at higher strain rates."
+  },
+  {
+    "key": "material_fatigue",
+    "term": "Material Fatigue",
+    "cat": "materials",
+    "b": "Gradual weakening of a material from repeated loading, potentially leading to failure.",
+    "i": "Progressive damage accumulation under cyclic loading below ultimate strength. S-N curves characterize fatigue life.",
+    "r": ["stress_fracture"]
+  },
+  {
+    "key": "stress_strain_curve",
+    "term": "Stress-Strain Curve",
+    "cat": "materials",
+    "b": "A graph showing how a material deforms under increasing load, revealing its mechanical behavior.",
+    "i": "Plot of stress vs strain from mechanical testing. Regions: toe, linear elastic, yield, plastic, ultimate, failure.",
+    "r": ["youngs_modulus", "yield_strength"]
+  },
+  {
+    "key": "ultimate_tensile_strength",
+    "term": "Ultimate Tensile Strength",
+    "cat": "materials",
+    "b": "The maximum stress a material can withstand before breaking.",
+    "i": "Peak stress on the stress-strain curve before failure. Cortical bone: ~130 MPa; tendon: ~50-100 MPa; ligament: ~20-40 MPa.",
+    "u": "MPa",
+    "r": ["yield_strength"]
+  },
+  {
+    "key": "injury_risk_assessment",
+    "term": "Injury Risk Assessment",
+    "cat": "injury",
+    "b": "Evaluating the likelihood of injury based on movement patterns, loads, and individual factors.",
+    "i": "Quantifying injury probability from biomechanical parameters (joint loads, tissue stress, fatigue). Informs training modifications.",
+    "r": ["crunch_factor", "load_tolerance"]
+  },
+  {
+    "key": "overuse_injury",
+    "term": "Overuse Injury",
+    "cat": "injury",
+    "b": "Injury from repeated stress without adequate recovery, common in golf from repetitive swinging.",
+    "i": "Cumulative microtrauma exceeding tissue repair capacity. Common in golf: medial epicondylitis, rotator cuff tendinopathy, lumbar disc issues.",
+    "r": ["cumulative_load", "tendinopathy"]
+  },
+  {
+    "key": "acute_injury",
+    "term": "Acute Injury",
+    "cat": "injury",
+    "b": "A sudden injury from a single event, like a muscle tear during an aggressive swing.",
+    "i": "Sudden tissue failure from single supramaximal load. Sprains, strains, fractures. Often at extreme joint angles or high angular velocities.",
+    "r": ["muscle_tear", "ligament_sprain"]
+  },
+  {
+    "key": "stress_fracture",
+    "term": "Stress Fracture",
+    "cat": "injury",
+    "b": "A tiny crack in bone caused by repeated loading, common in the ribs and wrists of golfers.",
+    "i": "Fatigue failure of bone from accumulated microcracking. Rib stress fractures in golfers from repetitive trunk rotation.",
+    "r": ["material_fatigue", "overuse_injury"]
+  },
+  {
+    "key": "tendinopathy",
+    "term": "Tendinopathy",
+    "cat": "injury",
+    "b": "Pain and degeneration of a tendon from overuse, like golfer's elbow.",
+    "i": "Chronic tendon pathology with failed healing response. Lateral/medial epicondylopathy common in golfers from repetitive grip and wrist loading.",
+    "r": ["overuse_injury", "tendon_tissue"]
+  },
+  {
+    "key": "impingement_syndrome",
+    "term": "Impingement Syndrome",
+    "cat": "injury",
+    "b": "Pain from tissues getting pinched in a joint, commonly in the shoulder during overhead movements.",
+    "i": "Mechanical compression of soft tissues (rotator cuff, bursa) in the subacromial space. Aggravated by repetitive overhead motions.",
+    "r": ["shoulder_joint"]
+  },
+  {
+    "key": "joint_instability",
+    "term": "Joint Instability",
+    "cat": "injury",
+    "b": "When a joint moves more than it should, increasing the risk of dislocation or pain.",
+    "i": "Excessive joint laxity from ligamentous damage or congenital factors. Can be structural (ligament damage) or functional (neuromuscular deficit).",
+    "r": ["ligament_sprain"]
+  },
+  {
+    "key": "ligament_sprain",
+    "term": "Ligament Sprain",
+    "cat": "injury",
+    "b": "Stretching or tearing of a ligament from excessive force, graded from mild stretch to complete tear.",
+    "i": "Ligament injury graded I (stretch), II (partial tear), III (complete rupture). Common in ankle, knee, and wrist during golf.",
+    "r": ["ligament_tissue", "acute_injury"]
+  },
+  {
+    "key": "muscle_strain_injury",
+    "term": "Muscle Strain",
+    "cat": "injury",
+    "b": "Overstretching or tearing of muscle fibers, common during explosive movements like the golf swing.",
+    "i": "Muscle fiber disruption from excessive lengthening under load. Graded I-III. Often occurs during eccentric contractions at high velocity.",
+    "r": ["muscle_tear", "eccentric_contraction"]
+  },
+  {
+    "key": "muscle_tear",
+    "term": "Muscle Tear",
+    "cat": "injury",
+    "b": "A significant rip in muscle tissue causing pain, swelling, and loss of function.",
+    "i": "Grade II-III muscle strain with macroscopic fiber disruption. Oblique abdominal and hamstring tears occur in golf from high rotational demands.",
+    "r": ["muscle_strain_injury", "acute_injury"]
+  },
+  {
+    "key": "fatigue_failure",
+    "term": "Fatigue Failure",
+    "cat": "injury",
+    "b": "When tissue breaks from many repeated loads, each individually below the failure threshold.",
+    "i": "Progressive damage accumulation from cyclic sub-failure loading. Rate of damage must not exceed rate of biological repair.",
+    "r": ["material_fatigue", "cumulative_load"]
+  },
+  {
+    "key": "load_tolerance",
+    "term": "Load Tolerance",
+    "cat": "injury",
+    "b": "The maximum load a tissue can handle before damage occurs.",
+    "i": "Tissue-specific failure threshold depending on loading mode, rate, history, and biological condition. Varies with training adaptation.",
+    "r": ["injury_risk_assessment"]
+  },
+  {
+    "key": "cumulative_load",
+    "term": "Cumulative Load",
+    "cat": "injury",
+    "b": "The total amount of loading on a tissue over time, important for understanding overuse injury risk.",
+    "i": "Time-integrated mechanical load on a tissue. Exceeding repair capacity leads to overuse injury. Managed by load monitoring.",
+    "r": ["overuse_injury", "fatigue_failure"]
+  },
+  {
+    "key": "injury_prevention",
+    "term": "Injury Prevention",
+    "cat": "injury",
+    "b": "Strategies to reduce injury risk, including proper technique, conditioning, and load management.",
+    "i": "Evidence-based interventions: biomechanical screening, strength programs, flexibility training, load management, and technique optimization.",
+    "r": ["injury_risk_assessment"]
+  },
+  {
+    "key": "return_to_play",
+    "term": "Return to Play",
+    "cat": "injury",
+    "b": "The process of safely getting back to sport after an injury, using objective criteria.",
+    "i": "Graduated protocol for resuming sport after injury. Criteria-based progression using strength, ROM, functional, and sport-specific tests."
+  },
+  {
+    "key": "pelvis_anatomy",
+    "term": "Pelvis",
+    "cat": "anatomy",
+    "b": "The bony structure at the base of the spine that connects the trunk to the legs and drives rotation in golf.",
+    "i": "Ring-shaped bony structure formed by ilia, ischia, pubes, and sacrum. Foundation for lower extremity kinetic chain in the golf swing.",
+    "r": ["hip_joint", "sacroiliac_joint"]
+  },
+  {
+    "key": "femur",
+    "term": "Femur",
+    "cat": "anatomy",
+    "b": "The thigh bone, the longest and strongest bone in the body.",
+    "i": "Proximal: head articulates with acetabulum; distal: condyles form knee joint. Transmits ground reaction forces during the golf stance."
+  },
+  {
+    "key": "tibia",
+    "term": "Tibia",
+    "cat": "anatomy",
+    "b": "The shinbone, the main weight-bearing bone of the lower leg.",
+    "i": "Larger of two lower leg bones. Bears 85% of lower leg load. Proximal tibial plateau articulates with femoral condyles at the knee."
+  },
+  {
+    "key": "fibula",
+    "term": "Fibula",
+    "cat": "anatomy",
+    "b": "The thin outer bone of the lower leg, providing muscle attachment and ankle stability.",
+    "i": "Lateral lower leg bone. Non-weight-bearing but provides lateral ankle stability and muscle attachment sites."
+  },
+  {
+    "key": "humerus",
+    "term": "Humerus",
+    "cat": "anatomy",
+    "b": "The upper arm bone connecting the shoulder to the elbow.",
+    "i": "Long bone of the upper arm. Head articulates at glenohumeral joint; distally forms elbow with radius and ulna. Key swing lever."
+  },
+  {
+    "key": "radius_bone",
+    "term": "Radius",
+    "cat": "anatomy",
+    "b": "The forearm bone on the thumb side, crucial for wrist movement and pronation/supination.",
+    "i": "Lateral forearm bone rotating around the ulna for pronation/supination. Distal end forms the primary wrist joint articulation."
+  },
+  {
+    "key": "ulna",
+    "term": "Ulna",
+    "cat": "anatomy",
+    "b": "The forearm bone on the pinky side, forming the main hinge at the elbow.",
+    "i": "Medial forearm bone. Olecranon forms the elbow point; trochlear notch creates the primary elbow hinge joint."
+  },
+  {
+    "key": "scapula",
+    "term": "Scapula",
+    "cat": "anatomy",
+    "b": "The shoulder blade, a flat triangular bone that anchors the arm to the trunk.",
+    "i": "Flat bone providing attachment for 17 muscles. Scapulohumeral rhythm coordinates scapula rotation with arm elevation.",
+    "r": ["shoulder_joint", "acromioclavicular_joint"]
+  },
+  {
+    "key": "clavicle",
+    "term": "Clavicle",
+    "cat": "anatomy",
+    "b": "The collarbone connecting the shoulder to the breastbone.",
+    "i": "S-shaped bone connecting scapula to sternum. Only bony connection of upper limb to axial skeleton. Strut for shoulder mechanics.",
+    "r": ["sternoclavicular_joint", "acromioclavicular_joint"]
+  },
+  {
+    "key": "vertebra",
+    "term": "Vertebra",
+    "cat": "anatomy",
+    "b": "One of the individual bones making up the spinal column.",
+    "i": "Segmental spinal bone: body (load-bearing), arch (neural protection), processes (muscle/ligament attachment). 33 total (24 mobile).",
+    "r": ["lumbar_spine", "thoracic_spine", "cervical_spine"]
+  },
+  {
+    "key": "lumbar_spine",
+    "term": "Lumbar Spine",
+    "cat": "anatomy",
+    "b": "The lower back region of the spine, bearing the highest loads during the golf swing.",
+    "i": "5 vertebrae (L1-L5) supporting trunk weight. Primary motions: flexion/extension. High injury risk in golf from combined rotation + side bend.",
+    "r": ["thoracic_spine", "intervertebral_disc"]
+  },
+  {
+    "key": "thoracic_spine",
+    "term": "Thoracic Spine",
+    "cat": "anatomy",
+    "b": "The middle back region of the spine connecting to the ribs, important for trunk rotation.",
+    "i": "12 vertebrae (T1-T12) articulating with ribs. Primary rotation region of the spine. Limited by rib cage attachment.",
+    "r": ["lumbar_spine", "cervical_spine"]
+  },
+  {
+    "key": "cervical_spine",
+    "term": "Cervical Spine",
+    "cat": "anatomy",
+    "b": "The neck region of the spine, allowing head movement and visual tracking during the swing.",
+    "i": "7 vertebrae (C1-C7). Most mobile spinal region. Atlas (C1) and axis (C2) enable nodding and rotation.",
+    "r": ["thoracic_spine"]
+  },
+  {
+    "key": "sacrum",
+    "term": "Sacrum",
+    "cat": "anatomy",
+    "b": "The triangular bone at the base of the spine connecting to the pelvis.",
+    "i": "Five fused vertebrae forming the posterior pelvis. Sacroiliac joints transfer loads between spine and lower extremities.",
+    "r": ["sacroiliac_joint", "pelvis_anatomy"]
+  },
+  {
+    "key": "hip_joint",
+    "term": "Hip Joint",
+    "cat": "anatomy",
+    "b": "The ball-and-socket joint connecting the thigh to the pelvis, allowing wide range of movement.",
+    "i": "Ball-and-socket joint (femoral head in acetabulum). 3 DOF. Primary driver of pelvic rotation in the golf swing.",
+    "r": ["hip_rotation_golf", "pelvis_anatomy"]
+  },
+  {
+    "key": "knee_joint",
+    "term": "Knee Joint",
+    "cat": "anatomy",
+    "b": "The largest joint in the body, connecting the thigh and shin bones.",
+    "i": "Modified hinge joint (femur-tibia) with patella. Primarily flexion/extension with limited rotation. Stabilized by cruciate and collateral ligaments."
+  },
+  {
+    "key": "ankle_joint",
+    "term": "Ankle Joint",
+    "cat": "anatomy",
+    "b": "The joint connecting the foot to the lower leg, critical for balance and ground force application.",
+    "i": "Talocrural joint: hinge for dorsiflexion/plantarflexion. Subtalar joint below adds inversion/eversion. Key for balance in golf stance."
+  },
+  {
+    "key": "shoulder_joint",
+    "term": "Shoulder Joint",
+    "cat": "anatomy",
+    "b": "The most mobile joint in the body, allowing the wide range of arm movements needed in golf.",
+    "i": "Complex of glenohumeral, AC, SC, and scapulothoracic joints. 3 DOF at GH joint. Sacrifices stability for mobility.",
+    "r": ["glenohumeral_joint", "scapula"]
+  },
+  {
+    "key": "elbow_joint",
+    "term": "Elbow Joint",
+    "cat": "anatomy",
+    "b": "The hinge joint connecting the upper and lower arm, involved in club control.",
+    "i": "Compound joint: humeroulnar (hinge) + humeroradial + proximal radioulnar. Flexion/extension and pronation/supination."
+  },
+  {
+    "key": "wrist_joint",
+    "term": "Wrist Joint",
+    "cat": "anatomy",
+    "b": "The complex joint connecting the forearm to the hand, critical for club face control.",
+    "i": "Radiocarpal + midcarpal joints allowing flexion/extension, radial/ulnar deviation. Wrist mechanics directly affect club face angle at impact.",
+    "r": ["wrist_cock", "wrist_release"]
+  },
+  {
+    "key": "glenohumeral_joint",
+    "term": "Glenohumeral Joint",
+    "cat": "anatomy",
+    "b": "The main ball-and-socket part of the shoulder where the arm bone meets the shoulder blade.",
+    "i": "Ball-and-socket joint with large humeral head on shallow glenoid fossa. Most mobile joint in the body. Stabilized by rotator cuff.",
+    "r": ["shoulder_joint"]
+  },
+  {
+    "key": "acromioclavicular_joint",
+    "term": "Acromioclavicular Joint",
+    "cat": "anatomy",
+    "b": "The joint at the top of the shoulder where the collarbone meets the shoulder blade.",
+    "i": "Plane synovial joint between acromion and clavicle. Allows gliding and rotation. Common site of injury from falls or direct impact.",
+    "r": ["clavicle", "scapula"]
+  },
+  {
+    "key": "sternoclavicular_joint",
+    "term": "Sternoclavicular Joint",
+    "cat": "anatomy",
+    "b": "The joint connecting the collarbone to the breastbone.",
+    "i": "Saddle joint connecting clavicle to sternum. Only skeletal connection of upper limb to axial skeleton. Allows elevation and protraction.",
+    "r": ["clavicle"]
+  },
+  {
+    "key": "sacroiliac_joint",
+    "term": "Sacroiliac Joint",
+    "cat": "anatomy",
+    "b": "The joint connecting the spine to the pelvis, transferring weight from upper body to legs.",
+    "i": "Strong, nearly immobile joint between sacrum and ilium. Transmits upper body loads to lower extremities. Can be a source of low back pain.",
+    "r": ["sacrum", "pelvis_anatomy"]
+  },
+  {
+    "key": "intervertebral_disc",
+    "term": "Intervertebral Disc",
+    "cat": "anatomy",
+    "b": "Cushioning pads between vertebrae that absorb shock and allow spinal flexibility.",
+    "i": "Fibrocartilaginous structure between vertebral bodies. Nucleus pulposus (gel core) + annulus fibrosus (layered rings). Subject to injury in golf.",
+    "r": ["lumbar_spine", "vertebra"]
+  },
+  {
+    "key": "cost_function",
+    "term": "Cost Function",
+    "cat": "optimization",
+    "b": "A formula that calculates how far off a solution is from the desired goal.",
+    "i": "Scalar function J(x) to be minimized. In biomechanics: may include tracking error, effort, jerk, or metabolic cost.",
+    "r": ["objective_function"]
+  },
+  {
+    "key": "objective_function",
+    "term": "Objective Function",
+    "cat": "optimization",
+    "b": "The function being optimized (minimized or maximized) in an optimization problem.",
+    "i": "Function f(x) to optimize subject to constraints. May combine multiple objectives (multi-objective optimization with Pareto front).",
+    "r": ["cost_function", "constrained_optimization"]
+  },
+  {
+    "key": "constrained_optimization",
+    "term": "Constrained Optimization",
+    "cat": "optimization",
+    "b": "Finding the best solution while satisfying physical limits like joint ranges and force capacity.",
+    "i": "Optimization with equality h(x)=0 and/or inequality g(x)<=0 constraints. Methods: Lagrange multipliers, penalty, interior point.",
+    "r": ["interior_point_method", "quadratic_programming"]
+  },
+  {
+    "key": "gradient_based_optimization",
+    "term": "Gradient-Based Optimization",
+    "cat": "optimization",
+    "b": "Optimization methods that use derivative information to efficiently find the best solution.",
+    "i": "Methods using gradient (and possibly Hessian) to determine search direction. Fast convergence for smooth problems. Requires differentiability.",
+    "r": ["gradient_descent", "bfgs_algorithm"]
+  },
+  {
+    "key": "gradient_free_optimization",
+    "term": "Gradient-Free Optimization",
+    "cat": "optimization",
+    "b": "Optimization methods that work without derivatives, useful for noisy or discontinuous problems.",
+    "i": "Methods not requiring gradient computation. Includes evolutionary algorithms, Nelder-Mead, Bayesian optimization. Robust but slower convergence.",
+    "r": ["genetic_algorithm", "nelder_mead_method"]
+  },
+  {
+    "key": "genetic_algorithm",
+    "term": "Genetic Algorithm",
+    "cat": "optimization",
+    "b": "An optimization method inspired by evolution, using selection, crossover, and mutation to find good solutions.",
+    "i": "Population-based metaheuristic using selection, crossover, and mutation operators. Good for global search in complex, multi-modal landscapes.",
+    "r": ["particle_swarm_optimization"]
+  },
+  {
+    "key": "particle_swarm_optimization",
+    "term": "Particle Swarm Optimization",
+    "cat": "optimization",
+    "b": "An optimization method inspired by bird flocking, where candidate solutions share information to converge.",
+    "i": "Population-based method where particles update positions based on personal best and swarm best. Simple to implement, few hyperparameters.",
+    "r": ["genetic_algorithm"]
+  },
+  {
+    "key": "simulated_annealing",
+    "term": "Simulated Annealing",
+    "cat": "optimization",
+    "b": "An optimization method inspired by metal cooling, accepting worse solutions early to avoid local traps.",
+    "i": "Probabilistic metaheuristic accepting uphill moves with decreasing probability (temperature schedule). Good for discrete and combinatorial problems."
+  },
+  {
+    "key": "nelder_mead_method",
+    "term": "Nelder-Mead Method",
+    "cat": "optimization",
+    "b": "A simple optimization method that uses a shape that morphs to find the minimum without needing derivatives.",
+    "i": "Simplex-based direct search method using reflection, expansion, contraction, and shrinkage. No gradients needed. Robust for noisy functions.",
+    "r": ["gradient_free_optimization"]
+  },
+  {
+    "key": "bfgs_algorithm",
+    "term": "BFGS Algorithm",
+    "cat": "optimization",
+    "b": "An efficient optimization method that approximates curvature information to converge quickly.",
+    "i": "Quasi-Newton method building approximate Hessian from gradient evaluations. Superlinear convergence. L-BFGS variant for large-scale problems.",
+    "r": ["newton_optimization", "gradient_based_optimization"]
+  },
+  {
+    "key": "newton_optimization",
+    "term": "Newton's Method (Optimization)",
+    "cat": "optimization",
+    "b": "An optimization method using curvature information for fast convergence near the solution.",
+    "i": "Second-order method: x_{k+1} = x_k - H^{-1} * grad(f). Quadratic convergence near minimum. Requires Hessian computation.",
+    "r": ["hessian_matrix", "bfgs_algorithm"]
+  },
+  {
+    "key": "conjugate_gradient",
+    "term": "Conjugate Gradient",
+    "cat": "optimization",
+    "b": "An efficient method for solving large systems of equations that arise in optimization.",
+    "i": "Iterative method for solving Ax=b where A is SPD, or for unconstrained optimization using conjugate search directions. O(n*sqrt(kappa)) convergence."
+  },
+  {
+    "key": "interior_point_method",
+    "term": "Interior Point Method",
+    "cat": "optimization",
+    "b": "An optimization method that approaches the boundary of constraints from inside the feasible region.",
+    "i": "Barrier method converting constrained to unconstrained problems via log-barrier function. Polynomial complexity for LP and convex QP.",
+    "r": ["constrained_optimization"]
+  },
+  {
+    "key": "quadratic_programming",
+    "term": "Quadratic Programming (QP)",
+    "cat": "optimization",
+    "b": "Optimization with a quadratic cost and linear constraints, common in motion optimization.",
+    "i": "Minimizing 0.5*x^THx + f^Tx subject to linear constraints. Solved efficiently by active-set or interior point methods.",
+    "r": ["nonlinear_programming", "constrained_optimization"]
+  },
+  {
+    "key": "nonlinear_programming",
+    "term": "Nonlinear Programming (NLP)",
+    "cat": "optimization",
+    "b": "Optimization problems with nonlinear objectives or constraints, typical of biomechanics problems.",
+    "i": "General constrained optimization with nonlinear functions. Solved by SQP, interior point, or augmented Lagrangian methods.",
+    "r": ["quadratic_programming", "convex_optimization"]
+  },
+  {
+    "key": "convex_optimization",
+    "term": "Convex Optimization",
+    "cat": "optimization",
+    "b": "Optimization where any local solution is guaranteed to be the global best, ensuring reliable results.",
+    "i": "Optimization over convex sets with convex objective. Any local minimum is global. Efficiently solvable by interior point methods.",
+    "r": ["global_optimization"]
+  },
+  {
+    "key": "global_optimization",
+    "term": "Global Optimization",
+    "cat": "optimization",
+    "b": "Finding the absolute best solution among all possibilities, not just a locally good one.",
+    "i": "Finding the global minimum of potentially non-convex functions. Methods: branch-and-bound, multistart, evolutionary algorithms.",
+    "r": ["local_minimum", "convex_optimization"]
+  },
+  {
+    "key": "local_minimum",
+    "term": "Local Minimum",
+    "cat": "optimization",
+    "b": "A solution that is better than nearby alternatives but may not be the best overall.",
+    "i": "Point where f(x*) <= f(x) for all x in a neighborhood. Non-convex problems may have multiple local minima; only one is the global minimum.",
+    "r": ["global_optimization", "saddle_point"]
+  },
+  {
+    "key": "saddle_point",
+    "term": "Saddle Point",
+    "cat": "optimization",
+    "b": "A point that is a minimum in some directions but a maximum in others, like a mountain pass.",
+    "i": "Critical point where gradient is zero but Hessian has both positive and negative eigenvalues. Common in high-dimensional optimization.",
+    "r": ["local_minimum", "hessian_matrix"]
+  },
+  {
+    "key": "pareto_optimality",
+    "term": "Pareto Optimality",
+    "cat": "optimization",
+    "b": "A solution where you cannot improve one objective without making another worse.",
+    "i": "In multi-objective optimization, a point on the Pareto front where no objective can improve without degrading another. Represents optimal trade-offs.",
+    "r": ["objective_function"]
+  },
+  {
+    "key": "signal_noise",
+    "term": "Signal and Noise",
+    "cat": "signal_processing",
+    "b": "The useful information (signal) mixed with unwanted random variation (noise) in measurements.",
+    "i": "Signal is the deterministic component of measured data; noise is the stochastic component. Goal: maximize signal-to-noise ratio."
+  },
+  {
+    "key": "noise_reduction",
+    "term": "Noise Reduction",
+    "cat": "signal_processing",
+    "b": "Techniques for removing unwanted random variation from measurements.",
+    "i": "Methods: filtering, averaging, wavelet denoising, Wiener filtering. Choice depends on noise characteristics and signal properties.",
+    "r": ["signal_filtering"]
+  },
+  {
+    "key": "signal_to_noise_ratio",
+    "term": "Signal-to-Noise Ratio (SNR)",
+    "cat": "signal_processing",
+    "b": "A measure of how much useful signal there is compared to background noise.",
+    "i": "SNR = P_signal/P_noise, often in dB: 10*log10(P_s/P_n). Higher SNR indicates cleaner measurements.",
+    "f": "SNR = 10*log10(P_s/P_n)",
+    "u": "dB"
+  },
+  {
+    "key": "bandpass_filter",
+    "term": "Bandpass Filter",
+    "cat": "signal_processing",
+    "b": "A filter that keeps only frequencies within a specified range, removing both low and high frequency noise.",
+    "i": "Passes frequencies between low and high cutoffs. Used for EMG processing (typically 20-450 Hz bandpass).",
+    "r": ["low_pass_filter", "highpass_filter"]
+  },
+  {
+    "key": "highpass_filter",
+    "term": "High-Pass Filter",
+    "cat": "signal_processing",
+    "b": "A filter that removes slow-changing trends while keeping rapid variations.",
+    "i": "Passes frequencies above the cutoff and attenuates lower frequencies. Used to remove DC offset and slow drift from EMG and force data.",
+    "r": ["low_pass_filter", "bandpass_filter"]
+  },
+  {
+    "key": "notch_filter",
+    "term": "Notch Filter",
+    "cat": "signal_processing",
+    "b": "A filter that removes a specific frequency, commonly used to eliminate power line interference.",
+    "i": "Band-reject filter with narrow stop-band. Commonly removes 50/60 Hz power line noise from EMG signals.",
+    "r": ["bandpass_filter"]
+  },
+  {
+    "key": "moving_average_filter",
+    "term": "Moving Average Filter",
+    "cat": "signal_processing",
+    "b": "A simple smoothing technique that replaces each value with the average of nearby values.",
+    "i": "FIR filter replacing each sample with the mean of N surrounding samples. Simple but introduces delay and reduces signal amplitude.",
+    "r": ["median_filter"]
+  },
+  {
+    "key": "median_filter",
+    "term": "Median Filter",
+    "cat": "signal_processing",
+    "b": "A smoothing technique that removes spikes by replacing each value with the middle value of its neighbors.",
+    "i": "Nonlinear filter replacing each sample with the median of surrounding samples. Excellent for removing impulse noise (spikes) without blurring edges.",
+    "r": ["moving_average_filter"]
+  },
+  {
+    "key": "savitzky_golay_filter",
+    "term": "Savitzky-Golay Filter",
+    "cat": "signal_processing",
+    "b": "A smoothing filter that preserves the shape of peaks and features better than simple averaging.",
+    "i": "Local polynomial regression filter. Preserves higher moments (peak shape, width) better than moving average. Good for derivative estimation.",
+    "r": ["data_smoothing"]
+  },
+  {
+    "key": "numerical_differentiation",
+    "term": "Numerical Differentiation",
+    "cat": "signal_processing",
+    "b": "Computing velocity and acceleration from position data using mathematical approximations.",
+    "i": "Estimating derivatives from discrete data: central differences, polynomial fitting, or Savitzky-Golay. Amplifies high-frequency noise.",
+    "r": ["savitzky_golay_filter"]
+  },
+  {
+    "key": "numerical_integration_signal",
+    "term": "Numerical Integration (Signal)",
+    "cat": "signal_processing",
+    "b": "Computing position from velocity or velocity from acceleration data by accumulating values over time.",
+    "i": "Discrete integration using trapezoidal rule, Simpson's rule, or cumulative sum. Subject to drift from noise accumulation and DC offset."
+  },
+  {
+    "key": "signal_resampling",
+    "term": "Resampling",
+    "cat": "signal_processing",
+    "b": "Changing the sampling rate of recorded data, either increasing or decreasing it.",
+    "i": "Converting signal to different sampling rate. Upsampling (interpolation) or downsampling (decimation with anti-aliasing)."
+  },
+  {
+    "key": "signal_interpolation",
+    "term": "Interpolation",
+    "cat": "signal_processing",
+    "b": "Estimating values between known data points to fill gaps or change timing.",
+    "i": "Estimating signal values between samples. Methods: linear, cubic, spline, sinc. Used for resampling and synchronizing multi-rate data.",
+    "r": ["spline_interpolation"]
+  },
+  {
+    "key": "signal_envelope",
+    "term": "Signal Envelope",
+    "cat": "signal_processing",
+    "b": "The smooth outline tracing the peaks of a signal, used to track EMG amplitude over time.",
+    "i": "Smooth curve bounding signal amplitude. Computed via rectification + low-pass filtering or Hilbert transform. Standard for EMG amplitude estimation.",
+    "r": ["hilbert_transform"]
+  },
+  {
+    "key": "hilbert_transform",
+    "term": "Hilbert Transform",
+    "cat": "signal_processing",
+    "b": "A mathematical tool for computing the instantaneous amplitude and frequency of a signal.",
+    "i": "Creates analytic signal z(t) = x(t) + jH{x(t)}. Envelope: |z(t)|. Instantaneous frequency: d(arg(z))/dt. Used for EMG and vibration analysis.",
+    "r": ["signal_envelope"]
+  },
+  {
+    "key": "sarcomere",
+    "term": "Sarcomere",
+    "cat": "muscle",
+    "b": "The smallest functional unit of a muscle fiber, responsible for contraction at the molecular level.",
+    "i": "Repeating unit between Z-lines (~2.5 um). Contains actin and myosin filaments whose overlap determines force capacity.",
+    "u": "um",
+    "r": ["actin_filament", "myosin_filament"]
+  },
+  {
+    "key": "actin_filament",
+    "term": "Actin",
+    "cat": "muscle",
+    "b": "Thin protein filaments in muscle that slide past thick filaments to produce contraction.",
+    "i": "Thin filament (~7 nm diameter) containing troponin and tropomyosin. Binding sites exposed by Ca2+ enable cross-bridge formation with myosin.",
+    "r": ["myosin_filament", "sarcomere"]
+  },
+  {
+    "key": "myosin_filament",
+    "term": "Myosin",
+    "cat": "muscle",
+    "b": "Thick protein filaments with heads that pull on actin to generate muscle force.",
+    "i": "Thick filament (~15 nm) with ATPase heads forming cross-bridges with actin. Power stroke produces ~2 pN force over ~10 nm displacement.",
+    "r": ["actin_filament", "sarcomere"]
+  },
+  {
+    "key": "motor_unit",
+    "term": "Motor Unit",
+    "cat": "muscle",
+    "b": "A nerve cell and all the muscle fibers it controls, the basic unit of muscle activation.",
+    "i": "Alpha motor neuron + all innervated muscle fibers. Size ranges from ~10 fibers (eye) to ~2000 (quadriceps). All-or-none activation.",
+    "r": ["motor_unit_recruitment", "rate_coding"]
+  },
+  {
+    "key": "motor_unit_recruitment",
+    "term": "Motor Unit Recruitment",
+    "cat": "muscle",
+    "b": "The process of activating more motor units to increase force, from smallest to largest.",
+    "i": "Orderly activation following Henneman's size principle: small (slow-twitch) units first, large (fast-twitch) at higher force demands.",
+    "r": ["motor_unit", "rate_coding"]
+  },
+  {
+    "key": "rate_coding",
+    "term": "Rate Coding",
+    "cat": "muscle",
+    "b": "Increasing force by sending nerve signals more frequently to already-active motor units.",
+    "i": "Modulating motor unit firing frequency (6-30 Hz range). Combined with recruitment for graded force control.",
+    "r": ["motor_unit_recruitment", "force_frequency_relationship"]
+  },
+  {
+    "key": "muscle_twitch",
+    "term": "Muscle Twitch",
+    "cat": "muscle",
+    "b": "The brief contraction from a single nerve signal, the building block of sustained muscle force.",
+    "i": "Force response to a single action potential. Characteristics: contraction time, peak force, half-relaxation time. Varies by fiber type.",
+    "r": ["tetanic_contraction"]
+  },
+  {
+    "key": "tetanic_contraction",
+    "term": "Tetanic Contraction",
+    "cat": "muscle",
+    "b": "Sustained muscle contraction from rapid repeated nerve signals, producing smooth, strong force.",
+    "i": "Fused summation of twitches at high stimulation frequency. Unfused tetanus: individual twitches visible. Fused: smooth force output.",
+    "r": ["muscle_twitch", "rate_coding"]
+  },
+  {
+    "key": "muscle_fatigue",
+    "term": "Muscle Fatigue",
+    "cat": "muscle",
+    "b": "The decline in muscle force capacity during sustained or repeated activity.",
+    "i": "Reduction in maximal force production from sustained activity. Central (neural) and peripheral (metabolic, excitation-contraction coupling) components.",
+    "r": ["fatigue_failure"]
+  },
+  {
+    "key": "muscle_spindle",
+    "term": "Muscle Spindle",
+    "cat": "muscle",
+    "b": "A sensory receptor inside muscles that detects changes in muscle length and stretch speed.",
+    "i": "Intrafusal fiber receptor detecting muscle length changes. Primary (Ia) afferents sensitive to length and velocity; secondary (II) to length only.",
+    "r": ["proprioception", "golgi_tendon_organ"]
+  },
+  {
+    "key": "golgi_tendon_organ",
+    "term": "Golgi Tendon Organ",
+    "cat": "muscle",
+    "b": "A sensor in tendons that detects muscle tension, providing protective feedback against excessive force.",
+    "i": "Mechanoreceptor at muscle-tendon junction sensing force. Ib afferents mediate autogenic inhibition protecting against excessive loading.",
+    "r": ["muscle_spindle", "proprioception"]
+  },
+  {
+    "key": "pennation_angle",
+    "term": "Pennation Angle",
+    "cat": "muscle",
+    "b": "The angle at which muscle fibers attach to the tendon, affecting force and contraction speed.",
+    "i": "Angle between muscle fibers and line of pull. Higher pennation: more fibers per volume (higher force) but reduced shortening velocity.",
+    "u": "degrees",
+    "r": ["muscle_architecture", "physiological_cross_section"]
+  },
+  {
+    "key": "physiological_cross_section",
+    "term": "Physiological Cross-Sectional Area (PCSA)",
+    "cat": "muscle",
+    "b": "The total cross-sectional area of all muscle fibers, determining maximum force capacity.",
+    "i": "PCSA = (mass * cos(pennation)) / (density * fiber_length). Maximum isometric force = PCSA * specific tension.",
+    "u": "cm^2",
+    "r": ["specific_tension", "pennation_angle"]
+  },
+  {
+    "key": "specific_tension",
+    "term": "Specific Tension",
+    "cat": "muscle",
+    "b": "The force a muscle can produce per unit of cross-sectional area.",
+    "i": "Maximum isometric stress per PCSA. Typically 15-30 N/cm^2 for mammalian skeletal muscle. Varies with fiber type and measurement method.",
+    "u": "N/cm^2",
+    "r": ["physiological_cross_section", "maximal_voluntary_contraction"]
+  },
+  {
+    "key": "maximal_voluntary_contraction",
+    "term": "Maximal Voluntary Contraction (MVC)",
+    "cat": "muscle",
+    "b": "The maximum force a person can produce by voluntarily contracting a muscle as hard as possible.",
+    "i": "Peak force during maximal voluntary effort. Used for normalizing EMG (%MVC). Affected by motivation, fatigue, and neural factors.",
+    "r": ["electromyography", "specific_tension"]
+  },
+  {
+    "key": "time_to_peak_force",
+    "term": "Time to Peak Force",
+    "cat": "muscle",
+    "b": "How quickly a muscle can develop its maximum force after being activated.",
+    "i": "Duration from activation onset to peak isometric force. Fast-twitch: ~40-80 ms; slow-twitch: ~80-150 ms.",
+    "u": "ms",
+    "r": ["muscle_twitch", "muscle_fiber_type"]
+  },
+  {
+    "key": "half_relaxation_time",
+    "term": "Half-Relaxation Time",
+    "cat": "muscle",
+    "b": "How quickly a muscle returns to half its peak force after stimulation stops.",
+    "i": "Time from peak twitch force to 50% relaxation. Faster in fast-twitch fibers. Slows with fatigue due to impaired Ca2+ reuptake.",
+    "u": "ms",
+    "r": ["muscle_twitch", "muscle_fatigue"]
+  },
+  {
+    "key": "force_frequency_relationship",
+    "term": "Force-Frequency Relationship",
+    "cat": "muscle",
+    "b": "The principle that higher nerve stimulation frequencies produce greater muscle force up to a maximum.",
+    "i": "Sigmoidal relationship between stimulation frequency and isometric force. Plateau at fused tetanus frequency (~50-80 Hz).",
+    "r": ["rate_coding", "tetanic_contraction"]
+  },
+  {
+    "key": "muscle_architecture",
+    "term": "Muscle Architecture",
+    "cat": "muscle",
+    "b": "The internal arrangement of muscle fibers, including their length, angle, and number.",
+    "i": "Structural arrangement: fiber length, pennation angle, PCSA, and volume. Determines force-length and force-velocity characteristics.",
+    "r": ["pennation_angle", "physiological_cross_section", "muscle_fiber_type"]
+  },
+  {
+    "key": "muscle_fiber_type",
+    "term": "Muscle Fiber Type",
+    "cat": "muscle",
+    "b": "Different types of muscle fibers (slow-twitch and fast-twitch) suited for endurance or power tasks.",
+    "i": "Type I (slow, oxidative, fatigue-resistant), Type IIA (fast, oxidative-glycolytic), Type IIX (fast, glycolytic, fatigable). Mix varies by muscle and individual.",
+    "r": ["motor_unit", "muscle_architecture"]
+  }
+]

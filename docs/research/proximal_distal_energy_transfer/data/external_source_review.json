@@ -1,0 +1,2182 @@
+{
+  "schema_version": "proximal-distal-external-source-review-v1",
+  "reviewed_on": "2026-08-14",
+  "reviewer": "Codex technical audit",
+  "scope_statement": "Every external claim-support URL is assigned exactly once to its underlying work. Mirror count is not treated as independent replication. Eligibility is bounded to the original source domain and does not close any prospective human falsification gate.",
+  "summary": {
+    "external_url_count": 78,
+    "canonical_work_count": 56,
+    "eligible_work_count": 56,
+    "contextual_only_work_count": 0,
+    "excluded_work_count": 0,
+    "externally_linked_claim_count": 54,
+    "supported_claim_count": 54,
+    "contextual_only_claim_count": 0,
+    "unsupported_claim_count": 0
+  },
+  "works": [
+    {
+      "work_id": "doi:10.1007/978-0-387-46050-5_30",
+      "title": "Segmental sequencing of kinetic energy in the golf swing",
+      "year": 2006,
+      "source_type": "book_chapter",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "not_applicable_non_periodical",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1007/978-0-387-46050-5_30",
+      "urls": [
+        "https://doi.org/10.1007/978-0-387-46050-5_30",
+        "https://www.researchgate.net/publication/226339824_Segmental_Sequencing_of_Kinetic_Energy_in_the_Golf_Swing"
+      ],
+      "linked_claims": ["PD-CLAIM-013"],
+      "supports_claims": ["PD-CLAIM-013"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-013": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-013; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Group-aggregated male scratch-golfer result; segment kinetic-energy peaks do not identify intersegment power flow, and full independent reconstruction from raw trajectories is unavailable."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1007/bf00198762",
+      "title": "Human control of a simple two-hand grasp",
+      "year": 1992,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1007/bf00198762",
+      "urls": ["https://doi.org/10.1007/BF00198762"],
+      "linked_claims": ["PD-CLAIM-068"],
+      "supports_claims": ["PD-CLAIM-068"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-068": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-068; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The external studies are not golf, do not rank golf strategies, and do not validate the model's quantitative force allocation."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1007/s12283-008-0005-0",
+      "title": "Segmental sequencing of kinetic energy in a computer-simulated golf swing",
+      "year": 2008,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1007/s12283-008-0005-0",
+      "urls": [
+        "https://doi.org/10.1007/s12283-008-0005-0",
+        "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Kenny%202008%20Segmental%20sequencing%20of%20kinetic%20energy%20in%20a%20computer-simulated.pdf"
+      ],
+      "linked_claims": ["PD-CLAIM-014"],
+      "supports_claims": ["PD-CLAIM-014"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-014": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-014; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Single-subject, representative-trial, model-dependent result; no population inference, direct intersegment energy-flow measurement, or independent implementation."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1007/s12283-009-0020-9",
+      "title": "A three-dimensional forward dynamics model of the golf swing",
+      "year": 2009,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1007/s12283-009-0020-9",
+      "urls": ["https://doi.org/10.1007/s12283-009-0020-9"],
+      "linked_claims": ["PD-CLAIM-031", "PD-CLAIM-034"],
+      "supports_claims": ["PD-CLAIM-031", "PD-CLAIM-034"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-031": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-031; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Validation used six accepted drives from one 3-handicap male and one 2-D camera; the model omitted lower-body energy and a trail arm, and the optimized speed was approximately 7 m/s below the professional comparison cited in the paper."
+        },
+        "PD-CLAIM-034": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-034; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes non-equivalence of the published estimands; it does not determine which model is most predictive of a population or which strategy a person should use."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1007/s12283-016-0197-7",
+      "title": "A three-dimensional forward dynamic model of the golf swing optimized for ball carry distance",
+      "year": 2016,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1007/s12283-016-0197-7",
+      "urls": [
+        "https://doi.org/10.1007/s12283-016-0197-7",
+        "https://uwspace.uwaterloo.ca/items/812277fb-2d1b-47b9-ba6d-8b25392c120f"
+      ],
+      "linked_claims": ["PD-CLAIM-032", "PD-CLAIM-034"],
+      "supports_claims": ["PD-CLAIM-032", "PD-CLAIM-034"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-032": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-032; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The model omitted the lower body and trail arm, explicitly assumed negligible trail-arm power, and treated pelvis rotation as unnecessary for its club-design objective rather than testing that assumption for whole-body power attribution."
+        },
+        "PD-CLAIM-034": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-034; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes non-equivalence of the published estimands; it does not determine which model is most predictive of a population or which strategy a person should use."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1007/s40279-025-02391-3",
+      "title": "Ground Reaction Force and Centre of Pressure During the Golf Swing and Associations with Clubhead Speed and Skill Level: A Systematic Review",
+      "year": 2026,
+      "source_type": "journal_article",
+      "evidence_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1007/s40279-025-02391-3",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/41653371/"],
+      "linked_claims": ["PD-CLAIM-074", "PD-CLAIM-079"],
+      "supports_claims": ["PD-CLAIM-074", "PD-CLAIM-079"],
+      "scope_assessment": "Eligible for scoped literature synthesis and terminology, not as a substitute for the underlying primary studies or a causal human test.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-074": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-074; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No cited study identifies a unique biological command, universal COP waveform, or causal performance intervention."
+        },
+        "PD-CLAIM-079": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-079; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No human outcome is present and tolerances must be fixed before data access rather than selected from this benchmark."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/0021-9290(80)90172-4",
+      "title": "Mechanical energy generation, absorption and transfer amongst segments during walking",
+      "year": 1980,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/0021-9290(80)90172-4",
+      "urls": ["https://doi.org/10.1016/0021-9290(80)90172-4"],
+      "linked_claims": ["PD-CLAIM-045", "PD-CLAIM-046"],
+      "supports_claims": ["PD-CLAIM-045", "PD-CLAIM-046"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-045": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-045; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Soft-tissue work, joint translation, contact losses, and frame inconsistencies can invalidate a simplified balance."
+        },
+        "PD-CLAIM-046": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-046; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The study is not golf validation, muscle identification, or evidence that its ankle agreement extends to high-speed upper-limb motion."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/0021-9290(92)90073-a",
+      "title": "Effects of changes in segmental values and timing of both torque and torque reversal in simulated throws",
+      "year": 1992,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/0021-9290(92)90073-a",
+      "urls": [
+        "https://doi.org/10.1016/0021-9290(92)90073-A",
+        "https://pubmed.ncbi.nlm.nih.gov/1400517/"
+      ],
+      "linked_claims": ["PD-CLAIM-041", "PD-CLAIM-043"],
+      "supports_claims": ["PD-CLAIM-041", "PD-CLAIM-043"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-041": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-041; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The torque steps are not activation dynamics, muscle-force histories, measured control, or proof that an instantaneous reversal is biologically feasible."
+        },
+        "PD-CLAIM-043": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-043; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes missing transport evidence; it does not show active braking is absent in golf or determine the best human strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/0021-9290(93)90084-r",
+      "title": "Sequential motions of body segments in striking and throwing skills: descriptions and explanations",
+      "year": 1993,
+      "source_type": "journal_article",
+      "evidence_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/0021-9290(93)90084-r",
+      "urls": [
+        "https://doi.org/10.1016/0021-9290(93)90084-R",
+        "https://pubmed.ncbi.nlm.nih.gov/8505347/"
+      ],
+      "linked_claims": ["PD-CLAIM-008", "PD-CLAIM-039", "PD-CLAIM-043"],
+      "supports_claims": ["PD-CLAIM-008", "PD-CLAIM-039", "PD-CLAIM-043"],
+      "scope_assessment": "Eligible for scoped literature synthesis and terminology, not as a substitute for the underlying primary studies or a causal human test.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-008": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-008; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Peak order may correlate with transfer in a declared dataset; the claim only rejects identity and sufficiency."
+        },
+        "PD-CLAIM-039": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-039; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The 1991 sample is four participants and lower-limb tasks; the 1993 paper is a synthesis, not a golf experiment or population estimate."
+        },
+        "PD-CLAIM-043": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-043; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes missing transport evidence; it does not show active braking is absent in golf or determine the best human strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/j.jbiomech.2013.01.020",
+      "title": "Defining feasible bounds on muscle activation in a redundant biomechanical task: practical implications of redundancy",
+      "year": 2013,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "correction_present",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/j.jbiomech.2013.01.020",
+      "urls": ["https://doi.org/10.1016/j.jbiomech.2013.01.020"],
+      "linked_claims": ["PD-CLAIM-062"],
+      "supports_claims": ["PD-CLAIM-062"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-062": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-062; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Neither source measures perceived effort, a causal force intervention, dynamic golf muscle activation, or universal response."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/j.jbiomech.2016.07.029",
+      "title": "Improving the Ground Reaction Force Prediction Accuracy Using One-Axis Plantar Pressure: Expansion of Input Variable for Neural Network",
+      "year": 2016,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/j.jbiomech.2016.07.029",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/27515436/"],
+      "linked_claims": ["PD-CLAIM-074"],
+      "supports_claims": ["PD-CLAIM-074"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-074": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-074; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No cited study identifies a unique biological command, universal COP waveform, or causal performance intervention."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/j.jbiomech.2022.111087",
+      "title": "Automated Optimization of Residual Reduction Algorithm Parameters in OpenSim",
+      "year": 2022,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/j.jbiomech.2022.111087",
+      "urls": ["https://doi.org/10.1016/j.jbiomech.2022.111087"],
+      "linked_claims": ["PD-CLAIM-075"],
+      "supports_claims": ["PD-CLAIM-075"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-075": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-075; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Condition number depends on contact-row scaling, while model error, filtering, inertias, and omitted loads can all enter residuals."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/s0966-6362(02)00068-1",
+      "title": "Biomechanics and muscle coordination of human walking. Part~I: introduction to concepts, power transfer, dynamics and simulations",
+      "year": 2002,
+      "source_type": "journal_article",
+      "evidence_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/s0966-6362(02)00068-1",
+      "urls": ["https://doi.org/10.1016/S0966-6362(02)00068-1"],
+      "linked_claims": ["PD-CLAIM-044", "PD-CLAIM-047", "PD-CLAIM-050"],
+      "supports_claims": ["PD-CLAIM-044", "PD-CLAIM-047", "PD-CLAIM-050"],
+      "scope_assessment": "Eligible for scoped literature synthesis and terminology, not as a substitute for the underlying primary studies or a causal human test.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-044": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-044; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Net joint power can combine agonist, antagonist, passive-tissue, and unmodeled contributions and does not recover muscle-specific metabolic or mechanical power."
+        },
+        "PD-CLAIM-047": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-047; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Induced quantities depend on coordinates, constraints, actuator representation, state, and intervention definition and do not uniquely identify neural control."
+        },
+        "PD-CLAIM-050": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-050; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "These requirements improve identifiability but do not guarantee that observational data identify neural control or a universally optimal strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1016/s1440-2440(04)80265-2",
+      "title": "How well does club head speed correlate with golf handicaps?",
+      "year": 2004,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1016/s1440-2440(04)80265-2",
+      "urls": [
+        "https://doi.org/10.1016/S1440-2440(04)80265-2",
+        "https://pubmed.ncbi.nlm.nih.gov/15712503/"
+      ],
+      "linked_claims": ["PD-CLAIM-006"],
+      "supports_claims": ["PD-CLAIM-006"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-006": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-006; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Does not establish drive distance, scoring causality, women, elite-only populations, launch conditions, or a universal performance metric."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1038/srep38845",
+      "title": "Adaptive use of interaction torque during arm reaching movement from the optimal control viewpoint",
+      "year": 2016,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1038/srep38845",
+      "urls": ["https://doi.org/10.1038/srep38845"],
+      "linked_claims": ["PD-CLAIM-069", "PD-CLAIM-070"],
+      "supports_claims": ["PD-CLAIM-069", "PD-CLAIM-070"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-069": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-069; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The reaching study is not golf validation and does not directly test the paper's four proposed mechanisms or cost terms."
+        },
+        "PD-CLAIM-070": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-070; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No activation, electromechanical delay calibration, slack measurement, human performance, or injury outcome is present."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1046/j.1460-2687.1999.00028.x",
+      "title": "On the double pendulum model of the golf swing",
+      "year": 1999,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
+      "urls": [
+        "https://doi.org/10.1046/j.1460-2687.1999.00028.x",
+        "https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1460-2687.1999.00028.x"
+      ],
+      "linked_claims": ["PD-CLAIM-022", "PD-CLAIM-059", "PD-CLAIM-093"],
+      "supports_claims": ["PD-CLAIM-022", "PD-CLAIM-059", "PD-CLAIM-093"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-022": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-022; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The publisher abstract does not expose the full parameter grid or numerical sensitivity; no human intervention, moving hub, flexible shaft, bilateral hand model, or population inference is established."
+        },
+        "PD-CLAIM-059": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-059; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Model predictions do not establish participant benefit, safety, intent, learning, or one optimum."
+        },
+        "PD-CLAIM-093": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-093; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The evidence does not identify a universal performance plateau, motor strategy, or causal human optimum."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1046/j.1460-2687.2001.00071.x",
+      "title": "Parametric acceleration --- the effect of inward pull of the golf club at impact stage",
+      "year": 2001,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1046/j.1460-2687.2001.00071.x",
+      "urls": [
+        "https://doi.org/10.1046/j.1460-2687.2001.00071.x",
+        "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Miura%202001%20Parametric%20acceleration%20effect%20of%20inward%20pull.pdf"
+      ],
+      "linked_claims": ["PD-CLAIM-026"],
+      "supports_claims": ["PD-CLAIM-026"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-026": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-026; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The study motivates a mechanism but does not isolate its magnitude in measured golfers, establish optimal pull timing, or identify the anatomical action that produces the hub motion."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1046/j.1460-2687.2002.00094.x",
+      "title": "Examining the delayed release in the golf swing using computer simulation",
+      "year": 2002,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1046/j.1460-2687.2002.00094.x",
+      "urls": ["https://doi.org/10.1046/j.1460-2687.2002.00094.x"],
+      "linked_claims": ["PD-CLAIM-024", "PD-CLAIM-093"],
+      "supports_claims": ["PD-CLAIM-024", "PD-CLAIM-093"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-024": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-024; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The forced-delay benefit is 1.6 percent in this model and is distinct from the much larger post-release torque ablation; the model omitted legs, torso translation, right-arm extension, and forearm long-axis rotation."
+        },
+        "PD-CLAIM-093": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-093; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The evidence does not identify a universal performance plateau, motor strategy, or causal human optimum."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1055/s-2008-1038732",
+      "title": "Kinematic analysis of swing in pro and amateur golfers",
+      "year": 2008,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1055/s-2008-1038732",
+      "urls": ["https://doi.org/10.1055/s-2008-1038732"],
+      "linked_claims": ["PD-CLAIM-012"],
+      "supports_claims": ["PD-CLAIM-012"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-012": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-012; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Not a meta-analytic population effect; access to several full texts and a study-by-study bias matrix remain open."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/026404100364983",
+      "title": "Long-axis rotation: the missing link in proximal-to-distal segmental sequencing",
+      "year": 2000,
+      "source_type": "journal_article",
+      "evidence_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/026404100364983",
+      "urls": [
+        "https://doi.org/10.1080/026404100364983",
+        "https://pubmed.ncbi.nlm.nih.gov/10824641/"
+      ],
+      "linked_claims": ["PD-CLAIM-042", "PD-CLAIM-043"],
+      "supports_claims": ["PD-CLAIM-042", "PD-CLAIM-043"],
+      "scope_assessment": "Eligible for scoped literature synthesis and terminology, not as a substitute for the underlying primary studies or a causal human test.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-042": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-042; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The source does not measure golf, wrist joint power, hand forces, negative torque, or energy transfer between golf-club system elements."
+        },
+        "PD-CLAIM-043": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-043; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes missing transport evidence; it does not show active braking is absent in golf or determine the best human strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/02640410410001730179",
+      "title": "A three-dimensional examination of the planar nature of the golf swing",
+      "year": 2005,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/02640410410001730179",
+      "urls": ["https://doi.org/10.1080/02640410410001730179"],
+      "linked_claims": ["PD-CLAIM-049", "PD-CLAIM-050"],
+      "supports_claims": ["PD-CLAIM-049", "PD-CLAIM-050"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-049": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-049; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The measurements do not establish one universal numerical planarity tolerance or show that a planar reduced model predicts all three-dimensional kinetics."
+        },
+        "PD-CLAIM-050": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-050; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "These requirements improve identifiability but do not guarantee that observational data identify neural control or a universally optimal strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/02640410600874971",
+      "title": "Different Centre of Pressure Patterns Within the Golf Stroke I: Cluster Analysis",
+      "year": 2007,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/02640410600874971",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/17454544/"],
+      "linked_claims": ["PD-CLAIM-074", "PD-CLAIM-078"],
+      "supports_claims": ["PD-CLAIM-074", "PD-CLAIM-078"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-074": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-074; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No cited study identifies a unique biological command, universal COP waveform, or causal performance intervention."
+        },
+        "PD-CLAIM-078": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-078; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Center-of-mass differentiation, unknown external loads, plate coverage, and segment inertial error can impair empirical closure."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/02640410701373543",
+      "title": "The role of upper torso and pelvis rotation in driving performance during the golf swing",
+      "year": 2008,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/02640410701373543",
+      "urls": [
+        "https://doi.org/10.1080/02640410701373543",
+        "https://pubmed.ncbi.nlm.nih.gov/17852693/"
+      ],
+      "linked_claims": ["PD-CLAIM-015"],
+      "supports_claims": ["PD-CLAIM-015"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-015": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-015; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Selected correlations and group contrasts; no causal intervention, out-of-sample prediction, or universal X-factor prescription."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/02640414.2010.507249",
+      "title": "The relationship between biomechanical variables and driving performance during the golf swing",
+      "year": 2010,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/02640414.2010.507249",
+      "urls": [
+        "https://doi.org/10.1080/02640414.2010.507249",
+        "https://people.stfx.ca/smackenz/courses/hk396/handouts/Chu%202010%20The%20relationship%20between%20biomechanical%20variables%20and%20driving%20performance.pdf"
+      ],
+      "linked_claims": ["PD-CLAIM-016"],
+      "supports_claims": ["PD-CLAIM-016"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-016": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-016; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "In-sample explained variance after stepwise selection; participant-level held-out accuracy, shrinkage, causal effects, and population transport are unreported."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/14763141.2010.535842",
+      "title": "Elite golfers' kinematic sequence in full-swing and partial-swing shots",
+      "year": 2010,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/14763141.2010.535842",
+      "urls": ["https://doi.org/10.1080/14763141.2010.535842"],
+      "linked_claims": ["PD-CLAIM-007"],
+      "supports_claims": ["PD-CLAIM-007"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-007": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-007; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Prevalence across all golfers and invariance across coordinate definitions, clubs, shot intents, and processing pipelines remain unestablished."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/14763141.2012.660799",
+      "title": "Assessment of planarity of the golf swing based on the functional swing plane of the clubhead and motion planes of the body points",
+      "year": 2012,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/14763141.2012.660799",
+      "urls": ["https://doi.org/10.1080/14763141.2012.660799"],
+      "linked_claims": ["PD-CLAIM-049", "PD-CLAIM-050"],
+      "supports_claims": ["PD-CLAIM-049", "PD-CLAIM-050"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-049": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-049; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The measurements do not establish one universal numerical planarity tolerance or show that a planar reduced model predicts all three-dimensional kinetics."
+        },
+        "PD-CLAIM-050": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-050; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "These requirements improve identifiability but do not guarantee that observational data identify neural control or a universally optimal strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/14763141.2012.728244",
+      "title": "Three-dimensional trunk kinematics in golf: between-club differences and relationships to clubhead speed",
+      "year": 2013,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/14763141.2012.728244",
+      "urls": [
+        "https://doi.org/10.1080/14763141.2012.728244",
+        "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.728244"
+      ],
+      "linked_claims": ["PD-CLAIM-017"],
+      "supports_claims": ["PD-CLAIM-017"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-017": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-017; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Small male low-handicap sample, multiple regressions, no held-out validation, and no causal intervention."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/14763141.2013.771896",
+      "title": "Validity of the X-factor computation methods and relationship between the X-factor parameters and clubhead velocity in skilled golfers",
+      "year": 2013,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/14763141.2013.771896",
+      "urls": [
+        "https://doi.org/10.1080/14763141.2013.771896",
+        "https://www.tandfonline.com/doi/abs/10.1080/14763141.2013.771896"
+      ],
+      "linked_claims": ["PD-CLAIM-018"],
+      "supports_claims": ["PD-CLAIM-018"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-018": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-018; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Small skilled-male sample and selected definitions; a null direct correlation does not exclude nonlinear, conditional, or within-player effects."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1080/14763141.2019.1586983",
+      "title": "Effects of the golfer--ground interaction on clubhead speed in skilled male golfers",
+      "year": 2019,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1080/14763141.2019.1586983",
+      "urls": [
+        "https://doi.org/10.1080/14763141.2019.1586983",
+        "https://pubmed.ncbi.nlm.nih.gov/31042142/"
+      ],
+      "linked_claims": ["PD-CLAIM-011", "PD-CLAIM-074"],
+      "supports_claims": ["PD-CLAIM-011", "PD-CLAIM-074"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-011": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-011; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Association only; male low-handicap population; selected peaks and club conditions; no causal intervention or energetic source attribution."
+        },
+        "PD-CLAIM-074": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-074; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No cited study identifies a unique biological command, universal COP waveform, or causal performance intervention."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1088/0034-4885/66/2/202",
+      "title": "The physics of golf",
+      "year": 2003,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1088/0034-4885/66/2/202",
+      "urls": ["https://doi.org/10.1088/0034-4885/66/2/202"],
+      "linked_claims": ["PD-CLAIM-051"],
+      "supports_claims": ["PD-CLAIM-051"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-051": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-051; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Books and analytical papers establish use and utility, not population validity or physiological control."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1098/rspa.2008.0304",
+      "title": "On the mechanics of the golf swing",
+      "year": 2009,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1098/rspa.2008.0304",
+      "urls": [
+        "https://doi.org/10.1098/rspa.2008.0304",
+        "https://people.stfx.ca/smackenz/courses/DirectedStudy/Articles/Sharp%202008%20Mechanics%20of%20golf.pdf"
+      ],
+      "linked_claims": ["PD-CLAIM-029", "PD-CLAIM-030", "PD-CLAIM-034"],
+      "supports_claims": ["PD-CLAIM-029", "PD-CLAIM-030", "PD-CLAIM-034"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-029": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-029; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "A near-optimal program in this model is not a unique global optimum, measured human torque strategy, muscle command, or validation of the same program in a moving-base spatial model."
+        },
+        "PD-CLAIM-030": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-030; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The accessible publisher record does not establish uniqueness or global convergence; Sharp's later reconstruction reported materially different timing and a faster admissible program."
+        },
+        "PD-CLAIM-034": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-034; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes non-equivalence of the published estimands; it does not determine which model is most predictive of a population or which strategy a person should use."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1115/1.3426951",
+      "title": "Maximizing distance of the golf drive: an optimal control study",
+      "year": 1975,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1115/1.3426951",
+      "urls": [
+        "https://api.crossref.org/works/10.1115/1.3426951",
+        "https://doi.org/10.1115/1.3426951"
+      ],
+      "linked_claims": ["PD-CLAIM-030", "PD-CLAIM-034"],
+      "supports_claims": ["PD-CLAIM-030", "PD-CLAIM-034"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-030": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-030; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The accessible publisher record does not establish uniqueness or global convergence; Sharp's later reconstruction reported materially different timing and a faster admissible program."
+        },
+        "PD-CLAIM-034": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-034; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes non-equivalence of the published estimands; it does not determine which model is most predictive of a population or which strategy a person should use."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1119/1.1976419",
+      "title": "On the dynamics of the swing of a golf club",
+      "year": 1970,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1119/1.1976419",
+      "urls": ["https://doi.org/10.1119/1.1976419"],
+      "linked_claims": ["PD-CLAIM-051"],
+      "supports_claims": ["PD-CLAIM-051"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-051": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-051; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Books and analytical papers establish use and utility, not population validity or physiological control."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1119/1.2346688",
+      "title": "On the efficiency of the golf swing",
+      "year": 2006,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1119/1.2346688",
+      "urls": [
+        "https://doi.org/10.1119/1.2346688",
+        "https://waddengolfacademy.com/biomechanics/White%202006%20On%20the%20efficiency%20of%20the%20golf%20swing.pdf"
+      ],
+      "linked_claims": ["PD-CLAIM-025"],
+      "supports_claims": ["PD-CLAIM-025"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-025": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-025; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The passive analysis is not an estimate of human joint-force power, and the driven sensitivity result depends on downswing angle, impact-at-peak-speed, constant torque, rigid links, and a fixed hub."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1123/ijsb.2.4.235",
+      "title": "Dynamics of the shoulder and elbow joints of the throwing arm during a baseball pitch",
+      "year": 1986,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1123/ijsb.2.4.235",
+      "urls": ["https://doi.org/10.1123/ijsb.2.4.235"],
+      "linked_claims": ["PD-CLAIM-040"],
+      "supports_claims": ["PD-CLAIM-040"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-040": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-040; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Resultant torques are not individual muscle forces, acceleration fractions depend on coordinates and model, and the task does not establish a golf mechanism."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1123/ijsb.5.4.403",
+      "title": "Three-Dimensional Interactions in a Two-Segment Kinetic Chain. Part I: General Model",
+      "year": 1989,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1123/ijsb.5.4.403",
+      "urls": ["https://doi.org/10.1123/ijsb.5.4.403"],
+      "linked_claims": ["PD-CLAIM-035", "PD-CLAIM-040"],
+      "supports_claims": ["PD-CLAIM-035", "PD-CLAIM-040"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-035": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-035; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The identity does not determine whether a particular pathway is practically large and does not include contact-mode changes, algebraic constraints, or actuator dynamics unless those are added to the equations."
+        },
+        "PD-CLAIM-040": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-040; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Resultant torques are not individual muscle forces, acceleration fractions depend on coordinates and model, and the task does not establish a golf mechanism."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1123/ijsb.5.4.420",
+      "title": "Three-Dimensional Interactions in a Two-Segment Kinetic Chain. Part II: Application to the Throwing Arm in Baseball Pitching",
+      "year": 1989,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1123/ijsb.5.4.420",
+      "urls": ["https://doi.org/10.1123/ijsb.5.4.420"],
+      "linked_claims": ["PD-CLAIM-035", "PD-CLAIM-040", "PD-CLAIM-043"],
+      "supports_claims": ["PD-CLAIM-035", "PD-CLAIM-040", "PD-CLAIM-043"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-035": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-035; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The identity does not determine whether a particular pathway is practically large and does not include contact-mode changes, algebraic constraints, or actuator dynamics unless those are added to the equations."
+        },
+        "PD-CLAIM-040": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-040; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Resultant torques are not individual muscle forces, acceleration fractions depend on coordinates and model, and the task does not establish a golf mechanism."
+        },
+        "PD-CLAIM-043": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-043; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes missing transport evidence; it does not show active braking is absent in golf or determine the best human strategy."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1123/jab.16.4.356",
+      "title": "An insight into the importance of wrist torque in driving the golfball: a simulation study",
+      "year": 2000,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1123/jab.16.4.356",
+      "urls": [
+        "https://doi.org/10.1123/jab.16.4.356",
+        "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml"
+      ],
+      "linked_claims": ["PD-CLAIM-023", "PD-CLAIM-059", "PD-CLAIM-093"],
+      "supports_claims": ["PD-CLAIM-023", "PD-CLAIM-059", "PD-CLAIM-093"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-023": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-023; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The contrast is not a forced-release-delay effect, human treatment effect, or reusable timing prescription; the source explicitly states timing sensitivity to torque-profile shape."
+        },
+        "PD-CLAIM-059": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-059; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Model predictions do not establish participant benefit, safety, intent, learning, or one optimum."
+        },
+        "PD-CLAIM-093": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-093; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The evidence does not identify a universal performance plateau, motor strategy, or causal human optimum."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1177/17479541261429479",
+      "title": "The effects of different kinematic sequences of the elite golf swing on clubhead speed",
+      "year": 2026,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1177/17479541261429479",
+      "urls": ["https://doi.org/10.1177/17479541261429479"],
+      "linked_claims": ["PD-CLAIM-007", "PD-CLAIM-012"],
+      "supports_claims": ["PD-CLAIM-007", "PD-CLAIM-012"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-007": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-007; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Prevalence across all golfers and invariance across coordinate definitions, clubs, shot intents, and processing pipelines remain unestablished."
+        },
+        "PD-CLAIM-012": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-012; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Not a meta-analytic population effect; access to several full texts and a study-by-study bias matrix remain open."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1249/00005768-198201000-00012",
+      "title": "Summation of segmental velocities in the golf swing",
+      "year": 1982,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1249/00005768-198201000-00012",
+      "urls": ["https://doi.org/10.1249/00005768-198201000-00012"],
+      "linked_claims": ["PD-CLAIM-038"],
+      "supports_claims": ["PD-CLAIM-038"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-038": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-038; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The source does not establish a human treatment effect, unique optimal release, three-dimensional validity, or muscle-control prescription."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1260/174795407789705497",
+      "title": "Body segment sequencing and timing in golf",
+      "year": 2007,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1260/174795407789705497",
+      "urls": [
+        "https://doi.org/10.1260/174795407789705497",
+        "https://journals.sagepub.com/doi/10.1260/174795407789705497",
+        "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Neal%202007%20Body%20Segment%20Sequencing%20and%20Timing%20in%20Golf.pdf"
+      ],
+      "linked_claims": ["PD-CLAIM-019", "PD-CLAIM-093"],
+      "supports_claims": ["PD-CLAIM-019", "PD-CLAIM-093"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-019": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-019; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The study did not measure pre-impact clubhead state or impact location; a null result for peak-speed lags does not establish what subjective timing represents."
+        },
+        "PD-CLAIM-093": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-093; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The evidence does not identify a universal performance plateau, motor strategy, or causal human optimum."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.1371/journal.pone.0295152",
+      "title": "AddBiomechanics: Automating Model Scaling, Inverse Kinematics, and Inverse Dynamics from Human Motion Data Through Sequential Optimization",
+      "year": 2023,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.1371/journal.pone.0295152",
+      "urls": ["https://doi.org/10.1371/journal.pone.0295152"],
+      "linked_claims": ["PD-CLAIM-075"],
+      "supports_claims": ["PD-CLAIM-075"],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-075": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-075; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Condition number depends on contact-row scaling, while model error, filtering, inertias, and omitted loads can all enter residuals."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.3200/jmbr.40.5.446-476",
+      "title": "Multifinger prehension: an overview",
+      "year": 2008,
+      "source_type": "journal_article",
+      "evidence_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.3200/jmbr.40.5.446-476",
+      "urls": ["https://doi.org/10.3200/JMBR.40.5.446-476"],
+      "linked_claims": ["PD-CLAIM-068"],
+      "supports_claims": ["PD-CLAIM-068"],
+      "scope_assessment": "Eligible for scoped literature synthesis and terminology, not as a substitute for the underlying primary studies or a causal human test.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-068": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-068; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The external studies are not golf, do not rank golf strategies, and do not validate the model's quantitative force allocation."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.3389/fspor.2026.1790645",
+      "title": "Foot--ground interaction and clubhead speed: impulse-based energy transfer as the key mechanism in the golf swing",
+      "year": 2026,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.3389/fspor.2026.1790645",
+      "urls": [
+        "https://doi.org/10.3389/fspor.2026.1790645",
+        "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1790645/full"
+      ],
+      "linked_claims": ["PD-CLAIM-010"],
+      "supports_claims": ["PD-CLAIM-010"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-010": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-010; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Small sample relative to the upstream feature space, pooled clubs, constructed factors, observational mediation, model-selection uncertainty, and no longitudinal causal intervention."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.3390/proceedings2060243",
+      "title": "Dynamic optimization of the golf swing using a six degree-of-freedom biomechanical model",
+      "year": 2018,
+      "source_type": "proceedings_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "not_applicable_non_periodical",
+      "correction_check_method": "Crossref relation metadata and publisher or PubMed record reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://doi.org/10.3390/proceedings2060243",
+      "urls": [
+        "https://doi.org/10.3390/proceedings2060243",
+        "https://www.mdpi.com/2504-3900/2/6/243"
+      ],
+      "linked_claims": ["PD-CLAIM-033", "PD-CLAIM-034"],
+      "supports_claims": ["PD-CLAIM-033", "PD-CLAIM-034"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-033": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-033; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The optimized pelvis-torso onset ordering contradicted the observed sequence cited by the authors; late simulated grip discrepancies were partly associated with an extreme forward and high tee position selected by the optimization."
+        },
+        "PD-CLAIM-034": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-034; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes non-equivalence of the published estimands; it does not determine which model is most predictive of a population or which strategy a person should use."
+        }
+      }
+    },
+    {
+      "work_id": "doi:10.5277/abb-01318-2019-02",
+      "title": "Biomechanical analysis of the golf swing: methodological effect of angular velocity component on the identification of the kinematic sequence",
+      "year": 2019,
+      "source_type": "journal_article",
+      "evidence_role": "methods_or_measurement",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed record and DOI resolver destination reviewed on 2026-08-14; the PubMed record is used because the publisher PDF destination returned 404.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://pubmed.ncbi.nlm.nih.gov/31741482/",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/31741482/"],
+      "linked_claims": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-020",
+        "PD-CLAIM-048",
+        "PD-CLAIM-050"
+      ],
+      "supports_claims": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-020",
+        "PD-CLAIM-048",
+        "PD-CLAIM-050"
+      ],
+      "scope_assessment": "Eligible for the declared measurement or computational method and its stated validation domain; it does not validate the golf-specific causal hypothesis by itself.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-007": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-007; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Prevalence across all golfers and invariance across coordinate definitions, clubs, shot intents, and processing pipelines remain unestablished."
+        },
+        "PD-CLAIM-020": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-020; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "One sample and a finite method set; does not quantify all preprocessing, filtering, coordinate, or population sources of variability."
+        },
+        "PD-CLAIM-048": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-048; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The study compares kinematic definitions; it does not measure energy flow, joint power, or establish the best method outside its sample."
+        },
+        "PD-CLAIM-050": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as methods or measurement evidence for the bounded proposition registered as PD-CLAIM-050; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "These requirements improve identifiability but do not guarantee that observational data identify neural control or a universally optimal strategy."
+        }
+      }
+    },
+    {
+      "work_id": "pmid:1997807",
+      "title": "A segment interaction analysis of proximal-to-distal sequential segment motion patterns",
+      "year": 1991,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://pubmed.ncbi.nlm.nih.gov/1997807/",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/1997807/"],
+      "linked_claims": ["PD-CLAIM-039", "PD-CLAIM-043"],
+      "supports_claims": ["PD-CLAIM-039", "PD-CLAIM-043"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-039": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-039; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The 1991 sample is four participants and lower-limb tasks; the 1993 paper is a synthesis, not a golf experiment or population estimate."
+        },
+        "PD-CLAIM-043": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-043; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The synthesis establishes missing transport evidence; it does not show active braking is absent in golf or determine the best human strategy."
+        }
+      }
+    },
+    {
+      "work_id": "pmid:24149910",
+      "title": "Low handicap golfers generate more torque at the shoe-natural grass interface when using a driver",
+      "year": 2008,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://pubmed.ncbi.nlm.nih.gov/24149910/",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/24149910/"],
+      "linked_claims": ["PD-CLAIM-074"],
+      "supports_claims": ["PD-CLAIM-074"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-074": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-074; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "No cited study identifies a unique biological command, universal COP waveform, or causal performance intervention."
+        }
+      }
+    },
+    {
+      "work_id": "pmid:24627665",
+      "title": "A three dimensional kinematic and kinetic study of the golf swing",
+      "year": 2005,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/",
+      "urls": ["https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/"],
+      "linked_claims": ["PD-CLAIM-009"],
+      "supports_claims": ["PD-CLAIM-009"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-009": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-009; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Small sample, model-dependent partition, no population interval, and no implication that low leg-joint work means ground reaction or lower-limb mechanics are unimportant."
+        }
+      }
+    },
+    {
+      "work_id": "pmid:25435779",
+      "title": "Kinetic constrained optimization of the golf swing hub path",
+      "year": 2014,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://pubmed.ncbi.nlm.nih.gov/25435779/",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/25435779/"],
+      "linked_claims": ["PD-CLAIM-028"],
+      "supports_claims": ["PD-CLAIM-028"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-028": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-028; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The optimization altered hand path and club angular trajectory jointly, so it does not isolate inward pull; constraints came from selected subject swings and do not represent physiological feasibility distributions."
+        }
+      }
+    },
+    {
+      "work_id": "pmid:2676547",
+      "title": "Determining muscle's force and action in multi-articular movement",
+      "year": 1989,
+      "source_type": "journal_article",
+      "evidence_role": "review_or_synthesis",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://pubmed.ncbi.nlm.nih.gov/2676547/",
+      "urls": ["https://pubmed.ncbi.nlm.nih.gov/2676547/"],
+      "linked_claims": ["PD-CLAIM-047"],
+      "supports_claims": ["PD-CLAIM-047"],
+      "scope_assessment": "Eligible for scoped literature synthesis and terminology, not as a substitute for the underlying primary studies or a causal human test.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-047": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as review or synthesis evidence for the bounded proposition registered as PD-CLAIM-047; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Induced quantities depend on coordinates, constraints, actuator representation, state, and intervention definition and do not uniquely identify neural control."
+        }
+      }
+    },
+    {
+      "work_id": "record:cheetham-2008-kinematic-sequence",
+      "title": "Comparison of kinematic sequence parameters between amateur and professional golfers",
+      "year": 2008,
+      "source_type": "book_chapter",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "not_applicable_non_periodical",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://www.researchgate.net/publication/252236426",
+      "urls": ["https://www.researchgate.net/publication/252236426"],
+      "linked_claims": ["PD-CLAIM-012", "PD-CLAIM-093"],
+      "supports_claims": ["PD-CLAIM-012", "PD-CLAIM-093"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-012": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-012; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Not a meta-analytic population effect; access to several full texts and a study-by-study bias matrix remain open."
+        },
+        "PD-CLAIM-093": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-093; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The evidence does not identify a universal performance plateau, motor strategy, or causal human optimum."
+        }
+      }
+    },
+    {
+      "work_id": "url:golfscience-12640",
+      "title": "How amateur golfers deliver energy to the driver",
+      "year": 2020,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://www.golfsciencejournal.org/article/12640-how-amateur-golfers-deliver-energy-to-the-driver",
+      "urls": [
+        "https://www.golfsciencejournal.org/article/12640-how-amateur-golfers-deliver-energy-to-the-driver"
+      ],
+      "linked_claims": ["PD-CLAIM-062"],
+      "supports_claims": ["PD-CLAIM-062"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-062": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-062; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Neither source measures perceived effort, a causal force intervention, dynamic golf muscle activation, or universal response."
+        }
+      }
+    },
+    {
+      "work_id": "url:jssm-04-520",
+      "title": "Work and power analysis of the golf swing",
+      "year": 2005,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf",
+      "urls": ["https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf"],
+      "linked_claims": ["PD-CLAIM-009"],
+      "supports_claims": ["PD-CLAIM-009"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-009": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-009; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Small sample, model-dependent partition, no population interval, and no implication that low leg-joint work means ground reaction or lower-limb mechanics are unimportant."
+        }
+      }
+    },
+    {
+      "work_id": "url:jssm-08-235",
+      "title": "Kinematic analyses of the golf swing hub path and its role in golfer/club kinetic transfers",
+      "year": 2009,
+      "source_type": "journal_article",
+      "evidence_role": "empirical_human",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf",
+      "urls": ["https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf"],
+      "linked_claims": ["PD-CLAIM-027", "PD-CLAIM-055"],
+      "supports_claims": ["PD-CLAIM-027", "PD-CLAIM-055"],
+      "scope_assessment": "Eligible as human observational or experimental evidence only for the sampled population, apparatus, variables, and estimand reported by the original work.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-027": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-027; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "Four selected swings, no population interval, planar mapping, numerical differentiation, and participant selection of the analyzed trial."
+        },
+        "PD-CLAIM-055": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as empirical human evidence for the bounded proposition registered as PD-CLAIM-055; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "A moving hub breaks the proximal radial-tangential orthogonality; gate coefficients alone do not establish term dominance or favorable work."
+        }
+      }
+    },
+    {
+      "work_id": "url:jssm-13-859",
+      "title": "Kinetic constrained optimization of the golf swing hub path",
+      "year": 2014,
+      "source_type": "journal_article",
+      "evidence_role": "modeling_or_simulation",
+      "independence": "independent_of_project",
+      "correction_status": "no_notice_found_in_reviewed_metadata",
+      "correction_check_method": "PubMed relational metadata or the original publication record was reviewed on 2026-08-14.",
+      "evidence_disposition": "eligible",
+      "canonical_metadata_url": "https://www.jssm.org/volume13/iss4/cap/jssm-13-859.pdf",
+      "urls": ["https://www.jssm.org/volume13/iss4/cap/jssm-13-859.pdf"],
+      "linked_claims": ["PD-CLAIM-028"],
+      "supports_claims": ["PD-CLAIM-028"],
+      "scope_assessment": "Eligible as a model-conditional result only under the original equations, parameters, controls, objective, and boundary conditions.",
+      "limitations": [
+        "Claim fit is bounded to the original study or model domain.",
+        "Citation and independent authorship do not by themselves establish causal or population-wide validity."
+      ],
+      "claim_assessments": {
+        "PD-CLAIM-028": {
+          "disposition": "supports_with_declared_boundary",
+          "use": "Used as modeling or simulation evidence for the bounded proposition registered as PD-CLAIM-028; it is not counted as an independent replication merely because multiple URLs exist.",
+          "boundary": "The optimization altered hand path and club angular trajectory jointly, so it does not isolate inward pull; constraints came from selected subject swings and do not represent physiological feasibility distributions."
+        }
+      }
+    }
+  ],
+  "availability_snapshot": {
+    "checked_on": "2026-08-14",
+    "method": "HTTP GET with redirects and a one-kilobyte range request; 2xx/3xx resolves, while 401/403/406/429 records automated access restriction. Broken and transient links are not admissible.",
+    "summary": {
+      "resolves": 36,
+      "automated_access_restricted": 42
+    },
+    "url_checks": {
+      "https://api.crossref.org/works/10.1115/1.3426951": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://api.crossref.org/works/10.1115/1.3426951"
+      },
+      "https://doi.org/10.1007/978-0-387-46050-5_30": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://link.springer.com/10.1007/978-0-387-46050-5_30"
+      },
+      "https://doi.org/10.1007/BF00198762": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://link.springer.com/article/10.1007/BF00198762"
+      },
+      "https://doi.org/10.1007/s12283-008-0005-0": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://link.springer.com/article/10.1007/s12283-008-0005-0"
+      },
+      "https://doi.org/10.1007/s12283-009-0020-9": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://link.springer.com/article/10.1007/s12283-009-0020-9"
+      },
+      "https://doi.org/10.1007/s12283-016-0197-7": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://link.springer.com/article/10.1007/s12283-016-0197-7"
+      },
+      "https://doi.org/10.1016/0021-9290(80)90172-4": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/0021929080901724"
+      },
+      "https://doi.org/10.1016/0021-9290(92)90073-A": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/002192909290073A"
+      },
+      "https://doi.org/10.1016/0021-9290(93)90084-R": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/002192909390084R"
+      },
+      "https://doi.org/10.1016/S0966-6362(02)00068-1": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/S0966636202000681"
+      },
+      "https://doi.org/10.1016/S1440-2440(04)80265-2": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/S1440244004802652"
+      },
+      "https://doi.org/10.1016/j.jbiomech.2013.01.020": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/S0021929013000614"
+      },
+      "https://doi.org/10.1016/j.jbiomech.2022.111087": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://linkinghub.elsevier.com/retrieve/pii/S0021929022001427"
+      },
+      "https://doi.org/10.1038/srep38845": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://www.nature.com/articles/srep38845"
+      },
+      "https://doi.org/10.1046/j.1460-2687.1999.00028.x": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://onlinelibrary.wiley.com/doi/full/10.1046/j.1460-2687.1999.00028.x"
+      },
+      "https://doi.org/10.1046/j.1460-2687.2001.00071.x": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://onlinelibrary.wiley.com/doi/full/10.1046/j.1460-2687.2001.00071.x"
+      },
+      "https://doi.org/10.1046/j.1460-2687.2002.00094.x": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://onlinelibrary.wiley.com/doi/full/10.1046/j.1460-2687.2002.00094.x"
+      },
+      "https://doi.org/10.1055/s-2008-1038732": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://www.thieme-connect.de/products/ejournals/abstract/10.1055/s-2008-1038732"
+      },
+      "https://doi.org/10.1080/026404100364983": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/full/10.1080/026404100364983"
+      },
+      "https://doi.org/10.1080/02640410410001730179": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/02640410410001730179"
+      },
+      "https://doi.org/10.1080/02640410701373543": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/02640410701373543"
+      },
+      "https://doi.org/10.1080/02640414.2010.507249": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/02640414.2010.507249"
+      },
+      "https://doi.org/10.1080/14763141.2010.535842": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/14763141.2010.535842"
+      },
+      "https://doi.org/10.1080/14763141.2012.660799": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.660799"
+      },
+      "https://doi.org/10.1080/14763141.2012.728244": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.728244"
+      },
+      "https://doi.org/10.1080/14763141.2013.771896": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/14763141.2013.771896"
+      },
+      "https://doi.org/10.1080/14763141.2019.1586983": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/full/10.1080/14763141.2019.1586983"
+      },
+      "https://doi.org/10.1088/0034-4885/66/2/202": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://validate.perfdrive.com/fb803c746e9148689b3984a31fccd902/?ssa=771d9a96-590e-40a4-bea0-9df22887e4e8&ssb=06591246077&ssc=https%3A%2F%2Fiopscience.iop.org%2Farticle%2F10.1088%2F0034-4885%2F66%2F2%2F202&ssi=eae043fb-cnvj-4c14-a890-d0d9f2443222&ssk=botmanager_support@radware.com&ssm=81283558938337403104964061474797&ssn=97a2748f8532f138a382d5b7ee6a3f39e92d5ac079b8-876e-4122-ab8d7f&sso=5f059e4e-a20749c4b60d46dfddbc055b4527d635fc83af8a4d62941e&ssp=32905937041786717709178671914976751&ssq=77853495332233985871253322121063335519197&ssr=MTcyLjU2LjEwNi45OQ==&sst=Mozilla/5.0%20UpstreamDriftEvidenceAudit/1.0&ssu=&ssv=&ssw=&ssx=eyJyZCI6ImlvcC5vcmciLCJfX3V6bWYiOiI3ZjkwMDA1YWMwNzliOC04NzZlLTQxMjItYWU0ZS1hMjA3NDljNGI2MGQxLTE3ODY3NTMzMjIxMTkwLTAwNDlmMzMyZDRlM2I2MWIzMDMxMCIsInV6bXgiOiI3ZmMwMDA2NDc2YWFlNC0zYzZhLTQyZWQtOGE3MS0yMzZiMjVjNjFhMzcxLTE3ODY3NTMzMjIxMTkwLTAwMGZkN2QzOTQxZWM0YzkwMzgxMCJ9"
+      },
+      "https://doi.org/10.1098/rspa.2008.0304": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://royalsocietypublishing.org/rspa/article/465/2102/551-570/82759"
+      },
+      "https://doi.org/10.1115/1.3426951": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://asmedigitalcollection.asme.org/dynamicsystems/article/97/4/362/400950/Maximizing-Distance-of-the-Golf-Drive-An-Optimal"
+      },
+      "https://doi.org/10.1119/1.1976419": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubs.aip.org/ajp/article/38/5/644/1048608/On-the-Dynamics-of-the-Swing-of-a-Golf-Club"
+      },
+      "https://doi.org/10.1119/1.2346688": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubs.aip.org/ajp/article/74/12/1088/1042181/On-the-efficiency-of-the-golf-swing"
+      },
+      "https://doi.org/10.1123/ijsb.2.4.235": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://journals.humankinetics.com/view/journals/jab/2/4/article-p235.xml"
+      },
+      "https://doi.org/10.1123/ijsb.5.4.403": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://journals.humankinetics.com/view/journals/jab/5/4/article-p403.xml"
+      },
+      "https://doi.org/10.1123/ijsb.5.4.420": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://journals.humankinetics.com/view/journals/jab/5/4/article-p420.xml"
+      },
+      "https://doi.org/10.1123/jab.16.4.356": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml"
+      },
+      "https://doi.org/10.1177/17479541261429479": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://journals.sagepub.com/doi/10.1177/17479541261429479"
+      },
+      "https://doi.org/10.1249/00005768-198201000-00012": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://journals.lww.com/00005768-198201000-00012"
+      },
+      "https://doi.org/10.1260/174795407789705497": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://journals.sagepub.com/doi/10.1260/174795407789705497"
+      },
+      "https://doi.org/10.1371/journal.pone.0295152": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0295152"
+      },
+      "https://doi.org/10.3200/JMBR.40.5.446-476": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/full/10.3200/JMBR.40.5.446-476"
+      },
+      "https://doi.org/10.3389/fspor.2026.1790645": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1790645/full"
+      },
+      "https://doi.org/10.3390/proceedings2060243": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.mdpi.com/2504-3900/2/6/243"
+      },
+      "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://journals.humankinetics.com/view/journals/jab/16/4/article-p356.xml"
+      },
+      "https://journals.sagepub.com/doi/10.1260/174795407789705497": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://journals.sagepub.com/doi/10.1260/174795407789705497"
+      },
+      "https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1460-2687.1999.00028.x": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1460-2687.1999.00028.x"
+      },
+      "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Kenny%202008%20Segmental%20sequencing%20of%20kinetic%20energy%20in%20a%20computer-simulated.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Kenny%202008%20Segmental%20sequencing%20of%20kinetic%20energy%20in%20a%20computer-simulated.pdf"
+      },
+      "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Miura%202001%20Parametric%20acceleration%20effect%20of%20inward%20pull.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Miura%202001%20Parametric%20acceleration%20effect%20of%20inward%20pull.pdf"
+      },
+      "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Neal%202007%20Body%20Segment%20Sequencing%20and%20Timing%20in%20Golf.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://people.stfx.ca/smackenz/Courses/DirectedStudy/Articles/Neal%202007%20Body%20Segment%20Sequencing%20and%20Timing%20in%20Golf.pdf"
+      },
+      "https://people.stfx.ca/smackenz/courses/DirectedStudy/Articles/Sharp%202008%20Mechanics%20of%20golf.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://people.stfx.ca/smackenz/courses/DirectedStudy/Articles/Sharp%202008%20Mechanics%20of%20golf.pdf"
+      },
+      "https://people.stfx.ca/smackenz/courses/hk396/handouts/Chu%202010%20The%20relationship%20between%20biomechanical%20variables%20and%20driving%20performance.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://people.stfx.ca/smackenz/courses/hk396/handouts/Chu%202010%20The%20relationship%20between%20biomechanical%20variables%20and%20driving%20performance.pdf"
+      },
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/10824641/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/10824641/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/1400517/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/1400517/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/15712503/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/15712503/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/17454544/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/17454544/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/17852693/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/17852693/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/1997807/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/1997807/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/24149910/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/24149910/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/25435779/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/25435779/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/2676547/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/2676547/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/27515436/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/27515436/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/31042142/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/31042142/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/31741482/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/31741482/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/41653371/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/41653371/"
+      },
+      "https://pubmed.ncbi.nlm.nih.gov/8505347/": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://pubmed.ncbi.nlm.nih.gov/8505347/"
+      },
+      "https://uwspace.uwaterloo.ca/items/812277fb-2d1b-47b9-ba6d-8b25392c120f": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://uwspace.uwaterloo.ca/items/812277fb-2d1b-47b9-ba6d-8b25392c120f"
+      },
+      "https://waddengolfacademy.com/biomechanics/White%202006%20On%20the%20efficiency%20of%20the%20golf%20swing.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://waddengolfacademy.com/biomechanics/White%202006%20On%20the%20efficiency%20of%20the%20golf%20swing.pdf"
+      },
+      "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1790645/full": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1790645/full"
+      },
+      "https://www.golfsciencejournal.org/article/12640-how-amateur-golfers-deliver-energy-to-the-driver": {
+        "status": "resolves",
+        "http_status": 200,
+        "final_url": "https://www.golfsciencejournal.org/article/12640-how-amateur-golfers-deliver-energy-to-the-driver"
+      },
+      "https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://www.jssm.org/volume04/iss4/cap/jssm-04-520.pdf"
+      },
+      "https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://www.jssm.org/volume08/iss2/cap/jssm-08-235.pdf"
+      },
+      "https://www.jssm.org/volume13/iss4/cap/jssm-13-859.pdf": {
+        "status": "resolves",
+        "http_status": 206,
+        "final_url": "https://www.jssm.org/volume13/iss4/cap/jssm-13-859.pdf"
+      },
+      "https://www.mdpi.com/2504-3900/2/6/243": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.mdpi.com/2504-3900/2/6/243"
+      },
+      "https://www.researchgate.net/publication/226339824_Segmental_Sequencing_of_Kinetic_Energy_in_the_Golf_Swing": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.researchgate.net/publication/226339824_Segmental_Sequencing_of_Kinetic_Energy_in_the_Golf_Swing"
+      },
+      "https://www.researchgate.net/publication/252236426": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.researchgate.net/publication/252236426"
+      },
+      "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.728244": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/14763141.2012.728244"
+      },
+      "https://www.tandfonline.com/doi/abs/10.1080/14763141.2013.771896": {
+        "status": "automated_access_restricted",
+        "http_status": 403,
+        "final_url": "https://www.tandfonline.com/doi/abs/10.1080/14763141.2013.771896"
+      }
+    }
+  }
+}

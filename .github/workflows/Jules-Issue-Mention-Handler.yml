@@ -1,0 +1,268 @@
+name: Jules Issue Mention Handler
+
+# Triggers when @jules is mentioned in an issue comment
+# Sends the issue to Jules AI for automated fixing
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: jules-issue-fix-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-kill-switch:
+    timeout-minutes: 30
+    runs-on: d-sorg-fleet-docker
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
+  pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  issue-mention-handler:
+    timeout-minutes: 30
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Acknowledge Request
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+          - **Jules here!** I've received your request and I'm analyzing this issue now.
+
+          I'll create a PR with a fix shortly. Stay tuned! -
+
+          ---
+          *Triggered by @${ACTOR}*
+          EOF
+          )"
+
+      - name: Call Jules API
+        id: jules
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -e
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Cannot process with Jules AI."
+            gh issue comment "$ISSUE_NUMBER" --body "-- Jules API key not configured. Please set up JULES_API_KEY secret."
+            exit 0
+          fi
+
+          # Get issue details (ISSUE_TITLE and COMMENT_BODY are passed via env to prevent injection)
+          ISSUE_BODY=$(gh issue view "$ISSUE_NUMBER" --json body -q '.body')
+
+          echo "Processing issue #$ISSUE_NUMBER: $ISSUE_TITLE"
+
+          # Lookup repository source
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" 2>/dev/null | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            gh issue comment "$ISSUE_NUMBER" --body "-- This repository is not configured in Jules. Please add it at https://jules.google.com"
+            exit 0
+          fi
+
+          echo "Found source: $SOURCE_ID"
+
+          # Build prompt for Jules
+          PROMPT=$(cat << PROMPT_EOF
+          Fix GitHub Issue #$ISSUE_NUMBER
+
+          ## Issue Title
+          $ISSUE_TITLE
+
+          ## Issue Description
+          $ISSUE_BODY
+
+          ## Trigger Comment
+          $COMMENT_BODY
+
+          ## Instructions
+          1. Analyze the issue thoroughly
+          2. Identify the root cause
+          3. Implement a minimal, focused fix
+          4. Run linters: ruff check --fix . && black .
+          5. Ensure tests pass if applicable
+          6. Create a PR that includes "Fixes #$ISSUE_NUMBER" in the description
+
+          Be precise and make only the changes necessary to fix this issue.
+          PROMPT_EOF
+          )
+
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            --arg startBranch "$DEFAULT_BRANCH" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: $startBranch
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions" || echo "000")
+
+          echo "HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            cat /tmp/session_response.json 2>/dev/null || true
+            gh issue comment "$ISSUE_NUMBER" --body "-- Jules API error (HTTP $HTTP_CODE). Please try again later."
+            exit 1
+          fi
+
+          SESSION_ID=$(jq -r '.name' /tmp/session_response.json)
+          echo "Created session: $SESSION_ID"
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+
+          # Poll for completion
+          MAX_WAIT=1800  # 30 minutes
+          POLL_INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID" || echo '{}')
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state // "UNKNOWN"')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                echo "status=success" >> $GITHUB_OUTPUT
+
+                # Get PR info if available
+                PR_URL=$(echo "$SESSION_STATUS" | jq -r '.pullRequestUrl // empty')
+                if [ -n "$PR_URL" ]; then
+                  echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+                fi
+                break
+                ;;
+              "FAILED")
+                echo "::warning::Session failed"
+                echo "status=failed" >> $GITHUB_OUTPUT
+                gh issue comment "$ISSUE_NUMBER" --body "- Jules was unable to fix this issue automatically. Manual intervention may be required."
+                exit 0
+                ;;
+              "CANCELLED")
+                echo "::warning::Session cancelled"
+                echo "status=cancelled" >> $GITHUB_OUTPUT
+                exit 0
+                ;;
+            esac
+
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "::warning::Session timed out"
+            gh issue comment "$ISSUE_NUMBER" --body "-- Jules session timed out. The fix may still be in progress - check back later."
+          fi
+
+      - name: Report Success
+        if: steps.jules.outputs.status == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_URL: ${{ steps.jules.outputs.pr_url }}
+        run: |
+          if [ -n "$PR_URL" ]; then
+            MESSAGE="- **Done!** I've created a PR with the fix: $PR_URL
+
+          Please review the changes and merge when ready.
+
+          ---
+          *Jules Issue Fixer*"
+          else
+            MESSAGE="- **Done!** I've analyzed the issue and submitted my fix.
+
+          A PR should appear shortly. If not, check the [Actions tab](https://github.com/${{ github.repository }}/actions) for details.
+
+          ---
+          *Jules Issue Fixer*"
+          fi
+
+          gh issue comment "$ISSUE_NUMBER" --body "$MESSAGE"
+
+      - name: Summary
+        if: always()
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ACTOR: ${{ github.event.comment.user.login }}
+          JULES_STATUS: ${{ steps.jules.outputs.status || 'N/A' }}
+          JULES_PR_URL: ${{ steps.jules.outputs.pr_url }}
+        run: |
+          {
+            echo "## Jules Issue Fixer Summary"
+            echo ""
+            echo "- **Issue:** #${ISSUE_NUMBER}"
+            echo "- **Title:** ${ISSUE_TITLE}"
+            echo "- **Triggered by:** @${ACTOR}"
+            echo "- **Status:** ${JULES_STATUS}"
+            if [ -n "${JULES_PR_URL}" ]; then
+              echo "- **PR:** ${JULES_PR_URL}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

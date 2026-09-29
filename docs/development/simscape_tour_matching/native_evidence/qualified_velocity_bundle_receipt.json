@@ -1,0 +1,16 @@
+{
+  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\velocity-seed-02-bundle.zip",
+  "remote_path": "C:/Users/diete/SimscapeTour9921/velocity-seed-02-bundle.zip",
+  "sha256": "798e83a1f5916e9004d29ec9d0fef9e08c9266f2c8ccd7a5d0aa41f96af081ed",
+  "source_base": "81a8086d9",
+  "patch": "configure_capture_velocity_targets.m",
+  "manifest": {
+    "velocity-seed-02/configure_capture_velocity_targets.m": "d047604a39b4ed2255981ab98ec628ed9205c61b75cd38dde94dca848ad34381",
+    "velocity-seed-02/driver_marker_payload.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "velocity-seed-02/initial_velocity_seed.json": "8ef526394bc31496b02222f0586377600015849ae42e515896584108d647f460",
+    "velocity-seed-02/initial_velocity_seed.m": "36cabfd0c6d453af27fc075519e1a9b6c6f6864ad563891fd4a51c2efd5ac35b",
+    "velocity-seed-02/initial_velocity_seed.mat": "920ac8d8343ea538b995a202bb02ad0fd114b1bd193a177b5ce843bfdc83feee",
+    "velocity-seed-02/run.log": "59c80902274b7b42daacb222cbfa5e9f04eb9f635f75fd024b3463377a1bfc44",
+    "velocity-seed-02/test_capture_initial_velocity.m": "3f50bfc5b95edfb161fd86d5bf69518bc7c92e470d88503e5e7476b3fb382cde"
+  }
+}

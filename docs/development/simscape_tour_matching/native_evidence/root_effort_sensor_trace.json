@@ -1,0 +1,181 @@
+{
+  "model": "src\\engines\\Simscape_Multibody_Models\\3D_Golf_Model\\matlab\\src\\model\\GolfSwing3D_Kinetic.slx",
+  "sha256": "daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9",
+  "system_xml": "simulink/systems/system_8281.xml",
+  "hip_block_sid": "7055",
+  "sensing_flags": {
+    "PxSenseTorqueForce": "on",
+    "PySenseTorqueForce": "on",
+    "PzSenseTorqueForce": "on",
+    "RxSenseTorqueForce": "on",
+    "RySenseTorqueForce": "on",
+    "RzSenseTorqueForce": "on"
+  },
+  "channels": [
+    {
+      "log": "CombinedSignalBus.HipLogs.TranslationForceXInput",
+      "coordinate": "TranslationInputX",
+      "unit": "N",
+      "converter_sid": "8518",
+      "converter_unit": "inherit",
+      "physical_connections": [
+        {
+          "ZOrder": "10937",
+          "Src": "8518#lconn:1",
+          "Points": "[-341, 0; 0, 310]",
+          "Dst": "7055#rconn:5"
+        }
+      ],
+      "bus_connections": [
+        {
+          "Name": "TranslationForceXInput",
+          "ZOrder": "11171",
+          "Labels": "[0, 0]",
+          "Src": "8518#out:1",
+          "Points": "[540, 0]",
+          "Dst": "9527#in:21"
+        }
+      ]
+    },
+    {
+      "log": "CombinedSignalBus.HipLogs.TranslationForceYInput",
+      "coordinate": "TranslationInputY",
+      "unit": "N",
+      "converter_sid": "8519",
+      "converter_unit": "inherit",
+      "physical_connections": [
+        {
+          "ZOrder": "10938",
+          "Src": "8519#lconn:1",
+          "Points": "[-332, 0; 0, 300]",
+          "Dst": "7055#rconn:9"
+        }
+      ],
+      "bus_connections": [
+        {
+          "Name": "TranslationForceYInput",
+          "ZOrder": "11172",
+          "Labels": "[0, 0]",
+          "Src": "8519#out:1",
+          "Points": "[560, 0]",
+          "Dst": "9527#in:22"
+        }
+      ]
+    },
+    {
+      "log": "CombinedSignalBus.HipLogs.TranslationForceZInput",
+      "coordinate": "TranslationInputZ",
+      "unit": "N",
+      "converter_sid": "8520",
+      "converter_unit": "inherit",
+      "physical_connections": [
+        {
+          "ZOrder": "10939",
+          "Src": "8520#lconn:1",
+          "Points": "[-35, 0; 0, 290]",
+          "Dst": "7055#rconn:13"
+        }
+      ],
+      "bus_connections": [
+        {
+          "Name": "TranslationForceZInput",
+          "ZOrder": "11173",
+          "Labels": "[0, 0]",
+          "Src": "8520#out:1",
+          "Points": "[580, 0]",
+          "Dst": "9527#in:23"
+        }
+      ]
+    },
+    {
+      "log": "CombinedSignalBus.HipLogs.HipTorqueXInput",
+      "coordinate": "HipInputX",
+      "unit": "Nm",
+      "converter_sid": "8515",
+      "converter_unit": "inherit",
+      "physical_connections": [
+        {
+          "ZOrder": "10940",
+          "Src": "8515#lconn:1",
+          "Points": "[-44, 0; 0, 280]",
+          "Dst": "7055#rconn:17"
+        }
+      ],
+      "bus_connections": [
+        {
+          "Name": "HipTorqueXInput",
+          "ZOrder": "11174",
+          "Labels": "[0, 0]",
+          "Src": "8515#out:1",
+          "Points": "[600, 0]",
+          "Dst": "9527#in:24"
+        }
+      ]
+    },
+    {
+      "log": "CombinedSignalBus.HipLogs.HipTorqueYInput",
+      "coordinate": "HipInputY",
+      "unit": "Nm",
+      "converter_sid": "8516",
+      "converter_unit": "inherit",
+      "physical_connections": [
+        {
+          "ZOrder": "10941",
+          "Src": "8516#lconn:1",
+          "Points": "[-315, 0; 0, 270]",
+          "Dst": "7055#rconn:21"
+        }
+      ],
+      "bus_connections": [
+        {
+          "Name": "HipTorqueYInput",
+          "ZOrder": "11175",
+          "Labels": "[0, 0]",
+          "Src": "8516#out:1",
+          "Points": "[620, 0]",
+          "Dst": "9527#in:25"
+        }
+      ]
+    },
+    {
+      "log": "CombinedSignalBus.HipLogs.HipTorqueZInput",
+      "coordinate": "HipInputZ",
+      "unit": "Nm",
+      "converter_sid": "8517",
+      "converter_unit": "inherit",
+      "physical_connections": [
+        {
+          "ZOrder": "10942",
+          "Src": "8517#lconn:1",
+          "Points": "[-362, 0; 0, 260]",
+          "Dst": "7055#rconn:25"
+        }
+      ],
+      "bus_connections": [
+        {
+          "Name": "HipTorqueZInput",
+          "ZOrder": "11176",
+          "Labels": "[0, 0]",
+          "Src": "8517#out:1",
+          "Points": "[640, 0]",
+          "Dst": "9527#in:26"
+        }
+      ]
+    }
+  ],
+  "interpretation": "Six primitive actuator-sensing channels. Force polynomial rows are world-resolved and must be rotated into the fixed hip-joint base; angular hip torques already use primitive axes. Composite force/torque outputs are excluded.",
+  "reference": "https://www.mathworks.com/help/sm/ref/bushingjoint.html",
+  "force_command_frame": "world",
+  "force_sensor_frame": "hip_joint_base",
+  "force_transform": {
+    "system_xml": "simulink/systems/system_7474.xml",
+    "product_sid": "7061",
+    "product_name": "ConvertGlobalXtoHipBaseLocal",
+    "rotation_tag": "RotationMatrixGlobaltoHipJointBase",
+    "base_transform_system_xml": "simulink/systems/system_7475.xml",
+    "base_transform_sid": "1206",
+    "sequence": "ZXZ",
+    "angles_deg": "[0 PlaneTilt 0]",
+    "world_to_hip_base": "transpose of Rx(PlaneTilt)"
+  }
+}

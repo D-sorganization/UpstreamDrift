@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "shapes": {
+    "head": {
+      "file": "head.stl",
+      "rest_dimensions": [0.17839, 0.205064, 0.209842],
+      "binding_template": {
+        "kind": "between_two",
+        "marker_names": ["HeadFront", "HeadTop"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "torso": {
+      "file": "torso.stl",
+      "rest_dimensions": [0.2, 0.3, 0.4],
+      "binding_template": {
+        "kind": "cluster",
+        "marker_names": ["C7", "T10", "CLAV", "STRN"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "upper_arm": {
+      "file": "upper_arm.stl",
+      "rest_dimensions": [0.079316, 0.079316, 0.3],
+      "binding_template": {
+        "kind": "between_two",
+        "marker_names": ["LSHO", "LELB"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "forearm": {
+      "file": "forearm.stl",
+      "rest_dimensions": [0.069401, 0.069401, 0.27],
+      "binding_template": {
+        "kind": "between_two",
+        "marker_names": ["LELB", "LWRA"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "hand": {
+      "file": "hand.stl",
+      "rest_dimensions": [0.029946, 0.08152, 0.096726],
+      "binding_template": {
+        "kind": "on_marker",
+        "marker_names": ["LFIN"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "thigh": {
+      "file": "thigh.stl",
+      "rest_dimensions": [0.119422, 0.119422, 0.45],
+      "binding_template": {
+        "kind": "between_two",
+        "marker_names": ["LASI", "LKNE"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "shin": {
+      "file": "shin.stl",
+      "rest_dimensions": [0.099518, 0.099518, 0.42],
+      "binding_template": {
+        "kind": "between_two",
+        "marker_names": ["LKNE", "LANK"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    },
+    "foot": {
+      "file": "foot.stl",
+      "rest_dimensions": [0.07, 0.1, 0.25],
+      "binding_template": {
+        "kind": "between_two",
+        "marker_names": ["LHEE", "LTOE"],
+        "rest_orientation_quat": [1.0, 0.0, 0.0, 0.0]
+      },
+      "license": "CC0-1.0",
+      "source": "procedural-low-poly"
+    }
+  }
+}

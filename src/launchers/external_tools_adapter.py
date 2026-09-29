@@ -1,0 +1,261 @@
+"""External tool adapters for cross-repo GUI embedding.
+
+Provides a mechanism for the UpstreamDrift unified launcher to discover
+and instantiate GUI tools that live in external repositories (e.g., the
+``Tools`` repository). Each adapter wraps one external tool and exposes
+the standard ``get_dockable_ui()`` protocol.
+
+The adapters gracefully degrade to a status widget when the external
+repository or its dependencies are not available.
+
+Design by Contract
+------------------
+Pre:  External repo paths must be resolvable through the canonical
+      ``tools_repo_path.resolve_tools_repo`` facade (env override, then the
+      pinned ``vendor/ud-tools`` gitlink, then dev-mode sibling discovery).
+Post: ``get_dockable_ui()`` always returns a valid QMainWindow, even if
+      the external tool is unavailable (shows error state).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+import sys
+from pathlib import Path
+from typing import Any
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QLabel,
+    QMainWindow,
+    QStatusBar,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.launchers.tools_repo_path import ToolsRepoResolution, resolve_tools_repo
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# External repo discovery
+# ---------------------------------------------------------------------------
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Cache of the last successful resolution. Setting ``_TOOLS_REPO = None``
+# (as legacy tests do) invalidates the cache; unresolved lookups are retried.
+_TOOLS_REPO: Path | None = None
+_TOOLS_RESOLUTION: ToolsRepoResolution | None = None
+
+
+def _resolve_tools_repo_cached() -> ToolsRepoResolution | None:
+    """Resolve the Tools repo once via the canonical facade (issue #8858).
+
+    Postcondition: any cached resolution came from ``resolve_tools_repo``;
+    this module never probes the filesystem for Tools itself.
+    """
+    global _TOOLS_REPO, _TOOLS_RESOLUTION
+    if _TOOLS_REPO is not None and _TOOLS_RESOLUTION is not None:
+        return _TOOLS_RESOLUTION
+    try:
+        resolution = resolve_tools_repo(_REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))
+    except RuntimeError as exc:
+        logger.warning("Invalid TOOLS_REPO_PATH override: %s", exc)
+        resolution = None
+    if resolution is None:
+        logger.warning(
+            "Tools repository not found (no TOOLS_REPO_PATH, no vendored "
+            "vendor/ud-tools, no sibling checkout)"
+        )
+        _TOOLS_REPO = None
+        _TOOLS_RESOLUTION = None
+        return None
+    logger.info(
+        "Tools repository resolved from %s source at %s (pinned=%s)",
+        resolution.source,
+        resolution.path,
+        resolution.pinned,
+    )
+    _TOOLS_REPO = resolution.path
+    _TOOLS_RESOLUTION = resolution
+    return resolution
+
+
+def _find_tools_repo() -> Path | None:
+    """Return the Tools repository root via the canonical resolution facade."""
+    resolution = _resolve_tools_repo_cached()
+    return None if resolution is None else resolution.path
+
+
+def _ensure_tools_on_path() -> bool:
+    """Ensure the Tools/src directory is on sys.path.
+
+    Returns True if the path was added or already present.
+    """
+    repo = _find_tools_repo()
+    if repo is None:
+        return False
+    src_dir = str(repo / "src")
+    if src_dir not in sys.path:
+        sys.path.insert(0, src_dir)
+        logger.info("Added Tools repo to sys.path: %s", src_dir)
+    return True
+
+
+# ---------------------------------------------------------------------------
+# Unavailable-tool placeholder
+# ---------------------------------------------------------------------------
+
+
+class _UnavailableToolWidget(QWidget):
+    """Placeholder widget shown when an external tool cannot be loaded."""
+
+    def __init__(
+        self, tool_name: str, error: str, parent: QWidget | None = None
+    ) -> None:
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        title = QLabel(f"⚠ {tool_name}")
+        title_font = title.font()
+        title_font.setPointSize(16)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        msg = QLabel(f"This tool could not be loaded:\n\n{error}")
+        msg.setWordWrap(True)
+        msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        msg.setStyleSheet("color: #ff9800;")
+        msg.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        layout.addWidget(msg)
+
+        hint = QLabel(
+            "Initialize the vendored Tools submodule "
+            "(git submodule update --init vendor/ud-tools),\n"
+            "or set TOOLS_REPO_PATH / provide a sibling Tools checkout "
+            "for development."
+        )
+        hint.setWordWrap(True)
+        hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hint.setStyleSheet("color: gray;")
+        hint.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        layout.addWidget(hint)
+
+    def cleanup(self) -> None:
+        """No-op cleanup for the placeholder."""
+
+
+class _UnavailableToolWindow(QMainWindow):
+    """Window wrapper for the unavailable tool placeholder."""
+
+    def __init__(self, tool_name: str, error: str) -> None:
+        super().__init__()
+        self.is_tool_available = False
+        self.setWindowTitle(f"{tool_name} (Unavailable)")
+        self.setMinimumSize(600, 400)
+        self._widget = _UnavailableToolWidget(tool_name, error, self)
+        self.setCentralWidget(self._widget)
+        status = QStatusBar()
+        self.setStatusBar(status)
+        status.showMessage(f"{tool_name}: not available")
+
+
+# ---------------------------------------------------------------------------
+# External tool adapters
+# ---------------------------------------------------------------------------
+
+
+def _wrap_external_widget(tool_name: str, import_func: Any) -> QMainWindow:
+    """Attempt to import and wrap an external tool widget.
+
+    Args:
+        tool_name: Human-readable tool name.
+        import_func: Callable that returns a QWidget instance.
+
+    Returns:
+        QMainWindow wrapping the tool widget, or an error placeholder.
+    """
+    if not _ensure_tools_on_path():
+        return _UnavailableToolWindow(tool_name, "Tools repository not found.")
+    try:
+        widget = import_func()
+        window = QMainWindow()
+        window.setWindowTitle(tool_name)
+        window.setMinimumSize(1000, 700)
+        window.setCentralWidget(widget)
+        status = QStatusBar()
+        window.setStatusBar(status)
+        status.showMessage(f"{tool_name} — loaded from Tools repository")
+        return window
+    except Exception as e:
+        logger.exception("Failed to load external tool: %s", tool_name)
+        return _UnavailableToolWindow(tool_name, str(e))
+
+
+# --- Video Analyzer ---
+
+
+def get_video_analyzer_dockable_ui() -> QMainWindow:
+    """Return the Video Analyzer window for docking.
+
+    This used to try importing ``video_analyzer.launch_pyqt6`` from a
+    sibling repository that has never existed in this checkout (issue
+    #8854 confirmed those paths are dead) and silently fell back to a
+    static "GUI placeholder" label on ``ImportError`` (issue #8883). The
+    real implementation now lives in this repo at
+    ``src.tools.video_analyzer.gui``, wired to the tested
+    ``SwingAnalyzer`` math, so no external resolution is needed here.
+    """
+    from src.tools.video_analyzer.gui import get_dockable_ui
+
+    return get_dockable_ui()
+
+
+# --- Data Explorer ---
+
+
+def _import_data_explorer() -> QWidget:
+    from data_explorer.gui import MainWidget  # type: ignore[import-untyped]
+
+    return MainWidget()
+
+
+def get_data_explorer_dockable_ui() -> QMainWindow:
+    """Return the Data Explorer window for docking."""
+    return _wrap_external_widget("Data Explorer", _import_data_explorer)
+
+
+# --- Data Processor ---
+
+
+def _import_data_processor() -> QWidget:
+    repo = _find_tools_repo()
+    if repo is not None:
+        dp_path = str(repo / "src" / "data_processing" / "data_processor" / "python")
+        if dp_path not in sys.path:
+            sys.path.insert(0, dp_path)
+
+    from data_processor.pyqt_widget import DataProcessorWidget
+
+    return DataProcessorWidget()
+
+
+def get_data_processor_dockable_ui() -> QMainWindow:
+    """Return the Data Processor window for docking."""
+    return _wrap_external_widget("Data Processor", _import_data_processor)
+
+
+# ---------------------------------------------------------------------------
+# Convenience registry
+# ---------------------------------------------------------------------------
+
+EXTERNAL_TOOLS: dict[str, Any] = {
+    "video_analyzer": get_video_analyzer_dockable_ui,
+    "data_explorer": get_data_explorer_dockable_ui,
+    "data_processor": get_data_processor_dockable_ui,
+}

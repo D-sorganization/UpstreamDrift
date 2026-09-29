@@ -1,0 +1,7 @@
+{
+  "_comment": "Baseline counts for bare suppression directives in src/. Captured 2026-05-24 as part of issue #5916. The ratchet check in scripts/ci/check_suppression_ratchet.py fails if any of these counts grow.",
+  "counts": {
+    "bare_type_ignore": 60,
+    "bare_noqa": 3
+  }
+}

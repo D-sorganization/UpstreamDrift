@@ -1,0 +1,91 @@
+"""Pydantic contracts for MCP (Model Context Protocol) infrastructure.
+
+Defines the over-the-wire and configuration data shapes:
+
+- ``McpTransport`` — enum of supported transports (stdio, http).
+- ``McpServerConfig`` — a single MCP server entry. Validation enforces:
+    * stdio transport requires ``command``.
+    * http  transport requires ``url``.
+- ``McpToolDescriptor`` — a tool advertised by an MCP server.
+- ``McpResourceDescriptor`` — a resource advertised by an MCP server.
+
+These models intentionally use Pydantic ``model_validator`` for cross-field
+DbC validation so that misconfigurations are caught at construction time
+rather than at connect/call time.
+"""
+
+from __future__ import annotations
+
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+
+class McpTransport(str, Enum):  # noqa: UP042 - Python 3.10 compatibility
+    """Supported MCP transports."""
+
+    STDIO = "stdio"
+    HTTP = "http"
+
+
+class McpServerConfig(BaseModel):
+    """Configuration for a single MCP server.
+
+    Attributes:
+        name: Unique server identifier used for namespacing tools.
+        transport: ``stdio`` (subprocess) or ``http`` (remote URL).
+        command: Executable to spawn for stdio servers.
+        args: Command-line arguments for stdio servers.
+        env: Extra environment variables for the stdio child process.
+        url: Endpoint URL for http servers.
+        timeout_seconds: Per-request timeout.
+    """
+
+    model_config = {"extra": "ignore"}
+
+    name: str = Field(..., min_length=1)
+    transport: McpTransport = McpTransport.STDIO
+    command: str | None = None
+    args: list[str] = Field(default_factory=list)
+    env: dict[str, str] = Field(default_factory=dict)
+    url: str | None = None
+    timeout_seconds: float = 30.0
+
+    @field_validator("name")
+    @classmethod
+    def _name_nonempty(cls, value: str) -> str:
+        if not value or not value.strip():
+            raise ValueError("name must be a non-empty string")
+        return value
+
+    @model_validator(mode="after")
+    def _validate_transport_fields(self) -> McpServerConfig:
+        if self.transport is McpTransport.STDIO and not self.command:
+            raise ValueError("stdio transport requires 'command'")
+        if self.transport is McpTransport.HTTP and not self.url:
+            raise ValueError("http transport requires 'url'")
+        return self
+
+
+class McpToolDescriptor(BaseModel):
+    """A tool advertised by an MCP server."""
+
+    model_config = {"extra": "ignore"}
+
+    name: str = Field(..., min_length=1)
+    description: str = ""
+    input_schema: dict[str, Any] = Field(
+        default_factory=lambda: {"type": "object", "properties": {}}
+    )
+
+
+class McpResourceDescriptor(BaseModel):
+    """A resource advertised by an MCP server."""
+
+    model_config = {"extra": "ignore"}
+
+    uri: str = Field(..., min_length=1)
+    name: str = ""
+    description: str = ""
+    mime_type: str | None = None

@@ -1,0 +1,1488 @@
+"""TDD tests for simulation WebSocket route fixes (issue #2481).
+
+Bugs covered:
+1. Engine name normalisation: EngineType(engine_type.upper()) fails for all valid
+   lowercase engine names because enum values are lowercase strings.
+2. set_state signature mismatch: engine.set_state expects (q, v) as two ndarray
+   arguments, but the route passed the raw dict from the JSON config.
+3. get_state serialisation: engine.get_state() returns (np.ndarray, np.ndarray)
+   which cannot be JSON-serialised; frames must convert arrays to lists.
+
+Unit tests use helper functions extracted from simulation_ws and do NOT require
+httpx. Integration tests (TestClient) are skipped when httpx is not installed.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import anyio
+import numpy as np
+import pytest
+import src.api.routes.simulation_ws as simulation_ws_module
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from src.api.routes import simulation_ws
+from src.api.routes.simulation_ws import (
+    _apply_initial_state,
+    _apply_set_speed,
+    _compute_real_time_sleep_delay,
+    _engine_analysis_to_dict,
+    _engine_state_to_dict,
+    _engine_type_from_str,
+    _get_simulation_speed_factor,
+    _handle_client_commands,
+    _is_numeric_sequence,
+    _process_pending_client_commands,
+    _send_simulation_frame,
+    _step_physics_batch,
+    _wait_for_resume_or_stop,
+)
+from src.shared.python.core.contracts.exceptions import PreconditionError
+from src.shared.python.engine_core.engine_registry import EngineType
+
+pytestmark = pytest.mark.unit
+
+try:
+    _HAS_TESTCLIENT = True
+except RuntimeError:
+    _HAS_TESTCLIENT = False
+
+requires_testclient = pytest.mark.skipif(
+    not _HAS_TESTCLIENT, reason="httpx not installed"
+)
+
+# ---------------------------------------------------------------------------
+# 1. Engine name normalisation — pure unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestEngineTypeNormalisation:
+    """_engine_type_from_str must handle any case variant of valid names."""
+
+    def test_lowercase_accepted(self) -> None:
+        """'mujoco' must map to EngineType.MUJOCO."""
+        assert _engine_type_from_str("mujoco") == EngineType.MUJOCO
+
+    def test_uppercase_accepted(self) -> None:
+        """'MUJOCO' must also map to EngineType.MUJOCO."""
+        assert _engine_type_from_str("MUJOCO") == EngineType.MUJOCO
+
+    def test_mixed_case_accepted(self) -> None:
+        """'MuJoCo' must map to EngineType.MUJOCO."""
+        assert _engine_type_from_str("MuJoCo") == EngineType.MUJOCO
+
+    def test_all_valid_names_round_trip(self) -> None:
+        """Every EngineType value must round-trip through _engine_type_from_str."""
+        for et in EngineType:
+            assert _engine_type_from_str(et.value) == et
+            assert _engine_type_from_str(et.value.upper()) == et
+
+    def test_invalid_name_raises_value_error(self) -> None:
+        """Unknown engine name must raise ValueError."""
+        with pytest.raises(ValueError):
+            _engine_type_from_str("nosuchengine")
+
+
+# ---------------------------------------------------------------------------
+# 2. set_state signature — pure unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestApplyInitialState:
+    """_apply_initial_state must call engine.set_state(q, v) correctly."""
+
+    def _make_engine(self) -> MagicMock:
+        engine = MagicMock()
+        engine.set_state.return_value = None
+        return engine
+
+    def test_set_state_called_with_two_ndarray_args(self) -> None:
+        """set_state receives (q, v) as two separate numpy arrays."""
+        engine = self._make_engine()
+        _apply_initial_state(engine, {"q": [1.0, 2.0], "v": [3.0, 4.0]})
+
+        engine.set_state.assert_called_once()
+        args = engine.set_state.call_args.args
+        assert len(args) == 2, f"Expected 2 args (q, v), got {len(args)}"
+        q, v = args
+        assert isinstance(q, np.ndarray)
+        assert isinstance(v, np.ndarray)
+        assert list(q) == pytest.approx([1.0, 2.0])
+        assert list(v) == pytest.approx([3.0, 4.0])
+
+    def test_empty_initial_state_dict_uses_empty_arrays(self) -> None:
+        """Missing q/v keys default to empty arrays."""
+        engine = self._make_engine()
+        _apply_initial_state(engine, {})
+        args = engine.set_state.call_args.args
+        assert len(args) == 2
+        q, v = args
+        assert len(q) == 0
+        assert len(v) == 0
+
+    def test_engine_without_set_state_is_skipped(self) -> None:
+        """Engines lacking set_state must not raise."""
+        engine = MagicMock(spec=[])  # no set_state attr
+        _apply_initial_state(engine, {"q": [0.0], "v": [0.0]})  # must not raise
+
+
+# ---------------------------------------------------------------------------
+# 3. get_state JSON serialisation — pure unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestEngineStateToDict:
+    """_engine_state_to_dict must produce a JSON-serialisable dict."""
+
+    def _make_engine(
+        self,
+        q: list[float] | None = None,
+        v: list[float] | None = None,
+    ) -> MagicMock:
+        engine = MagicMock()
+        engine.get_state.return_value = (
+            np.array(q or [0.1, 0.2]),
+            np.array(v or [0.3, 0.4]),
+        )
+        return engine
+
+    def test_returns_dict_with_q_and_v(self) -> None:
+        engine = self._make_engine([0.1, 0.2], [0.3, 0.4])
+        result = _engine_state_to_dict(engine)
+        assert "q" in result
+        assert "v" in result
+        assert result["q"] == pytest.approx([0.1, 0.2])
+        assert result["v"] == pytest.approx([0.3, 0.4])
+
+    def test_result_is_json_serialisable(self) -> None:
+        engine = self._make_engine([0.5, 1.0, 1.5], [2.0, 2.5, 3.0])
+        result = _engine_state_to_dict(engine)
+        try:
+            json.dumps(result)
+        except (TypeError, ValueError) as exc:
+            pytest.fail(f"State dict is not JSON-serialisable: {exc}")
+
+    def test_q_and_v_are_plain_lists(self) -> None:
+        """q and v must be plain Python lists, not numpy arrays."""
+        engine = self._make_engine([0.1], [0.2])
+        result = _engine_state_to_dict(engine)
+        assert isinstance(result["q"], list)
+        assert isinstance(result["v"], list)
+
+    def test_engine_without_get_state_returns_empty(self) -> None:
+        """Engines lacking get_state return an empty dict."""
+        engine = MagicMock(spec=[])  # no get_state attr
+        result = _engine_state_to_dict(engine)
+        assert result == {}
+
+    def test_numpy_float32_serialises(self) -> None:
+        """numpy float32 values inside arrays must be JSON-serialisable."""
+        engine = MagicMock()
+        engine.get_state.return_value = (
+            np.array([0.1], dtype=np.float32),
+            np.array([0.2], dtype=np.float32),
+        )
+        result = _engine_state_to_dict(engine)
+        json.dumps(result)  # must not raise
+
+
+class TestEngineAnalysisToDict:
+    """Issue #7718: live-analysis payload must carry real q/v from get_state,
+    not the always-null output of the removed bespoke-method-only path."""
+
+    def test_derives_angles_and_velocities_from_get_state(self) -> None:
+        engine = MagicMock(spec=["get_state"])
+        engine.get_state.return_value = (
+            np.array([0.1, 0.2, 0.3]),
+            np.array([1.0, 2.0, 3.0]),
+        )
+        result = _engine_analysis_to_dict(engine)
+        assert result["joint_angles"] == pytest.approx([0.1, 0.2, 0.3])
+        assert result["velocities"] == pytest.approx([1.0, 2.0, 3.0])
+        assert "warning" not in result
+
+    def test_result_is_json_serialisable(self) -> None:
+        engine = MagicMock(spec=["get_state"])
+        engine.get_state.return_value = (
+            np.array([0.1], dtype=np.float32),
+            np.array([0.2], dtype=np.float32),
+        )
+        result = _engine_analysis_to_dict(engine)
+        json.dumps(result)  # must not raise
+        assert isinstance(result["joint_angles"], list)
+        assert isinstance(result["velocities"], list)
+
+    def test_legacy_methods_take_precedence_when_present(self) -> None:
+        engine = MagicMock(spec=["get_joint_angles", "get_velocities"])
+        engine.get_joint_angles.return_value = np.array([9.0])
+        engine.get_velocities.return_value = np.array([8.0])
+        result = _engine_analysis_to_dict(engine)
+        assert result["joint_angles"] == pytest.approx([9.0])
+        assert result["velocities"] == pytest.approx([8.0])
+
+    def test_warns_instead_of_silent_null_when_no_state(self) -> None:
+        engine = MagicMock(spec=[])  # no get_state / bespoke methods
+        result = _engine_analysis_to_dict(engine)
+        assert result["joint_angles"] is None
+        assert result["velocities"] is None
+        assert "warning" in result
+
+
+class _Stats:
+    def __init__(self, speed_factor: float) -> None:
+        self.speed_factor = speed_factor
+
+
+class _SimulationService:
+    def __init__(self, speed_factor: float) -> None:
+        self.stats = _Stats(speed_factor)
+
+
+class _AppState:
+    def __init__(self, speed_factor: float | None = None) -> None:
+        if speed_factor is not None:
+            self.simulation_service = _SimulationService(speed_factor)
+
+
+class _App:
+    def __init__(self, speed_factor: float | None = None) -> None:
+        self.state = _AppState(speed_factor)
+
+
+class _WebSocket:
+    def __init__(self, speed_factor: float | None = None) -> None:
+        self.app = _App(speed_factor)
+
+
+class TestSimulationSpeedFactor:
+    """Simulation WebSocket loop must read speed from shared service state."""
+
+    def test_uses_service_speed_factor_when_available(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=2.5)
+        assert _get_simulation_speed_factor(websocket, {}) == pytest.approx(2.5)
+
+    def test_falls_back_to_config_when_service_missing(self) -> None:
+        websocket: Any = _WebSocket()
+        assert _get_simulation_speed_factor(
+            websocket, {"speed_factor": 1.5}
+        ) == pytest.approx(1.5)
+
+    def test_invalid_speed_falls_back_to_default(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=0.0)
+        assert _get_simulation_speed_factor(websocket, {}) == pytest.approx(1.0)
+
+
+class TestRealTimeSleepDelay:
+    """Real-time pacing must scale inverse to requested simulation speed."""
+
+    def test_returns_remaining_delay_at_default_speed(self) -> None:
+        assert _compute_real_time_sleep_delay(0.002, 1.0, 0.0005) == pytest.approx(
+            0.0015
+        )
+
+    def test_scales_delay_for_faster_speed(self) -> None:
+        assert _compute_real_time_sleep_delay(0.002, 2.0, 0.0) == pytest.approx(0.001)
+
+    def test_never_returns_negative_delay(self) -> None:
+        assert _compute_real_time_sleep_delay(0.002, 2.0, 0.01) == pytest.approx(0.0)
+
+
+class TestApplySetSpeed:
+    """_apply_set_speed is the single source of set_speed mutation (issue #7719)."""
+
+    def test_clamps_and_propagates_valid_factor(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+        config: dict[str, Any] = {"speed_factor": 1.0}
+
+        _apply_set_speed(websocket, config, {"speed_factor": 4.5})
+
+        assert config["speed_factor"] == pytest.approx(4.5)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(4.5)
+        )
+
+    def test_invalid_factor_falls_back_to_default(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+        config: dict[str, Any] = {"speed_factor": 2.0}
+
+        _apply_set_speed(websocket, config, {"speed_factor": "not-a-number"})
+
+        assert config["speed_factor"] == pytest.approx(1.0)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(1.0)
+        )
+
+
+class TestClientCommandHandling:
+    """_handle_client_commands and _wait_for_resume_or_stop must update config/stats on set_speed."""
+
+    @pytest.mark.anyio
+    async def test_handle_client_commands_set_speed(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        async def mock_receive_json() -> dict[str, Any]:
+            return {"action": "set_speed", "speed_factor": 4.5}
+
+        websocket.receive_json = mock_receive_json
+
+        config = {"speed_factor": 1.0}
+        command = await _handle_client_commands(websocket, config)
+
+        assert command == "continue"
+        assert config["speed_factor"] == pytest.approx(4.5)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(4.5)
+        )
+
+    @pytest.mark.anyio
+    async def test_wait_for_resume_or_stop_set_speed(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        messages: list[dict[str, Any]] = [
+            {"action": "set_speed", "speed_factor": 3.0},
+            {"action": "resume"},
+        ]
+
+        async def mock_receive_json() -> dict[str, Any]:
+            return messages.pop(0)
+
+        websocket.receive_json = mock_receive_json
+
+        async def mock_send_json(data: Any) -> None:
+            pass
+
+        websocket.send_json = mock_send_json
+
+        config = {"speed_factor": 1.0}
+        stopped = await _wait_for_resume_or_stop(websocket, config)
+
+        assert not stopped
+        assert config["speed_factor"] == pytest.approx(3.0)
+        assert (
+            websocket.app.state.simulation_service.stats.speed_factor
+            == pytest.approx(3.0)
+        )
+
+
+class _FailingEngine:
+    def step(self, _timestep: float) -> None:
+        raise RuntimeError("sensitive simulation failure")
+
+
+class _EngineManager:
+    def switch_engine(self, _engine_type: EngineType) -> bool:
+        return True
+
+    def get_active_physics_engine(self) -> object:
+        return _FailingEngine()
+
+
+class TestSimulationStreamErrors:
+    """Unexpected simulation failures should preserve tracebacks server-side."""
+
+    def test_unexpected_error_hides_internal_details(self) -> None:
+        app = FastAPI()
+        app.state.engine_manager = _EngineManager()
+        app.include_router(simulation_ws.router)
+
+        async def fake_resolve_ws_user(_websocket: Any) -> object:
+            return object()
+
+        with (
+            patch(
+                "src.api.routes.simulation_ws.resolve_ws_user",
+                side_effect=fake_resolve_ws_user,
+            ),
+            patch("src.api.routes.simulation_ws.logger.exception") as logger_exception,
+            TestClient(app).websocket_connect("/ws/simulate/mujoco") as websocket,
+        ):
+            websocket.send_json(
+                {"action": "start", "config": {"duration": 0.01, "timestep": 0.01}}
+            )
+
+            running = websocket.receive_json()
+            assert running == {"status": "running", "duration": 0.01}
+
+            error = websocket.receive_json()
+            assert error == {"error": "Internal server error"}
+
+        logger_exception.assert_called_once()
+
+
+class _RouteAppState:
+    def __init__(self, *, has_engine_manager: bool = True) -> None:
+        if has_engine_manager:
+            self.engine_manager = object()
+
+
+class _RouteApp:
+    def __init__(self, *, has_engine_manager: bool = True) -> None:
+        self.state = _RouteAppState(has_engine_manager=has_engine_manager)
+
+
+class _RouteWebSocket:
+    def __init__(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        has_engine_manager: bool = True,
+    ) -> None:
+        self._messages = list(messages)
+        self.app = _RouteApp(has_engine_manager=has_engine_manager)
+        self.accepted = False
+        self.closed = False
+        self.sent: list[dict[str, Any]] = []
+
+    async def accept(self) -> None:
+        self.accepted = True
+
+    async def receive_json(self) -> dict[str, Any]:
+        return self._messages.pop(0)
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+    async def close(self) -> None:
+        self.closed = True
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_sanitizes_unexpected_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Unexpected runtime failures must be logged with traceback and sanitized."""
+
+    websocket: Any = _RouteWebSocket([{"action": "start", "config": {}}])
+
+    async def fake_load_simulation_engine(*_args: Any, **_kwargs: Any) -> object:
+        return object()
+
+    async def fake_run_simulation_loop(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("top secret backend detail")
+
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "_load_simulation_engine",
+        fake_load_simulation_engine,
+    )
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "_run_simulation_loop",
+        fake_run_simulation_loop,
+    )
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "resolve_ws_user",
+        AsyncMock(return_value=object()),
+    )
+
+    with caplog.at_level("ERROR"):
+        await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "Internal server error"}]
+    assert "top secret backend detail" not in json.dumps(websocket.sent)
+    assert any(
+        record.message == "Simulation WebSocket failed for engine=mujoco"
+        and record.exc_info is not None
+        for record in caplog.records
+    )
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_reports_missing_engine_manager(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Missing engine manager state must return a structured service error."""
+
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {}}],
+        has_engine_manager=False,
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module,
+        "resolve_ws_user",
+        AsyncMock(return_value=object()),
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [
+        {
+            "error": "service_unavailable",
+            "message": "Engine manager not initialized",
+        }
+    ]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_invalid_duration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Invalid duration must fail at the WS boundary before engine load."""
+
+    websocket: Any = _RouteWebSocket([{"action": "start", "config": {"duration": 0}}])
+    load_engine = AsyncMock()
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    # The WS numeric-field guard fires before Pydantic and emits a specific message.
+    assert websocket.sent == [{"error": "duration must be a positive finite number"}]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_malformed_initial_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Malformed q/v vectors must be rejected before set_state runs."""
+
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"initial_state": {"q": "bad-state"}}}]
+    )
+    load_engine = AsyncMock()
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert websocket.sent == [{"error": "Invalid simulation config"}]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_oversized_initial_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An oversized initial_state q must be rejected with an error frame and
+    never reach the engine (#7056).
+
+    Defense-in-depth: the request model caps the vector length at the validation
+    boundary, and ``_apply_initial_state`` independently caps before ``np.array``
+    (see ``TestApplyInitialStateLengthCap``). Either way the oversized payload is
+    rejected before ``set_state`` and before a large allocation.
+    """
+    from src.api.models.requests import MAX_STATE_VECTOR_LEN
+
+    oversized = [0.0] * (MAX_STATE_VECTOR_LEN + 1)
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"initial_state": {"q": oversized}}}]
+    )
+
+    engine = MagicMock()
+    engine.set_state.return_value = None
+
+    async def fake_load_engine(*_args: Any, **_kwargs: Any) -> object:
+        return engine
+
+    async def fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(simulation_ws_module, "resolve_ws_user", fake_resolve_ws_user)
+    monkeypatch.setattr(
+        simulation_ws_module, "_load_simulation_engine", fake_load_engine
+    )
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    # An error frame is emitted and the oversized payload never reaches set_state.
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    engine.set_state.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# 5. _is_numeric_sequence — pure unit tests (issue #5918)
+# ---------------------------------------------------------------------------
+
+
+class TestIsNumericSequence:
+    """_is_numeric_sequence guards np.array() against non-numeric inputs."""
+
+    def test_valid_float_list(self) -> None:
+        """A list of floats must be accepted."""
+        assert _is_numeric_sequence([1.0, 2.5, 3.14]) is True
+
+    def test_valid_int_list(self) -> None:
+        """A list of ints must be accepted."""
+        assert _is_numeric_sequence([0, 1, 2]) is True
+
+    def test_empty_list_is_valid(self) -> None:
+        """An empty list is a valid (zero-length) numeric sequence."""
+        assert _is_numeric_sequence([]) is True
+
+    def test_string_is_rejected(self) -> None:
+        """A bare string must be rejected."""
+        assert _is_numeric_sequence("not-a-list") is False
+
+    def test_none_is_rejected(self) -> None:
+        """None must be rejected (would produce NaN array)."""
+        assert _is_numeric_sequence(None) is False
+
+    def test_list_with_string_element_is_rejected(self) -> None:
+        """A list containing a non-numeric element must be rejected."""
+        assert _is_numeric_sequence([1.0, "bad"]) is False
+
+    def test_bool_elements_are_rejected(self) -> None:
+        """Lists of booleans must be rejected (bool is a subclass of int)."""
+        assert _is_numeric_sequence([True, False]) is False
+
+    def test_tuple_of_numbers_is_valid(self) -> None:
+        """A tuple of numbers is also accepted."""
+        assert _is_numeric_sequence((1.0, 2.0)) is True
+
+    def test_nested_list_is_rejected(self) -> None:
+        """A nested list must be rejected."""
+        assert _is_numeric_sequence([[1.0], [2.0]]) is False
+
+
+# ---------------------------------------------------------------------------
+# 6. _apply_initial_state validation — issue #5918
+# ---------------------------------------------------------------------------
+
+
+class TestApplyInitialStateValidation:
+    """_apply_initial_state must guard set_state() against non-numeric q/v."""
+
+    def _make_engine(self) -> MagicMock:
+        engine = MagicMock()
+        engine.set_state.return_value = None
+        return engine
+
+    def test_string_q_is_ignored_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Non-numeric q must produce a warning and skip set_state."""
+        engine = self._make_engine()
+        with caplog.at_level("WARNING"):
+            _apply_initial_state(engine, {"q": "bad-state", "v": []})
+        engine.set_state.assert_not_called()
+        assert any("initial_state.q" in r.message for r in caplog.records)
+
+    def test_none_q_is_ignored_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """None q must produce a warning and skip set_state."""
+        engine = self._make_engine()
+        with caplog.at_level("WARNING"):
+            _apply_initial_state(engine, {"q": None, "v": []})
+        engine.set_state.assert_not_called()
+        assert any("initial_state.q" in r.message for r in caplog.records)
+
+    def test_string_v_is_ignored_with_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Non-numeric v must produce a warning and skip set_state."""
+        engine = self._make_engine()
+        with caplog.at_level("WARNING"):
+            _apply_initial_state(engine, {"q": [1.0], "v": "bad-v"})
+        engine.set_state.assert_not_called()
+        assert any("initial_state.v" in r.message for r in caplog.records)
+
+    def test_valid_q_and_v_calls_set_state(self) -> None:
+        """Valid numeric q and v must still invoke set_state."""
+        engine = self._make_engine()
+        _apply_initial_state(engine, {"q": [0.1, 0.2], "v": [0.3, 0.4]})
+        engine.set_state.assert_called_once()
+
+    def test_missing_q_and_v_defaults_to_empty_arrays(self) -> None:
+        """Missing q/v keys must default to empty arrays (existing contract)."""
+        engine = self._make_engine()
+        _apply_initial_state(engine, {})
+        engine.set_state.assert_called_once()
+        args = engine.set_state.call_args.args
+        assert len(args[0]) == 0
+        assert len(args[1]) == 0
+
+
+# ---------------------------------------------------------------------------
+# 7. _apply_initial_state length cap — issue #7056 (memory DoS)
+# ---------------------------------------------------------------------------
+
+
+class TestApplyInitialStateLengthCap:
+    """Oversized q/v must be rejected before np.array() allocates (issue #7056)."""
+
+    def _make_engine(self, nq: int | None = None) -> MagicMock:
+        engine = MagicMock()
+        engine.set_state.return_value = None
+        if nq is None:
+            del engine.nq
+        else:
+            engine.nq = nq
+        return engine
+
+    def test_valid_small_array_returns_none_and_applies(self) -> None:
+        """Within-bounds q/v return no error and invoke set_state."""
+        engine = self._make_engine()
+        err = _apply_initial_state(engine, {"q": [0.1, 0.2], "v": [0.3, 0.4]})
+        assert err is None
+        engine.set_state.assert_called_once()
+
+    def test_oversized_q_rejected_without_allocation(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A q longer than the hard ceiling is rejected before np.array runs."""
+        engine = self._make_engine()
+        # Guard: np.array must never be called on the oversized payload.
+        monkeypatch.setattr(
+            simulation_ws_module.np,
+            "array",
+            lambda *a, **k: (_ for _ in ()).throw(
+                AssertionError("np.array must not allocate oversized input")
+            ),
+        )
+        oversized = range(simulation_ws_module._MAX_INITIAL_STATE_LEN + 1)
+        # Use a list so _is_numeric_sequence passes; length is the only issue.
+        err = _apply_initial_state(engine, {"q": list(oversized), "v": []})
+        assert err is not None
+        assert "initial_state.q" in err
+        engine.set_state.assert_not_called()
+
+    def test_oversized_v_rejected(self) -> None:
+        """A v longer than the hard ceiling is rejected."""
+        engine = self._make_engine()
+        big = [0.0] * (simulation_ws_module._MAX_INITIAL_STATE_LEN + 1)
+        err = _apply_initial_state(engine, {"q": [], "v": big})
+        assert err is not None
+        assert "initial_state.v" in err
+        engine.set_state.assert_not_called()
+
+    def test_engine_dof_tightens_cap(self) -> None:
+        """When the engine exposes nq, q beyond a small DoF-derived cap is rejected."""
+        engine = self._make_engine(nq=4)
+        # 4 DoF -> cap is small; a 1000-element q is rejected even though it is
+        # well under the hard ceiling.
+        err = _apply_initial_state(engine, {"q": [0.0] * 1000, "v": [0.0] * 1000})
+        assert err is not None
+        engine.set_state.assert_not_called()
+
+    def test_engine_dof_allows_matching_length(self) -> None:
+        """A q/v sized to the engine DoF is accepted."""
+        engine = self._make_engine(nq=4)
+        err = _apply_initial_state(engine, {"q": [0.0] * 4, "v": [0.0] * 4})
+        assert err is None
+        engine.set_state.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# 7. _handle_client_commands JSON parse error isolation — issue #5918
+# ---------------------------------------------------------------------------
+
+
+class TestHandleClientCommandsJsonError:
+    """_handle_client_commands must handle invalid JSON from the client."""
+
+    @pytest.mark.anyio
+    async def test_invalid_json_sends_error_and_continues(self) -> None:
+        """A json.JSONDecodeError must trigger an error response, not a crash."""
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        async def mock_receive_json() -> dict[str, Any]:
+            raise json.JSONDecodeError("Expecting value", "", 0)
+
+        sent_messages: list[dict[str, Any]] = []
+
+        async def mock_send_json(data: dict[str, Any]) -> None:
+            sent_messages.append(data)
+
+        websocket.receive_json = mock_receive_json
+        websocket.send_json = mock_send_json
+
+        config: dict[str, Any] = {}
+        result = await _handle_client_commands(websocket, config)
+
+        assert result == "continue"
+        assert sent_messages == [
+            {"error": "invalid_json", "message": "Message must be valid JSON"}
+        ]
+
+    @pytest.mark.anyio
+    async def test_timeout_still_returns_continue(self) -> None:
+        """TimeoutError (no message yet) must still return 'continue' cleanly."""
+        websocket: Any = _WebSocket(speed_factor=1.0)
+
+        async def mock_receive_json() -> dict[str, Any]:
+            raise TimeoutError
+
+        websocket.receive_json = mock_receive_json
+
+        config: dict[str, Any] = {}
+        result = await _handle_client_commands(websocket, config)
+        assert result == "continue"
+
+
+# ---------------------------------------------------------------------------
+# _validate_ws_numeric_fields — unit tests for issue #5918
+# ---------------------------------------------------------------------------
+
+
+class TestValidateWsNumericFields:
+    """_validate_ws_numeric_fields must reject non-finite and out-of-bounds values."""
+
+    def _call(self, config: dict[str, Any]) -> str | None:
+        return simulation_ws_module._validate_ws_numeric_fields(config)
+
+    # speed_factor checks
+    def test_nan_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": float("nan")}) is not None
+
+    def test_inf_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": float("inf")}) is not None
+
+    def test_neg_inf_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": float("-inf")}) is not None
+
+    def test_string_nan_speed_factor_rejected(self) -> None:
+        assert self._call({"speed_factor": "NaN"}) is not None
+
+    def test_valid_speed_factor_accepted(self) -> None:
+        assert self._call({"speed_factor": 2.0}) is None
+
+    def test_zero_speed_factor_rejected(self) -> None:
+        """A zero speed_factor must be rejected, not silently clamped to 1.0."""
+        assert self._call({"speed_factor": 0.0}) is not None
+
+    def test_negative_speed_factor_rejected(self) -> None:
+        """A negative speed_factor must be rejected, not silently clamped."""
+        assert self._call({"speed_factor": -2.0}) is not None
+
+    # duration checks
+    def test_nan_duration_rejected(self) -> None:
+        assert self._call({"duration": float("nan")}) is not None
+
+    def test_inf_duration_rejected(self) -> None:
+        assert self._call({"duration": float("inf")}) is not None
+
+    def test_zero_duration_rejected(self) -> None:
+        assert self._call({"duration": 0.0}) is not None
+
+    def test_negative_duration_rejected(self) -> None:
+        assert self._call({"duration": -1.0}) is not None
+
+    def test_duration_over_cap_rejected(self) -> None:
+        """duration above the Pydantic cap (300s) must be rejected."""
+        assert self._call({"duration": 300.1}) is not None
+
+    def test_duration_at_cap_accepted(self) -> None:
+        """The cap value itself is valid (Pydantic uses an inclusive ``le``)."""
+        assert self._call({"duration": 300.0}) is None
+
+    def test_valid_duration_accepted(self) -> None:
+        assert self._call({"duration": 10.0}) is None
+
+    # timestep checks
+    def test_nan_timestep_rejected(self) -> None:
+        assert self._call({"timestep": float("nan")}) is not None
+
+    def test_inf_timestep_rejected(self) -> None:
+        assert self._call({"timestep": float("inf")}) is not None
+
+    def test_zero_timestep_rejected(self) -> None:
+        assert self._call({"timestep": 0.0}) is not None
+
+    def test_negative_timestep_rejected(self) -> None:
+        assert self._call({"timestep": -0.001}) is not None
+
+    def test_timestep_over_max_rejected(self) -> None:
+        """timestep above the Pydantic cap (0.1s) must be rejected."""
+        assert self._call({"timestep": 0.2}) is not None
+
+    def test_timestep_at_max_accepted(self) -> None:
+        """The cap value itself is valid (Pydantic uses an inclusive ``le``)."""
+        assert self._call({"timestep": 0.1}) is None
+
+    def test_timestep_too_small_rejected(self) -> None:
+        """timestep < 1e-6 must be rejected."""
+        assert self._call({"timestep": 1e-7}) is not None
+
+    def test_valid_timestep_accepted(self) -> None:
+        assert self._call({"timestep": 0.002}) is None
+
+    def test_empty_config_accepted(self) -> None:
+        """No numeric fields supplied should not raise."""
+        assert self._call({}) is None
+
+
+# ---------------------------------------------------------------------------
+# WS handler integration: non-finite speed_factor/timestep/duration error frames
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_nan_speed_factor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-finite speed_factor must send an error frame and not load an engine."""
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"speed_factor": float("nan")}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_inf_speed_factor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Infinite speed_factor must send an error frame and not load an engine."""
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"speed_factor": float("inf")}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_duration_over_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """duration >= 3600s must send a specific error frame and not load an engine."""
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"duration": 3600.0}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_timestep_over_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """timestep >= 1.0s must send a specific error frame and not load an engine."""
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"duration": 1.0, "timestep": 1.5}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_timestep_too_small(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """timestep < 1e-6s must send a specific error frame and not load an engine."""
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"duration": 1.0, "timestep": 1e-9}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_simulation_stream_rejects_non_positive_speed_factor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A zero/negative speed_factor must be rejected before the engine loads.
+
+    Regression for finding #7740: a non-positive speed_factor was silently
+    clamped to 1.0 by ``_clamp_speed_factor`` instead of being rejected.
+    """
+    websocket: Any = _RouteWebSocket(
+        [{"action": "start", "config": {"speed_factor": -1.0}}]
+    )
+    load_engine = AsyncMock()
+
+    monkeypatch.setattr(
+        simulation_ws_module, "resolve_ws_user", AsyncMock(return_value=object())
+    )
+    monkeypatch.setattr(simulation_ws_module, "_load_simulation_engine", load_engine)
+
+    await simulation_ws_module.simulation_stream(websocket, "mujoco")
+
+    assert websocket.accepted is True
+    assert websocket.closed is True
+    assert len(websocket.sent) == 1
+    assert "error" in websocket.sent[0]
+    load_engine.assert_not_called()
+
+
+def test_ws_bounds_match_pydantic_single_source_of_truth() -> None:
+    """The WS numeric guard reuses the Pydantic request-model bounds (#7740).
+
+    Previously the WS layer used looser caps (3600s / 1.0s) than the Pydantic
+    model (300s / 0.1s), so gap values passed the WS guard then failed
+    ``model_validate`` with a generic error. They must now be identical.
+    """
+    from src.api.models.requests import (
+        MAX_SIMULATION_DURATION,
+        MAX_TIMESTEP,
+        MIN_TIMESTEP,
+    )
+
+    assert simulation_ws_module._MAX_WS_DURATION == MAX_SIMULATION_DURATION
+    assert simulation_ws_module._MAX_WS_TIMESTEP == MAX_TIMESTEP
+    assert simulation_ws_module._MIN_WS_TIMESTEP == MIN_TIMESTEP
+
+
+# ---------------------------------------------------------------------------
+# _resolve_sim_stats — single reach-through accessor (finding #7740)
+# ---------------------------------------------------------------------------
+
+
+class TestResolveSimStats:
+    """_resolve_sim_stats collapses the app.state.simulation_service.stats chain."""
+
+    def test_returns_stats_when_fully_resolvable(self) -> None:
+        websocket: Any = _WebSocket(speed_factor=2.0)
+        stats = simulation_ws_module._resolve_sim_stats(websocket)
+        assert stats is not None
+        assert stats.speed_factor == pytest.approx(2.0)
+
+    def test_returns_none_when_service_missing(self) -> None:
+        websocket: Any = _WebSocket()  # no simulation_service on app state
+        assert simulation_ws_module._resolve_sim_stats(websocket) is None
+
+    def test_returns_none_when_app_missing(self) -> None:
+        websocket: Any = object()  # no .app attribute at all
+        assert simulation_ws_module._resolve_sim_stats(websocket) is None
+
+
+# ---------------------------------------------------------------------------
+# _run_simulation_loop — direct async coverage of the CC-13 success branches
+# (finding #7740: e2e monkeypatches the loop away, leaving it untested).
+# ---------------------------------------------------------------------------
+
+
+class _FakeStepEngine:
+    """Minimal engine exposing step/get_state for loop tests."""
+
+    def __init__(self) -> None:
+        self.steps = 0
+        self._q = np.array([0.0, 0.0])
+        self._v = np.array([0.0, 0.0])
+
+    def step(self, timestep: float) -> None:
+        self.steps += 1
+        self._q = self._q + timestep
+        self._v = self._v + timestep
+
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        return self._q, self._v
+
+
+class _LoopWebSocket:
+    """WebSocket double driving _run_simulation_loop with scripted commands."""
+
+    def __init__(
+        self,
+        command_messages: list[dict[str, Any]] | None = None,
+        *,
+        speed_factor: float = 1.0,
+    ) -> None:
+        self._messages = list(command_messages or [])
+        self.sent: list[dict[str, Any]] = []
+        self.app = _App(speed_factor=speed_factor)
+
+    async def receive_json(self) -> dict[str, Any]:
+        if self._messages:
+            return self._messages.pop(0)
+        # No queued command -> behave like an idle client awaiting incoming messages.
+        await anyio.sleep(3600)
+        raise TimeoutError
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+
+class TestRunSimulationLoop:
+    """Cover the loop's frame-emission, pause/resume, analysis, and pacing paths."""
+
+    @pytest.mark.anyio
+    async def test_emits_frames_and_steps_engine(self) -> None:
+        """The loop steps the engine and streams throttled frame payloads."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
+        config = {"duration": 0.01, "timestep": 0.01}
+
+        frame, elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+
+        assert engine.steps >= 1
+        assert frame >= 1
+        assert elapsed == pytest.approx(0.01)
+        # First frame is the "running" status, then at least one data frame.
+        assert websocket.sent[0] == {"status": "running", "duration": 0.01}
+        data_frames = [m for m in websocket.sent if "frame" in m]
+        assert data_frames
+        assert "state" in data_frames[0]
+        assert "q" in data_frames[0]["state"]
+
+    @pytest.mark.anyio
+    async def test_includes_analysis_when_requested(self) -> None:
+        """live_analysis adds an analysis payload derived from get_state."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
+        config = {"duration": 0.01, "timestep": 0.01, "live_analysis": True}
+
+        await simulation_ws_module._run_simulation_loop(websocket, engine, config)
+
+        data_frames = [m for m in websocket.sent if "frame" in m]
+        assert data_frames
+        assert "analysis" in data_frames[0]
+        assert data_frames[0]["analysis"]["joint_angles"] is not None
+
+    @pytest.mark.anyio
+    async def test_stop_command_breaks_loop_early(self) -> None:
+        """A stop command ends the loop before the duration elapses."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket([{"action": "stop"}], speed_factor=1000.0)
+        # Long duration so only the stop command ends the loop.
+        config = {"duration": 10.0, "timestep": 0.01}
+
+        frame, _elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+
+        assert frame == 0
+        assert engine.steps == 0
+
+    @pytest.mark.anyio
+    async def test_pause_then_resume_continues(self) -> None:
+        """A pause command parks the loop until a resume arrives, then runs."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(
+            [{"action": "pause"}, {"action": "resume"}],
+            speed_factor=1000.0,
+        )
+        config = {"duration": 0.01, "timestep": 0.01}
+
+        await simulation_ws_module._run_simulation_loop(websocket, engine, config)
+
+        assert {"status": "paused"} in websocket.sent
+        assert engine.steps >= 1
+
+    @pytest.mark.anyio
+    async def test_pause_then_stop_breaks(self) -> None:
+        """A stop while paused ends the loop without further stepping."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(
+            [{"action": "pause"}, {"action": "stop"}],
+            speed_factor=1000.0,
+        )
+        config = {"duration": 10.0, "timestep": 0.01}
+
+        frame, _elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+
+        assert {"status": "paused"} in websocket.sent
+        assert frame == 0
+
+    @pytest.mark.anyio
+    async def test_real_time_pacing_sleeps_between_steps(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """At slow speed the loop awaits a real-time pacing delay each step."""
+        engine = _FakeStepEngine()
+        # speed_factor=1 with a non-trivial timestep -> a positive sleep delay.
+        websocket: Any = _LoopWebSocket(speed_factor=1.0)
+        config = {"duration": 0.02, "timestep": 0.01}
+
+        sleeps: list[float] = []
+
+        async def fake_sleep(delay: float) -> None:
+            sleeps.append(delay)
+
+        monkeypatch.setattr(simulation_ws_module.asyncio, "sleep", fake_sleep)
+
+        await simulation_ws_module._run_simulation_loop(websocket, engine, config)
+
+        # At least one positive pacing delay was awaited.
+        assert any(d > 0 for d in sleeps)
+
+    @pytest.mark.anyio
+    async def test_batches_physics_steps_to_worker_thread(self) -> None:
+        """The loop batches steps and offloads them to worker threads via anyio."""
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
+        # 100 steps total; with frame_skip ~ 16, this should require ~7 batch dispatches.
+        config = {"duration": 0.1, "timestep": 0.001}
+
+        dispatched_batches: list[int] = []
+        original_run_sync = anyio.to_thread.run_sync
+
+        async def intercept_run_sync(fn: Any, *args: Any, **kwargs: Any) -> Any:
+            if fn is _step_physics_batch:
+                dispatched_batches.append(args[2])
+            return await original_run_sync(fn, *args, **kwargs)
+
+        with patch("anyio.to_thread.run_sync", side_effect=intercept_run_sync):
+            frame, elapsed = await simulation_ws_module._run_simulation_loop(
+                websocket, engine, config
+            )
+
+        assert engine.steps == 100
+        assert frame == 100
+        assert elapsed == pytest.approx(0.1)
+        # Verify batching took place: far fewer calls than individual steps.
+        assert len(dispatched_batches) < 10
+        assert sum(dispatched_batches) == 100
+        assert all(b > 1 for b in dispatched_batches[:-1])
+
+    @pytest.mark.anyio
+    async def test_high_speed_throughput_reaches_real_time(self) -> None:
+        """200 steps must complete well under 0.2s wall-clock time at high speed factor."""
+        import time
+
+        engine = _FakeStepEngine()
+        websocket: Any = _LoopWebSocket(speed_factor=1000.0)
+        config = {"duration": 0.2, "timestep": 0.001}
+
+        start = time.perf_counter()
+        frame, elapsed = await simulation_ws_module._run_simulation_loop(
+            websocket, engine, config
+        )
+        duration_sec = time.perf_counter() - start
+
+        assert frame == 200
+        assert elapsed == pytest.approx(0.2)
+        # Previously took >0.2-2.0s due to 1ms wait_for timer overhead per step.
+        assert duration_sec < 0.2
+
+
+# ---------------------------------------------------------------------------
+# 11. Physics batch stepping and persistent loop performance — issue #8936
+# ---------------------------------------------------------------------------
+
+
+class TestStepPhysicsBatch:
+    """Unit tests for _step_physics_batch contract and batch execution."""
+
+    def test_steps_engine_correct_number_of_times(self) -> None:
+        engine = MagicMock()
+        executed = _step_physics_batch(engine, timestep=0.002, step_count=5)
+        assert executed == 5
+        assert engine.step.call_count == 5
+        engine.step.assert_called_with(0.002)
+
+    def test_zero_steps_does_not_call_step(self) -> None:
+        engine = MagicMock()
+        executed = _step_physics_batch(engine, timestep=0.002, step_count=0)
+        assert executed == 0
+        engine.step.assert_not_called()
+
+    def test_engine_without_step_method_is_safe(self) -> None:
+        engine = object()
+        executed = _step_physics_batch(engine, timestep=0.001, step_count=3)
+        assert executed == 3
+
+    def test_non_positive_timestep_violates_precondition(self) -> None:
+        engine = MagicMock()
+        with pytest.raises(PreconditionError):
+            _step_physics_batch(engine, timestep=0.0, step_count=5)
+        with pytest.raises(PreconditionError):
+            _step_physics_batch(engine, timestep=-0.001, step_count=5)
+
+    def test_negative_step_count_violates_precondition(self) -> None:
+        engine = MagicMock()
+        with pytest.raises(PreconditionError):
+            _step_physics_batch(engine, timestep=0.002, step_count=-1)
+
+
+class TestSendSimulationFrame:
+    """Unit tests for _send_simulation_frame."""
+
+    @pytest.mark.anyio
+    async def test_sends_basic_frame_payload(self) -> None:
+        engine = _FakeStepEngine()
+        websocket = MagicMock()
+        websocket.send_json = AsyncMock()
+
+        await _send_simulation_frame(
+            websocket,
+            engine,
+            config={},
+            frame=10,
+            time_elapsed=0.02,
+        )
+
+        websocket.send_json.assert_awaited_once()
+        payload = websocket.send_json.await_args.args[0]
+        assert payload["frame"] == 10
+        assert payload["time"] == 0.02
+        assert "state" in payload
+        assert payload["state"]["q"] == [0.0, 0.0]
+
+    @pytest.mark.anyio
+    async def test_includes_live_analysis_when_configured(self) -> None:
+        engine = _FakeStepEngine()
+        websocket = MagicMock()
+        websocket.send_json = AsyncMock()
+
+        await _send_simulation_frame(
+            websocket,
+            engine,
+            config={"live_analysis": True},
+            frame=5,
+            time_elapsed=0.01,
+        )
+
+        payload = websocket.send_json.await_args.args[0]
+        assert "analysis" in payload
+        assert "joint_angles" in payload["analysis"]
+
+
+class TestProcessPendingClientCommands:
+    """Unit tests for _process_pending_client_commands."""
+
+    @pytest.mark.anyio
+    async def test_initializes_recv_task_when_none(self) -> None:
+        import contextlib
+
+        websocket = _LoopWebSocket()
+        recv_task, action = await _process_pending_client_commands(
+            None, websocket, config={}
+        )
+        assert action == "continue"
+        assert recv_task is not None
+        recv_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await recv_task
+
+    @pytest.mark.anyio
+    async def test_handles_stop_command(self) -> None:
+        import contextlib
+
+        websocket = _LoopWebSocket([{"action": "stop"}])
+        recv_task, action = await _process_pending_client_commands(
+            None, websocket, config={}
+        )
+        assert action == "stop"
+        if recv_task is not None:
+            recv_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await recv_task
+
+    @pytest.mark.anyio
+    async def test_handles_set_speed_command(self) -> None:
+        import contextlib
+
+        websocket = _LoopWebSocket([{"action": "set_speed", "speed_factor": 3.0}])
+        config: dict[str, Any] = {"speed_factor": 1.0}
+        recv_task, action = await _process_pending_client_commands(
+            None, websocket, config
+        )
+        assert action == "continue"
+        assert config["speed_factor"] == pytest.approx(3.0)
+        if recv_task is not None:
+            recv_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await recv_task
+
+    @pytest.mark.anyio
+    async def test_handles_invalid_json_gracefully(self) -> None:
+        import contextlib
+
+        websocket = MagicMock()
+        websocket.send_json = AsyncMock()
+
+        async def fail_receive() -> dict[str, Any]:
+            raise json.JSONDecodeError("Invalid JSON", "", 0)
+
+        websocket.receive_json = fail_receive
+        recv_task = asyncio.create_task(fail_receive())
+
+        new_recv_task, action = await _process_pending_client_commands(
+            recv_task, websocket, config={}
+        )
+        assert action == "continue"
+        websocket.send_json.assert_awaited_once_with(
+            {"error": "invalid_json", "message": "Message must be valid JSON"}
+        )
+        if new_recv_task is not None:
+            new_recv_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await new_recv_task

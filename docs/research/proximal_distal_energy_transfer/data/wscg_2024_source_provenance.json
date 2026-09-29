@@ -1,0 +1,30 @@
+{
+  "source_hashes_sha256": {
+    "Charts.pptx": "17dff3b767ef432d76aacaa7be2ce24339d24755b00da293ced4f4ef62a307a5",
+    "WeT21_Evaluation_of_the_Effect_of_Momentum_on_Interaction_Forces_in_a_Linked_System.pptx": "b1d53150a9669744842ac5bb4200522fbd5aa4697092a0f6e88bcd4da687ea0a"
+  },
+  "source_chart": "ppt/charts/chart1.xml",
+  "row_count": 1625,
+  "series_count": 13,
+  "series_names": [
+    "LHDiffAxial",
+    "LHDiffNormal",
+    "LeadHandAxial",
+    "LeadHandCFAxial",
+    "LeadHandCFNormal",
+    "LeadHandNormal",
+    "THDiffAxial",
+    "THDiffNormal",
+    "TrailHandCFAxial",
+    "TrailHandCFNormal",
+    "TrailHandNormal",
+    "TrailHeadAxial",
+    "Wrist Torque"
+  ],
+  "units": {
+    "time_s": "s",
+    "force_series": "N",
+    "Wrist Torque": "N m"
+  },
+  "interpretation": "Cached source-chart values; not independently measured data."
+}

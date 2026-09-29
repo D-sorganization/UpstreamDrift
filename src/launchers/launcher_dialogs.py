@@ -1,0 +1,1102 @@
+"""Dialog and settings management mixin for UpstreamDriftLauncher.
+
+Contains methods for help dialogs, about dialog, shortcuts overlay,
+preferences, settings, diagnostics, environment manager, layout manager,
+bug reporting, and AI settings.
+"""
+
+# mypy: disable-error-code="attr-defined,call-overload,arg-type,assignment"
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QDesktopServices, QKeySequence, QShortcut
+from PyQt6.QtWidgets import QMessageBox, QDialog, QWidget
+
+from src.launchers import wsl_probe
+from src.launchers.help_menu import show_keyboard_shortcuts_modal
+from src.launchers.launcher_constants import (
+    AI_AVAILABLE,
+    HELP_SYSTEM_AVAILABLE,
+    LAYOUT_CONFIG_FILE,
+    REPOS_ROOT,
+    UI_COMPONENTS_AVAILABLE,
+)
+from src.launchers.launcher_manager_attrs import forward_manager_attribute
+from src.launchers.layout_config_backup import replace_existing_layout_backup
+from src.launchers.ui_components import (
+    LayoutManagerDialog,
+)
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
+
+if TYPE_CHECKING:
+    pass
+
+logger = get_logger(__name__)
+
+
+class DialogsManager:
+    docker_available: bool
+
+    def __init__(self, launcher):
+        self.launcher = launcher
+
+    def __getattr__(self, name):
+        return getattr(self.launcher, name)
+
+    def __setattr__(self, name, value):
+        forward_manager_attribute(self, name, value)
+
+    """Mixin for UpstreamDriftLauncher dialog and settings management.
+
+    Provides methods for displaying help, about, shortcuts, preferences,
+    settings, diagnostics, environment manager, layout manager dialogs,
+    and AI settings.
+    """
+
+    def _init_ui_components(self) -> None:
+        """Initialize optional UI components (toast, shortcuts, etc.)."""
+        # Toast notification manager
+        if UI_COMPONENTS_AVAILABLE:
+            from src.shared.python.ui.toast import ToastManager
+
+            self.toast_manager: ToastManager | None = ToastManager(self)
+
+            # Setup keyboard shortcuts
+            self._setup_keyboard_shortcuts()
+        else:
+            self.toast_manager = None
+
+        # Register the Sidekick feature Window menu (Tools surfacing).
+        # Done after the menu bar exists; tolerated as a no-op when
+        # menuBar() returns None (e.g. test fixtures without a window).
+        self._register_feature_window_menu()
+
+    def _register_feature_window_menu(self) -> None:
+        """Add the Window menu surfacing Sidekick features to the menu bar.
+
+        Idempotent: safe to call multiple times (we drop a previously
+        attached menu before re-adding).
+        """
+        menubar = getattr(self, "menu_bar", None)
+        if menubar is None:
+            return
+        try:
+            from src.launchers.feature_menu import register_feature_menu
+
+            self._feature_menu_actions = register_feature_menu(self, menubar)
+        except ImportError as exc:  # pragma: no cover - guarded
+            logger.debug("feature_menu unavailable: %s", exc)
+            self._feature_menu_actions = {}
+
+    def _setup_keyboard_shortcuts(self) -> None:
+        """Set up global keyboard shortcuts."""
+        # F1 for help dialog (User Manual)
+        shortcut_f1 = QShortcut(QKeySequence("F1"), self.launcher)
+        shortcut_f1.setObjectName("User Manual")
+        shortcut_f1.activated.connect(self._show_help_dialog)
+
+        # Ctrl+? for shortcuts modal
+        shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self.launcher)
+        shortcut_help.setObjectName("Keyboard Shortcuts")
+        shortcut_help.activated.connect(self._show_shortcuts_modal)
+
+        # Ctrl+, for preferences
+        shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self.launcher)
+        shortcut_prefs.setObjectName("Preferences")
+        shortcut_prefs.activated.connect(self._show_preferences)
+
+        # Ctrl+Q to quit
+        shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self.launcher)
+        shortcut_quit.setObjectName("Quit Application")
+        shortcut_quit.activated.connect(self.close)
+
+        # Sidekick feature shortcuts (Tools #2882/#2883/#2884/#2888/#2889).
+        # The single source of truth lives in feature_menu.FEATURE_ENTRIES so
+        # menu actions and these shortcuts cannot drift apart.
+        try:
+            from src.launchers.feature_menu import FEATURE_ENTRIES
+
+            for entry in FEATURE_ENTRIES:
+                if not entry.availability_probe():
+                    continue
+                sc = QShortcut(QKeySequence(entry.shortcut), self.launcher)
+                sc.setObjectName(entry.label.replace("&", "").strip())
+                sc.activated.connect(lambda e=entry: e.factory(self.launcher))
+        except ImportError as exc:  # pragma: no cover — guard import path
+            logger.debug("feature_menu not importable: %s", exc)
+
+    def _show_help_dialog(self, topic: str | None = None) -> None:
+        """Show the help dialog.
+
+        Args:
+            topic: Optional help topic to display initially.
+        """
+        if HELP_SYSTEM_AVAILABLE:
+            from src.shared.python.gui_pkg.help_system import HelpDialog
+
+            dialog = HelpDialog(self.launcher, initial_topic=topic)
+            dialog.exec()
+        else:
+            from src.launchers.ui_components import HelpDialog as LegacyHelpDialog
+
+            dialog = LegacyHelpDialog(self)
+            dialog.exec()
+
+    #: Project Map candidates, most comprehensive first. ``docs/PROJECT_MAP.md``
+    #: has never existed at that path (issue #8014); the real documents live
+    #: under ``docs/architecture/`` and ``docs/governance/``.
+    PROJECT_MAP_CANDIDATES = (
+        Path("docs") / "architecture" / "PROJECT_MAP.md",
+        Path("docs") / "governance" / "PROJECT_MAP.md",
+    )
+
+    def _open_project_map(self) -> None:
+        """Open the Project Map document in the system viewer."""
+        searched = [REPOS_ROOT / rel for rel in self.PROJECT_MAP_CANDIDATES]
+        for project_map in searched:
+            if project_map.exists():
+                from src.shared.python.ui.qt.widgets.document_reader import (
+                    show_document,
+                )
+
+                show_document(project_map)
+                return
+
+        listed = "\n".join(str(path) for path in searched)
+        QMessageBox.warning(
+            self.launcher,
+            "Project Map Not Found",
+            f"The Project Map file was not found. Searched:\n{listed}",
+        )
+
+    def _show_about_dialog(self) -> None:
+        """Show the About dialog."""
+        QMessageBox.about(
+            self.launcher,
+            "About UpstreamDrift",
+            "<h2>UpstreamDrift</h2>"
+            "<h3>Biomechanical Golf Swing Analysis</h3>"
+            "<p><b>Version 2.1</b></p>"
+            "<p>Biomechanical Golf Swing Analysis Platform</p>"
+            "<hr>"
+            "<p>A unified platform for biomechanical golf swing analysis "
+            "integrating multiple physics engines including MuJoCo, Drake, "
+            "Pinocchio, OpenSim, and MyoSuite.</p>"
+            "<p>Copyright 2024-2026 UpstreamDrift Contributors</p>"
+            '<p><a href="https://github.com/dieterolson/UpstreamDrift">GitHub Repository</a></p>',
+        )
+
+    def _show_shortcuts_modal(self) -> None:
+        """Show the live keyboard shortcuts modal."""
+        show_keyboard_shortcuts_modal(self.launcher)
+
+    def _show_shortcuts_overlay(self) -> None:
+        """Show the live keyboard shortcuts dialog."""
+        self._show_shortcuts_modal()
+
+    def _show_preferences(self) -> None:
+        """Show the preferences in the unified settings tab."""
+        self._open_settings(tab=4)  # 4 is the appearance/preferences tab
+
+    def open_sidekick_tab(self, tool_id: str) -> None:
+        """Open *tool_id* as a Sidekick tab in the launcher.
+
+        Best-effort dispatcher that delegates to the embedded host if
+        available. Logs a warning (and shows a toast) when the host or
+        the tool isn't wired up — never raises, so the menu/shortcut
+        path remains robust during the transitional period while
+        Sidekick tabs are being wired feature-by-feature.
+
+        Tools surfaced through this hook: #2882 (OS terminal),
+        #2883 (Python REPL, workspace), #2884 (MCP servers),
+        #2888 (skills), #2889 (Jupyter).
+        """
+        if not tool_id:
+            raise ValueError("tool_id must be non-empty")
+
+        if self._open_tab_on_sidekick_sidebar(tool_id):
+            return
+
+        host = getattr(self, "embedded_host", None)
+        opener = getattr(host, "open_tab", None) if host is not None else None
+        if callable(opener):
+            try:
+                opener(tool_id)
+                return
+            except Exception as exc:  # noqa: BLE001 — bubble via toast
+                logger.warning("embedded_host.open_tab(%r) failed: %s", tool_id, exc)
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return
+
+        logger.info(
+            "open_sidekick_tab(%r): embedded host not available yet — "
+            "Sidekick tab integration lands with Tools surfacing PR.",
+            tool_id,
+        )
+        self.show_toast(
+            f"Sidekick tab '{tool_id}' is not yet wired in this build.",
+            "info",
+        )
+
+    def _open_tab_on_sidekick_sidebar(self, tool_id: str) -> bool:
+        """Open a Tools sidebar tab through its public tab-selection API."""
+        sidebar = getattr(self, "sidekick_sidebar", None)
+        if sidebar is None:
+            try:
+                from src.shared.python.gui_launcher import tools_sidebar_integration
+
+                get_active_sidebar = getattr(
+                    tools_sidebar_integration, "get_active_sidebar", None
+                )
+                if callable(get_active_sidebar):
+                    sidebar = get_active_sidebar()
+            except ImportError:
+                sidebar = None
+        if sidebar is None:
+            return False
+
+        set_visible = getattr(sidebar, "setVisible", None)
+        if callable(set_visible):
+            set_visible(True)
+
+        for method_name in (
+            "open_tab",
+            "set_active_tab",
+            "activate_tab",
+            "select_tab",
+            "show_tab",
+        ):
+            opener = getattr(sidebar, method_name, None)
+            if not callable(opener):
+                continue
+            try:
+                result = opener(tool_id)
+                if result is not False:
+                    return True
+            except Exception as exc:  # noqa: BLE001 - show through toast path
+                logger.warning(
+                    "sidekick_sidebar.%s(%r) failed: %s",
+                    method_name,
+                    tool_id,
+                    exc,
+                )
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return True
+
+        show_hidden = getattr(sidebar, "set_tab_visible", None)
+        activate = getattr(sidebar, "set_active_tab", None)
+        if callable(show_hidden) and callable(activate):
+            try:
+                if show_hidden(tool_id, True) and activate(tool_id):
+                    return True
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("sidekick_sidebar tab activation failed: %s", exc)
+                self.show_toast(f"Failed to open {tool_id} tab: {exc}", "error")
+                return True
+        return False
+
+    def open_preferences_section(self, section_id: str) -> None:
+        """Open the preferences dialog focused on *section_id*.
+
+        Currently delegates to the generic preferences entry point; the
+        section_id parameter is accepted so callers can use a stable
+        API while a section-aware dialog is wired up.
+        """
+        if not section_id:
+            raise ValueError("section_id must be non-empty")
+        logger.debug("open_preferences_section(%r)", section_id)
+        self._open_settings(tab=0)
+
+    def show_toast(self, message: str, toast_type: str = "info") -> None:
+        """Show a toast notification.
+
+        Args:
+            message: Message to display
+            toast_type: Type of toast ("success", "error", "warning", "info")
+        """
+        if self.toast_manager:
+            if toast_type == "success":
+                self.toast_manager.show_success(message)
+            elif toast_type == "error":
+                self.toast_manager.show_error(message)
+            elif toast_type == "warning":
+                self.toast_manager.show_warning(message)
+            else:
+                self.toast_manager.show_info(message)
+
+    def _open_ai_settings(self) -> None:
+        """Open the AI settings dialog."""
+        if not AI_AVAILABLE:
+            return
+
+        from src.shared.python.ai.gui import AISettingsDialog
+
+        dialog = AISettingsDialog(self)
+        # Reload settings in panel
+        if dialog.exec() and hasattr(self, "ai_panel"):
+            pass
+
+    def _open_integrations_health(self) -> None:
+        """Open the integrations health dashboard window (UD #5643).
+
+        Hosts the shared :class:`IntegrationsHealthDashboardWidget` from
+        Tools (PR #2914) in a modeless dialog.
+        """
+        from src.launchers.integrations_health_window import (
+            open_integrations_health_window,
+        )
+
+        # Keep a reference so the dialog isn't garbage-collected.
+        self._integrations_health_dialog = open_integrations_health_window(self)
+
+    def toggle_ai_assistant(self, checked: bool) -> None:
+        """Toggle the AI Assistant panel visibility via the content splitter.
+
+        Args:
+            checked: Whether the button is checked.
+        """
+        if checked is None:
+            raise ValueError("checked must be provided")
+        if not AI_AVAILABLE:
+            return
+
+        self._ai_visible = checked
+        # Keep the toggle button in sync when called programmatically
+        btn = getattr(self, "btn_toggle_right_sidebar", None) or getattr(
+            self, "btn_ai_sidebar", None
+        )
+        if btn is not None and btn.isChecked() != checked:
+            btn.setChecked(checked)
+
+        if hasattr(self, "sidekick_sidebar") and self.sidekick_sidebar is not None:
+            self.sidekick_sidebar.setVisible(checked)
+            if checked and hasattr(self, "open_sidekick_tab"):
+                self.open_sidekick_tab("chat")
+
+    def _report_bug(self) -> None:
+        """Open default mail client to report a bug."""
+        subject = "Bug Report: UpstreamDrift"
+        body = "Please describe the issue you encountered:\n\n"
+
+        from urllib.parse import quote
+
+        email = "support@golfmodelingsuite.com"
+        mailto_url = f"mailto:{email}?subject={quote(subject)}&body={quote(body)}"
+
+        QDesktopServices.openUrl(QUrl(mailto_url))
+
+    def _open_settings(self, tab: int = 0) -> None:
+        """Open the Settings tab in the workspace (Layout / Configuration / Diagnostics)."""
+        if tab is None:
+            raise ValueError("tab must be provided")
+
+        # Check if settings tab is already open or detached
+        if hasattr(self, "workspace_tabs"):
+            # 1. Check docked tabs
+            for i in range(self.workspace_tabs.count()):
+                if self.workspace_tabs.tabText(i) == "Settings":
+                    self.workspace_tabs.setCurrentIndex(i)
+                    widget = self.workspace_tabs.widget(i)
+                    if hasattr(widget, "tabs"):
+                        widget.tabs.setCurrentIndex(tab)
+                    return
+
+            # 2. Check detached/floating tabs
+            if hasattr(self.workspace_tabs, "detached_tabs"):
+                for win, (
+                    widget,
+                    text,
+                    _icon,
+                ) in self.workspace_tabs.detached_tabs.items():
+                    if text == "Settings":
+                        win.show()
+                        win.raise_()
+                        win.activateWindow()
+                        if hasattr(widget, "tabs"):
+                            widget.tabs.setCurrentIndex(tab)
+                        return
+
+        from src.launchers.settings_dialog import SettingsWidget
+
+        settings_widget = SettingsWidget(
+            launcher=self,
+            initial_tab=tab,
+        )
+        settings_widget.reset_layout_requested.connect(self._reset_layout_to_defaults)
+
+        if hasattr(self, "dock_widget_as_tab"):
+            self.dock_widget_as_tab(settings_widget, "Settings")
+            # Select the correct inner tab
+            settings_widget.tabs.setCurrentIndex(tab)
+        else:
+            # Fallback if no workspace_tabs available
+            settings_widget.show()
+
+    def open_diagnostics(self) -> None:
+        """Open the settings dialog on the Diagnostics tab."""
+        self._open_settings(tab=2)
+
+    def open_environment_manager(self) -> None:
+        """Open the settings dialog on the Configuration tab."""
+        self._open_settings(tab=1)
+
+    def _reset_layout_to_defaults(self) -> None:
+        """Reset layout configuration to show all default tiles."""
+        config_file = LAYOUT_CONFIG_FILE
+
+        try:
+            backup_path = replace_existing_layout_backup(config_file)
+            if backup_path is not None:
+                logger.info(f"Backed up existing config to {backup_path}")
+
+            self._initialize_model_order()
+            self._sync_model_cards()
+            self._rebuild_grid()
+
+            self.show_toast("Layout reset to defaults", "success")
+            logger.info("Layout reset to defaults")
+
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error(f"Failed to reset layout: {e}")
+            self.show_toast(f"Failed to reset layout: {e}", "error")
+
+    def open_help(self) -> None:
+        """Open the help dialog.
+
+        Note: This method is kept for backward compatibility.
+        Use _show_help_dialog() for new code.
+        """
+        self._show_help_dialog()
+
+    def open_layout_manager(self) -> None:
+        """Open the layout customization dialog."""
+        dialog = LayoutManagerDialog(
+            self.available_models, self.model_order, self.launcher
+        )
+        if dialog.exec():
+            selected = dialog.selected_ids()
+            self._apply_model_selection(selected)
+            self.show_toast("Layout updated", "success")
+
+    def toggle_layout_mode(self, checked: bool) -> None:
+        """Toggle tile editing mode."""
+        if checked is None:
+            raise ValueError("checked must be provided")
+        self.layout_edit_mode = checked
+        self.layout_manager.set_edit_mode(checked)
+
+        # Keep the menu action in sync
+        if (
+            hasattr(self, "_action_layout_mode")
+            and self._action_layout_mode.isChecked() != checked
+        ):
+            self._action_layout_mode.setChecked(checked)
+
+        if checked:
+            self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
+
+    def _on_windows_mode_changed(self, state: int) -> None:
+        """Handle Windows Native mode toggle change."""
+        if state is None:
+            raise ValueError("state must be provided")
+        use_windows = state == 2
+        if use_windows:
+            if hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+                self.chk_docker.setChecked(False)
+            if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+                self.chk_wsl.setChecked(False)
+            logger.info("Windows Native mode enabled")
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast(
+                    "Local Windows mode - engines will run natively", "info"
+                )
+        else:
+            logger.info("Windows Native mode disabled")
+            # If neither docker nor wsl is checked, fallback to Windows (Default)
+            if (
+                hasattr(self, "chk_docker")
+                and not self.chk_docker.isChecked()
+                and hasattr(self, "chk_wsl")
+                and not self.chk_wsl.isChecked()
+            ):
+                self.chk_windows.setChecked(True)
+
+        self.update_execution_status()
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _on_docker_mode_changed(self, state: int) -> None:
+        """Handle Docker mode toggle change.
+
+        Args:
+            state: Qt checkbox state (0=unchecked, 2=checked)
+        """
+        if state is None:
+            raise ValueError("state must be provided")
+        use_docker = state == 2
+        if use_docker:
+            # Disable WSL and Windows native mode if Docker is enabled (mutually exclusive)
+            if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+                self.chk_wsl.setChecked(False)
+            if hasattr(self, "chk_windows") and self.chk_windows.isChecked():
+                self.chk_windows.setChecked(False)
+
+            if not self.docker_available:
+                if getattr(self.launcher, "loading", False):
+                    self.chk_docker.setChecked(False)
+                    return
+                reply = QMessageBox.question(
+                    self.launcher,
+                    "Docker Warning",
+                    "Docker was not detected as running during startup. Do you want to enable Docker mode anyway?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No,
+                )
+                if reply == QMessageBox.StandardButton.Yes:
+                    self.docker_available = True
+                else:
+                    self.chk_docker.setChecked(False)
+                    return
+
+        if use_docker:
+            logger.info("Docker mode enabled")
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast(
+                    "Docker mode enabled - engines will run in containers", "info"
+                )
+        else:
+            logger.info("Docker mode disabled")
+            # If neither docker nor wsl is checked, fallback to Windows (Default)
+            if (
+                hasattr(self, "chk_wsl")
+                and not self.chk_wsl.isChecked()
+                and hasattr(self, "chk_windows")
+                and not self.chk_windows.isChecked()
+            ):
+                self.chk_windows.setChecked(True)
+            elif hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast("Local mode - engines will run on host system", "info")
+
+        # Update UI status
+        self.update_execution_status()
+
+        # Update launch button text if a model is selected
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _on_wsl_mode_changed(self, state: int) -> None:
+        """Handle WSL mode toggle change.
+
+        Never blocks the GUI thread (#8903): the WSL availability check runs
+        in a :class:`~src.launchers.wsl_probe.WslAvailabilityWorker`; the
+        checkbox is disabled while the probe is in flight and the result is
+        applied (or the toggle reverted) in :meth:`_on_wsl_probe_finished`.
+
+        Args:
+            state: Qt checkbox state (0=unchecked, 2=checked)
+        """
+        if state is None:
+            raise ValueError("state must be provided")
+        use_wsl = state == 2
+
+        if use_wsl:
+            # Disable Docker and Windows native mode if WSL is enabled (mutually exclusive)
+            if hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+                self.chk_docker.setChecked(False)
+            if hasattr(self, "chk_windows") and self.chk_windows.isChecked():
+                self.chk_windows.setChecked(False)
+
+            # Check if WSL is available (async; cached for process lifetime)
+            if not getattr(self.launcher, "loading", False):
+                cached = wsl_probe.cached_wsl_result()
+                if cached is None:
+                    self._start_wsl_probe()
+                    return
+                if not cached.available:
+                    self._warn_wsl_unavailable(cached.detail)
+                    return
+
+            self._complete_wsl_enable()
+            return
+        logger.info("WSL mode disabled")
+        # If neither docker nor wsl is checked, fallback to Windows (Default)
+        if (
+            hasattr(self, "chk_docker")
+            and not self.chk_docker.isChecked()
+            and hasattr(self, "chk_windows")
+            and not self.chk_windows.isChecked()
+        ):
+            self.chk_windows.setChecked(True)
+        elif hasattr(self, "toast_manager") and self.toast_manager:
+            self.show_toast("Local Windows mode", "info")
+
+        # Update UI status
+        self.update_execution_status()
+
+        # Update launch button text if a model is selected
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _complete_wsl_enable(self) -> None:
+        """Apply the UI effects of successfully enabling WSL mode."""
+        logger.info("WSL mode enabled")
+        if hasattr(self, "toast_manager") and self.toast_manager:
+            self.show_toast("WSL mode - full Pinocchio/Drake/Crocoddyl support", "info")
+        self.update_execution_status()
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _start_wsl_probe(self) -> None:
+        """Kick off the async WSL availability probe (#8903).
+
+        Disables the checkbox and shows an in-progress hint; the result is
+        applied on the GUI thread in :meth:`_on_wsl_probe_finished`. No-op if
+        a probe is already in flight.
+        """
+        if getattr(self, "_wsl_probe_worker", None) is not None:
+            return
+        self.chk_wsl.setEnabled(False)
+        if hasattr(self, "toast_manager") and self.toast_manager:
+            self.show_toast("Checking WSL availability...", "info")
+        worker = wsl_probe.WslAvailabilityWorker(parent=self.launcher)
+        worker.result_ready.connect(self._on_wsl_probe_finished)
+        self._wsl_probe_worker = worker
+        worker.start()
+
+    def _on_wsl_probe_finished(self, result: object) -> None:
+        """Apply an async WSL probe result on the GUI thread."""
+        if not isinstance(result, wsl_probe.WslProbeResult):
+            raise TypeError("result must be a WslProbeResult")
+        wsl_probe.store_wsl_result(result)
+        worker = getattr(self, "_wsl_probe_worker", None)
+        self._wsl_probe_worker = None
+        if worker is not None:
+            worker.deleteLater()
+        self.chk_wsl.setEnabled(True)
+        if not self.chk_wsl.isChecked():
+            # User already un-toggled while the probe ran; nothing to apply.
+            return
+        if result.available:
+            self._complete_wsl_enable()
+        else:
+            self._warn_wsl_unavailable(result.detail)
+
+    def _warn_wsl_unavailable(self, error: object) -> None:
+        """Warn the user that WSL mode cannot be enabled and revert the toggle.
+
+        The dialog is shown with :meth:`QMessageBox.open` (window-modal, no
+        nested event loop) rather than the blocking ``QMessageBox.warning``.
+        The probe result arrives via a queued signal, which can be delivered
+        while the event loop is being drained outside normal interaction —
+        pytest-qt's teardown drain being the proven case (PR #8976: a nested
+        ``exec`` there wedged the whole CI worker with no user to dismiss
+        it). Reverting the toggle first keeps the UI state correct even if
+        the dialog is never dismissed.
+        """
+        self.chk_wsl.setChecked(False)
+        box = QMessageBox(self.launcher)
+        box.setIcon(QMessageBox.Icon.Warning)
+        box.setWindowTitle("WSL Not Available")
+        box.setText(
+            f"WSL2 with Ubuntu is not available.\n\n"
+            f"Error: {error}\n\n"
+            "Please install WSL2 and Ubuntu:\n"
+            "  wsl --install -d Ubuntu-22.04"
+        )
+        box.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        box.open()
+
+    def update_execution_status(self) -> None:
+        """Update the runtime indicator label based on current selection.
+
+        The label name uses ``Runtime:`` (not ``Mode:``) because that's
+        the term the matching Settings group and the help dialog use,
+        and it makes the answer to "where do my engines actually run?"
+        unambiguous at a glance. WSL takes precedence over Docker if
+        both are somehow checked (only one is meaningful at a time).
+        """
+        if not hasattr(self, "lbl_execution_mode"):
+            return
+
+        if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+            self.lbl_execution_mode.setText("Runtime: WSL2")
+            self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
+        elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+            self.lbl_execution_mode.setText("Runtime: Docker")
+            self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
+        else:
+            self.lbl_execution_mode.setText("Runtime: Windows")
+            self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
+
+    def show_dependency_error(
+        self,
+        model_name: str,
+        dependency_name: str,
+        install_cmd: str,
+        doc_url: str,
+        error_detail: str = "",
+    ) -> None:
+        """Show the stylized dependency error dialog."""
+        dialog = DependencyErrorDialog(
+            parent=self.launcher,
+            model_name=model_name,
+            dependency_name=dependency_name,
+            install_cmd=install_cmd,
+            doc_url=doc_url,
+            error_detail=error_detail,
+        )
+        dialog.exec()
+
+
+class ThemedModalDialog(QDialog):
+    """Custom themed frameless modal dialog."""
+
+    def __init__(self, parent=None, title="Dialog", message=""):
+        super().__init__(parent)
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import (
+            QVBoxLayout,
+            QLabel,
+            QHBoxLayout,
+            QPushButton,
+            QGraphicsDropShadowEffect,
+            QFrame,
+        )
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setProperty("class", "themed-modal")
+        style = self.style()
+        if style is not None:
+            style.polish(self)
+
+        layout = QVBoxLayout(self)
+
+        self.frame = QFrame(self)
+        self.frame.setStyleSheet(
+            "QFrame { background-color: #24272e; border: 1px solid #3a3f4a; border-radius: 8px; }"
+        )
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        shadow.setOffset(0, 4)
+        self.frame.setGraphicsEffect(shadow)
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        lbl_title = QLabel(title)
+        lbl_title.setStyleSheet(
+            "color: white; font-weight: bold; font-size: 16px; border: none; background: transparent;"
+        )
+        frame_layout.addWidget(lbl_title)
+
+        lbl_msg = QLabel(message)
+        lbl_msg.setStyleSheet(
+            "color: #d4d4d4; font-size: 13px; border: none; background: transparent;"
+        )
+        lbl_msg.setWordWrap(True)
+        frame_layout.addWidget(lbl_msg)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        self.btn_yes = QPushButton("Yes")
+        self.btn_yes.setProperty("class", "primary")
+        yes_style = self.btn_yes.style()
+        if yes_style is not None:
+            yes_style.polish(self.btn_yes)
+        self.btn_yes.clicked.connect(self.accept)
+
+        self.btn_no = QPushButton("No")
+        self.btn_no.setProperty("class", "secondary")
+        no_style = self.btn_no.style()
+        if no_style is not None:
+            no_style.polish(self.btn_no)
+        self.btn_no.clicked.connect(self.reject)
+
+        btn_layout.addWidget(self.btn_no)
+        btn_layout.addWidget(self.btn_yes)
+
+        frame_layout.addLayout(btn_layout)
+        layout.addWidget(self.frame)
+
+
+class DependencyErrorDialog(QDialog):
+    """Custom themed modal dialog for dependency errors."""
+
+    def __init__(
+        self,
+        parent=None,
+        model_name: str = "",
+        dependency_name: str = "",
+        install_cmd: str = "",
+        doc_url: str = "",
+        error_detail: str = "",
+    ):
+        super().__init__(parent)
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import QVBoxLayout, QFrame
+
+        self.install_cmd = install_cmd
+        self.doc_url = doc_url
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setProperty("class", "themed-modal")
+        style = self.style()
+        if style is not None:
+            style.polish(self)
+
+        layout = QVBoxLayout(self)
+
+        self.frame = QFrame(self)
+        # Red border to represent error
+        self.frame.setStyleSheet(
+            "QFrame { background-color: #24272e; border: 1px solid #c92a2a; border-radius: 8px; }"
+        )
+        self._apply_error_frame_shadow()
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        self._build_header_section(
+            frame_layout, model_name, dependency_name, error_detail
+        )
+        self._build_install_command_section(frame_layout, install_cmd)
+        self._build_button_row(frame_layout, doc_url)
+
+        layout.addWidget(self.frame)
+
+    def _apply_error_frame_shadow(self) -> None:
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import QGraphicsDropShadowEffect
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        shadow.setOffset(0, 4)
+        self.frame.setGraphicsEffect(shadow)
+
+    def _build_header_section(
+        self, frame_layout, model_name: str, dependency_name: str, error_detail: str
+    ) -> None:
+        from PyQt6.QtWidgets import QLabel
+
+        lbl_title = QLabel(f"Dependency Missing: {dependency_name}")
+        lbl_title.setStyleSheet(
+            "color: #ff6b6b; font-weight: bold; font-size: 16px; border: none; background: transparent;"
+        )
+        frame_layout.addWidget(lbl_title)
+
+        msg_text = (
+            f"Cannot run <b>{model_name}</b> because the required dependency "
+            f"<b>{dependency_name}</b> is not installed locally."
+        )
+        if error_detail:
+            msg_text += f"<br><br><font color='#aaaaaa'>Details: {error_detail}</font>"
+
+        lbl_msg = QLabel(msg_text)
+        lbl_msg.setStyleSheet(
+            "color: #d4d4d4; font-size: 13px; border: none; background: transparent;"
+        )
+        lbl_msg.setWordWrap(True)
+        frame_layout.addWidget(lbl_msg)
+
+    def _build_install_command_section(self, frame_layout, install_cmd: str) -> None:
+        from PyQt6.QtWidgets import QLabel, QHBoxLayout, QPushButton, QFrame
+
+        if not install_cmd:
+            return
+
+        cmd_group = QFrame()
+        cmd_group.setStyleSheet(
+            "QFrame { background-color: #1e2026; border: 1px solid #2d3139; border-radius: 4px; padding: 8px; }"
+        )
+        cmd_layout = QHBoxLayout(cmd_group)
+        cmd_layout.setContentsMargins(5, 5, 5, 5)
+
+        self.lbl_cmd = QLabel(install_cmd)
+        self.lbl_cmd.setStyleSheet(
+            "color: #51cf66; font-family: monospace; font-size: 12px; border: none; background: transparent;"
+        )
+        self.lbl_cmd.setWordWrap(True)
+        cmd_layout.addWidget(self.lbl_cmd, stretch=1)
+
+        self.btn_copy = QPushButton("Copy")
+        self.btn_copy.setFixedWidth(60)
+        self.btn_copy.setStyleSheet(
+            "QPushButton { background-color: #3b5bdb; color: white; border: none; border-radius: 3px; padding: 4px; font-size: 11px; }"
+            "QPushButton:hover { background-color: #4c6ef5; }"
+            "QPushButton:pressed { background-color: #2b4bcb; }"
+        )
+        self.btn_copy.clicked.connect(self._copy_command)
+        cmd_layout.addWidget(self.btn_copy)
+
+        frame_layout.addWidget(cmd_group)
+
+    def _build_button_row(self, frame_layout, doc_url: str) -> None:
+        from PyQt6.QtWidgets import QHBoxLayout, QPushButton
+
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(10)
+        btn_layout.addStretch()
+
+        if doc_url:
+            self.btn_doc = QPushButton("Documentation")
+            self.btn_doc.setStyleSheet(
+                "QPushButton { background-color: #495057; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; }"
+                "QPushButton:hover { background-color: #6c757d; }"
+            )
+            self.btn_doc.clicked.connect(self._open_doc)
+            btn_layout.addWidget(self.btn_doc)
+
+        self.btn_close = QPushButton("Close")
+        self.btn_close.setStyleSheet(
+            "QPushButton { background-color: #ae3ec9; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #c225db; }"
+        )
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+
+        frame_layout.addLayout(btn_layout)
+
+    def _copy_command(self) -> None:
+        from PyQt6.QtWidgets import QApplication
+
+        clipboard = QApplication.clipboard()
+        if clipboard:
+            clipboard.setText(self.install_cmd)
+            self.btn_copy.setText("Copied!")
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(2000, lambda: self.btn_copy.setText("Copy"))
+
+    def _open_doc(self) -> None:
+        from PyQt6.QtCore import QUrl
+        from PyQt6.QtGui import QDesktopServices
+
+        QDesktopServices.openUrl(QUrl(self.doc_url))
+
+
+class CriticalErrorDialog(QDialog):
+    """Custom themed critical error dialog with hover copy support for the traceback."""
+
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        title: str = "Application Error",
+        message: str = "",
+        detail_text: str = "",
+    ) -> None:
+        super().__init__(parent)
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import (
+            QVBoxLayout,
+            QLabel,
+            QHBoxLayout,
+            QPushButton,
+            QGraphicsDropShadowEffect,
+            QFrame,
+        )
+        from src.launchers.hover_copy_browser import HoverCopyTextBrowser
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setProperty("class", "themed-modal")
+        style = self.style()
+        if style is not None:
+            style.polish(self)
+
+        layout = QVBoxLayout(self)
+        self.frame = QFrame(self)
+        self.frame.setStyleSheet(
+            "QFrame { background-color: #24272e; border: 1px solid #c92a2a; border-radius: 8px; }"
+        )
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 150))
+        shadow.setOffset(0, 4)
+        self.frame.setGraphicsEffect(shadow)
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        lbl_title = QLabel(title)
+        lbl_title.setStyleSheet(
+            "color: #ff6b6b; font-weight: bold; font-size: 16px; border: none; background: transparent;"
+        )
+        frame_layout.addWidget(lbl_title)
+
+        lbl_msg = QLabel(message)
+        lbl_msg.setStyleSheet(
+            "color: #d4d4d4; font-size: 13px; border: none; background: transparent;"
+        )
+        lbl_msg.setWordWrap(True)
+        frame_layout.addWidget(lbl_msg)
+
+        if detail_text:
+            self.detail_browser = HoverCopyTextBrowser(self)
+            self.detail_browser.setPlainText(detail_text)
+            self.detail_browser.setMinimumHeight(150)
+            self.detail_browser.setMaximumHeight(300)
+            self.detail_browser.setStyleSheet("""
+                QTextBrowser {
+                    background-color: #1e2026;
+                    border: 1px solid #2d3139;
+                    border-radius: 4px;
+                    color: #e0e0e0;
+                    font-family: Consolas, Monaco, monospace;
+                    font-size: 11px;
+                }
+            """)
+            frame_layout.addWidget(self.detail_browser)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        self.btn_copy_all = QPushButton("Copy Error")
+        self.btn_copy_all.setStyleSheet(
+            "QPushButton { background-color: #3b5bdb; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; }"
+            "QPushButton:hover { background-color: #4c6ef5; }"
+        )
+        self.btn_copy_all.clicked.connect(self._copy_all)
+        btn_layout.addWidget(self.btn_copy_all)
+
+        self.btn_close = QPushButton("Close")
+        self.btn_close.setStyleSheet(
+            "QPushButton { background-color: #ae3ec9; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; font-weight: bold; }"
+            "QPushButton:hover { background-color: #c225db; }"
+        )
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+
+        frame_layout.addLayout(btn_layout)
+        layout.addWidget(self.frame)
+
+    def _copy_all(self) -> None:
+        from PyQt6.QtWidgets import QApplication
+
+        clipboard = QApplication.clipboard()
+        if clipboard:
+            if hasattr(self, "detail_browser"):
+                clipboard.setText(self.detail_browser.toPlainText())
+            self.btn_copy_all.setText("Copied!")
+            from PyQt6.QtCore import QTimer
+
+            QTimer.singleShot(2000, lambda: self.btn_copy_all.setText("Copy Error"))

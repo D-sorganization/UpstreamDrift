@@ -1,0 +1,245 @@
+name: Docker Size and Health Check
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "docker-compose*.yml"
+      - "scripts/docker/**"
+      - "pyproject.toml"
+      - "requirements*.txt"
+      - "requirements.lock"
+      - "requirements*.lock"
+      - "src/**"
+      - ".github/workflows/docker-size-gates.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "docker-compose*.yml"
+      - "scripts/docker/**"
+      - ".github/workflows/docker-size-gates.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: docker-size-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  # -- Legacy monolithic image: keep passing for backward compatibility -------
+  docker-smoke-and-size:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 90
+    steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Fetch pinned Tools packages
+        # The primary Dockerfile now COPYs vendor/ud-tools (UD #9406).
+        uses: ./.github/actions/fetch-pinned-tools
+
+      - name: Rehydrate tracked Dockerfile
+        shell: bash
+        run: python3 scripts/ci/rehydrate_docker_context.py --targets Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
+      - name: Prepare local BuildKit cache (runtime)
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/runtime"
+          rm -rf "${CACHE_BASE}-next"
+          mkdir -p "${CACHE_BASE}"
+
+      - name: Build Docker Image (runtime)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime
+          load: true # Load image into local docker engine
+          tags: upstream-drift:runtime
+          cache-from: type=local,src=${{ runner.tool_cache }}/buildx-cache/upstream-drift/runtime
+          cache-to: type=local,dest=${{ runner.tool_cache }}/buildx-cache/upstream-drift/runtime-next,mode=max
+
+      - name: Promote local BuildKit cache (runtime)
+        if: always()
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/runtime"
+          if [ -d "${CACHE_BASE}-next" ]; then
+            rm -rf "${CACHE_BASE}"
+            mv "${CACHE_BASE}-next" "${CACHE_BASE}"
+          fi
+
+      - name: Verify Image Size Budget
+        run: |
+          # Runtime image budget: slim venv (~1 GB) + src/ models (~650 MB) + base + libs - 4 GB
+          MAX_SIZE_MB=4000
+
+          # Get size in bytes
+          IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:runtime --format='{{.Size}}')
+
+          # Convert to MB
+          IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
+
+          echo "Image size: ${IMAGE_SIZE_MB} MB"
+          echo "Budget: ${MAX_SIZE_MB} MB"
+
+          if [ "$IMAGE_SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::Image size (${IMAGE_SIZE_MB} MB) exceeds budget (${MAX_SIZE_MB} MB)!"
+            exit 1
+          else
+            echo "Image size is within budget."
+          fi
+
+      - name: Run Basic Health Checks
+        run: |
+          docker run --rm upstream-drift:runtime python -c "import mujoco, numpy, scipy; print('Core physics stack OK')"
+          docker run --rm upstream-drift:runtime python -c "import fastapi, uvicorn; print('API server stack OK')"
+          docker run --rm upstream-drift:runtime python -c "import pinocchio; print('Pinocchio OK')"
+
+  # -- Phase 2: per-profile modular image size matrix ------------------------
+  #
+  # Each profile is built from Dockerfile.modular with --build-arg PROFILE=<name>
+  # and measured against the budget declared in docker/profiles.yaml.
+  # Only the "core" profiles (slim, standard, research) are gated as blocking
+  # checks. The heavier profiles (biomech, full, gpu-training) are advisory
+  # (continue-on-error: true) because their base images are expensive and
+  # not always cached on the fleet.
+  profile-size-matrix:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - profile: slim
+            max_size_mb: 900
+            advisory: false
+          - profile: standard
+            max_size_mb: 2200
+            advisory: false
+          - profile: research
+            max_size_mb: 3500
+            advisory: true # advisory until fleet cache warms up
+          - profile: biomech
+            max_size_mb: 4800
+            advisory: true
+          - profile: full
+            max_size_mb: 6000
+            advisory: true
+    continue-on-error: ${{ matrix.advisory }}
+    steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Rehydrate tracked Dockerfile
+        shell: bash
+        run: python3 scripts/ci/rehydrate_docker_context.py --targets Dockerfile.modular
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
+      - name: Fetch pinned Tools packages
+        id: pinned-tools
+        uses: ./.github/actions/fetch-pinned-tools
+        with:
+          emit-source-provenance: "true"
+
+      - name: Prepare local BuildKit cache (profile=${{ matrix.profile }})
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/profile-${{ matrix.profile }}"
+          rm -rf "${CACHE_BASE}-next"
+          mkdir -p "${CACHE_BASE}"
+
+      - name: Build modular image (profile=${{ matrix.profile }})
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          file: ./Dockerfile.modular
+          build-args: |
+            PROFILE=${{ matrix.profile }}
+            TOOLS_GITLINK_SHA=${{ steps.pinned-tools.outputs.gitlink-sha }}
+            TOOLS_SOURCE_SHA256=${{ steps.pinned-tools.outputs.source-sha256 }}
+          load: true
+          tags: upstream-drift:${{ matrix.profile }}
+          cache-from: type=local,src=${{ runner.tool_cache }}/buildx-cache/upstream-drift/profile-${{ matrix.profile }}
+          cache-to: type=local,dest=${{ runner.tool_cache }}/buildx-cache/upstream-drift/profile-${{ matrix.profile }}-next,mode=max
+
+      - name: Promote local BuildKit cache (profile=${{ matrix.profile }})
+        if: always()
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/profile-${{ matrix.profile }}"
+          if [ -d "${CACHE_BASE}-next" ]; then
+            rm -rf "${CACHE_BASE}"
+            mv "${CACHE_BASE}-next" "${CACHE_BASE}"
+          fi
+
+      - name: Verify size budget (profile=${{ matrix.profile }}, budget=${{ matrix.max_size_mb }} MB)
+        run: |
+          MAX_SIZE_MB=${{ matrix.max_size_mb }}
+          IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:${{ matrix.profile }} --format='{{.Size}}')
+          IMAGE_SIZE_MB=$((IMAGE_SIZE_BYTES / 1024 / 1024))
+
+          echo "Profile : ${{ matrix.profile }}"
+          echo "Size    : ${IMAGE_SIZE_MB} MB"
+          echo "Budget  : ${MAX_SIZE_MB} MB"
+
+          if [ "$IMAGE_SIZE_MB" -gt "$MAX_SIZE_MB" ]; then
+            echo "::error::profile=${{ matrix.profile }} image (${IMAGE_SIZE_MB} MB) exceeds budget (${MAX_SIZE_MB} MB)"
+            exit 1
+          else
+            echo "Size within budget."
+          fi
+
+      - name: Health check (profile=${{ matrix.profile }})
+        run: |
+          docker run --rm upstream-drift:${{ matrix.profile }} \
+            python -c "import fastapi, uvicorn; print('API stack OK for profile ${{ matrix.profile }}')"

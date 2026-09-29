@@ -1,0 +1,108 @@
+"""Provider config widget registry.
+
+Replaces the legacy single ``ProviderConfigWidget`` that branched on
+``AIProvider`` to render different bodies. Each provider now owns its own
+widget class registered here. Adding a new provider = subclass a
+``_BaseProviderConfigWidget`` and call :meth:`ProviderConfigRegistry.register`.
+
+Tools issue #2762.
+"""
+
+from __future__ import annotations
+
+from PyQt6.QtWidgets import QWidget
+
+from src.shared.python.ai.gui._provider_config_widgets import (
+    AnthropicConfigWidget,
+    BitnetConfigWidget,
+    ClaudeCliConfigWidget,
+    ClineConfigWidget,
+    CodexCliConfigWidget,
+    GeminiConfigWidget,
+    OllamaConfigWidget,
+    OpenAIConfigWidget,
+)
+from src.shared.python.ai.gui._provider_registry_data import AIProvider
+
+
+class ProviderConfigRegistry:
+    """Registry mapping provider id -> widget factory class."""
+
+    _factories: dict[str, type[QWidget]] = {}
+
+    @classmethod
+    def register(cls, provider_id: str, widget_factory: type[QWidget]) -> None:
+        """Register a widget factory for ``provider_id``.
+
+        Args:
+            provider_id: Lower-case identifier (e.g. ``"anthropic"``). May
+                also be the name of an :class:`AIProvider` enum member.
+            widget_factory: ``QWidget`` subclass instantiable with a single
+                optional ``parent`` argument.
+
+        Raises:
+            ValueError: If ``provider_id`` is empty.
+            TypeError: If ``widget_factory`` is not a ``QWidget`` subclass.
+        """
+        if not provider_id or not provider_id.strip():
+            raise ValueError("provider_id must be a non-empty string")
+        if not isinstance(widget_factory, type) or not issubclass(
+            widget_factory, QWidget
+        ):
+            raise TypeError("widget_factory must be a QWidget subclass")
+        cls._factories[provider_id.lower()] = widget_factory
+
+    @classmethod
+    def unregister(cls, provider_id: str) -> None:
+        """Remove a registration (mainly for tests)."""
+        cls._factories.pop(provider_id.lower(), None)
+
+    @classmethod
+    def is_registered(cls, provider_id: str) -> bool:
+        return provider_id.lower() in cls._factories
+
+    @classmethod
+    def get_widget(
+        cls, provider_id: str | AIProvider, parent: QWidget | None = None
+    ) -> QWidget:
+        """Build a fresh widget for ``provider_id``.
+
+        Args:
+            provider_id: Either an :class:`AIProvider` member, the enum
+                ``name`` (case-insensitive), or any registered string id.
+            parent: Optional Qt parent.
+
+        Returns:
+            A new widget instance.
+
+        Raises:
+            KeyError: If no factory is registered for ``provider_id``.
+        """
+        key = provider_id.name if isinstance(provider_id, AIProvider) else provider_id
+        factory = cls._factories.get(key.lower())
+        if factory is None:
+            raise KeyError(f"No provider config widget registered for {provider_id!r}")
+        return factory(parent)
+
+    @classmethod
+    def registered_ids(cls) -> list[str]:
+        return sorted(cls._factories)
+
+
+# ---------------------------------------------------------------------------
+# Default registrations.  Use both lower-case slugs (``"anthropic"``) and the
+# AIProvider enum names (``"ANTHROPIC"``-cased through ``.lower()``) so
+# callers can register/look-up via either convention.
+# ---------------------------------------------------------------------------
+ProviderConfigRegistry.register("ollama", OllamaConfigWidget)
+ProviderConfigRegistry.register("openai", OpenAIConfigWidget)
+ProviderConfigRegistry.register("anthropic", AnthropicConfigWidget)
+ProviderConfigRegistry.register("gemini", GeminiConfigWidget)
+ProviderConfigRegistry.register("cline", ClineConfigWidget)
+ProviderConfigRegistry.register("cline_cli", ClineConfigWidget)
+ProviderConfigRegistry.register("bitnet", BitnetConfigWidget)
+ProviderConfigRegistry.register("claude_cli", ClaudeCliConfigWidget)
+ProviderConfigRegistry.register("codex_cli", CodexCliConfigWidget)
+
+
+__all__ = ["ProviderConfigRegistry"]

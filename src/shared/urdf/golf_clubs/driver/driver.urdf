@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<robot name="driver">
+    <!-- Base link (reference frame) -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.01 0.01 0.01"/>
+            </geometry>
+            <material name="transparent">
+                <color rgba="0 0 0 0"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- Grip -->
+    <link name="grip">
+        <inertial>
+            <mass value="0.045"/>
+            <origin xyz="0 0 0.127" rpy="0 0 0"/>
+            <inertia ixx="0.00024383624999999996"
+                     iyy="0.00024383624999999996"
+                     izz="3.8024999999999996e-06"
+                     ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0.127" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.254" radius="0.013"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.1 0.1 0.1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.127" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.254" radius="0.013"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="base_to_grip" type="fixed">
+        <parent link="base_link"/>
+        <child link="grip"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Shaft -->
+    <link name="shaft">
+        <inertial>
+            <mass value="0.065"/>
+            <origin xyz="0 0 0.40650000000000003" rpy="0 0 0"/>
+            <inertia ixx="0.003580833750000001"
+                     iyy="0.003580833750000001"
+                     izz="1.17e-06"
+                     ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0.40650000000000003" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.8130000000000001" radius="0.006"/>
+            </geometry>
+            <material name="graphite">
+                <color rgba="0.2 0.2 0.2 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.40650000000000003" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.8130000000000001" radius="0.006"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="grip_to_shaft" type="fixed">
+        <parent link="grip"/>
+        <child link="shaft"/>
+        <origin xyz="0 0 0.254" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Club Head -->
+    <link name="club_head">
+        <inertial>
+            <mass value="0.2"/>
+            <origin xyz="0.05 0 0" rpy="0 0.1832595714594046 0"/>
+            <inertia ixx="6.833333333333335e-05"
+                     iyy="0.00019333333333333336"
+                     izz="0.00020833333333333337"
+                     ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.05 0 0" rpy="0 0.1832595714594046 0"/>
+            <geometry>
+                <box size="0.1 0.05 0.04"/>
+            </geometry>
+            <material name="steel">
+                <color rgba="0.7 0.7 0.7 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0.05 0 0" rpy="0 0.1832595714594046 0"/>
+            <geometry>
+                <box size="0.1 0.05 0.04"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="shaft_to_head" type="fixed">
+        <parent link="shaft"/>
+        <child link="club_head"/>
+        <origin xyz="0 0 0.8130000000000001" rpy="0 0 0"/>
+    </joint>
+</robot>

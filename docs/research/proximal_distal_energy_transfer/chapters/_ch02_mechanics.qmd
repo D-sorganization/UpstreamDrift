@@ -1,0 +1,441 @@
+# Mechanics of Sequenced Swings {#sec-mechanics}
+
+This chapter assembles the mechanical foundations the rest of the
+document builds on: the dynamics formalism (@sec-formalism), the
+summation-of-speed principle and its dynamical correction
+(@sec-summation), the double-pendulum tradition that made release timing
+an explicit variable (@sec-doublependulum), the optimal-control
+literature (@sec-optimalcontrol), and the operational meanings of
+"energy transfer" (@sec-energyflow).
+
+## Dynamics Formalism {#sec-formalism}
+
+Write the equation of motion of an articulated chain in standard
+manipulator form [@featherstone2008]:
+
+$$
+M(q)\,\ddot q \;=\; \tau \;-\; b(q, \dot q),
+\qquad
+b(q,\dot q) \;=\; C(q,\dot q)\,\dot q \;+\; g(q) \;+\; d(\dot q),
+$$ {#eq-eom}
+
+with configuration $q$, inertia matrix $M$, applied generalized torques
+$\tau$, Coriolis/centripetal terms $C\dot q$, gravity $g$, and
+velocity-dependent dissipation $d$. In an articulated rigid-body model,
+$M(q)$ is generally configuration dependent and can contain off-diagonal
+terms. A generalized torque can therefore produce accelerations in
+coordinates other than the coordinate at which it is applied through
+$M^{-1}$; the exact pathways depend on the coordinates, inertial
+parameters, constraints, and instantaneous configuration. Symmetry,
+decoupled coordinates, or a special configuration can make a particular
+cross-coordinate pathway zero. This qualified coupling is the basis of
+induced-acceleration analysis [@zajac1989] and of the counterfactual
+decompositions of @sec-timing-framework.
+
+For the declared unconstrained manipulator model, with $b$ independent of
+the current applied torque, the equation is *affine in* $\tau$:
+
+$$
+\ddot q = -M^{-1}b + M^{-1}\tau.
+$$ {#eq-affine-split}
+
+The accompanying tests enforce this drift--control split to numerical
+tolerance (@sec-appendix-validation). It is an exact identity for that
+model class, not a universal biological decomposition. Closed-loop
+constraints add reaction terms, contact can change mode, and muscle,
+tendon, or actuator states can make the mapping from neural command to
+generalized torque dynamic and state dependent.
+
+## The Summation-of-Speed Principle and Its Limits {#sec-summation}
+
+An influential coaching formulation of P→D sequencing is Bunn's
+*summation of speed* principle: in skills demanding high end-point speed,
+each segment should begin its motion at the moment of peak speed of the
+segment proximal to it, so that distal speed is built on top of proximal
+speed [@bunn1972]. This is a coaching proposition, not an experimental
+law.
+Milburn applied the principle to golf with a double-pendulum analysis of
+the downswing and found the characteristic pattern of an initially
+dominant proximal (arm) rotation followed by rapid distal (club)
+rotation, noting that *"an initial delay in the uncocking of the wrist"*
+allows the arm to reach greater acceleration and the club's acceleration
+to be summed with the proximal segment's maximum [@milburn1982]. Note
+the structure of that finding: the summation principle, taken naively,
+prescribes *sequential initiation*; Milburn's analysis showed the
+benefit comes specifically from *delaying* the distal contribution.
+
+Putnam's segment-interaction analyses gave the principle a dynamical
+test and exposed its limits [@putnam1991; @putnam1993]. In a linked
+chain, each segment's angular acceleration depends not only on joint
+torques but on *motion-dependent interaction terms* — including
+centripetal and Coriolis terms that contain squares and products of
+segment angular velocities (represented within $C\dot q$ in @eq-eom).
+The 1991 study used high-speed film from four participants performing
+walking, running, and kicking. It found a significant thigh--leg
+interaction and support for summation of segment speeds, but no support
+for summation of force or for a general rule that negative thigh
+acceleration produces positive leg acceleration [@putnam1991]. Putnam's
+1993 synthesis extended the discussion to striking and throwing: distal
+acceleration could arise largely from motion-dependent interaction tied
+to proximal angular velocity, and proximal slowing could arise largely
+from the distal segment's motion-dependent effect. The source explicitly
+warned that task-dependent interaction differences must be examined
+before general principles are asserted [@putnam1993].
+
+Feltner and Dapena's 1986 inverse-dynamics study estimated resultant
+shoulder and elbow forces and torques in fastball pitches by eight
+intercollegiate pitchers [@feltner1986]. The later two-part interaction
+analysis supplied the relevant decomposition: a general three-dimensional
+two-segment model [@feltner1989a] and its application to the same class of
+pitching motion [@feltner1989b]. In eight collegiate pitchers, the Part II
+analysis attributed rapid pre-release elbow extension primarily to the
+angular velocity of the upper arm and trunk rather than to elbow-extensor
+torque [@feltner1989b]. That result is a task- and model-bounded
+acceleration attribution, not evidence that distal musculature is
+generally inactive.
+
+Herring and Chapman obtained P→D torque onsets and beneficial late torque
+reversals in a sagittal three-segment throw simulation [@herring1992].
+The inputs were idealized constant joint torques switched on at varied
+times, with shoulder and elbow torque signs reversed instantaneously in
+the reversal trials. The result demonstrates a linked-system mechanism;
+it does not establish physiological muscle timing or the feasibility of
+an instantaneous human torque reversal. Two implications matter for
+golf.
+First, kinematic order does not reveal *which* torques produced it: an
+identical peak sequence can arise from different mixes of muscular and
+interaction torques. Second, the proximal deceleration observed in
+experts need not be an active "braking" strategy — it can be the
+dynamical *consequence* of the distal segment accelerating and
+back-reacting on the chain.
+
+Marshall and Elliott added a task-specific measurement caution. In the
+tennis serve and squash forehand drive, upper-arm and forearm long-axis
+rotations peaked late and were important contributors to racquet-head
+speed [@marshall2000]. This shows why a planar peak-ordering analysis can
+omit relevant three-dimensional rotations in those racquet tasks. A
+corresponding role for forearm rotation and wrist action in golf is a
+testable analogy, not a result measured by that study.
+
+### Foundational Sequencing Evidence Boundaries
+
+| Source | Declared Domain | Supported Finding | Boundary for This Paper |
+|---|---|---|---|
+| Bunn [@bunn1972] | Coaching text | Summation-of-speed heuristic | Not an empirical validation or universal timing law |
+| Putnam [@putnam1991] | Four participants; walking, running, and kicking | Motion-dependent thigh--leg interaction was significant; segment-speed summation was supported | No support for summation of force or a general negative-proximal-acceleration rule |
+| Putnam [@putnam1993] | Review and mechanics synthesis spanning kicking, striking, and throwing | Proximal angular velocity can drive distal acceleration, and distal motion can slow the proximal segment | Interaction differs across skills; task geometry must be examined before generalization |
+| Feltner and Dapena [@feltner1986; @feltner1989a; @feltner1989b] | Three-dimensional pitching analysis; eight collegiate pitchers | Resultant joint loads were estimated, then angular acceleration was decomposed into torque- and motion-dependent terms | The 1986 paper alone does not provide the later decomposition; pitching attribution is not a golf or population-wide result |
+| Herring and Chapman [@herring1992] | Sagittal three-segment throw simulation with constant torque inputs | P→D onsets and late P→D torque reversals improved simulated output | Idealized switches and instantaneous reversals are not muscle or neural-control evidence |
+| Marshall and Elliott [@marshall2000] | Tennis serve and squash forehand drive | Long-axis rotations peaked late and contributed to racquet-head speed | Golf relevance is an analogy requiring direct three-dimensional golf measurement |
+
+These sources establish candidate mechanisms and measurement cautions. They
+do not make peak order a measure of energy flow, prove a universal active
+braking strategy, or identify one optimal golf control program.
+
+## Double-Pendulum Mechanics of the Golf Downswing {#sec-doublependulum}
+
+The two-lever, one-hinge model of the downswing — an "arm" link rotating
+about a hub, connected by a wrist hinge to a "club" link — has been the
+workhorse of golf mechanics since Cochran and Stobbs' *Search for the
+Perfect Swing* [@cochran1968] and Jorgensen's dynamical analysis fitted
+to stroboscopic photographs of a professional swing
+[@jorgensen1970; @jorgensen1999]; Penner's review surveys the tradition
+[@penner2003]. Its enduring value here is that it makes the *timing* of
+the P→D handoff an explicit variable (the "release": the point at which
+the wrist angle is allowed, or driven, to open) and exposes mechanisms
+by which delay can affect delivery. This lineage establishes an
+analytically useful reduced model, not empirical validation of a fixed
+hub, planar rigid shaft, or human wrist-control program. Three results
+anchor the analysis:
+
+**Delayed Release Increases Clubhead Speed.** Pickering and Vickers,
+sweeping release angles in a driven double-pendulum model, found
+clubhead velocity at impact increases as release is delayed — the
+classical "late hit" [@pickering1999]. This result supports late release
+for the particular fixed-hub, rigid-link, torque, release, and impact
+definitions examined; it does not establish that every earlier release is
+inferior in every model. In particular, White later found release timing
+to have only a second-order effect in his constant-shoulder-torque model
+[@white2006].
+
+**Late Wrist Torque Can Help in Actuator-Bounded Simulations.**
+Sprigings and Neal, using a torque-driven three-segment model with
+physiologically bounded actuators, found that an active wrist torque
+applied *during the latter stages of the downswing* increased clubhead
+speed by approximately 9% relative to their wrist-generator-disabled
+condition [@sprigings2000]. Their optimization placed wrist activation
+when the arm was about 30° below horizontal, but the authors also reported
+that this time depended strongly on the assumed torque-profile shape. In a
+follow-up three-segment study, Sprigings and MacKenzie separated a forced
+50 ms resistive delay from post-release wrist drive. The optimized forced
+delay increased impact speed from 44.0 to 44.7 m/s (1.6%), whereas removing
+active wrist torque after that delay reduced it to 38.9 m/s
+[@sprigings2002]. These are model-conditional comparisons, not a general
+human timing rule or a common effect size.
+
+**Energy Transfer to the Club Can Be Largely Passive—Governed by the
+Changing Geometry.** White analyzed an *undriven* double pendulum and
+showed that the transfer of kinetic energy from arms to club late in the
+downswing is a parametric-transfer phenomenon: as the club swings out,
+the effective moment of inertia of the system changes, and conservation
+of energy and angular momentum move kinetic energy distally without any
+wrist torque at all; the wrist-cock angle maintained before release is
+the principal efficiency-determining parameter in that model
+[@white2006]. In White's driven sensitivity study, however, ordinary
+release advances or delays had little net effect, and increasing constant
+positive wrist torque reduced predicted distance because its efficiency
+gain was offset by a shorter downswing. White separately noted that
+selective late torque can avoid that tradeoff. Miura's modified
+double-link emulation predicted that moving the hub inward near impact, when the
+modeled centrifugal force was developed, could substantially increase
+clubhead velocity [@miura2001]. Nesbit and McGinnis measured one selected
+driver swing from each of four diverse amateur golfers and found
+non-circular hand paths with a shared three-phase radius pattern but
+substantial between-subject geometry differences [@nesbit2009hub]. Their
+later two-dimensional constrained optimization predicted that combined
+hand-path and club-angular-trajectory changes could increase impact speed
+for all four subjects within each subject's modeled force, torque, work,
+and power limits; the changes and limiting quantities were subject
+dependent [@nesbit2014hub]. These model-based results motivate hub-path
+interventions, but they do not isolate an inward-pull contribution in a
+human experiment.
+
+Together these studies motivate, but do not prove, a **retain-early /
+release-late** hypothesis. Pickering and Vickers, Sprigings and Neal,
+Sprigings and MacKenzie, and Sharp identify benefits from delayed release,
+late wrist drive, or a negative-to-positive wrist-torque program within
+their respective models [@pickering1999; @sprigings2000; @sprigings2002;
+@sharp2009]. White supports passive geometry-mediated transfer while also
+showing that release-delay and wrist-torque effects depend on how the
+downswing angle, impact event, and torque program are defined
+[@white2006]. The numerical study in @sec-results therefore tests one
+specified intervention family rather than treating the literature as a
+prior proof of its ordering.
+
+### Which Double-Pendulum Parameters Are Identifiable? {#sec-double-pendulum-identifiability}
+
+The analytical model also permits an exact distinction between coefficient
+excitation and physical-parameter recovery. Its inverse dynamics factor as
+
+$$
+\tau=Y(q,\dot q,\ddot q)\,
+[\alpha,\beta,\delta,\gamma_1,\gamma_2,d_1,d_2]^\mathsf{T},
+$$
+
+where the seven base coefficients combine eleven reduced physical entries:
+two masses, two centers of mass, two proximal inertias, upper-link length,
+gravity, plane inclination, and two damping coefficients. The exact
+physical-to-base Jacobian has analytic row rank seven because one declared
+$7\times7$ minor has magnitude
+$m_2^2r_1r_2[g\cos(\phi)]^2>0$. Its nullity is therefore four. Three finite
+counterexample families independently preserve every base coefficient while
+changing mass--center-of-mass, lower-link coupling, or gravity--plane
+parameters. Consequently, even an arbitrarily long noiseless record governed
+by this model cannot uniquely recover the declared eleven-entry physical
+vector.
+
+The registered `restrain_then_drive@0.100s` synthetic record answers the
+separate excitation question. After scaling each coefficient by its registered
+base value and generalized torque by the registered 60 N m maximum, its
+$700\times7$ dimensionless regressor has rank seven with retained condition
+number 180.853 under the threshold
+$\max(10^{-8},10^{-7}\bar\sigma_1)$. Equivalent coefficient units change the
+dimensionless matrix by at most $4.45\times10^{-16}$ and preserve the rank.
+Two additional positive scale choices also preserve rank while changing the
+condition number, so every reported condition number remains inseparable from
+its declared scale contract.
+
+Full rank does not imply useful finite-noise recovery. Under deliberately
+favorable assumptions of exact kinematics, exact model form and event timing,
+and independent known Gaussian torque noise, a 1 N m noise standard deviation
+produces a worst relative 95% half-width of 0.123 for the full record but 499
+for its first 10%. These are Cramér--Rao-style oracle lower bounds. Kinematic
+differentiation noise, correlated sensor errors, model discrepancy, unknown
+noise scale, repeated participants, and held-out prediction can only weaken
+the practical inference. The result therefore establishes structural
+non-uniqueness of the declared physical map and finite-record excitation of
+seven base coefficients; it does not establish participant parameters, model
+adequacy, human mechanism, or coaching guidance. The derivation, unit and
+scale audits, adverse windows, exact counterexamples, and reproduction command
+are provided in
+[`DOUBLE_PENDULUM_IDENTIFIABILITY.md`](../DOUBLE_PENDULUM_IDENTIFIABILITY.md)
+and the registered
+[`double_pendulum_identifiability.json`](../data/double_pendulum_identifiability.json).
+
+### Source-Level Contrast Matrix {#sec-release-contrast-matrix}
+
+The cited studies answer different questions. Keeping their contrasts
+separate prevents a release-delay effect, an active-wrist-torque effect,
+and passive energy redistribution from being treated as the same
+quantity.
+
+| Source | Declared Comparison | Reported Finding | Evidentiary Boundary |
+|---|---|---|---|
+| Pickering and Vickers [@pickering1999] | Release angle in a driven fixed-hub double pendulum | Impact clubhead velocity increased with later release in the tested sweep; natural release minimized supplied energy | Computational parameter study; abstract does not establish universality or a human causal effect |
+| Sprigings and Neal [@sprigings2000] | Physiologically constrained three-segment simulation with wrist generator enabled versus disabled | Approximately 9% clubhead-speed gain with late active wrist torque; optimum activation near 30° below horizontal | Timing depended strongly on assumed torque-profile shape |
+| Sprigings and MacKenzie [@sprigings2002] | No forced delay (SIM-1), 50 ms resisted delay plus active release (SIM-2), and resisted delay without post-release wrist torque (SIM-3) | SIM-2 versus SIM-1: 44.7 versus 44.0 m/s (1.6%); SIM-3: 38.9 m/s | Model included activation and force–velocity limits but omitted legs, lateral torso motion, right-arm extension, and forearm rotation |
+| White [@white2006] | Undriven transfer analysis and driven constant-shoulder-torque sensitivity study | Passive parametric redistribution; ordinary release timing had a second-order net effect; increasing constant positive wrist torque reduced predicted distance | Point-mass or rigid-link planar models; late selective torque was discussed separately from constant torque |
+| Sharp [@sharp2009] | Parameterized arm–club and shoulder–arm–club simulations fitted to historical expert data and optimized within torque bounds | Near-optimal programs included a negative-to-positive wrist-torque switch and delayed release | The author explicitly identifies kinematic mismatch, sparse historical data, and model-dependence |
+
+This matrix is a preregistration aid for the project: a new model or
+experiment must declare which row's contrast it reproduces, or define a
+new estimand, before its result is compared numerically.
+
+## Optimal Control and Torque Sequencing {#sec-optimalcontrol}
+
+If the timing question is posed as an optimization — what torque program
+maximizes clubhead speed subject to actuator limits? — the answer has
+been studied repeatedly, but the resulting control histories are not one
+estimand. Lampsa used film of his own swing to parameterize and constrain
+a generalized two-link model, compared computed and actual torques, and
+used steepest ascent to search for torques maximizing drive distance
+[@lampsa1975]. Sharp later reproduced the published torque
+parameterization, found timing differences too large for both solutions
+to be numerically correct, and obtained a faster model swing with a
+negative-to-positive wrist-torque switch [@sharp2009]. Lampsa is therefore
+an early demonstration of the optimization question, not an independently
+confirmed global optimum or evidence that a human swing is suboptimal.
+
+Later spatial forward models increased biomechanical and club detail, but
+also changed the state, controls, constraints, and objective. MacKenzie and
+Sprigings optimized a four-degree-of-freedom model with a flexible
+segmented shaft for impact clubhead speed [@mackenzie2009]. Balzerson,
+Banerjee and McPhee coupled a four-degree-of-freedom golfer to a Rayleigh
+beam, impact, and ball-flight model and optimized carry distance
+[@balzerson2016]. McNally and McPhee added a pelvis, a second shoulder
+degree of freedom, a modeled backswing, passive joint resistance, and
+eccentric--concentric torque--velocity scaling, then optimized carry
+distance [@mcnally2018]. These models contain late wrist or forearm
+activations, but they do not establish one universal distal-torque program.
+Their source-level contrasts are separated below; McPhee reviews the
+broader lineage [@mcphee2022].
+
+### Forward-Optimization Model Boundaries
+
+| Source | Declared Model and Objective | Reported Result | Evidentiary Boundary |
+|---|---|---|---|
+| Lampsa [@lampsa1975] | Film-parameterized generalized two-link swing; steepest-ascent search for drive distance under penalty constraints | Computed optimal torques were compared with torques derived from the author's filmed swing, with parameter sensitivity examined | The publisher record reports necessary conditions and a numerical search, not proof of a unique global optimum; Sharp later reported a materially different reproduction and a faster admissible program [@sharp2009] |
+| MacKenzie and Sprigings [@mackenzie2009] | Four-degree-of-freedom spatial golfer with torque generators and a segmented flexible shaft; maximize impact clubhead speed | Optimized impact speed was 41.9 m/s; torso, shoulder, wrist-ulnar-deviation, and lead-arm external-rotation generators activated at approximately 0, 0.07, 0.16, and 0.17 s | Model validation used six accepted drives from one 3-handicap male and a single 2-D camera; the model omitted lower-body energy and a trail arm, and its optimized speed was about 7 m/s below the professional comparison cited by the authors |
+| Balzerson, Banerjee, and McPhee [@balzerson2016] | Four-degree-of-freedom torso--lead-arm--lead-hand model, continuous flexible shaft, impact, and ball flight; maximize carry | Optimized impact speed was 41.5 m/s with 196 m carry; wrist activation was approximately 0.11--0.12 s and forearm activation approximately 0.14--0.17 s | The model omitted the lower body and trail arm and explicitly assumed negligible trail-arm power; its authors positioned pelvis rotation as unnecessary for their club-design objective, not for joint-power attribution |
+| McNally and McPhee [@mcnally2018] | Six-degree-of-freedom golfer, flexible shaft, volumetric impact, and ball flight driven by 12 backswing/downswing torque generators; maximize carry | Optimized clubhead speed was 164 km/h (45.6 m/s) and carry was 257 yd | The optimizer initiated torso motion before pelvis motion, which the authors identified as inconsistent with real swings; simulated grip kinematics left the measured elite-golfer standard-deviation bands at some phases, especially late in the swing |
+
+Optimal control optimizes *within a model*. Even the direction and timing of
+an apparent optimum can change with hub mobility, shaft flexibility
+[@betzler2012; @osis2012], actuator parameterization, impact definition,
+ball-flight objective, or omitted degrees of freedom. Cross-engine
+validation (@sec-platform), intervention ablations, and held-out human
+kinematics are therefore required before treating any optimized timing as a
+biological or coaching result.
+
+## What "Energy Transfer" Means Operationally {#sec-energyflow}
+
+Claims about energy transfer require an accounting framework. Four
+levels of analysis appear in the literature, and they are not
+interchangeable.
+
+### Joint Power and Work
+
+For a one-degree-of-freedom joint spanning segments $i$ and $i{+}1$, with
+net generalized joint torque $\tau$ and compatible relative joint rate
+$\dot q$, the net joint power is
+
+$$
+P_{\mathrm{joint}} = \tau\dot q.
+$$ {#eq-net-joint-power}
+
+Its time integral is the net mechanical work associated with the
+resultant joint moment under the declared sign convention. Positive and
+negative values mean net positive and negative mechanical power; they do
+not, by themselves, identify muscle energy generation or absorption.
+Resultant inverse-dynamics torque can combine agonist and antagonist
+forces, passive tissue moments, and other unmodeled contributions. This
+net work--power quantity is central to the budget of Nesbit and Serrano
+(@sec-workbudget) [@nesbit2005work], but interpreting it physiologically
+requires additional muscle and tissue measurements or models.
+
+### Joint-Force Power and Segmental Energy Accounting {#sec-rw}
+
+Joint moments are not the only conduit of segmental mechanical energy.
+For a wrench acting on one segment at joint point $J$, the endpoint power
+must use the velocity and angular velocity of that same segment, expressed
+in compatible frames:
+
+$$
+P_{J\rightarrow i}
+= \mathbf{F}_{J\rightarrow i}\!\cdot\mathbf{v}_{J,i}
++ \mathbf{M}_{J\rightarrow i}\!\cdot\boldsymbol{\omega}_i.
+$$ {#eq-segment-endpoint-power}
+
+The equal-and-opposite wrench on the adjacent segment generally has a
+different segment angular velocity, so the two moment-power terms need
+not cancel. Their sum is related to the net relative joint power; the
+individual segment terms describe delivery to or removal from each
+segment. At a common ideal joint point, the internal force-power terms
+cancel in the whole-system sum but remain essential to each segment's
+energy balance.
+
+Robertson and Winter balanced each leg segment's rate of mechanical-energy
+change against proximal and distal reaction-force and moment powers
+[@robertson1980]. Their validation used sagittal-plane force-plate and
+cinefilm data from two participants walking at several speeds. Agreement
+was acceptable except for ankle power during weight acceptance and late
+push-off, and the estimated joint transfers were comparable in magnitude
+to estimated muscle generation and absorption. The method therefore
+motivates full segment-level accounting; the small walking study is not a
+validation of golf power, three-dimensional joint-center estimates, or
+individual muscle energetics.
+
+The "retain-early / release-late" hypothesis concerns the time course of
+declared intersegment power terms, so segment energy balances are more
+direct than peak angular velocities. They are still not sufficient for
+muscle coordination: Zajac, Neptune, and Kautz explicitly cautioned that
+joint powers and segment angular velocities alone cannot determine energy
+flow, and recommended muscle-induced acceleration and power analysis in a
+dynamical simulation [@zajac2002]. @sec-methods implements a model-level
+wrist-interface balance, including a residual check; it does not identify
+the human muscles responsible for that balance.
+
+### Induced Accelerations and Dynamic Coupling
+
+In a coupled chain, a single generalized torque can induce acceleration at
+multiple coordinates — including coordinates it does not span — through
+the inverse inertia matrix when the corresponding coupling terms are
+nonzero [@zajac1989]. Zajac, Neptune, and Kautz reviewed why inverse
+dynamics cannot by itself assign causal action to individual muscles and
+why muscle-driven simulations are needed for induced-acceleration and
+power analyses [@zajac2002]. In a golf model with nonzero pathways, an
+early torso torque may induce club acceleration and a late wrist torque
+may induce proximal acceleration or deceleration. Their signs and
+magnitudes must be computed for the declared model and state; these are
+mechanical possibilities, not human-golf findings supplied by the walking
+literature. The ZTCF/ZVCF decompositions of @sec-timing-framework are
+model-level counterfactual analyses with a different intervention
+definition, not measurements of individual muscle action.
+
+### Kinematic Sequence as a Proxy — And Its Failure Modes
+
+Peak-ordering of segment angular speeds is a *proxy* for energy flow, not
+a measurement of it. Marsan and colleagues analyzed driver swings from
+13 golfers with seven angular-velocity component-selection methods and
+obtained almost as many sequences as methods for each golfer; no method
+could be designated the reference, although one correlated most strongly
+with performance in that sample [@marsan2019]. Marshall and Elliott's
+long-axis-rotation result in two racquet tasks [@marshall2000] illustrates
+one omitted component, not a golf energy-flow validation.
+
+"Planar" also requires a declared object and tolerance. Coleman and Rankin
+measured seven right-handed golfers (handicap 0--15) and found that the
+left-arm plane changed orientation through the downswing while the
+clubhead was, on average, 0.291 m from that plane at impact
+[@coleman2005]. Kwon and colleagues measured 14 skilled male golfers with
+three clubs: the clubhead followed a well-defined functional swing plane,
+but shoulder and arm points occupied different motion planes and deviated
+substantially from the clubhead plane [@kwon2012]. These results reject a
+single fixed plane shared by the body and club; they do not imply that a
+planar club model is useless for a narrowly declared mechanism.
+
+Tests of the timing hypothesis should therefore pair an explicitly defined
+kinematic sequence with segment and interface power accounting
+(@sec-rw), coordinate sensitivity, and three-dimensional residuals. The
+sequence remains corroborating description rather than evidence of energy
+transfer—which is how @sec-results uses it.

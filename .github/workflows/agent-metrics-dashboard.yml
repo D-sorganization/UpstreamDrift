@@ -1,0 +1,37 @@
+name: Agent Metrics Dashboard
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  # schedule: DISABLED to reduce CI cost (see #1751)
+  # Every Monday at 10am UTC (after CI failure digest)
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+  pull-requests: read
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"

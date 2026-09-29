@@ -1,0 +1,33 @@
+{
+  "spec_sha256": "aba8196843e66c897770795e04cc0d2fca7c9ee4ba2472b2aa380d62a817ff31",
+  "spec_file_sha256": "56fc17c818612f3dfa13fd82fe09084ad5af0c8c810eaa88cb8205a7a27e35d1",
+  "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1",
+  "subject": {
+    "stature_m": 1.71,
+    "mass_kg": 78.0,
+    "trunk_scale": 1.15,
+    "arm_scale": 1.1,
+    "shoulder_scale": 1.0,
+    "grip_roll_deg": 0.0,
+    "grip_rotation_deg": {
+      "L": [-90.0, 47.0, 0.0],
+      "R": [-34.0, 46.0, 62.0]
+    },
+    "source": "de Leva 1996 male table",
+    "de_leva_table_sha256": "7e930d2248251ae345af1b3c889d47b50bd3a032dbe22345752a0e18178aa1c1"
+  },
+  "inputs": {
+    "docs\\development\\simscape_tour_matching\\native_evidence\\native_geometry_spec_9967.json": "0202c8b2e08e8f2664a2dae453a58caa0eae2cabcea4c067fafdc4bc49933c1d",
+    "src\\engines\\physics_engines\\opensim\\models\\golf_humanoid.osim": "344e8a86bd155e90d0882db4300c963b2665fe087b950245555fc38dc33b5ad7",
+    "docs\\development\\full_body_models\\evidence\\native_candidates\\returned81_candidate.json": "3f94aa92f28acde61b6b2f8c871ad536f93eef62cbbae5d0ffe7c85e4b41a6ad"
+  },
+  "hip_half_width_m": 0.08892,
+  "hub_height_above_l5s1_m": 0.42261093595634686,
+  "total_mass_kg": 79.4734923989728,
+  "simplifications": [
+    "patella bodies and patellofemoral coupler constraints dropped",
+    "walker knee reduced to a hinge about its primary axis; coupled spline translations ignored",
+    "OpenSim body inertia interpreted as about the mass centre in the body frame"
+  ],
+  "qualification": "anthropometric geometry; unqualified until Simscape parity (AN-1)"
+}

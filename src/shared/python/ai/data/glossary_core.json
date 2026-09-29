@@ -1,0 +1,1721 @@
+[
+  {
+    "key": "equations_of_motion",
+    "term": "Equations of Motion",
+    "cat": "dynamics",
+    "b": "Math formulas that describe how an object moves over time, like predicting where a golf ball will go.",
+    "i": "Differential equations relating position, velocity, acceleration, and forces acting on a system.",
+    "a": "Newton-Euler or Lagrangian formulations yielding ODEs: M(q)q̈ + C(q,q̇)q̇ + g(q) = τ.",
+    "r": ["inverse_dynamics", "forward_dynamics"]
+  },
+  {
+    "key": "lagrangian",
+    "term": "Lagrangian Mechanics",
+    "cat": "dynamics",
+    "b": "A way to describe motion using energy instead of forces, often simpler for complex systems like the human body.",
+    "i": "Formulation based on L = T - V (kinetic minus potential energy), yielding equations of motion via the Euler-Lagrange equation.",
+    "f": "L = T - V",
+    "r": ["hamiltonian", "euler_lagrange", "kinetic_energy", "potential_energy"]
+  },
+  {
+    "key": "hamiltonian",
+    "term": "Hamiltonian Mechanics",
+    "cat": "dynamics",
+    "b": "Another way to describe motion using total energy, useful for understanding energy conservation in movement.",
+    "i": "Reformulation of dynamics using generalized momenta p and coordinates q, with H = T + V representing total energy.",
+    "f": "H(q,p) = T + V",
+    "r": ["lagrangian", "kinetic_energy", "potential_energy"]
+  },
+  {
+    "key": "newton_euler",
+    "term": "Newton-Euler Method",
+    "cat": "dynamics",
+    "b": "A step-by-step method for calculating forces in linked body segments, working from the extremities inward.",
+    "i": "Recursive algorithm computing forces and torques by sweeping outward for kinematics then inward for dynamics. O(n) complexity.",
+    "r": ["inverse_dynamics", "equations_of_motion"]
+  },
+  {
+    "key": "euler_lagrange",
+    "term": "Euler-Lagrange Equation",
+    "cat": "dynamics",
+    "b": "A key formula that derives motion equations from energy descriptions of a system.",
+    "i": "d/dt(∂L/∂q̇) - ∂L/∂q = Q, where L is the Lagrangian and Q represents non-conservative generalized forces.",
+    "f": "d/dt(∂L/∂q̇) - ∂L/∂q = Q",
+    "r": ["lagrangian", "generalized_forces"]
+  },
+  {
+    "key": "runge_kutta",
+    "term": "Runge-Kutta Method",
+    "cat": "dynamics",
+    "b": "A numerical recipe for advancing a simulation forward in time with good accuracy.",
+    "i": "Family of ODE integrators using weighted slope evaluations. RK4 (4th-order) balances accuracy and cost for biomechanics simulations.",
+    "r": ["rk4", "timestep", "numerical_integration"]
+  },
+  {
+    "key": "symplectic_euler",
+    "term": "Symplectic Euler",
+    "cat": "dynamics",
+    "b": "A time-stepping method that conserves energy well over long simulations, important for physics accuracy.",
+    "i": "Semi-implicit integrator that updates velocity then position, preserving the symplectic structure and long-term energy behavior.",
+    "r": ["numerical_integration", "timestep"]
+  },
+  {
+    "key": "mass_matrix",
+    "term": "Mass Matrix",
+    "cat": "dynamics",
+    "b": "A table of numbers describing how heavy and how the mass is distributed across all body segments.",
+    "i": "Symmetric positive-definite matrix M(q) mapping generalized accelerations to generalized forces in the equations of motion.",
+    "f": "M(q)q̈ = τ - C - g",
+    "u": "kg·m²",
+    "r": ["equations_of_motion", "inertia_tensor"]
+  },
+  {
+    "key": "coriolis_effect",
+    "term": "Coriolis Effect",
+    "cat": "dynamics",
+    "b": "A force that appears when things move within a rotating system, like the club moving relative to rotating arms.",
+    "i": "Velocity-dependent force in rotating frames, captured by the C(q,q̇) term in the equations of motion.",
+    "r": ["centrifugal_force", "equations_of_motion"]
+  },
+  {
+    "key": "centrifugal_force",
+    "term": "Centrifugal Force",
+    "cat": "dynamics",
+    "b": "The outward pull you feel on a merry-go-round, or the club pulling away from you during a swing.",
+    "i": "Apparent outward force in rotating reference frames, proportional to mass, angular velocity squared, and radius.",
+    "f": "F = mω²r",
+    "u": "N",
+    "r": ["coriolis_effect", "angular_velocity"]
+  },
+  {
+    "key": "gravity_vector",
+    "term": "Gravity Vector",
+    "cat": "dynamics",
+    "b": "The downward pull of gravity on every part of the body and club during a swing.",
+    "i": "Configuration-dependent gravitational force vector g(q) in the equations of motion, pointing along the global -Z axis.",
+    "u": "N",
+    "r": ["equations_of_motion", "gravitational_force"]
+  },
+  {
+    "key": "constraint_force",
+    "term": "Constraint Force",
+    "cat": "dynamics",
+    "b": "Forces that keep things connected, like the force keeping your hand attached to the club grip.",
+    "i": "Reaction forces enforcing kinematic constraints (joint connections, ground contact). They do no virtual work in ideal constraints.",
+    "r": ["holonomic_constraint", "contact_force"]
+  },
+  {
+    "key": "contact_force",
+    "term": "Contact Force",
+    "cat": "dynamics",
+    "b": "Forces that arise when two objects touch, like your feet pushing on the ground or hands gripping the club.",
+    "i": "Normal and frictional forces at contact points, computed via complementarity conditions or penalty methods in simulation.",
+    "r": ["friction", "normal_force", "ground_reaction_force"]
+  },
+  {
+    "key": "friction",
+    "term": "Friction",
+    "cat": "dynamics",
+    "b": "The force that prevents sliding, like the grip between your shoes and the ground during a swing.",
+    "i": "Tangential contact force opposing relative sliding. Coulomb model: |f_t| ≤ μ|f_n|, where μ is the friction coefficient.",
+    "f": "|f_t| ≤ μf_n",
+    "r": ["contact_force", "normal_force"]
+  },
+  {
+    "key": "normal_force",
+    "term": "Normal Force",
+    "cat": "dynamics",
+    "b": "The push-back force perpendicular to a surface, like the ground pushing up on your feet.",
+    "i": "Component of contact force perpendicular to the contact surface, preventing interpenetration of bodies.",
+    "u": "N",
+    "r": ["contact_force", "friction", "ground_reaction_force"]
+  },
+  {
+    "key": "impulse",
+    "term": "Impulse",
+    "cat": "dynamics",
+    "b": "The total push delivered over a short time, like the brief but powerful force at club-ball impact.",
+    "i": "Time integral of force: J = ∫F dt. Equals the change in momentum. Critical for impact analysis in golf.",
+    "f": "J = ∫F dt = Δp",
+    "u": "N·s",
+    "r": ["linear_momentum", "impact_phase"]
+  },
+  {
+    "key": "linear_momentum",
+    "term": "Linear Momentum",
+    "cat": "dynamics",
+    "b": "A measure of how hard it is to stop something moving, combining mass and speed.",
+    "i": "Product of mass and velocity: p = mv. Conserved in isolated systems. Transfer of momentum drives ball launch.",
+    "f": "p = mv",
+    "u": "kg·m/s",
+    "r": ["impulse", "angular_momentum"]
+  },
+  {
+    "key": "angular_momentum",
+    "term": "Angular Momentum",
+    "cat": "dynamics",
+    "b": "The rotational equivalent of momentum, measuring how strongly something spins.",
+    "i": "L = Iω for rigid bodies. In golf, angular momentum transfers sequentially through the kinetic chain from hips to club.",
+    "f": "L = Iω",
+    "u": "kg·m²/s",
+    "r": ["linear_momentum", "kinetic_chain", "moment_of_inertia"]
+  },
+  {
+    "key": "kinetic_energy",
+    "term": "Kinetic Energy",
+    "cat": "dynamics",
+    "b": "The energy of motion. A faster-moving club has more kinetic energy to transfer to the ball.",
+    "i": "Energy due to motion: T = ½mv² (translational) + ½Iω² (rotational). Key metric for swing power output.",
+    "f": "T = ½mv² + ½Iω²",
+    "u": "J (Joules)",
+    "r": ["potential_energy", "work_energy_theorem"]
+  },
+  {
+    "key": "potential_energy",
+    "term": "Potential Energy",
+    "cat": "dynamics",
+    "b": "Stored energy due to position, like the energy stored at the top of the backswing due to height and stretched muscles.",
+    "i": "Energy stored in gravitational field (mgh) or elastic elements (muscles, tendons). Converts to kinetic energy during downswing.",
+    "f": "V = mgh",
+    "u": "J (Joules)",
+    "r": ["kinetic_energy", "work_energy_theorem"]
+  },
+  {
+    "key": "work_energy_theorem",
+    "term": "Work-Energy Theorem",
+    "cat": "dynamics",
+    "b": "The principle that the work done on an object equals its change in kinetic energy.",
+    "i": "W_net = ΔKE. In golf, net work from muscles and gravity determines final club head kinetic energy at impact.",
+    "f": "W = ΔKE",
+    "u": "J",
+    "r": ["kinetic_energy", "potential_energy"]
+  },
+  {
+    "key": "rigid_body",
+    "term": "Rigid Body",
+    "cat": "dynamics",
+    "b": "An object that doesn't bend or deform, used to simplify body segment modeling.",
+    "i": "Idealized body where distance between any two points remains constant. Standard assumption for skeletal segments in biomechanics.",
+    "r": ["deformable_body", "multibody_system"]
+  },
+  {
+    "key": "deformable_body",
+    "term": "Deformable Body",
+    "cat": "dynamics",
+    "b": "An object that can bend, stretch, or compress, like muscles and soft tissue.",
+    "i": "Body whose shape changes under load. Relevant for modeling club shaft flex, muscle tissue, and soft-tissue artifacts.",
+    "r": ["rigid_body", "finite_element_method"]
+  },
+  {
+    "key": "multibody_system",
+    "term": "Multibody System",
+    "cat": "dynamics",
+    "b": "A system of connected rigid parts, like the linked segments of a human body.",
+    "i": "Collection of rigid bodies connected by joints with defined degrees of freedom. The golfer + club is a multibody system with ~30 DOF.",
+    "r": ["rigid_body", "degrees_of_freedom", "physics_engine"]
+  },
+  {
+    "key": "degrees_of_freedom",
+    "term": "Degrees of Freedom",
+    "cat": "dynamics",
+    "b": "The number of independent ways something can move, like bending, rotating, or sliding.",
+    "i": "Minimum number of independent coordinates needed to describe a system's configuration. Human body: ~200 DOF; golf model: ~30 DOF.",
+    "r": ["generalized_coordinates", "multibody_system"]
+  },
+  {
+    "key": "generalized_coordinates",
+    "term": "Generalized Coordinates",
+    "cat": "dynamics",
+    "b": "A set of numbers that fully describes the position of every part of a system.",
+    "i": "Minimal set of independent coordinates q describing system configuration. For articulated bodies, these are typically joint angles.",
+    "r": ["degrees_of_freedom", "generalized_forces", "configuration_space"]
+  },
+  {
+    "key": "generalized_forces",
+    "term": "Generalized Forces",
+    "cat": "dynamics",
+    "b": "Forces expressed in terms of joint movements rather than simple pushes and pulls.",
+    "i": "Forces/torques conjugate to generalized coordinates: τ = M(q)q̈ + C + g. Include muscle torques and external loads.",
+    "u": "N or N·m",
+    "r": ["generalized_coordinates", "joint_torque"]
+  },
+  {
+    "key": "virtual_work",
+    "term": "Virtual Work",
+    "cat": "dynamics",
+    "b": "A thought experiment about tiny imaginary displacements used to derive motion equations.",
+    "i": "Work done by forces through infinitesimal virtual displacements consistent with constraints. Foundation of Lagrangian mechanics.",
+    "r": ["d_alembert_principle", "lagrangian"]
+  },
+  {
+    "key": "d_alembert_principle",
+    "term": "D'Alembert's Principle",
+    "cat": "dynamics",
+    "b": "A rule that converts dynamics problems into static-like problems by adding inertial forces.",
+    "i": "States that F - ma = 0 for virtual displacements, bridging Newton's laws and analytical mechanics via virtual work.",
+    "r": ["virtual_work", "equations_of_motion"]
+  },
+  {
+    "key": "holonomic_constraint",
+    "term": "Holonomic Constraint",
+    "cat": "dynamics",
+    "b": "A restriction on movement that depends only on position, like a hinge that only allows rotation.",
+    "i": "Constraint expressible as f(q,t) = 0, depending only on coordinates and time. Joint constraints are typically holonomic.",
+    "r": ["nonholonomic_constraint", "constraint_force"]
+  },
+  {
+    "key": "nonholonomic_constraint",
+    "term": "Nonholonomic Constraint",
+    "cat": "dynamics",
+    "b": "A restriction that depends on velocity, like rolling without slipping.",
+    "i": "Constraint involving velocities that cannot be integrated to a position constraint: f(q,q̇,t) = 0. Rolling contact is a common example.",
+    "r": ["holonomic_constraint", "constraint_force"]
+  },
+  {
+    "key": "stability",
+    "term": "Stability",
+    "cat": "dynamics",
+    "b": "Whether a system returns to its original state after being disturbed, like maintaining balance during a swing.",
+    "i": "A system is stable if small perturbations produce bounded responses. Lyapunov stability analysis quantifies this for dynamic systems.",
+    "r": ["equilibrium", "damping"]
+  },
+  {
+    "key": "equilibrium",
+    "term": "Equilibrium",
+    "cat": "dynamics",
+    "b": "A balanced state where all forces cancel out and there is no net motion.",
+    "i": "State where net force and torque are zero. Static equilibrium (no motion) vs dynamic equilibrium (constant velocity).",
+    "r": ["stability", "zero_torque_configuration"]
+  },
+  {
+    "key": "damping",
+    "term": "Damping",
+    "cat": "dynamics",
+    "b": "The gradual loss of motion energy, like how a pendulum eventually stops swinging.",
+    "i": "Energy dissipation opposing motion, modeled as force proportional to velocity: F = -bv. Muscles and joints have natural damping properties.",
+    "f": "F = -bv",
+    "r": ["stability", "viscoelasticity"]
+  },
+  {
+    "key": "inertia_tensor",
+    "term": "Inertia Tensor",
+    "cat": "dynamics",
+    "b": "A description of how mass is distributed in 3D, affecting how an object resists rotation.",
+    "i": "3x3 symmetric matrix I describing rotational inertia about all axes. Diagonal elements are moments of inertia; off-diagonal are products of inertia.",
+    "u": "kg·m²",
+    "r": ["moment_of_inertia", "mass_matrix"]
+  },
+  {
+    "key": "position",
+    "term": "Position",
+    "cat": "kinematics",
+    "b": "Where something is in space, described by coordinates like (x, y, z).",
+    "i": "Location of a point in a reference frame, expressed as a 3D vector. Tracked over time to compute velocity and acceleration.",
+    "u": "m (meters)",
+    "r": ["velocity", "acceleration"]
+  },
+  {
+    "key": "velocity",
+    "term": "Velocity",
+    "cat": "kinematics",
+    "b": "How fast and in which direction something is moving.",
+    "i": "Time derivative of position: v = dx/dt. Club head velocity at impact is the primary driver of ball speed.",
+    "f": "v = dx/dt",
+    "u": "m/s",
+    "r": ["position", "acceleration", "club_head_speed"]
+  },
+  {
+    "key": "acceleration",
+    "term": "Acceleration",
+    "cat": "kinematics",
+    "b": "How quickly speed or direction changes, like the rapid speed increase during the downswing.",
+    "i": "Time derivative of velocity: a = dv/dt. Measured by accelerometers or computed from position data via double differentiation.",
+    "f": "a = dv/dt",
+    "u": "m/s²",
+    "r": ["velocity", "position"]
+  },
+  {
+    "key": "angular_velocity",
+    "term": "Angular Velocity",
+    "cat": "kinematics",
+    "b": "How fast something rotates, like the spin rate of the club or a body segment.",
+    "i": "Rate of change of orientation: ω = dθ/dt. Expressed as a 3D vector whose direction is the rotation axis.",
+    "f": "ω = dθ/dt",
+    "u": "rad/s",
+    "r": ["angular_acceleration", "angular_momentum"]
+  },
+  {
+    "key": "angular_acceleration",
+    "term": "Angular Acceleration",
+    "cat": "kinematics",
+    "b": "How quickly rotation speed changes, crucial during the golf swing transition.",
+    "i": "Time derivative of angular velocity: α = dω/dt. Drives joint torque requirements via Newton's second law for rotation.",
+    "f": "α = dω/dt",
+    "u": "rad/s²",
+    "r": ["angular_velocity", "joint_torque"]
+  },
+  {
+    "key": "rotation_matrix",
+    "term": "Rotation Matrix",
+    "cat": "kinematics",
+    "b": "A 3x3 grid of numbers that describes how one coordinate frame is rotated relative to another.",
+    "i": "Orthogonal matrix R ∈ SO(3) mapping vectors between coordinate frames. Used to transform forces and positions between body segments.",
+    "r": ["euler_angles", "quaternion", "so3_group"]
+  },
+  {
+    "key": "euler_angles",
+    "term": "Euler Angles",
+    "cat": "kinematics",
+    "b": "Three rotation angles describing orientation, like tilting, turning, and leaning of body segments.",
+    "i": "Three sequential rotations (e.g., ZYX convention) defining orientation. Intuitive but suffer from gimbal lock at certain configurations.",
+    "u": "degrees or radians",
+    "r": ["rotation_matrix", "quaternion"]
+  },
+  {
+    "key": "quaternion",
+    "term": "Quaternion",
+    "cat": "kinematics",
+    "b": "A mathematical tool for describing rotations without the problems that Euler angles can have.",
+    "i": "4D number q = (w, x, y, z) representing rotation. Avoids gimbal lock and provides smooth interpolation (SLERP) between orientations.",
+    "r": ["euler_angles", "rotation_matrix"]
+  },
+  {
+    "key": "homogeneous_transform",
+    "term": "Homogeneous Transform",
+    "cat": "kinematics",
+    "b": "A single matrix combining rotation and position to describe where and how a body segment is oriented.",
+    "i": "4x4 matrix combining rotation R and translation t into a single transformation. Chain multiplication gives end-effector pose.",
+    "r": ["rotation_matrix", "forward_kinematics_robot"]
+  },
+  {
+    "key": "denavit_hartenberg",
+    "term": "Denavit-Hartenberg Parameters",
+    "cat": "kinematics",
+    "b": "A standard way to describe the geometry of linked segments, widely used in robotics and biomechanics.",
+    "i": "Convention using 4 parameters per joint (θ, d, a, α) to define transformations between consecutive links in a kinematic chain.",
+    "r": ["forward_kinematics_robot", "serial_chain"]
+  },
+  {
+    "key": "forward_kinematics_robot",
+    "term": "Forward Kinematics",
+    "cat": "kinematics",
+    "b": "Calculating where the club head ends up given all the joint angles in the body.",
+    "i": "Computing end-effector (club head) pose from joint angles by chaining transformations along the kinematic chain.",
+    "r": ["inverse_kinematics", "denavit_hartenberg"]
+  },
+  {
+    "key": "inverse_kinematics",
+    "term": "Inverse Kinematics",
+    "cat": "kinematics",
+    "b": "Figuring out what joint angles are needed to place the club head at a desired position.",
+    "i": "Solving for joint angles q given desired end-effector pose. Generally non-unique and may use iterative methods or pseudoinverse solutions.",
+    "r": ["forward_kinematics_robot", "jacobian_matrix"]
+  },
+  {
+    "key": "jacobian_matrix",
+    "term": "Jacobian Matrix",
+    "cat": "kinematics",
+    "b": "A matrix that relates joint movements to club head movement, showing how each joint contributes.",
+    "i": "Matrix J mapping joint velocities to end-effector velocity: v = J(q)q̇. Rows correspond to task-space DOFs, columns to joint DOFs.",
+    "f": "v = J(q)q̇",
+    "r": ["inverse_kinematics", "singularity", "manipulability_ellipsoid"]
+  },
+  {
+    "key": "workspace",
+    "term": "Workspace",
+    "cat": "kinematics",
+    "b": "The region of space that the club head or hand can reach given the body's joint ranges.",
+    "i": "Set of all achievable end-effector positions/orientations. Dexterous workspace requires full orientation control.",
+    "r": ["reachable_workspace", "dexterous_workspace"]
+  },
+  {
+    "key": "singularity",
+    "term": "Singularity",
+    "cat": "kinematics",
+    "b": "A body configuration where certain movements become impossible, like a fully extended arm losing a bending direction.",
+    "i": "Configuration where the Jacobian loses rank, reducing achievable task-space velocities. Near-singular configurations amplify torque requirements.",
+    "r": ["jacobian_matrix", "condition_number"]
+  },
+  {
+    "key": "joint_angle",
+    "term": "Joint Angle",
+    "cat": "kinematics",
+    "b": "The angle at a body joint, like how much the elbow is bent or the hip is rotated.",
+    "i": "Angular measure of relative orientation between two connected segments. Primary generalized coordinate for revolute joints.",
+    "u": "degrees or radians",
+    "r": ["range_of_motion", "generalized_coordinates"]
+  },
+  {
+    "key": "range_of_motion",
+    "term": "Range of Motion",
+    "cat": "kinematics",
+    "b": "How far a joint can move, from fully bent to fully straight or fully rotated.",
+    "i": "Angular extent of joint movement in each plane. Limited by bone geometry, ligaments, and muscle flexibility. Varies by individual.",
+    "u": "degrees",
+    "r": ["joint_angle", "joint_limit"]
+  },
+  {
+    "key": "trajectory",
+    "term": "Trajectory",
+    "cat": "kinematics",
+    "b": "The path an object follows through space over time, like the club head path during a swing.",
+    "i": "Time-parameterized curve q(t) describing motion through configuration or task space. Analyzed for smoothness and optimality.",
+    "r": ["path_planning", "spline_interpolation"]
+  },
+  {
+    "key": "path_planning",
+    "term": "Path Planning",
+    "cat": "kinematics",
+    "b": "Computing an efficient movement path from one position to another while avoiding obstacles.",
+    "i": "Finding a collision-free trajectory in configuration space. In biomechanics, the body naturally optimizes movement paths.",
+    "r": ["trajectory", "trajectory_optimization"]
+  },
+  {
+    "key": "spline_interpolation",
+    "term": "Spline Interpolation",
+    "cat": "kinematics",
+    "b": "Creating smooth curves through measured data points to fill in gaps between measurements.",
+    "i": "Piecewise polynomial (cubic or quintic) fitting through waypoints with continuity constraints. Used to smooth motion capture data.",
+    "r": ["trajectory", "data_smoothing"]
+  },
+  {
+    "key": "pose",
+    "term": "Pose",
+    "cat": "kinematics",
+    "b": "The complete position and orientation of a body or object in 3D space.",
+    "i": "Combined position (3D translation) and orientation (3D rotation) of a rigid body, requiring 6 parameters (SE(3) element).",
+    "r": ["orientation", "translation", "se3_group"]
+  },
+  {
+    "key": "orientation",
+    "term": "Orientation",
+    "cat": "kinematics",
+    "b": "Which direction something is pointing or how it is rotated.",
+    "i": "Rotational component of pose, represented by rotation matrices, Euler angles, or quaternions. Three degrees of freedom.",
+    "r": ["rotation_matrix", "euler_angles", "quaternion"]
+  },
+  {
+    "key": "translation",
+    "term": "Translation",
+    "cat": "kinematics",
+    "b": "Movement from one place to another without rotating.",
+    "i": "Linear displacement vector in 3D space. Three degrees of freedom (x, y, z).",
+    "u": "m",
+    "r": ["position", "pose"]
+  },
+  {
+    "key": "screw_motion",
+    "term": "Screw Motion",
+    "cat": "kinematics",
+    "b": "A combined rotation and slide along the same axis, like a corkscrew motion.",
+    "i": "General rigid body displacement as simultaneous rotation about and translation along a screw axis. Basis of screw theory kinematics.",
+    "r": ["twist_velocity", "wrench"]
+  },
+  {
+    "key": "twist_velocity",
+    "term": "Twist",
+    "cat": "kinematics",
+    "b": "A combined description of linear and angular velocity of a rigid body.",
+    "i": "6D velocity vector combining angular and linear velocity: ξ = (ω, v). Element of se(3), the Lie algebra of SE(3).",
+    "r": ["spatial_velocity", "wrench", "lie_algebra"]
+  },
+  {
+    "key": "wrench",
+    "term": "Wrench",
+    "cat": "kinematics",
+    "b": "A combined description of force and torque acting on a body.",
+    "i": "6D force vector combining torque and force: w = (τ, f). Dual to twist. Used for ground reaction force analysis.",
+    "r": ["twist_velocity", "wrench_force", "ground_reaction_force"]
+  },
+  {
+    "key": "spatial_velocity",
+    "term": "Spatial Velocity",
+    "cat": "kinematics",
+    "b": "The velocity of a body expressed in a fixed reference frame rather than the body's own frame.",
+    "i": "Twist expressed in the spatial (world) frame. Distinguished from body velocity which is expressed in the body frame.",
+    "r": ["twist_velocity", "body_frame", "world_frame"]
+  },
+  {
+    "key": "body_frame",
+    "term": "Body Frame",
+    "cat": "kinematics",
+    "b": "A coordinate system attached to and moving with a body segment.",
+    "i": "Local reference frame fixed to a rigid body. Velocities and forces can be expressed in body or spatial frames.",
+    "r": ["world_frame", "local_reference_frame"]
+  },
+  {
+    "key": "world_frame",
+    "term": "World Frame",
+    "cat": "kinematics",
+    "b": "The fixed, non-moving coordinate system used as the main reference for all measurements.",
+    "i": "Global inertial reference frame. Typically Z-up with origin at ground level. All body frames are expressed relative to it.",
+    "r": ["body_frame", "global_reference_frame"]
+  },
+  {
+    "key": "configuration_space",
+    "term": "Configuration Space",
+    "cat": "kinematics",
+    "b": "The set of all possible body positions described by joint angles.",
+    "i": "n-dimensional space of all generalized coordinates q. Each point represents a unique system configuration. Abbreviated C-space.",
+    "r": ["generalized_coordinates", "degrees_of_freedom", "phase_space"]
+  },
+  {
+    "key": "gait_analysis",
+    "term": "Gait Analysis",
+    "cat": "biomechanics",
+    "b": "The study of how people walk and move, used to detect problems or improve performance.",
+    "i": "Systematic measurement and analysis of locomotion using kinematics, kinetics, and EMG. Methods transfer to golf swing analysis.",
+    "r": ["gait_cycle", "motion_capture_system"]
+  },
+  {
+    "key": "stride_length",
+    "term": "Stride Length",
+    "cat": "biomechanics",
+    "b": "The distance covered in one complete walking or running cycle.",
+    "i": "Distance between successive contacts of the same foot. Normalized by leg length for inter-subject comparison.",
+    "u": "m",
+    "r": ["cadence", "gait_cycle"]
+  },
+  {
+    "key": "cadence",
+    "term": "Cadence",
+    "cat": "biomechanics",
+    "b": "The rhythm or rate of steps during walking, or swing tempo in golf.",
+    "i": "Number of steps per minute in gait, or swings per unit time. Optimal cadence minimizes energy cost for a given speed.",
+    "u": "steps/min",
+    "r": ["stride_length", "swing_tempo"]
+  },
+  {
+    "key": "stance_phase",
+    "term": "Stance Phase",
+    "cat": "biomechanics",
+    "b": "The part of the gait cycle when the foot is on the ground, similar to the grounded phase of a golf swing.",
+    "i": "Portion of gait cycle from heel strike to toe-off (~60% of cycle). Ground reaction forces are generated only during stance.",
+    "r": ["swing_phase", "gait_cycle", "ground_reaction_force"]
+  },
+  {
+    "key": "swing_phase",
+    "term": "Swing Phase",
+    "cat": "biomechanics",
+    "b": "The part of a gait cycle when the foot is in the air between steps.",
+    "i": "Portion of gait cycle from toe-off to heel strike (~40% of cycle). Leg moves as a pendulum under gravity and muscle control.",
+    "r": ["stance_phase", "gait_cycle"]
+  },
+  {
+    "key": "double_support",
+    "term": "Double Support",
+    "cat": "biomechanics",
+    "b": "When both feet are on the ground at the same time during walking.",
+    "i": "Period when both feet contact the ground simultaneously. Decreases with walking speed and disappears during running.",
+    "r": ["stance_phase", "gait_cycle"]
+  },
+  {
+    "key": "gait_cycle",
+    "term": "Gait Cycle",
+    "cat": "biomechanics",
+    "b": "One complete sequence of steps, from one heel strike to the next heel strike of the same foot.",
+    "i": "Full locomotion cycle divided into stance and swing phases. Provides the temporal framework for normalizing kinematic and kinetic data.",
+    "r": ["stance_phase", "swing_phase", "stride_length"]
+  },
+  {
+    "key": "joint_moment",
+    "term": "Joint Moment",
+    "cat": "biomechanics",
+    "b": "The net rotational force at a joint, representing the combined effect of muscles, ligaments, and other structures.",
+    "i": "Net torque about a joint axis calculated via inverse dynamics. Represents the resultant of all internal structures crossing the joint.",
+    "u": "N·m",
+    "r": ["joint_torque", "inverse_dynamics"]
+  },
+  {
+    "key": "segment_inertia",
+    "term": "Segment Inertia",
+    "cat": "biomechanics",
+    "b": "How a body segment resists changes in rotation, depending on its mass and shape.",
+    "i": "Rotational inertia of a body segment about its center of mass. Determined from anthropometric data or medical imaging.",
+    "u": "kg·m²",
+    "r": ["inertia_tensor", "body_segment_parameters"]
+  },
+  {
+    "key": "body_segment_parameters",
+    "term": "Body Segment Parameters",
+    "cat": "biomechanics",
+    "b": "Measurements of body parts (mass, length, center of mass) needed for biomechanical calculations.",
+    "i": "Mass, length, center of mass location, and moments of inertia for each segment. Estimated from regression equations or imaging.",
+    "r": ["anthropometry", "segment_inertia"]
+  },
+  {
+    "key": "anthropometry",
+    "term": "Anthropometry",
+    "cat": "biomechanics",
+    "b": "Measuring the human body's dimensions and proportions for biomechanical analysis.",
+    "i": "Systematic measurement of body dimensions. Used to estimate segment inertial properties via regression models (de Leva, Dempster).",
+    "r": ["body_segment_parameters", "center_of_mass"]
+  },
+  {
+    "key": "center_of_mass",
+    "term": "Center of Mass",
+    "cat": "biomechanics",
+    "b": "The balance point of a body or segment where all mass effectively concentrates.",
+    "i": "Point where total mass can be considered concentrated for translational dynamics. Whole-body COM tracked for balance analysis.",
+    "u": "m (position)",
+    "r": ["center_of_gravity", "body_segment_parameters"]
+  },
+  {
+    "key": "center_of_gravity",
+    "term": "Center of Gravity",
+    "cat": "biomechanics",
+    "b": "The point where gravity appears to act on the body, same as center of mass in uniform gravity.",
+    "i": "Point where gravitational force effectively acts. Coincides with center of mass in uniform gravity fields on Earth.",
+    "r": ["center_of_mass", "stability"]
+  },
+  {
+    "key": "moment_of_inertia",
+    "term": "Moment of Inertia",
+    "cat": "biomechanics",
+    "b": "How much a body segment resists spinning, depending on mass and how far the mass is from the rotation axis.",
+    "i": "Scalar I = ∑mr² for a given axis. Larger for extended limbs (backswing) vs tucked positions. Governs angular acceleration.",
+    "f": "I = ∑m_i r_i²",
+    "u": "kg·m²",
+    "r": ["inertia_tensor", "parallel_axis_theorem"]
+  },
+  {
+    "key": "parallel_axis_theorem",
+    "term": "Parallel Axis Theorem",
+    "cat": "biomechanics",
+    "b": "A formula for calculating rotational inertia about any axis from the inertia about the center of mass.",
+    "i": "I_axis = I_cm + md², where d is the distance between axes. Essential for computing segment inertias about joint centers.",
+    "f": "I = I_cm + md²",
+    "r": ["moment_of_inertia", "segment_inertia"]
+  },
+  {
+    "key": "body_weight_normalization",
+    "term": "Body Weight Normalization",
+    "cat": "biomechanics",
+    "b": "Expressing forces as multiples of body weight so you can compare people of different sizes.",
+    "i": "Dividing forces by body weight (mg) to enable inter-subject comparison. GRF is typically reported in BW units.",
+    "u": "BW (body weight)",
+    "r": ["ground_reaction_force"]
+  },
+  {
+    "key": "electromyography",
+    "term": "Electromyography (EMG)",
+    "cat": "biomechanics",
+    "b": "A technique for measuring muscle electrical activity to see when and how hard muscles are working.",
+    "i": "Recording of muscle electrical signals via surface or intramuscular electrodes. Indicates muscle activation timing and relative intensity.",
+    "r": ["muscle_activation", "co_contraction"]
+  },
+  {
+    "key": "muscle_activation",
+    "term": "Muscle Activation",
+    "cat": "biomechanics",
+    "b": "How much a muscle is turned on, from completely relaxed to fully contracted.",
+    "i": "Neural drive level to a muscle, from 0 (inactive) to 1 (maximal). Estimated from processed EMG or computed via optimization.",
+    "r": ["electromyography", "motor_unit_recruitment"]
+  },
+  {
+    "key": "force_velocity_relationship",
+    "term": "Force-Velocity Relationship",
+    "cat": "biomechanics",
+    "b": "The principle that muscles produce less force when contracting quickly and more force when moving slowly.",
+    "i": "Hyperbolic relationship (Hill equation): faster shortening reduces force capacity. Eccentric contractions exceed isometric force.",
+    "f": "(F + a)(v + b) = (F_0 + a)b",
+    "r": [
+      "hill_muscle_model",
+      "concentric_contraction",
+      "eccentric_contraction"
+    ]
+  },
+  {
+    "key": "length_tension_relationship",
+    "term": "Length-Tension Relationship",
+    "cat": "biomechanics",
+    "b": "The principle that muscles produce the most force at an optimal length, less when too short or too stretched.",
+    "i": "Parabolic relationship between muscle fiber length and isometric force. Peak at optimal sarcomere length (~2.7 μm in humans).",
+    "r": ["hill_muscle_model", "sarcomere"]
+  },
+  {
+    "key": "hill_muscle_model",
+    "term": "Hill Muscle Model",
+    "cat": "biomechanics",
+    "b": "A simplified model of muscle behavior using three components: contractile element, elastic springs, and dampers.",
+    "i": "Lumped-parameter model: contractile element (CE) + series elastic (SE) + parallel elastic (PE). Standard in musculoskeletal simulation.",
+    "r": [
+      "force_velocity_relationship",
+      "length_tension_relationship",
+      "muscle_tendon_unit"
+    ]
+  },
+  {
+    "key": "muscle_tendon_unit",
+    "term": "Muscle-Tendon Unit",
+    "cat": "biomechanics",
+    "b": "The combination of a muscle and its connecting tendon, working together to produce and transmit force.",
+    "i": "Functional unit of muscle fiber and tendon in series. Tendon stores elastic energy during stretch-shortening cycles.",
+    "r": ["hill_muscle_model", "stretch_shortening_cycle"]
+  },
+  {
+    "key": "isometric_contraction",
+    "term": "Isometric Contraction",
+    "cat": "biomechanics",
+    "b": "A muscle contraction where the muscle generates force but doesn't change length, like holding a heavy object still.",
+    "i": "Contraction at constant muscle length. Produces maximum force at optimal length. Used as reference for normalizing force capacity.",
+    "r": ["isotonic_contraction", "isokinetic_contraction"]
+  },
+  {
+    "key": "isotonic_contraction",
+    "term": "Isotonic Contraction",
+    "cat": "biomechanics",
+    "b": "A muscle contraction where the force stays constant while the muscle shortens or lengthens.",
+    "i": "Contraction against constant load. Includes concentric (shortening) and eccentric (lengthening) phases.",
+    "r": [
+      "isometric_contraction",
+      "concentric_contraction",
+      "eccentric_contraction"
+    ]
+  },
+  {
+    "key": "isokinetic_contraction",
+    "term": "Isokinetic Contraction",
+    "cat": "biomechanics",
+    "b": "A muscle contraction at a constant speed, often measured with special testing machines.",
+    "i": "Contraction at constant angular velocity, achieved using dynamometer machines that adapt resistance. Used for strength testing.",
+    "r": ["isometric_contraction", "isotonic_contraction"]
+  },
+  {
+    "key": "concentric_contraction",
+    "term": "Concentric Contraction",
+    "cat": "biomechanics",
+    "b": "When a muscle shortens while producing force, like the bicep during a curl.",
+    "i": "Shortening contraction where muscle force exceeds external load. Force decreases with increasing shortening velocity.",
+    "r": ["eccentric_contraction", "force_velocity_relationship"]
+  },
+  {
+    "key": "eccentric_contraction",
+    "term": "Eccentric Contraction",
+    "cat": "biomechanics",
+    "b": "When a muscle lengthens while producing force, like lowering a weight slowly. Produces more force than shortening.",
+    "i": "Lengthening contraction where external load exceeds muscle force. Can produce ~1.5x isometric force. Important for deceleration phases.",
+    "r": ["concentric_contraction", "force_velocity_relationship"]
+  },
+  {
+    "key": "agonist",
+    "term": "Agonist",
+    "cat": "biomechanics",
+    "b": "The main muscle responsible for a movement, like the pectorals during a golf downswing.",
+    "i": "Primary mover for a given joint action. Produces the torque that drives the intended motion.",
+    "r": ["antagonist", "synergist"]
+  },
+  {
+    "key": "antagonist",
+    "term": "Antagonist",
+    "cat": "biomechanics",
+    "b": "The muscle opposing the main mover, providing control and braking during fast movements.",
+    "i": "Muscle opposing the agonist. Co-activation with agonist increases joint stiffness and control accuracy.",
+    "r": ["agonist", "co_contraction"]
+  },
+  {
+    "key": "synergist",
+    "term": "Synergist",
+    "cat": "biomechanics",
+    "b": "A helper muscle that assists the main mover in producing a movement.",
+    "i": "Muscle assisting the agonist or stabilizing adjacent joints. Multiple synergists provide redundant control strategies.",
+    "r": ["agonist", "antagonist"]
+  },
+  {
+    "key": "co_contraction",
+    "term": "Co-contraction",
+    "cat": "biomechanics",
+    "b": "When opposing muscles activate simultaneously to stiffen and stabilize a joint.",
+    "i": "Simultaneous activation of agonist and antagonist muscles. Increases joint stiffness at the cost of metabolic efficiency.",
+    "r": ["agonist", "antagonist", "electromyography"]
+  },
+  {
+    "key": "stretch_shortening_cycle",
+    "term": "Stretch-Shortening Cycle",
+    "cat": "biomechanics",
+    "b": "A natural movement pattern where a muscle stretches then rapidly shortens, producing more power than shortening alone.",
+    "i": "Eccentric-concentric muscle action sequence that enhances force via elastic energy storage and stretch reflex. Key in golf downswing.",
+    "r": ["plyometric", "muscle_tendon_unit"]
+  },
+  {
+    "key": "plyometric",
+    "term": "Plyometric",
+    "cat": "biomechanics",
+    "b": "Explosive exercises using the stretch-shortening cycle, like jumping, to build power.",
+    "i": "Training method exploiting SSC to maximize power output. Short amortization phase between eccentric and concentric phases is critical.",
+    "r": ["stretch_shortening_cycle"]
+  },
+  {
+    "key": "proprioception",
+    "term": "Proprioception",
+    "cat": "biomechanics",
+    "b": "Your body's sense of where its parts are and how they are moving without looking.",
+    "i": "Sensory information from muscle spindles, GTOs, and joint receptors about body position and movement. Essential for motor control.",
+    "r": ["muscle_spindle", "golgi_tendon_organ", "motor_control"]
+  },
+  {
+    "key": "motor_learning",
+    "term": "Motor Learning",
+    "cat": "biomechanics",
+    "b": "The process of improving movement skills through practice, like developing a consistent golf swing.",
+    "i": "Relatively permanent changes in motor behavior through practice. Progresses from cognitive to associative to autonomous stages.",
+    "r": ["motor_control", "proprioception"]
+  },
+  {
+    "key": "club_head_speed",
+    "term": "Club Head Speed",
+    "cat": "golf",
+    "b": "How fast the club is moving at impact. Faster speed generally means more distance.",
+    "i": "Velocity of the club head at impact, the primary determinant of ball speed. PGA Tour average: ~113 mph (driver).",
+    "u": "mph or m/s",
+    "r": ["ball_speed", "smash_factor", "kinetic_chain"]
+  },
+  {
+    "key": "ball_speed",
+    "term": "Ball Speed",
+    "cat": "golf",
+    "b": "How fast the golf ball leaves the club face after impact.",
+    "i": "Initial velocity of the ball post-impact. Related to club head speed via smash factor. PGA avg: ~167 mph (driver).",
+    "u": "mph or m/s",
+    "r": ["club_head_speed", "smash_factor"]
+  },
+  {
+    "key": "smash_factor",
+    "term": "Smash Factor",
+    "cat": "golf",
+    "b": "The efficiency of energy transfer from club to ball. Higher means better contact quality.",
+    "i": "Ratio of ball speed to club head speed. Maximum ~1.50 for driver. Indicates quality of impact (center hit vs off-center).",
+    "f": "SF = ball_speed / club_head_speed",
+    "r": ["ball_speed", "club_head_speed", "sweet_spot"]
+  },
+  {
+    "key": "launch_angle",
+    "term": "Launch Angle",
+    "cat": "golf",
+    "b": "The angle at which the ball takes off relative to the ground.",
+    "i": "Vertical angle of ball trajectory at launch. Determined by dynamic loft and attack angle. Optimal varies by club and speed.",
+    "u": "degrees",
+    "r": ["attack_angle", "dynamic_loft", "spin_rate"]
+  },
+  {
+    "key": "spin_rate",
+    "term": "Spin Rate",
+    "cat": "golf",
+    "b": "How fast the ball is spinning after being hit. Affects how high the ball flies and how it stops on the green.",
+    "i": "Angular velocity of the ball post-impact. Backspin creates lift; sidespin causes curve. Optimal driver: ~2200-2800 rpm.",
+    "u": "rpm",
+    "r": ["backspin", "sidespin", "magnus_effect"]
+  },
+  {
+    "key": "carry_distance",
+    "term": "Carry Distance",
+    "cat": "golf",
+    "b": "How far the ball flies through the air before landing.",
+    "i": "Aerial distance from launch to landing. Function of ball speed, launch angle, spin rate, and atmospheric conditions.",
+    "u": "yards or meters",
+    "r": ["total_distance", "launch_angle", "spin_rate"]
+  },
+  {
+    "key": "total_distance",
+    "term": "Total Distance",
+    "cat": "golf",
+    "b": "The complete distance the ball travels including carry and roll after landing.",
+    "i": "Carry distance plus roll. Roll depends on landing angle, spin, and ground conditions.",
+    "u": "yards or meters",
+    "r": ["carry_distance"]
+  },
+  {
+    "key": "attack_angle",
+    "term": "Attack Angle",
+    "cat": "golf",
+    "b": "Whether the club is moving up or down when it hits the ball. Drivers hit up; irons hit down.",
+    "i": "Vertical angle of club head path at impact. Positive = ascending (driver: +3-5°). Negative = descending (irons: -2 to -6°).",
+    "u": "degrees",
+    "r": ["club_path", "dynamic_loft", "launch_angle"]
+  },
+  {
+    "key": "club_path",
+    "term": "Club Path",
+    "cat": "golf",
+    "b": "The direction the club is moving at impact relative to the target line, affecting ball curve.",
+    "i": "Horizontal direction of club head travel at impact. Positive = in-to-out; negative = out-to-in. Interacts with face angle to determine spin axis.",
+    "u": "degrees",
+    "r": ["face_angle", "spin_axis"]
+  },
+  {
+    "key": "face_angle",
+    "term": "Face Angle",
+    "cat": "golf",
+    "b": "Where the club face is pointing at impact. Determines the initial direction the ball starts.",
+    "i": "Orientation of club face at impact relative to target line. Primary determinant of initial ball direction (~75-85% influence).",
+    "u": "degrees",
+    "r": ["club_path", "dynamic_loft"]
+  },
+  {
+    "key": "dynamic_loft",
+    "term": "Dynamic Loft",
+    "cat": "golf",
+    "b": "The actual loft angle of the club at the moment of impact, which may differ from the club's built-in loft.",
+    "i": "Effective loft at impact after accounting for shaft lean, wrist conditions, and attack angle. Determines launch and spin.",
+    "u": "degrees",
+    "r": ["launch_angle", "spin_rate", "face_angle"]
+  },
+  {
+    "key": "spin_axis",
+    "term": "Spin Axis",
+    "cat": "golf",
+    "b": "The tilt of the ball's spin axis, determining whether it curves left or right in flight.",
+    "i": "Tilt of the ball's rotation axis from vertical. Result of face-to-path difference at impact. 0° = pure backspin.",
+    "u": "degrees",
+    "r": ["club_path", "face_angle", "sidespin"]
+  },
+  {
+    "key": "backspin",
+    "term": "Backspin",
+    "cat": "golf",
+    "b": "The backward spin on the ball that makes it rise in the air and stop quickly on the green.",
+    "i": "Spin component about the horizontal axis perpendicular to the ball's direction. Creates aerodynamic lift via the Magnus effect.",
+    "u": "rpm",
+    "r": ["spin_rate", "magnus_effect", "lift_force"]
+  },
+  {
+    "key": "sidespin",
+    "term": "Sidespin",
+    "cat": "golf",
+    "b": "The sideways spin that makes the ball curve left or right during flight.",
+    "i": "Horizontal component of ball spin resulting from a tilted spin axis. Creates a lateral Magnus force causing draw or fade.",
+    "u": "rpm",
+    "r": ["spin_axis", "magnus_effect"]
+  },
+  {
+    "key": "sweet_spot",
+    "term": "Sweet Spot",
+    "cat": "golf",
+    "b": "The ideal spot on the club face to hit the ball for maximum energy transfer and best feel.",
+    "i": "Point on the club face aligned with the center of mass, minimizing twisting at impact. Produces maximum smash factor.",
+    "r": ["smash_factor", "moment_of_inertia_club"]
+  },
+  {
+    "key": "moment_of_inertia_club",
+    "term": "Club MOI",
+    "cat": "golf",
+    "b": "How resistant the club head is to twisting on off-center hits. Higher MOI means more forgiveness.",
+    "i": "Rotational inertia of the club head about its center of mass. Higher MOI reduces speed loss and directional error on mishits.",
+    "u": "g·cm²",
+    "r": ["sweet_spot", "moment_of_inertia"]
+  },
+  {
+    "key": "shaft_flex",
+    "term": "Shaft Flex",
+    "cat": "golf",
+    "b": "How much the club shaft bends during the swing, affecting timing and feel.",
+    "i": "Stiffness rating of the shaft (L, A, R, S, X). Flex profile affects loading/unloading timing and dynamic loft at impact.",
+    "r": ["shaft_kick_point", "lag_angle"]
+  },
+  {
+    "key": "shaft_kick_point",
+    "term": "Shaft Kick Point",
+    "cat": "golf",
+    "b": "The point on the shaft that bends the most, influencing launch angle and feel.",
+    "i": "Location of maximum shaft deflection. Low kick point increases dynamic loft; high kick point reduces it.",
+    "r": ["shaft_flex", "dynamic_loft"]
+  },
+  {
+    "key": "swing_tempo",
+    "term": "Swing Tempo",
+    "cat": "golf",
+    "b": "The rhythm and timing of the swing, measured as the ratio of backswing to downswing time.",
+    "i": "Ratio of backswing to downswing duration. Elite golfers average ~3:1 ratio regardless of overall swing speed.",
+    "r": ["backswing", "downswing", "transition_phase"]
+  },
+  {
+    "key": "swing_plane",
+    "term": "Swing Plane",
+    "cat": "golf",
+    "b": "The tilted circular path the club follows during the swing, like a tilted wheel.",
+    "i": "Inclined plane best fitting the club head trajectory. Analyzed via SVD/PCA fit. Deviations indicate compensatory patterns.",
+    "r": ["club_path", "trajectory"]
+  },
+  {
+    "key": "lie_angle",
+    "term": "Lie Angle",
+    "cat": "golf",
+    "b": "The angle between the shaft and the ground at address, affecting where the ball goes.",
+    "i": "Angle between the shaft axis and the ground plane when the sole sits flat. Incorrect lie angle causes directional bias.",
+    "u": "degrees",
+    "r": ["face_angle"]
+  },
+  {
+    "key": "wrist_cock",
+    "term": "Wrist Cock",
+    "cat": "golf",
+    "b": "The hinging of the wrists during the backswing that stores energy for the downswing.",
+    "i": "Radial deviation (cocking) of the wrists creating a lever angle between forearm and club. Maximum at top of backswing.",
+    "u": "degrees",
+    "r": ["wrist_release", "lag_angle"]
+  },
+  {
+    "key": "wrist_release",
+    "term": "Wrist Release",
+    "cat": "golf",
+    "b": "The uncocking of the wrists during the downswing, adding speed to the club head.",
+    "i": "Rapid ulnar deviation and uncocking of wrists releasing stored energy. Timing relative to impact is critical for consistency.",
+    "r": ["wrist_cock", "lag_angle"]
+  },
+  {
+    "key": "lag_angle",
+    "term": "Lag Angle",
+    "cat": "golf",
+    "b": "The angle between the club and the lead arm during the downswing. Maintaining lag creates more speed.",
+    "i": "Angle between club shaft and lead forearm during downswing. Late release (more lag) correlates with higher club head speed.",
+    "u": "degrees",
+    "r": ["wrist_cock", "wrist_release", "club_head_speed"]
+  },
+  {
+    "key": "supination",
+    "term": "Supination",
+    "cat": "golf",
+    "b": "Rotating the forearm so the palm faces up, important in the release phase of the golf swing.",
+    "i": "Forearm rotation moving the palm toward supine (upward) position. Lead arm supination through impact squares the club face.",
+    "r": ["pronation", "wrist_release"]
+  },
+  {
+    "key": "pronation",
+    "term": "Pronation",
+    "cat": "golf",
+    "b": "Rotating the forearm so the palm faces down, the opposite of supination.",
+    "i": "Forearm rotation moving the palm toward prone (downward) position. Trail arm pronation helps close the face through impact.",
+    "r": ["supination"]
+  },
+  {
+    "key": "hip_rotation_golf",
+    "term": "Hip Rotation",
+    "cat": "golf",
+    "b": "The turning of the hips during the swing, generating power from the ground up.",
+    "i": "Axial rotation of the pelvis. Leads the kinetic chain in the downswing. Peak velocity of ~720°/s in elite golfers.",
+    "u": "degrees or degrees/s",
+    "r": ["pelvis_tilt", "kinetic_chain", "x_factor"]
+  },
+  {
+    "key": "shoulder_rotation",
+    "term": "Shoulder Rotation",
+    "cat": "golf",
+    "b": "The turning of the shoulders during the swing, following the hips in the power sequence.",
+    "i": "Thorax axial rotation relative to global frame. Lags behind hip rotation, creating the X-factor stretch for energy storage.",
+    "u": "degrees",
+    "r": ["hip_rotation_golf", "x_factor"]
+  },
+  {
+    "key": "pelvis_tilt",
+    "term": "Pelvis Tilt",
+    "cat": "golf",
+    "b": "The forward or backward tilting of the pelvis during the swing, affecting posture and power.",
+    "i": "Sagittal-plane inclination of the pelvis. Anterior tilt increases lumbar lordosis. Changes through the swing phases.",
+    "u": "degrees",
+    "r": ["hip_rotation_golf", "spine_angle"]
+  },
+  {
+    "key": "spine_angle",
+    "term": "Spine Angle",
+    "cat": "golf",
+    "b": "The forward bend angle of the spine at address and throughout the swing.",
+    "i": "Sagittal flexion angle of the trunk. Maintaining consistent spine angle is key for consistent contact. Changes indicate early extension.",
+    "u": "degrees",
+    "r": ["pelvis_tilt", "lateral_bend"]
+  },
+  {
+    "key": "address_position",
+    "term": "Address Position",
+    "cat": "golf",
+    "b": "The golfer's setup position before starting the swing.",
+    "i": "Static posture at swing initiation. Defines initial joint angles, stance width, ball position, and weight distribution.",
+    "r": ["spine_angle", "backswing"]
+  },
+  {
+    "key": "backswing",
+    "term": "Backswing",
+    "cat": "golf",
+    "b": "The first part of the swing where the club moves away from the ball to the top position.",
+    "i": "Phase from address to top of swing. Stores elastic energy via trunk rotation and wrist cock. Duration ~0.8-1.0s for most golfers.",
+    "r": ["downswing", "transition_phase", "wrist_cock"]
+  },
+  {
+    "key": "downswing",
+    "term": "Downswing",
+    "cat": "golf",
+    "b": "The powerful forward motion from the top of the swing to impact with the ball.",
+    "i": "Phase from top of swing to impact. Duration ~0.2-0.3s. Kinetic chain sequence produces peak club head acceleration.",
+    "r": ["backswing", "impact_phase", "kinetic_chain"]
+  },
+  {
+    "key": "impact_phase",
+    "term": "Impact",
+    "cat": "golf",
+    "b": "The brief moment when the club contacts the ball, lasting only about 0.5 milliseconds.",
+    "i": "Club-ball contact event lasting ~0.45ms. Ball compresses, energy transfers. All launch conditions determined at this instant.",
+    "r": ["downswing", "follow_through", "smash_factor"]
+  },
+  {
+    "key": "follow_through",
+    "term": "Follow-Through",
+    "cat": "golf",
+    "b": "The continuation of the swing after hitting the ball, important for deceleration and injury prevention.",
+    "i": "Post-impact phase where the body decelerates. Proper follow-through dissipates rotational energy safely across the kinetic chain.",
+    "r": ["impact_phase", "finish_position"]
+  },
+  {
+    "key": "finish_position",
+    "term": "Finish Position",
+    "cat": "golf",
+    "b": "The balanced end pose of the swing, reflecting overall swing quality.",
+    "i": "Terminal swing posture. Balanced finish with weight on lead foot indicates proper deceleration and kinetic chain sequencing.",
+    "r": ["follow_through"]
+  },
+  {
+    "key": "transition_phase",
+    "term": "Transition",
+    "cat": "golf",
+    "b": "The brief moment between backswing and downswing where the body reverses direction.",
+    "i": "Critical phase where lower body initiates the downswing while upper body completes the backswing, creating X-factor stretch.",
+    "r": ["backswing", "downswing", "x_factor"]
+  },
+  {
+    "key": "weight_shift",
+    "term": "Weight Shift",
+    "cat": "golf",
+    "b": "The transfer of body weight from back foot to front foot during the downswing.",
+    "i": "Center of pressure migration from trail to lead foot during downswing. Measured via dual force plates. Correlates with power generation.",
+    "r": ["center_of_pressure", "ground_reaction_force"]
+  },
+  {
+    "key": "lateral_bend",
+    "term": "Lateral Bend",
+    "cat": "golf",
+    "b": "The sideways bending of the spine during the swing, tilting away from or toward the target.",
+    "i": "Frontal-plane trunk inclination. Increases toward trail side at top, reverses through impact. Excessive bend risks back injury.",
+    "u": "degrees",
+    "r": ["spine_angle", "crunch_factor"]
+  },
+  {
+    "key": "crunch_factor",
+    "term": "Crunch Factor",
+    "cat": "golf",
+    "b": "A measure combining side bend and rotation speed that indicates spinal stress and injury risk.",
+    "i": "Product of lateral bend angle and axial rotation velocity. Higher values indicate greater spinal loading and injury risk.",
+    "u": "degrees²/s",
+    "r": ["lateral_bend", "hip_rotation_golf", "injury_risk_assessment"]
+  },
+  {
+    "key": "timestep",
+    "term": "Timestep",
+    "cat": "simulation",
+    "b": "The small time increment used to advance a simulation, like frames in a movie.",
+    "i": "Duration Δt between simulation steps. Smaller timesteps improve accuracy but increase computation. Typical: 0.001-0.01s for biomechanics.",
+    "u": "seconds",
+    "r": ["numerical_integration", "numerical_stability"]
+  },
+  {
+    "key": "numerical_integration",
+    "term": "Numerical Integration",
+    "cat": "simulation",
+    "b": "Using math to step a simulation forward in time, computing new positions from current forces.",
+    "i": "Approximating solutions of ODEs by discrete time-stepping. Choice of integrator affects accuracy, stability, and energy conservation.",
+    "r": ["timestep", "runge_kutta", "explicit_euler"]
+  },
+  {
+    "key": "explicit_euler",
+    "term": "Explicit Euler",
+    "cat": "simulation",
+    "b": "The simplest method for stepping forward in time, fast but can become unstable.",
+    "i": "First-order integrator: x(t+Δt) = x(t) + Δt·f(x,t). Conditionally stable; requires small timesteps for stiff systems.",
+    "r": ["implicit_euler", "numerical_stability"]
+  },
+  {
+    "key": "implicit_euler",
+    "term": "Implicit Euler",
+    "cat": "simulation",
+    "b": "A more stable but computationally expensive time-stepping method used for stiff problems.",
+    "i": "Backward Euler: x(t+Δt) = x(t) + Δt·f(x(t+Δt),t+Δt). Unconditionally stable but adds numerical damping. Requires solving nonlinear system.",
+    "r": ["explicit_euler", "numerical_stability"]
+  },
+  {
+    "key": "semi_implicit_euler",
+    "term": "Semi-Implicit Euler",
+    "cat": "simulation",
+    "b": "A balanced time-stepping method that is more stable than explicit Euler while being simpler than implicit methods.",
+    "i": "Updates velocity explicitly then position with new velocity. Symplectic (energy-preserving). Default integrator in MuJoCo.",
+    "r": ["symplectic_euler", "explicit_euler"]
+  },
+  {
+    "key": "verlet_integration",
+    "term": "Verlet Integration",
+    "cat": "simulation",
+    "b": "A time-stepping method that tracks position without explicitly computing velocity, good for particle systems.",
+    "i": "Symplectic integrator: x(t+Δt) = 2x(t) - x(t-Δt) + a(t)Δt². Second-order accurate, time-reversible, energy-conserving.",
+    "r": ["leapfrog_integration", "numerical_integration"]
+  },
+  {
+    "key": "leapfrog_integration",
+    "term": "Leapfrog Integration",
+    "cat": "simulation",
+    "b": "A method where position and velocity updates alternate in half-steps, providing good energy conservation.",
+    "i": "Symplectic integrator with velocity at half-steps. Equivalent to velocity Verlet. Used in molecular dynamics and n-body simulations.",
+    "r": ["verlet_integration", "symplectic_euler"]
+  },
+  {
+    "key": "rk4",
+    "term": "RK4 (4th-Order Runge-Kutta)",
+    "cat": "simulation",
+    "b": "A very accurate time-stepping method that evaluates the system four times per step.",
+    "i": "Classic 4th-order method using weighted average of four slope evaluations. Local error O(Δt⁵). Gold standard for smooth ODE integration.",
+    "r": ["runge_kutta", "adaptive_timestep"]
+  },
+  {
+    "key": "adaptive_timestep",
+    "term": "Adaptive Timestep",
+    "cat": "simulation",
+    "b": "Automatically adjusting the time step size to be smaller when things change quickly and larger when they are smooth.",
+    "i": "Timestep control based on error estimation. Pairs embedded methods (e.g., RK45) to estimate local error and adjust Δt accordingly.",
+    "r": ["rk4", "numerical_stability"]
+  },
+  {
+    "key": "numerical_stability",
+    "term": "Numerical Stability",
+    "cat": "simulation",
+    "b": "Whether a simulation stays well-behaved or blows up due to mathematical errors accumulating over time.",
+    "i": "Property that numerical errors remain bounded over time. Stiff systems require implicit methods or very small timesteps for stability.",
+    "r": ["timestep", "convergence"]
+  },
+  {
+    "key": "convergence",
+    "term": "Convergence",
+    "cat": "simulation",
+    "b": "Whether a simulation's results get closer to the true answer as you use smaller time steps.",
+    "i": "Property that numerical solution approaches exact solution as Δt → 0. Order of convergence indicates the rate of improvement.",
+    "r": ["numerical_stability", "timestep"]
+  },
+  {
+    "key": "collision_detection",
+    "term": "Collision Detection",
+    "cat": "simulation",
+    "b": "The process of figuring out when objects in a simulation touch or overlap.",
+    "i": "Determining contact points and penetration depth between geometric primitives. Two phases: broad phase (AABB) and narrow phase (GJK/EPA).",
+    "r": ["broad_phase_collision", "narrow_phase_collision", "contact_model"]
+  },
+  {
+    "key": "broad_phase_collision",
+    "term": "Broad Phase Collision",
+    "cat": "simulation",
+    "b": "A quick first pass to identify pairs of objects that might be touching, using simple bounding boxes.",
+    "i": "Fast culling using axis-aligned bounding boxes (AABB) or spatial hashing. Reduces O(n²) pairs to a manageable subset for detailed checks.",
+    "r": ["narrow_phase_collision", "collision_detection"]
+  },
+  {
+    "key": "narrow_phase_collision",
+    "term": "Narrow Phase Collision",
+    "cat": "simulation",
+    "b": "A detailed check on object pairs that passed the broad phase to find exact contact points.",
+    "i": "Precise contact detection using GJK/EPA algorithms on convex shapes or mesh-mesh intersection for complex geometry.",
+    "r": ["broad_phase_collision", "gjk_algorithm"]
+  },
+  {
+    "key": "gjk_algorithm",
+    "term": "GJK Algorithm",
+    "cat": "simulation",
+    "b": "An efficient algorithm for determining if two convex shapes overlap.",
+    "i": "Gilbert-Johnson-Keerthi algorithm uses Minkowski difference and simplex iteration to detect intersection between convex shapes in O(n) time.",
+    "r": ["collision_detection", "narrow_phase_collision"]
+  },
+  {
+    "key": "contact_model",
+    "term": "Contact Model",
+    "cat": "simulation",
+    "b": "The mathematical rules describing what happens when objects collide in a simulation.",
+    "i": "Mathematical formulation for computing contact forces. Approaches include penalty methods (soft), complementarity (hard), and impulse-based.",
+    "r": ["penalty_method", "linear_complementarity", "contact_force"]
+  },
+  {
+    "key": "penalty_method",
+    "term": "Penalty Method",
+    "cat": "simulation",
+    "b": "A contact simulation approach that uses spring-like forces to push overlapping objects apart.",
+    "i": "Soft contact model applying restoring force proportional to penetration depth. Simple to implement but requires stiffness tuning.",
+    "r": ["contact_model", "constraint_solver"]
+  },
+  {
+    "key": "constraint_solver",
+    "term": "Constraint Solver",
+    "cat": "simulation",
+    "b": "The algorithm that enforces physical rules like joints staying connected and objects not passing through each other.",
+    "i": "Iterative solver enforcing equality and inequality constraints. Methods include PGS, Lemke, and direct factorization.",
+    "r": ["gauss_seidel", "linear_complementarity"]
+  },
+  {
+    "key": "linear_complementarity",
+    "term": "Linear Complementarity Problem (LCP)",
+    "cat": "simulation",
+    "b": "A mathematical formulation for contact that ensures objects either separate or have contact forces, not both.",
+    "i": "Find z ≥ 0 such that w = Mz + q ≥ 0 and zᵀw = 0. Models unilateral contact constraints in rigid body dynamics.",
+    "r": ["complementarity_problem", "contact_model"]
+  },
+  {
+    "key": "complementarity_problem",
+    "term": "Complementarity Problem",
+    "cat": "simulation",
+    "b": "A type of math problem where two quantities cannot both be positive at the same time.",
+    "i": "Mathematical framework where for each pair (z_i, w_i), at least one must be zero. Generalizes LCP to nonlinear (NCP) and mixed (MCP) forms.",
+    "r": ["linear_complementarity", "constraint_solver"]
+  },
+  {
+    "key": "gauss_seidel",
+    "term": "Gauss-Seidel Solver",
+    "cat": "simulation",
+    "b": "An iterative method for solving contact constraints one at a time, commonly used in physics engines.",
+    "i": "Projected Gauss-Seidel (PGS): iteratively solves each contact constraint while projecting onto friction cone. Default in MuJoCo.",
+    "r": ["jacobi_iteration", "constraint_solver"]
+  },
+  {
+    "key": "jacobi_iteration",
+    "term": "Jacobi Iteration",
+    "cat": "simulation",
+    "b": "A method for solving equations by updating all unknowns simultaneously using previous values.",
+    "i": "Updates all unknowns in parallel using previous iteration values. Slower convergence than Gauss-Seidel but naturally parallelizable.",
+    "r": ["gauss_seidel", "constraint_solver"]
+  },
+  {
+    "key": "model_predictive_control",
+    "term": "Model Predictive Control (MPC)",
+    "cat": "simulation",
+    "b": "A control method that plans ahead by simulating future outcomes to choose the best current action.",
+    "i": "Online optimization solving a finite-horizon optimal control problem at each timestep. Handles constraints naturally.",
+    "r": ["optimal_control", "trajectory_optimization"]
+  },
+  {
+    "key": "finite_element_method",
+    "term": "Finite Element Method (FEM)",
+    "cat": "simulation",
+    "b": "Breaking a complex shape into many small pieces to analyze how forces spread through it.",
+    "i": "Discretizing continuous domains into mesh elements to solve PDEs for stress, strain, and deformation. Used for club shaft and tissue modeling.",
+    "r": ["mesh_discretization", "boundary_conditions"]
+  },
+  {
+    "key": "boundary_conditions",
+    "term": "Boundary Conditions",
+    "cat": "simulation",
+    "b": "Rules that define what happens at the edges of a simulation, like a fixed support or applied force.",
+    "i": "Constraints applied at domain boundaries: Dirichlet (fixed value) or Neumann (fixed gradient/flux). Essential for well-posed FEM problems.",
+    "r": ["finite_element_method"]
+  },
+  {
+    "key": "mesh_discretization",
+    "term": "Mesh Discretization",
+    "cat": "simulation",
+    "b": "Dividing a continuous shape into small triangles or boxes for computer simulation.",
+    "i": "Converting continuous geometry into discrete elements (triangles, tetrahedra, hexahedra). Mesh quality affects solution accuracy.",
+    "r": ["finite_element_method"]
+  },
+  {
+    "key": "state_space_model",
+    "term": "State Space Model",
+    "cat": "simulation",
+    "b": "A compact mathematical description of a system using position, velocity, and input variables.",
+    "i": "Representation dx/dt = f(x,u) where x is the state vector and u is the control input. Foundation for modern control theory.",
+    "r": ["phase_space", "kalman_filter"]
+  },
+  {
+    "key": "phase_space",
+    "term": "Phase Space",
+    "cat": "simulation",
+    "b": "A plot showing both position and velocity of a system, revealing its complete dynamic behavior.",
+    "i": "Space of all generalized coordinates and momenta (q, p). Trajectories in phase space fully describe system evolution. Cannot cross.",
+    "r": ["configuration_space", "state_space_model"]
+  },
+  {
+    "key": "bifurcation",
+    "term": "Bifurcation",
+    "cat": "simulation",
+    "b": "A sudden qualitative change in system behavior when a parameter is varied, like a tipping point.",
+    "i": "Qualitative change in system dynamics as a parameter crosses a critical value. Types include saddle-node, Hopf, and period-doubling.",
+    "r": ["stability", "chaotic_dynamics"]
+  },
+  {
+    "key": "chaotic_dynamics",
+    "term": "Chaotic Dynamics",
+    "cat": "simulation",
+    "b": "When tiny differences in starting conditions lead to vastly different outcomes, making long-term prediction impossible.",
+    "i": "Deterministic but unpredictable behavior with sensitive dependence on initial conditions. Double pendulum is a classic example.",
+    "r": ["bifurcation", "numerical_stability"]
+  },
+  {
+    "key": "force_plate",
+    "term": "Force Plate",
+    "cat": "forces",
+    "b": "A platform embedded in the floor that measures the forces you push on the ground with during movement.",
+    "i": "Instrumented platform with piezoelectric or strain gauge sensors measuring 3D ground reaction forces, moments, and center of pressure.",
+    "r": ["ground_reaction_force", "center_of_pressure", "force_plate_data"]
+  },
+  {
+    "key": "center_of_pressure",
+    "term": "Center of Pressure (COP)",
+    "cat": "forces",
+    "b": "The single point on the ground where your total ground force effectively acts, like a balance point of pressure.",
+    "i": "Point of application of the resultant GRF. COP = (M_y/F_z, -M_x/F_z). Trajectory indicates weight transfer patterns in the swing.",
+    "f": "COP = (M_y/F_z, -M_x/F_z)",
+    "u": "m",
+    "r": ["ground_reaction_force", "force_plate", "weight_shift"]
+  },
+  {
+    "key": "free_moment",
+    "term": "Free Moment",
+    "cat": "forces",
+    "b": "The twisting force the ground exerts on you around a vertical axis, related to rotational effort.",
+    "i": "Vertical component of ground reaction moment (Mz), representing torque about the vertical axis. Indicates rotational demand of movement.",
+    "u": "N·m",
+    "r": ["ground_reaction_moment", "torque_force"]
+  },
+  {
+    "key": "ground_reaction_moment",
+    "term": "Ground Reaction Moment",
+    "cat": "forces",
+    "b": "The rotational forces from the ground that resist or assist body rotation during movement.",
+    "i": "3D moment vector from force plate: (Mx, My, Mz). Combined with forces forms the full GRF wrench for biomechanical analysis.",
+    "u": "N·m",
+    "r": ["ground_reaction_force", "wrench_force", "free_moment"]
+  },
+  {
+    "key": "torque_force",
+    "term": "Torque",
+    "cat": "forces",
+    "b": "A twisting or rotational force, like the turning force muscles apply at joints.",
+    "i": "Rotational equivalent of force: τ = r × F. Causes angular acceleration proportional to moment of inertia: τ = Iα.",
+    "f": "τ = r × F",
+    "u": "N·m",
+    "r": ["joint_torque", "moment_of_inertia"]
+  },
+  {
+    "key": "wrench_force",
+    "term": "Wrench (Force/Torque)",
+    "cat": "forces",
+    "b": "The complete set of forces and torques at a point, combining all linear and rotational forces.",
+    "i": "6D vector (force + torque) representing the full loading at a point. Used in GRF analysis and robotic force control.",
+    "r": ["wrench", "ground_reaction_force"]
+  },
+  {
+    "key": "couple_force",
+    "term": "Couple",
+    "cat": "forces",
+    "b": "Two equal and opposite forces that create pure rotation without moving the object sideways.",
+    "i": "Pair of equal, opposite, non-collinear forces producing pure moment. Torque = F × d, independent of reference point.",
+    "r": ["torque_force"]
+  },
+  {
+    "key": "resultant_force",
+    "term": "Resultant Force",
+    "cat": "forces",
+    "b": "The single force that represents the combined effect of all forces acting on an object.",
+    "i": "Vector sum of all applied forces. If zero, the system is in translational equilibrium (Newton's first law).",
+    "u": "N",
+    "r": ["equilibrium", "reaction_force"]
+  },
+  {
+    "key": "reaction_force",
+    "term": "Reaction Force",
+    "cat": "forces",
+    "b": "The force that pushes back when you push on something, per Newton's third law.",
+    "i": "Equal and opposite force arising from Newton's third law. Joint reaction forces act at articulation points between segments.",
+    "u": "N",
+    "r": ["ground_reaction_force", "constraint_force"]
+  },
+  {
+    "key": "internal_force",
+    "term": "Internal Force",
+    "cat": "forces",
+    "b": "Forces within the body, like muscle tension or bone compression, that don't affect overall body motion.",
+    "i": "Forces between components of the system (muscles, ligaments). Cancel in pairs for whole-body analysis but are critical for tissue loading.",
+    "u": "N",
+    "r": ["external_force"]
+  },
+  {
+    "key": "external_force",
+    "term": "External Force",
+    "cat": "forces",
+    "b": "Forces from outside the body, like gravity, ground reaction, and wind.",
+    "i": "Forces applied to the system from outside: gravity, GRF, aerodynamic forces. Determine whole-body translational and rotational dynamics.",
+    "u": "N",
+    "r": ["internal_force", "ground_reaction_force", "gravitational_force"]
+  },
+  {
+    "key": "gravitational_force",
+    "term": "Gravitational Force",
+    "cat": "forces",
+    "b": "The pull of gravity on every body segment, always acting straight down.",
+    "i": "F = mg acting at center of mass of each segment. The dominant external force in most biomechanical analyses.",
+    "f": "F = mg",
+    "u": "N",
+    "r": ["gravity_vector", "external_force"]
+  },
+  {
+    "key": "centripetal_force_applied",
+    "term": "Centripetal Force",
+    "cat": "forces",
+    "b": "The inward force that keeps something moving in a circle, like the pull on the club during a swing.",
+    "i": "Force directed toward the center of circular motion: F = mv²/r = mω²r. Essential for maintaining the swing arc.",
+    "f": "F = mv²/r",
+    "u": "N",
+    "r": ["centrifugal_force", "angular_velocity"]
+  },
+  {
+    "key": "drag_force",
+    "term": "Drag Force",
+    "cat": "forces",
+    "b": "Air resistance that slows the golf ball down during flight.",
+    "i": "Aerodynamic force opposing motion: F_d = ½C_dρAv². Depends on ball dimple pattern, speed, and air density.",
+    "f": "F_d = ½C_dρAv²",
+    "u": "N",
+    "r": ["lift_force", "aerodynamic_force"]
+  },
+  {
+    "key": "lift_force",
+    "term": "Lift Force",
+    "cat": "forces",
+    "b": "The upward force created by backspin that keeps the golf ball in the air longer.",
+    "i": "Force perpendicular to ball velocity, generated by backspin-induced pressure differential (Magnus effect): F_l = ½C_lρAv².",
+    "f": "F_l = ½C_lρAv²",
+    "u": "N",
+    "r": ["magnus_effect", "backspin", "drag_force"]
+  },
+  {
+    "key": "magnus_effect",
+    "term": "Magnus Effect",
+    "cat": "forces",
+    "b": "The physics behind how a spinning ball curves in flight, making draws, fades, and backspin-assisted lift possible.",
+    "i": "Aerodynamic force on a spinning body due to asymmetric airflow. Creates lift from backspin and lateral force from sidespin.",
+    "r": ["lift_force", "backspin", "sidespin"]
+  },
+  {
+    "key": "aerodynamic_force",
+    "term": "Aerodynamic Force",
+    "cat": "forces",
+    "b": "Forces from air acting on the ball in flight, including both drag and lift.",
+    "i": "Combined drag and lift forces on a body moving through air. Ball dimple pattern reduces drag by triggering turbulent boundary layer.",
+    "r": ["drag_force", "lift_force"]
+  },
+  {
+    "key": "pressure",
+    "term": "Pressure",
+    "cat": "forces",
+    "b": "Force spread over an area, like the pressure distribution under your feet during a swing.",
+    "i": "Force per unit area: P = F/A. In biomechanics, plantar pressure mapping reveals foot loading patterns during the golf swing.",
+    "f": "P = F/A",
+    "u": "Pa (Pascals) or kPa",
+    "r": ["center_of_pressure", "stress_mechanics"]
+  },
+  {
+    "key": "stress_mechanics",
+    "term": "Stress",
+    "cat": "forces",
+    "b": "The internal forces per unit area within a material, like the stress in a bone or tendon during loading.",
+    "i": "Internal force per unit area (σ = F/A). Types: normal (tension/compression) and shear. Determines material failure risk.",
+    "f": "σ = F/A",
+    "u": "Pa or MPa",
+    "r": ["strain_mechanics", "youngs_modulus"]
+  },
+  {
+    "key": "strain_mechanics",
+    "term": "Strain",
+    "cat": "forces",
+    "b": "How much a material deforms relative to its original size when forces are applied.",
+    "i": "Relative deformation: ε = ΔL/L for normal strain, γ = tan(θ) for shear. Dimensionless measure of deformation.",
+    "f": "ε = ΔL/L",
+    "r": ["stress_mechanics", "youngs_modulus"]
+  },
+  {
+    "key": "youngs_modulus",
+    "term": "Young's Modulus",
+    "cat": "forces",
+    "b": "A measure of how stiff a material is, determining how much it deforms under load.",
+    "i": "Ratio of stress to strain in the elastic region: E = σ/ε. Cortical bone: ~17 GPa; tendon: ~1.5 GPa; muscle: ~0.01 GPa.",
+    "f": "E = σ/ε",
+    "u": "Pa or GPa",
+    "r": ["stress_mechanics", "strain_mechanics", "poisson_ratio"]
+  },
+  {
+    "key": "poisson_ratio",
+    "term": "Poisson's Ratio",
+    "cat": "forces",
+    "b": "How much a material gets thinner when stretched, or wider when compressed.",
+    "i": "Ratio of transverse to axial strain: ν = -ε_transverse/ε_axial. Ranges 0-0.5 for most materials. Rubber: ~0.5; bone: ~0.3.",
+    "f": "ν = -ε_t/ε_a",
+    "r": ["youngs_modulus", "elastic_deformation"]
+  },
+  {
+    "key": "viscoelasticity",
+    "term": "Viscoelasticity",
+    "cat": "forces",
+    "b": "Material behavior that combines elastic (spring-like) and viscous (fluid-like) properties, common in biological tissues.",
+    "i": "Time-dependent mechanical behavior exhibiting both elastic recovery and viscous flow. Models: Maxwell, Voigt, standard linear solid.",
+    "r": ["creep", "stress_relaxation", "hysteresis"]
+  },
+  {
+    "key": "creep",
+    "term": "Creep",
+    "cat": "forces",
+    "b": "The slow, continuous deformation of a material under constant load, like a ligament gradually stretching.",
+    "i": "Time-dependent strain increase under constant stress. Biological tissues exhibit logarithmic creep. Relevant for prolonged loading analysis.",
+    "r": ["viscoelasticity", "stress_relaxation"]
+  },
+  {
+    "key": "stress_relaxation",
+    "term": "Stress Relaxation",
+    "cat": "forces",
+    "b": "When the internal force in a material decreases over time while being held at a constant stretch.",
+    "i": "Time-dependent stress decrease under constant strain. Exponential decay modeled by viscoelastic elements. Important in tissue loading analysis.",
+    "r": ["viscoelasticity", "creep"]
+  },
+  {
+    "key": "hysteresis",
+    "term": "Hysteresis",
+    "cat": "forces",
+    "b": "Energy lost as heat when a material is loaded and unloaded, visible as a loop on a stress-strain plot.",
+    "i": "Difference between loading and unloading paths in the stress-strain curve. Represents energy dissipation. Tendons exhibit ~5-10% hysteresis.",
+    "r": ["viscoelasticity", "elastic_deformation"]
+  },
+  {
+    "key": "elastic_deformation",
+    "term": "Elastic Deformation",
+    "cat": "forces",
+    "b": "Deformation that fully recovers when the force is removed, like a spring returning to its original shape.",
+    "i": "Reversible deformation where material returns to original shape upon unloading. Governed by Hooke's law in the linear region.",
+    "r": ["plastic_deformation", "youngs_modulus"]
+  },
+  {
+    "key": "plastic_deformation",
+    "term": "Plastic Deformation",
+    "cat": "forces",
+    "b": "Permanent deformation that remains after the force is removed, indicating material damage.",
+    "i": "Irreversible deformation beyond the yield point. In biological tissues, indicates microstructural damage or failure initiation.",
+    "r": ["elastic_deformation", "yield_strength"]
+  },
+  {
+    "key": "yield_strength",
+    "term": "Yield Strength",
+    "cat": "forces",
+    "b": "The stress level at which a material begins to permanently deform, marking the onset of damage.",
+    "i": "Stress at the transition from elastic to plastic behavior. For cortical bone: ~130 MPa (compression), ~50 MPa (tension).",
+    "u": "Pa or MPa",
+    "r": [
+      "elastic_deformation",
+      "plastic_deformation",
+      "ultimate_tensile_strength"
+    ]
+  },
+  {
+    "key": "shear_force",
+    "term": "Shear Force",
+    "cat": "forces",
+    "b": "A force that acts sideways on a material, trying to slide one part past another.",
+    "i": "Force acting parallel to a surface or cross-section. Important in joint loading analysis and cartilage mechanics.",
+    "u": "N",
+    "r": ["stress_mechanics", "friction"]
+  }
+]

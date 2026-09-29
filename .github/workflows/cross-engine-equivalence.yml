@@ -1,0 +1,340 @@
+# Cross-Engine Forward-Sim Equivalence (PARITY-EQUIVALENCE, issue #4096)
+#
+# CI gate enforcing src/engines/CROSS_ENGINE_PARITY_SPEC.md §2.2:
+# every engine's `simulate_with_coefficients(theta_truth, pose)` must agree
+# with the reference engine to within 5 mm grip-position RMSE / 1° grip-
+# orientation RMSE / (5 mm + max club-length difference) clubhead RMSE at
+# three canonical poses (impact, top-of-backswing, address).
+#
+# CC-8 also makes this workflow the Canonical Core conformance gate. The
+# light lane runs adapter/validator conformance that is safe for the standard
+# fleet runner. When CC-7's tests/integration/cross_engine harness exists on
+# the branch, the same lane automatically includes it.
+#
+# Triggered on every PR (and main push) that touches src/engines/. Engines
+# whose Python deps fail to install are gracefully skipped by the test
+# itself via `requires_<engine>` markers + dynamic availability probing.
+
+name: Cross-Engine Equivalence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/engines/**"
+      - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
+      - "src/shared/python/engine_core/cross_engine_validator.py"
+      - "shared/models/**"
+      - "tests/integration/test_cross_engine_validation.py"
+      - "tests/integration/cross_engine/**"
+      - "tests/unit/pose_interchange/adapters/**"
+      - "tests/motion_matching/test_cross_engine_equivalence.py"
+      - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
+      - "tests/cross_engine/test_jaxsim_forward_sim.py"
+      - "tests/fixtures/test_poses.json"
+      - "scripts/jaxsim/check_jaxsim_pin.py"
+      - "scripts/ci/check_pinocchio_dynamics_api.py"
+      - ".jules/templates/**"
+      - "pyproject.toml"
+      - ".github/workflows/cross-engine-equivalence.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/engines/**"
+      - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
+      - "src/shared/python/engine_core/cross_engine_validator.py"
+      - "shared/models/**"
+      - "tests/integration/test_cross_engine_validation.py"
+      - "tests/integration/cross_engine/**"
+      - "tests/unit/pose_interchange/adapters/**"
+      - "tests/motion_matching/test_cross_engine_equivalence.py"
+      - "tests/cross_engine/test_jaxsim_vs_pinocchio.py"
+      - "tests/cross_engine/test_jaxsim_forward_sim.py"
+      - "tests/fixtures/test_poses.json"
+      - "scripts/jaxsim/check_jaxsim_pin.py"
+      - "scripts/ci/check_pinocchio_dynamics_api.py"
+      - ".jules/templates/**"
+      - "pyproject.toml"
+      - ".github/workflows/cross-engine-equivalence.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  equivalence:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+            # Scoped to the tool cache ONLY (UpstreamDrift#9443).
+            # This used to be `chown -R ... /home/dieterolson/actions-runners`,
+            # which swept EVERY runner's _work tree on the host -- including
+            # the checked-out repositories of jobs running concurrently on
+            # other runners. chown bumps each inode's ctime without touching
+            # content, which invalidates git's index stat cache; the next
+            # actions/checkout on that workspace then reports success while
+            # leaving a half-populated working tree, and the job dies on a
+            # file its PR never touched. Never let this touch a git worktree.
+            if [ -n "${RUNNER_TOOL_CACHE:-}" ] && [ -d "$RUNNER_TOOL_CACHE" ]; then
+              sudo chown -R "$(id -u):$(id -g)" "$RUNNER_TOOL_CACHE" 2>/dev/null || true
+            fi
+          fi
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install equivalence-test dependencies
+        # Per spec §2.2, the gate is meaningful only when at least two engines
+        # can simulate. We install every Python-installable engine and let the
+        # test skip per-engine if any individual dep fails to load. Simscape
+        # is intentionally out of scope here — it requires MATLAB, which is
+        # licensed and lives behind the matlab.engine bridge tested by the
+        # nightly workflow.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed --no-deps pip
+          python -m pip install --ignore-installed pathspec hatchling editables
+          # Always install the dev/test stack and the default mujoco engine.
+          python -m ensurepip --upgrade || true
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          pip uninstall -y pytest-vcr pytest-recording || true
+          # Optional engines: best-effort. The test self-skips when any of
+          # these is missing rather than failing the gate.
+          python -m ensurepip --upgrade || true
+          pip install "mujoco>=3.6.0,<4.0.0" || echo "::warning::mujoco install failed"
+          python -m ensurepip --upgrade || true
+          pip install "drake>=1.22.0" || echo "::warning::drake install failed (Linux+macOS only)"
+          python -m ensurepip --upgrade || true
+          # PyPI also has an unrelated `pinocchio` distribution (version 0.1)
+          # that imports successfully but exposes none of the robotics
+          # dynamics APIs. Remove it before installing the correct `pin`
+          # distribution, whose import package is also named `pinocchio`.
+          pip uninstall -y pinocchio || true
+          pip install --force-reinstall --no-cache-dir "pin>=2.6.0,<5.0.0" || echo "::warning::pinocchio install failed"
+          python -m ensurepip --upgrade || true
+          pip install -e ".[jaxsim]" || echo "::warning::jaxsim install failed"
+          python -m ensurepip --upgrade || true
+          pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
+          python3 scripts/ci/bootstrap_conformance_deps.py
+
+      - name: Guard JaxSim version pin (issue #6660)
+        # Fail the build if the jaxsim pin drifts from the gated ==0.9.0,
+        # either in pyproject or in the installed optional stack.
+        shell: bash
+        run: python3 scripts/jaxsim/check_jaxsim_pin.py
+
+      - name: Assert JaxSim parity prerequisites importable (issue #6881)
+        # A required parity gate is meaningful only if its engines actually
+        # import. Best-effort installs above can silently leave the stack
+        # missing; this check makes that fail loudly instead of greening on
+        # skipped assertions.
+        shell: bash
+        run: |
+          python -c "import jax, jaxlib, jaxsim"
+          python3 scripts/ci/check_pinocchio_dynamics_api.py
+
+      - name: Run cross-engine forward-sim equivalence test
+        env:
+          UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        shell: bash
+        run: |
+          mkdir -p "$UPSTREAM_DRIFT_OUTPUT_ROOT/cross_engine_equivalence"
+          # We deliberately run with `-p no:cacheprovider` to avoid caching
+          # across reruns and disable third-party plugin autoload because the
+          # shared runner may have mutually incompatible pytest plugins
+          # installed globally. `-rs` makes skips show up clearly in the log.
+          python3 -m pytest \
+            -o addopts="" \
+            tests/motion_matching/test_cross_engine_equivalence.py \
+            tests/cross_engine/test_jaxsim_vs_pinocchio.py \
+            tests/cross_engine/test_jaxsim_forward_sim.py \
+            -v -rs --tb=short -p no:xvfb \
+            --junitxml=test-results/cross-engine-equivalence-junit.xml
+
+      - name: Assert JaxSim parity cases actually ran (issue #6881)
+        # Even with deps present, a JUnit report of only skipped JaxSim parity
+        # cases must not green this required gate. This post-pytest assertion
+        # fails unless at least one JaxSim/Pinocchio parity case passed.
+        shell: bash
+        run: |
+          python3 scripts/ci/require_junit_test_passed.py \
+            test-results/cross-engine-equivalence-junit.xml \
+            test_jaxsim_pinocchio_free_body_dynamics_terms_match
+
+      - name: Upload equivalence report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cross-engine-equivalence-report
+          path: |
+            output/cross_engine_equivalence/**
+            test-results/cross-engine-equivalence-junit.xml
+          if-no-files-found: warn
+
+      - name: Summarize results
+        if: always()
+        shell: bash
+        run: |
+          echo "## Cross-Engine Equivalence Summary" >> "$GITHUB_STEP_SUMMARY"
+          report=$(find output/cross_engine_equivalence -name 'report.md' -print -quit 2>/dev/null || true)
+          if [ -n "$report" ] && [ -f "$report" ]; then
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No equivalence report generated (test was skipped or crashed before emission)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  canonical-conformance-gate:
+    name: Canonical Core Conformance Gate
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: adapter-core
+            python-version: "3.11"
+            marker: "not requires_pinocchio and not requires_drake and not requires_jaxsim and not requires_mujoco and not slow and not live_simulation"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+            # Scoped to the tool cache ONLY (UpstreamDrift#9443).
+            # This used to be `chown -R ... /home/dieterolson/actions-runners`,
+            # which swept EVERY runner's _work tree on the host -- including
+            # the checked-out repositories of jobs running concurrently on
+            # other runners. chown bumps each inode's ctime without touching
+            # content, which invalidates git's index stat cache; the next
+            # actions/checkout on that workspace then reports success while
+            # leaving a half-populated working tree, and the job dies on a
+            # file its PR never touched. Never let this touch a git worktree.
+            if [ -n "${RUNNER_TOOL_CACHE:-}" ] && [ -d "$RUNNER_TOOL_CACHE" ]; then
+              sudo chown -R "$(id -u):$(id -g)" "$RUNNER_TOOL_CACHE" 2>/dev/null || true
+            fi
+          fi
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install conformance dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed --no-deps pip
+          python -m pip install --ignore-installed pathspec hatchling editables
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          python3 scripts/ci/bootstrap_conformance_deps.py
+          pip uninstall -y pytest-vcr pytest-recording || true
+
+      - name: Run canonical conformance gate
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_paths=(
+            tests/integration/test_cross_engine_validation.py
+            tests/unit/pose_interchange/adapters
+          )
+          if [ -d tests/integration/cross_engine ]; then
+            test_paths+=(tests/integration/cross_engine)
+          fi
+          python3 -m pytest \
+            -o addopts="" \
+            "${test_paths[@]}" \
+            -m "${{ matrix.marker }}" \
+            -v -rs --tb=short -p no:xvfb \
+            --junitxml="test-results/canonical-conformance-${{ matrix.engine }}-junit.xml"
+
+      - name: Upload conformance report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: canonical-conformance-${{ matrix.engine }}-${{ matrix.python-version }}
+          path: test-results/canonical-conformance-${{ matrix.engine }}-junit.xml
+          if-no-files-found: warn

@@ -1,0 +1,94 @@
+# PGA Tour baseline shot-dispersion reference.
+#
+# Source: Broadie, *Every Shot Counts* (2014), Tables A.1–A.4 (driving accuracy,
+#   GIR by distance, proximity to hole by distance). Wedge proximity data also
+#   from Fawcett's Decade Golf publicly-shared distributions.
+#
+# Values flagged `# INTERPOLATED:` are linearly interpolated between Broadie's
+# tabulated club groupings; `# ESTIMATE:` denotes values not directly tabulated
+# (e.g., per-club rho coefficients) and chosen consistent with the tour-wide
+# clubface-correlation literature (rho ∈ [0.15, 0.30] for full swings).
+#
+# All distances are yards.
+name: PGA Tour Average
+source: "Broadie, Every Shot Counts (2014), Tables A.1–A.4; Fawcett (Decade Golf) wedge dispersion data."
+
+clubs:
+  driver:
+    carry_mean: 275
+    total_mean: 295
+    sigma_long: 14
+    sigma_lat: 18
+    rho: 0.25 # ESTIMATE: clubface-driven coupling, high for driver
+  3_wood:
+    carry_mean: 243
+    total_mean: 258
+    sigma_long: 12
+    sigma_lat: 15
+    rho: 0.22 # ESTIMATE
+  5_wood: # INTERPOLATED between 3-wood and 4-iron
+    carry_mean: 230
+    total_mean: 242
+    sigma_long: 11
+    sigma_lat: 13
+    rho: 0.22
+  4_iron:
+    carry_mean: 212
+    total_mean: 222
+    sigma_long: 10
+    sigma_lat: 12
+    rho: 0.22
+  5_iron:
+    carry_mean: 201
+    total_mean: 210
+    sigma_long: 8
+    sigma_lat: 10
+    rho: 0.20
+  6_iron:
+    carry_mean: 188
+    total_mean: 195
+    sigma_long: 7
+    sigma_lat: 9
+    rho: 0.20
+  7_iron:
+    carry_mean: 172
+    total_mean: 178
+    sigma_long: 5
+    sigma_lat: 7
+    rho: 0.20
+  8_iron:
+    carry_mean: 160
+    total_mean: 165
+    sigma_long: 5
+    sigma_lat: 6
+    rho: 0.18
+  9_iron:
+    carry_mean: 148
+    total_mean: 152
+    sigma_long: 4
+    sigma_lat: 5
+    rho: 0.18
+  pw:
+    carry_mean: 136
+    total_mean: 139
+    sigma_long: 4
+    sigma_lat: 5
+    rho: 0.15
+  gw: # ESTIMATE: gap wedge dispersion ~ between PW and SW
+    carry_mean: 118
+    total_mean: 121
+    sigma_long: 4
+    sigma_lat: 5
+    rho: 0.15
+  sw:
+    carry_mean: 102
+    total_mean: 105
+    sigma_long: 4
+    sigma_lat: 5
+    rho: 0.15
+  lw:
+    carry_mean: 78
+    total_mean: 80
+    sigma_long: 4
+    sigma_lat: 5
+    rho: 0.15

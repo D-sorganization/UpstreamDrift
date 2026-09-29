@@ -1,0 +1,322 @@
+"""Persistent AI assistant memory for shared chat surfaces.
+
+The memory file is not model training data. It is a small, auditable context
+bundle that adapters may include in system prompts.
+"""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import os
+import tempfile
+import threading
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from src.shared.python.ai.types import ConversationContext
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+UTC_TIMEZONE = timezone.utc  # noqa: UP017 - keep Python 3.10 compatibility.
+MEMORY_SCHEMA_VERSION = 1
+DEFAULT_MAX_PROMPT_MEMORIES = 8
+MAX_MEMORY_TEXT_CHARS = 400
+MEMORY_TRIGGER_PREFIXES = (
+    "remember ",
+    "please remember ",
+    "from now on ",
+    "always ",
+    "never ",
+    "prefer ",
+    "i prefer ",
+    "my preference is ",
+)
+
+
+@dataclass(frozen=True)
+class MemoryCandidate:
+    """A candidate memory extracted from a conversation."""
+
+    kind: str
+    content: str
+    source: str
+    source_hash: str
+
+    def to_dict(self) -> dict[str, str]:
+        """Serialize the candidate to a stable dictionary."""
+        return {
+            "kind": self.kind,
+            "content": self.content,
+            "source": self.source,
+            "source_hash": self.source_hash,
+            "created_at": datetime.now(UTC_TIMEZONE).isoformat(),
+        }
+
+
+class MemoryManager:
+    """Manage persistent prompt memory for AI chat.
+
+    Args:
+        storage_dir: Optional storage directory. If omitted, `TOOLS_AI_HOME` is
+            honored before falling back to a Tools-specific profile directory.
+        memory_file_name: Memory JSON filename.
+    """
+
+    def __init__(
+        self,
+        storage_dir: Path | None = None,
+        *,
+        memory_file_name: str = "user_memory.json",
+    ) -> None:
+        if storage_dir is None:
+            configured = os.environ.get("TOOLS_AI_HOME")
+            storage_dir = (
+                Path(configured) if configured else Path.home() / ".tools_ai_assistant"
+            )
+
+        self.storage_dir = storage_dir
+        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        self.memory_file = self.storage_dir / memory_file_name
+        # Reentrant lock guarding mutations to ``self._memory``. Memory state is
+        # consumed by both the UI thread (settings/prompt refresh) and the
+        # background indexer thread, so all reads/writes must be serialized.
+        self._lock: threading.RLock = threading.RLock()
+        # Separate lock serializing disk writes so that ``save`` can release
+        # ``self._lock`` before performing slow file I/O while still preventing
+        # two writers from racing on the on-disk file.
+        self._io_lock: threading.Lock = threading.Lock()
+        self._memory = self._load_memory()
+
+    @property
+    def memory(self) -> dict[str, Any]:
+        """Return a deep copy of the normalized in-memory state.
+
+        The copy is taken under the lock so callers receive a consistent
+        snapshot even while background threads mutate the underlying dict.
+        """
+        with self._lock:
+            return copy.deepcopy(self._memory)
+
+    def get_snapshot(self) -> dict[str, Any]:
+        """Return an atomic deep copy of the in-memory state."""
+        with self._lock:
+            return copy.deepcopy(self._memory)
+
+    def _default_memory(self) -> dict[str, Any]:
+        return {
+            "schema_version": MEMORY_SCHEMA_VERSION,
+            "preferences": {},
+            "memories": [],
+            "last_archive_digest_at": None,
+        }
+
+    def _load_memory(self) -> dict[str, Any]:
+        if not self.memory_file.exists():
+            return self._default_memory()
+
+        try:
+            raw = json.loads(self.memory_file.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning(
+                "Failed to load AI memory file %s: %s",
+                self.memory_file,
+                exc,
+            )
+            return self._default_memory()
+
+        if not isinstance(raw, dict):
+            return self._default_memory()
+
+        normalized = self._default_memory()
+        preferences = raw.get("preferences", {})
+        if isinstance(preferences, dict):
+            normalized["preferences"] = preferences
+
+        memories = raw.get("memories", raw.get("knowledge_snippets", []))
+        if isinstance(memories, list):
+            normalized["memories"] = [
+                item
+                for item in memories
+                if isinstance(item, dict) and isinstance(item.get("content"), str)
+            ]
+
+        last_sync = raw.get("last_archive_digest_at", raw.get("last_sync"))
+        if isinstance(last_sync, str) or last_sync is None:
+            normalized["last_archive_digest_at"] = last_sync
+        return normalized
+
+    def save(self) -> None:
+        """Persist memory using an atomic replace.
+
+        The in-memory state is serialized under the lock, but the actual file
+        write happens after releasing the lock so that slow disk I/O does not
+        block readers/writers on the dict.
+        """
+        with self._lock:
+            payload = json.dumps(self._memory, indent=2, sort_keys=True) + "\n"
+        with self._io_lock:
+            with tempfile.NamedTemporaryFile(
+                "w",
+                encoding="utf-8",
+                dir=self.storage_dir,
+                delete=False,
+            ) as handle:
+                handle.write(payload)
+                temp_name = handle.name
+            Path(temp_name).replace(self.memory_file)
+
+    def set_preference(self, key: str, value: str) -> None:
+        """Persist a user preference."""
+        if not key.strip():
+            raise ValueError("preference key must be non-empty")
+        if not value.strip():
+            raise ValueError("preference value must be non-empty")
+        with self._lock:
+            self._memory.setdefault("preferences", {})[key.strip()] = value.strip()
+        self.save()
+
+    def add_memory(self, candidate: MemoryCandidate) -> bool:
+        """Add a memory if it is not already present.
+
+        Returns:
+            True when the memory was inserted.
+        """
+        with self._lock:
+            existing_hashes = {
+                item.get("source_hash")
+                for item in self._memory.setdefault("memories", [])
+                if isinstance(item, dict)
+            }
+            if candidate.source_hash in existing_hashes:
+                return False
+
+            self._memory["memories"].append(candidate.to_dict())
+            return True
+
+    def digest_archived_contexts(
+        self,
+        contexts: list[ConversationContext],
+    ) -> int:
+        """Extract bounded memory candidates from archived conversations."""
+        inserted = 0
+        for context in contexts:
+            for candidate in extract_memory_candidates(context):
+                if self.add_memory(candidate):
+                    inserted += 1
+
+        if inserted:
+            with self._lock:
+                self._memory["last_archive_digest_at"] = datetime.now(
+                    UTC_TIMEZONE
+                ).isoformat()
+            self.save()
+        return inserted
+
+    def build_prompt_memory(
+        self,
+        *,
+        max_items: int = DEFAULT_MAX_PROMPT_MEMORIES,
+    ) -> dict[str, Any]:
+        """Return a bounded memory payload safe for provider prompts."""
+        with self._lock:
+            memories = self._memory.get("memories", [])
+            if not isinstance(memories, list):
+                memories = []
+            return {
+                "preferences": dict(self._memory.get("preferences", {})),
+                "memories": list(memories[-max_items:]),
+                "last_archive_digest_at": self._memory.get("last_archive_digest_at"),
+            }
+
+
+def extract_memory_candidates(context: ConversationContext) -> list[MemoryCandidate]:
+    """Extract explicit memory requests from a conversation.
+
+    The extractor only records user-authored preference-like statements. This is
+    deliberate: archived chats should not become opaque training data.
+    """
+    candidates: list[MemoryCandidate] = []
+    for index, message in enumerate(context.messages):
+        if message.role != "user":
+            continue
+        content = _normalize_memory_text(message.content)
+        if content is None:
+            continue
+        source = f"{context.session_id}:{index}"
+        digest = hashlib.sha256(f"{source}:{content}".encode()).hexdigest()
+        candidates.append(
+            MemoryCandidate(
+                kind="preference",
+                content=content,
+                source=source,
+                source_hash=digest,
+            )
+        )
+    return candidates
+
+
+def load_agents_md(project_root: Path | None) -> str:
+    """Load AGENTS.md from an explicit project root."""
+    if project_root is None:
+        return ""
+    agents_path = project_root.resolve() / "AGENTS.md"
+    if not agents_path.is_file():
+        return ""
+    try:
+        return agents_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        logger.warning("Failed to read %s: %s", agents_path, exc)
+        return ""
+
+
+def build_memory_prompt_section(
+    *,
+    prompt_memory: dict[str, Any] | None,
+    agents_md: str = "",
+) -> str:
+    """Build a bounded prompt section from AGENTS.md and persisted memory."""
+    lines: list[str] = []
+    if agents_md.strip():
+        lines.extend(
+            [
+                "### Repository Instructions",
+                agents_md.strip(),
+                "",
+            ]
+        )
+
+    if prompt_memory:
+        preferences = prompt_memory.get("preferences", {})
+        memories = prompt_memory.get("memories", [])
+        if isinstance(preferences, dict) and preferences:
+            lines.append("### User Preferences")
+            for key, value in sorted(preferences.items()):
+                lines.append(f"- {key}: {value}")
+            lines.append("")
+
+        if isinstance(memories, list) and memories:
+            lines.append("### Archived Chat Memory")
+            for item in memories:
+                if not isinstance(item, dict):
+                    continue
+                content = str(item.get("content", "")).strip()
+                if content:
+                    lines.append(f"- {content[:MAX_MEMORY_TEXT_CHARS]}")
+            lines.append("")
+
+    return "\n".join(lines).strip()
+
+
+def _normalize_memory_text(text: str) -> str | None:
+    normalized = " ".join(text.strip().split())
+    if not normalized:
+        return None
+    lowered = normalized.lower()
+    if not lowered.startswith(MEMORY_TRIGGER_PREFIXES):
+        return None
+    return normalized[:MAX_MEMORY_TEXT_CHARS]

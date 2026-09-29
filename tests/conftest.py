@@ -1,0 +1,1394 @@
+"""Shared fixtures and utilities for the Golf Modeling Suite test suite.
+
+This module centralizes common setup logic to improve test orthogonality
+and adherence to the DRY principle.
+"""
+
+from __future__ import annotations
+
+import os
+
+# ---------------------------------------------------------------------------
+# Fleet Testing Standards §5: thread-safety + headless env vars.
+# Must be set BEFORE any heavy import (numpy, matplotlib, Qt, etc.) so that
+# C-extension thread pools and matplotlib/Qt backends pick them up.
+# See: docs/FLEET_TESTING_STANDARDS.md in the Repository_Management repo.
+# ---------------------------------------------------------------------------
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+# ---------------------------------------------------------------------------
+# Issue #9220: generated run output must never land inside the checkout.
+# ``OutputManager``'s default base path is the documented interactive/CLI
+# location ``<repo>/output``; the *tests* redirect it instead of the default
+# being made test-shaped. Set at import time -- before any test module is
+# collected -- so it cannot be defeated by autouse-fixture ordering.
+# ---------------------------------------------------------------------------
+import tempfile as _tempfile
+
+os.environ.setdefault(
+    "UPSTREAM_DRIFT_OUTPUT_DIR",
+    _tempfile.mkdtemp(prefix="upstream_drift_test_output_"),
+)
+# ---------------------------------------------------------------------------
+# Patch broken transitive imports before any test module is collected.
+# Other agents are refactoring src.shared.python.data_io and
+# src.shared.python.config, which temporarily removes symbols that
+# __init__.py still re-exports.  Inject stub packages so deeper imports
+# (LauncherManifest, ModelHandlerRegistry, etc.) can succeed.
+# ---------------------------------------------------------------------------
+import sys as _sys
+import types as _types
+import importlib as _early_importlib
+from pathlib import Path as _Path
+import contextlib
+
+_tools_path = str(
+    (
+        _Path(__file__).resolve().parents[1]
+        / "vendor"
+        / "ud-tools"
+        / "src"
+        / "shared"
+        / "python"
+    ).resolve()
+)
+_tools_src_path = str(
+    (_Path(__file__).resolve().parents[1] / "vendor" / "ud-tools" / "src").resolve()
+)
+_python_src_path = str(
+    (
+        _Path(__file__).resolve().parents[1]
+        / "vendor"
+        / "ud-tools"
+        / "src"
+        / "python"
+        / "src"
+    ).resolve()
+)
+_updrift_src = str((_Path(__file__).resolve().parents[1] / "src").resolve())
+if _updrift_src in _sys.path:
+    _sys.path.remove(_updrift_src)
+_sys.path.insert(0, _updrift_src)
+
+# Strip out Gasification_Model paths to prevent generic top-level package collisions (e.g. 'utils')
+_sys.path = [p for p in _sys.path if "Gasification_Model" not in p]
+
+for _p in reversed((_python_src_path, _tools_src_path, _tools_path)):
+    if _p in _sys.path:
+        _sys.path.remove(_p)
+    _sys.path.insert(1, _p)
+
+_updrift_shared_python = str(
+    (_Path(__file__).resolve().parents[1] / "src" / "shared" / "python").resolve()
+)
+if _updrift_shared_python in _sys.path:
+    _sys.path.remove(_updrift_shared_python)
+_sys.path.insert(1, _updrift_shared_python)
+
+
+for _pkg in ("chat", "sidekick", "ai", "shared.python", "src.shared.python"):
+    with contextlib.suppress(ImportError):
+        if _pkg == "shared.python" or _pkg == "src.shared.python":
+            __import__("shared.python")
+            _pkg_mod = _sys.modules.get(_pkg)
+            _v_path = str(_Path(_tools_path))
+            _local_path = str(
+                _Path(__file__).resolve().parents[1] / "src" / "shared" / "python"
+            )
+        else:
+            __import__(_pkg)
+            _pkg_mod = _sys.modules.get(_pkg)
+            _v_path = str(_Path(_tools_path) / _pkg)
+            _local_path = str(
+                _Path(__file__).resolve().parents[1]
+                / "src"
+                / "shared"
+                / "python"
+                / _pkg
+            )
+
+        if _pkg_mod is not None and hasattr(_pkg_mod, "__path__"):
+            if _local_path not in _pkg_mod.__path__:
+                _pkg_mod.__path__.insert(0, _local_path)
+            if _v_path not in _pkg_mod.__path__:
+                _pkg_mod.__path__.append(_v_path)
+
+_local_tools_path = str((_Path(__file__).resolve().parents[1] / "tools").resolve())
+with contextlib.suppress(ImportError):
+    import tools
+
+    if hasattr(tools, "__path__") and _local_tools_path not in tools.__path__:
+        tools.__path__.insert(0, _local_tools_path)
+
+
+def _ensure_importable_package(module_name: str, package_path: str) -> None:
+    try:
+        _early_importlib.import_module(module_name)
+    except (AttributeError, ImportError):
+        module = _types.ModuleType(module_name)
+        module.__path__ = [package_path]
+        module.__package__ = module_name
+        _sys.modules[module_name] = module
+
+
+_data_io_name = "src.shared.python.data_io"
+_ensure_importable_package(_data_io_name, "src/shared/python/data_io")
+
+_config_name = "src.shared.python.config"
+_ensure_importable_package(_config_name, "src/shared/python/config")
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+import importlib
+import importlib.util
+import json
+import sys
+import warnings
+from collections.abc import Callable, Generator
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+# On Windows, missing PyQt6 DLLs can cause a fatal crash.
+# Mock them immediately before any imports happen.
+try:
+    _pyqt6_qtcore = importlib.import_module("PyQt6.QtCore")
+    _pyqt6_qtgui = importlib.import_module("PyQt6.QtGui")
+    _pyqt6_qtwidgets = importlib.import_module("PyQt6.QtWidgets")
+    _has_pyqt6 = all(
+        module is not None for module in (_pyqt6_qtcore, _pyqt6_qtgui, _pyqt6_qtwidgets)
+    )
+except (AttributeError, ImportError):
+    _has_pyqt6 = False
+
+if not _has_pyqt6:
+    for module_name in tuple(sys.modules):
+        if module_name == "PyQt6" or module_name.startswith("PyQt6."):
+            sys.modules.pop(module_name, None)
+
+    class DummySignal:
+        def __init__(self, *args, **kwargs):
+            self._callbacks = []
+
+        def connect(self, callback):
+            self._callbacks.append(callback)
+
+        def emit(self, *args, **kwargs):
+            for callback in list(self._callbacks):
+                callback(*args, **kwargs)
+
+    class DummyQObject:
+        def __init__(self, *args, **kwargs):
+            super().__init__()
+
+    class DummyQSettings:
+        _values: dict[tuple[str, str, str], object] = {}
+
+        def __init__(self, organization: str = "", application: str = ""):
+            self._organization = organization
+            self._application = application
+
+        def value(self, key: str, defaultValue=None, type=None):
+            value = self._values.get(
+                (self._organization, self._application, key), defaultValue
+            )
+            if type is not None and value is not None:
+                try:
+                    return type(value)
+                except (TypeError, ValueError):
+                    return defaultValue
+            return value
+
+        def setValue(self, key: str, value):
+            self._values[(self._organization, self._application, key)] = value
+
+    class DummyQStandardPaths:
+        class StandardLocation:
+            AppConfigLocation = 0
+
+        @staticmethod
+        def writableLocation(_location):
+            return str(Path.cwd())
+
+    mock_core = MagicMock()
+    mock_core.QObject = DummyQObject
+    mock_core.QSettings = DummyQSettings
+    mock_core.QStandardPaths = DummyQStandardPaths
+    mock_core.pyqtSignal = DummySignal
+    mock_core.QLibraryInfo.version.return_value.toString.return_value = "6.6.0"
+    mock_core.QLibraryInfo.version.return_value.segments.return_value = (6, 6, 0)
+    mock_core.PYQT_VERSION_STR = "6.6.0"
+    mock_core.PYQT_VERSION = 0x060600
+    mock_core.__version__ = "6.6.0"
+    mock_core.qVersion.return_value = "6.6.0"
+
+    pyqt_mock = MagicMock()
+    pyqt_mock.__ud_fake__ = True
+    pyqt_mock.QtCore = mock_core
+    pyqt_mock.QtGui = MagicMock()
+
+    class DummyWidget:
+        def __init__(self, *args, **kwargs):
+            self.__dict__["_mocks"] = {}
+
+        def __getattr__(self, name):
+            if name not in self.__dict__["_mocks"]:
+                self.__dict__["_mocks"][name] = MagicMock()
+            return self.__dict__["_mocks"][name]
+
+        @classmethod
+        def instance(cls):
+            return MagicMock()
+
+    DummyWidget.Shape = MagicMock()  # type: ignore[attr-defined]
+    DummyWidget.ToolButtonPopupMode = MagicMock()  # type: ignore[attr-defined]
+    DummyWidget.setTabOrder = MagicMock()  # type: ignore[attr-defined]
+    DummyWidget.DockWidgetFeature = MagicMock()  # type: ignore[attr-defined]
+
+    qt_widgets = MagicMock()
+    qt_widgets.QWidget = DummyWidget
+    qt_widgets.QApplication = DummyWidget
+    qt_widgets.QLabel = DummyWidget
+    qt_widgets.QComboBox = DummyWidget
+    qt_widgets.QToolBar = DummyWidget
+    qt_widgets.QDockWidget = DummyWidget
+    qt_widgets.QSplitter = DummyWidget
+    qt_widgets.QScrollArea = DummyWidget
+    qt_widgets.QToolButton = DummyWidget
+    qt_widgets.QDialog = DummyWidget
+    qt_widgets.QVBoxLayout = DummyWidget
+    qt_widgets.QHBoxLayout = DummyWidget
+    qt_widgets.QGridLayout = DummyWidget
+    qt_widgets.QFrame = DummyWidget
+    qt_widgets.QPushButton = DummyWidget
+    qt_widgets.QDoubleSpinBox = DummyWidget
+    qt_widgets.QSlider = DummyWidget
+    qt_widgets.QGroupBox = DummyWidget
+    qt_widgets.QMainWindow = DummyWidget
+    qt_widgets.QSplitter = DummyWidget
+    qt_widgets.QMenuBar = DummyWidget
+    qt_widgets.QMenu = DummyWidget
+    pyqt_mock.QtWidgets = qt_widgets
+    pyqt_mock.QtWebEngineWidgets = MagicMock()
+    sys.modules["PyQt6"] = pyqt_mock
+    sys.modules["PyQt6.QtCore"] = mock_core
+    sys.modules["PyQt6.QtGui"] = pyqt_mock.QtGui
+    sys.modules["PyQt6.QtWidgets"] = pyqt_mock.QtWidgets
+    sys.modules["PyQt6.QtWebEngineWidgets"] = pyqt_mock.QtWebEngineWidgets
+
+
+@pytest.fixture(autouse=True)
+def _prevent_repo_root_io(monkeypatch, tmp_path):
+    """Prevent tests from polluting the repository root with logs or databases.
+
+    Issue #7935: test execution should not generate files like base.csv,
+    golf_modeling_suite.db, or logs/errors_*.log in the repository root.
+    """
+    monkeypatch.chdir(tmp_path)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_network_in_unit_lane(request, monkeypatch):
+    """Block real outbound HTTP from unit tests by default.
+
+    Fleet Testing Standards §5: unit-marked tests must not make real
+    network calls. Tests that need the network must be marked
+    ``requires_network`` (and typically ``slow``).
+    """
+    if "unit" not in request.keywords:
+        return
+
+    def _refuse(*_a, **_kw):
+        raise RuntimeError(
+            "Unit test made a real network call. Mock with `responses` "
+            "or `pytest-httpx`, or mark the test "
+            "`@pytest.mark.requires_network`."
+        )
+
+    for module in ("httpx", "requests", "urllib.request"):
+        try:
+            mod = __import__(module, fromlist=["*"])
+        except ImportError:
+            continue
+        for attr in ("get", "post", "put", "delete", "request"):
+            if hasattr(mod, attr):
+                monkeypatch.setattr(mod, attr, _refuse, raising=False)
+
+
+@dataclass(frozen=True)
+class OptionalCollectionRule:
+    """Collection rule for test stacks that require optional modules."""
+
+    path_suffixes: tuple[str, ...]
+    modules: tuple[str, ...] = ()
+    symbols: tuple[tuple[str, str], ...] = ()
+
+
+_PROCESS_CALCULATOR_ANCHOR = "sidekick.process_calculators.acid_gas_dewpoint_calculator"
+_PROCESS_CALCULATOR_TESTS = (
+    "tests/unit/process_calculators",
+    "tests/unit/sidekick/test_acid_gas_dewpoint.py",
+    "tests/unit/sidekick/test_analysis_utils.py",
+    "tests/unit/sidekick/test_baghouse_calculator.py",
+    "tests/unit/sidekick/test_electrode_and_thermal.py",
+    "tests/unit/sidekick/test_financial_calculator.py",
+    "tests/unit/sidekick/test_flare_calculator.py",
+    "tests/unit/sidekick/test_gas_properties.py",
+    "tests/unit/sidekick/test_pipe_database.py",
+    "tests/unit/sidekick/test_pressure_drop_interface.py",
+    "tests/unit/sidekick/test_process_constants.py",
+    "tests/unit/sidekick/test_syngas_compression.py",
+    "tests/unit/sidekick/test_ui_modules_importable.py",
+    "tests/unit/sidekick/test_wgs_reactor_calculator.py",
+)
+_CALC_BACKEND_TESTS = (
+    "tests/unit/calc_backend",
+    "tests/unit/test_calc_backend_protocols.py",
+)
+_OPTIONAL_COLLECTION_RULES = (
+    OptionalCollectionRule(
+        path_suffixes=_PROCESS_CALCULATOR_TESTS,
+        modules=(_PROCESS_CALCULATOR_ANCHOR,),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=_CALC_BACKEND_TESTS,
+        modules=("src.shared.python.calc_backend.contracts.acid_gas_dewpoint",),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=(
+            "tests/unit/signal_toolkit",
+            "tests/unit/shared_python/test_signal_toolkit_calculus.py",
+            "tests/unit/shared_python/test_signal_toolkit_core.py",
+            "tests/unit/shared_python/test_signal_toolkit_filters.py",
+            "tests/unit/shared_python/test_signal_toolkit_fitting.py",
+            "tests/unit/shared_python/test_signal_toolkit_limits.py",
+            "tests/unit/shared_python/test_signal_toolkit_noise.py",
+            "tests/unit/shared_python/test_signal_toolkit_series.py",
+            "tests/unit/dbc/test_dbc_runtime_calculus.py",
+            "tests/unit/dbc/test_dbc_runtime_signal_toolkit.py",
+        ),
+        modules=("src.shared.python.signal_toolkit.core",),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=(
+            "tests/unit/data_io/test_data_processor.py",
+            "tests/unit/data_io/test_dataset_generator.py",
+            "tests/unit/test_dataset_generator.py",
+        ),
+        symbols=(
+            ("src.shared.python.data_processing.processor", "DatasetInfo"),
+            ("src.shared.python.data_io.dataset_generator", "SimulationSample"),
+        ),
+    ),
+    # NOTE (#8006): rules for `c3d_reader`, `setup_golf_suite` and
+    # `start_api_server` were removed here. None of those names was importable in
+    # ANY supported configuration, so the rules were not tolerating an optional
+    # stack -- they were permanently deleting 20 tests with no skip entry and no
+    # CI signal. Do not add a rule for a module that cannot be imported by some
+    # documented extra; `tests/unit/test_optional_collection_rules.py` enforces
+    # this.
+)
+_OPTIONAL_COLLECTION_WARNED_PATHS: set[str] = set()
+_FAKE_PYQT6_GUI_TESTS = (
+    "tests/launchers",
+    "tests/shared/wave7_python_core/test_theme_typography.py",
+    "tests/imports/test_gui_import_boundaries.py",
+    "tests/unit/launcher",
+    "tests/unit/launchers",
+    "tests/unit/shared_python/test_advanced_analysis_features.py",
+    "tests/unit/shared_python/test_analysis_tab_refresh.py",
+    "tests/unit/shared_python/test_dashboard_advanced_analysis.py",
+    "tests/unit/shared_python/test_launcher_integration.py",
+    "tests/unit/shared_python/test_openpose_gui_coverage.py",
+    "tests/unit/shared_python/test_simulation_gui_base.py",
+    "tests/unit/theme",
+    "tests/unit/tools/starting_pose_matcher",
+    "tests/unit/ui",
+    "tests/ui",
+    "tests/help/test_tile_help_qt.py",
+)
+
+
+def _normalized_collection_path(path: object) -> str:
+    return Path(str(path)).as_posix().lower()
+
+
+def _matches_collection_suffix(path_text: str, suffix: str) -> bool:
+    normalized_suffix = suffix.lower().strip("/")
+    return (
+        path_text == normalized_suffix
+        or path_text.startswith(f"{normalized_suffix}/")
+        or path_text.endswith(f"/{normalized_suffix}")
+        or f"/{normalized_suffix}/" in path_text
+    )
+
+
+def _module_available(module_name: str) -> bool:
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except (ImportError, AttributeError, ValueError):
+        return False
+
+
+def _symbol_available(module_name: str, symbol_name: str) -> bool:
+    try:
+        module = importlib.import_module(module_name)
+    except Exception:  # noqa: BLE001
+        return False
+    return hasattr(module, symbol_name)
+
+
+def _rule_requirement_missing(rule: OptionalCollectionRule) -> bool:
+    missing_module = any(not _module_available(module) for module in rule.modules)
+    missing_symbol = any(
+        not _symbol_available(module, symbol) for module, symbol in rule.symbols
+    )
+    return missing_module or missing_symbol
+
+
+def _rule_missing_requirements(
+    rule: OptionalCollectionRule,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    missing_modules = tuple(
+        module for module in rule.modules if not _module_available(module)
+    )
+    missing_symbols = tuple(
+        f"{module}.{symbol}"
+        for module, symbol in rule.symbols
+        if not _symbol_available(module, symbol)
+    )
+    return missing_modules, missing_symbols
+
+
+def _should_ignore_optional_collection_path(path: object) -> bool:
+    path_text = _normalized_collection_path(path)
+    for rule in _OPTIONAL_COLLECTION_RULES:
+        if any(
+            _matches_collection_suffix(path_text, suffix)
+            for suffix in rule.path_suffixes
+        ):
+            return _rule_requirement_missing(rule)
+    return False
+
+
+def _warn_optional_collection_skip(path: object) -> None:
+    path_text = _normalized_collection_path(path)
+    if path_text in _OPTIONAL_COLLECTION_WARNED_PATHS:
+        return
+
+    for rule in _OPTIONAL_COLLECTION_RULES:
+        if not any(
+            _matches_collection_suffix(path_text, suffix)
+            for suffix in rule.path_suffixes
+        ):
+            continue
+
+        missing_modules, missing_symbols = _rule_missing_requirements(rule)
+        missing_parts = [*missing_modules, *missing_symbols]
+        if not missing_parts:
+            return
+
+        warnings.warn(
+            pytest.PytestWarning(
+                "Skipping optional test collection for "
+                f"{path_text} because required optional imports are missing: "
+                + ", ".join(missing_parts)
+            ),
+            stacklevel=2,
+        )
+        _OPTIONAL_COLLECTION_WARNED_PATHS.add(path_text)
+        return
+
+
+def _fake_pyqt6_active() -> bool:
+    pyqt6_module = sys.modules.get("PyQt6")
+    return not _has_pyqt6 and bool(getattr(pyqt6_module, "__ud_fake__", False))
+
+
+def _is_fake_pyqt6_gui_path(path: object) -> bool:
+    path_text = _normalized_collection_path(path)
+    return any(
+        _matches_collection_suffix(path_text, suffix)
+        for suffix in _FAKE_PYQT6_GUI_TESTS
+    )
+
+
+def _skip_fake_pyqt6_gui_items(items: list[pytest.Item]) -> None:
+    if not _fake_pyqt6_active():
+        return
+
+    skip_marker = pytest.mark.skip(
+        reason="real PyQt6 is unavailable; GUI tests must not pass against stubs"
+    )
+    for item in items:
+        item_path = getattr(item, "path", getattr(item, "fspath", ""))
+        if _is_fake_pyqt6_gui_path(item_path):
+            item.add_marker(skip_marker)
+
+
+def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
+    """Do not collect tests for optional stacks that are absent in this checkout."""
+    should_ignore = _should_ignore_optional_collection_path(collection_path)
+    if should_ignore:
+        _warn_optional_collection_skip(collection_path)
+    return should_ignore
+
+
+_BIOMECH_SIBLINGS_DIRECT = (
+    "MuJoCo_Models",
+    "Drake_Models",
+    "Pinocchio_Models",
+    "OpenSim_Models",
+    "Movement-Optimizer",
+)
+
+
+def _default_biomech_mode() -> str:
+    """Return ``editable`` if any sibling checkout exists, else ``vendored``."""
+    repo_root = Path(__file__).resolve().parent.parent
+    workspace_root = repo_root.parent
+    for repo_name in _BIOMECH_SIBLINGS_DIRECT:
+        if (workspace_root / repo_name).is_dir():
+            return "editable"
+    return "vendored"
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Add command line options for Tools vendoring resolution."""
+    parser.addoption(
+        "--tools-mode",
+        action="store",
+        default="local",
+        choices=["local", "vendored"],
+        help="Tools resolution mode: 'local' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
+    )
+    parser.addoption(
+        "--biomech-mode",
+        action="store",
+        default=None,
+        choices=["editable", "vendored", "env"],
+        help=(
+            "Biomech sibling-repo resolution mode. Defaults to 'editable' if "
+            "any sibling checkout exists at ../<RepoName>/, else 'vendored'."
+        ),
+    )
+
+
+@pytest.fixture(scope="session")
+def biomech_mode(request: pytest.FixtureRequest) -> str:
+    """Expose the active ``--biomech-mode`` value to tests."""
+    explicit = request.config.getoption("--biomech-mode")
+    if explicit is not None:
+        return str(explicit)
+    return _default_biomech_mode()
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Dynamically adjust system path based on selected Tools mode."""
+    if hasattr(config, "addinivalue_line"):
+        config.addinivalue_line(
+            "markers", "cross_engine: cross-engine physics parity tests"
+        )
+    mode = config.getoption("--tools-mode")
+    root_dir = Path(__file__).resolve().parent.parent
+    local_path = str((root_dir / "src/shared/python").resolve())
+    explicit_tools = os.environ.get("TOOLS_REPO_PATH")
+    tools_root = Path(explicit_tools or root_dir / "vendor/ud-tools").resolve()
+    parent_paths = [
+        str((tools_root / "src/shared/python").resolve()),
+        str((tools_root / "src").resolve()),
+        str((tools_root / "src/python/src").resolve()),
+    ]
+    vendored_path = str((root_dir / "vendor/ud-tools/src/shared/python").resolve())
+
+    # Only process if directories actually exist
+    if not os.path.exists(local_path) or not all(
+        os.path.exists(path) for path in parent_paths
+    ):
+        return
+
+    # Clean existing occurrences to enforce determinism (case-insensitive on Windows)
+    controlled_paths = {
+        local_path.casefold(),
+        vendored_path.casefold(),
+        *(path.casefold() for path in parent_paths),
+    }
+    clean_path = []
+    for p in sys.path:
+        try:
+            resolved_p = str(Path(p).resolve()).casefold()
+            if resolved_p not in controlled_paths:
+                clean_path.append(p)
+        except Exception as e:  # noqa: BLE001, F841
+            clean_path.append(p)
+    sys.path = clean_path
+
+    parent_mode = explicit_tools is not None or mode == "vendored"
+    if parent_mode:
+        for path in reversed(parent_paths):
+            sys.path.insert(0, path)
+        sys.path.append(local_path)
+    else:
+        # Force local shared codebase to have precedence
+        for path in reversed(parent_paths):
+            sys.path.insert(0, path)
+        sys.path.insert(0, local_path)
+
+    # Prevent dual-loading of shared contracts and training modules under different path aliases.
+    # With both '.' and 'src/shared/python' in sys.path, contracts/training can be
+    # imported as both 'src.shared.python.contracts'/'src.shared.python.training' and
+    # 'contracts'/'training', creating two distinct class objects that break pytest and type checks.
+    # Pre-load via the canonical path and alias all alternate module names.
+    try:
+        import importlib
+
+        canonical_name = (
+            "shared.python.contracts" if parent_mode else "src.shared.python.contracts"
+        )
+        if parent_mode:
+            sys.modules.pop("shared.python.contracts", None)
+        canonical_mod = importlib.import_module(canonical_name)
+        # Always override — even if already present — to ensure a single class identity.
+        # xdist workers may have loaded 'contracts' via the short sys.path entry before
+        # pytest_configure runs, creating a stale second module instance.
+        # Register every spelling explicitly. Seeding of the src.* spelling
+        # used to happen only as a side effect of earlier imports installing
+        # the alias finder, which made vendored-mode sessions order-dependent
+        # (test_tools_mode_aliases_contract_modules_to_one_identity fails when
+        # run in isolation without this).
+        contract_aliases = (
+            ("contracts", "src.shared.python.contracts")
+            if parent_mode
+            else ("contracts", "shared.python.contracts")
+        )
+        for alias in contract_aliases:
+            sys.modules[alias] = canonical_mod
+
+        # Alias training and all of its submodules recursively
+        training_dir = root_dir / "src/shared/python/training"
+        if training_dir.exists():
+            canonical_tr_name = "src.shared.python.training"
+            canonical_tr_mod = importlib.import_module(canonical_tr_name)
+            sys.modules["training"] = canonical_tr_mod
+            sys.modules["shared.python.training"] = canonical_tr_mod
+
+            for path in training_dir.rglob("*.py"):
+                if path.name == "__init__.py":
+                    if path.parent == training_dir:
+                        continue
+                    rel = path.parent.relative_to(training_dir)
+                else:
+                    rel = path.with_suffix("").relative_to(training_dir)
+
+                sub_path = str(rel).replace(os.path.sep, ".")
+                if sub_path:
+                    sub_name = f"src.shared.python.training.{sub_path}"
+                    mod = importlib.import_module(sub_name)
+                    sys.modules[f"training.{sub_path}"] = mod
+                    sys.modules[f"shared.python.training.{sub_path}"] = mod
+    except Exception as e:  # noqa: BLE001, F841
+        pass  # Don't block test collection if this fails
+
+
+# Engine module prefixes whose sys.modules entries must be isolated between
+# tests.  Pinocchio's C extension (pinocchio_pywrap_default) is corrupted by
+# PinocchioProbe.probe(); Drake gets replaced with MagicMock objects by tests
+# that mock pydrake, causing downstream TypeError comparisons. Drake engine
+# modules also get polluted when imported with different paths (src.engines.*
+# vs engines.*), breaking test_drake_wrapper.py.
+_PROTECTED_PREFIXES = (
+    "pinocchio",
+    "pydrake",
+    "src.engines",
+)
+
+
+def _matches_protected(name: str) -> bool:
+    """Return True if *name* is a protected engine module."""
+    for prefix in _PROTECTED_PREFIXES:
+        if name == prefix or name.startswith(prefix + "."):
+            return True
+    return False
+
+
+@pytest.fixture(autouse=True)
+def _protect_engine_modules() -> Generator[None, None, None]:
+    """Prevent engine module state corruption from leaking between tests.
+
+    Several tests instantiate ``EngineManager`` or ``UpstreamDriftLauncher`` which
+    trigger engine probes that import pinocchio/drake.  The probes can corrupt
+    C extension module state or leave MagicMock objects in ``sys.modules``.
+    Subsequent tests then fail with ``NameError`` or ``TypeError``.
+
+    This fixture snapshots all engine-related ``sys.modules`` entries before
+    each test and restores them afterward so that corruption cannot leak
+    across test boundaries.
+    """
+    # list() needed: mutating dict during iteration. The lazy alias meta-path
+    # finder installed by src/shared/python/import_aliases.py can insert into
+    # sys.modules while this comprehension walks it, raising
+    # "RuntimeError: dictionary changed size during iteration" during setup.
+    # The teardown loop below already guards this the same way.
+    protected_keys = {k for k in list(sys.modules) if _matches_protected(k)}
+    saved = {k: sys.modules[k] for k in protected_keys}
+    yield
+    # Remove any engine modules added or mutated during the test
+    for k in list(sys.modules):  # list() needed: mutating dict during iteration
+        if _matches_protected(k):
+            if k in saved:
+                sys.modules[k] = saved[k]
+            else:
+                del sys.modules[k]
+    # Restore any that were removed during the test
+    for k, v in saved.items():
+        if k not in sys.modules:
+            sys.modules[k] = v
+
+
+# ---------------------------------------------------------------------------
+# Qt ``sys.modules`` pollution guard (issue #9188)
+#
+# A test that drops a stub into ``sys.modules`` for a Qt module and never puts
+# the real one back turns the suite into a lottery: the *next* test to do
+# ``from PyQt6.QtCore import Qt`` fails with
+#
+#     ImportError: cannot import name 'Qt' from '<unknown module name>'
+#                  (unknown location)
+#
+# ...and which test that is depends only on collection order.  ``<unknown
+# module name> (unknown location)`` is the fingerprint of a non-module object
+# sitting in ``sys.modules``.
+#
+# ``pytest_runtest_teardown`` below runs ``trylast``, i.e. after pytest's own
+# teardown hook has finalized every fixture that is due — so it is immune to
+# fixture ordering, unlike a guard written as an autouse fixture.  It does two
+# things:
+#
+#   * After every test, it compares the watched ``sys.modules`` entries against
+#     the baseline taken once collection finished, and remembers the *first*
+#     test at which they started deviating.  Returning to baseline clears that.
+#   * At each test-*file* boundary it reports a deviation that is still in
+#     place, naming the remembered first offender.
+#
+# Deferring the report to the file boundary is what keeps the guard free of
+# false positives: a deliberate, properly-scoped stub (say a module-scoped
+# ``patch.dict(sys.modules, ...)``) is undone before the boundary is reached
+# and is never reported, while a stub that outlives the file that installed it
+# has escaped every legitimate scope.  That is exactly the #9188 shape — a
+# ``scope="session"`` autouse fixture declared in a *directory* conftest.py is
+# created lazily at the first test in that directory but only finalized at the
+# end of the whole session.
+#
+# The check repairs ``sys.modules`` after reporting, so one bad test produces
+# one attributable failure rather than a cascade of innocent victims.
+# ---------------------------------------------------------------------------
+_QT_MODULE_PREFIXES = (
+    "PyQt6",
+    "PyQt5",
+    "PySide2",
+    "PySide6",
+    "qtpy",
+    # The repo's own Qt shim layer, stubbed by the same conftests that stub
+    # PyQt6 and therefore subject to the identical leak.
+    "src.shared.python.ui",
+    "shared.python.ui",
+)
+
+# ``str.startswith`` accepts a tuple and runs in C, which keeps the per-test
+# scan of ``sys.modules`` (a few thousand keys) cheap.
+_QT_PREFIX_MATCH = tuple(_QT_MODULE_PREFIXES) + tuple(
+    prefix + "." for prefix in _QT_MODULE_PREFIXES
+)
+
+_qt_baseline: dict[str, Any] = {}
+# Node id of the first test after which the watched entries stopped matching
+# the baseline; used to attribute a leak to its author, not to whoever is
+# unlucky enough to run next.
+_qt_dirty_since: list[str] = []
+# Single-element flag set once the baseline has been taken.  An *empty*
+# baseline is legitimate — no Qt binding imported yet — and must still police
+# stub *additions*, so armed-ness cannot be inferred from the baseline being
+# non-empty.
+_qt_guard_armed: list[bool] = []
+
+
+def _is_qt_module_name(name: str) -> bool:
+    """Return True if *name* is a Qt binding module we police."""
+    if not name.startswith(_QT_PREFIX_MATCH):
+        return False
+    return any(
+        name == prefix or name.startswith(prefix + ".")
+        for prefix in _QT_MODULE_PREFIXES
+    )
+
+
+def _qt_module_snapshot() -> dict[str, Any]:
+    """Map every watched Qt module name to the object currently registered."""
+    # list() needed: the lazy alias meta-path finder can insert into
+    # sys.modules while we walk it (see _protect_engine_modules).
+    modules = sys.modules
+    return {
+        name: modules[name]
+        for name in list(modules)
+        if _is_qt_module_name(name) and name in modules
+    }
+
+
+def _is_module_stub(obj: object) -> bool:
+    """Return True if *obj* is a stand-in rather than a genuine module.
+
+    A ``MagicMock`` — even ``MagicMock(spec=ModuleType)`` — is a stub: it has
+    no ``__name__``/``__file__``, which is precisely why the resulting
+    ``ImportError`` says ``<unknown module name> (unknown location)``.
+    """
+    from unittest.mock import NonCallableMock
+
+    if isinstance(obj, NonCallableMock):
+        return True
+    return not isinstance(obj, _types.ModuleType)
+
+
+def _describe_module_object(obj: object) -> str:
+    """Render *obj* for a guard failure message."""
+    if _is_module_stub(obj):
+        return f"stub {type(obj).__name__}"
+    location = getattr(obj, "__file__", None)
+    return f"module {getattr(obj, '__name__', '?')} ({location or 'namespace'})"
+
+
+def _diff_qt_modules(
+    before: dict[str, Any], after: dict[str, Any]
+) -> tuple[list[str], list[str]]:
+    """Compare two snapshots.
+
+    Returns ``(problems, repairable_additions)``.  Newly imported *real*
+    modules are legitimate lazy imports and are not reported; only stubs,
+    replacements and removals are.
+    """
+    problems: list[str] = []
+    added_stubs: list[str] = []
+    for name, original in before.items():
+        if name not in after:
+            problems.append(
+                f"  {name}: removed from sys.modules "
+                f"(was {_describe_module_object(original)})"
+            )
+        elif after[name] is not original:
+            problems.append(
+                f"  {name}: {_describe_module_object(original)} "
+                f"-> {_describe_module_object(after[name])}"
+            )
+    for name, current in after.items():
+        if name in before:
+            continue
+        if _is_module_stub(current):
+            added_stubs.append(name)
+            problems.append(
+                f"  {name}: stub added to sys.modules "
+                f"({_describe_module_object(current)})"
+            )
+    return problems, added_stubs
+
+
+def _repair_qt_modules(before: dict[str, Any], added_stubs: list[str]) -> None:
+    """Put the watched Qt entries back the way the snapshot found them."""
+    for name in added_stubs:
+        sys.modules.pop(name, None)
+    for name, original in before.items():
+        sys.modules[name] = original
+
+
+_QT_GUARD_REMEDY = (
+    "Stub Qt modules with `monkeypatch.setitem(sys.modules, ...)` or "
+    "`unittest.mock.patch.dict(sys.modules, ...)` so teardown is automatic, "
+    "and never from a fixture scoped wider than the tests that need it "
+    "(a scope='session' autouse fixture in a directory conftest.py is only "
+    "finalized at the END of the session). A leaked stub makes every later "
+    "`from PyQt6.QtCore import Qt` fail with \"cannot import name 'Qt' from "
+    "'<unknown module name>' (unknown location)\", blaming an innocent test. "
+    "See issue #9188."
+)
+
+
+def _arm_qt_guard() -> None:
+    """Snapshot the clean Qt ``sys.modules`` state, once."""
+    if _qt_guard_armed:
+        return
+    _qt_guard_armed.append(True)
+    _qt_baseline.clear()
+    _qt_baseline.update(_qt_module_snapshot())
+    _qt_dirty_since.clear()
+
+
+def pytest_collection_finish(session: pytest.Session) -> None:
+    """Arm the guard once collection is done and before the run loop starts."""
+    _arm_qt_guard()
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> None:
+    """Arm the guard on the first test, if collection did not already.
+
+    ``tryfirst`` puts this ahead of pytest's own setup hook, so the snapshot is
+    still taken before the first test's fixtures run.  This is a fallback for
+    runners that reach the run loop without ``pytest_collection_finish``.
+    """
+    _arm_qt_guard()
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> None:
+    """Name the test that leaked a Qt stub, rather than its next-door neighbour.
+
+    Runs ``trylast`` so it executes after pytest's own teardown hook, i.e.
+    after every fixture finalizer that is due at this point — including the
+    module-, class-, package- and session-scoped ones.  That makes the check
+    independent of autouse fixture ordering.
+    """
+    if not _qt_guard_armed:
+        return
+
+    after = _qt_module_snapshot()
+    deviates = after != _qt_baseline
+    if deviates and not _qt_dirty_since:
+        # First test at which the watched entries stopped matching the
+        # baseline: the prime suspect, recorded even though a wider scope may
+        # still legitimately restore them before the file ends.
+        _qt_dirty_since.append(item.nodeid)
+    elif not deviates:
+        _qt_dirty_since.clear()
+        return
+
+    current_file = item.nodeid.partition("::")[0]
+    if nextitem is not None and nextitem.nodeid.partition("::")[0] == current_file:
+        return  # still inside the same file; wider scopes may legitimately hold
+
+    problems, added_stubs = _diff_qt_modules(_qt_baseline, after)
+    if not problems:
+        _qt_dirty_since.clear()
+        return
+
+    culprit = _qt_dirty_since[0] if _qt_dirty_since else item.nodeid
+    _repair_qt_modules(_qt_baseline, added_stubs)
+    _qt_dirty_since.clear()
+    pytest.fail(
+        f"Qt modules are still altered in sys.modules at the end of "
+        f"{current_file}.\nFirst test at which they diverged: {culprit}\n"
+        + "\n".join(problems)
+        + "\n\nThe stub outlived the file that installed it, so every test "
+        "collected after this one would import Qt names from the stub.\n"
+        + _QT_GUARD_REMEDY,
+        pytrace=False,
+    )
+
+
+@pytest.fixture
+def pendulum_urdf(tmp_path: Path) -> str:
+    """Create a standardized simple pendulum URDF for testing."""
+    urdf_content = """<?xml version="1.0"?>
+<robot name="pendulum">
+  <link name="world"/>
+  <link name="link1">
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+  <joint name="joint1" type="revolute">
+    <parent link="world"/>
+    <child link="link1"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="10"/>
+  </joint>
+</robot>
+"""
+    urdf_path = tmp_path / "pendulum.urdf"
+    urdf_path.write_text(urdf_content)
+    return str(urdf_path)
+
+
+@pytest.fixture
+def clean_pendulum_dynamics() -> Callable[..., Any]:
+    """Fixture to provide standardized DoublePendulumDynamics setup for unit tests."""
+    from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        DoublePendulumDynamics,
+        DoublePendulumParameters,
+        LowerSegmentProperties,
+        SegmentProperties,
+    )
+
+    def _create(m1_kg: float = 1.0, l1_m: float = 1.0) -> Any:
+        assert m1_kg is not None, "m1_kg must be provided"
+        assert l1_m is not None, "l1_m must be provided"
+        assert m1_kg > 0.0, "m1_kg must be positive"
+        assert l1_m > 0.0, "l1_m must be positive"
+        upper_segment = SegmentProperties(
+            length_m=l1_m,
+            mass_kg=m1_kg,
+            center_of_mass_ratio=1.0,
+            inertia_about_com=0.0,
+        )
+        # Quasi-massless link 2
+        epsilon_kg = 1e-10
+        lower_segment = LowerSegmentProperties(
+            length_m=1.0,
+            shaft_mass_kg=epsilon_kg,
+            clubhead_mass_kg=epsilon_kg,
+            shaft_com_ratio=0.5,
+        )
+        params = DoublePendulumParameters(
+            upper_segment=upper_segment,
+            lower_segment=lower_segment,
+            plane_inclination_deg=0.0,
+            damping_shoulder=0.0,
+            damping_wrist=0.0,
+            gravity_enabled=True,
+            constrained_to_plane=True,
+        )
+        return DoublePendulumDynamics(parameters=params)
+
+    return _create
+
+
+# Mock classes that need to be defined before importing the engine
+class MockPhysicsEngine:
+    pass
+
+
+@pytest.fixture
+def mock_drake_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
+    """Fixture to mock pydrake and interfaces safely.
+
+    This fixture mocks pydrake modules to allow testing Drake integration
+    without having Drake installed.
+    """
+    mock_pydrake = MagicMock()
+    mock_interfaces = MagicMock(PhysicsEngine=MockPhysicsEngine)
+
+    with patch.dict(
+        "sys.modules",
+        {
+            "pydrake": mock_pydrake,
+            "pydrake.geometry": MagicMock(),
+            "pydrake.math": MagicMock(),
+            "pydrake.multibody": MagicMock(),
+            "pydrake.multibody.plant": MagicMock(),
+            "pydrake.multibody.parsing": MagicMock(),
+            "pydrake.multibody.tree": MagicMock(),
+            "pydrake.systems": MagicMock(),
+            "pydrake.systems.framework": MagicMock(),
+            "pydrake.systems.analysis": MagicMock(),
+            "pydrake.all": MagicMock(),
+            "shared.python.interfaces": mock_interfaces,
+        },
+    ):
+        yield mock_pydrake, mock_interfaces
+
+
+@pytest.fixture
+def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
+    """Fixture to mock mujoco and interfaces safely.
+
+    This fixture mocks mujoco modules to allow testing MuJoCo integration
+    without having MuJoCo installed.
+    """
+    mock_mujoco = MagicMock()
+    mock_interfaces = MagicMock(PhysicsEngine=MockPhysicsEngine)
+
+    # Create common MuJoCo structure mocks
+    # These are needed for attribute access in many tests
+    mock_model = MagicMock()
+    mock_model.nv = 2
+    mock_model.nu = 2
+    mock_model.nq = 2
+    mock_model.nbody = 2
+
+    mock_data = MagicMock()
+    mock_data.qpos = MagicMock()
+    mock_data.qvel = MagicMock()
+    mock_data.qacc = MagicMock()
+    mock_data.ctrl = MagicMock()
+
+    mock_mujoco.MjModel.return_value = mock_model
+    mock_mujoco.MjData.return_value = mock_data
+
+    with patch.dict(
+        "sys.modules",
+        {
+            "mujoco": mock_mujoco,
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces": mock_interfaces,
+        },
+    ):
+        yield mock_mujoco, mock_interfaces
+
+
+# ---------------------------------------------------------------------------
+# Suite-marker enforcement (issue #7158, defect 2)
+# ---------------------------------------------------------------------------
+#
+# Goal: every test should declare which suite it belongs to via one of the
+# recognized "suite" markers below.  Unmarked tests run by default and nothing
+# requires a suite marker, which lets tests drift out of every CI lane's
+# selection expression.
+#
+# This hook runs in REPORT-ONLY mode first (the ratchet pattern used elsewhere
+# in this repo): it counts collected tests that carry none of the suite markers
+# and surfaces the count. CI can reject net-new unmarked tests with
+# ``UD_RATCHET_SUITE_MARKERS=1`` and the committed baseline; once the baseline
+# reaches zero, ``UD_ENFORCE_SUITE_MARKERS=1`` makes any missing marker a
+# collection error.
+#
+# Acceptance-criteria mapping: "Add a pytest_collection_modifyitems hook ...
+# that fails collection when a test has none of {unit, integration, e2e,
+# slow, ...} — start in report-only mode with a baseline count, then flip to
+# enforcing."
+#
+# The classification logic lives in tests/support/suite_markers.py so it can be
+# unit-tested in isolation (see tests/unit/test_suite_marker_enforcement_7158).
+from tests.support.suite_markers import (  # noqa: E402
+    SUITE_MARKERS,
+    find_unmarked,
+    find_unmarked_baseline_drift,
+    load_baseline_nodeids,
+    suite_marker_ratchet_enabled,
+    suite_markers_enforced,
+)
+
+_UNIT_GATE_QUARANTINE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "config"
+    / "unit_gate_quarantine.json"
+)
+
+
+def _apply_unit_gate_quarantine(items: list[pytest.Item]) -> None:
+    """Skip ledgered debt node IDs, only when the unit gate opts in.
+
+    ``UNIT_GATE_QUARANTINE=1`` is set exclusively by the Green-Suite Unit
+    Gate step in ``ci-standard.yml``. The ledger records tests that fail
+    deterministically on ``main`` from the hollow-merge era (issue #8766);
+    entries may only be removed, never added, so any new failure still reds
+    the gate. Local runs and every other CI lane are unaffected.
+    """
+    if os.environ.get("UNIT_GATE_QUARANTINE") != "1":
+        return
+    try:
+        ledger = json.loads(_UNIT_GATE_QUARANTINE_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        # A missing or unreadable ledger must never green the gate by
+        # accident; it simply applies no skips.
+        return
+    quarantined = set(ledger.get("node_ids", []))
+    if not quarantined:
+        return
+    issue = ledger.get("issue", "#8766")
+    marker = pytest.mark.skip(
+        reason=f"unit-gate quarantine ledger ({issue}); do not add entries"
+    )
+    for item in items:
+        if item.nodeid in quarantined:
+            item.add_marker(marker)
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
+    """Report (or, when enforced, fail on) tests lacking a suite marker.
+
+    Postcondition: stores the unmarked count on ``config`` as
+    ``_ud_unmarked_suite_count`` for the terminal summary; raises
+    ``pytest.UsageError`` only when enforcement is enabled.
+    """
+    _skip_fake_pyqt6_gui_items(items)
+    _apply_unit_gate_quarantine(items)
+
+    unmarked = find_unmarked(items)  # type: ignore[arg-type]
+    config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]
+    config._ud_unmarked_suite_nodeids = [  # type: ignore[attr-defined]
+        item.nodeid for item in unmarked
+    ]
+
+    if unmarked and suite_markers_enforced():
+        listing = "\n".join(f"  - {item.nodeid}" for item in unmarked)
+        raise pytest.UsageError(
+            f"{len(unmarked)} test(s) carry none of the required suite markers "
+            f"{sorted(SUITE_MARKERS)}:\n{listing}"
+        )
+
+    if unmarked and suite_marker_ratchet_enabled():
+        baseline = load_baseline_nodeids()
+        drift = find_unmarked_baseline_drift(unmarked, baseline)
+        config._ud_unmarked_suite_drift_count = len(drift)  # type: ignore[attr-defined]
+        if drift:
+            listing = "\n".join(f"  - {item.nodeid}" for item in drift)
+            raise pytest.UsageError(
+                f"{len(drift)} net-new test(s) carry none of the required suite "
+                f"markers {sorted(SUITE_MARKERS)} and are absent from "
+                "scripts/config/suite_marker_baseline.json:\n"
+                f"{listing}"
+            )
+
+
+def pytest_terminal_summary(
+    terminalreporter: Any, exitstatus: int, config: pytest.Config
+) -> None:
+    """Surface the unmarked-suite-marker count and seam test skip report in terminal summary."""
+    count = getattr(config, "_ud_unmarked_suite_count", None)
+    if count:
+        if suite_markers_enforced():
+            mode = "ENFORCED"
+        elif suite_marker_ratchet_enabled():
+            drift_count = getattr(config, "_ud_unmarked_suite_drift_count", 0)
+            mode = f"ratchet, drift={drift_count}"
+        else:
+            mode = "report-only"
+        terminalreporter.write_line(
+            f"[suite-markers:{mode}] {count} collected test(s) carry no suite marker "
+            f"(one of {sorted(SUITE_MARKERS)}); see issue #7158.",
+            yellow=True,
+        )
+
+    seam_skips: list[tuple[str, str]] = getattr(config, "_ud_seam_test_skips", [])
+    if seam_skips:
+        terminalreporter.write_sep(
+            "!",
+            f"WARNING: {len(seam_skips)} seam test(s) SKIPPED due to missing Tools vendor tree (issue #9501)",
+            red=True,
+            bold=True,
+        )
+        for nodeid, reason in seam_skips:
+            terminalreporter.write_line(f"  SKIPPED: {nodeid}", red=True)
+            terminalreporter.write_line(f"    Reason: {reason}", yellow=True)
+        terminalreporter.write_line(
+            "Populate vendor/ud-tools or set SEAM_TESTS_ALLOW_SKIP=1 to silence this warning.\n"
+            "Workaround for linked worktrees: git -C ../Tools archive <pin> | tar -x -C vendor/ud-tools",
+            yellow=True,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Rust-wheel parity enforcement (issue #7601)
+#
+# Several parity / binding suites guard themselves with
+# ``pytest.mark.skipif(not is_rust_available())`` or
+# ``pytest.importorskip("upstream_...")`` so a clean checkout (no maturin
+# build) stays green. The downside is that the main Test lane silently SKIPS
+# those tests instead of exercising the Rust kernels, so a parity regression
+# can land unnoticed.
+#
+# The dedicated ``rust-wheel-parity`` CI job builds + installs all six PyO3
+# wheels and runs the parity suite with ``CI_RUST_WHEELS_EXPECTED=1``. In that
+# lane a missing wheel (and therefore a skipped parity test) is a hard error:
+# the wheel is *expected* to be present, so a skip means the build/install
+# regressed. This hook converts such skips into failures.
+#
+# Note: this lives in the test layer on purpose. The Python facades
+# (``rust_kernel`` et al.) keep their graceful pure-Python fallback untouched.
+# ---------------------------------------------------------------------------
+
+# Python extension modules produced by the maturin wheel build. A skip whose
+# reason names one of these (or the generic "Rust kernel not available"
+# message) is treated as a missing-wheel regression when wheels are expected.
+_RUST_WHEEL_MODULES: tuple[str, ...] = (
+    "upstream_physics",
+    "upstream_mocap_preproc",
+    "upstream_mocap_io",
+    "upstream_muscle",
+    "upstream_motion_matching",
+    "ai_backend",
+)
+
+
+def _rust_wheels_expected() -> bool:
+    return os.environ.get("CI_RUST_WHEELS_EXPECTED") == "1"
+
+
+def _skip_reason_is_missing_rust_wheel(reason: str) -> bool:
+    """Return True if a skip reason indicates an unavailable Rust wheel."""
+    lowered = reason.lower()
+    if any(module in lowered for module in _RUST_WHEEL_MODULES):
+        return True
+    # ``is_rust_available()`` skipif messages and importorskip phrasing.
+    return "rust kernel not available" in lowered or (
+        "rust" in lowered and "not available" in lowered
+    )
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(
+    item: pytest.Item, call: pytest.CallInfo[None]
+) -> Generator[None, Any, None]:
+    """Fail (instead of skip) Rust-parity tests when wheels are expected.
+
+    Precondition: only active when ``CI_RUST_WHEELS_EXPECTED=1``; otherwise the
+    normal skip behaviour is preserved so clean checkouts stay green.
+    Postcondition: a skip caused by a missing Rust wheel becomes a failure so
+    the wheel-installing CI lane cannot pass while silently skipping parity.
+    """
+    outcome = yield
+    report = outcome.get_result()
+    if not report.skipped:
+        return
+
+    longrepr = report.longrepr
+    reason = ""
+    # Skipped longrepr is typically a (path, lineno, "Skipped: <reason>") tuple.
+    if isinstance(longrepr, tuple) and len(longrepr) == 3:
+        reason = str(longrepr[2])
+    else:
+        reason = str(longrepr)
+
+    # Seam guard skip tracking and enforcement (issue #9501)
+    # Note: tests in tests/launchers/ are consumer integration tests that run against
+    # the real Tools tree in shared-tools-consumer-contracts rather than unit-test-gate.
+    lowered = reason.lower()
+    is_seam_reason = any(
+        k in lowered
+        for k in (
+            "vendor/ud-tools",
+            "tools repository not found",
+            "tools checkout is unavailable",
+            "tools checkout unavailable",
+        )
+    )
+    if is_seam_reason and not item.nodeid.startswith(
+        ("tests/launchers/", "tests/config/test_tile_paths_resolve.py")
+    ):
+        if not hasattr(item.config, "_ud_seam_test_skips"):
+            item.config._ud_seam_test_skips = []
+        item.config._ud_seam_test_skips.append((item.nodeid, reason))
+
+        # In CI, or locally when SEAM_TESTS_ALLOW_SKIP is not set, seam skips are forbidden.
+        seam_allow_skip = os.environ.get("SEAM_TESTS_ALLOW_SKIP", "").strip() == "1"
+        if os.environ.get("CI") or not seam_allow_skip:
+            report.outcome = "failed"
+            report.longrepr = (
+                f"{item.nodeid} SKIPPED due to missing Tools vendor tree: {reason!r}.\n"
+                "Seam guards protect the Tools <-> UpstreamDrift convergence boundary and must "
+                "not pass vacuously (issue #9501).\n"
+                "Workaround for linked worktrees where submodule update fails:\n"
+                "    git -C ../Tools archive <pin> | tar -x -C vendor/ud-tools\n"
+                "To explicitly opt out and allow skipping locally, set SEAM_TESTS_ALLOW_SKIP=1."
+            )
+            return
+
+    if not _rust_wheels_expected():
+        return
+
+    if _skip_reason_is_missing_rust_wheel(reason):
+        report.outcome = "failed"
+        report.longrepr = (
+            f"CI_RUST_WHEELS_EXPECTED=1 but {item.nodeid} skipped because a Rust "
+            f"wheel is unavailable ({reason!r}). In the rust-wheel-parity lane "
+            "all six PyO3 wheels must be importable so parity actually runs. "
+            "This skip indicates the maturin build or wheel install regressed. "
+            "See issue #7601."
+        )

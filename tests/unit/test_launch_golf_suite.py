@@ -1,0 +1,99 @@
+import argparse
+from types import ModuleType
+from unittest.mock import patch
+
+import launch_golf_suite
+import launch_upstream_drift
+
+
+def test_parse_arguments() -> None:
+    with patch("sys.argv", ["launch_golf_suite.py", "--engine", "mujoco"]):
+        args = launch_golf_suite.parse_arguments()
+        assert args.engine == "mujoco"
+        assert args.port == 8000
+
+    with patch("sys.argv", ["launch_golf_suite.py", "--classic", "--port", "9000"]):
+        args = launch_golf_suite.parse_arguments()
+        assert args.classic is True
+        assert args.port == 9000
+
+
+@patch("src.shared.python.launcher_factory.launch_engine_directly")
+def test_route_launch_engine(mock_launch, monkeypatch) -> None:
+    args = argparse.Namespace(engine="mujoco", classic=False, api_only=False)
+    launch_golf_suite.route_launch(args)
+    mock_launch.assert_called_once_with("mujoco")
+
+
+@patch("src.api.local_server.main")
+def test_route_launch_web_engine(mock_server_main, monkeypatch) -> None:
+    args = argparse.Namespace(
+        engine="matlab_2d", classic=False, api_only=False, port=8000, no_browser=False
+    )
+    launch_golf_suite.route_launch(args)
+    mock_server_main.assert_called_once()
+
+
+@patch("src.launchers.upstream_drift_launcher.main")
+def test_route_launch_classic(mock_classic_main) -> None:
+    args = argparse.Namespace(engine=None, classic=True, api_only=False)
+    launch_golf_suite.route_launch(args)
+    mock_classic_main.assert_called_once()
+
+
+@patch("src.api.local_server.main")
+def test_route_launch_api_only(mock_server_main) -> None:
+    args = argparse.Namespace(engine=None, classic=False, api_only=True, port=8080)
+    launch_golf_suite.route_launch(args)
+    mock_server_main.assert_called_once()
+
+
+@patch("src.api.local_server.main")
+def test_route_launch_default(mock_server_main) -> None:
+    args = argparse.Namespace(
+        engine=None, classic=False, api_only=False, port=8000, no_browser=True
+    )
+    launch_golf_suite.route_launch(args)
+    mock_server_main.assert_called_once()
+
+
+@patch("launch_golf_suite.parse_arguments")
+@patch("launch_golf_suite.route_launch")
+def test_launch_golf_suite_main(mock_route, mock_parse) -> None:
+    mock_args = argparse.Namespace()
+    mock_parse.return_value = mock_args
+    launch_golf_suite.main()
+    mock_route.assert_called_once_with(mock_args)
+
+
+def test_launch_golf_suite_exports_canonical_router() -> None:
+    assert launch_golf_suite.parse_arguments is launch_upstream_drift.parse_arguments
+    assert launch_golf_suite.route_launch is launch_upstream_drift.route_launch
+
+
+def test_classic_qt_environment_uses_offscreen_when_headless_linux(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(launch_upstream_drift.sys, "platform", "linux")
+    monkeypatch.delenv("DISPLAY", raising=False)
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    monkeypatch.delenv("QT_QPA_PLATFORM", raising=False)
+
+    class _QApplication:
+        @staticmethod
+        def instance() -> None:
+            return None
+
+        def __init__(self, _args: list[str]) -> None:
+            pass
+
+    pyqt_module = ModuleType("PyQt6")
+    widgets_module = ModuleType("PyQt6.QtWidgets")
+    widgets_module.QApplication = _QApplication
+
+    with patch.dict(
+        "sys.modules", {"PyQt6": pyqt_module, "PyQt6.QtWidgets": widgets_module}
+    ):
+        launch_upstream_drift._ensure_classic_qt_environment()
+
+    assert launch_upstream_drift.os.environ["QT_QPA_PLATFORM"] == "offscreen"

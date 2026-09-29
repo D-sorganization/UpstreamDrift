@@ -1,0 +1,454 @@
+{
+  "provenance": {
+    "git_sha": "78da14847",
+    "experiment": "E1d one-at-a-time model-parameter sensitivity",
+    "shoulder_torque_nm": 60.0,
+    "wrist_drive_nm": 15.0,
+    "interpretation": "local model sensitivity; not a population distribution"
+  },
+  "all_cases_confirm_ordering": true,
+  "cases": [
+    {
+      "case": "baseline",
+      "varied_parameter": "none",
+      "value": 1.0,
+      "unit": "baseline",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 28.9182969487125,
+          "impact_time_s": 0.32670359932775184,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 34.15364542695601,
+          "impact_time_s": 0.36990090543102033,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 38.395335750230586,
+          "impact_time_s": 0.35234432212815464,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 38.85378591434185,
+          "impact_time_s": 0.3492558238610142,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "arm_length_low",
+      "varied_parameter": "upper.length_m",
+      "value": 0.675,
+      "unit": "m",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 30.131084321383984,
+          "impact_time_s": 0.3178643401209269,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 33.26661935113377,
+          "impact_time_s": 0.3589473752697732,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 38.259170552798594,
+          "impact_time_s": 0.3391070165210772,
+          "onset_s": 0.175,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 38.48465615519119,
+          "impact_time_s": 0.3401350034295796,
+          "onset_s": 0.125,
+          "wrist_restrain_nm": 5.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "arm_length_high",
+      "varied_parameter": "upper.length_m",
+      "value": 0.8250000000000001,
+      "unit": "m",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 27.748091563221482,
+          "impact_time_s": 0.3352792585148526,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 34.392997601726115,
+          "impact_time_s": 0.3819490163113553,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 38.40115424014052,
+          "impact_time_s": 0.3660504941934784,
+          "onset_s": 0.225,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 39.11727392430688,
+          "impact_time_s": 0.3726480351605506,
+          "onset_s": 0.125,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "arm_mass_low",
+      "varied_parameter": "upper.mass_kg",
+      "value": 6.375,
+      "unit": "kg",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 29.219816917147874,
+          "impact_time_s": 0.3228641202024919,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 34.71651492632549,
+          "impact_time_s": 0.3592015655297193,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 38.58945001458077,
+          "impact_time_s": 0.3442984204935508,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 39.0446439117147,
+          "impact_time_s": 0.34132378941463004,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "arm_mass_high",
+      "varied_parameter": "upper.mass_kg",
+      "value": 8.625,
+      "unit": "kg",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 28.632507009271016,
+          "impact_time_s": 0.3300267492809609,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 33.611116355472575,
+          "impact_time_s": 0.37970538218331706,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 38.20940989899605,
+          "impact_time_s": 0.35945776866763657,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 38.67874799562531,
+          "impact_time_s": 0.3561784882584226,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "club_length_low",
+      "varied_parameter": "lower.length_m",
+      "value": 0.9,
+      "unit": "m",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 26.359231146590982,
+          "impact_time_s": 0.30958652893960437,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 33.37001861227632,
+          "impact_time_s": 0.35799590187658853,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 37.474386029042805,
+          "impact_time_s": 0.34446674055394033,
+          "onset_s": 0.225,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 38.357586751149526,
+          "impact_time_s": 0.3445151241425833,
+          "onset_s": 0.15,
+          "wrist_restrain_nm": 5.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "club_length_high",
+      "varied_parameter": "lower.length_m",
+      "value": 1.1,
+      "unit": "m",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 31.295882893218437,
+          "impact_time_s": 0.3419842511860921,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 34.225683186011196,
+          "impact_time_s": 0.38216021512432485,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 39.059033841698536,
+          "impact_time_s": 0.3645616306426913,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 39.25748461239769,
+          "impact_time_s": 0.36213959678459967,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "clubhead_mass_low",
+      "varied_parameter": "lower.clubhead_mass_kg",
+      "value": 0.16000000000000003,
+      "unit": "kg",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 29.197735894693036,
+          "impact_time_s": 0.3112607766112074,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 35.600779465630495,
+          "impact_time_s": 0.3639939541420801,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 40.60216843178839,
+          "impact_time_s": 0.3447204803349953,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 41.338756139726456,
+          "impact_time_s": 0.3419169498260915,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "clubhead_mass_high",
+      "varied_parameter": "lower.clubhead_mass_kg",
+      "value": 0.24,
+      "unit": "kg",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 28.540396824832186,
+          "impact_time_s": 0.3393490801945805,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 32.875105443640464,
+          "impact_time_s": 0.3750887769189339,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 36.523324538862816,
+          "impact_time_s": 0.36265521716987353,
+          "onset_s": 0.225,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 36.79811127566942,
+          "impact_time_s": 0.3556833429786888,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "plane_inclination_low",
+      "varied_parameter": "plane_inclination_deg",
+      "value": 25.0,
+      "unit": "deg",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 29.577733682985016,
+          "impact_time_s": 0.323511814021217,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 34.43840034240511,
+          "impact_time_s": 0.36576697263438807,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 38.762023161803896,
+          "impact_time_s": 0.3490199971753308,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 39.187663985587854,
+          "impact_time_s": 0.3465365056596481,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "plane_inclination_high",
+      "varied_parameter": "plane_inclination_deg",
+      "value": 45.0,
+      "unit": "deg",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 28.061547441249907,
+          "impact_time_s": 0.33087089486192434,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 33.77162215241045,
+          "impact_time_s": 0.3754745971701718,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 37.95715135690896,
+          "impact_time_s": 0.361031090208933,
+          "onset_s": 0.225,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 38.47671172763534,
+          "impact_time_s": 0.3608307626677326,
+          "onset_s": 0.15,
+          "wrist_restrain_nm": 5.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "joint_damping_low",
+      "varied_parameter": "damping_shoulder_and_wrist",
+      "value": 0.5,
+      "unit": "multiple of baseline",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 29.449238807612126,
+          "impact_time_s": 0.323151414045051,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 34.98460416575094,
+          "impact_time_s": 0.36805046658827345,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 39.50341514843313,
+          "impact_time_s": 0.3507005291176545,
+          "onset_s": 0.2,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 39.96737247827739,
+          "impact_time_s": 0.348875780931235,
+          "onset_s": 0.1,
+          "wrist_restrain_nm": 10.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    },
+    {
+      "case": "joint_damping_high",
+      "varied_parameter": "damping_shoulder_and_wrist",
+      "value": 1.5,
+      "unit": "multiple of baseline",
+      "strategies": {
+        "early_drive": {
+          "clubhead_speed_mps": 28.41494228059962,
+          "impact_time_s": 0.3302523991673478,
+          "onset_s": 0.0,
+          "wrist_restrain_nm": 0.0
+        },
+        "passive": {
+          "clubhead_speed_mps": 33.26205051319895,
+          "impact_time_s": 0.372102929147405,
+          "onset_s": null,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_drive": {
+          "clubhead_speed_mps": 37.33732228013173,
+          "impact_time_s": 0.3582752327409485,
+          "onset_s": 0.225,
+          "wrist_restrain_nm": 0.0
+        },
+        "best_restrain": {
+          "clubhead_speed_mps": 37.819575095399856,
+          "impact_time_s": 0.3576488767411442,
+          "onset_s": 0.15,
+          "wrist_restrain_nm": 5.0
+        }
+      },
+      "ordering": ["early_drive", "passive", "best_drive", "best_restrain"],
+      "ordering_confirmed": true
+    }
+  ]
+}

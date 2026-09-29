@@ -1,0 +1,153 @@
+# Empirical Evidence in Golfers {#sec-evidence}
+
+## The Work and Power Budget of the Swing {#sec-workbudget}
+
+Nesbit's full-body kinematic-kinetic study and the companion work-power
+analysis of Nesbit and Serrano provide detailed published energy budgets of
+the swing [@nesbit2005kinematic; @nesbit2005work]. Using
+subject-specific full-body models of four golfers of widely differing
+skill, they report that the trunk complex (lumbar and thoracic spine
+plus hips) contributes 68.7–72.2% of total swing work, the shoulder and
+arm joints 24.3–28%, and the modeled leg joints 3.3–3.8%
+[@nesbit2005work]. These fractions are conditional on the four subject models,
+joint partition, inverse-dynamics assumptions, and definition of work; the
+small leg-joint fraction is not evidence that the lower limbs or ground
+reactions are mechanically unimportant. Within that study, power generation
+and clubhead speed decreased as handicap increased, and the phase analysis
+placed much of the modeled torso work earlier than the late shoulder/arm and
+club-interface conversion. This temporal separation motivates a delayed-
+handoff hypothesis but does not establish that it is optimal in humans.
+
+Ground reactions supply external forces and moments that constrain and redirect
+the golfer; muscular work supplies the system's internal mechanical energy.
+Han and colleagues characterized golfer-ground interaction in 63 skilled male
+golfers and reported associations between selected force and moment variables
+and maximum clubhead speed [@han2019]. A later cross-sectional study pooled
+driver and 7-iron swings from 30 right-handed golfers (15 professionals and 15
+amateurs) and formed principal-component constructs for hierarchical
+regression and mediation [@frontiers2026footground]. Its first regression block
+— early and late center-of-pressure factors **plus skill group** — explained
+35.5% of clubhead-speed variance; adding trunk sequencing and the study's
+constructed *impulse-related energy-transfer efficiency* factor increased the
+final model's explained variance to 75.4%. Early center-of-pressure behavior
+had no significant direct association, whereas an indirect path through the
+transfer-efficiency factor was significant. These are model-dependent
+cross-sectional associations, not a demonstrated causal transmission pathway;
+the source itself makes that limitation explicit. They motivate measuring
+transfer efficiency separately from sequence order rather than treating either
+as a causal mechanism by definition.
+
+## Segmental Kinetic-Energy Sequencing {#sec-ke-sequencing}
+
+Two early studies calculated segment *kinetic energy* rather than inferring
+energy flow from angular-speed peaks, but their results do not show a simple
+P→D timing sequence. Anderson, Wright and Stefanyshyn analyzed driver swings
+from 45 male scratch golfers with a four-group kinematic model. Peak total-KE
+magnitudes increased from hips to club, whereas hips, torso, and arms peaked at
+approximately the same normalized time and only the club peaked significantly
+later [@anderson2006]. Kenny, McCloy, Wallace and Otto used measured kinematics
+from one elite male golfer to drive a 19-segment model and compared one driver
+and one 7-iron simulation. Peak-KE magnitudes again increased distally, but the
+reported timing order was arms, hips, torso, then club—not a proximal-to-distal
+sequence [@kenny2008]. Thus, segment KE is a computable observable, and both
+studies place the club's KE peak near impact; neither demonstrates sequential
+body-segment energy transfer, estimates intersegment power, or independently
+validates the present model.
+
+## Kinematic-Sequence Evidence and Skill-Level Differences {#sec-skill}
+
+The descriptive P→D pattern is common in sampled skilled populations, but its
+reported prevalence and exact ordering depend on the measurement definition.
+Tinmark
+and colleagues, studying elite golfers across full and partial shots,
+found a significant proximal-to-distal temporal ordering of peak speeds
+(pelvis → torso → hands/club) with successive amplification of peak
+speed at every level of effort, in both men and women [@tinmark2010].
+Cheetham and colleagues compared amateur recreational players with
+touring professionals on transition- and downswing-phase kinematic
+sequence parameters and found professionals showed higher peak-speed
+magnitudes and more consistent sequencing and timing characteristics
+[@cheetham2008]. Zheng and colleagues' three-dimensional comparison of
+professional and amateur swings found systematic temporal and spatial
+differences, with amateurs deviating progressively more from
+professional norms as handicap increased [@zheng2008]. Meister and
+colleagues provide elite rotational benchmarks (pelvis-thorax separation
+and its timing) against which amateurs can be compared [@meister2011],
+and Lindsay, Mantrop and Vandervoort review the broader catalogue of
+skill-level biomechanical differences [@lindsay2008].
+
+Torso-pelvis variables have sample-specific associations with ball or clubhead
+speed. Myers and colleagues reported moderate associations in 100 recreational
+golfers [@myers2008]. Chu, Sell and Lephart fit event-specific regressions to
+308 golfers; their selected kinematic and ground-reaction variables accounted
+for 44–74% of in-sample ball-speed variance [@chu2010]. Joyce and colleagues
+reported associations between three-dimensional trunk kinematics and clubhead
+speed across clubs [@joyce2013]. These observational regressions do not establish
+that changing an isolated variable will reproduce the between-golfer
+association. For the widely coached “X-factor,” Kwon and colleagues tested 18
+skilled male golfers and found that three computation methods produced
+significantly different parameter values; none of the computed X-factor
+parameters was directly related to maximum clubhead velocity in that sample
+[@kwon2013]. The studies jointly motivate explicit measurement definitions and
+held-out or interventional validation, not a universal torso prescription.
+
+Three refinements prevent an overly tidy reading:
+
+1. **Sequence Order Is Common but Not Universal — Even Among the Best.**
+   A recent study of 14 elite right-handed men reported that slight sequence
+   variations could yield clubhead speeds comparable to the authors' defined
+   optimal pattern, although its regression models and unavailable public data
+   do not establish a population-wide causal optimum [@lee2026]. On-plane
+   analysis of 66 right-handed skilled men found associations between selected
+   axle-chain angular-motion characteristics and clubhead speed
+   [@madrid2020]. These studies support heterogeneity and variable-level
+   analysis; they do not show that sequence order alone determines speed.
+
+2. **Within-Player Timing Differences Do Not Straightforwardly Explain
+   Shot Quality.** Neal and colleagues compared player-rated well-timed and
+   mistimed driver shots in 25 highly skilled amateurs and found no significant
+   differences in the lags between peak angular speeds of contiguous segments
+   [@neal2007]. They did not measure pre-impact clubhead state or impact location
+   and proposed that the ratings may have reflected contact centeredness. The
+   result limits that five-segment peak-lag metric under the declared protocol;
+   it does not localize a golfer's perception of timing. Reviews of golf-swing
+   variability likewise caution that trial-to-trial variation can be structured
+   and task-dependent [@langdown2012; @glazier2011], not that every deviation is
+   beneficial.
+
+3. **Method Sensitivity.** Marsan and colleagues processed driver swings from
+   13 golfers with seven angular-velocity component definitions and obtained
+   almost as many sequence classifications as methods for each golfer
+   [@marsan2019]. Cross-study ordering comparisons therefore require matched
+   coordinate, component, filtering, and peak-event definitions. Historical
+   trunk-pelvis measurements used different specialized instrumentation and
+   remain conditional on their own definitions [@mcteigue1994].
+
+What survives these refinements is narrower: sampled skilled groups often show
+higher segment-speed magnitudes and more repeatable timing, while recent
+cross-sectional models associate constructed transfer-efficiency measures with
+clubhead speed. Merely exhibiting a P→D peak order is neither unique to skill
+nor sufficient for it [@cheetham2008; @zheng2008;
+@frontiers2026footground; @lee2026].
+Coaching perception has partly internalized this: when surveyed
+systematically, coaches' key swing parameters overlap with, but do not
+coincide with, the parameters the biomechanical literature supports
+[@smith2015].
+
+## Where the Transfer Occurs {#sec-where}
+
+The available studies support a narrower account of where transfer may occur.
+Nesbit and Serrano's four subject-specific inverse-dynamics models assigned most
+positive joint work to the trunk complex and reported earlier torso-dominated
+work than the late club-interface conversion [@nesbit2005work]. Classical and
+later models show that wrist-cock geometry and hub-path motion can accelerate
+the club without requiring large simultaneous positive wrist torque
+[@white2006; @miura2001; @sprigings2000; @nesbit2009hub]. Anderson and Kenny
+place peak club KE near impact while explicitly rejecting simple P→D timing of
+body-segment KE peaks [@anderson2006; @kenny2008]. These model-dependent results
+motivate late-handoff hypotheses but do not establish a dominant human pathway.
+Likewise, “casting” is a model and coaching interpretation: the cited amateur
+cohort comparisons and Milburn's double-pendulum analysis do not by themselves
+show that early release causally produced the observed skill-group differences
+[@cheetham2008; @zheng2008; @milburn1982]. @sec-results demonstrates a
+related failure mode only within the registered model and command family.

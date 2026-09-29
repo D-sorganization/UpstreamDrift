@@ -1,0 +1,526 @@
+"""MeshCat adapter for MuJoCo humanoid golf visualization.
+
+Provides a browser-based 3D visualization backend via MeshCat,
+wrapping MuJoCo model data for interactive display.
+"""
+
+import os
+import webbrowser
+from typing import Any
+
+import mujoco
+import numpy as np
+
+from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
+from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
+from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+try:
+    import meshcat
+    import meshcat.geometry as g
+    import meshcat.transformations as tf
+except ImportError:
+    meshcat = None
+
+logger = get_logger(__name__)
+
+
+class MuJoCoMeshcatAdapter:
+    """
+    Adapts MuJoCo model/data to Meshcat for web-based visualization.
+    """
+
+    def __init__(self, model: mujoco.MjModel | None = None) -> None:
+        self._force_colors: MeshcatForceColors | None = None
+        if meshcat is None:
+            logger.warning("Meshcat not installed. Visualization disabled.")
+            self.vis = None
+            return
+
+        # Initialize Visualizer
+        # Note: We let meshcat find a free port if None, or use specific if provided.
+        # But standard Visualizer doesn't take scalar port easily
+        # without custom serverargs.
+        # We'll rely on default behavior or pass zmq_url if needed?
+        # For now, standard init.
+        self.vis = meshcat.Visualizer()
+
+        self.model = model
+        self.is_open = True
+
+        # Log URL
+        self.url = self.vis.url()
+        logger.info(f"Meshcat initialized at {self.url}")
+
+        # Determine host-accessible URL if in Docker
+        if os.environ.get("MESHCAT_HOST") == "0.0.0.0":  # nosec B104 - comparing env var value, not binding to an address
+            try:
+                port = self.url.split(":")[-1].split("/")[0]
+                host_url = f"http://127.0.0.1:{port}/static/"
+                logger.info(f"Host Meshcat URL: {host_url}")
+            except (IndexError, ValueError):
+                pass
+
+        self.load_model_geometry()
+
+    def open_browser(self) -> None:
+        """Open the Meshcat visualization URL in the default browser."""
+        if self.vis is not None:
+            webbrowser.open(self.vis.url())
+
+    def load_model_geometry(self) -> None:  # noqa: C901
+        """
+        Parses MuJoCo model geoms and creates corresponding Meshcat objects.
+        """
+        if self.vis is None or self.model is None:
+            return
+
+        model = self.model
+        self.vis["visuals"].delete()
+        color_bindings: dict[str, dict[str, list[float]]] = {}
+
+        # Iterate over all geometries
+        for i in range(model.ngeom):
+            # geom properties
+            gtype = model.geom_type[i]
+            size = model.geom_size[i]
+            rgba = model.geom_rgba[i]
+
+            # Material/Color
+            material = g.MeshPhongMaterial(
+                color=self._rgba_to_hex(rgba), opacity=rgba[3]
+            )  # noqa: E501
+
+            shape = None
+
+            if gtype == mujoco.mjtGeom.mjGEOM_SPHERE:
+                shape = g.Sphere(radius=size[0])
+            elif gtype == mujoco.mjtGeom.mjGEOM_CAPSULE:
+                # Meshcat has no capsule, approximate with Cylinder + 2 Spheres?
+                # Or just Cylinder for now to keep it fast.
+                # size[0] = radius, size[1] = half-length
+                shape = g.Cylinder(height=size[1] * 2, radius=size[0])
+            elif gtype == mujoco.mjtGeom.mjGEOM_CYLINDER:
+                shape = g.Cylinder(height=size[1] * 2, radius=size[0])
+            elif gtype == mujoco.mjtGeom.mjGEOM_BOX:
+                # size is half-extents
+                shape = g.Box(lengths=size * 2)
+            elif gtype == mujoco.mjtGeom.mjGEOM_PLANE:
+                # Infinite plane - approximate with large box/plane
+                shape = g.Box([20, 20, 0.01])
+            elif gtype == mujoco.mjtGeom.mjGEOM_MESH:
+                # Loading meshes is complex (need to get vertices from model.mesh_*)
+                # For now, approximate with Box or Sphere based on rbound
+                shape = g.Sphere(radius=model.geom_rbound[i])
+            else:
+                # Fallback
+                shape = g.Sphere(radius=0.1)
+
+            if shape:
+                name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i)
+                if not name:
+                    name = f"geom_{i}"
+
+                # If capsule/cylinder, MuJoCo defines them along Z axis.
+                # If using Cylinder, we might need rotation correction depending on
+                # meshcat convention (usually Y-axis aligned?)
+                # Meshcat Cylinder is along Y axis by default? No, usually Y.
+                # Let's check: Three.js cylinder is geometry aligned with the Y axis.
+                # MuJoCo cylinder is Z axis.
+                # So we need to rotate 90 deg around X.
+                if gtype in [
+                    mujoco.mjtGeom.mjGEOM_CYLINDER,
+                    mujoco.mjtGeom.mjGEOM_CAPSULE,
+                ]:
+                    # We will wrap it in a node that rotates
+                    self.vis["visuals"][name]["geometry"].set_object(shape, material)
+                    # Rotate geometry to align Y (meshcat) with Z (mujoco)
+                    # Rotate -90 deg around X?
+                    # Actually we update the PARENT transform in update(),
+                    # which sets the Z-axis orientation.
+                    # But the SHAPE itself needs to be pre-rotated if the local
+                    # frame mismatch exists.
+                    rotation_matrix = tf.rotation_matrix(np.pi / 2, [1, 0, 0])
+                    self.vis["visuals"][name]["geometry"].set_transform(rotation_matrix)
+                else:
+                    self.vis["visuals"][name].set_object(shape, material)
+
+                body = mujoco.mj_id2name(
+                    model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[i]
+                )
+                if body:
+                    suffix = (
+                        "/geometry"
+                        if gtype
+                        in (
+                            mujoco.mjtGeom.mjGEOM_CYLINDER,
+                            mujoco.mjtGeom.mjGEOM_CAPSULE,
+                        )
+                        else ""
+                    )
+                    path = f"visuals/{name}{suffix}/<object>"
+                    # Match the quantized RGB actually submitted in the material.
+                    color_bindings.setdefault(body, {})[path] = [
+                        *(int(c * 255) / 255 for c in rgba[:3]),
+                        float(rgba[3]),
+                    ]
+        self._force_colors = MeshcatForceColors(
+            self._set_color_property, color_bindings
+        )
+
+    def _set_color_property(self, path: str, prop: str, value: list[float]) -> None:
+        if self.vis is not None:
+            self.vis[path].set_property(prop, value)
+
+    def update_force_colors(
+        self, frame: AxialLoadFrame | None, scale: ForceColorScale
+    ) -> None:
+        """Share the native view's qualified loads and color settings."""
+        if self._force_colors is not None:
+            self._force_colors.apply(frame, scale)
+
+    def update(self, data: mujoco.MjData) -> None:
+        """
+        Updates geometry transforms from MuJoCo data.
+        """
+        if data is None:
+            raise ValueError("data must be provided")
+        if self.vis is None or data is None or self.model is None:
+            return
+
+        model = self.model
+
+        # Update Geoms
+        for i in range(model.ngeom):
+            name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i)
+            if not name:
+                name = f"geom_{i}"
+
+            pos = data.geom_xpos[i]
+            mat = data.geom_xmat[i].reshape(3, 3)
+
+            # Construct 4x4 matrix
+            T = np.eye(4)
+            T[:3, :3] = mat
+            T[:3, 3] = pos
+
+            self.vis["visuals"][name].set_transform(T)
+
+    def draw_vectors(  # noqa: C901
+        self,
+        data: mujoco.MjData,
+        show_force: bool,
+        show_torque: bool,
+        force_scale: float = 0.1,
+        torque_scale: float = 0.1,
+    ) -> None:
+        """
+        Draws force/torque vectors at joints.
+        """
+        if data is None:
+            raise ValueError("data must be provided")
+        if self.vis is None or self.model is None:
+            return
+
+        model = self.model
+
+        if not show_force:
+            self.vis["overlays/forces"].delete()
+        if not show_torque:
+            self.vis["overlays/torques"].delete()
+
+        if not (show_force or show_torque):
+            return
+
+        # Iterate over bodies (skipping world 0)
+        for i in range(1, model.nbody):
+            body_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
+            if not body_name:
+                body_name = f"body_{i}"
+
+            if data.cfrc_int is None:
+                continue
+            wrench = data.cfrc_int[i]  # type: ignore[index]
+            f = wrench[3:]
+            t = wrench[:3]
+
+            pos = data.xpos[i]
+
+            if show_force and np.linalg.norm(f) > 1e-3:
+                self._draw_arrow(
+                    f"overlays/forces/{body_name}", pos, f * force_scale, 0xFF0000
+                )  # noqa: E501
+
+            if show_torque and np.linalg.norm(t) > 1e-3:
+                self._draw_arrow(
+                    f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
+                )  # noqa: E501
+
+    def draw_induced_vectors(  # noqa: C901
+        self,
+        data: mujoco.MjData,
+        bio_data: BiomechanicalData | None,
+        source: str,
+        scale: float = 0.1,
+    ) -> None:
+        """
+        Draws induced acceleration vectors.
+        """
+        if data is None:
+            raise ValueError("data must be provided")
+        if self.vis is None or self.model is None:
+            return
+
+        self.vis["overlays/induced"].delete()
+
+        if bio_data is None:
+            return
+
+        # Determine key
+        key = source
+        # Custom name logic handled in sim_widget, usually passed as
+        # 'selected_actuator' if the source string didn't match standard keys.
+        # However, bio_data stores it under 'selected_actuator' if calculated
+        # that way. We check if the key exists directly, else try
+        # 'selected_actuator'
+        if (
+            key not in ["gravity", "velocity", "total", "actuator"]
+            and key not in bio_data.induced_accelerations
+        ):
+            key = "selected_actuator"
+
+        if key not in bio_data.induced_accelerations:
+            return
+
+        accels = bio_data.induced_accelerations[key]
+
+        # Draw vectors at joints (angular acceleration mainly)
+        for j in range(self.model.njnt):
+            # Only visualize 1-DOF joints (Slide=2, Hinge=3)
+            # 0=Free, 1=Ball have multiple DOFs and axes are different
+            jtype = self.model.jnt_type[j]
+            if jtype not in [mujoco.mjtJoint.mjJNT_SLIDE, mujoco.mjtJoint.mjJNT_HINGE]:
+                continue
+
+            body_id = self.model.jnt_bodyid[j]
+            qvel_adr = self.model.jnt_dofadr[j]
+
+            if qvel_adr >= len(accels):
+                continue
+
+            acc = accels[qvel_adr]
+            if abs(acc) < 1e-3:
+                continue
+
+            joint_pos = data.xpos[body_id]
+            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+
+            arrow_len = acc * scale * 0.5
+            arrow_dir = joint_axis * arrow_len
+
+            # Magenta
+            self._draw_arrow(
+                f"overlays/induced/joint_{j}", joint_pos, arrow_dir, 0xFF00FF
+            )  # noqa: E501
+
+    def draw_cf_vectors(
+        self,
+        data: mujoco.MjData,
+        bio_data: BiomechanicalData | None,
+        cf_type: str,
+        scale: float = 0.1,
+    ) -> None:
+        """
+        Draws Counterfactual vectors.
+        """
+        if data is None:
+            raise ValueError("data must be provided")
+        if self.vis is None or self.model is None:
+            return
+
+        self.vis["overlays/cf"].delete()
+
+        if bio_data is None or cf_type not in bio_data.counterfactuals:
+            return
+
+        values = bio_data.counterfactuals[cf_type]
+
+        for j in range(self.model.njnt):
+            # Only visualize 1-DOF joints
+            jtype = self.model.jnt_type[j]
+            if jtype not in [mujoco.mjtJoint.mjJNT_SLIDE, mujoco.mjtJoint.mjJNT_HINGE]:
+                continue
+
+            qvel_adr = self.model.jnt_dofadr[j]
+            if qvel_adr >= len(values):
+                continue
+
+            val = values[qvel_adr]
+            if abs(val) < 1e-3:
+                continue
+
+            body_id = self.model.jnt_bodyid[j]
+            joint_pos = data.xpos[body_id]
+            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+
+            arrow_len = val * scale * 0.5
+            arrow_dir = joint_axis * arrow_len
+
+            # Yellow
+            self._draw_arrow(f"overlays/cf/joint_{j}", joint_pos, arrow_dir, 0xFFFF00)
+
+    def draw_ellipsoid(
+        self,
+        name: str,
+        position: np.ndarray,
+        rotation: np.ndarray,
+        radii: np.ndarray,
+        color: int = 0x00FF00,
+        opacity: float = 0.3,
+    ) -> None:
+        """
+        Draws an ellipsoid at the specified position/orientation.
+        """
+        if name is None:
+            raise ValueError("name must be provided")
+        if self.vis is None:
+            return
+
+        path = f"overlays/ellipsoids/{name}"
+        material = g.MeshPhongMaterial(color=color, opacity=opacity, transparent=True)
+        shape = g.Sphere(radius=1.0)
+
+        T = np.eye(4)
+        T[:3, :3] = rotation @ np.diag(radii)
+        T[:3, 3] = position
+
+        self.vis[path].set_object(shape, material)
+        self.vis[path].set_transform(T)
+
+    def clear_ellipsoids(self) -> None:
+        """Clears all drawn ellipsoids."""
+        if self.vis:
+            self.vis["overlays/ellipsoids"].delete()
+
+    def draw_swing_plane(
+        self,
+        name: str,
+        vertices: np.ndarray,
+        color: int = 0x4488FF,
+        opacity: float = 0.25,
+    ) -> None:
+        """Draw a swing plane as a quad mesh.
+
+        Args:
+            name: Unique name for this plane object.
+            vertices: (4, 3) corner positions in CCW order [m].
+            color: Hex color for the plane surface.
+            opacity: Transparency (0=invisible, 1=opaque).
+        """
+        if name is None:
+            raise ValueError("name must be provided")
+        if self.vis is None:
+            return
+
+        path = f"overlays/swing_plane/{name}"
+        # Build two-triangle mesh from the 4 corners
+        verts = np.array(vertices, dtype=np.float32)  # (4, 3)
+        faces = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.uint32)
+
+        material = g.MeshPhongMaterial(
+            color=color,
+            opacity=opacity,
+            transparent=True,
+            side=2,  # double-sided
+        )
+        mesh = g.TriangularMeshGeometry(vertices=verts, faces=faces)
+        self.vis[path].set_object(mesh, material)
+
+    def draw_trajectory(
+        self,
+        name: str,
+        points: np.ndarray,
+        color: int = 0x00FF00,
+    ) -> None:
+        """Draw a trajectory as a polyline with point markers.
+
+        Args:
+            name: Unique name for this trajectory object.
+            points: (N, 3) trajectory positions [m].
+            color: Hex color for the line.
+        """
+        if name is None:
+            raise ValueError("name must be provided")
+        if self.vis is None or len(points) < 2:
+            return
+
+        path = f"overlays/trajectories/{name}"
+        pts = np.array(points, dtype=np.float32).T  # (3, N)
+        self.vis[path].set_object(
+            g.Line(
+                g.PointsGeometry(pts),
+                g.LineBasicMaterial(color=color, linewidth=3),
+            )
+        )
+
+    def draw_arrow_line(
+        self,
+        name: str,
+        start: np.ndarray,
+        end: np.ndarray,
+        color: int = 0x4488FF,
+    ) -> None:
+        """Draw a single directional line (e.g. plane normal arrow).
+
+        Args:
+            name: Unique name for this arrow.
+            start: Start position [m] (3,).
+            end: End position [m] (3,).
+            color: Hex color.
+        """
+        if name is None:
+            raise ValueError("name must be provided")
+        if self.vis is None:
+            return
+
+        path = f"overlays/arrows/{name}"
+        vertices = np.array([start, end], dtype=np.float32).T  # (3, 2)
+        self.vis[path].set_object(
+            g.Line(
+                g.PointsGeometry(vertices),
+                g.LineBasicMaterial(color=color, linewidth=4),
+            )
+        )
+
+    def clear_swing_plane(self) -> None:
+        """Clear all swing plane and trajectory overlays."""
+        if self.vis:
+            self.vis["overlays/swing_plane"].delete()
+            self.vis["overlays/trajectories"].delete()
+            self.vis["overlays/arrows"].delete()
+
+    def _draw_arrow(
+        self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
+    ) -> None:
+        if path is None:
+            raise ValueError("path must be provided")
+        if self.vis is None:
+            return
+
+        # Create a Line segment
+        end = start + vec
+        vertices = np.array([start, end]).T  # 3x2
+
+        self.vis[path].set_object(
+            g.Line(
+                g.PointsGeometry(vertices),
+                g.LineBasicMaterial(color=color_hex, linewidth=5),
+            )
+        )
+
+    def _rgba_to_hex(self, rgba: Any) -> int:
+        if rgba is None:
+            return 0
+        r, g, b = (int(c * 255) for c in rgba[:3])
+        return (r << 16) + (g << 8) + b

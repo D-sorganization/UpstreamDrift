@@ -1,0 +1,66 @@
+{
+  "schema_version": "articulated-uncertainty-study/v1",
+  "study_id": "articulated-parameter-uncertainty-and-sensitivity",
+  "configuration": {
+    "sample_count": 40,
+    "seed": 8752,
+    "duration_s": 0.02,
+    "time_step_s": 0.001,
+    "station_count_per_hand": 3,
+    "station_width_m": 0.03,
+    "arm_length_range": [0.9, 1.1],
+    "body_mass_range": [0.85, 1.15],
+    "grip_stiffness_range": [1000.0, 3000.0],
+    "grip_damping_range": [10.0, 35.0],
+    "friction_range": [0.15, 0.65],
+    "club_mass_range": [0.28, 0.42],
+    "club_moi_range": [0.8, 1.25],
+    "velocity_range": [0.01, 0.2]
+  },
+  "uncertainty_parameters": [
+    "arm_length_scale",
+    "body_mass_scale",
+    "grip_stiffness_n_m",
+    "grip_damping_n_s_m",
+    "friction_coefficient",
+    "club_mass_kg",
+    "club_moi_scale",
+    "initial_velocity_m_s"
+  ],
+  "output_metrics": [
+    "peak_station_force_n",
+    "peak_force_couple_nm",
+    "max_sliding_speed_m_s",
+    "total_transition_count",
+    "normalized_work_energy_residual"
+  ],
+  "results": {
+    "sample_count": 40,
+    "failure_distribution": {
+      "full_loss_of_contact": 17,
+      "partial_opening": 5,
+      "slip_occurring": 18
+    },
+    "mean_peak_force_n": 1.3313622811061852,
+    "mean_peak_couple_nm": 0.021177282350221684,
+    "maximum_normalized_work_energy_residual": 0.00840018178309055,
+    "all_simulations_energy_closed": true,
+    "top_sensitivities": {
+      "peak_station_force_n": {
+        "arm_length_scale": -0.8230126606620907
+      },
+      "peak_force_couple_nm": {
+        "arm_length_scale": -0.691833683146763
+      },
+      "max_sliding_speed_m_s": {
+        "arm_length_scale": -0.6804714269300097
+      },
+      "total_transition_count": {
+        "initial_velocity_m_s": -0.1232505392820473
+      },
+      "normalized_work_energy_residual": {
+        "body_mass_scale": 0.967783504061888
+      }
+    }
+  }
+}

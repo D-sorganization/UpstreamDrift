@@ -1,0 +1,125 @@
+# Implementation Gaps and Inaccuracies Review 2025
+
+**Date:** 2025-05-24
+**Reviewer:** Jules
+**Scope:** Repository-wide implementation completeness and accuracy review
+
+## Executive Summary
+
+This review identifies critical implementation gaps, placeholder code, physics inaccuracies, and naming/citation gaps within the codebase. Several modules contain `TRACKED_TASK`, `TRACKED_DEFECT`, or `NotImplementedError` markers that indicate features were started but not completed.
+
+## 1. Critical Implementation Gaps (Blocking)
+
+These gaps prevent core functionality from working, particularly hardware integration and real-time control.
+
+### Real-Time Controller Connectivity
+
+- **File:** `src/deployment/realtime/controller.py`
+- **Status:** **INCOMPLETE**
+- **Details:**
+  - `_connect_ros2`, `_connect_udp`, and `_connect_ethercat` methods raise `NotImplementedError`.
+  - `_read_state` and `_send_command` raise `NotImplementedError` for non-simulation modes.
+- **Impact:** Prevents integration with physical robots via standard protocols. The controller is effectively simulation-only.
+
+### Teleoperation Input Devices
+
+- **File:** `src/deployment/teleoperation/devices.py`
+- **Status:** **PLACEHOLDER**
+- **Details:**
+  - `SpaceMouseInput`: `connect` and `update` methods are placeholders with comments like `# Actual implementation would...`.
+  - `VRControllerInput`: `connect` and `update` methods are placeholders.
+  - `HapticDeviceInput`: `connect`, `update`, and `set_force_feedback` are placeholders.
+- **Impact:** Unable to use physical input devices for teleoperation.
+
+### Model Format Conversion
+
+- **File:** `src/tools/model_generation/converters/format_utils.py`
+- **Status:** **INCOMPLETE**
+- **Details:**
+  - `convert` function raises `NotImplementedError` for conversions other than URDF<->MJCF.
+- **Impact:** Limited interoperability between model formats.
+
+## 2. Physics Fidelity Gaps (High Risk)
+
+Missing or simplified physics models that compromise simulation accuracy.
+
+### Ball Flight Physics
+
+- **File:** `src/shared/python/physics/ball_flight_physics.py`
+- **Status:** **PARTIAL / TODOs**
+- **Details:**
+  - Missing implementation for "Environmental Gradient Modeling" (TRACKED_TASK).
+  - Missing implementation for "Hydrodynamic Lubrication" (TRACKED_TASK).
+  - Missing implementation for "Dimple Geometry Optimization" (TRACKED_TASK).
+  - Missing implementation for "Turbulence Modeling" (TRACKED_TASK).
+  - Missing implementation for "Mud Ball Physics" (TRACKED_TASK).
+  - Hardcoded aerodynamic coefficients (`cd0=0.21`, etc.) without configuration.
+- **Impact:** Simulation may not reflect real-world ball behavior under complex conditions.
+
+### Flexible Shaft Dynamics
+
+- **File:** `src/shared/python/physics/flexible_shaft.py`
+- **Status:** **PARTIAL / TODOs**
+- **Details:**
+  - Missing "Torsional Dynamics" (TRACKED_TASK). The current Euler-Bernoulli beam model ignores twist.
+  - Missing "Asymmetric Cross-Sections" (TRACKED_TASK).
+- **Impact:** Unable to model shaft spine alignment or twisting effects during swing.
+
+### Impact Model
+
+- **File:** `src/shared/python/physics/impact_model.py`
+- **Status:** **SIMPLIFIED / TRACKED_DEFECT**
+- **Details:**
+  - `RigidBodyImpactModel` uses a simplified scalar effective mass formula (`1 / (1/m + r^2/I)`).
+  - TRACKED_DEFECT: "this uses a simplified scalar effective mass model."
+- **Impact:** Ignores full 3D inertia tensor and impact vector direction, leading to inaccuracies in off-center impacts.
+
+### Ground Reaction Forces (GRF)
+
+- **File:** `src/shared/python/physics/ground_reaction_forces.py`
+- **Status:** **INACCURATE**
+- **Details:**
+  - Fallback mechanism in `extract_grf_from_contacts` incorrectly sums static gravity ($W=mg$) instead of accounting for dynamic acceleration ($F=m(g+a)$).
+- **Impact:** Inaccurate GRF estimation during dynamic movements when native contact data is unavailable.
+
+## 3. Biomechanical Metric Gaps
+
+Missing metrics required for advanced swing analysis.
+
+### Kinematic Sequence
+
+- **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
+- **Status:** **MISSING METRICS / TODOs**
+- **Details:**
+  - Missing "Proximal Braking Efficiency" calculation (TRACKED_TASK).
+  - Missing "X-Factor Stretch" calculation (TRACKED_TASK).
+  - Missing "Inter-segmental Power Flow" calculation (TRACKED_TASK).
+- **Impact:** Incomplete biomechanical analysis capabilities.
+
+## 4. Naming, Citation, and Provenance Gaps
+
+Implementation choices where the code asserts more than it can support.
+
+### Metrics that overstate what they compute
+
+- **File:** `src/shared/python/analysis/pca_analysis.py`
+- **Gap:** `efficiency_score` (`matches / len(expected_order)`) measures segment ordering only; it has no energy term and should not be called efficiency.
+- **File:** `src/shared/python/injury/injury_risk.py`
+- **Gap:** "X-Factor Stretch" thresholds (e.g., > 55 degrees) are hardcoded with no citation to the literature they came from.
+- **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
+- **Gap:** Carries a TRACKED_DEFECT marker for the same `efficiency_score` naming problem.
+
+### Data provenance
+
+- **File:** `src/shared/python/validation_pkg/validation_data.py`
+- **Gap:** Hardcoded "PGA Tour TrackMan Averages" with a bare "trackman.com" attribution.
+- **Details:** The retrieval date, the exact source page, and the sample definition are all unrecorded, so the numbers cannot be verified or refreshed.
+- **Impact:** Validation baselines that cannot be reproduced.
+
+## 5. Tooling Gaps
+
+### Signal Toolkit
+
+- **File:** `src/shared/python/signal_toolkit/io.py`
+- **Status:** **SAFEGUARDED**
+- **Details:** `resolve_column` raises `NotImplementedError` (though seemingly intentional for unsupported types).

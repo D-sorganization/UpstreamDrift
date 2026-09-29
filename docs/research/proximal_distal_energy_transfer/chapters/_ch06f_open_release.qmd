@@ -1,0 +1,71 @@
+# Open-Resource Release and Reviewer Qualification {#sec-open-release}
+
+## Release Contract
+
+The scientific product is distributed as an open research resource rather
+than as evidence for a software platform. Canonical presets identify
+reproducible entry points across the analytical, moving-base, two-hand,
+distributed-shaft, articulated-contact, passive-shaft, finite-ground,
+uncertainty/control, and experimental-readiness tiers.
+Preset names preserve
+the model ladder and never
+imply that a higher unexecuted tier is available.
+
+The release manifest hashes the report source and PDF, chapter source, linked
+bibliography, evidence JSON/NPZ/CSV, publication PDF/SVG figures, analysis
+scripts, evidence schema, data dictionary, citation metadata, and reviewer
+guide. A separate `CHECKSUMS.sha256` is sorted by path for standard tooling.
+Validation is read-only and fails on missing or changed bytes, unsafe paths,
+and malformed records. Updating expected hashes requires a separate explicit
+write command after analysis, render, and visual gates pass.
+
+## Reviewer Path
+
+The reviewer workbench begins with the claim–evidence–alternative–falsifier
+matrix, then groups static SVG/PDF figures and downloadable data by model tier.
+It distinguishes analytical attribution, branched forward counterfactuals,
+common-state inverse dynamics, uncertainty/control screening, and experimental
+readiness. This is a deliberately static, link-stable review surface; it does
+not recompute results in a browser or introduce a second scientific code path.
+
+The data dictionary defines common units, state and wrench fields, power/work
+terms, residuals, provenance, ensemble partitions, and interpretation
+boundaries. Citation metadata points to the article and requests the exact
+release commit. Code and repository-authored documentation use the repository's
+MIT license; linked papers, external archives, and the registered WSCG source
+retain their own boundaries.
+
+## Qualification Commands
+
+From the repository root:
+
+```bash
+python -m scripts.research.proximal_distal_energy.qualify_open_release list-presets
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+```
+
+The first command exposes canonical deterministic entry points. The second
+validates the pinned bundle but never changes it. Maintainers regenerate the
+manifest only through the explicit `write` action after all source data,
+figures, article source, rendered PDF, and documentation are final.
+
+## Qualified and Open Claims
+
+The release records planar interaction dynamics and negative-couple
+feasibility as supported at their declared tiers, geometry response as
+supported through reduced spatial common-state inverse dynamics, and modal
+reduction behavior as supported on a synthetic structural shaft case. It records
+forward distributed-shaft coupling as supported only for the declared synthetic
+planar tier. It records the finite-ground/free-moment mechanism as numerically
+qualified with an empty preregistered matched set, post-killswitch contact
+persistence as supported only in the reduced spatial carriage model, human
+predictions as untested, and a universal controller as unsupported.
+
+Five release-level completion gates remain visible: three-dimensional
+articulated contact with calibrated unilateral foot support, force-plate
+comparison, grip, and shaft; equipment-calibrated beam and measured grip
+properties; measured tissue-level preload and slack identification; governed
+held-out human evaluation; and external archive deposit with a persistent
+identifier. Archive deposition changes
+external state and has not been performed. A reproducible local bundle is not
+described as a permanently archived release until that deposit is verified.

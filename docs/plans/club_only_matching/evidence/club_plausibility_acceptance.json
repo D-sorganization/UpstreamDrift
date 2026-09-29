@@ -1,0 +1,1718 @@
+{
+  "schema": "club-plausibility-acceptance/1.0.0",
+  "governing_issue": 10606,
+  "objective_rules": [
+    "lexicographic_measured_then_prior",
+    "pareto_measured_prior_runtime"
+  ],
+  "models": {
+    "constrained_upper_body_golfer": {
+      "model_id": "constrained_upper_body_golfer",
+      "topology": "constrained_upper_body",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.08,
+        "max_face_position_rmse_m": 0.08,
+        "max_grip_orientation_rmse_rad": 0.12,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 3.0,
+        "max_phase_error_s": 0.03
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Face orientation is unsupported without a calibrated face frame; orientation limitation is declared rather than a distorted target.",
+        "Lower-extremity body markers are out of scope for this model class.",
+        "Reduced-model club-only profiles do not satisfy full-body G3."
+      ]
+    },
+    "driven_double_pendulum": {
+      "model_id": "driven_double_pendulum",
+      "topology": "planar_driven_pendulum",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation", "grip_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation", "grip_orientation"],
+        "max_grip_position_rmse_m": 0.15,
+        "max_face_position_rmse_m": 0.15,
+        "max_grip_orientation_rmse_rad": null,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 5.0,
+        "max_phase_error_s": 0.05
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Planar topology cannot score out-of-plane face orientation; orientation residuals are recorded as limitations, not gates.",
+        "Reduced-model club-only profiles do not satisfy full-body G3."
+      ]
+    },
+    "driven_triple_pendulum": {
+      "model_id": "driven_triple_pendulum",
+      "topology": "planar_driven_pendulum",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation", "grip_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation", "grip_orientation"],
+        "max_grip_position_rmse_m": 0.15,
+        "max_face_position_rmse_m": 0.15,
+        "max_grip_orientation_rmse_rad": null,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 5.0,
+        "max_phase_error_s": 0.05
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Planar topology cannot score out-of-plane face orientation; orientation residuals are recorded as limitations, not gates.",
+        "Reduced-model club-only profiles do not satisfy full-body G3."
+      ]
+    },
+    "full_body_drake": {
+      "model_id": "full_body_drake",
+      "topology": "full_body_multibody",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": true,
+      "supported_observables": [
+        "body_markers",
+        "face_orientation",
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage",
+        "phase",
+        "speed"
+      ],
+      "unsupported_components": [],
+      "observation": {
+        "supported_observables": [
+          "body_markers",
+          "face_orientation",
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage",
+          "phase",
+          "speed"
+        ],
+        "unsupported_components": [],
+        "max_grip_position_rmse_m": 0.1,
+        "max_face_position_rmse_m": 0.1,
+        "max_grip_orientation_rmse_rad": 0.1,
+        "max_face_orientation_rmse_rad": 0.1,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 2.0,
+        "max_phase_error_s": 0.02
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": true
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Full-body G3 gates remain binding and separate from club-only priors.",
+        "Scientific qualification still requires native continuous replay evidence."
+      ]
+    },
+    "full_body_mujoco": {
+      "model_id": "full_body_mujoco",
+      "topology": "full_body_multibody",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": true,
+      "supported_observables": [
+        "body_markers",
+        "face_orientation",
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage",
+        "phase",
+        "speed"
+      ],
+      "unsupported_components": [],
+      "observation": {
+        "supported_observables": [
+          "body_markers",
+          "face_orientation",
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage",
+          "phase",
+          "speed"
+        ],
+        "unsupported_components": [],
+        "max_grip_position_rmse_m": 0.1,
+        "max_face_position_rmse_m": 0.1,
+        "max_grip_orientation_rmse_rad": 0.1,
+        "max_face_orientation_rmse_rad": 0.1,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 2.0,
+        "max_phase_error_s": 0.02
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": true
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Full-body G3 gates remain binding and separate from club-only priors.",
+        "Scientific qualification still requires native continuous replay evidence."
+      ]
+    },
+    "full_body_myosuite": {
+      "model_id": "full_body_myosuite",
+      "topology": "full_body_multibody",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": true,
+      "supported_observables": [
+        "body_markers",
+        "face_orientation",
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage",
+        "phase",
+        "speed"
+      ],
+      "unsupported_components": [],
+      "observation": {
+        "supported_observables": [
+          "body_markers",
+          "face_orientation",
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage",
+          "phase",
+          "speed"
+        ],
+        "unsupported_components": [],
+        "max_grip_position_rmse_m": 0.1,
+        "max_face_position_rmse_m": 0.1,
+        "max_grip_orientation_rmse_rad": 0.1,
+        "max_face_orientation_rmse_rad": 0.1,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 2.0,
+        "max_phase_error_s": 0.02
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": true
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Full-body G3 gates remain binding and separate from club-only priors.",
+        "Scientific qualification still requires native continuous replay evidence."
+      ]
+    },
+    "full_body_opensim": {
+      "model_id": "full_body_opensim",
+      "topology": "full_body_multibody",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": true,
+      "supported_observables": [
+        "body_markers",
+        "face_orientation",
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage",
+        "phase",
+        "speed"
+      ],
+      "unsupported_components": [],
+      "observation": {
+        "supported_observables": [
+          "body_markers",
+          "face_orientation",
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage",
+          "phase",
+          "speed"
+        ],
+        "unsupported_components": [],
+        "max_grip_position_rmse_m": 0.1,
+        "max_face_position_rmse_m": 0.1,
+        "max_grip_orientation_rmse_rad": 0.1,
+        "max_face_orientation_rmse_rad": 0.1,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 2.0,
+        "max_phase_error_s": 0.02
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": true
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Full-body G3 gates remain binding and separate from club-only priors.",
+        "Scientific qualification still requires native continuous replay evidence."
+      ]
+    },
+    "full_body_pinocchio": {
+      "model_id": "full_body_pinocchio",
+      "topology": "full_body_multibody",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": true,
+      "supported_observables": [
+        "body_markers",
+        "face_orientation",
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage",
+        "phase",
+        "speed"
+      ],
+      "unsupported_components": [],
+      "observation": {
+        "supported_observables": [
+          "body_markers",
+          "face_orientation",
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage",
+          "phase",
+          "speed"
+        ],
+        "unsupported_components": [],
+        "max_grip_position_rmse_m": 0.1,
+        "max_face_position_rmse_m": 0.1,
+        "max_grip_orientation_rmse_rad": 0.1,
+        "max_face_orientation_rmse_rad": 0.1,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 2.0,
+        "max_phase_error_s": 0.02
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": true
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Full-body G3 gates remain binding and separate from club-only priors.",
+        "Scientific qualification still requires native continuous replay evidence."
+      ]
+    },
+    "full_body_simscape": {
+      "model_id": "full_body_simscape",
+      "topology": "full_body_multibody",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": true,
+      "supported_observables": [
+        "body_markers",
+        "face_orientation",
+        "face_position",
+        "grip_orientation",
+        "grip_position",
+        "native_coverage",
+        "phase",
+        "speed"
+      ],
+      "unsupported_components": [],
+      "observation": {
+        "supported_observables": [
+          "body_markers",
+          "face_orientation",
+          "face_position",
+          "grip_orientation",
+          "grip_position",
+          "native_coverage",
+          "phase",
+          "speed"
+        ],
+        "unsupported_components": [],
+        "max_grip_position_rmse_m": 0.1,
+        "max_face_position_rmse_m": 0.1,
+        "max_grip_orientation_rmse_rad": 0.1,
+        "max_face_orientation_rmse_rad": 0.1,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 2.0,
+        "max_phase_error_s": 0.02
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": true,
+        "requires_body_markers": true
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Full-body G3 gates remain binding and separate from club-only priors.",
+        "Scientific qualification still requires native continuous replay evidence."
+      ]
+    },
+    "myosuite_body": {
+      "model_id": "myosuite_body",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "opensim_golfer": {
+      "model_id": "opensim_golfer",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "reconstruction_double_pendulum": {
+      "model_id": "reconstruction_double_pendulum",
+      "topology": "kinematic_reconstruction",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation", "grip_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation", "grip_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": null,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 4.0,
+        "max_phase_error_s": 0.04
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Kinematic reconstruction omits simulated club dynamics; orientation and force claims remain unsupported.",
+        "Reduced-model club-only profiles do not satisfy full-body G3."
+      ]
+    },
+    "reconstruction_golfer": {
+      "model_id": "reconstruction_golfer",
+      "topology": "kinematic_reconstruction",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation", "grip_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation", "grip_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": null,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 4.0,
+        "max_phase_error_s": 0.04
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Kinematic reconstruction omits simulated club dynamics; orientation and force claims remain unsupported.",
+        "Reduced-model club-only profiles do not satisfy full-body G3."
+      ]
+    },
+    "reconstruction_triple_pendulum": {
+      "model_id": "reconstruction_triple_pendulum",
+      "topology": "kinematic_reconstruction",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "lexicographic_measured_then_prior",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation", "grip_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation", "grip_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": null,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.8,
+        "max_speed_error_m_s": 4.0,
+        "max_phase_error_s": 0.04
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Kinematic reconstruction omits simulated club dynamics; orientation and force claims remain unsupported.",
+        "Reduced-model club-only profiles do not satisfy full-body G3."
+      ]
+    },
+    "reference_drake_urdf": {
+      "model_id": "reference_drake_urdf",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "reference_human_subject": {
+      "model_id": "reference_human_subject",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "reference_mujoco_humanoid": {
+      "model_id": "reference_mujoco_humanoid",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "reference_pinocchio_urdf": {
+      "model_id": "reference_pinocchio_urdf",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "reference_pinocchio_urdf_ik": {
+      "model_id": "reference_pinocchio_urdf_ik",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    },
+    "reference_simple_humanoid": {
+      "model_id": "reference_simple_humanoid",
+      "topology": "reference_catalog_urdf",
+      "schema": "club-plausibility-acceptance/1.0.0",
+      "objective_rule": "pareto_measured_prior_runtime",
+      "preserves_full_body_g3": false,
+      "supported_observables": [
+        "face_position",
+        "grip_position",
+        "native_coverage"
+      ],
+      "unsupported_components": ["face_orientation"],
+      "observation": {
+        "supported_observables": [
+          "face_position",
+          "grip_position",
+          "native_coverage"
+        ],
+        "unsupported_components": ["face_orientation"],
+        "max_grip_position_rmse_m": 0.12,
+        "max_face_position_rmse_m": 0.12,
+        "max_grip_orientation_rmse_rad": 0.15,
+        "max_face_orientation_rmse_rad": null,
+        "min_native_coverage_fraction": 0.75,
+        "max_speed_error_m_s": null,
+        "max_phase_error_s": null
+      },
+      "physical": {
+        "max_closure_residual_m": 0.005,
+        "max_penetration_m": 0.01,
+        "requires_contact_feasibility": false,
+        "requires_body_markers": false
+      },
+      "plausibility": {
+        "priors": {
+          "schema": "club-plausibility-priors/1.0.0",
+          "assumptions": [
+            {
+              "name": "fixed_anthropometry_and_club_geometry",
+              "source": "club_models.py catalog + CO-01 club_calibration",
+              "description": "Subject segment lengths and club length/type stay fixed for a fit; geometry is not free to absorb measurement residual.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "joint_rate_and_acceleration_bounds",
+              "source": "reviewed golf ROM literature envelope (named assumption)",
+              "description": "Joint rates and accelerations are softly bounded; values are regularizers, not measured kinematics.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "bilateral_grip_closure",
+              "source": "motion_matching.acceptance.AcceptanceGates.max_closure_residual_m",
+              "description": "Hands remain welded to the grip within closure tolerance.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "stance_contact_and_nonpenetration",
+              "source": "AcceptanceGates max_penetration_m / support polygon gates",
+              "description": "Foot/ground contact and non-penetration apply when the model exposes contact; absent contact state fails closed.",
+              "is_measured_truth": false
+            },
+            {
+              "name": "posture_and_effort_regularization",
+              "source": "tour-baselines qualification + effort prior convention",
+              "description": "Unobserved null-space motion is pulled toward a golf posture prior and low effort; score cannot override measured residual.",
+              "is_measured_truth": false
+            }
+          ],
+          "max_joint_rate_rad_s": 35.0,
+          "max_joint_accel_rad_s2": 800.0,
+          "grip_closure_tol_m": 0.005,
+          "effort_regularization_weight": 0.25,
+          "posture_regularization_weight": 0.35
+        },
+        "ambiguity_residual_tol_m": 0.005,
+        "min_diverse_candidates": 2
+      },
+      "limitations": [
+        "Catalog URDF/MJCF baselines are exploratory for club-only matching.",
+        "Orientation/force qualification requires a native adapter receipt."
+      ]
+    }
+  },
+  "notes": [
+    "Profiles freeze supported observables and numeric gates before campaigns.",
+    "Priors are named assumptions; synthetic labels are not force measurements.",
+    "Full-body G3 gates stay in AcceptanceGates and are not relaxed here."
+  ]
+}

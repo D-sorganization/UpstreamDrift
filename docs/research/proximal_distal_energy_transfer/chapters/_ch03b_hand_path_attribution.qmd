@@ -1,0 +1,557 @@
+# Hand-Path Force Attribution Across the Model Ladder {#sec-hand-path-attribution}
+
+## The Observation and the Inference It Does Not Support {#sec-hand-path-observation}
+
+MacKenzie, McCourt, and Champoux analyzed drives from 76 right-handed amateur
+golfers with handicaps below 15 and represented the golfer's action on the
+driver as a resultant force at the mid-grip point plus a resultant couple
+[@mackenzie2020energy]. Their path-averaged force was strongly associated with
+clubhead speed ($r=0.96$); the corresponding bivariate regression entry
+reported $R^2=0.92$ in that sample. Mean linear work was 174 J, mean angular
+work was 39 J, mean hand-path length was 1.35 m, and mean force along the path
+was 129 N. These are observational between-golfer associations from one sample
+and shared-club protocol, not an intervention estimate or a claim that adding
+force while holding the trajectory and all other determinants fixed would
+cause the same speed change.
+
+That result is important, but the observable must be named precisely. It is a
+signed mechanical line integral divided by path length,
+
+$$
+\overline F_{\parallel}
+=\frac{\int_{t_a}^{t_b}\mathbf F_H\!\cdot\!\mathbf v_H\,dt}
+       {\int_{t_a}^{t_b}\lVert\mathbf v_H\rVert\,dt}
+=\frac{W_{H,F}}{L_H},
+$$ {#eq-mackenzie-estimand}
+
+not a time average, not a force-magnitude average, and not an average of two
+individual hand-force magnitudes. It is also not a physiological effort
+measure. In a linked system, the force transmitted at the grip is the reaction
+required to satisfy the equations of motion and the joint constraints. Its
+value can contain a large contribution from gravity, velocity-dependent
+interaction dynamics, passive elements, prescribed-base motion, and earlier
+work stored in the achieved state. None of those contributions is identified
+by a net grip-force trace alone [@putnam1991; @putnam1993; @zajac1989]. Even a
+specified endpoint force can admit wide ranges of muscle activation in a
+redundant musculoskeletal model [@sohn2013]. That cited demonstration used
+static endpoint-force production in a 31-muscle cat-hindlimb model; it supports
+an identifiability warning, not a quantitative statement about human golf
+muscles or dynamic activation histories.
+
+The correct conclusion from the 2020 study is therefore narrow and useful:
+golfers who produced more signed linear work per metre of hand travel also
+produced greater clubhead speed in that sample. The result does not establish
+that they experienced proportionally greater perceived effort, generated
+proportionally greater instantaneous muscle activation, or could obtain the
+same change by simply trying to pull harder along the observed path. This
+chapter asks the model-based question left open by that evidence: how much of
+the transmitted force, impulse, power, and work is present in the achieved
+state without the instantaneous command, and how does that attribution change
+with joint, phase, geometry, and model structure?
+
+## Four Distinct Counterfactual Quantities {#sec-four-counterfactuals}
+
+For a control-affine model,
+
+$$
+M(q)\ddot q+h(q,\dot q)=B(q)u,
+$$ {#eq-hand-path-dynamics}
+
+the same-state acceleration is separated exactly as
+
+$$
+\ddot q_{\mathrm{total}}
+=\underbrace{-M^{-1}h}_{\ddot q_{\mathrm{drift}}}
++\underbrace{M^{-1}Bu}_{\ddot q_{\mathrm{control}}}.
+$$ {#eq-hand-path-drift-control}
+
+The **pointwise ZTCF sample** is the first term evaluated at the achieved state
+after the declared applied controls are set to zero. Repeating this operation
+along the achieved history produces a **stitched pointwise ZTCF trace**, not a
+single forward trajectory. In the analyses here, its
+inventory includes gravity and motion-dependent terms and includes a passive
+element only when that element belongs to the declared model. The **control
+increment** is total minus ZTCF at that identical state. The two close exactly
+because the state, constraints, parameters, and numerical protocol are held
+fixed.
+
+The **ZVCF** is a different counterfactual: velocities are set to zero while
+the configuration and the declared commands are retained. Velocity-dependent
+terms disappear, but gravity, configuration-dependent stiffness, and the
+direct command generally remain. ZVCF is therefore not another name for the
+control increment. It answers which reactions and accelerations would remain
+at this configuration if the generalized velocity vanished under its stated
+protocol.
+
+Finally, a **forward** or **branched ZTCF** starts a new trajectory after
+removing a command. It ceases to share the achieved state as soon as it is
+integrated. A pointwise ZTCF sample can attribute an instantaneous reaction;
+only a forward experiment can test persistence. Results from one experiment
+are not silently promoted into claims about the other.
+
+For a constrained two-hand model, the same distinction applies to the complete
+Karush--Kuhn--Tucker solve,
+
+$$
+\begin{bmatrix}M&-J^T\\J&0\end{bmatrix}
+\begin{bmatrix}\ddot q\\\lambda\end{bmatrix}
+=
+\begin{bmatrix}Bu-h\\-\dot J\dot q\end{bmatrix}.
+$$ {#eq-two-hand-kkt}
+
+The contact reactions $\lambda$ must be recomputed in each counterfactual.
+Subtracting unconstrained accelerations, assigning a residual by least
+squares, or comparing reactions from diverged trajectories does not provide a
+valid reaction-force attribution.
+
+## From Force Vectors to Transfer Metrics {#sec-attribution-metrics}
+
+At every moving interface, the path tangent is
+
+$$
+\mathbf e_t=\frac{\mathbf v}{\lVert\mathbf v\rVert},
+\qquad \lVert\mathbf v\rVert>v_\epsilon,
+$$ {#eq-path-tangent}
+
+and the signed along-path components are
+
+$$
+F_{\parallel,k}=\mathbf F_k\cdot\mathbf e_t,
+\qquad k\in\{\mathrm{total},\mathrm{drift},\mathrm{control},\mathrm{ZVCP}\}.
+$$ {#eq-path-projection-components}
+
+The tangent is taken from the achieved trajectory for all pointwise additive
+components. Samples below the declared speed threshold are undefined rather
+than being assigned a convenient direction. This matters near the top of the
+backswing and at fixed joints.
+
+Four integrals answer different questions:
+
+$$
+\mathbf J_k=\int\mathbf F_k\,dt,
+\qquad
+J_{\parallel,k}=\int F_{\parallel,k}\,dt,
+$$ {#eq-impulse-pair}
+
+$$
+P_{F,k}=\mathbf F_k\cdot\mathbf v,
+\qquad
+W_{F,k}=\int P_{F,k}\,dt.
+$$ {#eq-force-power-work}
+
+The vector impulse $\mathbf J$ retains direction in the global frame. The
+signed tangent impulse $J_\parallel$ integrates projections onto a tangent that
+rotates with the path, so it is not $\lVert\mathbf J\rVert$ and is not an energy
+measure. Force power weights the same signed projection by path speed; its
+integral is linear work. A component can dominate absolute impulse while doing
+little work, or do substantial work over a short high-speed interval without
+dominating time-integrated force.
+
+At a joint that also transmits a couple, the complete planar wrench power is
+
+$$
+P_k=\mathbf F_k\cdot\mathbf v_O+C_{O,k}\omega,
+$$ {#eq-interface-wrench-power}
+
+where the force, couple, translational velocity, and angular velocity use the
+same body, sign, frame, and reference point. Reporting force power and couple
+power separately reveals whether energy crossed an interface through
+translation, rotation, or opposing contributions whose net is small.
+
+## Fractions, Cancellation, and Undefined Ratios {#sec-attribution-fractions}
+
+For any additive signed quantity $X=X_d+X_c$, the familiar ratio $X_d/X$ is
+useful only when $X$ is safely separated from zero. Drift and control can
+oppose, so the ratio can be negative or exceed 100%; those values are physical
+sign information, not errors. Near cancellation, however, an arbitrarily
+large signed percentage is a poor summary. Each table therefore retains the
+raw values and reports both
+
+$$
+s_d=\frac{X_d}{X},\qquad s_c=\frac{X_c}{X},
+$$ {#eq-signed-shares}
+
+when the denominator is valid, and the cancellation-stable magnitude shares
+
+$$
+m_d=\frac{|X_d|}{|X_d|+|X_c|},\qquad
+m_c=\frac{|X_c|}{|X_d|+|X_c|}.
+$$ {#eq-magnitude-shares}
+
+The companion cancellation index
+
+$$
+\chi=1-\frac{|X|}{|X_d|+|X_c|}
+$$ {#eq-cancellation-index}
+
+is zero when the components reinforce and approaches one when large opposing
+components leave a small resultant. An attribution atlas without this guard
+would systematically exaggerate unstable percentages at exactly the joints
+and phases where the mechanics are most counterintuitive.
+
+## Model Ladder and Common Observables {#sec-attribution-model-ladder}
+
+The same observable contract is evaluated at three levels. Increasing model
+complexity is used as a stress test, not as a claim that the highest tier is a
+validated representation of an individual golfer.
+
+### Double Pendulum: Exact Minimal Mechanism {#sec-attribution-double}
+
+The two-link arm--club model has a fixed shoulder, a distributed-inertia arm,
+a distributed-inertia club, and two generalized controls. Exact equations of
+motion yield total and zero-command accelerations at every achieved state. The
+wrist reaction on the club is independently reconstructed from the club
+free-body equation, and the shoulder reaction is checked against the arm
+subsystem balance. This tier isolates the central mechanism: a large wrist
+reaction and positive wrist-force work can exist with zero instantaneous wrist
+command because the moving proximal segment, gravity, and joint geometry still
+constrain the club.
+
+The fixed shoulder has no linear path and therefore no shoulder path-force
+estimand. It does have a transmitted couple and corresponding couple power.
+The wrist has both a translational path and a rotational interface. Keeping
+those observables separate prevents the phrase *force along the hand path*
+from being applied indiscriminately to every joint.
+
+### One-Arm Three-Link Tier: Joint-by-Joint Redistribution {#sec-attribution-one-arm}
+
+The next tier introduces upper-arm, forearm, and club coordinates and reports
+shoulder, elbow, and wrist actions. The repository implementation uses distal
+point masses and is therefore a mechanism model rather than a calibrated
+anatomical limb. Its value is structural: adding an elbow allows the analysis
+to test whether drift dominance at the wrist implies drift dominance
+everywhere else. It does not. Each joint has a different distal subsystem,
+velocity, moment arm, and phase history, so force, couple, impulse, and work
+shares need not agree either across joints or within one joint.
+
+### Two-Arm Closed Loop: Constraint Reactions and Redundancy {#sec-attribution-two-arm}
+
+The two-arm tier contains seven planar generalized coordinates: two relative
+joint pairs for the arms and a freely translating and rotating club. Four
+independent hand-position constraints close both hands on separated grip
+points. The constraint Jacobian must have row rank four, the mass matrix must
+remain positive definite, and both the acceleration-constraint and KKT
+residuals must satisfy declared tolerances. Singular poses fail closed.
+
+This construction avoids a common but consequential shortcut in which the club
+translation is implicitly anchored to one hand and the second contact is added
+as if it supplied two further independent constraints. Such a model can return
+numbers from a least-squares solve while failing to identify the individual
+contact reactions required for the scientific claim.
+
+## Reference-Case Attribution Results {#sec-attribution-reference-results}
+
+The three reference cases apply one observable contract but do not pretend to
+be three measurements of the same swing. The double pendulum is a forward
+simulation truncated at its first valid club-vertical impact (0.3493 s). The
+one-arm model is a forward simulation over a declared 0.400 s window. The
+two-arm closed loop is a 0.400 s, constraint-consistent **local kinematic
+sweep** with only 0.0425 m of mid-grip travel. Its line integrals diagnose the
+prescribed path; they are not realized forward-simulation work and are not
+scaled up to a full downswing.
+
+@tbl-hand-path-primary-results reports the MacKenzie-compatible primary
+estimand at the wrist for the open-chain models and at the mid-grip resultant
+for the closed loop. Drift is the stitched pointwise ZTCF contribution. Total
+equals drift plus control at the achieved state. The zero-velocity
+control-preserved evaluation (ZVCP) is displayed in a separate column because
+it is not an additive component of that equality; its force is projected on
+the achieved velocity only to make the diagnostic comparable in units. ZVCP
+is not canonical ZVCF.
+
+| Model Tier | Path (m) | Total Work (J) | Drift Work (J) | Control Work (J) | ZVCP Projected Diagnostic (J) | $\overline F_{\parallel}$ Total / Drift / Control (N) |
+|---|---:|---:|---:|---:|---:|---:|
+| Double pendulum | 2.2241 | 130.794 | 132.375 | -1.580 | -1.588 | 58.807 / 59.517 / -0.711 |
+| One-arm three-link | 2.7336 | 27.802 | 28.781 | -0.979 | -1.827 | 10.170 / 10.528 / -0.358 |
+| Two-arm closed loop | 0.0425 | -0.00381 | -0.05236 | +0.04855 | +0.00188 | -0.0898 / -1.2330 / +1.1432 |
+
+: Primary Hand-Path Force-Work Attribution in the Declared Reference Cases {#tbl-hand-path-primary-results}
+
+The first two rows answer the central inference question directly. In the
+double pendulum, the drift contribution is 101.2% of signed force work and the
+control increment is -1.2%; in cancellation-stable magnitude terms the split
+is 98.8% drift and 1.2% control. In the one-arm case, the signed split is
+103.5% drift and -3.5% control, while the magnitude split is 96.7% and 3.3%.
+Thus a positive net force-work-per-path-length value can be generated mostly
+by the state-dependent reaction even while the current command contribution
+opposes the hand path. The result is about mechanical attribution within the
+declared trajectories. It does not imply that the achieved states were
+obtained without earlier control or biological effort.
+
+The two-arm row exposes the opposite interpretive hazard. Drift and control
+work are individually about an order of magnitude larger than their net and
+oppose one another. Their magnitude shares are 51.9% and 48.1%, but the
+cancellation index is 0.962. A signed percentage of the near-zero resultant
+would exceed 1,000% and obscure the mechanics. Raw work, magnitude shares, and
+the cancellation index are therefore the defensible summary.
+
+![Signed Force Along the Achieved Hand Path for the Three Reference Cases](data/hand_path_attribution/figures/fig_hand_path_components.pdf){#fig-hand-path-components width=100%}
+
+@fig-hand-path-components shows why the integrated results cannot be
+inferred from a force peak alone. In the double pendulum, the late positive
+rise is almost entirely drift. In the one-arm model, drift changes sign and
+then becomes strongly positive while control remains opposing late. In the
+two-arm local sweep, much larger opposing drift and control components leave a
+small net resultant. The dashed ZVCP trace stays distinct from the control
+increment even when the two happen to be close over part of a history.
+
+![Total, Drift, Control, and Zero-Velocity Control-Preserved Force Vectors at Normalized Time Quartiles](data/hand_path_attribution/figures/fig_hand_path_force_vectors.pdf){#fig-hand-path-force-vectors width=100%}
+
+@fig-hand-path-force-vectors retains vector direction rather than only
+the along-path scalar. All four splits use one force-arrow scale within each
+model row, and both two-hand contacts are shown. The achieved path tangent is a
+geometric reference, not an additional force. A control vector can therefore
+look counterintuitive in global coordinates while its tangent projection,
+normal component, and future geometric effect remain separately identifiable.
+
+![Signed Target-Direction Impulse and Force-Work Attribution](data/hand_path_attribution/figures/fig_hand_path_impulse_work.pdf){#fig-hand-path-impulse-work width=100%}
+
+@fig-hand-path-impulse-work separates the target-direction component of
+global vector impulse from force work. For example, the two-arm sweep has a
+positive 5.57 N s target-direction resultant assembled from -0.40 N s drift
+and +5.97 N s control, yet its net force work is nearly zero because work also
+depends on the direction and speed of the mid-grip path. ZVCF bars are again
+same-configuration projections, not a third additive share.
+
+### Every Joint and Time Window {#sec-attribution-joint-atlas}
+
+The joint atlas uses total-wrench work, including both force and couple power.
+Each horizontal bar in @fig-hand-path-phase-shares is
+$|W_d|/(|W_d|+|W_c|)$ for one joint and one normalized time quartile. The cross
+is plotted at the corresponding cancellation index when that index is at least
+0.25. This presentation keeps all 36 model--joint--window combinations visible
+without converting cancellation into unstable signed percentages.
+
+![Phase-Resolved Drift Work Shares and Cancellation for Every Joint](data/hand_path_attribution/figures/fig_hand_path_phase_joint_shares.pdf){#fig-hand-path-phase-shares width=100%}
+
+The atlas rejects a system-wide label such as “drift dominated.” In the double
+pendulum, shoulder total-wrench work remains control dominated in all four
+windows, while wrist drift share rises from less than 1% in the first window
+to roughly 63%, 56%, and 72% thereafter. In the one-arm case, the shoulder is
+control dominated throughout, whereas the elbow and wrist become strongly
+drift influenced late. The two-arm model adds left/right asymmetry and contact
+redundancy: a drift-dominant hand contact can coexist with a control-dominant
+shoulder or elbow during the same interval. The exact raw work values and
+signed shares remain in the JSON evidence rather than being recoverable only
+from bar lengths.
+
+Power requires an instantaneous guard analogous to the work guard:
+
+$$
+m_{P,d}(t)=\frac{|P_d(t)|}{|P_d(t)|+|P_c(t)|},
+\qquad
+\chi_P(t)=1-\frac{|P_d(t)+P_c(t)|}{|P_d(t)|+|P_c(t)|}.
+$$ {#eq-power-share-cancellation}
+
+Near-zero denominators are undefined and masked.
+@fig-hand-path-power-shares plots $m_{P,d}$ for every joint; crosses identify
+samples with $\chi_P\geq0.25$. The rapid excursions are a substantive result:
+an integrated work share can be stable even though the instantaneous power
+allocation changes quickly or passes through near cancellation. This is why a
+single peak-power fraction is not substituted for the time history.
+
+![Instantaneous Drift Power Shares and Cancellation for Every Joint](data/hand_path_attribution/figures/fig_hand_path_power_shares.pdf){#fig-hand-path-power-shares width=100%}
+
+### Numerical Closure and Resolution Sensitivity {#sec-attribution-closure}
+
+For all three tiers, the maximum additive force and couple residual is below
+$1.8\times10^{-15}$ in SI units, the maximum power residual is below
+$2.3\times10^{-13}$ W, and the maximum cumulative-work residual is below
+$5.7\times10^{-14}$ J. The four windows cover every integration interval once
+and only once. Coarsening the stored histories from 81 to 41 samples changes
+primary force work by 0.044 J in the double pendulum, 0.059 J in the one-arm
+case, and less than 0.001 J in the two-arm sweep. At 21 samples, the respective
+changes are 1.11 J, 0.29 J, and less than 0.001 J. These are quadrature and
+sampling checks, not parameter uncertainty or biological validation.
+
+![Quadrature Sensitivity and Additive Closure Diagnostics](data/hand_path_attribution/figures/fig_hand_path_sensitivity_closure.pdf){#fig-hand-path-sensitivity-closure width=100%}
+
+## Two Hands Create Observable and Internal Modes {#sec-attribution-two-hand-modes}
+
+Let $\mathbf F_R$ and $\mathbf F_L$ be the right- and left-hand forces on the
+club. The evidence package uses the explicitly declared convention
+
+$$
+\mathbf R=\mathbf F_R+\mathbf F_L,
+\qquad
+\mathbf F_d=\frac{\mathbf F_R-\mathbf F_L}{2}.
+$$ {#eq-attribution-contact-modes}
+
+The common mode is the resultant $\mathbf R$. About the grip midpoint, the
+differential mode creates the force couple
+
+$$
+\mathbf M_{F,M}=-\mathbf d\times\mathbf F_d,
+$$ {#eq-attribution-differential-couple}
+
+where $\mathbf d$ points from the right-hand contact to the left-hand contact.
+Two large opposing forces
+can therefore produce a small net force and a large club moment. Conversely,
+a large internal squeeze can increase contact loading while contributing no
+net rigid-club wrench. Neither the net hand force nor the club's rigid-body
+work identifies that internal demand [@zatsiorsky2008prehension].
+
+The redundancy extends to control allocation. A desired equivalent club
+moment can be produced by the separated hand-force couple, by applied wrist
+free torques, or by combinations in which those pathways oppose. Equal net
+club action does not imply equal joint loading, actuator work, co-contraction,
+or robustness to perturbation. The constrained model can expose these
+mechanical alternatives, but without muscles, activation dynamics, and a
+physiological objective it cannot rank them as human effort strategies. One
+instructed fast two-hand-grasp experiment likewise produced kinematics nearly
+indistinguishable from single-hand movement while the hand torques and internal
+squeeze differed substantially [@reinkensmeyer1992]. That experiment isolated
+one strategy in several subjects; it demonstrates non-equivalence of
+kinematics and internal action, not prevalence or optimality in golf.
+
+![Common-Resultant and Differential Two-Hand Force Modes](data/hand_path_attribution/figures/fig_two_hand_common_differential.pdf){#fig-two-hand-common-differential width=100%}
+
+@fig-two-hand-common-differential makes the hidden mode visible in the
+declared local sweep. The common resultant is largely control supplied while
+the drift contribution remains smaller. The differential-mode magnitudes are
+larger and diverge late, so the same interval can support a modest net
+mid-grip force and a substantial separated-contact couple. Magnitudes alone do
+not identify the sign of that couple; the signed contact vectors and the
+declared right-minus-left convention are required for that calculation.
+
+## Why an Apparently Counterproductive Control Can Be Useful {#sec-counterintuitive-control}
+
+Optimal control need not point in the same direction as the instantaneous
+motion or the net reaction. A control increment may oppose the drift reaction
+while still improving a later objective through at least four mechanisms:
+
+1. it can retain angular separation and delay distal acceleration;
+2. it can rotate the future force vector toward a more useful path projection;
+3. it can trade a transient negative actuator work interval for greater later
+   positive force work; and
+4. in a closed loop, it can alter the common and differential contact modes
+   without the same change in net club wrench.
+
+Consequently, a negative control force along the path is not automatically a
+mistake, and a positive drift force is not free propulsion. The achieved state
+embodies earlier control and energy history. A defensible strategy statement
+must specify the optimized objective, actuator limits, event definition, and
+cost of producing that state.
+
+This interpretation is consistent with multijoint reaching evidence in which
+people exploited or compensated interaction torque differently across the
+study's speed and load conditions; the authors compared optimal-control costs
+rather than validating a single force-maximization rule [@vu2016]. It is
+supporting upper-limb context, not golf-specific validation or a direct test of
+the present cost terms.
+
+## Late Reversal and the Preactivation Hypothesis {#sec-preactivation-hypothesis}
+
+The archived WSCG result in @sec-two-hand-wrench shows a late sign reversal of
+the force-generated two-hand couple under pointwise zero command. The present
+closed-loop model makes a related hypothesis testable: an opposed contact mode
+or wrist command established before that reversal may reduce the size or rate
+of the command change required when the drift contribution turns favorable.
+This is a mechanical **prepositioning** or **preloading** hypothesis.
+
+It is not yet evidence of physiological preactivation. That stronger claim
+requires activation dynamics, electromechanical delay, torque-rate and
+torque--velocity limits, passive tissue impedance, and a matched physiological
+cost. It also requires experimental observables capable of separating net
+club action from individual-hand force and muscle activation. The model can
+show whether a prior internal-force state changes later wrench attribution;
+it cannot show that golfers use a neural preactivation strategy or that such a
+strategy improves performance in humans.
+
+The hypothesis is falsifiable. It would be weakened if the effect disappears
+under timestep, event-boundary, geometry, and parameter perturbations; if it
+depends on a rank-deficient contact configuration; if equal-effort actuator
+models remove the apparent benefit; or if measured two-hand forces and muscle
+activity do not exhibit the predicted phase relation.
+
+### A Bounded Residual-Couple Preview Test {#sec-preactivation-preview-test}
+
+The archived WSCG traces permit one limited part of the hypothesis to be tested
+without inventing a muscle model. Treat the archived BASE equivalent midpoint
+couple as a reference, the stitched pointwise ZTCF couple as the reaction
+available at each achieved state, and their registered DELTA as the required
+control residual. At the pointwise ZTCF minimum (0.2148 s), the reaction is
+$-19.63$ N m while BASE is $-22.78$ N m. Thus 86.2% of the negative BASE
+couple at that instant is present in the declared zero-applied-control solve;
+the required residual is only $-3.15$ N m. Across the 0.16--0.25 s analysis
+window, the residual's peak magnitude is 3.18 N m compared with 23.17 N m for
+BASE.
+
+Those values motivate a narrower signal-allocation hypothesis within this
+archived decomposition: when drift is recomputed at the achieved state, the
+additive command target is the residual rather than the net couple. Feeding the
+entire BASE trace into an additive control channel while also adding the
+registered drift trace double-counts the same target by construction. This is
+bookkeeping for the declared split, not a physiological control law. To examine
+timing, a unit-gain first-order actuator was used solely as a signal model,
+
+$$
+T_a\dot C_a+C_a=C_{\mathrm{cmd}},
+$$ {#eq-preactivation-actuator}
+
+with the archived BASE and pointwise ZTCF traces held fixed. For the reference
+$T_a=30$ ms case, commanding the instantaneous residual produced a late-window
+tracking RMSE of 1.252 N m. Previewing that same residual by 24 ms reduced the
+RMSE to 0.531 N m, a 57.6% reduction. By contrast, sending the net BASE couple
+through the actuator and then adding the drift reaction produced 19.06 N m
+RMSE. Across assumed time constants from 10 to 50 ms, the best preview ranged
+from 9 to 35 ms and reduced residual-tracking error by 46.1% to 79.4%.
+
+![Residual-Couple Preview Test for the Archived Two-Hand Model](figures/fig_two_hand_preactivation_hypothesis.pdf){#fig-two-hand-preactivation-hypothesis width=100%}
+
+@fig-two-hand-preactivation-hypothesis establishes a narrow signal-tracking
+result: oracle preview can compensate a declared first-order delay when the
+command targets BASE minus drift. It does not evaluate clubhead speed, muscle
+activation, metabolic cost, or a forward coupled golfer trajectory. The best
+preview is conditional on the assumed time constant and known future residual;
+without a causal state estimator or predictor, held-out evaluation, and a
+forward coupled plant, it is not an implementable controller or a recommended
+physiological timing value. The study turns anticipation into a reproducible
+hypothesis with explicit failure conditions rather than presenting
+preactivation as an observed human mechanism.
+
+## Phase-Resolved Reporting Protocol {#sec-attribution-phases}
+
+Every reference history is partitioned into four nonoverlapping, equal-duration
+windows whose exact time and sample boundaries are stored with the data. These
+are named **normalized time quartiles**, not anatomical swing phases. They make
+the bookkeeping and cross-tier comparisons reproducible, but equal fractions
+of elapsed time are not assumed to represent equivalent mechanics. When a
+model or experiment provides independently defined events, a second analysis
+should replace or supplement these neutral windows with intervals such as:
+
+1. early acceleration and retention;
+2. transition toward release;
+3. rapid distal acceleration;
+4. late drift-reaction reversal; and
+5. the final delivery interval.
+
+For every joint and time window, the evidence record stores vector impulse,
+signed tangent impulse, force work, couple work, total-wrench work, robust
+shares, cancellation indices, and closure residuals. Dense arrays retain the
+positive, negative, and absolute tangent-impulse accumulations and the
+pointwise force, couple, and total-power traces, so peak and sign-specific
+questions can be recomputed without reconstructing the dynamics. Path length
+and path-averaged force are reported separately. Total, drift, control, and
+ZVCF force traces are retained; ZVCF power is not called a realized quantity
+because its defining velocity is zero. A conclusion is called common across
+tiers only when its sign and interpretation survive the declared differences
+in coordinates, mass representation, constraints, and control allocation.
+
+## What the Models Can Establish {#sec-attribution-claims}
+
+The model ladder can establish that a declared fraction of a mechanical
+reaction, impulse, power, or work is attributable to drift or control within a
+specified model at a specified state. It can show that drift dominance varies
+by joint and phase, that a large force may have a weak power projection, and
+that two-hand internal modes are hidden by the net grip wrench. It can also
+identify geometries and command allocations that are consistent with late
+positive transfer.
+
+It cannot convert net force into perceived exertion, muscle activation,
+metabolic cost, injury risk, or a universal coaching instruction. Those require
+additional measurements and model layers. The neutral practical implication is
+therefore diagnostic rather than prescriptive: evaluate how the complete force
+vector, couple, and interface velocity evolve together, and distinguish the
+state-dependent reaction from the current command before interpreting a large
+hand-path force as greater effort.

@@ -1,0 +1,711 @@
+name: CI Optional Stack
+# ---------------------------------------------------------------------------
+# OPTIONAL-STACK VERIFICATION LANE (issue #2368)
+# ---------------------------------------------------------------------------
+# This workflow is the canonical optional-stack verification lane.
+# It installs the full optional dependency set (Pinocchio, Pink, Crocoddyl,
+# API extras, and PyQt6) so that tests which would normally be skipped due
+# to missing dependencies are executed.
+#
+# Purpose:
+#   - Ensure API and Pinocchio ecosystem tests run without being skipped.
+#   - Make skipped-path regressions easy to spot via the job summary.
+#   - Provide end-to-end confidence for the optional integration paths.
+#
+# Acceptance criteria (issue #2368):
+#   1. At least one CI job installs the full optional stack used by API and
+#      Pinocchio ecosystem tests.
+#   2. The relevant API and Pinocchio ecosystem tests run without being
+#      skipped due to missing dependencies.
+#   3. This comment block documents which job is the optional-stack lane.
+# ---------------------------------------------------------------------------
+on:
+  push:
+    branches: [main, staging]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+  workflow_dispatch:
+  schedule:
+    # Weekly run every Wednesday at 07:00 UTC  -  staggered from ci-standard
+    - cron: "0 7 * * 3"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+  optional-stack-check:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    env:
+      # The shared runner may advertise an interactive Qt backend. This lane is
+      # headless, so make Matplotlib deterministic even when DISPLAY is absent
+      # or Xvfb becomes unavailable during a long test step.
+      MPLBACKEND: Agg
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11"]
+
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        working-directory: .
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - name: Configure Git to use HTTP/1.1
+        run: |
+          git config --global http.version HTTP/1.1
+          git config --global http.postBuffer 1048576000
+          git config --global http.lowSpeedLimit 1000
+          git config --global http.lowSpeedTime 30
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Reject Raw Merge Conflict Markers
+        run: |
+          if git grep -n '<<<<<<< HEAD' -- . ':!.github'; then
+            echo "::error::Raw git merge conflict markers found!"
+            exit 1
+          fi
+
+      - name: Install System Dependencies
+        run: |
+          if [ "$(id -u)" -eq 0 ]; then
+            APT_PREFIX=()
+          elif command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            APT_PREFIX=(sudo)
+          else
+            echo "::warning::No root or non-interactive sudo available; skipping system package installation."
+            exit 0
+          fi
+
+          apt_retry() {
+            for attempt in {1..12}; do
+              if "${APT_PREFIX[@]}" apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            "${APT_PREFIX[@]}" apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python }}
+
+      # Cache pip download cache. The optional-stack lane installs ~1.5GB of
+      # wheels (fastapi[all], pinocchio, pin-pink, crocoddyl, pyqt6, etc.) and a
+      # warm cache avoids re-downloading them on every PR.
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Cache pip wheels
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pip
+          key: pip-optstack-${{ runner.os }}-py${{ matrix.python }}-${{ hashFiles('pyproject.toml', 'requirements*.txt') }}
+          restore-keys: |
+            pip-optstack-${{ runner.os }}-py${{ matrix.python }}-
+            pip-optstack-${{ runner.os }}-
+
+      - name: Prepare Optional-Stack Venv
+        # The shared self-hosted runner can expose partially installed ambient
+        # site-packages (for example matplotlib without a RECORD file), which
+        # breaks editable installs before tests even start. Use an isolated venv
+        # so this lane only sees the packages it installs itself.
+        run: |
+          python -m venv "$RUNNER_TEMP/optional-stack-venv"
+          export PATH="$RUNNER_TEMP/optional-stack-venv/bin:$PATH"
+          echo "$RUNNER_TEMP/optional-stack-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/optional-stack-venv" >> "$GITHUB_ENV"
+          source scripts/ci/pip_retry.sh
+          python -m ensurepip --upgrade || true
+          pip_retry install --upgrade pip
+
+      - name: Document Optional-Stack Lane Identity
+        run: |
+          echo "## Optional-Stack Verification Lane" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "This is the **optional-stack verification lane** (issue #2368)." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### What is installed in this lane" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Core project dependencies (\`[dev,gui-test]\`)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pinocchio ecosystem: \`pinocchio\`, \`pin-pink\`, \`crocoddyl\` (where available via conda-forge/pip)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Trajectory optimization: \`casadi\` (\`[optimal-control]\`), \`bioptim\` (\`[bioptim]\`, git-pinned) -- #9759 / epic #9762" >> "$GITHUB_STEP_SUMMARY"
+          echo "- API extras: \`fastapi[all]\`, \`httpx\`, \`python-multipart\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GUI extras: \`PyQt6\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Purpose" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tests that are skipped in the core CI lane due to missing optional dependencies" >> "$GITHUB_STEP_SUMMARY"
+          echo "are exercised here, providing full confidence in optional integration paths." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install Core Project Dependencies
+        # Force-reinstall sortedcontainers + hypothesis first: the shared
+        # toolcache can carry a half-installed sortedcontainers that is missing
+        # SortedSet, causing hypothesis to fail its import at pytest startup.
+        run: |
+          source scripts/ci/pip_retry.sh
+          python -m ensurepip --upgrade || true
+          pip_retry install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          python -m ensurepip --upgrade || true
+          pip_retry install -e ".[dev,gui-test]"
+          pip_retry install "trimesh>=4.0.0"
+
+      - name: Install API Extras
+        # Install full FastAPI stack for API-path tests.
+        # fastapi[all] pulls uvicorn, httpx, python-multipart etc.
+        # Force-reinstall idna[uts46]: the toolcache may carry a minimal idna
+        # (installed as a transitive dep) that lacks uts46_remap, breaking
+        # email-validator which email validation tests depend on.
+        run: |
+          source scripts/ci/pip_retry.sh
+          python -m ensurepip --upgrade || true
+          pip_retry install "fastapi[all]" httpx
+          python -m ensurepip --upgrade || true
+          pip_retry install --force-reinstall "idna[uts46]>=3.4" "email-validator>=2.0.0"
+
+      - name: Attempt Pinocchio Ecosystem Installation
+        # Pinocchio, Pink, and Crocoddyl are not on PyPI for all platforms.
+        # We attempt installation and record the outcome; tests that require
+        # these packages will be marked as SKIPPED (not FAILED) if unavailable.
+        # On runners where conda-forge is available this will succeed.
+        id: pinocchio_install
+        continue-on-error: true
+        run: |
+          source scripts/ci/pip_retry.sh
+          python -m ensurepip --upgrade || true
+          pip_retry install pin pin-pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log
+          if python3 -c "import pinocchio" 2>/dev/null; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "Pinocchio installation: SUCCESS"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Pinocchio installation: NOT AVAILABLE on this runner (tests will be skipped)"
+          fi
+
+      - name: Report Pinocchio Install Status
+        run: |
+          echo "### Pinocchio Ecosystem Availability" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.pinocchio_install.outputs.available }}" == "true" ]]; then
+            echo "- Pinocchio: installed" >> "$GITHUB_STEP_SUMMARY"
+            python3 -c "import pinocchio; print('  version:', pinocchio.__version__)" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+            if python3 -c "import pink" >/dev/null 2>&1; then
+              echo "- Pink: installed" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- Pink: not available" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if python3 -c "import crocoddyl" >/dev/null 2>&1; then
+              echo "- Crocoddyl: installed" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- Crocoddyl: not available" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "- Pinocchio: not available on this runner (ecosystem tests will be skipped)" >> "$GITHUB_STEP_SUMMARY"
+            echo "  _Install via conda: conda install pinocchio pink crocoddyl -c conda-forge_" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Run API Tests (Optional Stack)
+        # Run the API test suite against the full API extras installation.
+        # These tests require fastapi, httpx, and related packages  -  they are
+        # skipped in the core CI lane which does not install these extras.
+        env:
+          PYTHONPATH: .:src
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### API Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
+          xvfb-run --auto-servernum pytest tests/api/ \
+            -p no:xvfb \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short \
+            -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+            2>&1 | tee /tmp/api-test-results.txt
+          rc=$?
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/api-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/api-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/api-test-results.txt || true)
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -ne 0 ]]; then
+            echo "::error::API tests failed in the optional-stack lane with pytest exit code $rc."
+            exit "$rc"
+          fi
+
+      - name: Run Pinocchio Ecosystem Tests (Optional Stack)
+        # Run pinocchio ecosystem tests.
+        # If Pinocchio is not installed these tests self-skip via skipTest();
+        # if Pinocchio IS installed they must pass without being skipped.
+        env:
+          PYTHONPATH: .:src
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### Pinocchio Ecosystem Tests" >> "$GITHUB_STEP_SUMMARY"
+          pytest --collect-only -q \
+            tests/engines/test_pinocchio_ecosystem.py \
+            tests/engines/test_pinocchio_recorder.py \
+            tests/research/test_articulated_manufactured_solution.py \
+            > /tmp/pinocchio-collect.txt
+          set +e
+          set -o pipefail
+          xvfb-run --auto-servernum pytest \
+            -p no:xvfb \
+            tests/engines/test_pinocchio_ecosystem.py \
+            tests/engines/test_pinocchio_recorder.py \
+            tests/research/test_articulated_manufactured_solution.py \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short \
+            2>&1 | tee /tmp/pinocchio-test-results.txt
+          rc=$?
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/pinocchio-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/pinocchio-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/pinocchio-test-results.txt || true)
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -eq 5 ]]; then
+            echo "::warning::No Pinocchio ecosystem tests were collected in the optional-stack lane."
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "::error::Pinocchio ecosystem tests failed with pytest exit code $rc."
+            exit "$rc"
+          fi
+
+          # If Pinocchio IS installed but all tests were skipped, that is a
+          # regression  -  the guard conditions may no longer match the installed
+          # package API.
+          if [[ "${{ steps.pinocchio_install.outputs.available }}" == "true" ]] && \
+             [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
+            echo "::warning::Pinocchio is installed but ALL pinocchio tests were skipped." \
+              "Check that skipTest() guard conditions are still valid."
+          fi
+
+      - name: Install Optimal-Control Stack (CasADi)
+        # #9759: the CasADi swing backend and its Pinocchio oracle tests had
+        # no CI leg. casadi wheels bundle IPOPT+MUMPS, so this is pip-only.
+        id: casadi_install
+        continue-on-error: true
+        run: |
+          source scripts/ci/pip_retry.sh
+          pip_retry install -e ".[optimal-control]" 2>&1 | tee /tmp/casadi_install.log
+          if python3 -c "import casadi" 2>/dev/null; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "CasADi installation: SUCCESS"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "CasADi installation: NOT AVAILABLE on this runner (tests will be skipped)"
+          fi
+
+      - name: Run Trajectory-Optimization Backend Tests (CasADi / Crocoddyl)
+        # Live solves for the CasADi (finite-difference and multiple-shooting)
+        # and Crocoddyl backends. Each file self-skips when its stack is
+        # absent; when a stack IS installed its tests must pass.
+        env:
+          PYTHONPATH: .:src
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### Trajectory-Optimization Backend Tests" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
+          xvfb-run --auto-servernum pytest \
+            -p no:xvfb \
+            tests/integration/optimization \
+            -m "requires_casadi or requires_crocoddyl" \
+            --timeout=600 \
+            --timeout-method=thread \
+            -v --tb=short \
+            2>&1 | tee /tmp/optimization-backend-test-results.txt
+          rc=$?
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/optimization-backend-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/optimization-backend-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/optimization-backend-test-results.txt || true)
+          echo "- CasADi installed: ${{ steps.casadi_install.outputs.available }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -eq 5 ]]; then
+            echo "::warning::No trajectory-optimization backend tests were collected."
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "::error::Trajectory-optimization backend tests failed with pytest exit code $rc."
+            exit "$rc"
+          fi
+          if [[ "${{ steps.casadi_install.outputs.available }}" == "true" ]] && \
+             [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
+            echo "::warning::CasADi is installed but ALL backend tests were skipped." \
+              "Check that the requires_casadi guards are still valid."
+          fi
+
+      - name: Install bioptim Stack
+        # Epic #9762 Phase 0.2: bioptim is git-pinned (conda-forge only) and
+        # its gui/plot.py imports tkinter at module scope, hence python3-tk.
+        id: bioptim_install
+        continue-on-error: true
+        run: |
+          if [ "$(id -u)" -eq 0 ]; then
+            apt-get -o DPkg::Lock::Timeout=300 install -y python3-tk || true
+          elif command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            sudo apt-get -o DPkg::Lock::Timeout=300 install -y python3-tk || true
+          fi
+          source scripts/ci/pip_retry.sh
+          pip_retry install -e ".[bioptim]" 2>&1 | tee /tmp/bioptim_install.log
+          if python3 -c "from src.shared.python.optimization.ocp._compat import require_bioptim; require_bioptim()"; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "bioptim installation: SUCCESS"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "bioptim installation: NOT AVAILABLE on this runner (tests will be skipped)"
+          fi
+
+      - name: Run bioptim OCP Tests
+        # Marker requires_bioptim; tests self-skip without the stack and must
+        # pass with it. MPLBACKEND=Agg is set job-wide; no test opens a plot.
+        env:
+          PYTHONPATH: .:src
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### bioptim OCP Tests" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
+          xvfb-run --auto-servernum pytest \
+            -p no:xvfb \
+            tests/integration/optimization/ocp \
+            tests/architecture/test_bioptim_isolation.py \
+            -m "requires_bioptim or integration" \
+            --timeout=600 \
+            --timeout-method=thread \
+            -v --tb=short \
+            2>&1 | tee /tmp/bioptim-test-results.txt
+          rc=$?
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/bioptim-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/bioptim-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/bioptim-test-results.txt || true)
+          echo "- bioptim installed: ${{ steps.bioptim_install.outputs.available }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -eq 5 ]]; then
+            echo "::warning::No bioptim tests were collected."
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "::error::bioptim OCP tests failed with pytest exit code $rc."
+            exit "$rc"
+          fi
+          if [[ "${{ steps.bioptim_install.outputs.available }}" == "true" ]] && \
+             [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
+            echo "::warning::bioptim is installed but ALL bioptim tests were skipped."
+          fi
+
+      - name: Run Unit Tests (Optional Stack)
+        # Run the non-engine unit suite with optional extras present. Native
+        # engine unit tests are covered by dedicated engine/equivalence lanes;
+        # keeping them out of this broad optional-stack lane avoids coupling API
+        # and GUI optional dependency checks to engine-specific mock behavior.
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### Unit Tests (Optional Stack)" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
+          : > /tmp/unit-test-results.txt
+          rc=0
+          run_with_heartbeat() {
+            label="$1"
+            shift
+            "$@" &
+            cmd_pid=$!
+            (
+              while kill -0 "$cmd_pid" 2>/dev/null; do
+                sleep 60
+                echo "::notice::$label still running at $(date -u +%H:%M:%SZ)"
+              done
+            ) &
+            heartbeat_pid=$!
+            wait "$cmd_pid"
+            status=$?
+            kill "$heartbeat_pid" 2>/dev/null || true
+            wait "$heartbeat_pid" 2>/dev/null || true
+            return "$status"
+          }
+
+          unit_targets=(
+            tests/unit/biomechanics
+            tests/unit/deployment
+            tests/unit/robotics
+          )
+          for target in "${unit_targets[@]}"; do
+            echo "## Optional-stack unit target: $target" | tee -a /tmp/unit-test-results.txt
+            run_with_heartbeat "optional-stack unit target $target" bash -o pipefail -c '
+              xvfb-run --auto-servernum pytest "$1" \
+                -p no:xvfb \
+                --timeout=180 \
+                --timeout-method=thread \
+                -v --tb=short \
+                --durations=20 \
+                -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+                2>&1 | tee -a /tmp/unit-test-results.txt
+            ' bash "$target"
+            target_rc=$?
+            if [[ "$target_rc" -eq 5 ]]; then
+              echo "::warning::No runnable tests collected for $target; treating as skipped optional coverage."
+              continue
+            fi
+            if [[ "$target_rc" -ne 0 ]]; then
+              rc="$target_rc"
+              break
+            fi
+          done
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/unit-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/unit-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/unit-test-results.txt || true)
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -ne 0 ]]; then
+            echo "::error::Unit tests failed in the optional-stack lane with pytest exit code $rc."
+            exit "$rc"
+          fi
+
+      - name: Optional-Stack Skip Visibility Report
+        # Summarise all remaining skips so regressions are easy to spot.
+        # A future PR can harden this into a skip-count gate.
+        if: always()
+        run: |
+          echo "### Skip Visibility Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "The following test files reported skips in the optional-stack lane." >> "$GITHUB_STEP_SUMMARY"
+          echo "If counts increase unexpectedly, investigate guard conditions." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          for f in /tmp/api-test-results.txt /tmp/pinocchio-test-results.txt /tmp/optimization-backend-test-results.txt /tmp/bioptim-test-results.txt /tmp/unit-test-results.txt; do
+            if [[ -f "$f" ]]; then
+              label=$(basename "$f" .txt)
+              count=$(grep -c "SKIPPED" "$f" || true)
+              echo "- $label: $count skipped" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Upload Test Logs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: optional-stack-test-logs-${{ matrix.python }}
+          path: |
+            /tmp/api-test-results.txt
+            /tmp/pinocchio-test-results.txt
+            /tmp/optimization-backend-test-results.txt
+            /tmp/bioptim-test-results.txt
+            /tmp/unit-test-results.txt
+            /tmp/pinocchio_install.log
+            /tmp/casadi_install.log
+            /tmp/bioptim_install.log
+
+  articulated-manufactured-authority:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .:src
+      MUJOCO_GL: egl
+      PYTHONNOUSERSITE: "1"
+      PIP_CONFIG_FILE: /dev/null
+    steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Initialize Pinned Research Provider
+        run: git submodule update --init --depth 1 vendor/ud-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11.15"
+      - name: Create Isolated Authority Runtime
+        run: python -m venv "$RUNNER_TEMP/articulated-manufactured-authority-venv"
+      - name: Install Hash-Locked Authority Runtime
+        run: |
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" \
+            -m pip install --require-hashes --no-deps \
+            -r scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" -m pip check
+      - name: Run Non-Vacuous Authority and Killswitch Contracts
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" -m pytest \
+            tests/research/test_articulated_manufactured_solution.py \
+            tests/research/test_articulated_manufactured_hybrid_authority_red.py \
+            -v --tb=short \
+            -k "same_environment_two_process or killswitch" \
+            2>&1 | tee "$RUNNER_TEMP/articulated-authority-tests.txt"
+          # pyproject addopts include -q, so per-test PASSED lines never print;
+          # read the summary line ("N passed") instead (#9594).
+          passed=$(grep -oE "[0-9]+ passed" "$RUNNER_TEMP/articulated-authority-tests.txt" | awk '{s+=$1} END {print s+0}')
+          if [[ "$passed" -eq 0 ]]; then
+            echo "::error::Authority native contracts executed zero passing tests."
+            exit 1
+          fi
+      - name: Generate and Validate Deterministic Authority Candidates
+        run: |
+          authority_python="$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python"
+          first="$RUNNER_TEMP/articulated-authority-first.json"
+          second="$RUNNER_TEMP/articulated-authority-second.json"
+          "$authority_python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+            --profile authority \
+            --output "$first" \
+            --validate-generated
+          "$authority_python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+            --profile authority \
+            --output "$second" \
+            --validate-generated
+          cmp --silent "$first" "$second"
+          sha256sum "$first" "$second"
+      - name: Compare Candidate With Committed Publication Authority
+        run: |
+          candidate="$RUNNER_TEMP/articulated-authority-first.json"
+          committed="docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json"
+          if ! cmp --silent "$candidate" "$committed"; then
+            echo "::error::Deterministic authority candidate differs from committed publication authority."
+            exit 1
+          fi
+      - name: Upload Independently Reviewable Authority Candidate
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: articulated-manufactured-authority-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/articulated-authority-first.json
+          if-no-files-found: error
+          retention-days: 14
+          overwrite: false
+
+  articulated-manufactured-rolling:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .:src
+      MUJOCO_GL: egl
+      PYTHONNOUSERSITE: "1"
+      PIP_CONFIG_FILE: /dev/null
+    steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Initialize Pinned Research Provider
+        run: git submodule update --init --depth 1 vendor/ud-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+      - name: Create Isolated Rolling Runtime
+        run: python -m venv "$RUNNER_TEMP/articulated-manufactured-rolling-venv"
+      - name: Install Rolling Native Compatibility Runtime
+        run: |
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pip install \
+            "defusedxml>=0.7,<1" "pydantic>=2.12,<3" "PyYAML>=6.0,<7" \
+            "numpy>=2.2,<3" "scipy>=1.13,<2" \
+            "mujoco>=3.6,<4" "pin>=2.6,<5" "pytest>=8,<10"
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pip check
+      - name: Run Non-Vacuous Rolling and Killswitch Contracts
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pytest \
+            tests/research/test_articulated_manufactured_solution.py \
+            tests/research/test_articulated_manufactured_hybrid_authority_red.py \
+            -v --tb=short \
+            -k "rolling_native_output or killswitch" \
+            2>&1 | tee "$RUNNER_TEMP/articulated-rolling-tests.txt"
+          # Summary-line count; see the authority lane (#9594).
+          passed=$(grep -oE "[0-9]+ passed" "$RUNNER_TEMP/articulated-rolling-tests.txt" | awk '{s+=$1} END {print s+0}')
+          if [[ "$passed" -eq 0 ]]; then
+            echo "::error::Rolling native contracts executed zero passing tests."
+            exit 1
+          fi
+      - name: Compare Non-Authoritative Rolling Semantics
+        run: |
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+            --profile rolling \
+            --output "$RUNNER_TEMP/articulated-non-authoritative-rolling.json" \
+            --compare-committed

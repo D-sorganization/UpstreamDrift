@@ -1,0 +1,146 @@
+{
+  "capture": "driver",
+  "club": "driver",
+  "metric": "sum of wrist and forearm excursions beyond HUMAN_RANGES_DEG (angles wrapped to a turn) over the full-capture IK, wrists unbounded",
+  "rows": [
+    {
+      "grip_roll_deg": 0.0,
+      "ik_rms_mm": 26.0,
+      "wrist_excess_deg": {
+        "LWInputX": 122.0,
+        "LFInput": 0.8,
+        "RWInputX": 27.3,
+        "RWInputY": 73.7
+      },
+      "total_wrist_excess_deg": 223.8,
+      "address_deg": {
+        "LWInputX": 63.1,
+        "LWInputY": 27.4,
+        "LFInput": 36.8,
+        "RWInputX": 21.8,
+        "RWInputY": -51.6,
+        "RFInput": -17.5
+      },
+      "range_deg": {
+        "LWInputX": [41.0, 147.0],
+        "LWInputY": [-11.8, 42.5],
+        "LFInput": [-90.8, 61.5],
+        "RWInputX": [-32.3, 52.3],
+        "RWInputY": [-143.7, -7.2],
+        "RFInput": [-23.4, 90.1]
+      }
+    },
+    {
+      "grip_roll_deg": 45.0,
+      "ik_rms_mm": 28.1,
+      "wrist_excess_deg": {
+        "LWInputX": 123.3,
+        "LWInputY": 58.4,
+        "RWInputX": 29.0,
+        "RWInputY": 21.2,
+        "RFInput": 45.1
+      },
+      "total_wrist_excess_deg": 277.0,
+      "address_deg": {
+        "LWInputX": 24.9,
+        "LWInputY": -13.4,
+        "LFInput": 46.8,
+        "RWInputX": 19.6,
+        "RWInputY": -28.9,
+        "RFInput": 59.6
+      },
+      "range_deg": {
+        "LWInputX": [8.5, 148.3],
+        "LWInputY": [-128.4, 36.0],
+        "LFInput": [-52.4, 81.6],
+        "RWInputX": [-66.7, 54.0],
+        "RWInputY": [-91.2, -2.9],
+        "RFInput": [37.0, 135.1]
+      }
+    },
+    {
+      "grip_roll_deg": -90.0,
+      "ik_rms_mm": 40.2,
+      "wrist_excess_deg": {
+        "LWInputX": 25.9,
+        "LWInputY": 55.1,
+        "LFInput": 61.6,
+        "RWInputX": 154.9,
+        "RWInputY": 0.8,
+        "RFInput": 4.3
+      },
+      "total_wrist_excess_deg": 302.6,
+      "address_deg": {
+        "LWInputX": -17.7,
+        "LWInputY": 41.1,
+        "LFInput": -27.4,
+        "RWInputX": -121.0,
+        "RWInputY": -28.7,
+        "RFInput": -25.0
+      },
+      "range_deg": {
+        "LWInputX": [-23.1, 50.9],
+        "LWInputY": [15.8, 125.1],
+        "LFInput": [-151.6, -18.6],
+        "RWInputX": [-179.8, 179.9],
+        "RWInputY": [-70.8, -28.7],
+        "RFInput": [-25.0, 94.3]
+      }
+    },
+    {
+      "grip_roll_deg": -45.0,
+      "ik_rms_mm": 30.0,
+      "wrist_excess_deg": {
+        "LWInputX": 61.9,
+        "LFInput": 89.7,
+        "RWInputX": 139.8,
+        "RFInput": 41.9
+      },
+      "total_wrist_excess_deg": 333.3,
+      "address_deg": {
+        "LWInputX": -18.5,
+        "LWInputY": -15.1,
+        "LFInput": -13.1,
+        "RWInputX": -67.7,
+        "RWInputY": -53.3,
+        "RFInput": 37.9
+      },
+      "range_deg": {
+        "LWInputX": [-101.9, 11.4],
+        "LWInputY": [-40.4, 29.1],
+        "LFInput": [-179.7, 179.6],
+        "RWInputX": [-179.8, -48.8],
+        "RWInputY": [-53.3, 5.2],
+        "RFInput": [36.3, 131.9]
+      }
+    },
+    {
+      "grip_roll_deg": 90.0,
+      "ik_rms_mm": 29.7,
+      "wrist_excess_deg": {
+        "LWInputX": 118.1,
+        "LWInputY": 54.0,
+        "RWInputX": 154.8,
+        "RWInputY": 88.7,
+        "RFInput": 35.3
+      },
+      "total_wrist_excess_deg": 450.9,
+      "address_deg": {
+        "LWInputX": 29.8,
+        "LWInputY": -15.6,
+        "LFInput": 37.2,
+        "RWInputX": 67.7,
+        "RWInputY": 24.6,
+        "RFInput": 56.9
+      },
+      "range_deg": {
+        "LWInputX": [10.0, 143.1],
+        "LWInputY": [-124.0, 57.9],
+        "LFInput": [-13.1, 71.1],
+        "RWInputX": [-178.8, 179.8],
+        "RWInputY": [0.1, 158.7],
+        "RFInput": [-4.9, 125.3]
+      }
+    }
+  ]
+}

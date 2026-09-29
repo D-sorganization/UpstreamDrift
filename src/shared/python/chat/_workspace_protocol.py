@@ -1,0 +1,87 @@
+"""Protocol bridging a chat widget to a host calculation workspace.
+
+The chat module does not depend on the calculator workspace package
+directly — hosts implement this Protocol against whatever workspace
+system they have (calculator, jupyter kernel, etc.).
+
+Tools issue #2849.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Protocol, runtime_checkable
+
+
+@dataclass(frozen=True)
+class WorkspaceVariableInfo:
+    """Lightweight metadata for one workspace variable.
+
+    Designed to be safe to embed in a system prompt: the ``preview`` field
+    is a short string preview (never the full numerical content of large
+    arrays), so injecting many of these into chat context does not blow
+    up the token budget.
+
+    Attributes:
+        name: Variable name as registered in the host workspace.
+        dtype: Best-effort dtype string (e.g. ``"float64"`` or ``"str"``).
+        shape: Shape tuple for array-like values, or ``None`` for scalars.
+        preview: Short human-readable preview of the value. Must never
+            embed the full payload for array-like values.
+    """
+
+    name: str
+    dtype: str
+    shape: tuple[int, ...] | None
+    preview: str
+
+
+@runtime_checkable
+class WorkspaceContextProtocol(Protocol):
+    """Bridge contract between a chat widget and a host workspace.
+
+    Hosts (e.g. the Sidekick sidebar) implement this to expose their
+    calculator/jupyter workspace to a co-resident chat dock. The chat
+    widget only depends on this Protocol, not on any concrete workspace
+    implementation, keeping the chat module reusable.
+
+    Implementations must obey the following preconditions:
+
+    * ``describe()`` returns a fresh list each call; previews must be
+      bounded in length so the result is safe to embed in a system
+      prompt.
+    * ``read(name)`` raises :class:`KeyError` when ``name`` is unknown.
+    * ``write(name, value)`` raises :class:`TypeError` when ``name`` is
+      not a ``str``. Other validation (value type, units, etc.) is the
+      host's responsibility.
+    """
+
+    def describe(self) -> list[WorkspaceVariableInfo]:
+        """Return metadata snapshots for all visible workspace variables.
+
+        The returned list must be safe to embed in a system prompt: each
+        entry's ``preview`` must be bounded (no full array dumps).
+        """
+        ...
+
+    def read(self, name: str) -> Any:
+        """Return the live value of ``name``.
+
+        Raises:
+            KeyError: If ``name`` is not a known workspace variable.
+        """
+        ...
+
+    def write(self, name: str, value: Any) -> None:
+        """Write ``value`` into the host workspace under ``name``.
+
+        Raises:
+            TypeError: If ``name`` is not a ``str``.
+        """
+        ...
+
+
+__all__ = [
+    "WorkspaceContextProtocol",
+    "WorkspaceVariableInfo",
+]

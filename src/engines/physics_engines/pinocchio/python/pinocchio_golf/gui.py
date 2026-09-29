@@ -1,0 +1,467 @@
+"""Pinocchio GUI Wrapper (PyQt6 + meshcat).
+
+The GUI functionality is decomposed into focused mixins:
+- ``UISetupMixin`` (gui_ui_setup.py): Widget/layout construction, kinematic controls
+- ``SimulationMixin`` (gui_simulation.py): Physics loop, recording, live analysis
+- ``PinocchioAnalysisMixin`` (pinocchio_analysis_mixin.py): Plotting and data export
+- ``PinocchioVisualizationMixin`` (pinocchio_visualization_mixin.py): Meshcat overlays
+
+``PinocchioGUI`` inherits from all four mixins and ``SimulationGUIBase``,
+acting as the coordinator class.
+"""
+
+import sys
+from pathlib import Path
+
+import numpy as np
+
+try:
+    import pinocchio as pin
+
+    PINOCCHIO_AVAILABLE = True
+except ImportError:
+    pin = None  # type: ignore[assignment]
+    PINOCCHIO_AVAILABLE = False
+from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.data_io.common_utils import get_shared_urdf_path
+from src.shared.python.logging_pkg.logging_config import (
+    configure_gui_logging,
+    get_logger,
+)
+from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
+from src.shared.python.ui.widgets import LogPanel
+
+# Mixin imports
+from .gui_simulation import SimulationMixin
+from .gui_ui_setup import UISetupMixin
+from .manipulability import PinocchioManipulabilityAnalyzer
+from .pinocchio_analysis_mixin import PinocchioAnalysisMixin
+from .pinocchio_recorder import PinocchioRecorder
+from .pinocchio_visualization_mixin import PinocchioVisualizationMixin
+
+# Check meshcat availability
+try:
+    import meshcat.visualizer as viz
+
+    MESHCAT_AVAILABLE = True
+except ImportError:
+    MESHCAT_AVAILABLE = False
+    viz = None  # type: ignore[assignment]
+
+if MESHCAT_AVAILABLE:
+    from pinocchio.visualize import MeshcatVisualizer
+else:
+    MeshcatVisualizer = object  # Dummy class if missing
+
+try:
+    from .induced_acceleration import InducedAccelerationAnalyzer
+except ImportError:
+    # Fallback for when script is run directly
+    from induced_acceleration import (  # type: ignore[no-redef]
+        InducedAccelerationAnalyzer,
+    )
+
+# Set up logging using centralized module
+configure_gui_logging()
+logger = get_logger(__name__)
+
+
+# Constants
+DT_DEFAULT = 0.01  # [s] Physics time step. 10ms is standard for real-time visualization.  # noqa: E501
+SLIDER_RANGE_RAD = 10.0  # [rad] Range for joint sliders provided in UI
+SLIDER_SCALE = 100.0  # Scale factor for QSlider (int) -> rad (float)
+COM_SPHERE_RADIUS = 0.02  # [m] Radius for Center of Mass visualization spheres
+COM_COLOR = 0xFFFF00  # Yellow color for COMs
+
+
+class PinocchioGUI(
+    UISetupMixin,
+    SimulationMixin,
+    PinocchioAnalysisMixin,
+    PinocchioVisualizationMixin,
+    SimulationGUIBase,
+):
+    """Main GUI widget for Pinocchio robot visualization and computation."""
+
+    WINDOW_TITLE = "Pinocchio Golf Model (Dynamics & Kinematics)"
+    WINDOW_WIDTH = 1000
+    WINDOW_HEIGHT = 900
+
+    def _init_internal_state(self) -> None:
+        self.model: pin.Model | None = None
+        self.data: pin.Data | None = None
+        self.visual_model: pin.GeometryModel | None = None
+        self.collision_model: pin.GeometryModel | None = None
+        self.viz: MeshcatVisualizer | None = None
+        self.q: np.ndarray | None = None  # type: ignore[assignment]
+        self.v: np.ndarray | None = None  # type: ignore[assignment]
+        self.commanded_tau: np.ndarray | None = None
+        self.applied_tau: np.ndarray | None = None
+
+        self.analyzer: InducedAccelerationAnalyzer | None = None  # type: ignore[assignment]
+        self.latest_induced: dict[str, np.ndarray] | None = None  # type: ignore[assignment]
+        self.latest_cf: dict[str, np.ndarray] | None = None  # type: ignore[assignment]
+
+        self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
+        self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+
+        self.recorder = PinocchioRecorder(engine=self)
+        self.sim_time = 0.0
+
+        self.joint_sliders: list[QtWidgets.QSlider] = []
+        self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
+        self.joint_names: list[str] = []
+
+        self.operating_mode = "dynamic"
+        self.is_running = False
+        self.dt = DT_DEFAULT
+
+    def _init_meshcat_viewer(self) -> None:
+        self.viewer: viz.Visualizer | None = None
+        if not MESHCAT_AVAILABLE:
+            self.log_write("Warning: Meshcat not available. Visualization disabled.")
+            logger.warning("Meshcat module not found.")
+            return
+
+        try:
+            try:
+                self.viewer = viz.Visualizer(server_args=["--port", "7000"])
+            except TypeError:
+                logger.warning(
+                    "Meshcat Visualizer: server_args not supported. Using default."
+                )  # noqa: E501
+                self.viewer = viz.Visualizer()
+
+            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
+            logger.info("Internal Meshcat URL: %s", url)
+
+            self._log_meshcat_url(url)
+        except (ConnectionError, OSError, RuntimeError) as exc:
+            logger.error(f"Failed to initialize Meshcat viewer: {exc}")
+            self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
+            self.log_write("Please ensure meshcat-server is running or try again.")
+
+    def _log_meshcat_url(self, url: str) -> None:
+        try:
+            port = url.split(":")[-1].split("/")[0]
+            host_url = f"http://127.0.0.1:{port}/static/"
+            logger.info(f"Host Access URL: {host_url}")
+            self.log_write("=" * 40)
+            self.log_write("VISUALIZER READY")
+            self.log_write("Open this URL in your browser:")
+            self.log_write(f"{host_url}")
+            self.log_write("=" * 40)
+        except (PermissionError, OSError):
+            logger.info("Could not determine host URL from: %s", url)
+
+    def _load_default_model(self) -> None:
+        default_urdf = (
+            Path(__file__).parent / "../../models/generated/golfer.urdf"
+        ).resolve()  # noqa: E501
+
+        if default_urdf.exists():
+            self.available_models.insert(
+                0, {"name": "Default: Golfer", "path": str(default_urdf)}
+            )  # noqa: E501
+            self.load_urdf(str(default_urdf))
+        else:
+            self.available_models.insert(0, {"name": "Select Model...", "path": None})
+
+    def __init__(self) -> None:
+        """Initialize the Pinocchio GUI."""
+        super().__init__()
+
+        from src.shared.python.body_part_viz.force_color_controls import (
+            install_force_color_menu,
+        )
+        from src.shared.python.body_part_viz.meshcat_force_colors import (
+            MeshcatForceColorSession,
+        )
+
+        self.segment_force_colors = MeshcatForceColorSession()
+
+        self._init_internal_state()
+
+        pin_version = getattr(pin, "__version__", "unknown")
+        logger.info(f"Pinocchio Version: {pin_version}")
+        logger.info(f"Python Executable: {sys.executable}")
+
+        self.log = LogPanel()
+
+        self._init_meshcat_viewer()
+
+        self.available_models: list[dict] = []
+        self._scan_urdf_models()
+
+        self._setup_ui()
+
+        install_force_color_menu(self, lambda: [self.segment_force_colors])
+
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self._game_loop)
+
+        self._load_default_model()
+
+    def _update_viewer(self) -> None:
+        """Synchronize qualified colors through the active visualization mixin."""
+        self.segment_force_colors.update(self.model, self.sim_time)
+        super()._update_viewer()
+
+    def get_joint_names(self) -> list[str]:
+        """Return joint names for LivePlotWidget."""
+        return self.joint_names
+
+    def _scan_urdf_models(self) -> None:
+        """Scan shared/urdf for models."""
+        try:
+            urdf_dir = get_shared_urdf_path()
+
+            if urdf_dir is not None and urdf_dir.exists():
+                for urdf_file in urdf_dir.glob("*.urdf"):
+                    name = urdf_file.stem.replace("_", " ").title()
+                    self.available_models.append(
+                        {"name": f"URDF: {name}", "path": str(urdf_file)}
+                    )  # noqa: E501
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.error(f"Failed to scan URDF models: {e}")
+
+    def log_write(self, text: str) -> None:
+        """Append a message to the log panel and logger."""
+        if text is None:
+            raise ValueError("text must be provided")
+        self.log.append(text)
+        logger.info(text)
+
+    def load_urdf(self, fname: str | None = None) -> None:  # noqa: C901
+        """Load a URDF model and initialize the viewer."""
+        if not fname:
+            fname, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Select URDF File", "", "URDF Files (*.urdf *.xml)"
+            )
+
+        if not fname:
+            return
+
+        try:
+            # Build models
+            self.model = pin.buildModelFromUrdf(fname)
+            if self.model is None:
+                self.log_write("Error loading URDF: Failed to build model")
+                return
+
+            try:
+                self.visual_model = pin.buildGeomFromUrdf(
+                    self.model, fname, pin.GeometryType.VISUAL
+                )
+                self.collision_model = pin.buildGeomFromUrdf(
+                    self.model, fname, pin.GeometryType.COLLISION
+                )
+            except (RuntimeError, ValueError, OSError) as e:
+                self.log_write(f"Warning: Failed to load geometries: {e}")
+                self.visual_model = None
+                self.collision_model = None
+
+            self.data = self.model.createData()
+            self.q = pin.neutral(self.model)
+            self.v = np.zeros(self.model.nv)
+            self.sim_time = 0.0
+
+            # Init Analyzer
+            self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
+
+            # Init Manipulability Analyzer
+            self.manip_analyzer = PinocchioManipulabilityAnalyzer(self.model, self.data)
+            self._populate_manipulability_checkboxes()
+
+            # Reset recorder
+            self.recorder.reset()
+            self.lbl_rec_status.setText("Frames: 0")
+            if self.btn_record.isChecked():
+                self.btn_record.setChecked(False)
+                self.btn_record.setText("Record")
+
+            # Initialize Pinocchio MeshcatVisualizer
+            # (Imports handled at module level)
+            if MESHCAT_AVAILABLE and self.viewer is not None:
+                try:
+                    self.viewer["robot"].delete()
+                    self.viewer["overlays"].delete()
+
+                    self.viz = MeshcatVisualizer(
+                        self.model, self.collision_model, self.visual_model
+                    )
+                    self.viz.initViewer(viewer=self.viewer, open=False)
+                    self.viz.loadViewerModel()
+                except (RuntimeError, ValueError, OSError) as e:
+                    self.log_write(f"Warning: Visualizer init failed: {e}")
+                    self.viz = None
+            else:
+                self.log_write("Model loaded without 3D visualization.")
+                self.viz = None
+
+            self.log_write(f"Successfully loaded URDF: {fname}")
+            self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
+
+            # Rebuild Kinematic Controls
+            self._build_kinematic_controls()
+            self._sync_kinematic_controls()
+
+            # Init state display
+            self._update_viewer()
+
+            # Restore overlays for new model if checkboxes are active
+            if self.chk_frames.isChecked():
+                self._toggle_frames(checked=True)
+            if self.chk_coms.isChecked():
+                self._toggle_coms(checked=True)
+
+            if not self.timer.isActive():
+                self.timer.start(int(self.dt * 1000))
+
+            # Update Live Plot joint names if initialized
+            if hasattr(self, "live_plot"):
+                self.live_plot.set_joint_names(self.get_joint_names())
+
+        except (ValueError, RuntimeError) as e:
+            self.log_write(f"Error loading URDF (Pinocchio): {e}")
+        except (PermissionError, OSError) as e:
+            # Catch-all for unexpected errors
+            self.log_write(f"Unexpected error loading URDF: {e}")
+            logger.exception("Unexpected error loading URDF")
+
+    # ==================================================================
+    # SimulationGUIBase overrides
+    # ==================================================================
+
+    def _build_base_ui(self) -> None:
+        """Override base UI construction.
+
+        Pinocchio builds its own comprehensive UI in ``_setup_ui``,
+        so we skip the generic skeleton.
+        """
+        # No-op: Pinocchio builds its own UI entirely
+
+    def step_simulation(self, tau: np.ndarray | None = None) -> None:
+        """Advance the Pinocchio simulation by one time step."""
+        if (
+            self.model is not None
+            and self.data is not None
+            and self.q is not None
+            and self.v is not None
+        ):
+            self._advance_physics(tau=tau)
+
+    def reset_simulation(self) -> None:
+        """Reset the Pinocchio simulation state."""
+        self._reset_simulation()
+
+    def update_visualization(self) -> None:
+        """Refresh the Pinocchio visualization."""
+        self._update_viewer()
+
+    def load_model(self, index: int) -> None:
+        """Load a model at the given index."""
+        self._on_model_combo_changed(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """Synchronize kinematic slider values with model state."""
+        self._sync_kinematic_controls()
+
+    def start_recording(self) -> None:
+        """Start recording simulation data."""
+        self.recorder.start_recording()
+
+    def stop_recording(self) -> None:
+        """Stop recording simulation data."""
+        self.recorder.stop_recording()
+
+    def get_recording_frame_count(self) -> int:
+        """Return the number of recorded frames."""
+        return self.recorder.get_num_frames()
+
+    def export_data(self, filename: str) -> None:
+        """Export recorded data to the given filename."""
+        self._export_statistics()
+
+
+class MainWidget(QtWidgets.QWidget):
+    """Embeddable Pinocchio Dashboard widget.
+
+    Wraps a :class:`PinocchioGUI` instance with ``Qt.WindowType.Widget``
+    flags so the launcher can host the dashboard as a tab / dock without
+    spawning a top-level window.
+
+    The wrapped window is exposed as :attr:`inner_main_window` for
+    callers that need access to the dashboard's tabs, sliders, or
+    recorder (e.g. tests).
+
+    The historical entry point — :class:`PinocchioGUI` ``QMainWindow`` —
+    still exists for back-compat (standalone ``python gui.py``), but its
+    contents are also exposed through :class:`MainWidget` defined here.
+    Embeddable hosts construct :class:`MainWidget` directly and never
+    see the top-level ``QMainWindow`` shell.
+
+    See Subtask 5 / #4998 of EPIC #4993.
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        super().__init__(parent)
+
+        # Build the dashboard as a child window. ``Qt.WindowType.Widget``
+        # tells Qt to treat this ``QMainWindow`` as a regular child
+        # widget rather than a top-level window — that way it lays out
+        # cleanly inside our ``QHBoxLayout`` instead of popping into its
+        # own OS window.
+        self._inner: PinocchioGUI = PinocchioGUI()
+        self._inner.setWindowFlags(QtCore.Qt.WindowType.Widget)
+        self._inner.setParent(self)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._inner)
+
+        logger.info("Pinocchio MainWidget initialized")
+
+    # ---- accessors -----------------------------------------------------
+
+    @property
+    def inner_main_window(self) -> "PinocchioGUI":
+        """Return the wrapped :class:`PinocchioGUI` ``QMainWindow``."""
+        return self._inner
+
+    # ---- lifecycle -----------------------------------------------------
+
+    def cleanup(self) -> None:
+        """Best-effort teardown of simulation timers.
+
+        Stops the periodic physics-loop timer so the host process does
+        not keep firing Qt timers after the embedded tab is closed.
+        Idempotent and defensive: never raises.
+        """
+        try:
+            timer = getattr(self._inner, "timer", None)
+            if timer is not None:
+                try:
+                    timer.stop()
+                except Exception:  # pragma: no cover - defensive  # noqa: BLE001
+                    logger.debug("PinocchioGUI.timer.stop raised", exc_info=True)
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("Pinocchio MainWidget cleanup raised")
+
+
+def get_dockable_ui() -> QtWidgets.QMainWindow:
+    """Return the main window instance for docking in the unified launcher."""
+    return PinocchioGUI()
+
+
+def main() -> None:
+    """Main entry point for the GUI application."""
+    app = QtWidgets.QApplication(sys.argv)
+    window = PinocchioGUI()
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,12 @@
+[submodule "shared/models/opensim/opensim-models"]
+	path = shared/models/opensim/opensim-models
+	url = https://github.com/opensim-org/opensim-models.git
+[submodule "shared/models/myosuite/myo_sim"]
+	path = shared/models/myosuite/myo_sim
+	url = https://github.com/MyoHub/myo_sim.git
+[submodule "src/shared/tools/human-gazebo"]
+	path = src/shared/tools/human-gazebo
+	url = https://github.com/gbionics/human-gazebo
+[submodule "vendor/ud-tools"]
+	path = vendor/ud-tools
+	url = https://github.com/D-sorganization/Tools.git

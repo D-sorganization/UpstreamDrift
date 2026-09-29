@@ -1,0 +1,1990 @@
+%%% MATLAB PROJECT PACKER - v1.0 %%%
+%%% Source Folder Base: C:\Users\diete\MATLAB Drive\Projects\Model Rebuild\Scripts\_BaseData Scripts %%%
+%%% Pack Time: 02-May-2025 09:27:43 %%%
+
+%%% START FILE: MASTER_SCRIPT_BaseDataCharts_3D.m %%%
+cd(matlabdrive);
+cd '3DModel';
+cd 'Scripts/_BaseData Scripts';
+% PauseTime=0;
+SCRIPT_101_3D_PLOT_BaseData_AngularWork;
+SCRIPT_102_3D_PLOT_BaseData_AngularPower;
+SCRIPT_103_3D_PLOT_BaseData_LinearPower;
+SCRIPT_104_3D_PLOT_BaseData_LinearWork;
+SCRIPT_105_3D_PLOT_BaseData_JointTorqueInputs;
+SCRIPT_106_3D_PLOT_BaseData_TotalWork;
+SCRIPT_107_3D_PLOT_BaseData_TotalPower;
+SCRIPT_112_3D_QUIVER_BaseData_NetForceEquivalentCouple;
+SCRIPT_113_3D_QUIVER_BaseData_NetForce;
+SCRIPT_114_3D_QUIVER_BaseData_LHRHForce;
+SCRIPT_115_3D_QUIVER_BaseData_LHRHTorque;
+SCRIPT_116_3D_QUIVER_BaseData_AllTorqueandMoments;
+SCRIPT_117_3D_QUIVER_BaseData_AllMoments;
+% SCRIPT_118_3D_QUIVER_BaseData_LeftUpperArmMoments;
+% SCRIPT_119_3D_QUIVER_BaseData_RightUpperArmMoments;
+% SCRIPT_120_3D_QUIVER_BaseData_LForearmMoments;
+% SCRIPT_121_3D_QUIVER_BaseData_RForearmMoments;
+SCRIPT_122_3D_PLOT_BaseData_ForceAlongHandPath;
+SCRIPT_123_3D_PLOT_BaseData_CHSandHandSpeed;
+SCRIPT_125_3D_PLOT_BaseData_LHRHForceAlongHandPath;
+SCRIPT_126_3D_PLOT_BaseData_LinearImpulse;
+SCRIPT_127_3D_PLOT_BaseData_LinearWork;
+SCRIPT_128_3D_PLOT_BaseData_LinearImpulse;
+SCRIPT_129_3D_PLOT_BaseData_EquivalentCoupleandMOF;
+SCRIPT_130_3D_PLOT_BaseData_LSWork;
+SCRIPT_131_3D_PLOT_BaseData_LSPower;
+SCRIPT_132_3D_PLOT_BaseData_RSWork;
+SCRIPT_133_3D_PLOT_BaseData_RSPower;
+SCRIPT_134_3D_PLOT_BaseData_LEWork;
+SCRIPT_135_3D_PLOT_BaseData_LEPower;
+SCRIPT_136_3D_PLOT_BaseData_REWork;
+SCRIPT_137_3D_PLOT_BaseData_REPower;
+SCRIPT_138_3D_PLOT_BaseData_LHWork;
+SCRIPT_139_3D_PLOT_BaseData_LHPower;
+SCRIPT_140_3D_PLOT_BaseData_RHWork;
+SCRIPT_141_3D_PLOT_BaseData_RHPower;
+SCRIPT_142_3D_QUIVER_BaseData_LHRHLinearImpulse;
+SCRIPT_143_3D_3D_QUIVER_BaseData_LHRH_BaseData_AngularImpulse;
+SCRIPT_144_3D_QUIVER_BaseData_TotalLinearImpulse;
+SCRIPT_145_3D_QUIVER_BaseData_TotalAngularImpulse;
+SCRIPT_146_3D_QUIVER_BaseData_NetForceEquivalantCoupleShafts;
+SCRIPT_147_3D_QUIVER_BaseData_HubForce;
+SCRIPT_148_3D_PLOT_BaseData_LocalHandForces;
+SCRIPT_149_3D_QUIVER_BaseData_LHRHMoments;
+% SCRIPT_150_3D_PLOT_BaseData_TorqueInputvsTorqueOutput;
+
+% clear PauseTime;
+
+
+
+%%% END FILE: MASTER_SCRIPT_BaseDataCharts_3D.m %%%
+
+%%% START FILE: SCRIPT_101_3D_PLOT_BaseData_AngularWork.m %%%
+figure(101);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSAngularWorkonArm);
+plot(BASEQ.Time,BASEQ.RSAngularWorkonArm);
+plot(BASEQ.Time,BASEQ.LEAngularWorkonForearm);
+plot(BASEQ.Time,BASEQ.REAngularWorkonForearm);
+plot(BASEQ.Time,BASEQ.LHAngularWorkonClub);
+plot(BASEQ.Time,BASEQ.RHAngularWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Work','RS Angular Work','LE Angular Work','RE Angular Work','LH Angular Work','RH Angular Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Angular Work');
+pause(PauseTime);
+
+%Close Figure
+close(101);
+
+%%% END FILE: SCRIPT_101_3D_PLOT_BaseData_AngularWork.m %%%
+
+%%% START FILE: SCRIPT_102_3D_PLOT_BaseData_AngularPower.m %%%
+figure(102);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSonArmAngularPower);
+plot(BASEQ.Time,BASEQ.RSonArmAngularPower);
+plot(BASEQ.Time,BASEQ.LEonForearmAngularPower);
+plot(BASEQ.Time,BASEQ.REonForearmAngularPower);
+plot(BASEQ.Time,BASEQ.LHonClubAngularPower);
+plot(BASEQ.Time,BASEQ.RHonClubAngularPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Power','RS Angular Power','LE Angular Power','RE Angular Power','LH Angular Power','RH Angular Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Angular Power');
+pause(PauseTime);
+
+%Close Figure
+close(102);
+
+%%% END FILE: SCRIPT_102_3D_PLOT_BaseData_AngularPower.m %%%
+
+%%% START FILE: SCRIPT_103_3D_PLOT_BaseData_LinearPower.m %%%
+figure(103);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSonArmLinearPower);
+plot(BASEQ.Time,BASEQ.RSonArmLinearPower);
+plot(BASEQ.Time,BASEQ.LEonForearmLinearPower);
+plot(BASEQ.Time,BASEQ.REonForearmLinearPower);
+plot(BASEQ.Time,BASEQ.LHonClubLinearPower);
+plot(BASEQ.Time,BASEQ.RHonClubLinearPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power','RS Linear Power','LE Linear Power','RE Linear Power','LH Linear Power','RH Linear Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Linear Power');
+pause(PauseTime);
+
+%Close Figure
+close(103);
+
+%%% END FILE: SCRIPT_103_3D_PLOT_BaseData_LinearPower.m %%%
+
+%%% START FILE: SCRIPT_104_3D_PLOT_BaseData_LinearWork.m %%%
+figure(104);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSLinearWorkonArm);
+plot(BASEQ.Time,BASEQ.RSLinearWorkonArm);
+plot(BASEQ.Time,BASEQ.LELinearWorkonForearm);
+plot(BASEQ.Time,BASEQ.RELinearWorkonForearm);
+plot(BASEQ.Time,BASEQ.LHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.RHLinearWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work','RS Linear Work','LE Linear Work','RE Linear Work','LH Linear Work','RH Linear Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Linear Work on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(104);
+
+%%% END FILE: SCRIPT_104_3D_PLOT_BaseData_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_105_3D_PLOT_BaseData_JointTorqueInputs.m %%%
+figure(105);
+hold on;
+
+plot(BASEQ.Time,BASEQ.HipTorqueXInput);
+plot(BASEQ.Time,BASEQ.HipTorqueYInput);
+plot(BASEQ.Time,BASEQ.HipTorqueZInput);
+plot(BASEQ.Time,BASEQ.TranslationForceXInput);
+plot(BASEQ.Time,BASEQ.TranslationForceYInput);
+plot(BASEQ.Time,BASEQ.TranslationForceZInput);
+plot(BASEQ.Time,BASEQ.TorsoTorqueInput);
+plot(BASEQ.Time,BASEQ.SpineTorqueXInput);
+plot(BASEQ.Time,BASEQ.SpineTorqueYInput);
+plot(BASEQ.Time,BASEQ.LScapTorqueXInput);
+plot(BASEQ.Time,BASEQ.LScapTorqueYInput);
+plot(BASEQ.Time,BASEQ.RScapTorqueXInput);
+plot(BASEQ.Time,BASEQ.RScapTorqueYInput);
+plot(BASEQ.Time,BASEQ.LSTorqueXInput);
+plot(BASEQ.Time,BASEQ.LSTorqueYInput);
+plot(BASEQ.Time,BASEQ.LSTorqueZInput);
+plot(BASEQ.Time,BASEQ.RSTorqueXInput);
+plot(BASEQ.Time,BASEQ.RSTorqueYInput);
+plot(BASEQ.Time,BASEQ.RSTorqueZInput);
+plot(BASEQ.Time,BASEQ.LETorqueInput);
+plot(BASEQ.Time,BASEQ.RETorqueInput);
+plot(BASEQ.Time,BASEQ.LFTorqueInput);
+plot(BASEQ.Time,BASEQ.RFTorqueInput);
+plot(BASEQ.Time,BASEQ.LWTorqueXInput);
+plot(BASEQ.Time,BASEQ.LWTorqueYInput);
+plot(BASEQ.Time,BASEQ.RWTorqueXInput);
+plot(BASEQ.Time,BASEQ.RWTorqueYInput);
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Hip Torque X','Hip Torque Y','Hip Torque Z','Translation Force X',...
+    'Translation Force Y','Translation Force Z','Torso Torque','Spine Torque X',...
+    'Spine Torque Y','LScap Torque X','Left Scap Torque Y','RScap Torque X',...
+    'RScapTorqueY','LS Torque X','LS Torque Y','LS Torque Z','RS Torque X','RS Torque Y',...
+    'RS Torque Z','LE Torque','RE Torque','LF Torque','RF Torque','LW Torque X',...
+    'LW Torque Y','RW Torque X','RW Torque Y');
+legend('Location','southeast');
+%Add a Title
+title('Joint Torque Inputs');
+%subtitle('Left Hand, Right Hand, Total');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Joint Torque Inputs');
+pause(PauseTime);
+
+%Close Figure
+close(105);
+
+%%% END FILE: SCRIPT_105_3D_PLOT_BaseData_JointTorqueInputs.m %%%
+
+%%% START FILE: SCRIPT_106_3D_PLOT_BaseData_TotalWork.m %%%
+figure(106);
+hold on;
+
+plot(BASEQ.Time,BASEQ.TotalLSWork);
+plot(BASEQ.Time,BASEQ.TotalRSWork);
+plot(BASEQ.Time,BASEQ.TotalLEWork);
+plot(BASEQ.Time,BASEQ.TotalREWork);
+plot(BASEQ.Time,BASEQ.TotalLHWork);
+plot(BASEQ.Time,BASEQ.TotalRHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Work','RS Total Work','LE Total Work','RE Total Work','LH Total Work','RH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Total Work');
+pause(PauseTime);
+
+%Close Figure
+close(106);
+
+%%% END FILE: SCRIPT_106_3D_PLOT_BaseData_TotalWork.m %%%
+
+%%% START FILE: SCRIPT_107_3D_PLOT_BaseData_TotalPower.m %%%
+figure(107);
+hold on;
+
+plot(BASEQ.Time,BASEQ.TotalLSPower);
+plot(BASEQ.Time,BASEQ.TotalRSPower);
+plot(BASEQ.Time,BASEQ.TotalLEPower);
+plot(BASEQ.Time,BASEQ.TotalREPower);
+plot(BASEQ.Time,BASEQ.TotalLHPower);
+plot(BASEQ.Time,BASEQ.TotalRHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Power','RS Total Power','LE Total Power','RE Total Power','LW Total Power','RW Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Total Power');
+pause(PauseTime);
+
+%Close Figure
+close(107);
+
+%%% END FILE: SCRIPT_107_3D_PLOT_BaseData_TotalPower.m %%%
+
+%%% START FILE: SCRIPT_112_3D_QUIVER_BaseData_NetForceEquivalentCouple.m %%%
+%Generate Club Quiver Plot
+figure(112);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,2),BASEQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','Net Force','Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('BASE');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Net Force and Equivalent MP Couple');
+pause(PauseTime);
+
+%Close Figure
+close(112);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_112_3D_QUIVER_BaseData_NetForceEquivalentCouple.m %%%
+
+%%% START FILE: SCRIPT_113_3D_QUIVER_BaseData_NetForce.m %%%
+%Generate Club Quiver Plot
+figure(113);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+%Add Legend to Plot
+legend('','','','','Net Force');
+
+%Add a Title
+title('Net Force');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots//BASE_Quiver Plot - Net Force');
+pause(PauseTime);
+
+%Close Figure
+close(113);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_113_3D_QUIVER_BaseData_NetForce.m %%%
+
+%%% START FILE: SCRIPT_114_3D_QUIVER_BaseData_LHRHForce.m %%%
+%Generate Club Quiver Plot
+figure(114);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH Total Force Quiver Plot
+LHForceQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHonClubFGlobal(:,1),BASEQ.LHonClubFGlobal(:,2),BASEQ.LHonClubFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Force Quiver Plot
+RHForceQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHonClubFGlobal(:,1),BASEQ.RHonClubFGlobal(:,2),BASEQ.RHonClubFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[1 0 0];
+RHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+RHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/RHForceQuiver.ScaleFactor;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+NetForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/NetForceQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Force','RH Force','Net Force');
+
+%Add a Title
+title('Total Force');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots//BASE_Quiver Plot - Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(114);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear RHForceQuiver;
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_114_3D_QUIVER_BaseData_LHRHForce.m %%%
+
+%%% START FILE: SCRIPT_115_3D_QUIVER_BaseData_LHRHTorque.m %%%
+%Generate Club Quiver Plot
+figure(115);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH Total Torque Quiver Plot
+LHTorqueQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHonClubTGlobal(:,1),BASEQ.LHonClubTGlobal(:,2),BASEQ.LHonClubTGlobal(:,3));
+LHTorqueQuiver.LineWidth=1;
+LHTorqueQuiver.Color=[0 0 1];
+LHTorqueQuiver.AutoScaleFactor=2;
+LHTorqueQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Torque Quiver Plot
+RHTorqueQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHonClubTGlobal(:,1),BASEQ.RHonClubTGlobal(:,2),BASEQ.RHonClubTGlobal(:,3));
+RHTorqueQuiver.LineWidth=1;
+RHTorqueQuiver.Color=[1 0 0];
+RHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHTorqueQuiver.AutoScaleFactor=LHTorqueQuiver.ScaleFactor/RHTorqueQuiver.ScaleFactor;
+
+%Generate Total Torque Quiver Plot
+NetTorqueQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandTorqueGlobal(:,1),BASEQ.TotalHandTorqueGlobal(:,2),BASEQ.TotalHandTorqueGlobal(:,3));
+NetTorqueQuiver.LineWidth=1;
+NetTorqueQuiver.Color=[0 1 0];
+NetTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+NetTorqueQuiver.AutoScaleFactor=LHTorqueQuiver.ScaleFactor/NetTorqueQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Torque','RH Torque','Net Torque');
+
+%Add a Title
+title('Total Torque');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots//BASE_Quiver Plot - Hand Torques');
+pause(PauseTime);
+
+%Close Figure
+close(115);
+
+%Clear Figure from Workspace
+clear LHTorqueQuiver;
+clear RHTorqueQuiver;
+clear NetTorqueQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_115_3D_QUIVER_BaseData_LHRHTorque.m %%%
+
+%%% START FILE: SCRIPT_116_3D_QUIVER_BaseData_AllTorqueandMoments.m %%%
+%Generate Club Quiver Plot
+figure(116);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHMOFonClubGlobal(:,1),BASEQ.LHMOFonClubGlobal(:,2),BASEQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=4;
+
+%Generate LH Torque Quiver Plot
+LHTorqueQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHonClubTGlobal(:,1),BASEQ.LHonClubTGlobal(:,2),BASEQ.LHonClubTGlobal(:,3));
+LHTorqueQuiver.LineWidth=1;
+LHTorqueQuiver.Color=[0 0 1];
+LHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+LHTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/LHTorqueQuiver.ScaleFactor;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHMOFonClubGlobal(:,1),BASEQ.RHMOFonClubGlobal(:,2),BASEQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate RH Total Torque Quiver Plot
+RHTorqueQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHonClubTGlobal(:,1),BASEQ.RHonClubTGlobal(:,2),BASEQ.RHonClubTGlobal(:,3));
+RHTorqueQuiver.LineWidth=1;
+RHTorqueQuiver.Color=[1 0 0];
+RHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHTorqueQuiver.ScaleFactor;
+
+%Generate Total MOF Quiver Plot
+TotalMOFQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.MPMOFonClubGlobal(:,1),BASEQ.MPMOFonClubGlobal(:,2),BASEQ.MPMOFonClubGlobal(:,3));
+TotalMOFQuiver.LineWidth=1;
+TotalMOFQuiver.Color=[0 0 0.5];
+TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Generate Total Torque Quiver Plot
+NetTorqueQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandTorqueGlobal(:,1),BASEQ.TotalHandTorqueGlobal(:,2),BASEQ.TotalHandTorqueGlobal(:,3));
+NetTorqueQuiver.LineWidth=1;
+NetTorqueQuiver.Color=[0 1 0];
+NetTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+NetTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/NetTorqueQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','LH Torque','RH MOF','RH Torque','Total MOF','Net Torque');
+
+%Add a Title
+title('All Torques and Moments on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots//BASE_Quiver Plot - Torques and Moments');
+pause(PauseTime);
+
+%Close Figure
+close(116);
+
+%Clear Figure from Workspace
+clear LHTorqueQuiver;
+clear RHTorqueQuiver;
+clear NetTorqueQuiver;
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_116_3D_QUIVER_BaseData_AllTorqueandMoments.m %%%
+
+%%% START FILE: SCRIPT_117_3D_QUIVER_BaseData_AllMoments.m %%%
+%Generate Club Quiver Plot
+figure(117);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHMOFonClubGlobal(:,1),BASEQ.LHMOFonClubGlobal(:,2),BASEQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=2;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHMOFonClubGlobal(:,1),BASEQ.RHMOFonClubGlobal(:,2),BASEQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate RH MOF Quiver Plot
+TotalMOFQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.MPMOFonClubGlobal(:,1),BASEQ.MPMOFonClubGlobal(:,2),BASEQ.MPMOFonClubGlobal(:,3));
+TotalMOFQuiver.LineWidth=1;
+TotalMOFQuiver.Color=[0 0 0.5];
+TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','RH MOF','Total MOF');
+
+%Add a Title
+title('All Moments of Force on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Club Moments of Force');
+pause(PauseTime);
+
+%Close Figure
+close(117);
+
+%Clear Figure from Workspace
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_117_3D_QUIVER_BaseData_AllMoments.m %%%
+
+%%% START FILE: SCRIPT_118_3D_QUIVER_BaseData_LeftUpperArmMoments.m %%%
+%Generate Club Quiver Plot
+figure(118);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Elbow on Left Upper Arm Total Force Quiver Plot
+LElbowQuiver=quiver3(BASEQ.LEx(:,1),BASEQ.LEy(:,1),BASEQ.LEz(:,1),BASEQ.LForearmonLArmFGlobal(:,1),BASEQ.LForearmonLArmFGlobal(:,2),BASEQ.LForearmonLArmFGlobal(:,3));
+LElbowQuiver.LineWidth=1;
+LElbowQuiver.Color=[0 0 1];
+LElbowQuiver.AutoScaleFactor=2;
+LElbowQuiver.MaxHeadSize=0.1;
+
+%Generate Shoulder on Left Upper Arm Total Force Quiver Plot
+LSForceQuiver=quiver3(BASEQ.LSx(:,1),BASEQ.LSy(:,1),BASEQ.LSz(:,1),BASEQ.LSonLArmFGlobal(:,1),BASEQ.LSonLArmFGlobal(:,2),BASEQ.LSonLArmFGlobal(:,3));
+LSForceQuiver.LineWidth=1;
+LSForceQuiver.Color=[1 0 0];
+LSForceQuiver.MaxHeadSize=0.1;
+LSForceQuiver.AutoScaleFactor=LElbowQuiver.ScaleFactor/LSForceQuiver.ScaleFactor;
+
+%Generate Left Elbow MOF on Left Upper Arm
+LEMOFLArmQuiver=quiver3(BASEQ.LEx(:,1),BASEQ.LEy(:,1),BASEQ.LEz(:,1),BASEQ.LElbowonLArmMOFGlobal(:,1),BASEQ.LElbowonLArmMOFGlobal(:,2),BASEQ.LElbowonLArmMOFGlobal(:,3));
+LEMOFLArmQuiver.LineWidth=1;
+LEMOFLArmQuiver.Color=[0 0.75 0];
+LEMOFLArmQuiver.MaxHeadSize=0.1;
+LEMOFLArmQuiver.AutoScaleFactor=2;
+
+%Generate Left Shoulder MOF on Left Upper Arm
+LSMOFLArm=quiver3(BASEQ.LSx(:,1),BASEQ.LSy(:,1),BASEQ.LSz(:,1),BASEQ.LShoulderonLArmMOFGlobal(:,1),BASEQ.LShoulderonLArmMOFGlobal(:,2),BASEQ.LShoulderonLArmMOFGlobal(:,3));
+LSMOFLArm.LineWidth=1;
+LSMOFLArm.Color=[0 0.5 0];
+LSMOFLArm.MaxHeadSize=0.1;
+LSMOFLArm.AutoScaleFactor=LEMOFLArmQuiver.ScaleFactor/LSMOFLArm.ScaleFactor;
+
+%Generate Left Arm Quivers
+LeftArm=quiver3(BASEQ.LSx(:,1),BASEQ.LSy(:,1),BASEQ.LSz(:,1),BASEQ.LeftArmdx(:,1),BASEQ.LeftArmdy(:,1),BASEQ.LeftArmdz(:,1),0);
+LeftArm.ShowArrowHead='off';
+LeftArm.LineWidth=1;
+LeftArm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','LE Force','LS Force','LE MOF','LS MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Left Upper Arm');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Left Upper Arm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(118);
+
+%Clear Figure from Workspace
+clear LElbowQuiver;
+clear LSForceQuiver;
+clear LEMOFLArmQuiver;
+clear LSMOFLArm;
+clear LeftArm;
+clear RHForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_118_3D_QUIVER_BaseData_LeftUpperArmMoments.m %%%
+
+%%% START FILE: SCRIPT_119_3D_QUIVER_BaseData_RightUpperArmMoments.m %%%
+%Generate Club Quiver Plot
+figure(119);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Elbow on Right Upper Arm Total Force Quiver Plot
+RElbowQuiver=quiver3(BASEQ.REx(:,1),BASEQ.REy(:,1),BASEQ.REz(:,1),BASEQ.RForearmonRArmFGlobal(:,1),BASEQ.RForearmonRArmFGlobal(:,2),BASEQ.RForearmonRArmFGlobal(:,3));
+RElbowQuiver.LineWidth=1;
+RElbowQuiver.Color=[0 0 1];
+RElbowQuiver.AutoScaleFactor=2;
+RElbowQuiver.MaxHeadSize=0.1;
+
+%Generate Shoulder on Right Upper Arm Total Force Quiver Plot
+RSForceQuiver=quiver3(BASEQ.RSx(:,1),BASEQ.RSy(:,1),BASEQ.RSz(:,1),BASEQ.RSonRArmFGlobal(:,1),BASEQ.RSonRArmFGlobal(:,2),BASEQ.RSonRArmFGlobal(:,3));
+RSForceQuiver.LineWidth=1;
+RSForceQuiver.Color=[1 0 0];
+RSForceQuiver.MaxHeadSize=0.1;
+RSForceQuiver.AutoScaleFactor=RElbowQuiver.ScaleFactor/RSForceQuiver.ScaleFactor;
+
+%Generate Right Elbow MOF on Right Upper Arm
+REMOFRArmQuiver=quiver3(BASEQ.REx(:,1),BASEQ.REy(:,1),BASEQ.REz(:,1),BASEQ.RElbowonRArmMOFGlobal(:,1),BASEQ.RElbowonRArmMOFGlobal(:,2),BASEQ.RElbowonRArmMOFGlobal(:,3));
+REMOFRArmQuiver.LineWidth=1;
+REMOFRArmQuiver.Color=[0 0.75 0];
+REMOFRArmQuiver.MaxHeadSize=0.1;
+REMOFRArmQuiver.AutoScaleFactor=2;
+
+%Generate Right Shoulder MOF on Right Upper Arm
+RSMOFRArm=quiver3(BASEQ.RSx(:,1),BASEQ.RSy(:,1),BASEQ.RSz(:,1),BASEQ.RShoulderonRArmMOFGlobal(:,1),BASEQ.RShoulderonRArmMOFGlobal(:,2),BASEQ.RShoulderonRArmMOFGlobal(:,3));
+RSMOFRArm.LineWidth=1;
+RSMOFRArm.Color=[0 0.5 0];
+RSMOFRArm.MaxHeadSize=0.1;
+RSMOFRArm.AutoScaleFactor=REMOFRArmQuiver.ScaleFactor/RSMOFRArm.ScaleFactor;
+
+%Generate Right Arm Quivers
+RightArm=quiver3(BASEQ.RSx(:,1),BASEQ.RSy(:,1),BASEQ.RSz(:,1),BASEQ.RightArmdx(:,1),BASEQ.RightArmdy(:,1),BASEQ.RightArmdz(:,1),0);
+RightArm.ShowArrowHead='off';
+RightArm.LineWidth=1;
+RightArm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','RE Force','RS Force','RE MOF','RS MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Right Upper Arm');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots//BASE_Quiver Plot - Right Upper Arm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(119);
+
+%Clear Figure from Workspace
+clear RElbowQuiver;
+clear RSForceQuiver;
+clear REMOFRArmQuiver;
+clear RSMOFRArm;
+clear RightArm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_119_3D_QUIVER_BaseData_RightUpperArmMoments.m %%%
+
+%%% START FILE: SCRIPT_120_3D_QUIVER_BaseData_LForearmMoments.m %%%
+%Generate Club Quiver Plot
+figure(120);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Club on LW Total Force Quiver Plot
+LWForceQuiver=quiver3(BASEQ.LWx(:,1),BASEQ.LWy(:,1),BASEQ.LWz(:,1),BASEQ.ClubonLWFGlobal(:,1),BASEQ.ClubonLWFGlobal(:,2),BASEQ.ClubonLWFGlobal(:,3));
+LWForceQuiver.LineWidth=1;
+LWForceQuiver.Color=[0 0 1];
+LWForceQuiver.AutoScaleFactor=2;
+LWForceQuiver.MaxHeadSize=0.1;
+
+%Generate LE Total Force on L Forearm Quiver Plot
+LEForceQuiver=quiver3(BASEQ.LEx(:,1),BASEQ.LEy(:,1),BASEQ.LEz(:,1),BASEQ.LArmonLForearmFGlobal(:,1),BASEQ.LArmonLForearmFGlobal(:,2),BASEQ.LArmonLForearmFGlobal(:,3));
+LEForceQuiver.LineWidth=1;
+LEForceQuiver.Color=[1 0 0];
+LEForceQuiver.MaxHeadSize=0.1;
+LEForceQuiver.AutoScaleFactor=LWForceQuiver.ScaleFactor/LEForceQuiver.ScaleFactor;
+
+%Generate Left Elbow MOF on Left Forearm
+LEMOFLForearmQuiver=quiver3(BASEQ.LEx(:,1),BASEQ.LEy(:,1),BASEQ.LEz(:,1),BASEQ.LElbowonLForearmMOFGlobal(:,1),BASEQ.LElbowonLForearmMOFGlobal(:,2),BASEQ.LElbowonLForearmMOFGlobal(:,3));
+LEMOFLForearmQuiver.LineWidth=1;
+LEMOFLForearmQuiver.Color=[0 0.75 0];
+LEMOFLForearmQuiver.MaxHeadSize=0.1;
+LEMOFLForearmQuiver.AutoScaleFactor=2;
+
+%Generate Left Wrist MOF on Left Forearm
+LWristMOFLForearm=quiver3(BASEQ.LWx(:,1),BASEQ.LWy(:,1),BASEQ.LWz(:,1),BASEQ.LWristonLForearmMOFGlobal(:,1),BASEQ.LWristonLForearmMOFGlobal(:,2),BASEQ.LWristonLForearmMOFGlobal(:,3));
+LWristMOFLForearm.LineWidth=1;
+LWristMOFLForearm.Color=[0 0.5 0];
+LWristMOFLForearm.MaxHeadSize=0.1;
+LWristMOFLForearm.AutoScaleFactor=LEMOFLForearmQuiver.ScaleFactor/LWristMOFLForearm.ScaleFactor;
+
+%Generate LeftForearm Quivers
+LeftForearm=quiver3(BASEQ.LEx(:,1),BASEQ.LEy(:,1),BASEQ.LEz(:,1),BASEQ.LeftForearmdx(:,1),BASEQ.LeftForearmdy(:,1),BASEQ.LeftForearmdz(:,1),0);
+LeftForearm.ShowArrowHead='off';
+LeftForearm.LineWidth=1;
+LeftForearm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','LW Force','LE Force','LE MOF','LW MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Left Forearm');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Left Forearm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(120);
+
+%Clear Figure from Workspace
+clear LWForceQuiver;
+clear LEForceQuiver;
+clear LEMOFLForearmQuiver;
+clear LWristMOFLForearm;
+clear LeftForearm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_120_3D_QUIVER_BaseData_LForearmMoments.m %%%
+
+%%% START FILE: SCRIPT_121_3D_QUIVER_BaseData_RForearmMoments.m %%%
+%Generate Club Quiver Plot
+figure(121);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate RH Total Force Quiver Plot
+RHForceQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.ClubonRHFGlobal(:,1),BASEQ.ClubonRHFGlobal(:,2),BASEQ.ClubonRHFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[0 0 1];
+RHForceQuiver.AutoScaleFactor=2;
+RHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RE Total Force Quiver Plot
+REForceQuiver=quiver3(BASEQ.REx(:,1),BASEQ.REy(:,1),BASEQ.REz(:,1),BASEQ.RArmonRForearmFGlobal(:,1),BASEQ.RArmonRForearmFGlobal(:,2),BASEQ.RArmonRForearmFGlobal(:,3));
+REForceQuiver.LineWidth=1;
+REForceQuiver.Color=[1 0 0];
+REForceQuiver.MaxHeadSize=0.1;
+REForceQuiver.AutoScaleFactor=RHForceQuiver.ScaleFactor/REForceQuiver.ScaleFactor;
+
+%Generate Right Elbow MOF on Right Forearm
+REMOFLForearmQuiver=quiver3(BASEQ.REx(:,1),BASEQ.REy(:,1),BASEQ.REz(:,1),BASEQ.RElbowonRForearmMOFGlobal(:,1),BASEQ.RElbowonRForearmMOFGlobal(:,2),BASEQ.RElbowonRForearmMOFGlobal(:,3));
+REMOFLForearmQuiver.LineWidth=1;
+REMOFLForearmQuiver.Color=[0 0.75 0];
+REMOFLForearmQuiver.MaxHeadSize=0.1;
+REMOFLForearmQuiver.AutoScaleFactor=2;
+
+%Generate Right Wrist MOF on Right Forearm
+RHristMOFLForearm=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHonRForearmMOFGlobal(:,1),BASEQ.RHonRForearmMOFGlobal(:,2),BASEQ.RHonRForearmMOFGlobal(:,3));
+RWristMOFLForearm.LineWidth=1;
+RWristMOFLForearm.Color=[0 0.5 0];
+RWristMOFLForearm.MaxHeadSize=0.1;
+RWristMOFLForearm.AutoScaleFactor=REMOFLForearmQuiver.ScaleFactor/RWristMOFLForearm.ScaleFactor;
+
+%Generate Right Forearm Quivers
+RightForearm=quiver3(BASEQ.REx(:,1),BASEQ.REy(:,1),BASEQ.REz(:,1),BASEQ.RightForearmdx(:,1),BASEQ.RightForearmdy(:,1),BASEQ.RightForearmdz(:,1),0);
+RightForearm.ShowArrowHead='off';
+RightForearm.LineWidth=1;
+RightForearm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','RH Force','RE Force','RE MOF','RH MOF');
+
+%Add a Title
+title('Moments of Force Acting on Right Forearm');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Right Forearm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(121);
+
+%Clear Figure from Workspace
+clear RHForceQuiver;
+clear REForceQuiver;
+clear REMOFLForearmQuiver;
+clear RWristMOFLForearm;
+clear RightForearm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_121_3D_QUIVER_BaseData_RForearmMoments.m %%%
+
+%%% START FILE: SCRIPT_122_3D_PLOT_BaseData_ForceAlongHandPath.m %%%
+figure(122);
+plot(BASEQ.Time,BASEQ.ForceAlongHandPath);
+xlabel('Time (s)');
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Force Along Hand Path');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Force Along Hand Path');
+pause(PauseTime);
+
+%Close Figure
+close(122);
+
+%%% END FILE: SCRIPT_122_3D_PLOT_BaseData_ForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_123_3D_PLOT_BaseData_CHSandHandSpeed.m %%%
+figure(123);
+hold on;
+plot(BASEQ.Time,BASEQ.("CHS (mph)"));
+plot(BASEQ.Time,BASEQ.("Hand Speed (mph)"));
+xlabel('Time (s)');
+ylabel('Speed (mph)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Clubhead Speed (mph)','Hand Speed (mph)');
+legend('Location','southeast');
+
+%Add a Title
+title('Clubhead and Hand Speed');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - CHS and Hand Speed');
+pause(PauseTime);
+
+%Close Figure
+close(123);
+
+%%% END FILE: SCRIPT_123_3D_PLOT_BaseData_CHSandHandSpeed.m %%%
+
+%%% START FILE: SCRIPT_125_3D_PLOT_BaseData_LHRHForceAlongHandPath.m %%%
+figure(125);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHForceAlongHandPath);
+plot(BASEQ.Time,BASEQ.RHForceAlongHandPath);
+plot(BASEQ.Time,BASEQ.ForceAlongHandPath);
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Force on Left Hand Path','RH Force on Right Hand Path','Net Force Along MP Hand Path');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+%subtitle('Left Hand, Right Hand, Total');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Force Along Hand Path - LH RH Total');
+pause(PauseTime);
+
+%Close Figure
+close(125);
+
+%%% END FILE: SCRIPT_125_3D_PLOT_BaseData_LHRHForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_126_3D_PLOT_BaseData_LinearImpulse.m %%%
+figure(126);
+plot(BASEQ.Time,BASEQ.LinearImpulseonClub);
+xlabel('Time (s)');
+ylabel('Impulse (Ns)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Linear Impulse');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Impulse');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Linear Impulse');
+pause(PauseTime);
+
+%Close Figure
+close(126);
+
+%%% END FILE: SCRIPT_126_3D_PLOT_BaseData_LinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_127_3D_PLOT_BaseData_LinearWork.m %%%
+figure(127);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.RHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.LinearWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work','RH Linear Work','Net Force Linear Work (midpoint)');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work');
+subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Linear Work on Club');
+subtitle('BaseData');
+pause(PauseTime);
+
+%Close Figure
+close(127);
+
+%%% END FILE: SCRIPT_127_3D_PLOT_BaseData_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_128_3D_PLOT_BaseData_LinearImpulse.m %%%
+figure(128);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHLinearImpulseonClub);
+plot(BASEQ.Time,BASEQ.RHLinearImpulseonClub);
+plot(BASEQ.Time,BASEQ.LinearImpulseonClub);
+
+ylabel('Linear Impulse (kgm/s)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Impulse','RH Linear Impulse','Net Force Linear Impulse (midpoint)');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Impulse');
+%subtitle('Left Hand, Right Hand, Total');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Linear Impulse LH,RH,Total');
+pause(PauseTime);
+
+%Close Figure
+close(128);
+
+%%% END FILE: SCRIPT_128_3D_PLOT_BaseData_LinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_129_3D_PLOT_BaseData_EquivalentCoupleandMOF.m %%%
+figure(129);
+hold on;
+
+EQMPLOCAL=BASEQ.EquivalentMidpointCoupleLocal(:,3);
+MPMOFLOCAL=BASEQ.MPMOFonClubLocal(:,3);
+SUMOFMOMENTSLOCAL=BASEQ.SumofMomentsonClubLocal(:,3);
+
+plot(BASEQ.Time,EQMPLOCAL);
+plot(BASEQ.Time,MPMOFLOCAL);
+plot(BASEQ.Time,SUMOFMOMENTSLOCAL);
+
+clear("EQMPLOCAL");
+clear("MPMOFLOCAL");
+clear("SUMOFMOMENTSLOCAL");
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Equivalent Midpoint Couple','Total Force on Midpoint MOF','Sum of Moments');
+legend('Location','southeast');
+
+%Add a Title
+title('Equivalent Couple, Moment of Force, Sum of Moments');
+subtitle('BASE - Grip Reference Frame');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Equivalent Couple and MOF');
+pause(PauseTime);
+
+%Close Figure
+close(129);
+
+%%% END FILE: SCRIPT_129_3D_PLOT_BaseData_EquivalentCoupleandMOF.m %%%
+
+%%% START FILE: SCRIPT_130_3D_PLOT_BaseData_LSWork.m %%%
+figure(130);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSLinearWorkonArm);
+plot(BASEQ.Time,BASEQ.LSAngularWorkonArm);
+plot(BASEQ.Time,BASEQ.TotalLSWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work','LS Angular Work','LS Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Shoulder Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Left Shoulder Work');
+pause(PauseTime);
+
+%Close Figure
+close(130);
+
+%%% END FILE: SCRIPT_130_3D_PLOT_BaseData_LSWork.m %%%
+
+%%% START FILE: SCRIPT_131_3D_PLOT_BaseData_LSPower.m %%%
+figure(131);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSonArmLinearPower);
+plot(BASEQ.Time,BASEQ.LSonArmAngularPower);
+plot(BASEQ.Time,BASEQ.TotalLSPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power','LS Angular Power','LS Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Shoulder Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Left Shoulder Power');
+pause(PauseTime);
+
+%Close Figure
+close(131);
+
+%%% END FILE: SCRIPT_131_3D_PLOT_BaseData_LSPower.m %%%
+
+%%% START FILE: SCRIPT_132_3D_PLOT_BaseData_RSWork.m %%%
+figure(132);
+hold on;
+
+plot(BASEQ.Time,BASEQ.RSLinearWorkonArm);
+plot(BASEQ.Time,BASEQ.RSAngularWorkonArm);
+plot(BASEQ.Time,BASEQ.TotalRSWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RS Linear Work','RS Angular Work','RS Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Shoulder Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Right Shoulder Work');
+pause(PauseTime);
+
+%Close Figure
+close(132);
+
+%%% END FILE: SCRIPT_132_3D_PLOT_BaseData_RSWork.m %%%
+
+%%% START FILE: SCRIPT_133_3D_PLOT_BaseData_RSPower.m %%%
+figure(133);
+hold on;
+
+plot(BASEQ.Time,BASEQ.RSonArmLinearPower);
+plot(BASEQ.Time,BASEQ.RSonArmAngularPower);
+plot(BASEQ.Time,BASEQ.TotalRSPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RS Linear Power','RS Angular Power','RS Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Shoulder Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Right Shoulder Power');
+pause(PauseTime);
+
+%Close Figure
+close(133);
+
+%%% END FILE: SCRIPT_133_3D_PLOT_BaseData_RSPower.m %%%
+
+%%% START FILE: SCRIPT_134_3D_PLOT_BaseData_LEWork.m %%%
+figure(134);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LELinearWorkonForearm);
+plot(BASEQ.Time,BASEQ.LEAngularWorkonForearm);
+plot(BASEQ.Time,BASEQ.TotalLEWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LE Linear Work','LE Angular Work','LE Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Elbow Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Left Elbow Work');
+pause(PauseTime);
+
+%Close Figure
+close(134);
+
+%%% END FILE: SCRIPT_134_3D_PLOT_BaseData_LEWork.m %%%
+
+%%% START FILE: SCRIPT_135_3D_PLOT_BaseData_LEPower.m %%%
+figure(135);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LEonForearmLinearPower);
+plot(BASEQ.Time,BASEQ.LEonForearmAngularPower);
+plot(BASEQ.Time,BASEQ.TotalLEPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LE Linear Power','LE Angular Power','LE Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Elbow Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Left Elbow Power');
+pause(PauseTime);
+
+%Close Figure
+close(135);
+
+%%% END FILE: SCRIPT_135_3D_PLOT_BaseData_LEPower.m %%%
+
+%%% START FILE: SCRIPT_136_3D_PLOT_BaseData_REWork.m %%%
+figure(136);
+hold on;
+
+plot(BASEQ.Time,BASEQ.RELinearWorkonForearm);
+plot(BASEQ.Time,BASEQ.REAngularWorkonForearm);
+plot(BASEQ.Time,BASEQ.TotalREWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RE Linear Work','RE Angular Work','RE Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Elbow Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Right Elbow Work');
+pause(PauseTime);
+
+%Close Figure
+close(136);
+
+%%% END FILE: SCRIPT_136_3D_PLOT_BaseData_REWork.m %%%
+
+%%% START FILE: SCRIPT_137_3D_PLOT_BaseData_REPower.m %%%
+figure(137);
+hold on;
+
+plot(BASEQ.Time,BASEQ.REonForearmLinearPower);
+plot(BASEQ.Time,BASEQ.REonForearmAngularPower);
+plot(BASEQ.Time,BASEQ.TotalREPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RE Linear Power','RE Angular Power','RE Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Elbow Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Right Elbow Power');
+pause(PauseTime);
+
+%Close Figure
+close(137);
+
+%%% END FILE: SCRIPT_137_3D_PLOT_BaseData_REPower.m %%%
+
+%%% START FILE: SCRIPT_138_3D_PLOT_BaseData_LHWork.m %%%
+figure(138);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.LHAngularWorkonClub);
+plot(BASEQ.Time,BASEQ.TotalLHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work','LH Angular Work','LH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Wrist Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Left Wrist Work');
+pause(PauseTime);
+
+%Close Figure
+close(138);
+
+%%% END FILE: SCRIPT_138_3D_PLOT_BaseData_LHWork.m %%%
+
+%%% START FILE: SCRIPT_139_3D_PLOT_BaseData_LHPower.m %%%
+figure(139);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHonClubLinearPower);
+plot(BASEQ.Time,BASEQ.LHonClubAngularPower);
+plot(BASEQ.Time,BASEQ.TotalLHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Power','LH Angular Power','LH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Wrist Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Left Wrist Power');
+pause(PauseTime);
+
+%Close Figure
+close(139);
+
+%%% END FILE: SCRIPT_139_3D_PLOT_BaseData_LHPower.m %%%
+
+%%% START FILE: SCRIPT_140_3D_PLOT_BaseData_RHWork.m %%%
+figure(140);
+hold on;
+
+plot(BASEQ.Time,BASEQ.RHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.RHAngularWorkonClub);
+plot(BASEQ.Time,BASEQ.TotalRHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RH Linear Work','RH Angular Work','RH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Wrist Work on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Right Wrist Work');
+pause(PauseTime);
+
+%Close Figure
+close(140);
+
+%%% END FILE: SCRIPT_140_3D_PLOT_BaseData_RHWork.m %%%
+
+%%% START FILE: SCRIPT_141_3D_PLOT_BaseData_RHPower.m %%%
+figure(141);
+hold on;
+
+plot(BASEQ.Time,BASEQ.RHonClubLinearPower);
+plot(BASEQ.Time,BASEQ.RHonClubAngularPower);
+plot(BASEQ.Time,BASEQ.TotalRHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RH Linear Power','RH Angular Power','RH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Wrist Power on Distal Segment');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Right Wrist Power');
+pause(PauseTime);
+
+%Close Figure
+close(141);
+
+%%% END FILE: SCRIPT_141_3D_PLOT_BaseData_RHPower.m %%%
+
+%%% START FILE: SCRIPT_142_3D_QUIVER_BaseData_LHRHLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(142);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Linear Impulse Quiver Plot
+LHLinearImpulseQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHLinearImpulseonClub(:,1),BASEQ.LHLinearImpulseonClub(:,2),BASEQ.LHLinearImpulseonClub(:,3));
+LHLinearImpulseQuiver.LineWidth=1;
+LHLinearImpulseQuiver.Color=[0 1 0];
+LHLinearImpulseQuiver.MaxHeadSize=0.1;
+LHLinearImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Linear Impulse Quiver Plot
+RHLinearImpulseQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHLinearImpulseonClub(:,1),BASEQ.RHLinearImpulseonClub(:,2),BASEQ.RHLinearImpulseonClub(:,3));
+RHLinearImpulseQuiver.LineWidth=1;
+RHLinearImpulseQuiver.Color=[.8 .2 0];
+RHLinearImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulses so that ZTCF and BASE are scaled the same.
+RHLinearImpulseQuiver.AutoScaleFactor=LHLinearImpulseQuiver.ScaleFactor/RHLinearImpulseQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Linear Impulse','RH Linear Impulse');
+
+%Add a Title
+title('LH and RH Linear Impulse on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - LHRH Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(142);
+
+%Clear Figure from Workspace
+clear LHLinearImpulseQuiver;
+clear RHLinearImpulseQuiver;
+clear ZTCFLHLinearImpulseQuiver;
+clear ZTCFRHLinearImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_142_3D_QUIVER_BaseData_LHRHLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_143_3D_3D_QUIVER_BaseData_LHRH_BaseData_AngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(143);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Angular Impulse Quiver Plot
+LHAngularImpulseQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHAngularImpulseonClub(:,1),BASEQ.LHAngularImpulseonClub(:,2),BASEQ.LHAngularImpulseonClub(:,3));
+LHAngularImpulseQuiver.LineWidth=1;
+LHAngularImpulseQuiver.Color=[0 1 0];
+LHAngularImpulseQuiver.MaxHeadSize=0.1;
+LHAngularImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Angular Impulse Quiver Plot
+RHAngularImpulseQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHAngularImpulseonClub(:,1),BASEQ.RHAngularImpulseonClub(:,2),BASEQ.RHAngularImpulseonClub(:,3));
+RHAngularImpulseQuiver.LineWidth=1;
+RHAngularImpulseQuiver.Color=[.8 .2 0];
+RHAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulses so that ZTCF and BASE are scaled the same.
+RHAngularImpulseQuiver.AutoScaleFactor=LHAngularImpulseQuiver.ScaleFactor/RHAngularImpulseQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','LH Angular Impulse','RH Angular Impulse');
+
+%Add a Title
+title('LH and RH Angular Impulse on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - LHRH Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(143);
+
+%Clear Figure from Workspace
+clear LHAngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFLHAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_143_3D_3D_QUIVER_BaseData_LHRH_BaseData_AngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_144_3D_QUIVER_BaseData_TotalLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(144);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Linear Impulse on Club Quiver Plot
+TotalLinearImpulse=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.LinearImpulseonClub(:,1),BASEQ.LinearImpulseonClub(:,2),BASEQ.LinearImpulseonClub(:,3));
+TotalLinearImpulse.LineWidth=1;
+TotalLinearImpulse.Color=[0 1 0];
+TotalLinearImpulse.MaxHeadSize=0.1;
+TotalLinearImpulse.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','Total Linear Impulse');
+
+%Add a Title
+title('Total Linear Impulse on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Total Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(144);
+
+%Clear Figure from Workspace
+clear TotalLinearImpulse;
+clear MPSumofMomentsQuiver;
+clear ZTCFTotalLinearImpulse;
+clear ZTCFMPSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_144_3D_QUIVER_BaseData_TotalLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_145_3D_QUIVER_BaseData_TotalAngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(145);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Create Total Angular Impulse Array by Adding LH and RH Angular Impulse
+TotalAngularImpulse=BASEQ.LHAngularImpulseonClub+BASEQ.RHAngularImpulseonClub;
+
+%Generate Total Hand Angular Impulse Quiver Plot
+AngularImpulseQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),TotalAngularImpulse(:,1),TotalAngularImpulse(:,2),TotalAngularImpulse(:,3));
+AngularImpulseQuiver.LineWidth=1;
+AngularImpulseQuiver.Color=[0 1 0];
+AngularImpulseQuiver.MaxHeadSize=0.1;
+AngularImpulseQuiver.AutoScaleFactor=3;
+
+%Add Legend to Plot
+legend('','','','','Total Angular Impulse');
+
+%Add a Title
+title('Total Angular Impulse on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Total Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(145);
+
+%Clear Figure from Workspace
+clear AngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear TotalAngularImpulse;
+
+%%% END FILE: SCRIPT_145_3D_QUIVER_BaseData_TotalAngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_146_3D_QUIVER_BaseData_NetForceEquivalantCoupleShafts.m %%%
+%Generate Club Quiver Plot
+figure(146);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+run SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,2),BASEQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','','','','','Net Force','Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('BASE');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - Net Force and Equivalent MP Couple Shafts Added');
+pause(PauseTime);
+
+%Close Figure
+close(146);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear GripAlpha;
+clear GripMaxCHS;
+clear ShaftAlpha;
+clear ShaftMaxCHS;
+
+%%% END FILE: SCRIPT_146_3D_QUIVER_BaseData_NetForceEquivalantCoupleShafts.m %%%
+
+%%% START FILE: SCRIPT_147_3D_QUIVER_BaseData_HubForce.m %%%
+%Generate Club Quiver Plot
+figure(147);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.HipGlobalPositionX(:,1),BASEQ.HipGlobalPositionY(:,1),BASEQ.HipGlobalPositionZ(:,1),BASEQ.BaseonHipForceGlobal(:,1),BASEQ.BaseonHipForceGlobal(:,2),BASEQ.BaseonHipForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+%Add Legend to Plot
+legend('','','','','Base on Hip Force');
+
+%Add a Title
+title('Base on Hip Force');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots//BASE_Quiver Plot - Base on Hip Force');
+pause(PauseTime);
+
+%Close Figure
+close(147);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_147_3D_QUIVER_BaseData_HubForce.m %%%
+
+%%% START FILE: SCRIPT_148_3D_PLOT_BaseData_LocalHandForces.m %%%
+figure(148);
+hold on;
+
+plot(BASEQ.Time(:,1),BASEQ.LHonClubForceLocal(:,1));
+plot(BASEQ.Time(:,1),BASEQ.LHonClubForceLocal(:,2));
+plot(BASEQ.Time(:,1),BASEQ.LHonClubForceLocal(:,3));
+
+plot(BASEQ.Time(:,1),BASEQ.RHonClubForceLocal(:,1));
+plot(BASEQ.Time(:,1),BASEQ.RHonClubForceLocal(:,2));
+plot(BASEQ.Time(:,1),BASEQ.RHonClubForceLocal(:,3));
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Left Hand X','Left Hand Y','Left Hand Z','Right Hand X','Right Hand Y','Right Hand Z');
+legend('Location','southeast');
+
+%Add a Title
+title('Local Hand Forces on Club');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Local Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(148);
+
+%%% END FILE: SCRIPT_148_3D_PLOT_BaseData_LocalHandForces.m %%%
+
+%%% START FILE: SCRIPT_149_3D_QUIVER_BaseData_LHRHMoments.m %%%
+%Generate Club Quiver Plot
+figure(149);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHMOFonClubGlobal(:,1),BASEQ.LHMOFonClubGlobal(:,2),BASEQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=10;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHMOFonClubGlobal(:,1),BASEQ.RHMOFonClubGlobal(:,2),BASEQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate Total MOF Quiver Plot
+% TotalMOFQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.MPMOFonClubGlobal(:,1),BASEQ.MPMOFonClubGlobal(:,2),BASEQ.MPMOFonClubGlobal(:,3));
+% TotalMOFQuiver.LineWidth=1;
+% TotalMOFQuiver.Color=[0 0 0.5];
+% TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+% TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','RH MOF');
+
+%Add a Title
+title('LHRH Moments of Force on Club');
+subtitle('BASE');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('BaseData Quiver Plots/BASE_Quiver Plot - LHRH Moments of Force');
+pause(PauseTime);
+
+%Close Figure
+close(149);
+
+%Clear Figure from Workspace
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_149_3D_QUIVER_BaseData_LHRHMoments.m %%%
+
+%%% START FILE: SCRIPT_150_3D_PLOT_BaseData_TorqueInputvsTorqueOutput.m %%%
+figure(150);
+hold on;
+
+plot(BASEQ.Time,BASEQ.HipConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.HipConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.HipConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.TorsoConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.TorsoConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.TorsoConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.SpineConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.SpineConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.SpineConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.LScapConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.LScapConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.LScapConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.RScapConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.RScapConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.RScapConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.LSConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.LSConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.LSConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.RSConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.RSConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.RSConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.LEConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.LEConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.LEConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.REConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.REConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.REConstraintTorqueZ);
+
+
+plot(BASEQ.Time,BASEQ.LFConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.LFConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.LFConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.RFConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.RFConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.RFConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.LWConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.LWConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.LWConstraintTorqueZ);
+
+plot(BASEQ.Time,BASEQ.RWConstraintTorqueX);
+plot(BASEQ.Time,BASEQ.RWConstraintTorqueY);
+plot(BASEQ.Time,BASEQ.RWConstraintTorqueZ);
+
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Hip Constraint Torque X','Hip Constraint Torque Y','Hip Constraint Torque Z',...
+    'Torso Constraint Torque X','Torso Constraint Torque Y','Torso Constraint Torque Z',...
+    'Spine Constraint Torque X','Spine Constraint Torque Y','Spine Constraint Torque Z',...
+    'LScap Constraint Torque X','LScap Constraint Torque Y','LScap Constraint Torque Z',...
+    'RScap Constraint Torque X','RScap Constraint Torque Y','RScap Constraint Torque Z',...
+    'LS Constraint Torque X','LS Constraint Torque Y','LS Constraint Torque Z',...
+    'RS Constraint Torque X','RS Constraint Torque Y','RS Constraint Torque Z',...
+    'LE Constraint Torque X','LE Constraint Torque Y','LE Constraint Torque Z',...
+    'RE Constraint Torque X','RE Constraint Torque Y','RE Constraint Torque Z',...
+    'LF Constraint Torque X','LF Constraint Torque Y','LF Constraint Torque Z',...
+    'RF Constraint Torque X','RF Constraint Torque Y','RF Constraint Torque Z',...
+    'LW Constraint Torque X','LW Constraint Torque Y','LW Constraint Torque Z',...
+    'RW Constraint Torque X','RW Constraint Torque Y','RW Constraint Torque Z');
+
+legend('Location','southeast');
+
+%Add a Title
+title('Joint Torque Inputs');
+subtitle('BASE');
+
+%Save Figure
+savefig('BaseData Charts/BASE_Plot - Joint Torque Inputs');
+pause(PauseTime);
+
+%Close Figure
+close(150);
+
+%%% END FILE: SCRIPT_150_3D_PLOT_BaseData_TorqueInputvsTorqueOutput.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubCOMDotsBaseData.m %%%
+COMDots=quiver3(BASEQ.ClubCOM(:,1),BASEQ.ClubCOM(:,2),BASEQ.ClubCOM(:,3),BASEQ.ClubCOM(:,1),BASEQ.ClubCOM(:,2),BASEQ.ClubCOM(:,3));
+COMDots.AutoScaleFactor=0.00001;
+COMDots.ShowArrowHead='off';
+COMDots.Marker='o';
+
+%%% END FILE: SCRIPT_QuiverClubCOMDotsBaseData.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+%Reads from a Table named Data in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate Shaft Quivers
+Shaft=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.Shaftdx(:,1),BASEQ.Shaftdy(:,1),BASEQ.Shaftdz(:,1),0);
+Shaft.ShowArrowHead='off';		%Turn off arrow heads
+Shaft.LineWidth=1;			    %Adjust line weighting
+Shaft.Color=[0.5 0.5 0.5];		%Set shaft color gray
+hold on;				        %Hold the current plot when you generate new
+
+%Generate Grip Quivers
+Grip=quiver3(BASEQ.Buttx(:,1),BASEQ.Butty(:,1),BASEQ.Buttz(:,1),BASEQ.Gripdx(:,1),BASEQ.Gripdy(:,1),BASEQ.Gripdz(:,1),0);
+Grip.ShowArrowHead='off';
+Grip.LineWidth=1;			    %Set grip line width
+Grip.Color=[0 0 0];			    %Set grip color to black
+
+%Calculate height of table
+H=height(BASEQ);
+
+%Calculate how many rows to copy
+h=H-1;
+
+%Generate Hand Path Quivers
+HandPath=quiver3(BASEQ.MPx(1:h,1),BASEQ.MPy(1:h,1),BASEQ.MPz(1:h,1),BASEQ.MPPx(1:h,1),BASEQ.MPPy(1:h,1),BASEQ.MPPz(1:h,1),0);
+HandPath.ShowArrowHead='off';		%Turn off arrow heads
+HandPath.LineWidth=1;			    %Adjust line weighting
+HandPath.Color=[0 0 0];		        %Set shaft color black
+
+%Generate Club Path Quivers
+ClubPath=quiver3(BASEQ.CHx(1:h,1),BASEQ.CHy(1:h,1),BASEQ.CHz(1:h,1),BASEQ.CHPx(1:h,1),BASEQ.CHPy(1:h,1),BASEQ.CHPz(1:h,1),0);
+ClubPath.ShowArrowHead='off';		%Turn off arrow heads
+ClubPath.LineWidth=1;			    %Adjust line weighting
+ClubPath.Color=[0 0 0];		        %Set shaft color black
+
+% clear Grip;
+% clear Shaft;
+% clear HandPath;
+% clear ClubPath;
+clear h;
+clear H;
+
+%%% END FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+
+%%% START FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%Grip Quiver for Alpha Reversal
+GripAlpha=quiver3(ClubQuiverAlphaReversal.ButtxAlphaReversal,ClubQuiverAlphaReversal.ButtyAlphaReversal,ClubQuiverAlphaReversal.ButtzAlphaReversal,ClubQuiverAlphaReversal.GripdxAlphaReversal,ClubQuiverAlphaReversal.GripdyAlphaReversal,ClubQuiverAlphaReversal.GripdzAlphaReversal,0);
+GripAlpha.ShowArrowHead='off';
+GripAlpha.LineWidth=3;			            %Set grip line width
+GripAlpha.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Alpha Reversal
+ShaftAlpha=quiver3(ClubQuiverAlphaReversal.RHxAlphaReversal,ClubQuiverAlphaReversal.RHyAlphaReversal,ClubQuiverAlphaReversal.RHzAlphaReversal,ClubQuiverAlphaReversal.ShaftdxAlphaReversal,ClubQuiverAlphaReversal.ShaftdyAlphaReversal,ClubQuiverAlphaReversal.ShaftdzAlphaReversal,0);
+ShaftAlpha.ShowArrowHead='off';		        %Turn off arrow heads
+ShaftAlpha.LineWidth=3;			            %Adjust line weighting
+ShaftAlpha.Color=[0.0745 0.6235 1.0000];
+hold on;				                    %Hold the current plot when you generate new
+
+%Grip Quiver for Max CHS
+GripMaxCHS=quiver3(ClubQuiverMaxCHS.ButtxMaxCHS,ClubQuiverMaxCHS.ButtyMaxCHS,ClubQuiverMaxCHS.ButtzMaxCHS,ClubQuiverMaxCHS.GripdxMaxCHS,ClubQuiverMaxCHS.GripdyMaxCHS,ClubQuiverMaxCHS.GripdzMaxCHS,0);
+GripMaxCHS.ShowArrowHead='off';
+GripMaxCHS.LineWidth=3;			            %Set grip line width
+GripMaxCHS.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Max CHS
+ShaftMaxCHS=quiver3(ClubQuiverMaxCHS.RHxMaxCHS,ClubQuiverMaxCHS.RHyMaxCHS,ClubQuiverMaxCHS.RHzMaxCHS,ClubQuiverMaxCHS.ShaftdxMaxCHS,ClubQuiverMaxCHS.ShaftdyMaxCHS,ClubQuiverMaxCHS.ShaftdzMaxCHS,0);
+ShaftMaxCHS.ShowArrowHead='off';		    %Turn off arrow heads
+ShaftMaxCHS.LineWidth=3;			        %Adjust line weighting
+ShaftMaxCHS.Color=[0.9294 0.6941 0.1255];
+
+%Set View
+view(-0.0885,-10.6789);
+
+%%% END FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%%% END OF PACKED PROJECT %%%

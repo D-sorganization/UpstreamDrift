@@ -1,0 +1,127 @@
+# See docker/README.md and ADR-0021 (docs/adr/0021-container-strategy.md) for container policy.
+# Dockerfile.heavy_test
+# ─────────────────────────────────────────────────────────────────────────────
+# LOCAL PARITY IMAGE for d-sorg-fleet-4core custom runner.
+# Built and used by: wsl bash run_local_heavy_tests.sh
+#
+# Must stay in sync with:
+#   .github/workflows/heavy-tests-opt-in.yml (calls reusable-heavy-tests.yml)
+# Policy reference:
+#   docker/README.md and docs/adr/0021-container-strategy.md
+#
+# Build args:
+#   (none) -- the base image is the same digest-pinned python:3.12-slim used by
+#   Dockerfile and Dockerfile.modular (issue #9414: one Python line, 3.11-3.12).
+# ─────────────────────────────────────────────────────────────────────────────
+FROM python:3.12-slim@sha256:c2d8472b831337ab296a8ce652e1ba786e9e3034fc445dc58b50a7f5251f0003
+
+# Avoid interactive prompts during apt
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+# X11 headless display (mirrors xvfb-run on the runner)
+ENV DISPLAY=:99
+
+# ── System dependencies (mirrors runner apt-get steps) ───────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl git \
+    # X11 + display
+    xvfb xauth x11-utils mesa-utils \
+    libgl1 libegl1 \
+    libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
+    libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
+    libxcb-xinerama0 libxcb-xkb1 libxcb-xinput0 libxcb-xfixes0 \
+    libdbus-1-3 libxrandr2 libxss1 libxcursor1 libxcomposite1 \
+    libasound2-dev libxi6 libxtst6 \
+    # SDL2 (for Game/Pygame tools)
+    libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev \
+    # Node (for any JS tooling)
+    nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python tooling ────────────────────────────────────────────────────────────
+RUN pip install --upgrade pip==26.2.1 setuptools==83.0.0 wheel
+
+# ── Testing infrastructure (mirrors reusable-heavy-tests.yml) ────────────────
+RUN pip install \
+    pytest \
+    pytest-cov \
+    pytest-timeout \
+    pytest-xdist \
+    ruff \
+    black \
+    mypy
+
+# ── Heavy physics / robotics engines ─────────────────────────────────────────
+# pinned to last-known-good versions; update deliberately
+RUN pip install \
+    pinocchio \
+    pink \
+    mujoco \
+    mediapipe \
+    meshcat \
+    pyvista \
+    vtk
+
+# ── Scientific stack ──────────────────────────────────────────────────────────
+RUN pip install \
+    numpy \
+    scipy \
+    sympy \
+    matplotlib \
+    pandas \
+    trimesh \
+    ezdxf \
+    pyyaml \
+    c3d
+
+# ── Optional tooling (genuinely platform-optional) ───────────────────────────
+# Issue #7161 D2: a failed *optional* install must not silently produce a
+# "heavy test" image that is quietly missing deps. Each optional package that
+# fails to install emits a warning AND records its status in a marker file
+# (/app/.optional_deps_status) that the test entrypoint surfaces, so any
+# resulting skips are attributable rather than mysterious ModuleNotFoundErrors.
+# The hard-required engines above (pinocchio/mujoco/mediapipe/…) still fail the
+# build outright if they cannot install.
+RUN set -u; \
+    mkdir -p /app; \
+    : > /app/.optional_deps_status; \
+    for pkg in PyQt6 drake opensim myosuite; do \
+        if pip install "$pkg"; then \
+            echo "$pkg=installed" >> /app/.optional_deps_status; \
+        else \
+            echo "::warning::optional dependency $pkg failed to install — dependent heavy tests will skip"; \
+            echo "$pkg=missing" >> /app/.optional_deps_status; \
+        fi; \
+    done
+
+WORKDIR /app
+
+# ── Copy codebase ─────────────────────────────────────────────────────────────
+COPY . /app/
+
+# ── Install project in editable mode ─────────────────────────────────────────
+RUN if [ -f "pyproject.toml" ]; then \
+      pip install -e ".[dev,test]"; \
+    elif [ -f "requirements.txt" ]; then \
+      pip install -r requirements.txt; \
+    fi
+
+# Keep late transitive installs from restoring scanner-known vulnerable tools.
+RUN pip install --upgrade --no-cache-dir \
+    msgpack==1.2.1 \
+    setuptools==83.0.0
+
+# The finished test image executes pytest but never installs packages at run
+# time. Remove pip and its embedded third-party SBOM from the final filesystem.
+RUN /usr/local/bin/python -m pip uninstall -y pip
+
+# ── Default: surface optional-dep status (issue #7161 D2) then run the heavy
+#    suite with Xvfb. The entrypoint prints the build-time optional-dependency
+#    marker so skips are attributable; pass args to `docker run` to override
+#    the default pytest invocation.
+COPY docker/heavy_test_entrypoint.sh /usr/local/bin/heavy_test_entrypoint.sh
+RUN chmod +x /usr/local/bin/heavy_test_entrypoint.sh
+RUN useradd --create-home --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+ENTRYPOINT ["/usr/local/bin/heavy_test_entrypoint.sh"]

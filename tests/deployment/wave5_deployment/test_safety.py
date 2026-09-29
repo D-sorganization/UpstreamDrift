@@ -1,0 +1,340 @@
+"""Comprehensive tests for deployment.safety.monitor."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from src.deployment.realtime import (
+    ControlCommand,
+    ControlMode,
+    RobotConfig,
+    RobotState,
+)
+from src.deployment.safety.monitor import (
+    SafetyLimits,
+    SafetyMonitor,
+    SafetyStatusLevel,
+)
+
+
+def _cfg(n: int = 3) -> RobotConfig:
+    return RobotConfig(
+        name="bot",
+        n_joints=n,
+        joint_limits_lower=np.full(n, -1.0),
+        joint_limits_upper=np.full(n, 1.0),
+        velocity_limits=np.full(n, 2.0),
+        torque_limits=np.full(n, 50.0),
+    )
+
+
+def _state(n: int = 3, **kwargs) -> RobotState:
+    defaults = {
+        "timestamp": 0.0,
+        "joint_positions": np.zeros(n),
+        "joint_velocities": np.zeros(n),
+        "joint_torques": np.zeros(n),
+    }
+    defaults.update(kwargs)
+    return RobotState(**defaults)
+
+
+class TestSafetyLimits:
+    def test_from_config(self) -> None:
+        lim = SafetyLimits.from_config(_cfg())
+        assert lim.max_joint_velocity.shape == (3,)
+        assert lim.max_joint_torque.shape == (3,)
+
+    def test_from_config_defaults(self) -> None:
+        cfg = RobotConfig(name="b", n_joints=3)
+        lim = SafetyLimits.from_config(cfg)
+        assert np.all(lim.max_joint_velocity == 2.0)
+        assert np.all(lim.max_joint_torque == 50.0)
+
+
+class TestSafetyMonitorCheckState:
+    def test_ok(self) -> None:
+        m = SafetyMonitor(_cfg())
+        st = m.check_state(_state())
+        assert st.is_safe
+        assert st.level == SafetyStatusLevel.OK
+
+    def test_velocity_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        st = m.check_state(_state(joint_velocities=np.array([10.0, 0, 0])))
+        assert not st.is_safe
+        assert any("velocity" in v for v in st.violations)
+
+    def test_torque_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        st = m.check_state(_state(joint_torques=np.array([100.0, 0, 0])))
+        assert not st.is_safe
+        assert any("torque" in v for v in st.violations)
+
+    def test_lower_limit_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        st = m.check_state(_state(joint_positions=np.array([-2.0, 0, 0])))
+        assert not st.is_safe
+        assert any("Lower" in v for v in st.violations)
+
+    def test_upper_limit_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        st = m.check_state(_state(joint_positions=np.array([2.0, 0, 0])))
+        assert not st.is_safe
+        assert any("Upper" in v for v in st.violations)
+
+    def test_warning_approaching_limit(self) -> None:
+        m = SafetyMonitor(_cfg())
+        st = m.check_state(_state(joint_positions=np.array([0.95, 0, 0])))
+        assert st.is_safe
+        assert st.level == SafetyStatusLevel.WARNING
+
+    def test_emergency_stop_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        st = m.check_state(_state())
+        assert not st.is_safe
+        assert any("Emergency" in v for v in st.violations)
+
+
+class TestSafetyMonitorCheckCommand:
+    def test_ok(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand.torque_command(0.0, np.zeros(3))
+        st = m.check_command(cmd)
+        assert st.is_safe
+
+    def test_torque_command_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand.torque_command(0.0, np.array([100.0, 0, 0]))
+        st = m.check_command(cmd)
+        assert not st.is_safe
+
+    @pytest.mark.unit
+    def test_velocity_command_violation(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.array([3.0, 0.0, -3.0]),
+        )
+        st = m.check_command(cmd)
+        assert not st.is_safe
+        assert any("velocity" in violation for violation in st.violations)
+
+    @pytest.mark.unit
+    def test_emergency_stop_rejects_command(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        cmd = ControlCommand.torque_command(0.0, np.zeros(3))
+        st = m.check_command(cmd)
+        assert not st.is_safe
+        assert any("Emergency stop" in violation for violation in st.violations)
+
+    def test_position_below_limit(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand.position_command(0.0, np.array([-2.0, 0, 0]))
+        st = m.check_command(cmd)
+        assert not st.is_safe
+        assert any("below" in v for v in st.violations)
+
+    def test_position_above_limit(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand.position_command(0.0, np.array([2.0, 0, 0]))
+        st = m.check_command(cmd)
+        assert not st.is_safe
+        assert any("above" in v for v in st.violations)
+
+
+class TestSafetyMonitorComputeSafe:
+    def test_clip_torque(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand.torque_command(0.0, np.array([100.0, -100.0, 0.0]))
+        safe = m.compute_safe_command(cmd, _state())
+        assert safe.torque_commands is not None
+        assert np.all(np.abs(safe.torque_commands) <= 50.0)
+
+    def test_clip_position(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand.position_command(0.0, np.array([2.0, -2.0, 0.5]))
+        safe = m.compute_safe_command(cmd, _state())
+        assert safe.position_targets is not None
+        assert safe.position_targets[0] <= 1.0
+        assert safe.position_targets[1] >= -1.0
+
+    def test_estop_freezes_position(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.IMPEDANCE,
+            position_targets=np.array([0.5, 0.5, 0.5]),
+            stiffness=np.ones(3),
+            damping=np.ones(3),
+            feedforward_torque=np.ones(3),
+        )
+        state = _state(joint_positions=np.array([0.1, 0.1, 0.1]))
+        safe = m.compute_safe_command(cmd, state)
+        np.testing.assert_array_equal(safe.position_targets, state.joint_positions)
+        assert np.all(safe.feedforward_torque == 0)
+
+    def test_speed_override_scales(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.set_speed_override(0.5)
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.ones(3),
+            torque_commands=np.ones(3),
+        )
+        safe = m.compute_safe_command(cmd, _state())
+        np.testing.assert_array_almost_equal(safe.velocity_targets, np.ones(3) * 0.5)
+        np.testing.assert_array_almost_equal(safe.torque_commands, np.ones(3) * 0.5)
+
+    @pytest.mark.unit
+    def test_velocity_targets_are_clipped_at_default_speed(self) -> None:
+        m = SafetyMonitor(_cfg())
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.array([3.0, -4.0, 0.5]),
+        )
+        safe = m.compute_safe_command(cmd, _state())
+        assert safe.velocity_targets is not None
+        assert np.all(np.abs(safe.velocity_targets) <= m.limits.max_joint_velocity)
+
+    @pytest.mark.unit
+    def test_emergency_stop_zeroes_actuation_after_speed_override_change(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        m.set_speed_override(1.0)
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.HYBRID,
+            position_targets=np.array([0.5, 0.5, 0.5]),
+            velocity_targets=np.ones(3),
+            torque_commands=np.ones(3) * 25.0,
+            feedforward_torque=np.ones(3) * 10.0,
+        )
+        state = _state(joint_positions=np.array([0.1, 0.2, 0.3]))
+        safe = m.compute_safe_command(cmd, state)
+        np.testing.assert_array_equal(safe.position_targets, state.joint_positions)
+        np.testing.assert_array_equal(safe.velocity_targets, np.zeros(3))
+        np.testing.assert_array_equal(safe.torque_commands, np.zeros(3))
+        np.testing.assert_array_equal(safe.feedforward_torque, np.zeros(3))
+
+    @pytest.mark.unit
+    def test_emergency_stop_requires_state_before_freezing_position(self) -> None:
+        """Issue #7693: E-stop must fail with a deterministic DbC error."""
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        cmd = ControlCommand.position_command(0.0, np.array([0.5, 0.5, 0.5]))
+
+        with pytest.raises(ValueError, match="state must be provided"):
+            m.compute_safe_command(cmd, None)  # type: ignore[arg-type]
+
+    @pytest.mark.unit
+    def test_velocity_clip_not_reachable_by_speed_override_alone(self) -> None:
+        """Issue #7694: with the default (1.0) speed override, no scaling is
+        applied, so an over-speed VELOCITY command must still be hard-clipped to
+        ``max_joint_velocity`` by ``compute_safe_command``.
+
+        This pins the dedicated clip step (not the speed-override branch): the
+        request is well above the limit on every joint and the override is left
+        at its default, so only the clip can bring it back in bounds.
+        """
+        m = SafetyMonitor(_cfg())
+        assert m._speed_override == 1.0  # default: override scaling is a no-op
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.array([5.0, -7.5, 9.0]),
+        )
+        safe = m.compute_safe_command(cmd, _state())
+        assert safe.velocity_targets is not None
+        # Hard limit is 2.0 rad/s per joint (see ``_cfg``).
+        np.testing.assert_array_equal(safe.velocity_targets, np.array([2.0, -2.0, 2.0]))
+        assert np.all(np.abs(safe.velocity_targets) <= m.limits.max_joint_velocity)
+
+    @pytest.mark.unit
+    def test_emergency_stop_zeroes_pure_torque_command(self) -> None:
+        """Issue #7694 (suggested fix 3): a pure TORQUE-mode command issued while
+        E-stopped, after the speed override was explicitly raised to 1.0, must be
+        neutralised to all-zero torque.
+
+        ``set_speed_override(1.0)`` is a no-op under E-stop (it is clamped back to
+        0.0), so the all-zero result is enforced by the E-stop branch itself, not
+        by speed scaling. This is the exact unsafe path the issue calls out.
+        """
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        m.set_speed_override(1.0)
+        assert m._speed_override == 0.0  # override cannot be raised under E-stop
+        cmd = ControlCommand.torque_command(0.0, np.array([40.0, -30.0, 12.0]))
+        state = _state(joint_positions=np.array([0.1, 0.2, 0.3]))
+        safe = m.compute_safe_command(cmd, state)
+        assert safe.torque_commands is not None
+        np.testing.assert_array_equal(safe.torque_commands, np.zeros(3))
+
+
+class TestSafetyMonitorMisc:
+    def test_stopping_distance(self) -> None:
+        m = SafetyMonitor(_cfg())
+        # ``body`` param was removed (issue #7740): worst-case joint braking
+        # angle is s = omega^2 / (2*alpha) = 4 / 4 = 1.0 rad.
+        d = m.get_stopping_distance(_state(joint_velocities=np.array([2.0, 0, 0])))
+        assert d == pytest.approx(1.0, rel=1e-3)
+
+    def test_set_speed_override_clamps(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.set_speed_override(2.0)
+        assert m._speed_override == 1.0
+        m.set_speed_override(-1.0)
+        assert m._speed_override == 0.0
+
+    @pytest.mark.unit
+    def test_set_speed_override_remains_zero_during_emergency_stop(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        m.set_speed_override(1.0)
+        assert m._speed_override == 0.0
+
+    def test_set_human_nearby(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.set_human_nearby(True)
+        assert m._human_nearby
+        assert m._speed_override <= 0.5
+
+    def test_emergency_stop_cycle(self) -> None:
+        m = SafetyMonitor(_cfg())
+        assert not m.is_emergency_stopped()
+        m.trigger_emergency_stop()
+        assert m.is_emergency_stopped()
+        assert m._speed_override == 0.0
+        m.clear_emergency_stop()
+        assert not m.is_emergency_stopped()
+        assert m._speed_override == 1.0
+
+    @pytest.mark.unit
+    def test_clear_emergency_stop_preserves_human_derate(self) -> None:
+        """Issue #7691: clearing E-stop must not restore full speed while a
+        human is still nearby — it should keep the proximity derate."""
+        m = SafetyMonitor(_cfg())
+        m.set_human_nearby(True)
+        m.trigger_emergency_stop()
+        assert m._speed_override == 0.0
+
+        m.clear_emergency_stop()
+
+        assert not m.is_emergency_stopped()
+        assert m._human_nearby
+        # Must NOT jump back to full speed with a human present.
+        assert m._speed_override == 0.5
+
+    @pytest.mark.unit
+    def test_clear_emergency_stop_restores_full_speed_when_no_human(self) -> None:
+        m = SafetyMonitor(_cfg())
+        m.trigger_emergency_stop()
+        m.clear_emergency_stop()
+        assert m._speed_override == 1.0

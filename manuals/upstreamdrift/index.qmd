@@ -1,0 +1,14 @@
+---
+title: "UpstreamDrift Engineering Design Manual"
+subtitle: "Governed Calculation and Implementation Pathways"
+format: html
+---
+
+# Release Status
+
+This is the canonical editable QMD source for the UpstreamDrift engineering
+design manual. It is a governance scaffold, not a released engineering manual.
+The calculation inventory is empty and release remains blocked by UP-D1 through
+UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
+
+{{< include chapters/00-governance.qmd >}}

@@ -1,0 +1,48 @@
+"""Echo skill — reference implementation demonstrating DbC (Tools #2737)."""
+
+from __future__ import annotations
+
+from typing import Any, ClassVar
+
+from ..base import Skill
+from ..contracts import SkillDescriptor, SkillInvocation, SkillResult
+
+
+class EchoSkill(Skill):
+    """Echoes a non-empty string payload back to the caller.
+
+    Demonstrates explicit precondition (``message`` is non-empty string)
+    and postcondition (``echoed`` equals input ``message``) validation.
+    """
+
+    descriptor: ClassVar[SkillDescriptor] = SkillDescriptor(
+        id="builtin.echo",
+        name="Echo",
+        version="1.0.0",
+        description="Echoes the supplied message back to the caller.",
+        inputs={"message": "string"},
+        outputs={"echoed": "string"},
+        preconditions=["message_is_non_empty_string"],
+        postconditions=["echoed_equals_message"],
+    )
+
+    def validate_preconditions(self, args: dict[str, Any]) -> None:
+        message = args.get("message")
+        if not isinstance(message, str) or not message:
+            raise ValueError(
+                "message_is_non_empty_string: 'message' must be a non-empty string"
+            )
+
+    def validate_postconditions(self, result: dict[str, Any]) -> None:
+        if "echoed" not in result:
+            raise ValueError("echoed_equals_message: missing 'echoed' field")
+
+    async def run(self, invocation: SkillInvocation) -> SkillResult:
+        message = invocation.args["message"]
+        return SkillResult(
+            request_id=invocation.request_id,
+            success=True,
+            value={"echoed": message},
+            error=None,
+            elapsed_ms=0.0,
+        )

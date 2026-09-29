@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "name": "club_head",
+      "target": "marker_group:club_head",
+      "style": {
+        "shape": "cube",
+        "size_px": 9.0,
+        "edge_color": "#000000",
+        "edge_width": 1.5,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#dddddd"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "ball",
+      "target": "marker_group:ball",
+      "style": {
+        "shape": "sphere",
+        "size_px": 7.0,
+        "edge_color": "#000000",
+        "edge_width": 1.5,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#ffffff"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "left_hand",
+      "target": "marker_group:left_hand",
+      "style": {
+        "shape": "cross",
+        "size_px": 7.0,
+        "edge_color": "#000000",
+        "edge_width": 1.25,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "Greys",
+          "palette_index": 90
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "right_hand",
+      "target": "marker_group:right_hand",
+      "style": {
+        "shape": "plus",
+        "size_px": 7.0,
+        "edge_color": "#000000",
+        "edge_width": 1.25,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "Greys",
+          "palette_index": 160
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "skeleton",
+      "target": "marker_group:skeleton",
+      "style": {
+        "shape": "point",
+        "size_px": 5.0,
+        "edge_color": "#000000",
+        "edge_width": 1.0,
+        "fill_color": {
+          "kind": "data_driven",
+          "channel": {
+            "name": "depth",
+            "unit": "m",
+            "shape": [0],
+            "dtype": "float64"
+          },
+          "colormap": "cividis",
+          "vmin": 0.0,
+          "vmax": 2.0,
+          "nan_color": "#aaaaaa"
+        }
+      }
+    }
+  ]
+}

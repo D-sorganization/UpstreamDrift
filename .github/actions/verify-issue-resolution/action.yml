@@ -1,0 +1,129 @@
+name: "Verify Issue Resolution"
+description: >
+  Verifies that a PR claiming to resolve an issue actually ships substantive code
+  before allowing close/merge. Prevents the Jules close-and-reopen spam loop by
+  failing the workflow when the PR is a phantom merge (zero/trivial diff that
+  collapsed because a sibling PR with the same files merged first).
+
+inputs:
+  pr_number:
+    description: "Pull request number to verify."
+    required: true
+  issue_number:
+    description: >
+      Optional issue number the PR claims to resolve. When supplied, the action
+      additionally checks that the PR diff touches at least one path referenced
+      in the issue body.
+    required: false
+    default: ""
+  min_additions:
+    description: "Minimum additions required before the PR is considered substantive."
+    required: false
+    default: "5"
+  min_deletions:
+    description: "Minimum deletions required before the PR is considered substantive."
+    required: false
+    default: "5"
+  min_changed_files:
+    description: "Minimum changed files required before the PR is considered substantive."
+    required: false
+    default: "2"
+  github_token:
+    description: "Token used for gh api calls. Must have repo read scope on PRs/issues."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Verify PR diff is substantive
+      id: verify
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        PR_NUMBER: ${{ inputs.pr_number }}
+        ISSUE_NUMBER: ${{ inputs.issue_number }}
+        MIN_ADDITIONS: ${{ inputs.min_additions }}
+        MIN_DELETIONS: ${{ inputs.min_deletions }}
+        MIN_CHANGED_FILES: ${{ inputs.min_changed_files }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "${PR_NUMBER:-}" ]; then
+          echo "::error::verify-issue-resolution: pr_number input is required"
+          exit 1
+        fi
+
+        # ---------------------------------------------------------------------
+        # Check 1: diff must not be trivial
+        # base..head must have at least min_additions OR min_deletions LOC
+        # AND at least min_changed_files files changed.
+        # ---------------------------------------------------------------------
+        DIFF_STATS=$(gh pr view "$PR_NUMBER" --json additions,deletions,changedFiles \
+          --jq '"\(.additions) \(.deletions) \(.changedFiles)"')
+        ADDS=$(echo "$DIFF_STATS" | awk '{print $1}')
+        DELS=$(echo "$DIFF_STATS" | awk '{print $2}')
+        FILES=$(echo "$DIFF_STATS" | awk '{print $3}')
+
+        echo "PR #$PR_NUMBER diff: +$ADDS / -$DELS across $FILES file(s)"
+
+        if [ "$ADDS" -lt "$MIN_ADDITIONS" ] \
+           && [ "$DELS" -lt "$MIN_DELETIONS" ] \
+           && [ "$FILES" -lt "$MIN_CHANGED_FILES" ]; then
+          echo "::error::Refusing to close/merge: PR #$PR_NUMBER has trivial diff (+$ADDS/-$DELS, $FILES files). Likely a phantom merge — sibling PR absorbed the work."
+          echo "verdict=trivial_diff" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+
+        # ---------------------------------------------------------------------
+        # Check 2: title-vs-content sanity
+        # If title looks like a feature claim, diff must touch at least one
+        # source file (src/ or rust_core/). Docs-only PRs claiming features
+        # are exactly the phantom-merge pattern we're guarding against.
+        # ---------------------------------------------------------------------
+        TITLE=$(gh pr view "$PR_NUMBER" --json title --jq .title)
+        echo "PR #$PR_NUMBER title: $TITLE"
+
+        if echo "$TITLE" | grep -iqE "^(\[?jules[^]]*\]?[: ]*)?feat[:(]|implement|system|engine|framework|architecture"; then
+          CODE_FILES=$(gh pr diff "$PR_NUMBER" --name-only \
+            | grep -cE "^(src/|rust_core/)" || true)
+          echo "PR #$PR_NUMBER touches $CODE_FILES source file(s) under src/ or rust_core/"
+          if [ "$CODE_FILES" -lt 1 ]; then
+            echo "::error::Refusing to close/merge: PR #$PR_NUMBER title claims a feature ('$TITLE') but touches no src/ or rust_core/ files. Phantom merge — refusing to propagate issue closure."
+            echo "verdict=feature_title_no_code" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+        fi
+
+        # ---------------------------------------------------------------------
+        # Check 3: if issue_number was supplied AND its body references paths,
+        # the PR diff must touch at least one referenced path.
+        # ---------------------------------------------------------------------
+        if [ -n "${ISSUE_NUMBER:-}" ]; then
+          ISSUE_BODY=$(gh issue view "$ISSUE_NUMBER" --json body --jq .body 2>/dev/null || echo "")
+          REFERENCED_PATHS=$(echo "$ISSUE_BODY" \
+            | grep -oE "(src|tests|rust_core|api|services)/[A-Za-z0-9_/.-]+" \
+            | sort -u || true)
+
+          if [ -n "$REFERENCED_PATHS" ]; then
+            PR_FILES=$(gh pr diff "$PR_NUMBER" --name-only)
+            MATCH=0
+            while IFS= read -r path; do
+              [ -z "$path" ] && continue
+              if echo "$PR_FILES" | grep -qF "$path"; then
+                MATCH=1
+                echo "PR #$PR_NUMBER touches referenced path: $path"
+                break
+              fi
+            done <<< "$REFERENCED_PATHS"
+
+            if [ "$MATCH" -eq 0 ]; then
+              echo "::error::Refusing to close/merge: PR #$PR_NUMBER does not touch any path referenced in issue #$ISSUE_NUMBER body. Referenced paths:"
+              echo "$REFERENCED_PATHS" | sed 's/^/  - /'
+              echo "verdict=issue_path_mismatch" >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+          fi
+        fi
+
+        echo "verdict=ok" >> "$GITHUB_OUTPUT"
+        echo "Diff verification passed for PR #$PR_NUMBER."

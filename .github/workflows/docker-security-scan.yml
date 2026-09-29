@@ -1,0 +1,77 @@
+name: Docker Security Scan
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "requirements*.txt"
+      - "pyproject.toml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "requirements*.txt"
+      - "pyproject.toml"
+  schedule:
+    # Weekly scan on Sunday at midnight
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: docker-security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy-scan:
+    timeout-minutes: 40
+    name: Trivy Container Scan
+    runs-on: d-sorg-fleet-docker
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Fetch pinned Tools packages
+        # The primary Dockerfile now COPYs vendor/ud-tools (UD #9406).
+        uses: ./.github/actions/fetch-pinned-tools
+
+      - name: Build Docker image
+        # --target runtime avoids pulling in the ~10 GB training stage (PyTorch + CUDA)
+        shell: bash
+        run: docker build --target runtime -t upstreamdrift:ci .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: "upstreamdrift:ci"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          # SARIF upload remains nonblocking; the table scan below is the
+          # blocking HIGH/CRITICAL gate.
+          exit-code: "0"
+          timeout: "30m0s"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@b25d0ebf40e5b63ee81e1bd6e5d2a12b7c2aeb61
+        if: success()
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: Run Trivy (table output for PR comments)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: "upstreamdrift:ci"
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          # Fail the build on actionable HIGH or CRITICAL vulnerabilities.
+          # The SARIF upload above still reports unfixed OS findings; this
+          # blocking gate ignores CVEs with no fixed package version available.
+          exit-code: "1"
+          ignore-unfixed: "true"
+          vuln-type: "os,library"
+          timeout: "30m0s"

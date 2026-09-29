@@ -1,0 +1,119 @@
+# Discussion {#sec-discussion}
+
+## Agreement With the Literature {#sec-discussion-agreement}
+
+Several results of @sec-results are directionally comparable with studies
+in @sec-mechanics, but their magnitudes are not directly exchangeable.
+The harm of the tested early-drive program is consistent with the
+delayed-release results of Pickering and Vickers and of Sprigings and
+MacKenzie [@pickering1999; @sprigings2002] and with Milburn's account of
+delayed uncocking [@milburn1982]. It is not a replication: the models,
+objectives, admissible torques, and impact definitions differ. The +12.4% and
++7.8% late-drive contrasts should likewise be compared cautiously with
+Sprigings and Neal's approximately 9% enabled-versus-disabled
+wrist-generator contrast [@sprigings2000], and not with the 1.6% forced-delay
+contrast reported by Sprigings and MacKenzie [@sprigings2002]. The
+dominance of the
+passive late energy pathway (joint-force transfer of 131.7 J versus
+25.7 J of late wrist work in the grid-selected swing) is White's parametric
+transfer made explicit in Robertson-Winter accounting
+[@white2006; @robertson1980]. The early-delivery geometry of the early-drive
+swing — clubhead overtaking the hands before the arm reaches vertical —
+is consistent with release differences documented across skill-level studies
+[@cheetham2008; @zheng2008]. The two selected programs instead have the hands
+ahead in the model's coordinate convention, with the arm 0.7–0.8 rad past
+vertical. These are geometric comparators, not player classifications.
+Finally, the drift/control
+time signature — control as early restraint, drift as late delivery —
+is the counterfactual pattern proposed in @sec-hypothesis, now exhibited
+by this model.
+
+## Why the Selected Retention Program Is Faster: A Mechanistic Reading {#sec-discussion-mechanism}
+
+Within this registered model and intervention family, the energy budgets
+localize two mechanisms associated with the ordering. Early wrist drive
+raises the system's
+moment of inertia about the hub while the shoulder is still
+accelerating (so the same shoulder torque buys less arm speed — the
+early-drive program banks 21 J less early shoulder work than the
+retain program despite identical $\tau_s$). It also changes wrist work and
+joint-force transfer at a different state; the present comparison does
+not isolate an independent "amplification" factor. Timed restraint is
+faster in the tested family: it holds the compact configuration slightly longer than a
+free hinge would (the drift field already wants to open the wrist — the
+restraint is fighting centrifugal release, not gravity), banks that
+margin as arm speed, and then releases into a fully developed
+motion-dependent field where the registered joint-force channel transfers
+arm energy to the club rapidly. The negative early wrist work (−1.9 J) is
+small in absolute terms and diagnostic only of this simulated command:
+the imposed negative actuator torque opposes the modeled joint's opening
+velocity. It distinguishes active model restraint from zero model torque,
+consistent with the restraining-torque role in Jorgensen's fitted swing and
+Sprigings--Neal-type actuator solutions
+[@jorgensen1999; @sprigings2000; @herring1992]. It does not identify a muscle,
+neural intent, eccentric physiology, or a human retention technique.
+
+Two qualifications temper this reading. Active restraint adds only +0.5 m/s
+over the selected passive-then-drive program; most of the modeled benefit comes
+from not driving early. Heavier or longer restraint crosses outside the
+registered delivery zone. Neither result prescribes human timing.
+
+## What the 2-DOF Model Cannot Establish {#sec-discussion-limits}
+
+The results chapter demonstrates the S2 pattern in the model class where
+the classical timing literature lives; it does not yet demonstrate it
+for a golfer. The specific gaps, each with a tracked remediation:
+
+- **Spatial Body and Distributed-Club Dynamics.** The hub-path and inward-pull
+  mechanisms [@miura2001; @nesbit2009hub; @nesbit2014hub], shaft
+  dynamics [@mackenzie2009; @betzler2012; @osis2012], and long-axis
+  rotations [@marshall2000] are outside the primary 2-DOF model. The forward
+  two-hand and coupled moving-base/flexible-club tiers address planar closure,
+  translation, and one lumped flex mode; base rotation, distributed beams, and
+  the reduced full-body common-state tier now addresses nonplanar inverse
+  dynamics. The reduced MuJoCo/Pinocchio forward-contact tier adds compliant
+  spatial closure, long-axis rotation, swing-plane evolution, and a reduced
+  ground-pathway proxy. Subject-scaled articulated arms, base--ground
+  dynamics, and a coupled distributed beam remain appropriate staged
+  extensions.
+- **Simplified Actuator Models.** E1b shows the S2 ordering survives a
+  linear torque-velocity bound on the drives with compressed margins
+  (@sec-results-e1b), but activation-rate limits, history dependence,
+  and eccentric-side detail remain unmodeled. The coupled study adds pure
+  delay, first-order activation, rate limits, torque--velocity bounds, and an
+  impedance proxy, but these remain command-level surrogates; full optimal-control
+  treatments with physiological actuators are the appropriate
+  refinement [@sprigings2000; @sharp2009; @mcnally2018].
+- **Coupled Sensitivity Is a Screening Tier.** Alternative impact definitions and
+  single-parameter perturbations preserved the ordering
+  (@sec-results-robustness). The 12-input Latin-hypercube study now exposes
+  coupled effects, parameter non-identifiability, and held-out strategy
+  tradeoffs. Its ranges are engineering envelopes and its sample is small;
+  measurement uncertainty and population distributions remain unmodeled.
+- **Counterfactuals Remain Model-Tier Specific.** The Python pathway now
+  includes both pointwise ZTCF profiles and forward same-state killswitches in
+  the double-pendulum and constrained two-hand tiers. The coupled extension now
+  preserves the finite negative-couple branch with endogenous base translation
+  and club flex. The spatial common-state tier transports the geometry response
+  across independent inverse-dynamics formulations. The reduced spatial
+  forward tier then preserves a negative contact couple after complete driver
+  removal under both native inertia-and-bias operators, with one shared
+  projected contact law and state update. Its hand carriages and declared
+  contact law do not establish persistence in anatomical arms or human
+  dynamics.
+- **No Human Data Yet.** The decisive observational test — wrist
+  interface power time courses across skill levels from motion capture
+  (@sec-falsify) — awaits an appropriately governed motion-capture study.
+
+## Implications, Cautiously Stated {#sec-discussion-implications}
+
+For modeling, counterfactual and energy-level accounting make the timing
+question testable without treating peak order as energy transfer. A recent
+cross-sectional study likewise found its constructed transfer-efficiency factor
+associated with clubhead speed, but its mediation analysis does not establish a
+causal human transfer mechanism [@frontiers2026footground]. The
+program names denote finite model inputs, not coaching cues or novelty over
+delayed-release literature [@cochran1968; @jorgensen1999]. No recommendation
+follows. Player-specific translation requires governed human evidence spanning
+physical constraints, injury history, and functional timing variability
+[@cole2016; @hume2005; @neal2007; @langdown2012; @glazier2011].

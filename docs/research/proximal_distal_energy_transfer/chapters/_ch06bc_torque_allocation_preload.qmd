@@ -1,0 +1,224 @@
+# Arm--Wrist Torque Allocation and Transmission Preload {#sec-torque-allocation-preload}
+
+## The Hypothesis Requires Two Separate Tests
+
+A club can receive a moment from direct wrist moments, from the moment of two
+separated hand forces about the club reference point, or from both. Those
+mechanisms are mechanically distinguishable even when their net club moment is
+identical. They are not, however, uniquely recoverable from club kinematics
+alone. The central comparison in this section therefore holds the club-level
+task fixed and varies only the modeled actuator allocation.
+
+The word *slack* presents a different problem. It can refer to a contact gap,
+series-elastic extension, low tangent stiffness, delayed force development, or
+simply low activation. Those conditions are not interchangeable. The second
+experiment therefore declares one operational definition: a rotational dead
+zone followed by a linear series stiffness and first-order torque development.
+It asks what that element predicts during a change in actuator roles. It does
+not claim that the wrist, grip, or shoulder girdle is literally a backlash
+joint.
+
+This separation is essential. If two complete swings are assigned different
+kinematics, a difference in club speed cannot identify whether allocation,
+preload, geometry, or the changed trajectory caused the result. Here the
+allocation comparison is same-state and task-matched; the transmission
+comparison uses the same post-transition net torque target. The implementation
+and evidence are available in
+[`torque_allocation_preload.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/torque_allocation_preload.py),
+[`torque_allocation_preload_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json),
+and the corresponding
+[`NPZ trace archive`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.npz).
+
+## Physiological Evidence and Its Limits
+
+Scapular electromyography in 15 competitive male golfers reported trail-side
+levator scapulae, rhomboid, and trapezius activity during takeaway; lead-side
+trapezius and rhomboid activity during the forward swing; and high trail-side
+serratus anterior activity during the forward swing [@jobe1995]. This is
+compatible with phase-dependent shoulder-girdle coordination. It does not
+establish the direction of either hand force, a bilateral grip couple, or a
+unique mapping from scapular activation to club moment.
+
+The wrist evidence is likewise informative but non-identifying. In 15 subelite
+male golfers, extensor carpi ulnaris activity differed by side and swing phase,
+yet downswing activation was not significantly related to the reported
+clubhead kinematics [@robinson2023]. A three-dimensional kinetic study found
+that wrist action and hand trajectory were important to the simulated swing,
+but its individual-subject results do not resolve a universal actuator
+allocation [@nesbit2014]. A systematic review covering 92 golf-kinematics
+studies found substantial methodological heterogeneity and contradictory
+results [@bourgain2022]. These sources motivate measurement; they do not prove
+either extreme strategy.
+
+Direct bilateral measurement is necessary because closed-chain inverse
+dynamics does not uniquely allocate forces between two hands. Instrumented
+grip studies have demonstrated that this ambiguity can be reduced with strain
+gauges or a six-axis grip sensor [@koike2016; @koike2020]. The present model
+therefore reports hand-force requirements as predictions to test, not as
+measured biological loads.
+
+## Matched-Task Allocation
+
+At a fixed configuration $\mathbf q$ and velocity $\dot{\mathbf q}$, the KKT
+system from @sec-forward-two-hand is affine in generalized control. Define the
+control-only club angular acceleration as
+
+$$
+\ddot\alpha_C(\mathbf u)=
+\ddot\alpha(\mathbf q,\dot{\mathbf q},\mathbf u)
+-\ddot\alpha(\mathbf q,\dot{\mathbf q},\mathbf 0).
+$$ {#eq-allocation-control-acceleration}
+
+Two actuator subspaces are evaluated. The *proximal* subspace contains the
+four shoulder and elbow generalized torques and sets both direct wrist moments
+to zero. The *wrist* subspace contains the two direct wrist moments and sets the
+four proximal torques to zero. Within each subspace, the minimum Euclidean-norm
+control is selected subject to the same target
+$I_C\ddot\alpha_C=8$ N m. This is a reproducible mathematical allocation; the
+proximal subspace must not be relabeled as a measured scapular strategy.
+
+Convex mixtures of the two task-normalized controls generate an allocation
+fraction from zero (proximal-only) to one (wrist-only). Because the KKT solve is
+linear in same-state control, every mixture retains the task. Across 19 club
+angles and 21 allocation fractions, the maximum task error is
+$5.33\times10^{-15}$ N m. The direct wrist moment plus the moment generated by
+the two-hand force couple closes to the same net moment within
+$4.44\times10^{-15}$ N m.
+
+![The Same Net Club-Moment Task Can Be Divided Between Direct Wrist Moment and a Two-Hand Force Couple](figures/fig_torque_allocation_moment_closure.pdf){#fig-torque-allocation-closure width=95% fig-alt="Geometry changes the direct moment required by a wrist-only generalized control because its contact-force response can contribute an opposing couple."}
+
+The task match does not make the internal demands equivalent. Across the
+declared geometry, RMS modeled hand force spans 7.58--91.51 N and the
+generalized-torque norm spans 5.74--25.45 N m. For these particular unweighted
+metrics, intermediate-to-wrist-dominant allocations minimize hand force, while
+wrist-dominant allocations minimize generalized-torque norm. The minimizing
+fraction changes with club geometry.
+
+![Modeled Demand Minima Vary With Geometry and Objective](figures/fig_torque_allocation_geometry_surface.pdf){#fig-torque-allocation-surface width=96% fig-alt="White curves show the grid minimum for each separately reported metric, not a physiological optimum."}
+
+This result rejects two shortcuts. First, a measured net club moment does not
+identify whether the arms or wrists supplied it. Second, a single scalar
+``effort`` cannot select the best allocation without declared weights for hand
+force, joint torque, work, stability, discomfort, accuracy, and robustness.
+The model supports an allocation surface, not universal technique advice.
+
+## A Falsifiable Definition of Slack
+
+For each actuator channel $i$, desired torque is converted to an equilibrium
+deflection $x_i^*$ through a dead zone $\delta_i$ and stiffness $k_i$:
+
+$$
+x_i^*=\operatorname{sgn}(\tau_i^*)
+\left(\delta_i+\frac{|\tau_i^*|}{k_i}\right),
+\qquad
+\dot x_i=\frac{x_i^*-x_i}{T_i},
+$$ {#eq-preload-command}
+
+$$
+\tau_i(x_i)=k_i\operatorname{sgn}(x_i)
+\max(|x_i|-\delta_i,0).
+$$ {#eq-preload-transmission}
+
+The declared numerical experiment uses $k=600$ N m rad$^{-1}$,
+$\delta=0.012$ rad, and $T=18$ ms for both abstract channels. These are
+synthetic sensitivity parameters, not identified tissue or grip properties.
+An interval with $|x_i|\leq\delta_i$ is the only condition called
+``zero transmission`` here.
+
+Two matched net-torque programs are compared. In the *persistent-direction*
+program, the arm channel remains positive and the wrist channel remains
+negative across the transition, with net torque changing from 6 to 10 N m. In
+the *role-reversal* program, the arm channel changes from -4 to +16 N m while
+the wrist channel changes from +10 to -6 N m, preserving the same pre- and
+post-transition net targets. Each is evaluated from its pre-transition loaded
+equilibrium and from a relaxed zero-deflection state.
+
+A separate history test removes the loaded-equilibrium initialization. Both
+channels start from zero deflection, experience their preparation commands for
+180 ms, and then cross the transition without resetting deflection or
+transmitted torque. Only the desired commands change at $t=0$. This operational
+preparation interval is not a simulated anatomical backswing; it is a direct
+test that the declared internal state can be generated by finite prior loading
+and carried continuously into the post-transition interval.
+
+![Continuous Preparation History and Command Transition](figures/fig_torque_continuous_preparation.pdf){#fig-torque-continuous-preparation width=96% fig-alt="Two torque-channel histories start relaxed, load for 180 milliseconds, and cross time zero continuously. Persistent channel directions remain engaged after the desired command changes; complete role reversal crosses zero transmission."}
+
+![Transmission Continuity for Persistent-Direction and Role-Reversal Programs](figures/fig_torque_role_reversal_transmission.pdf){#fig-role-reversal-transmission width=96% fig-alt="With the declared dead zone, maintaining each channel's sign preserves immediate transmission from a loaded state. Reversing both channel signs requires passage through the dead zone. A relaxed start delays either program."}
+
+From the loaded state, the persistent-direction program has no zero-transmission
+interval and a net torque-error impulse of 0.0717 N m s. The role-reversal
+program spends 11.5 ms and 22.0 ms in zero transmission for the arm and wrist
+channels, respectively, and its error impulse is 0.1954 N m s. These are
+zero-valued sample-occupancy estimates on a 0.1 ms grid; unresolved entry and
+exit locations bound them to 11.4--11.6 ms and 21.9--22.1 ms. A relaxed start
+produces an error impulse of 0.2011 N m s for either program. Thus preload
+improves continuity for a fixed desired program, while a sign reversal can
+discard that advantage under this particular dead-zone model.
+
+The finite-history test reproduces those post-transition values without state
+reinitialization: the persistent-direction program again has zero gap in both
+channels and a 0.0717 N m s error impulse, while complete role reversal produces
+11.5 ms and 22.0 ms gaps and a 0.1954 N m s impulse. Equality with the loaded
+initialization is expected after ten declared time constants of preparation;
+the new evidence establishes state continuity, not a new physiological result.
+
+The interpretation is conditional. Biological series elasticity normally
+stores and returns energy rather than acting as backlash, and short-range
+muscle stiffness can increase with activation [@izzietal2023; @degroote2017].
+Series compliance can also delay force rise [@luo1994; @mayfield2016], while
+co-contraction can improve task-relevant stiffness at an energetic cost
+[@berret2024]. Consequently, neither zero compliance nor maximum co-contraction
+is presumed optimal. Useful compliance can filter impact, store energy, and
+permit coordination; unwanted gaps or low tangent stiffness can impair rapid
+torque transmission. The distinction must be measured.
+
+Across the registered four-dead-zone by three-time-constant grid, an explicit
+$10^{-10}$ N m s equivalence tolerance classifies all three zero-dead-zone cases
+as equivalent, all nine positive-dead-zone cases as favoring persistent
+direction, and none as favoring complete role reversal. This is a structural
+result of the chosen backlash-like law: when its defining dead zone is removed,
+the modeled advantage disappears. The grid does not establish that biological
+transmission contains such a dead zone or that the sampled parameters span a
+human population.
+
+## Critical Comparison of the Two Extremes
+
+| Question | Persistent Arm Drive With Wrist Resistance | Wrist-to-Arm Role Reversal |
+|---|---|---|
+| Club-level task | Can match the same net moment | Can match the same net moment |
+| Transmission continuity in the declared dead-zone model | Favored when each channel remains loaded in the same direction | Penalized when both channels cross zero |
+| Possible coordination benefit | Reuses a directionally persistent proximal command | Separates preparation and delivery roles |
+| Principal modeled cost | May require larger hand forces or proximal generalized torques, depending on geometry | May require reversal delay and transient torque error |
+| Physiological evidence | Scapular phase activity is compatible but non-identifying | Wrist phase activity is compatible but non-identifying |
+| Main falsifier | Measured bilateral forces show no predicted couple or preload continuity | Measured reversal occurs without force/stiffness gap and yields equal or better robustness |
+
+The persistent-direction strategy therefore has a clear conditional advantage:
+if the relevant biological transmission behaves like the declared dead-zone
+element, retaining load direction can preserve immediate torque transmission.
+It is not established as universally superior. The wrist-led preparation may
+reduce proximal loading, exploit elastic storage, or improve accuracy in a
+participant-specific system; the current model does not price those outcomes.
+
+## Measurements That Can Refute the Interpretation
+
+The experimental protocol in @sec-experimental-protocol should add the
+following preregistered observables:
+
+1. bilateral six-axis grip wrenches and grip-pressure distribution, transformed
+   to a declared club reference point;
+2. wrist moments from a closed-chain inverse-dynamics solve constrained by the
+   measured internal grip wrench;
+3. ultrasound or validated musculotendon-length proxies where feasible, plus
+   perturbation-based or system-identification estimates of tangent stiffness;
+4. surface EMG for forearm, shoulder, and scapular muscles, interpreted as
+   activation timing rather than joint torque;
+5. transition-aligned force-development delay, zero-force duration, torque-error
+   impulse, club angular acceleration, shaft strain, and launch outcomes; and
+6. participant-held-out comparisons of the two extremes and intermediate
+   allocations, with no universal optimum asserted from group means alone.
+
+The interpretation is falsified if the same club task does not show the
+predicted allocation-dependent hand forces, if inferred channel reversal does
+not produce a measurable transmission delay under a documented gap or low
+stiffness, or if any claimed performance advantage disappears on participant
+holdout. Observing scapular or wrist EMG timing alone is insufficient.

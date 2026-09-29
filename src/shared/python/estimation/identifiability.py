@@ -1,0 +1,342 @@
+"""Identifiability probes for synthetic estimation targets.
+
+Besides the exploratory :func:`probe_identifiability`, this module owns the
+pre-solve **gate** (#9758) that every MAP / multi-trial solve with free shared
+parameters passes through: :func:`gate_shared_parameters` builds the
+residual-vs-parameter Jacobian at the initial guess, runs the SVD, and warns
+about, locks, or refuses parameters that align with null directions.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Literal, TypeAlias
+
+import numpy as np
+import numpy.typing as npt
+
+from src.shared.python.core.contracts import check_finite, require
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from src.shared.python.estimation.map_estimator import SharedParameterBlock
+
+logger = get_logger(__name__)
+
+FloatArray: TypeAlias = npt.NDArray[np.float64]
+ObservationModel = Callable[[FloatArray], FloatArray]
+GatePolicy = Literal["off", "warn", "lock", "raise"]
+
+
+@dataclass(frozen=True)
+class ParameterSpec:
+    """Named parameter vector layout for probe reports."""
+
+    names: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        require(len(self.names) > 0, "at least one parameter is required")
+        require(len(set(self.names)) == len(self.names), "parameter names unique")
+        require(all(name.strip() for name in self.names), "parameter names non-empty")
+
+
+@dataclass(frozen=True)
+class IdentifiabilityReport:
+    """SVD summary of a stacked observation Jacobian."""
+
+    parameter_names: tuple[str, ...]
+    jacobian: FloatArray
+    singular_values: FloatArray
+    right_singular_vectors: FloatArray
+    rank: int
+    tolerance: float
+
+    @property
+    def condition_number(self) -> float:
+        """Return ``sigma_max / sigma_min`` or infinity when rank deficient."""
+        if self.singular_values.size == 0 or self.singular_values[-1] <= 0.0:
+            return float("inf")
+        return float(self.singular_values[0] / self.singular_values[-1])
+
+    @property
+    def nullspace_directions(self) -> dict[str, FloatArray]:
+        """Return right-singular directions whose singular value is tiny."""
+        directions: dict[str, FloatArray] = {}
+        for index, sigma in enumerate(self.singular_values):
+            if sigma <= self.tolerance:
+                directions[f"sv_{index}"] = self.right_singular_vectors[:, index]
+        return directions
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a JSON-friendly report summary."""
+        return {
+            "parameter_names": list(self.parameter_names),
+            "singular_values": self.singular_values.tolist(),
+            "rank": self.rank,
+            "tolerance": self.tolerance,
+            "condition_number": self.condition_number,
+            "nullspace_directions": {
+                key: value.tolist() for key, value in self.nullspace_directions.items()
+            },
+        }
+
+
+def finite_difference_jacobian(
+    model: ObservationModel,
+    parameters: npt.ArrayLike,
+    *,
+    step: float = 1.0e-6,
+) -> FloatArray:
+    """Return central finite-difference Jacobian of flattened observations."""
+    params = _finite_vector(parameters, "parameters")
+    require(step > 0.0 and np.isfinite(step), "step must be positive and finite")
+    baseline = _finite_vector(model(params.copy()), "model(parameters)")
+    jacobian = np.empty((baseline.size, params.size), dtype=np.float64)
+    for col in range(params.size):
+        delta = np.zeros_like(params)
+        local_step = step * max(1.0, abs(float(params[col])))
+        delta[col] = local_step
+        plus = _finite_vector(model(params + delta), "model(parameters + delta)")
+        minus = _finite_vector(model(params - delta), "model(parameters - delta)")
+        require(plus.shape == baseline.shape, "model output shape changed")
+        require(minus.shape == baseline.shape, "model output shape changed")
+        jacobian[:, col] = (plus - minus) / (2.0 * local_step)
+    return jacobian
+
+
+def probe_identifiability(
+    model: ObservationModel,
+    parameters: npt.ArrayLike,
+    spec: ParameterSpec,
+    *,
+    step: float = 1.0e-6,
+    tolerance: float | None = None,
+) -> IdentifiabilityReport:
+    """Compute SVD of the stacked finite-difference observation Jacobian."""
+    params = _finite_vector(parameters, "parameters")
+    require(len(spec.names) == params.size, "spec names must match parameters")
+    jacobian = finite_difference_jacobian(model, params, step=step)
+    _, singular_values, vt = np.linalg.svd(jacobian, full_matrices=False)
+    tol = _rank_tolerance(jacobian, singular_values, tolerance)
+    rank = int(
+        (singular_values > tol).sum()
+    )  # ⚡ Bolt: mask.sum() is ~1.8x faster than np.sum(mask)
+    return IdentifiabilityReport(
+        parameter_names=spec.names,
+        jacobian=jacobian,
+        singular_values=singular_values,
+        right_singular_vectors=vt.T,
+        rank=rank,
+        tolerance=tol,
+    )
+
+
+def sweep_parameter(
+    model: ObservationModel,
+    parameters: npt.ArrayLike,
+    parameter_index: int,
+    values: npt.ArrayLike,
+) -> FloatArray:
+    """Evaluate flattened observations while sweeping one parameter."""
+    params = _finite_vector(parameters, "parameters")
+    sweep_values = _finite_vector(values, "values")
+    require(0 <= parameter_index < params.size, "parameter_index out of range")
+    outputs: list[FloatArray] = []
+    for value in sweep_values:
+        candidate = params.copy()
+        candidate[parameter_index] = value
+        outputs.append(_finite_vector(model(candidate), "model(candidate)"))
+    first_shape = outputs[0].shape
+    require(all(out.shape == first_shape for out in outputs), "model shape changed")
+    return np.vstack(outputs)
+
+
+def plot_singular_values(report: IdentifiabilityReport):
+    """Return a matplotlib figure for the singular-value spectrum."""
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    ax.semilogy(np.arange(report.singular_values.size), report.singular_values, "o-")
+    ax.axhline(report.tolerance, color="tab:red", linestyle="--", linewidth=1.0)
+    ax.set_xlabel("singular vector")
+    ax.set_ylabel("singular value")
+    ax.set_title("Observation Jacobian singular spectrum")
+    return fig
+
+
+def _finite_vector(value: npt.ArrayLike, name: str) -> FloatArray:
+    arr = np.asarray(value, dtype=np.float64).reshape(-1)
+    require(arr.size > 0, f"{name} must be non-empty")
+    require(check_finite(arr), f"{name} must be finite")
+    return arr
+
+
+def _rank_tolerance(
+    jacobian: FloatArray, singular_values: FloatArray, tolerance: float | None
+) -> float:
+    if tolerance is not None:
+        require(tolerance >= 0.0 and np.isfinite(tolerance), "tolerance invalid")
+        return tolerance
+    if singular_values.size == 0:
+        return 0.0
+    scale = max(jacobian.shape) * np.finfo(np.float64).eps
+    return float(scale * singular_values[0])
+
+
+# ---------------------------------------------------------------------------
+# Pre-solve identifiability gate (#9758)
+# ---------------------------------------------------------------------------
+
+
+class UnidentifiableParametersError(RuntimeError):
+    """Raised under gate policy ``"raise"`` when free parameters are unobservable."""
+
+
+@dataclass(frozen=True)
+class IdentifiabilityGateOptions:
+    """How the MAP solvers react to weakly identifiable shared parameters.
+
+    ``policy``:
+        ``"off"`` skips the probe; ``"warn"`` (default) logs the flagged
+        parameters and solves anyway; ``"lock"`` locks them at their initial
+        values before solving; ``"raise"`` refuses the solve.
+    ``relative_tolerance``:
+        A singular value below ``relative_tolerance * sigma_max`` counts as a
+        null direction. ``1e-6`` separates "numerically zero" from merely
+        ill-conditioned columns.
+    ``alignment``:
+        A parameter is flagged when the absolute component of any null
+        direction along it exceeds this value.
+    ``step``:
+        Finite-difference step for the probe Jacobian.
+    """
+
+    policy: GatePolicy = "warn"
+    relative_tolerance: float = 1e-6
+    alignment: float = 0.5
+    step: float = 1e-6
+
+    def __post_init__(self) -> None:
+        require(self.policy in ("off", "warn", "lock", "raise"), "unknown policy")
+        require(
+            0.0 <= self.relative_tolerance < 1.0, "relative_tolerance must be in [0, 1)"
+        )
+        require(0.0 < self.alignment <= 1.0, "alignment must be in (0, 1]")
+        require(self.step > 0.0, "step must be positive")
+
+
+@dataclass(frozen=True)
+class IdentifiabilityGateReport:
+    """Outcome of the pre-solve gate for one solve."""
+
+    policy: GatePolicy
+    report: IdentifiabilityReport
+    flagged_parameters: tuple[str, ...]
+    locked_parameters: tuple[str, ...]
+
+    @property
+    def free_parameter_names(self) -> tuple[str, ...]:
+        return self.report.parameter_names
+
+    @property
+    def rank(self) -> int:
+        return self.report.rank
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "policy": self.policy,
+            "flagged_parameters": list(self.flagged_parameters),
+            "locked_parameters": list(self.locked_parameters),
+            "rank": self.rank,
+            "n_free": len(self.free_parameter_names),
+            "condition_number": self.report.condition_number,
+            "singular_values": self.report.singular_values.tolist(),
+        }
+
+
+def gate_shared_parameters(
+    residual_of_free: Callable[[FloatArray], FloatArray],
+    block: SharedParameterBlock,
+    options: IdentifiabilityGateOptions | None = None,
+) -> IdentifiabilityGateReport:
+    """Probe the free parameters of ``block`` through ``residual_of_free``.
+
+    Args:
+        residual_of_free: Maps a vector of the block's *free* parameter
+            values (trajectory held at the initial guess) to the data
+            residual. Must return finite values at the initial guess.
+        block: Shared parameter block whose ``free_specs`` are probed.
+        options: Gate policy and thresholds; defaults to ``warn``.
+
+    Returns:
+        The gate report. Under policy ``"lock"`` the caller is expected to
+        lock ``locked_parameters``; under ``"raise"`` this function raises
+        :class:`UnidentifiableParametersError` instead of returning.
+
+    Precondition: ``block.free_size > 0`` and ``options.policy != "off"``.
+    """
+    options = options or IdentifiabilityGateOptions()
+    require(options.policy != "off", "gate called with policy 'off'")
+    names = block.free_parameter_names
+    require(len(names) > 0, "block has no free parameters to gate")
+    initial = block.free_initial_vector()
+    spec = ParameterSpec(names)
+    jacobian = finite_difference_jacobian(residual_of_free, initial, step=options.step)
+    _, singular_values, vt = np.linalg.svd(jacobian, full_matrices=False)
+    sigma_max = float(singular_values[0]) if singular_values.size else 0.0
+    tolerance = options.relative_tolerance * sigma_max
+    rank = int((singular_values > tolerance).sum()) if sigma_max > 0.0 else 0
+    report = IdentifiabilityReport(
+        parameter_names=spec.names,
+        jacobian=jacobian,
+        singular_values=singular_values,
+        right_singular_vectors=vt.T,
+        rank=rank,
+        tolerance=tolerance,
+    )
+    flagged = _flag_null_aligned(report, names, options.alignment)
+    if sigma_max == 0.0:
+        flagged = tuple(names)
+
+    if flagged:
+        message = (
+            "shared parameters %s are not identifiable from the residual at the "
+            "initial guess (rank %d of %d free); policy=%s"
+        )
+        if options.policy == "raise":
+            raise UnidentifiableParametersError(
+                message % (list(flagged), rank, len(names), options.policy)
+            )
+        logger.warning(message, list(flagged), rank, len(names), options.policy)
+    locked = flagged if options.policy == "lock" else ()
+    return IdentifiabilityGateReport(
+        policy=options.policy,
+        report=report,
+        flagged_parameters=flagged,
+        locked_parameters=locked,
+    )
+
+
+def _flag_null_aligned(
+    report: IdentifiabilityReport, names: tuple[str, ...], alignment: float
+) -> tuple[str, ...]:
+    flagged: list[str] = []
+    # Every singular vector beyond the rank spans a null direction, including
+    # the ones ``full_matrices=False`` would drop for wide Jacobians.
+    n = len(names)
+    null_vectors = [
+        report.right_singular_vectors[:, index]
+        for index, sigma in enumerate(report.singular_values)
+        if sigma <= report.tolerance
+    ]
+    if report.singular_values.size < n:
+        basis = report.right_singular_vectors
+        complement = np.eye(n) - basis @ basis.T
+        extra, _, _ = np.linalg.svd(complement)
+        null_vectors.extend(extra[:, : n - report.singular_values.size].T)
+    for vector in null_vectors:
+        for index, name in enumerate(names):
+            if abs(float(vector[index])) > alignment and name not in flagged:
+                flagged.append(name)
+    return tuple(flagged)

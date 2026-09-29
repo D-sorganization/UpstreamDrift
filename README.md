@@ -1,0 +1,317 @@
+<p align="center">
+  <img src="assets/branding/logo.png" alt="UpstreamDrift" width="180"/>
+</p>
+
+<h1 align="center">UpstreamDrift</h1>
+
+<p align="center">
+  Biomechanical golf swing analysis across multiple physics engines,
+  from two-degree-of-freedom pendulums to muscle-driven musculoskeletal models.
+</p>
+
+<p align="center">
+  <a href="https://github.com/D-sorganization/UpstreamDrift/actions/workflows/ci-standard.yml"><img src="https://github.com/D-sorganization/UpstreamDrift/actions/workflows/ci-standard.yml/badge.svg" alt="CI Standard"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg" alt="Python 3.11 and 3.12"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT"></a>
+</p>
+
+---
+
+UpstreamDrift is a simulation and analysis platform for the golf swing. It runs
+the same model definitions through several physics engines, so a result can be
+checked against an independent implementation rather than taken on trust. It
+covers forward and inverse dynamics, inverse kinematics, trajectory
+optimization, motion-capture retargeting, and cross-engine comparison, with a
+web interface and a desktop application over the top.
+
+- **Audience**: biomechanics researchers, robotics engineers, and golf
+  instruction technologists.
+- **Platform**: Windows, macOS, and Linux. Python 3.11 or 3.12.
+- **Status**: actively developed. MuJoCo is the supported engine; other engines
+  carry the support levels stated in [Engine Support](#engine-support).
+
+## Contents
+
+| Section                                       | Purpose                                  |
+| --------------------------------------------- | ---------------------------------------- |
+| [Start Here](#start-here)                     | Choose a path for your first hour        |
+| [Capabilities](#capabilities)                 | What the platform can do                 |
+| [Installation](#installation)                 | Get a working environment                |
+| [Running the Platform](#running-the-platform) | Entry points and what each one opens     |
+| [Engine Support](#engine-support)             | Which engines are validated, and how far |
+| [Documentation](#documentation)               | Guides, API reference, and architecture  |
+| [Repository Layout](#repository-layout)       | Where things live                        |
+| [Contributing](#contributing)                 | Development workflow                     |
+| [Citation](#citation)                         | How to cite this work                    |
+
+## Start Here
+
+Pick the entry point that matches what you want to do.
+
+| If you want to                           | Read                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------- |
+| See one reproducible result end to end   | [Guided walkthrough](docs/portfolio/golf_modeling_demo.md)                      |
+| Install and launch the platform          | [Installation](#installation), below                                            |
+| Understand the whole system              | [Project map](docs/architecture/PROJECT_MAP.md)                                 |
+| Choose a physics engine for your problem | [Engine selection guide](docs/engines/engine_selection_guide.md)                |
+| Go from video to tracked motion          | [Motion pipeline guide](docs/motion_pipeline/README.md)                         |
+| Build a humanoid model                   | [Character builder quickstart](docs/user_guide/character_builder_quickstart.md) |
+| Add support for a new engine             | [Adapter authoring guide](docs/adapters/authoring_guide.md)                     |
+| Browse everything                        | [Documentation hub](docs/README.md)                                             |
+
+## Capabilities
+
+### Modeling
+
+- Models spanning 2 to 28 degrees of freedom, including flexible-shaft
+  formulations, up to musculoskeletal models with several hundred muscle
+  actuators.
+- Parametric humanoid generation with anthropometric scaling and URDF export.
+- MATLAB Simscape Multibody models, maintained as research references rather
+  than production artifacts.
+
+### Analysis
+
+- **Inverse kinematics** with nullspace optimization for redundant chains.
+- **Inverse dynamics** with full torque computation and force decomposition.
+- **Kinematic force analysis** separating Coriolis, centrifugal, and
+  gravitational contributions.
+- **Trajectory optimization** for comparing candidate swing objectives across
+  speed, accuracy, and efficiency.
+- **Cross-engine validation** running one model definition through several
+  engines and reporting the deviation.
+
+### Control and Robotics
+
+Impedance, admittance, hybrid force-position, and operational-space control;
+parallel-mechanism analysis of the two-handed grip; manipulability and
+singularity characterization; task-space control with redundancy resolution.
+
+### Motion Capture
+
+Load and retarget motion data in CSV, JSON, and C3D formats. Markerless tracking
+runs through OpenPose or MediaPipe. See the
+[motion pipeline guide](docs/motion_pipeline/README.md) for the video-to-motion
+workflow.
+
+### Visualization and Export
+
+Real-time three-dimensional rendering with multiple camera views and
+force-torque vector overlays; more than ten plot types including energy
+breakdowns, phase diagrams, and three-dimensional trajectories; CSV and JSON
+export for external analysis.
+
+## Installation
+
+### Prerequisites
+
+- Python 3.11 or 3.12.
+- Git. The shared Tools layer (`theme`, `sidekick`, `chat`, `utils`, ...) is a
+  pinned submodule at `vendor/ud-tools`; the platform will not import without
+  it. The repository does not use Git LFS.
+- MATLAB R2023a or later with Simulink and Simscape Multibody, only for the
+  MATLAB models.
+
+The supported combinations of Python version, operating system, engine tier, and
+hardware are recorded in the
+[production readiness matrix](docs/operations/production-readiness.md).
+
+### Install
+
+```bash
+git clone https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
+git submodule update --init --recursive vendor/ud-tools
+
+pip install -e ".[dev]"
+
+python scripts/ci/verify_installation.py
+```
+
+Only the `vendor/ud-tools` submodule is required. The three model submodules
+(`shared/models/opensim/opensim-models`, `shared/models/myosuite/myo_sim`,
+`src/shared/tools/human-gazebo`) are optional and only needed for the
+experimental OpenSim/MyoSuite engines.
+
+`pyproject.toml` is the canonical dependency source. A Conda wrapper is
+generated from it:
+
+```bash
+conda env create -f environment.yml
+conda activate upstream-drift
+```
+
+Edit dependencies in `pyproject.toml` and run `make sync-deps` to regenerate
+`environment.yml`.
+
+For interface development without the physics engines:
+
+```bash
+pip install -e .
+export GOLF_USE_MOCK_ENGINE=1
+```
+
+If installation fails, see
+[installation troubleshooting](docs/troubleshooting/installation.md).
+
+### Rust Kernels
+
+The Rust build works from a clean clone. The shared `tools-core` crate is
+fetched from a pinned `D-sorganization/Tools` revision, so no sibling checkout is
+required.
+
+```bash
+cargo build
+
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip maturin
+
+cd rust_core/upstream-physics
+python -m maturin develop --features python
+python -c "import upstream_physics; print(upstream_physics.IntegratorConfig())"
+```
+
+To develop against a local `Tools` checkout instead of the pinned revision, run
+`scripts/setup_tools_workspace.sh`.
+
+## Running the Platform
+
+```bash
+python launch_upstream_drift.py
+```
+
+This starts the local API server on port 8000 and opens the web interface in
+your browser. The other entry points:
+
+| Command                                           | Opens                                                 |
+| ------------------------------------------------- | ----------------------------------------------------- |
+| `python launch_upstream_drift.py`                 | Web interface (recommended default entry point)       |
+| `python launch_upstream_drift.py --classic`       | PyQt6 desktop application (canonical reference model) |
+| `python launch_upstream_drift.py --api-only`      | API server with no interface                          |
+| `python launch_upstream_drift.py --engine <name>` | A single engine directly                              |
+| `python -m src.tools.pose_studio`                 | Pose Studio, standalone                               |
+
+`upstream-drift` is installed as a console script and accepts the same
+arguments. The PyQt6 desktop application serves as the canonical feature-parity
+reference model against which web capabilities are tracked (see
+[`docs/development/feature_parity_matrix.md`](docs/development/feature_parity_matrix.md)).
+The desktop application remains supported for users who prefer a native window.
+
+`launch_golf_suite.py` is a deprecated compatibility shim retained for existing
+scripts. New work should use `launch_upstream_drift.py`.
+
+Development tasks run through the Makefile:
+
+```bash
+make help      # List available targets
+make check     # Run linters and tests
+make format    # Apply Ruff formatting
+```
+
+## Engine Support
+
+Support level determines what is validated in continuous integration, not what
+is implemented. Engines outside the supported tier work, but regressions in them
+are found later.
+
+| Tier         | Engines           | Install profile                        | Validation                         |
+| ------------ | ----------------- | -------------------------------------- | ---------------------------------- |
+| Supported    | MuJoCo            | `pip install -e ".[dev]"`              | Required on every pull request     |
+| Extended     | Drake, Pinocchio  | `pip install -e ".[dev,all-engines]"`  | Nightly cross-engine validation    |
+| Experimental | OpenSim, MyoSuite | `pip install -e ".[dev,biomechanics]"` | Best-effort, local validation only |
+
+| Engine                                                       | Strengths                                                                   |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| [MuJoCo](src/engines/physics_engines/mujoco/README.md)       | Contact-rich dynamics, ground and ball contact, motion capture workflow     |
+| [Drake](src/engines/physics_engines/drake/README.md)         | Trajectory optimization, contact modeling, system analysis, URDF            |
+| [Pinocchio](src/engines/physics_engines/pinocchio/README.md) | Fast rigid-body algorithms, analytical derivatives, PINK inverse kinematics |
+| [OpenSim](src/engines/physics_engines/opensim/README.md)     | Biomechanics validation surface, experimental                               |
+| [MyoSuite](src/engines/physics_engines/myosuite/README.md)   | Muscle modeling surface, experimental                                       |
+
+The full contract is in [support tiers](docs/engines/support_tiers.md);
+feature-level coverage is in
+[engine capabilities](docs/engines/engine_capabilities.md).
+
+## Documentation
+
+The [documentation hub](docs/README.md) is the entry point. Frequently used
+sections:
+
+- [Project map](docs/architecture/PROJECT_MAP.md) — every feature, module, and integration.
+- [Architecture map](docs/architecture/C4.md) — maintainable Mermaid C4Context and C4Container views and feature-evidence map.
+- [User guide](docs/user_guide/README.md) — installation, running simulations, using the interface.
+- [Engines](docs/engines/README.md) — engine documentation and comparison.
+- [API reference](docs/api/README.md) — code interfaces and REST endpoints.
+- [Adapters](docs/adapters/authoring_guide.md) — adding a physics engine.
+- [Architecture decisions](docs/adr/) — durable design records.
+- [Specification](SPEC.md) — the platform specification.
+- [Troubleshooting](docs/troubleshooting/) — installation, configuration, and cross-engine deviations.
+- [Development](docs/development/README.md) — architecture, contributing, and testing.
+
+## Repository Layout
+
+```text
+UpstreamDrift/
+├── launch_upstream_drift.py     Canonical entry point
+├── src/
+│   ├── launchers/               Launch applications
+│   ├── engines/
+│   │   ├── physics_engines/     MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite
+│   │   ├── Simscape_Multibody_Models/   MATLAB and Simulink models
+│   │   └── pendulum_models/     Reduced-order models
+│   ├── shared/                  Code with more than one consumer
+│   └── tools/                   Standalone utilities, including Pose Studio
+├── rust_core/                   Rust physics kernels
+├── apps/                        Web interface
+├── shared/                      Model assets and vendored dependencies
+├── docs/                        Documentation
+└── tests/                       Test suite
+```
+
+## Contributing
+
+Contributions are welcome. Start with the
+[contributing guide](docs/development/contributing.md), then the
+[development guidelines](docs/development/README.md) and the
+[testing guide](docs/testing/testing-guide.md).
+
+Before adding code, read [AGENTS.md](AGENTS.md). It maps the shared
+infrastructure and gives a discovery workflow that prevents reimplementing
+something the repository already provides.
+
+Report vulnerabilities through [SECURITY.md](SECURITY.md), not through public
+issues.
+
+## Citation
+
+```bibtex
+@software{upstream_drift,
+  title  = {UpstreamDrift: A Unified Platform for Biomechanical Golf Swing Analysis},
+  author = {Dieter Olson},
+  year   = {2026},
+  url    = {https://github.com/D-sorganization/UpstreamDrift}
+}
+```
+
+## License
+
+Released under the MIT License. See [LICENSE](LICENSE).
+
+## Acknowledgments
+
+This project builds on
+[MuJoCo](https://mujoco.org/) for physics simulation,
+[Drake](https://drake.mit.edu/) for model-based design and control,
+[Pinocchio](https://stack-of-tasks.github.io/pinocchio/) for rigid-body dynamics,
+[MyoSuite](https://github.com/MyoHub/myosuite) for musculoskeletal models, and
+[OpenSim](https://opensim.stanford.edu/) for biomechanical modeling.
+
+## Future Validation Planning
+
+Unavailable physical and human studies are preserved in [repo-owned Board plans](docs/development/planning/README.md). Numerical, native-runtime and available-data work remain executable. Deferral grants no scientific or release approval.
+
+Validate the existing catalog with `python3 shared_scripts/deferred_validation.py --repo-root .`.
+Install the configured always-run gate with `python3 -m pre_commit install`;
+invalid activation and competing catalogs fail without changing the plans.

@@ -1,0 +1,3638 @@
+name: CI Standard
+# Workflow ownership, overlap decisions, and growth guardrails live in
+# .github/WORKFLOWS.md and are enforced by scripts/check_workflow_inventory.py.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".github/**"
+  # NO `paths-ignore` here, deliberately. `quality-gate` (below) is a required
+  # status check, and GitHub blocks a PR forever on a required context that
+  # never reports. When this workflow was skipped by path filter, docs-only PRs
+  # had to get `quality-gate` from somewhere else, so docs-ci.yml published a
+  # second check under the same name - which meant branch protection could be
+  # satisfied by the docs check while this aggregate was red (PR #8728).
+  #
+  # Instead the workflow always runs and the `changed-paths` job decides whether
+  # there is any non-docs work to do; the heavy jobs skip on docs-only PRs and
+  # the aggregate reports success in seconds. Docs-only PRs therefore cost one
+  # dispatcher job plus one diff, not the full suite.
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+  schedule:
+    # Weekly run every Monday at 06:00 UTC  -  catches test drift and
+    # coverage regression independent of code changes (issue #1789)
+    - cron: "0 6 * * 1"
+
+concurrency:
+  # On main the group is per-commit so consecutive merges queue instead of
+  # cancelling each other (main was never verified: every run was cancelled by
+  # the next push). PR/branch refs keep the per-ref group so superseded pushes
+  # still cancel. RM #1507 / #9409.
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  local-only-workflows:
+    name: Reject hosted runner routing
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Install workflow parser dependency
+        shell: bash
+        run: |
+          python3 -m venv .ci-local-only-venv
+          .ci-local-only-venv/bin/python -m pip install --disable-pip-version-check pyyaml==6.0.2
+      - name: Run local-only workflow guard
+        shell: bash
+        run: .ci-local-only-venv/bin/python scripts/check_local_only_workflows.py
+
+  pinned-actions:
+    name: Enforce action SHA pinning
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Run GitHub Actions pinning guard
+        shell: bash
+        run: python3 scripts/check_github_actions_pinned.py
+
+  workflow-inventory:
+    name: Enforce workflow inventory
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Run workflow inventory guard
+        shell: bash
+        run: python3 scripts/check_workflow_inventory.py
+
+  urdf-layering:
+    name: Enforce URDF subsystem layering (ADR 0007)
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Run URDF layering guard
+        shell: bash
+        run: python3 scripts/ci/check_urdf_layering.py
+
+  # -- Dispatcher: route to hosted runners on public repos ---------------------
+  # This repo is public, so standard GitHub-hosted runners are free and
+  # unmetered. Keeping the dispatcher itself pinned to the fleet meant every
+  # downstream job had to wait for a self-hosted slot before it could even
+  # learn where to run. Private repos still fall through to the fleet, so no
+  # Actions minutes are ever billed.
+  #
+  # Reverting: set the repo variable CI_RUNNER_MODE=local.
+  pick-runner:
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 3
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+      mode: ${{ steps.check.outputs.mode }}
+    steps:
+      - name: Select runner target without API polling
+        id: check
+        shell: bash
+        env:
+          CI_RUNNER_MODE: ${{ vars.CI_RUNNER_MODE }}
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+          RUNNER_LABEL: d-sorg-fleet-docker
+        run: |
+          mode="${CI_RUNNER_MODE:-auto}"
+          if [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
+            mode="hosted"
+            runner="ubuntu-latest"
+          else
+            mode="local"
+            runner="$RUNNER_LABEL"
+          fi
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          {
+            echo "runner=$runner"
+            echo "mode=$mode"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Runner Selection"
+            echo "- requested mode: \`${CI_RUNNER_MODE:-unset}\`"
+            echo "- selected target: \`$runner\` (\`$mode\`)"
+            echo "- GitHub API calls: \`0\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Decides whether this ref contains anything besides documentation. Every
+  # substantive job below keys off `code`, so a docs-only PR skips them while
+  # the required `quality-gate` aggregate still reports.
+  #
+  # The patterns below MUST stay in sync with docs-ci.yml's `paths:` filter -
+  # the two are exact complements, and that is what guarantees this workflow
+  # runs (and reports `quality-gate`) on every PR.
+  changed-paths:
+    name: changed-paths
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+      docs: ${{ steps.detect.outputs.docs }}
+      publication: ${{ steps.detect.outputs.publication }}
+    steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Detect non-docs changes
+        id: detect
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+
+          # Only pull_request runs can be narrowed; push, schedule and
+          # workflow_dispatch always exercise the full suite.
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "Event '$EVENT_NAME' always runs the full suite."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "docs=true" >> "$GITHUB_OUTPUT"
+            echo "publication=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          echo "Changed files:"
+          echo "$changed"
+
+          code=false
+          docs=false
+          publication=false
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            case "$file" in
+              .github/workflows/ci-standard.yml | \
+              docs/research/proximal_distal_energy_transfer/* | \
+              scripts/research/proximal_distal_energy/* | \
+              tests/research/test_publication_quality.py | \
+              pyproject.toml)
+                publication=true
+                echo "Publication authority change: $file"
+                ;;
+            esac
+            # Mirror of docs-governance.yml's trigger paths (plus this workflow
+            # and the shared composite action): these files feed the
+            # docs-governance-gates job, whose result the required
+            # `quality-gate` aggregate enforces. Before that job existed,
+            # auto-merge could land a governance regression while the
+            # non-required doc-governance check was still running (PR #9418).
+            case "$file" in
+              docs/* | \
+              manuals/upstreamdrift/* | \
+              scripts/config/design_manual_governance.json | \
+              scripts/check_design_manual_governance.py | \
+              scripts/design_manual_contract.py | \
+              scripts/check_docs_governance.py | \
+              scripts/check_doc_catalog.py | \
+              scripts/check_doc_size_budget.py | \
+              scripts/check_document_title_case.py | \
+              scripts/config/doc_size_budget.json | \
+              tests/scripts/test_doc_governance_checks.py | \
+              tests/scripts/test_document_title_case.py | \
+              tests/scripts/test_design_manual_governance_contract.py | \
+              .github/workflows/ci-standard.yml | \
+              .github/actions/docs-governance-checks/*)
+                docs=true
+                echo "Docs-governance change: $file"
+                ;;
+            esac
+            case "$file" in
+              docs/* | *.md | LICENSE | .gitignore) ;;
+              *)
+                code=true
+                echo "Non-docs change: $file"
+                ;;
+            esac
+          done <<< "$changed"
+
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "docs=$docs" >> "$GITHUB_OUTPUT"
+          echo "publication=$publication" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Changed paths"
+            echo "- non-docs changes: \`$code\`"
+            echo "- docs-governance changes: \`$docs\`"
+            echo "- publication authority changes: \`$publication\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # Quality gates are split into independent, parallel jobs (issue #7064) so a
+  # single flaky step no longer masks unrelated failures. The required branch-
+  # protection check is the `quality-gate` summary job at the bottom, which
+  # aggregates the results of these jobs. The name `quality-gate` is preserved
+  # exactly so existing branch protection and bot workflows keep resolving it.
+  #
+  #   code-quality        — lint/format + mypy + install-dependent gates
+  #   security-scans       — Semgrep / Bandit / detect-secrets / Trivy
+  #   repo-structure-gates — structural / SPEC / budget checks with minimal parser deps
+  #   docs-governance-gates — docs governance (size budget, catalog, title case)
+  #                           on docs-touching PRs; shared composite action with
+  #                           docs-governance.yml (see that job's comment)
+  # ---------------------------------------------------------------------------
+  code-quality:
+    name: code-quality
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 45
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Validate Unit-Gate Quarantine Contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python scripts/ci/check_unit_gate_quarantine.py \
+              --baseline-ref "origin/${{ github.base_ref }}"
+          else
+            python scripts/ci/check_unit_gate_quarantine.py
+          fi
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create Quality Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/quality-ci-venv"
+          echo "$RUNNER_TEMP/quality-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/quality-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
+      - name: Clear pip cache
+        run: python -m pip cache purge || true
+      - name: Install Quality Tools
+        run: |
+          # Shared self-hosted runners can retain broken tool packages without
+          # RECORD metadata. Ignore ambient installs so pip lays down clean
+          # copies instead of trying to uninstall corrupted cache entries.
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed ruff==0.15.17 "mypy==1.20.1" bandit==1.7.7 pydocstyle==6.3.0 semgrep
+
+      - name: Lint
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -d '' py_files < <(
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
+            )
+            if [ "${#py_files[@]}" -eq 0 ]; then
+              echo "No changed Python files; skipping Ruff lint check."
+              exit 0
+            fi
+            ruff check "${py_files[@]}"
+          else
+            ruff check .
+          fi
+
+      # Use ruff format (consistent with pre-commit hooks) - ruff format is
+      # a strict superset of black's style; running both causes conflicts.
+      # On PRs, only check changed Python files so baseline formatting drift
+      # does not block workflow-only or narrowly scoped changes.
+      - name: Check Formatting (ruff)
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -d '' py_files < <(
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
+            )
+            if [ "${#py_files[@]}" -eq 0 ]; then
+              echo "No changed Python files; skipping Ruff format check."
+              exit 0
+            fi
+            ruff format --check "${py_files[@]}"
+          else
+            ruff format --check .
+          fi
+
+      - run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed "mypy==1.20.1" types-PyYAML types-requests
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Create stub ui/dist for editable install (quality checks only)
+        run: mkdir -p ui/dist
+      - run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
+
+      - name: Generated Capability Atlas Freshness
+        run: python3 -m scripts.generate_capability_atlas --check
+
+      - name: Pin Type Toolchain
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed --no-cache-dir "mypy==1.20.1" "numpy==2.2.6"
+          mypy --version
+          python - << 'PY'
+          from importlib import metadata
+
+          for package_name in ("numpy", "mypy", "types-numpy"):
+              try:
+                  version = metadata.version(package_name)
+              except metadata.PackageNotFoundError:
+                  version = "not installed"
+              print(f"{package_name}: {version}")
+          PY
+
+      - name: MyPy Exclusion Budget
+        run: python3 scripts/check_mypy_exclusion_budget.py
+
+      # Baseline mypy check across all of src/. On PRs and ordinary pushes,
+      # only check changed source files so unrelated repository-wide type debt
+      # does not block narrowly scoped quality, documentation, or CI-only work.
+      # Scheduled/manual runs retain the full baseline audit.
+      - name: MyPy Baseline
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+          else
+            python3 scripts/ci/run_full_mypy_baseline.py
+            exit 0
+          fi
+
+          mapfile -d '' src_py_files < <(
+            git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- 'src/**/*.py' 'src/*.py'
+          )
+          if [ "${#src_py_files[@]}" -eq 0 ]; then
+            echo "No changed source Python files; skipping baseline mypy check."
+            exit 0
+          fi
+          python3 scripts/ci/run_mypy.py "${src_py_files[@]}" --config-file pyproject.toml
+      # Strict mypy for the fully-annotated API layer (issue #2105).
+      # --follow-imports=silent applies strict rules only to src/api/ files,
+      # not to their transitive dependencies (which have pre-existing issues).
+      - name: MyPy Strict (src/api)
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            diff_base="origin/${{ github.base_ref }}"
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+          else
+            mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
+            exit 0
+          fi
+
+          mapfile -d '' api_py_files < <(
+            git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- 'src/api/**/*.py' 'src/api/*.py'
+          )
+          if [ "${#api_py_files[@]}" -eq 0 ]; then
+            echo "No changed API Python files; skipping strict API mypy check."
+            exit 0
+          fi
+          mypy "${api_py_files[@]}" --strict --follow-imports=silent --config-file pyproject.toml
+
+      - name: Alembic Drift Check
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f "$RUNNER_TEMP/alembic-drift.db"
+          export DATABASE_URL="sqlite:///$RUNNER_TEMP/alembic-drift.db"
+          python3 scripts/db_migrate.py upgrade head
+          python3 scripts/check_alembic_drift.py
+
+      - name: Check for UI changes
+        id: ui_changes
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --quiet "${{ github.event.pull_request.base.sha }}" HEAD -- ui; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # UI Security and Quality Checks (only when ui/ files change)
+      - name: Setup Node for UI audit
+        if: steps.ui_changes.outputs.changed == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+
+      - name: UI Install (audit prerequisite)
+        if: steps.ui_changes.outputs.changed == 'true'
+        working-directory: ui
+        run: npm ci
+
+      - name: UI Security Audit
+        if: steps.ui_changes.outputs.changed == 'true'
+        working-directory: ui
+        run: npm audit --audit-level=high
+
+      # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
+      - name: Security Audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_with_heartbeat() {
+            label="$1"
+            shift
+            "$@" &
+            cmd_pid=$!
+            (
+              while kill -0 "$cmd_pid" 2>/dev/null; do
+                sleep 60
+                echo "::notice::$label still running at $(date -u +%H:%M:%SZ)"
+              done
+            ) &
+            heartbeat_pid=$!
+            wait "$cmd_pid"
+            rc=$?
+            kill "$heartbeat_pid" 2>/dev/null || true
+            wait "$heartbeat_pid" 2>/dev/null || true
+            return "$rc"
+          }
+
+          audit_venv="$RUNNER_TEMP/pip-audit-venv"
+          python3 -m venv "$audit_venv"
+          audit_python="$audit_venv/bin/python"
+          python -m ensurepip --upgrade || true
+          "$audit_python" -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
+          "$audit_python" -m pip install "pip-audit==2.10.0"
+
+          set +e
+          run_with_heartbeat "pip-audit JSON report" "$audit_python" -m pip_audit -r requirements-dev.lock --format json --output pip-audit-report.json
+          audit_status=$?
+          set -e
+
+          if [ "$audit_status" -ne 0 ] && [ ! -s pip-audit-report.json ]; then
+            echo "::error::pip-audit failed before producing a JSON report"
+            exit "$audit_status"
+          fi
+
+          mapfile -t pip_audit_waiver_flags < <(
+            "$audit_python" scripts/ci/check_pip_audit_waivers.py \
+              --waiver-file scripts/config/pip_audit_waivers.json \
+              --audit-report pip-audit-report.json
+          )
+          run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
+
+      # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
+      - name: Code Quality Check
+        run: |
+          PYTHONPATH=. python src/tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
+
+      - name: MATLAB Quality Check
+        continue-on-error: true
+        run: |
+          PYTHONPATH=. python src/tools/matlab_utilities/scripts/matlab_quality_check.py > matlab_quality_report.txt || touch matlab_quality_report.txt
+          cat matlab_quality_report.txt
+
+      - name: Upload MATLAB Report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: matlab-quality-report
+          path: matlab_quality_report.txt
+
+  # Security scanners run static analysis on the checkout only — no editable
+  # install required — so they parallelise cleanly and a flaky scanner no
+  # longer blocks lint/type/structural gates.
+  security-scans:
+    name: security-scans
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create Security Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/security-ci-venv"
+          echo "$RUNNER_TEMP/security-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/security-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
+      - name: Install Security Tools
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed bandit==1.7.7 semgrep
+
+      - name: Semgrep SAST Scan
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -d '' semgrep_targets < <(
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+                'src/**/*.py' \
+                'scripts/**/*.py' \
+                'tests/**/*.py' \
+                'ui/**/*.js' \
+                'ui/**/*.jsx' \
+                'ui/**/*.ts' \
+                'ui/**/*.tsx' \
+                'src/**/*.json' \
+                'src/**/*.xml' \
+                'scripts/**/*.sh'
+            )
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            mapfile -d '' semgrep_targets < <(
+              git diff --name-only --diff-filter=ACMRT -z "${{ github.event.before }}" HEAD -- \
+                'src/**/*.py' \
+                'scripts/**/*.py' \
+                'tests/**/*.py' \
+                'ui/**/*.js' \
+                'ui/**/*.jsx' \
+                'ui/**/*.ts' \
+                'ui/**/*.tsx' \
+                'src/**/*.json' \
+                'src/**/*.xml' \
+                'scripts/**/*.sh'
+            )
+            if [ "${#semgrep_targets[@]}" -eq 0 ]; then
+              echo "No changed source/application files supported by Semgrep; skipping push SAST delta scan."
+              exit 0
+            fi
+            semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
+            exit 0
+          else
+            diff_base="HEAD~1"
+            if ! git rev-parse --verify --quiet "${diff_base}^{commit}" >/dev/null; then
+              diff_base=""
+            fi
+            if [ -n "$diff_base" ]; then
+              mapfile -d '' semgrep_targets < <(
+                git diff --name-only --diff-filter=ACMRT -z "$diff_base" HEAD -- \
+                  'src/**/*.py' \
+                  'scripts/**/*.py' \
+                  'tests/**/*.py' \
+                  'ui/**/*.js' \
+                  'ui/**/*.jsx' \
+                  'ui/**/*.ts' \
+                  'ui/**/*.tsx' \
+                  'src/**/*.json' \
+                  'src/**/*.xml' \
+                  'scripts/**/*.sh'
+              )
+              if [ "${#semgrep_targets[@]}" -eq 0 ]; then
+                echo "No changed source/application files supported by Semgrep; skipping SAST delta scan."
+                exit 0
+              fi
+              semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
+              exit 0
+            fi
+            semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error
+            exit 0
+          fi
+
+          if [ "${#semgrep_targets[@]}" -eq 0 ]; then
+            echo "No changed source/application files supported by Semgrep; skipping PR SAST delta scan."
+            exit 0
+          fi
+          semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error "${semgrep_targets[@]}"
+
+      # SECURITY: Bandit static security analysis (Issue #782)
+      # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
+      - name: Bandit Security Scan
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -d '' bandit_targets < <(
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+                'src/**/*.py' \
+                'scripts/**/*.py'
+            )
+            if [ "${#bandit_targets[@]}" -eq 0 ]; then
+              echo "No changed source/application Python files supported by Bandit; skipping PR Bandit delta scan."
+              exit 0
+            fi
+            set +e
+            bandit_output="$(bandit "${bandit_targets[@]}" -ll -ii --format txt 2>&1)"
+            exit_code=$?
+            set -e
+          else
+            set +e
+            bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1)"
+            exit_code=$?
+            set -e
+          fi
+          echo "$bandit_output"
+          echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
+          exit $exit_code
+
+      # Secret scanning (issue #5915): detect-secrets runs on every PR and
+      # on pushes to main, catching committed credentials before they ship.
+      - name: Secret Scanning (detect-secrets)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed detect-secrets==1.5.0 -q
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -d '' changed_files < <(
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD
+            )
+            if [ "${#changed_files[@]}" -eq 0 ]; then
+              echo "No changed files; skipping detect-secrets PR scan."
+              exit 0
+            fi
+            detect-secrets scan --only-allowlisted --baseline /dev/null "${changed_files[@]}" \
+              > /tmp/secrets-baseline.json || true
+          else
+            detect-secrets scan --only-allowlisted --baseline /dev/null \
+              > /tmp/secrets-baseline.json || true
+          fi
+
+          # Fail if high-confidence secrets found
+          secret_count=$(python -c "
+          import json, sys
+          data = json.load(open('/tmp/secrets-baseline.json'))
+          total = sum(len(v) for v in data.get('results', {}).values())
+          print(total)
+          " 2>/dev/null || echo "0")
+
+          echo "detect-secrets: $secret_count potential secret(s) found"
+          echo "## Secret Scan Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Potential secrets detected: $secret_count" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$secret_count" -gt 0 ]; then
+            cat /tmp/secrets-baseline.json
+            echo "::error::detect-secrets found $secret_count potential secret(s). Review and remediate before merging."
+            exit 1
+          fi
+
+      - name: Select Trivy PR scan target
+        id: trivy-pr-target
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          mapfile -d '' trivy_targets < <(
+            git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+              'Dockerfile' \
+              'Dockerfile.*' \
+              '**/Dockerfile' \
+              '**/Dockerfile.*' \
+              '**/Cargo.lock' \
+              '**/package-lock.json' \
+              '**/pnpm-lock.yaml' \
+              '**/yarn.lock' \
+              '**/environment.yml' \
+              '**/requirements*.txt'
+          )
+          if [ "${#trivy_targets[@]}" -eq 0 ]; then
+            echo "has_target=false" >> "$GITHUB_OUTPUT"
+            echo "No changed dependency/container/config files supported by Trivy; skipping PR Trivy delta scan."
+            exit 0
+          fi
+          echo "has_target=true" >> "$GITHUB_OUTPUT"
+          echo "scan_ref=${trivy_targets[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy Filesystem Security Scan
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+
+      - name: Trivy Filesystem Security Scan (PR Delta)
+        if: github.event_name == 'pull_request' && steps.trivy-pr-target.outputs.has_target == 'true'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: fs
+          scan-ref: ${{ steps.trivy-pr-target.outputs.scan_ref }}
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+
+  # Structural / SPEC / size-budget gates. These avoid an editable install and
+  # install only the parser dependency needed by workflow YAML guards, which
+  # keeps this job fast and independent of the heavier code-quality job.
+  repo-structure-gates:
+    name: repo-structure-gates
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+        with:
+          fetch-depth: 0
+      - name: Fetch pinned Tools packages
+        # Retired src/shared/python roots resolve to vendor/ud-tools (UD #9406);
+        # check_tutorial_imports.py resolves src.shared.python.* specs.
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+
+      # The Tutorial Import Check resolves canonical modules with find_spec.
+      # Since #9406 began retiring UpstreamDrift child copies, some of those
+      # names are served by the pinned Tools layer, which a submodule-less
+      # checkout does not provide -- the same reason twelve other jobs in this
+      # file already run this action.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install workflow parser dependency
+        run: python3 -m pip install --disable-pip-version-check pyyaml==6.0.2
+
+      - name: Dependency Direction Fitness Check
+        run: python3 scripts/check_dependency_direction.py
+
+      - name: Engine Tier Metadata Check
+        run: python3 scripts/check_engine_tiers.py
+
+      - name: Changed-File Size Budget Check
+        run: python3 scripts/ci/check_file_size_budget.py
+
+      - name: Changed-File Architecture Budget Check
+        run: python3 scripts/ci/check_architecture_budget.py
+
+      - name: DRY Duplication Ratchet (issue #7315)
+        run: python3 scripts/ci/check_dry_duplication_gate.py
+
+      - name: Error-Handling Ratchet (issue #5911)
+        run: python3 scripts/ci/check_error_handling_ratchet.py
+
+      - name: Hardcoded-Style Ratchet (issue #8885)
+        run: python3 scripts/ci/check_hardcoded_style_ratchet.py
+
+      - name: Suppression Discipline Ratchet (issue #5916)
+        run: python3 scripts/ci/check_suppression_ratchet.py
+
+      - name: GUI Thread-Blocking Ratchet (issue #8880)
+        run: python3 scripts/ci/check_gui_thread_blocking_ratchet.py
+
+      - name: Repo Root Clutter Check
+        run: python3 scripts/check_root_clutter.py
+
+      - name: SPEC Drift Check
+        run: python3 scripts/check_spec_paths.py
+
+      - name: Agent Docs Consistency Check
+        run: python3 scripts/check_agent_docs_consistency.py
+
+      - name: Security Workflow Silent-Failure Guard
+        run: python3 scripts/check_workflows_no_silent_failures.py
+
+      - name: Workflow Run Trust Boundary Guard
+        run: python3 scripts/check_workflow_run_trust_boundary.py
+
+      - name: Workflow Context Availability Guard
+        run: python3 scripts/ci/check_workflow_contexts.py
+
+      - name: Workflow Pytest Path Guard
+        run: python3 scripts/ci/check_workflow_pytest_paths.py
+
+      - name: Suite Marker Ratchet
+        run: python3 scripts/ci/check_suite_marker_ratchet.py
+
+      - name: Rust Parity / Wheel Import Gate Ratchet
+        run: python3 scripts/ci/check_rust_parity_wheel_gates.py
+
+      - name: Docker Build Contract Guard
+        run: python3 scripts/ci/check_dockerfile_contracts.py
+
+      - name: Tauri IPC Capabilities Guard
+        run: python3 scripts/ci/check_tauri_capabilities.py
+
+      - name: Version Consistency Check
+        run: python3 scripts/check_version_consistency.py
+
+      - name: VERSION / pyproject / SPEC.md Consistency Check
+        run: python3 scripts/ci/check_version_consistency.py
+
+      - name: SPEC.md Changelog Duplicate Version Check
+        run: python3 scripts/ci/check_spec_changelog_duplicates.py
+
+      - name: Python Version Coherence Check
+        run: python3 scripts/ci/check_python_version_coherence.py
+
+      - name: Test Layout Guard
+        run: python3 scripts/check_test_layout.py
+
+      - name: In-Tree Pytest Collection Guard
+        run: python3 scripts/check_pytest_intree_testpaths.py
+
+      - name: Tutorial Import Check
+        run: python3 scripts/ci/check_tutorial_imports.py
+
+      - name: SPEC.md Path Check
+        run: python3 scripts/check_spec_paths.py
+
+      - name: Module Size Budget Check
+        run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
+
+      - name: Heavy Test Dependency Parity Check
+        run: python3 scripts/check_heavy_dep_parity.py
+
+      - name: Prevent Net-New print() Calls
+        run: python3 scripts/check_no_print_calls.py
+
+      # Declared-route-producer gate (issue #9484): every launcher tile with
+      # web.mode=route must have a pipeline that produces what its route
+      # serves. Fails while /tools/impact-explorer has no bundle producer.
+      - name: Declared Web Route Producer Check
+        run: python3 scripts/check_declared_route_producers.py
+
+      # Placeholder detection is blocking. Issue-linked TODO markers are allowed
+      # because they already have a tracked owner and follow-up path.
+      - name: Verify No Placeholders
+        shell: bash
+        # src/shared/python/ai/auth is a Tools-owned child copy: the
+        # child-copy contract (tests/unit/repo_hygiene/
+        # test_tools_child_copy_contract.py) forbids editing it here, so a
+        # placeholder violation inside it is unfixable in this repo — the
+        # TODO cleanup must land in D-sorganization/Tools and arrive via a
+        # vendor pin bump (tracked in #8770). Excluded until then.
+        run: |
+          violations=$(
+            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" -o -path "./tests/tools" -o -path "./vendor" -o -path "./src/shared/python/ai/auth" \) -prune -o -type f -name "*.py" -print0 \
+              | xargs -0 grep -nE "TODO|FIXME" \
+              | grep -vE "TODO(\(#?[0-9]+|:.*#[0-9]+)" || true
+          )
+          if [ -n "$violations" ]; then
+            echo "$violations"
+            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+            exit 1
+          fi
+
+  # Green-suite unit gate (issue #7042). Runs the full collection of
+  # dependency-light `unit` tests and FAILS the build on ANY non-skip failure.
+  # Before this gate, ~36 red unit tests slipped onto `main` because no job
+  # enforced a collection-wide pass. There is intentionally NO `|| true` /
+  # `continue-on-error` here: pytest's exit code is the gate. Dependency-gated
+  # markers (optional native engines, GL, slow, live) are excluded so the gate
+  # stays green on the standard runner without the heavy extras installed; those
+  # stacks are covered by their own provisioned lanes.
+  unit-test-gate:
+    name: unit-test-gate
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    # 25 min of pytest plus a cached-registry release build of one crate.
+    timeout-minutes: 35
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch PR base for ownership guards
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+      # Also satisfies the ownership guards below, which read the pinned
+      # Tools sources out of vendor/ud-tools.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install System Dependencies
+        shell: bash
+        run: bash scripts/ci/install_ubuntu_dependencies.sh
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+      - name: Install Unit Test Dependencies
+        # Mirror the `tests` lane install: force-reinstall hypothesis +
+        # sortedcontainers (the shared toolcache can carry half-installed
+        # versions), then pin numpy/scipy to a consistent ABI.
+        run: |
+          python -m venv "$RUNNER_TEMP/unit-gate-venv"
+          echo "$RUNNER_TEMP/unit-gate-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/unit-gate-venv" >> "$GITHUB_ENV"
+          python -m ensurepip --upgrade || true
+          "$RUNNER_TEMP/unit-gate-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/unit-gate-venv/bin/python"
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -c "import numpy, scipy; from scipy import signal; print(f'numpy={numpy.__version__} scipy={scipy.__version__} signal=ok')"
+      # The ball simulator enforces strict Rust parity (it raises when the
+      # upstream-physics kernel is missing), so without the wheel every
+      # BunkerShot workbench/GUI unit test failed on Linux and sat in the
+      # quarantine ledger (#9411). Build and install exactly that one crate
+      # into the unit-gate venv, mirroring rust-wheel-parity's toolchain,
+      # cache and maturin invocation.
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+      - name: Verify Rust toolchain
+        shell: bash
+        run: |
+          echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+          export PATH="$CARGO_HOME/bin:$PATH"
+          rustc --version
+          cargo --version
+      - name: Cache Cargo registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Build and install upstream-physics Rust kernel
+        # Fail closed: the import probe must load the installed wheel and
+        # exercise its bindings, or the job stops before pytest runs.
+        shell: bash
+        run: |
+          python="$RUNNER_TEMP/unit-gate-venv/bin/python"
+          "$python" -m pip install maturin
+          rm -f target/wheels/upstream_physics-*.whl
+          (cd rust_core/upstream-physics && "$python" -m maturin build --interpreter "$python" --features python --release)
+          "$python" -m pip install --force-reinstall --no-deps target/wheels/upstream_physics-*.whl
+          "$python" scripts/ci/import_built_rust_wheels.py upstream_physics
+          # cargo writes an untracked workspace Cargo.lock that the
+          # root-clutter gate (tests/ci) rightly rejects.
+          git ls-files --error-unmatch Cargo.lock >/dev/null 2>&1 || rm -f Cargo.lock
+      - name: Run Green-Suite Unit Gate
+        # No `|| true` / `continue-on-error`: any non-skip unit failure must
+        # red this job and, via the `quality-gate` aggregate below, block merge.
+        #
+        # UNIT_GATE_QUARANTINE=1 activates the debt ledger in
+        # scripts/config/unit_gate_quarantine.json (issue #8766): tests that
+        # fail deterministically on main from the hollow-merge era are skipped
+        # here — and only here — so the gate stays meaningful for new
+        # regressions. Ledger entries may only be removed, never added.
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+          UNIT_GATE_QUARANTINE: "1"
+          REQUIRE_VENDORED_FALLBACK: "1"
+        run: |
+          set +e
+          xvfb-run --auto-servernum python -m pytest \
+            -p no:xvfb \
+            -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            -n 4 \
+            --timeout=60 \
+            --timeout-method=thread \
+            -p no:cacheprovider \
+            --no-cov \
+            --tb=short
+          pytest_exit_code=$?
+          set -e
+          if [ "$pytest_exit_code" -eq 0 ]; then
+            exit 0
+          elif [ "$pytest_exit_code" -eq 5 ]; then
+            echo "No runnable green-suite unit tests were available after optional dependency skips."
+            exit 0
+          fi
+          exit "$pytest_exit_code"
+
+  publication-quality:
+    name: publication-quality
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.publication == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ] && ! git fsck --quick >/dev/null 2>&1; then
+            echo "git fsck failed, purging stale checkout metadata"
+            rm -rf .git
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Isolate Python tool cache
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+      - name: Install publication inspection dependencies
+        run: >-
+          python -m pip install --no-cache-dir
+          "numpy>=1.26.0"
+          "pymupdf>=1.26.0"
+          "pikepdf>=10.0.0"
+      - name: Validate release authority and every PDF page
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.research.proximal_distal_energy.build_claim_numeric_comparison_evidence check
+          python -m scripts.research.proximal_distal_energy.register_numeric_claim_evidence check
+          python -m scripts.research.proximal_distal_energy.claim_audit numeric
+          python -m scripts.research.proximal_distal_energy.qualify_open_release validate \
+            --source-revision "$(git rev-parse HEAD)" \
+            --publication-profile computational
+
+  # Docs governance, folded into the required `quality-gate` aggregate
+  # (the repo's single required context — see the aggregate's comment). The
+  # standalone docs-governance.yml check `doc-governance` is not required, so
+  # auto-merge historically fired as soon as `quality-gate` passed and could
+  # land a governance regression the docs check caught seconds later: PR #9418
+  # merged a doc-size-budget violation red onto main this way. This job runs
+  # the identical steps via the shared composite action, keyed off the
+  # `changed-paths` docs classification, so `quality-gate` cannot go green on a
+  # docs-touching PR until docs governance passes.
+  docs-governance-gates:
+    name: docs-governance-gates
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.docs == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Run docs governance checks
+        uses: ./.github/actions/docs-governance-checks
+        with:
+          changed-from: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+  # Governed companion workflows execute on every code PR and protected-main
+  # push. The job emits exact-commit evidence but does not publish or qualify it.
+  companion-workflows:
+    name: companion-workflows
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch pinned Tools packages
+        # Retired src/shared/python roots resolve to vendor/ud-tools (UD #9406);
+        # the companion workflow authority imports src.shared.python.logging_pkg.
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      # ADR-0046 Stage 2 wave 1 (#9425): the launch-monitor import/export
+      # workflow imports the launch-monitor façade, which since wave 1 serves
+      # `dispersion`, `multivariate`, `trends`, `comparison`, `schema`, and
+      # `treatment` from the canonical Tools layer rather than from
+      # UpstreamDrift. This job checks out no submodule, so without this step
+      # the façade has nothing to resolve those six names against.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install governed companion workflow dependencies
+        run: >-
+          python3 -m pip install
+          jsonschema==4.26.0 pyyaml==6.0.3 numpy==2.2.6 scipy==1.15.3
+          pandas==3.0.2 matplotlib==3.10.9 simpleeval==1.0.7
+          pydantic==2.12.5
+      - name: Check companion manifest builds from a clean checkout (#9416)
+        run: python3 -m scripts.companion_publication --repo-root . check
+      - name: Execute governed companion workflow authority
+        run: >-
+          python3 -m scripts.companion_workflows
+          --repo-root . execute-all
+          --report dist/companion-workflows/execution-report.v1.json
+      - name: Upload exact-revision companion workflow evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: upstreamdrift-companion-workflows-${{ github.sha }}
+          path: dist/companion-workflows/
+          if-no-files-found: error
+          retention-days: 30
+
+  # Seam drift gate (UD #9406, RM #1505 Phase 1, RM #1507 main-green):
+  # docs/shared_tools/seam_rulings.v1.json rules every top-level entry of the
+  # shared tree; this job fails when a package ruled tools-canonical/split and
+  # marked cleaned still has a UD copy under src/shared/python, when a
+  # ud-canonical package has no Tools ledger row, or when the pinned Tools
+  # tree gains a module without a ruling. Rulings start as pending-cleanup so
+  # the gate is green at merge and ratchets as copies are deleted.
+  seam-drift-gate:
+    name: seam-drift-gate
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Seam drift gate
+        run: python3 scripts/shared_tools/check_seam_drift.py
+
+  # -- Always-on minimal lane (issue #9409) ------------------------------------
+  # Every substantive gate below keys off `changed-paths.outputs.code`, so a
+  # docs-only PR used to reach the aggregate with every gate `skipped` and a
+  # verdict decided by a diff, not by any executed check. This lane runs
+  # unconditionally (deliberately NO `if:`), stays within a 10-minute budget,
+  # and exercises the cheapest honest surface: `verify_installation.py`
+  # (core dependency imports, suite module imports, and the shared Tools
+  # alias-root import smoke), the top-level smoke tests, and the contract
+  # tests. `quality-gate` requires it to be `success` on every PR, docs-only
+  # or not.
+  always-on-unit-lane:
+    name: always-on-unit-lane
+    needs: [pick-runner, changed-paths]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      # verify_installation's alias-root smoke resolves the shared Tools
+      # packages through vendor/ud-tools, so the pinned submodule must be
+      # materialised before the lane runs.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+      - name: Install Lane Dependencies
+        # Same install recipe as `unit-test-gate` (hypothesis toolcache
+        # hygiene, ABI-consistent numpy/scipy pin) minus the xvfb/apt steps:
+        # this lane only runs headless-safe tests. Keep both installs in
+        # sync so the two lanes exercise the same dependency set.
+        run: |
+          python -m venv "$RUNNER_TEMP/always-on-lane-venv"
+          echo "$RUNNER_TEMP/always-on-lane-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/always-on-lane-venv" >> "$GITHUB_ENV"
+          python -m ensurepip --upgrade || true
+          "$RUNNER_TEMP/always-on-lane-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/always-on-lane-venv/bin/python"
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e .
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -c "import numpy, scipy; from scipy import signal; print(f'numpy={numpy.__version__} scipy={scipy.__version__} signal=ok')"
+      - name: Import smoke of core deps, suite modules, and aliased roots
+        # scripts/ci/verify_installation.py is the repo's existing import
+        # smoke: core dependencies, the `src.*` suite modules, and one
+        # spec-resolution import per shared Tools alias root.
+        run: python scripts/ci/verify_installation.py
+      - name: Run smoke and contract tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest \
+            tests/smoke/test_chat_launcher_discovery.py \
+            tests/smoke/test_e2e_tool_registry_and_chat.py \
+            tests/smoke/test_smoke_suite_contract.py \
+            tests/shared_contracts/ \
+            -p no:cacheprovider \
+            --no-cov \
+            --tb=short
+
+  # Required branch-protection check (issue #7064). The name `quality-gate` is
+  # preserved exactly so the org ruleset `Repository_Protections` and the bot
+  # workflows (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep
+  # resolving it. This job carries no gate logic of its own; it simply fails if
+  # any of the split quality jobs failed, giving a single aggregate status while
+  # letting each underlying job report independently.
+  #
+  # This is now the ONLY job in the repo named `quality-gate`. It used to share
+  # the name with jobs in quality-gate.yml and docs-ci.yml, which published
+  # competing check runs under the same required context - on PR #8728 this
+  # aggregate reported `failure` while the other two reported `success` and the
+  # PR merged anyway. They are now `lod-quality-gate` and `docs-quality-gate`.
+  agent-context:
+    name: agent-context
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Initialize the Pinned Context Provider
+        run: git submodule update --init vendor/ud-tools
+      - name: Install Dependency-Free Context Package and Test Tools
+        run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic numpy
+      - name: Check Source, Contracts, Pins and Generated Views
+        run: python3 -m agent_context --root . check
+      - name: Validate Real Navigation Tasks
+        run: |
+          python3 -m pytest --confcutdir=tests/agent_context -o addopts= tests/agent_context -q
+          python3 -m agent_context --root . evaluate
+      - name: Require Published Tools Revision
+        run: |
+          git -C vendor/ud-tools fetch --no-tags origin main:refs/remotes/origin/main
+          git -C vendor/ud-tools merge-base --is-ancestor HEAD refs/remotes/origin/main
+      - name: Check the Existing Capability Atlas
+        run: python3 -m scripts.generate_capability_atlas --check
+
+  quality-gate:
+    name: quality-gate
+    needs:
+      [
+        agent-context,
+        pick-runner,
+        changed-paths,
+        code-quality,
+        companion-workflows,
+        security-scans,
+        repo-structure-gates,
+        tests,
+        always-on-unit-lane,
+        unit-test-gate,
+        publication-quality,
+        docs-governance-gates,
+        rust-wheel-parity,
+        shared-tools-consumer-contracts,
+        seam-drift-gate,
+        impact-explorer-web-build,
+      ]
+    if: always()
+    # This job is the ONLY required branch-protection check on `main`, and it
+    # carries no scientific logic of its own - it aggregates the split jobs.
+    # Pinning it to the fleet meant every merge in the repo waited on a
+    # self-hosted Docker slot for a five-second summary job. It deliberately
+    # does NOT consume `needs.pick-runner.outputs.runner`: the required check
+    # must not inherit the dispatcher as an extra failure mode. Public repos
+    # get free unmetered hosted runners; private repos still fall through to
+    # the fleet, so no Actions minutes are ever billed.
+    #
+    # Reverting: set the repo variable CI_RUNNER_MODE=local.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 5
+    steps:
+      - name: Require Current Agent Context
+        env:
+          CONTEXT_RESULT: ${{ needs.agent-context.result }}
+        run: test "$CONTEXT_RESULT" = "success"
+      - name: Aggregate quality gate results
+        shell: bash
+        env:
+          PICK_RUNNER: ${{ needs.pick-runner.result }}
+          CHANGED_PATHS: ${{ needs.changed-paths.result }}
+          CODE_CHANGED: ${{ needs.changed-paths.outputs.code }}
+          PUBLICATION_CHANGED: ${{ needs.changed-paths.outputs.publication }}
+          CODE_QUALITY: ${{ needs.code-quality.result }}
+          COMPANION_WORKFLOWS: ${{ needs.companion-workflows.result }}
+          SECURITY_SCANS: ${{ needs.security-scans.result }}
+          REPO_STRUCTURE_GATES: ${{ needs.repo-structure-gates.result }}
+          TESTS: ${{ needs.tests.result }}
+          UNIT_TEST_GATE: ${{ needs.unit-test-gate.result }}
+          PUBLICATION_QUALITY: ${{ needs.publication-quality.result }}
+          DOCS_GOVERNANCE_GATES: ${{ needs.docs-governance-gates.result }}
+          DOCS_CHANGED: ${{ needs.changed-paths.outputs.docs }}
+          RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
+          SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
+          IMPACT_EXPLORER_WEB_BUILD: ${{ needs.impact-explorer-web-build.result }}
+          SEAM_DRIFT_GATE: ${{ needs.seam-drift-gate.result }}
+          ALWAYS_ON_UNIT_LANE: ${{ needs.always-on-unit-lane.result }}
+        run: |
+          set -uo pipefail
+          failed=0
+
+          gates="code-quality:$CODE_QUALITY"
+          gates="$gates companion-workflows:$COMPANION_WORKFLOWS"
+          gates="$gates security-scans:$SECURITY_SCANS"
+          gates="$gates repo-structure-gates:$REPO_STRUCTURE_GATES"
+          gates="$gates tests:$TESTS"
+          gates="$gates unit-test-gate:$UNIT_TEST_GATE"
+          gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
+          gates="$gates shared-tools-consumer-contracts:$SHARED_TOOLS_CONSUMER_CONTRACTS"
+          gates="$gates seam-drift-gate:$SEAM_DRIFT_GATE"
+          gates="$gates impact-explorer-web-build:$IMPACT_EXPLORER_WEB_BUILD"
+
+          {
+            echo "## Quality Gate Summary"
+            echo ""
+            echo "- non-docs changes: \`$CODE_CHANGED\`"
+            echo "- docs-governance changes: \`$DOCS_CHANGED\`"
+            echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
+            echo ""
+            echo "| Job | Result |"
+            echo "| --- | ------ |"
+            echo "| pick-runner | $PICK_RUNNER |"
+            echo "| changed-paths | $CHANGED_PATHS |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          for entry in $gates; do
+            echo "${entry%%:*}: ${entry#*:}"
+            echo "| ${entry%%:*} | ${entry#*:} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          if [ "$PUBLICATION_CHANGED" = "true" ]; then
+            publication_expected="success"
+          else
+            publication_expected="skipped"
+          fi
+          echo "publication-quality: $PUBLICATION_QUALITY"
+          echo "| publication-quality | $PUBLICATION_QUALITY |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$PUBLICATION_QUALITY" != "$publication_expected" ]; then
+            echo "::error::publication-quality reported '$PUBLICATION_QUALITY', expected '$publication_expected'."
+            failed=1
+          fi
+
+          # Docs governance runs whenever docs-governance paths changed,
+          # independent of the code/docs-only split — a docs-only PR skips the
+          # general gates but must still pass docs governance (PR #9418).
+          if [ "$DOCS_CHANGED" = "true" ]; then
+            docs_expected="success"
+          else
+            docs_expected="skipped"
+          fi
+          echo "docs-governance-gates: $DOCS_GOVERNANCE_GATES"
+          echo "| docs-governance-gates | $DOCS_GOVERNANCE_GATES |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DOCS_GOVERNANCE_GATES" != "$docs_expected" ]; then
+            echo "::error::docs-governance-gates reported '$DOCS_GOVERNANCE_GATES', expected '$docs_expected'."
+            failed=1
+          fi
+
+          # The always-on minimal lane (issue #9409) runs on EVERY pull
+          # request, docs-only or not - the aggregate must require it to have
+          # actually succeeded, never to have been skipped.
+          echo "always-on-unit-lane: $ALWAYS_ON_UNIT_LANE"
+          echo "| always-on-unit-lane | $ALWAYS_ON_UNIT_LANE |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$ALWAYS_ON_UNIT_LANE" != "success" ]; then
+            echo "::error::always-on-unit-lane reported '$ALWAYS_ON_UNIT_LANE', expected 'success' (the lane runs on every PR - issue #9409)."
+            failed=1
+          fi
+
+          # The prerequisites must genuinely succeed. Without this check a
+          # failure in pick-runner or changed-paths would skip the split gates
+          # below, and the docs-only `skipped` branch would wave the PR through.
+          if [ "$PICK_RUNNER" != "success" ] || [ "$CHANGED_PATHS" != "success" ]; then
+            echo "::error::quality-gate prerequisites failed (pick-runner=$PICK_RUNNER, changed-paths=$CHANGED_PATHS)."
+            exit 1
+          fi
+
+          if [ "$CODE_CHANGED" = "true" ]; then
+            expected="success"
+          else
+            # Docs-only change: the gates are deliberately skipped. Requiring
+            # exactly `skipped` means a gate that somehow ran (and failed) is
+            # still caught rather than tolerated.
+            expected="skipped"
+          fi
+
+          for entry in $gates; do
+            name="${entry%%:*}"
+            result="${entry#*:}"
+            if [ "$result" != "$expected" ]; then
+              echo "::error::$name reported '$result', expected '$expected'."
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more quality-gate jobs failed."
+            exit 1
+          fi
+
+          if [ "$CODE_CHANGED" != "true" ]; then
+            if [ "$PUBLICATION_CHANGED" = "true" ]; then
+              echo "Docs-only publication change: publication-quality succeeded; general gates correctly skipped."
+            else
+              echo "Docs-only change: docs-governance-gates reported '$DOCS_GOVERNANCE_GATES', always-on-unit-lane reported '$ALWAYS_ON_UNIT_LANE'; general quality-gate jobs correctly skipped."
+            fi
+            exit 0
+          fi
+          echo "All quality-gate jobs succeeded."
+
+  core-only-install:
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Create isolated core install
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv-core-only
+          . .venv-core-only/bin/activate
+          python -m ensurepip --upgrade || true
+          python3 -m pip install --upgrade pip
+          mkdir -p ui/dist
+          python -m ensurepip --upgrade || true
+          python3 -m pip install --no-cache-dir --ignore-installed -r requirements.lock
+          python3 -m pip install --no-cache-dir --no-deps -e .
+      - name: Verify optional engines are absent from core install
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-only/bin/activate
+          python3 scripts/check_core_install_isolation.py
+      - name: Run core-only test slice
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-only/bin/activate
+          python -m ensurepip --upgrade || true
+          python3 -m pip install pytest pytest-asyncio pytest-timeout
+          python3 -m pytest \
+            tests/architecture/test_core_public_api.py \
+            tests/unit/test_core_install_isolation.py \
+            -m core_only \
+            --timeout=60
+
+  dependency-consistency:
+    name: dependency-consistency
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create Dependency Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/dep-ci-venv"
+          echo "$RUNNER_TEMP/dep-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/dep-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
+      - name: Regenerate dependency artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          make sync-deps
+          git diff --exit-code -- pyproject.toml requirements.lock requirements-dev.lock environment.yml
+      - name: Audit runtime install without extras
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/runtime-audit-venv"
+          source "$RUNNER_TEMP/runtime-audit-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
+          python -m pip install "pip-audit==2.10.0"
+          python -m pip_audit -r requirements.lock
+
+  tests:
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    # Budget measured from CI run 33779933815 (job 100731026646, `tests (3.11)`,
+    # commit ee247039, 2026-09-03): the serial core lane needed 2m36s to collect
+    # and had executed 24% of its 40,488 selected tests after 30m45s (5.27
+    # tests/s), i.e. ~135 min for the full lane including install/collection.
+    # The old 35-minute budget was set on 2026-06-11 (6bc73cb93) while this lane
+    # still ran under xdist; it was serialised to `-n 0` on 2026-06-13
+    # (b4ddf7b30) to stop native GUI/MuJoCo worker termination from destroying
+    # coverage data, and the budget was never re-measured. Every `main` run
+    # since has been killed at exactly 35 minutes, which fails `quality-gate`
+    # without reporting a single assertion (RM #1507, #1505; UD #9431).
+    # 150 = measured ~135 min + ~10% headroom for self-hosted runner contention.
+    # Per-test hangs stay bounded by `--timeout=60 --timeout-method=thread`
+    # below; this budget only bounds the lane as a whole.
+    timeout-minutes: 150
+    env:
+      # Debt ledger (scripts/config/unit_gate_quarantine.json, issue #8766):
+      # the dependency-light lane below only executes when a PR touches src
+      # coverage targets, so its accumulated hollow-merge debt reds the job
+      # for exactly the PRs that do real work. Ledger entries may only be
+      # removed, never added.
+      UNIT_GATE_QUARANTINE: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Check for core test relevant changes
+        id: core-test-changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+
+          # Same failure shape as the core-test diff below (#8771): a diff that
+          # errors out must not degrade into "nothing changed". Verify the base
+          # resolves, and capture the diff through a file so `-e` catches a
+          # failed `git diff` instead of silently yielding an empty array.
+          if ! git rev-parse --verify --quiet "origin/${{ github.base_ref }}^{commit}" >/dev/null; then
+            echo "::error::Cannot resolve base ref 'origin/${{ github.base_ref }}' after fetch."
+            echo "::error::Refusing to infer 'no relevant changes' from an unresolvable base ref."
+            exit 1
+          fi
+
+          git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- \
+            'src/**/*.py' \
+            'tests/**/*.py' \
+            'pyproject.toml' \
+            'requirements*.txt' \
+            'environment.yml' \
+            ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**' \
+            > "$RUNNER_TEMP/core_test_targets.txt"
+          mapfile -d '' core_test_targets < "$RUNNER_TEMP/core_test_targets.txt"
+
+          if [ "${#core_test_targets[@]}" -eq 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Test matrix NOT EXECUTED - no core Python/test/dependency changes against origin/${{ github.base_ref }}."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install System Dependencies
+        if: steps.core-test-changes.outputs.skip != 'true'
+        shell: bash
+        run: bash scripts/ci/install_ubuntu_dependencies.sh
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        if: steps.core-test-changes.outputs.skip != 'true'
+        with:
+          python-version: ${{ matrix.python }}
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create stub ui/dist for editable install
+        if: steps.core-test-changes.outputs.skip != 'true'
+        run: mkdir -p ui/dist
+      - name: Install Core Test Dependencies
+        if: steps.core-test-changes.outputs.skip != 'true'
+        # Force-reinstall hypothesis + sortedcontainers: the shared self-
+        # hosted toolcache occasionally carries half-installed versions
+        # where the pip metadata says 2.4.0 but the package namespace is
+        # missing exports (e.g. `SortedSet`). A plain `pip install -e` sees
+        # "Requirement already satisfied" and doesn't repair the cache,
+        # which causes hypothesis to fail its terminal-summary import.
+        run: |
+          python -m venv "$RUNNER_TEMP/core-ci-venv"
+          echo "$RUNNER_TEMP/core-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/core-ci-venv" >> "$GITHUB_ENV"
+          python -m ensurepip --upgrade || true
+          "$RUNNER_TEMP/core-ci-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/core-ci-venv/bin/python"
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -c "import numpy, scipy; from scipy import signal; print(f'numpy={numpy.__version__} scipy={scipy.__version__} signal=ok')"
+
+      - name: Document Native Engine Coverage In Core Lane
+        if: steps.core-test-changes.outputs.skip != 'true'
+        run: |
+          echo "## Core CI Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Start Xvfb
+        if: steps.core-test-changes.outputs.skip != 'true'
+        run: |
+          for display_num in $(seq 90 129); do
+            lockdir="/tmp/upstreamdrift-xvfb-${display_num}.lock"
+            if ! mkdir "$lockdir" 2>/dev/null; then
+              continue
+            fi
+
+            if [ -e "/tmp/.X${display_num}-lock" ] && \
+               ! pgrep -f "Xvfb :${display_num}( |$)" >/dev/null; then
+              rm -f "/tmp/.X${display_num}-lock"
+            fi
+
+            Xvfb ":${display_num}" -screen 0 1280x720x24 -ac +extension GLX +render -noreset >"/tmp/upstreamdrift-xvfb-${display_num}.log" 2>&1 &
+            xvfb_pid=$!
+            sleep 2
+
+            if kill -0 "$xvfb_pid" 2>/dev/null; then
+              echo "DISPLAY=:${display_num}" >> "$GITHUB_ENV"
+              echo "UPSTREAMDRIFT_XVFB_PID=${xvfb_pid}" >> "$GITHUB_ENV"
+              echo "UPSTREAMDRIFT_XVFB_LOCKDIR=${lockdir}" >> "$GITHUB_ENV"
+              echo "Started Xvfb on display :${display_num}"
+              exit 0
+            fi
+
+            cat "/tmp/upstreamdrift-xvfb-${display_num}.log" || true
+            rmdir "$lockdir" || true
+          done
+
+          echo "::error::Unable to start Xvfb on displays 90-129"
+          exit 1
+
+      - name: Clean Stale Coverage Data
+        if: steps.core-test-changes.outputs.skip != 'true'
+        # Self-hosted runners reuse workspaces across jobs. A crashed
+        # worker from a prior run can leave behind a partially-written
+        # .coverage.<host>.<pid>.<rand> sqlite file with no 'file' table,
+        # which then causes pytest-cov to abort the next run with
+        # "sqlite3.OperationalError: no such table: file". Remove any
+        # stale coverage artefacts before collecting fresh data.
+        run: |
+          rm -f .coverage .coverage.* coverage.xml coverage.json || true
+
+      - name: Run Core Test Suite
+        id: core-tests
+        if: steps.core-test-changes.outputs.skip != 'true'
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+          # Machine-readable failure record. `-ra` alone is not enough:
+          # pytest skips every terminal-summary section when a run dies
+          # with INTERNALERROR, which is how `main` reported 305 failures
+          # without naming one of them (UD #9474, RM #1507). The JUnit XML
+          # is written by the same terminal-summary phase, so it is a
+          # second copy of the same signal, not a replacement for the log.
+          mkdir -p "$RUNNER_TEMP/junit"
+          coverage_args=(--cov=src)
+          coverage_report_args=(
+            --cov-report=term-missing
+            --cov-report=xml:coverage.xml
+            --cov-report=json:coverage.json
+            --cov-config=pyproject.toml
+            --cov-fail-under=75
+          )
+          dependency_light_targets=(
+            tests/unit/shared_python
+            tests/unit/sidekick
+            tests/unit/robotics
+            tests/unit/scripts/test_check_mypy_exclusion_budget.py
+          )
+
+          # Route `git diff` output through a file instead of a process
+          # substitution. `mapfile -t x < <(git diff ...)` discards git's exit
+          # code: a `fatal: bad object <sha>` leaves the array empty, and an
+          # empty array is indistinguishable from "nothing changed". That is
+          # exactly how `tests` reported success on `main` @ 6b68f94 without
+          # running the suite - the push diff base was not in the shallow
+          # checkout, all four diffs failed with `fatal: bad object`, and the
+          # skip branch below exited 0 (#8771). A plain redirect lets the
+          # step's `-e` make a failed diff fatal instead.
+          diff_into() {
+            local out="$1"
+            shift
+            git diff --name-only "$@" >"$out"
+          }
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Fetch base branch for merge-base resolution.
+            git fetch --no-tags origin "${{ github.base_ref }}"
+
+            # Compute merge-base for accurate three-way diff. If shallow, unshallow to resolve.
+            merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
+            if [ -z "$merge_base" ]; then
+              git fetch --unshallow origin "${{ github.base_ref }}" 2>/dev/null || true
+              merge_base=$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || echo "")
+            fi
+            if [ -z "$merge_base" ]; then
+              echo "NOTE: merge-base unavailable; using direct diff against origin/${{ github.base_ref }}"
+            fi
+            diff_base="${merge_base:-origin/${{ github.base_ref }}}"
+          elif [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
+            # Trunk pushes and scheduled runs on default branch always run the full lane, unscoped (#8771).
+            echo "::notice::Default branch run - running the full core lane, unscoped (#8771)."
+            diff_base=""
+            dependency_light_targets=(
+              tests/unit/shared_python
+              tests/unit/sidekick
+              tests/unit/robotics
+              tests/unit/scripts/test_check_mypy_exclusion_budget.py
+            )
+            coverage_args=(--no-cov)
+            coverage_report_args=()
+          elif [ "${{ github.event_name }}" = "push" ] \
+            && [ -n "${{ github.event.before }}" ] \
+            && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            diff_base="${{ github.event.before }}"
+          else
+            diff_base=""
+          fi
+
+          # A diff base git cannot resolve must fail loudly. Inferring
+          # "nothing changed" from an unresolvable base is how a green check
+          # ends up covering a suite that was never executed.
+          if [ -n "$diff_base" ] \
+            && ! git rev-parse --verify --quiet "${diff_base}^{commit}" >/dev/null; then
+            echo "::error::Cannot resolve the core-test diff base '${diff_base}'."
+            echo "::error::Refusing to infer 'no relevant changes' from an unresolvable diff base."
+            exit 1
+          fi
+
+          if [ -n "$diff_base" ]; then
+            diff_into "$RUNNER_TEMP/core_changed_tests.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- 'tests/**/*.py'
+            mapfile -t changed_tests < "$RUNNER_TEMP/core_changed_tests.txt"
+
+            # Compute deleted tests against merge_base to prevent false positives
+            # from tests newly added on the base branch (issue #10751).
+            python scripts/ci/check_deleted_test_files.py \
+              --base-ref "${merge_base:-$diff_base}" \
+              --head HEAD \
+              --output "$RUNNER_TEMP/core_deleted_tests.txt" \
+              --fallback-to-base
+            mapfile -t deleted_tests < "$RUNNER_TEMP/core_deleted_tests.txt"
+            if [ "${#deleted_tests[@]}" -gt 0 ]; then
+              echo "::error::Deleted Python test files require review before CI can proceed."
+              printf '  %s\n' "${deleted_tests[@]}"
+              exit 1
+            fi
+
+            diff_into "$RUNNER_TEMP/core_changed_targets.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- \
+                'src/**/*.py' \
+                'tests/**/*.py' \
+                'pyproject.toml' \
+                'requirements*.txt' \
+                'environment.yml' \
+                ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
+            mapfile -t changed_core_targets < "$RUNNER_TEMP/core_changed_targets.txt"
+
+            diff_into "$RUNNER_TEMP/core_coverage_targets.txt" \
+              --diff-filter=ACMRT "$diff_base" HEAD -- \
+                'src/**/*.py' \
+                'pyproject.toml' \
+                'requirements*.txt' \
+                'environment.yml' \
+                ':(exclude)src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**'
+            mapfile -t changed_coverage_targets < "$RUNNER_TEMP/core_coverage_targets.txt"
+
+            if [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
+              coverage_args=()
+              for target in "${changed_coverage_targets[@]}"; do
+                if [[ "$target" == src/*.py ]]; then
+                  coverage_module="${target%.py}"
+                  coverage_args+=(--cov="${coverage_module//\//.}")
+                fi
+              done
+              if [ "${#coverage_args[@]}" -eq 0 ]; then
+                coverage_args=(--cov=src)
+              fi
+            fi
+
+            if [ "${#changed_tests[@]}" -eq 0 ] && [ "${#changed_core_targets[@]}" -eq 0 ]; then
+              # Reached only for a pull request or a non-default-branch push
+              # whose diff base resolved cleanly and contained no Python. Say
+              # so loudly: this check passing means "not evaluated", not
+              # "suite green", and a reader must be able to tell them apart
+              # (#8771).
+              echo "::warning::Core test suite NOT EXECUTED - diff base ${diff_base} shows no Python/test/dependency changes."
+              {
+                echo "## Core Test Suite: not executed"
+                echo
+                echo "No \`src/**/*.py\`, \`tests/**/*.py\` or dependency-manifest change"
+                echo "against diff base \`${diff_base}\`, so the core suite was skipped."
+                echo
+                echo "**This check passing does not mean the suite is green.**"
+                echo "The full lane always runs on pushes to the default branch."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            elif [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
+              echo "Source/dependency targets changed; running scoped dependency-light unit targets for this PR."
+              printf '%s\n' "${changed_coverage_targets[@]}" > "$RUNNER_TEMP/changed_coverage_targets.txt"
+              dependency_light_targets=(
+                tests/unit/shared_python
+                tests/unit/sidekick
+                tests/unit/robotics
+                tests/unit/scripts/test_check_mypy_exclusion_budget.py
+              )
+              coverage_args=(--no-cov)
+              coverage_report_args=()
+            elif [ "${#changed_tests[@]}" -eq 0 ]; then
+              echo "No Python test changes detected for changed core targets."
+              echo "Falling through to targeted coverage lane to ensure source/dependency coverage."
+            else
+              if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
+                echo "Running PR-scoped core tests:"
+                coverage_mode=(--no-cov)
+              else
+                echo "Running PR-scoped core tests with targeted coverage:"
+                coverage_mode=(
+                  "${coverage_args[@]}"
+                  --cov-report=term-missing
+                  --cov-report=xml:coverage.xml
+                  --cov-report=json:coverage.json
+                  --cov-config=pyproject.toml
+                  --cov-fail-under=75
+                )
+                echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
+              fi
+              printf '  %s\n' "${changed_tests[@]}"
+              set +e
+              xvfb-run --auto-servernum python -m pytest "${changed_tests[@]}" \
+                -p no:xvfb \
+                -n 0 \
+                --timeout=60 \
+                --timeout-method=thread \
+                -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+                -o addopts="" \
+                "${coverage_mode[@]}" \
+                --junitxml="$RUNNER_TEMP/junit/pr-scoped-${{ matrix.python }}.xml" \
+                -ra \
+                --tb=short \
+                -v
+              pytest_exit_code=$?
+              set -e
+
+              # Handle pytest exit codes properly:
+              # - 0: All tests passed
+              # - 5: No tests collected (NOT the same as all skipped)
+              # - Other: Tests failed or error
+              if [ $pytest_exit_code -eq 0 ]; then
+                echo "All PR-scoped tests passed."
+                if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
+                  echo "No source/dependency coverage targets changed; PR-scoped tests passed, skipping targeted coverage lane."
+                  echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
+              elif [ $pytest_exit_code -eq 5 ]; then
+                # Exit code 5 means no tests were collected, not that tests were skipped
+                # This can happen if changed files don't contain any test functions
+                # Fall back to running the full test suite to ensure coverage
+                echo "WARNING: pytest exit code 5 (no tests collected) detected."
+                echo "This may indicate the changed files do not contain test functions."
+                if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
+                  # No src/dependency change: the whole-src fallback below
+                  # would run with the global coverage floor, which this
+                  # dependency-light lane can never reach (#11052). The
+                  # selected tests are skip-gated here (e.g. optional JAX),
+                  # so say loudly that nothing ran rather than going red.
+                  echo "::warning::Core test suite NOT EXECUTED - every PR-scoped test was skipped or deselected in this lane and no src/dependency file changed."
+                  {
+                    echo "## Core Test Suite: not executed"
+                    echo
+                    echo "Every PR-scoped test was skipped or deselected in this lane"
+                    echo "(for example, an optional dependency is absent) and no"
+                    echo "\`src/**/*.py\` or dependency manifest changed."
+                    echo
+                    echo "**This check passing does not mean the suite is green.**"
+                  } >> "$GITHUB_STEP_SUMMARY"
+                  echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"
+                  echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
+                echo "Falling back to full test suite to ensure proper validation."
+              elif [ $pytest_exit_code -eq 1 ]; then
+                # Tests failed - propagate the failure
+                echo "PR-scoped tests failed with exit code $pytest_exit_code"
+                exit $pytest_exit_code
+              else
+                # Other error codes
+                echo "PR-scoped tests encountered unexpected exit code $pytest_exit_code"
+                exit $pytest_exit_code
+              fi
+
+              echo "Source/dependency coverage targets changed; targeted coverage lane will run after PR-scoped tests."
+            fi
+          fi
+
+          # Run the targeted, dependency-light CI lane:
+          # - Serial execution (-n 0) avoids native GUI/MuJoCo xdist worker
+          #   termination on self-hosted runners, where worker crashes prevent
+          #   pytest-cov from collecting coverage data and fail the matrix before
+          #   reporting any test assertion. The PR-scoped path above is also
+          #   serial for the same stability reason.
+          # - 60 second timeout per test
+          # - Skip slow tests in CI for faster feedback
+          # - Coverage measurement on src/ (pytest-cov)
+          # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
+          # are intentionally not provisioned here.
+          run_with_heartbeat() {
+            label="$1"
+            shift
+            "$@" &
+            cmd_pid=$!
+            (
+              while kill -0 "$cmd_pid" 2>/dev/null; do
+                sleep 60
+                echo "::notice::$label still running at $(date -u +%H:%M:%SZ)"
+              done
+            ) &
+            heartbeat_pid=$!
+            wait "$cmd_pid"
+            rc=$?
+            kill "$heartbeat_pid" 2>/dev/null || true
+            wait "$heartbeat_pid" 2>/dev/null || true
+            return "$rc"
+          }
+
+          pytest_parallel_args=(-n 0)
+          echo "Core lane: using serial pytest to avoid xdist worker termination."
+
+          if [ "${coverage_args[0]:-}" = "--no-cov" ]; then
+            echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
+            echo "PR-scoped dependency-light lane is running without coverage to avoid self-hosted runner OOM."
+          else
+            echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
+            if [ "${{ github.event_name }}" = "pull_request" ] && [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
+              printf '%s\n' "${changed_coverage_targets[@]}" > "$RUNNER_TEMP/changed_coverage_targets.txt"
+              echo "pr_targeted_coverage_generated=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "full_coverage_generated=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          run_with_heartbeat "core pytest lane" xvfb-run --auto-servernum python -m pytest \
+            "${dependency_light_targets[@]}" \
+            -p no:xvfb \
+            "${pytest_parallel_args[@]}" \
+            --timeout=60 \
+            --timeout-method=thread \
+            --ignore=tests/shared_contracts \
+            --ignore=tests/integration/launch_monitor_drift \
+            --ignore=tests/integration/putting_green_drift \
+            --ignore=tests/heavy_integration \
+            --ignore=tests/benchmarks \
+            --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
+            --ignore=tests/docker \
+            --ignore=tests/examples \
+            -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            "${coverage_args[@]}" \
+            "${coverage_report_args[@]}" \
+            --junitxml="$RUNNER_TEMP/junit/core-${{ matrix.python }}.xml" \
+            -ra \
+            --tb=short \
+            --durations=20 \
+            -v
+
+      - name: Upload JUnit Test Results
+        if: always() && steps.core-test-changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: junit-tests-${{ matrix.python }}
+          path: ${{ runner.temp }}/junit/*.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop Xvfb
+        if: always() && steps.core-test-changes.outputs.skip != 'true'
+        run: |
+          if [ -n "${UPSTREAMDRIFT_XVFB_PID:-}" ]; then
+            kill "${UPSTREAMDRIFT_XVFB_PID}" 2>/dev/null || true
+            wait "${UPSTREAMDRIFT_XVFB_PID}" 2>/dev/null || true
+          fi
+          if [ -n "${UPSTREAMDRIFT_XVFB_LOCKDIR:-}" ]; then
+            rmdir "${UPSTREAMDRIFT_XVFB_LOCKDIR}" 2>/dev/null || true
+          fi
+
+      - name: Enforce Per-Package Coverage Thresholds
+        if: >-
+          steps.core-test-changes.outputs.skip != 'true' &&
+          (
+            steps.core-tests.outputs.full_coverage_generated == 'true' ||
+            steps.core-tests.outputs.pr_targeted_coverage_generated == 'true'
+          )
+        run: |
+          if [ "${{ steps.core-tests.outputs.pr_targeted_coverage_generated }}" = "true" ]; then
+            python3 scripts/config/coverage_enforcer.py coverage.xml --changed-files "$RUNNER_TEMP/changed_coverage_targets.txt"
+          else
+            python3 scripts/config/coverage_enforcer.py coverage.xml
+          fi
+
+      # Per-package coverage gates (#10965): the budget JSON is the single
+      # --strict gate authority, evaluated against the same coverage.json
+      # the enforcer reads.
+      - name: Enforce Budget Package Coverage Gates
+        if: >-
+          steps.core-test-changes.outputs.skip != 'true' &&
+          (
+            steps.core-tests.outputs.full_coverage_generated == 'true' ||
+            steps.core-tests.outputs.pr_targeted_coverage_generated == 'true'
+          )
+        run: |
+          python3 scripts/check_coverage_gates.py --report coverage.json --strict
+      # Dependency-free validator coverage that supports future native-engine jobs.
+      - name: Cross-Engine Validator Core Unit Tests
+        if: steps.core-test-changes.outputs.skip != 'true'
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          set -o pipefail
+          echo "## Cross-Engine Validator Core Unit Tests" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
+          echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
+          xvfb-run --auto-servernum python -m pytest tests/integration/test_cross_engine_validation.py \
+            -p no:xvfb \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short 2>&1 | tee cross-engine-results.txt
+
+          # Report to summary
+          passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
+          failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
+          echo "- Passed: $passed | - Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
+
+      # Performance regression benchmarks (issue #3510)
+      # Lightweight, dependency-free benchmarks that compare median wall-
+      # clock time of critical hot paths against tests/benchmarks/baseline.json
+      # using a generous 5x regression multiplier. Failures here indicate a
+      # large performance drop (intentional or otherwise) and should be
+      # investigated before merging. To re-baseline, capture new medians and
+      # update tests/benchmarks/baseline.json in a follow-up commit.
+      - name: Performance Regression Benchmarks
+        if: matrix.python == '3.11' && steps.core-test-changes.outputs.skip != 'true'
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          xvfb-run --auto-servernum python -m pytest \
+            tests/benchmarks/test_regression_benchmarks.py \
+            -p no:xvfb \
+            -m benchmark \
+            --timeout=120 \
+            --timeout-method=thread \
+            --no-cov \
+            -v --tb=short
+
+      - name: Upload Benchmark Baseline Artifact
+        if: matrix.python == '3.11' && steps.core-test-changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: performance-baseline
+          path: tests/benchmarks/baseline.json
+          if-no-files-found: warn
+
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: env.CODECOV_TOKEN != '' && steps.core-test-changes.outputs.skip != 'true'
+        with:
+          fail_ci_if_error: false # Do not block if token is missing
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+
+  parity-smoke:
+    needs: pick-runner
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install parity smoke dependencies
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
+      - name: Run scheduled parity smoke suite
+        run: |
+          python -m pytest \
+            tests/api/test_api_parity.py \
+            tests/config/launcher_manifest/test_parity.py \
+            tests/parity/test_fitresult_field_parity.py \
+            tests/unit/theme/test_sidekick_parity.py \
+            -m parity \
+            -q \
+            --tb=short
+
+  alembic-postgres-round-trip:
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: upstreamdrift_migrations
+          POSTGRES_USER: upstreamdrift
+          POSTGRES_PASSWORD: upstreamdrift
+        ports:
+          - 5432
+        options: >-
+          --health-cmd "pg_isready -U upstreamdrift -d upstreamdrift_migrations"
+          --health-interval 10s
+          --health-start-period 300s
+          --health-timeout 5s
+          --health-retries 60
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create Alembic Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/alembic-ci-venv"
+          echo "$RUNNER_TEMP/alembic-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/alembic-ci-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install migration test dependencies
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
+          python -m ensurepip --upgrade || true
+          python -m pip install "psycopg[binary]>=3.1"
+      - name: Run Alembic PostgreSQL round-trip
+        env:
+          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports[5432] }}/upstreamdrift_migrations
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: |
+          python3 - <<'PY'
+          import os
+          import time
+
+          import psycopg
+
+          sqlalchemy_url = os.environ["ALEMBIC_ROUND_TRIP_DATABASE_URL"]
+          psycopg_url = sqlalchemy_url.replace("postgresql+psycopg://", "postgresql://", 1)
+          deadline = time.monotonic() + 60
+          last_error = None
+
+          while time.monotonic() < deadline:
+              try:
+                  with psycopg.connect(psycopg_url, connect_timeout=5) as connection:
+                      with connection.cursor() as cursor:
+                          cursor.execute("SELECT 1")
+                          cursor.fetchone()
+                  break
+              except Exception as exc:  # noqa: BLE001 - surface the last transient startup error.
+                  last_error = exc
+                  time.sleep(2)
+          else:
+              raise SystemExit(f"PostgreSQL did not accept SQL connections: {last_error!r}")
+          PY
+          python3 -m pytest -p pytest_timeout -p asyncio tests/integration/test_alembic_round_trip.py \
+            -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            --timeout=180 \
+            --timeout-method=thread \
+            --durations=10 \
+            -vv --tb=short
+
+  shared-tools-consumer-contracts:
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Checkout Tools Hub
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ vars.TOOLS_REPOSITORY || format('{0}/Tools', github.repository_owner) }}
+          path: _tools_dep
+      - name: Symlink Tools for Workspace
+        run: bash "$GITHUB_WORKSPACE/scripts/setup_tools_workspace.sh"
+      - name: Reject Raw Merge Conflict Markers
+        run: |
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
+            echo "::error::Raw git merge conflict markers found!"
+            exit 1
+          fi
+
+      - name: Install System Dependencies
+        shell: bash
+        run: bash scripts/ci/install_ubuntu_dependencies.sh
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+      - name: Install Core Test Dependencies
+        # See tests/Install Core Test Dependencies for the rationale  -
+        # the shared toolcache can carry a stale `sortedcontainers` that
+        # makes hypothesis fail during pytest_terminal_summary.
+        # Force-reinstall numpy/scipy to ensure a consistent binary ABI:
+        # the self-hosted toolcache for Python 3.11 carries numpy 2.4.x
+        # which is incompatible with cached scipy wheels built against <2.3.
+        run: |
+          python -m venv "$RUNNER_TEMP/shared-contracts-venv"
+          echo "$RUNNER_TEMP/shared-contracts-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/shared-contracts-venv" >> "$GITHUB_ENV"
+          python -m ensurepip --upgrade || true
+          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          "$python" -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          "$python" -m pip uninstall -y pytest-vcr pytest-recording || true
+          python -m ensurepip --upgrade || true
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          "$python" -c "import numpy, scipy; from scipy import signal; print(f'numpy={numpy.__version__} scipy={scipy.__version__} signal=ok')"
+      - name: Run Shared Tools Consumer Contracts
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+          REQUIRE_REAL_TOOLS_REPO: "1"
+        run: |
+          xvfb-run --auto-servernum python -m pytest tests/shared_contracts/ \
+            -p no:xvfb \
+            --tools-mode=vendored \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short
+      # ADR-0046 G0: the cross-stack drift gates need the vendored Tools
+      # stack, which only this job materialises (fetch-pinned-tools). The
+      # main tests job checks out no submodule, where the suite's guard
+      # skips locally but FAILS under CI - so a placement mistake can never
+      # again report green without executing.
+      - name: Run Launch-Monitor Drift Gates (ADR-0046 G0)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          REQUIRE_DRIFT_GATES: "1"
+        run: |
+          drift_suites="tests/integration/launch_monitor_drift/"
+          if [ -d tests/integration/putting_green_drift ]; then
+            drift_suites="$drift_suites tests/integration/putting_green_drift/"
+          fi
+          python -m pytest $drift_suites \
+            --timeout=120 \
+            --timeout-method=thread \
+            -v --tb=short
+
+  # Impact Explorer web bundle producer (issue #9484): the rate_of_closure
+  # launcher tile declares web.mode=route for /tools/impact-explorer and
+  # src/api/local_server.py mounts vendor/ud-tools/src/rate_of_closure/web/dist
+  # when it exists, but nothing built that bundle, so a clean checkout served
+  # the honest fallback instead of the app. Build the bundle from the pinned
+  # Tools tree with the exact commands the route's fallback documents (Tools'
+  # rate-of-closure-web-distribution.yml build authority: npm ci + a vite
+  # build; base-path authority: ui/src/pages/ImpactExplorer.tsx).
+  # scripts/check_declared_route_producers.py fails if this producer
+  # disappears while the tile still declares the route. Shipping the built
+  # bundle inside the wheel/image remains an open distribution decision
+  # (#9417); this job only proves the pinned tree builds.
+  impact-explorer-web-build:
+    name: impact-explorer-web-build
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        working-directory: .
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pinned Tools packages
+        id: tools
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          # Node 22 is the vendored Tools web build authority
+          # (rate-of-closure-web-distribution.yml pins node-version 22).
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: vendor/ud-tools/src/rate_of_closure/web/package-lock.json
+      - name: Build Impact Explorer bundle
+        working-directory: vendor/ud-tools/src/rate_of_closure/web
+        env:
+          # Tools' release contract stamps this revision into index.html, the
+          # runtime descriptor and the SHA-256 asset manifest, so the served
+          # artifact provably comes from the pinned source (#9550 item 4).
+          ROC_RELEASE_REVISION: ${{ steps.tools.outputs.gitlink-sha }}
+        run: |
+          npm ci
+          npm run build -- --base=/impact-explorer-app/
+          node release/generateReleaseArtifacts.mjs
+      - name: Verify bundle is built under the mandated base path
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f vendor/ud-tools/src/rate_of_closure/web/dist/index.html
+          grep -q '/impact-explorer-app/' \
+            vendor/ud-tools/src/rate_of_closure/web/dist/index.html
+          echo "Impact Explorer bundle present and base-pathed to /impact-explorer-app/"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Install served-bundle verifier dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check \
+            fastapi==0.136.3 httpx==0.28.1
+      # Serve the built bundle through the /impact-explorer-app mount contract
+      # and check what a client receives: real JavaScript whose digests match
+      # the provider manifest, a descriptor stamped with the pinned gitlink,
+      # and 404 (not the index fallback) for a missing artifact. HTTP 200 on
+      # index.html alone is not install evidence (#9550 item 4).
+      - name: Verify served bundle matches pinned Tools release artifacts
+        run: |
+          python3 scripts/ci/verify_impact_explorer_bundle.py \
+            --dist vendor/ud-tools/src/rate_of_closure/web/dist \
+            --expected-revision "${{ steps.tools.outputs.gitlink-sha }}" \
+            --receipt "$RUNNER_TEMP/impact-explorer-bundle-receipt.json"
+      - name: Upload served-bundle receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: impact-explorer-bundle-receipt-${{ github.sha }}
+          path: ${{ runner.temp }}/impact-explorer-bundle-receipt.json
+          if-no-files-found: error
+          retention-days: 30
+
+  frontend-tests:
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        working-directory: .
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check for frontend changes
+        id: frontend-changes
+        working-directory: .
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          if git diff --quiet "origin/${{ github.base_ref }}" HEAD -- ui; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No ui/ changes detected; skipping frontend checks for this PR."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        if: steps.frontend-changes.outputs.skip != 'true'
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install Dependencies
+        if: steps.frontend-changes.outputs.skip != 'true'
+        run: npm ci
+
+      - name: Type Check
+        if: steps.frontend-changes.outputs.skip != 'true'
+        run: npm run type-check
+
+      - name: Lint
+        if: steps.frontend-changes.outputs.skip != 'true'
+        run: npm run lint
+
+      - name: Run Tests
+        if: steps.frontend-changes.outputs.skip != 'true'
+        run: npm run test:run -- --testTimeout=15000
+
+      - name: Build Check
+        if: steps.frontend-changes.outputs.skip != 'true'
+        run: npm run build
+
+  # =============================================================================
+  # MATLAB TESTS - DISABLED BY DEFAULT
+  # =============================================================================
+  # This job requires a MATLAB license which is NOT available in GitHub CI.
+  # DO NOT enable (remove 'if: false') unless you have configured MATLAB licensing.
+  # To enable: set 'if: true' and configure matlab-actions.
+  # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
+  # =============================================================================
+  matlab-tests:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    if: false # DISABLED - Requires MATLAB license not available in CI
+    continue-on-error: true
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: matlab-actions/setup-matlab@f9e43010f1ae678f7cfa0542fe2a4f60f7d1ad8d
+      - uses: matlab-actions/run-command@bfa857648f4895aa98a446fe41c85e0788421ed5
+        with:
+          command: |
+            addpath('matlab');
+            run_all
+
+  # =============================================================================
+  # ARDUINO BUILD - DISABLED BY DEFAULT
+  # =============================================================================
+  # No Arduino components in this project - disabled.
+  # =============================================================================
+  arduino-build:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    if: false # DISABLED - No Arduino components in this project
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - run: |
+          python -m ensurepip --upgrade || true
+          pip install platformio
+      - name: Verify Build
+        working-directory: ./arduino
+        run: pio run -e uno
+
+  # =============================================================================
+  # RUST QUALITY GATE
+  # =============================================================================
+  # Runs when Rust source files, Cargo manifests, or Rust-backed Python physics
+  # facades/callers/tests change.
+  # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
+  # =============================================================================
+  rust-quality-gate:
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    # The matrix already declares `ubuntu-latest` and several steps gate on
+    # `matrix.os == 'ubuntu-latest'`, so the fleet pin was a straight
+    # contradiction: hosted-shaped work queued behind a self-hosted slot.
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 25
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+    defaults:
+      run:
+        # Git Bash is preinstalled on `windows-latest`, so a single `bash`
+        # default keeps the existing heredoc / `source` / POSIX idioms working
+        # uniformly across all three OSes.
+        shell: bash
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Check for Rust changes
+        id: rust-changes
+        run: |
+          rust_gate_paths=(
+            '*.rs'
+            'Cargo.toml'
+            '*/Cargo.toml'
+            'rust-toolchain.toml'
+            'src/shared/python/physics/**'
+            'src/tools/ball_flight_gui/**'
+            'src/tools/golf_simulation_suite/**'
+            'tests/unit/test_ball_flight_physics.py'
+            'tests/unit/shared_python/test_ball_flight_physics.py'
+            'tests/rust_bindings/**'
+          )
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+            RUST_GATE_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- "${rust_gate_paths[@]}" || true)
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            RUST_GATE_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- "${rust_gate_paths[@]}" || true)
+          else
+            RUST_GATE_FILES=$(git diff --name-only HEAD~1 HEAD -- "${rust_gate_paths[@]}" || echo "")
+          fi
+
+          if [ -n "$RUST_GATE_FILES" ]; then
+            # Only enable the gate if a Cargo workspace actually exists
+            if [ -f "Cargo.toml" ]; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              echo "Changed Rust/Python kernel gate files:"
+              echo "$RUST_GATE_FILES"
+            else
+              echo "has_changes=false" >> "$GITHUB_OUTPUT"
+              echo "Rust/Python kernel gate files changed but no Cargo.toml found  -  skipping quality gate."
+            fi
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust/Python kernel gate changes detected  -  skipping Rust quality gate."
+          fi
+
+      - name: Rust Quality Gate Skipped
+        if: steps.rust-changes.outputs.has_changes != 'true'
+        run: echo "No Rust/Python kernel gate changes detected; Rust quality gate is not required."
+
+      # Enable Windows long-path support before cargo clones the `tools-core`
+      # git dep. The Tools repo contains a >260-char PDF filename
+      # (`.../psa_package/References/H16-1061 PSA upgrading proposal G4 rev 06
+      # with Perez notes from 2019 01 17 9am call with Xebec - Internal Use
+      # Only.pdf`) which fails cargo's git checkout on Windows without this.
+      - name: Enable Git long paths (Windows)
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
+        shell: bash
+        run: git config --system core.longpaths true
+
+      # Pin Python BEFORE installing Rust so PyO3-backed crates build cleanly
+      # on hosted macos-latest / windows-latest, which default to Python 3.14.
+      # `pyo3 0.24` (workspace pin) supports up to Python 3.13 only, so 3.14
+      # makes `pyo3-ffi` fail its build script with:
+      #   "the configured Python interpreter version (3.14) is newer than
+      #    PyO3's maximum supported version (3.13)"
+      # 3.12 is the safe middle of pyo3 0.24's supported range (3.7-3.13).
+      # Tracked: issue #5221.
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Set up Python (for PyO3 builds)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Configure Cargo Git dependency fetches
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          mkdir -p "$CARGO_HOME"
+          git config --global --unset-all url.git@github.com:.insteadOf || true
+          git config --global --unset-all url.ssh://git@github.com/.insteadOf || true
+          git config --global --unset-all url.https://github.com/.insteadOf || true
+          git config --global --add url.https://github.com/.insteadOf git@github.com:
+          git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
+      - name: Enable long Cargo git dependency paths on Windows
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'windows-latest'
+        run: |
+          git config --global core.longpaths true
+
+      - name: Install Rust toolchain
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+        with:
+          components: rustfmt, clippy
+          # WASM target is only exercised on Linux (see WASM step below); we
+          # still install it everywhere so `rust-toolchain.toml` stays
+          # consistent across the matrix and `rustup target add` is a no-op.
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry and build
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Format Check (rustfmt)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo fmt --all -- --check
+
+      - name: Lint (Clippy)
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run Rust Tests
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          # Features `python` and `wasm` use mutually-exclusive FFI systems.
+          # `cargo test` enumerates all workspace members via the resolver, so
+          # new crates joining `[workspace] members = [...]` are auto-covered.
+          cargo test
+
+      - name: Check Rust Python Features
+        # The workspace pyo3 dependency enables `extension-module`, so Python
+        # feature crates are built as importable extension modules whose Python
+        # symbols are resolved by the interpreter loader. A `cargo test`
+        # executable links those symbols directly and fails on Linux too. Use
+        # `cargo check` for all Python-feature targets here, then let the
+        # maturin wheel build + binding smoke tests below cover integration.
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        run: cargo check --workspace --all-targets --features python
+
+      # ----------------------------------------------------------------------
+      # The remaining steps (Maturin wheel build, Python-binding/source tests,
+      # WASM target build) are slow and largely platform-independent. We keep
+      # them on Linux only so the cross-platform matrix stays focused on the
+      # acceptance-criteria checks (fmt / clippy / test / python-feature check)
+      # without burning Windows + macOS minutes on redundant work.
+      # ----------------------------------------------------------------------
+      - name: Build PyO3 Wheel (Maturin)
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/rust-venv"
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip maturin
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend rust_core/upstream-urdf rust_core/upstream-realtime rust_core/upstream-mesh rust_core/upstream-pinocchio-id; do
+            (cd "$crate" && python -m maturin build --interpreter python --features python --release)
+          done
+          echo "Wheels built successfully"
+          ls target/wheels/
+
+      - name: Fetch pinned Tools packages
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Verify Python Bindings
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        run: |
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[dev]"
+          python -m pip install --force-reinstall target/wheels/*.whl
+          python scripts/ci/import_built_rust_wheels.py \
+            upstream_physics \
+            upstream_mocap_preproc \
+            upstream_mocap_io \
+            upstream_muscle \
+            upstream_motion_matching \
+            ai_backend \
+            upstream_urdf \
+            upstream_realtime \
+            upstream_mesh \
+            upstream_pinocchio_id
+          CI_RUST_WHEELS_EXPECTED=1 python -m pytest \
+            tests/unit/test_ball_flight_physics.py \
+            tests/unit/shared_python/test_ball_flight_physics.py \
+            tests/rust_bindings \
+            -q -o addopts="" --tb=short
+          python -m pytest tests/unit/motion_pipeline/sources -q -o addopts="" --tb=short
+          python -c "
+          import upstream_physics
+          # Verify key types are importable
+          cfg = upstream_physics.IntegratorConfig()
+          cp = upstream_physics.ContactParameters()
+          print('IntegratorConfig:', cfg)
+          print('ContactParameters:', cp)
+          print('SwingPlaneResult available:', hasattr(upstream_physics, 'SwingPlaneResult'))
+          print('All Python bindings verified!')
+          "
+          # ai_backend wheel: smoke-test that the #[pymodule] is importable
+          # and exposes the four pyclasses + version. See issue #5220.
+          python -c "
+          import ai_backend
+          assert hasattr(ai_backend, 'AIConfig'), 'AIConfig missing'
+          assert hasattr(ai_backend, 'AIEngine'), 'AIEngine missing'
+          assert hasattr(ai_backend, 'MemoryManager'), 'MemoryManager missing'
+          assert hasattr(ai_backend, 'RagPipeline'), 'RagPipeline missing'
+          cfg = ai_backend.AIConfig('k', 'https://api.example/v1', 'm', ':memory:')
+          assert cfg.chat_url() == 'https://api.example/v1/chat/completions', cfg.chat_url()
+          assert cfg.embed_url() == 'https://api.example/v1/embeddings', cfg.embed_url()
+          print('ai_backend bindings verified, version:', ai_backend.__version__)
+          "
+
+      - name: Build WASM Module (wasm-pack)
+        if: steps.rust-changes.outputs.has_changes == 'true' && matrix.os == 'ubuntu-latest'
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo build --target wasm32-unknown-unknown --features wasm -p upstream-physics
+          echo "WASM target build successful"
+
+      - name: Rust Quality Gate Summary
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          echo "## Rust Quality Gate (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
+          echo "- rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
+          echo "- clippy: no warnings" >> $GITHUB_STEP_SUMMARY
+          echo "- cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            echo "- cargo check --features python: all targets typecheck" >> $GITHUB_STEP_SUMMARY
+            echo "- maturin: wheel built" >> $GITHUB_STEP_SUMMARY
+            echo "- Python bindings and source adapters: verified" >> $GITHUB_STEP_SUMMARY
+            echo "- WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  rust-quickstart:
+    name: Rust Quickstart
+    needs: changed-paths
+    if: needs.changed-paths.outputs.code == 'true'
+    # No `needs: pick-runner` on this job, so it routes directly rather than
+    # gaining a dependency edge just to learn where to run.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Check for Rust changes
+        id: rust-changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+            RUST_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            RUST_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          else
+            RUST_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || echo "")
+          fi
+
+          if [ -n "$RUST_FILES" ] && [ -f "Cargo.toml" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "$RUST_FILES"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust changes detected  -  skipping Rust quickstart."
+          fi
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Setup Python
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Install Rust toolchain
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+
+      - name: Cache Cargo registry
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: rust-quickstart-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            rust-quickstart-${{ runner.os }}-
+
+      - name: Cargo build from clean clone
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo build
+
+      - name: Maturin develop from clean clone
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          python -m venv "$RUNNER_TEMP/rust-quickstart-venv"
+          source "$RUNNER_TEMP/rust-quickstart-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip maturin
+          cd rust_core/upstream-physics
+          python -m maturin develop --features python
+          python -c "
+          import upstream_physics
+          print(upstream_physics.IntegratorConfig())
+          "
+
+  # ----------------------------------------------------------------------
+  # rust-wheel-parity (issue #7601)
+  #
+  # The path-gated `rust-quality-gate` job builds the six PyO3 wheels into a
+  # throwaway venv but the main `tests:` job never installs them, so the
+  # parity / Rust-binding suites SKIP via `skipif(not is_rust_available())`
+  # and `importorskip("upstream_...")`. A parity regression could therefore
+  # land unnoticed.
+  #
+  # This REQUIRED job (wired into `quality-gate.needs`) runs for Rust wheel,
+  # parity-test, and Python facade changes on PRs and pushes, and always runs on
+  # schedule and manual dispatch events. It builds + installs all PyO3 wheels
+  # (mirroring the exact maturin invocation in `rust-quality-gate`) and runs
+  # the parity suite with
+  # `CI_RUST_WHEELS_EXPECTED=1`, which the test layer (tests/conftest.py +
+  # tests/rust_bindings/test_ci_rust_wheels_available.py) turns into a hard
+  # failure if any wheel is missing. Non-Rust PRs get an explicit successful
+  # skip summary instead of burning a parity lane on unrelated changes. It does
+  # NOT touch the Python facades, which keep their pure-Python fallback for
+  # clean checkouts.
+  # ----------------------------------------------------------------------
+  rust-wheel-parity:
+    name: rust-wheel-parity
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
+    # blocked every merge a second time. Pure `cargo`/`maturin` work with no
+    # fleet-local state, so it follows the dispatcher like its siblings.
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+      CI_RUST_WHEELS_EXPECTED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Check for Rust wheel parity changes
+        id: rust-wheel-parity-changes
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          BASE_SHA=""
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ "$EVENT_NAME" = "schedule" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Rust wheel parity runs for $EVENT_NAME events."
+            exit 0
+          fi
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+          elif [ "$EVENT_NAME" = "push" ]; then
+            BEFORE_SHA="${{ github.event.before }}"
+            if [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+              BASE_SHA="$BEFORE_SHA"
+              if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+                git fetch --no-tags --depth=1 origin "$BASE_SHA" || true
+              fi
+            else
+              BASE_SHA=$(git rev-parse HEAD^ 2>/dev/null || true)
+            fi
+
+            if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              echo "Unable to resolve push base for Rust wheel parity diff; running fail-closed."
+              exit 0
+            fi
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Rust wheel parity runs fail-closed for unsupported event: $EVENT_NAME"
+            exit 0
+          fi
+
+          PARITY_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            'rust_core/**' \
+            'Cargo.toml' \
+            'Cargo.lock' \
+            '*/Cargo.toml' \
+            'rust-toolchain.toml' \
+            'src/shared/python/ai/adapters/rust_adapter.py' \
+            'src/shared/python/biomechanics/rust_muscle.py' \
+            'src/shared/python/humanoid_character_builder/mesh/**' \
+            'src/shared/python/model_generation/converters/*rust_facade.py' \
+            'src/shared/python/motion_pipeline/**' \
+            'src/shared/python/physics/**' \
+            'src/shared/python/pose_interchange/adapters/pinocchio_reference.py' \
+            'src/shared/python/realtime/**' \
+            'tests/rust_bindings/**' \
+            'tests/parity/**' \
+            'tests/ai/test_rust_rag_pipeline.py' \
+            'tests/integration/codemap/test_rust_cli_parity.py' \
+            'tests/unit/biomechanics/test_rust_muscle.py' \
+            'tests/unit/motion_matching/test_cmc_rust_parity.py' \
+            'tests/unit/motion_matching/test_pinocchio_id_rust_parity.py' \
+            'tests/unit/motion_pipeline/preprocessing/test_rust_parity.py' \
+            'tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py' \
+            'tests/unit/motion_pipeline/test_rust_finite_diff_parity.py' \
+            'tests/unit/realtime/test_rust_parity.py' \
+            'tests/unit/urdf/test_mjcf_rust_facade.py' \
+            'tests/unit/urdf/test_rust_facade_parity.py' \
+            'tests/unit/test_ball_flight_physics.py' \
+            'tests/unit/shared_python/test_ball_flight_physics.py' \
+            'scripts/ci/import_built_rust_wheels.py' \
+            'scripts/ci/check_rust_parity_wheel_gates.py' \
+            || true)
+
+          if [ -n "$PARITY_FILES" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Rust wheel parity relevant changes detected:"
+            echo "$PARITY_FILES"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust wheel parity changes detected; skipping mandatory wheel parity suite for this $EVENT_NAME change."
+          fi
+
+      - name: Install System Dependencies
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        shell: bash
+        run: bash scripts/ci/install_ubuntu_dependencies.sh
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows' && steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+
+      # Pin Python 3.12 (pyo3 0.24 supports up to 3.13; 3.12 is the safe
+      # middle of its range, matching rust-quality-gate). See issue #5221.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+
+      - name: Purge pip cache
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        run: python -m pip cache purge || true
+
+      - name: Install Rust toolchain
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8
+        with:
+          components: rustfmt, clippy
+
+      - name: Verify Rust toolchain
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+          export PATH="$CARGO_HOME/bin:$PATH"
+          command -v rustup
+          command -v rustc
+          command -v cargo
+          rustup --version
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo registry and build
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Create stub ui/dist for editable install
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        run: mkdir -p ui/dist
+
+      # Mirror the exact maturin build invocation used in `rust-quality-gate`
+      # so the two lanes stay in lock-step.
+      - name: Build PyO3 Wheels (Maturin)
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/rust-venv"
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip maturin
+          for crate in rust_core/upstream-physics rust_core/upstream-mocap-preproc rust_core/upstream-mocap-io rust_core/upstream-muscle rust_core/upstream-motion-matching rust_core/ai_backend rust_core/upstream-urdf rust_core/upstream-realtime rust_core/upstream-mesh rust_core/upstream-pinocchio-id; do
+            (cd "$crate" && python -m maturin build --interpreter python --features python --release)
+          done
+          echo "Wheels built successfully"
+          ls target/wheels/
+
+      # Build the upstream-codemap CLI binary so the Python-vs-Rust codemap
+      # parity test runs instead of self-skipping (issue #7603). The binary is
+      # a [[bin]] target (no pymodule), so it ships via cargo, not maturin.
+      - name: Build codemap CLI binary
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        run: |
+          cargo build --release -p upstream-codemap --bin upstream-codemap
+          ls -l target/release/upstream-codemap
+
+      - name: Fetch pinned Tools packages
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Install project + built wheels
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        run: |
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m ensurepip --upgrade || true
+          python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
+          python -m pip install --no-cache-dir --no-deps -e ".[gui-test]"
+          python -m pip install --force-reinstall target/wheels/*.whl
+          # tree-sitter grammars for the Python codemap side so the Python-vs-Rust
+          # codemap parity test can index the same languages the Rust binary does
+          # (rust + markdown), instead of degrading to Python-only (issue #7603).
+          python -m pip install --no-cache-dir \
+            "tree-sitter==0.25.2" \
+            "tree-sitter-python==0.25.0" \
+            "tree-sitter-rust==0.24.2" \
+            "tree-sitter-markdown==0.5.1"
+          # Fail-closed probe: every wheel must import + expose its bindings.
+          python scripts/ci/import_built_rust_wheels.py \
+            upstream_physics \
+            upstream_mocap_preproc \
+            upstream_mocap_io \
+            upstream_muscle \
+            upstream_motion_matching \
+            ai_backend \
+            upstream_urdf \
+            upstream_realtime \
+            upstream_mesh \
+            upstream_pinocchio_id
+
+      - name: Run parity suite (wheels mandatory)
+        if: steps.rust-wheel-parity-changes.outputs.has_changes == 'true'
+        # CI_RUST_WHEELS_EXPECTED=1 (job env) makes a skipped Rust-parity test
+        # a hard failure (tests/conftest.py), so parity actually executes.
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          xvfb-run --auto-servernum python -m pytest \
+            tests/rust_bindings \
+            tests/parity \
+            tests/unit/motion_pipeline/preprocessing/test_rust_parity.py \
+            tests/unit/motion_pipeline/sources/test_mocap_io_rust_parity.py \
+            tests/unit/motion_pipeline/test_rust_finite_diff_parity.py \
+            tests/unit/motion_matching/test_cmc_rust_parity.py \
+            tests/unit/realtime/test_rust_parity.py \
+            tests/unit/urdf/test_rust_facade_parity.py \
+            tests/integration/codemap/test_rust_cli_parity.py \
+            tests/unit/test_ball_flight_physics.py \
+            tests/unit/shared_python/test_ball_flight_physics.py \
+            -p no:xvfb \
+            -n 0 \
+            --timeout=120 \
+            --timeout-method=thread \
+            -o addopts="" \
+            -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
+            --no-cov \
+            --tb=short \
+            -v
+
+      - name: Rust Wheel Parity Summary
+        if: always()
+        run: |
+          {
+            echo "## Rust Wheel Parity (issue #7601)"
+            if [ "${{ steps.rust-wheel-parity-changes.outputs.has_changes }}" = "true" ]; then
+              echo "- PyO3 wheels built via maturin and installed into the test venv"
+              echo "- CI_RUST_WHEELS_EXPECTED=1 makes a skipped parity test a hard failure"
+              echo "- parity suite executed for Rust wheel/parity relevant changes"
+            else
+              echo "- no Rust wheel/parity/facade changes detected"
+              echo "- skipped mandatory wheel parity suite for this non-Rust change"
+              echo "- scheduled runs and manual dispatches still execute parity"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,247 @@
+# Coordinate-Explicit Coriolis, Centripetal, and Gravity Attribution {#sec-coordinate-force-sources}
+
+## Why the Names Need a Contract {#sec-force-source-contract}
+
+The words *Coriolis*, *centripetal*, and *centrifugal* can make a multibody
+equation sound as though three additional physical agents have appeared. They
+have not. The physical system still contains applied torques, gravity,
+damping, constraints, and body-to-body reactions. Coriolis and squared-speed
+terms are velocity-dependent parts of the same equations after a coordinate
+system has been chosen. They explain how an achieved configuration and motion
+redirect the effects of earlier and current loading.
+
+This chapter uses the fixed convention
+
+$$
+M(q)\ddot q+h(q,\dot q)+g(q)+d(\dot q)=\tau,
+$$ {#eq-source-equation}
+
+where $h$ is the complete velocity bias. An equation term $r_k$ is reported
+with its equal-and-opposite generalized **drive** $Q_k=-r_k$. Thus a positive
+drive accelerates the declared positive coordinate, whereas a positive
+left-hand-side term resists it. Every figure and data field follows this sign
+rule.
+
+The first-kind Christoffel symbols are
+
+$$
+\Gamma_{ijk}
+=\frac{1}{2}\left(
+\frac{\partial M_{ij}}{\partial q_k}
++\frac{\partial M_{ik}}{\partial q_j}
+-\frac{\partial M_{jk}}{\partial q_i}
+\right),
+\qquad
+h_i=\sum_{j,k}\Gamma_{ijk}\dot q_j\dot q_k.
+$$ {#eq-source-christoffel}
+
+The registered monomial convention assigns
+
+$$
+h_i^{\mathrm{sq}}=\sum_j\Gamma_{ijj}\dot q_j^2,
+\qquad
+h_i^{\mathrm{cor}}=2\sum_{j<k}\Gamma_{ijk}\dot q_j\dot q_k.
+$$ {#eq-source-monomial-split}
+
+The cross-speed terms are called **Coriolis terms** and the squared-speed
+terms are called **centripetal/centrifugal terms**. Their sum is checked
+against the provider's independently evaluated $h$. Any discrepancy is
+retained as `velocity_residual`; it is never hidden in one of the named
+sources. The total $h$ is mechanically meaningful within the model, but the
+cross-versus-squared partition changes under a change of generalized
+coordinates. A coordinate label is therefore part of every reported result.
+
+## What the Terms Mean in This Pendulum {#sec-two-link-source-meaning}
+
+The double-pendulum study declares $q_1$ as the absolute arm angle and $q_2$
+as the club angle relative to the arm, so the club's absolute angle is
+$q_1+q_2$. Let $K=m_2 l_1 l_{c2}$ be the inertial coupling coefficient. For
+this coordinate choice, the velocity terms reduce to
+
+$$
+h^{\mathrm{cor}}
+=
+\begin{bmatrix}
+-2K\sin(q_2)\dot q_1\dot q_2\\
+0
+\end{bmatrix},
+\qquad
+h^{\mathrm{sq}}
+=
+\begin{bmatrix}
+-K\sin(q_2)\dot q_2^2\\
+ K\sin(q_2)\dot q_1^2
+\end{bmatrix}.
+$$ {#eq-two-link-source-terms}
+
+This form gives the names operational meaning:
+
+1. The Coriolis cross term exists only while both the arm and the relative
+   wrist angle are moving. If either rate is zero, it vanishes. Its sign also
+   changes with link geometry through $\sin(q_2)$ and with either rate.
+2. The squared-speed terms remain when only one rate is nonzero. The
+   $\dot q_1^2$ term is the generalized wrist-coordinate consequence of
+   carrying the distal mass around the proximal pivot; the $\dot q_2^2$ term
+   is its reciprocal contribution to the proximal equation.
+3. In an inertial free-body diagram, **centripetal** denotes the inward force
+   required to bend a mass trajectory. **Centrifugal** is the outward inertial
+   interpretation used in a rotating frame or generalized-coordinate
+   balance. These are two descriptions of one interaction, not forces to add
+   together.
+4. Gravity is configuration dependent rather than speed dependent. Its drive
+   is $-g(q)$ under Equation @eq-source-equation, and its power can be positive
+   or negative depending on the direction of motion.
+
+The equations do not say that a golfer consciously creates a Coriolis force.
+Applied moments and external forces create and reshape the state; the linked
+system's geometry and velocity then determine the velocity-bias terms. In that
+limited, useful sense, earlier proximal work can be expressed later as a
+motion-dependent distal drive. The flow is state mediated, not force free.
+
+::: {.callout-note title="Plain-language picture"}
+Imagine swinging a partly folded two-section ruler. Pulling and turning it
+builds motion. As the hinge opens, the same moving mass must be redirected, so
+the ruler pushes back through the hinge. The cross-speed part appears only
+when the whole ruler is turning *and* the hinge is opening. The squared-speed
+part is the inward-turning demand associated with either rotation by itself.
+Gravity tilts the balance throughout. These labels help audit the motion; they
+do not identify which muscle supplied the original energy.
+:::
+
+## From a Generalized Drive to Force Along the Hand Path {#sec-source-hand-path-map}
+
+MacKenzie, McCourt, and Champoux found that signed linear work per metre of
+hand travel was strongly associated with clubhead speed in their sample
+[@mackenzie2020energy]. That observable motivates a hand-path projection, but
+it does not authorize relabeling every generalized term as a measured hand
+force.
+
+For endpoint position $x_H(q)$ and Jacobian $J_H=\partial x_H/\partial q$,
+virtual work requires
+
+$$
+Q_k=J_H^T F_{H,k}+r_k,
+$$ {#eq-source-virtual-work}
+
+where $F_{H,k}$ is the minimum-norm force-only equivalent and $r_k$ is the
+unreconstructed generalized residual. Both are reported. The wrist point in
+this fixed-hub model depends only on $q_1$:
+
+$$
+J_H=
+\begin{bmatrix}
+l_1\cos q_1&0\\
+l_1\sin q_1&0
+\end{bmatrix}.
+$$ {#eq-source-wrist-jacobian}
+
+Its rank is one. A two-coordinate generalized drive containing a wrist couple
+therefore cannot be represented exactly by a single planar force at that
+point. The contract reports `rank_deficient_force_only` and the residual in
+N m. The mapped force is useful for a declared along-path comparison, while
+the residual prevents that comparison from masquerading as a complete grip
+wrench.
+
+When hand speed exceeds the numerical threshold, the achieved path tangent is
+
+$$
+e_t=\frac{\dot x_H}{\lVert\dot x_H\rVert},
+\qquad F_{\parallel,k}=F_{H,k}\cdot e_t.
+$$ {#eq-source-tangent}
+
+Zero-speed samples have no tangent and remain undefined. Trajectory
+integration uses only intervals whose two endpoints have a defined tangent,
+and publishes valid duration divided by total duration.
+
+## Impulse, Power, and Energy Answer Different Questions {#sec-source-metrics}
+
+For each source $k$, the implementation reports
+
+$$
+I_{\parallel,k}=\int F_{\parallel,k}\,dt,
+\qquad
+I_{|\parallel|,k}=\int |F_{\parallel,k}|\,dt,
+$$
+
+$$
+P_{q,k}=Q_k^T\dot q,
+\qquad
+W_{q,k}=\int P_{q,k}\,dt.
+$$ {#eq-source-integrals}
+
+Signed impulse measures directional accumulation; absolute impulse measures
+how much action occurred before cancellation. Power measures instantaneous
+energy rate. Work measures its time integral. A large impulse can do little
+work if it is nearly normal to velocity, and a shorter high-power interval can
+do substantial work. These quantities must not be substituted for one
+another.
+
+The generalized work of a Coriolis or squared-speed equation term is a
+coordinate-explicit kinetic-energy attribution. It is not automatically the
+energy transferred from arm to club as physical subsystems. That latter claim
+requires the club free-body balance and wrist reaction-force power developed
+in @sec-interaction-forces. The two views are complementary: one audits the
+joint-coordinate equation; the other audits energy crossing a named physical
+interface.
+
+## Registered Optimization Example {#sec-source-optimization}
+
+The executable study evaluates a complete, frozen 135-program grid: three
+shoulder torques (60, 80, and 100 N m), three early wrist-restraining
+magnitudes (0, 5, and 10 N m), and fifteen drive-onset times from 0.000 to
+0.350 s, all followed by a 15 N m wrist drive. Each trajectory is integrated
+with the ODE reference backend and truncated at the first club-vertical
+crossing inside the registered delivery zone. Forty-four programs fail that
+impact gate and are excluded rather than rewarded for additional rotations;
+91 qualify.
+
+The primary example maximizes **absolute** Coriolis tangent impulse because
+the signed values reverse within a swing. A signed companion objective is
+published so direction and cancellation remain visible. The grid maximum is
+not a continuous optimal-control solution and not a human technique
+recommendation.
+
+The two grid-selected programs are:
+
+- **Maximum absolute Coriolis impulse:** shoulder torque 100 N m, early wrist
+  restraint 10 N m, drive onset 0.100 s, absolute/signed Coriolis tangent
+  impulse 13.817/-6.825 N s, and impact speed 46.780 m/s.
+- **Maximum clubhead speed:** shoulder torque 100 N m, early wrist restraint
+  5 N m, drive onset 0.125 s, absolute/signed Coriolis tangent impulse
+  13.701/-7.033 N s, and impact speed 46.913 m/s.
+
+![The registered search compares absolute Coriolis tangent impulse with impact clubhead speed and signed component work. The two highlighted optima are close but not identical.](figures/fig_force_source_optimization.pdf){#fig-source-optimization width=100% fig-alt="Scatterplot of 91 qualified pendulum programs comparing absolute Coriolis hand-path impulse with clubhead speed, colored by wrist-drive onset. A star marks maximum impulse and a diamond marks maximum speed. A bar chart compares signed Coriolis, squared-speed, gravity, and applied generalized work for the two programs."}
+
+For the maximum-impulse program, Coriolis generalized work is -100.69 J,
+squared-speed work is -33.73 J, gravity work is +25.56 J, and applied-drive
+work is +358.20 J through impact. The negative Coriolis work does not mean the
+term was absent: its absolute tangent impulse is the largest in the grid, but
+its generalized drive opposes the instantaneous generalized velocity on net.
+That contrast is precisely why impulse and energy-transfer claims are reported
+separately.
+
+The force-only wrist mapping is rank deficient for every sample. In the two
+highlighted programs, the maximum retained generalized residual is 54.44 and
+52.81 N m, respectively; the hand-path tangent is defined for more than 99.6%
+of the impact-truncated duration. These diagnostics are part of the result,
+not footnotes to discard.
+
+## What a Researcher Can Optimize Next {#sec-source-next-optimization}
+
+The reusable objective returns the negative signed or absolute component
+impulse for minimizer-compatible software. A defensible next study can vary a
+smooth torque history, segment parameters, or event-triggered timing while
+constraining impact validity, torque, torque rate, joint range, work, peak
+force, and mapping residual. It should report at least a Pareto surface over
+
+1. clubhead speed or task outcome;
+2. signed and absolute Coriolis hand-path impulse;
+3. net force-work-per-path-length using the MacKenzie-compatible definition;
+4. actuator work and peak applied moment;
+5. physical wrist-interface work from the subsystem balance; and
+6. robustness on held-out parameter and initial-state distributions.
+
+Optimizing only one named equation term can produce a mechanically extreme
+trajectory, exploit cancellation, or move work into the actuators. The term
+is most informative as an explanatory coordinate within a constrained,
+multi-objective experiment—not as an isolated coaching target.

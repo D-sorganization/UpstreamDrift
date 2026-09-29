@@ -1,0 +1,938 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
+"""MuJoCo physics engine integration for humanoid golf simulation.
+
+Wraps the MuJoCo physics backend to provide a unified interface for
+running golf swing simulations with humanoid models.
+"""
+
+from __future__ import annotations
+
+import os
+import tempfile
+from pathlib import Path
+from typing import Any, cast  # noqa: F401
+
+import mujoco
+import numpy as np
+
+from src.shared.python.body_part_viz import AxialLoadFrame
+from src.shared.python.core.contracts import (
+    PreconditionError,
+    check_finite,
+    invariant,
+    postcondition,
+    precondition,
+)
+from src.shared.python.core.error_decorators import log_errors
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+# Model directories allowed for loading (relative to suite root).
+# Use centralized root discovery rather than fragile parents[N] indexing
+# (see issue #2354).
+REPO_ROOT = get_repo_root()
+SUITE_ROOT = REPO_ROOT / "src"
+
+ALLOWED_MODEL_DIRS = [
+    SUITE_ROOT / "engines",
+    SUITE_ROOT / "shared" / "resources",
+    REPO_ROOT / "tests" / "fixtures",
+    Path(tempfile.gettempdir()),  # Allow temp dir for tests
+]
+
+
+@invariant(
+    lambda self: self.model is None or self.data is not None,
+    "If model is loaded, data must also be initialized",
+)
+class MuJoCoPhysicsEngine(BasePhysicsEngine):
+    """Encapsulates MuJoCo model, data, and simulation control.
+
+    Implements the shared PhysicsEngine protocol via BasePhysicsEngine,
+    gaining checkpoint save/restore (Checkpointable contract), path validation,
+    and model name tracking from the base class.
+
+    Design by Contract:
+        Preconditions:
+            - step/forward/reset: Engine must be initialized (model loaded)
+            - set_state: q and v dimensions must match model
+            - set_control: u dimension must match model.nu
+
+        Postconditions:
+            - compute_* methods: Results must be finite arrays
+            - get_state: Returns valid (q, v) tuple
+
+        Invariants:
+            - If model is not None, data is also not None
+    """
+
+    def __init__(self) -> None:
+        """Initialize the physics engine."""
+        super().__init__(allowed_dirs=ALLOWED_MODEL_DIRS)
+        self.model: mujoco.MjModel | None = None
+        self.data: mujoco.MjData | None = None
+        self.xml_path: str | None = None
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has a loaded model."""
+        return self.model is not None and self.data is not None
+
+    @property
+    def engine_type(self) -> str:
+        """Get engine type identifier (Checkpointable contract)."""
+        return "mujoco"
+
+    @property
+    def n_q(self) -> int:
+        """Return the loaded model's generalized position dimension."""
+        self.require_initialized("n_q")
+        assert self.model is not None
+        return int(self.model.nq)
+
+    @property
+    def n_v(self) -> int:
+        """Return the loaded model's generalized velocity dimension."""
+        self.require_initialized("n_v")
+        assert self.model is not None
+        return int(self.model.nv)
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report MuJoCo's verified canonical-core capability surface (#7050).
+
+        MuJoCo provides analytic mass matrix (``mj_fullM``), recursive
+        Newton-Euler inverse dynamics (``mj_inverse``), analytic body
+        Jacobians (``mj_jac``), a velocity-stabilised soft-contact solver,
+        and drift / ZVCF counterfactuals. Trajectory optimization is not a
+        native MuJoCo primitive (handled by higher layers), so it is left at
+        ``NONE``.
+        """
+        return EngineCapabilities(
+            engine_name="MuJoCo",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.FULL,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            dataset_export=CapabilityLevel.PARTIAL,
+            extra={
+                "contact_model": "soft_constraint_pgs",
+                "spatial_jacobian_order": "angular_linear",
+                "zvcf": "supported",
+            },
+        )
+
+    @property
+    def model_name(self) -> str:
+        """Return the name of the currently loaded model.
+
+        F6 fix (issue #6638): Use mj_id2name to return the real MuJoCo model
+        name instead of a constant string, falling back to the xml_path stem.
+        """
+        if self.model is None:
+            return "None"
+        # Decode the real model name. MuJoCo stores it as the first
+        # NUL-terminated entry in the ``names`` buffer (#6638 F6).
+        names = getattr(self.model, "names", None)
+        if names:
+            try:
+                raw = bytes(names)
+                decoded = raw.split(b"\x00", 1)[0].decode("utf-8", "replace")
+                if decoded:
+                    return decoded
+            except (TypeError, ValueError, UnicodeDecodeError):
+                pass
+
+        # Try to get the model-level name (body index 0 is the world body;
+        # the first non-world body name is typically the model name.)
+        # In MuJoCo the 'model name' in the XML is stored as worldbody name
+        # or can be read via mj_id2name for body 0.
+        world_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, 0)
+        if world_name:
+            return world_name
+
+        # Fall back to the xml_path stem
+        if self.xml_path:
+            return os.path.basename(self.xml_path).replace(".xml", "")
+        # Try to read a real body name from MuJoCo's names buffer
+        try:
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, 0)
+            if name:
+                return name
+        except (TypeError, ValueError, AttributeError):
+            pass
+        return "MuJoCo Model"
+
+    # ------------------------------------------------------------------
+    # BasePhysicsEngine abstract implementation
+    # ------------------------------------------------------------------
+
+    @log_errors("Failed to load MuJoCo model from string", reraise=True)
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """Engine-specific XML string loading (called by BasePhysicsEngine)."""
+        self.model = mujoco.MjModel.from_xml_string(content)
+        self.data = mujoco.MjData(self.model)
+        self.xml_path = None
+
+    @log_errors("Failed to load MuJoCo model from path", reraise=True)
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific path loading (called by BasePhysicsEngine).
+
+        BasePhysicsEngine already validates existence and allowed-dirs before
+        calling this method, so we only need the MuJoCo-specific logic here.
+        """
+        self.model = mujoco.MjModel.from_xml_path(path)
+        self.data = mujoco.MjData(self.model)
+        self.xml_path = path
+
+    def set_model_data(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
+        """Set model and data manually (e.g. from async loader)."""
+        if model is None:
+            raise ValueError("model must be provided")
+        self.model = model
+        self.data = data
+        self.xml_path = None
+
+    def get_model(self) -> mujoco.MjModel | None:
+        """Return the loaded MuJoCo model, or None."""
+        return self.model
+
+    def get_data(self) -> mujoco.MjData | None:
+        """Return the MuJoCo simulation data, or None."""
+        return self.data
+
+    @precondition(
+        lambda self, dt=None: self.is_initialized, "Engine must be initialized"
+    )  # noqa: E501
+    def step(self, dt: float | None = None) -> None:
+        """Step the simulation forward."""
+        if self.model is not None and self.data is not None:
+            # If dt is provided, temporarily override option.timestep
+            if dt is not None:
+                old_dt = self.model.opt.timestep
+                self.model.opt.timestep = dt
+                mujoco.mj_step(self.model, self.data)
+                self.model.opt.timestep = old_dt
+            else:
+                mujoco.mj_step(self.model, self.data)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    def forward(self) -> None:
+        """Compute forward kinematics/dynamics without stepping time."""
+        if self.model is not None and self.data is not None:
+            mujoco.mj_forward(self.model, self.data)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    def reset(self) -> None:
+        """Reset simulation state to initial configuration."""
+        if self.model is not None and self.data is not None:
+            mujoco.mj_resetData(self.model, self.data)
+            self.forward()
+
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Get the current state (positions, velocities)."""
+        if self.data is None:
+            return np.array([]), np.array([])
+        return self.data.qpos.copy(), self.data.qvel.copy()
+
+    def get_link_transforms(self) -> dict[str, np.ndarray]:
+        """Return body link poses without advancing the simulation."""
+        self.require_initialized("get_link_transforms")
+        assert self.model is not None and self.data is not None
+        result: dict[str, np.ndarray] = {}
+        for index in range(int(self.model.nbody)):
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, index)
+            if not name:
+                continue
+            transform = np.eye(4)
+            transform[:3, :3] = np.asarray(self.data.xmat[index]).reshape(3, 3)
+            transform[:3, 3] = self.data.xpos[index]
+            result[str(name)] = transform
+        return result
+
+    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:  # type: ignore[override]
+        """Set the current state.
+
+        Raises StateError when called on an uninitialised engine instead of
+        silently no-oping (F4 fix).
+        """
+        self.require_initialized("set_state")  # F4: typed error on unloaded engine
+        assert self.data is not None  # guaranteed by require_initialized
+        # Validate dimensions
+        if len(q) != len(self.data.qpos):
+            raise ValueError(
+                f"State q size mismatch: got {len(q)}, expected {len(self.data.qpos)}"
+            )
+        self.data.qpos[:] = q
+
+        if len(v) != len(self.data.qvel):
+            raise ValueError(
+                f"State v size mismatch: got {len(v)}, expected {len(self.data.qvel)}"
+            )
+        self.data.qvel[:] = v
+
+        # Critical: Update derived quantities (accelerations, sensors, etc.)
+        self.forward()
+
+    def set_control(self, u: np.ndarray) -> None:
+        """Set control vector.
+
+        Raises StateError when called on an uninitialised engine instead of
+        silently no-oping (F4 fix).
+        """
+        self.require_initialized("set_control")  # F4: typed error on unloaded engine
+        assert self.data is not None and self.model is not None
+        # Strict size validation
+        if len(u) != self.model.nu:
+            raise ValueError(
+                f"Control vector size mismatch: got {len(u)}, expected {self.model.nu}"
+            )
+        self.data.ctrl[:] = u
+
+    def get_joint_positions(self) -> np.ndarray:
+        """Return generalized positions for RL/deployment adapters."""
+        self.require_initialized("get_joint_positions")
+        assert self.data is not None
+        return self.data.qpos.copy()
+
+    def get_joint_velocities(self) -> np.ndarray:
+        """Return generalized velocities for RL/deployment adapters."""
+        self.require_initialized("get_joint_velocities")
+        assert self.data is not None
+        return self.data.qvel.copy()
+
+    def get_joint_torques(self) -> np.ndarray:
+        """Return the current MuJoCo control vector as applied joint torques."""
+        self.require_initialized("get_joint_torques")
+        assert self.data is not None
+        return self.data.ctrl.copy()
+
+    def set_joint_torques(self, torques: np.ndarray) -> None:
+        """Apply torque commands through the existing MuJoCo control path."""
+        self.set_control(torques)
+
+    def get_base_position(self) -> np.ndarray:
+        """Return the root body position from MuJoCo state."""
+        self.require_initialized("get_base_position")
+        assert self.data is not None
+        qpos = self.data.qpos
+        if qpos.shape[0] >= 3:
+            return qpos[:3].copy()
+        xpos = self.data.xpos
+        body_id = 1 if xpos.shape[0] > 1 else 0
+        return xpos[body_id].copy()
+
+    def get_base_orientation(self) -> np.ndarray:
+        """Return the root body orientation quaternion."""
+        self.require_initialized("get_base_orientation")
+        assert self.data is not None
+        qpos = self.data.qpos
+        if qpos.shape[0] >= 7:
+            return qpos[3:7].copy()
+        xquat = self.data.xquat
+        body_id = 1 if xquat.shape[0] > 1 else 0
+        return xquat[body_id].copy()
+
+    def get_base_velocity(self) -> np.ndarray:
+        """Return the root linear velocity from generalized velocity state."""
+        self.require_initialized("get_base_velocity")
+        assert self.data is not None
+        qvel = self.data.qvel
+        if qvel.shape[0] < 3:
+            raise ValueError("MuJoCo model does not expose a 3D base velocity")
+        return qvel[:3].copy()
+
+    def get_imu_data(self) -> np.ndarray:
+        """Return six IMU-like channels from sensors or root velocity state."""
+        self.require_initialized("get_imu_data")
+        assert self.data is not None
+        sensor_data = getattr(self.data, "sensordata", None)
+        if sensor_data is not None and len(sensor_data) >= 6:
+            return sensor_data[:6].copy()
+        qvel = self.data.qvel
+        if qvel.shape[0] < 6:
+            raise ValueError("MuJoCo model does not expose six IMU channels")
+        return qvel[:6].copy()
+
+    def get_contact_forces(self) -> np.ndarray:
+        """Return aggregate external contact wrench from MuJoCo contact forces."""
+        self.require_initialized("get_contact_forces")
+        assert self.data is not None
+        contact_forces = getattr(self.data, "cfrc_ext", None)
+        if contact_forces is None:
+            raise ValueError("MuJoCo data does not expose external contact forces")
+        return np.asarray(contact_forces).sum(axis=0).copy()
+
+    def get_time(self) -> float:
+        """Get the current simulation time."""
+        if self.data is None:
+            return 0.0
+        return float(self.data.time)
+
+    def get_segment_axial_loads(self) -> AxialLoadFrame | None:
+        """Return qualified current rod reactions, or None for unavailable models."""
+        from src.shared.python.body_part_viz.mujoco_axial_loads import (
+            MujocoAxialLoadSource,
+        )
+
+        if self.model is None or self.data is None:
+            return None
+        return MujocoAxialLoadSource(self.model).sample(self.data)
+
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names."""
+        if self.model is None:
+            return []
+        return [
+            mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i) or f"Joint {i}"
+            for i in range(self.model.njnt)
+        ]
+
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call (performance optimization).
+
+        PERFORMANCE FIX: Returns all commonly-needed state in one call to avoid
+        multiple separate engine queries (was 3+ calls per frame).
+
+        Returns:
+            Dictionary with 'q', 'v', 't', and 'M' (mass matrix).
+        """
+        if self.model is None or self.data is None:
+            return {"q": np.array([]), "v": np.array([]), "t": 0.0, "M": None}
+
+        # Get state (single data access)
+        q = self.data.qpos.copy()
+        v = self.data.qvel.copy()
+        t = float(self.data.time)
+
+        # Compute mass matrix
+        if hasattr(mujoco, "mj_makeInertia"):
+            mujoco.mj_makeInertia(self.model, self.data)
+        M = full_mass_matrix(mujoco, self.model, self.data)
+
+        return {"q": q, "v": v, "t": t, "M": M}
+
+    # -------- Section 1: Core Dynamics Engine Capabilities --------
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
+    def compute_mass_matrix(self) -> np.ndarray:
+        """Compute the dense inertia matrix M(q)."""
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Ensure qM is updated
+        if hasattr(mujoco, "mj_makeInertia"):
+            mujoco.mj_makeInertia(self.model, self.data)
+
+        return full_mass_matrix(mujoco, self.model, self.data)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
+    def compute_bias_forces(self) -> np.ndarray:
+        """Compute bias forces C(q, qdot) + g(q)."""
+        if self.data is None:
+            return np.array([])
+        # This is populated after mj_forward/mj_step
+        return cast(np.ndarray, self.data.qfrc_bias.copy())
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
+    def compute_gravity_forces(self) -> np.ndarray:
+        """Compute pure gravity forces g(q) with zero velocity (F3 fix).
+
+        F3 fix (issue #6638): Previously fell back to qfrc_bias which includes
+        Coriolis/centrifugal C(q,v)v, mislabelling bias forces as pure gravity.
+
+        Correct approach: temporarily zero qvel, run mj_forward, read qfrc_bias
+        (which now equals g(q) since C(q,0)·0=0), then restore original qvel.
+        This mirrors Pinocchio's compute_gravity_forces and matches the
+        documented postcondition of returning velocity-independent g(q).
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Use qfrc_grav when available (some MuJoCo versions expose it directly)
+        qfrc_grav = getattr(self.data, "qfrc_grav", None)
+        if qfrc_grav is not None:
+            return cast(np.ndarray, qfrc_grav).copy()
+
+        # No dedicated gravity buffer: qfrc_bias = C(q, v) v + g(q) includes
+        # Coriolis/centrifugal terms. To return pure gravity g(q) we evaluate
+        # the bias at zero velocity, then restore the real velocity (#6638 F3).
+        qvel_saved = self.data.qvel.copy()
+        try:
+            self.data.qvel[:] = 0.0
+            mujoco.mj_forward(self.model, self.data)
+            grav = cast(np.ndarray, self.data.qfrc_bias).copy()
+        finally:
+            self.data.qvel[:] = qvel_saved
+            mujoco.mj_forward(self.model, self.data)
+        return grav
+
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics result must contain finite values")
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute inverse dynamics: tau = ID(q, qdot, qacc).
+
+        Saves and restores ``data.qacc`` in a finally block so that this
+        pure-query method does not corrupt persistent simulation state (F2 fix).
+
+        F2 fix (issue #6638): Previously wrote self.data.qacc[:] = qacc and
+        called mj_inverse without restoring qacc — leaving persistent sim state
+        corrupted for subsequent step()/forward() calls.  Now saves and restores
+        qacc in a finally block, mirroring compute_ztcf / compute_zvcf.
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        if len(qacc) != self.model.nv:
+            raise PreconditionError(
+                f"qacc dimension mismatch: got {len(qacc)}, expected {self.model.nv}",
+                function_name="compute_inverse_dynamics",
+                parameter="qacc",
+            )
+
+        # Snapshot qacc so this "pure query" does not pollute persistent sim
+        # state; a subsequent step()/forward() must see the original qacc
+        # (#6638 F2), mirroring compute_ztcf/compute_zvcf save-restore.
+        qacc_saved = self.data.qacc.copy()
+        try:
+            self.data.qacc[:] = qacc
+            mujoco.mj_inverse(self.model, self.data)
+            result = cast(np.ndarray, self.data.qfrc_inverse.copy())
+        finally:
+            self.data.qacc[:] = qacc_saved
+        return result
+
+    # -------- Section F: Drift-Control Decomposition --------
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Drift acceleration must contain finite values")
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero control inputs.
+
+        Section F Implementation: Uses MuJoCo's mj_forward with zero control
+        to compute passive dynamics due to gravity and Coriolis/centrifugal forces.
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        return self.compute_affine_drift()
+
+    @precondition(lambda self, tau: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Control acceleration must contain finite values")
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from applied torques only.
+
+        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if tau is None:
+            raise ValueError("tau must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Get mass matrix
+        M = self.compute_mass_matrix()
+
+        # Control component: M^-1 * tau
+        a_control = np.linalg.solve(M, tau)
+
+        return a_control
+
+    def compute_affine_drift(self) -> np.ndarray:
+        """Compute the 'Drift' vector f(q, qdot).
+
+        Legacy method - use compute_drift_acceleration() for Section F compliance.
+
+        Returns acceleration when tau = 0 (and no active control).
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Save current control
+        saved_ctrl = self.data.ctrl.copy()
+
+        # Zero out control
+        self.data.ctrl[:] = 0
+
+        # Compute forward dynamics
+        mujoco.mj_forward(self.model, self.data)
+        drift_acc = self.data.qacc.copy()
+
+        # Restore control
+        self.data.ctrl[:] = saved_ctrl
+        mujoco.mj_forward(self.model, self.data)  # Restore state
+
+        return cast(np.ndarray, drift_acc)
+
+    # -------- Section 4: Jacobian Analysis --------
+
+    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
+        """Compute spatial Jacobian for a specific body."""
+        if body_name is None:
+            raise ValueError("body_name must be provided")
+        if self.model is None or self.data is None:
+            return None
+
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+        if body_id == -1:
+            return None
+
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+
+        mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
+
+        return {
+            "linear": jacp,
+            "angular": jacr,
+            "spatial": np.vstack([jacr, jacp]),
+            # Suite spatial convention: [Angular; Linear].
+        }
+
+    def compute_contact_forces(self) -> np.ndarray:
+        """Compute total contact forces (GRF).
+
+        Returns:
+            f: (3,) vector representing total ground reaction force.
+        """
+        # Sum up all contact forces
+        if self.data is None or self.model is None:
+            return np.zeros(3)
+
+        total_force = np.zeros(3)
+
+        for i in range(self.data.ncon):
+            # c_force contains [normal, tan1, tan2, torsional, rolling1, rolling2]
+            # defined in the local contact frame.
+            c_force = np.zeros(6, dtype=np.float64)
+            mujoco.mj_contactForce(self.model, self.data, i, c_force)
+
+            # Contact frame maps from world to local
+            # frame rows: normal, tangent1, tangent2
+            contact_frame = self.data.contact[i].frame.reshape(3, 3)
+
+            # Force exerted ON geom2's body (see below), rotated to world.
+            f_local = c_force[:3]
+            f_world = contact_frame.T @ f_local
+
+            contact = self.data.contact[i]
+            if contact.geom1 < 0 or contact.geom2 < 0:
+                continue
+
+            geom1_body = self.model.geom_bodyid[contact.geom1]
+            geom2_body = self.model.geom_bodyid[contact.geom2]
+
+            # mj_contactForce returns the wrench acting ON geom2's body. This
+            # is MuJoCo's own accounting in mj_rnePostConstraint, which adds
+            # the contact wrench to cfrc_ext[body2] and subtracts it from
+            # cfrc_ext[body1]. Note MuJoCo's collision table orders geoms by
+            # type, so a floor plane is always geom1.
+            if geom1_body == 0 and geom2_body != 0:
+                # World is geom1; the system is geom2 and receives +f_world.
+                total_force += f_world
+            elif geom2_body == 0 and geom1_body != 0:
+                # World is geom2; the system is geom1 and receives -f_world.
+                total_force -= f_world
+
+        return total_force
+
+    def get_sensors(self) -> dict[str, float | np.ndarray]:
+        """Get all sensor readings."""
+        if self.data is None or self.model is None:
+            return {}
+
+        sensors: dict[str, float | np.ndarray] = {}
+        if self.model.nsensor > 0:
+            for i in range(self.model.nsensor):
+                name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_SENSOR, i)
+                if not name:
+                    name = f"sensor_{i}"
+
+                adr = self.model.sensor_adr[i]
+                dim = self.model.sensor_dim[i]
+                val = self.data.sensordata[adr : adr + dim].copy()
+
+                if dim == 1:
+                    sensors[name] = float(val[0])
+                else:
+                    sensors[name] = val
+        return sensors
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving state.
+        This isolates drift (gravity + Coriolis + constraints) from control effects.
+
+        **Purpose**: Answer "What would happen if all actuators turned off RIGHT NOW?"
+
+        **Physics**: With τ=0, acceleration is purely passive:
+            q̈_ZTCF = M(q)⁻¹ · (C(q,v)·v + g(q) + J^T·λ)
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+            v: Joint velocities (n_v,) [rad/s or m/s]
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Save current state and control
+        saved_qpos = self.data.qpos.copy()
+        saved_qvel = self.data.qvel.copy()
+        saved_ctrl = self.data.ctrl.copy()
+
+        try:
+            # Set to counterfactual state
+            self.data.qpos[:] = q
+            self.data.qvel[:] = v
+
+            # Zero out control (ZTCF: zero torque)
+            self.data.ctrl[:] = 0
+
+            # Compute forward dynamics with zero control
+            mujoco.mj_forward(self.model, self.data)
+
+            # Extract acceleration (this is the drift acceleration)
+            a_ztcf = self.data.qacc.copy()
+
+            return cast(np.ndarray, a_ztcf)
+
+        finally:
+            # Restore original state and control
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
+            mujoco.mj_forward(self.model, self.data)
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration at fixed configuration with joint velocities and
+        declared applied control set to zero.
+
+        **Purpose**: Answer "What acceleration would occur if motion FROZE
+        instantaneously?"
+
+        **Physics**: With v=0, acceleration has no velocity-dependent terms:
+            q̈_ZVCF = M(q)⁻¹ · (g(q) + J^T·λ)
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Save current state
+        saved_qpos = self.data.qpos.copy()
+        saved_qvel = self.data.qvel.copy()
+        saved_ctrl = self.data.ctrl.copy()
+
+        try:
+            # Set to counterfactual configuration with v=0
+            self.data.qpos[:] = q
+            self.data.qvel[:] = 0  # ZVCF: zero velocity
+            self.data.ctrl[:] = 0  # ZVCF: zero declared applied control
+
+            # Compute forward dynamics with zero velocity
+            mujoco.mj_forward(self.model, self.data)
+            self.data.qvel[:] = 0  # #7979
+
+            # Extract acceleration
+            a_zvcf = self.data.qacc.copy()
+
+            return cast(np.ndarray, a_zvcf)
+
+        finally:
+            # Restore original state
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
+            mujoco.mj_forward(self.model, self.data)
+
+    # -------- Section B5: Flexible Beam Shaft --------
+
+    def set_shaft_properties(
+        self,
+        length: float,
+        EI_profile: np.ndarray,
+        mass_profile: np.ndarray,
+        damping_ratio: float = 0.02,
+    ) -> bool:
+        """Configure flexible shaft properties (Guideline B5).
+
+        Uses modal representation with first 3 bending modes.
+
+        Args:
+            length: Total shaft length [m]
+            EI_profile: Bending stiffness at each station [N·m²] (n_stations,)
+            mass_profile: Mass per unit length at each station [kg/m] (n_stations,)
+            damping_ratio: Modal damping ratio [unitless]
+
+        Returns:
+            True if successfully configured.
+        """
+        # Store shaft configuration
+        if length is None:
+            raise ValueError("length must be provided")
+        self._shaft_config = {
+            "length": length,
+            "EI_profile": EI_profile.copy(),
+            "mass_profile": mass_profile.copy(),
+            "damping_ratio": damping_ratio,
+            "n_stations": len(EI_profile),
+        }
+
+        # Compute modal parameters using Euler-Bernoulli beam theory
+        n_modes = 3
+        modal_frequencies, mode_shapes = self._compute_shaft_modes(
+            length, EI_profile, mass_profile, n_modes
+        )
+
+        self._shaft_modes = {
+            "frequencies": modal_frequencies,
+            "mode_shapes": mode_shapes,
+            "damping_ratios": np.full(n_modes, damping_ratio),
+        }
+
+        # Initialize modal state
+        self._shaft_modal_state = {
+            "amplitudes": np.zeros(n_modes),
+            "velocities": np.zeros(n_modes),
+        }
+
+        logger.info(
+            f"Configured flexible shaft: length={length:.3f}m, "
+            f"modes={n_modes}, f1={modal_frequencies[0]:.1f}Hz"
+        )
+        return True
+
+    def _compute_shaft_modes(
+        self,
+        length: float,
+        EI_profile: np.ndarray,
+        mass_profile: np.ndarray,
+        n_modes: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute shaft natural frequencies and mode shapes.
+
+        Uses Euler-Bernoulli beam theory with average properties.
+
+        Args:
+            length: Shaft length [m]
+            EI_profile: Bending stiffness [N·m²]
+            mass_profile: Linear mass density [kg/m]
+            n_modes: Number of modes to compute
+
+        Returns:
+            Tuple of (frequencies [Hz], mode_shapes (n_modes, n_stations))
+        """
+        # Use average properties for simple analytical solution
+        if length is None:
+            raise ValueError("length must be provided")
+        EI_avg = np.mean(EI_profile)
+        mu_avg = np.mean(mass_profile)  # Linear mass density [kg/m]
+
+        # Cantilever beam eigenvalues (β_n * L) for first bending modes
+        # Standard clamped-free Euler-Bernoulli beam values.
+        # Source: S. S. Rao, "Mechanical Vibrations", 5th ed., Pearson, 2011,
+        # Table 8.2: Dimensionless frequency parameters for cantilever beams.
+        beta_L = np.array([1.875, 4.694, 7.855, 10.996, 14.137])[:n_modes]
+
+        # Natural frequencies: ω_n = β_n² * sqrt(EI/(μL⁴))
+        omega_n = (beta_L / length) ** 2 * np.sqrt(EI_avg / mu_avg)
+        frequencies = omega_n / (2 * np.pi)  # [Hz]
+
+        # Mode shapes at each station (cantilever mode shapes)
+        n_stations_local: int = len(EI_profile)
+        x = np.linspace(0, length, n_stations_local)
+        mode_shapes = np.zeros((n_modes, n_stations_local))
+
+        for i, beta in enumerate(beta_L / length):
+            # Cantilever mode shape (clamped-free)
+            cosh_bl = np.cosh(beta * length)
+            cos_bl = np.cos(beta * length)
+            sinh_bl = np.sinh(beta * length)
+            sin_bl = np.sin(beta * length)
+
+            sigma = (sinh_bl - sin_bl) / (cosh_bl - cos_bl + 1e-10)
+
+            phi = (
+                np.cosh(beta * x)
+                - np.cos(beta * x)
+                - sigma * (np.sinh(beta * x) - np.sin(beta * x))
+            )
+
+            # Normalize so max(|phi|) = 1
+            phi = phi / (np.abs(phi).max() + 1e-10)
+            mode_shapes[i, :] = phi
+
+        return frequencies, mode_shapes
+
+    def get_shaft_state(self) -> dict[str, np.ndarray] | None:
+        """Get current shaft deformation state.
+
+        Returns:
+            Dictionary with deflection, rotation, velocity, modal_amplitudes,
+            or None if shaft not configured.
+        """
+        if not hasattr(self, "_shaft_config") or not hasattr(
+            self, "_shaft_modal_state"
+        ):  # noqa: E501
+            return None
+
+        modes = self._shaft_modes
+        state = self._shaft_modal_state
+        n_stations: int = cast(int, self._shaft_config["n_stations"])
+
+        # Reconstruct physical deflection from modal amplitudes
+        deflection = np.zeros(n_stations)
+        velocity = np.zeros(n_stations)
+
+        for i, (amp, vel) in enumerate(
+            zip(state["amplitudes"], state["velocities"], strict=True)
+        ):  # noqa: E501
+            deflection += amp * modes["mode_shapes"][i]
+            velocity += vel * modes["mode_shapes"][i]
+
+        # Rotation is derivative of deflection (approximate with finite diff)
+        length: float = cast(float, self._shaft_config["length"])
+        dx = length / (n_stations - 1)
+        rotation = np.gradient(deflection, dx)
+
+        return {
+            "deflection": deflection,
+            "rotation": rotation,
+            "velocity": velocity,
+            "modal_amplitudes": state["amplitudes"].copy(),
+        }

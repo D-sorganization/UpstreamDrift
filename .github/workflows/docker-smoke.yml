@@ -1,0 +1,203 @@
+name: Docker Profile Smoke Tests
+
+# Assert that each modular profile contains exactly its declared features
+# (positive checks) and does NOT contain features from a heavier profile
+# (negative / dep-leakage checks).
+#
+# This workflow is the Phase 2.d deliverable from the Modular Docker Builds
+# epic (issue #5768). It uses the capability registry CLI added in Phase 1
+# (src/shared/python/feature_registry/__main__.py) to probe each built image.
+#
+# Workflow inventory note: this workflow is intentionally scoped to
+# Dockerfile.modular changes and is separate from docker-size-gates.yml
+# (size budgets) to keep individual job timeouts manageable.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "scripts/docker/**"
+      - "src/shared/python/feature_registry/**"
+      - ".github/workflows/docker-smoke.yml"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "Dockerfile.modular"
+      - "docker/profiles.yaml"
+      - "scripts/docker/**"
+      - "src/shared/python/feature_registry/**"
+      - ".github/workflows/docker-smoke.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: docker-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+
+  profile-smoke:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          # slim: api + pendulum + core MuJoCo; Pinocchio and Drake must be ABSENT
+          - profile: slim
+            must_have: "api,pendulum,mujoco"
+            must_not_have: "pinocchio,drake"
+            advisory: false
+
+          # standard: slim + Pinocchio; Drake must be ABSENT
+          - profile: standard
+            must_have: "api,pendulum,mujoco,pinocchio"
+            must_not_have: "drake"
+            advisory: false
+
+          # research: standard + drake + pose-mediapipe; biomech features absent
+          - profile: research
+            must_have: "api,mujoco,pinocchio,drake"
+            must_not_have: "opensim,myosuite"
+            advisory: true # advisory while fleet cache is cold
+
+    continue-on-error: ${{ matrix.advisory }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Rehydrate tracked Dockerfile
+        shell: bash
+        run: python3 scripts/ci/rehydrate_docker_context.py --targets Dockerfile.modular
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
+      - name: Fetch pinned Tools packages
+        id: pinned-tools
+        uses: ./.github/actions/fetch-pinned-tools
+        with:
+          emit-source-provenance: "true"
+
+      - name: Prepare local BuildKit cache (profile=${{ matrix.profile }})
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}"
+          rm -rf "${CACHE_BASE}-next"
+          mkdir -p "${CACHE_BASE}"
+
+      - name: Build modular image (profile=${{ matrix.profile }})
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          file: ./Dockerfile.modular
+          build-args: |
+            PROFILE=${{ matrix.profile }}
+            TOOLS_GITLINK_SHA=${{ steps.pinned-tools.outputs.gitlink-sha }}
+            TOOLS_SOURCE_SHA256=${{ steps.pinned-tools.outputs.source-sha256 }}
+          load: true
+          tags: upstream-drift-smoke:${{ matrix.profile }}
+          cache-from: type=local,src=${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}
+          cache-to: type=local,dest=${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}-next,mode=max
+
+      - name: Promote local BuildKit cache (profile=${{ matrix.profile }})
+        if: always()
+        run: |
+          CACHE_BASE="${{ runner.tool_cache }}/buildx-cache/upstream-drift/smoke-${{ matrix.profile }}"
+          if [ -d "${CACHE_BASE}-next" ]; then
+            rm -rf "${CACHE_BASE}"
+            mv "${CACHE_BASE}-next" "${CACHE_BASE}"
+          fi
+
+      - name: Positive capability checks (profile=${{ matrix.profile }})
+        # Each feature listed in must_have must report AVAILABLE inside the image.
+        run: |
+          PROFILE="${{ matrix.profile }}"
+          MUST_HAVE="${{ matrix.must_have }}"
+          FAILED=0
+
+          IFS=',' read -ra FEATURES <<< "$MUST_HAVE"
+          for feature in "${FEATURES[@]}"; do
+            echo "Checking that '$feature' is AVAILABLE in profile '$PROFILE'..."
+            if STATUS=$(python3 scripts/ci/docker_feature_probe.py "upstream-drift-smoke:${PROFILE}" "${feature}"); then
+              :
+            else
+              STATUS="PROBE_ERROR"
+            fi
+
+            if [ "$STATUS" = "AVAILABLE" ]; then
+              echo "  [OK] $feature -> $STATUS"
+            else
+              echo "  [FAIL] $feature -> $STATUS (expected AVAILABLE)"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED positive capability check(s) failed for profile '$PROFILE'"
+            exit 1
+          fi
+
+      - name: Negative capability checks / dep-leakage (profile=${{ matrix.profile }})
+        # Each feature listed in must_not_have must NOT report AVAILABLE.
+        # This catches accidental dep leakage between profiles.
+        run: |
+          PROFILE="${{ matrix.profile }}"
+          MUST_NOT_HAVE="${{ matrix.must_not_have }}"
+          FAILED=0
+
+          IFS=',' read -ra FEATURES <<< "$MUST_NOT_HAVE"
+          for feature in "${FEATURES[@]}"; do
+            echo "Checking that '$feature' is NOT available in profile '$PROFILE'..."
+            if STATUS=$(python3 scripts/ci/docker_feature_probe.py "upstream-drift-smoke:${PROFILE}" "${feature}"); then
+              :
+            else
+              STATUS="PROBE_ERROR"
+            fi
+
+            if [ "$STATUS" != "AVAILABLE" ]; then
+              echo "  [OK] $feature -> $STATUS (not leaked)"
+            else
+              echo "  [FAIL] $feature -> AVAILABLE in profile '$PROFILE' — dep leakage detected!"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED dep-leakage check(s) failed for profile '$PROFILE'"
+            exit 1
+          fi
+
+      - name: Registry CLI smoke (profile=${{ matrix.profile }})
+        # Verify that the registry CLI runs without errors and returns JSON.
+        run: |
+          docker run --rm upstream-drift-smoke:${{ matrix.profile }} \
+            python -m src.shared.python.feature_registry --json \
+            | python3 -c "import sys, json; data=json.load(sys.stdin); print(f'Registry OK: {len(data)} entries')"
+
+      - name: API health (profile=${{ matrix.profile }})
+        run: |
+          docker run --rm upstream-drift-smoke:${{ matrix.profile }} \
+            python -c "import fastapi, uvicorn; print('API stack importable')"

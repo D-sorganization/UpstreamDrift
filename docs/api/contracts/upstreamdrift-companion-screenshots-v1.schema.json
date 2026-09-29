@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-screenshots-v1.schema.json",
+  "title": "UpstreamDrift companion screenshot metadata v1",
+  "description": "Metadata-only screenshot inventory. A pending record carries no asset and an explicit reason; a captured record must carry exact bytes, dimensions, viewport, theme, capture provenance, and accessibility text (#9191). Nothing here grants scientific qualification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "manifest_id", "source", "records"],
+  "properties": {
+    "$schema": {
+      "const": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-screenshots-v1.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "manifest_id": {
+      "const": "upstreamdrift-companion-screenshots"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "repoPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "pixels": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": {
+          "const": "https://github.com/D-sorganization/UpstreamDrift"
+        },
+        "commit": {
+          "$ref": "#/$defs/commit"
+        }
+      }
+    },
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": {
+          "$ref": "#/$defs/pixels"
+        },
+        "height": {
+          "$ref": "#/$defs/pixels"
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "program_id",
+        "status",
+        "path",
+        "sha256",
+        "width",
+        "height",
+        "viewport",
+        "theme",
+        "capture_workflow_id",
+        "capture_step_id",
+        "alt_text",
+        "caption",
+        "visible_limitations",
+        "artifact_class",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "program_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "status": {
+          "enum": ["pending", "captured"]
+        },
+        "path": {
+          "oneOf": [{ "$ref": "#/$defs/repoPath" }, { "type": "null" }]
+        },
+        "sha256": {
+          "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        },
+        "width": {
+          "oneOf": [{ "$ref": "#/$defs/pixels" }, { "type": "null" }]
+        },
+        "height": {
+          "oneOf": [{ "$ref": "#/$defs/pixels" }, { "type": "null" }]
+        },
+        "viewport": {
+          "oneOf": [{ "$ref": "#/$defs/viewport" }, { "type": "null" }]
+        },
+        "theme": {
+          "enum": ["light", "dark", null]
+        },
+        "capture_workflow_id": {
+          "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }]
+        },
+        "capture_step_id": {
+          "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }]
+        },
+        "alt_text": {
+          "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }]
+        },
+        "caption": {
+          "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }]
+        },
+        "visible_limitations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "artifact_class": {
+          "enum": ["illustrative", "raw_plot", "qualification_evidence"]
+        },
+        "reason": {
+          "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "pending" } }
+          },
+          "then": {
+            "properties": {
+              "path": { "type": "null" },
+              "sha256": { "type": "null" },
+              "width": { "type": "null" },
+              "height": { "type": "null" },
+              "viewport": { "type": "null" },
+              "theme": { "type": "null" },
+              "capture_workflow_id": { "type": "null" },
+              "capture_step_id": { "type": "null" },
+              "alt_text": { "type": "null" },
+              "caption": { "type": "null" },
+              "reason": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          },
+          "else": {
+            "properties": {
+              "path": { "$ref": "#/$defs/repoPath" },
+              "sha256": { "$ref": "#/$defs/sha256" },
+              "width": { "$ref": "#/$defs/pixels" },
+              "height": { "$ref": "#/$defs/pixels" },
+              "viewport": { "$ref": "#/$defs/viewport" },
+              "theme": { "enum": ["light", "dark"] },
+              "capture_workflow_id": { "$ref": "#/$defs/identifier" },
+              "capture_step_id": { "$ref": "#/$defs/identifier" },
+              "alt_text": { "$ref": "#/$defs/nonEmptyString" },
+              "caption": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

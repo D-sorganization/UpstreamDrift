@@ -1,0 +1,132 @@
+# Experimental Falsification Protocol {#sec-experimental-protocol}
+
+## Why Readiness Is Not Evidence
+
+Human measurements are the decisive next tier, but an empty data slot must not
+be filled with model output or an opportunistic dataset lacking the required
+observables. Protocol `proximal-distal-human-falsification-v1` is frozen before
+human outcomes are accessed. Its validator qualifies acquisition metadata,
+modality coverage, provenance, participant splits, and inference boundaries.
+The committed input is synthetic and the result is explicitly
+`synthetic_dry_run_only`; all human predictions remain untested.
+
+## Registered Measurements
+
+H1--H3 require synchronized full-body kinematics, bilateral hand wrenches,
+club kinematics, and ground reaction. H4 additionally requires launch-monitor
+delivery and surface EMG or an equivalent governed activation measurement.
+The arm--wrist allocation hypotheses in @sec-torque-allocation-preload also
+require grip-pressure distribution, a closed-chain inverse-dynamics estimate
+conditioned on the measured internal grip wrench, and a preregistered estimate
+of force-development delay or tangent stiffness. Ultrasound-derived
+musculotendon length is preferred where feasible. EMG remains an activation
+timing measure and is not converted directly to joint torque.
+The protocol fixes SI units, minimum rates, and maximum synchronization
+uncertainty before outcome access. Hand wrench and ground reaction are sampled
+at at least 1000 Hz, club motion at at least 500 Hz, and the primary non-launch
+streams are synchronized within 1--2 ms.
+
+Every stream carries a SHA-256 digest, coordinate frame, reference point,
+sampling rate, units, synchronization uncertainty, calibration record, and
+acquisition identity. Governed source data stay outside the public repository.
+Public evidence contains approved pseudonyms and derived results, never names,
+contacts, birth dates, medical identifiers, or identities inferred from
+filename, directory, session, row order, club, or device.
+
+## Fixed Outcomes and Falsifiers
+
+| Prediction | Primary Estimand | Falsifier or Inconclusive Condition |
+|---|---|---|
+| EXP-H1 | Participant-level late distal drift work | Hierarchical interval enters the negligible region, or reconstruction/residual gates fail |
+| EXP-H2 | Event-aligned force--velocity projection and transported wrench power | Sign order is smaller than timing uncertainty or fails reference/frame controls |
+| EXP-H3 | Negative equivalent club-couple interval after active/passive inventory | Sign is explained by measured active/passive terms or fails filtering/residual sensitivity |
+| EXP-H4 | EMG onset--reversal interval and held-out delivery association | Anticipatory interval or held-out association disappears under registered sensitivity |
+| EXP-H5 | Bilateral force-couple and direct-wrist allocation under a matched club task | Internal-force pattern does not vary with the assigned allocation or fails wrench closure |
+| EXP-H6 | Transition-aligned zero-force duration, tangent stiffness, and torque-error impulse | Inferred channel reversal has no measurable transmission gap, or preload does not improve same-program continuity |
+
+EXP-H3 can establish an observational interval, not muscular inactivity. EXP-H4
+can establish timing and held-out association, not that a neural strategy
+caused the outcome.
+
+## Calibration, Filtering, and Residual Gates
+
+The laboratory frame is right-handed and SI-valued. The club-frame transform,
+wrench reference, functional joint centers, segment inertias, and ground
+reference are retained. The primary low-pass cutoff is selected before
+held-out outcomes are opened; residual-analysis and plus/minus 20% cutoff
+variants are mandatory sensitivities. Event-specific filter tuning is
+prohibited.
+
+Primary-window force and wrench values are never imputed. Kinematic gaps are
+limited to 10 ms and reported. Force residual greater than 10% body weight or
+moment residual greater than 5% body-weight-times-height fails the primary
+inverse-dynamics gate. Event uncertainty combines device synchronization,
+resampling, and event localization. A predicted order within that interval is
+inconclusive.
+
+## Participant-Level Holdout and Hierarchy
+
+The split unit is the participant, never the swing. At least 25% of eligible
+participants are assigned to the held-out set by governed random allocation
+before fitting or threshold selection. Repeated swings are nested within
+participants; participant contrasts, not swing rows, are the primary units.
+Hierarchical partial pooling reports both within- and between-participant
+uncertainty. Skill is analyzed only if it is a governed declared variable and
+is never inferred from performance, session, filename, row order, or club.
+
+## Negative Controls
+
+The experiment retains four controls. Rotating complete wrench/twist pairs or
+transporting them together to a second reference must preserve power. Shuffled
+timing within a prespecified noncausal window tests spurious event alignment.
+Replacing bilateral loads with net wrench must recover the known
+individual-hand null mode. Model-only sign-reversing geometry interventions
+remain labeled as model counterfactuals rather than human interventions.
+
+Each outcome is classified as supported, contradicted, inconclusive, or
+untested. Missing modality, residual failure, ambiguous timing, or unapproved
+provenance cannot be silently excluded after outcomes are known.
+
+## Executed Dry Run and Open Gate
+
+### Torso-Velocity Validation Amendment
+
+The rotating-base study adds a frozen, outcome-blind amendment,
+`torso-velocity-human-validation-registration-v1`. Its primary null is that
+measured thorax velocity adds no participant-held-out prediction of distal
+energy gain after conditioning on release geometry, club angular velocity,
+bilateral wrist state, shaft state, hand-path velocity and curvature, phase,
+and measured control-work proxies. A second test estimates the matched high-
+minus-low thorax-velocity contrast in negative bilateral grip work. The adverse
+test estimates the corresponding peak-wrench contrast at equal clubhead speed.
+
+All three tests require full-body, club, and ground-reaction measurements plus
+bilateral six-axis hand wrenches; launch outcome is also required. Registered
+sensitivities vary filtering, wrench reference and coordinate frame, inverse-
+dynamics residual threshold, synchronization extremes, shaft-state inclusion,
+and the participant-level holdout assignment frozen before outcomes. Failure
+to improve held-out prediction, an interval overlapping the negligible region,
+increased braking, or increased peak load weakens the proposed strategy. Even
+a positive held-out result would remain observational and would not establish
+a causal coaching instruction.
+
+The synthetic record contains two pseudonymous fixture participants separated
+at participant level and all six modality descriptors. The validator confirms
+units, hashes, sampling, synchronization, split uniqueness, and absence of
+identity fields. Deliberate identity, unit, hash, synchronization, split, and
+governance violations fail closed in tests.
+
+No governed human dataset was available in this phase or found in the
+subsequent workspace and public-data search recorded in
+[UpstreamDrift #8556](https://github.com/D-sorganization/UpstreamDrift/issues/8556).
+Published instrumented-grip studies by
+[Choi and Park](https://mdpi-res.com/d_attachment/sensors/sensors-20-03672/article_deploy/sensors-20-03672-v2.pdf)
+and [Koike](https://ojs.ub.uni-konstanz.de/cpa/article/download/6828/6125)
+do not provide a governed participant-level deposit satisfying the synchronized
+bilateral six-axis grip-wrench contract. Accordingly, EXP-H1 through EXP-H6
+remain `untested_no_governed_human_data`. Synthetic traces, digitized figures,
+and publication-level aggregates are not substitutes. Evaluation begins only
+after an ethics/oversight reference, consent and reuse basis, private data
+authority, synchronized streams, calibration records, frozen participant split,
+and analysis-release authorization pass the same validator. The protocol
+removes analytical discretion; it does not remove the need for measurements.

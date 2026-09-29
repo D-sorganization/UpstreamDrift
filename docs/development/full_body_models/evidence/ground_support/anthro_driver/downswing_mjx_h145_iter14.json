@@ -1,0 +1,76 @@
+{
+  "run": "anthro_driver",
+  "name": "mjx_h145_iter14",
+  "settings": {
+    "cutoff_hz": 12.0,
+    "reference": "docs\\development\\full_body_models\\evidence\\ground_support\\anthro_driver\\mjx_h145_iter14.npz",
+    "omega_rad_s": 30.0,
+    "legs_omega_rad_s": null,
+    "zeta": 1.0,
+    "acceleration_feedforward": 1.0,
+    "balance": [60.0, 15.0],
+    "root_regulation": null,
+    "transition_velocity_m_s": null,
+    "friction": null,
+    "stiffness_n_m": null,
+    "dissipation_s_m": null,
+    "dt_s": 0.001,
+    "duration_s": 1.8138888888888889
+  },
+  "reference": {
+    "root_acceleration_max_m_s2": 22.017039793954567,
+    "root_acceleration_downswing_max_m_s2": 22.017039793954567,
+    "joint_acceleration_max_deg_s2": 32943.12017645292,
+    "deviation_from_q_ref_root_max_m": 0.007820086534262895,
+    "deviation_from_q_ref_joints_max_deg": 4.535346956817182
+  },
+  "elapsed_s": 72.5,
+  "root_error_timeline_m": {
+    "0.00": 0.0005626915225005768,
+    "0.50": 0.008813464672003182,
+    "1.00": 0.009536038831478123,
+    "1.10": 0.008691351594405592,
+    "1.20": 0.008865381457583135,
+    "1.30": 0.020320318515195838,
+    "1.40": 0.02097166073613533,
+    "1.50": 0.040986834623547026,
+    "1.75": 0.22153842856398898
+  },
+  "root_error_max_m": 0.26062697519693956,
+  "root_tilt_timeline_deg": {
+    "0.50": 0.8209484614171718,
+    "1.00": 0.8677681847626141,
+    "1.20": 4.653231402880982,
+    "1.30": 9.868751291122118,
+    "1.40": 3.054311222527622,
+    "1.50": 12.025448497696967,
+    "1.75": 99.1069892608125
+  },
+  "joint_tracking_rms_deg": 1.1559232102143169,
+  "weight_fraction": {
+    "min": 0.25369279346985635,
+    "max": 3.0770702330857906,
+    "mean": 0.9893367940932308
+  },
+  "inside_support_polygon_fraction": 0.9702970297029703,
+  "peak_joint_torque_n_m": 2494.2058263830236,
+  "lowest_sphere_height_m": [-0.018738594216946826, -0.0022617029872929392],
+  "marker_rms_m": 0.1848567174335801,
+  "marker_rms_comparable_to_receipt": true,
+  "segment_rms_m": {
+    "head": 0.08825194411392985,
+    "trunk": 0.07916451034205019,
+    "pelvis": 0.11490108249297509,
+    "left_arm": 0.2128448292488588,
+    "right_arm": 0.1186886432781491,
+    "left_leg": 0.08843027230068538,
+    "right_leg": 0.24101364291416924,
+    "club": 0.28952899568730467
+  },
+  "tracking_rms_vs_reference_m": 0.18329332837633341,
+  "backswing_to_1s": {
+    "root_error_max_m": 0.010678376636306964,
+    "marker_rms_m": 0.025248981120072782
+  },
+  "marker_rms_to_1_5s_m": 0.04157886079021164
+}

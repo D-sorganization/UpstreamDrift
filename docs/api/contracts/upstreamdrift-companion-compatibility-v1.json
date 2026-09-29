@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.0.0",
+  "current": "1.0.0",
+  "previous_supported": [],
+  "fixtures": {
+    "1.0.0": "tests/fixtures/companion/current-v1.0.0.json"
+  },
+  "rejected_fixtures": [
+    "tests/fixtures/companion/rejected-future-v2.0.0.json",
+    "tests/fixtures/companion/rejected-incompatible-v1.0.0.json"
+  ],
+  "policy": {
+    "unknown_version": "reject",
+    "future_version": "reject",
+    "rollback": "Retain every previous supported immutable release asset until a replacement pin is reviewed and promoted atomically."
+  }
+}

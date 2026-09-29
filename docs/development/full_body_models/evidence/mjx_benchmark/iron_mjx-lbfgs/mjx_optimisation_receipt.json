@@ -1,0 +1,107 @@
+{
+  "run": "iron_mjx-lbfgs",
+  "settings": {
+    "method": "lbfgs",
+    "iterations": 10,
+    "substeps": 6,
+    "knot_spacing_s": 0.04,
+    "learning_rate": 0.002,
+    "regularisation": 0.001,
+    "horizon_s": 1.65,
+    "weld_stiffness": 200000.0,
+    "weld_damping": 400.0,
+    "run": "C:\\Users\\diete\\AppData\\Local\\Temp\\claude\\C--Users-diete-Repositories\\3b2df4af-b4a6-4806-b7cf-2c6990c4d236\\scratchpad\\p5bench\\iron_mjx-lbfgs"
+  },
+  "knots": 47,
+  "actuated_coordinates": 38,
+  "port_check_replay_marker_rms_m": 0.06293411661375653,
+  "shared_simulator_replay_marker_rms_m": 0.08860926039813796,
+  "best_replay_marker_rms_m": 0.0337422822973903,
+  "history": [
+    {
+      "iteration": 0,
+      "replay_marker_rms_m": 0.06293411661375653,
+      "total_cost": 0.003960703033953905
+    },
+    {
+      "iteration": 1,
+      "replay_marker_rms_m": 2.284530371354069,
+      "total_cost": 5.219079494476318,
+      "delta_max_rad": 0.2569796244237663
+    },
+    {
+      "iteration": 2,
+      "replay_marker_rms_m": 0.07255507187234737,
+      "total_cost": 0.005264238454401493,
+      "delta_max_rad": 0.0032685096235037705
+    },
+    {
+      "iteration": 3,
+      "replay_marker_rms_m": 0.059075033939984846,
+      "total_cost": 0.0034898596350103617,
+      "delta_max_rad": 0.0011686013404279597
+    },
+    {
+      "iteration": 4,
+      "replay_marker_rms_m": 0.05448247163219542,
+      "total_cost": 0.002968339715152979,
+      "delta_max_rad": 0.001593523497249378
+    },
+    {
+      "iteration": 5,
+      "replay_marker_rms_m": 0.05018483963672352,
+      "total_cost": 0.002518518129363656,
+      "delta_max_rad": 0.002993814740842827
+    },
+    {
+      "iteration": 6,
+      "replay_marker_rms_m": 0.04706868251969947,
+      "total_cost": 0.0022154611069709063,
+      "delta_max_rad": 0.004374054311462084
+    },
+    {
+      "iteration": 7,
+      "replay_marker_rms_m": 0.04133704808469451,
+      "total_cost": 0.0017087517771869898,
+      "delta_max_rad": 0.008073140275482178
+    },
+    {
+      "iteration": 8,
+      "replay_marker_rms_m": 0.0378394387648707,
+      "total_cost": 0.00143182382453233,
+      "delta_max_rad": 0.010941033540410525
+    },
+    {
+      "iteration": 9,
+      "replay_marker_rms_m": 0.03633215244846371,
+      "total_cost": 0.0013200262328609824,
+      "delta_max_rad": 0.01025139807999145
+    },
+    {
+      "iteration": 10,
+      "replay_marker_rms_m": 0.03453848897511285,
+      "total_cost": 0.0011929083848372102,
+      "delta_max_rad": 0.011636514020878775
+    },
+    {
+      "iteration": 11,
+      "replay_marker_rms_m": 0.04737741711647965,
+      "total_cost": 0.002244622213765979,
+      "delta_max_rad": 0.015648238764372387
+    },
+    {
+      "iteration": 12,
+      "replay_marker_rms_m": 0.03417366179075682,
+      "total_cost": 0.0011678405571728945,
+      "delta_max_rad": 0.01215318157992449
+    },
+    {
+      "iteration": 13,
+      "replay_marker_rms_m": 0.0337422822973903,
+      "total_cost": 0.0011385431280359626,
+      "delta_max_rad": 0.012770327215328985
+    }
+  ],
+  "elapsed_s": 1894.0,
+  "dtype": "float32"
+}

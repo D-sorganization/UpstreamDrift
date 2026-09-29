@@ -1,0 +1,73 @@
+"""Tests for Pinocchio IK task creation."""
+
+from __future__ import annotations
+
+import sys
+from collections.abc import Generator
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
+
+
+@pytest.fixture
+def mock_pinocchio_env() -> Generator[None, None, None]:
+    """Mock pinocchio and pink dependencies."""
+    module_under_test = "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks"
+    mock_mods = {
+        "pink": MagicMock(),
+        "pink.tasks": MagicMock(),
+        "pinocchio": MagicMock(),
+    }
+    # Clean up module under test to ensure it imports mocks.  Snapshot the
+    # previous entry so teardown restores the pre-fixture namespace
+    # (#9387: fixtures must not leave a mocked import cached).
+    saved_tasks_module = sys.modules.pop(module_under_test, None)
+    try:
+        with patch.dict(sys.modules, mock_mods):
+            yield
+    finally:
+        if saved_tasks_module is not None:
+            sys.modules[module_under_test] = saved_tasks_module
+        else:
+            sys.modules.pop(module_under_test, None)
+
+
+def test_create_joint_coupling_task(mock_pinocchio_env) -> None:
+    """Verify that create_joint_coupling_task works as expected."""
+    # This is the mocked pinocchio
+    import pinocchio as pin  # noqa: I001
+
+    from src.engines.physics_engines.pinocchio.python.dtack.ik.tasks import (  # noqa: I001
+        create_joint_coupling_task,
+    )
+
+    # Setup mock model
+    mock_model = pin.Model()
+    mock_model.nv = 10
+    mock_model.existJointName.return_value = True
+
+    # Mock getJointId and corresponding joint info
+    mock_model.getJointId.return_value = 1
+    mock_joint = MagicMock()
+    mock_joint.idx_v = 5
+    mock_model.joints = [None, mock_joint]  # index 1 access
+
+    # Call the function
+    joint_names = ["joint1"]
+    ratios = [1.0]
+    create_joint_coupling_task(mock_model, joint_names, ratios)
+
+    # Verify the task was created with correct A matrix
+    # The implementation calls pink.tasks.LinearHolonomicTask(A, b, cost=cost)
+    # We can check the arguments passed to the mock
+    import pink.tasks
+
+    args, kwargs = pink.tasks.LinearHolonomicTask.call_args
+    A_matrix = args[0]
+    b_vector = args[1]
+
+    assert A_matrix.shape == (1, 10)
+    assert A_matrix[0, 5] == 1.0
+    assert np.all(b_vector == 0)
+    assert kwargs["cost"] == 100.0

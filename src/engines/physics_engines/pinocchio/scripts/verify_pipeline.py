@@ -1,0 +1,54 @@
+"""Manual verification of the Unified Platform pipeline."""
+
+import sys
+
+import numpy as np
+
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
+
+try:
+    import pinocchio as pin
+except ImportError:
+    sys.exit(1)
+
+from dtack.ik.pink_solver import PinkSolver
+from dtack.sim.dynamics import DynamicsEngine
+from dtack.utils.matlab_importer import MATLABImporter
+
+
+def main() -> None:
+    """Verify the unified platform pipeline end to end."""
+    setup_logging()
+    logger = get_logger("VerifyWorkflow")
+
+    logger.info("1. Verifying Pinocchio Installation...")
+
+    logger.info("2. Building Sample Model...")
+    model = pin.buildSampleModelManipulator()
+    data = model.createData()
+    logger.info(f"Model built: nq={model.nq}, nv={model.nv}")
+
+    logger.info("3. Verifying Dynamics Engine...")
+    dyn = DynamicsEngine(model, data)
+    q = pin.neutral(model)
+    v = np.zeros(model.nv)
+    tau = np.zeros(model.nv)
+    acc = dyn.forward_dynamics(q, v, tau)
+    logger.info(f"Forward Dynamics computed. Acc shape: {acc.shape}")
+
+    logger.info("4. Verifying Pink Solver...")
+    try:
+        PinkSolver(model, data, pin.GeometryModel(), pin.GeometryModel())
+        logger.info("PinkSolver instantiated.")
+    except (RuntimeError, ValueError, OSError):
+        logger.exception("PinkSolver failed")
+
+    logger.info("5. Verifying Data Import...")
+    MATLABImporter()
+    logger.info("MATLABImporter instantiated.")
+
+    logger.info("Verification Complete. Ready for integration.")
+
+
+if __name__ == "__main__":
+    main()

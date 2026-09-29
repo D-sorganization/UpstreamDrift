@@ -1,0 +1,40 @@
+flowchart LR
+    subgraph Data Sources
+        Input[User Input/Config]
+        Sim[Physics Simulation]
+        Sensor[Virtual Sensors]
+    end
+
+    subgraph Data Processing
+        Metrics[Biomechanical Metrics]
+        Recorder[Data Recorder]
+        Analyzer[Real-time Analyzer]
+    end
+
+    subgraph Visualization
+        GUI[PyQt Interface]
+        Plot[Matplotlib Plots]
+        Render[3D Scene]
+    end
+
+    subgraph Export
+        CSV[CSV File]
+        JSON[JSON File]
+        Vid[Video File]
+    end
+
+    Input --> Sim
+    Sim --> Sensor
+    Sensor --> Metrics
+    Sensor --> Recorder
+    
+    Metrics --> Analyzer
+    Analyzer --> GUI
+    Analyzer --> Plot
+    
+    Recorder --> CSV
+    Recorder --> JSON
+    Recorder --> Vid
+    
+    Sim --> Render
+    Render --> GUI

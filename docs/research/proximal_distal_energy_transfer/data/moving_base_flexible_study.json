@@ -1,0 +1,445 @@
+{
+  "schema_version": "moving-base-flexible-club-evidence-v1",
+  "study_id": "coupled-moving-base-flexible-club-v1",
+  "trajectory_kind": "forward_constrained_dynamics",
+  "base_motion_prescribed": false,
+  "shaft_flex_prescribed": false,
+  "human_validation": false,
+  "physiological_evidence": false,
+  "source_files": {
+    "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": "c3f7b033f01ef890a384443e6a723c963afa5be5f244ef14c1a17344150b755e",
+    "scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py": "df549928a5ade0aec1fa957e59b6c319e44c46681cb1958d064c463021d7d970",
+    "scripts/research/proximal_distal_energy/two_arm_closed_loop.py": "bd322833baee73319a8f5c9a3ae0d14c150cc9fbcd062a7a2594b946f6065302"
+  },
+  "model_boundary": "Planar finite-mass translating base, two two-link arms, two ideal point contacts, and one lumped torsional club-flex mode. Parameters are declared mechanism-study values, not subject calibration.",
+  "reference_parameters": {
+    "right_shoulder_offset_m": [
+      0.19,
+      0.0
+    ],
+    "left_shoulder_offset_m": [
+      -0.19,
+      0.0
+    ],
+    "upper_length_m": 0.32,
+    "forearm_length_m": 0.3,
+    "upper_mass_kg": 1.9,
+    "forearm_mass_kg": 1.35,
+    "upper_inertia_kg_m2": 0.016213333333333333,
+    "forearm_inertia_kg_m2": 0.010125,
+    "base_mass_kg": 35.0,
+    "base_stiffness_n_m": 24000.0,
+    "base_damping_ns_m": 500.0,
+    "proximal_club_length_m": 0.46,
+    "distal_club_length_m": 0.54,
+    "proximal_club_mass_kg": 0.18,
+    "distal_club_mass_kg": 0.27,
+    "proximal_club_inertia_kg_m2": 0.003174,
+    "distal_club_inertia_kg_m2": 0.006561000000000001,
+    "shaft_stiffness_nm_rad": 80.0,
+    "shaft_damping_nms_rad": 0.6,
+    "joint_damping_nms_rad": 0.08,
+    "right_grip_offset_m": 0.065,
+    "left_grip_offset_m": -0.065,
+    "gravity_m_s2": 9.80665,
+    "rank_tolerance": 1e-10,
+    "constraint_tolerance_m": 1e-08,
+    "kkt_tolerance": 1e-08
+  },
+  "baseline": {
+    "duration_s": 0.4,
+    "step_s": 0.0005,
+    "maximum_base_displacement_m": 0.02690830609257601,
+    "maximum_abs_shaft_flex_deg": 7.083053423729821,
+    "peak_shaft_strain_energy_j": 0.6113019222499219,
+    "peak_clubhead_speed_m_s": 10.977323146837609,
+    "force_generated_couple": {
+      "minimum_nm": -4.151485604904827,
+      "maximum_nm": 22.95159608683891,
+      "first_negative_time_s": 0.2175
+    },
+    "direct_wrist_torque": {
+      "minimum_nm": -1.0,
+      "maximum_nm": 0.0
+    },
+    "maximum_abs_shaft_elastic_moment_nm": 9.889808267099394,
+    "maximum_abs_shaft_damping_moment_nm": 3.1468554212243465,
+    "closure": {
+      "constraint_rank_min": 4,
+      "position_constraint_max_m": 7.474596892702678e-11,
+      "velocity_constraint_max_m_s": 2.422543663313644e-15,
+      "kkt_residual_max": 2.0506971081352102e-13,
+      "acceleration_constraint_residual_max": 1.7683674715359964e-13,
+      "contact_power_identity_max_w": 1.2789769243681803e-13,
+      "constraint_two_sided_power_residual_max_w": 2.6548346043078273e-13,
+      "mechanical_energy_change_j": 91.52128478288229,
+      "applied_control_work_j": 111.13256385757784,
+      "dissipated_work_j": -19.62431075820033,
+      "net_nonconstraint_work_j": 91.50825309937751,
+      "work_energy_residual_abs_j": 0.013031683504777902,
+      "projection_energy_change_sum_j": -0.07578260102563839,
+      "projection_energy_change_absolute_sum_j": 0.07578260105887757,
+      "projection_energy_change_max_abs_j": 0.0004389506392321607,
+      "projection_correction_max_m": 1.1195549763140595e-06
+    }
+  },
+  "constraint_acceleration_bias_audit": {
+    "method": "exact centripetal expression versus centered directional derivative of J",
+    "tolerance_m_s2": 1e-07,
+    "maximum_residual_m_s2": 6.277142948777396e-08
+  },
+  "zero_command_branch": {
+    "cut_index": 400,
+    "cut_time_s": 0.2,
+    "initial_state_exactly_inherited": true,
+    "initial_force_generated_couple_nm": -0.6748016629062538,
+    "minimum_force_generated_couple_nm": -2.173091553546857,
+    "negative_persistence_s": 0.04999999999999999,
+    "closure": {
+      "constraint_rank_min": 4,
+      "position_constraint_max_m": 2.633125101432526e-16,
+      "velocity_constraint_max_m_s": 1.0592670983278974e-15,
+      "kkt_residual_max": 5.2331443093816156e-14,
+      "acceleration_constraint_residual_max": 3.436745539521598e-14,
+      "contact_power_identity_max_w": 1.0658141036401503e-14,
+      "constraint_two_sided_power_residual_max_w": 6.683173845522804e-15,
+      "mechanical_energy_change_j": -1.0862885705873282,
+      "applied_control_work_j": 0.0,
+      "dissipated_work_j": -1.088945807682491,
+      "net_nonconstraint_work_j": -1.088945807682491,
+      "work_energy_residual_abs_j": 0.0026572370951627455,
+      "projection_energy_change_sum_j": -0.0025255953678424703,
+      "projection_energy_change_absolute_sum_j": 0.0025255953678424703,
+      "projection_energy_change_max_abs_j": 3.683417218169893e-05,
+      "projection_correction_max_m": 4.80994442712157e-08
+    }
+  },
+  "coincident_grip_negative_control": {
+    "right_grip_offset_m": 0.0,
+    "left_grip_offset_m": 0.0,
+    "maximum_abs_force_generated_couple_nm": 0.0
+  },
+  "mechanism_sensitivity": [
+    {
+      "parameter": "base_stiffness_n_m",
+      "value": 12000.0,
+      "minimum_force_generated_couple_nm": -4.933183077669091,
+      "first_negative_time_s": 0.211,
+      "maximum_base_displacement_m": 0.0496122735468725,
+      "maximum_abs_shaft_flex_deg": 6.718731756649322,
+      "peak_shaft_strain_energy_j": 0.550033740706595,
+      "peak_clubhead_speed_m_s": 12.64317964276175
+    },
+    {
+      "parameter": "base_stiffness_n_m",
+      "value": 48000.0,
+      "minimum_force_generated_couple_nm": -4.31397606854908,
+      "first_negative_time_s": 0.217,
+      "maximum_base_displacement_m": 0.015899121974280634,
+      "maximum_abs_shaft_flex_deg": 7.275983625433683,
+      "peak_shaft_strain_energy_j": 0.6450570892479197,
+      "peak_clubhead_speed_m_s": 10.851576087285514
+    },
+    {
+      "parameter": "shaft_stiffness_nm_rad",
+      "value": 40.0,
+      "minimum_force_generated_couple_nm": -3.7340218105067455,
+      "first_negative_time_s": 0.2195,
+      "maximum_base_displacement_m": 0.02662503542520127,
+      "maximum_abs_shaft_flex_deg": 11.262007501002211,
+      "peak_shaft_strain_energy_j": 0.7727096845184079,
+      "peak_clubhead_speed_m_s": 10.813804910144558
+    },
+    {
+      "parameter": "shaft_stiffness_nm_rad",
+      "value": 160.0,
+      "minimum_force_generated_couple_nm": -4.377061253146768,
+      "first_negative_time_s": 0.2175,
+      "maximum_base_displacement_m": 0.02707435301920661,
+      "maximum_abs_shaft_flex_deg": 3.977753284923635,
+      "peak_shaft_strain_energy_j": 0.3855852464928774,
+      "peak_clubhead_speed_m_s": 11.078077682422688
+    },
+    {
+      "parameter": "shaft_damping_nms_rad",
+      "value": 0.0,
+      "minimum_force_generated_couple_nm": -10.092911217238171,
+      "first_negative_time_s": 0.16,
+      "maximum_base_displacement_m": 0.0269155097072114,
+      "maximum_abs_shaft_flex_deg": 9.378502925068243,
+      "peak_shaft_strain_energy_j": 1.0717210549467706,
+      "peak_clubhead_speed_m_s": 13.052899411778752
+    }
+  ],
+  "timestep_convergence": [
+    {
+      "step_s": 0.002,
+      "minimum_force_generated_couple_nm": -4.117528991112781,
+      "first_negative_time_s": 0.218,
+      "work_energy_residual_abs_j": 0.04826462542672516,
+      "projection_correction_max_m": 6.922111157160186e-05
+    },
+    {
+      "step_s": 0.001,
+      "minimum_force_generated_couple_nm": -4.1422956306709775,
+      "first_negative_time_s": 0.218,
+      "work_energy_residual_abs_j": 0.025420632729492354,
+      "projection_correction_max_m": 8.865667767416026e-06
+    },
+    {
+      "step_s": 0.0005,
+      "minimum_force_generated_couple_nm": -4.151485604904827,
+      "first_negative_time_s": 0.2175,
+      "work_energy_residual_abs_j": 0.013031683504777902,
+      "projection_correction_max_m": 1.1195549763140595e-06
+    }
+  ],
+  "common_wrench_samples": [
+    {
+      "model_tier": "moving_base_two_hand_flexible_club",
+      "time_s": 0.0,
+      "frame": "planar-world",
+      "reference_point_m": [
+        0.0,
+        -0.5,
+        0.0
+      ],
+      "force_n": [
+        4.899802473521319,
+        -2.6756038518541,
+        0.0
+      ],
+      "couple_nm": [
+        0.0,
+        0.0,
+        0.7552880650571843
+      ],
+      "linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "angular_velocity_rad_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "force_power_w": 0.0,
+      "couple_power_w": 0.0,
+      "total_power_w": 0.0,
+      "force_generated_couple_nm": 1.7552880650571843,
+      "direct_wrist_torque_nm": -1.0,
+      "shaft_flex_rad": 0.0
+    },
+    {
+      "model_tier": "moving_base_two_hand_flexible_club",
+      "time_s": 0.1,
+      "frame": "planar-world",
+      "reference_point_m": [
+        0.21129310444972893,
+        -0.5001813293315608,
+        0.0
+      ],
+      "force_n": [
+        13.83506265906832,
+        31.811389862721576,
+        0.0
+      ],
+      "couple_nm": [
+        0.0,
+        0.0,
+        5.8998821479121215
+      ],
+      "linear_velocity_m_s": [
+        3.7549971806228157,
+        0.9575110747159445,
+        0.0
+      ],
+      "angular_velocity_rad_s": [
+        0.0,
+        0.0,
+        -4.327395744292538
+      ],
+      "force_power_w": 82.41037937420398,
+      "couple_power_w": -25.531124898702434,
+      "total_power_w": 56.879254475501554,
+      "force_generated_couple_nm": 6.6498821479121215,
+      "direct_wrist_torque_nm": -0.75,
+      "shaft_flex_rad": -0.011048693037177005
+    },
+    {
+      "model_tier": "moving_base_two_hand_flexible_club",
+      "time_s": 0.2,
+      "frame": "planar-world",
+      "reference_point_m": [
+        0.3462146106375934,
+        -0.2270405623571043,
+        0.0
+      ],
+      "force_n": [
+        -1.2084548317979706,
+        16.510485299487957,
+        0.0
+      ],
+      "couple_nm": [
+        0.0,
+        0.0,
+        1.500099789891295
+      ],
+      "linear_velocity_m_s": [
+        0.2528716904540173,
+        3.1215956291946894,
+        0.0
+      ],
+      "angular_velocity_rad_s": [
+        0.0,
+        0.0,
+        6.356511967552158
+      ],
+      "force_power_w": 51.2334747306107,
+      "couple_power_w": 9.535402266966495,
+      "total_power_w": 60.768876997577195,
+      "force_generated_couple_nm": 2.000099789891295,
+      "direct_wrist_torque_nm": -0.5,
+      "shaft_flex_rad": -0.010531560029514785
+    },
+    {
+      "model_tier": "moving_base_two_hand_flexible_club",
+      "time_s": 0.25,
+      "frame": "planar-world",
+      "reference_point_m": [
+        0.3491054680262213,
+        -0.06280206738124142,
+        0.0
+      ],
+      "force_n": [
+        -13.964624526069006,
+        11.034729580541299,
+        0.0
+      ],
+      "couple_nm": [
+        0.0,
+        0.0,
+        -4.166208728737338
+      ],
+      "linear_velocity_m_s": [
+        -0.29537563273099704,
+        3.381212657022052,
+        0.0
+      ],
+      "angular_velocity_rad_s": [
+        0.0,
+        0.0,
+        6.231248622028122
+      ],
+      "force_power_w": 41.43557712978031,
+      "couple_power_w": -25.960682400026073,
+      "total_power_w": 15.47489472975424,
+      "force_generated_couple_nm": -3.791208728737338,
+      "direct_wrist_torque_nm": -0.375,
+      "shaft_flex_rad": 0.0135458063910974
+    },
+    {
+      "model_tier": "moving_base_two_hand_flexible_club",
+      "time_s": 0.3,
+      "frame": "planar-world",
+      "reference_point_m": [
+        0.3163728698866944,
+        0.09872612747626629,
+        0.0
+      ],
+      "force_n": [
+        -13.491307989499012,
+        14.77204373491345,
+        0.0
+      ],
+      "couple_nm": [
+        0.0,
+        0.0,
+        0.6429000477193256
+      ],
+      "linear_velocity_m_s": [
+        -0.9582358545319347,
+        3.1991144497516917,
+        0.0
+      ],
+      "angular_velocity_rad_s": [
+        0.0,
+        0.0,
+        6.3043037644138495
+      ],
+      "force_power_w": 60.18531360479666,
+      "couple_power_w": 4.053037190978788,
+      "total_power_w": 64.23835079577545,
+      "force_generated_couple_nm": 0.8929000477193259,
+      "direct_wrist_torque_nm": -0.2500000000000002,
+      "shaft_flex_rad": 0.0019021706327759843
+    },
+    {
+      "model_tier": "moving_base_two_hand_flexible_club",
+      "time_s": 0.4,
+      "frame": "planar-world",
+      "reference_point_m": [
+        0.07573725357876845,
+        0.4498545812996223,
+        0.0
+      ],
+      "force_n": [
+        -14.775666200989713,
+        1.0487158039558993,
+        0.0
+      ],
+      "couple_nm": [
+        0.0,
+        0.0,
+        -0.23830397573221024
+      ],
+      "linear_velocity_m_s": [
+        -3.583937502103192,
+        3.3016526596893714,
+        0.0
+      ],
+      "angular_velocity_rad_s": [
+        0.0,
+        0.0,
+        7.247760863830541
+      ],
+      "force_power_w": 56.417559539674905,
+      "couple_power_w": -1.7271702290071362,
+      "total_power_w": 54.69038931066777,
+      "force_generated_couple_nm": -0.23830397573221024,
+      "direct_wrist_torque_nm": 0.0,
+      "shaft_flex_rad": -0.0015063359720368698
+    }
+  ],
+  "falsification_tests": [
+    {
+      "claim": "late negative force-generated couple survives coupled base and flex dynamics",
+      "failure_condition": "no sign reversal under the declared reference trajectory"
+    },
+    {
+      "claim": "the negative couple can persist without continued command",
+      "failure_condition": "same-state zero-command branch is nonnegative immediately or within 45 ms"
+    },
+    {
+      "claim": "hand separation supplies the geometric moment arm",
+      "failure_condition": "coincident grip contacts retain nonzero force-generated couple"
+    },
+    {
+      "claim": "base motion and shaft flex are endogenous",
+      "failure_condition": "either coordinate remains identically zero under nonzero coupled loading"
+    },
+    {
+      "claim": "reported transfer respects ideal-contact power equivalence",
+      "failure_condition": "two-point and transported-wrench powers differ beyond numerical tolerance"
+    },
+    {
+      "claim": "ideal hand-grip constraints do no net work on the complete system",
+      "failure_condition": "the two-sided multiplier power exceeds numerical tolerance"
+    },
+    {
+      "claim": "numerical conclusions are resolution-stable",
+      "failure_condition": "timing, sign, or energy closure fails to converge under timestep refinement"
+    }
+  ]
+}

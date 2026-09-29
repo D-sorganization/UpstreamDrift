@@ -1,0 +1,160 @@
+{
+  "source_base": "d4e5d2b114dfdfc8bc460049c77aaa69020cdbb3",
+  "qualification": "native-initialization-boundary-only",
+  "saved_release": "R2025b",
+  "models": [
+    {
+      "file": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/Kinetically_Driven_Gimbal_Joint.slx",
+      "before_sha256": "35bec0de3aa6e541b00b25a6973d217aa1193836c08b9f192bc2418321a9f0aa",
+      "after_sha256": "1dd72e348eeba0ffa5df16a927dd43b5c7f3441d03a45cfdee15f329ac0d825a",
+      "same_block_names": true,
+      "same_connections": true,
+      "block_parameter_changes": [
+        {
+          "block": "Kinetically Driven",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        },
+        {
+          "block": "Kinetically Driven",
+          "parameter": "RxPositionTargetValue",
+          "before": "LSStartPositionX",
+          "after": "StartPositionX"
+        },
+        {
+          "block": "Kinetically Driven",
+          "parameter": "RxVelocityTargetValue",
+          "before": "LSStartVelocityX",
+          "after": "StartVelocityX"
+        },
+        {
+          "block": "Kinetically Driven",
+          "parameter": "RyPositionTargetValue",
+          "before": "LSStartPositionY",
+          "after": "StartPositionY"
+        },
+        {
+          "block": "Kinetically Driven",
+          "parameter": "RyVelocityTargetValue",
+          "before": "LSStartVelocityY",
+          "after": "StartVelocityY"
+        },
+        {
+          "block": "Kinetically Driven",
+          "parameter": "RzPositionTargetValue",
+          "before": "LSStartPositionZ",
+          "after": "StartPositionZ"
+        },
+        {
+          "block": "Kinetically Driven",
+          "parameter": "RzVelocityTargetValue",
+          "before": "LSStartVelocityZ",
+          "after": "StartVelocityZ"
+        },
+        {
+          "block": "Transform\nSensor",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        },
+        {
+          "block": "World Frame",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        }
+      ]
+    },
+    {
+      "file": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/Kinetically_Driven_Universal_Joint.slx",
+      "before_sha256": "dbdfc8e8c04ea7129deaa3c879c06956e941ebaefbfa438f9c86d1d762ae558a",
+      "after_sha256": "2252a7f9a7457359b26b7c640c01dfdcfe5ac3e3500bab0a6bfc275cbf747ab0",
+      "same_block_names": true,
+      "same_connections": true,
+      "block_parameter_changes": [
+        {
+          "block": "Kinetically Driven Universal Joint",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        },
+        {
+          "block": "Kinetically Driven Universal Joint",
+          "parameter": "RxPositionTargetSpecify",
+          "before": "on",
+          "after": "off"
+        },
+        {
+          "block": "Kinetically Driven Universal Joint",
+          "parameter": "RxVelocityTargetSpecify",
+          "before": "on",
+          "after": "off"
+        },
+        {
+          "block": "Kinetically Driven Universal Joint",
+          "parameter": "RyPositionTargetSpecify",
+          "before": "on",
+          "after": "off"
+        },
+        {
+          "block": "Kinetically Driven Universal Joint",
+          "parameter": "RyVelocityTargetSpecify",
+          "before": "on",
+          "after": "off"
+        },
+        {
+          "block": "Transform\nSensor",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        },
+        {
+          "block": "World Frame",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        }
+      ]
+    },
+    {
+      "file": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/Kinetically_Driven_Revolute_Joint.slx",
+      "before_sha256": "70b6e69c68703632b6e7564a726102e341f40c728d75b0caf5ab5294b1b662f7",
+      "after_sha256": "90b2d0bb06af0758300a498cc919857cd717c8d22aa99644feab60376ec1c9ab",
+      "same_block_names": true,
+      "same_connections": true,
+      "block_parameter_changes": [
+        {
+          "block": "Kinetically Driven Revolute",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        },
+        {
+          "block": "Kinetically Driven Revolute",
+          "parameter": "PositionTargetSpecify",
+          "before": "on",
+          "after": "off"
+        },
+        {
+          "block": "Kinetically Driven Revolute",
+          "parameter": "VelocityTargetSpecify",
+          "before": "on",
+          "after": "off"
+        },
+        {
+          "block": "Transform\nSensor",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        },
+        {
+          "block": "World Frame",
+          "parameter": "LibraryVersion",
+          "before": "25.11",
+          "after": "25.21"
+        }
+      ]
+    }
+  ]
+}

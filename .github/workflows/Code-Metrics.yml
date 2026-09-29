@@ -1,0 +1,153 @@
+name: Code Metrics
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Informational code quality metrics - never fails CI
+# Reports complexity (radon) and duplication (jscpd) metrics
+
+on:
+  # COST OPTIMIZATION: Schedule removed. This is an informational report - run manually via workflow_dispatch.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  complexity-metrics:
+    timeout-minutes: 30
+    needs: pick-runner
+    name: Complexity Analysis (radon)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/hostedtoolcache
+          RUNNER_TOOL_CACHE: ${{ runner.temp }}/hostedtoolcache
+        run: |
+          mkdir -p "$AGENT_TOOLSDIRECTORY"
+          echo "Using isolated Python tool cache: $AGENT_TOOLSDIRECTORY"
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        env:
+          AGENT_TOOLSDIRECTORY: ${{ runner.temp }}/hostedtoolcache
+          RUNNER_TOOL_CACHE: ${{ runner.temp }}/hostedtoolcache
+        with:
+          python-version: "3.11"
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Install Radon
+        run: |
+          python -m ensurepip --upgrade || true
+          pip install radon
+
+      - name: Run Complexity Analysis
+        run: |
+          echo "## Code Complexity Analysis (Radon)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cyclomatic Complexity (Top 10)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          radon cc src -s -a -nb C | head -20 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "### Maintainability Index" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          radon mi src -s -nb B | head -20 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  duplication-metrics:
+    timeout-minutes: 30
+    needs: pick-runner
+    name: Duplication Analysis (jscpd)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+
+      - name: Install jscpd
+        run: npm install -g jscpd
+
+      - name: Run Duplication Analysis
+        run: |
+          echo "## Code Duplication Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Create jscpd config
+          cat > .jscpd.json << 'EOF'
+          {
+            "threshold": 0,
+            "reporters": ["console", "json"],
+            "ignore": [
+              "**/node_modules/**",
+              "**/.git/**",
+              "**/venv/**",
+              "**/.venv/**",
+              "**/archive/**",
+              "**/legacy/**",
+              "**/__pycache__/**",
+              "**/*.min.js",
+              "**/*.min.css"
+            ],
+            "format": ["python", "javascript", "typescript", "matlab"],
+            "absolute": true,
+            "gitignore": true
+          }
+          EOF
+
+          # Run jscpd and capture output
+          jscpd src --output ./jscpd-report 2>&1 || true
+
+          echo "### Duplication Summary" >> $GITHUB_STEP_SUMMARY
+          if [ -f "./jscpd-report/jscpd-report.json" ]; then
+             echo '```' >> $GITHUB_STEP_SUMMARY
+             jscpd src --reporters console | tail -10 >> $GITHUB_STEP_SUMMARY || true
+             echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No duplication report generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  summary:
+    timeout-minutes: 30
+    name: Metrics Summary
+    needs: [pick-runner, complexity-metrics, duplication-metrics]
+    if: always()
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    steps:
+      - name: Final Summary
+        run: |
+          echo "## Code Metrics Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This is an **informational report** - it does not block CI." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "- **Complexity**: Refactor functions with Grade C or worse" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duplication**: Extract common code into shared utilities" >> $GITHUB_STEP_SUMMARY
+          echo "- **Maintainability**: Focus on files with MI score below 20" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Generated by Code Metrics workflow*" >> $GITHUB_STEP_SUMMARY

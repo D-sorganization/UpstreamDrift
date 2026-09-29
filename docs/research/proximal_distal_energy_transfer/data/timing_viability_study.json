@@ -1,0 +1,1673 @@
+{
+  "schema_version": "timing-viability-adverse-load/v1",
+  "study_id": "common-phase-timing-viability-adverse-load-recovery",
+  "parent_epic": 8557,
+  "issue": 8623,
+  "registered_before_preferred_result": true,
+  "model_tier": "moving_base_two_hand_compliant_club",
+  "policies": ["clock", "state_triggered"],
+  "phase_offsets_s": [-0.03, -0.015, 0.0, 0.015, 0.03],
+  "nominal_event_time_s": 0.14,
+  "common_phase_mapping": {
+    "source": "common_nominal_clock_trajectory",
+    "target_event_times_s": [
+      0.11000000000000001, 0.125, 0.14, 0.15500000000000003, 0.17
+    ],
+    "state_angle_thresholds_rad": [
+      -0.5023370607163419, -0.46348188119736516, -0.41864763994255216,
+      -0.37115671487452623, -0.32855873600208474
+    ],
+    "mapping_coordinate": "right_shoulder_angle_rad"
+  },
+  "load_cases": [
+    {
+      "name": "nominal",
+      "distal_mass_scale": 1.0,
+      "shaft_stiffness_scale": 1.0,
+      "actuator_delay_add_s": 0.0,
+      "perturbation_scale": 1.0
+    },
+    {
+      "name": "heavier_club",
+      "distal_mass_scale": 1.15,
+      "shaft_stiffness_scale": 1.0,
+      "actuator_delay_add_s": 0.0,
+      "perturbation_scale": 1.0
+    },
+    {
+      "name": "lower_shaft_stiffness",
+      "distal_mass_scale": 1.0,
+      "shaft_stiffness_scale": 0.8,
+      "actuator_delay_add_s": 0.0,
+      "perturbation_scale": 1.0
+    },
+    {
+      "name": "longer_actuator_delay",
+      "distal_mass_scale": 1.0,
+      "shaft_stiffness_scale": 1.0,
+      "actuator_delay_add_s": 0.012,
+      "perturbation_scale": 1.0
+    },
+    {
+      "name": "larger_initial_perturbation",
+      "distal_mass_scale": 1.0,
+      "shaft_stiffness_scale": 1.0,
+      "actuator_delay_add_s": 0.0,
+      "perturbation_scale": 1.5
+    },
+    {
+      "name": "combined_adverse",
+      "distal_mass_scale": 1.1,
+      "shaft_stiffness_scale": 0.85,
+      "actuator_delay_add_s": 0.01,
+      "perturbation_scale": 1.3
+    }
+  ],
+  "case_count": 60,
+  "metric_names": [
+    "delivery_speed_m_s",
+    "face_path_error_deg",
+    "peak_hand_force_n",
+    "effort_proxy_nms",
+    "returned_to_viable_set",
+    "normalized_energy_residual",
+    "realized_event_time_s"
+  ],
+  "common_baseline_rule": "clock policy at zero phase offset within each load cohort",
+  "numerical_guard_basis": "A five-percent normalized residual ceiling is paired with explicit half-step sensitivity because the constrained projection integrator's registered coarse-step residual is percent-scale.",
+  "recovery_definition": {
+    "state": "six declared angles and six rates normalized by engineering scales",
+    "criterion": "error at or below 50 percent of initial perturbation for every remaining delivery sample",
+    "interpretation": "trajectory recovery in this model, not neural correction"
+  },
+  "rows": [
+    {
+      "policy": "clock",
+      "load_case": "nominal",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.524481974434732,
+        "face_path_error_deg": 6.24578080102866,
+        "peak_hand_force_n": 161.3946912405553,
+        "effort_proxy_nms": 90.30988668975651,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01721476020714414,
+        "realized_event_time_s": 0.11000000000000001
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "nominal",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.453738546468764,
+        "face_path_error_deg": 7.885672881078028,
+        "peak_hand_force_n": 156.04484658381045,
+        "effort_proxy_nms": 89.9324379338999,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01617627170036712,
+        "realized_event_time_s": 0.125
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "nominal",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.3430874738335215,
+        "face_path_error_deg": 9.329660614393138,
+        "peak_hand_force_n": 152.2227741070146,
+        "effort_proxy_nms": 89.614275431507,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014898187014538596,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "nominal",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.217629714199397,
+        "face_path_error_deg": 10.504690650720704,
+        "peak_hand_force_n": 151.7609438354738,
+        "effort_proxy_nms": 89.37633144356678,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014335632432055769,
+        "realized_event_time_s": 0.15500000000000003
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "nominal",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.125457614499469,
+        "face_path_error_deg": 11.331914581079149,
+        "peak_hand_force_n": 151.7609438354738,
+        "effort_proxy_nms": 89.26065703856801,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014217906555022695,
+        "realized_event_time_s": 0.17
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "heavier_club",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.95538720816835,
+        "face_path_error_deg": 6.610812163957105,
+        "peak_hand_force_n": 165.05680166421308,
+        "effort_proxy_nms": 90.35190353717545,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01808849432546659,
+        "realized_event_time_s": 0.11000000000000001
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "heavier_club",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.8926051998668285,
+        "face_path_error_deg": 8.420757591729553,
+        "peak_hand_force_n": 159.74130608655787,
+        "effort_proxy_nms": 89.97676690358907,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.016665346886602813,
+        "realized_event_time_s": 0.125
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "heavier_club",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.791796833054821,
+        "face_path_error_deg": 10.015596355623147,
+        "peak_hand_force_n": 155.92072240401828,
+        "effort_proxy_nms": 89.65988101707119,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015393551313925384,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "heavier_club",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.678005199101292,
+        "face_path_error_deg": 11.316264323709024,
+        "peak_hand_force_n": 155.46354322867992,
+        "effort_proxy_nms": 89.42277931579525,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014837748382726822,
+        "realized_event_time_s": 0.15500000000000003
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "heavier_club",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.595330599459973,
+        "face_path_error_deg": 12.235884344495062,
+        "peak_hand_force_n": 155.46354322867992,
+        "effort_proxy_nms": 89.30763820470155,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014723663578133593,
+        "realized_event_time_s": 0.17
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.592459925774771,
+        "face_path_error_deg": 6.341875524619235,
+        "peak_hand_force_n": 159.66970510319325,
+        "effort_proxy_nms": 90.31036676691818,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.016503883445724385,
+        "realized_event_time_s": 0.11000000000000001
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.518067192977666,
+        "face_path_error_deg": 7.976175985062792,
+        "peak_hand_force_n": 154.34556626273437,
+        "effort_proxy_nms": 89.93344026912092,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015519908987556761,
+        "realized_event_time_s": 0.125
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.402153016145832,
+        "face_path_error_deg": 9.407906963251587,
+        "peak_hand_force_n": 150.5416347137173,
+        "effort_proxy_nms": 89.61553231047229,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014275279154190204,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.275914571295038,
+        "face_path_error_deg": 10.558284653523117,
+        "peak_hand_force_n": 150.07949493634374,
+        "effort_proxy_nms": 89.37751977607192,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013709580902073927,
+        "realized_event_time_s": 0.15500000000000003
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.185770400865255,
+        "face_path_error_deg": 11.358298491884629,
+        "peak_hand_force_n": 150.07949493634374,
+        "effort_proxy_nms": 89.26164953963286,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013577840916840604,
+        "realized_event_time_s": 0.17
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.150388355154343,
+        "face_path_error_deg": 6.548675589900519,
+        "peak_hand_force_n": 170.08460799417546,
+        "effort_proxy_nms": 80.2454587672323,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.018572248063093235,
+        "realized_event_time_s": 0.11000000000000001
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.0580413111771705,
+        "face_path_error_deg": 8.277759128391914,
+        "peak_hand_force_n": 164.01447005896023,
+        "effort_proxy_nms": 79.92065362748255,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.017027733881137052,
+        "realized_event_time_s": 0.125
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.936014368876662,
+        "face_path_error_deg": 9.711270716258976,
+        "peak_hand_force_n": 161.07109213546354,
+        "effort_proxy_nms": 79.67598009005631,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01578152341474926,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.836630757848578,
+        "face_path_error_deg": 10.743034848354963,
+        "peak_hand_force_n": 160.84081639039402,
+        "effort_proxy_nms": 79.54143912167125,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015354325253260314,
+        "realized_event_time_s": 0.15500000000000003
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.779715591032561,
+        "face_path_error_deg": 11.340567139775303,
+        "peak_hand_force_n": 160.84081639039402,
+        "effort_proxy_nms": 79.54301023383194,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015227631636226523,
+        "realized_event_time_s": 0.17
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.497126574340773,
+        "face_path_error_deg": 6.385410392507906,
+        "peak_hand_force_n": 159.13200091848552,
+        "effort_proxy_nms": 90.32309519703252,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.014801783588943148,
+        "realized_event_time_s": 0.11000000000000001
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.4241774221939005,
+        "face_path_error_deg": 7.98478588238052,
+        "peak_hand_force_n": 153.6909766800067,
+        "effort_proxy_nms": 89.94695713700285,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013555683152358425,
+        "realized_event_time_s": 0.125
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.31258246465775,
+        "face_path_error_deg": 9.393767416441587,
+        "peak_hand_force_n": 151.05823299931814,
+        "effort_proxy_nms": 89.62263028692388,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01348579836415934,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.188611658363795,
+        "face_path_error_deg": 10.542578696928214,
+        "peak_hand_force_n": 150.85880408851662,
+        "effort_proxy_nms": 89.3801691082314,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013474030859737845,
+        "realized_event_time_s": 0.15500000000000003
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.09805098877211,
+        "face_path_error_deg": 11.35222432520461,
+        "peak_hand_force_n": 150.85880408851662,
+        "effort_proxy_nms": 89.26239769533113,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013425169481217147,
+        "realized_event_time_s": 0.17
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "combined_adverse",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.9306628680935125,
+        "face_path_error_deg": 7.122677008175333,
+        "peak_hand_force_n": 166.29360861160248,
+        "effort_proxy_nms": 83.48387795578257,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.016570797642938666,
+        "realized_event_time_s": 0.11000000000000001
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "combined_adverse",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.8415490097744485,
+        "face_path_error_deg": 8.856522135858732,
+        "peak_hand_force_n": 160.43651328096368,
+        "effort_proxy_nms": 83.1506721058927,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015154440895660728,
+        "realized_event_time_s": 0.125
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "combined_adverse",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.72490729037748,
+        "face_path_error_deg": 10.313440543442592,
+        "peak_hand_force_n": 158.23656562068047,
+        "effort_proxy_nms": 82.88912475986692,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01408007664290646,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "combined_adverse",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.626846035292901,
+        "face_path_error_deg": 11.400347127801975,
+        "peak_hand_force_n": 158.11000533578624,
+        "effort_proxy_nms": 82.73214259433308,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013753018044131808,
+        "realized_event_time_s": 0.15500000000000003
+      }
+    },
+    {
+      "policy": "clock",
+      "load_case": "combined_adverse",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.572642561951162,
+        "face_path_error_deg": 12.03555884112158,
+        "peak_hand_force_n": 158.11000533578624,
+        "effort_proxy_nms": 82.71387494363225,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.013653956575717427,
+        "realized_event_time_s": 0.17
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "nominal",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.493644059096858,
+        "face_path_error_deg": 1.013733743681367,
+        "peak_hand_force_n": 194.37415939454525,
+        "effort_proxy_nms": 92.99430948144182,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.02530559458134799,
+        "realized_event_time_s": 0.124
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "nominal",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.593454329939296,
+        "face_path_error_deg": 0.6764461975939233,
+        "peak_hand_force_n": 184.77468776306068,
+        "effort_proxy_nms": 92.62615817486822,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.02374741532308413,
+        "realized_event_time_s": 0.136
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "nominal",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.662782237344676,
+        "face_path_error_deg": 2.856578170911199,
+        "peak_hand_force_n": 173.9189103139734,
+        "effort_proxy_nms": 92.13696663911125,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.020360609409966028,
+        "realized_event_time_s": 0.152
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "nominal",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.671720974521046,
+        "face_path_error_deg": 4.395821163458815,
+        "peak_hand_force_n": 166.87106497073523,
+        "effort_proxy_nms": 91.77592607387508,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.018031609992219304,
+        "realized_event_time_s": 0.164
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "nominal",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.646404240998182,
+        "face_path_error_deg": 5.84608876360769,
+        "peak_hand_force_n": 158.9263454126472,
+        "effort_proxy_nms": 91.35804200048354,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.017192315327850538,
+        "realized_event_time_s": 0.176
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "heavier_club",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.921715179345479,
+        "face_path_error_deg": 1.4630077631507896,
+        "peak_hand_force_n": 197.71722237391984,
+        "effort_proxy_nms": 93.02576532268053,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.02542098402389277,
+        "realized_event_time_s": 0.124
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "heavier_club",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.013297819921331,
+        "face_path_error_deg": 0.42290588845582733,
+        "peak_hand_force_n": 188.26979902735496,
+        "effort_proxy_nms": 92.66115477180813,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.023898472149078764,
+        "realized_event_time_s": 0.136
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "heavier_club",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.0777834604402665,
+        "face_path_error_deg": 2.8600520092083794,
+        "peak_hand_force_n": 177.5792486887678,
+        "effort_proxy_nms": 92.17477249271994,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.021212046815520413,
+        "realized_event_time_s": 0.152
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "heavier_club",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.0874863992270445,
+        "face_path_error_deg": 4.571962428054367,
+        "peak_hand_force_n": 170.5237861955294,
+        "effort_proxy_nms": 91.81650711349751,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.018702897041540763,
+        "realized_event_time_s": 0.164
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "heavier_club",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.089041183766786,
+        "face_path_error_deg": 6.458287792366291,
+        "peak_hand_force_n": 162.5316855984967,
+        "effort_proxy_nms": 91.28163163546287,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.016797767533562272,
+        "realized_event_time_s": 0.176
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.494166401706497,
+        "face_path_error_deg": 1.473361957207899,
+        "peak_hand_force_n": 195.88170400167058,
+        "effort_proxy_nms": 93.11359999976631,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.02487564182990526,
+        "realized_event_time_s": 0.12
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.677238081260779,
+        "face_path_error_deg": 1.3447687985970203,
+        "peak_hand_force_n": 179.99304387523364,
+        "effort_proxy_nms": 92.50254024184696,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.022355181442961603,
+        "realized_event_time_s": 0.14
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.729360110537591,
+        "face_path_error_deg": 2.9686435874210413,
+        "peak_hand_force_n": 172.0875741002471,
+        "effort_proxy_nms": 92.13719324487543,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01939665772592826,
+        "realized_event_time_s": 0.152
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.743204842335095,
+        "face_path_error_deg": 4.504556773557708,
+        "peak_hand_force_n": 165.0043256512079,
+        "effort_proxy_nms": 91.77611550508982,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01724264161431026,
+        "realized_event_time_s": 0.164
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "lower_shaft_stiffness",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.7419201907649375,
+        "face_path_error_deg": 6.193973220083057,
+        "peak_hand_force_n": 157.2417791368778,
+        "effort_proxy_nms": 91.2392102690631,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015454315438227128,
+        "realized_event_time_s": 0.176
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.652158494375545,
+        "face_path_error_deg": 3.234737235584957,
+        "peak_hand_force_n": 226.78102761938635,
+        "effort_proxy_nms": 83.29383416664813,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.032593695005196745,
+        "realized_event_time_s": 0.116
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.142327231806565,
+        "face_path_error_deg": 1.4682901036761256,
+        "peak_hand_force_n": 207.32635636378237,
+        "effort_proxy_nms": 82.8084988675367,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.028158686887947815,
+        "realized_event_time_s": 0.136
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.258779011092735,
+        "face_path_error_deg": 0.46231553373318746,
+        "peak_hand_force_n": 196.04159144795992,
+        "effort_proxy_nms": 82.46087349426814,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.025246255316838648,
+        "realized_event_time_s": 0.148
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.323682760091202,
+        "face_path_error_deg": 3.2469478918051116,
+        "peak_hand_force_n": 181.8608693143832,
+        "effort_proxy_nms": 81.87409869444916,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.02464565157119304,
+        "realized_event_time_s": 0.168
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "longer_actuator_delay",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.31685488588315,
+        "face_path_error_deg": 4.661133073977126,
+        "peak_hand_force_n": 174.92359478434568,
+        "effort_proxy_nms": 81.63456347153046,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01950108518836231,
+        "realized_event_time_s": 0.176
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.407506484120765,
+        "face_path_error_deg": 1.6664715190394261,
+        "peak_hand_force_n": 198.9875033130667,
+        "effort_proxy_nms": 93.24585892065639,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.025110199964587535,
+        "realized_event_time_s": 0.116
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.582058634476969,
+        "face_path_error_deg": 1.0003030020802708,
+        "peak_hand_force_n": 181.95712016975318,
+        "effort_proxy_nms": 92.64704407967379,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01931908884978808,
+        "realized_event_time_s": 0.136
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.633053633346153,
+        "face_path_error_deg": 2.5746669043812216,
+        "peak_hand_force_n": 173.48447539228945,
+        "effort_proxy_nms": 92.27308814105548,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01809874073566634,
+        "realized_event_time_s": 0.148
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.6462848756939215,
+        "face_path_error_deg": 4.572249649867069,
+        "peak_hand_force_n": 163.6636471370051,
+        "effort_proxy_nms": 91.78928498294539,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01614300209106927,
+        "realized_event_time_s": 0.164
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "larger_initial_perturbation",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.630065404212026,
+        "face_path_error_deg": 5.520849739949994,
+        "peak_hand_force_n": 158.3971949064354,
+        "effort_proxy_nms": 91.55048958418256,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.015015540281055503,
+        "realized_event_time_s": 0.17200000000000001
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "combined_adverse",
+      "phase_offset_s": -0.03,
+      "state_angle_threshold_rad": -0.5023370607163419,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.762841563117758,
+        "face_path_error_deg": 2.9522351823474984,
+        "peak_hand_force_n": 212.56711661215817,
+        "effort_proxy_nms": 86.44879011757708,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.027186695839678428,
+        "realized_event_time_s": 0.12
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "combined_adverse",
+      "phase_offset_s": -0.015,
+      "state_angle_threshold_rad": -0.46348188119736516,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 4.953417984955213,
+        "face_path_error_deg": 0.9044606776973789,
+        "peak_hand_force_n": 199.48192750226016,
+        "effort_proxy_nms": 86.01597155012735,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.027239165584909877,
+        "realized_event_time_s": 0.136
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "combined_adverse",
+      "phase_offset_s": 0.0,
+      "state_angle_threshold_rad": -0.41864763994255216,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.056009664220558,
+        "face_path_error_deg": 1.3428710749203445,
+        "peak_hand_force_n": 187.97433311671503,
+        "effort_proxy_nms": 85.65507746430289,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.022229700650915514,
+        "realized_event_time_s": 0.148
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "combined_adverse",
+      "phase_offset_s": 0.015,
+      "state_angle_threshold_rad": -0.37115671487452623,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.099901736895611,
+        "face_path_error_deg": 3.773264775332994,
+        "peak_hand_force_n": 176.9097555908077,
+        "effort_proxy_nms": 85.18420870551265,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.01921429573736602,
+        "realized_event_time_s": 0.164
+      }
+    },
+    {
+      "policy": "state_triggered",
+      "load_case": "combined_adverse",
+      "phase_offset_s": 0.03,
+      "state_angle_threshold_rad": -0.32855873600208474,
+      "status": "valid",
+      "outcomes": {
+        "delivery_speed_m_s": 5.096198792964644,
+        "face_path_error_deg": 4.905034369513946,
+        "peak_hand_force_n": 171.64831801177738,
+        "effort_proxy_nms": 84.9496976301536,
+        "returned_to_viable_set": 0.0,
+        "normalized_energy_residual": 0.017760118041008875,
+        "realized_event_time_s": 0.17200000000000001
+      }
+    }
+  ],
+  "viability_sensitivity": {
+    "strict": {
+      "policies": {
+        "clock": {
+          "limits": {
+            "speed_fraction_min": 0.98,
+            "face_error_allowance_deg": 1.0,
+            "peak_force_ratio_max": 1.05,
+            "effort_ratio_max": 1.05,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": false
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, true, true, false, false],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "heavier_club": {
+              "viable_mask": [false, true, true, false, false],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, true, true, false, false],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, true, true, false, false],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, true, true, false, false],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "combined_adverse": {
+              "viable_mask": [false, true, true, false, false],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            }
+          },
+          "robust_viable_mask": [false, true, true, false, false],
+          "robust_viable_fraction": 0.4,
+          "robust_contiguous_width_s": 0.015
+        },
+        "state_triggered": {
+          "limits": {
+            "speed_fraction_min": 0.98,
+            "face_error_allowance_deg": 1.0,
+            "peak_force_ratio_max": 1.05,
+            "effort_ratio_max": 1.05,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": false
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, true],
+              "viable_fraction": 0.2,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, true],
+              "viable_fraction": 0.2,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, true],
+              "viable_fraction": 0.2,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, true],
+              "viable_fraction": 0.2,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        }
+      }
+    },
+    "primary": {
+      "policies": {
+        "clock": {
+          "limits": {
+            "speed_fraction_min": 0.95,
+            "face_error_allowance_deg": 2.0,
+            "peak_force_ratio_max": 1.1,
+            "effort_ratio_max": 1.1,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": false
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [true, true, true, true, false],
+              "viable_fraction": 0.8,
+              "contiguous_width_s": 0.045
+            },
+            "heavier_club": {
+              "viable_mask": [true, true, true, true, false],
+              "viable_fraction": 0.8,
+              "contiguous_width_s": 0.045
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "combined_adverse": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            }
+          },
+          "robust_viable_mask": [true, true, true, true, false],
+          "robust_viable_fraction": 0.8,
+          "robust_contiguous_width_s": 0.045
+        },
+        "state_triggered": {
+          "limits": {
+            "speed_fraction_min": 0.95,
+            "face_error_allowance_deg": 2.0,
+            "peak_force_ratio_max": 1.1,
+            "effort_ratio_max": 1.1,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": false
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, true, true],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, true, true],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, true, true],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, true],
+              "viable_fraction": 0.2,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, true, true],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, true],
+              "viable_fraction": 0.2,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, true],
+          "robust_viable_fraction": 0.2,
+          "robust_contiguous_width_s": 0.0
+        }
+      }
+    },
+    "lenient": {
+      "policies": {
+        "clock": {
+          "limits": {
+            "speed_fraction_min": 0.9,
+            "face_error_allowance_deg": 4.0,
+            "peak_force_ratio_max": 1.2,
+            "effort_ratio_max": 1.2,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": false
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "heavier_club": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            },
+            "combined_adverse": {
+              "viable_mask": [true, true, true, true, true],
+              "viable_fraction": 1.0,
+              "contiguous_width_s": 0.06
+            }
+          },
+          "robust_viable_mask": [true, true, true, true, true],
+          "robust_viable_fraction": 1.0,
+          "robust_contiguous_width_s": 0.06
+        },
+        "state_triggered": {
+          "limits": {
+            "speed_fraction_min": 0.9,
+            "face_error_allowance_deg": 4.0,
+            "peak_force_ratio_max": 1.2,
+            "effort_ratio_max": 1.2,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": false
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, true, true, true],
+              "viable_fraction": 0.6,
+              "contiguous_width_s": 0.03
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, true, true, true],
+              "viable_fraction": 0.6,
+              "contiguous_width_s": 0.03
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, true, true, true, true],
+              "viable_fraction": 0.8,
+              "contiguous_width_s": 0.045
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, true, true],
+              "viable_fraction": 0.4,
+              "contiguous_width_s": 0.015
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, true, true, true],
+              "viable_fraction": 0.6,
+              "contiguous_width_s": 0.03
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, true, true, true],
+              "viable_fraction": 0.6,
+              "contiguous_width_s": 0.03
+            }
+          },
+          "robust_viable_mask": [false, false, false, true, true],
+          "robust_viable_fraction": 0.4,
+          "robust_contiguous_width_s": 0.015
+        }
+      }
+    }
+  },
+  "recovery_qualified_viability_sensitivity": {
+    "strict": {
+      "policies": {
+        "clock": {
+          "limits": {
+            "speed_fraction_min": 0.98,
+            "face_error_allowance_deg": 1.0,
+            "peak_force_ratio_max": 1.05,
+            "effort_ratio_max": 1.05,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": true
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        },
+        "state_triggered": {
+          "limits": {
+            "speed_fraction_min": 0.98,
+            "face_error_allowance_deg": 1.0,
+            "peak_force_ratio_max": 1.05,
+            "effort_ratio_max": 1.05,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": true
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        }
+      }
+    },
+    "primary": {
+      "policies": {
+        "clock": {
+          "limits": {
+            "speed_fraction_min": 0.95,
+            "face_error_allowance_deg": 2.0,
+            "peak_force_ratio_max": 1.1,
+            "effort_ratio_max": 1.1,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": true
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        },
+        "state_triggered": {
+          "limits": {
+            "speed_fraction_min": 0.95,
+            "face_error_allowance_deg": 2.0,
+            "peak_force_ratio_max": 1.1,
+            "effort_ratio_max": 1.1,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": true
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        }
+      }
+    },
+    "lenient": {
+      "policies": {
+        "clock": {
+          "limits": {
+            "speed_fraction_min": 0.9,
+            "face_error_allowance_deg": 4.0,
+            "peak_force_ratio_max": 1.2,
+            "effort_ratio_max": 1.2,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": true
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        },
+        "state_triggered": {
+          "limits": {
+            "speed_fraction_min": 0.9,
+            "face_error_allowance_deg": 4.0,
+            "peak_force_ratio_max": 1.2,
+            "effort_ratio_max": 1.2,
+            "normalized_energy_residual_max": 0.05,
+            "require_sustained_recovery": true
+          },
+          "per_load": {
+            "nominal": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "heavier_club": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "lower_shaft_stiffness": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "longer_actuator_delay": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "larger_initial_perturbation": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            },
+            "combined_adverse": {
+              "viable_mask": [false, false, false, false, false],
+              "viable_fraction": 0.0,
+              "contiguous_width_s": 0.0
+            }
+          },
+          "robust_viable_mask": [false, false, false, false, false],
+          "robust_viable_fraction": 0.0,
+          "robust_contiguous_width_s": 0.0
+        }
+      }
+    }
+  },
+  "numerical_sensitivity": {
+    "clock": {
+      "coarse_step_s": 0.004,
+      "refined_step_s": 0.002,
+      "delivery_speed_absolute_difference_m_s": 0.02904029389392271,
+      "peak_hand_force_relative_difference": 0.025462175986676494,
+      "coarse_normalized_energy_residual": 0.01408007664290646,
+      "refined_normalized_energy_residual": 0.008110106789591067
+    },
+    "state_triggered": {
+      "coarse_step_s": 0.004,
+      "refined_step_s": 0.002,
+      "delivery_speed_absolute_difference_m_s": 0.03373774544831143,
+      "peak_hand_force_relative_difference": 0.026414180343230887,
+      "coarse_normalized_energy_residual": 0.022229700650915514,
+      "refined_normalized_energy_residual": 0.01195669505367771
+    }
+  },
+  "recovery_fraction_by_policy_and_load": {
+    "clock": {
+      "nominal": 0.0,
+      "heavier_club": 0.0,
+      "lower_shaft_stiffness": 0.0,
+      "longer_actuator_delay": 0.0,
+      "larger_initial_perturbation": 0.0,
+      "combined_adverse": 0.0
+    },
+    "state_triggered": {
+      "nominal": 0.0,
+      "heavier_club": 0.0,
+      "lower_shaft_stiffness": 0.0,
+      "longer_actuator_delay": 0.0,
+      "larger_initial_perturbation": 0.0,
+      "combined_adverse": 0.0
+    }
+  },
+  "claim_status": {
+    "model_policy_ordering": "clock_larger",
+    "recovery_policy_ordering": "no_separation",
+    "state_triggered_larger_timing_region": "not_supported",
+    "registered_sustained_recovery": "not_observed_in_any_case",
+    "human_timing_demand": "untested",
+    "human_self_correction": "untested",
+    "coaching_prescription": "unsupported"
+  },
+  "limitations": [
+    "The terminal state is a delivery proxy, not a modeled ball-impact collision.",
+    "The declared engineering load cases are not a golfer population or fitted probability distribution.",
+    "The state observer is a delayed noisy engineering surrogate, not an identified sensory estimator.",
+    "Sustained return toward a matched trajectory is model recovery, not motor learning, reflex correction, or coaching evidence.",
+    "The common phase map is local to one nominal trajectory and must be rebuilt for another model tier or subject."
+  ],
+  "source_sha256": {
+    "run_timing_viability_study.py": "01b4baf9959abe193af78bf84714a8e0e12c793dd1de22e89687300617f0b016",
+    "timing_viability.py": "4dfb9032d5f41a2d49e97ef3e49aa0bb77c8e16b74a0cb11b7e4fc1beef1b572",
+    "moving_base_flexible_club.py": "c3f7b033f01ef890a384443e6a723c963afa5be5f244ef14c1a17344150b755e",
+    "uncertainty_control.py": "443012e55b6cb1dd23bcd3595efbe68da07ae120735e8ee756085ac1f7e883e9"
+  },
+  "array_artifact": "timing_viability_study.npz",
+  "figure_artifact": "fig_timing_viability_adverse_load.pdf"
+}

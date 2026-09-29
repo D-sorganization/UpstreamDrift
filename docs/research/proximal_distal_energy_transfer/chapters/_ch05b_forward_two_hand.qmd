@@ -1,0 +1,355 @@
+# Forward Constrained Two-Hand Dynamics {#sec-forward-two-hand}
+
+## Purpose and Evidential Scope {#sec-forward-two-hand-scope}
+
+The preceding two-hand analysis established that separated contact forces can
+produce a club couple even when their resultant is small. It also reconstructed
+the archived WSCG zero-command solution point by point along a commanded state
+history [@olson2024wscg]. That calculation answers an instantaneous question:
+what acceleration and constraint force would the model produce if the applied
+commands were removed at this state? It does not answer whether the resulting
+negative couple survives after the state begins to evolve under zero command.
+
+This chapter supplies that missing forward test. Two planar two-link arms grasp
+a club with two independent point constraints. The club translates and rotates;
+the arm and club coordinates evolve under the constrained equations of motion.
+At a declared late-downswing state, all six applied joint torques are set to
+zero and a new trajectory is integrated from the *exact same* generalized
+position and velocity. The resulting branch is therefore a test of dynamic
+persistence, not a stitched collection of same-state counterfactuals.
+
+The scope is deliberately narrow. The calculation establishes mechanical
+feasibility in a planar rigid-body model. It is not a fit to a golfer, contains
+no muscle model, does not identify neural intent, and does not prove that a
+human golfer uses the modeled strategy. Redundant two-hand tasks generally do
+not permit biological effort to be inferred uniquely from the net wrench
+[@reinkensmeyer1992; @zatsiorsky2008prehension]. The more defensible result is
+that a negative late force-generated club couple can persist without continued
+command in a nonsingular forward constrained model.
+
+## Coordinates, Geometry, and Closure {#sec-forward-two-hand-geometry}
+
+The generalized coordinate vector is
+
+$$
+q =
+\begin{bmatrix}
+\theta_{Rs} & \theta_{Re} & \theta_{Ls} & \theta_{Le} & x_c & y_c & \phi_c
+\end{bmatrix}^{\mathsf T},
+$$ {#eq-forward-two-hand-q}
+
+where the four arm angles describe right and left shoulder--elbow chains and
+$(x_c,y_c,\phi_c)$ describe the floating club. Angles are measured in the
+declared planar frame, with $x$ along the target-line coordinate and $y$
+upward. For a segment angle $\alpha$, the direction and angular derivative are
+
+$$
+d(\alpha)=
+\begin{bmatrix}\sin\alpha\\-\cos\alpha\end{bmatrix},
+\qquad
+d_{,\alpha}(\alpha)=
+\begin{bmatrix}\cos\alpha\\\sin\alpha\end{bmatrix}.
+$$ {#eq-forward-two-hand-direction}
+
+The right and left hand positions follow from the corresponding two-link
+chains. The club grip points are
+
+$$
+r_{g,R}=r_c+a_R d(\phi_c),
+\qquad
+r_{g,L}=r_c+a_L d(\phi_c),
+$$ {#eq-forward-two-hand-grips}
+
+with $a_R=+0.065$ m and $a_L=-0.065$ m in the reference case. The four
+holonomic constraints are
+
+$$
+C(q)=
+\begin{bmatrix}
+r_{h,R}(q)-r_{g,R}(q)\\
+r_{h,L}(q)-r_{g,L}(q)
+\end{bmatrix}=0,
+\qquad
+J(q)=\frac{\partial C}{\partial q}.
+$$ {#eq-forward-two-hand-constraints}
+
+The model has seven coordinates and four independent scalar constraints,
+leaving three admissible instantaneous degrees of freedom. Every accepted
+sample must retain $\operatorname{rank}J=4$. A rank-deficient Jacobian, a
+singular Schur complement, or a constraint residual above the declared limit
+causes the solver to fail closed; a least-squares fallback is not used. This is
+important because a numerically convenient force allocation at a singular
+grasp would not be evidence for a physically identified two-hand couple.
+
+## Constrained Equations of Motion {#sec-forward-two-hand-equations}
+
+The mass matrix is assembled from center-of-mass translational Jacobians and
+segment angular Jacobians. Gravity and the velocity-dependent bias are kept
+explicit. This follows standard rigid-body dynamics accounting
+[@featherstone2008] while retaining the small model's auditable analytical
+structure. At each state, the acceleration and constraint multiplier solve
+
+$$
+\begin{bmatrix}
+M(q) & -J(q)^{\mathsf T}\\
+J(q) & 0
+\end{bmatrix}
+\begin{bmatrix}
+\ddot q\\\lambda
+\end{bmatrix}
+=
+\begin{bmatrix}
+Q(u)-h(q,\dot q)\\
+-\dot J(q,\dot q)\dot q
+\end{bmatrix}.
+$$ {#eq-forward-two-hand-kkt}
+
+Here $h=c+g$ contains Coriolis/centrifugal and gravitational terms. With the
+implemented sign convention, the force exerted by the hands on the club is
+$F_{h\rightarrow c}=-\lambda$ after reshaping the four multipliers into two
+planar forces. The residuals of both rows of @eq-forward-two-hand-kkt are stored
+for every sample.
+
+The primary acceleration-constraint bias
+$\dot J(q,\dot q)\dot q$ is evaluated from the exact centripetal terms of both
+arms and both club grip offsets. It is not obtained by numerically
+differentiating $J$ inside the KKT solve. An independent five-point centered
+directional derivative agrees within $1.04\times10^{-9}$ m/s² over the
+reference trajectory, below the registered $10^{-7}$ m/s² tolerance.
+
+The applied generalized force is not a six-entry vector copied directly into
+the seven coordinates. Wrist torque is an internal action--reaction pair: a
+positive wrist torque acts positively on the club and negatively on the two
+arm coordinates that contribute to the corresponding forearm angle. Thus,
+
+$$
+Q(u)=
+\begin{bmatrix}
+u_{Rs}-u_{Rw}\\
+u_{Re}-u_{Rw}\\
+u_{Ls}-u_{Lw}\\
+u_{Le}-u_{Lw}\\
+0\\0\\
+u_{Rw}+u_{Lw}
+\end{bmatrix}.
+$$ {#eq-forward-two-hand-control-map}
+
+This mapping prevents the directly applied wrist torque from being silently
+counted as a contact-force couple.
+
+## Forward Integration and Numerical Audit {#sec-forward-two-hand-integration}
+
+The reference trajectory is integrated for 0.400 s with a 0.25 ms step. A
+velocity-Verlet update is paired with mass-metric position and velocity
+projection. For a position residual $C$, the local correction is
+
+$$
+\delta q = M^{-1}J^{\mathsf T}
+\left(JM^{-1}J^{\mathsf T}\right)^{-1}C,
+\qquad q\leftarrow q-\delta q.
+$$ {#eq-forward-two-hand-projection}
+
+The projection is iterated to the declared tolerance. Velocity is projected
+onto $J\dot q=0$ with the same mass metric. Projection correction and its
+numerical energy change are recorded separately. They are numerical
+stabilization diagnostics and are **not** reclassified as physical work.
+
+The initial club center is $(0,-0.50)$ m, the club angle is 0.16 rad, and the
+arm angles are obtained by inverse kinematics on specified elbow branches. The
+initial generalized velocity is zero. The open-loop command is a smooth test
+input, not an inferred human torque history:
+
+| Applied Torque | Command Over $0\le t\le0.4$ s (N m) |
+|---|---:|
+| Right Shoulder | $18+4t/0.4$ |
+| Right Elbow | $7-1.5t/0.4$ |
+| Right Wrist | $-3+2t/0.4$ |
+| Left Shoulder | $16+3t/0.4$ |
+| Left Elbow | $6-t/0.4$ |
+| Left Wrist | $2-t/0.4$ |
+
+The commands create a repeatable state history through which mechanism
+interventions can be compared. They are not optimized for clubhead speed and
+are not presented as normative technique. More complete forward golf models
+have shown why joint-torque timing, body motion, and objective definition must
+be treated together [@mackenzie2009; @balzerson2016].
+
+## Registered Observables {#sec-forward-two-hand-observables}
+
+The force-generated couple about the declared club center is
+
+$$
+M_F =
+(r_{g,R}-r_c)\times F_R+
+(r_{g,L}-r_c)\times F_L.
+$$ {#eq-forward-two-hand-force-couple}
+
+The direct wrist contribution is stored separately as
+$M_w=u_{Rw}+u_{Lw}$. The total rotational action on the club is therefore
+$M_F+M_w$ before any other modeled external moment. This distinction is the
+central test: $M_F<0$ cannot be attributed algebraically to a negative applied
+wrist torque because $M_F$ is computed only from the two constraint forces.
+
+The contact forces are also transformed into common and differential modes,
+
+$$
+R=F_R+F_L,
+\qquad
+D=\tfrac12(F_R-F_L).
+$$ {#eq-forward-two-hand-modes}
+
+The resultant $R$ controls club translation. The differential mode $D$ becomes
+rotationally effective through the signed grip moment arms. Large opposing
+forces can therefore produce a substantial couple with a modest resultant, as
+is familiar in multifinger prehension [@zatsiorsky2008prehension].
+
+Finally, contact power is evaluated both pointwise and through the reduced
+wrench identity:
+
+$$
+P_{contact}=F_R\cdot v_{g,R}+F_L\cdot v_{g,L}
+=R\cdot v_c+M_F\omega_c.
+$$ {#eq-forward-two-hand-power}
+
+The two forms agree to $6.68\times10^{-13}$ W in the reference run. Couple sign
+alone still does not determine energy transfer: rotational power also depends
+on club angular velocity, while the resultant contributes translational power.
+This is consistent with standard joint-force and segment-power bookkeeping
+[@winter2009].
+
+## Counterfactual and Negative-Control Design {#sec-forward-two-hand-interventions}
+
+Four intervention families expose the result to contradiction.
+
+1. **Matched-State Torque Killswitch.** At 0.200 s, the achieved $q$ and
+   $\dot q$ are copied bit for bit into a new forward trajectory and all six
+   commands are set to zero for 50 ms. Additional branches start at 0.180,
+   0.190, 0.210, 0.220, and 0.240 s.
+2. **Zero Contact Moment Arm.** Both grip offsets are set to zero and a new
+   constraint-consistent initial state is constructed. If
+   @eq-forward-two-hand-force-couple is implemented correctly, the
+   force-generated couple must vanish even though nonzero contact forces may
+   remain.
+3. **Timestep Refinement.** The 0.400 s baseline is repeated at 2.0, 1.0, and
+   0.5 ms. The sign-reversal time and minimum couple must remain stable while
+   the work--energy residual contracts.
+4. **Projection Sensitivity.** The position-projection tolerance is changed
+   from $10^{-8}$ to $10^{-10}$ m at a fixed 1.0 ms step. A mechanism that
+   depends materially on stabilization tolerance is rejected.
+
+These are mechanistic interventions. They are stronger than visual similarity
+between two curves because each has a declared null consequence and an
+observable failure mode.
+
+## Results {#sec-forward-two-hand-results}
+
+### Force-Generated Couple Reversal {#sec-forward-two-hand-reversal}
+
+The baseline force-generated couple first becomes negative at 0.19825 s and
+reaches $-32.85$ N m over the recorded interval. The direct wrist torque ranges
+only from $-1.0$ to 0 N m and is excluded from that force-generated series. The
+late negative value is therefore not a relabeled wrist command.
+
+![Forward Two-Hand Interaction-Force Mechanism. The force-generated couple is
+separated from direct wrist torque (upper left). A zero-command branch starts
+from the exact 200 ms state and retains a negative couple for the full 50 ms
+window (upper right). Contact power and common/differential force modes show
+why moment sign, power sign, and force magnitude are different observables.](figures/fig_forward_two_hand_couple_killswitch.pdf){#fig-forward-two-hand-couple-killswitch}
+
+At the 0.200 s cut, the inherited force-generated couple is $-2.57$ N m. With
+all applied commands removed, it remains negative throughout the 50 ms branch
+and reaches $-7.43$ N m. The commanded continuation becomes more negative,
+reaching approximately $-13$ N m over the same horizon, but that difference is
+not the central claim. The decisive observation is that the negative
+force-generated couple does not collapse to zero when command is removed.
+
+The branch ensemble also limits the interpretation. A branch at 0.180 s begins
+before reversal and crosses negative at 0.185 s. Branches initiated from 0.190
+through 0.220 s remain negative for the full 50 ms window. The 0.240 s branch
+remains negative for 37.25 ms before changing sign. Zero-command persistence is
+therefore state dependent and finite; it is not an invariant property of the
+club or grip.
+
+### Geometric Mechanism {#sec-forward-two-hand-vector-mechanism}
+
+@fig-forward-two-hand-force-geometry displays the actual hand-on-club
+force vectors with one common scale. Between 0.180 and 0.240 s, the club and
+arm geometry change the signed moment arms and the tangential components of the
+two forces. The couple reversal is generated by that evolving vector geometry,
+not by force magnitude alone. At 0.300 s the force directions and club
+orientation have changed again, illustrating why a static instruction such as
+"pull harder" cannot specify the sign of $M_F$.
+
+![Two-Hand Force Vectors Through the Couple Reversal. Blue and red arrows are
+the right- and left-hand forces on the club; all panels use the same force
+scale. Black denotes the floating club, colored links denote the two arms, and
+the black point is the declared club center.](figures/fig_forward_two_hand_force_geometry.pdf){#fig-forward-two-hand-force-geometry}
+
+The zero-moment-arm intervention makes the geometric requirement explicit.
+When both grip points coincide with the club center, the maximum absolute
+force-generated couple is exactly 0 N m to machine representation. Contact
+force alone is insufficient; a nonzero signed lever arm and a transverse force
+component are jointly necessary.
+
+### Solver Closure and Convergence {#sec-forward-two-hand-closure}
+
+The reference trajectory retains constraint rank four. The maximum position
+constraint residual is $9.51\times10^{-11}$ m, the maximum velocity residual is
+$5.03\times10^{-15}$ m/s, the KKT residual is below
+$4.41\times10^{-13}$, and the acceleration-constraint residual is below
+$2.57\times10^{-13}$. Complete two-sided ideal-constraint power,
+$\lambda^\mathsf T J\dot q$, remains below $1.27\times10^{-12}$ W; this is
+distinct from the one-sided contact power delivered to the club. Over the
+0.400 s interval, mechanical energy rises by
+203.714 J and integrated applied-control work is 203.618 J, leaving a 0.096 J
+numerical work--energy residual at the 0.25 ms reporting step.
+
+![Forward Solver Closure and Sensitivity Audit. Work--energy residual and
+maximum projection correction contract under timestep refinement (top).
+Integrated control work overlays the mechanical-energy change, while the
+closed-loop position residual remains below its declared limit
+(bottom).](figures/fig_forward_two_hand_numerical_audit.pdf){#fig-forward-two-hand-numerical-audit}
+
+The work--energy residual decreases from 0.695 to 0.373 to 0.191 J as the step
+is refined from 2.0 to 1.0 to 0.5 ms. The maximum projection correction falls
+from 190 to 24.4 to 3.08 $\mu$m over the same sequence. Negative-couple onset
+is 0.1980, 0.1980, and 0.1985 s, a spread of only 0.5 ms. Tightening the
+projection tolerance by two orders of magnitude changes the 1.0 ms minimum
+couple by less than $5\times10^{-8}$ N m and leaves onset unchanged. The
+reported reversal is therefore resolved relative to both timestep and
+projection tolerance in this model.
+
+The baseline projections change mechanical energy by -0.778 J in signed sum
+(0.778 J in absolute sum), with no individual correction larger than 0.00446 J.
+This cumulative correction is larger than the raw 0.096 J work--energy
+residual, so the latter is not the complete integration-error budget. The
+projection-energy diagnostic is negative and converges toward zero with
+timestep refinement. It is not added to or subtracted from the physical work
+budget; reporting both prevents numerical stabilization and cancellation from
+being mistaken for passive energy transfer or exact closure.
+
+## What the Forward Test Establishes {#sec-forward-two-hand-conclusions}
+
+The forward calculation strengthens the archived pointwise result in one
+specific way: it demonstrates that an achieved state can carry a negative
+force-generated two-hand couple forward for a finite interval after all
+applied joint torques are removed. The negative control shows that the effect
+requires grip geometry, and the convergence studies show that it is not a
+timestep or projection-tolerance artifact at the declared resolution.
+
+It does **not** establish that the negative couple is wholly passive in a human
+swing. The baseline state was created by prior applied torques; after the cut,
+gravity, velocity-dependent interaction terms, and constraint reactions remain.
+"Passive" here means zero *applied model command after the branch*, not absence
+of force, momentum, gravity, stored energy, or biological activation. Nor does
+the model include a moving torso, out-of-plane rotations, compliant wrists, a
+distributed shaft, hand-contact compliance, or ground reaction pathways.
+
+For strategy, the result supports a conditional mechanical statement rather
+than a coaching prescription: club acceleration can coexist with a negative
+hand-force couple when the current state and grip geometry make the coupled
+reaction favorable. Consequently, maximizing positive wrist torque at every
+instant is not a necessary condition for increasing distal speed. Whether a
+specific golfer should reduce, reverse, or maintain wrist torque requires the
+higher-order moving-base, flexible-shaft, three-dimensional, and human-data
+tests that follow in the completion program.

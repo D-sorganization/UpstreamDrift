@@ -1,0 +1,32 @@
+# Interactive Proximal–Distal Dynamics Workbench {#sec-interactive-workbench}
+
+An open-source interactive workbench accompanies the scripted analyses. It
+provides PyQt6 and React/Tauri interfaces for the double-pendulum,
+triple-pendulum, and bilateral golfer models. Both interfaces consume one
+machine-readable experiment and glossary catalog from the canonical
+[Tools pendulum simulator](https://github.com/D-sorganization/Tools/tree/main/src/pendulum_simulator),
+so experiment names, hypotheses, falsifiers, limitations, and definitions do
+not diverge between applications.
+
+The guide exposes six bounded experiments: passive two-link transfer,
+distal-torque onset, a three-link cascade, the two-hand equivalent-couple
+mechanism, pointwise versus forward zero-torque counterfactuals, and a
+parameter-robustness envelope. Each experiment names an observation that would
+weaken or reject its proposed interpretation. The interfaces expose force and
+moment vectors, energy and power histories, counterfactual comparisons, and
+parameter perturbations; hover help and a searchable glossary define the terms
+at the point of use.
+
+The workbench is not the authority for numerical claims in this document.
+Interactive states are intentionally exploratory and carry the evidence status
+`exploratory_model_output`. Publication evidence must be reproduced by the
+committed scripts, frozen parameters, matched controls, convergence and closure
+checks, and machine-readable outputs described in @sec-methods. This separation
+allows a reader to discover and challenge mechanisms without converting an
+unrecorded GUI configuration into evidence.
+
+Installation, launch commands, the guided-experiment matrix, and interpretation
+boundaries are provided in the
+[workbench guide](../COMPANION_WORKBENCH.md). UpstreamDrift consumes the Tools
+provider rather than maintaining a second implementation, and its immutable
+vendor pin identifies the reviewed provider revision.

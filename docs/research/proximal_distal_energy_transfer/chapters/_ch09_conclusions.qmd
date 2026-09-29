@@ -1,0 +1,223 @@
+# Conclusions and Research Priorities {#sec-conclusions}
+
+## Conclusions
+
+The literature does not support equating proximal-to-distal peak order
+with a requirement to transfer mechanical energy outward as early as
+possible. Interaction dynamics, optimal-control studies, and segmental
+energy measurements instead motivate a timing hypothesis: retain a compact
+proximal configuration while proximal speed develops, then accelerate the
+distal handoff later in the downswing.
+
+The present simulations provide model-derived support for that mechanism.
+Under matched shoulder torque in a planar two-link model, early wrist drive
+reduced clubhead speed relative to a passive wrist, whereas grid-selected late
+drive increased it. A small early restraining torque followed by late drive
+was best among the tested programs. Energy and counterfactual accounting
+located the modeled mechanism in early arm-energy retention and late
+joint-force transfer rather than in early active wrist work.
+
+This conclusion is conditional. The result survived torque-velocity bounds,
+alternative scoring rules, 13 one-at-a-time parameter cases, and declared
+20--50 ms command transitions, but the selected onset shifted across cases.
+The study therefore supports a robust
+ordering within a local model neighborhood, not a universal timing value or
+an individual coaching prescription. Planar motion, simplified actuators, and
+absence of human data remain material limitations. The finite sweep is not a
+continuous optimal-control solution, and the command filters are not muscle
+activation models.
+
+The forward constrained two-hand extension resolves one previously open
+mechanistic question. Starting from the exact same 0.200 s state, the
+force-generated club couple remains negative for 50 ms after all applied joint
+torques are removed. The effect disappears exactly when both grip moment arms
+are removed and remains stable under timestep and projection refinement. This
+supports finite passive-couple persistence in the declared planar model, not a
+claim about muscle inactivity or human technique.
+
+The coupled moving-base/flexible-club extension resolves the next structural
+question at the planar tier. Base translation, shaft flex, and both grip forces
+evolve in one forward constrained solve. The negative force-generated couple
+survives the same-state zero-command intervention, while coincident grip points
+remove it exactly; constraint, contact-power, and work--energy residuals close
+under timestep refinement. This transports the mechanism beyond a fixed base
+and rigid club without promoting it to a spatial or physiological result.
+
+The distributed-shaft comparison closes a narrower structural gate. A
+one-mode reduction and six-mode Euler--Bernoulli reference share the same
+assembled mass, stiffness, damping, tip inertia, and loads. The reduced model
+closely follows slow loading but misses higher-mode history under a short
+force-and-moment pulse, even when their peak deflections are similar. Synthetic
+modal identification, mesh convergence, and work--energy closure pass. This
+does not calibrate equipment or show that the result survives coupling the
+beam into the two-hand constrained solve.
+
+The articulated finite-base extension closes the next numerical mechanism
+gate while producing an adverse primary inference result. Across 384 pathway
+and 192 independent-control trajectories, the native inertia-and-bias
+operators remain within the registered transport bounds, energy
+residuals decrease with step refinement, and all declared shaft/base domains
+hold through 50 ms. Ground force and intrinsic free moment are mechanically
+active, but none of 384 coupled--fixed comparisons meets the preregistered 5%
+peak-load and total-dissipated-work match. A post-hoc non-ground-dissipation
+sensitivity admits 60 cells with both speed-difference signs. The experiment
+therefore qualifies finite-base coupling and rejects a universal delivery
+interpretation; it does not identify a ground-use strategy or human benefit.
+
+The reduced full-body common-state extension resolves implementation transport
+for a narrower spatial estimand. MuJoCo and an independent
+Lagrange--Christoffel formulation agree across 20 coordinates and 61 nonplanar
+states to $2.14\times10^{-11}$ relative error. Reversing the hand moment arm
+reverses the force-generated couple and coincident points remove it exactly.
+Because the forces are prescribed and the state is shared, this supports
+spatial inverse-dynamics and geometry transport but leaves passive forward
+contact inconclusive at that tier.
+
+The subject-scaled contact-closure audit rejects a tempting shortcut at that
+same tier. Six deterministic de Leva profiles retain a full-row-rank local
+contact Jacobian, yet the prescribed anatomical hand points remain
+0.171--0.616 m from the declared grips. Rank and conditioning therefore cannot
+substitute for closed feasible anatomy. The next articulated spatial tier must
+solve bilateral closed-contact inverse kinematics with joint-limit and
+collision checks before its forward contact, timing, recovery, or slack
+results can be interpreted. The registered inverse-kinematics follow-up now
+clears that reduced-tree gate in all 234 profile/span/phase samples while
+holding the club pose fixed. Its minimum engineering-limit margin is 0.103 rad
+and its minimum coarse bounding-sphere clearance is 30.9 mm. These are
+screening results, not measured anatomical ranges or mesh-level clearance;
+they advance the next test to calibrated compliant forward contact from the
+closed states.
+
+A paired arm-only intervention now isolates one omitted structure. With trunk
+and club pose fixed, the fixed-shoulder branch closes none of 54 registered
+states, whereas a bounded scapula-on-ellipsoid surrogate reaches the contact
+residual in 31 states and satisfies both residual and solver-termination gates
+in 16. Full rank persists while coordinate nullity rises from two to ten, so
+the result supports the importance of scapular geometry but also strengthens
+the non-identifiability boundary. It is not an anatomical, muscular, or human
+strategy result.
+
+The reduced spatial forward-contact extension resolves that narrower mechanism
+gate. Native MuJoCo and Pinocchio independently supply rigid-body kinematics,
+mass, bias, gravity, and continuous-time acceleration for two finite-mass hand
+carriages and a free rigid club without direct club actuation. Both branches
+share the projected compliant interfaces and project-authored state update.
+Their baseline and same-state killswitch trajectories satisfy
+the declared position, orientation, wrench, and energy regions. Removing the
+complete grounded driver leaves a negative force-generated swing-normal couple
+for 37.5 ms in both engines; coincident and reversed-moment-arm controls close
+exactly, and the work--energy residual decreases under timestep refinement.
+This supports reduced spatial contact persistence and inertia-and-bias
+transport, not independent contact-solver equivalence, anatomical arms,
+muscles, calibrated grip tissue, equipment, or human strategy. A separate
+MuJoCo-native equality and `mj_step` control produces a nonzero discrepancy
+from the projected formulation and is reported as a formulation difference,
+not a parity success.
+
+The closed-state validity-horizon extension further shows that the same two
+engines remain inside the declared trajectory, wrench, energy-discrepancy, and
+work--energy closure gates for all 2,160 registered cases through 50 ms. The
+matrix spans all profile--span--phase states plus one-factor stiffness,
+damping, hand-mass, timestep, and immediate-driver-off branches. No failure is
+observed inside the registered interval, so the result is right-censored at 50
+ms. It strengthens the reduced numerical reference but does not turn the
+hand-carriage model into articulated anatomy or a full delivery simulation.
+
+The coupled uncertainty/control phase rejects two additional shortcuts. A net
+planar wrench cannot uniquely identify both hand forces, and six summary
+observables cannot identify the complete 12-parameter vector. Separate
+training and held-out ensembles leave objective-dependent tradeoffs among all
+eight command programs. Early restraint improves held-out lower-tail speed
+relative to late drive but increases the planar face/path error, so the result
+supports a conditional model mechanism rather than a universal or
+physiological strategy.
+
+The experimental phase is preregistered but not empirically executed. Its
+machine-readable protocol fixes six synchronized modalities, participant-level
+holdout, identity-safe provenance, filtering and residual sensitivities, and
+four prediction-specific falsifiers. The synthetic dry run passes all intake
+and fail-closed controls, but it cannot advance H1--H4. Governed human data are
+still required.
+
+The open-resource layer now supplies model-tier presets, a hash-pinned release
+manifest, standard checksums, a data dictionary, citation metadata, and a
+claim-first reviewer workbench. Validation fails closed on artifact drift. The
+bundle remains a qualified local release candidate rather than a persistent
+archive: articulated subject-scaled contact, equipment-calibrated beam
+coupling, governed human evaluation, and external identifier deposit remain
+open.
+
+## Research Priorities {#sec-future}
+
+The next work should reduce the largest inferential risks in dependency
+order:
+
+1. **Articulated Spatial Forward-Contact Counterfactual.** Replace the executed
+   hand-carriage reference with subject-scaled articulated arms and calibrated
+   grip interfaces. Start from the executed bilateral closed-contact,
+   engineering-limit, and coarse collision-qualified configurations, replace
+   those screens with subject-specific anatomy where available, then preserve the two-engine
+   same-state killswitch, force, couple, power, work, pathway, and closure
+   observables.
+2. **Calibrated Uncertainty and Constrained Control.** Extend the executed
+   multivariable screen with population-informed distributions, measurement
+   error, profile-likelihood or Bayesian calibration, larger held-out
+   ensembles, and a constrained optimal-control comparator.
+3. **Spatial Model-Fidelity Ladder.** Extend the executed planar base rotation,
+   intrinsic free moment, distributed grip, and passive shaft into a three-
+   dimensional club/body solve with calibrated unilateral foot contact and
+   force-plate comparison without changing the registered interface
+   observables. Each rung should carry conservation checks and cross-engine
+   tolerance gates.
+4. **Execute the Frozen Human-Data Protocol.** Acquire governed synchronized
+   measurements that pass the fixed inclusion, residual, missingness,
+   participant-holdout, and provenance gates. Sequence order alone must not be
+   treated as evidence of energy transfer.
+5. **Arm--Wrist Allocation and Preload Falsification.** Execute the bilateral
+   grip-wrench, pressure, activation, stiffness, and participant-holdout tests
+   registered in @sec-torque-allocation-preload. Treat the dead-zone mechanism
+   as rejected if its predicted gap is absent under documented low tangent
+   stiffness or if any performance difference disappears on holdout.
+6. **Open-Resource Release.** Maintain deterministic commands,
+   machine-readable results, data dictionaries, checksums, citation metadata,
+   and explicit license boundaries. Archive validated releases with a
+   persistent identifier.
+
+The implementation roadmap and acceptance criteria are tracked in
+[the open research epic](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
+The matched-task allocation and transmission program is tracked separately in
+[its falsification epic](https://github.com/D-sorganization/UpstreamDrift/issues/8497).
+
+# Code and Data Availability {.unnumbered}
+
+Analysis code, tests, figures, machine-readable outputs, and parameter
+records are available in the
+[open-source repository](https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/research/proximal_distal_energy_transfer).
+The repository name identifies provenance only; none of the scientific
+claims depend on adoption of the broader software project. The principal
+summary is recorded in
+[`data/results_summary.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/results_summary.json),
+and the parameter-sensitivity results are recorded in
+[`data/e1d_parameter_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/e1d_parameter_sensitivity.json).
+The spatial common-state evidence is recorded in
+[`data/spatial_full_body_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json).
+The two-engine spatial forward-contact evidence is recorded in
+[`data/spatial_forward_contact_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json).
+The uncertainty, identifiability, and control evidence is recorded in
+[`data/uncertainty_control_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json).
+The distributed-shaft structural evidence is recorded in
+[`data/shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json).
+The forward distributed-modal shaft and arm--wrist allocation evidence are
+recorded in
+[`data/moving_base_modal_shaft_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json)
+and
+[`data/torque_allocation_preload_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json).
+The frozen experimental protocol and synthetic readiness classification are
+recorded in [`data/experimental_protocol_v1.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json)
+and [`data/experimental_protocol_readiness.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/experimental_protocol_readiness.json).
+The finite-ground initialization, preregistered atlas, and labeled post-hoc
+matching sensitivity are recorded in
+[`data/articulated_ground_diagnostic.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json),
+[`data/articulated_ground_atlas.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json),
+and
+[`data/articulated_ground_posthoc_sensitivity.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json).

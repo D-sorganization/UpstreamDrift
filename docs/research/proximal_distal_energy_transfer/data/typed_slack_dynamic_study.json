@@ -1,0 +1,253 @@
+{
+  "schema_version": "typed-slack-dynamic-study/v1",
+  "study_id": "typed-slack-dynamic-passivity-identifiability-audit",
+  "model_tier": "synthetic_scalar_dynamic_constitutive_screen",
+  "classes": [
+    "contact_disengagement",
+    "transmission_backlash",
+    "structural_preload",
+    "biological_series_compliance",
+    "control_deadband"
+  ],
+  "excitations": ["slow_sine", "multisine_reversal"],
+  "cases": {
+    "slow_sine": {
+      "contact_disengagement": {
+        "engaged_fraction": 0.4506373406648338,
+        "peak_abs_transmitted": 2.6402668636264286,
+        "input_work_j": 0.0006709913874065783,
+        "dissipative_work_j": 0.0006709913874065744,
+        "loop_area_j": 0.0006709913874065783,
+        "energy_residual_j": 3.903127820947816e-18,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "transmission_backlash": {
+        "engaged_fraction": 0.9012746813296676,
+        "peak_abs_transmitted": 2.6402668636264286,
+        "input_work_j": 0.0026839655496263062,
+        "dissipative_work_j": 0.0026839655496262967,
+        "loop_area_j": 0.0026839655496263062,
+        "energy_residual_j": 9.540979117872439e-18,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "structural_preload": {
+        "engaged_fraction": 1.0,
+        "peak_abs_transmitted": 3.4802668636264285,
+        "input_work_j": 0.0033359235661339186,
+        "dissipative_work_j": 0.0033359235479952397,
+        "loop_area_j": 0.0033359235661339186,
+        "energy_residual_j": 1.8138681203740126e-11,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "biological_series_compliance": {
+        "engaged_fraction": 0.4506373406648338,
+        "peak_abs_transmitted": 2.6402668636264286,
+        "input_work_j": 0.0013419827748131531,
+        "dissipative_work_j": 0.001341982774813149,
+        "loop_area_j": 0.0013419827748131531,
+        "energy_residual_j": 4.119968255444917e-18,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "control_deadband": {
+        "engaged_fraction": 0.9012746813296676,
+        "peak_abs_transmitted": 2.620236077898814,
+        "input_work_j": 0.0,
+        "dissipative_work_j": 0.0,
+        "loop_area_j": 0.0,
+        "energy_residual_j": 0.0,
+        "passivity_applicable": false,
+        "activation_delay_s": 0.018
+      }
+    },
+    "multisine_reversal": {
+      "contact_disengagement": {
+        "engaged_fraction": 0.4791302174456386,
+        "peak_abs_transmitted": 1.8027880241470662,
+        "input_work_j": 0.001216706997156091,
+        "dissipative_work_j": 0.0012167069971560748,
+        "loop_area_j": 0.001216706997156091,
+        "energy_residual_j": 1.6046192152785466e-17,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "transmission_backlash": {
+        "engaged_fraction": 0.9582604348912772,
+        "peak_abs_transmitted": 1.8027880241470662,
+        "input_work_j": 0.004866827988624318,
+        "dissipative_work_j": 0.004866827988624298,
+        "loop_area_j": 0.004866827988624318,
+        "energy_residual_j": 1.9949319973733282e-17,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "structural_preload": {
+        "engaged_fraction": 1.0,
+        "peak_abs_transmitted": 2.642788024147066,
+        "input_work_j": 0.006415180707712543,
+        "dissipative_work_j": 0.006415180195650084,
+        "loop_area_j": 0.006415180707712543,
+        "energy_residual_j": 5.120624639370561e-10,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "biological_series_compliance": {
+        "engaged_fraction": 0.4791302174456386,
+        "peak_abs_transmitted": 1.8027880241470662,
+        "input_work_j": 0.0024334139943121644,
+        "dissipative_work_j": 0.0024334139943121493,
+        "loop_area_j": 0.0024334139943121644,
+        "energy_residual_j": 1.5178830414797062e-17,
+        "passivity_applicable": true,
+        "activation_delay_s": 0.0
+      },
+      "control_deadband": {
+        "engaged_fraction": 0.9582604348912772,
+        "peak_abs_transmitted": 1.7289763990323765,
+        "input_work_j": 0.0,
+        "dissipative_work_j": 0.0,
+        "loop_area_j": 0.0,
+        "energy_residual_j": 0.0,
+        "passivity_applicable": false,
+        "activation_delay_s": 0.018
+      }
+    }
+  },
+  "identifiability": {
+    "slow_sine": {
+      "contact_disengagement": {
+        "parameter_names": ["threshold", "stiffness", "damping"],
+        "scaled_singular_values": [
+          0.9945853873227942, 0.10367870300069584, 0.007115747892058586
+        ],
+        "rank": 3,
+        "condition_number": 139.77243185256535,
+        "minimum_scaled_singular_value": 0.007115747892058586
+      },
+      "transmission_backlash": {
+        "parameter_names": ["threshold", "stiffness", "damping"],
+        "scaled_singular_values": [
+          0.9945257964573413, 0.10354034699066461, 0.014065444392059222
+        ],
+        "rank": 3,
+        "condition_number": 70.70702984818668,
+        "minimum_scaled_singular_value": 0.014065444392059222
+      },
+      "structural_preload": {
+        "parameter_names": ["stiffness", "damping", "preload"],
+        "scaled_singular_values": [
+          0.9875360149601701, 0.15687537360059442, 0.012756814424462982
+        ],
+        "rank": 3,
+        "condition_number": 77.41243088607068,
+        "minimum_scaled_singular_value": 0.012756814424462982
+      },
+      "biological_series_compliance": {
+        "parameter_names": ["threshold", "stiffness", "damping"],
+        "scaled_singular_values": [
+          0.9945257964573385, 0.10354034699066329, 0.014065444392058403
+        ],
+        "rank": 3,
+        "condition_number": 70.7070298481906,
+        "minimum_scaled_singular_value": 0.014065444392058403
+      },
+      "control_deadband": {
+        "parameter_names": ["threshold", "stiffness", "time_constant_s"],
+        "scaled_singular_values": [
+          0.9895425581556815, 0.11243235907122347, 0.09035756876094539
+        ],
+        "rank": 3,
+        "condition_number": 10.951407521528893,
+        "minimum_scaled_singular_value": 0.09035756876094539
+      }
+    },
+    "multisine_reversal": {
+      "contact_disengagement": {
+        "parameter_names": ["threshold", "stiffness", "damping"],
+        "scaled_singular_values": [
+          0.9951512883595734, 0.0971366158864458, 0.015439920025959687
+        ],
+        "rank": 3,
+        "condition_number": 64.45313749594494,
+        "minimum_scaled_singular_value": 0.015439920025959687
+      },
+      "transmission_backlash": {
+        "parameter_names": ["threshold", "stiffness", "damping"],
+        "scaled_singular_values": [
+          0.9949505334092725, 0.09690888901191755, 0.026117107402844796
+        ],
+        "rank": 3,
+        "condition_number": 38.09574000912895,
+        "minimum_scaled_singular_value": 0.026117107402844796
+      },
+      "structural_preload": {
+        "parameter_names": ["stiffness", "damping", "preload"],
+        "scaled_singular_values": [
+          0.9800074237046369, 0.19768338326866328, 0.02251065221745727
+        ],
+        "rank": 3,
+        "condition_number": 43.53527451082159,
+        "minimum_scaled_singular_value": 0.02251065221745727
+      },
+      "biological_series_compliance": {
+        "parameter_names": ["threshold", "stiffness", "damping"],
+        "scaled_singular_values": [
+          0.994950533409267, 0.09690888901191129, 0.026117107402843464
+        ],
+        "rank": 3,
+        "condition_number": 38.09574000913069,
+        "minimum_scaled_singular_value": 0.026117107402843464
+      },
+      "control_deadband": {
+        "parameter_names": ["threshold", "stiffness", "time_constant_s"],
+        "scaled_singular_values": [
+          0.9844067697265697, 0.16160071764554468, 0.06948755120842674
+        ],
+        "rank": 3,
+        "condition_number": 14.166663706047983,
+        "minimum_scaled_singular_value": 0.06948755120842674
+      }
+    }
+  },
+  "pairwise_normalized_output_rmse_multisine": {
+    "contact_disengagement__transmission_backlash": 0.7072443855523635,
+    "contact_disengagement__structural_preload": 0.645349055124434,
+    "contact_disengagement__biological_series_compliance": 0.019574147495748373,
+    "contact_disengagement__control_deadband": 0.7221052150691932,
+    "transmission_backlash__structural_preload": 0.34128828471386236,
+    "transmission_backlash__biological_series_compliance": 0.7071067811865475,
+    "transmission_backlash__control_deadband": 0.22219275129850488,
+    "structural_preload__biological_series_compliance": 0.6478493211747516,
+    "structural_preload__control_deadband": 0.3852751374495036,
+    "biological_series_compliance__control_deadband": 0.723818207063739
+  },
+  "passivity_summary": {
+    "mechanical_classes": {
+      "all_pass": true,
+      "maximum_abs_energy_residual_j": 5.120624639370561e-10
+    }
+  },
+  "control_boundary": {
+    "passivity_applicable": false,
+    "reason": "The control deadband is a delayed command-transmission map, not a mechanical energy-storage element."
+  },
+  "claims": {
+    "global_slack_benefit": "unsupported",
+    "class_identification_from_one_channel": "not_established",
+    "excitation_independent_identifiability": "not_supported",
+    "human_intentionality": "untested"
+  },
+  "limitations": [
+    "All excitations and parameters are synthetic and are not fitted to a golfer, tissue, grip, shaft, or controller.",
+    "Transmission backlash is represented by the existing memoryless dead-zone-plus-damping surrogate; a stateful rate-independent play operator is not represented.",
+    "Biological series compliance is a unilateral Kelvin-Voigt surrogate, not a Hill-type tendon or subject-specific anatomical model.",
+    "Local sensitivity rank is not global or practical identifiability and does not prove that a class generated measured data.",
+    "Output separation under the registered multisine does not identify anatomical intent or a beneficial amount of slack.",
+    "The suite tests constitutive channels, not club delivery, injury risk, or performance."
+  ],
+  "array_artifact": "typed_slack_dynamic_study.npz",
+  "figure_artifact": "fig_typed_slack_dynamic_audit.pdf"
+}

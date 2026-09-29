@@ -1,0 +1,65 @@
+name: Quality Gate
+
+# Blocking repository-wide Law-of-Demeter quality gate. Existing findings are
+# ratcheted in scripts/ci/lod_baseline.txt; new production src/ occurrences
+# fail this required `lod-quality-gate` status.
+#
+# The job was named `quality-gate` until it was renamed here, which collided
+# with the CI Standard aggregate of the same name: both published check runs
+# under the single required `quality-gate` context, so branch protection could
+# be satisfied by whichever reported. This workflow carries no path filter and
+# so runs on every PR, which makes `lod-quality-gate` safe to require directly.
+# Keep it that way: a required check that does not report blocks the PR.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lod-quality-gate:
+    name: lod-quality-gate
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 15
+    steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Run repo-wide LOD lint
+        shell: bash
+        run: |
+          python3 scripts/ci/check_lod.py \
+            src \
+            --baseline scripts/ci/lod_baseline.txt

@@ -1,0 +1,374 @@
+# ruff: noqa: E501
+"""Comprehensive tests for signal_toolkit.noise module.
+
+Covers NoiseGenerator, add_noise_to_signal, generate_disturbance_profile,
+and DisturbanceSimulator to achieve 100% coverage of the pure-python code.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from signal_toolkit.core import Signal
+from signal_toolkit.noise import (
+    DEFAULT_LINE_FREQUENCY_HZ,
+    PERIODIC_NOISE_2ND_HARMONIC,
+    PERIODIC_NOISE_3RD_HARMONIC,
+    DisturbanceSimulator,
+    NoiseGenerator,
+    NoiseType,
+    add_noise_to_signal,
+    generate_disturbance_profile,
+)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fixtures
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture
+def t() -> np.ndarray:
+    return np.linspace(0, 1, 200)
+
+
+@pytest.fixture
+def sine_signal(t: np.ndarray) -> Signal:
+    return Signal(time=t, values=np.sin(2 * np.pi * 5 * t), name="sine")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Module-level constants
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestConstants:
+    def test_default_line_frequency(self):
+        assert DEFAULT_LINE_FREQUENCY_HZ == 60.0
+
+    def test_harmonic_constants(self):
+        assert PERIODIC_NOISE_2ND_HARMONIC == 0.3
+        assert PERIODIC_NOISE_3RD_HARMONIC == 0.1
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# NoiseType enum
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestNoiseType:
+    def test_all_values(self):
+        types = {nt.value for nt in NoiseType}
+        assert "white" in types
+        assert "pink" in types
+        assert "brown" in types
+        assert "blue" in types
+        assert "violet" in types
+        assert "uniform" in types
+        assert "impulse" in types
+        assert "quantization" in types
+        assert "periodic" in types
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# NoiseGenerator
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestNoiseGenerator:
+    def test_seeded_reproducibility(self, t: np.ndarray):
+        gen1 = NoiseGenerator(seed=42)
+        gen2 = NoiseGenerator(seed=42)
+        s1 = gen1.generate(t, NoiseType.WHITE)
+        s2 = gen2.generate(t, NoiseType.WHITE)
+        np.testing.assert_array_equal(s1.values, s2.values)
+
+    def test_white_noise_length(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.WHITE, amplitude=1.0)
+        assert len(sig.values) == len(t)
+        assert sig.name == "white_noise"
+
+    def test_pink_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.PINK, amplitude=1.0)
+        assert len(sig.values) == len(t)
+        assert sig.name == "pink_noise"
+
+    def test_brown_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.BROWN, amplitude=0.5)
+        assert len(sig.values) == len(t)
+        assert sig.name == "brown_noise"
+
+    def test_blue_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.BLUE, amplitude=1.0)
+        assert len(sig.values) == len(t)
+
+    def test_violet_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.VIOLET, amplitude=1.0)
+        assert len(sig.values) == len(t)
+
+    def test_uniform_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.UNIFORM, amplitude=1.0)
+        assert len(sig.values) == len(t)
+
+    def test_impulse_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.IMPULSE, amplitude=1.0, probability=0.05)
+        assert len(sig.values) == len(t)
+
+    def test_impulse_noise_default_probability(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.IMPULSE, amplitude=1.0)
+        assert len(sig.values) == len(t)
+
+    def test_quantization_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.QUANTIZATION, amplitude=1.0, levels=64)
+        assert len(sig.values) == len(t)
+
+    def test_quantization_noise_default_levels(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.QUANTIZATION, amplitude=1.0)
+        assert len(sig.values) == len(t)
+
+    def test_periodic_noise_output(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.PERIODIC, amplitude=1.0, frequency=60.0)
+        assert len(sig.values) == len(t)
+        assert sig.name == "periodic_noise"
+
+    def test_periodic_noise_single_sample(self):
+        """Single-point t array should not crash (fs uses fallback 1000 Hz)."""
+        gen = NoiseGenerator(seed=0)
+        t_single = np.array([0.0])
+        sig = gen.generate(t_single, NoiseType.PERIODIC, amplitude=1.0)
+        assert len(sig.values) == 1
+
+    def test_generate_metadata(self, t: np.ndarray):
+        gen = NoiseGenerator(seed=0)
+        sig = gen.generate(t, NoiseType.WHITE, amplitude=2.0)
+        assert sig.metadata["noise_type"] == "white"
+        assert sig.metadata["amplitude"] == 2.0
+
+    def test_generate_no_seed(self, t: np.ndarray):
+        gen = NoiseGenerator()
+        sig = gen.generate(t, NoiseType.WHITE)
+        assert len(sig.values) == len(t)
+
+    def test_pink_noise_single_sample(self):
+        """Pink noise with 1-sample array should not crash."""
+        gen = NoiseGenerator(seed=0)
+        t_single = np.array([0.0])
+        sig = gen.generate(t_single, NoiseType.PINK, amplitude=1.0)
+        assert len(sig.values) == 1
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# add_noise_to_signal
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestAddNoiseToSignal:
+    def test_with_explicit_amplitude(self, sine_signal: Signal):
+        noisy = add_noise_to_signal(sine_signal, amplitude=0.1, seed=42)
+        assert len(noisy.values) == len(sine_signal.values)
+        assert noisy.name == "sine_noisy"
+
+    def test_with_snr_db(self, sine_signal: Signal):
+        noisy = add_noise_to_signal(sine_signal, snr_db=20.0, seed=42)
+        assert noisy.metadata["snr_db"] == 20.0
+
+    def test_default_amplitude(self, sine_signal: Signal):
+        """No amplitude or snr_db → defaults to 10% of signal std."""
+        noisy = add_noise_to_signal(sine_signal, seed=42)
+        assert noisy.values is not None
+
+    def test_noise_is_added(self, sine_signal: Signal):
+        noisy = add_noise_to_signal(sine_signal, amplitude=0.1, seed=0)
+        # The noisy signal should differ from the clean one
+        assert not np.allclose(noisy.values, sine_signal.values)
+
+    def test_metadata_contains_noise_info(self, sine_signal: Signal):
+        noisy = add_noise_to_signal(
+            sine_signal, noise_type=NoiseType.PINK, amplitude=0.05, seed=0
+        )
+        assert noisy.metadata["noise_type"] == "pink"
+        assert noisy.metadata["noise_amplitude"] == 0.05
+
+    def test_with_all_noise_types(self, sine_signal: Signal):
+        for noise_type in NoiseType:
+            noisy = add_noise_to_signal(
+                sine_signal, noise_type=noise_type, amplitude=0.1, seed=0
+            )
+            assert len(noisy.values) == len(sine_signal.values)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# generate_disturbance_profile
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestGenerateDisturbanceProfile:
+    def test_step_disturbance(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "step", step_time=0.5, magnitude=2.0)
+        assert sig.name == "step_disturbance"
+        assert sig.values[-1] == 2.0  # after step
+
+    def test_step_default_params(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "step")
+        assert sig.name == "step_disturbance"
+        assert len(sig.values) == len(t)
+
+    def test_pulse_disturbance(self, t: np.ndarray):
+        sig = generate_disturbance_profile(
+            t, "pulse", start_time=0.3, duration=0.1, magnitude=3.0
+        )
+        assert sig.name == "pulse_disturbance"
+        # Values should be non-zero during pulse window
+        assert np.any(sig.values > 0)
+
+    def test_pulse_default_params(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "pulse")
+        assert len(sig.values) == len(t)
+
+    def test_ramp_disturbance(self, t: np.ndarray):
+        sig = generate_disturbance_profile(
+            t, "ramp", start_time=0.0, end_time=0.5, start_value=0.0, end_value=5.0
+        )
+        assert sig.name == "ramp_disturbance"
+        # After end_time, should be end_value
+        assert sig.values[-1] == pytest.approx(5.0)
+
+    def test_ramp_default_params(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "ramp")
+        assert len(sig.values) == len(t)
+
+    def test_sine_disturbance(self, t: np.ndarray):
+        sig = generate_disturbance_profile(
+            t, "sine", frequency=2.0, amplitude=1.5, phase=0.0
+        )
+        assert sig.name == "sine_disturbance"
+        assert len(sig.values) == len(t)
+
+    def test_sine_default_params(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "sine")
+        assert len(sig.values) == len(t)
+
+    def test_random_steps_disturbance(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "random_steps", num_steps=5, seed=0)
+        assert sig.name == "random_steps_disturbance"
+        assert len(sig.values) == len(t)
+
+    def test_random_steps_default_params(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "random_steps")
+        assert len(sig.values) == len(t)
+
+    def test_chirp_disturbance(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "chirp", f0=0.5, f1=5.0, amplitude=1.0)
+        assert sig.name == "chirp_disturbance"
+        assert len(sig.values) == len(t)
+
+    def test_chirp_default_params(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "chirp")
+        assert len(sig.values) == len(t)
+
+    def test_unknown_type_returns_zeros(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "nonexistent")
+        assert np.all(sig.values == 0)
+
+    def test_metadata_contains_type(self, t: np.ndarray):
+        sig = generate_disturbance_profile(t, "step", magnitude=1.0)
+        assert sig.metadata["disturbance_type"] == "step"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DisturbanceSimulator
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestDisturbanceSimulator:
+    def test_empty_simulator_generates_zeros(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        sig = sim.generate(t)
+        assert np.all(sig.values == 0)
+        assert sig.name == "combined_disturbance"
+
+    def test_add_noise_chaining(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        result = sim.add_noise(NoiseType.WHITE, amplitude=0.1)
+        assert result is sim  # Returns self
+
+    def test_add_step_chaining(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        result = sim.add_step(0.5, magnitude=1.0)
+        assert result is sim
+
+    def test_add_pulse_chaining(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        result = sim.add_pulse(0.3, 0.1)
+        assert result is sim
+
+    def test_add_periodic_chaining(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        result = sim.add_periodic(60.0, 0.1)
+        assert result is sim
+
+    def test_combined_disturbance_generation(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=42)
+        sim.add_noise(NoiseType.WHITE, amplitude=0.1)
+        sim.add_step(0.5, magnitude=1.0)
+        sim.add_pulse(0.3, 0.1, magnitude=0.5)
+        sim.add_periodic(60.0, 0.05)
+        sig = sim.generate(t)
+        assert len(sig.values) == len(t)
+        assert sig.metadata["components"] == 4
+
+    def test_apply_to_signal(self, sine_signal: Signal):
+        sim = DisturbanceSimulator(seed=0)
+        sim.add_noise(NoiseType.WHITE, amplitude=0.1)
+        disturbed = sim.apply_to_signal(sine_signal)
+        assert disturbed.name == "sine_disturbed"
+        assert len(disturbed.values) == len(sine_signal.values)
+        assert not np.allclose(disturbed.values, sine_signal.values)
+
+    def test_apply_to_signal_preserves_time(self, sine_signal: Signal):
+        sim = DisturbanceSimulator(seed=0)
+        sim.add_step(0.5)
+        disturbed = sim.apply_to_signal(sine_signal)
+        np.testing.assert_array_equal(disturbed.time, sine_signal.time)
+
+    def test_metadata_components_count(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        sim.add_noise()
+        sim.add_step(0.3)
+        sig = sim.generate(t)
+        assert sig.metadata["components"] == 2
+
+    def test_add_noise_default_type(self, t: np.ndarray):
+        sim = DisturbanceSimulator(seed=0)
+        sim.add_noise()  # defaults to WHITE
+        sig = sim.generate(t)
+        assert len(sig.values) == len(t)
+
+
+class TestNoiseGeneratorElseFallback:
+    def test_generate_with_unknown_noise_type_uses_white(self, t: np.ndarray):
+        """The else branch falls back to white noise for unknown/future enum values.
+
+        We hit the else by passing a mock that is not equal to any NoiseType member.
+        """
+        from unittest.mock import MagicMock
+
+        gen = NoiseGenerator(seed=0)
+        # A MagicMock is not equal to any NoiseType member, so all if/elif branches skip.
+        # We give it a .value attribute so Signal construction doesn't crash.
+        fake_noise = MagicMock()
+        fake_noise.value = "unknown"
+        result = gen.generate(t, fake_noise)  # type: ignore[arg-type]
+        # Should have gotten white noise (same length, finite values)
+        assert len(result.values) == len(t)
+        assert np.all(np.isfinite(result.values))

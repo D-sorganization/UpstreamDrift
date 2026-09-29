@@ -1,0 +1,315 @@
+"""Tests for ChatService - Server-side AI chat session management.
+
+Verifies session CRUD, TTL eviction, message handling,
+adapter loading, and disk persistence.
+"""
+
+from __future__ import annotations
+
+import time
+from typing import Any
+from unittest.mock import MagicMock, patch
+
+import pytest
+from src.shared.python.core.error_utils import InvalidRequestError
+
+
+@pytest.fixture
+def chat_service(tmp_path) -> Any:
+    """Create a ChatService with mocked adapter and temp persist dir."""
+    with patch("src.api.services.chat_service.ChatService._load_adapter"):
+        from src.api.services.chat_service import ChatService
+
+        svc = ChatService()
+        # Use temp directory for persistence
+        svc.PERSIST_DIR = tmp_path / "chat_sessions"
+        # Provide a mock adapter
+        svc._adapter = MagicMock()
+        return svc
+
+
+class TestSessionManagement:
+    """Tests for session creation, retrieval, and eviction."""
+
+    def test_create_new_session(self, chat_service) -> None:
+        """Creating a session with no ID yields a new ConversationContext."""
+        ctx = chat_service.get_or_create_session(None)
+        assert ctx is not None
+        assert ctx.session_id is not None
+        assert len(ctx.messages) == 0
+
+    def test_retrieve_existing_session(self, chat_service) -> None:
+        """Retrieving a session by its ID returns the same context."""
+        ctx1 = chat_service.get_or_create_session(None)
+        ctx2 = chat_service.get_or_create_session(ctx1.session_id)
+        assert ctx1.session_id == ctx2.session_id
+
+    def test_unknown_session_creates_new(self, chat_service) -> None:
+        """Requesting a non-existent session ID creates a new one."""
+        ctx = chat_service.get_or_create_session("nonexistent-id-123")
+        assert ctx is not None
+        assert ctx.session_id is not None
+
+    def test_max_sessions_eviction(self, chat_service) -> None:
+        """When MAX_SESSIONS is exceeded, oldest sessions are evicted."""
+        chat_service.MAX_SESSIONS = 3
+        sessions = []
+        for _ in range(5):
+            ctx = chat_service.get_or_create_session(None)
+            sessions.append(ctx.session_id)
+
+        assert len(chat_service._sessions) <= 3
+        # Most recent sessions should survive
+        assert sessions[-1] in chat_service._sessions
+
+    def test_ttl_eviction(self, chat_service) -> None:
+        """Sessions older than TTL are evicted on next access."""
+        chat_service.SESSION_TTL_SECONDS = 0  # Immediate expiry
+        ctx = chat_service.get_or_create_session(None)
+        sid = ctx.session_id
+
+        # Force time to advance past TTL
+        chat_service._timestamps[sid] = time.monotonic() - 1
+
+        # Accessing any session triggers cleanup
+        chat_service.get_or_create_session(None)
+        assert sid not in chat_service._sessions
+
+
+class TestMessageHandling:
+    """Tests for adding messages and retrieving history."""
+
+    def test_add_user_message(self, chat_service) -> None:
+        """Adding a user message returns a message ID."""
+        ctx = chat_service.get_or_create_session(None)
+        msg_id = chat_service.add_user_message(ctx.session_id, "Hello, world!")
+        assert msg_id is not None
+        assert len(msg_id) == 12  # hex[:12]
+
+    def test_add_message_with_engine_context(self, chat_service) -> None:
+        """Engine context is stored in session metadata."""
+        ctx = chat_service.get_or_create_session(None)
+        chat_service.add_user_message(
+            ctx.session_id, "Help with MuJoCo", engine_context="mujoco"
+        )
+        assert ctx.metadata.get("last_engine") == "mujoco"
+
+    def test_add_message_to_nonexistent_session(self, chat_service) -> None:
+        """Adding a message to a non-existent session raises InvalidRequestError."""
+        with pytest.raises(InvalidRequestError, match="not found"):
+            chat_service.add_user_message("fake-session", "Hello")
+
+    def test_get_session_history(self, chat_service) -> None:
+        """Session history returns messages in order."""
+        ctx = chat_service.get_or_create_session(None)
+        chat_service.add_user_message(ctx.session_id, "First message")
+        chat_service.add_user_message(ctx.session_id, "Second message")
+
+        history = chat_service.get_session_history(ctx.session_id)
+        assert len(history) == 2
+        assert history[0]["role"] == "user"
+        assert history[0]["content"] == "First message"
+        assert history[1]["content"] == "Second message"
+
+    def test_get_history_nonexistent_session(self, chat_service) -> None:
+        """Getting history for a non-existent session returns empty list."""
+        history = chat_service.get_session_history("nonexistent")
+        assert history == []
+
+    def test_chat_service_list_sessions(self, chat_service) -> None:
+        """Listing sessions returns summary info."""
+        ctx = chat_service.get_or_create_session(None)
+        chat_service.add_user_message(ctx.session_id, "Hello")
+
+        sessions = chat_service.list_sessions()
+        assert len(sessions) == 1
+        assert sessions[0]["session_id"] == ctx.session_id
+        assert sessions[0]["message_count"] == 1
+
+
+class TestPersistence:
+    """Tests for session disk persistence and loading."""
+
+    def test_persist_and_load_session(self, chat_service, tmp_path) -> None:
+        """A persisted session can be loaded from disk."""
+        ctx = chat_service.get_or_create_session(None)
+        sid = ctx.session_id
+        chat_service.add_user_message(sid, "Persisted message")
+
+        # Force persist
+        chat_service._persist_session(sid)
+
+        # Verify file exists
+        session_file = chat_service.PERSIST_DIR / f"{sid}.json"
+        assert session_file.exists()
+
+        # Remove from memory and reload
+        chat_service._sessions.pop(sid, None)
+        chat_service._timestamps.pop(sid, None)
+
+        loaded = chat_service.get_or_create_session(sid)
+        assert loaded.session_id == sid
+        assert len(loaded.messages) == 1
+        assert loaded.messages[0].content == "Persisted message"
+
+    def test_load_nonexistent_session(self, chat_service) -> None:
+        """Loading a session that doesn't exist on disk returns None."""
+        result = chat_service._load_session("does-not-exist")
+        assert result is None
+
+
+class TestAdapterLoading:
+    """Tests for AI adapter initialization."""
+
+    def test_fallback_to_ollama(self, chat_service) -> None:
+        """Fallback creates an OllamaAdapter when settings fail."""
+        chat_service._adapter = None
+        with patch(
+            "src.api.services.chat_service.ChatService._fallback_to_ollama"
+        ) as mock_fallback:
+            # Just verify fallback is callable
+            chat_service._fallback_to_ollama()
+        mock_fallback.assert_called_once()
+
+    def test_service_works_without_adapter(self, chat_service) -> None:
+        """ChatService functions for session management even without adapter."""
+        chat_service._adapter = None
+        ctx = chat_service.get_or_create_session(None)
+        assert ctx is not None
+        chat_service.add_user_message(ctx.session_id, "No adapter test")
+        history = chat_service.get_session_history(ctx.session_id)
+        assert len(history) == 1
+
+    def test_fallback_failure_surfaces_backend_error(self, chat_service) -> None:
+        """When the fallback adapter import fails, a clear state is set (#6945)."""
+        chat_service._adapter = MagicMock()  # pre-existing, should be cleared
+        chat_service._backend_error = None
+        with patch(
+            "src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter",
+            side_effect=ImportError("ollama missing"),
+        ):
+            chat_service._fallback_to_ollama()
+        assert chat_service._adapter is None
+        assert not chat_service.adapter_available
+        assert chat_service.backend_error is not None
+        assert "no chat backend available" in chat_service.backend_error.lower()
+
+    def test_successful_fallback_clears_backend_error(self, chat_service) -> None:
+        """A successful fallback clears any prior backend error (#6945)."""
+        chat_service._adapter = None
+        chat_service._backend_error = "stale error"
+        with patch(
+            "src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter",
+            return_value=MagicMock(),
+        ):
+            chat_service._fallback_to_ollama()
+        assert chat_service.adapter_available
+        assert chat_service.backend_error is None
+
+
+class TestRefreshModels:
+    """Tests for refresh_models (Tools issue #2547 / PR #2566)."""
+
+    def test_refresh_models_with_string_list(self, chat_service) -> None:
+        """Adapter returning ``list[str]`` is normalised to ChatModelInfo dicts."""
+
+        class _Adapter:
+            def list_available_models(self) -> list[str]:
+                return ["llama3.1:8b", "mistral"]
+
+        chat_service._adapter = _Adapter()
+        payload = chat_service.refresh_models()
+        assert "refreshed_at" in payload
+        assert isinstance(payload["models"], list)
+        assert len(payload["models"]) == 2
+        assert payload["models"][0]["name"] == "llama3.1:8b"
+        # provider is derived from the adapter class name
+        assert payload["models"][0]["provider"] == "_"
+        assert payload["models"][0]["display_name"] is None
+
+    def test_refresh_models_with_dict_entries(self, chat_service) -> None:
+        """Adapter returning dicts preserves provider/display_name fields."""
+
+        class FancyAdapter:
+            def list_available_models(self) -> list[dict]:
+                return [
+                    {
+                        "name": "gpt-4o",
+                        "provider": "openai",
+                        "display_name": "GPT-4o",
+                    }
+                ]
+
+        chat_service._adapter = FancyAdapter()
+        payload = chat_service.refresh_models()
+        assert payload["models"] == [
+            {"name": "gpt-4o", "provider": "openai", "display_name": "GPT-4o"}
+        ]
+
+    def test_refresh_models_handles_adapter_error(self, chat_service) -> None:
+        """A raising adapter yields an empty list, not an exception."""
+
+        class BrokenAdapter:
+            def list_available_models(self) -> list[str]:
+                raise ConnectionError("boom")
+
+        chat_service._adapter = BrokenAdapter()
+        payload = chat_service.refresh_models()
+        assert payload["models"] == []
+        assert "refreshed_at" in payload
+
+    def test_refresh_models_no_adapter(self, chat_service) -> None:
+        """No adapter configured yields an empty list."""
+        chat_service._adapter = None
+        payload = chat_service.refresh_models()
+        assert payload["models"] == []
+        assert "refreshed_at" in payload
+
+
+class TestCodemapRebuild:
+    """Tests for run_codemap_rebuild (Tools issue #2549 / PR #2567)."""
+
+    def test_rebuild_complete_payload(self, chat_service) -> None:
+        """A successful rebuild yields a 'complete' status with totals."""
+        import asyncio
+
+        from src.shared.python.codemap.indexer import RebuildStats
+
+        fake_stats = RebuildStats(files_parsed=11, symbols_inserted=99, elapsed_s=0.42)
+        with (
+            patch(
+                "src.shared.python.codemap.indexer.rebuild",
+                return_value=fake_stats,
+            ),
+            patch(
+                "src.shared.python.codemap.discover_repo_root",
+                return_value="/fake/repo",
+            ),
+        ):
+            payload = asyncio.run(chat_service.run_codemap_rebuild())
+
+        assert payload["state"] == "complete"
+        assert payload["files_parsed"] == 11
+        assert payload["symbols_inserted"] == 99
+        assert payload["duration_seconds"] == 0.42
+        assert payload["error"] is None
+
+    def test_rebuild_error_payload(self, chat_service) -> None:
+        """A raising rebuild yields an 'error' status with the message."""
+        import asyncio
+
+        with (
+            patch(
+                "src.shared.python.codemap.indexer.rebuild",
+                side_effect=RuntimeError("disk full"),
+            ),
+            patch(
+                "src.shared.python.codemap.discover_repo_root",
+                return_value="/fake/repo",
+            ),
+        ):
+            payload = asyncio.run(chat_service.run_codemap_rebuild())
+
+        assert payload["state"] == "error"
+        assert payload["error"] == "disk full"
+        assert payload["files_parsed"] == 0

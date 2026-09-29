@@ -1,0 +1,142 @@
+name: Agent Redundant PR Closer
+
+# Closes redundant PRs across the multi-agent fleet by priority.
+#
+# When two or more open PRs in this repo reference the same issue via a
+# closing keyword (Fixes|Closes|Resolves #N), the PR from the highest-
+# priority agent wins and the rest are closed with a deferral comment.
+# ``user``-authored PRs are never closed by automation.
+#
+# Priority order (see shared_scripts/agent_identity.py::PRIORITY_ORDER):
+#   user > maxwell-daemon > claude > codex > jules > local > gaai
+#
+# Triggers:
+# - Every time a PR is opened, reopened, marked ready for review,
+#   synchronized, or closed (fast response to new peer PRs and unmerged
+#   winner backstops)
+# - Schedule every 3 hours (backstop)
+# - Manual dispatch for ad-hoc runs
+#
+# Fail-open: a failure of this workflow does not halt agent progress.
+# It only means redundancy cleanup is deferred to the next run.
+#
+# Back-compat: the workflow is named "Agent Redundant PR Closer" but
+# preserves the previous "Jules Redundant PR Closer" identifier by
+# keeping its concurrency group. Teams can still locate it in workflow
+# history.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, synchronize, closed]
+  schedule:
+    - cron: "0 */3 * * *" # every 3 hours
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Detect only, don't close"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+      agent_filter:
+        description: "Comma-separated agent ids whose PRs are eligible to close (default: all non-user)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: jules-redundant-pr-closer-${{ github.repository }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  close-redundant:
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 10
+    steps:
+      - name: Generate Jules app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.JULES_APP_ID }}
+          private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout Repository_Management (for scripts)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: D-sorganization/Repository_Management
+          ref: main
+          path: .jules-tools
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Close redundant agent PRs
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          AGENT_FILTER: ${{ inputs.agent_filter }}
+          PR_ACTION: ${{ github.event.action || '' }}
+          EVENT_PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+        run: |
+          set -uo pipefail
+          DRY_FLAG=""
+          if [ "$DRY_RUN_INPUT" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          FILTER_FLAG=""
+          if [ -n "$AGENT_FILTER" ]; then
+            FILTER_FLAG="--agent-filter $AGENT_FILTER"
+          fi
+          BACKSTOP_FLAG=""
+          if [ "$PR_ACTION" = "closed" ] && [ -n "$EVENT_PR_NUMBER" ]; then
+            BACKSTOP_FLAG="--backstop-pr $EVENT_PR_NUMBER"
+          fi
+          # Fail-open: never let a coordination glitch fail the job.
+          PYTHONPATH=".jules-tools" python -m scripts.close_redundant_agent_prs \
+            --repo "$REPO_NAME" \
+            $DRY_FLAG \
+            $FILTER_FLAG \
+            $BACKSTOP_FLAG || {
+              echo "::warning::redundant-PR closer exited non-zero; continuing"
+              exit 0
+            }
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Agent Redundant PR Closer"
+            echo ""
+            echo "- **Repo:** ${{ github.repository }}"
+            echo "- **Trigger:** ${{ github.event_name }}"
+            echo "- **Dry run:** ${{ inputs.dry_run || 'false' }}"
+            echo "- **Agent filter:** ${{ inputs.agent_filter || 'all non-user' }}"
+          } >> "$GITHUB_STEP_SUMMARY"

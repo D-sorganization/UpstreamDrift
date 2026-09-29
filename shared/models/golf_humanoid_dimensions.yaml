@@ -1,0 +1,282 @@
+# Golf Humanoid — Body Segment Dimensions
+#
+# Single source of truth for the body-segment lengths used by every physics-
+# engine wrapper (Simscape, MuJoCo, Drake, Pinocchio, OpenSim). See
+# src/engines/CROSS_ENGINE_PARITY_SPEC.md §2.6.
+#
+# Units: SI throughout (metres, kg, kg·m²).
+#
+# Provenance: pulled from the live Simscape model workspace
+# (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/
+# GolfSwing3D_Kinetic.slx`) as captured in the dataset trial CSV
+# `trial_001_20251030_202704.csv` (golf_swing_dataset_20251030). The
+# Simscape model authors most segment dimensions in inches and lets the
+# Simscape body-element units convert internally; this YAML stores the
+# converted SI values so every downstream engine is unit-clean.
+#
+# Inch → metre conversion factor: 0.0254 (exact, by definition).
+#
+# Schema:
+#   <name>:
+#     value:    float           # numeric value (SI)
+#     units:    str             # "m" for lengths, "kg" for masses
+#     source:   str             # provenance string
+#     simscape_name: str        # original model-workspace identifier
+#     raw_value: float          # value as stored in the model workspace
+#     raw_units: str            # "in" | "m" | "kg" | "lb"
+#     notes:    str             # optional commentary
+#
+# Last updated: 2026-05-06 (issue #4093)
+
+schema_version: 1
+units_system: SI
+
+# ---------------------------------------------------------------------------
+# Trunk segments
+# ---------------------------------------------------------------------------
+
+UpperTorsoLength:
+  value: 0.3048
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: UpperTorsoLength
+  raw_value: 12
+  raw_units: in
+  notes: >
+    Vertical extent from the spine-base (HUB) to the top of the upper torso
+    (where the neck attaches). The Simscape FK chain models the spine landmark
+    as half this length above the hip and the hub as the full length above the
+    spine landmark.
+
+LowerTorsoLength:
+  value: 0.3048
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: LowerTorsoLength
+  raw_value: 12
+  raw_units: in
+  notes: >
+    Vertical extent from the pelvis floor (hip joint) down to the lower-torso
+    base. Used by the Simscape Lower Torso Solid block.
+
+# ---------------------------------------------------------------------------
+# Shoulder geometry
+# ---------------------------------------------------------------------------
+
+HubtoSLength:
+  value: 0.254
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: HubtoSLength
+  raw_value: 10
+  raw_units: in
+  notes: >
+    Lateral distance from the spinal hub to the medial end of the
+    sternoclavicular joint. The Simscape chain places the actual shoulder
+    joints at HubtoSLength + LeftShoulderWidth (or RightShoulderWidth) along
+    ±x from the hub.
+
+LeftShoulderWidth:
+  value: 0.254
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: LeftShoulderWidth
+  raw_value: 10
+  raw_units: in
+  notes: >
+    Lateral offset from the medial scapular landmark to the glenohumeral joint
+    centre. Combines with HubtoSLength to define the world-space shoulder
+    position.
+
+RightShoulderWidth:
+  value: 0.254
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: RightShoulderWidth
+  raw_value: 10
+  raw_units: in
+  notes: Mirror of LeftShoulderWidth. Symmetric in the canonical model.
+
+# ---------------------------------------------------------------------------
+# Arm segments
+# ---------------------------------------------------------------------------
+
+LeftUpperArmLength:
+  value: 0.3048
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: LeftUpperArmLength
+  raw_value: 12
+  raw_units: in
+  notes: >
+    Glenohumeral joint to elbow joint. The Simscape FK helper models the
+    elbow as the upper-arm displacement along the local -z axis.
+
+RightUpperArmLength:
+  value: 0.3048
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: RightUpperArmLength
+  raw_value: 12
+  raw_units: in
+  notes: Mirror of LeftUpperArmLength.
+
+UpperArmLength:
+  value: 0.3048
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: UpperArmLength
+  raw_value: 12
+  raw_units: in
+  notes: >
+    Single-side legacy parameter kept in lockstep with Left/RightUpperArmLength.
+    Used by Simscape Body geometry blocks that don't carry a side suffix
+    (e.g. visualization cylinders).
+
+LowerArmLength:
+  value: 0.3556
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: LowerArmLength
+  raw_value: 14
+  raw_units: in
+  notes: >
+    Forearm length (elbow → wrist). Single name in the model — Simscape uses
+    the same value for both forearms.
+
+LeftWristStandoffLength:
+  value: 0.0254
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: LeftWristStandoffLength
+  raw_value: 1
+  raw_units: in
+  notes: >
+    Small offset from the wrist joint frame to the grip-anchor frame on the
+    palm side. Kept separate so the FK helper can position the grip-anchor
+    correctly without re-solving the wrist DOF.
+
+RightWristStandoffLength:
+  value: 0.0254
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: RightWristStandoffLength
+  raw_value: 1
+  raw_units: in
+  notes: Mirror of LeftWristStandoffLength.
+
+# ---------------------------------------------------------------------------
+# Visualisation geometry (cylinders / spheres in the Simscape body blocks)
+# ---------------------------------------------------------------------------
+
+NeckLength:
+  value: 0.254
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: NeckLength
+  raw_value: 10
+  raw_units: in
+  notes: >
+    Visualisation-only — the Simscape kinematic chain treats the head as
+    rigidly attached to the upper torso. Engines that need to render a head
+    can use this length.
+
+NeckRadius:
+  value: 0.0508
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: NeckRadius
+  raw_value: 2
+  raw_units: in
+  notes: Visualisation cylinder radius for the neck.
+
+UpperArmRadius:
+  value: 0.04445
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: UpperArmRadius
+  raw_value: 1.75
+  raw_units: in
+  notes: Visualisation cylinder radius for the upper-arm segment.
+
+HubtoSRadius:
+  value: 0.0762
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: HubtoSRadius
+  raw_value: 3
+  raw_units: in
+  notes: Visualisation cylinder radius for the hub-to-shoulder strut.
+
+HeadRadius:
+  value: 0.127
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: HeadRadius
+  raw_value: 5
+  raw_units: in
+  notes: Visualisation sphere radius for the head.
+
+# ---------------------------------------------------------------------------
+# Club geometry
+# ---------------------------------------------------------------------------
+
+ShaftLength:
+  value: 1.0
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: ShaftLength
+  raw_value: 1.0
+  raw_units: m
+  notes: >
+    Authored in METRES in the model (LengthUnits='m' on the General Flexible
+    Beam block). NOT inches — apply no conversion. The shaft is modelled as a
+    hollow cylindrical beam, radius 0.010 m, thickness 0.0015 m, density
+    500 kg/m³.
+
+ClubheadRadius:
+  value: 0.0635
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: ClubheadRadius
+  raw_value: 2.5
+  raw_units: in
+  notes: >
+    Visualisation sphere radius for the clubhead (the Simscape mass model is
+    a Spherical Solid with this radius).
+
+CFVectorLength:
+  value: 0.127
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: CFVectorLength
+  raw_value: 5
+  raw_units: in
+  notes: >
+    Length of the centrifugal-force visualisation vector at the clubhead.
+    Diagnostic only — does not affect dynamics.
+
+COMRodLength:
+  value: 0.0508
+  units: m
+  source: "Simscape model workspace (GolfSwing3D_Kinetic.slx) via dataset CSV"
+  simscape_name: COMRodLength
+  raw_value: 2
+  raw_units: in
+  notes: >
+    Length of the COM-marker rod visualisation at each segment. Diagnostic
+    only.
+
+# ---------------------------------------------------------------------------
+# Derived / convenience
+# ---------------------------------------------------------------------------
+
+derived:
+  hub_to_left_shoulder_total_m: 0.508
+  hub_to_right_shoulder_total_m: 0.508
+  left_arm_to_grip_total_m: 0.6858
+  right_arm_to_grip_total_m: 0.6858
+  notes: >
+    hub_to_*_shoulder_total = HubtoSLength + (Left|Right)ShoulderWidth.
+    *_arm_to_grip_total = (Left|Right)UpperArmLength + LowerArmLength
+                         + (Left|Right)WristStandoffLength.

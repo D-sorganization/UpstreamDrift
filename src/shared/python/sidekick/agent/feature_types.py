@@ -1,0 +1,60 @@
+"""Feature catalog value types."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from enum import Enum
+from types import MappingProxyType
+
+
+class FeatureKind(str, Enum):  # noqa: UP042 - Python 3.10 compatibility.
+    """Closed set of feature categories the catalog understands."""
+
+    CALCULATOR = "calculator"
+    PROCESS_CALCULATOR = "process_calculator"
+    SUBTAB = "subtab"
+    WORKFLOW = "workflow"
+    THEME = "theme"
+
+
+_NAMESPACE_PREFIX: Mapping[str, str] = MappingProxyType(
+    {
+        FeatureKind.CALCULATOR.value: "calculator.",
+        FeatureKind.PROCESS_CALCULATOR.value: "process_calculator.",
+        FeatureKind.SUBTAB.value: "subtab.",
+        FeatureKind.WORKFLOW.value: "workflow.",
+        FeatureKind.THEME.value: "theme.",
+    }
+)
+_VALID_KIND_VALUES = frozenset(k.value for k in FeatureKind)
+
+
+@dataclass(frozen=True, slots=True)
+class FeatureEntry:
+    """One row in the machine-readable feature catalog."""
+
+    feature_id: str
+    kind: str
+    title: str
+    summary: str
+    module: str
+    help_anchors: tuple[str, ...] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        if not self.feature_id:
+            raise ValueError("feature_id must be a non-empty string")
+        if self.kind not in _VALID_KIND_VALUES:
+            raise ValueError(f"kind={self.kind!r} not in {sorted(_VALID_KIND_VALUES)}")
+        expected = _NAMESPACE_PREFIX[self.kind]
+        if not self.feature_id.startswith(expected):
+            raise ValueError(
+                f"feature_id {self.feature_id!r} does not match {self.kind} "
+                f"namespace {expected!r}"
+            )
+        if not self.title:
+            raise ValueError("title must be non-empty")
+        if not self.summary:
+            raise ValueError("summary must be non-empty")
+        if not self.module:
+            raise ValueError("module must be a non-empty dotted path")

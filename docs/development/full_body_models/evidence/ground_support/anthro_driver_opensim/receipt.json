@@ -1,0 +1,93 @@
+{
+  "schema_version": "opensim-document-ik/v1",
+  "note": "Relabelled under #10960 P1-8: dropped inherited MuJoCo fields (dynamics, address, ground, hip_calibration, club, grip_rotation, wrists_bounded, posture_top_of_backswing, and IK closure/attachments). Historical diagnostic evidence. ik.frames was the hard-coded literal 654 in document_ik.py and is unverified, so it is null.",
+  "backend": "opensim",
+  "engine": "opensim",
+  "base_spec_file": "full_body_spec_anthro_driver.json",
+  "base_spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+  "spec_file": "full_body_spec_anthro_driver.json",
+  "spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+  "candidate_sha256": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+  "capture_sha256": "203ad3629ea38c4c4705426bbd938de8c9706ea364c08366b61068f554eaa07f",
+  "labels": [
+    "WaistLeft",
+    "WaistRight",
+    "WaistLBack",
+    "WaistRBack",
+    "BackTop",
+    "BackLeft",
+    "BackRight",
+    "HeadTop",
+    "HeadFront",
+    "HeadSide",
+    "LShoulderTop",
+    "LShoulderBack",
+    "LElbowOut",
+    "LUArmHigh",
+    "LWristTop",
+    "RShoulderTop",
+    "RShoulderBack",
+    "RElbowOut",
+    "RUArmHigh",
+    "RWristTop",
+    "LKneeOut",
+    "LToeIn",
+    "LToeOut",
+    "LAnkleOut",
+    "RKneeOut",
+    "RToeIn",
+    "RToeOut",
+    "RAnkleOut",
+    "Marker_2:2:1",
+    "Marker_2:2:2",
+    "Marker_2:2:3",
+    "Marker_3:3:1",
+    "Marker_3:3:2",
+    "Marker_3:3:3"
+  ],
+  "elapsed_s": 71.83356401103083,
+  "qualification": "OpenSim full-body IK milestone on shared anthropometric document model (MS-41 #10340); IK-only, dynamics not_run: use moco",
+  "canonical_reference": {
+    "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
+    "whole_marker_rmse_m": 0.05226635663114428
+  },
+  "ik": {
+    "frames": null,
+    "marker_rms_m": 0.26215802208491734,
+    "segment_rms_m": {
+      "head": 0.1367556812693762,
+      "trunk": 0.10809730438117138,
+      "pelvis": 0.15320978659310758,
+      "left_arm": 0.2554127485163983,
+      "right_arm": 0.22611689942805088,
+      "left_leg": 0.24982128045289353,
+      "right_leg": 0.2218141814922127,
+      "club": 0.43600895112110344
+    }
+  },
+  "acceptance": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "DIAGNOSTIC",
+    "note": "Relabelled under #10960 P1-8: dropped inherited MuJoCo fields (dynamics, address, ground, hip_calibration, club, grip_rotation, wrists_bounded, posture_top_of_backswing, and IK closure/attachments). Historical diagnostic evidence.",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.06,
+        "measured": 0.26215802208491734,
+        "unit": "m",
+        "reason": "OpenSim IK whole RMSE 262.16 mm vs MuJoCo canonical 52.27 mm (delta 209.89 mm > 5.00 mm)"
+      },
+      {
+        "name": "dynamics_stage",
+        "status": "not_run",
+        "threshold": 0.0,
+        "measured": null,
+        "unit": "stage",
+        "reason": "not_run: use moco"
+      }
+    ],
+    "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical"
+  }
+}

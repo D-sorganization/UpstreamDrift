@@ -1,0 +1,80 @@
+name: Maintenance Global Control
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to perform"
+        required: true
+        default: "pause"
+        type: choice
+        options:
+          - pause
+          - resume
+      reason:
+        description: "Reason for pause/resume"
+        required: false
+        default: "Maintenance"
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+  control:
+    timeout-minutes: 30
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Update Pause State
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ "${{ inputs.action }}" == "pause" ]; then
+            echo "Paused by workflow dispatch" > .github/WORKFLOWS_PAUSED
+            echo "Reason: ${{ inputs.reason }}" >> .github/WORKFLOWS_PAUSED
+            git add .github/WORKFLOWS_PAUSED
+            git commit -m "chore(maintenance): pause workflows [${{ inputs.reason }}]"
+            git push
+          else
+            rm -f .github/WORKFLOWS_PAUSED
+            git add .github/WORKFLOWS_PAUSED || true
+            git commit -m "chore(maintenance): resume workflows"
+            git push
+          fi
+
+          echo "## - Global Workflow Control" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.action }}" == "pause" ]; then
+            echo "- **Status:** -- **PAUSED**" >> $GITHUB_STEP_SUMMARY
+            echo "- **Reason:** ${{ inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status:** -- **RESUMED**" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<robot name="pendulum_putter">
+  <material name="base_material">
+    <color rgba="0.3 0.3 0.35 1"/>
+  </material>
+  <material name="metal">
+    <color rgba="0.7 0.7 0.75 1"/>
+  </material>
+  <material name="mount_material">
+    <color rgba="0.5 0.5 0.55 1"/>
+  </material>
+  <material name="arm_material">
+    <color rgba="0.4 0.4 0.45 1"/>
+  </material>
+  <link name="world">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.001"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1e-09" iyz="0" izz="1e-09"/>
+    </inertial>
+  </link>
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="8"/>
+      <inertia ixx="0.0616667" ixy="0" ixz="0" iyy="0.0616667" iyz="0" izz="0.12"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.3 0.05"/>
+      </geometry>
+      <material name="base_material"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.3 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="vertical_post">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.5"/>
+      <inertia ixx="0.0802344" ixy="0" ixz="0" iyy="0.0802344" iyz="0" izz="0.00046875"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.4" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.025" length="0.8"/>
+      </geometry>
+      <material name="metal"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.4" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.025" length="0.8"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="shoulder_mount">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.000466667" ixy="0" ixz="0" iyy="0.0004" iyz="0" izz="0.000466667"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.08"/>
+      </geometry>
+      <material name="mount_material"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="pendulum_arm">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.3"/>
+      <inertia ixx="0.00401688" ixy="0" ixz="0" iyy="0.00401688" iyz="0" izz="3.375e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.015" length="0.4"/>
+      </geometry>
+      <material name="arm_material"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.015" length="0.4"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="club_mount">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.1"/>
+      <inertia ixx="1.5e-05" ixy="0" ixz="0" iyy="1.5e-05" iyz="0" izz="1.5e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.03 0.03"/>
+      </geometry>
+      <material name="mount_material"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.03 0.03"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <joint name="base_to_post" type="fixed">
+    <parent link="base_link"/>
+    <child link="vertical_post"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+  </joint>
+  <joint name="post_to_shoulder" type="fixed">
+    <parent link="vertical_post"/>
+    <child link="shoulder_mount"/>
+    <origin xyz="0 0 0.8" rpy="0 0 0"/>
+  </joint>
+  <joint name="pendulum_joint" type="revolute">
+    <parent link="shoulder_mount"/>
+    <child link="pendulum_arm"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.785398" upper="0.785398" effort="100" velocity="5"/>
+    <dynamics damping="0.05" friction="0.01"/>
+  </joint>
+  <joint name="arm_to_mount" type="fixed">
+    <parent link="pendulum_arm"/>
+    <child link="club_mount"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+  </joint>
+</robot>

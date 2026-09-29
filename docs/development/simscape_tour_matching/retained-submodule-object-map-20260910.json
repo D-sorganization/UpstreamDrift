@@ -1,0 +1,74 @@
+[
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9810\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_9810_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9813\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_9813_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9815\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_9815_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9816\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_9816_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_9846\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_9846_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_ingest\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_ingest_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\_wt_claude_p1merge\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\_wt_claude_p1merge_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-analysis-drawings-9932\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-analysis-drawings-9932_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-analysis-metrics-9942\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-analysis-metrics-9942_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-impact-claim-preservation\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-impact-claim-preservation_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-impact-provider-pin\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-impact-provider-pin_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-impact-reference\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-impact-reference_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-reference-9914\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-reference-9914_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-9407-install-path\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-9407-install-path_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-capability-atlas\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-capability-atlas_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-capture-setup\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-capture-setup_modules_vendor_ud-tools_objects"
+  },
+  {
+    "source": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\worktrees\\UpstreamDrift-swing-editing\\modules\\vendor\\ud-tools\\objects",
+    "destination": "C:\\Users\\diete\\Repositories\\UpstreamDrift\\.git\\retained-submodule-objects\\UpstreamDrift-swing-editing_modules_vendor_ud-tools_objects"
+  }
+]

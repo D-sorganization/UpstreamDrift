@@ -1,0 +1,3682 @@
+{
+  "blockers": [
+    {
+      "issue": 10337,
+      "kind": "native_engine",
+      "title": "MS-30: Drake native G1 fit"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for drake/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "MS-100 acceptance receipt path missing"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "MS-100 acceptance receipt hash missing"
+    },
+    {
+      "issue": 10352,
+      "kind": "conformance",
+      "title": "MS-72 conformance version missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "replay",
+      "title": "Native replay receipt path missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "replay",
+      "title": "Native replay receipt hash missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "convergence",
+      "title": "Numerical-convergence receipt path missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "convergence",
+      "title": "Numerical-convergence receipt hash missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "provenance",
+      "title": "Candidate hash missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "provenance",
+      "title": "Model hash missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "provenance",
+      "title": "Runtime hash missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "provenance",
+      "title": "Gate hash missing"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-110: Drake driver/iron G2 native match"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for drake/driver"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-110: Drake driver/iron G3 native match"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for drake/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for drake/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for drake/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for drake/iron"
+    },
+    {
+      "issue": 10336,
+      "kind": "native_engine",
+      "title": "MS-21: MuJoCo G1 native dynamic match and replay"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for mujoco/driver"
+    },
+    {
+      "issue": 10336,
+      "kind": "native_engine",
+      "title": "MS-21: MuJoCo G2 through-impact ladder"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for mujoco/driver"
+    },
+    {
+      "issue": 10336,
+      "kind": "native_engine",
+      "title": "MS-21: MuJoCo G3 full-capture ladder"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for mujoco/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for mujoco/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for mujoco/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for mujoco/iron"
+    },
+    {
+      "issue": 10346,
+      "kind": "native_engine",
+      "title": "MS-53: MyoSuite excitation-driven G1"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for myosuite/driver"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-112: MyoSuite muscle-driven G2"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for myosuite/driver"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-112: MyoSuite muscle-driven G3"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for myosuite/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for myosuite/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for myosuite/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for myosuite/iron"
+    },
+    {
+      "issue": 10341,
+      "kind": "native_engine",
+      "title": "MS-42: OpenSim Moco G1 on shared document"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for opensim/driver"
+    },
+    {
+      "issue": 10341,
+      "kind": "native_engine",
+      "title": "MS-42 phase B: OpenSim G2"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for opensim/driver"
+    },
+    {
+      "issue": 10341,
+      "kind": "native_engine",
+      "title": "MS-42 phase B: OpenSim G3"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for opensim/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for opensim/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for opensim/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for opensim/iron"
+    },
+    {
+      "issue": 10381,
+      "kind": "native_engine",
+      "title": "MS-107: Pinocchio/Crocoddyl replayable G1"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for pinocchio/driver"
+    },
+    {
+      "issue": 10385,
+      "kind": "native_engine",
+      "title": "MS-111: Pinocchio driver/iron G2 continuation"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for pinocchio/driver"
+    },
+    {
+      "issue": 10385,
+      "kind": "native_engine",
+      "title": "MS-111: Pinocchio driver/iron G3 continuation"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for pinocchio/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for pinocchio/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for pinocchio/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for pinocchio/iron"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-109: Simscape full-body flagship G1"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for simscape/driver"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-109: Simscape full-body flagship G2"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for simscape/driver"
+    },
+    {
+      "issue": 10378,
+      "kind": "native_engine",
+      "title": "MS-104 folded MS-109: Simscape full-body flagship G3"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for simscape/driver"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G1 receipt for simscape/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G2 receipt for simscape/iron"
+    },
+    {
+      "issue": 10374,
+      "kind": "acceptance",
+      "title": "No MS-100 physically accepted G3 receipt for simscape/iron"
+    }
+  ],
+  "generated_at": "2026-09-22T11:00:00Z",
+  "incomplete_required_count": 36,
+  "partial_rows": [
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "model_class",
+          "title": "27-coordinate Simscape remains a reduced-model oracle, not flagship G3"
+        }
+      ],
+      "club": "driver",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": "1.0.0",
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": false,
+      "ledger_receipt_path": null,
+      "model_class": "reduced_oracle",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    }
+  ],
+  "qualification_note": "Software-contract matrix only; no invented six-engine native pass. Release stays blocked until every required row links MS-100 acceptance, MS-72 conformance, native replay, and numerical-convergence receipts.",
+  "release_status": "blocked",
+  "required_rows": [
+    {
+      "blockers": [
+        {
+          "issue": 10337,
+          "kind": "native_engine",
+          "title": "MS-30: Drake native G1 fit"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for drake/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "drake",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-110: Drake driver/iron G2 native match"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for drake/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "drake",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-110: Drake driver/iron G3 native match"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for drake/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "drake",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10337,
+          "kind": "native_engine",
+          "title": "MS-30: Drake native G1 fit"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for drake/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "drake",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-110: Drake driver/iron G2 native match"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for drake/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "drake",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-110: Drake driver/iron G3 native match"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for drake/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "drake",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10336,
+          "kind": "native_engine",
+          "title": "MS-21: MuJoCo G1 native dynamic match and replay"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for mujoco/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "mujoco",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10336,
+          "kind": "native_engine",
+          "title": "MS-21: MuJoCo G2 through-impact ladder"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for mujoco/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "mujoco",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10336,
+          "kind": "native_engine",
+          "title": "MS-21: MuJoCo G3 full-capture ladder"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for mujoco/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "mujoco",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10336,
+          "kind": "native_engine",
+          "title": "MS-21: MuJoCo G1 native dynamic match and replay"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for mujoco/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "mujoco",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10336,
+          "kind": "native_engine",
+          "title": "MS-21: MuJoCo G2 through-impact ladder"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for mujoco/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "mujoco",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10336,
+          "kind": "native_engine",
+          "title": "MS-21: MuJoCo G3 full-capture ladder"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for mujoco/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "mujoco",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10346,
+          "kind": "native_engine",
+          "title": "MS-53: MyoSuite excitation-driven G1"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for myosuite/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "myosuite",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-112: MyoSuite muscle-driven G2"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for myosuite/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "myosuite",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-112: MyoSuite muscle-driven G3"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for myosuite/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "myosuite",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10346,
+          "kind": "native_engine",
+          "title": "MS-53: MyoSuite excitation-driven G1"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for myosuite/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "myosuite",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-112: MyoSuite muscle-driven G2"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for myosuite/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "myosuite",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-112: MyoSuite muscle-driven G3"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for myosuite/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "myosuite",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10341,
+          "kind": "native_engine",
+          "title": "MS-42: OpenSim Moco G1 on shared document"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for opensim/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "opensim",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10341,
+          "kind": "native_engine",
+          "title": "MS-42 phase B: OpenSim G2"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for opensim/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "opensim",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10341,
+          "kind": "native_engine",
+          "title": "MS-42 phase B: OpenSim G3"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for opensim/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "opensim",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10341,
+          "kind": "native_engine",
+          "title": "MS-42: OpenSim Moco G1 on shared document"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for opensim/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "opensim",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10341,
+          "kind": "native_engine",
+          "title": "MS-42 phase B: OpenSim G2"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for opensim/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "opensim",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10341,
+          "kind": "native_engine",
+          "title": "MS-42 phase B: OpenSim G3"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for opensim/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "opensim",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10381,
+          "kind": "native_engine",
+          "title": "MS-107: Pinocchio/Crocoddyl replayable G1"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for pinocchio/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "pinocchio",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10385,
+          "kind": "native_engine",
+          "title": "MS-111: Pinocchio driver/iron G2 continuation"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for pinocchio/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "pinocchio",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10385,
+          "kind": "native_engine",
+          "title": "MS-111: Pinocchio driver/iron G3 continuation"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for pinocchio/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "pinocchio",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10381,
+          "kind": "native_engine",
+          "title": "MS-107: Pinocchio/Crocoddyl replayable G1"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for pinocchio/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "pinocchio",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10385,
+          "kind": "native_engine",
+          "title": "MS-111: Pinocchio driver/iron G2 continuation"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for pinocchio/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "pinocchio",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10385,
+          "kind": "native_engine",
+          "title": "MS-111: Pinocchio driver/iron G3 continuation"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for pinocchio/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "pinocchio",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "any",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-109: Simscape full-body flagship G1"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for simscape/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-109: Simscape full-body flagship G2"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for simscape/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-109: Simscape full-body flagship G3"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for simscape/driver"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "driver",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-109: Simscape full-body flagship G1"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G1 receipt for simscape/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G1",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-109: Simscape full-body flagship G2"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G2 receipt for simscape/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G2",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    },
+    {
+      "blockers": [
+        {
+          "issue": 10378,
+          "kind": "native_engine",
+          "title": "MS-104 folded MS-109: Simscape full-body flagship G3"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "No MS-100 physically accepted G3 receipt for simscape/iron"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt path missing"
+        },
+        {
+          "issue": 10374,
+          "kind": "acceptance",
+          "title": "MS-100 acceptance receipt hash missing"
+        },
+        {
+          "issue": 10352,
+          "kind": "conformance",
+          "title": "MS-72 conformance version missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "replay",
+          "title": "Native replay receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt path missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "convergence",
+          "title": "Numerical-convergence receipt hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Candidate hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Model hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Runtime hash missing"
+        },
+        {
+          "issue": 10378,
+          "kind": "provenance",
+          "title": "Gate hash missing"
+        }
+      ],
+      "club": "iron",
+      "engine": "simscape",
+      "evidence": {
+        "candidate_sha": null,
+        "gate_hash": null,
+        "model_sha": null,
+        "ms100_acceptance_path": null,
+        "ms100_acceptance_sha256": null,
+        "ms70_parity_receipt_path": null,
+        "ms72_conformance_version": null,
+        "native_replay_receipt_path": null,
+        "native_replay_sha256": null,
+        "numerical_convergence_receipt_path": null,
+        "numerical_convergence_sha256": null,
+        "runtime_hash": null
+      },
+      "gate": "G3",
+      "is_qualified": false,
+      "is_required": true,
+      "ledger_receipt_path": null,
+      "model_class": "full_body_flagship",
+      "platform": "deskcomputer",
+      "status": "blocked"
+    }
+  ],
+  "schema_version": "full-swing-qualification/1.0.0"
+}

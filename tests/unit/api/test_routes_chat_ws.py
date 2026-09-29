@@ -1,0 +1,321 @@
+"""Unit tests for the chat WebSocket API route."""
+
+from typing import Any
+
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect as StarletteWSDisconnect
+
+from src.api.routes.chat_ws import router
+
+pytestmark = pytest.mark.unit
+
+
+class MockSession:
+    def __init__(self, session_id):
+        self.session_id = session_id
+
+
+class MockChatService:
+    def __init__(self):
+        self.add_message_error = False
+        self.stream_chunks = [{"type": "chunk", "content": "mock "}, "response"]
+        # Issue #7687: toggles that make the model-refresh / codemap-rebuild
+        # actions raise, to verify failures surface as error frames instead of
+        # tearing down the socket.
+        self.refresh_models_error = False
+        self.codemap_rebuild_error = False
+
+    def refresh_models(self):
+        if self.refresh_models_error:
+            raise RuntimeError("provider unreachable")
+        return {"models": ["m1", "m2"], "refreshed_at": "now"}
+
+    async def run_codemap_rebuild(self):
+        if self.codemap_rebuild_error:
+            raise RuntimeError("indexer crashed")
+        return {"state": "complete", "files_parsed": 3, "symbols_inserted": 9}
+
+    def get_or_create_session(self, session_id):
+        return MockSession(session_id or "new_id")
+
+    def list_sessions(self):
+        return [{"session_id": "session_1"}]
+
+    def get_session_history(self, session_id):
+        return [{"role": "user", "content": "hello"}]
+
+    def add_user_message(self, session_id, message, engine_context):
+        if self.add_message_error:
+            raise ValueError("Test error")
+
+    async def stream_response(self, session_id):
+        for chunk in self.stream_chunks:
+            yield chunk
+
+
+@pytest.fixture
+def app() -> FastAPI:
+    """Create a FastAPI app with the chat router."""
+    test_app = FastAPI()
+    test_app.include_router(router)
+    test_app.state.chat_service = MockChatService()
+    return test_app
+
+
+@pytest.fixture(autouse=True)
+def _bypass_ws_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Bypass WebSocket authentication (issue #5913) for these route tests.
+
+    The chat WS endpoint now calls :func:`resolve_ws_user` before
+    ``accept()`` and closes with code 1008 when unauthenticated. These tests
+    exercise the chat protocol, not the auth gate (covered by
+    ``test_ws_auth_hardening.py``), so we stub the resolver to return a
+    non-``None`` user — mirroring the pattern in ``test_simulation_ws.py``.
+    """
+
+    async def _fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr("src.api.routes.chat_ws.resolve_ws_user", _fake_resolve_ws_user)
+
+
+@pytest.fixture
+def client(app: FastAPI) -> TestClient:
+    """Create a test client."""
+    return TestClient(app)
+
+
+def test_routes_chat_ws_list_sessions(client: TestClient) -> None:
+    """Test listing chat sessions."""
+    response = client.get("/chat/sessions")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+
+def test_routes_chat_ws_get_history(client: TestClient) -> None:
+    """Test getting chat history."""
+    response = client.get("/chat/sessions/session_1/history")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["session_id"] == "session_1"
+    assert len(data["messages"]) == 1
+
+
+def test_chat_websocket_new_session_flow(client: TestClient) -> None:
+    """Test WebSocket connection and the new_session action."""
+    with client.websocket_connect("/ws/chat/new") as websocket:
+        data = websocket.receive_json()
+        assert data["type"] == "session_info"
+        assert data["session_id"] == "new_id"
+
+        websocket.send_json({"action": "new_session"})
+        data = websocket.receive_json()
+        assert data["type"] == "session_created"
+        assert data["session_id"] == "new_id"
+
+
+def test_chat_websocket_history_flow(client: TestClient) -> None:
+    """Test getting history through WebSocket."""
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        data = websocket.receive_json()
+        assert data["type"] == "session_info"
+        assert data["session_id"] == "session_1"
+
+        websocket.send_json({"action": "history"})
+        data = websocket.receive_json()
+        assert data["type"] == "history"
+        assert len(data["messages"]) == 1
+        assert data["messages"][0]["content"] == "hello"
+
+
+def test_chat_websocket_send_flow(client: TestClient) -> None:
+    """Test sending a message and streaming the response."""
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        # Ignore session info
+        websocket.receive_json()
+
+        # Test empty message
+        websocket.send_json({"action": "send", "message": "   "})
+        data = websocket.receive_json()
+        assert data["type"] == "error"
+        assert data["detail"] == "Empty message"
+
+        # Test valid message
+        websocket.send_json(
+            {"action": "send", "message": "hello", "engine_context": "mujoco"}
+        )
+
+        # Receive chunk 1 (dict)
+        data = websocket.receive_json()
+        assert data["type"] == "chunk"
+        assert data["content"] == "mock "
+
+        # Receive chunk 2 (string)
+        data = websocket.receive_json()
+        assert data["type"] == "chunk"
+        assert data["content"] == "response"
+
+        # Receive complete
+        data = websocket.receive_json()
+        assert data["type"] == "complete"
+        assert data["session_id"] == "session_1"
+
+
+def test_chat_websocket_send_error(client: TestClient, app: FastAPI) -> None:
+    """Test sending a message when add_user_message raises an error."""
+    app.state.chat_service.add_message_error = True
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "send", "message": "hello"})
+        data = websocket.receive_json()
+        assert data["type"] == "error"
+        assert data["detail"] == "Test error"
+
+
+def test_chat_websocket_unknown_action(client: TestClient) -> None:
+    """Test sending an unknown action."""
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "unknown_action"})
+        data = websocket.receive_json()
+        assert data["type"] == "error"
+        assert "Unknown action: unknown_action" in data["detail"]
+
+
+def test_refresh_models_success(client: TestClient) -> None:
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "refresh_models"})
+        data = websocket.receive_json()
+        assert data["type"] == "model_list"
+        assert data["models"] == ["m1", "m2"]
+
+
+def test_refresh_models_failure_sends_error_frame(
+    client: TestClient, app: FastAPI
+) -> None:
+    """Issue #7687: a refresh failure must yield an error frame, and the
+    socket must stay alive for subsequent actions."""
+    app.state.chat_service.refresh_models_error = True
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "refresh_models"})
+        data = websocket.receive_json()
+        assert data["type"] == "error"
+        # Socket survived — a follow-up action still works.
+        websocket.send_json({"action": "history"})
+        follow = websocket.receive_json()
+        assert follow["type"] == "history"
+
+
+def test_index_codebase_success(client: TestClient) -> None:
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "index_codebase"})
+        running = websocket.receive_json()
+        assert running["type"] == "index_status"
+        assert running["state"] == "running"
+        final = websocket.receive_json()
+        assert final["type"] == "index_status"
+        assert final["state"] == "complete"
+
+
+def test_index_codebase_failure_sends_error_status(
+    client: TestClient, app: FastAPI
+) -> None:
+    """Issue #7687: a rebuild crash must produce an ``error`` index_status
+    frame rather than killing the socket."""
+    app.state.chat_service.codemap_rebuild_error = True
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.send_json({"action": "index_codebase"})
+        running = websocket.receive_json()
+        assert running["state"] == "running"
+        err = websocket.receive_json()
+        assert err["type"] == "index_status"
+        assert err["state"] == "error"
+        # Socket survived.
+        websocket.send_json({"action": "history"})
+        assert websocket.receive_json()["type"] == "history"
+
+
+def test_chat_websocket_disconnect(client: TestClient) -> None:
+    """Test that disconnect is handled silently."""
+    with client.websocket_connect("/ws/chat/session_1") as websocket:
+        websocket.receive_json()
+        websocket.close()
+
+
+class _DisconnectingChatService(MockChatService):
+    """ChatService whose stream raises WebSocketDisconnect mid-stream (#7057)."""
+
+    async def stream_response(self, session_id):  # type: ignore[override]
+        # Emit one valid chunk, then the client drops mid-stream.
+        yield {"type": "chunk", "content": "partial"}
+        raise StarletteWSDisconnect(code=1006)
+
+
+class _ChatRouteWebSocket:
+    """Minimal in-process WebSocket double for driving ``chat_stream`` directly.
+
+    Avoids TestClient deadlocks when the handler itself raises mid-stream.
+    """
+
+    def __init__(self, messages: list[dict[str, Any]], chat_service: Any) -> None:
+        self._messages = list(messages)
+        state = type("_S", (), {"chat_service": chat_service})()
+        self.app = type("_A", (), {"state": state})()
+        self.accepted = False
+        self.sent: list[dict[str, Any]] = []
+
+    async def accept(self) -> None:
+        self.accepted = True
+
+    async def receive_json(self) -> dict[str, Any]:
+        if not self._messages:
+            # No further client messages -> normal disconnect.
+            raise StarletteWSDisconnect(code=1000)
+        return self._messages.pop(0)
+
+    async def send_json(self, data: dict[str, Any]) -> None:
+        self.sent.append(data)
+
+
+@pytest.mark.anyio
+async def test_chat_disconnect_midstream_is_not_internal_error(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A mid-stream WebSocketDisconnect must propagate to the outer disconnect
+    handler — not be logged as an internal error nor produce an error frame on
+    the dead socket (issue #7057)."""
+    import src.api.routes.chat_ws as chat_ws
+
+    async def _fake_resolve_ws_user(_websocket: Any) -> object:
+        return object()
+
+    monkeypatch.setattr(chat_ws, "resolve_ws_user", _fake_resolve_ws_user)
+
+    websocket = _ChatRouteWebSocket(
+        [{"action": "send", "message": "hello"}],
+        _DisconnectingChatService(),
+    )
+
+    with caplog.at_level("DEBUG", logger="src.api.routes.chat_ws"):
+        # The handler must complete via the outer WebSocketDisconnect branch
+        # (it does not re-raise out of chat_stream).
+        await chat_ws.chat_stream(websocket, "session_1")
+
+    # The partial chunk was sent, but NO error frame ever reached the socket.
+    assert {"type": "chunk", "content": "partial"} in websocket.sent
+    assert not any(
+        frame.get("type") == "error" and frame.get("detail") == "Internal server error"
+        for frame in websocket.sent
+    )
+    # The streaming except-branch must NOT have logged an internal error.
+    assert not any(
+        "Error during streaming response" in r.message for r in caplog.records
+    )
+    # It is logged as a normal disconnect by the outer handler.
+    assert any("Chat WebSocket disconnected" in r.message for r in caplog.records)

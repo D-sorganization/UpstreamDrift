@@ -1,0 +1,835 @@
+"""WebSocket routes for real-time simulation streaming."""
+
+import asyncio
+import contextlib
+import json
+import math
+import time
+from collections.abc import Iterable
+from typing import Any, cast
+
+import anyio
+import numpy as np
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, ValidationError
+
+from src.api.auth.ws_auth import resolve_ws_user
+from src.api.dependencies import get_ws_engine_manager
+from src.api.models.requests import (
+    MAX_SIMULATION_DURATION,
+    MAX_STATE_VECTOR_LEN,
+    MAX_TIMESTEP,
+    MIN_TIMESTEP,
+    SimulationRequest,
+)
+from src.shared.python.core.contracts import require
+from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+router = APIRouter()
+_DEFAULT_SPEED_FACTOR = 1.0
+logger = get_logger(__name__)
+
+
+def _clamp_speed_factor(raw: object) -> float:
+    """Coerce and validate a client-supplied speed_factor value.
+
+    Args:
+        raw: The raw value received from the WebSocket client.
+
+    Returns:
+        A positive finite float; falls back to ``_DEFAULT_SPEED_FACTOR`` when
+        the input is zero, negative, non-finite, or non-numeric.
+
+    Postcondition:
+        Return value is a positive finite float.
+    """
+    try:
+        value = float(raw)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return _DEFAULT_SPEED_FACTOR
+    if not math.isfinite(value) or value <= 0:
+        return _DEFAULT_SPEED_FACTOR
+    return value
+
+
+# The WebSocket numeric-field guard must agree with the Pydantic request model
+# (``SimulationRequest``), which is the single source of truth for duration /
+# timestep bounds. Previously the WS layer used looser caps (3600s / 1.0s), so
+# values between the WS cap and the Pydantic cap passed the WS guard only to be
+# rejected with a generic "Invalid simulation config" by ``model_validate``.
+# Reusing the model's constants keeps the two layers consistent and yields a
+# specific error frame (DRY; finding #7740). ``MAX_*`` are inclusive upper
+# bounds in the model (``le=``), so the WS guard rejects strictly above them.
+_MAX_WS_DURATION = MAX_SIMULATION_DURATION  # 300s, matches Pydantic ``le``
+_MAX_WS_TIMESTEP = MAX_TIMESTEP  # 0.1s, matches Pydantic ``le``
+_MIN_WS_TIMESTEP = MIN_TIMESTEP  # 1e-6s, matches Pydantic floor
+
+
+def _validate_ws_numeric_fields(config_input: dict[str, Any]) -> str | None:
+    """Validate speed_factor finiteness and timestep/duration bounds for WS start.
+
+    Performs WebSocket-specific checks that must reject bad values with an error
+    frame rather than silently clamping, complementing the Pydantic layer.
+
+    Args:
+        config_input: The raw config dict from the ``start`` message.
+
+    Returns:
+        An error message string if validation fails, or ``None`` if valid.
+
+    Postcondition:
+        Returns ``None`` only when all present numeric fields are finite and
+        within their respective WS limits.
+    """
+    if "speed_factor" in config_input:
+        raw_sf = config_input["speed_factor"]
+        try:
+            sf_value = float(raw_sf)
+        except (TypeError, ValueError):
+            return "speed_factor must be a positive finite number"
+        if not math.isfinite(sf_value):
+            return "speed_factor must be a positive finite number"
+        # Reject non-positive speed_factor instead of silently clamping it to
+        # 1.0 in ``_clamp_speed_factor`` — the WS guard's contract is to reject,
+        # not clamp, bad start-config values (finding #7740).
+        if sf_value <= 0:
+            return "speed_factor must be a positive finite number"
+
+    if "duration" in config_input:
+        raw_dur = config_input["duration"]
+        try:
+            dur_value = float(raw_dur)
+        except (TypeError, ValueError):
+            return "duration must be a positive finite number"
+        if not math.isfinite(dur_value) or dur_value <= 0:
+            return "duration must be a positive finite number"
+        # ``_MAX_WS_DURATION`` mirrors the Pydantic ``le`` bound, so the cap
+        # value itself is valid and only strictly-larger values are rejected.
+        if dur_value > _MAX_WS_DURATION:
+            return f"duration must not exceed {_MAX_WS_DURATION}s"
+
+    if "timestep" in config_input:
+        raw_ts = config_input["timestep"]
+        try:
+            ts_value = float(raw_ts)
+        except (TypeError, ValueError):
+            return "timestep must be a positive finite number"
+        if not math.isfinite(ts_value) or ts_value <= 0:
+            return "timestep must be a positive finite number"
+        if ts_value > _MAX_WS_TIMESTEP:
+            return f"timestep must not exceed {_MAX_WS_TIMESTEP}s"
+        if ts_value < _MIN_WS_TIMESTEP:
+            return f"timestep must be at least {_MIN_WS_TIMESTEP}s"
+
+    return None
+
+
+def _engine_type_from_str(name: str) -> EngineType:
+    """Resolve an engine type string to EngineType, accepting any case.
+
+    Args:
+        name: Engine identifier (e.g. 'mujoco', 'MUJOCO', 'MuJoCo').
+
+    Returns:
+        Matching EngineType enum member.
+
+    Raises:
+        ValueError: If the name does not match any registered engine.
+    """
+    return EngineType(name.lower())
+
+
+def _is_numeric_sequence(value: object) -> bool:
+    """Return True iff value is a list/tuple of int/float values (no bools).
+
+    Precondition: value is any Python object.
+    Postcondition: returns True only when value is a non-string sequence whose
+    every element is a finite numeric scalar (int or float, not bool).
+    """
+    if not isinstance(value, (list, tuple)):
+        return False
+    return all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in value)
+
+
+# Hard ceiling on initial_state q/v length, applied before ``np.array`` so an
+# authenticated client cannot trigger a multi-million-element allocation
+# (memory / event-loop DoS, issue #7056). This is a defense-in-depth bound that
+# mirrors the request-model cap (``MAX_STATE_VECTOR_LEN``, issue #6948): the WS
+# start path already validates through that model, but ``_apply_initial_state``
+# must not assume it was reached only via the validated path. Reusing the same
+# constant keeps the two layers consistent (DRY).
+_MAX_INITIAL_STATE_LEN = MAX_STATE_VECTOR_LEN
+
+
+def _max_initial_state_len(engine: object) -> int:
+    """Return the accepted q/v length ceiling for ``engine``.
+
+    Prefers the engine's declared DoF (``nq``) with a small slack factor so a
+    payload grossly larger than the model is rejected early; falls back to the
+    hard ceiling when the engine does not advertise its dimensionality. The
+    engine's own ``set_state`` still enforces the exact dimension match — this
+    bound only exists to cap allocation size before ``np.array`` (issue #7056).
+    """
+    nq = getattr(engine, "nq", None)
+    if isinstance(nq, int) and not isinstance(nq, bool) and nq > 0:
+        # Allow a little slack (e.g. quaternion-vs-tangent sizing) but stay far
+        # below the hard ceiling so a tiny model rejects huge payloads.
+        return min(_MAX_INITIAL_STATE_LEN, max(nq * 4, 16))
+    return _MAX_INITIAL_STATE_LEN
+
+
+def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> str | None:
+    """Apply an initial state dict to the engine using the (q, v) contract.
+
+    Engines expose ``set_state(q: np.ndarray, v: np.ndarray)``.  The WebSocket
+    client sends ``{"q": [...], "v": [...]}``; this helper converts and
+    dispatches correctly.
+
+    Preconditions:
+        - state_dict must be a dict
+        - state_dict.get("q"), if present, must be a list/tuple of numbers
+        - state_dict.get("v"), if present, must be a list/tuple of numbers
+
+    Args:
+        engine: The active physics engine instance.
+        state_dict: Dict with optional 'q' and 'v' lists.
+
+    Returns:
+        ``None`` when the state was applied (or safely skipped); a human-readable
+        error string when the payload is rejected. Oversized q/v are rejected
+        *before* any ``np.array`` allocation to prevent a memory DoS (issue
+        #7056); the caller surfaces the string as a WebSocket error frame.
+
+    Postcondition: ``engine.set_state`` is never invoked, and no array is
+    allocated, when a non-``None`` error string is returned.
+    """
+    if not hasattr(engine, "set_state"):
+        return None
+    q_raw = state_dict.get("q", [])
+    v_raw = state_dict.get("v", [])
+    if not _is_numeric_sequence(q_raw):
+        logger.warning(
+            "initial_state.q must be a list of numbers; ignoring initial state"
+        )
+        return "initial_state.q must be a list of numbers"
+    if not _is_numeric_sequence(v_raw):
+        logger.warning(
+            "initial_state.v must be a list of numbers; ignoring initial state"
+        )
+        return "initial_state.v must be a list of numbers"
+    max_len = _max_initial_state_len(engine)
+    if len(q_raw) > max_len:
+        logger.warning(
+            "initial_state.q length %d exceeds cap %d; rejecting",
+            len(q_raw),
+            max_len,
+        )
+        return f"initial_state.q exceeds maximum length {max_len}"
+    if len(v_raw) > max_len:
+        logger.warning(
+            "initial_state.v length %d exceeds cap %d; rejecting",
+            len(v_raw),
+            max_len,
+        )
+        return f"initial_state.v exceeds maximum length {max_len}"
+    q = np.array(q_raw, dtype=float)
+    v = np.array(v_raw, dtype=float)
+    engine.set_state(q, v)
+    return None
+
+
+def _engine_state_to_dict(engine: object) -> dict[str, Any]:
+    """Serialise engine state to a JSON-safe dict with 'q' and 'v' lists.
+
+    ``engine.get_state()`` returns ``(np.ndarray, np.ndarray)``; raw numpy
+    arrays are not JSON-serialisable, so we convert them to plain Python lists.
+
+    Args:
+        engine: The active physics engine instance.
+
+    Returns:
+        Dict with 'q' and 'v' as plain Python float lists, or empty dict if
+        the engine does not implement get_state.
+    """
+    if not hasattr(engine, "get_state"):
+        return {}
+    result = engine.get_state()
+    if not isinstance(result, (tuple, list)) or len(result) < 2:
+        return {}
+    q, v = result[0], result[1]
+    return {
+        "q": q.tolist() if isinstance(q, np.ndarray) else list(q),
+        "v": v.tolist() if isinstance(v, np.ndarray) else list(v),
+    }
+
+
+def _to_json_list(arr: object) -> list[float] | None:
+    """Convert a numpy array (or sequence) to a JSON-safe list, or None."""
+    if arr is None:
+        return None
+    if isinstance(arr, np.ndarray):
+        return cast("list[float]", arr.tolist())
+    if not isinstance(arr, Iterable):
+        return None
+    try:
+        return list(cast("Iterable[float]", arr))
+    except TypeError:
+        return None
+
+
+def _engine_analysis_to_dict(engine: object) -> dict[str, Any]:
+    """Build the live-analysis payload (joint angles + velocities).
+
+    Issue #7718: the previous implementation only consulted
+    ``engine.get_joint_angles()`` / ``engine.get_velocities()``, which no
+    engine implements, so the analysis frame was always ``{"joint_angles":
+    null, "velocities": null}``. Engines expose state via ``get_state()``
+    (``(q, v)``), so we derive angles/velocities from there, while still
+    honouring the legacy bespoke methods if an engine ever provides them.
+
+    Returns:
+        Dict with JSON-safe ``joint_angles`` and ``velocities`` lists. When
+        the engine cannot supply state, a ``warning`` key is included instead
+        of silently returning nulls.
+    """
+    joint_angles: list[float] | None = None
+    velocities: list[float] | None = None
+
+    if hasattr(engine, "get_joint_angles"):
+        joint_angles = _to_json_list(engine.get_joint_angles())
+    if hasattr(engine, "get_velocities"):
+        velocities = _to_json_list(engine.get_velocities())
+
+    # Fall back to the canonical get_state() (q, v) tuple.
+    if (joint_angles is None or velocities is None) and hasattr(engine, "get_state"):
+        result = engine.get_state()
+        if isinstance(result, (tuple, list)) and len(result) >= 2:
+            if joint_angles is None:
+                joint_angles = _to_json_list(result[0])
+            if velocities is None:
+                velocities = _to_json_list(result[1])
+
+    payload: dict[str, Any] = {
+        "joint_angles": joint_angles,
+        "velocities": velocities,
+    }
+    if joint_angles is None and velocities is None:
+        payload["warning"] = "engine does not expose live-analysis state"
+    return payload
+
+
+def _resolve_sim_stats(websocket: WebSocket) -> Any:
+    """Return the shared simulation-service ``stats`` object, or ``None``.
+
+    Collapses the ``websocket.app.state.simulation_service.stats`` reach-through
+    chain into a single Law-of-Demeter-respecting accessor so the five call
+    sites cannot drift apart (DRY; finding #7740). Every ``getattr`` defaults to
+    ``None`` so a partially-initialised app state (or a test double missing any
+    link) yields ``None`` rather than raising.
+
+    Postcondition: returns the ``stats`` object when fully resolvable, else
+    ``None``.
+    """
+    app_state = getattr(getattr(websocket, "app", None), "state", None)
+    simulation_service = getattr(app_state, "simulation_service", None)
+    return getattr(simulation_service, "stats", None)
+
+
+def _get_simulation_speed_factor(
+    websocket: WebSocket,
+    config: dict[str, Any],
+) -> float:
+    """Return the current simulation speed factor from shared app state."""
+    stats = _resolve_sim_stats(websocket)
+    speed_factor = getattr(stats, "speed_factor", config.get("speed_factor"))
+    if not isinstance(speed_factor, (int, float)) or speed_factor <= 0:
+        return _DEFAULT_SPEED_FACTOR
+    return float(speed_factor)
+
+
+def _compute_real_time_sleep_delay(
+    timestep: float,
+    speed_factor: float,
+    step_elapsed: float,
+) -> float:
+    """Return the remaining real-time pacing delay for the current step."""
+    target_step_time = timestep / speed_factor
+    return max(0.0, target_step_time - step_elapsed)
+
+
+def _reset_simulation_stats(websocket: WebSocket, config: dict[str, Any]) -> None:
+    """Reset shared simulation stats for a new WebSocket simulation run."""
+    stats = _resolve_sim_stats(websocket)
+    if stats is None:
+        return
+    stats.start_time = time.time()
+    stats.frame_count = 0
+    stats.speed_factor = _get_simulation_speed_factor(websocket, config)
+
+
+class SimulationFrame(BaseModel):
+    """Single frame of simulation data."""
+
+    time: float
+    state: dict[str, Any]
+    analysis: dict[str, Any] | None = None
+
+
+def _validate_start_config(
+    engine_type: str,
+    raw_config: object,
+) -> dict[str, Any]:
+    """Validate and normalize the simulation start config."""
+    config_input = raw_config or {}
+    if not isinstance(config_input, dict):
+        raise ValueError("Simulation config must be an object")
+
+    validated = SimulationRequest.model_validate(
+        {
+            "engine_type": engine_type,
+            **config_input,
+        }
+    )
+    config = {
+        key: value
+        for key, value in config_input.items()
+        if key not in SimulationRequest.model_fields
+    }
+    config.update(
+        validated.model_dump(
+            exclude={"engine_type"},
+            exclude_none=True,
+        )
+    )
+    if "speed_factor" in config_input:
+        config["speed_factor"] = _clamp_speed_factor(config_input["speed_factor"])
+    return config
+
+
+async def _load_simulation_engine(
+    engine_manager: object,
+    engine_type: str,
+    websocket: WebSocket,
+) -> object | None:
+    """Load and return the physics engine, or send an error and return None.
+
+    Args:
+        engine_manager: The engine manager from app state.
+        engine_type: Engine type string from the URL path.
+        websocket: The active WebSocket connection.
+
+    Returns:
+        The active physics engine, or None if loading failed.
+    """
+    if not (engine_manager is not None):
+        raise ValueError("engine_manager must be provided")
+    require(
+        engine_type is not None and len(engine_type.strip()) > 0,
+        "Engine type must be a non-empty string",
+        engine_type,
+    )
+    try:
+        enum_type = _engine_type_from_str(engine_type)
+        success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
+        if not success:
+            raise ValueError("Could not load engine")
+
+        engine = engine_manager.get_active_physics_engine()  # type: ignore[attr-defined]
+        if not engine:
+            raise ValueError("Could not load engine")
+
+        return engine  # type: ignore[no-any-return]
+    except ValueError:
+        await websocket.send_json({"error": f"Invalid engine: {engine_type}"})
+        return None
+
+
+def _apply_set_speed(
+    websocket: WebSocket,
+    config: dict[str, Any],
+    msg: dict[str, Any],
+) -> None:
+    """Apply a ``set_speed`` command, clamping and propagating the factor.
+
+    Resolves the requested speed factor via :func:`_clamp_speed_factor`,
+    writes it to ``config['speed_factor']``, and mirrors it onto the
+    simulation service stats when available. Shared by both the running
+    (:func:`_handle_client_commands`) and paused
+    (:func:`_wait_for_resume_or_stop`) command handlers so the two paths
+    cannot diverge.
+
+    Args:
+        websocket: The active WebSocket connection.
+        config: Simulation configuration dict (mutated in place).
+        msg: The decoded client message; ``speed_factor`` is read from it.
+    """
+    speed_factor = _clamp_speed_factor(msg.get("speed_factor", _DEFAULT_SPEED_FACTOR))
+    config["speed_factor"] = speed_factor
+    stats = _resolve_sim_stats(websocket)
+    if stats is not None:
+        stats.speed_factor = speed_factor
+
+
+async def _handle_client_commands(
+    websocket: WebSocket,
+    config: dict[str, Any],
+) -> str:
+    """Check for client commands (stop/pause/set_speed) with a short timeout.
+
+    Returns:
+        One of "continue", "stop", or "pause".
+    """
+    try:
+        msg = await asyncio.wait_for(websocket.receive_json(), timeout=0.001)
+        action = msg.get("action")
+        if action == "stop":
+            return "stop"
+        if action == "pause":
+            return "pause"
+        if action == "set_speed":
+            _apply_set_speed(websocket, config, msg)
+    except TimeoutError:
+        pass  # No message, continue simulation
+    except json.JSONDecodeError:
+        logger.warning("Received invalid JSON from WebSocket client; ignoring message")
+        await websocket.send_json(
+            {"error": "invalid_json", "message": "Message must be valid JSON"}
+        )
+    return "continue"
+
+
+async def _wait_for_resume_or_stop(
+    websocket: WebSocket, config: dict[str, Any]
+) -> bool:
+    """Wait while paused for a resume or stop command.
+
+    Args:
+        websocket: The active WebSocket connection.
+        config: Simulation configuration dict.
+
+    Returns:
+        True if the simulation should stop, False if it should resume.
+    """
+    await websocket.send_json({"status": "paused"})
+    while True:
+        try:
+            msg = await websocket.receive_json()
+        except json.JSONDecodeError:
+            logger.warning(
+                "Received invalid JSON from WebSocket client while paused; ignoring"
+            )
+            await websocket.send_json(
+                {"error": "invalid_json", "message": "Message must be valid JSON"}
+            )
+            continue
+        action = msg.get("action")
+        if action == "resume":
+            return False
+        if action == "stop":
+            return True
+        if action == "set_speed":
+            _apply_set_speed(websocket, config, msg)
+
+
+def _step_physics_batch(engine: Any, timestep: float, step_count: int) -> int:
+    """Step the physics engine synchronously for a batch of integration steps.
+
+    Args:
+        engine: The physics engine instance.
+        timestep: Delta time for each step in seconds.
+        step_count: Number of steps to advance.
+
+    Returns:
+        Number of steps successfully executed.
+    """
+    require(timestep > 0, "Simulation timestep must be positive", timestep)
+    require(step_count >= 0, "Step count cannot be negative", step_count)
+    if hasattr(engine, "step"):
+        for _ in range(step_count):
+            engine.step(timestep)
+    return step_count
+
+
+async def _send_simulation_frame(
+    websocket: WebSocket,
+    engine: Any,
+    config: dict[str, Any],
+    frame: int,
+    time_elapsed: float,
+) -> None:
+    """Construct and transmit a frame payload over WebSocket.
+
+    Args:
+        websocket: The active WebSocket connection.
+        engine: The physics engine instance.
+        config: Simulation configuration dict.
+        frame: Current frame counter.
+        time_elapsed: Current simulation time elapsed.
+    """
+    state = _engine_state_to_dict(engine)
+
+    frame_data: dict[str, Any] = {
+        "frame": frame,
+        "time": round(time_elapsed, 4),
+        "state": state,
+    }
+
+    # Include analysis if requested (issue #7718: derive real q/v from
+    # the engine's get_state() instead of unimplemented bespoke calls).
+    if config.get("live_analysis"):
+        frame_data["analysis"] = _engine_analysis_to_dict(engine)
+
+    from src.shared.python.body_part_viz.axial_loads import (
+        read_axial_load_frame,
+    )
+
+    try:
+        loads = read_axial_load_frame(engine, time_elapsed)
+    except (ValueError, TypeError, RuntimeError):
+        logger.exception("Axial load provider unavailable for current frame")
+        loads = None
+    if loads is not None:
+        # Validate against the exact integration clock first, then apply
+        # the same wire timestamp rounding used by the geometry frame.
+        loads["time_s"] = frame_data["time"]
+        frame_data["segment_loads"] = loads
+
+    await websocket.send_json(frame_data)
+
+
+async def _process_pending_client_commands(
+    recv_task: asyncio.Task[Any] | None,
+    websocket: WebSocket,
+    config: dict[str, Any],
+) -> tuple[asyncio.Task[Any] | None, str]:
+    """Check if the receive task has completed and process incoming commands.
+
+    Args:
+        recv_task: Active asyncio.Task awaiting client JSON, or None.
+        websocket: Active WebSocket connection.
+        config: Simulation configuration dict.
+
+    Returns:
+        Tuple of (updated_recv_task, action) where action is "continue", "stop", or "pause".
+    """
+    if not hasattr(websocket, "receive_json"):
+        cmd = await _handle_client_commands(websocket, config)
+        return None, (cmd if cmd in ("stop", "pause") else "continue")
+
+    if recv_task is None:
+        recv_task = asyncio.create_task(websocket.receive_json())
+
+    if not recv_task.done():
+        await anyio.sleep(0)
+
+    while recv_task.done():
+        try:
+            msg = recv_task.result()
+        except (TimeoutError, asyncio.CancelledError):
+            msg = None
+        except json.JSONDecodeError:
+            logger.warning(
+                "Received invalid JSON from WebSocket client; ignoring message"
+            )
+            await websocket.send_json(
+                {"error": "invalid_json", "message": "Message must be valid JSON"}
+            )
+            msg = None
+        except (WebSocketDisconnect, ConnectionResetError, RuntimeError) as exc:
+            logger.debug("WebSocket receive error: %s", exc)
+            return None, "stop"
+
+        recv_task = asyncio.create_task(websocket.receive_json())
+
+        if msg is not None:
+            action = msg.get("action")
+            if action == "stop":
+                return recv_task, "stop"
+            if action == "pause":
+                return recv_task, "pause"
+            if action == "set_speed":
+                _apply_set_speed(websocket, config, msg)
+
+    return recv_task, "continue"
+
+
+async def _run_simulation_loop(
+    websocket: WebSocket,
+    engine: object,
+    config: dict[str, Any],
+) -> tuple[int, float]:
+    """Execute the simulation loop, streaming frames to the client.
+
+    Args:
+        websocket: The active WebSocket connection.
+        engine: The physics engine instance.
+        config: Simulation configuration dict.
+
+    Returns:
+        Tuple of (frame_count, time_elapsed).
+    """
+    if not (websocket is not None):
+        raise ValueError("websocket must be provided")
+    duration = config.get("duration", 3.0)
+    timestep = config.get("timestep", 0.002)
+
+    require(duration > 0, "Simulation duration must be positive", duration)
+    require(timestep > 0, "Simulation timestep must be positive", timestep)
+
+    await websocket.send_json({"status": "running", "duration": duration})
+
+    time_elapsed = 0.0
+    frame = 0
+
+    # Calculate frame skip for ~60fps UI updates
+    target_fps = 60
+    steps_per_second = 1.0 / timestep
+    frame_skip = max(1, int(steps_per_second / target_fps))
+    total_steps = max(1, int(math.ceil(duration / timestep)))
+    loop = asyncio.get_running_loop()
+    stats = _resolve_sim_stats(websocket)
+
+    recv_task: asyncio.Task[Any] | None = None
+    try:
+        if hasattr(websocket, "receive_json"):
+            recv_task = asyncio.create_task(websocket.receive_json())
+        while frame < total_steps:
+            batch_started_at = loop.time()
+            recv_task, command = await _process_pending_client_commands(
+                recv_task, websocket, config
+            )
+            if command == "stop":
+                break
+            if command == "pause":
+                if recv_task is not None and not recv_task.done():
+                    recv_task.cancel()
+                    with contextlib.suppress(asyncio.CancelledError):
+                        await recv_task
+                    recv_task = None
+                stopped = await _wait_for_resume_or_stop(websocket, config)
+                if stopped:
+                    break
+                recv_task = asyncio.create_task(websocket.receive_json())
+
+            batch_steps = min(frame_skip, total_steps - frame)
+            await anyio.to_thread.run_sync(
+                _step_physics_batch, engine, timestep, batch_steps
+            )
+
+            frame += batch_steps
+            time_elapsed = min(duration, frame * timestep)
+            if stats is not None:
+                stats.frame_count = frame
+
+            if frame % frame_skip == 0 or frame >= total_steps:
+                await _send_simulation_frame(
+                    websocket, engine, config, frame, time_elapsed
+                )
+
+            speed_factor = _get_simulation_speed_factor(websocket, config)
+            batch_duration = batch_steps * timestep
+            delay = _compute_real_time_sleep_delay(
+                batch_duration,
+                speed_factor,
+                loop.time() - batch_started_at,
+            )
+            if delay > 0:
+                await asyncio.sleep(delay)
+    finally:
+        if recv_task is not None and not recv_task.done():
+            recv_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await recv_task
+
+    return frame, time_elapsed
+
+
+@router.websocket("/ws/simulate/{engine_type}")
+async def simulation_stream(
+    websocket: WebSocket,
+    engine_type: str,
+) -> None:
+    """
+    Stream simulation in real-time over WebSocket.
+
+    Client sends: {"action": "start", "config": {...}}
+    Server sends: {"frame": 0, "time": 0.0, "state": {...}, ...}
+    """
+    if not (websocket is not None):
+        raise ValueError("websocket must be provided")
+    user = await resolve_ws_user(websocket)
+    if user is None:
+        return
+    await websocket.accept()
+
+    try:
+        engine_manager = get_ws_engine_manager(websocket)
+        if engine_manager is None:
+            await websocket.send_json(
+                {
+                    "error": "service_unavailable",
+                    "message": "Engine manager not initialized",
+                }
+            )
+            return
+
+        # Wait for start command
+        start_msg = await websocket.receive_json()
+
+        if start_msg.get("action") != "start":
+            await websocket.send_json({"error": "Expected 'start' action"})
+            return
+
+        raw_config = start_msg.get("config", {}) or {}
+        ws_error = _validate_ws_numeric_fields(
+            raw_config if isinstance(raw_config, dict) else {}
+        )
+        if ws_error is not None:
+            await websocket.send_json({"error": ws_error})
+            return
+
+        try:
+            config = _validate_start_config(engine_type, raw_config)
+        except (ValidationError, ValueError):
+            await websocket.send_json({"error": "Invalid simulation config"})
+            return
+        _reset_simulation_stats(websocket, config)
+
+        # Load engine
+        engine = await _load_simulation_engine(engine_manager, engine_type, websocket)
+        if engine is None:
+            return
+
+        # Set initial state if provided, using the (q, v) engine contract.
+        # Reject oversized q/v with an error frame before allocating (#7056).
+        if "initial_state" in config:
+            state_error = _apply_initial_state(engine, config["initial_state"])
+            if state_error is not None:
+                await websocket.send_json({"error": state_error})
+                return
+
+        # Run simulation loop
+        frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)
+
+        # Send completion
+        await websocket.send_json(
+            {
+                "status": "complete",
+                "total_frames": frame,
+                "total_time": round(time_elapsed, 4),
+            }
+        )
+
+    except WebSocketDisconnect:
+        pass  # Client disconnected
+    except (ValueError, RuntimeError, AttributeError):
+        logger.exception(
+            "Simulation WebSocket failed for engine=%s",
+            engine_type,
+        )
+        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
+            await websocket.send_json({"error": "Internal server error"})
+    finally:
+        with contextlib.suppress(ConnectionError, TimeoutError, OSError):
+            await websocket.close()

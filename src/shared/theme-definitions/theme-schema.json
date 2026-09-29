@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "D-sorganization Theme Definitions",
+  "description": "Cross-platform theme definitions for PyQt6, React, and Tauri applications",
+  "type": "object",
+  "required": ["version", "colorKeys", "chartColors", "themes"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version"
+    },
+    "colorKeys": {
+      "type": "object",
+      "required": ["base", "semantic"],
+      "properties": {
+        "base": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Required base color keys for all themes"
+        },
+        "semantic": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Semantic color keys (success, warning, etc.)"
+        }
+      }
+    },
+    "chartColors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+      },
+      "description": "Chart colors for data visualization"
+    },
+    "themes": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/theme"
+      }
+    }
+  },
+  "$defs": {
+    "theme": {
+      "type": "object",
+      "required": ["name", "category", "isDark", "colors", "semantic"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the theme"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "neutral",
+            "nature",
+            "editor",
+            "office",
+            "accessibility"
+          ],
+          "description": "Theme category for grouping in menus"
+        },
+        "isDark": {
+          "type": "boolean",
+          "description": "Whether this is a dark theme"
+        },
+        "colors": {
+          "type": "object",
+          "description": "Base color definitions",
+          "required": [
+            "bg",
+            "group_bg",
+            "border",
+            "text",
+            "text_secondary",
+            "label",
+            "focus",
+            "input_bg",
+            "accent",
+            "title_bg",
+            "title_border",
+            "table_header",
+            "table_alt",
+            "button_hover"
+          ],
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6,8}$"
+          }
+        },
+        "semantic": {
+          "type": "object",
+          "description": "Semantic color definitions",
+          "required": [
+            "success",
+            "warning",
+            "error",
+            "info",
+            "link",
+            "link_hover",
+            "selection_bg",
+            "selection_text"
+          ],
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6,8}$"
+          }
+        }
+      }
+    }
+  }
+}

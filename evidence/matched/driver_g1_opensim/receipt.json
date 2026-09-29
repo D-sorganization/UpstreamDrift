@@ -1,0 +1,196 @@
+{
+  "schema": "matched-swing-fit/opensim-moco-v1",
+  "engine": "opensim",
+  "lane": "opensim_moco_tracking",
+  "deliverable": "OS-7",
+  "work_package": "MS-42",
+  "issue": "#10341",
+  "epic": "#10363",
+  "capture": "driver",
+  "horizon_s": 0.85,
+  "requested_horizon_s": 0.85,
+  "mesh_intervals": 85,
+  "candidate_sha256": "d1026b1c154fbb43957dfc6192d05b0d0eadc07733578d89a0185f3889985717",
+  "timestamp_utc": "2026-09-19T20:00:00+00:00",
+  "solver": {
+    "solver": "opensim.MocoTrack/Ipopt",
+    "mesh_intervals": 85,
+    "max_iterations": 600,
+    "iterations": 600,
+    "solver_status": "Maximum_Iterations_Exceeded",
+    "converged": false,
+    "wall_clock_s": 5876.101743647014,
+    "warm_start": "MocoInverse on smoothed IK (states + controls)"
+  },
+  "shared_metrics": {
+    "whole_marker_rmse_m": 0.2452450443233475,
+    "early_marker_rmse_m": 0.23014149679046664,
+    "terminal_marker_rmse_m": 0.26151220010975246,
+    "club_marker_rmse_m": 0.3900449519505721,
+    "pelvis_yaw_rmse_rad": 0.32399201077582096,
+    "pelvis_yaw_diff_deg": 18.56337481341163
+  },
+  "solution_metrics": {
+    "metrics": {
+      "whole_marker_rmse_m": 0.2452450443233475,
+      "early_marker_rmse_m": 0.23014149679046664,
+      "terminal_marker_rmse_m": 0.26151220010975246,
+      "club_marker_rmse_m": 0.3900449519505721,
+      "pelvis_yaw_rmse_rad": 0.32399201077582096
+    },
+    "gates": {
+      "gates": {
+        "whole_marker_rmse_m": {
+          "value": 0.2452450443233475,
+          "target": 0.025,
+          "passed": false
+        },
+        "early_marker_rmse_m": {
+          "value": 0.23014149679046664,
+          "target": 0.012,
+          "passed": false
+        },
+        "terminal_marker_rmse_m": {
+          "value": 0.26151220010975246,
+          "target": 0.035,
+          "passed": false
+        },
+        "club_marker_rmse_m": {
+          "value": 0.3900449519505721,
+          "target": 0.06,
+          "passed": false
+        },
+        "pelvis_yaw_rmse_deg": {
+          "value": 18.56337481341163,
+          "target": 3.0,
+          "passed": false
+        }
+      },
+      "all_passed": false
+    }
+  },
+  "open_loop_replay": {
+    "integrator": "semi_explicit_euler",
+    "duration_s": 0.85,
+    "drift_m": 0.8789352925092767,
+    "whole_marker_rmse_m": 0.8789352925092767,
+    "early_marker_rmse_m": 0.6737585171829202,
+    "terminal_marker_rmse_m": 1.2897105595660214,
+    "club_marker_rmse_m": 1.222529074444107,
+    "pelvis_yaw_rmse_rad": 1.722603930346782,
+    "pelvis_yaw_diff_deg": 98.69793498151824,
+    "wall_clock_s": 4.894294700003229
+  },
+  "contact_audit": {
+    "max_normal_force_n": 799.2591582275049,
+    "max_penetration_m": 0.0,
+    "max_closure_residual_m": 0.001,
+    "min_support_polygon_fraction": 1.0
+  },
+  "dynamics": {
+    "weight_fraction": {
+      "min": 0.5,
+      "max": 2.0
+    },
+    "max_root_force_n": 0.0,
+    "delta_tau_root_max_n": 0.0,
+    "pelvis_residual_rms": {
+      "tau_pelvis_tilt": 130.71941030527123,
+      "tau_pelvis_list": 39.61839751842636,
+      "tau_pelvis_rotation": 70.9694522388412,
+      "tau_pelvis_tx": 287.6146711659104,
+      "tau_pelvis_ty": 799.2591582275049,
+      "tau_pelvis_tz": 210.39520054786405
+    },
+    "pelvis_residual_rms_max": 799.2591582275049,
+    "joint_rms_max": 101.78809810809655
+  },
+  "artifacts": {
+    "candidate_npz": "candidate.npz",
+    "playback_gif": "playback.gif",
+    "solution_sto": "solution.sto",
+    "states_sto": "states.sto",
+    "controls_sto": "controls.sto"
+  },
+  "qualification": "OpenSim Moco full-swing dynamic match pilot on G1 0.85s horizon (MS-42 #10341). Direct collocation converges near calibration floor (~0.245m); open-loop forward replay departs after ~0.4s (whole RMSE 0.879m). Physical and kinematic gates failed honestly.",
+  "acceptance": {
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "status": "REJECTED",
+    "gates": [
+      {
+        "name": "whole_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.025,
+        "measured": 0.2452450443233475,
+        "unit": "m",
+        "reason": "whole RMSE 245.25 mm > 25.00 mm"
+      },
+      {
+        "name": "early_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.012,
+        "measured": 0.23014149679046664,
+        "unit": "m",
+        "reason": "early RMSE 230.14 mm > 12.00 mm"
+      },
+      {
+        "name": "terminal_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.035,
+        "measured": 0.26151220010975246,
+        "unit": "m",
+        "reason": "terminal RMSE 261.51 mm > 35.00 mm"
+      },
+      {
+        "name": "club_marker_rmse_m",
+        "status": "failed",
+        "threshold": 0.06,
+        "measured": 0.3900449519505721,
+        "unit": "m",
+        "reason": "club RMSE 390.04 mm > 60.00 mm"
+      },
+      {
+        "name": "pelvis_yaw_rmse_rad",
+        "status": "failed",
+        "threshold": 0.05236,
+        "measured": 0.32399201077582096,
+        "unit": "rad",
+        "reason": "pelvis yaw RMSE 0.3240 rad > 0.0524 rad"
+      },
+      {
+        "name": "max_normal_force_n",
+        "status": "passed",
+        "threshold": 2354.4,
+        "measured": 799.2591582275049,
+        "unit": "N",
+        "reason": ""
+      },
+      {
+        "name": "max_penetration_m",
+        "status": "passed",
+        "threshold": 0.01,
+        "measured": 0.0,
+        "unit": "m",
+        "reason": ""
+      },
+      {
+        "name": "weight_fraction",
+        "status": "passed",
+        "threshold": 0.2,
+        "measured": 0.5,
+        "unit": "BW",
+        "reason": ""
+      },
+      {
+        "name": "open_loop_replay",
+        "status": "failed",
+        "threshold": 0.025,
+        "measured": 0.8789352925092767,
+        "unit": "m",
+        "reason": "open-loop drift 878.9 mm exceeds 25.0 mm threshold"
+      }
+    ],
+    "qualification_note": "Physical or kinematic thresholds violated"
+  }
+}

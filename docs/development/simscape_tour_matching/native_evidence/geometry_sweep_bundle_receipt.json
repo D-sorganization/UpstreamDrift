@@ -1,0 +1,26 @@
+{
+  "bundle_sha256": "ca61cfbe43a0800f04bb53190a2b03da25584213ddf37975141f306172ece64a",
+  "local_path": "C:\\Users\\diete\\Repositories\\simscape-tour-checkpoints\\geometry-sweep-02-bundle.zip",
+  "remote_path": "C:/Users/diete/SimscapeTour9921/geometry-sweep-02-bundle.zip",
+  "runtime_revision": "5309fb140",
+  "physics_source_base": "9a381f018",
+  "source_patch": "fit_golf_pose_seed.m",
+  "manifest": {
+    "geometry-sweep-02/fit_golf_pose_seed.m": "86540efe926af1edd342e729b44cd34cb7c8400c3ebfcebd5affc4f42cda5ad9",
+    "geometry-sweep-02/native_geometry_seed_sweep.json": "3e8b21b67ec8f8b2933ab8c2f584fe7c03052b20dbf36b07a12c234c4a9be815",
+    "geometry-sweep-02/native_geometry_seed_sweep.m": "b7e42318d8dba9fe0c7f5e36e4492fa5a8f4d8fba8c8bdf0d0b9a2b0b7454648",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_01.json": "418750c1c97a0cf6b1aa8f7f5b837e08e906e7c3e946b7e6479439d607ae645a",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_02.json": "b79c555f4db7e034e92a22cf56696d8a016c6bb36f76b10355da51604e5d9b0a",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_03.json": "1428f4baab5a0808d3820973b516070c9322c9f3744c7d4a15b80318b241d7ba",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_04.json": "e46856230b366f7623c335e336512992b2b78a632be5bda190219044c9000b39",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_05.json": "066956e6ed69592391d88c707c68c945b02ea85b9e976b04bfc309a54d609531",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_06.json": "5de589b0ac0503b27830caacd1bb0f41f27c996ce77e5dab826f7aa21b615699",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_07.json": "81265933e6b421614eef146bfda937583146a98e3cc01bd00b81493e3c273f3e",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_08.json": "236abcc094c42534ed0cbf87e1cd0d21c086785eea38ea4f25a51aa2cd591d76",
+    "geometry-sweep-02/native_geometry_seed_sweep_case_09.json": "3e8b21b67ec8f8b2933ab8c2f584fe7c03052b20dbf36b07a12c234c4a9be815",
+    "geometry-sweep-02/native_pose_seed_waist.json": "eff17bfdbe2d64eaf85af09ecf8de91c065b355cef2425922dec33bd14e588c3",
+    "geometry-sweep-02/native_pose_seed_waist_target.json": "888916a5dfa688c8be7ad69b73b157cca9aea49ac98ddc6202351f1d3e21cfda",
+    "geometry-sweep-02/run.log": "b0f146829f84c259e7d01807a1b153430662b071c35598c135d55806691d331a",
+    "geometry-sweep-02/test_fit_golf_pose_seed.m": "8b7e6095dcac435294fc245f27b52484e84c556b24a46194fb869938499897c7"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "neural-dynamics-baselines-receipt/1.0.0",
+  "governing_issue": 10620,
+  "parent_epic": 10603,
+  "baseline_schema": "neural-dynamics-baselines/1.0.0",
+  "episode_store_schema": "neural-episode-store/1.0.0",
+  "source_hashes": {
+    "__init__.py": "0f02b6a01c1a683c269b05cc387ab458dd5ceace1b626acd51e8e8b1821cea75",
+    "classical.py": "43e6b65dec144f66328de3294cec6f5c58a0778b9c87c1639030c5224e9ec6a9",
+    "dataset.py": "c04638e92965ec04bcb1a4270532981b791af0f5f8ea6dc0f86c9cd47daea540",
+    "evaluate.py": "328ffc099918c0c2a4ee2bf9b9010ff47839a76d7eb02c24d48b2e5d2ae2b72f",
+    "neural.py": "7b6b1c3d90fddb093ff245c2cc615c4dcb56fc65981f77163734d9190fd212a1",
+    "train.py": "01d69da59c61f751e31abc1e45a9b3a3fe8ac5bc62ecbdea6046c99d106ee8b8",
+    "types.py": "fbf99db633f0b0a3fc0713b942b8b01a85b6eabe38b81338e4ee6c58783a0f1e"
+  },
+  "validation": {
+    "command": "python -m pytest tests/unit/neural_motion/test_dynamics_baselines_nm05.py -q -n 0 --no-cov --timeout=60",
+    "outcome": "passed",
+    "test_count": 10,
+    "recorded_at": "2026-09-22"
+  },
+  "limitations": [
+    "Synthetic fixtures and software contracts only",
+    "No native training success or acceleration claim",
+    "Low validation MSE alone does not certify a motion-matching accelerator"
+  ],
+  "next_action_issue": 10621
+}

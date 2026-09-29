@@ -1,0 +1,880 @@
+"""Tests for security - Authentication and authorization utilities.
+
+These tests verify the security module using Design by Contract principles.
+"""
+
+import os
+from datetime import timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+# Configure async tests to use asyncio backend only
+pytestmark = [pytest.mark.anyio, pytest.mark.unit]
+
+
+@pytest.fixture(scope="module")
+def anyio_backend() -> str:
+    """Use asyncio backend only (trio not installed)."""
+    return "asyncio"
+
+
+class _FakeClock:
+    """Deterministic stand-in for the ``time`` module used by AuthCache.
+
+    Exposes a ``time()`` method so it can be assigned to ``AuthCache._time``,
+    letting tests control TTL expiry without real sleeps.
+    """
+
+    def __init__(self, start: float = 0.0) -> None:
+        self._now = start
+
+    def time(self) -> float:
+        return self._now
+
+    def advance(self, seconds: float) -> None:
+        self._now += seconds
+
+
+class TestSecretKeyValidation:
+    """Module-import-time validation of the JWT signing secret."""
+
+    @staticmethod
+    def _reload_security() -> object:
+        import importlib
+
+        import src.api.auth.security as security_module
+
+        return importlib.reload(security_module)
+
+    def test_short_key_rejected_in_production(self) -> None:
+        """A <32-char SECRET_KEY must raise in production, not just warn."""
+        with patch.dict(
+            os.environ,
+            {"GOLF_API_SECRET_KEY": "short", "ENVIRONMENT": "production"},
+            clear=False,
+        ):
+            os.environ.pop("SECRET_KEY", None)
+            with pytest.raises(RuntimeError, match="at least 32 characters"):
+                self._reload_security()
+        # Restore a clean module state for subsequent tests.
+        self._reload_security()
+
+    def test_short_key_warns_in_development(self) -> None:
+        """A <32-char SECRET_KEY is accepted (warn-only) outside production."""
+        with patch.dict(
+            os.environ,
+            {"GOLF_API_SECRET_KEY": "short", "ENVIRONMENT": "development"},
+            clear=False,
+        ):
+            os.environ.pop("SECRET_KEY", None)
+            module = self._reload_security()
+            secret_key = module.SECRET_KEY  # type: ignore[attr-defined]
+            assert secret_key == "short"
+        self._reload_security()
+
+    def test_long_key_accepted_in_production(self) -> None:
+        """A >=32-char SECRET_KEY is accepted in production."""
+        long_key = "x" * 40
+        with patch.dict(
+            os.environ,
+            {"GOLF_API_SECRET_KEY": long_key, "ENVIRONMENT": "production"},
+            clear=False,
+        ):
+            os.environ.pop("SECRET_KEY", None)
+            module = self._reload_security()
+            secret_key = module.SECRET_KEY  # type: ignore[attr-defined]
+            assert secret_key == long_key
+        self._reload_security()
+
+
+class TestSecurityManagerContract:
+    """Design by Contract tests for SecurityManager class."""
+
+    def test_security_instantiates(self) -> None:
+        """Postcondition: SecurityManager can be instantiated."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            assert manager is not None
+
+    def test_has_required_methods(self) -> None:
+        """Postcondition: SecurityManager has required methods."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            assert hasattr(manager, "hash_password")
+            assert hasattr(manager, "verify_password")
+            assert hasattr(manager, "create_access_token")
+            assert hasattr(manager, "create_refresh_token")
+            assert hasattr(manager, "verify_token")
+            assert hasattr(manager, "generate_api_key")
+            assert hasattr(manager, "hash_api_key")
+            assert hasattr(manager, "verify_api_key")
+
+
+class TestSecurityManagerHashPassword:
+    """Tests for SecurityManager.hash_password."""
+
+    def test_security_returns_string(self) -> None:
+        """Test that hash_password returns a string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            result = manager.hash_password("password123")
+            assert isinstance(result, str)
+
+    def test_hash_differs_from_input(self) -> None:
+        """Test that hash differs from input password."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            password = "password123"  # nosec B105 - test fixture, not a real credential
+            hashed = manager.hash_password(password)
+            assert hashed != password
+
+    def test_same_password_different_hashes(self) -> None:
+        """Test that same password produces different hashes (salt)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            password = "password123"  # nosec B105 - test fixture, not a real credential
+            hash1 = manager.hash_password(password)
+            hash2 = manager.hash_password(password)
+            assert hash1 != hash2  # Different salts
+
+
+class TestSecurityManagerVerifyPassword:
+    """Tests for SecurityManager.verify_password."""
+
+    def test_correct_password_returns_true(self) -> None:
+        """Test that correct password returns True."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            password = "correct_password"  # nosec B105 - test fixture, not a real credential
+            hashed = manager.hash_password(password)
+            assert manager.verify_password(password, hashed) is True
+
+    def test_wrong_password_returns_false(self) -> None:
+        """Test that wrong password returns False."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            hashed = manager.hash_password("correct_password")
+            assert manager.verify_password("wrong_password", hashed) is False
+
+    def test_invalid_hash_returns_false(self) -> None:
+        """Test that invalid hash returns False."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            assert manager.verify_password("password", "invalid_hash") is False
+
+
+class TestSecurityManagerTokens:
+    """Tests for SecurityManager token operations."""
+
+    def test_create_access_token_returns_string(self) -> None:
+        """Test that create_access_token returns a string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            token = manager.create_access_token({"sub": "user123"})
+            assert isinstance(token, str)
+            assert len(token) > 0
+
+    def test_create_refresh_token_returns_string(self) -> None:
+        """Test that create_refresh_token returns a string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            token = manager.create_refresh_token({"sub": "user123"})
+            assert isinstance(token, str)
+            assert len(token) > 0
+
+    def test_access_and_refresh_tokens_differ(self) -> None:
+        """Test that access and refresh tokens are different."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            data = {"sub": "user123"}
+            access = manager.create_access_token(data)
+            refresh = manager.create_refresh_token(data)
+            assert access != refresh
+
+    def test_verify_access_token(self) -> None:
+        """Test verifying access token."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            data = {"sub": "user123", "email": "test@example.com"}
+            token = manager.create_access_token(data)
+            payload = manager.verify_token(token, "access")
+            assert payload["sub"] == "user123"
+            assert payload["email"] == "test@example.com"
+            assert payload["type"] == "access"
+
+    def test_verify_refresh_token(self) -> None:
+        """Test verifying refresh token."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            data = {"sub": "user123"}
+            token = manager.create_refresh_token(data)
+            payload = manager.verify_token(token, "refresh")
+            assert payload["sub"] == "user123"
+            assert payload["type"] == "refresh"
+
+    def test_verify_token_wrong_type_raises(self) -> None:
+        """Test that verifying with wrong type raises HTTPException."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from fastapi import HTTPException
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            access_token = manager.create_access_token({"sub": "user123"})
+
+            with pytest.raises(HTTPException) as exc_info:
+                manager.verify_token(access_token, "refresh")
+
+            assert exc_info.value.status_code == 401
+
+    def test_verify_invalid_token_raises(self) -> None:
+        """Test that invalid token raises HTTPException."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from fastapi import HTTPException
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+
+            with pytest.raises(HTTPException) as exc_info:
+                manager.verify_token("invalid.token.here", "access")
+
+            assert exc_info.value.status_code == 401
+
+    def test_custom_expiration(self) -> None:
+        """Test creating token with custom expiration."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
+            token = manager.create_access_token(
+                {"sub": "user123"}, expires_delta=timedelta(hours=1)
+            )
+            payload = manager.verify_token(token, "access")
+            assert payload["sub"] == "user123"
+
+
+class TestSecurityManagerApiKey:
+    """Tests for SecurityManager API key operations."""
+
+    def test_generate_api_key_returns_string(self) -> None:
+        """Test that generate_api_key returns a string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            key = manager.generate_api_key()
+            assert isinstance(key, str)
+
+    def test_api_key_has_prefix(self) -> None:
+        """Test that API key has gms_ prefix."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            key = manager.generate_api_key()
+            assert key.startswith("gms_")
+
+    def test_api_keys_are_unique(self) -> None:
+        """Test that generated API keys are unique."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            keys = {manager.generate_api_key() for _ in range(100)}
+            assert len(keys) == 100
+
+    def test_hash_api_key_returns_string(self) -> None:
+        """Test that hash_api_key returns a string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            key = manager.generate_api_key()
+            hashed = manager.hash_api_key(key)
+            assert isinstance(hashed, str)
+
+    def test_verify_api_key_correct(self) -> None:
+        """Test verifying correct API key."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            key = manager.generate_api_key()
+            hashed = manager.hash_api_key(key)
+            assert manager.verify_api_key(key, hashed) is True
+
+    def test_verify_api_key_wrong(self) -> None:
+        """Test verifying wrong API key."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import SecurityManager
+
+            manager = SecurityManager(secret_key="test-secret")
+            key = manager.generate_api_key()
+            hashed = manager.hash_api_key(key)
+            assert manager.verify_api_key("wrong_key", hashed) is False
+
+
+class TestRoleCheckerContract:
+    """Design by Contract tests for RoleChecker class."""
+
+    def test_security_instantiates(self) -> None:
+        """Postcondition: RoleChecker can be instantiated."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import RoleChecker
+
+            checker = RoleChecker(UserRole.PROFESSIONAL)
+            assert checker is not None
+
+    def test_is_callable(self) -> None:
+        """Postcondition: RoleChecker is callable."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import RoleChecker
+
+            checker = RoleChecker(UserRole.FREE)
+            assert callable(checker)
+
+
+class TestRoleChecker:
+    """Functional tests for RoleChecker."""
+
+    def test_user_with_exact_role_passes(self) -> None:
+        """Test user with exact required role passes."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import RoleChecker
+
+            checker = RoleChecker(UserRole.PROFESSIONAL)
+            user = MagicMock()
+            user.role = UserRole.PROFESSIONAL.value
+            assert checker(user) is True
+
+    def test_user_with_higher_role_passes(self) -> None:
+        """Test user with higher role passes."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import RoleChecker
+
+            checker = RoleChecker(UserRole.PROFESSIONAL)
+            user = MagicMock()
+            user.role = UserRole.ADMIN.value
+            assert checker(user) is True
+
+    def test_user_with_lower_role_fails(self) -> None:
+        """Test user with lower role fails."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import RoleChecker
+
+            checker = RoleChecker(UserRole.ENTERPRISE)
+            user = MagicMock()
+            user.role = UserRole.FREE.value
+            assert checker(user) is False
+
+    def test_role_hierarchy(self) -> None:
+        """Test complete role hierarchy."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import RoleChecker
+
+            # Admin can access everything
+            admin_user = MagicMock()
+            admin_user.role = UserRole.ADMIN.value
+
+            for role in [
+                UserRole.FREE,
+                UserRole.PROFESSIONAL,
+                UserRole.ENTERPRISE,
+                UserRole.ADMIN,
+            ]:
+                checker = RoleChecker(role)
+                assert checker(admin_user) is True
+
+            # Free can only access free
+            free_user = MagicMock()
+            free_user.role = UserRole.FREE.value
+
+            free_checker = RoleChecker(UserRole.FREE)
+            assert free_checker(free_user) is True
+
+            pro_checker = RoleChecker(UserRole.PROFESSIONAL)
+            assert pro_checker(free_user) is False
+
+
+class TestUsageTrackerQuotaTableCoverage:
+    """All UserRole values must resolve a quota entry (issue #7681)."""
+
+    @pytest.mark.parametrize(
+        "role_name",
+        ["FREE", "PROFESSIONAL", "ENTERPRISE", "ADMIN"],
+    )
+    def test_quota_limit_resolves_for_every_role(self, role_name: str) -> None:
+        """quota_limit must not KeyError for any defined role (incl. ADMIN)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole[role_name].value
+
+            for resource in ("api_calls", "video_analyses", "simulations"):
+                limit = tracker.quota_limit(user, resource)
+                assert isinstance(limit, int)
+                assert limit > 0
+
+    @pytest.mark.parametrize(
+        "role_name",
+        ["FREE", "PROFESSIONAL", "ENTERPRISE", "ADMIN"],
+    )
+    def test_get_usage_summary_resolves_for_every_role(self, role_name: str) -> None:
+        """get_usage_summary must return a dict for any role (incl. ADMIN)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole[role_name].value
+            user.api_calls_this_month = 0
+            user.video_analyses_this_month = 0
+            user.simulations_this_month = 0
+
+            summary = tracker.get_usage_summary(user)
+            assert summary["subscription_tier"] == UserRole[role_name].value
+            for resource in ("api_calls", "video_analyses", "simulations"):
+                assert resource in summary
+
+    @pytest.mark.parametrize(
+        "role_name",
+        ["FREE", "PROFESSIONAL", "ENTERPRISE", "ADMIN"],
+    )
+    @pytest.mark.parametrize(
+        "resource",
+        ["api_calls", "video_analyses", "simulations"],
+    )
+    def test_check_quota_resolves_for_every_role(
+        self, role_name: str, resource: str
+    ) -> None:
+        """check_quota must not KeyError for any role (incl. ADMIN).
+
+        check_quota is the production-reachable caller of quota_limit; a
+        missing SUBSCRIPTION_QUOTAS entry surfaces here as a KeyError before
+        any request is served. Exercise it for a fresh (zero-usage) user of
+        every role so the admin path stays covered.
+        """
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole[role_name].value
+            user.api_calls_this_month = 0
+            user.video_analyses_this_month = 0
+            user.simulations_this_month = 0
+
+            # A fresh user is always within quota; the assertion mainly guards
+            # against the quota_limit lookup raising for the role.
+            assert tracker.check_quota(user, resource) is True
+
+
+class TestUsageTrackerContract:
+    """Design by Contract tests for UsageTracker class."""
+
+    def test_security_instantiates(self) -> None:
+        """Postcondition: UsageTracker can be instantiated."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            assert tracker is not None
+
+
+class TestUsageTracker:
+    """Functional tests for UsageTracker."""
+
+    def test_check_quota_within_limit(self) -> None:
+        """Test check_quota when within limit."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole.FREE.value
+            user.api_calls_this_month = 100  # Free tier limit is 1000
+
+            assert tracker.check_quota(user, "api_calls") is True
+
+    def test_check_quota_exceeded(self) -> None:
+        """Test check_quota when exceeded."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole.FREE.value
+            user.api_calls_this_month = 1001  # Exceeds free tier limit of 1000
+
+            assert tracker.check_quota(user, "api_calls") is False
+
+    def test_increment_usage(self) -> None:
+        """Test incrementing usage counter."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.api_calls_this_month = 10
+
+            tracker.increment_usage(user, "api_calls")
+            assert user.api_calls_this_month == 11
+
+    def test_get_usage_summary(self) -> None:
+        """Test getting usage summary."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.models import UserRole
+            from src.api.auth.security import UsageTracker
+
+            tracker = UsageTracker()
+            user = MagicMock()
+            user.role = UserRole.FREE.value
+            user.api_calls_this_month = 100
+            user.video_analyses_this_month = 2
+            user.simulations_this_month = 5
+
+            summary = tracker.get_usage_summary(user)
+
+            assert summary["subscription_tier"] == "free"
+            assert summary["api_calls"]["used"] == 100
+            assert summary["api_calls"]["remaining"] == 900
+            assert summary["video_analyses"]["used"] == 2
+            assert summary["simulations"]["used"] == 5
+
+
+class TestAuthCacheContract:
+    """Design by Contract tests for AuthCache class."""
+
+    def test_security_instantiates(self) -> None:
+        """Postcondition: AuthCache can be instantiated."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache()
+            assert cache is not None
+
+
+class TestAuthCache:
+    """Functional tests for AuthCache."""
+
+    def test_get_returns_none_for_missing(self) -> None:
+        """Test get returns None for missing key."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache()
+            assert cache.get("nonexistent_key") is None
+
+    def test_set_and_get_round_trip(self) -> None:
+        """Test set and get work together."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache()
+            api_key = "gms_test_key_12345"  # nosec B105 - test fixture, not a real credential
+            user_id = 42
+
+            cache.set(api_key, user_id)
+            result = cache.get(api_key)
+
+            assert result == user_id
+
+    def test_different_keys_cached_separately(self) -> None:
+        """Test different keys are cached separately."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache()
+            cache.set("key1", "value1")
+            cache.set("key2", "value2")
+
+            assert cache.get("key1") == "value1"
+            assert cache.get("key2") == "value2"
+
+    def test_get_expires_entry_after_ttl(self) -> None:
+        """Expired entries are evicted on read and return None."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=1000.0)
+            cache = AuthCache(ttl_seconds=10)
+            cache._time = clock
+
+            cache.set("k", "v")
+            # Within TTL: still cached.
+            clock.advance(9.0)
+            assert cache.get("k") == "v"
+            # Past TTL: expired, returns None and the entry is deleted.
+            clock.advance(2.0)  # now 11s since set, ttl is 10
+            assert cache.get("k") is None
+            # Lookup token is internal; assert the backing store was pruned.
+            assert cache._cache == {}
+
+    def test_get_deletes_only_requested_expired_entry(self) -> None:
+        """Expiry cleanup prunes the stale lookup and preserves fresh entries."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=0.0)
+            cache = AuthCache(ttl_seconds=5)
+            cache._time = clock
+
+            cache.set("expired", "old")
+            clock.advance(4.0)
+            cache.set("fresh", "new")
+            clock.advance(2.0)
+
+            assert cache.get("expired") is None
+            assert cache.get("fresh") == "new"
+            assert list(cache._cache) == [cache._cache_lookup_token("fresh")]
+
+    def test_ttl_monkeypatch_overrides_instance_value(self) -> None:
+        """Monkeypatching the class TTL_SECONDS wins over the instance TTL."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=0.0)
+            cache = AuthCache(ttl_seconds=10)
+            cache._time = clock
+            cache.set("k", "v")
+
+            # Shrink the effective TTL via the class attribute. _effective_ttl
+            # detects the monkeypatch and prefers it over the instance's 10s.
+            with patch.object(AuthCache, "TTL_SECONDS", 1):
+                assert cache._effective_ttl_seconds() == 1
+                clock.advance(2.0)  # 2s > patched 1s TTL
+                assert cache.get("k") is None
+
+    def test_effective_ttl_uses_instance_value_without_class_monkeypatch(
+        self,
+    ) -> None:
+        """The constructor TTL remains active when TTL_SECONDS is unchanged."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            clock = _FakeClock(start=10.0)
+            cache = AuthCache(ttl_seconds=3)
+            cache._time = clock
+            cache.set("k", "v")
+
+            assert cache._effective_ttl_seconds() == 3
+            clock.advance(2.0)
+            assert cache.get("k") == "v"
+            clock.advance(2.0)
+            assert cache.get("k") is None
+
+    def test_evict_overflow_is_bounded_fifo(self) -> None:
+        """The cache stays bounded and evicts the oldest entry first (FIFO)."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache(ttl_seconds=300, max_entries=2)
+
+            cache.set("first", "1")
+            cache.set("second", "2")
+            assert len(cache._cache) == 2
+
+            # Inserting a third entry must evict the oldest ("first") to stay
+            # within max_entries, leaving the two most-recent entries.
+            cache.set("third", "3")
+            assert len(cache._cache) == 2
+            assert cache.get("first") is None
+            assert cache.get("second") == "2"
+            assert cache.get("third") == "3"
+            assert list(cache._cache) == [
+                cache._cache_lookup_token("second"),
+                cache._cache_lookup_token("third"),
+            ]
+
+    def test_max_entries_monkeypatch_overrides_instance_value(self) -> None:
+        """Monkeypatching MAX_ENTRIES wins over the instance bound."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import AuthCache
+
+            cache = AuthCache(ttl_seconds=300, max_entries=100)
+            with patch.object(AuthCache, "MAX_ENTRIES", 1):
+                cache.set("a", "1")
+                cache.set("b", "2")
+                # Bound is the patched value of 1, so only the newest remains.
+                assert len(cache._cache) == 1
+                assert cache.get("a") is None
+                assert cache.get("b") == "2"
+
+
+class TestComputePrefixHash:
+    """Tests for compute_prefix_hash function."""
+
+    def test_security_returns_string(self) -> None:
+        """Test that compute_prefix_hash returns a string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import compute_prefix_hash
+
+            result = compute_prefix_hash("gms_test")
+            assert isinstance(result, str)
+
+    def test_returns_hex_string(self) -> None:
+        """Test that result is a valid hex string."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import compute_prefix_hash
+
+            result = compute_prefix_hash("gms_test")
+            # SHA256 produces 64 hex characters
+            assert len(result) == 64
+            int(result, 16)  # Should not raise
+
+    def test_same_input_same_output(self) -> None:
+        """Test deterministic output."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import compute_prefix_hash
+
+            hash1 = compute_prefix_hash("gms_abcd")
+            hash2 = compute_prefix_hash("gms_abcd")
+            assert hash1 == hash2
+
+    def test_different_input_different_output(self) -> None:
+        """Test different inputs produce different outputs."""
+        with patch.dict(
+            os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
+        ):
+            from src.api.auth.security import compute_prefix_hash
+
+            hash1 = compute_prefix_hash("prefix_a")
+            hash2 = compute_prefix_hash("prefix_b")
+            assert hash1 != hash2

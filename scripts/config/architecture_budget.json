@@ -1,0 +1,1012 @@
+{
+  "max_function_lines": 100,
+  "max_parameters": 8,
+  "exceptions": [
+    {
+      "path": "src/shared/python/model_generation/core/physics_validation.py",
+      "symbol": "PhysicsValidator.validate_inertia_tensor",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9411,
+      "reason": "Issue #9411: Pinned vendor copy of PhysicsValidator.validate_inertia_tensor performs comprehensive inertia checks across 101 lines (> 100 budget).",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/force_nullspace.py",
+      "symbol": "redistribute_forces",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: redistribute_forces formulates and solves bounded quadratic programming for force redistribution.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/force_nullspace.py",
+      "symbol": "redistribute_trajectory",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: redistribute_trajectory solves multi-collocation-node temporal smoothing trajectory optimization.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/force_nullspace.py",
+      "symbol": "explore_torque_tradeoffs",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10436,
+      "reason": "Issue #10436: explore_torque_tradeoffs explores feasible force null spaces and generates torque distribution tradeoffs.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/companion_evidence.py",
+      "symbol": "_documentation_record",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9193,
+      "reason": "Issue #9193: _documentation_record validates documentation records, audiences, statuses, and cross-references.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/companion_evidence.py",
+      "symbol": "render_evidence_document",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9193,
+      "reason": "Issue #9193: render_evidence_document renders evidence documents, programs, and tables for publication quality.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_calibration.py",
+      "symbol": "hip_rotation_zero",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10108,
+      "reason": "Issue #10108: hip_rotation_zero calculates zero-twist rotation angle offsets with dual-leg knee-in/ankle fallback across frame subsets.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_calibration.py",
+      "symbol": "hip_rotation_zero",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10108,
+      "reason": "Issue #10108: hip_rotation_zero accepts marker kinematics, waist offsets, knee/ankle label pairs, and calibration options without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/swing_evaluator.py",
+      "symbol": "SwingEvaluator.evaluate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10431,
+      "reason": "Issue #10431: SwingEvaluator.evaluate coordinates tracking, contact penetration, kinematic closure, and phase event verification across full-swing time series without lossy parameter packing.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/contact_force_allocator.py",
+      "symbol": "ContactForceAllocator.allocate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10433,
+      "reason": "Issue #10433: ContactForceAllocator.allocate coordinates RNEA, Jacobians, objectives, bounds, contact masks, and terrain normals without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/hip_calibration.py",
+      "symbol": "apply_hip_calibration",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10108,
+      "reason": "Issue #10108: apply_hip_calibration transforms joint frames and incorporates zero-twist offsets into parent-to-base transforms.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/two_window_fit_100.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: execution script for candidate 100 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_101/two_window_fit_101.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: execution script for continuation 101 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/two_window_fit_102.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: execution script for candidate 102 fit preserves CLI options and delegates to modular motion_matching.two_window_fit.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/audit_solver_convergence_9967.py",
+      "symbol": "run_convergence_audit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: run_convergence_audit executes and certifies the 9-configuration Pinocchio vs Simscape solver convergence matrix.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/equality_least_squares.py",
+      "symbol": "solve_equality_least_squares",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: solve_equality_least_squares implements generalized bounded equality-constrained least-squares solver with QR nullspace projection.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/equality_least_squares.py",
+      "symbol": "solve_equality_least_squares",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: solve_equality_least_squares accepts problem matrices (A, b, C, d), bounds, regularization, and solver options without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting.residual",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: inner residual evaluation in multiple shooting fit coordinates marker errors, terminal states, defect constraints, and pelvis yaw penalties.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting.analytic_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9967,
+      "reason": "Issue #9967: inner analytic Jacobian in multiple shooting fit evaluates exact block derivatives for markers, continuity defects, and 2-component pelvis yaw penalty.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/physics/impact_model/solver.py",
+      "symbol": "ImpactSolverAPI.solve_impact",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10193,
+      "reason": "Issue #10193: solve_impact preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/physics/impact_model/solver.py",
+      "symbol": "ImpactSolverAPI.solve_with_gear_effect",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10193,
+      "reason": "Issue #10193: solve_with_gear_effect preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/launchers/launcher_layout_manager.py",
+      "symbol": "LayoutManager.rebuild_grid",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing layout manager rebuild_grid method exceeds function-lines budget; PR #9481 only reconciled tile category derivation without altering grid layout logic.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/config/model_pack_manifest.py",
+      "symbol": "_normalize_model_pack_v1",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing manifest normalizer exceeds function-lines budget by 1 line; PR #9481 touched LauncherPresentationMetadata in this file.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/config/model_pack_manifest.py",
+      "symbol": "ModelPackEntry.from_dict",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing model pack entry deserializer exceeds function-lines budget; PR #9481 touched LauncherPresentationMetadata in this file.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/api/services/chat_service.py",
+      "symbol": "ChatService.stream_response",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9495,
+      "reason": "Issue #9495: pre-existing legacy chat streaming method (237 lines) coordinates adapter thread lifecycle, SSE queue pumping, and session persistence; unblocking and thread join fix touched this function, full modularization tracked as part of chat service decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/api/services/chat_service.py",
+      "symbol": "ChatService.stream_response._stream_to_queue",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9495,
+      "reason": "Issue #9495: pre-existing inner thread worker function (143 lines) handles token streaming and tool call execution loops; full modularization tracked as part of chat service decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+      "symbol": "make_figure",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9153,
+      "reason": "Issue #9153: the 102-line deterministic figure writer is hash-frozen in the completed two-replay CRBA requalification. Splitting two lines after observing the replay would invalidate the prospective figure-source authority and require two new native executions; defer the behavior-preserving helper extraction until the protected evidence lands.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+      "symbol": "_analyze_case",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9233,
+      "reason": "Issue #9233: pre-existing research analysis script exceeds function-lines budget; touched to fix MATLAB table path and re-register SHA256.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+      "symbol": "build_outputs",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9233,
+      "reason": "Issue #9233: pre-existing research analysis script exceeds function-lines budget; touched to fix MATLAB table path and re-register SHA256.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/optimization/batch_swing_optimizer.py",
+      "symbol": "BatchSwingOptimizer.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8958,
+      "reason": "Issue #8958: pre-existing optimizer initializer takes explicit hyperparameter configurations; PR #8958 only optimizes vector math in score_batch.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation.py",
+      "symbol": "run_simulation",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing simulation runner exceeds parameters budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation_golfer.py",
+      "symbol": "run_simulation",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing golfer simulation runner exceeds function-lines budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation_golfer.py",
+      "symbol": "run_simulation",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing golfer simulation runner exceeds parameters budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation_triple.py",
+      "symbol": "run_simulation",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing triple simulation runner exceeds parameters budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/upstream_drift_launcher.py",
+      "symbol": "UpstreamDriftLauncher.select_model",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7217 legacy launcher decomposition: select_model remains over the function-lines budget until the launcher is split by responsibility.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/launchers/upstream_drift_launcher.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7217 legacy launcher decomposition: main remains over the function-lines budget until startup and window orchestration move into focused launcher modules.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
+      "symbol": "ChatDockWidget.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9357,
+      "reason": "Audited 2026-09-01: the prior justification cited issue #7362, which is unrelated (import-layering) and already closed, so this had been renewed on autopilot without real review. Re-reviewed: the 16 keyword params group naturally into connection/presentation/integration-hooks config objects (see #9357), so unlike an irreducible-parameter case this genuinely should be split, but it is a breaking constructor-signature change across 5 in-repo call sites and is out of scope for the current pass. Tracked in #9357.",
+      "expires_on": "2026-10-15"
+    },
+    {
+      "path": "src/launchers/launcher_ui_setup.py",
+      "symbol": "UISetupManager.init_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #8490 records the independent launcher bootstrap follow-up: init_ui remains over the function-lines budget until its widget orchestration is split without changing startup order.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/loaders/c3d.py",
+      "symbol": "load_club_target_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Relocation legacy code",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/motion_matching/loaders/c3d_body.py",
+      "symbol": "load_body_target_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Relocation legacy code",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 7725,
+      "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
+      "symbol": "compute_qpos_jacobian",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7688 cross-engine torque ordering fix touches jacobians.py; compute_qpos_jacobian was already over the changed-file function-lines budget (pre-existing rollout/linearisation loop) and needs setup/rollout/propagation split.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
+      "symbol": "compute_cost_gradient_analytical",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7688 cross-engine torque ordering fix touches jacobians.py; compute_cost_gradient_analytical was already over the changed-file function-lines budget (pre-existing analytical gradient assembly) and needs decomposition.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #7688 cross-engine torque ordering fix touches simulate.py; simulate_with_coefficients was already over the changed-file function-lines budget (pre-existing forward-sim orchestration) and needs setup/rollout/output-assembly split.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py",
+      "symbol": "evaluate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 7829,
+      "reason": "Issue #7829: evaluate exceeded the changed-file parameter budget. Temporary exception until configuration object is extracted.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/diff_ik.py",
+      "symbol": "solve_dual_frame_ik",
+      "rule": "parameters",
+      "owner": "@bolt @D-sorganization/core-maintainers",
+      "issue": 8271,
+      "reason": "Issue #8271: Performance optimization PR modifies file which contains a function exceeding parameter budget (12 > 8).",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/bunkershot3d/geometry/wedge.py",
+      "symbol": "WedgeGeometry.from_millimetres",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8609,
+      "reason": "Issue #8609 (epic #8607): from_millimetres is the unit-converting alternative constructor of a value object whose design vector genuinely has ~19 independent parameters - the Acushnet sole schema of US10143900B2/US10661131B2 (loft, lie, geometric bounce, sole width, 1.2 mm datum, entry height, leading and trailing sole radii, camber area, three rocker radii, three relief fractions, face progression, blade length, face height, topline width, head mass). Every one of them is an independent physical dimension of the head, so there is nothing cohesive left to group: the only way under the budget is a dict or **kwargs, which would trade a typed, mypy-checked signature for an untyped bag and move the constructor's invariant checks (bounce against entry height, sole-contour ratio, mass band) off the boundary where they currently fail closed. The count is the domain's, not the code's; the explicit signature is the right design and this exception records that deliberately rather than hiding it.",
+      "expires_on": "2027-08-31"
+    },
+    {
+      "path": "src/bunkershot3d/geometry/presets.py",
+      "symbol": "_retail_wedge",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8609,
+      "reason": "Issue #8609 (epic #8607): _retail_wedge is the keyword-only builder over the same wedge design vector as WedgeGeometry.from_millimetres, narrowed to the parameters a retail model actually publishes (loft, marketed bounce, head mass, sole width, entry height, camber area, three relief fractions) plus the provenance citations each preset must carry. The parameters are independent published facts about a specific club, not a cohesive sub-object, and collapsing them into a mapping would lose both the type checking and the per-parameter provenance the presets exist to record. Same rationale as the from_millimetres exception above.",
+      "expires_on": "2027-08-31"
+    },
+    {
+      "path": "src/shared/python/simulation_backends/trace_io.py",
+      "symbol": "_write_common",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8617,
+      "reason": "Pre-existing on origin/main: _write_common already carried 19 parameters before epic #8607 and is byte-identical to the origin/main version. PR #8617 (BunkerShot3D result schema v2) rewrote read_bunkershot3d_result in the same file, and because the architecture budget inspects whole changed files rather than changed functions, the pre-existing signature surfaced as if it were new. It was surfaced, not introduced, by #8617. It is shared platform code - the single write path that keeps Trace and BatchTrace from drifting apart - so decomposing it is a simulation_backends change owned outside this epic, and doing it inside a bunkershot3d PR would put an unreviewed refactor of every engine's trace writer in a granular-physics diff.",
+      "expires_on": "2027-02-28"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py",
+      "symbol": "_autodiff_simulate_and_cost",
+      "rule": "function-lines",
+      "owner": "@dieterolson",
+      "reason": "Issue #8959 Bolt micro-optimization caused budget validation to fail. Requires decomposition later.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py",
+      "symbol": "_autodiff_simulate_and_cost",
+      "rule": "parameters",
+      "owner": "@dieterolson",
+      "reason": "Issue #8959 Bolt micro-optimization caused budget validation to fail. Requires decomposition later.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py",
+      "symbol": "fit_swing_drake_autodiff",
+      "rule": "function-lines",
+      "owner": "@dieterolson",
+      "reason": "Issue #8959 Bolt micro-optimization caused budget validation to fail. Requires decomposition later.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/launchers/custom_title_bar.py",
+      "symbol": "create_window_control_button",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/custom_title_bar.py",
+      "symbol": "CustomTitleBar.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/launchers/library_widget.py",
+      "symbol": "LibraryWidget._setup_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/terrain_engine/gui.py",
+      "symbol": "TerrainExplorerWidget._build_ui",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8965,
+      "reason": "Pre-existing on origin/main: this function is byte-identical to the origin/main version; PR #8976 (EPIC #8965) only re-pointed a theme/metrics import in the same file after relocating UD-owned symbols out of the Tools child-copy tree, and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violation surfaced as if it were new. It was surfaced, not introduced, by #8976; decomposition is follow-up work.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "symbol": "NonlinearDynamicsMixin.estimate_lyapunov_exponent",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9000,
+      "reason": "Bolt micro-optimization touched file causing pre-existing function-lines budget to trigger. Decomposition needed later.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+      "symbol": "_evaluate_controls",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9151,
+      "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/shared/python/optimization/crocoddyl_backend.py",
+      "symbol": "solve_swing_ddp",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9762,
+      "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/optimization/crocoddyl_backend.py",
+      "symbol": "solve_swing_ddp",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9762,
+      "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/model_converter/mjcf_exporter.py",
+      "symbol": "export_mjcf",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: export_mjcf handles comprehensive hierarchical MuJoCo model construction and elements formatting.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/schema_validator.py",
+      "symbol": "validate_canonical_model",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: validate_canonical_model comprehensively checks units, topology, and physical invariants.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "export_urdf",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: export_urdf orchestrates whole URDF assembly from canonical spec.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "_export_segment",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: _export_segment decomposes multi-DOF joints into revolute chains.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: SimOut canonical dataclass coordinates 19 state and energy trajectory fields matching Simscape contract.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: SimOut coordinates all 19 kinematic, kinetic, energy, and work output fields across simulation steps.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py",
+      "symbol": "simulate_with_coefficients",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9967,
+      "reason": "Issue #9967: simulate_with_coefficients executes continuous Bernstein torque evaluation with RK4 internal stage integration for Pinocchio ABA.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: SimOut.__init__ handles comprehensive backward-compatible keyword aliases and canonical Simscape fields.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "SimOut.__init__",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: SimOut.__init__ parameter list reflects canonical multibody states, kinetic/potential energy, and metadata.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/simulate.py",
+      "symbol": "_record_rollout",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: _record_rollout coordinates Drake MultibodyPlant state logging, forward kinematics transforms, and energy accounting buffers.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/motion_matching/fit_swing.py",
+      "symbol": "fit_swing_drake",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9968,
+      "reason": "Issue #9968: fit_swing_drake coordinates optimization objective, parameter bounds, SLSQP minimize loop, and result validation.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/model_converter/urdf_exporter.py",
+      "symbol": "_add_revolute_joint",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9965,
+      "reason": "Issue #9965: XML joint builder requires explicit URDF kinematic and dynamic attributes.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/api.py",
+      "symbol": "create_app",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8875,
+      "reason": "Issue #8875: pre-existing motion pipeline API create_app function exceeds function-lines budget; PR #8875 only reconciled advertised source formats in docstrings.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/motion_pipeline/api.py",
+      "symbol": "create_app.run_pipeline",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8875,
+      "reason": "Issue #8875: pre-existing motion pipeline API run_pipeline route handler exceeds function-lines budget; PR #8875 only reconciled advertised source formats in docstrings.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "docs/development/simscape_tour_matching/native_evidence/reproduction/constrained_sextic_transition_fit.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: reproduction script executes complete multi-stage transition fitting and diagnostic export workflow.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: multiple shooting optimizer coordinates interval partitioning, defect matching, and Pareto-tuning.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/multi_shooting_fit.py",
+      "symbol": "fit_multiple_shooting",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: multiple shooting optimizer requires options, target trajectories, initial guess, and telemetry callbacks.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/prefix_fit.py",
+      "symbol": "_run_prefix_stage",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 9921,
+      "reason": "Issue #9921: prefix stage coordinator handles De Casteljau continuity, bounds, and gate enforcement across ladder horizons.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/full_body_models/build_full_body_spec.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10063,
+      "reason": "Issue #10063: build script driver coordinates spec parsing, pelvis registration, and receipt generation across engines.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/opensim_tour_matching/os3_calibrate_ik.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10003,
+      "reason": "Issue #10003: calibration driver coordinates TRC subsampling, OpenSim IK tool configuration, and receipt logging.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/full_body_models/build_anthropometric_spec.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: monolithic anthropometric spec builder landing in HO-0; scheduled for decomposition under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/ground_support/downswing_experiment.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: downswing experiment driver landing in HO-0; scheduled for decomposition under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py",
+      "symbol": "build",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: MJX trajectory optimisation builder landing in HO-0; scheduled for refactoring in HO-5 under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/ground_support/mjx_trajectory_optimisation.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: MJX trajectory optimisation runner landing in HO-0; scheduled for refactoring in HO-5 under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/ground_support/run_ground_support.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: ground support pipeline driver landing in HO-0; scheduled for pipeline decomposition in HO-1/HO-2 under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/visual_layer.py",
+      "symbol": "attach_visual_layer",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: visual layer attachment function landing in HO-0; scheduled for decomposition under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/anthropometric_candidate.py",
+      "symbol": "anthropometric_candidate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: anthropometric candidate constructor landing in HO-0; scheduled for decomposition in HO-1 under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/anthropometric_geometry.py",
+      "symbol": "build_upper_body",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: upper body builder landing in HO-0; scheduled for decomposition in HO-1 under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/anthropometric_geometry.py",
+      "symbol": "build_upper_body",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: upper body builder parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/visual_skeleton.py",
+      "symbol": "derive_visual_skeleton",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10186,
+      "reason": "Issue #10186: visual skeleton derivation landing in HO-0; scheduled for decomposition under epic #10162.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/address.py",
+      "symbol": "fit_address_pose",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10399,
+      "reason": "Issue #10399: fit_address_pose performs multi-objective optimization with bilateral grip closure, ground plane clearance, and holdout validation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/full_swing_tracking.py",
+      "symbol": "qualify_full_swing_tracking",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10400,
+      "reason": "Issue #10400: qualify_full_swing_tracking validates ladder stages, continuity, dynamic grip closure, and compiles dual receipts under MS-100 / MS-104.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/registration.py",
+      "symbol": "align_tour_capture_to_golf_world",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10398,
+      "reason": "Issue #10398: align_tour_capture_to_golf_world computes stance support ground plane translation and target-line yaw rotation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/segment_scaling.py",
+      "symbol": "apply_segment_scaling",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10396,
+      "reason": "Issue #10396: apply_segment_scaling scales joint frames, attached meshes, COM positions, and inertia matrices under fixed_mass or density_preserving policies.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py",
+      "symbol": "build_golf_view_package",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10403,
+      "reason": "Issue #10403: build_golf_view_package packages model variants, verifies hashes, renders keyframe milestone stills, and exports reproducible video.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/opensim/python/tour_matching/view_package.py",
+      "symbol": "build_golf_view_package",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10403,
+      "reason": "Issue #10403: build_golf_view_package accepts trajectory, variant, presets, paths, digest hashes, and event milestones.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/match_pinocchio_c3d.py",
+      "symbol": "match_pinocchio_c3d",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: match_pinocchio_c3d orchestrates full-swing kinematics, C3D extraction, contact detection, and state estimation.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "scripts/match_pinocchio_c3d.py",
+      "symbol": "match_pinocchio_c3d",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: match_pinocchio_c3d accepts model paths, trajectory configurations, contact parameters, and tolerances without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "make_action_models",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: make_action_models builds Crocoddyl ActionModelAbstract sequences configuring marker tracking and contact residual models.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "make_action_models",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: make_action_models accepts pinocchio model, contact sequences, weights, and time steps without lossy unpacking.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/crocoddyl_action.py",
+      "symbol": "tracking_rollout",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: tracking_rollout simulates forward dynamics along Crocoddyl shooting nodes with state/control constraints.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "_resume_from_candidate",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: _resume_from_candidate restores optimization warm-start states, multipliers, and trajectory knots from prior checkpoint.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "run_fit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: run_fit coordinates multi-stage full body dynamic motion matching fitting against C3D point cloud.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/full_body_fit.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: CLI entrypoint for full body fitting with argument parsing and execution logging.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/contact_force_allocator.py",
+      "symbol": "ContactForceAllocator.allocate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: ContactForceAllocator.allocate solves quadratic program for trail-side ground reaction force distribution under friction cone constraints.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/swing_evaluator.py",
+      "symbol": "SwingEvaluator.evaluate",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10338,
+      "reason": "Issue #10338: SwingEvaluator.evaluate computes kinetic energy, momentum transfer, and clubhead delivery metrics across motion phases.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "build_parser",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: build_parser configures CLI flags for multi-engine pipeline execution across Drake, MuJoCo, and Pinocchio.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "_solve_pink_ik",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: _solve_pink_ik coordinates Pink solver setup, frame targets, posture regularization, and iterative frame progression.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/cli.py",
+      "symbol": "_simulate_and_receipt",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 10329,
+      "reason": "Issue #10329: _simulate_and_receipt orchestrates trajectory simulation, marker metrics, receipt schema emission, and artifact bundle export.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/motion_matching/pipeline/dynamics.py",
+      "symbol": "shooting_fit",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/simulation-team",
+      "issue": 10591,
+      "reason": "Issue #10591: Bolt optimization added extra lines to replace np.linalg.norm with np.sqrt(np.einsum) causing function line count to marginally exceed 100.",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "shared_scripts/deferred_validation.py",
+      "symbol": "_validate_record_shape",
+      "rule": "function-lines",
+      "owner": "codex",
+      "issue": 10783,
+      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
+      "expires_on": "2026-10-23"
+    },
+    {
+      "path": "shared_scripts/deferred_validation.py",
+      "symbol": "validate_catalog",
+      "rule": "function-lines",
+      "owner": "codex",
+      "issue": 10783,
+      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
+      "expires_on": "2026-10-23"
+    },
+    {
+      "path": "shared_scripts/handoff_validator.py",
+      "symbol": "validate_handoff_content",
+      "rule": "function-lines",
+      "owner": "codex",
+      "issue": 10783,
+      "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
+      "expires_on": "2026-10-23"
+    }
+  ]
+}
