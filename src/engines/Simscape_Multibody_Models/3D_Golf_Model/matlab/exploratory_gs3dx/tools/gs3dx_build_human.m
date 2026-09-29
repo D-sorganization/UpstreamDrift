@@ -42,13 +42,22 @@ function report = gs3dx_build_human(info, opts)
 %     damper, so the heel can rise over a bending forefoot.  ForefootMass
 %     moves from the foot to the forefoot; the rearfoot's centre of mass
 %     moves back so the foot's is unchanged at zero angle.  Both parts
-%     are drawn as ellipsoids.
-%   * Foot contacts.  Five spheres per foot instead of three: heel inside
-%     and outside (so the foot can roll onto an edge), the first and fifth
-%     metatarsal heads on the rearfoot (the ball of the foot, which carries
-%     the standing load, so the midfoot spring carries none of it) and the
-%     big toe on the forefoot (which keeps the toes on the ground as the
-%     heel rises).  'FootContactForces' keeps the left contacts first.
+%     are drawn as ellipsoids.  The spring is 2000 N*m/rad: at 100 and
+%     800 N*m/rad the toes folded and the golfer drifted (65 mm pelvis
+%     RMS at 800); at 2000 it drifts 1.7 mm more than with the joint
+%     locked, and the toes can still bend when the heel rises.
+%   * Foot contacts.  Five spheres per foot instead of three: the heel on
+%     the foot's axis, the first and fifth metatarsal heads on the
+%     rearfoot (the ball of the foot, which carries the standing load, so
+%     the midfoot spring carries none of it), and the big toe and the
+%     lesser toes on the forefoot (which keep the toes on the ground as
+%     the heel rises).  The outside ball and lesser toes let the foot
+%     roll onto its outside edge, the inside ball and big toe onto its
+%     inside edge.  The toes reach as far forward as GS3DX_Neck's toe
+%     corners: with the big toe 15 mm behind the tip and the lesser toes
+%     at 64% of the foot length, the pelvis drifted 26-31 mm RMS to
+%     impact, against 20 mm here and 18 mm for GS3DX_Neck (docs/HUMAN.md).
+%     'FootContactForces' keeps the left contacts first.
 %   * Balance anchor.  Moving the head moves the body's centre of mass at
 %     address (about 7 mm), and BalanceCOMRef is the capture's COM path
 %     anchored at GS3DX_Neck's.  After saving, a balance-off start measures
@@ -66,13 +75,14 @@ function report = gs3dx_build_human(info, opts)
 %   centre (m) and lofted face normal, models/README_DRIVER_HEAD.md),
 %   forefoot_mass (0.25 kg), mtp_fraction
 %   (0.73 of the foot length from the heel), mtp_height (0.025 m above the
-%   sole), midfoot_stiffness (100 N*m/rad), midfoot_damping (0.5
+%   sole), midfoot_stiffness (2000 N*m/rad), midfoot_damping (0.5
 %   N*m*s/rad), head_radii ([0.09 0.09 0.105] m), neck_address ([-24.2
-%   -7.0] deg, measured at address, docs/HUMAN.md), heel_contact_width
-%   (0.05 m between the heel spheres), ball_out_fraction (0.64 of the foot
-%   length from the heel: the fifth metatarsal head), toe_inset (0.015 m
-%   behind the toe tip) and toe_offset (0.02 m inside the foot's axis: the
-%   big toe), neck_pivot_lift (0.058 m: the capture's C7 projected on
+%   -7.0] deg, measured at address, docs/HUMAN.md), ball_out_fraction
+%   (0.64 of the foot length from the heel: the fifth metatarsal head),
+%   toe_inset (0 m: the big toe under the toe tip), toe_offset (0.05 m
+%   inside the foot's axis: the big toe), lesser_toe_fraction (0.945 of
+%   the foot length from the heel: the third and fourth toe pads),
+%   lesser_toe_offset (0.05 m outside the foot's axis), neck_pivot_lift (0.058 m: the capture's C7 projected on
 %   the address neck axis, docs/HUMAN.md).
 %   REPORT fields: .budget, .hidden, .visuals, .joints, .contacts,
 %   .neck_length (in), .com_shift (m, World: the balance re-anchoring).
@@ -89,14 +99,15 @@ function report = gs3dx_build_human(info, opts)
         opts.forefoot_mass (1,1) double {mustBePositive} = 0.25
         opts.mtp_fraction (1,1) double {mustBeInRange(opts.mtp_fraction, 0.5, 0.95)} = 0.73
         opts.mtp_height (1,1) double {mustBeNonnegative} = 0.025
-        opts.midfoot_stiffness (1,1) double {mustBePositive} = 100
+        opts.midfoot_stiffness (1,1) double {mustBePositive} = 2000
         opts.midfoot_damping (1,1) double {mustBeNonnegative} = 0.5
         opts.head_radii (1,3) double {mustBePositive} = [0.09 0.09 0.105]
         opts.neck_address (1,2) double = [-24.2 -7.0]
-        opts.heel_contact_width (1,1) double {mustBePositive} = 0.05
         opts.ball_out_fraction (1,1) double {mustBeInRange(opts.ball_out_fraction, 0.5, 0.95)} = 0.64
-        opts.toe_inset (1,1) double {mustBeNonnegative} = 0.015
-        opts.toe_offset (1,1) double = 0.02
+        opts.toe_inset (1,1) double {mustBeNonnegative} = 0
+        opts.toe_offset (1,1) double = 0.05
+        opts.lesser_toe_fraction (1,1) double {mustBeInRange(opts.lesser_toe_fraction, 0.75, 1)} = 0.945
+        opts.lesser_toe_offset (1,1) double = 0.05
         opts.neck_pivot_lift (1,1) double {mustBeNonnegative} = 0.058
     end
     names = gs3dx_names();
@@ -379,25 +390,26 @@ function [joints, vis, forefoot] = local_midfeet(mdl, opts)
 end
 
 function names = local_foot_contacts(mdl, forefoot, opts)
-% Five contacts per foot from GS3DX_Neck's three.  Heel, Toe In and Toe Out
-% become Heel In, Ball In and Ball Out (same parent, moved); Heel Out is a
-% copy of Heel In, and Toe a copy of Ball In re-based on the forefoot.
-% Then the force log is rewired, left contacts first.
+% Five contacts per foot from GS3DX_Neck's three.  Heel stays (moved onto
+% the foot's axis); Toe In and Toe Out become Ball In and Ball Out (same
+% parent, moved); Big Toe and Lesser Toes are copies re-based on the
+% forefoot.  Then the force log is rewired, left contacts first.
     sys = [mdl '/Lower Body'];
     ws = get_param(mdl, 'ModelWorkspace');
-    assignin(ws, 'HeelContactWidth', opts.heel_contact_width);
     assignin(ws, 'FootBallOutFraction', opts.ball_out_fraction);
     assignin(ws, 'FootToeInset', opts.toe_inset);
     assignin(ws, 'FootToeOffset', opts.toe_offset);
+    assignin(ws, 'FootLesserToeFraction', opts.lesser_toe_fraction);
+    assignin(ws, 'FootLesserToeOffset', opts.lesser_toe_offset);
     z = '-AnkleHeight+FootContactRadius';
     % name, made from, x, y (%d = side sign: +1 left; inside is -sign), on the forefoot
     spec = { ...
-        'Heel In',  "rename Heel",    '-FootHeelOffset*FootLength', '-%d*HeelContactWidth/2', false; ...
-        'Ball In',  "rename Toe In",  'MidfootOffset(1)', '-%d*FootContactWidth/2', false; ...
-        'Ball Out', "rename Toe Out", '(FootBallOutFraction-FootHeelOffset)*FootLength', '%d*FootContactWidth/2', false; ...
-        'Heel Out', "copy Heel In",   '-FootHeelOffset*FootLength', '%d*HeelContactWidth/2', false; ...
-        'Toe',      "copy Ball In",   '(1-FootHeelOffset)*FootLength-FootToeInset-MidfootOffset(1)', '-%d*FootToeOffset', true};
-    order = ["Heel In" "Heel Out" "Ball In" "Ball Out" "Toe"];   % in the force log
+        'Heel',        "keep Heel",      '-FootHeelOffset*FootLength', '0', false; ...
+        'Ball In',     "rename Toe In",  'MidfootOffset(1)', '-%d*FootContactWidth/2', false; ...
+        'Ball Out',    "rename Toe Out", '(FootBallOutFraction-FootHeelOffset)*FootLength', '%d*FootContactWidth/2', false; ...
+        'Big Toe',     "copy Ball In",   '(1-FootHeelOffset)*FootLength-FootToeInset-MidfootOffset(1)', '-%d*FootToeOffset', true; ...
+        'Lesser Toes', "copy Ball Out",  '(FootLesserToeFraction-FootHeelOffset)*FootLength-MidfootOffset(1)', '%d*FootLesserToeOffset', true};
+    order = ["Heel" "Ball In" "Ball Out" "Big Toe" "Lesser Toes"];   % in the force log
     ground = local_ground_port(sys);
     % The three spheres per foot share their mass among five, so the total
     % mass stays GS3DX_Neck's.
@@ -414,7 +426,9 @@ function names = local_foot_contacts(mdl, forefoot, opts)
             target = s + " " + name;
             src = s + " " + extractAfter(how, " ");
             zz = z;
-            if startsWith(how, "rename")
+            if startsWith(how, "keep")
+                t = local_trio(sys, target);
+            elseif startsWith(how, "rename")
                 t = local_rename_contact(sys, src, target);
             elseif fore
                 t = local_copy_contact(sys, src, target, ground, forefoot.(s));
@@ -423,7 +437,10 @@ function names = local_foot_contacts(mdl, forefoot, opts)
                 ph = get_param(local_trio(sys, src).point, 'PortHandles');
                 t = local_copy_contact(sys, src, target, ground, ph.LConn(1));   % same frame node
             end
-            set_param(t.point, 'TranslationCartesianOffset', sprintf(['[%s, ' y ', %s]'], x, sgn, zz));
+            if contains(y, '%d')
+                y = sprintf(y, sgn);
+            end
+            set_param(t.point, 'TranslationCartesianOffset', sprintf('[%s, %s, %s]', x, y, zz));
             set_param(t.sphere, 'Mass', 'FootContactSphereMass');
             trio.(strrep(name, ' ', '')) = t;
         end

@@ -9,7 +9,7 @@
 - Implementation commit: `SELF`
 - Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
 - Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979)
-- Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T10:14Z)
+- Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T15:22Z)
 - Development log: `DL-#10950`
 
 ## Objective and Status
@@ -319,7 +319,7 @@ Creator` (newline); find it by BlockType.
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
 2. #10979 human, in progress (2026-09-29, owner reviews of the renders). State:
-   - **Done, tested (human 9/9, render 4/5 + mesh test fixed pending rerun):** five
+   - **Done, tested (human 9/9, render 5/5):** five
      contacts per foot; fixed "Neck Address" transform; neck pivot at C7 (`NeckLength`
      7.717 in; lift is `-lift*Q0(:,3)`); driver head = massless File Solid of
      `models/gs3dx_driver_head.stl` (Tools `rate_of_closure` Driver 10.5,
@@ -327,7 +327,7 @@ Creator` (newline); find it by BlockType.
      runs head centre -> 50 mm past C7 and a "Trapezius" ellipsoid on UpperTorsoTop joins
      it to the shoulders (owner: neck gap; test `neck_joins_the_head_and_the_trunk`).
      965 compiled / 788 uncompiled. Renderer returns `out.focus` (bug found by the mesh
-     test; fixed, rerun queued).
+     test; fixed).
    - **Start kick FIXED:** bisected with scratch `human/bisect/bisect_human.m` (Neck copy +
      builder stages). Not the feet/midfoot/foot inertia: the neck address moved the address
      COM (-4.7, -0.9, +5.2) mm while `BalanceCOMRef` was anchored at Neck's COM, so the
@@ -335,18 +335,23 @@ Creator` (newline); find it by BlockType.
      re-anchors `BalanceCOMRef` after saving (1 ms balance-off `gs3dx_contact_check`;
      `report.com_shift`; test `balance_reference_is_anchored_at_this_body`). Support now
      0.46-1.97 BW (was 0-10.3).
-   - **Balance drift (OPEN, top priority):** full run to impact (`human/balance_human3.m`):
-     pelvis 159 mm RMS (423 at impact), COM horizontal 142 mm RMS, ankle lift 79/76 mm;
-     `GS3DX_Neck` 21.6 mm. Running `human/balance_human4.m`: same with `MidfootStiffness`
-     1e5 (locked) and 800 N\*m/rad (stance-realistic) to test whether the compliant midfoot
-     (heels rising) is the cause. If locked recovers ~21 mm, pick a literature MTP stiffness
-     and document it; if not, compare per-contact loads with Neck's over the swing. Never
-     loosen tolerances.
+   - **Balance drift FIXED (2026-09-29):** the foot layout, not the midfoot or the head. A
+     Neck-feet variant with the same head + anchor drifts 18.0 mm; the first five-contact
+     layout 42.9 mm even locked (159 mm at 100 N\*m/rad). COP (scratch `human/cop.m`): both
+     models stand on the front contacts, lead foot on its inside front corner, and the
+     Human's front support stopped short of the toe tip. Layout sweep (scratch
+     `human/layout1.m`, `layout2.m`; table in `docs/HUMAN.md#why-the-human-drifted`) ->
+     built layout: one heel on the axis, balls unchanged, Big Toe under the tip 50 mm
+     inside, Lesser Toes at 0.945 of the foot length 50 mm outside, both on the forefoot.
+     Built model (scratch `human/test9.m`): pelvis 20.2 mm RMS locked, 21.9 mm at 2,000
+     N\*m/rad (COM 14.0, support 0.52-2.02 BW); `midfoot_stiffness` default now 2,000
+     (100/800 fold). Human 9/9 + render 5/5 pass on the rebuilt model.
    - **Trap:** a failed `gs3dx_build_human` leaves `GS3DX_Human.slx` as a copy of
      `GS3DX_Neck`; check size/mtime before trusting a run. `gs3dx_render` and
      `gs3dx_contact_check` close the models they load: tests reload after them.
-   - Then: swing videos (`gs3dx_render ... video=`) for the owner, DESIGN_REPORT balance
-     status + limitations, commit, push.
+   - Next: simulate past impact through the finish (trail heel up onto the toes, lead foot
+     onto its outside edge); needs a reference past impact (the IK and leg reference stop
+     at impact + reach clamp) and a stop time beyond `.impact_frame`.
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
