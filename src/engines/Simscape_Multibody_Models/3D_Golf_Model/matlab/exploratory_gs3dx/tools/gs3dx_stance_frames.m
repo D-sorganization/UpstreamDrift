@@ -19,6 +19,8 @@ function frames = gs3dx_stance_frames(mdl, vars, opts)
 %     shoulders  (default true) sense the shoulder origins; false leaves
 %                out their six blocks (FRAMES then has no *_shoulder_p),
 %                for models near the license limit (GS3DX_CONTACT_CHECK).
+%     simscape_log  (default 0) when positive, log every Simscape variable
+%                (FRAMES.out.simlog), keeping every Nth solver step.
 
     arguments
         mdl (1,:) char
@@ -26,6 +28,7 @@ function frames = gs3dx_stance_frames(mdl, vars, opts)
         opts.stop_time (1,1) double {mustBeNonnegative} = 0
         opts.mass (1,1) logical = false
         opts.shoulders (1,1) logical = true
+        opts.simscape_log (1,1) double {mustBeInteger, mustBeNonnegative} = 0
     end
     if ~bdIsLoaded(mdl)
         load_system(mdl);
@@ -66,6 +69,10 @@ function frames = gs3dx_stance_frames(mdl, vars, opts)
     end
     in = in.setModelParameter('StopTime', num2str(opts.stop_time), 'SignalLogging', 'on', ...
         'SignalLoggingName', 'logsout', 'ReturnWorkspaceOutputs', 'on');
+    if opts.simscape_log > 0
+        in = in.setModelParameter('SimscapeLogType', 'all', 'SimscapeLogName', 'simlog', ...
+            'SimscapeLogDecimation', opts.simscape_log);   % numeric: a char value errors
+    end
     out = sim(in);
     assert(isempty(out.ErrorMessage), 'gs3dx:stance', '%s', out.ErrorMessage);
     for k = 1:size(targets, 1)

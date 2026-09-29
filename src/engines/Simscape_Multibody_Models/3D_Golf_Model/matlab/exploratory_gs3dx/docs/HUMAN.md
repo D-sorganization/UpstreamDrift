@@ -217,6 +217,21 @@ after impact against the Human's 57). What differs from the capture is the
 trail foot: from 1.45 s it runs 60-105 mm ahead of its reference as it
 pivots, so it sits under the centre of mass and takes the load.
 
+It is not the midfoot either. Softening the midfoot to 300 N·m/rad or
+stiffening it to 10,000 leaves the trail overshoot at 113-123 mm and the
+ankle rise at 142 mm; the stiffness only trades balance (pelvis 37.8 mm RMS
+before impact and 72.8 after at 300, against 20.5 and 59.7 at 10,000). The
+remaining suspects are the foot feedback, the servo references through the
+pivot and the contact friction.
+
+Drawn from the simulation's own joint log (see
+[Rendering in the Simulated Pose](#rendering-in-the-simulated-pose)), the
+trail foot at 1.55 s stands almost upright on its toe contacts while the lead
+foot, unloaded, has turned on the ground:
+
+![Simulated pose at 1.55 s, face-on](screenshots/GS3DX_Human_sim_1p55_fo.png)
+![Simulated finish at 1.80 s, down the line](screenshots/GS3DX_Human_sim_finish_dtl.png)
+
 ## Ball Contact
 
 `gs3dx_capture_markers` gives two events:
@@ -272,9 +287,17 @@ the ball, 22° flared on the lead side and 9° on the trail. Use it for renders
 of any variant: rows are named by `gs3dx_joint_keys`, and joints it lacks,
 such as the midfoot joints, are drawn at zero.
 
+To draw what the model actually did, rather than what it was asked to do,
+pass `joints=dt` to `gs3dx_contact_check`. The run then keeps a Simscape log
+(every 10th solver step), and `gs3dx_simlog_joints` reads each joint
+variable from it every `dt` seconds; a spherical joint's logged quaternion
+becomes the solver's axis and angle. `gs3dx_render` draws the returned
+`.joints` like an IK. Over the full swing the drawn pelvis stays within
+0.12 mm of the simulated pelvis frame.
+
 ## Tests
 
-`tests/test_gs3dx_human.m` (9 tests):
+`tests/test_gs3dx_human.m` (10 tests):
 
 - every visible solid off the club is an ellipsoid, except the 1 cm contact
   spheres;
@@ -293,7 +316,9 @@ such as the midfoot joints, are drawn at zero.
 - `BalanceCOMRef` is `GS3DX_Neck`'s translated, and starts at this model's
   own address centre of mass (a 1 ms balance-off start, to 1 µm);
 - at address the drawn neck runs from inside the head to inside the trunk,
-  and the pivot (C7) lies inside the trapezius.
+  and the pivot (C7) lies inside the trapezius;
+- joints read from a 60 ms simulation's log carry the drawn pelvis with the
+  simulated pelvis frame (0.5 mm, 1 mrad).
 
 `tests/test_gs3dx_capture.m` pins the ball-contact frame
 (`ball_contact_follows_peak_speed`).

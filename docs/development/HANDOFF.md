@@ -346,7 +346,7 @@ Creator` (newline); find it by BlockType.
      inside, Lesser Toes at 0.945 of the foot length 50 mm outside, both on the forefoot.
      Built model (scratch `human/test9.m`): pelvis 20.2 mm RMS locked, 21.9 mm at 2,000
      N\*m/rad (COM 14.0, support 0.52-2.02 BW); `midfoot_stiffness` default now 2,000
-     (100/800 fold). Human 9/9 + render 5/5 pass on the rebuilt model.
+     (100/800 fold). Human 9/9 + render 5/5 pass on the rebuilt model; human 10/10 with the simulated-render test (2026-09-29).
    - **Trap:** a failed `gs3dx_build_human` leaves `GS3DX_Human.slx` as a copy of
      `GS3DX_Neck`; check size/mtime before trusting a run. `gs3dx_render` and
      `gs3dx_contact_check` close the models they load: tests reload after them.
@@ -361,9 +361,16 @@ Creator` (newline); find it by BlockType.
      origin: subtract `tf.S.' * tf.origin` (`gs3dx_capture_address_transform`) before
      comparing with joint centres, which use the address-waist origin). Neck and Shape do
      the same and worse (support 0 near 1.4 s, trail slide 0.55 m; scratch `fin4.m`). The
-     trail foot runs 60-105 mm ahead of its reference from 1.45 s. Hypothesis: the stiff
-     midfoot makes the foot pivot on the toe tip instead of hinging at the ball; running
-     `human/fin6.m` (MidfootStiffness 300 vs 1e4 through the finish) to test it.
+     trail foot runs 60-105 mm ahead of its reference from 1.45 s. REJECTED hypothesis
+     (scratch `human/fin6.m`): the stiff midfoot is not the cause. Trail overshoot 113-123
+     mm and ankle rise 142 mm at MidfootStiffness 300 and 1e4 alike; K only trades balance
+     (pelvis pre/post impact 37.8/72.8 mm at 300, 20.5/59.7 at 1e4). Next suspects: foot
+     feedback gains, the servo references through the pivot, contact friction.
+   - **Simulated-motion render (2026-09-29):** `gs3dx_contact_check(..., joints=dt)` logs
+     Simscape (decimation 10) and returns `.joints` via new `tools/gs3dx_simlog_joints.m`
+     (spherical S.Q quaternion -> S.ax*\*/S.q), which `gs3dx_render` draws. Test
+     `simulated_joints_render_the_simulated_body` checks the rendered heels track the
+     logged ankles. Finish videos: scratch `human/fin7.m` -> `human/sim_finish*\*.mp4`.
 
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
