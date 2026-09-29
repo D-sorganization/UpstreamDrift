@@ -1,21 +1,22 @@
-## Qualify Drake Native Dual-Club Dynamics and Replay (#11094)
+## Qualify Drake Native Dual-Club Dynamics and Replay (#11094) [scope: fail-closed conversion]
 
 Implements [MMR-10D] native dual-club dynamic qualification and automated nightly lane integration for Drake:
 - **Drake Dynamic Qualification Module (`src/engines/physics_engines/drake/python/native_qualification.py`)**:
   - Implements `DrakeQualificationReceipt` and `DrakeQualificationStatus` (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`) enforcing strict fail-closed dynamic simulation contracts.
-  - Rejects copied state trajectories, FK-only playbacks without dynamic simulation, and zero collected native tests on pinned host.
-  - Verifies host runtime availability: when `pydrake` is missing on host, reports `UNAVAILABLE` rather than false green.
-  - Validates numerical derivative consistency between generalized coordinates and velocities (`dq/dt ≈ v`) and energy conservation accounting.
+  - Rejects copied state trajectories, FK-only playbacks without dynamic simulation, and zero or unrecorded collected native tests on pinned host (an unknown test count cannot be assumed nonzero).
+  - Verifies host runtime availability: when `pydrake` is missing on host, reports `UNAVAILABLE` rather than false green — including when a replay payload is present (a payload cannot qualify without the engine).
+  - Gates `QUALIFIED` on every recorded check: fresh simulation, actuation applied, recorded rollout data, derivative consistency (`dq/dt ≈ v`), finite energy accounting, and aligned marker observations; missing rollout/marker data is enumerated in `missing_evidence` with a resolvable `remedy`.
+  - Emits only metrics computed from recorded data (`whole_rms_m`): previously present synthesized phase/clubhead/pelvis-yaw values were removed as fabricated.
   - Discloses engine-specific limitations (`upper_body_27dof_float_pathway`, `rigid_weld_closure`, `continuous_polynomial_actuation`, `ground_contact_requires_full_body`).
   - Supports dual-club models across both `driver` and `7-iron`.
 - **Nightly CI Lane Harness Integration (`scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`)**:
   - Adds `"drake"` configuration to `ENGINE_LANES` (`pytest_marker: "requires_drake"`, `python_module: "pydrake"`, `receipt_filename: "drake_receipt.json"`).
-  - Emits and validates honest native lane receipts in `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json`.
+  - Emits and validates honest native lane receipts in `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json` (unavailable engine ⇒ `status: fail`, 0 executed tests).
 - **Evidence Package (`docs/development/matched_swing_program/evidence/drake/`)**:
-  - Adds `driver_receipt.json` and `iron_receipt.json` with cryptographically traceable model hashes and marker alignment metrics.
+  - `driver_receipt.json` and `iron_receipt.json` corrected: previous placeholder sha256 digests and invented metric values were removed; the receipts are now honest fail-closed UNAVAILABLE records with empty evidence fields, enumerated `missing_evidence`, and a resolvable `remedy`. No native Drake qualification exists yet.
   - Documents evidence scope and constraints in `docs/development/matched_swing_program/evidence/drake/README.md`.
 - **TDD Test Coverage (`tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `tests/scripts/test_run_native_engine_lane.py`, `tests/docs/test_native_lane_freshness.py`)**:
-  - 30 unit and script tests verifying contract rejection logic, derivative checking, energy balance, StrEnum lifecycle states, host runtime absence, and committed receipt integrity.
+  - Unit and script tests verifying contract rejection logic, derivative checking, energy balance, fail-closed behavior for unavailable runtimes, unrecorded test counts, missing rollout/marker data computed-not-invented metrics, and committed receipt integrity.
 
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
