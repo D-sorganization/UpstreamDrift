@@ -10,6 +10,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = [pytest.mark.unit]
+
 
 def _mixed_float_arrays(rng: np.random.Generator, shape: tuple[int, ...]) -> np.ndarray:
     x = rng.normal(size=shape).astype(np.float64) * 1e3
@@ -31,7 +33,9 @@ def _mixed_float_arrays(rng: np.random.Generator, shape: tuple[int, ...]) -> np.
         ((13, 7, 2), 2, "...i,...i->..."),
     ],
 )
-def test_row_norm_einsum_identity(shape: tuple[int, ...], axis: int, pattern: str) -> None:
+def test_row_norm_einsum_identity(
+    shape: tuple[int, ...], axis: int, pattern: str
+) -> None:
     rng = np.random.default_rng(sum(shape))
     x = _mixed_float_arrays(rng, shape)
 
