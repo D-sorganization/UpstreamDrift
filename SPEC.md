@@ -10,9 +10,28 @@ Resolves the split-brain coverage gates by making the budget JSON the single gat
   - The `tests` job emits `--cov-report=json:coverage.json` alongside the XML report, and a new `Enforce Budget Package Coverage Gates` step runs `python3 scripts/check_coverage_gates.py --report coverage.json --strict` after the per-package threshold enforcer.
 - **Measured floors** (`min_coverage` set to measurement rounded DOWN to 0.1, `ratchet_on` 2027-01-01): api-routes 84.3% (5221 stmts), data-io 50.1% (2891), execution-checkpointing 22.4% (2521), deployment 48.4% (1362), optimization 49.9% (2815), engine-adapters 7.1% (51393; optional-engine packages only covered when their backend is installed).
 - **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
-  - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
+  - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0).
 
 ## Shadow State, Camera, and Renderer Boundary Verification (#11110)
+
+## Fail-Closed Fitting Capabilities and Recoverable Cancellation (#11111)
+
+Implements fail-closed capability checks, cancellation recovery semantics, and architecture budget decomposition for shadow tracking:
+- **Capability Validation & Fail-Closed Semantics (`src/shared/python/shadow_tracker/service.py`)**:
+  - Implements `_validate_fit_capabilities` enforcing backend availability, requested engine capabilities, and scientific release qualification prior to trajectory fitting, failing closed on unsupported setups.
+  - `fit` honours the requested `time_window_start_pts`/`time_window_end_pts` PTS window, failing closed when the window is empty, when a windowed frame lacks a manual mask (observations, times and masks are always emitted as aligned tuples), and when `physical_time_s` is unknown instead of fabricating a timestamp.
+- **Recoverable Cancellation Accounting**:
+  - Implements `_build_cancelled_bundle` cleanly segregating aborted fits (`cancelled=True`, empty candidates) from uncalibrated failures or convergence faults.
+  - Distinguishes user cancellation from physical tracking faults in result telemetry; the optimizer's non-success `execution_status` is propagated into the returned `ResultBundle` and service lifecycle for synthetic and non-synthetic backends.
+- **Stale Checkpoint Invalidation**:
+  - `OptimizationCheckpoint` records mask revision IDs and a deterministic SHA-256 fingerprint of the full camera calibration; manual mask corrections (`update_mask`) and camera updates (`update_camera`, which also refreshes the registered silhouette renderer's camera map) invalidate active fits and checkpoints, and resume verification compares both the camera ID and the calibration fingerprint.
+- **Atomic Bundle Persistence (`src/shared/python/shadow_tracker/artifacts.py`)**:
+  - `save_bundle` stages the replacement bundle outside the target and publishes with a single atomic directory operation (RENAME_EXCHANGE swap on Linux, backup-rollback rename fallback elsewhere), so an interrupted save never leaves a partially written or missing target.
+- **Architecture Decomposition**:
+  - Decomposes monolithic `DefaultShadowTrackerService.fit()` into modular helpers (`_validate_fit_capabilities`, `_build_cancelled_bundle`, `_assemble_fit_result`), reducing cyclomatic complexity and satisfying the repository 100-line function architecture budget.
+- **Verification & Testing (`tests/unit/shadow_tracker/test_fail_closed_fitting.py`)**:
+  - Unit tests verifying capability validation, PTS-window and aligned-coverage fail-closed gates, unknown-frame-timing refusal, execution-status propagation, camera calibration staleness, renderer calibration sync, atomic publish and rollback, and cancellation recovery.
+
 
 Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
 - **No-Evidence Abstention & State Convention Support (`src/shared/python/shadow_tracker/initialization.py`)**:
@@ -7160,6 +7179,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11120 | [MMR-14] Review fixes for shadow-tracker boundary tests (#11110): initialization seeding below the minimum winner score so valid all-zero-IoU candidates win with real evidence, explicit length check for NumPy candidate matrices (no truthiness ValueError), and a real fx/fy scaling assertion comparing anamorphic vs isotropic rendering spans. |
 | 2026-09-29 | #11123 | Head/trunk/grip diagnostic receipts (#11106, first tranche): compose the calibrated attachment rotation into the observed SO(3) orientation residual before evaluation, require `receipt_sha256` on schema-1.0 receipt load, validate grip/clubface calibration frame endpoints, and freeze `marker_residuals_mm` receipts against post-construction mutation. |
 | 2026-09-29 | #11118 | Tour-baseline observation manifests (#11105): freeze per-marker frame-level validity spans derived from the sha-verified canonical captures, bind metric evaluation to the frozen frame-by-marker mask through a public manifest contract, enforce holdout protection inside the real calibration entry points by slicing manifest calibration frames, start the holdout at the recorded top-of-backswing event (driver frame 397, iron 394), make `markers` immutable, and regenerate the shared Tools divergence inventory from a full clone. |
+| 2026-09-29 | #11121 | Shadow Tracker fits fail closed on unavailable or unqualified backends, empty PTS windows, incomplete mask coverage and unknown frame timing; optimizer execution status propagates into result bundles; checkpoints fingerprint full camera calibration and invalidate on mask or camera edits (registered renderers refresh their camera maps); bundle replacement publishes through a single atomic directory swap (#11111). |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |

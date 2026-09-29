@@ -44,6 +44,7 @@ from .contracts import (
 from .mask_records import MaskFrame
 from .projection import (
     PinholeCameraModel,
+    camera_calibration_fingerprint,
     compute_silhouette_loss,
 )
 
@@ -119,6 +120,9 @@ class OptimizationCheckpoint:
     best_loss: float
     is_physically_accepted: bool
     parameters: tuple[tuple[float, ...], ...]
+    mask_revision_ids: tuple[str, ...] = ()
+    camera_id: str | None = None
+    camera_calibration_sha256: str = ""
 
     def __post_init__(self) -> None:
         check_pos_int(self.step_index, "step_index")
@@ -127,6 +131,7 @@ class OptimizationCheckpoint:
         check_strict_float(self.image_loss, "image_loss")
         check_strict_float(self.physics_loss, "physics_loss")
         check_strict_float(self.best_loss, "best_loss")
+        object.__setattr__(self, "mask_revision_ids", tuple(self.mask_revision_ids))
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -499,6 +504,7 @@ class ControlFitter:
     ) -> None:
         """Record an optimization snapshot checkpoint."""
         ckpt_params = tuple(tuple(float(x) for x in row) for row in cand_controls)
+        mask_revs = tuple(m.revision_id for m in self.observed_masks)
         checkpoints.append(
             OptimizationCheckpoint(
                 step_index=eval_count,
@@ -509,6 +515,9 @@ class ControlFitter:
                 best_loss=best_loss,
                 is_physically_accepted=breakdown.is_physically_accepted,
                 parameters=ckpt_params,
+                mask_revision_ids=mask_revs,
+                camera_id=self.camera.camera_id,
+                camera_calibration_sha256=camera_calibration_fingerprint(self.camera),
             )
         )
 
