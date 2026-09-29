@@ -9,7 +9,7 @@
 - Implementation commit: `SELF`
 - Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
 - Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979)
-- Lease session: `claude-deskcomputer-20260926-gs3dx`
+- Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T01:43Z)
 - Development log: `DL-#10950`
 
 ## Objective and Status
@@ -318,8 +318,25 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 human: record the `GS3DX_Human` balance run (midfoot joints) in `docs/HUMAN.md`
-   against Neck's (2.03 BW peak, pelvis 21 mm RMS, COM 12.9 mm).
+2. #10979 human, in progress (2026-09-28/29 owner review of the renders):
+   - **Balance regression (open).** `GS3DX_Human` balance to impact FAILS where Neck passes:
+     pelvis 213 mm RMS (Neck 21), COM 193 mm, support drops to 0 (falls), peak 1.13 BW at
+     0.10 s. Suspect: the 100 N\*m/rad midfoot spring carries the toe-sphere load (toe points
+     ~7 cm past the MTP axis, so ~14 deg of collapse). Diagnostic `scratch/human/diag1.m`
+     (K = 100 / 2000 / 20000 via `gs3dx_contact_check(variables=)`, 0.5 s) decides it.
+     Likely design fix: carry the load at the ball of the foot (contact under the MTP axis)
+     and keep a toe-tip contact on the forefoot, within the 975 compiled cap.
+   - **Ball contact frame (code + test committed; test run pending).** `gs3dx_capture_markers` now returns
+     `.ball_time`/`.ball_frame` (head back at its address position along the target line):
+     477.3 / 477; peak speed (`.impact_frame` 476) is 16 cm before the ball; speed drops
+     50.7 -> 41.4 m/s across contact. Test `ball_contact_follows_peak_speed`. Renders of
+     "impact" must use `ball_frame`.
+   - **Neck too long (open).** Head centre 0.28 m above the shoulder line vs ~0.22 m
+     anthropometric (Drillis-Contini 0.182H to vertex); `NeckLength` = 10 in resolves via
+     slResolve but is not in the model workspace; `scratch/human/probe_neck.m` finds its
+     source. Target ~7.5 in, then re-aim `NeckAddress` and review all proportions.
+   - Then: rerun balance, re-render address/top/ball stills + videos, write the design
+     report, commit, push.
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
