@@ -245,17 +245,18 @@ def load_coverage_report(
 def evaluate_gates(
     gates: list[CoverageGate],
     files_coverage: dict[str, tuple[int, int]],
+    strict: bool = False,
 ) -> tuple[dict[str, GateResult], int]:
     """Evaluate coverage data against gates.
 
     Returns:
         tuple of (results_dict, exit_code)
-        exit_code 0: all passed
-        exit_code 1: one or more gates below floor
-        exit_code 2: one or more gates matched zero files (misconfigured)
+        exit_code 0: all matched gates passed (unmatched gates allowed without --strict)
+        exit_code 1: one or more gates below floor, or any gate matched
+            zero files under ``--strict`` (no silently-skipped gates)
     """
     results: dict[str, GateResult] = {}
-    has_misconfigured = False
+    has_unmatched = False
     has_failure = False
 
     for gate in gates:
@@ -269,9 +270,9 @@ def evaluate_gates(
                 percent=0.0,
                 min_coverage=gate.min_coverage,
                 matching_files=0,
-                status="MISCONFIGURED",
+                status="UNMATCHED",
             )
-            has_misconfigured = True
+            has_unmatched = True
             continue
 
         covered = sum(files_coverage[f][0] for f in matching_files)
@@ -293,12 +294,7 @@ def evaluate_gates(
             status=status,
         )
 
-    if has_misconfigured:
-        exit_code = 2
-    elif has_failure:
-        exit_code = 1
-    else:
-        exit_code = 0
+    exit_code = 1 if has_failure or (has_unmatched and strict) else 0
 
     return results, exit_code
 
@@ -311,9 +307,9 @@ def format_summary_table(results: dict[str, GateResult]) -> str:
         f"  {'-' * 26} {'-' * 36} {'-' * 5} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 14}",
     ]
     for res in results.values():
-        if res.status == "MISCONFIGURED":
+        if res.status == "UNMATCHED":
             pct_str = "N/A"
-            status_str = "MISCONFIGURED"
+            status_str = "UNMATCHED"
         else:
             pct_str = f"{res.percent:.1f}%"
             status_str = res.status
@@ -346,7 +342,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Maintained for backward compatibility.",
+        help="Fail when any gate matches zero files (no silently-skipped gates).",
     )
     args = parser.parse_args(argv)
 
@@ -366,24 +362,32 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(f"Configuration or file error: {exc}\n")
         return 2
 
-    results, exit_code = evaluate_gates(gates, coverage_data)
+    results, exit_code = evaluate_gates(gates, coverage_data, strict=args.strict)
     print(format_summary_table(results))
 
-    if exit_code == 2:
-        misconfigured = [
-            r.name for r in results.values() if r.status == "MISCONFIGURED"
-        ]
+    unmatched = [r for r in results.values() if r.status == "UNMATCHED"]
+    if unmatched and args.strict:
         sys.stderr.write(
-            f"\nERROR: Coverage gate(s) matched zero files (misconfigured): {', '.join(misconfigured)}\n"
+            f"\nERROR: Coverage gate(s) matched zero files: "
+            f"{', '.join(f'{r.name} ({r.path})' for r in unmatched)}\n"
         )
-    elif exit_code == 1:
+    elif unmatched:
+        sys.stdout.write(
+            f"\nWARNING: Coverage gate(s) matched zero files and were skipped: "
+            f"{', '.join(f'{r.name} ({r.path})' for r in unmatched)}\n"
+        )
+
+    if exit_code == 1:
         failed = [
             f"{r.name} ({r.percent:.1f}% < {r.min_coverage:.1f}%)"
             for r in results.values()
             if r.status == "FAIL"
         ]
-        sys.stderr.write(f"\nFAIL: Coverage gate(s) below floor: {', '.join(failed)}\n")
-    else:
+        if failed:
+            sys.stderr.write(
+                f"\nFAIL: Coverage gate(s) below floor: {', '.join(failed)}\n"
+            )
+    elif not unmatched:
         print(f"\nAll {len(gates)} coverage gates passed.")
 
     return exit_code
