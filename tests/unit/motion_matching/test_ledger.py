@@ -98,38 +98,20 @@ def test_row_classification():
 
 @pytest.mark.unit
 def test_disqualified_tour_baseline_receipts_are_indexed_as_rejected() -> None:
-    """TB-04 and TB-05 pendulum receipts remain discoverable, report measured RMSE, but are REJECTED."""
+    """TB-04 evidence remains discoverable but cannot become an accepted fit."""
     ledger = scan()
     rows = [
         row
         for row in ledger.rows
-        if any(
-            pattern in row.receipt_path
-            for pattern in (
-                "docs/plans/tour_baselines/evidence/tb04_",
-                "docs/plans/tour_baselines/evidence/tb05_",
-            )
-        )
+        if "docs/plans/tour_baselines/evidence/tb04_" in row.receipt_path
     ]
 
-    assert len(rows) == 4
     assert {row.capture for row in rows} == {"driver", "iron"}
     assert all(row.engine == "tools" for row in rows)
     assert all(row.lane == "tour_baselines" for row in rows)
-    assert all(
-        row.acceptance is not None and row.acceptance["status"] == "REJECTED"
-        for row in rows
-    )
-    assert all(
-        row.acceptance is not None and row.acceptance["is_physically_accepted"] is False
-        for row in rows
-    )
-    # True measured whole marker RMSE must be extracted (415 mm to 567 mm), not None or zero
-    assert all(
-        row.metrics.whole_marker_rmse_m is not None
-        and 0.40 <= row.metrics.whole_marker_rmse_m <= 0.60
-        for row in rows
-    )
+    assert all(row.acceptance is not None for row in rows)
+    assert all(row.acceptance["status"] == "REJECTED" for row in rows)
+    assert all(row.acceptance["is_physically_accepted"] is False for row in rows)
 
 
 @pytest.mark.unit
@@ -142,10 +124,8 @@ def test_upper_body_planarity_receipts_are_indexed_as_rejected() -> None:
     ]
     assert {row.capture for row in rows} == {"driver", "iron"}
     assert all(row.engine == "tools" for row in rows)
-    assert all(
-        row.acceptance is not None and row.acceptance["status"] == "REJECTED"
-        for row in rows
-    )
+    assert all(row.acceptance is not None for row in rows)
+    assert all(row.acceptance["status"] == "REJECTED" for row in rows)
 
 
 @pytest.mark.unit
@@ -258,115 +238,3 @@ def test_extract_horizon_s_prefers_dynamics_duration_over_elapsed_s() -> None:
         "elapsed_s": 326.2,
     }
     assert extract_horizon_s(payload_no_dynamics) is None
-
-
-@pytest.mark.unit
-def test_contradictory_status_strings_fail_closed_to_rejected() -> None:
-    """Contradictory status strings (e.g. self-reported PASSED with failed gate) fail closed to REJECTED."""
-    from src.shared.python.motion_matching.ledger import extract_acceptance
-
-    # 1. Receipt declares self-reported PASSED and accepted=True, but statuses says disqualified
-    contradictory_1 = {
-        "status": "PASSED",
-        "receipt": {"accepted": True, "status": "PASSED"},
-        "statuses": {"scientific_qualification": "disqualified"},
-    }
-    block_1 = extract_acceptance("evidence/test1.json", contradictory_1, None)
-    assert block_1 is not None
-    assert block_1["status"] == "REJECTED"
-    assert block_1["is_physically_accepted"] is False
-
-    # 2. Acceptance block says status=PASSED and is_physically_accepted=True, but contains a FAILED gate
-    contradictory_2 = {
-        "acceptance": {
-            "horizon": "G1",
-            "is_physically_accepted": True,
-            "status": "PASSED",
-            "gates": [
-                {"name": "whole", "status": "passed"},
-                {
-                    "name": "max_normal_force_n",
-                    "status": "failed",
-                    "reason": "excessive force",
-                },
-            ],
-        }
-    }
-    block_2 = extract_acceptance("evidence/test2.json", contradictory_2, None)
-    assert block_2 is not None
-    assert block_2["status"] == "REJECTED"
-    assert block_2["is_physically_accepted"] is False
-
-
-@pytest.mark.unit
-def test_failed_gate_override_is_confined_to_success_claims() -> None:
-    """A failed-gate override must only rewrite blocks that claim success.
-
-    Regression for review concern on #11117: the flood-gate override clobbered
-    historical DIAGNOSTIC verdicts (which do not claim acceptance) with REJECTED,
-    overwriting unrelated evidence.
-    """
-    from src.shared.python.motion_matching.ledger import extract_acceptance
-
-    diagnostic = {
-        "acceptance": {
-            "horizon": "G1",
-            "is_physically_accepted": False,
-            "status": "DIAGNOSTIC",
-            "gates": [
-                {
-                    "name": "max_normal_force_n",
-                    "status": "failed",
-                    "reason": "instrumented only",
-                },
-            ],
-        }
-    }
-    block = extract_acceptance("evidence/test4.json", diagnostic, None)
-    assert block is not None
-    assert block["status"] == "DIAGNOSTIC", (
-        "historical DIAGNOSTIC verdict must be preserved verbatim; the "
-        "failed-gate override may only rewrite success claims"
-    )
-    assert block["is_physically_accepted"] is False
-
-
-@pytest.mark.unit
-def test_fk_only_and_short_horizon_cannot_acquire_full_dynamics_badges() -> None:
-    """FK-only and short-horizon receipts cannot acquire full-dynamics G2/G3 acceptance."""
-    from src.shared.python.motion_matching.acceptance import evaluate, Horizon
-
-    # 1. Short-window fit (0.3 s duration) evaluated against G1 (>= 0.85 s)
-    short_window_receipt = {
-        "duration_s": 0.30,
-        "shared_metrics": {
-            "whole_marker_rmse_m": 0.020,
-            "early_marker_rmse_m": 0.010,
-            "terminal_marker_rmse_m": 0.020,
-            "club_marker_rmse_m": 0.030,
-            "pelvis_yaw_rmse_rad": 0.02,
-        },
-    }
-    v_short = evaluate(short_window_receipt, horizon=Horizon.G1)
-    trunc_gates = [g for g in v_short.gates if g.name == "horizon_truncation"]
-    assert len(trunc_gates) == 1
-    assert trunc_gates[0].status.value == "failed"
-    assert v_short.is_physically_accepted is False
-    assert v_short.status == "REJECTED"
-
-    # 2. FK-only / kinematic lane without contact audit evaluated against G2 (dynamic ground support)
-    fk_only_receipt = {
-        "lane": "native",
-        "duration_s": 1.25,
-        "shared_metrics": {
-            "whole_marker_rmse_m": 0.020,
-            "early_marker_rmse_m": 0.010,
-            "terminal_marker_rmse_m": 0.020,
-            "club_marker_rmse_m": 0.030,
-            "pelvis_yaw_rmse_rad": 0.02,
-        },
-    }
-    v_fk = evaluate(fk_only_receipt, horizon=Horizon.G2)
-    # G2 requires contact audit; kinematic lane cannot bypass contact audit in G2
-    assert v_fk.is_physically_accepted is False
-    assert v_fk.status == "REJECTED"

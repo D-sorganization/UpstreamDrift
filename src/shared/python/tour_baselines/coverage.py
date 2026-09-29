@@ -125,16 +125,6 @@ _DRIVEN_DOUBLE_REJECTION = (
     "accuracy exceeds its declared threshold."
 )
 
-_DRIVEN_TRIPLE_RECEIPTS: dict[str, str] = {
-    "driver": "docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json",
-    "iron": "docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json",
-}
-
-_DRIVEN_TRIPLE_REJECTION = (
-    "TB-05 receipt is DISQUALIFIED: solver reached max iterations and marker "
-    "accuracy exceeds its declared threshold."
-)
-
 _UPPER_BODY_PLANARITY_RECEIPTS: dict[str, str] = {
     capture: f"docs/plans/tour_baselines/evidence/tb06_{capture}_planarity_receipt.json"
     for capture in ("driver", "iron")
@@ -188,19 +178,6 @@ def _cell_driven(m: GolfModelIdentity, capture: str) -> CoverageCell:
             missing_adapter=None,
             blocked_reason=_DRIVEN_DOUBLE_REJECTION,
             governing_issue="#10589",
-            evidence_status=EvidenceStatus.REJECTED,
-        )
-    if m.model_id == "driven_triple_pendulum":
-        return CoverageCell(
-            model_id=m.model_id,
-            capture=capture,
-            supported=True,
-            observation_set="Projected 2D swing plane (shoulder pivot + clubhead/grip)",
-            existing_artifact=(f"{_DRIVEN_TRIPLE_RECEIPTS[capture]} (DISQUALIFIED)"),
-            ownership="Tools",
-            missing_adapter=None,
-            blocked_reason=_DRIVEN_TRIPLE_REJECTION,
-            governing_issue="#10590",
             evidence_status=EvidenceStatus.REJECTED,
         )
     return CoverageCell(
