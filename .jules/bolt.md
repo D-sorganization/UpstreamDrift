@@ -192,3 +192,11 @@
 ## 2024-05-25 - [Optimize Quaternion and Vector Norm Calculation in Pre-Impact Contracts]
 **Learning:** In the physics pre-impact contracts (`src/shared/python/physics/_pre_impact_contracts.py`), calculating the magnitude of 1D arrays (like quaternions and 3D vectors) using `np.linalg.norm` incurs significant overhead due to NumPy's internal function dispatch and instance checks. Replacing `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for small 1D arrays completely bypasses this overhead, resulting in a ~2x performance speedup. This mirrors similar optimizations made across the codebase.
 **Action:** Replace `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for calculating the magnitude of small, static 1D arrays like vectors or quaternions, especially in contract validation or heavily evaluated numerical loops.
+
+## 2026-10-24 - [Optimize np.linalg.norm in pink_tasks.py]
+**Learning:** In the IK constraint solver (`src/engines/physics_engines/pinocchio/python/pink_tasks.py`), calculating the error norms using `np.linalg.norm` for small 1D vectors creates significant overhead due to array allocations and NumPy dispatch mechanisms. Replacing this with `math.sqrt(np.vdot())` completely eliminates this overhead while mathematically equivalent, matching optimizations elsewhere.
+**Action:** Replace `np.linalg.norm` with `math.sqrt(np.vdot())` for small 1D error arrays.
+
+## 2026-10-24 - [Optimize np.linalg.norm in pink_tasks.py]
+**Learning:** In the IK constraint solver (`src/engines/physics_engines/pinocchio/python/pink_tasks.py`), calculating the error norms using `np.linalg.norm` for small 1D vectors creates significant overhead due to array allocations and NumPy dispatch mechanisms. Replacing this with `math.sqrt(np.vdot())` completely eliminates this overhead while mathematically equivalent, matching optimizations elsewhere.
+**Action:** Replace `np.linalg.norm` with `math.sqrt(np.vdot())` for small 1D error arrays.
