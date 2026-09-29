@@ -272,7 +272,9 @@ def fit_initial_state_multiview(
 
     # Inferred convention if not explicitly passed
     if state_convention is None:
-        if candidate_poses and len(candidate_poses[0]) in (37, 27):
+        # Explicit length check: `if candidate_poses` raises a truthiness
+        # ValueError for 2-D NumPy candidate matrices.
+        if len(candidate_poses) > 0 and len(candidate_poses[0]) in (37, 27):
             state_convention = CANONICAL_ARTICULATED_CONVENTION
         else:
             state_convention = POINT_LANDMARKS_CONVENTION
@@ -286,7 +288,7 @@ def fit_initial_state_multiview(
 
     evaluated_candidates: list[InitialHypothesis] = []
     best_hyp: InitialHypothesis | None = None
-    best_score = 0.0
+    best_score = float("-inf")
 
     for i, pose in enumerate(candidate_poses):
         scores: list[float] = []

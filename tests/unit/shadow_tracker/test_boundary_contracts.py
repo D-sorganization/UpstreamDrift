@@ -216,6 +216,120 @@ def test_no_valid_pixel_input_cannot_yield_winning_initialization() -> None:
 
 
 # ===========================================================================
+# 1b. Evidence With Uniformly Zero Scores Must Not Be Confused With Abstention
+# ===========================================================================
+
+
+def test_all_zero_score_candidates_with_evidence_select_first_candidate() -> None:
+    """With real foreground evidence, candidates scoring exactly 0.0 must still win.
+
+    Regression for review P2: ``best_score`` was seeded at ``0.0`` with a strict
+    comparison, so a uniformly disjoint (all-zero IoU) candidate set left
+    ``best_hypothesis`` as None even though evidence existed.
+    """
+    cam = PinholeCameraModel(
+        camera_id="cam-front",
+        width_px=100,
+        height_px=100,
+        fx=80.0,
+        fy=80.0,
+        cx=50.0,
+        cy=50.0,
+        translation_world_to_camera=(0.0, 0.0, 3.0),
+    )
+    renderer = ArticulatedSilhouetteRenderer(
+        cameras={"cam-front": cam},
+        subject_binding=_make_test_subject_binding(),
+    )
+
+    # A stub renderer whose body mask is always empty makes every candidate's body
+    # IoU exactly 0.0 regardless of pose, while the observation still carries real
+    # foreground pixels (i.e. has_evidence is True).
+    stub_px = 100 * 100
+
+    class _ZeroBodyRenderer:
+        def render(self, request):
+            return RenderResult(
+                body_mask=(0,) * stub_px,
+                club_mask=(0,) * stub_px,
+                visibility_mask=(1,) * stub_px,
+            )
+
+    body_px = [0] * stub_px
+    body_px[1] = 1
+    observation = _make_mask_frame(
+        camera_id="cam-front",
+        width_px=100,
+        height_px=100,
+        body=bytes(body_px),
+        club=bytes([0] * stub_px),
+        valid=bytes([1] * stub_px),
+    )
+
+    angles = reference_golfer_setup()
+    candidate_state = state_vector_from_joint_dict(angles)
+
+    result = fit_initial_state_multiview(
+        cameras=(cam,),
+        observed_masks=(observation,),
+        candidate_poses=(candidate_state, candidate_state),
+        subject_binding=_make_test_subject_binding(),
+        # type: ignore[arg-type] — renderer protocol duck-typed by fit call
+        renderer=_ZeroBodyRenderer(),  # type: ignore[arg-type]
+    )
+
+    assert result.best_hypothesis is not None, (
+        "Uniformly zero-score candidates with real evidence must still produce a winner"
+    )
+    assert result.best_hypothesis.hypothesis_id == "cand_000"
+
+
+def test_numpy_candidate_matrix_does_not_raise_truthiness_valueerror() -> None:
+    """A 2-D NumPy candidate matrix must be usable without a truthiness ValueError."""
+    cam = PinholeCameraModel(
+        camera_id="cam-front",
+        width_px=100,
+        height_px=100,
+        fx=80.0,
+        fy=80.0,
+        cx=50.0,
+        cy=50.0,
+        translation_world_to_camera=(0.0, 0.0, 3.0),
+    )
+    renderer = ArticulatedSilhouetteRenderer(
+        cameras={"cam-front": cam},
+        subject_binding=_make_test_subject_binding(),
+    )
+
+    total_px = 100 * 100
+    empty_mask = _make_mask_frame(
+        camera_id="cam-front",
+        width_px=100,
+        height_px=100,
+        body=bytes(total_px),
+        club=bytes(total_px),
+        valid=bytes([1] * total_px),
+    )
+
+    angles = reference_golfer_setup()
+    candidate_state = state_vector_from_joint_dict(angles)
+    # A 2-D NumPy array of candidates (worked with the previous enumeration-based
+    # implementation; must not raise 'truth value of an array is ambiguous').
+    candidates = np.tile(candidate_state, (2, 1))
+
+    result = fit_initial_state_multiview(
+        cameras=(cam,),
+        observed_masks=(empty_mask,),
+        candidate_poses=candidates,
+        subject_binding=_make_test_subject_binding(),
+        renderer=renderer,
+    )
+
+    assert result.best_hypothesis is None  # no evidence path
+    assert result.residuals_evaluated == 2
+
+
+# ===========================================================================
 # 2. Real Limb and Club Pose Changes Move Expected Geometry
 # ===========================================================================
 
@@ -406,6 +520,47 @@ def test_anamorphic_camera_rendering_and_bridge_consistency() -> None:
     span_y = np.max(ys) - np.min(ys)
     assert span_x > 0 and span_y > 0
     # Because fx = 2 * fy, horizontal scaling is doubled relative to isotropic camera
+    # Compare against an isotropic camera (fx = fy = 100) at the same geometry: the
+    # horizontal span must scale by ~2x while the vertical span is unchanged. This
+    # asserts the renderer actually consumes fy; a renderer that uses fx for both
+    # axes would produce span_x == span_x_iso and fail here.
+    cam_isotropic = PinholeCameraModel(
+        camera_id="cam-isotropic",
+        width_px=200,
+        height_px=200,
+        fx=100.0,
+        fy=100.0,
+        cx=100.0,
+        cy=100.0,
+        translation_world_to_camera=(0.0, 0.0, 2.5),
+    )
+    renderer_iso = ArticulatedSilhouetteRenderer(
+        cameras={"cam-isotropic": cam_isotropic},
+        subject_binding=_make_test_subject_binding(),
+    )
+    res_iso = renderer_iso.render(
+        RenderRequest(
+            camera_id="cam-isotropic",
+            state=state,
+            image_size_px=(200, 200),
+            state_convention=CANONICAL_ARTICULATED_CONVENTION,
+        )
+    )
+    body_iso = np.array(res_iso.body_mask).reshape((200, 200))
+    ys_iso, xs_iso = np.where(body_iso == 1)
+    span_x_iso = np.max(xs_iso) - np.min(xs_iso)
+    span_y_iso = np.max(ys_iso) - np.min(ys_iso)
+    assert span_x_iso > 0 and span_y_iso > 0
+    # Real fx/fy scaling assertion: horizontal doubling, vertical invariance
+    # (small tolerance for pixel quantisation at mask boundaries).
+    assert abs(span_x - 2 * span_x_iso) <= 2, (
+        f"anamorphic fx=2fy must double the horizontal span: got {span_x} vs "
+        f"2x isotropic {span_x_iso}"
+    )
+    assert abs(span_y - span_y_iso) <= 1, (
+        f"fy equal between cameras must keep the vertical span: got {span_y} vs "
+        f"isotropic {span_y_iso}"
+    )
 
     # 2. Bridge test: round-trip through camera bridge preserves fx and fy
     obs_cam = CameraCalibration(
