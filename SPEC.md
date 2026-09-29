@@ -7191,7 +7191,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-09-29 | #11152 | Archive 142 finished development-log entries (135 shipped plus 7 merged `completed`) verbatim to `docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md`, bringing the log from 345,986 to 191,326 bytes, under the 200 KB size ceiling. |
+| 2026-09-29 | #11152 | Archive 142 finished development-log entries (135 shipped plus 7 merged `completed`) verbatim to `docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md`, bringing the log from 345,986 to 191,326 bytes, under the 200 KB size ceiling; the archive gets a doc-size-budget exception. |
 | 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
