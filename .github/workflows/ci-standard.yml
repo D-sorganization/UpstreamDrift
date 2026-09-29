@@ -1971,7 +1971,7 @@ jobs:
         # "sqlite3.OperationalError: no such table: file". Remove any
         # stale coverage artefacts before collecting fresh data.
         run: |
-          rm -f .coverage .coverage.* coverage.xml || true
+          rm -f .coverage .coverage.* coverage.xml coverage.json || true
 
       - name: Run Core Test Suite
         id: core-tests
@@ -1993,6 +1993,7 @@ jobs:
           coverage_report_args=(
             --cov-report=term-missing
             --cov-report=xml:coverage.xml
+            --cov-report=json:coverage.json
             --cov-config=pyproject.toml
             --cov-fail-under=75
           )
@@ -2155,6 +2156,7 @@ jobs:
                   "${coverage_args[@]}"
                   --cov-report=term-missing
                   --cov-report=xml:coverage.xml
+                  --cov-report=json:coverage.json
                   --cov-config=pyproject.toml
                   --cov-fail-under=75
                 )
@@ -2330,6 +2332,19 @@ jobs:
           else
             python3 scripts/config/coverage_enforcer.py coverage.xml
           fi
+
+      # Per-package coverage gates (#10965): the budget JSON is the single
+      # --strict gate authority, evaluated against the same coverage.json
+      # the enforcer reads.
+      - name: Enforce Budget Package Coverage Gates
+        if: >-
+          steps.core-test-changes.outputs.skip != 'true' &&
+          (
+            steps.core-tests.outputs.full_coverage_generated == 'true' ||
+            steps.core-tests.outputs.pr_targeted_coverage_generated == 'true'
+          )
+        run: |
+          python3 scripts/check_coverage_gates.py --report coverage.json --strict
       # Dependency-free validator coverage that supports future native-engine jobs.
       - name: Cross-Engine Validator Core Unit Tests
         if: steps.core-test-changes.outputs.skip != 'true'
