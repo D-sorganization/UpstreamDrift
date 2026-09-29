@@ -149,7 +149,7 @@ def verify_force_and_torque_limits(
     if f_arr.ndim == 1 and len(f_arr) == 3:
         max_f = float(np.linalg.norm(f_arr))
     elif f_arr.ndim == 2 and f_arr.shape[-1] == 3:
-        max_f = float(np.max(np.linalg.norm(f_arr, axis=-1)))
+        max_f = float(np.sqrt(np.max(np.einsum("...i,...i->...", f_arr, f_arr))))
     else:
         max_f = float(np.max(np.abs(f_arr)))
 

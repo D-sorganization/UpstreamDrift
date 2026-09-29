@@ -1,4 +1,19 @@
-# Current Handoff — Run the MJX L-BFGS Arm Toward Convergence (#11071)
+# Current Handoff — Consolidated Bolt Row-Norm Micro-Optimisations (#11073, #11074, #11076)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-ud-bolt-einsum`
+- Branch: `claude/ud-bolt-einsum-consolidated` (baseline `origin/main` 0206717f)
+- Commit: `SELF`
+- Pull request: #11081 (https://github.com/D-sorganization/UpstreamDrift/pull/11081). It supersedes the Bolt PRs #11073, #11074 and #11076, which conflicted on `SPEC.md` and carried `n/a` change-log rows.
+- Done: took only the `src/` changes from the three Bolt PRs. Row-wise `np.linalg.norm(..., axis=1)` becomes `np.sqrt(np.einsum("ij,ij->i", d, d))` in `contact_identification`, `multi_shooting_fit` and `tour_baselines/calibration`, and max-norm reductions take one square root after `np.max` in `contact_mode_qualifier` and `calibration`. The unmeasured inline speed claims were removed.
+- Measured (NumPy 2.2.6, this workstation): 4.8x on 20000x3 rows and 1.8x on 657x3 rows; results match `np.linalg.norm` to 1e-15.
+- Excluded: #11077. On top of the same edits it reverts the `nightly-cross-engine.yml` hardening, deletes cross-engine validation tests and raises the architecture budget.
+- Validation: `test_contact_identification`, `test_contact_mode_qualifier_pf04`, `test_multi_shooting_fit` and `test_tour_calibration`: 54 passed. Architecture budget OK. Divergence inventory regenerated (all four files are UD-only).
+- Next step: CI green, then ready and arm the PR; close the three Bolt PRs as superseded after merge.
+
+---
+
+# Past Handoff — Run the MJX L-BFGS Arm Toward Convergence (#11071)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-ud-11071-lbfgs`
@@ -11,7 +26,7 @@
 - Trend: the MJX-plant RMS in the optimiser history went 37.6 → 28.2 mm (driver) and 34.5 → 27.3 mm (iron) between evaluations 10 and 69, about 0.05 mm per evaluation at the end. The shared-simulator replay stays 12-15 mm above the MJX plant, so more iterations mostly shrink the plant number, not the scored one.
 - Decision: keep `none` as the default (the promotion rule needs a `converged` stop). 60 iterations (about 1.5 h per capture) is the practical budget reached.
 - Evidence: `docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/` (receipts, `provenance.json`, `rows.json`, `REPORT.md`); ledger 133 receipts.
-- Next step: CI green, then ready and arm the PR.
+- Next step: none; merged as PR #11075.
 
 ---
 
