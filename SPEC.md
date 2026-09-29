@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
@@ -11,6 +12,27 @@ Resolves the split-brain coverage gates by making the budget JSON the single gat
 - **Measured floors** (`min_coverage` set to measurement rounded DOWN to 0.1, `ratchet_on` 2027-01-01): api-routes 84.3% (5221 stmts), data-io 50.1% (2891), execution-checkpointing 22.4% (2521), deployment 48.4% (1362), optimization 49.9% (2815), engine-adapters 7.1% (51393; optional-engine packages only covered when their backend is installed).
 - **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
   - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
+
+## Fail-Closed Disqualified Tour Baseline Receipts in Motion Matching Ledger and Tracker (#11085)
+
+Implements [MMR-01] fail-closed qualification and rejection propagation across the motion-matching ledger, coverage matrix, and status tracking documents:
+- **TB-05 Driven Triple Pendulum Disqualification (`src/shared/python/tour_baselines/coverage.py`)**:
+  - Registers `_DRIVEN_TRIPLE_RECEIPTS` and `_DRIVEN_TRIPLE_REJECTION`.
+  - Updates `_cell_driven` so `driven_triple_pendulum` returns `EvidenceStatus.REJECTED` for both driver and 7-iron captures instead of `UNQUALIFIED`.
+  - Updates `docs/plans/tour_baselines/coverage_matrix.md` lines 25-26 to display `❌ Rejected`.
+- **Ledger Accuracy & Fail-Closed Gates (`src/shared/python/motion_matching/ledger.py`)**:
+  - `_extract_metric_value`: Adds traversal of the `"metrics"` mapping, correctly extracting `whole_marker_rmse_m` (415–567 mm) from `tb04_` and `tb05_` qualification receipts.
+  - `extract_candidate_sha`: Adds inspection of `identity_hash` and nested `identity` mapping.
+  - `extract_acceptance`: Hardens gate evaluation so that any acceptance block containing a failed or rejected gate fails closed to `status: "REJECTED"` and `is_physically_accepted: False`, ensuring physical and numerical gate results supersede self-reported status strings.
+- **Status Document Generator Hardening (`scripts/generate_matched_swing_status.py`)**:
+  - Configures `sys.stdout` and `sys.stderr` to UTF-8 on Windows to prevent `UnicodeEncodeError` when rendering emoji badges.
+  - Adds `_normalize_markdown` comparison in `--check` mode to ensure resilient whitespace handling across formatting variations.
+- **Ledger & Status Synchronization**:
+  - Re-indexes all receipts with `python -m src.shared.python.motion_matching ledger --write` (`reports/matched_swing_ledger.json`).
+  - Synchronizes tracker documentation with `python scripts/generate_matched_swing_status.py --write` (`docs/development/matched_swing_program/README.md`).
+- **TDD Test Coverage**:
+  - `tests/unit/tour_baselines/test_coverage_matrix.py`: Adds `test_disqualified_driven_triple_receipts_are_not_promoted`.
+  - `tests/unit/motion_matching/test_ledger.py`: Adds `test_disqualified_tour_baseline_receipts_are_indexed_as_rejected` and `test_contradictory_status_strings_fail_closed_to_rejected`.
 
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
