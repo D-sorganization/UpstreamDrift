@@ -1,4 +1,25 @@
-# Current Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+# Current Handoff — Qualify Drake Native Dual-Club Dynamics and Replay (#11094)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-10d-drake-dual-club-11094`
+- Commit: `SELF`
+- Pull request: Closes #11094.
+- Done: Implemented [MMR-10D] native dual-club dynamic qualification contracts and automated nightly CI lane harness integration for Drake:
+  - Created `src/engines/physics_engines/drake/python/native_qualification.py` with `DrakeQualificationReceipt` and `DrakeQualificationStatus` (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`).
+  - Added fail-closed rejection of copied state trajectories (`is_fresh_simulation` check), FK-only playbacks without dynamic simulation, and zero collected native tests on pinned host.
+  - Implemented host runtime detection: reports `UNAVAILABLE` when `pydrake` is absent rather than passing or erroring blindly.
+  - Implemented independent derivative consistency (`dq/dt ≈ v`) and energy conservation error accounting.
+  - Disclosed four engine-specific limitations: `upper_body_27dof_float_pathway`, `rigid_weld_closure`, `continuous_polynomial_actuation`, `ground_contact_requires_full_body`.
+  - Added `"drake"` to `ENGINE_LANES` in `scripts/ci/run_native_engine_lane.py` and updated `scripts/ci/run_native_engine_lane.sh`.
+  - Emitted verified offline nightly receipt in `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json`.
+  - Generated committed dual-club evidence package in `docs/development/matched_swing_program/evidence/drake/` (`driver_receipt.json`, `iron_receipt.json`, `README.md`).
+- Tests: 30 focused unit and script tests passed (`tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `tests/scripts/test_run_native_engine_lane.py`, `tests/docs/test_native_lane_freshness.py`).
+- Pre-commit: Ruff check and format clean; dry duplication gate clean; hardcoded style ratchet clean; architecture budgets pass.
+- Next step: CI green, auto-merge squash to main.
+
+---
+
+# Past Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `/tmp/ud-wt-10965` (baseline `origin/main` 64962e8d6)

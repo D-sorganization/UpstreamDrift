@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "engine": "drake",
+  "club": "driver",
+  "status": "qualified",
+  "candidate_sha256": "c0ffee778899aabbccddeeff00112233445566778899aabbccddeeff00112233",
+  "model_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+  "capture_sha256": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+  "runtime_available": true,
+  "is_fresh_simulation": true,
+  "derivatives_consistent": true,
+  "energy_balance_checked": true,
+  "energy_summary": {
+    "energy_conservation_error": 0.042,
+    "kinetic_energy_j": 142.35,
+    "potential_energy_j": 28.14
+  },
+  "marker_metrics": {
+    "clubhead_rms_m": 0.0112,
+    "early_rms_m": 0.0098,
+    "pelvis_yaw_error_pct": 8.75,
+    "terminal_rms_m": 0.0148,
+    "whole_rms_m": 0.0124
+  },
+  "declared_limitations": [
+    "upper_body_27dof_float_pathway: pelvis translation and orientation are free float coordinates",
+    "rigid_weld_closure: dual-grip closed loop enforced via 6D rigid weld constraint",
+    "continuous_polynomial_actuation: 6th-order Bernstein/power torque polynomials per joint",
+    "ground_contact_requires_full_body: upper-body slice does not model ground reaction forces"
+  ],
+  "rejection_reasons": [],
+  "diagnostic_message": "All qualification checks passed."
+}

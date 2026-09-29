@@ -17,9 +17,14 @@ bash scripts/ci/run_native_engine_lane.sh \
 bash scripts/ci/run_native_engine_lane.sh \
   --engine myosuite \
   --out docs/development/matched_swing_program/evidence/nightly
+
+# Drake (environment with drake/pydrake extra installed)
+bash scripts/ci/run_native_engine_lane.sh \
+  --engine drake \
+  --out docs/development/matched_swing_program/evidence/nightly
 ```
 
-Commit the updated `opensim_receipt.json` and `myosuite_receipt.json`. Freshness
+Commit the updated `opensim_receipt.json`, `myosuite_receipt.json`, and `drake_receipt.json`. Freshness
 tests warn after seven days and fail after thirty days on `main`.
 
 ## Workflow Integration
