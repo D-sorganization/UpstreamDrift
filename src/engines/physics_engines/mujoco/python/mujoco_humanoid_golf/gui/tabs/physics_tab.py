@@ -1,0 +1,505 @@
+"""Physics tab for the MuJoCo humanoid golf GUI.
+
+Provides controls for adjusting physics parameters including gravity,
+contact stiffness, damping, friction, and simulation timestep settings.
+"""
+
+from __future__ import annotations
+
+import typing
+from pathlib import Path
+
+from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.data_io.common_utils import get_shared_urdf_path
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+from ...linkage_mechanisms import LINKAGE_CATALOG
+from ...models import (
+    ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
+    CHAOTIC_PENDULUM_XML,
+    DOUBLE_PENDULUM_XML,
+    FULL_BODY_GOLF_SWING_XML,
+    HUMANOID_CM_JOINTS,
+    MYOARM_SIMPLE_PATH,
+    MYOBODY_PATH,
+    MYOUPPERBODY_PATH,
+    TRIPLE_PENDULUM_XML,
+    UPPER_BODY_GOLF_SWING_XML,
+    load_humanoid_cm_xml,
+)
+from ...sim_widget import MuJoCoSimWidget
+
+if typing.TYPE_CHECKING:
+    from ..advanced_gui import AdvancedGolfAnalysisWindow
+
+logger = get_logger(__name__)
+
+
+class PhysicsTab(QtWidgets.QWidget):
+    """Tab for physics engine configuration and model selection."""
+
+    # Signal emitted when model changes
+    # Arguments: model_name, config_dict
+    model_changed = QtCore.pyqtSignal(str, dict)
+
+    # Signal emitted when operating mode changes
+    # Arguments: mode ("dynamic" or "kinematic")
+    mode_changed = QtCore.pyqtSignal(str)
+
+    def __init__(
+        self,
+        sim_widget: MuJoCoSimWidget,
+        main_window: AdvancedGolfAnalysisWindow,
+        parent: QtWidgets.QWidget | None = None,
+    ) -> None:
+        if sim_widget is None:
+            raise ValueError("sim_widget must be provided")
+        super().__init__(parent)
+        self.sim_widget = sim_widget
+        self.main_window = main_window
+
+        self.model_configs: list[dict] = []
+        self.model_descriptions: dict[int, str] = {}
+        self._default_model_index = 5  # advanced_biomech fallback
+
+        self._init_model_configs()
+        self._setup_ui()
+
+    def _init_model_configs(self) -> None:
+        """Initialize the list of available physics models."""
+        self.model_configs = self._build_pendulum_and_golf_configs()
+        self._add_humanoid_cm_config()
+        self._add_musculoskeletal_configs()
+        self._add_linkage_mechanism_configs()
+
+        # Add shared URDF models
+        self._load_shared_urdfs()
+
+        # Connect to sim_widget loading signals
+        if hasattr(self.sim_widget, "loading_started"):
+            self.sim_widget.loading_started.connect(self._on_loading_started)
+            self.sim_widget.loading_finished.connect(self._on_loading_finished)
+
+    @staticmethod
+    def _build_pendulum_and_golf_configs() -> list[dict]:
+        """Build configs for pendulum and golf swing models."""
+        return [
+            {
+                "name": "chaotic_pendulum",
+                "xml": CHAOTIC_PENDULUM_XML,
+                "actuators": ["Base Drive (Forcing)", "Pendulum Control"],
+            },
+            {
+                "name": "double",
+                "xml": DOUBLE_PENDULUM_XML,
+                "actuators": ["Shoulder", "Wrist"],
+            },
+            {
+                "name": "triple",
+                "xml": TRIPLE_PENDULUM_XML,
+                "actuators": ["Shoulder", "Elbow", "Wrist"],
+            },
+            {
+                "name": "upper_body",
+                "xml": UPPER_BODY_GOLF_SWING_XML,
+                "actuators": [
+                    "Spine Rotation",
+                    "L Shoulder Swing",
+                    "L Shoulder Lift",
+                    "L Elbow",
+                    "L Wrist",
+                    "R Shoulder Swing",
+                    "R Shoulder Lift",
+                    "R Elbow",
+                    "R Wrist",
+                    "R Wrist",
+                    "Club Wrist",
+                ],
+            },
+            {
+                "name": "full_body",
+                "xml": FULL_BODY_GOLF_SWING_XML,
+                "actuators": [
+                    "L Ankle",
+                    "L Knee",
+                    "R Ankle",
+                    "R Knee",
+                    "Spine Bend",
+                    "Spine Rotation",
+                    "L Shoulder Swing",
+                    "L Shoulder Lift",
+                    "L Elbow",
+                    "L Wrist",
+                    "R Shoulder Swing",
+                    "R Shoulder Lift",
+                    "R Elbow",
+                    "R Wrist",
+                    "Club Wrist",
+                ],
+            },
+            {
+                "name": "advanced_biomech",
+                "xml": ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
+                "actuators": [
+                    "L Ankle Plantar",
+                    "L Ankle Invert",
+                    "L Knee",
+                    "R Ankle Plantar",
+                    "R Ankle Invert",
+                    "R Knee",
+                    "Spine Lateral",
+                    "Spine Sagittal",
+                    "Spine Rotation",
+                    "L Scap Elev",
+                    "L Scap Prot",
+                    "L Shldr Flex",
+                    "L Shldr Abd",
+                    "L Shldr Rot",
+                    "L Elbow",
+                    "L Wrist Flex",
+                    "L Wrist Dev",
+                    "R Scap Elev",
+                    "R Scap Prot",
+                    "R Shldr Flex",
+                    "R Shldr Abd",
+                    "R Shldr Rot",
+                    "R Elbow",
+                    "R Wrist Flex",
+                    "R Wrist Dev",
+                    "Shaft Upper",
+                    "Shaft Middle",
+                    "Shaft Tip",
+                ],
+            },
+        ]
+
+    def _add_humanoid_cm_config(self) -> None:
+        """Add CMU Humanoid model if dm_control is available."""
+        humanoid_cm_xml = load_humanoid_cm_xml()
+
+        if humanoid_cm_xml is not None:
+            self.model_configs.append(
+                {
+                    "name": "humanoid_cm",
+                    "xml": humanoid_cm_xml,
+                    "actuators": list(HUMANOID_CM_JOINTS),
+                },
+            )
+            # Humanoid CM is the preferred default
+            self._default_model_index = len(self.model_configs) - 1
+            logger.info("Loaded humanoid CM (CMU) model from dm_control")
+        else:
+            # Fallback default: advanced_biomech (index 5)
+            self._default_model_index = 5
+            logger.info(
+                "dm_control not available; defaulting to advanced_biomech model"
+            )  # noqa: E501
+
+    def _add_musculoskeletal_configs(self) -> None:
+        """Add MyoSuite musculoskeletal model configs."""
+        self.model_configs.extend(
+            [
+                {
+                    "name": "myoupperbody",
+                    "xml_path": MYOUPPERBODY_PATH,
+                    "actuators": [
+                        "R Shoulder Flex",
+                        "R Shoulder Add",
+                        "R Shoulder Rot",
+                        "R Elbow",
+                        "R Forearm",
+                        "R Wrist Flex",
+                        "R Wrist Dev",
+                        "L Shoulder Flex",
+                        "L Shoulder Add",
+                        "L Shoulder Rot",
+                        "L Elbow",
+                        "L Forearm",
+                        "L Wrist Flex",
+                        "L Wrist Dev",
+                        "R Erector Spinae",
+                        "L Erector Spinae",
+                        "R Int Oblique",
+                        "L Int Oblique",
+                        "R Ext Oblique",
+                        "L Ext Oblique",
+                    ],
+                },
+                {
+                    "name": "myobody",
+                    "xml_path": MYOBODY_PATH,
+                    "actuators": [f"Muscle {i + 1}" for i in range(290)],
+                },
+                {
+                    "name": "myoarm_simple",
+                    "xml_path": MYOARM_SIMPLE_PATH,
+                    "actuators": [
+                        "R Shoulder Flex",
+                        "R Shoulder Add",
+                        "R Shoulder Rot",
+                        "R Elbow",
+                        "R Forearm",
+                        "R Wrist Flex",
+                        "R Wrist Dev",
+                        "L Shoulder Flex",
+                        "L Shoulder Add",
+                        "L Shoulder Rot",
+                        "L Elbow",
+                        "L Forearm",
+                        "L Wrist Flex",
+                        "L Wrist Dev",
+                    ],
+                },
+            ]
+        )
+
+    def _add_linkage_mechanism_configs(self) -> None:
+        """Add linkage mechanism configs from the catalog."""
+        self.model_configs.extend(
+            [
+                {
+                    "name": mech_name.lower()
+                    .replace(" ", "_")
+                    .replace(":", "")
+                    .replace("(", "")
+                    .replace(")", ""),
+                    "xml": mech_config["xml"],
+                    "actuators": mech_config["actuators"],
+                    "category": mech_config.get("category", "Mechanisms"),
+                    "description": mech_config.get("description", ""),
+                }
+                for (mech_name, mech_config) in LINKAGE_CATALOG.items()
+            ]
+        )
+
+    def _load_shared_urdfs(self) -> None:
+        """Load URDF models from shared/urdf directory."""
+        shared_path = get_shared_urdf_path()
+        if shared_path is None:
+            return
+        base_dir = Path(shared_path).parent
+        if not base_dir.exists():
+            return
+
+        for urdf_file in base_dir.glob("*.urdf"):
+            name = urdf_file.stem
+            self.model_configs.append(
+                {
+                    "name": name,
+                    "xml_path": urdf_file,
+                    "actuators": ["Joint 1", "Joint 2"],  # Generic fallback
+                    "description": "Shared URDF Model",
+                }
+            )
+
+    def _setup_ui(self) -> None:
+        """Create the physics configuration UI."""
+        main_layout = QtWidgets.QVBoxLayout(self)
+        main_layout.setContentsMargins(8, 8, 8, 8)
+
+        # 1. Model Selector
+        model_group = QtWidgets.QGroupBox("Physics Models & Mechanisms")
+        model_layout = QtWidgets.QVBoxLayout(model_group)
+        self.model_combo = QtWidgets.QComboBox()
+        self.model_combo.setToolTip(
+            "Select a physics model to simulate.\n"
+            "DOF = Degrees of Freedom\n"
+            "Higher DOF = more complex/realistic model"
+        )
+        self._populate_model_combo()
+        self.model_combo.currentIndexChanged.connect(self.on_model_changed)
+        model_layout.addWidget(self.model_combo)
+
+        # Model description label
+        self.model_description_label = QtWidgets.QLabel()
+        self.model_description_label.setWordWrap(True)
+        # Style set in dark_theme.qss
+        self.model_description_label.setObjectName("descriptionLabel")
+        model_layout.addWidget(self.model_description_label)
+        self._update_model_description(0)
+        main_layout.addWidget(model_group)
+
+        # 2. Operating Mode Selector
+        mode_group = QtWidgets.QGroupBox("Operating Mode")
+        mode_layout = QtWidgets.QHBoxLayout(mode_group)
+        self.mode_combo = QtWidgets.QComboBox()
+        self.mode_combo.addItems(
+            ["Dynamic (Torque Control)", "Kinematic (Pose Adjustment)"]
+        )  # noqa: E501
+        self.mode_combo.setToolTip(
+            "Dynamic: Physics-driven simulation using torques.\n"
+            "Kinematic: Direct control of joint positions (pose)."
+        )
+        self.mode_combo.currentIndexChanged.connect(self._on_operating_mode_changed)
+        mode_layout.addWidget(QtWidgets.QLabel("Mode:"))
+        mode_layout.addWidget(self.mode_combo)
+        main_layout.addWidget(mode_group)
+
+        # Add stretch to push everything to top
+        main_layout.addStretch(1)
+
+        # Select default model (humanoid CM if available, else advanced_biomech)
+        if self.model_combo.count() > self._default_model_index:
+            self.model_combo.setCurrentIndex(self._default_model_index)
+
+    def _populate_model_combo(self) -> None:
+        # Name-based descriptions (stable regardless of insertion order)
+        desc_map = {
+            "chaotic_pendulum": ("Simple driven pendulum showing chaotic behavior."),
+            "double": ("Basic swing with shoulder and wrist joints."),
+            "triple": ("Adds elbow joint for more realistic arm mechanics."),
+            "upper_body": ("Upper body model with spine rotation and both arms."),
+            "full_body": ("Full body with leg drive and weight transfer."),
+            "advanced_biomech": (
+                "Detailed golf model: scapulae, 3-DOF shoulders, flexible shaft."
+            ),  # noqa: E501
+            "humanoid_cm": (
+                "CMU Humanoid from DeepMind Control Suite. Original MuJoCo humanoid."
+            ),  # noqa: E501
+            "myoupperbody": ("Muscle-actuated upper body. Independent muscle control."),
+            "myobody": (
+                "Complete musculoskeletal model. Very complex - for advanced users."
+            ),  # noqa: E501
+            "myoarm_simple": (
+                "Both arms with muscle actuation. Good for arm mechanics study."
+            ),  # noqa: E501
+        }
+
+        # Names that should be categorized as golf/pendulum models
+        golf_names = {
+            "chaotic_pendulum",
+            "double",
+            "triple",
+            "upper_body",
+            "full_body",
+            "advanced_biomech",
+            "humanoid_cm",
+        }
+
+        for i, config in enumerate(self.model_configs):
+            display_name = config["name"].replace("_", " ").title()
+            if "category" in config:
+                display_name = f"{config['category']}: {display_name}"
+            elif config["name"] in desc_map:
+                prefix = "Golf" if config["name"] in golf_names else "Musculoskeletal"
+                display_name = (
+                    f"{prefix}: {display_name} ({len(config['actuators'])} DOF)"  # noqa: E501
+                )
+
+            self.model_combo.addItem(display_name)
+
+            # Store description
+            desc = desc_map.get(config["name"])
+            if not desc:
+                desc = str(config.get("description", "Imported model"))
+            self.model_descriptions[i] = desc
+
+    def _update_model_description(self, index: int) -> None:
+        if index in self.model_descriptions:
+            self.model_description_label.setText(self.model_descriptions[index])
+        else:
+            self.model_description_label.setText("")
+
+    def on_model_changed(self, index: int) -> None:
+        """Handle model selection change."""
+        if index is None:
+            raise ValueError("index must be provided")
+        self.load_current_model()
+        self._update_model_description(index)
+
+    def _on_loading_started(self) -> None:
+        """Handle start of model loading."""
+        self.model_combo.setEnabled(False)
+        self.mode_combo.setEnabled(False)
+        if hasattr(self.main_window, "statusBar"):
+            self.main_window.statusBar().showMessage("Loading physics model...")
+
+    def _on_loading_finished(self, success: bool) -> None:
+        """Handle completion of model loading."""
+        if success is None:
+            raise ValueError("success must be provided")
+        self.model_combo.setEnabled(True)
+        self.mode_combo.setEnabled(True)
+
+        if hasattr(self.main_window, "statusBar"):
+            if success:
+                self.main_window.statusBar().showMessage(
+                    "Model loaded successfully.", 3000
+                )  # noqa: E501
+            else:
+                self.main_window.statusBar().showMessage("Model load failed.", 5000)
+
+        if success:
+            self._finalize_model_change()
+
+    def _finalize_model_change(self) -> None:
+        """Post-load configuration update."""
+        index = self.model_combo.currentIndex()
+        if index < 0 or index >= len(self.model_configs):
+            return
+
+        config = self.model_configs[index]
+
+        # Handle actuator count mismatch
+        model = self.sim_widget.model
+        if model and model.nu != len(config["actuators"]):
+            # Fix up
+            diff = model.nu - len(config["actuators"])
+            if diff > 0:
+                config["actuators"].extend(
+                    [f"Actuator {i}" for i in range(len(config["actuators"]), model.nu)]
+                )
+            else:
+                config["actuators"] = config["actuators"][: model.nu]
+
+        self.sim_widget.verify_control_system()
+
+        # Emit signal so other tabs can update
+        self.model_changed.emit(config["name"], config)
+
+        # Trigger mode update too
+        self._on_operating_mode_changed(self.mode_combo.currentIndex())
+
+    def load_current_model(self) -> None:
+        """Load selected model and emit change signal."""
+        index = self.model_combo.currentIndex()
+        if index < 0 or index >= len(self.model_configs):
+            return
+
+        config = self.model_configs[index]
+
+        try:
+            if hasattr(self.sim_widget, "load_model_async"):
+                if "xml_path" in config:
+                    self.sim_widget.load_model_async(
+                        str(config["xml_path"]), is_file=True
+                    )  # noqa: E501
+                elif "xml" in config:
+                    self.sim_widget.load_model_async(str(config["xml"]), is_file=False)
+                else:
+                    raise ValueError(f"Invalid config: {config['name']}")
+            else:
+                # Fallback to sync
+                if "xml_path" in config:
+                    self.sim_widget.load_model_from_file(str(config["xml_path"]))
+                elif "xml" in config:
+                    self.sim_widget.load_model_from_xml(str(config["xml"]))
+                else:
+                    raise ValueError(f"Invalid config: {config['name']}")
+
+                # If sync, manually trigger finalize
+                self._finalize_model_change()
+
+        except (RuntimeError, ValueError, OSError) as e:
+            QtWidgets.QMessageBox.warning(self, "Error", f"Failed to load model: {e}")
+            logger.error("Failed to load model: %s", e)
+            return
+
+    def _on_operating_mode_changed(self, index: int) -> None:
+        """Handle operating mode change (Dynamic vs Kinematic)."""
+        if index is None:
+            raise ValueError("index must be provided")
+        mode = "dynamic" if index == 0 else "kinematic"
+        self.sim_widget.set_operating_mode(mode)
+        self.mode_changed.emit(mode)

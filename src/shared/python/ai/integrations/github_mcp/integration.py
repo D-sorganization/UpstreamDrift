@@ -1,0 +1,88 @@
+"""Convenience helper for adding the GitHub MCP server to a pool.
+
+External callers (the UD MCP Prefs UI from #5642, automated config
+bootstrap, smoke tests) should reach the pool through this helper rather
+than building an :class:`McpServerConfig` and calling
+:meth:`McpClientPool.add_server` themselves — that keeps the npm package
+name, env var name, and default server name in one place (DRY) and keeps
+callers from poking the pool's internals (LOD).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from typing import Protocol
+
+from src.shared.python.ai.integrations.github_mcp.server_config import (
+    GITHUB_MCP_SERVER_NAME,
+    GITHUB_MCP_TOKEN_ENV_VAR,
+    build_github_mcp_config,
+)
+from src.shared.python.ai.mcp.contracts import McpServerConfig
+
+_LOG = logging.getLogger(__name__)
+
+
+class _PoolLike(Protocol):
+    """The subset of :class:`McpClientPool` this helper depends on.
+
+    Declared as a :class:`Protocol` so unit tests can pass a fake pool
+    without dragging the real one (and its transport stack) into the
+    test's import graph.
+    """
+
+    @property
+    def is_started(self) -> bool: ...
+
+    def add_server(self, config: McpServerConfig) -> None: ...
+
+
+def register_github_mcp(
+    pool: _PoolLike,
+    token: str | None = None,
+    *,
+    name: str = GITHUB_MCP_SERVER_NAME,
+    extra_env: dict[str, str] | None = None,
+) -> McpServerConfig:
+    """Add the GitHub MCP server to an already-started :class:`McpClientPool`.
+
+    Args:
+        pool: A pool with :pyattr:`is_started` already ``True``. The MCP
+            infrastructure expects servers to be added pre-start; this
+            helper is the explicit "register after the pool is live"
+            entry point used by interactive flows (Prefs UI).
+        token: Personal Access Token. If ``None``, the env var
+            ``GITHUB_PERSONAL_ACCESS_TOKEN`` is read instead.
+        name: Override the default server name (``"github"``). Useful for
+            multi-account setups.
+        extra_env: Optional extra env vars (e.g. ``GITHUB_API_URL`` for
+            GitHub Enterprise).
+
+    Returns:
+        The :class:`McpServerConfig` that was registered. Returning it
+        lets callers chain follow-up actions (e.g. ``await pool.start_all()``
+        for a deferred-start flow, or persisting the config to disk).
+
+    Raises:
+        RuntimeError: If ``pool.is_started`` is ``False``.
+        ValueError: If no token is supplied and the env var is unset.
+        ValueError: Propagated from the pool if a server named ``name``
+            is already registered.
+    """
+    if not pool.is_started:
+        raise RuntimeError(
+            "register_github_mcp precondition failed: pool must be started"
+        )
+
+    effective_token = (
+        token if token is not None else os.environ.get(GITHUB_MCP_TOKEN_ENV_VAR)
+    )
+    config = build_github_mcp_config(
+        token=effective_token,
+        name=name,
+        extra_env=extra_env,
+    )
+    pool.add_server(config)
+    _LOG.info("registered GitHub MCP server as %r", name)
+    return config

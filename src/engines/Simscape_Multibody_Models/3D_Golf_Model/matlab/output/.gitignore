@@ -1,0 +1,3 @@
+# Demo / experiment artefacts regenerate on every run; don't track them.
+*
+!.gitignore

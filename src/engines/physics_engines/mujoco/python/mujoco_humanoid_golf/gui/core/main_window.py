@@ -1,0 +1,562 @@
+"""Advanced professional GUI for golf swing analysis.
+
+This module provides a comprehensive interface with:
+- Simulation controls and visualization
+- Real-time biomechanical analysis
+- Advanced plotting and data export
+- Force/torque vector visualization
+- Camera controls
+"""
+
+from __future__ import annotations
+
+import typing
+from pathlib import Path
+
+from PyQt6 import QtCore, QtGui, QtWidgets
+
+from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
+from src.shared.python.ui.overlay import OverlayWidget
+from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
+
+from ...advanced_gui_methods import AdvancedGuiMethodsMixin
+from ...grip_modelling_tab import GripModellingTab
+from ...sim_widget import MuJoCoSimWidget
+from ..tabs.analysis_tab import AnalysisTab
+from ..tabs.controls_tab import ControlsTab
+from ..tabs.humanoid_config_tab import HumanoidConfigTab
+from ..tabs.manipulability_tab import ManipulabilityTab
+from ..tabs.manipulation_tab import ManipulationTab
+from ..tabs.physics_tab import PhysicsTab
+from ..tabs.plotting_tab import PlottingTab
+from ..tabs.visualization_tab import VisualizationTab
+
+logger = get_logger(__name__)
+
+
+class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
+    """Professional golf swing analysis application with comprehensive features."""
+
+    SIMPLIFIED_ACTUATOR_THRESHOLD: typing.Final[int] = 60
+
+    def __init__(self) -> None:
+        """Initialize the AdvancedGolfAnalysisWindow.
+
+        Sets up the main window, models, and UI components including
+        controls, visualization, analysis, and plotting tabs.
+        """
+        super().__init__()
+
+        self.setWindowTitle("Golf Swing Biomechanical Analysis Suite")
+        self.resize(1600, 900)
+
+        # Apply Global Stylesheet
+        # Apply Global Stylesheet
+        self._load_stylesheet()
+
+    def _load_stylesheet(self) -> None:
+        """Load and apply the external QSS stylesheet."""
+        self._apply_qss_stylesheet()
+        self._create_main_tabs()
+        self._create_golf_analysis_layout()
+        self._create_secondary_tabs()
+        self._create_analysis_tabs()
+        self._connect_signals()
+
+        self.grip_modelling_tab.connect_sim_widget(self.sim_widget)
+        self.sim_widget.reset_state()
+
+        self._apply_styling()
+        self._load_launch_config()
+        self._create_status_bar()
+        self._start_status_timer()
+
+    def _apply_qss_stylesheet(self) -> None:
+        try:
+            from src.shared.python.theme import ThemeManager as SharedThemeManager
+
+            theme_mgr = SharedThemeManager.instance()
+            self.setStyleSheet(theme_mgr.get_current_stylesheet())
+            theme_mgr.themeChanged.connect(self._on_shared_theme_changed)
+        except Exception:
+            try:
+                style_path = Path(__file__).parent.parent / "styles" / "dark_theme.qss"
+                if style_path.exists():
+                    with open(style_path) as f:
+                        self.setStyleSheet(f.read())
+                else:
+                    logger.warning(
+                        "Stylesheet not found: %s; using default Qt styling", style_path
+                    )  # noqa: E501
+            except Exception:
+                logger.exception("Failed to load stylesheet, using default Qt styling")
+
+    def _on_shared_theme_changed(self, colors: dict[str, str]) -> None:
+        """Update stylesheet dynamically when the shared theme changes."""
+        try:
+            from src.shared.python.theme import ThemeManager as SharedThemeManager
+
+            theme_mgr = SharedThemeManager.instance()
+            self.setStyleSheet(theme_mgr.get_current_stylesheet())
+        except Exception:
+            pass
+
+    def _create_main_tabs(self) -> None:
+        self.main_tab_widget = QtWidgets.QTabWidget()
+        self.setCentralWidget(self.main_tab_widget)
+
+        self.golf_analysis_widget = QtWidgets.QWidget()
+        self.main_tab_widget.addTab(self.golf_analysis_widget, "Golf Swing Analysis")
+
+        self.grip_modelling_tab = GripModellingTab()
+        self.main_tab_widget.addTab(self.grip_modelling_tab, "Grip Modelling")
+
+        self.humanoid_config_tab = HumanoidConfigTab()
+        self.main_tab_widget.addTab(self.humanoid_config_tab, "Humanoid Config")
+
+    def _create_golf_analysis_layout(self) -> None:
+        main_layout = QtWidgets.QHBoxLayout(self.golf_analysis_widget)
+
+        main_splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
+
+        self.sim_widget = MuJoCoSimWidget(width=900, height=700, fps=60)
+        main_splitter.addWidget(self.sim_widget)
+
+        self.overlay = OverlayWidget(self.sim_widget)
+        self.overlay.rec_btn.clicked.connect(self._on_overlay_rec_toggled)
+        self.overlay.pause_btn.clicked.connect(self._on_overlay_pause_clicked)
+
+        self.tab_widget = QtWidgets.QTabWidget()
+        self.tab_widget.setMinimumWidth(400)
+        main_splitter.addWidget(self.tab_widget)
+
+        main_splitter.setSizes([1100, 500])
+        main_layout.addWidget(main_splitter)
+
+    def _create_secondary_tabs(self) -> None:
+        self.physics_tab = PhysicsTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.physics_tab, "Physics")
+
+        self.controls_tab = ControlsTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.controls_tab, "Controls")
+
+        self.visualization_tab = VisualizationTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.visualization_tab, "Visualization")
+        self.analysis_tab = AnalysisTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.analysis_tab, "Analysis")
+        self.plotting_tab = PlottingTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.plotting_tab, "Plotting")
+
+    def _create_analysis_tabs(self) -> None:
+        recorder = self.sim_widget.get_recorder()
+        recorder.engine = self.sim_widget.engine
+        self.live_plot = LivePlotWidget(recorder)
+        self.tab_widget.addTab(self.live_plot, "Live Analysis")
+
+        self.manipulation_tab = ManipulationTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.manipulation_tab, "Interactive Pose")
+
+        self.manipulability_tab = ManipulabilityTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.manipulability_tab, "Manipulability")
+
+    def _connect_signals(self) -> None:
+        self.physics_tab.model_changed.connect(self.controls_tab.on_model_loaded)
+        self.physics_tab.model_changed.connect(self.on_model_changed_signal)
+        self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
+
+        if hasattr(self.controls_tab, "chk_live_analysis"):
+            self.controls_tab.chk_live_analysis.toggled.connect(
+                self.on_live_analysis_toggled
+            )
+
+        self.physics_tab.model_changed.connect(
+            lambda n, c: self.manipulability_tab.on_model_loaded()
+        )
+
+    def _start_status_timer(self) -> None:
+        self.status_timer = QtCore.QTimer(self)
+        self.status_timer.timeout.connect(self._update_status_bar)
+        self.status_timer.start(200)
+
+        if hasattr(self.sim_widget, "connect_timer"):
+            self.sim_widget.connect_timer(self.live_plot.update_plot)
+
+    @property
+    def model_configs(self) -> list[dict]:
+        """Expose model configs from PhysicsTab for mixin compatibility."""
+        if hasattr(self, "physics_tab"):
+            return self.physics_tab.model_configs
+        return []
+
+    @property
+    def model_combo(self) -> QtWidgets.QComboBox | None:  # type: ignore[override]
+        """Expose model combo from PhysicsTab for mixin compatibility."""
+        if hasattr(self, "physics_tab"):
+            return self.physics_tab.model_combo
+        return None
+
+    def on_model_changed_signal(self, model_name: str, config: dict) -> None:
+        """Handle model change signal from PhysicsTab."""
+        # Update body lists for interactive manipulation
+        if model_name is None:
+            raise ValueError("model_name must be provided")
+        self.update_body_lists()
+
+        # Update camera controls to match new model
+        if hasattr(self, "visualization_tab"):
+            self.visualization_tab.update_camera_sliders()
+
+        # Update plotting tab joints
+        if hasattr(self, "plotting_tab"):
+            self.plotting_tab.update_joint_list()
+
+        # Update status bar immediately
+        self._update_status_bar()
+
+    def _on_quick_camera_clicked(self, preset_name: str) -> None:
+        """Handle quick camera button click."""
+        if hasattr(self, "visualization_tab"):
+            self.visualization_tab.camera_combo.setCurrentText(preset_name)
+
+    def on_reset_camera(self) -> None:
+        """Reset camera to default position."""
+        if hasattr(self, "visualization_tab"):
+            self.visualization_tab.on_reset_camera()
+        else:
+            self.sim_widget.reset_camera()
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:  # type: ignore[override]  # noqa: C901
+        """Handle keyboard shortcuts."""
+        if event is None:
+            return
+        key = event.key()
+
+        # Camera preset shortcuts (1-5)
+        camera_shortcuts = {
+            QtCore.Qt.Key.Key_1: "side",
+            QtCore.Qt.Key.Key_2: "front",
+            QtCore.Qt.Key.Key_3: "top",
+            QtCore.Qt.Key.Key_4: "follow",
+            QtCore.Qt.Key.Key_5: "down-the-line",
+        }
+
+        if key in camera_shortcuts:
+            # Enum key lookup issue with Int key
+            preset = camera_shortcuts[key]  # type: ignore[index]
+            self._on_quick_camera_clicked(preset)
+            return
+
+        # Space key: Play/Pause
+        if key == QtCore.Qt.Key.Key_Space:
+            if hasattr(self.controls_tab, "play_pause_btn"):
+                self.controls_tab.play_pause_btn.toggle()
+            return
+
+        # R key: Reset
+        if key == QtCore.Qt.Key.Key_R:
+            if hasattr(self.controls_tab, "reset_btn"):
+                self.controls_tab.reset_btn.click()
+            return
+
+        # O key: Toggle overlay
+        if key == QtCore.Qt.Key.Key_O:
+            if hasattr(self, "overlay"):
+                self.overlay.toggle()
+            return
+
+        # H key: Toggle help panel
+        if key == QtCore.Qt.Key.Key_H:
+            # Find the help group and toggle it
+            if hasattr(self.controls_tab, "help_group"):
+                self.controls_tab.help_group.setChecked(
+                    not self.controls_tab.help_group.isChecked(),
+                )
+            return
+
+        super().keyPressEvent(event)
+
+    def _create_status_bar(self) -> None:
+        """Create a status bar showing simulation information."""
+        status_bar = self.statusBar()
+        if status_bar is None:
+            return
+        status_bar.setStyleSheet(Styles.STATUSBAR_DARK)
+
+        # Model info label
+        self.status_model_label = QtWidgets.QLabel("Model: --")
+        self.status_model_label.setStyleSheet(Styles.STATUSBAR_MODEL)
+        status_bar.addWidget(self.status_model_label)
+
+        # Separator
+        sep1 = QtWidgets.QLabel("|")
+        sep1.setStyleSheet(Styles.STATUSBAR_SEPARATOR)
+        status_bar.addWidget(sep1)
+
+        # Time label
+        self.status_time_label = QtWidgets.QLabel("Time: 0.00s")
+        self.status_time_label.setStyleSheet(Styles.STATUSBAR_TIME)
+        status_bar.addWidget(self.status_time_label)
+
+        # Separator
+        sep2 = QtWidgets.QLabel("|")
+        sep2.setStyleSheet(Styles.STATUSBAR_SEPARATOR)
+        status_bar.addWidget(sep2)
+
+        # Camera info label
+        self.status_camera_label = QtWidgets.QLabel("Camera: side")
+        self.status_camera_label.setStyleSheet(Styles.STATUSBAR_CAMERA)
+        status_bar.addWidget(self.status_camera_label)
+
+        # Separator
+        sep3 = QtWidgets.QLabel("|")
+        sep3.setStyleSheet(Styles.STATUSBAR_SEPARATOR)
+        status_bar.addWidget(sep3)
+
+        # Simulation state label
+        self.status_state_label = QtWidgets.QLabel("Running")
+        self.status_state_label.setStyleSheet(Styles.STATUSBAR_STATE_RUNNING)
+        status_bar.addWidget(self.status_state_label)
+
+        # Permanent widget for recording status (right side)
+        self.status_recording_label = QtWidgets.QLabel("")
+        self.status_recording_label.setStyleSheet(Styles.STATUSBAR_RECORDING)
+        status_bar.addPermanentWidget(self.status_recording_label)
+
+    def _update_status_bar(self) -> None:
+        """Update status bar with current simulation info."""
+        if self.sim_widget.model is None:
+            return
+
+        # Update model info
+        if hasattr(self, "physics_tab") and hasattr(self.physics_tab, "model_configs"):
+            config_idx = self.physics_tab.model_combo.currentIndex()
+            if config_idx < len(self.physics_tab.model_configs):
+                model_name = self.physics_tab.model_configs[config_idx]["name"]
+                num_actuators = self.sim_widget.get_num_actuators()
+                self.status_model_label.setText(
+                    f"Model: {model_name} ({num_actuators} actuators)",
+                )
+
+        # Update time
+        if self.sim_widget.data is not None:
+            time = self.sim_widget.get_time()
+            self.status_time_label.setText(f"Time: {time:.2f}s")
+
+        # Update camera info
+        if self.sim_widget.camera is not None:
+            az = self.sim_widget.get_camera_azimuth()
+            el = self.sim_widget.get_camera_elevation()
+            dist = self.sim_widget.get_camera_distance()
+            self.status_camera_label.setText(
+                f"Camera: Az={az:.0f}° El={el:.0f}° D={dist:.1f}",
+            )
+
+        # Update simulation state
+        if self.sim_widget.running:
+            self.status_state_label.setText("Running")
+            self.status_state_label.setStyleSheet(Styles.STATUSBAR_STATE_RUNNING)
+        else:
+            self.status_state_label.setText("Paused")
+            self.status_state_label.setStyleSheet(Styles.STATUSBAR_STATE_PAUSED)
+
+        # Update recording status
+        recorder = self.sim_widget.get_recorder()
+        if recorder.is_recording:
+            frames = recorder.get_num_frames()
+            duration = recorder.get_duration()
+            self.status_recording_label.setText(
+                f"RECORDING: {frames} frames ({duration:.1f}s)",
+            )
+            self.status_recording_label.setStyleSheet(
+                Styles.STATUSBAR_RECORDING_ACTIVE,
+            )
+        else:
+            frames = recorder.get_num_frames()
+            if frames > 0:
+                self.status_recording_label.setText(f"Recorded: {frames} frames")
+                self.status_recording_label.setStyleSheet(
+                    Styles.STATUSBAR_RECORDING_DONE,
+                )
+            else:
+                self.status_recording_label.setText("")
+
+    def _apply_styling(self) -> None:
+        """Apply professional styling to the application."""
+        try:
+            from src.shared.python.theme import apply_theme_to_window
+
+            if callable(apply_theme_to_window):
+                apply_theme_to_window(self)
+            return
+        except ImportError:
+            pass
+
+        self.setStyleSheet(
+            """
+            QMainWindow {
+                background-color: #f0f0f0;
+            }
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #cccccc;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+            QPushButton {
+                padding: 5px 10px;
+                border-radius: 3px;
+                background-color: #1f77b4;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #1a5f8f;
+            }
+            QPushButton:pressed {
+                background-color: #144a6e;
+            }
+            QTabWidget::pane {
+                border: 1px solid #cccccc;
+                background-color: white;
+            }
+            QTabBar::tab {
+                padding: 8px 16px;
+                margin-right: 2px;
+            }
+            QTabBar::tab:selected {
+                background-color: #1f77b4;
+                color: white;
+                font-weight: bold;
+            }
+```
+        """,
+        )
+
+    def on_live_analysis_toggled(self, checked: bool) -> None:
+        """Handle live analysis toggle."""
+        if checked is None:
+            raise ValueError("checked must be provided")
+        self.sim_widget.enable_live_analysis = checked
+        status_bar = self.statusBar()
+        if checked:
+            if status_bar:
+                status_bar.showMessage(
+                    "Live Biomechanical Analysis Enabled (Performance may drop)", 3000
+                )
+        else:
+            if status_bar:
+                status_bar.showMessage("Live Biomechanical Analysis Disabled", 3000)
+
+    # -------- Model management --------
+
+    def _update_camera_sliders(self) -> None:
+        """Update camera control sliders to match current camera state."""
+        if hasattr(self, "visualization_tab"):
+            self.visualization_tab.update_camera_sliders()
+
+    # -------- Interactive manipulation event handlers --------
+
+    def _on_overlay_rec_toggled(self, checked: bool) -> None:
+        """Handle overlay REC button toggle."""
+        if checked is None:
+            raise ValueError("checked must be provided")
+        recorder = self.sim_widget.get_recorder()
+        if checked:
+            recorder.start_recording()
+            self.overlay.status_label.setText("RECORDING")
+        else:
+            recorder.stop_recording()
+            self.overlay.status_label.setText("Recording Stopped")
+
+    def _on_overlay_pause_clicked(self) -> None:
+        """Handle overlay PAUSE button click."""
+        self.sim_widget.set_running(not self.sim_widget.running)
+        if self.sim_widget.running:
+            self.overlay.pause_btn.setText("\u23f8 PAUSE")
+        else:
+            self.overlay.pause_btn.setText("\u25b6 PLAY")
+
+    def update_body_lists(self) -> None:
+        """Update body selection combo boxes."""
+        if hasattr(self, "manipulation_tab"):
+            self.manipulation_tab.update_body_lists()
+        if hasattr(self, "visualization_tab"):
+            self.visualization_tab.update_body_list()
+
+    # ==================================================================
+    # SimulationGUIBase overrides
+    # ==================================================================
+
+    def _build_base_ui(self) -> None:
+        """Override base UI construction.
+
+        MuJoCo builds its own comprehensive tab-based UI in
+        ``_load_stylesheet``, so we skip the generic skeleton.
+        """
+        # No-op: MuJoCo builds its own UI entirely
+
+    def step_simulation(self) -> None:
+        """Advance the MuJoCo simulation by one step."""
+        self.sim_widget.step()  # type: ignore[attr-defined]
+
+    def reset_simulation(self) -> None:
+        """Reset the MuJoCo simulation state."""
+        self.sim_widget.reset_state()
+
+    def update_visualization(self) -> None:
+        """Refresh the MuJoCo visualization."""
+        self.sim_widget.update()
+
+    def load_model(self, index: int) -> None:
+        """Load a model at the given index via PhysicsTab."""
+        if hasattr(self, "physics_tab"):
+            self.physics_tab.model_combo.setCurrentIndex(index)
+
+    def sync_kinematic_controls(self) -> None:
+        """Synchronize kinematic slider values with model state."""
+        if hasattr(self, "manipulation_tab"):
+            self.manipulation_tab.sync_sliders()  # type: ignore[attr-defined]
+
+    def start_recording(self) -> None:
+        """Start recording simulation data."""
+        recorder = self.sim_widget.get_recorder()
+        recorder.start_recording()
+
+    def stop_recording(self) -> None:
+        """Stop recording simulation data."""
+        recorder = self.sim_widget.get_recorder()
+        recorder.stop_recording()
+
+    def get_recording_frame_count(self) -> int:
+        """Return the number of recorded frames."""
+        recorder = self.sim_widget.get_recorder()
+        return recorder.get_num_frames()
+
+    def export_data(self, filename: str) -> None:
+        """Export recorded data to the given filename."""
+        if filename is None:
+            raise ValueError("filename must be provided")
+        recorder = self.sim_widget.get_recorder()
+        data_dict = recorder.export_to_dict()
+        try:
+            from src.shared.python.data_io.export import export_recording_all_formats
+
+            export_recording_all_formats(filename, data_dict)
+        except ImportError:
+            logger.warning("Export module not available")
+
+    def get_joint_names(self) -> list[str]:
+        """Return joint names from the MuJoCo model."""
+        if self.sim_widget.model is not None:
+            return [
+                self.sim_widget.get_joint_name(i)
+                for i in range(self.sim_widget.get_num_joints())  # noqa: E501
+            ]
+        return []

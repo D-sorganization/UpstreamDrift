@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "name": "club_head",
+      "target": "marker_group:club_head",
+      "style": {
+        "shape": "sphere",
+        "size_px": 9.0,
+        "edge_color": "#000000",
+        "edge_width": 0.5,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#1f77b4"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "ball",
+      "target": "marker_group:ball",
+      "style": {
+        "shape": "sphere",
+        "size_px": 7.0,
+        "edge_color": "#222222",
+        "edge_width": 0.5,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#ff7f0e"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "left_hand",
+      "target": "marker_group:left_hand",
+      "style": {
+        "shape": "sphere",
+        "size_px": 6.0,
+        "edge_color": "#000000",
+        "edge_width": 0.5,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "tab10",
+          "palette_index": 2
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "right_hand",
+      "target": "marker_group:right_hand",
+      "style": {
+        "shape": "sphere",
+        "size_px": 6.0,
+        "edge_color": "#000000",
+        "edge_width": 0.5,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "tab10",
+          "palette_index": 3
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "skeleton",
+      "target": "marker_group:skeleton",
+      "style": {
+        "shape": "sphere",
+        "size_px": 5.0,
+        "edge_color": "#333333",
+        "edge_width": 0.4,
+        "fill_color": {
+          "kind": "data_driven",
+          "channel": {
+            "name": "speed",
+            "unit": "m/s",
+            "shape": [0],
+            "dtype": "float64"
+          },
+          "colormap": "viridis",
+          "vmin": 0.0,
+          "vmax": 50.0,
+          "nan_color": "#888888"
+        }
+      }
+    }
+  ]
+}

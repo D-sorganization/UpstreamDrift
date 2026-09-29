@@ -1,0 +1,108 @@
+"""
+Example 01: Basic Simulation
+
+This example demonstrates how to:
+1. Initialize the Engine Manager
+2. Load the MuJoCo engine
+3. Run a basic simulation loop
+4. Save results
+"""
+
+import sys
+import time
+from pathlib import Path
+
+# Allow running from repo root without installing the package
+_project_root = Path(__file__).resolve().parents[1]
+for _p in (
+    _project_root,
+    _project_root / "src",
+    _project_root / "src" / "shared" / "python",
+):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.core.error_utils import EngineNotAvailableError
+from src.shared.python.data_io.output_manager import OutputManager
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
+
+# Configure logging using centralized module
+setup_logging()
+logger = get_logger(__name__)
+
+project_root = get_repo_root()
+
+
+def main() -> None:
+    """Run basic simulation example."""
+    logger.info("Starting Example 01: Basic Simulation")
+
+    # 1. Initialize Managers
+    engine_manager = EngineManager(project_root)
+    output_manager = OutputManager(project_root / "output")
+    output_manager.create_output_structure()
+
+    # 2. Load Engine
+    # Note: This checks for actual installation.
+    # If not installed, raise an actionable error with install hint.
+    logger.info("Initializing MuJoCo engine...")
+    if not engine_manager.switch_engine(EngineType.MUJOCO):
+        raise EngineNotAvailableError(
+            engine_name="mujoco",
+            operation="basic simulation",
+            install_hint="pip install mujoco",
+        )
+
+    # 3. Simulation Loop (Conceptual)
+    logger.info("Running simulation...")
+
+    # In a real scenario, this would interface with engine_manager._mujoco_module
+    # For this example, we generate synthetic data representing a ball trajectory
+    duration = 3.0
+    dt = 0.01
+    steps = int(duration / dt)
+
+    times = []
+    heights = []
+    velocities = []
+
+    # Simple ballistic trajectory: z = v0*t - 0.5*g*t^2
+    v0 = 20.0
+
+    for i in range(steps):
+        t = i * dt
+        z = v0 * t - 0.5 * GRAVITY_M_S2 * t**2
+        v = v0 - GRAVITY_M_S2 * t
+
+        if z < 0:
+            z = 0
+            v = 0
+
+        times.append(t)
+        heights.append(z)
+        velocities.append(v)
+
+    logger.info(f"Simulation complete. {steps} steps computed.")
+
+    # 4. Save Results
+    results = {"time": times, "height": heights, "velocity": velocities}
+
+    metadata = {
+        "example": "01_basic_simulation",
+        "engine": "MuJoCo (Simulated)",
+        "date": time.strftime("%Y-%m-%d"),
+    }
+
+    save_path = output_manager.save_simulation_results(
+        results, "example_01_trajectory", engine="mujoco", metadata=metadata
+    )
+
+    logger.info(f"Results saved to: {save_path}")
+
+
+if __name__ == "__main__":
+    main()

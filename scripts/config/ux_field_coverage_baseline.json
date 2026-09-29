@@ -1,0 +1,10 @@
+{
+  "bare_html_input": 35,
+  "bare_html_select": 14,
+  "bare_html_textarea": 1,
+  "bare_qcombobox": 217,
+  "bare_qdoublespinbox": 221,
+  "bare_qlineedit": 94,
+  "bare_qslider": 70,
+  "bare_qspinbox": 62
+}

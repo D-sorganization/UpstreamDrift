@@ -1,0 +1,76 @@
+name: Docs Governance
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "manuals/upstreamdrift/**"
+      - "scripts/config/design_manual_governance.json"
+      - "scripts/check_design_manual_governance.py"
+      - "scripts/design_manual_contract.py"
+      - "scripts/check_docs_governance.py"
+      - "scripts/check_doc_catalog.py"
+      - "scripts/check_doc_size_budget.py"
+      - "scripts/check_document_title_case.py"
+      - "scripts/config/doc_size_budget.json"
+      - "tests/scripts/test_doc_governance_checks.py"
+      - "tests/scripts/test_document_title_case.py"
+      - "tests/scripts/test_design_manual_governance_contract.py"
+      - ".github/workflows/docs-governance.yml"
+      - ".github/actions/docs-governance-checks/**"
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "manuals/upstreamdrift/**"
+      - "scripts/config/design_manual_governance.json"
+      - "scripts/check_design_manual_governance.py"
+      - "scripts/design_manual_contract.py"
+      - "scripts/check_docs_governance.py"
+      - "scripts/check_doc_catalog.py"
+      - "scripts/check_doc_size_budget.py"
+      - "scripts/check_document_title_case.py"
+      - "scripts/config/doc_size_budget.json"
+      - "tests/scripts/test_doc_governance_checks.py"
+      - "tests/scripts/test_document_title_case.py"
+      - "tests/scripts/test_design_manual_governance_contract.py"
+      - ".github/workflows/docs-governance.yml"
+      - ".github/actions/docs-governance-checks/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  # The steps live in .github/actions/docs-governance-checks so this advisory
+  # check and the merge-blocking `docs-governance-gates` job in ci-standard.yml
+  # run the identical gate list. Edit the composite action, not this file, to
+  # change what docs governance checks.
+  doc-governance:
+    name: doc-governance
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Run docs governance checks
+        uses: ./.github/actions/docs-governance-checks
+        with:
+          changed-from: ${{ github.event.pull_request.base.sha || github.event.before }}

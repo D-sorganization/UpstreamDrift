@@ -1,0 +1,306 @@
+from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
+
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
+
+from src.tools.pose_studio.gui import MainWidget, PoseStudioWindow, _EmbedAdapter, main
+from src.tools.pose_studio.core import EngineStatus
+from src.shared.python.pose_interchange.canonical import (
+    canonical_zero_pose,
+)
+from src.shared.python.motion_matching.diagnostics.reference_pose import (
+    REFERENCE_GOLFER_FIELDS,
+)
+from src.shared.python.pose_interchange.services import MockKinematicsService
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_initialization(mock_qapp) -> None:
+    # Test fallback to "drake" if unknown engine is provided
+    win = PoseStudioWindow(initial_engine="unknown_engine")
+    assert win is not None
+    assert win.main_widget is not None
+    assert win.main_widget._engine_controller.engine_name == "drake"
+    assert win._engine_controller.engine_name == "drake"
+    assert win.act_undo is not None
+    assert win.act_redo is not None
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_embed_adapter_create_and_edit_pose(mock_qapp) -> None:
+    adapter = _EmbedAdapter()
+    widget = adapter.create_main_widget(parent=None)
+    assert isinstance(widget, MainWidget)
+    assert widget.act_undo is not None
+    assert widget.act_redo is not None
+
+    # Test editing an angle without crash
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    widget._on_angle_edited(joint, 30.0)
+    assert widget._engine_controller.pose.joint_angles_deg[joint] == 30.0
+    assert widget.act_undo.isEnabled()
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_engine_selected(mock_qapp) -> None:
+    win = PoseStudioWindow()
+    # Mock the controller switch to avoid full initialization of real engines if they exist
+    win._engine_controller.switch_engine = MagicMock(return_value=EngineStatus.MOCK)
+
+    win._on_engine_selected("mujoco")
+
+    # The selection is delegated to the controller exactly once with the
+    # selected engine name (issue #7157 — verify the argument, not just .called).
+    win._engine_controller.switch_engine.assert_called_once_with("mujoco")
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited(mock_qapp) -> None:
+    win = PoseStudioWindow()
+    win._history.push = MagicMock()
+
+    # Edit valid angle
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    win._on_angle_edited(joint, 45.0)
+
+    # Issue #7157: verify the *pushed pose* carries the edited angle, not just
+    # that push() was called with some argument.
+    win._history.push.assert_called_once()
+    pushed_pose = win._history.push.call_args.args[0]
+    assert pushed_pose.joint_angles_deg[joint] == 45.0
+    # And the controller's live pose reflects the edit (observable state).
+    assert win._engine_controller.pose.joint_angles_deg[joint] == 45.0
+
+    # Edit with an error
+    win._history.push.reset_mock()
+
+    # Triggering ValueError by injecting invalid joint name (though GUI doesn't do this, testing the try/except)
+    win._on_angle_edited("unknown_joint", 45.0)
+    assert not win._history.push.called
+    # The rejected edit left no "unknown_joint" key in the live pose.
+    assert "unknown_joint" not in win._engine_controller.pose.joint_angles_deg
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_undo_redo(mock_qapp) -> None:
+    win = PoseStudioWindow()
+
+    pose1 = canonical_zero_pose()
+
+    # mock history controller
+    win._history.undo = MagicMock(return_value=pose1)
+    win._history.redo = MagicMock(return_value=pose1)
+    win._apply_pose = MagicMock()
+
+    win._on_undo()
+    win._history.undo.assert_called_once()
+    # Issue #7157: assert the undone pose was actually applied (not just that
+    # undo() was called and its return value ignored), without re-recording it.
+    win._apply_pose.assert_called_once_with(pose1, record_history=False)
+
+    win._apply_pose.reset_mock()
+    win._on_redo()
+    win._history.redo.assert_called_once()
+    win._apply_pose.assert_called_once_with(pose1, record_history=False)
+
+    # When history returns None (nothing to undo/redo) the pose is NOT applied.
+    win._history.undo = MagicMock(return_value=None)
+    win._history.redo = MagicMock(return_value=None)
+    win._apply_pose.reset_mock()
+
+    win._on_undo()
+    win._on_redo()
+    win._apply_pose.assert_not_called()
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_load_poses(mock_qapp) -> None:
+    win = PoseStudioWindow()
+    win._apply_pose = MagicMock()
+
+    win._on_load_zero()
+    assert win._apply_pose.call_count == 1
+
+    win._on_load_reference()
+    assert win._apply_pose.call_count == 2
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_save_load_clicked(mock_qapp) -> None:
+    """Save/Load open real file dialogs and no-op cleanly on cancel (#8882).
+
+    Before #8882 these handlers only flashed a QToolTip, so calling them
+    unpatched was harmless. They now open a modal QFileDialog, so the
+    dialogs are patched to return the "user cancelled" empty path.
+    """
+    win = PoseStudioWindow()
+    with patch(
+        "src.tools.pose_studio.gui.QtWidgets.QFileDialog.getSaveFileName",
+        return_value=("", ""),
+    ) as save_dialog:
+        win._on_save_clicked()
+    assert save_dialog.call_count == 1
+
+    with patch(
+        "src.tools.pose_studio.gui.QtWidgets.QFileDialog.getOpenFileName",
+        return_value=("", ""),
+    ) as load_dialog:
+        win._on_load_clicked()
+    assert load_dialog.call_count == 1
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_apply_pose_with_service_transforms(mock_qapp) -> None:
+    win = PoseStudioWindow()
+
+    pose = canonical_zero_pose()
+
+    # Mock service with get_link_transforms
+    mock_service = MagicMock()
+    mock_service.get_link_transforms.return_value = {"pelvis": np.eye(4)}
+    win._engine_controller._service = mock_service
+
+    # Patch the real view_3d method so we can assert on it
+    with patch.object(win.view_3d, "update_from_service_transforms") as mock_update:
+        win._apply_pose(pose, record_history=False)
+        assert mock_update.call_count == 1
+        args, _ = mock_update.call_args
+        assert "pelvis" in args[0]
+        np.testing.assert_array_equal(args[0]["pelvis"], np.eye(4))
+
+    # Test exception fallback
+    mock_service.get_link_transforms.side_effect = NotImplementedError()
+    with patch.object(win.view_3d, "update_pose") as mock_update_pose:
+        win._apply_pose(pose, record_history=False)
+        mock_update_pose.assert_called_with(pose)
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_apply_pose_refreshes_stale_status_pill_on_mock_downgrade(
+    mock_qapp,
+) -> None:
+    """Issue #8827: a mid-session silent mock-downgrade must not leave a
+    stale 'live' status pill.
+
+    ``EngineController.set_pose`` transparently swaps in
+    ``MockKinematicsService`` (and sets ``EngineStatus.MOCK``) when the
+    live engine bridge raises ``NotImplementedError``. Before this fix,
+    ``MainWidget._apply_pose`` never re-read ``EngineController.status``
+    after calling ``set_pose``, so the pill only updated at initial
+    engine selection (``_on_engine_selected``) and stayed stuck on
+    whatever it showed then -- e.g. a green "live" pill -- even though
+    the 3D view was now being driven by the mock service.
+    """
+    win = PoseStudioWindow()
+
+    # Force the controller into a "live" state with a service whose
+    # set_pose() raises NotImplementedError, simulating a partial engine
+    # bridge (EPIC #4895) that only fails once the user actually edits a
+    # joint (not at initial activation).
+    live_service = MagicMock()
+    live_service.set_pose.side_effect = NotImplementedError("partial bridge")
+    win._engine_controller._service = live_service
+    win._engine_controller._status = EngineStatus.LIVE
+
+    # Simulate the pill showing "live" from the earlier, healthy
+    # engine-selection event.
+    win.engine_picker.set_status(EngineStatus.LIVE)
+    assert win.engine_picker.status_pill.text() == EngineStatus.LIVE.value
+
+    # A pose edit (e.g. a joint drag) now triggers the silent downgrade.
+    win._apply_pose(canonical_zero_pose(), record_history=False)
+
+    # The controller itself downgraded correctly...
+    assert win._engine_controller.status == EngineStatus.MOCK
+    assert isinstance(win._engine_controller.service, MockKinematicsService)
+    # ...and the pill must reflect that in real time, not just at the
+    # next engine-selection event.
+    assert win.engine_picker.status_pill.text() == EngineStatus.MOCK.value
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_engine_selected_reranges_joint_limits(mock_qapp) -> None:
+    """Issue #8887: switching engines must re-apply the new engine's
+    reported joint limits, not leave every slider at the generic default."""
+    win = PoseStudioWindow()
+    win._engine_controller.switch_engine = MagicMock(return_value=EngineStatus.MOCK)
+    limits = {REFERENCE_GOLFER_FIELDS[0]: (-10.0, 120.0)}
+    win._engine_controller.joint_limits_deg = MagicMock(return_value=limits)
+    win.joint_panel.set_limits = MagicMock()
+
+    win._on_engine_selected("mujoco")
+
+    win.joint_panel.set_limits.assert_called_once_with(limits)
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited_rejected_gives_visible_feedback(mock_qapp) -> None:
+    """Issue #8887: a rejected edit must name itself in the status label,
+    not just log a warning (the offending joint here has no widget to
+    red-border since it is not a real canonical joint name)."""
+    win = PoseStudioWindow()
+    win.status_label = MagicMock()
+
+    win._on_angle_edited("unknown_joint", 45.0)
+
+    win.status_label.setText.assert_called_once()
+    message = win.status_label.setText.call_args.args[0]
+    assert "unknown_joint" in message
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited_rejected_real_joint_reddens_spinbox(mock_qapp) -> None:
+    """A rejected edit on a real joint must red-border its spinbox."""
+    win = PoseStudioWindow()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    win.joint_panel.set_error = MagicMock()
+
+    # Force a rejection on a real joint by making CanonicalPose reject it.
+    with patch(
+        "src.tools.pose_studio.gui.CanonicalPose", side_effect=ValueError("boom")
+    ):
+        win._on_angle_edited(joint, 45.0)
+
+    win.joint_panel.set_error.assert_called_once_with(joint, True)
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_on_angle_edited_success_clears_prior_error(mock_qapp) -> None:
+    win = PoseStudioWindow()
+    joint = REFERENCE_GOLFER_FIELDS[0]
+    win.joint_panel.set_error = MagicMock()
+    win.status_label = MagicMock()
+
+    # First, a rejected edit on this joint leaves a status message and a
+    # red border.
+    with patch(
+        "src.tools.pose_studio.gui.CanonicalPose", side_effect=ValueError("boom")
+    ):
+        win._on_angle_edited(joint, 45.0)
+    win.joint_panel.set_error.assert_called_with(joint, True)
+
+    # A subsequent valid edit must clear the stale status message and
+    # clear any red border on the edited joint's spinbox.
+    win.joint_panel.set_error.reset_mock()
+    win._on_angle_edited(joint, 10.0)
+    win.status_label.setText.assert_called_with("")
+    win.joint_panel.set_error.assert_called_with(joint, False)
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_main(mock_qapp) -> None:
+    # Mock QApplication and its instance method
+    mock_app_instance = MagicMock()
+    mock_app_instance.exec.return_value = 0
+
+    # If instance() returns None, it calls the constructor
+    mock_qapp.instance.return_value = None
+    mock_qapp.return_value = mock_app_instance
+
+    assert main(["--test"]) == 0
+    mock_qapp.assert_called()
+    mock_app_instance.exec.assert_called_once()

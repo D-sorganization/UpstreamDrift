@@ -1,0 +1,65 @@
+{
+  "number": 9619,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/9619",
+  "title": "[EPIC] Self-calibrating markerless mocap: learn camera placement and skeleton from observed swings, with strict outlier rejection",
+  "body": "## Status as of 2026-09-19\n\nStatus as of 2026-09-19\n- Done (synthetic evidence): C1 ball anchor, C2 intrinsics command, C3 extrinsic self-calibration + bundle adjustment, C4 shared bone lengths, C5 robust cost/outlier blame, C6 dynamics-constrained smoother, C7 rig reconstruct -> JointTrajectory/TRC/Simscape export, C8 OpenPose-vs-MediaPipe compare; Capture Rig tile (#9649); model registry + kinetics (#9709).\n- Owner-side real data still missing: board recording per camera, tape-measured segment lengths, one real three-view take (TURNOVER.md Open Validations 1,4).\n- Open: #9613 camera open failures on the rig (hardware/USB topology), #9604 Tools session-manifest bridge (PR #10466), #9630 ADR-0041 amendment recording that UD hosts the self-calibration fitter.\n- Superseded/folded: #9551 #9554 #9556 (commissioning epic set), #9599 (rig capture umbrella, C1-C4 done).\n\n---\n\n## Goal\n\nTurn the three-camera rig (#9599) into a markerless capture pipeline that does **not** depend on precise setup. Cameras may move a little between takes; the system learns their placement relative to the golfer from the motion it observes, from its model of that motion, and from every subsequent take of the same subject. It learns the subject's bone lengths the same way. Bad detections are rejected, not averaged in, and the reconstruction is constrained by the dynamics of a golf swing so no joint jumps between frames.\n\n## What exists today (inventory 2026-09-06)\n\n- Capture, time sync, per-view 2-D detection, session bundles, proxies: `src/motion_capture/rig` (#9595, #9598, #9606, #9609, #9614, #9615).\n- Calibration **records** (`CameraIntrinsics`, `CameraExtrinsics`, `CanonicalObservations`) in `src/shared/python/pose_estimation/observations.py` — tested, no producer, no consumer.\n- 3-D markers → rigid skeleton with **fixed segment lengths**: `motion_pipeline/ik/geometric_backend.py` (damped LM, analytic Jacobian), `ik/pinocchio_backend.py`; subject scaling in `motion_pipeline/scaling/anthropometric.py`; per-channel smoothing in `motion_pipeline/preprocessing/filter.py`.\n- **Missing**: intrinsic/extrinsic calibration solvers, multi-view triangulation with residuals, any 2-D reprojection fit of a skeleton, a skeleton-constrained temporal estimator, ball detection, and the wiring from `observations/<view>.json` into `motion_pipeline`.\n- MediaPipe alone cannot fuse views or respect limb lengths: it is a per-image detector. Evidence from the first real swing (take 2, 2026-09-06): every frame of the swing has a pose, torso/legs at ~0.7–0.9 visibility, hands/wrists mostly < 0.4, head leaves frame at finish.\n\n## Path forward (ordered; each child has its own acceptance criteria)\n\n1. **Ball detection and marking** per view — the one scene point shared by all cameras and all takes (C1).\n2. **One-time intrinsics per camera** keyed by USB serial — the only \"precise\" step, done once with a printed board and stored; everything after is learned (C2).\n3. **Extrinsic self-calibration from the golfer**: 2-D detections across views + strobe timing → pairwise geometry with RANSAC → joint bundle adjustment of camera poses, the ball, and the subject's 3-D joints, with gravity (up) and the ground plane (feet, ball) fixing scale and orientation; warm-started from the previous take (C3).\n4. **Subject skeleton learning**: bone lengths and symmetry as shared parameters across all frames and takes of one subject, with anthropometric priors, persisted per subject (C4).\n5. **Robust cost and outlier rejection**: confidence-weighted robust kernels, per-frame cross-view consistency gating, left/right swap detection, reprojection-residual thresholds; rejected points recorded, never silently dropped (C5).\n6. **Dynamics-constrained temporal estimator** in joint space: velocity/acceleration bounds per joint, smoothness prior tuned on swings, residual/uncertainty output — the \"no flashy jumps\" guarantee (C6).\n7. **Wiring**: rig ingest → `CanonicalObservations` producer → adapter into `motion_pipeline` (scaling → IK → matching); resolve the two `CanonicalObservations` classes (C7).\n8. **OpenPose vs MediaPipe** on the same takes: an OpenCV-DNN BODY_25 estimator (no pyopenpose build on this host) and a comparison harness (coverage, confidence, temporal jitter, cross-view consistency) (C8).\n9. **Synthetic evaluation**: render a known skeleton through known cameras with noise/outliers, recover placement and bone lengths, assert error bounds; take-over-take consistency on real data (C9).\n10. **Decision**: ADR-0041 gives Tools authority over reconstruction reference algorithms. Either the generic geometry lands in Tools `sidekick.lab.mocap` and UD hosts the golf-specific subject/scene fitter, or the ADR is amended. Must be settled before C3 merges (C10).\n\nDesign write-up: `docs/motion_capture/self_calibrating_pipeline.md` (PR to follow).\n\nRelated: #9422 (umbrella), #9599 (capture epic), #9613 (rig stability), #9604 (Tools bridge).\n\n## Folded in from backlog triage 2026-09-19\n\n- [ ] - [ ] #9556 owner-side acceptance packet: real board recording per camera, tape-measured segment lengths, a full three-view take reconstructed end to end, second-operator runbook pass, clean Windows install (from #9556)\n- [ ] - [ ] #9630 amend ADR-0041 to record that UD hosts the golf-specific self-calibration fitter over Tools record contracts; update tests/architecture/test_markerless_mocap_authority.py (from #9630)\n- [ ] Held-out real reference-placement accuracy evidence for the everyday-reference (paper/ruler/board) calibration; document scale-only and planar limits; no physical accuracy claim until measured (from #9901)\n\n## Tracked issues (2026-09-19 triage)\n\n- [ ] #9422 [readiness P6] UpstreamDrift consumer integration for the fleet mocap lab (Tools #4706) an\n- [ ] #9604 C5: Tools consumer bridge for session manifests (blocked on the vendor pin shipping sideki\n- [ ] #9613 Rig soak: three-camera sessions intermittently fail to open cameras (dshow I/O error) and \n",
+  "updated_at": "2026-09-19T17:44:35Z",
+  "labels": [
+    {
+      "id": 10467298569,
+      "node_id": "LA_kwDOQqJAi88AAAACb-ZNCQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/pose-estimation",
+      "name": "pose-estimation",
+      "color": "0052CC",
+      "default": false,
+      "description": "",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10467299948,
+      "node_id": "LA_kwDOQqJAi88AAAACb-ZSbA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/motion",
+      "name": "motion",
+      "color": "5319E7",
+      "default": false,
+      "description": "",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10765063750,
+      "node_id": "LA_kwDOQqJAi88AAAACgaXWRg",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/epic",
+      "name": "epic",
+      "color": "ededed",
+      "default": false,
+      "description": null,
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10796034801,
+      "node_id": "LA_kwDOQqJAi88AAAACg35q8Q",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/P1",
+      "name": "P1",
+      "color": "fbca04",
+      "default": false,
+      "description": "High priority",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12266883256,
+      "node_id": "LA_kwDOQqJAi88AAAAC2ynIuA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/triaged-2026-09",
+      "name": "triaged-2026-09",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Reviewed in the 2026-09-19 backlog triage",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "open"
+}

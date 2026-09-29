@@ -1,0 +1,34 @@
+{
+  "source_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+  "qualification": "surface distances only, not anatomical joint-center lengths",
+  "pairs": [
+    {
+      "labels": ["LShoulderTop", "LElbowOut"],
+      "valid_samples": 654,
+      "median_m": 0.3330554669237542,
+      "p05_m": 0.2993006844162282,
+      "p95_m": 0.34512548443701485
+    },
+    {
+      "labels": ["RShoulderBack", "RElbowOut"],
+      "valid_samples": 654,
+      "median_m": 0.4128853113821017,
+      "p05_m": 0.3951586415345481,
+      "p95_m": 0.44147559227426014
+    },
+    {
+      "labels": ["LElbowOut", "LWristTop"],
+      "valid_samples": 654,
+      "median_m": 0.27811522027570257,
+      "p05_m": 0.2641828289512499,
+      "p95_m": 0.2835832843729169
+    },
+    {
+      "labels": ["RElbowOut", "RWristTop"],
+      "valid_samples": 654,
+      "median_m": 0.2817211929120169,
+      "p05_m": 0.2731453401484632,
+      "p95_m": 0.29353762771405006
+    }
+  ]
+}

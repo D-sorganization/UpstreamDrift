@@ -1,0 +1,31 @@
+[package]
+name = "upstream-motion-matching"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Motion-matching outer-loop kernels for UpstreamDrift: finite-difference qdot/qddot, Pinocchio inverse-dynamics driver. First slice of issue #5218."
+
+[lib]
+name = "upstream_motion_matching"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+# Optional PyO3 binding. Off by default so the crate builds in the workspace
+# without a Python toolchain. Enabled by maturin via [tool.maturin].features.
+python = ["dep:pyo3"]
+
+[dependencies]
+nalgebra = { workspace = true }
+serde = { workspace = true }
+pyo3 = { workspace = true, optional = true }
+
+[dev-dependencies]
+approx = "0.5"
+criterion = "0.5"
+
+[[bench]]
+name = "finite_diff"
+harness = false

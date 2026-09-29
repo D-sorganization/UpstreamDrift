@@ -1,0 +1,55 @@
+{
+  "capture": "driver",
+  "capture_plane": {
+    "basis": [
+      [0.2689922951707074, -0.2805886898765001],
+      [0.911135416841285, 0.38423051970912897],
+      [0.31221050161109737, -0.8795663106539734]
+    ],
+    "max_deviation_m": 0.25555810052980266,
+    "origin_m": [0.9528256143776418, 0.07193886805511723, 1.259539599592898],
+    "rmse_m": 0.11037639768704899
+  },
+  "evaluation_clock": {
+    "frame_count": 301,
+    "impact_index": 251,
+    "sample_rate_hz": 1000.0
+  },
+  "marker_coverage_fraction": {
+    "LElbowOut": 1.0,
+    "LShoulderBack": 1.0,
+    "LWristTop": 1.0,
+    "RElbowOut": 1.0,
+    "RShoulderBack": 1.0,
+    "RWristTop": 1.0
+  },
+  "marker_names": [
+    "RShoulderBack",
+    "RElbowOut",
+    "RWristTop",
+    "LShoulderBack",
+    "LElbowOut",
+    "LWristTop"
+  ],
+  "model_id": "constrained_upper_body_golfer",
+  "planarity_lower_bound": {
+    "marker_rmse_lower_bound_m": 0.11037639768704899,
+    "max_marker_rmse_m": 0.055,
+    "reason": "a rigid planar replay cannot attain the declared 3D marker RMSE ceiling: irreducible normal RMSE 0.110376 m exceeds 0.055000 m"
+  },
+  "qualification": "not_assessed",
+  "schema": "upper-body-planarity-preflight/1.0.0",
+  "source": {
+    "coordinate_frame": "z_up_right_handed",
+    "filename": "C3D_TA_Driver.c3d",
+    "sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba"
+  },
+  "source_clock": {
+    "raw_frame_count": 654,
+    "raw_frame_rate_hz": 360.0
+  },
+  "status": "planar_fit_blocked_unqualified",
+  "statuses": {
+    "scientific_qualification": "disqualified"
+  }
+}

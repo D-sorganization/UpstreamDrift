@@ -1,0 +1,532 @@
+[
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift",
+    "HEAD": "d8d739cc1cf53d3772499988cc755d789dadbe91",
+    "branch": "refs/heads/main",
+    "bytes": 48943886438,
+    "gib": 45.58,
+    "clean": false,
+    "merged_ancestry": true,
+    "status_lines": 71
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/.context-implementation/UpstreamDrift",
+    "HEAD": "d9e3d1addd3ab4d9a5c24f8a4dd4e15c8c4da3ae",
+    "branch": "refs/heads/feat/issue-9915-agent-context",
+    "bytes": 1070518224,
+    "gib": 1.0,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_codex_worktrees/upstream-fixed-hub-pin",
+    "HEAD": "f90af6b3e04a2135292e4900b94c120d5d714393",
+    "branch": "refs/heads/fix/tools-fixed-hub-pin",
+    "bytes": 1065813377,
+    "gib": 0.99,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_codex_worktrees/upstream-force-source-integration",
+    "HEAD": "7ccf6a0c07a98da4e7f5c49a1d10f50a059bd362",
+    "branch": "refs/heads/feat/integrate-force-source-lab",
+    "bytes": 1455048914,
+    "gib": 1.36,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_codex_worktrees/upstream-force-source-main",
+    "HEAD": "aee241bd4f3f29cdda968a599655aa05b8e3f025",
+    "branch": "refs/heads/fix/align-agent-merge-policy",
+    "bytes": 981801039,
+    "gib": 0.91,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_codex_worktrees/upstream-force-source-refinement",
+    "HEAD": "2378fe8510bac091fdbed490b31346f869fc912a",
+    "branch": "refs/heads/feat/force-source-optimization-refinement",
+    "bytes": 876956295,
+    "gib": 0.82,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 1
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9810",
+    "HEAD": "24ad9a0778fec59b5979119ae435c7e4a3f790ca",
+    "branch": "refs/heads/claude/9810-layout-model",
+    "bytes": 624661330,
+    "gib": 0.58,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9812",
+    "HEAD": "5709a8c6ea269d1434cd3ab91f22e93b39820db4",
+    "branch": "refs/heads/claude/9812-layout-editor",
+    "bytes": 593610066,
+    "gib": 0.55,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9813",
+    "HEAD": "3a40b1c0a45005b6834481e308ee0d76d78f062a",
+    "branch": "refs/heads/claude/9813-multiview-panes",
+    "bytes": 596745195,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9815",
+    "HEAD": "c9bde4f2e2fd37a609110a7937950dfd3f96a129",
+    "branch": "refs/heads/claude/9815-multipicture",
+    "bytes": 598220568,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9816",
+    "HEAD": "78a3f91768df76e07a68bd51ec1814c432f33dfb",
+    "branch": "refs/heads/claude/9816-capture-rig-theme",
+    "bytes": 598809817,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9844",
+    "HEAD": "2f0e90013830738dad1ba572e369f8c86293b040",
+    "branch": "refs/heads/claude/9844-action-grid-reflow",
+    "bytes": 598514730,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9845",
+    "HEAD": "8fe56332cece292bbb53547035f7292d593fe3dc",
+    "branch": "refs/heads/claude/9845-step-rail",
+    "bytes": 598696113,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_9846",
+    "HEAD": "dfeae3099fe038c88c6964a44d4a8e3da0171bf3",
+    "branch": "refs/heads/claude/9846-video-central",
+    "bytes": 598961968,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_ingest",
+    "HEAD": "0c455b578de865b2dbbc1b0eb3a42ff6e82f6842",
+    "branch": "refs/heads/claude/9602-ingest-observations",
+    "bytes": 601925672,
+    "gib": 0.56,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_model",
+    "HEAD": "94e814783f4d3aa380a1be7ee2beeb6a168dbbf1",
+    "branch": "refs/heads/claude/camera-subsets-annotation",
+    "bytes": 542217243,
+    "gib": 0.5,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_claude_p1merge",
+    "HEAD": "99de5a28e97616b3b831f83a516d1e3c1030dadc",
+    "branch": "refs/heads/docs/release-runbook-tagging",
+    "bytes": 926747279,
+    "gib": 0.86,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_ud_9477",
+    "HEAD": "fa1cee09ac3490536b0ba0a4a2c4d57311951434",
+    "branch": "refs/heads/fix/9477-physics-metrics-actuation",
+    "bytes": 774183746,
+    "gib": 0.72,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_ud_9495_thread",
+    "HEAD": "c235acd82f4084cfdf33ea6cfd152668c440b7a8",
+    "branch": "refs/heads/fix/9233-research-source-sha256-drift",
+    "bytes": 590268691,
+    "gib": 0.55,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_ud_9499_spec",
+    "HEAD": "d488bd13cae2e0ee85b3665180b54cad21073ca2",
+    "branch": "refs/heads/fix/9499-spec-check-syntax-error",
+    "bytes": 463381049,
+    "gib": 0.43,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/_wt_ud_9501_seam",
+    "HEAD": "fe278c863521ae20373eb8aff77179634f7b3292",
+    "branch": "refs/heads/fix/9501-seam-guard-fail-closed",
+    "bytes": 463481575,
+    "gib": 0.43,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift/_wt_claude_base",
+    "HEAD": "cc190ef840b4005198a48e618a79b6a18819cd41",
+    "branch": "refs/heads/readiness/p0-9409-phase0-gate",
+    "bytes": 984823619,
+    "gib": 0.92,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-9926",
+    "HEAD": "5138eac39edda88b1292dcbf1133b5226e65602a",
+    "branch": "refs/heads/feat/9926-unified-analysis",
+    "bytes": 855033651,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-drawings-9932",
+    "HEAD": "1cc539e5482c312cb75ce06ca7cbb68ff5b01a35",
+    "branch": "refs/heads/feat/9932-comparison-drawings",
+    "bytes": 855528347,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-analysis-metrics-9942",
+    "HEAD": "b24d76a179a03ff972aedc25dd961f7111061737",
+    "branch": "refs/heads/docs/9926-analysis-completion",
+    "bytes": 858613072,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-acoustics",
+    "HEAD": "02970c5303f3648e2453e636eda3a2949fc5876c",
+    "branch": "refs/heads/docs/9700-impact-acoustics-program",
+    "bytes": 556348371,
+    "gib": 0.52,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-authority",
+    "HEAD": "6235789dc75d8d1a9efe2e20d3622aee6b692573",
+    "branch": "refs/heads/fix/9787-manufactured-authority",
+    "bytes": 588640522,
+    "gib": 0.55,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-claim-preservation",
+    "HEAD": "fced8c0d62fcfadffb414b1ea850c0624ddc8713",
+    "branch": "refs/heads/fix/9825-preserve-reviewed-claims",
+    "bytes": 854700067,
+    "gib": 0.8,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-provider",
+    "HEAD": "8f05dd10ec636cc0ee95fa623ccacff1333ab128",
+    "branch": "refs/heads/fix/9735-impact-provider-imports",
+    "bytes": 646462452,
+    "gib": 0.6,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin",
+    "HEAD": "37790892f50d38b007b85bbb87aa58e9ceab2beb",
+    "branch": "refs/heads/feat/9912-impact-provider-pin",
+    "bytes": 592557308,
+    "gib": 0.55,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-impact-reference",
+    "HEAD": "aa08217c520c68867945b999a8c77425e6b3ae2b",
+    "branch": "refs/heads/fix/9783-reviewed-renderer-reference",
+    "bytes": 551615611,
+    "gib": 0.51,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-reference-9914",
+    "HEAD": "0862e298e165fc5f0ee7e800c73960d71958807d",
+    "branch": "refs/heads/docs/reference-9914-shipped",
+    "bytes": 713545302,
+    "gib": 0.66,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift-shooting-convergence",
+    "HEAD": "6ae0af664db924f57831a2e0d551ae274e299aff",
+    "branch": "refs/heads/fix/9830-independent-shooting-convergence",
+    "bytes": 633485392,
+    "gib": 0.59,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/UpstreamDrift_main_codex",
+    "HEAD": "bad2028c4f2be23904015cb9e5bf21616dd24cf4",
+    "branch": "refs/heads/fix/8152-web-raw-fetch-timeouts",
+    "bytes": 1363332693,
+    "gib": 1.27,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-9407-install-path",
+    "HEAD": "6e0c93dbf55f42d758cc134c14ea3d12370abc08",
+    "branch": "refs/heads/fix/9415-artifact-dir-hygiene",
+    "bytes": 548766074,
+    "gib": 0.51,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capability-atlas",
+    "HEAD": "2d9fb871ff058d8df02618dafc0c2044b126e804",
+    "branch": "refs/heads/feat/9850-capability-atlas",
+    "bytes": 1006683493,
+    "gib": 0.94,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-performance",
+    "HEAD": "164c7a832e1d90e728ae5894a4cd37a1c0beb92f",
+    "branch": "refs/heads/perf/9851-capture-responsiveness",
+    "bytes": 681456306,
+    "gib": 0.63,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup",
+    "HEAD": "501092b27387a120a629e48f85ae061488f8f859",
+    "branch": "refs/heads/feat/9913-capture-journey",
+    "bytes": 681381888,
+    "gib": 0.63,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-wizard",
+    "HEAD": "3482a5a39a3ff81e1dfee21fbd5bb687fbd42595",
+    "branch": "refs/heads/feat/9907-capture-goal-wizard",
+    "bytes": 708628561,
+    "gib": 0.66,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 7
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-coaching-drawings",
+    "HEAD": "f6a16d01dd4f96c1818c0219d5d155c861d58504",
+    "branch": "refs/heads/feat/9862-coaching-drawings",
+    "bytes": 673296314,
+    "gib": 0.63,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 3
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-common-calibration",
+    "HEAD": "1229dd7aae53e80823fab7c69cfb63a4e0d43956",
+    "branch": "refs/heads/feat/9899-calibration-revision-status",
+    "bytes": 1297834051,
+    "gib": 1.21,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 6
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-main-health",
+    "HEAD": "76d27bd84f8dc2b0418b16fe15fd2063b15bbb02",
+    "branch": "refs/heads/fix/9511-isolated-pytest-shutdown-hang",
+    "bytes": 512252128,
+    "gib": 0.48,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-parameter-bounds",
+    "HEAD": "0c531a4003d397e82ce32660bef31e8e9408671b",
+    "branch": "refs/heads/fix/9949-installed-capture",
+    "bytes": 561660002,
+    "gib": 0.52,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-bag",
+    "HEAD": "f7e2f27af8c65adc81e54f227f42f01939d41628",
+    "branch": "refs/heads/feat/9905-player-club-bag",
+    "bytes": 684763732,
+    "gib": 0.64,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-player-clubs",
+    "HEAD": "6732fa18f55ed4f0cb4bdef0755100ede88ef565",
+    "branch": "refs/heads/feat/9903-player-club-catalog",
+    "bytes": 661240389,
+    "gib": 0.62,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-assets",
+    "HEAD": "82ae29d73ad3a4231c5052fa6cb79a7f3f6475e7",
+    "branch": "refs/heads/feat/9864-reference-assets",
+    "bytes": 676039196,
+    "gib": 0.63,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 1
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-controls",
+    "HEAD": "0787dde270b0bebd63c47e9b49a98293c3e0ee10",
+    "branch": "refs/heads/fix/9892-fleet-guide-validation",
+    "bytes": 695139676,
+    "gib": 0.65,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-registration",
+    "HEAD": "fe2846d406d3b83fc7503a5d29579a7120f5bdff",
+    "branch": "refs/heads/fix/reference-comparison-qualification",
+    "bytes": 679092883,
+    "gib": 0.63,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 1
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-rendering",
+    "HEAD": "7e06f8b68173aca8d9133d635133c44580e5b14e",
+    "branch": "refs/heads/fix/9882-comparison-rendering",
+    "bytes": 678567922,
+    "gib": 0.63,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 2
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-timing",
+    "HEAD": "7bd6b4d0c586c20135e3a2cf0e2ee1fb41f91fc1",
+    "branch": "refs/heads/fix/9881-reference-timing",
+    "bytes": 678960934,
+    "gib": 0.63,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 3
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-simscape-tour",
+    "HEAD": "0a00a50fa069347dc24e1968224ff07d535a25bf",
+    "branch": "refs/heads/feat/9921-simscape-tour-matching",
+    "bytes": 670768071,
+    "gib": 0.62,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 2
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-swing-editing",
+    "HEAD": "4909ee460b6c932bc3f98d3bff20a77bafc745e6",
+    "branch": "refs/heads/feat/9860-swing-editing",
+    "bytes": 690131525,
+    "gib": 0.64,
+    "clean": true,
+    "merged_ancestry": false,
+    "status_lines": 0
+  },
+  {
+    "worktree": "C:/Users/diete/Repositories/Worktrees/UpstreamDrift-ubuntu-ci",
+    "HEAD": "12b4e141da27775688fb9e30a05055e9e8c21f4c",
+    "branch": "refs/heads/fix/9894-ubuntu-ci-sources",
+    "bytes": 1125063948,
+    "gib": 1.05,
+    "clean": false,
+    "merged_ancestry": false,
+    "status_lines": 11
+  }
+]

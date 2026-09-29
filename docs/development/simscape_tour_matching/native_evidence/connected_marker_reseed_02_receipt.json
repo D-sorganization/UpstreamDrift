@@ -1,0 +1,53 @@
+{
+  "archive": "connected-marker-reseed-02-bundle.zip",
+  "sha256": "56f474503e41d847f1fcb366ae1e9c61032f2cefc6dd342bfecb3ef0abda4c9c",
+  "native_exit_code": 0,
+  "qualification": "Three valid local native pose solutions from alternate seeds; no forward dynamics or global optimum claim.",
+  "samples": [
+    {
+      "path": "case-01/frame-00445.json",
+      "time_s": 1.2333333333333334,
+      "rms_mm": 38.358599815095474,
+      "valid_marker_count": 22
+    },
+    {
+      "path": "case-02/frame-00457.json",
+      "time_s": 1.2666666666666666,
+      "rms_mm": 28.903795530045286,
+      "valid_marker_count": 25
+    },
+    {
+      "path": "case-03/frame-00541.json",
+      "time_s": 1.5,
+      "rms_mm": 44.390239849116476,
+      "valid_marker_count": 22
+    }
+  ],
+  "files": {
+    "case-01/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-01/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-01/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-01/frame-00445.json": "99194cb61ad6a625735bf4f53c9aecfdd83a3684ba35f20dde1f49be4f5a18e4",
+    "case-01/initial_state.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "case-01/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "case-02/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-02/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-02/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-02/frame-00457.json": "25f1f7eee42b9a94ae2bd76e687982e2936460598fbf8814b9d6a7156279bab8",
+    "case-02/initial_state.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "case-02/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "case-03/attached_pose_probe.m": "c718ee295eb30e1a7de6b28a7d9043b7b108844643db1733774e31261af499ab",
+    "case-03/capture.json": "64d745dbe0c062b55c9d8021a51932cbf61bfcf47e10c09d5132db9009e9eb87",
+    "case-03/fit_golf_pose_seed.m": "10a6a59e9c83dfdce1b133b1c6be64db8da7abe2900369ece83ec4fbcdc36fd1",
+    "case-03/frame-00541.json": "058d6446ca5b418d303c028857163ab5c961c156ba05e567c4e72b92a0e6bf0a",
+    "case-03/initial_state.json": "cbc78ff5ad70f88364d8d8cc54c53ffcb1bd77b56e18fc8d506f5e3c2cc937ca",
+    "case-03/select_capture_marker_frame.m": "485cad4abe227f76fbe0f2d408495231fa2687c6ab50e65c0059c9994c9a11ff",
+    "exit-code.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "experiment.m": "681da67b37a6a19e8e0c0f586d0200f0d15205e16a0d0bbd0b9fdd2b5868771d",
+    "launch.ps1": "d2d218d5a87c3e4b691f088bbefc784c64e704816e241ccfbcf8c0b7ecb74d8f",
+    "probe.log": "0e42fa0e65fc19953bb7a99acc708327a648c3b3d78d4f5da886e5e61c3d4e9f",
+    "seed-01.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "seed-02.json": "0ad4557687549afded35793aba8c5320346eb7ce48bfa0ea64d292f947df9ea7",
+    "seed-03.json": "cbc78ff5ad70f88364d8d8cc54c53ffcb1bd77b56e18fc8d506f5e3c2cc937ca"
+  }
+}

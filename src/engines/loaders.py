@@ -1,0 +1,601 @@
+"""Engine loader functions.
+
+Canonical location for engine loader functions. Previously lived in
+``src.shared.python.engine_loaders`` which created an inverted dependency
+(shared -> engines). Now lives in ``src.engines.loaders`` which is the
+correct dependency direction (engines layer).
+
+Each loader function uses lazy imports to avoid importing concrete engine
+implementations at module level.
+
+Design by Contract
+------------------
+All loader functions enforce postconditions to guarantee the returned engine
+is in a usable state. Callers may rely on these guarantees without defensive
+checks.
+
+DRY — Factory Pattern
+---------------------
+The 7 loader functions share an identical 8-step pattern. The shared logic
+is factored into :func:`_load_engine_with_probe` to eliminate ~150 LOC of
+duplication while preserving each loader's unique import paths and
+diagnostic messages.
+
+Supported engines
+-----------------
+- ``MUJOCO`` — :func:`load_mujoco_engine`
+- ``DRAKE`` — :func:`load_drake_engine`
+- ``PINOCCHIO`` — :func:`load_pinocchio_engine`
+- ``JAXSIM`` — :func:`load_jaxsim_engine`
+- ``OPENSIM`` — :func:`load_opensim_engine`
+- ``MYOSIM`` — :func:`load_myosim_engine`
+- ``PENDULUM`` — :func:`load_pendulum_engine`
+- ``GOLF_SWING_PENDULUM`` — :func:`load_golf_swing_pendulum_engine`
+- ``PUTTING_GREEN`` — :func:`load_putting_green_engine`
+- ``MATLAB_2D`` — :func:`load_matlab_2d_engine` (legacy web-only Simscape
+  model shell)
+- ``MATLAB_3D`` — :func:`load_matlab_3d_engine` (Simscape Multibody bridge,
+  see ``motion_matching/option4_python_bridge``)
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from src.shared.python.data_io.common_utils import GolfModelingError
+from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    pass
+
+logger = get_logger(__name__)
+
+__all__ = [
+    "load_mujoco_engine",
+    "load_drake_engine",
+    "load_pinocchio_engine",
+    "load_jaxsim_engine",
+    "load_opensim_engine",
+    "load_myosim_engine",
+    "load_pendulum_engine",
+    "load_golf_swing_pendulum_engine",
+    "load_putting_green_engine",
+    "load_matlab_2d_engine",
+    "load_matlab_3d_engine",
+    "LOADER_MAP",
+    "DEFAULT_MATLAB_2D_SLX_RELPATH",
+    "DEFAULT_MATLAB_3D_SLX_RELPATH",
+]
+
+
+# ---------------------------------------------------------------------------
+# MATLAB_3D constants
+# ---------------------------------------------------------------------------
+
+DEFAULT_MATLAB_2D_SLX_RELPATH: Path = Path(
+    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/GolfSwing.slx"
+)
+"""Default Simulink ``.slx`` model path for the MATLAB_2D engine, relative
+to the suite root.
+"""
+
+DEFAULT_MATLAB_3D_SLX_RELPATH: Path = Path(
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/"
+    "GolfSwing3D_Kinetic.slx"
+)
+"""Default Simulink ``.slx`` model path for the MATLAB_3D engine, relative
+to the suite root. Verbatim from
+``motion_matching/option4_python_bridge/INTERFACES.md``.
+"""
+
+
+# ---------------------------------------------------------------------------
+# DbC helpers
+# ---------------------------------------------------------------------------
+
+
+def _ensure_engine_loaded(engine: PhysicsEngine, engine_name: str) -> None:
+    """DbC postcondition: verify the engine object is non-None after loading.
+
+    Parameters
+    ----------
+    engine:
+        The engine returned by a loader function.
+    engine_name:
+        Human-readable engine name for the error message.
+
+    Raises
+    ------
+    GolfModelingError
+        If the engine is None or otherwise falsy.
+    """
+    if engine is None:
+        raise GolfModelingError(
+            f"DbC postcondition violated: {engine_name} loader returned None. "
+            "The engine constructor must not return None."
+        )
+
+
+# ---------------------------------------------------------------------------
+# DRY — shared probe-based loading logic
+# ---------------------------------------------------------------------------
+
+
+def _load_engine_with_probe(
+    *,
+    engine_name: str,
+    probe_factory: Callable[[Path], Any],
+    engine_factory: Callable[[], PhysicsEngine],
+    model_path_fn: Callable[[Path], Path] | None = None,
+    load_model: bool = True,
+    install_hint: str = "",
+    suite_root: Path,
+) -> PhysicsEngine:
+    """Shared engine-loading scaffold used by all probe-based loaders.
+
+    Preconditions (DbC)
+    -------------------
+    - ``suite_root`` must be a Path (caller responsibility via type hint).
+
+    Postconditions (DbC)
+    --------------------
+    - Returned engine is non-None (enforced by :func:`_ensure_engine_loaded`).
+
+    Parameters
+    ----------
+    engine_name:
+        Human-readable engine name used in log and error messages.
+    probe_factory:
+        Callable(suite_root) -> Probe instance.
+    engine_factory:
+        Zero-argument callable that creates the engine instance.
+    model_path_fn:
+        Optional callable(suite_root) -> Path. If provided and the path
+        exists, ``engine.load_from_path()`` is called.
+    load_model:
+        Whether to attempt model loading (default ``True``).
+    install_hint:
+        Install instructions appended to ImportError messages.
+    suite_root:
+        Repository root path forwarded to probe and model path resolution.
+
+    Returns
+    -------
+    PhysicsEngine
+        A non-None, probe-verified engine.
+
+    Raises
+    ------
+    GolfModelingError
+        On ImportError, failed probe, or failed DbC postcondition.
+    """
+    probe = probe_factory(suite_root)
+    result = probe.probe()
+
+    if not result.is_available():
+        raise GolfModelingError(
+            f"{engine_name} not ready:\n{result.diagnostic_message}\n"
+            f"Fix: {result.get_fix_instructions()}"
+        )
+
+    engine = engine_factory()
+
+    if load_model and model_path_fn is not None:
+        model_path = model_path_fn(suite_root)
+        if model_path.exists():
+            logger.info(f"Loading default {engine_name} model: {model_path}")
+            try:
+                engine.load_from_path(str(model_path))
+            except (ValueError, RuntimeError, AttributeError) as exc:
+                logger.warning(
+                    f"Failed to load default model into {engine_name} "
+                    f"(expected if missing meshes): {exc}"
+                )
+        else:
+            logger.warning(f"Default {engine_name} model not found at {model_path}")
+
+    _ensure_engine_loaded(engine, engine_name)
+    return engine  # type: ignore[return-value]
+
+
+# ---------------------------------------------------------------------------
+# Public loader functions
+# ---------------------------------------------------------------------------
+
+
+def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
+    """Load MuJoCo engine with full initialization.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        import mujoco  # noqa: F401
+
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+            MuJoCoPhysicsEngine,
+        )
+        from src.shared.python.engine_core.engine_probes import MuJoCoProbe
+
+        def _model_path(root: Path) -> Path:
+            return (
+                root
+                / "engines"
+                / "physics_engines"
+                / "mujoco"
+                / "models"
+                / "simple_pendulum.xml"
+            )
+
+        return _load_engine_with_probe(
+            engine_name="MuJoCo",
+            probe_factory=MuJoCoProbe,
+            engine_factory=lambda: MuJoCoPhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=_model_path,
+            install_hint="Install mujoco>=3.2.3",
+            suite_root=suite_root,
+        )
+
+    except ImportError as e:
+        raise GolfModelingError(
+            "MuJoCo requirements not met. Install mujoco>=3.2.3"
+        ) from e
+
+
+def load_drake_engine(suite_root: Path) -> PhysicsEngine:
+    """Load Drake engine with full initialization.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        import pydrake  # noqa: F401
+
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
+            DrakePhysicsEngine,
+        )
+        from src.shared.python.engine_core.engine_probes import DrakeProbe
+
+        def _model_path(root: Path) -> Path:
+            return (
+                root
+                / "engines"
+                / "physics_engines"
+                / "pinocchio"
+                / "models"
+                / "generated"
+                / "golfer.urdf"
+            )
+
+        return _load_engine_with_probe(
+            engine_name="Drake",
+            probe_factory=DrakeProbe,
+            engine_factory=lambda: DrakePhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=_model_path,
+            install_hint="Install drake>=1.22.0",
+            suite_root=suite_root,
+        )
+
+    except ImportError as e:
+        raise GolfModelingError("Drake requirements not met.") from e
+
+
+def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
+    """Load Pinocchio engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        import pinocchio  # noqa: F401
+
+        from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            PinocchioPhysicsEngine,
+        )
+        from src.shared.python.engine_core.engine_probes import PinocchioProbe
+
+        def _model_path(root: Path) -> Path:
+            return (
+                root
+                / "engines"
+                / "physics_engines"
+                / "pinocchio"
+                / "models"
+                / "generated"
+                / "golfer.urdf"
+            )
+
+        return _load_engine_with_probe(
+            engine_name="Pinocchio",
+            probe_factory=PinocchioProbe,
+            engine_factory=lambda: PinocchioPhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=_model_path,
+            install_hint="Install pin>=2.6.0",
+            suite_root=suite_root,
+        )
+
+    except ImportError as e:
+        raise GolfModelingError("Pinocchio requirements not met.") from e
+
+
+def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
+    """Load OpenSim engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
+            OpenSimPhysicsEngine,
+        )
+        from src.shared.python.engine_core.engine_probes import OpenSimProbe
+
+        return _load_engine_with_probe(
+            engine_name="OpenSim",
+            probe_factory=OpenSimProbe,
+            engine_factory=lambda: OpenSimPhysicsEngine(),  # type: ignore[abstract]
+            model_path_fn=None,
+            load_model=False,
+            install_hint="Install opensim>=4.4.0",
+            suite_root=suite_root,
+        )
+
+    except ImportError as e:
+        raise GolfModelingError("OpenSim requirements not met.") from e
+
+
+def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
+    """Load MyoSim engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            MyoSuitePhysicsEngine,
+        )
+        from src.shared.python.engine_core.engine_probes import MyoSimProbe
+
+        return _load_engine_with_probe(
+            engine_name="MyoSim",
+            probe_factory=MyoSimProbe,
+            engine_factory=lambda: MyoSuitePhysicsEngine(),  # type: ignore[abstract,no-any-return]
+            model_path_fn=None,
+            load_model=False,
+            install_hint="Install myosuite>=2.0.0",
+            suite_root=suite_root,
+        )
+
+    except ImportError as e:
+        raise GolfModelingError("MyoSim requirements not met.") from e
+
+
+def load_pendulum_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load Pendulum (double-pendulum) engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+            PendulumPhysicsEngine,
+        )
+
+        engine = PendulumPhysicsEngine()
+        logger.info("Pendulum engine loaded successfully")
+
+        # DbC postcondition
+        _ensure_engine_loaded(engine, "Pendulum")
+        return engine  # type: ignore[return-value]
+
+    except ImportError as e:
+        raise GolfModelingError("Pendulum engine not found.") from e
+
+
+def load_golf_swing_pendulum_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load Golf Swing Pendulum engine (Tools vendor model).
+
+    Wraps the ``double_pendulum_golf`` package from the vendored Tools
+    repository (``vendor/ud-tools``).  This model uses relative coordinates
+    with explicit clubhead mass, viscous+Coulomb damping, and joint-limit
+    barriers — complementing the primary :func:`load_pendulum_engine` which
+    uses distributed inertia.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        from src.engines.physics_engines.pendulum.python.golf_swing_physics_engine import (
+            GolfSwingPendulumEngine,
+        )
+
+        if not GolfSwingPendulumEngine.is_available():
+            raise GolfModelingError(
+                "GolfSwingPendulumEngine requires the vendor/ud-tools submodule. "
+                "Run: git submodule update --init vendor/ud-tools"
+            )
+
+        engine = GolfSwingPendulumEngine()
+        logger.info("Golf Swing Pendulum engine (Tools model) loaded successfully")
+
+        _ensure_engine_loaded(engine, "GolfSwingPendulum")
+        return engine  # type: ignore[return-value]
+
+    except ImportError as e:
+        raise GolfModelingError(
+            "Golf Swing Pendulum engine not found. "
+            "Ensure vendor/ud-tools submodule is initialised."
+        ) from e
+
+
+def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG001
+    """Load Putting Green engine.
+
+    Postcondition: returned engine is non-None (DbC).
+    """
+    try:
+        from src.engines.physics_engines.putting_green.python.simulator import (
+            PuttingGreenSimulator,
+        )
+
+        # Putting green doesn't need probing - it's always available as pure Python
+        simulator = PuttingGreenSimulator()
+        logger.info("Putting Green engine loaded successfully")
+
+        # DbC postcondition
+        _ensure_engine_loaded(simulator, "PuttingGreen")  # type: ignore[arg-type]
+        return simulator  # type: ignore[return-value]
+
+    except ImportError as e:
+        raise GolfModelingError("Putting Green engine not found.") from e
+
+
+def _load_simscape_adapter(
+    *,
+    suite_root: Path,
+    engine_name: str,
+    default_model_relpath: Path,
+    load_default_model: bool,
+) -> PhysicsEngine:
+    """Load a registry-backed Simscape adapter for MATLAB-family engines.
+
+    Preconditions (DbC):
+        - ``suite_root`` is a :class:`Path`.
+
+    Postcondition (DbC):
+        - Returned engine is non-None.
+
+    Args:
+        suite_root: Repository root path.
+        engine_name: Human-readable engine name used in logs/errors.
+        default_model_relpath: Default ``.slx`` path relative to ``suite_root``.
+        load_default_model: Whether to load the default model immediately.
+
+    Returns:
+        A :class:`SimscapeAdapter` instance.
+
+    Raises:
+        GolfModelingError: If ``SimscapeAdapter`` cannot be imported, or
+            if the resolved default model path exists but fails to load
+            (e.g. missing metadata sibling).
+    """
+    if not isinstance(suite_root, Path):
+        raise TypeError(f"suite_root must be a Path, got {type(suite_root).__name__}")
+
+    try:
+        from src.engines.simscape import SimscapeAdapter
+    except ImportError as exc:
+        raise GolfModelingError(
+            f"{engine_name} engine not available: failed to import SimscapeAdapter. "
+            "See motion_matching/option4_python_bridge/INSTALLATION.md."
+        ) from exc
+
+    engine: PhysicsEngine = SimscapeAdapter()  # type: ignore[assignment]
+
+    model_path = suite_root / default_model_relpath
+    if load_default_model and model_path.exists():
+        logger.info("Loading default %s model: %s", engine_name, model_path)
+        try:
+            engine.load_from_path(str(model_path))
+        except (ValueError, RuntimeError, FileNotFoundError) as exc:
+            raise GolfModelingError(
+                f"{engine_name} loader failed to load default model "
+                f"'{model_path}': {exc}"
+            ) from exc
+    elif load_default_model:
+        logger.warning(
+            "Default %s model not found at %s; returning unloaded adapter",
+            engine_name,
+            model_path,
+        )
+    else:
+        logger.warning(
+            "%s default model loading skipped for registry startup; model path is %s",
+            engine_name,
+            model_path,
+        )
+
+    _ensure_engine_loaded(engine, engine_name)
+    return engine
+
+
+def load_matlab_2d_engine(suite_root: Path) -> PhysicsEngine:
+    """Load the legacy MATLAB_2D registry adapter without starting MATLAB.
+
+    The 2D Simscape model remains web-only at the CLI layer. Registering a
+    lightweight adapter keeps EngineManager dispatch uniform while avoiding
+    the old manager-local ``matlab.engine.start_matlab`` path.
+    """
+    return _load_simscape_adapter(
+        suite_root=suite_root,
+        engine_name="MATLAB_2D",
+        default_model_relpath=DEFAULT_MATLAB_2D_SLX_RELPATH,
+        load_default_model=False,
+    )
+
+
+def load_matlab_3d_engine(suite_root: Path) -> PhysicsEngine:
+    """Load Simscape Multibody (MATLAB_3D) engine via the Python bridge.
+
+    Wires :class:`src.engines.simscape.SimscapeAdapter` into the registry
+    as ``EngineType.MATLAB_3D``. The default model path resolves to
+    :data:`DEFAULT_MATLAB_3D_SLX_RELPATH` under ``suite_root``.
+    """
+    return _load_simscape_adapter(
+        suite_root=suite_root,
+        engine_name="MATLAB_3D",
+        default_model_relpath=DEFAULT_MATLAB_3D_SLX_RELPATH,
+        load_default_model=True,
+    )
+
+
+def load_jaxsim_engine(suite_root: Path) -> PhysicsEngine:
+    """Load the optional JaxSim backend adapter.
+
+    The backend imports JaxSim lazily so core installations remain importable.
+    Live loading requires the ``upstream-drift[jaxsim]`` extra and a model
+    path supplied by the caller after construction.
+    """
+
+    if not isinstance(suite_root, Path):
+        raise TypeError(f"suite_root must be a Path, got {type(suite_root).__name__}")
+
+    # Validate the JaxSim runtime import surface *before* reporting success.
+    # The backend imports ``jaxsim.api`` lazily (deep inside method bodies), so
+    # constructing the adapter alone does not prove the runtime is installed.
+    # Probe it up front so a missing optional dependency cannot be mistaken for
+    # a live engine (#6880).
+    import importlib
+
+    try:
+        importlib.import_module("jaxsim.api")
+    except ImportError as exc:
+        raise GolfModelingError(
+            "JaxSim runtime is not available (could not import 'jaxsim.api'). "
+            "Install with `pip install upstream-drift[jaxsim]`."
+        ) from exc
+
+    try:
+        from src.engines.physics_engines.jaxsim import JaxSimBackend
+    except ImportError as exc:
+        raise GolfModelingError(
+            "JaxSim backend adapter is not available. "
+            "Install with `pip install upstream-drift[jaxsim]`."
+        ) from exc
+
+    engine: PhysicsEngine = JaxSimBackend()  # type: ignore[assignment]
+    _ensure_engine_loaded(engine, "JaxSim")
+    return engine
+
+
+# Helper for loaders map
+LOADER_MAP: dict[EngineType, Callable[[Path], PhysicsEngine]] = {
+    EngineType.MUJOCO: load_mujoco_engine,
+    EngineType.DRAKE: load_drake_engine,
+    EngineType.PINOCCHIO: load_pinocchio_engine,
+    EngineType.JAXSIM: load_jaxsim_engine,
+    EngineType.OPENSIM: load_opensim_engine,
+    EngineType.MYOSIM: load_myosim_engine,
+    EngineType.PENDULUM: load_pendulum_engine,
+    EngineType.GOLF_SWING_PENDULUM: load_golf_swing_pendulum_engine,
+    EngineType.PUTTING_GREEN: load_putting_green_engine,
+    EngineType.MATLAB_2D: load_matlab_2d_engine,
+    EngineType.MATLAB_3D: load_matlab_3d_engine,
+}

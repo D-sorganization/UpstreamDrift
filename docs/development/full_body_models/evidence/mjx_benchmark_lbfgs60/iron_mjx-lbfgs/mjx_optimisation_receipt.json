@@ -1,0 +1,443 @@
+{
+  "run": "iron_mjx-lbfgs",
+  "settings": {
+    "method": "lbfgs",
+    "iterations": 60,
+    "substeps": 6,
+    "knot_spacing_s": 0.04,
+    "learning_rate": 0.002,
+    "regularisation": 0.001,
+    "horizon_s": 1.65,
+    "weld_stiffness": 200000.0,
+    "weld_damping": 400.0,
+    "run": "C:\\Users\\diete\\AppData\\Local\\Temp\\claude\\C--Users-diete-Repositories\\3b2df4af-b4a6-4806-b7cf-2c6990c4d236\\scratchpad\\p6work\\iron_mjx-lbfgs"
+  },
+  "knots": 47,
+  "actuated_coordinates": 38,
+  "port_check_replay_marker_rms_m": 0.06293411661375653,
+  "shared_simulator_replay_marker_rms_m": 0.08860926039813796,
+  "best_replay_marker_rms_m": 0.027289464401553158,
+  "history": [
+    {
+      "iteration": 0,
+      "replay_marker_rms_m": 0.06293411661375653,
+      "total_cost": 0.003960703033953905
+    },
+    {
+      "iteration": 1,
+      "replay_marker_rms_m": 2.284530371354069,
+      "total_cost": 5.219079494476318,
+      "delta_max_rad": 0.2569796244237663
+    },
+    {
+      "iteration": 2,
+      "replay_marker_rms_m": 0.07255507187234737,
+      "total_cost": 0.005264238454401493,
+      "delta_max_rad": 0.0032685096235037705
+    },
+    {
+      "iteration": 3,
+      "replay_marker_rms_m": 0.059075033939984846,
+      "total_cost": 0.0034898596350103617,
+      "delta_max_rad": 0.0011686013404279597
+    },
+    {
+      "iteration": 4,
+      "replay_marker_rms_m": 0.05448247163219542,
+      "total_cost": 0.002968339715152979,
+      "delta_max_rad": 0.001593523497249378
+    },
+    {
+      "iteration": 5,
+      "replay_marker_rms_m": 0.05018483963672352,
+      "total_cost": 0.002518518129363656,
+      "delta_max_rad": 0.002993814740842827
+    },
+    {
+      "iteration": 6,
+      "replay_marker_rms_m": 0.04706868251969947,
+      "total_cost": 0.0022154611069709063,
+      "delta_max_rad": 0.004374054311462084
+    },
+    {
+      "iteration": 7,
+      "replay_marker_rms_m": 0.04133704808469451,
+      "total_cost": 0.0017087517771869898,
+      "delta_max_rad": 0.008073140275482178
+    },
+    {
+      "iteration": 8,
+      "replay_marker_rms_m": 0.0378394387648707,
+      "total_cost": 0.00143182382453233,
+      "delta_max_rad": 0.010941033540410525
+    },
+    {
+      "iteration": 9,
+      "replay_marker_rms_m": 0.03633215244846371,
+      "total_cost": 0.0013200262328609824,
+      "delta_max_rad": 0.01025139807999145
+    },
+    {
+      "iteration": 10,
+      "replay_marker_rms_m": 0.03453848897511285,
+      "total_cost": 0.0011929083848372102,
+      "delta_max_rad": 0.011636514020878775
+    },
+    {
+      "iteration": 11,
+      "replay_marker_rms_m": 0.04737741711647965,
+      "total_cost": 0.002244622213765979,
+      "delta_max_rad": 0.015648238764372387
+    },
+    {
+      "iteration": 12,
+      "replay_marker_rms_m": 0.03417366179075682,
+      "total_cost": 0.0011678405571728945,
+      "delta_max_rad": 0.01215318157992449
+    },
+    {
+      "iteration": 13,
+      "replay_marker_rms_m": 0.0337422822973903,
+      "total_cost": 0.0011385431280359626,
+      "delta_max_rad": 0.012770327215328985
+    },
+    {
+      "iteration": 14,
+      "replay_marker_rms_m": 0.03287726443810772,
+      "total_cost": 0.0010809169616550207,
+      "delta_max_rad": 0.0148733117791994
+    },
+    {
+      "iteration": 15,
+      "replay_marker_rms_m": 0.03191171539726971,
+      "total_cost": 0.001018360024318099,
+      "delta_max_rad": 0.01439629411770165
+    },
+    {
+      "iteration": 16,
+      "replay_marker_rms_m": 0.031557540509807934,
+      "total_cost": 0.000995880807749927,
+      "delta_max_rad": 0.013810361738651189
+    },
+    {
+      "iteration": 17,
+      "replay_marker_rms_m": 0.031194803919349614,
+      "total_cost": 0.0009731185855343938,
+      "delta_max_rad": 0.013328551351835862
+    },
+    {
+      "iteration": 18,
+      "replay_marker_rms_m": 0.030746591534581518,
+      "total_cost": 0.0009453558595851064,
+      "delta_max_rad": 0.013701258759659097
+    },
+    {
+      "iteration": 19,
+      "replay_marker_rms_m": 0.030503336444363597,
+      "total_cost": 0.000930456561036408,
+      "delta_max_rad": 0.0137386193073199
+    },
+    {
+      "iteration": 20,
+      "replay_marker_rms_m": 0.03028411542329566,
+      "total_cost": 0.000917130964808166,
+      "delta_max_rad": 0.014359924164636186
+    },
+    {
+      "iteration": 21,
+      "replay_marker_rms_m": 0.02999932549601258,
+      "total_cost": 0.0008999635465443134,
+      "delta_max_rad": 0.015452078733404748
+    },
+    {
+      "iteration": 22,
+      "replay_marker_rms_m": 0.029811199910690808,
+      "total_cost": 0.0008887117728590965,
+      "delta_max_rad": 0.015541367981023737
+    },
+    {
+      "iteration": 23,
+      "replay_marker_rms_m": 0.02967913903592926,
+      "total_cost": 0.0008808556012809277,
+      "delta_max_rad": 0.015820582348097603
+    },
+    {
+      "iteration": 24,
+      "replay_marker_rms_m": 0.029418141999099874,
+      "total_cost": 0.0008654326084069908,
+      "delta_max_rad": 0.01725811325847075
+    },
+    {
+      "iteration": 25,
+      "replay_marker_rms_m": 0.02949463932001489,
+      "total_cost": 0.0008699400350451469,
+      "delta_max_rad": 0.018509453585223126
+    },
+    {
+      "iteration": 26,
+      "replay_marker_rms_m": 0.029348169562710944,
+      "total_cost": 0.0008613208774477243,
+      "delta_max_rad": 0.017634220908621823
+    },
+    {
+      "iteration": 27,
+      "replay_marker_rms_m": 0.029305128087421063,
+      "total_cost": 0.0008587962947785854,
+      "delta_max_rad": 0.017614462170221504
+    },
+    {
+      "iteration": 28,
+      "replay_marker_rms_m": 0.02918718785480495,
+      "total_cost": 0.000851898395922035,
+      "delta_max_rad": 0.018760157850393956
+    },
+    {
+      "iteration": 29,
+      "replay_marker_rms_m": 0.02910350722657194,
+      "total_cost": 0.000847020884975791,
+      "delta_max_rad": 0.019418211423537255
+    },
+    {
+      "iteration": 30,
+      "replay_marker_rms_m": 0.02902453721133495,
+      "total_cost": 0.0008424310362897813,
+      "delta_max_rad": 0.020339318703370846
+    },
+    {
+      "iteration": 31,
+      "replay_marker_rms_m": 0.028948374047706293,
+      "total_cost": 0.0008380162180401385,
+      "delta_max_rad": 0.021319295112923037
+    },
+    {
+      "iteration": 32,
+      "replay_marker_rms_m": 0.028892958289908517,
+      "total_cost": 0.0008348107803612947,
+      "delta_max_rad": 0.021285019233385664
+    },
+    {
+      "iteration": 33,
+      "replay_marker_rms_m": 0.028826258585698847,
+      "total_cost": 0.0008309613331221044,
+      "delta_max_rad": 0.022024776621356084
+    },
+    {
+      "iteration": 34,
+      "replay_marker_rms_m": 0.028745900245991832,
+      "total_cost": 0.0008263346971943974,
+      "delta_max_rad": 0.021797853338433953
+    },
+    {
+      "iteration": 35,
+      "replay_marker_rms_m": 0.02867329272070522,
+      "total_cost": 0.0008221656898967922,
+      "delta_max_rad": 0.022020826487126825
+    },
+    {
+      "iteration": 36,
+      "replay_marker_rms_m": 0.028584177999228393,
+      "total_cost": 0.0008170632645487785,
+      "delta_max_rad": 0.022413417140166644
+    },
+    {
+      "iteration": 37,
+      "replay_marker_rms_m": 0.028557381202827102,
+      "total_cost": 0.000815531937405467,
+      "delta_max_rad": 0.0224417149393806
+    },
+    {
+      "iteration": 38,
+      "replay_marker_rms_m": 0.028498240701145556,
+      "total_cost": 0.0008121575810946524,
+      "delta_max_rad": 0.022345611237917385
+    },
+    {
+      "iteration": 39,
+      "replay_marker_rms_m": 0.028467883192374702,
+      "total_cost": 0.0008104282314889133,
+      "delta_max_rad": 0.02241118512766819
+    },
+    {
+      "iteration": 40,
+      "replay_marker_rms_m": 0.02843133155042605,
+      "total_cost": 0.0008083484135568142,
+      "delta_max_rad": 0.022347378912464782
+    },
+    {
+      "iteration": 41,
+      "replay_marker_rms_m": 0.028328980566287985,
+      "total_cost": 0.0008025389397516847,
+      "delta_max_rad": 0.02248519255573799
+    },
+    {
+      "iteration": 42,
+      "replay_marker_rms_m": 0.02825498342332966,
+      "total_cost": 0.0007983517716638744,
+      "delta_max_rad": 0.022144560247043622
+    },
+    {
+      "iteration": 43,
+      "replay_marker_rms_m": 0.028170986337987775,
+      "total_cost": 0.000793612387496978,
+      "delta_max_rad": 0.022452748796276813
+    },
+    {
+      "iteration": 44,
+      "replay_marker_rms_m": 0.028275923635712255,
+      "total_cost": 0.0007995357736945152,
+      "delta_max_rad": 0.02288364176249146
+    },
+    {
+      "iteration": 45,
+      "replay_marker_rms_m": 0.02813050982692405,
+      "total_cost": 0.0007913334993645549,
+      "delta_max_rad": 0.02244150382681083
+    },
+    {
+      "iteration": 46,
+      "replay_marker_rms_m": 0.028242551166783623,
+      "total_cost": 0.0007976495544426143,
+      "delta_max_rad": 0.022780014734944645
+    },
+    {
+      "iteration": 47,
+      "replay_marker_rms_m": 0.028092172458516713,
+      "total_cost": 0.0007891780696809292,
+      "delta_max_rad": 0.022437417557371407
+    },
+    {
+      "iteration": 48,
+      "replay_marker_rms_m": 0.02803706576205442,
+      "total_cost": 0.0007860853220336139,
+      "delta_max_rad": 0.02322098163188525
+    },
+    {
+      "iteration": 49,
+      "replay_marker_rms_m": 0.028052016938476,
+      "total_cost": 0.0007869243854656816,
+      "delta_max_rad": 0.023729373085988388
+    },
+    {
+      "iteration": 50,
+      "replay_marker_rms_m": 0.028006589745122136,
+      "total_cost": 0.0007843775092624128,
+      "delta_max_rad": 0.02341848132540858
+    },
+    {
+      "iteration": 51,
+      "replay_marker_rms_m": 0.02796146449941787,
+      "total_cost": 0.0007818520534783602,
+      "delta_max_rad": 0.02370832769029667
+    },
+    {
+      "iteration": 52,
+      "replay_marker_rms_m": 0.027848695693400045,
+      "total_cost": 0.0007755590486340225,
+      "delta_max_rad": 0.025652692568286197
+    },
+    {
+      "iteration": 53,
+      "replay_marker_rms_m": 0.027793934539573555,
+      "total_cost": 0.0007725121104158461,
+      "delta_max_rad": 0.025943445970098112
+    },
+    {
+      "iteration": 54,
+      "replay_marker_rms_m": 0.027716112924351548,
+      "total_cost": 0.0007681928109377623,
+      "delta_max_rad": 0.027437843717831367
+    },
+    {
+      "iteration": 55,
+      "replay_marker_rms_m": 0.02762648638192461,
+      "total_cost": 0.0007632335764355958,
+      "delta_max_rad": 0.029426123011653465
+    },
+    {
+      "iteration": 56,
+      "replay_marker_rms_m": 0.02797224359796596,
+      "total_cost": 0.0007824590429663658,
+      "delta_max_rad": 0.03295250529534671
+    },
+    {
+      "iteration": 57,
+      "replay_marker_rms_m": 0.02759208056609924,
+      "total_cost": 0.0007613341440446675,
+      "delta_max_rad": 0.030249964677910062
+    },
+    {
+      "iteration": 58,
+      "replay_marker_rms_m": 0.027547273654549537,
+      "total_cost": 0.0007588642183691263,
+      "delta_max_rad": 0.03161509946340281
+    },
+    {
+      "iteration": 59,
+      "replay_marker_rms_m": 0.027602367063182483,
+      "total_cost": 0.0007619031239300966,
+      "delta_max_rad": 0.032692915236675876
+    },
+    {
+      "iteration": 60,
+      "replay_marker_rms_m": 0.027530667787445798,
+      "total_cost": 0.0007579497760161757,
+      "delta_max_rad": 0.031991314485581256
+    },
+    {
+      "iteration": 61,
+      "replay_marker_rms_m": 0.027496868175003818,
+      "total_cost": 0.0007560895173810422,
+      "delta_max_rad": 0.031374813757148914
+    },
+    {
+      "iteration": 62,
+      "replay_marker_rms_m": 0.027458541753403145,
+      "total_cost": 0.0007539835060015321,
+      "delta_max_rad": 0.03193795222896574
+    },
+    {
+      "iteration": 63,
+      "replay_marker_rms_m": 0.02740056445067784,
+      "total_cost": 0.000750803854316473,
+      "delta_max_rad": 0.03385705755965515
+    },
+    {
+      "iteration": 64,
+      "replay_marker_rms_m": 0.027375240372433652,
+      "total_cost": 0.0007494171732105315,
+      "delta_max_rad": 0.03490492346070745
+    },
+    {
+      "iteration": 65,
+      "replay_marker_rms_m": 0.02736239989370434,
+      "total_cost": 0.0007487144903279841,
+      "delta_max_rad": 0.035222930483757
+    },
+    {
+      "iteration": 66,
+      "replay_marker_rms_m": 0.027356602424113505,
+      "total_cost": 0.0007483978406526148,
+      "delta_max_rad": 0.03612799372289212
+    },
+    {
+      "iteration": 67,
+      "replay_marker_rms_m": 0.027347614449514182,
+      "total_cost": 0.0007479058112949133,
+      "delta_max_rad": 0.035629432415283296
+    },
+    {
+      "iteration": 68,
+      "replay_marker_rms_m": 0.027339822197551492,
+      "total_cost": 0.0007474796730093658,
+      "delta_max_rad": 0.03557185936918909
+    },
+    {
+      "iteration": 69,
+      "replay_marker_rms_m": 0.027289464401553158,
+      "total_cost": 0.0007447288371622562,
+      "delta_max_rad": 0.03579066373390373
+    }
+  ],
+  "elapsed_s": 4335.5,
+  "dtype": "float32"
+}

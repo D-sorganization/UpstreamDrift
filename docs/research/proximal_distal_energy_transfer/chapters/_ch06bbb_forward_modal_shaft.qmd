@@ -1,0 +1,222 @@
+# Forward Coupling of a Distributed Modal Shaft {#sec-forward-modal-shaft}
+
+## Question, Scope, and Claim Boundary
+
+The isolated beam experiment in @sec-shaft-beam-reference established that a
+one-mode reduction can conceal excitation-dependent response history. It did
+not establish whether the two-hand force-couple mechanism survives when the
+distributed shaft participates in the same forward dynamics as the moving
+base, arms, grips, and clubhead. This section closes that specific numerical
+gate. Finite-element-derived bending modes are inserted directly into the
+planar constrained solve from @sec-coupled-base-flex; the grip forces, modal
+coordinates, base motion, and clubhead motion are simultaneous outputs of one
+KKT system.
+
+The implementation, deterministic study, and machine-readable result are
+available in
+[`moving_base_modal_shaft.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/moving_base_modal_shaft.py),
+[`run_moving_base_modal_shaft_study.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py),
+and
+[`moving_base_modal_shaft_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json).
+The corresponding trace archive is
+[`moving_base_modal_shaft_study.npz`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.npz).
+
+This remains a synthetic mechanism experiment. The shaft bending rigidity is
+four times the isolated structural reference (implemented as 448 GPa with the
+reference geometry). That multiplier was intended to keep the declared drive
+inside a conservative small-deflection screen, but the executed baseline still
+fails that screen as shown below. It is a numerical stress-test choice, not a
+material, commercial-shaft, or equipment-calibration claim. No measured EI
+profile, damping, grip compliance, hand force, body segment, or launch data
+enter the calculation.
+
+## Coupled Coordinates and Distributed Inertia
+
+The generalized coordinate vector is
+
+$$
+\mathbf q=
+[\theta_R,\phi_R,\theta_L,\phi_L,x_B,y_B,x_G,y_G,\alpha,
+\eta_1,\ldots,\eta_n]^\mathsf T,
+$$ {#eq-modal-shaft-coordinates}
+
+where the first four angles describe the two planar arms, $(x_B,y_B)$ is the
+finite-mass translating base, $(x_G,y_G,\alpha)$ describes the club root, and
+$\eta_i$ are mass-normalized shaft bending coordinates. At shaft station $s$,
+
+$$
+\mathbf r(s,\mathbf q)=\mathbf r_G+s\,\mathbf e(\alpha)
++\left[\sum_{i=1}^{n}\Phi_i(s)\eta_i\right]\mathbf n(\alpha).
+$$ {#eq-modal-shaft-centerline}
+
+The finite-element mode shapes from @eq-beam-eigenproblem are evaluated by
+Hermite interpolation at Gaussian quadrature stations. Distributed shaft mass,
+clubhead translation mass, and clubhead rotary inertia then contribute through
+their exact point Jacobians,
+
+$$
+\mathbf M_s(\mathbf q)=
+\int_0^L \rho A(s)\mathbf J(s,\mathbf q)^\mathsf T
+\mathbf J(s,\mathbf q)\,ds
++m_h\mathbf J_h^\mathsf T\mathbf J_h
++I_h\mathbf J_\omega^\mathsf T\mathbf J_\omega.
+$$ {#eq-modal-shaft-distributed-mass}
+
+This construction retains rigid--modal inertial coupling. It is not a beam
+response calculated after a rigid-club trajectory has already been prescribed.
+The transported quadrature basis reproduces the first three finite-element
+frequencies to a maximum relative discrepancy of $1.09\times10^{-5}$ and the
+modal mass matrix differs from identity by at most $2.22\times10^{-16}$.
+For the declared four-times-EI case, those frequencies are 10.480, 125.891,
+and 276.066 Hz.
+
+## Constraint Forces, Couples, and Power
+
+Both hand endpoints remain constrained to separated grip points. With four
+holonomic constraints $\mathbf c(\mathbf q)=\mathbf 0$, the acceleration and
+reaction multipliers are obtained without a rank-deficient fallback:
+
+$$
+\begin{bmatrix}
+\mathbf M(\mathbf q) & -\mathbf J_c^\mathsf T\\
+\mathbf J_c & \mathbf 0
+\end{bmatrix}
+\begin{bmatrix}
+\ddot{\mathbf q}\\ \boldsymbol\lambda
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf Q-\mathbf h(\mathbf q,\dot{\mathbf q})\\
+-\dot{\mathbf J}_c\dot{\mathbf q}
+\end{bmatrix}.
+$$ {#eq-modal-shaft-kkt}
+
+The two solved forces on the club are $\mathbf F_R$ and $\mathbf F_L$. Their
+force-generated grip couple about the club-root reference is
+
+$$
+M_F=(\mathbf r_R-\mathbf r_G)\times\mathbf F_R
++(\mathbf r_L-\mathbf r_G)\times\mathbf F_L.
+$$ {#eq-modal-shaft-force-couple}
+
+This quantity remains separate from the directly commanded wrist moment and
+from the internal elastic generalized forces. The contact-power identity is
+checked at every sample in both equivalent forms,
+
+$$
+\mathbf F_R\!\cdot\!\mathbf v_R+
+\mathbf F_L\!\cdot\!\mathbf v_L
+=(\mathbf F_R+\mathbf F_L)\!\cdot\!\mathbf v_G+M_F\dot\alpha.
+$$ {#eq-modal-shaft-contact-power}
+
+The maximum discrepancy is $1.71\times10^{-13}$ W in the baseline and
+$1.42\times10^{-13}$ W after the intervention. Position, velocity,
+acceleration, and KKT residuals are also recorded rather than inferred from
+visual agreement.
+
+![Forward Geometry, Distributed Shaft, and Achieved Grip Forces](figures/fig_modal_shaft_forward_geometry.pdf){#fig-modal-shaft-forward-geometry width=100%}
+
+@fig-modal-shaft-forward-geometry shows three states from the integrated
+trajectory. The arrows are the achieved constraint forces, not specified
+loads. Their directions change with the arm--grip geometry while the modal
+centerline, base, and clubhead evolve in the same solve. Arrow length uses one
+common display scale; force interpretation still requires the registered
+reference point and power variables.
+
+## Model-Use Screen and Baseline Closure
+
+Linear Euler--Bernoulli kinematics are inappropriate if the numerical case is
+allowed to bend without a declared range-of-use guard. This study therefore
+preregisters the screening rule
+
+$$
+\max_t |w(L,t)|/L < 0.05.
+$$ {#eq-modal-shaft-deflection-screen}
+
+The observed maximum is 0.13476, so the current baseline **fails** this
+preregistered screen. The coupled run is retained as an explicit out-of-domain
+stress test, not as quantitatively valid small-deflection beam evidence. The
+5% value is a conservative model-use screen for this resource, not a universal
+theorem about beam validity. Torsion, shear deformation, geometric
+nonlinearity, impact, and material anisotropy remain absent.
+
+At a 0.50 ms step, the base moves by at most 26.70 mm, the modal tip deflection
+reaches 134.76 mm, and the first three modal coordinates all depart from zero.
+Peak shaft strain energy is 2.123 J and peak clubhead speed is 7.356 m/s. The
+force-generated couple spans -21.60 to 28.87 N m. Mechanical energy changes by
+39.482 J while integrated applied and dissipative work is 39.464 J, leaving a
+0.0174 J absolute residual. These are numerical observations for an
+out-of-screen synthetic stress test, not estimates of golfer or equipment
+performance.
+
+## Excitation-Dependent Mode Truncation
+
+One-, three-, and six-mode systems are integrated from identical initial
+states under two resolved inputs. A smooth drive represents the low-frequency
+case; a 2 ms wrist-moment pulse deliberately excites higher frequencies. The
+six-mode result is the within-model comparison reference, not experimental
+truth.
+
+![Mode-Truncation Response Under Smooth and Short Inputs](figures/fig_modal_shaft_mode_convergence.pdf){#fig-modal-shaft-mode-convergence width=100%}
+
+For the smooth drive, the one-mode tip-deflection RMS discrepancy relative to
+six modes is 0.160 mm and its maximum clubhead-position discrepancy is 13.45
+$\mu$m. Retaining three modes reduces those values to 0.00186 mm and 0.422
+$\mu$m. Under the short pulse, the one-mode deflection discrepancy grows to
+0.484 mm, 3.03 times its smooth-input value, while the three-mode discrepancy
+is 0.00755 mm and its maximum clubhead-position discrepancy is 1.184 $\mu$m.
+@fig-modal-shaft-mode-convergence therefore supports a conditional
+statement: three modes are converged for the two declared excitations and
+timestep, whereas a single-mode approximation is input-dependent. It does not
+establish that three modes suffice for impact or arbitrary loading.
+
+## Same-State Zero-Command Intervention
+
+At 0.220 s, the complete state $(\mathbf q,\dot{\mathbf q})$ is copied exactly
+and all shoulder, elbow, and wrist commands are set to zero. The branch is
+then integrated for 30 ms. Because the branch shares its cut state bit for bit,
+any subsequent difference from a zero-inertia or relabeled-load construction
+cannot be attributed to a changed initial condition.
+
+The force-generated couple is already negative at the cut and remains negative
+for 25.5 ms of the branch, reaching -21.17 N m. This is a statement about
+the continued constrained motion of the declared model after command removal;
+it is not evidence that biological muscles are inactive. The branch continues
+to contain inertia, gravity, base restoring forces, joint damping, modal
+elasticity, and shaft damping.
+
+Two exact geometry controls bound the interpretation. Moving both grip moment
+arms to the same reference point makes the force-generated couple identically
+zero while retaining the achieved force records. Reversing the registered
+moment arms reverses the couple with zero residual. Thus the negative sign is
+not a force-magnitude label: it depends on the cross products in
+@eq-modal-shaft-force-couple.
+
+![Same-State Killswitch, Geometry Controls, and Numerical Closure](figures/fig_modal_shaft_killswitch_controls.pdf){#fig-modal-shaft-killswitch-controls width=100%}
+
+The intervention is repeated at 0.50, 0.25, and 0.125 ms. The absolute
+work--energy residual decreases monotonically from 0.00934 to 0.00464 to
+0.00231 J, while the negative interval converges from 25.50 to 25.25 to
+25.125 ms and the minimum couple from -21.17 to -21.19 N m. This separates a persistent mechanism
+result from a fixed-step artifact without claiming zero numerical error.
+
+## Falsifiers and Remaining Inference Gaps
+
+The coupled distributed-shaft result would fail its declared claim if any of
+the following occurred: transported modes did not reproduce the finite-element
+frequencies; higher modes remained numerically inert under the resolved pulse;
+the negative interval disappeared with timestep refinement; the coincident or
+reversed moment-arm controls failed; the 5% deflection screen failed; or the
+constraint, contact-power, and work--energy residuals ceased to close.
+
+The 5% screen does fail in the current synthetic planar baseline, so the
+quantitative small-deflection claim is rejected for this run. The remaining
+supported claim is narrower: the finite-element-derived modal coordinates can
+be coupled into the moving-base two-hand forward solve while preserving the
+registered negative-couple intervention, geometry controls, and numerical
+identities, but the resulting amplitudes cannot be interpreted as a valid
+linear-beam equipment prediction. Equipment
+calibration, anatomical arms, base rotation, three-dimensional shaft bending
+and torsion, compliant tissue, impact, muscle coordination, optimal control,
+human strategy, and coaching benefit remain untested. Those omissions define
+the next model tiers; they are not conclusions supplied by this one.

@@ -1,0 +1,809 @@
+# mypy: ignore-errors
+# ruff: noqa: E501
+"""
+URDF parser for loading and editing existing URDF files.
+
+This module provides comprehensive parsing of URDF files into
+editable data structures.
+"""
+
+from __future__ import annotations
+
+import logging
+import math
+import os
+import re
+import subprocess  # nosec B404 - xacro CLI invoked with a fixed argv, shell=False
+from dataclasses import dataclass, field
+from pathlib import Path, PurePosixPath
+from typing import TYPE_CHECKING, cast
+
+import defusedxml.ElementTree as DefusedET
+
+if TYPE_CHECKING:
+    # Type-only: never imported at runtime, and every parse in this module
+    # goes through DefusedET. No XXE surface exists to defuse.
+    import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
+from src.shared.python.model_generation.core.types import (
+    Geometry,
+    GeometryType,
+    Inertia,
+    Joint,
+    JointDynamics,
+    JointLimits,
+    JointType,
+    Link,
+    Material,
+    Origin,
+)
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ParsedModel:
+    """Result of parsing a URDF file."""
+
+    # Robot name
+    name: str
+
+    # Parsed links
+    links: list[Link] = field(default_factory=list)
+
+    # Parsed joints
+    joints: list[Joint] = field(default_factory=list)
+
+    # Material definitions
+    materials: dict[str, Material] = field(default_factory=dict)
+
+    # Original XML (for text editing)
+    original_xml: str | None = None
+
+    # Source file path
+    source_path: Path | None = None
+
+    # Parse warnings/errors
+    warnings: list[str] = field(default_factory=list)
+
+    # Whether file is read-only (from library)
+    read_only: bool = False
+
+    def get_link(self, name: str) -> Link | None:
+        """Get link by name."""
+        if name is None:
+            raise ValueError("name must be provided")
+        for link in self.links:
+            if link.name == name:
+                return link
+        return None
+
+    def get_joint(self, name: str) -> Joint | None:
+        """Get joint by name."""
+        if name is None:
+            raise ValueError("name must be provided")
+        for joint in self.joints:
+            if joint.name == name:
+                return joint
+        return None
+
+    def get_root_link(self) -> Link | None:
+        """Get the root (base) link."""
+        child_names = {j.child for j in self.joints}
+        for link in self.links:
+            if link.name not in child_names:
+                return link
+        return self.links[0] if self.links else None
+
+    def get_children(self, link_name: str) -> list[str]:
+        """Get child link names."""
+        return [j.child for j in self.joints if j.parent == link_name]
+
+    def get_parent(self, link_name: str) -> str | None:
+        """Get parent link name."""
+        if link_name is None:
+            raise ValueError("link_name must be provided")
+        for j in self.joints:
+            if j.child == link_name:
+                return str(j.parent)
+        return None
+
+    def get_subtree(self, link_name: str) -> list[str]:
+        """Get all links in subtree rooted at link_name."""
+        if link_name is None:
+            raise ValueError("link_name must be provided")
+        result = [link_name]
+        queue = [link_name]
+        while queue:
+            current = queue.pop(0)
+            children = self.get_children(current)
+            result.extend(children)
+            queue.extend(children)
+        return result
+
+    def to_urdf(self, pretty_print: bool = True) -> str:
+        """Convert back to URDF XML."""
+        if pretty_print is None:
+            raise ValueError("pretty_print must be provided")
+        from shared.python.model_generation.builders.urdf_writer import URDFWriter
+
+        writer = URDFWriter(pretty_print=pretty_print)
+        return str(writer.write(self.name, self.links, self.joints, self.materials))
+
+    def copy(self) -> ParsedModel:
+        """Create a deep copy."""
+        return ParsedModel(
+            name=self.name,
+            links=[Link.from_dict(link.to_dict()) for link in self.links],
+            joints=[Joint.from_dict(j.to_dict()) for j in self.joints],
+            materials={
+                k: Material.from_dict(v.to_dict()) for k, v in self.materials.items()
+            },
+            original_xml=self.original_xml,
+            source_path=self.source_path,
+            warnings=self.warnings.copy(),
+            read_only=False,  # Copy is editable
+        )
+
+
+class URDFParser:
+    """
+    Parse URDF files into editable data structures.
+
+    Features:
+    - Full URDF parsing (links, joints, materials)
+    - Mesh path resolution
+    - Validation during parsing
+    - Preserves original XML for text editing
+    """
+
+    def __init__(self, resolve_meshes: bool = True) -> None:
+        """
+        Initialize parser.
+
+        Args:
+            resolve_meshes: If True, attempt to resolve mesh file paths
+        """
+        self.resolve_meshes = resolve_meshes
+
+    def parse(
+        self,
+        source: str | Path,
+        read_only: bool = False,
+    ) -> ParsedModel:
+        """
+        Parse a URDF file.
+
+        Args:
+            source: Path to URDF file or XML string
+            read_only: If True, mark model as read-only
+
+        Returns:
+            ParsedModel with parsed contents
+        """
+        xml_string, source_path = self._read_source(source)
+
+        fast = self._try_rust_fast_path(xml_string, source_path, read_only)
+        if fast is not None:
+            return fast
+
+        # Parse XML
+        try:
+            root = DefusedET.fromstring(xml_string)
+        except DefusedET.ParseError as e:
+            raise ValueError(f"Invalid URDF XML: {e}") from e
+
+        if root.tag != "robot":
+            raise ValueError(f"Expected 'robot' root element, got '{root.tag}'")
+
+        robot_name = root.get("name", "unnamed_robot")
+
+        # Parse materials first
+        materials = {}
+        for mat_elem in root.findall("material"):
+            material = self._parse_material(mat_elem)
+            if material:
+                materials[material.name] = material
+
+        # Parse links
+        links = []
+        warnings = []
+        for link_elem in root.findall("link"):
+            try:
+                link = self._parse_link(link_elem, materials, source_path)
+                links.append(link)
+            except (ValueError, TypeError, KeyError, AttributeError) as e:
+                warnings.append(f"Failed to parse link: {e}")
+
+        # Parse joints
+        joints = []
+        for joint_elem in root.findall("joint"):
+            try:
+                joint = self._parse_joint(joint_elem)
+                joints.append(joint)
+            except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+                warnings.append(f"Failed to parse joint: {e}")
+
+        return ParsedModel(
+            name=robot_name,
+            links=links,
+            joints=joints,
+            materials=materials,
+            original_xml=xml_string,
+            source_path=source_path,
+            warnings=warnings,
+            read_only=read_only,
+        )
+
+    def _read_source(self, source: str | Path) -> tuple[str, Path | None]:
+        """Return ``(xml, source_path)`` for a path or a raw XML string.
+
+        A xacro source is expanded here so everything downstream sees plain
+        URDF. Expansion failure is not fatal: a file may declare the namespace
+        without using any directives, in which case the raw text still parses.
+        """
+        if isinstance(source, Path) or (
+            isinstance(source, str) and not source.strip().startswith("<")
+        ):
+            source_path = Path(source)
+            if not source_path.exists():
+                raise FileNotFoundError(f"URDF file not found: {source_path}")
+            raw_text = source_path.read_text()
+            if not (self._is_xacro(source_path) or self._has_xacro_namespace(raw_text)):
+                return raw_text, source_path
+            processed = self._preprocess_xacro(source_path)
+            if processed is not None:
+                return processed, source_path
+            logger.warning(
+                f"Could not preprocess xacro file {source_path}, "
+                "attempting to parse as plain XML"
+            )
+            return raw_text, source_path
+        return source, None
+
+    def _try_rust_fast_path(
+        self,
+        xml_string: str,
+        source_path: Path | None,
+        read_only: bool,
+    ) -> ParsedModel | None:
+        """Parse via the Rust backend, or return ``None`` to use pure Python.
+
+        Opt-in through ``UPSTREAM_URDF_USE_RUST=1`` and routed via the typed
+        AST in ``rust_core/upstream-urdf/``; the facade returns a ParsedModel
+        field-compatible with the Python branch. Epic #4520 (#5215).
+        """
+        try:
+            from model_generation.converters import _urdf_rust_facade as _rust_facade
+        except ImportError:  # pragma: no cover - layout safety net
+            return None
+        if not _rust_facade.should_use_rust():
+            return None
+        try:
+            ast = _rust_facade.parse_urdf_to_dict(xml_string)
+            return _rust_facade.parsed_model_from_rust_ast(
+                ast,
+                source_path=source_path,
+                original_xml=xml_string,
+                read_only=read_only,
+            )
+        except Exception as exc:  # pragma: no cover - fallback path
+            logger.warning(
+                "upstream_urdf Rust parser failed (%s); falling back to pure Python",
+                exc,
+            )
+            return None
+
+    def parse_string(self, xml_string: str, read_only: bool = False) -> ParsedModel:
+        """Parse URDF from XML string."""
+        return self.parse(xml_string, read_only=read_only)
+
+    def _is_xacro(self, path: Path) -> bool:
+        """Whether a path names a xacro file, by extension.
+
+        ``.suffixes`` rather than ``.suffix`` so the common ``robot.urdf.xacro``
+        double extension is recognised as well as a bare ``robot.xacro``.
+        """
+        if path is None:
+            raise ValueError("path must be provided")
+        return ".xacro" in path.suffixes
+
+    def _has_xacro_namespace(self, xml_string: str) -> bool:
+        """Whether XML content declares or uses the xacro namespace.
+
+        A file may need preprocessing without carrying a ``.xacro`` extension,
+        so content is checked as well as the name.
+        """
+        return "xmlns:xacro" in xml_string or "xacro:" in xml_string
+
+    def _preprocess_xacro(self, path: Path) -> str | None:
+        """Expand a xacro file with the ``xacro`` CLI.
+
+        Returns:
+            The expanded XML, or ``None`` when xacro is unavailable, fails, or
+            times out. ``None`` is a signal to fall back to parsing the raw
+            text, not an error: a file that merely declares the namespace
+            without using any xacro directives still parses as plain URDF.
+        """
+        try:
+            result = subprocess.run(  # nosec B603 B607 - fixed argv, shell=False
+                ["xacro", str(path)],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            if result.returncode == 0:
+                return result.stdout
+            logger.warning(
+                f"xacro processing failed (exit {result.returncode}): {result.stderr}"
+            )
+            return None
+        except FileNotFoundError:
+            logger.warning("xacro CLI tool not found. Install with: pip install xacro")
+            return None
+        except subprocess.TimeoutExpired:
+            logger.warning(f"xacro processing timed out for {path}")
+            return None
+
+    def _parse_link(
+        self,
+        elem: ET.Element,
+        materials: dict[str, Material],
+        base_path: Path | None,
+    ) -> Link:
+        """Parse a link element."""
+        name = elem.get("name")
+        if not name:
+            raise ValueError("Link missing 'name' attribute")
+
+        inertia = self._parse_link_inertial(elem)
+        visual_geometry, visual_origin, visual_material = self._parse_link_visual(
+            elem, materials, base_path
+        )
+        collision_geometry, collision_origin = self._parse_link_collision(
+            elem, base_path
+        )
+
+        return Link(
+            name=name,
+            inertia=inertia,
+            visual_geometry=visual_geometry,
+            visual_origin=visual_origin,
+            visual_material=visual_material,
+            collision_geometry=collision_geometry,
+            collision_origin=collision_origin,
+        )
+
+    def _parse_link_inertial(self, elem: ET.Element) -> Inertia:
+        """Parse the inertial element of a link."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        inertial_elem = elem.find("inertial")
+        if inertial_elem is not None:
+            return self._parse_inertial(inertial_elem)
+        return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=1.0)
+
+    def _parse_link_visual(
+        self,
+        elem: ET.Element,
+        materials: dict[str, Material],
+        base_path: Path | None,
+    ) -> tuple[Geometry | None, Origin, Material | None]:
+        """Parse the visual element of a link."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        visual_elem = elem.find("visual")
+        if visual_elem is None:
+            return None, Origin(), None
+
+        visual_origin = Origin()
+        origin_elem = visual_elem.find("origin")
+        if origin_elem is not None:
+            visual_origin = self._parse_origin(origin_elem)
+
+        visual_geometry = None
+        geom_elem = visual_elem.find("geometry")
+        if geom_elem is not None:
+            visual_geometry = self._parse_geometry(geom_elem, base_path)
+
+        visual_material = self._parse_visual_material(visual_elem, materials)
+
+        return visual_geometry, visual_origin, visual_material
+
+    def _parse_visual_material(
+        self, visual_elem: ET.Element, materials: dict[str, Material]
+    ) -> Material | None:
+        """Parse material from visual element."""
+        if visual_elem is None:
+            raise ValueError("visual_elem must be provided")
+        mat_elem = visual_elem.find("material")
+        if mat_elem is None:
+            return None
+
+        mat_name = mat_elem.get("name")
+        if mat_name and mat_name in materials:
+            return materials[mat_name]
+        return self._parse_material(mat_elem)
+
+    def _parse_link_collision(
+        self, elem: ET.Element, base_path: Path | None
+    ) -> tuple[Geometry | None, Origin]:
+        """Parse the collision element of a link."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        collision_elem = elem.find("collision")
+        if collision_elem is None:
+            return None, Origin()
+
+        collision_origin = Origin()
+        origin_elem = collision_elem.find("origin")
+        if origin_elem is not None:
+            collision_origin = self._parse_origin(origin_elem)
+
+        collision_geometry = None
+        geom_elem = collision_elem.find("geometry")
+        if geom_elem is not None:
+            collision_geometry = self._parse_geometry(geom_elem, base_path)
+
+        return collision_geometry, collision_origin
+
+    def _parse_joint(self, elem: ET.Element) -> Joint:
+        """Parse a joint element."""
+        name = elem.get("name")
+        if not name:
+            raise ValueError("Joint missing 'name' attribute")
+
+        joint_type = self._parse_joint_type(elem)
+        parent, child = self._parse_joint_parent_child(elem, name)
+        origin = self._parse_joint_origin(elem)
+        axis = self._parse_joint_axis(elem)
+        limits = self._parse_joint_limits(elem)
+        dynamics = self._parse_joint_dynamics(elem)
+
+        return Joint(
+            name=name,
+            joint_type=joint_type,
+            parent=parent,
+            child=child,
+            origin=origin,
+            axis=axis,
+            limits=limits,
+            dynamics=dynamics,
+        )
+
+    def _parse_joint_type(self, elem: ET.Element) -> JointType:
+        """Parse joint type from element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        joint_type_str = elem.get("type", "fixed")
+        try:
+            return JointType(joint_type_str)
+        except ValueError:
+            logger.warning(f"Unknown joint type '{joint_type_str}', using fixed")
+            return JointType.FIXED
+
+    def _parse_joint_parent_child(
+        self, elem: ET.Element, joint_name: str
+    ) -> tuple[str, str]:
+        """Parse parent and child link names from joint element."""
+        parent_elem = elem.find("parent")
+        child_elem = elem.find("child")
+
+        if parent_elem is None or child_elem is None:
+            raise ValueError(f"Joint '{joint_name}' missing parent or child")
+
+        return parent_elem.get("link", ""), child_elem.get("link", "")
+
+    def _parse_joint_origin(self, elem: ET.Element) -> Origin:
+        """Parse origin from joint element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        origin_elem = elem.find("origin")
+        if origin_elem is not None:
+            return self._parse_origin(origin_elem)
+        return Origin()
+
+    def _parse_joint_axis(self, elem: ET.Element) -> tuple[float, ...]:
+        """Parse axis from joint element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        axis_elem = elem.find("axis")
+        if axis_elem is not None:
+            xyz_str = axis_elem.get("xyz", "0 0 1")
+            return tuple(float(v) for v in xyz_str.split())
+        return (0.0, 0.0, 1.0)
+
+    def _parse_joint_limits(self, elem: ET.Element) -> JointLimits | None:
+        """Parse limits from joint element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        limit_elem = elem.find("limit")
+        if limit_elem is not None:
+            return JointLimits(
+                lower=float(limit_elem.get("lower", -math.pi)),
+                upper=float(limit_elem.get("upper", math.pi)),
+                effort=float(limit_elem.get("effort", 1000)),
+                velocity=float(limit_elem.get("velocity", 10)),
+            )
+        return None
+
+    def _parse_joint_dynamics(self, elem: ET.Element) -> JointDynamics:
+        """Parse dynamics from joint element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        dynamics_elem = elem.find("dynamics")
+        if dynamics_elem is not None:
+            return JointDynamics(
+                damping=float(dynamics_elem.get("damping", 0.5)),
+                friction=float(dynamics_elem.get("friction", 0.0)),
+            )
+        return JointDynamics()
+
+    def _parse_inertial(self, elem: ET.Element) -> Inertia:
+        """Parse inertial element."""
+        # Origin (COM)
+        if elem is None:
+            raise ValueError("elem must be provided")
+        com: tuple[float, float, float] = (0.0, 0.0, 0.0)
+        origin_elem = elem.find("origin")
+        if origin_elem is not None:
+            xyz_str = origin_elem.get("xyz", "0 0 0")
+            com = cast(
+                "tuple[float, float, float]",
+                tuple(float(v) for v in xyz_str.split()),
+            )
+
+        # Mass
+        mass = 1.0
+        mass_elem = elem.find("mass")
+        if mass_elem is not None:
+            mass = float(mass_elem.get("value", 1.0))
+
+        # Inertia
+        inertia_elem = elem.find("inertia")
+        if inertia_elem is not None:
+            return Inertia(
+                ixx=float(inertia_elem.get("ixx", 0.1)),
+                iyy=float(inertia_elem.get("iyy", 0.1)),
+                izz=float(inertia_elem.get("izz", 0.1)),
+                ixy=float(inertia_elem.get("ixy", 0.0)),
+                ixz=float(inertia_elem.get("ixz", 0.0)),
+                iyz=float(inertia_elem.get("iyz", 0.0)),
+                mass=mass,
+                center_of_mass=com,
+            )
+        return Inertia(ixx=0.1, iyy=0.1, izz=0.1, mass=mass, center_of_mass=com)
+
+    def _parse_origin(self, elem: ET.Element) -> Origin:
+        """Parse origin element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        xyz_str = elem.get("xyz", "0 0 0")
+        rpy_str = elem.get("rpy", "0 0 0")
+
+        xyz = tuple(float(v) for v in xyz_str.split())
+        rpy = tuple(float(v) for v in rpy_str.split())
+
+        return Origin(xyz=xyz, rpy=rpy)
+
+    def _parse_geometry(self, elem: ET.Element, base_path: Path | None) -> Geometry:
+        """Parse geometry element."""
+        # Box
+        if elem is None:
+            raise ValueError("elem must be provided")
+        box_elem = elem.find("box")
+        if box_elem is not None:
+            size_str = box_elem.get("size", "0.1 0.1 0.1")
+            size = tuple(float(v) for v in size_str.split())
+            return Geometry(geometry_type=GeometryType.BOX, dimensions=size)
+
+        # Cylinder
+        cylinder_elem = elem.find("cylinder")
+        if cylinder_elem is not None:
+            radius = float(cylinder_elem.get("radius", 0.05))
+            length = float(cylinder_elem.get("length", 0.1))
+            return Geometry(
+                geometry_type=GeometryType.CYLINDER, dimensions=(radius, length)
+            )
+
+        # Sphere
+        sphere_elem = elem.find("sphere")
+        if sphere_elem is not None:
+            radius = float(sphere_elem.get("radius", 0.05))
+            return Geometry(geometry_type=GeometryType.SPHERE, dimensions=(radius,))
+
+        # Mesh
+        mesh_elem = elem.find("mesh")
+        if mesh_elem is not None:
+            filename = mesh_elem.get("filename", "")
+            scale_str = mesh_elem.get("scale", "1 1 1")
+            scale = tuple(float(v) for v in scale_str.split())
+
+            # Resolve mesh path
+            if self.resolve_meshes and base_path and filename:
+                try:
+                    resolved = self._resolve_mesh_path(filename, base_path)
+                except ValueError:
+                    resolved = None
+                if resolved:
+                    filename = str(resolved)
+
+            return Geometry(
+                geometry_type=GeometryType.MESH,
+                mesh_filename=filename,
+                mesh_scale=scale,
+            )
+
+        # Default
+        return Geometry(geometry_type=GeometryType.BOX, dimensions=(0.1, 0.1, 0.1))
+
+    def _parse_material(self, elem: ET.Element) -> Material | None:
+        """Parse material element."""
+        if elem is None:
+            raise ValueError("elem must be provided")
+        name = elem.get("name")
+        if not name:
+            return None
+
+        color: tuple[float, float, float, float] = (0.8, 0.8, 0.8, 1.0)
+        color_elem = elem.find("color")
+        if color_elem is not None:
+            rgba_str = color_elem.get("rgba", "0.8 0.8 0.8 1.0")
+            color = cast(
+                "tuple[float, float, float, float]",
+                tuple(float(v) for v in rgba_str.split()),
+            )
+
+        texture = None
+        texture_elem = elem.find("texture")
+        if texture_elem is not None:
+            texture = texture_elem.get("filename")
+
+        return Material(name=name, color=color, texture=texture)
+
+    def _resolve_mesh_path(self, filename: str, base_path: Path) -> Path | None:
+        """Resolve a mesh reference while rejecting unsafe ones.
+
+        ``package://`` URIs are searched in the order a ROS user expects:
+        directories next to the URDF first (so a self-contained model bundle
+        wins), then ``ROS_PACKAGE_PATH``, then catkin (``CMAKE_PREFIX_PATH``,
+        under ``src/``) and colcon (``COLCON_PREFIX_PATH``) workspaces.
+
+        ``filename`` is validated before any lookup, so traversal segments and
+        foreign URI schemes are rejected rather than searched for.
+        """
+        filename = self._validate_mesh_filename(filename)
+        if filename.startswith("package://"):
+            package_path = filename[len("package://") :]
+
+            resolved = self._resolve_package_uri(package_path, base_path)
+            if resolved is not None:
+                return resolved
+
+            logger.warning(
+                f"Could not resolve package URI: {filename}. Searched "
+                f"ROS_PACKAGE_PATH, CMAKE_PREFIX_PATH, COLCON_PREFIX_PATH "
+                f"and directories near {base_path}"
+            )
+            return None
+
+        # Handle relative paths
+        if not Path(filename).is_absolute():
+            candidate = base_path.parent / filename
+            if candidate.exists():
+                return candidate
+
+        return Path(filename) if Path(filename).exists() else None
+
+    def _resolve_package_uri(self, package_path: str, base_path: Path) -> Path | None:
+        """Return the first existing location for a validated package path."""
+        for search_dir in (base_path.parent, base_path.parent.parent):
+            candidate = search_dir / package_path
+            if candidate.exists():
+                return candidate
+
+        for root in self._split_search_path(os.environ.get("ROS_PACKAGE_PATH", "")):
+            candidate = Path(root) / package_path
+            if candidate.exists():
+                return candidate
+
+        # catkin workspaces expose packages under <workspace>/src.
+        for root in self._split_search_path(os.environ.get("CMAKE_PREFIX_PATH", "")):
+            candidate = Path(root) / "src" / package_path
+            if candidate.exists():
+                return candidate
+
+        for root in self._split_search_path(os.environ.get("COLCON_PREFIX_PATH", "")):
+            candidate = Path(root) / package_path
+            if candidate.exists():
+                return candidate
+
+        return None
+
+    @staticmethod
+    def _split_search_path(value: str) -> list[str]:
+        """Split a PATH-style variable, tolerating Windows drive letters.
+
+        ROS publishes these variables colon-separated on every platform, so
+        splitting on ``os.pathsep`` alone drops entries on Windows. Splitting
+        on ``":"`` alone would instead sever ``C:/ws`` into ``C`` and ``/ws``,
+        so a lone drive letter is rejoined with the fragment after it.
+        """
+        if not value:
+            return []
+        fragments = re.split(r"[;:]", value)
+        parts: list[str] = []
+        index = 0
+        while index < len(fragments):
+            piece = fragments[index]
+            following = fragments[index + 1] if index + 1 < len(fragments) else ""
+            if len(piece) == 1 and piece.isalpha() and following[:1] in ("/", "\\"):
+                parts.append(f"{piece}:{following}")
+                index += 2
+                continue
+            parts.append(piece)
+            index += 1
+        return [part.strip() for part in parts if part.strip()]
+
+    @staticmethod
+    def _validate_mesh_filename(filename: str) -> str:
+        """Validate mesh filenames for safe resolution."""
+        if filename is None:
+            raise ValueError("filename must be provided")
+
+        normalized = filename.replace("\\", "/")
+        if not normalized.strip():
+            raise ValueError("Mesh filename must be a non-empty string")
+
+        if normalized.startswith("package://"):
+            package_path = normalized[len("package://") :]
+            if not package_path:
+                raise ValueError(
+                    f"Mesh filename '{filename}' must reference a package-relative asset"  # noqa: E501
+                )
+            if package_path.startswith("/"):
+                raise ValueError(
+                    f"Mesh filename '{filename}' must reference a package-relative asset"  # noqa: E501
+                )
+            if "://" in package_path:
+                raise ValueError(
+                    f"Mesh filename '{filename}' uses an unsupported URI scheme"
+                )
+            if URDFParser._has_windows_drive_prefix(package_path):
+                raise ValueError(
+                    f"Mesh filename '{filename}' uses an unsupported URI scheme"
+                )
+            candidate = PurePosixPath(package_path)  # noqa: F821
+        else:
+            if "://" in normalized:
+                raise ValueError(
+                    f"Mesh filename '{filename}' uses an unsupported URI scheme"
+                )
+            if normalized.startswith("/") or URDFParser._has_windows_drive_prefix(
+                normalized
+            ):
+                raise ValueError(
+                    f"Mesh filename '{filename}' must be relative or package://"
+                )
+            first_segment = normalized.split("/", 1)[0]
+            if ":" in first_segment:
+                raise ValueError(
+                    f"Mesh filename '{filename}' uses an unsupported URI scheme"
+                )
+            candidate = PurePosixPath(normalized)  # noqa: F821
+
+        if not candidate.parts or ".." in candidate.parts:
+            raise ValueError(f"Mesh filename '{filename}' contains path traversal")
+
+        return (
+            f"package://{candidate.as_posix()}"
+            if normalized.startswith("package://")
+            else candidate.as_posix()
+        )
+
+    @staticmethod
+    def _has_windows_drive_prefix(path: str) -> bool:
+        """Return True when a path starts with a Windows drive prefix."""
+        return (
+            len(path) >= 3 and path[0].isalpha() and path[1] == ":" and path[2] == "/"
+        )

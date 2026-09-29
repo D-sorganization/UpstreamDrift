@@ -1,0 +1,269 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "source_revision": "d7e3b0ad5836726f41544ddcdc2bf70c1754e7f6",
+  "source_patch": "qualified kinematic schema and factory under development",
+  "qualification": "surface-proxy-pose-seed-only",
+  "target": {
+    "qualification": "surface-proxy-initial-pose-seed-only",
+    "source_sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+    "frame_index": 0,
+    "time_s": 0,
+    "source_to_model_rotation": [
+      [1, 0, 0],
+      [0, 0, -1],
+      [0, 1, 0]
+    ],
+    "observations": [
+      {
+        "frame": "Hub",
+        "labels": ["BackTop"],
+        "target_m": [
+          0.91724127531051636, 0.094017654657363892, 1.4975920915603638
+        ]
+      },
+      {
+        "frame": "LS",
+        "labels": ["LShoulderBack"],
+        "target_m": [
+          0.96281325817108154, -0.0657489150762558, 1.4865453243255615
+        ]
+      },
+      {
+        "frame": "RS",
+        "labels": ["RShoulderBack"],
+        "target_m": [0.921960711479187, 0.231577530503273, 1.4345051050186157]
+      },
+      {
+        "frame": "LE",
+        "labels": ["LElbowOut"],
+        "target_m": [
+          0.93944096565246582, -0.12975390255451202, 1.1066957712173462
+        ]
+      },
+      {
+        "frame": "RE",
+        "labels": ["RElbowOut"],
+        "target_m": [0.9026530385017395, 0.18232136964797974, 1.02082097530365]
+      },
+      {
+        "frame": "LW",
+        "labels": ["LWristTop"],
+        "target_m": [
+          0.83386313915252686, -0.060262396931648254, 0.86552894115448
+        ]
+      },
+      {
+        "frame": "RW",
+        "labels": ["RWristTop"],
+        "target_m": [
+          0.79413419961929321, 0.0624002106487751, 0.79902416467666626
+        ]
+      },
+      {
+        "frame": "Clubhead",
+        "labels": ["Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3"],
+        "target_m": [
+          0.06739121675491333, -0.030370226362720132, 0.057379845529794693
+        ]
+      }
+    ],
+    "limitations": "Surface markers and club cluster centroid are provisional pose-seed proxies, not calibrated native joint centres or clubhead centre; no marker-fit acceptance is implied."
+  },
+  "initial_residual": [
+    -0.86644127531051629, -1.0546295679472351, -0.84274569691361345,
+    -1.0903625833689432, -1.1266698006023339, -1.0243113984541412,
+    -1.0606440063564058, -1.3315776302843552, -0.39881765465736396,
+    -0.42049384649873289, -0.29682520954116015, -0.16804416397262928,
+    -0.21993925644287507, -0.030796503866871897, -0.15785408143753127,
+    -0.13772703538678133, -0.96966300541336981, -1.0647063529766685,
+    -0.82705701190534264, -0.45269694226683488, -0.42716143543168716,
+    0.07508447562929943, 0.14291787563564462, 0.88148225820070125, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  ],
+  "initial_proxy_rms_m": 0.74923589112454925,
+  "fit_s": 29.3076588,
+  "q": [
+    0.66126536377305112, 0.46769215844596213, 0.858473910486146,
+    -0.49167102347489089, 0.18928221445759644, -0.495361362483913,
+    -0.55201172398312082, 0.24933383832010314, -0.49536136009979265,
+    0.69551249540686133, 1.2180752360862535, 0.037302649795266367,
+    -0.36504518608293668, 0.34041613923292141, -1.8384800469098745,
+    -3.3820189180633475, 0.58479117814443715, -1.7955516355721086,
+    -9.3607901853642872e-5, 0.51854397567936772, 1.21922374229879,
+    -0.13145274868009113, -1.6810802871287123, -0.35197925118592105,
+    1.5892608125332146, -0.591355566248887, -0.55031700569556341
+  ],
+  "coordinate_names": [
+    "TranslationInputX",
+    "TranslationInputY",
+    "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "SpineInputX",
+    "SpineInputY",
+    "TorsoInput",
+    "LEInput",
+    "LFInput",
+    "LScapInputX",
+    "LScapInputY",
+    "LSInputX",
+    "LSInputY",
+    "LSInputZ",
+    "LWInputX",
+    "LWInputY",
+    "REInput",
+    "RFInput",
+    "RScapInputX",
+    "RScapInputY",
+    "RSInputX",
+    "RSInputY",
+    "RSInputZ",
+    "RWInputX",
+    "RWInputY"
+  ],
+  "frame_positions_m": [
+    [0.730084562745451, -0.035671038449268166, 1.3363505739053092],
+    [0.71861469625005092, -0.033759809520738912, 1.2765098606194496],
+    [0.96118186562917041, -0.15281812268365069, 1.1401899422043029],
+    [0.89151872123210485, -0.071103094159864946, 0.99847706196376029],
+    [0.86786807579302772, 0.10137641664501706, 1.4921462227034963],
+    [0.98092370257911621, -0.12062285863622385, 1.4426412024872752],
+    [0.82185557683503918, 0.010611934363920807, 0.85676418172321744],
+    [0.87543527351408079, 0.163496882853436, 1.1037916862482204],
+    [0.82223404434000269, 0.086071271194256838, 0.95283558708833493],
+    [0.86786807579302783, 0.10137641664501713, 1.4921462227034963],
+    [0.96666455251206551, 0.29622104149319461, 1.362566793951562],
+    [0.76903281516592459, 0.0086456595350776523, 0.80187948792844943],
+    [0.86786807579302783, 0.10137641664501711, 1.4921462227034963],
+    [0.0935011585356178, -0.024349566205594551, 0.064849328458274069],
+    [0.81312463476537777, 0.0024377028209475395, 0.81256324746546582]
+  ],
+  "frames": [
+    {
+      "name": "Spine",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Transform\nSensor/F",
+      "source": "SpineLogs.GlobalPosition"
+    },
+    {
+      "name": "Torso",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Transform\nSensor/F",
+      "source": "TorsoLogs.GlobalPosition"
+    },
+    {
+      "name": "LE",
+      "port": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Transform\nSensor/F",
+      "source": "LELogs.LEJoint.GlobalPosition"
+    },
+    {
+      "name": "LF",
+      "port": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Transform\nSensor/F",
+      "source": "LFLogs.GlobalPosition"
+    },
+    {
+      "name": "LScap",
+      "port": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Transform\nSensor/F",
+      "source": "LScapLogs.GlobalPosition"
+    },
+    {
+      "name": "LS",
+      "port": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Transform\nSensor/F",
+      "source": "LSLogs.GlobalPosition"
+    },
+    {
+      "name": "LW",
+      "port": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Transform\nSensor/F",
+      "source": "LWLogs.LWJoint.GlobalPosition"
+    },
+    {
+      "name": "RE",
+      "port": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Transform\nSensor/F",
+      "source": "RELogs.REJoint.GlobalPosition"
+    },
+    {
+      "name": "RF",
+      "port": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Transform\nSensor/F",
+      "source": "RFLogs.GlobalPosition"
+    },
+    {
+      "name": "RScap",
+      "port": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Transform\nSensor/F",
+      "source": "RScapLogs.GlobalPosition"
+    },
+    {
+      "name": "RS",
+      "port": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Transform\nSensor/F",
+      "source": "RSLogs.GlobalPosition"
+    },
+    {
+      "name": "RW",
+      "port": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Transform\nSensor/F",
+      "source": "RWLogs.RWJoint.GlobalPosition"
+    },
+    {
+      "name": "Hub",
+      "port": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Transform\nSensor/F",
+      "source": "HipLogs.HUBGlobalPosition"
+    },
+    {
+      "name": "Clubhead",
+      "port": "GolfSwing3D_Kinetic/Clubhead/Transform\nSensor10/F",
+      "source": "ClubLogs.CHGlobalPosition"
+    },
+    {
+      "name": "Grip",
+      "port": "GolfSwing3D_Kinetic/Midpoint/Transform\nSensor8/F",
+      "source": "MidpointCalcsLogs.MPGlobalPosition"
+    }
+  ],
+  "proxy_errors_m": [
+    [-0.049373199517488531, 0.0073587619876532145, -0.0054458688568674862],
+    [0.018110444408034665, -0.054873943559968053, -0.043904121838286292],
+    [0.0447038410328785, 0.0646435109899216, -0.071938311067053728],
+    [0.021740899976704586, -0.023064220129138668, 0.033494170986956728],
+    [-0.02721776498765871, -0.018824486794543738, 0.082970710944570536],
+    [-0.012007562317487674, 0.070874331295569054, -0.0087647594312625365],
+    [-0.025101384453368625, -0.053754551113697452, 0.0028553232517831706],
+    [0.026109941780704471, 0.0060206601571255805, 0.0074694829284793762]
+  ],
+  "final_proxy_rms_m": 0.040203694121293453,
+  "exitflag": 2,
+  "optimizer": {
+    "firstorderopt": 3.5919937369325972,
+    "iterations": 93,
+    "funcCount": 2068,
+    "cgiterations": 0,
+    "algorithm": "trust-region-reflective",
+    "stepsize": 4.6220620589228675e-8,
+    "message": "Local minimum possible.\nlsqnonlin stopped because the size of the current step is less than\nthe value of the step size tolerance.\n\n<stopping criteria details>\n\nOptimization stopped because the norm of the current step, 4.622062e-08,\nis less than options.StepTolerance = 1.000000e-07.",
+    "bestfeasible": [],
+    "constrviolation": []
+  },
+  "solver_flag": -1,
+  "target_flags": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "resnorm": 0.039130509543607812,
+  "status": "seed-computed"
+}

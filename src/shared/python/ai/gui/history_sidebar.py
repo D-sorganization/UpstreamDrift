@@ -1,0 +1,454 @@
+"""Sidebar widget for chat history navigation."""
+
+from datetime import datetime
+from typing import Any
+
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.shared.python.ai.gui.session_manager import ChatSessionManager
+
+
+class SessionListWidgetItem(QListWidgetItem):
+    """Custom list item to hold session metadata."""
+
+    def __init__(self, session_data: dict[str, Any]) -> None:
+        super().__init__()
+        self.session_data = session_data
+
+        # Format the text
+        title = session_data.get("title", "New Chat")
+        dt = session_data.get("timestamp")
+
+        if dt and dt != datetime.min:
+            time_str = dt.strftime("%Y-%m-%d %H:%M")
+        else:
+            time_str = "Unknown"
+
+        self.setText(f"{title}\n{time_str}")
+        self.setToolTip(session_data.get("snippet", ""))
+
+
+class SessionListItemWidget(QFrame):
+    """Readable wrapped chat-history row with icon-only actions."""
+
+    def __init__(
+        self,
+        session_data: dict[str, Any],
+        *,
+        archived: bool,
+        on_archive_toggle: Any,
+        on_delete: Any,
+        colors: dict[str, str],
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.session_data = session_data
+        self._colors = colors
+        self._archive_toggle_btn: QToolButton | None = None
+        self._delete_btn: QToolButton | None = None
+        self._setup_ui(
+            archived=archived,
+            on_archive_toggle=on_archive_toggle,
+            on_delete=on_delete,
+        )
+
+    def _setup_ui(
+        self,
+        *,
+        archived: bool,
+        on_archive_toggle: Any,
+        on_delete: Any,
+    ) -> None:
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(8, 7, 8, 7)
+        layout.setSpacing(8)
+
+        text_layout = QVBoxLayout()
+        text_layout.setContentsMargins(0, 0, 0, 0)
+        text_layout.setSpacing(3)
+
+        title = str(self.session_data.get("title") or "New Chat")
+        snippet = str(self.session_data.get("snippet") or "")
+        dt = self.session_data.get("timestamp")
+        if dt and dt != datetime.min:
+            time_str = dt.strftime("%Y-%m-%d %H:%M")
+        else:
+            time_str = "Unknown"
+
+        self._title_label = QLabel(title)
+        self._title_label.setWordWrap(True)
+        self._title_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        text_layout.addWidget(self._title_label)
+
+        self._meta_label = QLabel(time_str)
+        text_layout.addWidget(self._meta_label)
+
+        self._snippet_label = QLabel(snippet)
+        self._snippet_label.setWordWrap(True)
+        self._snippet_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        text_layout.addWidget(self._snippet_label)
+
+        layout.addLayout(text_layout, stretch=1)
+
+        actions = QVBoxLayout()
+        actions.setContentsMargins(0, 0, 0, 0)
+        actions.setSpacing(4)
+        self._archive_toggle_btn = self._make_icon_button(
+            "↩" if archived else "⇣",
+            "Restore conversation" if archived else "Archive conversation",
+            on_archive_toggle,
+        )
+        self._delete_btn = self._make_icon_button("×", "Delete conversation", on_delete)
+        actions.addWidget(self._archive_toggle_btn)
+        actions.addWidget(self._delete_btn)
+        actions.addStretch()
+        layout.addLayout(actions)
+
+        self._apply_style()
+        self.setMinimumHeight(86)
+
+    def _make_icon_button(self, text: str, tooltip: str, callback: Any) -> QToolButton:
+        button = QToolButton(self)
+        button.setText(text)
+        button.setToolTip(tooltip)
+        button.setAutoRaise(True)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.setFixedSize(24, 24)
+        button.clicked.connect(callback)
+        return button
+
+    def _apply_style(self) -> None:
+        self.setStyleSheet(f"""
+            SessionListItemWidget {{
+                background: transparent;
+                border: none;
+            }}
+            QLabel {{
+                background: transparent;
+                color: {self._colors["text_color"]};
+            }}
+            QLabel#meta {{
+                color: {self._colors["text_muted"]};
+            }}
+            QToolButton {{
+                background: transparent;
+                border: none;
+                color: {self._colors["text_muted"]};
+                font-size: 16px;
+                padding: 0;
+            }}
+            QToolButton:hover {{
+                color: {self._colors["accent"]};
+            }}
+        """)
+        self._title_label.setStyleSheet("font-weight: 600;")
+        self._meta_label.setObjectName("meta")
+        self._meta_label.setStyleSheet(f"color: {self._colors['text_muted']};")
+        self._snippet_label.setStyleSheet(f"color: {self._colors['text_muted']};")
+
+
+class ChatHistorySidebar(QWidget):
+    """Sidebar for managing chat sessions (multi-conversation, archive, delete)."""
+
+    session_selected = pyqtSignal(str)  # Emits session ID
+    new_chat_requested = pyqtSignal()
+    memory_sync_requested = pyqtSignal()
+
+    def __init__(
+        self, session_manager: ChatSessionManager, parent: QWidget | None = None
+    ) -> None:
+        super().__init__(parent)
+        self._collapsed: bool = False
+        self._manager = session_manager
+        self._manager.sessions_updated.connect(self.refresh_lists)
+        self.refresh_theme()
+        self._setup_ui()
+        self.refresh_theme()
+        self.refresh_lists()
+
+    @property
+    def collapsed(self) -> bool:
+        """Return whether the sidebar is in compact/collapsed mode."""
+        return self._collapsed
+
+    def set_collapsed(self, collapsed: bool) -> None:
+        """Switch between full and collapsed state.
+
+        Hides the main UI components when collapsed.
+        """
+        self._collapsed = collapsed
+        self._header.setVisible(not collapsed)
+        self._tabs.setVisible(not collapsed)
+        self.updateGeometry()
+
+    def minimumSizeHint(self) -> QSize:
+        """Override minimumSizeHint to allow compact sizes when collapsed."""
+        if self._collapsed:
+            return QSize(56, 0)
+        return QSize(320, 0)
+
+    def refresh_theme(self) -> None:
+        """Dynamically update colors based on the current theme."""
+        try:
+            from shared.python.theme.theme_manager import get_theme_manager
+
+            colors = get_theme_manager().get_current_colors()
+            bg_base = colors.get("bg", "#1e1e1e")
+            bg_alt = colors.get("group_bg", "#252526")
+            text_color = colors.get("text", "#e0e0e0")
+            text_muted = colors.get("text_secondary", "#888888")
+            accent = colors.get("accent", "#FF8800")
+            border = colors.get("border", "#3c3c3c")
+        except ImportError:
+            bg_base = "#1e1e1e"
+            bg_alt = "#252526"
+            text_color = "#e0e0e0"
+            text_muted = "#888888"
+            accent = "#FF8800"
+            border = "#3c3c3c"
+
+        self._theme_colors = {
+            "bg_base": bg_base,
+            "bg_alt": bg_alt,
+            "text_color": text_color,
+            "text_muted": text_muted,
+            "accent": accent,
+            "border": border,
+        }
+
+        if hasattr(self, "_header"):
+            self._header.setStyleSheet(f"""
+                QFrame {{
+                    background-color: {self._theme_colors["bg_alt"]};
+                    border-bottom: 1px solid {self._theme_colors["border"]};
+                }}
+            """)
+        if hasattr(self, "_title_label"):
+            self._title_label.setStyleSheet(
+                f"font-weight: bold; color: {self._theme_colors['text_color']};"
+            )
+        if hasattr(self, "_new_btn"):
+            self._new_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: transparent;
+                    color: {self._theme_colors["accent"]};
+                    border: 1px solid {self._theme_colors["accent"]};
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    font-weight: bold;
+                }}
+                QPushButton:hover {{
+                    background-color: {self._theme_colors["accent"]};
+                    color: {self._theme_colors["bg_base"]};
+                }}
+            """)
+        if hasattr(self, "_sync_memory_btn"):
+            self._sync_memory_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: transparent;
+                    color: {self._theme_colors["text_color"]};
+                    border: 1px solid {self._theme_colors["border"]};
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                }}
+                QPushButton:hover {{
+                    border-color: {self._theme_colors["accent"]};
+                    color: {self._theme_colors["accent"]};
+                }}
+            """)
+        if hasattr(self, "_tabs"):
+            self._tabs.setStyleSheet(f"""
+                QTabWidget::pane {{ border: none; }}
+                QTabBar::tab {{
+                    background: {self._theme_colors["bg_alt"]};
+                    color: {self._theme_colors["text_muted"]};
+                    padding: 6px 12px;
+                    border: 1px solid {self._theme_colors["border"]};
+                    border-bottom: none;
+                    border-top-left-radius: 4px;
+                    border-top-right-radius: 4px;
+                }}
+                QTabBar::tab:selected {{
+                    background: {self._theme_colors["bg_base"]};
+                    color: {self._theme_colors["accent"]};
+                    font-weight: bold;
+                }}
+            """)
+
+        if hasattr(self, "_active_list"):
+            self._apply_list_style(self._active_list)
+        if hasattr(self, "_archive_list"):
+            self._apply_list_style(self._archive_list)
+
+    def _apply_list_style(self, list_widget: QListWidget) -> None:
+        list_widget.setStyleSheet(f"""
+            QListWidget {{
+                background-color: {self._theme_colors["bg_base"]};
+                color: {self._theme_colors["text_color"]};
+                border: none;
+                outline: 0;
+            }}
+            QListWidget::item {{
+                border-bottom: 1px solid {self._theme_colors["border"]};
+                padding: 8px;
+            }}
+            QListWidget::item:selected {{
+                background-color: transparent;
+                border-left: 3px solid {self._theme_colors["accent"]};
+            }}
+            QListWidget::item:hover:!selected {{
+                background-color: {self._theme_colors["bg_alt"]};
+            }}
+        """)
+
+    def _setup_ui(self) -> None:
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # Header with New Chat button
+        self._header = QFrame()
+        header_layout = QHBoxLayout(self._header)
+        header_layout.setContentsMargins(8, 8, 8, 8)
+
+        self._title_label = QLabel("Conversations")
+        header_layout.addWidget(self._title_label)
+
+        header_layout.addStretch()
+
+        self._new_btn = QPushButton("⊕ New")
+        self._new_btn.setToolTip("Start a new conversation")
+        self._new_btn.clicked.connect(self.new_chat_requested.emit)
+        header_layout.addWidget(self._new_btn)
+
+        self._sync_memory_btn = QPushButton("Sync")
+        self._sync_memory_btn.setToolTip(
+            "Extract explicit preferences from archived conversations"
+        )
+        self._sync_memory_btn.clicked.connect(self.memory_sync_requested.emit)
+        header_layout.addWidget(self._sync_memory_btn)
+
+        layout.addWidget(self._header)
+
+        # Tabs for Active / Archived
+        self._tabs = QTabWidget()
+
+        # Active List
+        self._active_list = QListWidget()
+        self._setup_list_widget(self._active_list)
+        self._tabs.addTab(self._active_list, "Active")
+
+        # Archived List
+        self._archive_list = QListWidget()
+        self._setup_list_widget(self._archive_list)
+        self._tabs.addTab(self._archive_list, "Archived")
+
+        layout.addWidget(self._tabs)
+
+    def _setup_list_widget(self, list_widget: QListWidget) -> None:
+        self._apply_list_style(list_widget)
+        list_widget.setWordWrap(True)
+        list_widget.setUniformItemSizes(False)
+        list_widget.itemClicked.connect(self._on_item_clicked)
+        # Context menu for right click
+        list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        list_widget.customContextMenuRequested.connect(
+            lambda pos, lw=list_widget: self._show_context_menu(pos, lw)
+        )
+
+    def refresh_lists(self) -> None:
+        """Reload sessions from the manager and update UI."""
+        self._active_list.clear()
+        self._archive_list.clear()
+
+        sessions = self._manager.list_sessions()
+        for s in sessions:
+            item = SessionListWidgetItem(s)
+            is_archived = bool(s.get("archived", False))
+            session_id = str(s["id"])
+
+            def on_archive(
+                _c: bool = False,
+                sid: str = session_id,
+                arc: bool = is_archived,
+            ) -> None:
+                self._manager.archive_session(sid, not arc)
+
+            row = SessionListItemWidget(
+                s,
+                archived=is_archived,
+                on_archive_toggle=on_archive,
+                on_delete=lambda _checked=False, sid=session_id: self._confirm_delete(
+                    sid
+                ),
+                colors=self._theme_colors,
+            )
+            item.setSizeHint(QSize(220, max(92, row.sizeHint().height())))
+            if s.get("archived", False):
+                self._archive_list.addItem(item)
+                self._archive_list.setItemWidget(item, row)
+            else:
+                self._active_list.addItem(item)
+                self._active_list.setItemWidget(item, row)
+
+    def _on_item_clicked(self, item: QListWidgetItem) -> None:
+        if isinstance(item, SessionListWidgetItem):
+            self.session_selected.emit(item.session_data["id"])
+
+    def _show_context_menu(self, pos: Any, list_widget: QListWidget) -> None:
+        item = list_widget.itemAt(pos)
+        if not item or not isinstance(item, SessionListWidgetItem):
+            return
+
+        menu = QMenu(self)
+        session_id = item.session_data["id"]
+        is_archived = item.session_data.get("archived", False)
+
+        if is_archived:
+            restore_action = menu.addAction("Restore")
+            if restore_action is not None:
+                restore_action.triggered.connect(
+                    lambda: self._manager.archive_session(session_id, False)
+                )
+        else:
+            archive_action = menu.addAction("Archive")
+            if archive_action is not None:
+                archive_action.triggered.connect(
+                    lambda: self._manager.archive_session(session_id, True)
+                )
+
+        menu.addSeparator()
+        delete_action = menu.addAction("Delete Permanently")
+        if delete_action is not None:
+            delete_action.triggered.connect(lambda: self._confirm_delete(session_id))
+
+        menu.exec(list_widget.mapToGlobal(pos))
+
+    def _confirm_delete(self, session_id: str) -> None:
+        reply = QMessageBox.question(
+            self,
+            "Confirm Delete",
+            "Are you sure you want to permanently delete this conversation?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            self._manager.delete_session(session_id)

@@ -1,0 +1,663 @@
+"""Tool Registry for AI-callable capabilities.
+
+This module provides a registry of tools that AI assistants can invoke
+to interact with the Golf Modeling Suite. Each tool is self-describing
+with JSON Schema parameters and validation.
+
+The registry follows the JSON-RPC 2.0 convention for tool definitions,
+making it compatible with OpenAI, Anthropic, and other providers.
+
+Example:
+    >>> from shared.python.ai.tool_registry import ToolRegistry
+    >>> registry = ToolRegistry()
+    >>> @registry.register("load_c3d", "Load a C3D motion capture file")
+    ... def load_c3d(file_path: str) -> dict:
+    ...     # Implementation
+    ...     ...
+"""
+
+from __future__ import annotations
+
+import functools
+import inspect
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from enum import Enum, auto
+from typing import Any, get_type_hints
+
+from src.shared.python.ai.exceptions import ToolExecutionError
+from src.shared.python.ai.types import ToolResult
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+# A dispatcher runs a zero-arg thunk on the GUI thread and returns its
+# result. The concrete Qt implementation lives in the GUI layer
+# (``ai/gui``); this module only depends on the call signature, so it
+# stays importable in headless contexts.
+MainThreadDispatcher = Callable[[Callable[[], ToolResult]], ToolResult]
+
+
+class ToolCategory(Enum):
+    """Categories for organizing tools in the UI.
+
+    Tools are grouped by category to help users discover
+    relevant functionality.
+    """
+
+    DATA_LOADING = auto()  # C3D, motion capture, etc.
+    SIMULATION = auto()  # Physics engine operations
+    ANALYSIS = auto()  # Inverse dynamics, energy, etc.
+    VISUALIZATION = auto()  # Plotting, rendering
+    VALIDATION = auto()  # Cross-engine checks
+    CONFIGURATION = auto()  # Settings, preferences
+    EDUCATIONAL = auto()  # Learning content
+
+
+@dataclass
+class ToolParameter:
+    """Definition of a single tool parameter.
+
+    Attributes:
+        name: Parameter name.
+        description: What the parameter is for.
+        type: JSON Schema type (string, number, boolean, array, object).
+        required: Whether the parameter is required.
+        default: Default value if not provided.
+        enum: List of allowed values (for enum parameters).
+    """
+
+    name: str
+    description: str
+    type: str = "string"
+    required: bool = True
+    default: Any = None
+    enum: list[str] | None = None
+
+    def to_json_schema(self) -> dict[str, Any]:
+        """Convert to JSON Schema format.
+
+        Returns:
+            JSON Schema property definition.
+        """
+        schema: dict[str, Any] = {
+            "type": self.type,
+            "description": self.description,
+        }
+        if self.enum:
+            schema["enum"] = self.enum
+        if self.default is not None:
+            schema["default"] = self.default
+        return schema
+
+
+@dataclass
+class Tool:
+    """A registered tool that AI can invoke.
+
+    Attributes:
+        name: Unique tool identifier (snake_case).
+        description: What the tool does (AI-consumable, <500 chars).
+        handler: Callable that executes the tool.
+        parameters: List of parameter definitions.
+        category: Tool category for UI organization.
+        requires_confirmation: Whether user must confirm before execution.
+        expertise_level: Minimum expertise level to see this tool.
+        examples: Example invocations for few-shot learning.
+    """
+
+    name: str
+    description: str
+    handler: Callable[..., Any]
+    parameters: list[ToolParameter] = field(default_factory=list)
+    category: ToolCategory = ToolCategory.ANALYSIS
+    requires_confirmation: bool = False
+    expertise_level: int = 1  # 1=beginner, 4=expert
+    examples: list[dict[str, Any]] = field(default_factory=list)
+    # When True, the handler mutates Qt widgets (or otherwise requires the
+    # GUI thread). The chat runs tools on a background ``StreamWorker``
+    # thread, so such a handler must be marshalled onto the GUI thread via
+    # ``ToolRegistry``'s registered main-thread dispatcher. Plain compute /
+    # IO tools leave this False so they keep running off the UI thread and
+    # never block it.
+    requires_main_thread: bool = False
+
+    def to_json_schema(self) -> dict[str, Any]:
+        """Convert to JSON Schema for AI providers.
+
+        Returns:
+            Complete JSON Schema tool definition.
+        """
+        properties = {}
+        required = []
+
+        for param in self.parameters:
+            properties[param.name] = param.to_json_schema()
+            if param.required:
+                required.append(param.name)
+
+        return {
+            "name": self.name,
+            "description": self.description,
+            "parameters": {
+                "type": "object",
+                "properties": properties,
+                "required": required,
+            },
+        }
+
+    def to_openai_format(self) -> dict[str, Any]:
+        """Convert to OpenAI function calling format.
+
+        Returns:
+            OpenAI-compatible function definition.
+        """
+        schema = self.to_json_schema()
+        return {
+            "type": "function",
+            "function": schema,
+        }
+
+    def to_anthropic_format(self) -> dict[str, Any]:
+        """Convert to Anthropic tool format.
+
+        Returns:
+            Anthropic-compatible tool definition.
+        """
+        schema = self.to_json_schema()
+        return {
+            "name": schema["name"],
+            "description": schema["description"],
+            "input_schema": schema["parameters"],
+        }
+
+    def validate_arguments(self, arguments: dict[str, Any]) -> list[str]:
+        """Validate arguments against parameter definitions.
+
+        Args:
+            arguments: Arguments to validate.
+
+        Returns:
+            List of validation error messages (empty if valid).
+        """
+        if arguments is None:
+            raise ValueError("arguments must be provided")
+        if arguments is None:
+            raise ValueError("arguments must be provided")
+        errors: list[str] = []
+
+        # Check required parameters
+        for param in self.parameters:
+            if param.required and param.name not in arguments:
+                errors.append(f"Missing required parameter: {param.name}")
+
+        # Check unknown parameters
+        known_params = {p.name for p in self.parameters}
+        for arg_name in arguments:
+            if arg_name not in known_params:
+                errors.append(f"Unknown parameter: {arg_name}")
+
+        # Check enum constraints
+        for param in self.parameters:
+            if (
+                param.enum
+                and param.name in arguments
+                and arguments[param.name] not in param.enum
+            ):
+                errors.append(
+                    f"Invalid value for {param.name}: {arguments[param.name]}. "
+                    f"Must be one of: {param.enum}"
+                )
+
+        return errors
+
+    def execute(self, arguments: dict[str, Any]) -> ToolResult:
+        """Execute the tool with given arguments.
+
+        Args:
+            arguments: Arguments to pass to the handler.
+
+        Returns:
+            ToolResult with execution outcome.
+        """
+        if arguments is None:
+            raise ValueError("arguments must be provided")
+        if arguments is None:
+            raise ValueError("arguments must be provided")
+        import time
+
+        start_time = time.perf_counter()
+
+        # Validate arguments
+        errors = self.validate_arguments(arguments)
+        if errors:
+            return ToolResult(
+                tool_call_id="",
+                success=False,
+                error="; ".join(errors),
+                execution_time=time.perf_counter() - start_time,
+            )
+
+        # Execute handler
+        try:
+            result = self.handler(**arguments)
+            return ToolResult(
+                tool_call_id="",
+                success=True,
+                result=result,
+                execution_time=time.perf_counter() - start_time,
+            )
+        except (RuntimeError, ValueError, OSError) as e:
+            logger.exception("Tool execution failed: %s", self.name)
+            return ToolResult(
+                tool_call_id="",
+                success=False,
+                error=str(e),
+                execution_time=time.perf_counter() - start_time,
+            )
+
+
+class ToolRegistry:
+    """Registry of all AI-callable tools.
+
+    Provides registration, discovery, and execution of tools
+    that AI assistants can invoke.
+
+    Example:
+        >>> registry = ToolRegistry()
+        >>> @registry.register("add", "Add two numbers")
+        ... def add(a: int, b: int) -> int:
+        ...     return a + b
+        >>> result = registry.execute("add", {"a": 1, "b": 2})
+        >>> result.result
+        3
+    """
+
+    def __init__(self) -> None:
+        """Initialize empty tool registry."""
+        self._tools: dict[str, Tool] = {}
+        # Optional callable that runs a thunk on the GUI thread and returns
+        # its result. Installed by the GUI layer (e.g. AIAssistantPanel)
+        # when a Qt event loop exists; left None in headless contexts.
+        self._main_thread_dispatcher: MainThreadDispatcher | None = None
+        logger.info("Initialized ToolRegistry")
+
+    def set_main_thread_dispatcher(
+        self, dispatcher: MainThreadDispatcher | None
+    ) -> None:
+        """Register (or clear) the GUI-thread dispatcher for tool execution.
+
+        Tools flagged ``requires_main_thread`` are executed through this
+        dispatcher so their Qt-widget mutations happen on the GUI thread,
+        even though the chat invokes tools from a background worker thread.
+
+        Args:
+            dispatcher: A callable taking a zero-arg thunk and returning the
+                thunk's result after running it on the GUI thread, or
+                ``None`` to clear (tools then run inline on the caller's
+                thread — correct for headless use).
+
+        Raises:
+            TypeError: If ``dispatcher`` is neither callable nor ``None``.
+        """
+        if dispatcher is not None and not callable(dispatcher):
+            raise TypeError("dispatcher must be callable or None")
+        self._main_thread_dispatcher = dispatcher
+
+    def register(
+        self,
+        name: str,
+        description: str,
+        category: ToolCategory = ToolCategory.ANALYSIS,
+        requires_confirmation: bool = False,
+        requires_main_thread: bool = False,
+        expertise_level: int = 1,
+        examples: list[dict[str, Any]] | None = None,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        """Decorator to register a function as a tool.
+
+        Args:
+            name: Unique tool identifier.
+            description: What the tool does.
+            category: Tool category.
+            requires_confirmation: Whether to confirm before execution.
+            requires_main_thread: Whether to execute through the registered
+                main-thread dispatcher.
+            expertise_level: Minimum expertise level (1-4).
+            examples: Example invocations.
+
+        Returns:
+            Decorator function.
+
+        Example:
+            >>> @registry.register("load_c3d", "Load C3D file")
+            ... def load_c3d(file_path: str) -> dict:
+            ...     ...
+        """
+
+        if name is None:
+            raise ValueError("name must be provided")
+        if name is None:
+            raise ValueError("name must be provided")
+
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+            """Register the decorated function as a tool in the registry."""
+            # Extract parameters from function signature
+            parameters = self._extract_parameters(func)
+
+            tool = Tool(
+                name=name,
+                description=description,
+                handler=func,
+                parameters=parameters,
+                category=category,
+                requires_confirmation=requires_confirmation,
+                requires_main_thread=requires_main_thread,
+                expertise_level=expertise_level,
+                examples=examples or [],
+            )
+
+            self._tools[name] = tool
+            logger.debug("Registered tool: %s", name)
+            return func
+
+        return decorator
+
+    def register_tool(self, tool: Tool) -> None:
+        """Register a pre-built Tool object.
+
+        Args:
+            tool: Tool to register.
+        """
+        if tool is None:
+            raise ValueError("tool must be provided")
+        if tool is None:
+            raise ValueError("tool must be provided")
+        self._tools[tool.name] = tool
+        logger.debug("Registered tool: %s", tool.name)
+
+    def _extract_parameters(self, func: Callable[..., Any]) -> list[ToolParameter]:
+        """Extract parameter definitions from function signature.
+
+        Uses type hints and docstrings to build parameter metadata.
+
+        Args:
+            func: Function to extract parameters from.
+
+        Returns:
+            List of ToolParameter definitions.
+        """
+        if func is None:
+            raise ValueError("func must be provided")
+        if func is None:
+            raise ValueError("func must be provided")
+        parameters: list[ToolParameter] = []
+        sig = inspect.signature(func)
+
+        # Try to get type hints
+        try:
+            hints = get_type_hints(func)
+        except (RuntimeError, ValueError, OSError):
+            hints = {}
+
+        # Extract parameter info
+        for param_name, param in sig.parameters.items():
+            # Skip self/cls
+            if param_name in ("self", "cls"):
+                continue
+
+            # Determine type
+            json_type = "string"  # default
+            if param_name in hints:
+                hint = hints[param_name]
+                json_type = self._python_type_to_json(hint)
+
+            # Check if required
+            required = param.default is inspect.Parameter.empty
+
+            # Get default value
+            default = None if required else param.default
+
+            # Create parameter definition
+            parameters.append(
+                ToolParameter(
+                    name=param_name,
+                    description=f"Parameter: {param_name}",  # Enhanced by docstring
+                    type=json_type,
+                    required=required,
+                    default=default,
+                )
+            )
+
+        return parameters
+
+    def _python_type_to_json(self, python_type: type) -> str:
+        """Convert Python type to JSON Schema type.
+
+        Args:
+            python_type: Python type annotation.
+
+        Returns:
+            JSON Schema type string.
+        """
+        if python_type is None:
+            raise ValueError("python_type must be provided")
+        if python_type is None:
+            raise ValueError("python_type must be provided")
+        type_mapping = {
+            str: "string",
+            int: "integer",
+            float: "number",
+            bool: "boolean",
+            list: "array",
+            dict: "object",
+        }
+
+        # Handle basic types
+        if python_type in type_mapping:
+            return type_mapping[python_type]
+
+        # Handle Optional, Union, etc.
+        origin = getattr(python_type, "__origin__", None)
+        if origin is list:
+            return "array"
+        if origin is dict:
+            return "object"
+
+        return "string"
+
+    def get_tool(self, name: str) -> Tool | None:
+        """Get a tool by name.
+
+        Args:
+            name: Tool name.
+
+        Returns:
+            Tool if found, None otherwise.
+        """
+        return self._tools.get(name)
+
+    def list_tools(
+        self,
+        category: ToolCategory | None = None,
+        max_expertise: int = 4,
+    ) -> list[Tool]:
+        """List available tools.
+
+        Args:
+            category: Filter by category (None for all).
+            max_expertise: Maximum expertise level to include.
+
+        Returns:
+            List of matching tools.
+        """
+        if max_expertise is None:
+            raise ValueError("max_expertise must be provided")
+        if max_expertise is None:
+            raise ValueError("max_expertise must be provided")
+        tools = list(self._tools.values())
+
+        if category is not None:
+            tools = [t for t in tools if t.category == category]
+
+        tools = [t for t in tools if t.expertise_level <= max_expertise]
+
+        return sorted(tools, key=lambda t: t.name)
+
+    def get_tools_for_provider(
+        self,
+        provider_format: str = "openai",
+        max_expertise: int = 4,
+    ) -> list[dict[str, Any]]:
+        """Get tools in provider-specific format.
+
+        Args:
+            provider_format: "openai" or "anthropic".
+            max_expertise: Maximum expertise level to include.
+
+        Returns:
+            List of tool definitions in provider format.
+        """
+        if provider_format is None:
+            raise ValueError("provider_format must be provided")
+        if provider_format is None:
+            raise ValueError("provider_format must be provided")
+        tools = self.list_tools(max_expertise=max_expertise)
+
+        if provider_format == "openai":
+            return [t.to_openai_format() for t in tools]
+        if provider_format == "anthropic":
+            return [t.to_anthropic_format() for t in tools]
+        return [t.to_json_schema() for t in tools]
+
+    def execute(
+        self,
+        name: str,
+        arguments: dict[str, Any],
+        tool_call_id: str = "",
+    ) -> ToolResult:
+        """Execute a tool by name.
+
+        Args:
+            name: Tool name to execute.
+            arguments: Arguments to pass.
+            tool_call_id: ID linking to the AI's tool call.
+
+        Returns:
+            ToolResult with execution outcome.
+
+        Raises:
+            ToolExecutionError: If tool not found.
+        """
+        if name is None:
+            raise ValueError("name must be provided")
+        if name is None:
+            raise ValueError("name must be provided")
+        tool = self.get_tool(name)
+        if tool is None:
+            raise ToolExecutionError(
+                f"Tool not found: {name}",
+                tool_name=name,
+                parameters=arguments,
+            )
+
+        if tool.requires_main_thread and self._main_thread_dispatcher is not None:
+            # Marshal Qt-touching handlers onto the GUI thread. The
+            # dispatcher short-circuits to an inline call when already on
+            # the GUI thread, so this is safe regardless of caller thread.
+            result = self._main_thread_dispatcher(lambda: tool.execute(arguments))
+        else:
+            result = tool.execute(arguments)
+        result.tool_call_id = tool_call_id
+        return result
+
+    def __len__(self) -> int:
+        """Return number of registered tools."""
+        return len(self._tools)
+
+    def __contains__(self, name: str) -> bool:
+        """Check if a tool is registered."""
+        return name in self._tools
+
+    async def refresh(self, mcp_pool: Any | None = None) -> int:
+        """Re-query an ``McpClientPool`` and merge MCP-tagged tools.
+
+        External callers should always go through ``mcp_pool.refresh_all()``
+        rather than reaching into the pool's internal client list (LOD).
+        MCP-sourced tools are stored under their namespaced name
+        (``server:tool``) so they cannot collide with locally registered
+        tools.
+
+        Args:
+            mcp_pool: An ``McpClientPool`` (or compatible) instance. Pass
+                ``None`` to clear previously merged MCP tools without
+                re-importing.
+
+        Returns:
+            Number of MCP tools merged into this registry.
+        """
+        # Drop any previously merged MCP tools so refresh is idempotent.
+        existing_mcp = [
+            name
+            for name, tool in self._tools.items()
+            if getattr(tool, "_mcp_source", None) is not None
+        ]
+        for name in existing_mcp:
+            del self._tools[name]
+        if mcp_pool is None:
+            return 0
+        merged = await mcp_pool.refresh_all()
+        count = 0
+        for entry in merged:
+            namespaced = entry["namespaced_name"]
+            tool = Tool(
+                name=namespaced,
+                description=entry.get("description", ""),
+                handler=_unsupported_local_handler,
+            )
+            tool._mcp_source = entry.get("source")  # type: ignore[attr-defined]
+            self._tools[namespaced] = tool
+            count += 1
+        logger.info("Merged %d MCP tools into registry", count)
+        return count
+
+
+def _unsupported_local_handler(*_args: Any, **_kwargs: Any) -> ToolResult:
+    """Placeholder handler for MCP-sourced tools.
+
+    MCP tools must be dispatched through the pool (``pool.call_tool``),
+    not via the local ``ToolRegistry.execute`` path. Calling this raises
+    so misuse is loud.
+    """
+    raise ToolExecutionError(
+        "MCP-sourced tools must be invoked via McpClientPool.call_tool, "
+        "not ToolRegistry.execute",
+        tool_name="<mcp>",
+    )
+
+
+@functools.lru_cache(maxsize=1)
+def get_global_registry() -> ToolRegistry:
+    """Get or create the process-wide global tool registry.
+
+    The instance is memoized with :func:`functools.lru_cache`, which owns the
+    single cached value internally — no module-level mutable global. Call
+    :func:`reset_global_registry` to clear the cache (primarily for tests that
+    need an isolated registry).
+
+    Returns:
+        Global ToolRegistry instance.
+    """
+    return ToolRegistry()
+
+
+def reset_global_registry() -> None:
+    """Discard the cached global registry so the next call builds a fresh one.
+
+    Intended for test isolation — production code should not need this. No-op
+    if the accessor has been monkeypatched to a plain function (as some test
+    bootstraps do), since there is then no cache to clear.
+    """
+    cache_clear = getattr(get_global_registry, "cache_clear", None)
+    if cache_clear is not None:
+        cache_clear()

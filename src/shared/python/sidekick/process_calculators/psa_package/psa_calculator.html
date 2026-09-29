@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSA System Calculator</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .login-container h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .login-container input {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+      }
+
+      .login-container button {
+        width: 100%;
+        padding: 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .login-container button:hover {
+        background: #5a6fd6;
+      }
+
+      .error {
+        color: #e74c3c;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+
+      .main-app {
+        display: none;
+      }
+
+      .header {
+        background: white;
+        padding: 20px 30px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+        margin: 0;
+        color: #333;
+      }
+
+      .header p {
+        margin: 5px 0 0;
+        color: #666;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 20px;
+      }
+
+      .sidebar {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        height: fit-content;
+      }
+
+      .sidebar h3 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+      }
+
+      .form-group input[type="range"] {
+        width: 100%;
+      }
+
+      .form-group input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .slider-value {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+      }
+
+      .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .metric-card .value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .metric-card .label {
+        color: #666;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      .metric-card.safe {
+        border-left: 4px solid #27ae60;
+      }
+
+      .metric-card.warning {
+        border-left: 4px solid #f39c12;
+      }
+
+      .metric-card.danger {
+        border-left: 4px solid #e74c3c;
+      }
+
+      .tabs {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .tab-buttons {
+        display: flex;
+        background: #f5f5f5;
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        transition: all 0.3s;
+      }
+
+      .tab-btn:hover {
+        background: #eee;
+      }
+
+      .tab-btn.active {
+        background: white;
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+      }
+
+      .tab-content {
+        padding: 25px;
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: right;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background: #f9f9f9;
+        font-weight: 600;
+        color: #333;
+      }
+
+      td:first-child,
+      th:first-child {
+        text-align: left;
+      }
+
+      .danger-cell {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .warning-cell {
+        background: #fff8e1;
+        color: #f57f17;
+      }
+
+      #plot-container,
+      #sensitivity-plot,
+      #o2-plot {
+        height: 400px;
+      }
+
+      .plot-options {
+        display: flex;
+        gap: 20px;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+
+      .plot-options label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .plot-options input[type="range"] {
+        width: 100px;
+      }
+
+      .btn-calculate {
+        width: 100%;
+        padding: 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s;
+      }
+
+      .btn-calculate:hover {
+        background: #5a6fd6;
+      }
+
+      @media (max-width: 1200px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+        .metrics-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Application -->
+    <div class="main-app container" id="main-app" style="display: block">
+      <div class="header">
+        <h1>🔬 Two-Stage PSA System Calculator</h1>
+        <p>Interactive analysis tool for pressure swing adsorption systems</p>
+      </div>
+
+      <div class="content">
+        <div class="sidebar">
+          <h3>Operating Parameters</h3>
+
+          <div class="form-group">
+            <label
+              >Total Feed (SCFM)
+              <span class="slider-value" id="feed-value">1100</span></label
+            >
+            <input
+              type="range"
+              id="total-feed"
+              min="500"
+              max="2000"
+              value="1100"
+              step="50"
+              oninput="
+                updateSliderValue('total-feed', 'feed-value');
+                calculate();
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              >S2 Tail Recycle (%)
+              <span class="slider-value" id="s2-value">100</span></label
+            >
+            <input
+              type="range"
+              id="s2-recycle"
+              min="0"
+              max="100"
+              value="100"
+              step="5"
+              oninput="
+                updateSliderValue('s2-recycle', 's2-value');
+                calculate();
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              >Product Recycle (%)
+              <span class="slider-value" id="prod-value">0</span></label
+            >
+            <input
+              type="range"
+              id="prod-recycle"
+              min="0"
+              max="50"
+              value="0"
+              step="5"
+              oninput="
+                updateSliderValue('prod-recycle', 'prod-value');
+                calculate();
+              "
+            />
+          </div>
+
+          <h3 style="margin-top: 30px">Feed Composition</h3>
+
+          <div class="form-group">
+            <label>H2 (%)</label>
+            <input
+              type="number"
+              id="feed-h2"
+              value="32.08"
+              step="0.1"
+              oninput="calculate()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>O2 (%)</label>
+            <input
+              type="number"
+              id="feed-o2"
+              value="0.5"
+              step="0.1"
+              oninput="calculate()"
+            />
+          </div>
+
+          <h3 style="margin-top: 30px">Stage 1 Removal</h3>
+
+          <div class="form-group">
+            <label
+              >H2 Removal (%)
+              <span class="slider-value" id="s1h2-value">18</span></label
+            >
+            <input
+              type="range"
+              id="s1-h2"
+              min="0"
+              max="50"
+              value="18"
+              step="1"
+              oninput="
+                updateSliderValue('s1-h2', 's1h2-value');
+                calculate();
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              >O2 Removal (%)
+              <span class="slider-value" id="s1o2-value">81</span></label
+            >
+            <input
+              type="range"
+              id="s1-o2"
+              min="50"
+              max="99"
+              value="81"
+              step="1"
+              oninput="
+                updateSliderValue('s1-o2', 's1o2-value');
+                calculate();
+              "
+            />
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="metrics-grid">
+            <div class="metric-card" id="metric-recovery">
+              <div class="value" id="h2-recovery">--</div>
+              <div class="label">H2 Recovery</div>
+            </div>
+            <div class="metric-card" id="metric-purity">
+              <div class="value" id="h2-purity">--</div>
+              <div class="label">H2 Purity</div>
+            </div>
+            <div class="metric-card" id="metric-product">
+              <div class="value" id="net-product">--</div>
+              <div class="label">Net Product (SCFM)</div>
+            </div>
+            <div class="metric-card" id="metric-status">
+              <div class="value" id="safety-status">--</div>
+              <div class="label">Safety Status</div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab-buttons">
+              <button
+                class="tab-btn active"
+                onclick="showTab('results', event)"
+              >
+                Results
+              </button>
+              <button class="tab-btn" onclick="showTab('sensitivity', event)">
+                Sensitivity
+              </button>
+              <button class="tab-btn" onclick="showTab('o2safety', event)">
+                O2 Safety
+              </button>
+              <button class="tab-btn" onclick="showTab('data', event)">
+                Data Tables
+              </button>
+            </div>
+
+            <div class="tab-content active" id="tab-results">
+              <h3>Flow Diagram</h3>
+              <div id="plot-container"></div>
+            </div>
+
+            <div class="tab-content" id="tab-sensitivity">
+              <h3>H2 Recovery vs S2 Tail Recycle</h3>
+              <div class="plot-options">
+                <label
+                  ><input
+                    type="checkbox"
+                    id="sens-lines"
+                    checked
+                    onchange="plotSensitivity()"
+                  />
+                  Lines</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    id="sens-markers"
+                    onchange="plotSensitivity()"
+                  />
+                  Markers</label
+                >
+                <label
+                  >Points:
+                  <input
+                    type="range"
+                    id="sens-points"
+                    min="11"
+                    max="101"
+                    value="51"
+                    step="10"
+                    oninput="plotSensitivity()"
+                  />
+                  <span id="sens-points-val">51</span></label
+                >
+              </div>
+              <div id="sensitivity-plot"></div>
+            </div>
+
+            <div class="tab-content" id="tab-o2safety">
+              <h3>O2 Safety Analysis</h3>
+              <p>
+                S2 Tail O2% vs Stage 1 O2 Removal -
+                <span style="color: red"
+                  >Red zone indicates danger (>2% O2)</span
+                >
+              </p>
+              <div class="plot-options">
+                <label
+                  ><input
+                    type="checkbox"
+                    id="o2-lines"
+                    checked
+                    onchange="plotO2Safety()"
+                  />
+                  Lines</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    id="o2-markers"
+                    onchange="plotO2Safety()"
+                  />
+                  Markers</label
+                >
+                <label
+                  >Points:
+                  <input
+                    type="range"
+                    id="o2-points"
+                    min="11"
+                    max="51"
+                    value="21"
+                    step="5"
+                    oninput="plotO2Safety()"
+                  />
+                  <span id="o2-points-val">21</span></label
+                >
+              </div>
+              <div id="o2-plot"></div>
+            </div>
+
+            <div class="tab-content" id="tab-data">
+              <h3>Mass Balance (SCFM)</h3>
+              <table id="mass-table">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th>Fresh Feed</th>
+                    <th>Mixed Feed</th>
+                    <th>Exhaust</th>
+                    <th>Interstage</th>
+                    <th>Net Product</th>
+                  </tr>
+                </thead>
+                <tbody id="mass-tbody"></tbody>
+              </table>
+
+              <h3 style="margin-top: 30px">Compositions (%)</h3>
+              <table id="comp-table">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th>Fresh Feed</th>
+                    <th>Mixed Feed</th>
+                    <th>Exhaust</th>
+                    <th>Interstage</th>
+                    <th>Net Product</th>
+                  </tr>
+                </thead>
+                <tbody id="comp-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function sumArray(arr) {
+        let s = 0;
+        for (let i = 0; i < arr.length; i++) s += arr[i];
+        return s;
+      }
+      function updateSliderValue(sliderId, valueId) {
+        document.getElementById(valueId).textContent =
+          document.getElementById(sliderId).value;
+      }
+
+      // Track if plots have been calculated
+      let plotsCalculated = { sensitivity: false, o2safety: false };
+
+      function showTab(tabName, event) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("tab-" + tabName).classList.add("active");
+        if (event && event.target && event.target.classList) {
+          event.target.classList.add("active");
+        }
+
+        // Pre-calculate plots when switching to their tabs
+        if (tabName === "sensitivity") plotSensitivity();
+        if (tabName === "o2safety") plotO2Safety();
+      }
+
+      function initializeApp() {
+        // Initialize the app and pre-calculate plots
+        calculate();
+        plotSensitivity();
+        plotO2Safety();
+        plotsCalculated.sensitivity = true;
+        plotsCalculated.o2safety = true;
+      }
+
+      // Initialize on page load
+      window.onload = initializeApp;
+
+      // Default components
+      const DEFAULT_COMPONENTS = [
+        { name: "H2", feed_pct: 32.08, s1_removal: 18.0, s2_removal: 15.0 },
+        { name: "CO", feed_pct: 38.22, s1_removal: 98.0, s2_removal: 99.99 },
+        { name: "CO2", feed_pct: 21.98, s1_removal: 98.0, s2_removal: 99.99 },
+        { name: "H2O", feed_pct: 4.85, s1_removal: 99.0, s2_removal: 99.99 },
+        { name: "N2", feed_pct: 0.5, s1_removal: 95.0, s2_removal: 99.99 },
+        { name: "O2", feed_pct: 0.5, s1_removal: 81.0, s2_removal: 99.99 },
+        { name: "CH4", feed_pct: 1.88, s1_removal: 99.0, s2_removal: 99.99 },
+      ];
+
+      function getComponents() {
+        const components = JSON.parse(JSON.stringify(DEFAULT_COMPONENTS));
+        components[0].feed_pct = parseFloat(
+          document.getElementById("feed-h2").value,
+        );
+        components[0].s1_removal = parseFloat(
+          document.getElementById("s1-h2").value,
+        );
+        components[5].feed_pct = parseFloat(
+          document.getElementById("feed-o2").value,
+        );
+        components[5].s1_removal = parseFloat(
+          document.getElementById("s1-o2").value,
+        );
+        return components;
+      }
+
+      function calculatePSA(totalFeed, s2Recycle, prodRecycle, components) {
+        const n = components.length;
+        // ⚡ Bolt Optimization: Replace multiple .map() allocations with single-pass pre-allocated loops to prevent GC overhead
+        const feedPct = new Array(n);
+        const r1 = new Array(n);
+        const r2 = new Array(n);
+        const rTail = s2Recycle;
+        const rProd = prodRecycle;
+
+        let feedSum = 0;
+        for (let i = 0; i < n; i++) {
+          feedPct[i] = components[i].feed_pct;
+          r1[i] = components[i].s1_removal / 100;
+          r2[i] = components[i].s2_removal / 100;
+          feedSum += feedPct[i];
+        }
+
+        const freshFeed = new Array(n);
+        const denominator = new Array(n);
+        const mixedFeed = new Array(n);
+        const exhaust = new Array(n);
+        const interstage = new Array(n);
+        const s2Tail = new Array(n);
+        const s2TailRecycle = new Array(n);
+        const s2TailVent = new Array(n);
+        const grossProduct = new Array(n);
+        const productRecycle = new Array(n);
+        const netProduct = new Array(n);
+
+        for (let i = 0; i < n; i++) {
+          freshFeed[i] = (totalFeed * feedPct[i]) / feedSum;
+          denominator[i] = 1 - (1 - r1[i]) * (r2[i] * rTail + (1 - r2[i]) * rProd);
+          mixedFeed[i] = freshFeed[i] / denominator[i];
+          exhaust[i] = mixedFeed[i] * r1[i];
+          interstage[i] = mixedFeed[i] - exhaust[i];
+          s2Tail[i] = interstage[i] * r2[i];
+          s2TailRecycle[i] = s2Tail[i] * rTail;
+          s2TailVent[i] = s2Tail[i] * (1 - rTail);
+          grossProduct[i] = interstage[i] - s2Tail[i];
+          productRecycle[i] = grossProduct[i] * rProd;
+          netProduct[i] = grossProduct[i] * (1 - rProd);
+        }
+
+
+        const calcComp = (arr) => {
+          const total = sumArray(arr);
+          if (total === 0) {
+            const zeros = new Array(arr.length);
+            for (let i = 0; i < arr.length; i++) zeros[i] = 0;
+            return zeros;
+          } else {
+            const result = new Array(arr.length);
+            for (let i = 0; i < arr.length; i++) result[i] = (arr[i] / total) * 100;
+            return result;
+          }
+        };
+
+        const h2Idx = 0,
+          o2Idx = 5;
+
+        return {
+          names: components.map((c) => c.name),
+          flows: {
+            freshFeed,
+            mixedFeed,
+            exhaust,
+            interstage,
+            s2Tail,
+            s2TailRecycle,
+            s2TailVent,
+            grossProduct,
+            productRecycle,
+            netProduct,
+          },
+          compositions: {
+            freshFeed: calcComp(freshFeed),
+            mixedFeed: calcComp(mixedFeed),
+            exhaust: calcComp(exhaust),
+            interstage: calcComp(interstage),
+            s2Tail: calcComp(s2Tail),
+            netProduct: calcComp(netProduct),
+          },
+          h2Recovery: (netProduct[h2Idx] / freshFeed[h2Idx]) * 100,
+          h2Purity: calcComp(netProduct)[h2Idx],
+          totalFeed: sum(freshFeed),
+          totalNetProduct: sum(netProduct),
+          totalExhaust: sum(exhaust),
+          s2TailH2: calcComp(s2Tail)[h2Idx],
+          s2TailO2: calcComp(s2Tail)[o2Idx],
+        };
+      }
+
+      function getFlammabilityStatus(h2, o2) {
+        if (o2 < 0.1) return { status: "Safe", class: "safe" };
+        if (h2 > 4 && o2 > 2) return { status: "CRITICAL", class: "danger" };
+        if (h2 < 4) return { status: "Safe", class: "safe" };
+        if (h2 > 75) return { status: "Caution", class: "warning" };
+        return { status: "FLAMMABLE", class: "danger" };
+      }
+
+      function calculate() {
+        const totalFeed = parseFloat(
+          document.getElementById("total-feed").value,
+        );
+        const s2Recycle =
+          parseFloat(document.getElementById("s2-recycle").value) / 100;
+        const prodRecycle =
+          parseFloat(document.getElementById("prod-recycle").value) / 100;
+        const components = getComponents();
+
+        const results = calculatePSA(
+          totalFeed,
+          s2Recycle,
+          prodRecycle,
+          components,
+        );
+
+        // Update metrics
+        document.getElementById("h2-recovery").textContent =
+          results.h2Recovery.toFixed(2) + "%";
+        document.getElementById("h2-purity").textContent =
+          results.h2Purity.toFixed(4) + "%";
+        document.getElementById("net-product").textContent =
+          results.totalNetProduct.toFixed(1);
+
+        const status = getFlammabilityStatus(
+          results.s2TailH2,
+          results.s2TailO2,
+        );
+        document.getElementById("safety-status").textContent = status.status;
+        document.getElementById("metric-status").className =
+          "metric-card " + status.class;
+
+        // Update tables
+        updateTables(results);
+
+        // Update Sankey diagram
+        plotSankey(results);
+      }
+
+      function escapeHtml(unsafe) {
+        if (!unsafe) return "";
+        return unsafe
+          .toString()
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function updateTables(results) {
+        let massHtml = "";
+        let compHtml = "";
+
+        for (let i = 0; i < results.names.length; i++) {
+          const safeName = escapeHtml(results.names[i]);
+          massHtml += `<tr>
+                    <td>${safeName}</td>
+                    <td>${results.flows.freshFeed[i].toFixed(4)}</td>
+                    <td>${results.flows.mixedFeed[i].toFixed(4)}</td>
+                    <td>${results.flows.exhaust[i].toFixed(4)}</td>
+                    <td>${results.flows.interstage[i].toFixed(4)}</td>
+                    <td>${results.flows.netProduct[i].toFixed(4)}</td>
+                </tr>`;
+
+          compHtml += `<tr>
+                    <td>${safeName}</td>
+                    <td>${results.compositions.freshFeed[i].toFixed(4)}</td>
+                    <td>${results.compositions.mixedFeed[i].toFixed(4)}</td>
+                    <td>${results.compositions.exhaust[i].toFixed(4)}</td>
+                    <td>${results.compositions.interstage[i].toFixed(4)}</td>
+                    <td>${results.compositions.netProduct[i].toFixed(4)}</td>
+                </tr>`;
+        }
+
+        // Add totals
+        massHtml += `<tr style="font-weight: bold; background: #f9f9f9;">
+                <td>TOTAL</td>
+                <td>${results.totalFeed.toFixed(2)}</td>
+                <td>${sumArray(results.flows.mixedFeed)
+                  .toFixed(2)}</td>
+                <td>${results.totalExhaust.toFixed(2)}</td>
+                <td>${sumArray(results.flows.interstage)
+                  .toFixed(2)}</td>
+                <td>${results.totalNetProduct.toFixed(2)}</td>
+            </tr>`;
+
+        document.getElementById("mass-tbody").innerHTML = massHtml;
+        document.getElementById("comp-tbody").innerHTML = compHtml;
+      }
+
+      function plotSankey(results) {
+        const data = [
+          {
+            type: "sankey",
+            orientation: "h",
+            node: {
+              pad: 15,
+              thickness: 20,
+              line: { color: "black", width: 0.5 },
+              label: [
+                "Feed",
+                "PSA 1",
+                "PSA 2",
+                "Exhaust",
+                "Net Product",
+                "S2 Recycle",
+              ],
+              color: [
+                "#3498db",
+                "#95a5a6",
+                "#95a5a6",
+                "#e74c3c",
+                "#27ae60",
+                "#f39c12",
+              ],
+            },
+            link: {
+              source: [0, 1, 1, 2, 2],
+              target: [1, 3, 2, 4, 5],
+              value: [
+                results.totalFeed,
+                results.totalExhaust,
+                sumArray(results.flows.interstage),
+                results.totalNetProduct,
+                sumArray(results.flows.s2TailRecycle),
+              ],
+            },
+          },
+        ];
+
+        Plotly.newPlot("plot-container", data, {
+          title: "PSA System Flow",
+          font: { size: 12 },
+        });
+      }
+
+      function plotSensitivity() {
+        const totalFeed = parseFloat(
+          document.getElementById("total-feed").value,
+        );
+        const prodRecycle =
+          parseFloat(document.getElementById("prod-recycle").value) / 100;
+        const components = getComponents();
+        const currentS2 = parseFloat(
+          document.getElementById("s2-recycle").value,
+        );
+
+        // Get plot options
+        const showLines = document.getElementById("sens-lines").checked;
+        const showMarkers = document.getElementById("sens-markers").checked;
+        const numPoints = parseInt(
+          document.getElementById("sens-points").value,
+        );
+        document.getElementById("sens-points-val").textContent = numPoints;
+
+        let mode = "none";
+        if (showLines && showMarkers) mode = "lines+markers";
+        else if (showLines) mode = "lines";
+        else if (showMarkers) mode = "markers";
+        else mode = "lines"; // Default to lines if nothing selected
+
+        const s2Range = [];
+        const h2Recovery = [];
+        const netProduct = [];
+
+        const step = 100 / (numPoints - 1);
+        for (let i = 0; i < numPoints; i++) {
+          const s2 = i * step;
+          s2Range.push(s2);
+          const results = calculatePSA(
+            totalFeed,
+            s2 / 100,
+            prodRecycle,
+            components,
+          );
+          h2Recovery.push(results.h2Recovery);
+          netProduct.push(results.totalNetProduct);
+        }
+
+        const trace1 = {
+          x: s2Range,
+          y: h2Recovery,
+          type: "scatter",
+          mode: mode,
+          name: "H2 Recovery",
+          yaxis: "y",
+          line: { width: 2 },
+          marker: { size: 6 },
+        };
+
+        const trace2 = {
+          x: s2Range,
+          y: netProduct,
+          type: "scatter",
+          mode: mode,
+          name: "Net Product",
+          yaxis: "y2",
+          line: { width: 2 },
+          marker: { size: 6 },
+        };
+
+        const layout = {
+          title: "Sensitivity to S2 Tail Recycle",
+          xaxis: { title: "S2 Tail Recycle (%)" },
+          yaxis: { title: "H2 Recovery (%)", side: "left" },
+          yaxis2: {
+            title: "Net Product (SCFM)",
+            side: "right",
+            overlaying: "y",
+          },
+          shapes: [
+            {
+              type: "line",
+              x0: currentS2,
+              x1: currentS2,
+              y0: 0,
+              y1: 1,
+              yref: "paper",
+              line: { color: "red", width: 2, dash: "dash" },
+            },
+          ],
+          legend: { x: 0.1, y: 0.9 },
+        };
+
+        Plotly.newPlot("sensitivity-plot", [trace1, trace2], layout);
+      }
+
+      function plotO2Safety() {
+        const totalFeed = parseFloat(
+          document.getElementById("total-feed").value,
+        );
+        const baseComponents = getComponents();
+
+        // Get plot options
+        const showLines = document.getElementById("o2-lines").checked;
+        const showMarkers = document.getElementById("o2-markers").checked;
+        const numPoints = parseInt(document.getElementById("o2-points").value);
+        document.getElementById("o2-points-val").textContent = numPoints;
+
+        let mode = "none";
+        if (showLines && showMarkers) mode = "lines+markers";
+        else if (showLines) mode = "lines";
+        else if (showMarkers) mode = "markers";
+        else mode = "lines"; // Default to lines if nothing selected
+
+        const inletO2Values = [0.5, 1.0, 2.0, 5.0];
+        const s1RemovalRange = [];
+        const step = 45 / (numPoints - 1); // 50 to 95 range
+        for (let i = 0; i < numPoints; i++) {
+          s1RemovalRange.push(50 + i * step);
+        }
+
+        const traces = [];
+
+        for (const inletO2 of inletO2Values) {
+          const yData = [];
+          for (const s1Rem of s1RemovalRange) {
+            const components = JSON.parse(JSON.stringify(baseComponents));
+            components[5].feed_pct = inletO2;
+            components[5].s1_removal = s1Rem;
+            const results = calculatePSA(totalFeed, 1.0, 0, components);
+            yData.push(results.s2TailO2);
+          }
+          traces.push({
+            x: s1RemovalRange,
+            y: yData,
+            type: "scatter",
+            mode: mode,
+            name: `${inletO2}% Inlet O2`,
+            line: { width: 2 },
+            marker: { size: 6 },
+          });
+        }
+
+        // Add danger line
+        traces.push({
+          x: [50, 95],
+          y: [2, 2],
+          type: "scatter",
+          mode: "lines",
+          name: "Danger (2%)",
+          line: { color: "red", width: 3, dash: "dash" },
+        });
+
+        const layout = {
+          title: "S2 Tail O2% vs Stage 1 O2 Removal",
+          xaxis: { title: "Stage 1 O2 Removal (%)", range: [50, 95] },
+          yaxis: { title: "S2 Tail O2 (%)" },
+          shapes: [
+            {
+              type: "rect",
+              x0: 50,
+              x1: 95,
+              y0: 2,
+              y1: 50,
+              fillcolor: "rgba(255,0,0,0.1)",
+              line: { width: 0 },
+            },
+          ],
+        };
+
+        Plotly.newPlot("o2-plot", traces, layout);
+      }
+    </script>
+  </body>
+</html>

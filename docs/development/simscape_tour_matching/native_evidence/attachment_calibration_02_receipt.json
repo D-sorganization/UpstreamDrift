@@ -1,0 +1,14 @@
+{
+  "archive": "attachment-calibration-02-bundle.zip",
+  "sha256": "8f85c5c3dd094ef528e75aaad8959a13656295482bfc57d14fad80d3d654d31a",
+  "qualification": "Fixed-native-pose attachment candidate, explicitly not forward qualified.",
+  "native_frame_archive": "calibration-body-frames-01-bundle.zip",
+  "tests_passed": 6,
+  "files": {
+    "calibrate_pose_attachments.py": "c19ece93e10f032e3856c374737c5c7b85571f7bf47f2b001efd77a4b72c0549",
+    "calibration_report.json": "58c609e50e4d6f03811ec76f9e29599344d7cd03ba6c33b518e53939303b73d1",
+    "candidate_seed.json": "b72201847a5b6de4d3a0eacf5def0b844fbdd96400b869796a4ca89ef21c3cc7",
+    "keypoint_offsets.py": "075af1cf5e0a2e0a601ebc721c3f4a27f312830fa83976378296681edc346b66",
+    "test_attachment_calibration_cli.py": "687bfda2bd2403e8f20c071bc365c336da34be90d689eee3a0f27a71d7eadf4a"
+  }
+}

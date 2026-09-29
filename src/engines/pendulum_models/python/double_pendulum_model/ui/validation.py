@@ -1,0 +1,26 @@
+"""Input validation helpers for the pendulum simulation UI parameters."""
+
+import ast
+
+
+def validate_polynomial_text(text: str) -> str | None:
+    """Validate polynomial coefficient text and return error or None."""
+    cleaned = text.replace(" ", "")
+    if not cleaned:
+        return None  # Empty is valid (treated as 0.0)
+    try:
+        tuple(float(c) for c in cleaned.split("+"))
+    except ValueError:
+        return "Invalid polynomial format. Use numbers separated by '+'."
+    return None
+
+
+def validate_torque_text(text: str) -> str | None:
+    """Validate torque expression syntax and return error or None."""
+    if not text.strip():
+        return None  # Empty is valid (treated as 0.0)
+    try:
+        ast.parse(text, mode="eval")
+    except SyntaxError:
+        return "Invalid syntax."
+    return None

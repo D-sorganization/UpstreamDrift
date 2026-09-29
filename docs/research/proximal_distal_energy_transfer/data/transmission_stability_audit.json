@@ -1,0 +1,127 @@
+{
+  "schema_version": "transmission-stability-audit-v1",
+  "study_id": "paired-transmission-pathway-task-robustness-v1",
+  "held_out_case_count": 15,
+  "pareto_leave_one_case_out": [
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ],
+    [
+      "clock_restrain_then_drive",
+      "state_triggered_handoff",
+      "state_triggered_higher_impedance",
+      "early_drive"
+    ]
+  ],
+  "pareto_membership_counts": {
+    "clock_restrain_then_drive": 15,
+    "state_triggered_handoff": 15,
+    "state_triggered_higher_impedance": 15,
+    "early_drive": 15
+  },
+  "local_task_map": {
+    "singular_values_raw_units": [
+      1141.2574052715859,
+      60.35847737933799,
+      7.751940658575211
+    ],
+    "effective_rank_by_relative_threshold": {
+      "0.01": 2,
+      "0.05": 2,
+      "0.1": 1,
+      "0.2": 1
+    },
+    "held_out_linear_prediction_rmse": {
+      "delivery_speed_m_s": 0.11472233840525102,
+      "face_path_error_deg": 2.6886393604953485,
+      "peak_hand_force_n": 7.478181958975956
+    },
+    "held_out_observed_range": {
+      "delivery_speed_m_s": 1.4292085116812032,
+      "face_path_error_deg": 5.3593816020863265,
+      "peak_hand_force_n": 47.98857864452225
+    },
+    "boundary": "singular values depend on units and scaling; the local Jacobian does not validate linear prediction across the held-out envelope"
+  }
+}

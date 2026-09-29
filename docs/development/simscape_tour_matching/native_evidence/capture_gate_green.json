@@ -1,0 +1,11 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "names": [
+    "test_capture_fit_sim_options/rejectsInvalidHorizon",
+    "test_capture_fit_sim_options/usesIndependentReplayDefaults",
+    "test_capture_fit_sim_options/torqueGateStaysEnabledPastOneSecond"
+  ],
+  "passed": [true, true, true],
+  "failed": [false, false, false],
+  "incomplete": [false, false, false]
+}

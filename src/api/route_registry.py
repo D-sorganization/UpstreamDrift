@@ -1,0 +1,395 @@
+"""Route registry for automatic route discovery and registration.
+
+Replaces the 20+ explicit route imports in server.py with a plugin-style
+auto-discovery pattern. Each route module that defines a ``router`` attribute
+(an ``APIRouter`` instance) is automatically discovered and registered.
+
+Architecture (#1485):
+    - Decouples server.py from individual route modules
+    - Adding a new route module requires only creating the file
+    - No changes to server.py needed for new routes
+    - Supports prefix overrides and route filtering
+
+Design by Contract:
+    - Precondition: route modules must define a ``router`` attribute
+    - Postcondition: all discovered routers are included in the app
+    - Invariant: registration order matches ``_REGISTRATION_ORDER`` for
+      modules with overlapping route paths (FastAPI first-match-wins)
+"""
+
+from __future__ import annotations
+
+import contextlib
+import importlib
+import pkgutil
+from collections.abc import AsyncGenerator, Callable
+from typing import TYPE_CHECKING, ContextManager
+
+from fastapi import Depends, Request
+from sqlalchemy.orm import Session
+
+from src.api.auth.dependencies import (
+    CheckSimulationQuota,
+    CheckVideoQuota,
+    authenticate_bearer_request,
+    check_usage_quota,
+)
+from src.api.auth.models import User
+from src.api.database import get_db_factory
+from src.shared.python.config.environment import is_auth_disabled
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from fastapi import APIRouter, FastAPI
+
+logger = get_logger(__name__)
+
+# Modules that should NOT be auto-discovered (they are WebSocket-only
+# or require special handling)
+_EXCLUDED_MODULES: frozenset[str] = frozenset(
+    {
+        "chat_ws",
+        "simulation_ws",
+        "realtime",
+    }
+)
+
+# Route modules that are *allowed* to fail to import — typically because they
+# depend on optional feature extras (e.g. ``cv2``/``mediapipe`` for video pose
+# estimation) that the slim runtime image intentionally omits. Such a module
+# must still keep its top-level import dependency-free (so route discovery picks
+# up its ``router``) and surface a clear 503 from inside its handlers when the
+# feature dependency is missing (see ``tests/unit/api/test_video_route_lazy_import``).
+#
+# Every other route module is mandatory: a broken import is treated as a
+# deploy-time error and fails route discovery closed (issue #7128) rather than
+# silently dropping endpoints and returning 404s to clients.
+_OPTIONAL_MODULES: frozenset[str] = frozenset(
+    {
+        "video",
+    }
+)
+
+# Explicit registration order matching the original server.py.
+# This is critical because some modules define overlapping route paths
+# and FastAPI uses first-match-wins semantics.
+#
+# Overlaps must be treated as bugs, not ordering puzzles: two handlers on the
+# same method+path means one of them is permanently unreachable and clients
+# silently get the wrong response shape (issue #7998, where physics.py shadowed
+# actuator_controls.py's /simulation/actuators and force_overlays.py's
+# /simulation/forces). ``tests/unit/api/test_route_uniqueness.py`` asserts every
+# method+path maps to exactly one handler.
+# Modules not listed here are appended alphabetically after these.
+_REGISTRATION_ORDER: tuple[str, ...] = (
+    "auth",
+    "observability",
+    "core",
+    "capabilities",
+    "engines",
+    "simulation",
+    "video",
+    "analysis",
+    # recordings must precede export: it defines the literal path
+    # "/export/formats" which would otherwise be shadowed by export.py's
+    # parameterized "/export/{task_id}" (FastAPI first-match-wins).
+    "recordings",
+    "export",
+    "launcher",
+    "terrain",
+    "dataset",
+    "physics",
+    "models",
+    "analysis_tools",
+    "force_overlays",
+    "actuator_controls",
+    "model_explorer",
+    "aip",
+    "putting_green",
+    "ball_flight",
+    "data_explorer",
+    "motion_capture",
+    "matched_swings",
+)
+
+
+async def _current_user_from_bearer_header(request: Request, db: Session) -> User:
+    """Resolve the caller from the raw ``Authorization`` header.
+
+    Thin delegate to :func:`src.api.auth.dependencies.authenticate_bearer_request`
+    so router-level auth and per-endpoint auth share one implementation.
+    """
+    return await authenticate_bearer_request(request, db)
+
+
+def _request_time_quota_dependency(
+    resource_type: str,
+    enforced_dependency: Callable[..., object],
+) -> Callable[..., object]:
+    """Build a router-level dependency that authenticates *and* consumes quota.
+
+    ``check_usage_quota`` returns a **generator** dependency: merely calling it
+    constructs a generator object whose body never runs, so the quota was never
+    consumed and the 429 path was unreachable (issue #7969). This wrapper is an
+    async generator itself, so FastAPI drives it like any ``yield`` dependency,
+    and it explicitly steps the inner generator — including the post-yield
+    cleanup and the refund-on-failure ``throw`` path.
+
+    Postcondition: in cloud mode ``usage_tracker.consume_quota`` has been called
+    exactly once before the endpoint body runs.
+    """
+    quota_dependency = check_usage_quota(resource_type)
+
+    async def dependency(
+        request: Request,
+        db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
+    ) -> AsyncGenerator[User | None, None]:
+        if is_auth_disabled():
+            yield None
+            return
+
+        with db_factory() as db:
+            current_user = await _current_user_from_bearer_header(request, db)
+            generator = quota_dependency(current_user, db)
+            # Drives consume_quota(); raises HTTP 429 when the quota is exhausted.
+            user = next(generator)
+            try:
+                yield user
+            except Exception as exc:  # noqa: BLE001 - hand off to the refund path
+                with contextlib.suppress(StopIteration):
+                    generator.throw(exc)
+                raise
+            else:
+                with contextlib.suppress(StopIteration):
+                    next(generator)
+
+    dependency.enforced_dependency = enforced_dependency  # type: ignore[attr-defined]
+    return dependency
+
+
+_SIMULATION_QUOTA_DEPENDENCY = _request_time_quota_dependency(
+    "simulations",
+    CheckSimulationQuota.dependency,
+)
+_VIDEO_QUOTA_DEPENDENCY = _request_time_quota_dependency(
+    "video_analyses",
+    CheckVideoQuota.dependency,
+)
+
+
+async def _global_auth_dependency(
+    request: Request,
+    db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
+) -> User | None:
+    """Require an authenticated bearer token for protected routers.
+
+    In local/auth-disabled mode this is a no-op (returns ``None``). In cloud
+    mode it enforces a valid ``Authorization: Bearer`` header, raising 401 on
+    failure. Applied at registration time to every router not in
+    ``_PUBLIC_ROUTERS`` so authentication can never depend on a per-quota side
+    effect (issue #6636 F1).
+    """
+    if is_auth_disabled():
+        return None
+    with db_factory() as db:
+        return await _current_user_from_bearer_header(request, db)
+
+
+async def _ws_compatible_auth_dependency(
+    request: Request = None,  # type: ignore[assignment]
+    db_factory: Callable[[], ContextManager[Session]] = Depends(get_db_factory),
+) -> User | None:
+    """Auth dependency safe to attach to routers that mix HTTP and WS routes.
+
+    The realtime and chat_ws routers are excluded from auto-discovery
+    (issues #6888, #6889) because they expose WebSocket endpoints that
+    authenticate themselves via ``resolve_ws_user`` before ``accept()``.
+    Their *HTTP* endpoints (``POST /realtime/publish``,
+    ``GET /chat/sessions``, ``GET /chat/sessions/{id}/history``) previously
+    had no auth at all, allowing unauthenticated broadcast injection and
+    session enumeration in cloud mode.
+
+    Attaching :func:`_global_auth_dependency` directly would break the WS
+    routes: it declares ``request: Request`` which FastAPI cannot inject into
+    a WebSocket scope, raising ``TypeError`` and dropping the connection. This
+    variant declares ``request`` as an optional special parameter: FastAPI
+    injects the HTTP ``Request`` and leaves it ``None`` in a WebSocket scope, so
+    the bearer header is enforced only on HTTP. WS connections fall through to
+    the route's own ``resolve_ws_user`` check.
+
+    In local/auth-disabled mode this is a no-op (returns ``None``).
+    """
+    if request is None or is_auth_disabled():
+        return None
+    with db_factory() as db:
+        return await _current_user_from_bearer_header(request, db)
+
+
+# Public alias for server.py: the chat_ws and realtime routers are mounted
+# explicitly there (they are excluded from auto-discovery) and need this
+# WS-safe auth dependency attached to close issues #6888 and #6889.
+ws_compatible_auth_dependency = _ws_compatible_auth_dependency
+
+
+_ROUTE_DEPENDENCIES: dict[str, tuple[Callable[..., object], ...]] = {
+    "simulation": (_SIMULATION_QUOTA_DEPENDENCY,),
+    "video": (_VIDEO_QUOTA_DEPENDENCY,),
+}
+
+# Routers that must remain reachable without authentication. Everything else
+# gets ``_global_auth_dependency`` injected at registration time. Keep this set
+# as small as possible (issue #6636 F1): health/liveness, auth (login/register
+# themselves), and capability discovery are intentionally public.
+_PUBLIC_ROUTERS: frozenset[str] = frozenset(
+    {
+        "auth",
+        "core",
+        "observability",
+        "capabilities",
+        "launcher",
+        "matched_swings",
+    }
+)
+
+
+def _dependencies_for_route(module_name: str) -> tuple[Callable[..., object], ...]:
+    explicit = _ROUTE_DEPENDENCIES.get(module_name, ())
+    if module_name in _PUBLIC_ROUTERS:
+        return explicit
+    # The quota dependencies already enforce auth as part of their flow, so we
+    # avoid double-resolving the bearer header for those routers.
+    if explicit:
+        return explicit
+    return (_global_auth_dependency,)
+
+
+def discover_routes(
+    package_path: str = "src.api.routes",
+    *,
+    exclude: frozenset[str] | None = None,
+    optional: frozenset[str] | None = None,
+) -> list[tuple[str, APIRouter]]:
+    """Discover all route modules with a ``router`` attribute.
+
+    Scans the given package for Python modules and imports each one.
+    If a module exposes a top-level ``router`` attribute that is an
+    ``APIRouter`` instance, it is included in the returned list.
+
+    The returned list is ordered according to ``_REGISTRATION_ORDER``
+    for modules that appear in that list, with any remaining modules
+    appended in alphabetical order.  This preserves FastAPI's
+    first-match-wins semantics for overlapping route paths.
+
+    Route discovery **fails closed** (issue #7128): if a mandatory route
+    module cannot be imported, the ``ImportError`` propagates so a broken
+    deploy fails fast instead of silently dropping endpoints and returning
+    404s. Only modules listed in ``optional`` (feature-gated routers whose
+    extras may be absent in slim images) are allowed to be skipped on
+    ``ImportError`` — and those are expected to register their router with a
+    dependency-free top-level import and emit a 503 from their handlers when
+    the missing feature dependency is actually exercised.
+
+    Args:
+        package_path: Dotted import path to the routes package.
+        exclude: Module names to skip entirely (without package prefix).
+        optional: Module names allowed to fail import and be skipped.
+            Defaults to ``_OPTIONAL_MODULES``.
+
+    Returns:
+        List of (module_name, router) tuples in registration order.
+
+    Raises:
+        ImportError: If the routes package itself cannot be imported, or if a
+            mandatory (non-optional) route module fails to import.
+    """
+    if exclude is None:
+        exclude = _EXCLUDED_MODULES
+    if optional is None:
+        optional = _OPTIONAL_MODULES
+
+    package = importlib.import_module(package_path)
+    if not hasattr(package, "__path__"):
+        raise ImportError(f"{package_path} is not a package (no __path__)")
+
+    # Build a lookup of discovered modules
+    discovered_map: dict[str, APIRouter] = {}
+
+    for _finder, module_name, _is_pkg in pkgutil.iter_modules(package.__path__):
+        if module_name.startswith("_"):
+            continue
+        if module_name in exclude:
+            logger.debug("Skipping excluded route module: %s", module_name)
+            continue
+
+        full_module_path = f"{package_path}.{module_name}"
+        try:
+            module = importlib.import_module(full_module_path)
+        except ImportError:
+            if module_name in optional:
+                logger.warning(
+                    "Optional route module %s failed to import — skipping. "
+                    "Its feature dependency is absent; handlers should 503.",
+                    full_module_path,
+                )
+                continue
+            # Fail closed: a mandatory route module that cannot import is a
+            # deploy-time error, not a silently-missing endpoint (issue #7128).
+            logger.exception(
+                "Mandatory route module %s failed to import; failing route "
+                "discovery closed",
+                full_module_path,
+            )
+            raise
+
+        router = getattr(module, "router", None)
+        if router is None:
+            logger.debug("Module %s has no 'router' attribute — skipping", module_name)
+            continue
+
+        discovered_map[module_name] = router
+        logger.debug("Discovered route module: %s", module_name)
+
+    # Order: priority modules first (in _REGISTRATION_ORDER), then remainder alphabetically
+    ordered: list[tuple[str, APIRouter]] = []
+    for name in _REGISTRATION_ORDER:
+        if name in discovered_map:
+            ordered.append((name, discovered_map.pop(name)))
+
+    # Append any newly added modules not in _REGISTRATION_ORDER (alphabetically)
+    ordered.extend([(name, discovered_map[name]) for name in sorted(discovered_map)])
+
+    logger.info("Discovered %d route modules", len(ordered))
+    return ordered
+
+
+def register_routes(
+    app: FastAPI,
+    *,
+    prefix: str = "",
+    exclude: frozenset[str] | None = None,
+    optional: frozenset[str] | None = None,
+) -> int:
+    """Discover and register all route modules on the given FastAPI app.
+
+    This is the primary entry point used by ``server.py``.
+
+    Args:
+        app: The FastAPI application instance.
+        prefix: Optional URL prefix to prepend to all routes (e.g. "/api/v1").
+        exclude: Module names to skip.
+        optional: Module names allowed to fail import and be skipped. Defaults
+            to ``_OPTIONAL_MODULES``. Mandatory modules fail closed (#7128).
+
+    Returns:
+        Number of routers registered.
+    """
+    routes = discover_routes(exclude=exclude, optional=optional)
+    for module_name, router in routes:
+        deps = _dependencies_for_route(module_name)
+        app.include_router(
+            router,
+            prefix=prefix,
+            dependencies=[Depends(dependency) for dependency in deps],
+        )
+        logger.debug("Registered router from %s with prefix '%s'", module_name, prefix)
+    return len(routes)

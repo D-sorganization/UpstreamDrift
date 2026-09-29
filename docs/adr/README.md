@@ -1,0 +1,125 @@
+# Architecture Decision Records (ADRs)
+
+This directory tracks architecture-impacting decisions for UpstreamDrift.
+
+## Policy
+
+- Use `ADR_TEMPLATE.md` for every new ADR.
+- Filename format: `NNNN-short-title.md`.
+- Every ADR must include Status, Date, and validation notes.
+- Superseded ADRs must link to the replacing ADR.
+
+## Index
+
+| ADR                                                                     | Title                                                                             | Status   | Date       |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------- | ---------- |
+| [0001](0001-fastapi-local-first-api.md)                                 | FastAPI for Local-First API Design                                                | Accepted | 2026-02-18 |
+| [0002](0002-physics-engine-plugin-architecture.md)                      | Physics Engine Plugin Architecture                                                | Accepted | 2026-02-18 |
+| [0003](0003-websocket-realtime-simulation.md)                           | WebSocket Protocol for Real-Time Simulation                                       | Accepted | 2026-02-18 |
+| [0004](0004-launcher-provider-migration.md)                             | Launcher Provider Migration Modes and Legacy Deprecation Policy                   | Accepted | 2026-04-08 |
+| [0005](0005-rust-tools-core-git-dependency.md)                          | Pin `tools-core` as a Git Dependency                                              | Accepted | 2026-04-23 |
+| [0006](0006-multi-source-motion-targets.md)                             | Multi-Source Motion Targets                                                       | Accepted | 2026-05-08 |
+| [0007](0007-motion-pipeline-architecture.md)                            | Motion Pipeline Architecture (CIR)                                                | Proposed | 2026-05-08 |
+| [0012](0012-canonical-pose-interchange.md)                              | Canonical Pose Interchange                                                        | Accepted | 2026-05-09 |
+| [0013](0013-launcher-composability.md)                                  | Launcher Composability — Embeddable-tool contract and IPC layer                   | Accepted | 2026-05-09 |
+| [0017](0017-sidekick-agentic-action-layer.md)                           | Sidekick agentic action layer                                                     | Accepted | 2026-05-22 |
+| [0018](0018-standalone-sidekick.md)                                     | Standalone Sidekick Application                                                   | Accepted | 2026-05-23 |
+| [0019](0019-mission-drift-calculators.md)                               | Mission-Drift Calculators                                                         | Accepted | 2026-04-25 |
+| [0020](0020-canonical-urdf-subsystem.md)                                | Canonical URDF subsystem                                                          | Accepted | 2026-05-08 |
+| [0021](0021-container-strategy.md)                                      | Container Strategy — Three-Dockerfile Policy                                      | Accepted | 2026-05-25 |
+| [0022](0022-chat-sidekick-boundary.md)                                  | Chat Sidekick Boundary                                                            | Accepted | 2026-06-12 |
+| [0023](0023-mujoco-warp-backend.md)                                     | MuJoCo Warp GPU + MuJoCo CPU backends behind one Protocol                         | Accepted | 2026-05-29 |
+| [0024](0024-differentiable-backend.md)                                  | Differentiable backend — MJX (JAX) vs custom Warp kernels                         | Accepted | 2026-05-29 |
+| [0025](0025-jaxsim-backend-home.md)                                     | JaxSim Backend Home                                                               | Accepted | 2026-05-30 |
+| [0026](0026-canonical-dynamic-state-v2.md)                              | Canonical Dynamic State v2                                                        | Accepted | 2026-05-31 |
+| [0027](0027-canonical-viewport-backend.md)                              | Canonical 3D Viewport Backend (Rerun export follow-up executed 2026-08-08, #8405) | Accepted | 2026-05-31 |
+| [0028](0028-react-tauri-launcher-parity.md)                             | React/Tauri launcher parity model                                                 | Accepted | 2026-06-10 |
+| [0030](0030-c3d-viewer-renderer-backend.md)                             | C3D Viewer Renderer Backend                                                       | Accepted | 2026-06-10 |
+| [0031](0031-launch-monitor-canonical-shot-schema.md)                    | Canonical Launch Monitor Shot Schema                                              | Accepted | 2026-08-04 |
+| [0032](0032-bunkershot3d-club-design-architecture.md)                   | BunkerShot3D as a Multi-Fidelity Club-Design Tool                                 | Accepted | 2026-08-13 |
+| [0033](0033-bunkershot3d-sand-field-tier.md)                            | Sand-Field Visualization Tier for BunkerShot3D                                    | Proposed | 2026-08-16 |
+| [0034](0034-launch-monitor-analysis-contract-v2.md)                     | Launch Monitor Analysis Contract V2                                               | Accepted | 2026-08-19 |
+| [0035](0035-source-backed-strokes-gained-contract.md)                   | Source-Backed Strokes-Gained Contract                                             | Accepted | 2026-08-20 |
+| [0036](0036-launch-monitor-identity-boundaries.md)                      | Launch Monitor Player, Session, and Order Identity Boundaries                     | Accepted | 2026-08-20 |
+| [0037](0037-immutable-launch-monitor-dataset-jobs.md)                   | Immutable Launch-Monitor Dataset Jobs                                             | Accepted | 2026-08-20 |
+| [0038](0038-launch-monitor-player-covariation-contract.md)              | Canonical Launch Monitor Player Covariation Contract                              | Accepted | 2026-08-20 |
+| [0039](0039-attested-launch-monitor-longitudinal-sessions.md)           | Attested Launch Monitor Longitudinal Sessions                                     | Accepted | 2026-08-20 |
+| [0040](0040-data-free-launch-monitor-conformance-bundle.md)             | Data-Free Launch-Monitor Conformance Bundle                                       | Accepted | 2026-08-21 |
+| [0041](0041-markerless-mocap-consumer-authority.md)                     | Markerless Mocap Consumer Authority                                               | Accepted | 2026-08-25 |
+| [0042](0042-engineering-design-manual-authority.md)                     | Engineering Design Manual Authority and Release Boundary                          | Accepted | 2026-08-25 |
+| [0043](0043-companion-manifest-provider-authority.md)                   | Companion Manifest Provider Authority                                             | Accepted | 2026-08-28 |
+| [0044](0044-out-of-plane-fidelity-for-bunkershot3d.md)                  | Out-of-Plane Fidelity for BunkerShot3D                                            | Proposed | 2026-08-29 |
+| [0045](0045-putting-integration-one-experience-two-preserved-stacks.md) | Putting Integration — One Experience, Two Preserved Physics Stacks                | Accepted | 2026-08-30 |
+| [0046](0046-launch-monitor-analytics-single-model-layer.md)             | Launch-Monitor Analytics — Two Workbenches, One Model Layer                       | Accepted | 2026-08-30 |
+| [0047](0047-trajectory-visualization-shared-wire-preserved-viewers.md)  | Trajectory Visualization — Shared Wire, Preserved Viewers                         | Accepted | 2026-08-30 |
+| [0048](0048-launch-monitor-port-plan.md)                                | Launch-Monitor Port Plan                                                          | Proposed | 2026-09-01 |
+| [0049](0049-obs-studio-is-not-a-capture-layer.md)                       | OBS Studio Is Not a Capture Layer for the Markerless Rig                          | Accepted | 2026-09-07 |
+| [0050](0050-optimizer-backend-registry-and-bioptim.md)                  | Optimizer Backend Registry and the `bioptim` OCP Layer                            | Accepted | 2026-09-08 |
+| [0051](0051-matched-swing-abstraction.md)                               | Unified Motion-Matching Abstraction Stack                                         | Accepted | 2026-09-20 |
+
+Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
+canonical-core app-shell registry reuse of the embeddable-tool contract.
+
+## Recent Amendments
+
+- **2026-09-26:** ADR-0041 gains Amendment 1: consumer-side fitters (unknowns include the
+  subject model) live in UpstreamDrift; Tools keeps record authority and reference geometry (#9619, #9630).
+- **2026-09-26:** ADR-0044 records the interim fail-closed sand-motion capability register
+  (`src/bunkershot3d/solvers/capability.py`, #9688); the ADR stays Proposed.
+- **2026-09-17:** ADR-0043 adds documentation and engine capability evidence authority for the companion (#9193): hashed registries, immutable blob URLs, and test-node-verified evidence.
+- **2026-09-21:** ADR-0046's Stage 2 (G2) note is updated to record that
+  module retirement onto the canonical layer landed across four waves
+  (#9348), gated by `tests/unit/launch_monitor/test_canonical_layer_parity.py`;
+  the UD workbench consumes the canonical layer through the
+  `src/tools/launch_monitor_model/` facade, the Impact Explorer tab through
+  Tools' own `rate_of_closure` re-point, and both launcher tiles state the
+  "same analytics engine" relationship, pinned by
+  `tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py`
+  (#9349).
+- **2026-09-10:** ADR-0048 classifies `launch_monitor_data.py` as `app-local` (#8365): it imports public Launch-Monitor-Data exports into the statistics core and has no Tools twin.
+- **2026-09-03:** ADR-0048's "Stage 2 Blocker (G2)" records that ADR-0046 Stage 2's module retirement is **complete**. All 28 `port-up`/`merge` launch-monitor modules are retired onto the canonical layer vendored from Tools across four waves (#9425, #9444, wave 3a, wave 3b); `src/tools/launch_monitor_model/` now holds only the re-export facade, the app-local `project`, and the expected-strokes baseline half that ADR-0048's step P12 deliberately excluded from the port because `rate_of_closure.launch_monitor_strokes_gained_baseline` is already its authority. Three owner rulings landed with the retirements and are pinned with old and new values in the drift gates: D15 (FDR denominator), D17 (boolean projection labelled), G1-D1 (pooled longitudinal estimator becomes a named-method pair), G1-D2 (session-cell inference unit), and D22/D23 (covariation interval withholding and registry units). The drift gates stay at 71 (#9348).
+- **2026-09-02:** ADR-0048's "Stage 2 Blocker (G2)" records that Option 1 was executed: UpstreamDrift's transitional launch-monitor copy moved out of the `shared.python` namespace to `src/tools/launch_monitor_model/`, beside the workbench that consumes it. The `launch_monitor` shadow-ledger entry cleared, `shared.python.launch_monitor` now resolves to the vendored canonical package, and ADR-0046 Stage 2 wave 1 is unblocked (#9420).
+- **2026-09-02:** ADR-0046's Consequences record the repo owner's ruling on
+  the TypeScript-twin obligation ADR-0048 G1 sized and flagged as unsized:
+  **deferred-twin policy** — canonical Python modules in the Tools model
+  layer stand alone, and each TypeScript twin is a tracked follow-up,
+  prioritized when a web surface (ADR-0046 Stage 2's re-pointing of the UD
+  workbench or the Impact Explorer tab) actually needs that module, rather
+  than a landing prerequisite.
+- **2026-09-02:** ADR-0048's "The TypeScript-Twin Obligation Is Unsized" risk
+  records the same deferred-twin ruling, cross-referenced to ADR-0046's
+  Consequences.
+- **2026-09-02:** ADR-0048 gains "Stage 2 Blocker (G2)": ADR-0046 Stage 2's module-by-module retirement cannot execute as written, because `shared.python.launch_monitor` resolves to UpstreamDrift's own package rather than the vendored canonical one — both carry an `__init__.py` on `shared.python.__path__` and the `src/` entry precedes the vendor entry, so the prescribed import rewrite is a self-referential no-op. The blocker is at package granularity, as is the shadow guard that tracks it, so the ledger entry cannot be narrowed per file. Three options are recorded for the owner (#9405).
+- **2026-09-02:** ADR-0048 records the repo owner's rulings on four of G0.1's pinned launch-monitor divergences: D15 (FDR multiplicity denominator excludes under-sampled predictors before correcting, Tools' existing posture), D17 (UD's boolean-as-0/1 capability is preserved but the projection must be explicit in the result), D22 (the low-dof between-player Fisher interval is withheld per UD's posture), and D23 (the column-name-suffix unit heuristic is deleted in favor of canonical-registry resolution, also UD's posture) (#9392).
+- **2026-09-02:** ADR-0044 corrected `ShotResult` force field name reference from `forces_n_m` to `forces_n` (#9375).
+- **2026-08-29:** ADR-0044 keeps BunkerShot3D in-plane: F1's
+  `RefusedQuantity.OUT_OF_PLANE`, the `EXTRUDED` slice labelling, and the
+  ball-as-cylinder caveat are recorded as the tool's durable position rather
+  than a stopgap, with a concrete, cheap reopening trigger (fix #9247, then
+  run the existing Sobol'/Morris study over `WedgeGeometry`'s heel/toe and
+  rocker parameters) instead of a permanent close.
+- **2026-08-29:** ADR-0043 adds the #9192 exact-commit publication boundary:
+  one shared bundle command, ephemeral protected-main evidence, draft-first
+  immutable release acquisition, attestation, and non-fabricated schema
+  compatibility history.
+- **2026-08-30:** ADR-0043 adds the #9190 structured-workflow authority:
+  a hashed repository registry, one fail-closed public executor, exact-commit
+  CI evidence, and an explicit boundary against scientific or native-engine
+  qualification.
+- **2026-08-16:** ADR-0033 amends ADR-0032's fidelity-tier table: F1 is
+  narrowed from "reduced-order / 2-D plane-strain continuum" to a 2-D
+  plane-strain **MPM** solver and becomes the sand-field visualization tier,
+  and the F3 MuJoCo proxy is recorded as non-functional rather than merely
+  low-fidelity.
+- **2026-08-11:** ADR-0019 supersedes its original universal 1 MB PDF ceiling
+  with signature validation, a 50,000,000-byte warning, and GitHub's
+  100,000,000-byte hard file boundary so in-scope scientific publications can
+  retain publication-quality figures.
+- **2026-05-31:** ADR-0017 now records the CC-38 canonical-core Sidekick tool
+  adapter and its fixed `canonical.*` action allowlist.
+
+## ADR Backlog
+
+1. Engine adapter boundary ownership and contract lifecycle.
+2. UI/API orchestration boundaries and dependency direction.
+3. CI quality gate scope and blocking policy.

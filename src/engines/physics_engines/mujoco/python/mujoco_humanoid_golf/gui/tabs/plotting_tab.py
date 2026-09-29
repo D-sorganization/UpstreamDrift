@@ -1,0 +1,430 @@
+"""Plotting tab for the MuJoCo humanoid golf GUI.
+
+Provides real-time plot widgets for joint positions, velocities,
+contact forces, and energy time-series during simulation.
+"""
+
+from __future__ import annotations
+
+import typing
+
+import numpy as np
+from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.style_constants import Styles
+
+from ...plotting import GolfSwingPlotter, MplCanvas
+from ...sim_widget import MuJoCoSimWidget
+
+if typing.TYPE_CHECKING:
+    from ..advanced_gui import AdvancedGolfAnalysisWindow
+
+logger = get_logger(__name__)
+
+
+class PlottingTab(QtWidgets.QWidget):
+    """Tab for advanced plotting and data visualization."""
+
+    PLOT_INDUCED_ACCEL: typing.ClassVar[str] = "Induced Accelerations"
+    PLOT_PHASE_DIAGRAM: typing.ClassVar[str] = "Phase Diagram"
+    PLOT_COUNTERFACTUAL: typing.ClassVar[str] = "Counterfactual Comparison"
+
+    CF_MAP: typing.ClassVar[dict[str, str]] = {
+        "ZTCF (Zero Torque)": "ztcf_accel",
+        "ZVCF (Zero Velocity)": "zvcf_torque",
+    }
+
+    def __init__(
+        self,
+        sim_widget: MuJoCoSimWidget,
+        main_window: AdvancedGolfAnalysisWindow,
+        parent: QtWidgets.QWidget | None = None,
+    ) -> None:
+        if sim_widget is None:
+            raise ValueError("sim_widget must be provided")
+        super().__init__(parent)
+        self.sim_widget = sim_widget
+        self.main_window = main_window
+
+        self.current_plot_canvas: MplCanvas | None = None
+
+        self._setup_ui()
+        self.update_joint_list()
+
+    def _setup_ui(self) -> None:
+        """Create the plotting interface."""
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(8, 8, 8, 8)
+
+        # Plot selection
+        plot_group = QtWidgets.QGroupBox("Plot Type")
+        plot_layout = QtWidgets.QVBoxLayout(plot_group)
+
+        self.plot_combo = QtWidgets.QComboBox()
+        self.plot_combo.addItems(
+            [
+                "Summary Dashboard",
+                "Joint Angles",
+                "Joint Velocities",
+                "Joint Torques",
+                self.PLOT_INDUCED_ACCEL,
+                "Actuator Powers",
+                "Energy Analysis",
+                "Club Head Speed",
+                "Club Head Trajectory (3D)",
+                "Swing Plane Analysis",
+                self.PLOT_PHASE_DIAGRAM,
+                "Torque Comparison",
+                self.PLOT_COUNTERFACTUAL,
+            ]
+        )
+        plot_layout.addWidget(self.plot_combo)
+
+        # Settings Stack
+        self.settings_stack = QtWidgets.QStackedWidget()
+        plot_layout.addWidget(self.settings_stack)
+
+        # Empty page
+        self.empty_page = QtWidgets.QWidget()
+        self.settings_stack.addWidget(self.empty_page)
+
+        # Joint selection (for phase diagram)
+        self.joint_select_widget = QtWidgets.QWidget()
+        js_layout = QtWidgets.QFormLayout(self.joint_select_widget)
+        self.joint_select_combo = QtWidgets.QComboBox()
+        js_layout.addRow("Joint:", self.joint_select_combo)
+        self.settings_stack.addWidget(self.joint_select_widget)
+
+        # Induced Accel Settings
+        self.induced_widget = QtWidgets.QWidget()
+        ind_layout = QtWidgets.QFormLayout(self.induced_widget)
+        self.induced_source_combo = QtWidgets.QComboBox()
+        self.induced_source_combo.addItems(["breakdown", "gravity", "actuator"])
+        # Add support for specific actuator selection if model is loaded
+        # We will populate this dynamically or allow text input?
+        # For now, let's add a text input for actuator name
+        self.induced_actuator_edit = QtWidgets.QLineEdit()
+        self.induced_actuator_edit.setPlaceholderText(
+            "Specific Actuator Name (optional)"
+        )  # noqa: E501
+        ind_layout.addRow("Source:", self.induced_source_combo)
+        ind_layout.addRow("Or Actuator:", self.induced_actuator_edit)
+        self.settings_stack.addWidget(self.induced_widget)
+
+        # Counterfactual Settings
+        self.cf_widget = QtWidgets.QWidget()
+        cf_layout = QtWidgets.QFormLayout(self.cf_widget)
+        self.cf_combo = QtWidgets.QComboBox()
+        self.cf_combo.addItems(list(self.CF_MAP.keys()))
+        cf_layout.addRow("Counterfactual:", self.cf_combo)
+        self.settings_stack.addWidget(self.cf_widget)
+
+        self.plot_combo.currentTextChanged.connect(self.on_plot_type_changed)
+
+        self.generate_plot_btn = QtWidgets.QPushButton("Generate Plot")
+        self.generate_plot_btn.clicked.connect(self.on_generate_plot)
+        self.generate_plot_btn.setStyleSheet(Styles.BTN_GENERATE_PLOT)
+        plot_layout.addWidget(self.generate_plot_btn)
+
+        self.btn_advanced_dialog = QtWidgets.QPushButton("Open Advanced Analysis...")
+        self.btn_advanced_dialog.clicked.connect(
+            self.main_window.show_advanced_plots_dialog
+        )
+        self.btn_advanced_dialog.setStyleSheet(Styles.BTN_ADVANCED_ANALYSIS)
+        plot_layout.addWidget(self.btn_advanced_dialog)
+
+        layout.addWidget(plot_group)
+
+        # Plot canvas container
+        self.plot_container = QtWidgets.QWidget()
+        self.plot_container_layout = QtWidgets.QVBoxLayout(self.plot_container)
+        self.plot_container_layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll_area = QtWidgets.QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(self.plot_container)
+        layout.addWidget(scroll_area, stretch=1)
+
+    def update_joint_list(self) -> None:
+        """Update the list of joints for phase diagram selection."""
+        self.joint_select_combo.clear()
+        if self.sim_widget.model is None:
+            return
+
+        import mujoco
+
+        for i in range(self.sim_widget.get_num_joints()):
+            name = mujoco.mj_id2name(
+                self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
+            )  # noqa: E501
+            if name:
+                self.joint_select_combo.addItem(name)
+            else:
+                self.joint_select_combo.addItem(f"Joint {i}")
+
+    def on_plot_type_changed(self, plot_type: str) -> None:
+        """Handle plot type selection change."""
+        if plot_type == self.PLOT_PHASE_DIAGRAM:
+            self.settings_stack.setCurrentWidget(self.joint_select_widget)
+            if self.joint_select_combo.count() == 0:
+                self.update_joint_list()
+        elif plot_type == self.PLOT_INDUCED_ACCEL:
+            self.settings_stack.setCurrentWidget(self.induced_widget)
+        elif plot_type == self.PLOT_COUNTERFACTUAL:
+            self.settings_stack.setCurrentWidget(self.cf_widget)
+        else:
+            self.settings_stack.setCurrentWidget(self.empty_page)
+
+    def on_generate_plot(self) -> None:
+        """Generate the selected plot."""
+        recorder = self.sim_widget.get_recorder()
+
+        if recorder.get_num_frames() == 0:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recorded data available. Please record some data first.",
+            )
+            return
+
+        # Safety: Pause simulation if running, as we might modify data for re-analysis
+        was_running = False
+        if self.sim_widget.running:
+            self.sim_widget.set_running(False)
+            was_running = True
+
+        canvas, plotter = self._prepare_plot_canvas(recorder)
+        plot_type = self.plot_combo.currentText()
+
+        # Feedback: Disable button and show loading state
+        self.generate_plot_btn.setEnabled(False)
+        original_text = self.generate_plot_btn.text()
+        self.generate_plot_btn.setText("Generating...")
+        QtWidgets.QApplication.processEvents()  # Force UI update
+
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+        try:
+            self._dispatch_plot(plot_type, plotter, canvas, recorder)
+
+            canvas.draw()
+            self.current_plot_canvas = canvas
+            self.plot_container_layout.addWidget(canvas)
+
+        except ImportError as e:
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Plot Error",
+                f"Error generating plot: {e!s}",
+            )
+            logger.error("Plot generation failed: %s", e)
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            self.generate_plot_btn.setText(original_text)
+            self.generate_plot_btn.setEnabled(True)
+
+            # Restore simulation state
+            if was_running:
+                self.sim_widget.set_running(True)
+
+    def _prepare_plot_canvas(
+        self,
+        recorder: typing.Any,
+    ) -> tuple[MplCanvas, GolfSwingPlotter]:
+        """Clear old canvas and create a fresh canvas and plotter."""
+        if recorder is None:
+            raise ValueError("recorder must be provided")
+        if self.current_plot_canvas is not None:
+            self.plot_container_layout.removeWidget(self.current_plot_canvas)
+            self.current_plot_canvas.deleteLater()
+            self.current_plot_canvas = None
+
+        canvas = MplCanvas(width=8, height=6, dpi=100)
+        plotter = GolfSwingPlotter(recorder)
+        return canvas, plotter
+
+    def _dispatch_plot(
+        self,
+        plot_type: str,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+        recorder: typing.Any,
+    ) -> None:
+        """Route the plot type to the appropriate generation method."""
+        if plot_type == self.PLOT_INDUCED_ACCEL:
+            self._generate_induced_acceleration_plot(plotter, canvas, recorder)
+        elif plot_type == self.PLOT_COUNTERFACTUAL:
+            self._generate_counterfactual_plot(plotter, canvas, recorder)
+        else:
+            self._generate_standard_plot(plot_type, plotter, canvas)
+
+    def _generate_standard_plot(
+        self,
+        plot_type: str,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+    ) -> None:
+        """Generate one of the standard (non-recomputation) plot types."""
+        if plot_type is None:
+            raise ValueError("plot_type must be provided")
+        standard_plots: dict[str, typing.Callable[..., typing.Any]] = {
+            "Summary Dashboard": plotter.plot_summary_dashboard,
+            "Joint Angles": plotter.plot_joint_angles,
+            "Joint Velocities": plotter.plot_joint_velocities,
+            "Joint Torques": plotter.plot_joint_torques,
+            "Actuator Powers": plotter.plot_actuator_powers,
+            "Energy Analysis": plotter.plot_energy_analysis,
+            "Club Head Speed": plotter.plot_club_head_speed,
+            "Club Head Trajectory (3D)": plotter.plot_club_head_trajectory,
+            "Swing Plane Analysis": plotter.plot_swing_plane,
+            "Torque Comparison": plotter.plot_torque_comparison,
+        }
+        plot_fn = standard_plots.get(plot_type)
+        if plot_fn is not None:
+            plot_fn(canvas.fig)
+        elif plot_type == self.PLOT_PHASE_DIAGRAM:
+            joint_idx = self.joint_select_combo.currentIndex()
+            plotter.plot_phase_diagram(canvas.fig, joint_idx)
+
+    def _generate_induced_acceleration_plot(
+        self,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+        recorder: typing.Any,
+    ) -> None:
+        """Generate an induced acceleration plot, recomputing data if needed."""
+        if plotter is None:
+            raise ValueError("plotter must be provided")
+        source = self.induced_source_combo.currentText()
+        spec_act = self.induced_actuator_edit.text().strip()
+        if spec_act:
+            _, vals = recorder.get_induced_acceleration_series(spec_act)
+            if len(vals) == 0:
+                self._recompute_induced_accelerations(recorder, spec_act)
+            source = spec_act
+
+        breakdown = source == "breakdown"
+        plotter.plot_induced_acceleration(
+            canvas.fig,
+            source,
+            breakdown_mode=breakdown,
+        )
+
+    def _recompute_induced_accelerations(
+        self,
+        recorder: typing.Any,
+        spec_act: str,
+    ) -> None:
+        """Recompute induced accelerations frame-by-frame using the analyzer."""
+        if recorder is None:
+            raise ValueError("recorder must be provided")
+        analyzer = self.sim_widget.get_analyzer()
+        if not analyzer:
+            return
+        if self.sim_widget.model is None or self.sim_widget.data is None:
+            return
+
+        total_frames = len(recorder.frames)
+        progress = QtWidgets.QProgressDialog(
+            "Computing Induced Accelerations...",
+            "Cancel",
+            0,
+            total_frames,
+            self,
+        )
+        progress.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+
+        vals_list = []
+        for i, frame in enumerate(recorder.frames):
+            if progress.wasCanceled():
+                raise RuntimeError("Operation canceled")
+            progress.setValue(i)
+
+            # Save current state
+            state_bak = self.sim_widget.get_state()
+
+            self.sim_widget.set_state_and_forward(
+                {
+                    "q": frame.joint_positions,
+                    "v": frame.joint_velocities,
+                    "ctrl": frame.joint_torques,
+                }
+            )
+
+            res = analyzer.compute_induced_acceleration("actuator")
+            vals_list.append(res)
+
+            # Restore
+            self.sim_widget.set_state_and_forward(state_bak)
+
+        progress.setValue(total_frames)
+
+        # Inject into recorder frames
+        for i, val in enumerate(vals_list):
+            recorder.frames[i].induced_accelerations[spec_act] = val
+
+    def _generate_counterfactual_plot(
+        self,
+        plotter: GolfSwingPlotter,
+        canvas: MplCanvas,
+        recorder: typing.Any,
+    ) -> None:
+        """Generate a counterfactual comparison plot, recomputing if needed."""
+        if plotter is None:
+            raise ValueError("plotter must be provided")
+        cf_selection = self.cf_combo.currentText()
+        cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
+
+        _, vals = recorder.get_counterfactual_series(cf_name)
+        if len(vals) == 0:
+            self._recompute_counterfactuals(recorder, cf_name)
+
+        plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
+
+    def _recompute_counterfactuals(
+        self,
+        recorder: typing.Any,
+        cf_name: str,
+    ) -> None:
+        """Recompute counterfactual data frame-by-frame using the analyzer."""
+        if recorder is None:
+            raise ValueError("recorder must be provided")
+        analyzer = self.sim_widget.get_analyzer()
+        if not analyzer:
+            return
+        if self.sim_widget.model is None or self.sim_widget.data is None:
+            return
+
+        total_frames = len(recorder.frames)
+        progress = QtWidgets.QProgressDialog(
+            "Computing Counterfactuals...",
+            "Cancel",
+            0,
+            total_frames,
+            self,
+        )
+        progress.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+
+        state_bak = self.sim_widget.get_state()
+
+        for i, frame in enumerate(recorder.frames):
+            if progress.wasCanceled():
+                raise RuntimeError("Operation canceled")
+            progress.setValue(i)
+
+            self.sim_widget.set_state_and_forward(
+                {
+                    "q": frame.joint_positions,
+                    "v": frame.joint_velocities,
+                    "ctrl": frame.joint_torques,
+                }
+            )
+
+            cf_results: dict[str, np.ndarray] = analyzer.compute_counterfactuals()
+            if cf_name in cf_results:
+                cf_value: np.ndarray = cf_results[cf_name]
+                frame.counterfactuals[cf_name] = cf_value
+
+        progress.setValue(total_frames)
+
+        self.sim_widget.set_state_and_forward(state_bak)

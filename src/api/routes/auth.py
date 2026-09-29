@@ -1,0 +1,400 @@
+"""Authentication routes for user management."""
+
+# Python 3.10 compatibility: UTC constant was added in 3.11
+from datetime import datetime, timedelta
+from typing import cast
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.orm import Session
+
+from src.api.auth.dependencies import RequireAdmin, RequireAuth
+from src.api.auth.models import (
+    API_KEY_NAME_MAX_LENGTH,
+    APIKey,
+    APIKeyCreate,
+    APIKeyResponse,
+    LoginRequest,
+    LoginResponse,
+    RefreshTokenRequest,
+    RefreshTokenResponse,
+    User,
+    UserCreate,
+    UserResponse,
+    UserRole,
+    UsageSummaryResponse,
+)
+from src.api.auth.security import compute_prefix_hash, security_manager, usage_tracker
+from src.api.database import get_db
+from src.api.utils.datetime_compat import UTC
+from src.shared.python.core.contracts import precondition
+
+router = APIRouter(prefix="/auth", tags=["authentication"])
+
+# Rate limiting constants for auth endpoints (Issue #522)
+# Protects against credential stuffing and brute force attacks
+REGISTRATION_RATE_LIMIT = "3/hour"
+LOGIN_RATE_LIMIT = "5/minute"
+
+# Use shared limiter - registered with app.state in server.py
+# This ensures proper rate limiting across all routes
+from src.api.rate_limit import limiter
+
+
+@router.post("/register", response_model=UserResponse)
+@limiter.limit(
+    REGISTRATION_RATE_LIMIT
+)  # SECURITY: Limit registration to prevent account farming
+async def register_user(
+    request: Request, user_data: UserCreate, db: Session = Depends(get_db)
+) -> UserResponse:
+    """Register a new user."""
+
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
+        )
+
+    # Create new user
+    hashed_password = security_manager.hash_password(user_data.password)
+    db_user = User(
+        email=user_data.email,
+        hashed_password=hashed_password,
+        full_name=user_data.full_name,
+        organization=user_data.organization,
+        role=UserRole.FREE.value,  # New users start with free tier
+        is_active=True,
+        is_verified=False,  # Email verification required
+    )
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    return db_user
+
+
+@router.post("/login", response_model=LoginResponse)
+@limiter.limit(
+    LOGIN_RATE_LIMIT
+)  # SECURITY: Limit login attempts to prevent brute force
+async def login(
+    request: Request, login_data: LoginRequest, db: Session = Depends(get_db)
+) -> LoginResponse:
+    """Authenticate user and return tokens."""
+
+    # Find user
+    user = db.query(User).filter(User.email == login_data.email).first()
+
+    # SECURITY: Prevent user enumeration via timing attacks by always
+    # performing a password verification even if the user is not found.
+    if user:
+        password_valid = security_manager.verify_password(
+            login_data.password, str(user.hashed_password)
+        )
+    else:
+        # Perform dummy verification using a valid bcrypt hash with the same
+        # work factor (12) used in the system, to take roughly the same time.
+        # This hash was generated with bcrypt for the password 'dummy_password'
+        dummy_hash = "$2b$12$9KWF9XkUM7.biKJYGY1oCeql3F9vNsKwhxDusKhRk8iCg5gUdT7G."
+        security_manager.verify_password(login_data.password, dummy_hash)
+        password_valid = False
+
+    if not password_valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+
+    # Check if user is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is deactivated"
+        )
+
+    # Create tokens
+    access_token_expires = timedelta(minutes=30)
+    access_token = security_manager.create_access_token(
+        data={"sub": str(user.id), "email": user.email},
+        expires_delta=access_token_expires,
+    )
+
+    refresh_token = security_manager.create_refresh_token(
+        data={"sub": str(user.id), "email": user.email}
+    )
+
+    # Update last login
+    user.last_login = datetime.now(UTC)  # type: ignore[assignment]
+    db.commit()
+
+    return LoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_in=int(access_token_expires.total_seconds()),
+        user=user,
+    )
+
+
+@router.post("/refresh", response_model=RefreshTokenResponse)
+@precondition(
+    lambda body, db=None: (
+        body is not None
+        and body.refresh_token is not None
+        and len(body.refresh_token.strip()) > 0
+    ),
+    "Refresh token must be a non-empty string",
+)
+async def refresh_token(
+    body: RefreshTokenRequest, db: Session = Depends(get_db)
+) -> RefreshTokenResponse:
+    """Refresh access token using refresh token.
+
+    Args:
+        body: Request body containing the refresh token.
+        db: Database session.
+
+    Returns:
+        New access token and metadata.
+    """
+    refresh_token = body.refresh_token
+    # Verify refresh token
+    payload = security_manager.verify_token(refresh_token, "refresh")
+    user_id = payload.get("sub")
+
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+        )
+
+    # Get user
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive",
+        )
+
+    # Create new access token
+    access_token_expires = timedelta(minutes=30)
+    access_token = security_manager.create_access_token(
+        data={"sub": str(user.id), "email": user.email},
+        expires_delta=access_token_expires,
+    )
+
+    return RefreshTokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=int(access_token_expires.total_seconds()),
+    )
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(current_user: User = RequireAuth) -> UserResponse:
+    """Get current user information."""
+    return current_user
+
+
+@router.get("/usage", response_model=UsageSummaryResponse)
+async def get_usage_info(current_user: User = RequireAuth) -> UsageSummaryResponse:
+    """Get current user's usage information."""
+    return UsageSummaryResponse(**usage_tracker.get_usage_summary(current_user))
+
+
+@router.post("/api-keys", response_model=APIKeyResponse)
+async def create_api_key(
+    api_key_data: APIKeyCreate,
+    current_user: User = RequireAuth,
+    db: Session = Depends(get_db),
+) -> APIKeyResponse:
+    """Create a new API key for the current user."""
+
+    # Generate API key
+    if not (api_key_data is not None):
+        raise ValueError("api_key_data must be provided")
+
+    # Defense-in-depth length precondition at the persistence boundary
+    # (issue #7167 D4): even if the Pydantic layer is bypassed or changed,
+    # never silently truncate the name at the String(API_KEY_NAME_MAX_LENGTH)
+    # column. Shares the single length bound with the model + DB CHECK.
+    if not (1 <= len(api_key_data.name) <= API_KEY_NAME_MAX_LENGTH):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "API key name must be between 1 and "
+                f"{API_KEY_NAME_MAX_LENGTH} characters"
+            ),
+        )
+
+    api_key = security_manager.generate_api_key()
+    api_key_hash = security_manager.hash_api_key(api_key)
+
+    # Create API key record
+    db_api_key = APIKey(
+        user_id=current_user.id,
+        key_hash=api_key_hash,
+        key_prefix=compute_prefix_hash(api_key[4:12]),
+        name=api_key_data.name,
+        is_active=True,
+    )
+
+    db.add(db_api_key)
+    db.commit()
+    db.refresh(db_api_key)
+
+    # Return API key (only time it's shown in plain text)
+    response = APIKeyResponse.from_orm(db_api_key)
+    response.key = api_key  # Include the actual key in response
+
+    return response
+
+
+@router.get("/api-keys", response_model=list[APIKeyResponse])
+async def list_api_keys(
+    current_user: User = RequireAuth, db: Session = Depends(get_db)
+) -> list[APIKeyResponse]:
+    """List all API keys for the current user."""
+
+    if not (current_user is not None):
+        raise ValueError("current_user must be provided")
+    api_keys = db.query(APIKey).filter(APIKey.user_id == current_user.id).all()
+    return [APIKeyResponse.from_orm(key) for key in api_keys]
+
+
+@router.delete("/api-keys/{api_key_id}")
+@precondition(
+    lambda api_key_id, current_user=None, db=None: api_key_id > 0,
+    "API key ID must be a positive integer",
+)
+async def delete_api_key(
+    api_key_id: int, current_user: User = RequireAuth, db: Session = Depends(get_db)
+) -> dict[str, str]:
+    """Delete an API key."""
+
+    api_key = (
+        db.query(APIKey)
+        .filter(APIKey.id == api_key_id, APIKey.user_id == current_user.id)
+        .first()
+    )
+
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="API key not found"
+        )
+
+    db.delete(api_key)
+    db.commit()
+
+    return {"message": "API key deleted successfully"}
+
+
+# Admin routes
+@router.get("/users", response_model=list[UserResponse])
+@precondition(
+    lambda skip=0, limit=100, current_user=None, db=None: skip >= 0 and limit > 0,
+    "skip must be non-negative and limit must be positive",
+)
+async def list_users(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = RequireAdmin,
+    db: Session = Depends(get_db),
+) -> list[UserResponse]:
+    """List all users (admin only)."""
+
+    if not (skip is not None):
+        raise ValueError("skip must be provided")
+    users = db.query(User).offset(skip).limit(limit).all()
+    return [UserResponse.from_orm(user) for user in users]
+
+
+def _count_active_admins(db: Session) -> int:
+    """Return the number of active admin users."""
+    return cast(
+        int,
+        db.query(User)
+        .filter(User.role == UserRole.ADMIN.value, User.is_active)
+        .count(),
+    )
+
+
+@router.put("/users/{user_id}/role")
+@precondition(
+    lambda user_id, new_role, current_user=None, db=None: user_id > 0,
+    "User ID must be a positive integer",
+)
+async def update_user_role(
+    user_id: int,
+    new_role: UserRole,
+    current_user: User = RequireAdmin,
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    """Update user role (admin only).
+
+    Precondition: user_id > 0, new_role is a valid UserRole.
+    Postcondition: user.role == new_role.value, unless the last admin would be demoted.
+    """
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if (
+        new_role != UserRole.ADMIN
+        and user.role == UserRole.ADMIN.value
+        and _count_active_admins(db) <= 1
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot demote the last active admin",
+        )
+
+    user.role = new_role.value  # type: ignore[assignment]
+    db.commit()
+
+    return {"message": f"User role updated to {new_role.value}"}
+
+
+@router.put("/users/{user_id}/status")
+@precondition(
+    lambda user_id, is_active, current_user=None, db=None: user_id > 0,
+    "User ID must be a positive integer",
+)
+async def update_user_status(
+    user_id: int,
+    is_active: bool,
+    current_user: User = RequireAdmin,
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    """Update user active status (admin only).
+
+    Precondition: user_id > 0.
+    Postcondition: user.is_active == is_active, unless the last admin would be deactivated
+    or the admin is deactivating themselves.
+    """
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    if not is_active:
+        if user.id == current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot deactivate your own account",
+            )
+        if user.role == UserRole.ADMIN.value and _count_active_admins(db) <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot deactivate the last active admin",
+            )
+
+    user.is_active = is_active  # type: ignore[assignment]
+    db.commit()
+
+    status_text = "activated" if is_active else "deactivated"
+    return {"message": f"User {status_text} successfully"}

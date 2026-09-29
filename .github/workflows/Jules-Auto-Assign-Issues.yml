@@ -1,0 +1,118 @@
+name: Jules Auto-Assign Issues
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Automatically comments @jules on new issues to trigger the fix workflow
+# IMPORTANT: Only triggers for AUTOMATED issues, NOT manually created ones
+# To manually request Jules help, add the 'jules-triage' label to an issue
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  check-kill-switch:
+    timeout-minutes: 30
+    runs-on: d-sorg-fleet-docker
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
+    runs-on: d-sorg-fleet-docker
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+  auto-assign:
+    timeout-minutes: 30
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    # CHANGED: Only trigger for automated issues or explicit jules-triage label
+    # - Issues created by github-actions (from automated assessments)
+    # - Issues with 'jules-triage' or 'auto-generated' labels
+    # This prevents unwanted cascade of PRs when manually creating issues
+    if: |
+      (github.event.action == 'opened' && github.event.issue.user.login == 'github-actions[bot]') ||
+      (github.event.action == 'labeled' && (github.event.label.name == 'jules-triage' || github.event.label.name == 'auto-generated'))
+    steps:
+      - name: Check Issue Labels
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
+          LABELS: ${{ toJson(github.event.issue.labels) }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          # LABELS and ISSUE_BODY are passed via env to prevent shell injection
+
+          # Skip issues created by Jules itself (prevents runaway cascade)
+          if echo "$ISSUE_BODY" | grep -q "jules.google.com/task/"; then
+            echo "Skipping - Jules-generated follow-up issue"
+            echo "should_assign=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Skip if labeled with 'no-jules', 'question', 'documentation', or 'wontfix'
+          SKIP_LABELS="no-jules question documentation wontfix duplicate invalid jules-assigned"
+
+          for label in $SKIP_LABELS; do
+            if echo "$LABELS" | jq -e ".[] | select(.name == \"$label\")" > /dev/null 2>&1; then
+              echo "Skipping - issue has '$label' label"
+              echo "should_assign=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+
+          echo "should_assign=true" >> $GITHUB_OUTPUT
+
+      - name: Comment @jules
+        if: steps.check.outputs.should_assign == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "$(cat <<'EOF'
+          @jules Please analyze and fix this issue.
+
+          ---
+          *Auto-assigned by Jules Auto-Assign workflow*
+          EOF
+          )"
+
+          echo "Commented @jules on issue #$ISSUE_NUMBER"
+
+      - name: Add Jules Label
+        if: steps.check.outputs.should_assign == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Create label if it doesn't exist
+          gh label create "jules-assigned" --repo "$REPO" --color "7057ff" --description "Issue assigned to Jules AI" 2>/dev/null || true
+
+          # Add label to issue
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "jules-assigned" || true

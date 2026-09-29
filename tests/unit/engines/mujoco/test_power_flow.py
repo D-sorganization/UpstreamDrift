@@ -1,0 +1,563 @@
+"""Tests for power flow analysis (Guideline E3 - Required).
+
+Comprehensive test suite validating:
+- Joint-level power calculations
+- Work decomposition (drift/control)
+- Inter-segment energy transfer
+- Energy conservation
+- Sign conventions (generation vs absorption)
+"""
+
+import mujoco
+import numpy as np
+import pytest
+from mujoco_humanoid_golf.power_flow import (
+    InterSegmentTransfer,
+    PowerFlowAnalyzer,
+    PowerFlowResult,
+)
+
+pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def simple_pendulum_model() -> mujoco.MjModel:
+    """Create simple pendulum for testing."""
+    xml = """
+    <mujoco>
+        <option gravity="0 0 -9.80665" timestep="0.01"/>
+        <worldbody>
+            <body name="pendulum" pos="0 0 0">
+                <joint name="hinge" type="hinge" axis="0 1 0" damping="0.1"/>
+                <geom type="capsule" size="0.01 0.5" mass="1.0"/>
+            </body>
+        </worldbody>
+        <actuator>
+            <motor joint="hinge" gear="1.0"/>
+        </actuator>
+    </mujoco>
+    """
+    return mujoco.MjModel.from_xml_string(xml)
+
+
+class TestPowerFlowBasics:
+    """Test basic power flow calculations."""
+
+    def test_power_is_torque_times_velocity(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test P =τ · ω."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.1])
+        qvel = np.array([2.0])  # 2 rad/s
+        qacc = np.array([0.0])
+        tau = np.array([3.0])  # 3 Nm
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        # P = τ · ω = 3.0 * 2.0 = 6.0 Watts
+        expected_power = 6.0
+        assert abs(result.joint_powers[0] - expected_power) < 1e-6, (
+            f"Expected power {expected_power}, got {result.joint_powers[0]}"
+        )
+
+    @pytest.mark.parametrize(
+        "tau_val,expect_positive",
+        [
+            (2.0, True),
+            (-2.0, False),
+        ],
+        ids=["aligned_positive", "opposed_negative"],
+    )
+    def test_power_sign_convention(
+        self, simple_pendulum_model: mujoco.MjModel, tau_val, expect_positive
+    ) -> None:
+        """Test power sign depends on torque-velocity alignment."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.0])
+        qvel = np.array([1.0])  # Positive velocity
+        qacc = np.array([0.0])
+        tau = np.array([tau_val])
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        if expect_positive:
+            assert result.joint_powers[0] > 0, (
+                "Power should be positive when torque and velocity are aligned"
+            )
+        else:
+            assert result.joint_powers[0] < 0, (
+                "Power should be negative when torque opposes velocity"
+            )
+
+    def test_zero_velocity_gives_zero_power(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test P = 0 when velocity is zero."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.5])
+        qvel = np.array([0.0])  # No motion
+        qacc = np.array([0.0])
+        tau = np.array([5.0])  # Non-zero torque
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        # v = 0 → P = 0 regardless of torque
+        assert abs(result.joint_powers[0]) < 1e-10, (
+            "Power should be zero when velocity is zero"
+        )
+
+
+class TestWorkCalculations:
+    """Test work calculations and decomposition."""
+
+    def test_work_equals_power_times_time(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test W = P · dt."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.0])
+        qvel = np.array([2.0])
+        qacc = np.array([0.0])
+        tau = np.array([3.0])
+        dt = 0.1  # 0.1 second
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau, dt=dt)
+
+        # W = P · dt = 6.0 * 0.1 = 0.6 Joules
+        expected_work = 6.0 * 0.1
+        assert abs(result.joint_work_total[0] - expected_work) < 1e-6, (
+            f"Expected work {expected_work}, got {result.joint_work_total[0]}"
+        )
+
+    def test_work_decomposition_sums_to_total(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test that drift + control work equals total work."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.2])
+        qvel = np.array([1.5])
+        qacc = np.array([0.0])
+        tau_total = np.array([4.0])
+        tau_drift = np.array([1.0])
+        tau_control = np.array([3.0])
+        dt = 0.05
+
+        result = analyzer.compute_power_flow(
+            qpos,
+            qvel,
+            qacc,
+            tau_total,
+            dt=dt,
+            tau_drift=tau_drift,
+            tau_control=tau_control,
+        )
+
+        # Work components should sum to total
+        work_sum = result.joint_work_drift[0] + result.joint_work_control[0]
+        assert abs(result.joint_work_total[0] - work_sum) < 1e-6, (
+            "Drift + control work should equal total work"
+        )
+
+
+class TestEnergyCalculations:
+    """Test segment energy calculations."""
+
+    def test_kinetic_energy_at_rest_is_zero(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test KE = 0 when velocity is zero."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.5])
+        qvel = np.array([0.0])  # At rest
+        qacc = np.array([0.0])
+        tau = np.array([0.0])
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        # All segments at rest → KE should be near zero
+        # (world body has no mass)
+        total_ke = np.sum(result.segment_kinetic_energy)
+        assert total_ke < 1e-6, f"Expected zero KE at rest, got {total_ke}"
+
+    def test_potential_energy_increases_with_height(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test PE computation runs for different positions."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qacc = np.array([0.0])
+        qvel = np.array([0.0])
+        tau = np.array([0.0])
+
+        # Low position
+        qpos_low = np.array([0.0])  # Hanging down
+        result_low = analyzer.compute_power_flow(qpos_low, qvel, qacc, tau)
+
+        # High position
+        qpos_high = np.array([np.pi / 2])  # Horizontal
+        result_high = analyzer.compute_power_flow(qpos_high, qvel, qacc, tau)
+
+        # Both results should have segment_potential_energy arrays
+        assert result_low.segment_potential_energy is not None
+        assert result_high.segment_potential_energy is not None
+
+        pe_low = np.sum(result_low.segment_potential_energy)
+        pe_high = np.sum(result_high.segment_potential_energy)
+
+        # If PE is computed, higher position should have >= PE
+        # Note: PE may be zero if mj_forward not called internally
+        assert pe_high >= pe_low, (
+            f"Higher position should have PE >= lower: {pe_high} vs {pe_low}"
+        )
+
+    def test_total_mechanical_energy_is_ke_plus_pe(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test E = KE + PE."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([np.pi / 4])
+        qvel = np.array([1.0])
+        qacc = np.array([0.0])
+        tau = np.array([0.0])
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        total_ke = np.sum(result.segment_kinetic_energy)
+        total_pe = np.sum(result.segment_potential_energy)
+        expected_me = total_ke + total_pe
+
+        assert abs(result.total_mechanical_energy - expected_me) < 1e-6, (
+            "Total ME should equal KE + PE"
+        )
+
+
+class TestSystemPowerMetrics:
+    """Test system-level power metrics."""
+
+    def test_power_input_is_sum_of_positive_powers(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test power input calculation."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.0])
+        qvel = np.array([2.0])
+        qacc = np.array([0.0])
+        tau = np.array([3.0])  # Positive power
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        # Single joint with positive power
+        expected_power_in = 3.0 * 2.0  # 6.0 W
+        assert abs(result.power_in - expected_power_in) < 1e-6, (
+            f"Expected power_in {expected_power_in}, got {result.power_in}"
+        )
+
+    def test_power_dissipation_from_damping(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test power dissipation calculation."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.0])
+        qvel = np.array([2.0])  # 2 rad/s
+        qacc = np.array([0.0])
+        tau = np.array([0.0])
+
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
+
+        # Damping = 0.1, velocity = 2.0
+        # P_diss = b * ω² = 0.1 * 4.0 = 0.4 W
+        expected_diss = 0.1 * 2.0**2
+        assert abs(result.power_dissipation - expected_diss) < 1e-6, (
+            f"Expected dissipation {expected_diss}, got {result.power_dissipation}"
+        )
+
+
+class TestTrajectoryAnalysis:
+    """Test trajectory-level analysis."""
+
+    def test_trajectory_analysis_length(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test trajectory analysis returns correct number of results."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        N = 10
+        times = np.linspace(0, 1, N)
+        qpos_traj = np.sin(times).reshape(-1, 1)
+        qvel_traj = np.cos(times).reshape(-1, 1)
+        qacc_traj = -np.sin(times).reshape(-1, 1)
+        tau_traj = np.ones((N, 1))
+
+        results = analyzer.analyze_trajectory(
+            times, qpos_traj, qvel_traj, qacc_traj, tau_traj
+        )
+
+        assert len(results) == N, f"Expected {N} results, got {len(results)}"
+        assert all(isinstance(r, PowerFlowResult) for r in results)
+
+
+class TestInterSegmentTransfer:
+    """Test inter-segment power transfer analysis."""
+
+    def test_inter_segment_transfer_structure(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test inter-segment transfer returns correct structure."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.2])
+        qvel = np.array([1.0])
+        tau = np.array([2.0])
+
+        transfers = analyzer.compute_inter_segment_transfer(qpos, qvel, tau)
+
+        # Should have transfers for all bodies (world + pendulum)
+        assert len(transfers) == simple_pendulum_model.nbody
+        assert all(isinstance(t, InterSegmentTransfer) for t in transfers)
+
+    def test_world_body_has_zero_power_transfer(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        """Test world body (fixed) has no power transfer."""
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+
+        qpos = np.array([0.0])
+        qvel = np.array([1.0])
+        tau = np.array([1.0])
+
+        transfers = analyzer.compute_inter_segment_transfer(qpos, qvel, tau)
+
+        # First transfer should be world body
+        world_transfer = transfers[0]
+        assert (
+            world_transfer.segment_name == "world"
+            or world_transfer.parent_name == "world"
+        )
+
+
+@pytest.mark.integration
+class TestPowerFlowPhysics:
+    """Integration tests for power flow physics validation."""
+
+
+class TestPowerDissipationParity:
+    """Vectorized power dissipation must equal the original scalar loop (#7561)."""
+
+    def test_dissipation_matches_scalar_reference(
+        self, simple_pendulum_model: mujoco.MjModel
+    ) -> None:
+        analyzer = PowerFlowAnalyzer(simple_pendulum_model)
+        model = simple_pendulum_model
+
+        for qvel in (np.array([0.0]), np.array([2.0]), np.array([-3.5])):
+            # Reference: the exact pre-optimization scalar loop.
+            expected = 0.0
+            for i in range(model.njnt):
+                joint = model.jnt(i)
+                if joint.damping[0] > 0:
+                    v_idx = joint.dofadr[0]
+                    if v_idx < model.nv:
+                        expected += joint.damping[0] * (qvel[v_idx] * qvel[v_idx])
+
+            got = analyzer._compute_power_dissipation(qvel)
+            assert abs(got - expected) < 1e-12
+
+    def test_dissipation_zero_when_no_damping(self) -> None:
+        xml = """
+        <mujoco>
+            <worldbody>
+                <body name="b" pos="0 0 0">
+                    <joint name="j" type="hinge" axis="0 1 0"/>
+                    <geom type="capsule" size="0.01 0.5" mass="1.0"/>
+                </body>
+            </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        analyzer = PowerFlowAnalyzer(model)
+        assert analyzer._compute_power_dissipation(np.array([5.0])) == 0.0
+
+
+class TestSegmentEnergyGroundTruth:
+    """Numeric regressions for #8002.
+
+    ``mjData.energy`` (``[potential, kinetic]``, filled by ``mj_energyPos`` /
+    ``mj_energyVel``) is the ground truth for a gravity-only model.
+    """
+
+    @staticmethod
+    def _mujoco_energy(
+        model: mujoco.MjModel, qpos: np.ndarray, qvel: np.ndarray
+    ) -> tuple[float, float]:
+        data = mujoco.MjData(model)
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        mujoco.mj_forward(model, data)
+        mujoco.mj_energyPos(model, data)
+        mujoco.mj_energyVel(model, data)
+        return float(data.energy[0]), float(data.energy[1])
+
+    def test_rotational_ke_uses_body_frame_inertia(self) -> None:
+        """Spin about a body's own long axis: world-frame contraction is ~630x off."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.80665"/>
+          <compiler eulerseq="xyz"/>
+          <worldbody>
+            <body name="rod" pos="0 0 1.5" euler="90 0 0">
+              <joint name="spin" type="hinge" axis="0 0 1"/>
+              <geom type="capsule" fromto="0 0 -0.6 0 0 0.6" size="0.02" mass="2"/>
+            </body>
+          </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        qpos = np.array([0.0])
+        qvel = np.array([10.0])
+        pe_truth, ke_truth = self._mujoco_energy(model, qpos, qvel)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(
+            qpos, qvel, np.zeros(model.nv), np.zeros(model.nv)
+        )
+
+        assert float(np.sum(result.segment_kinetic_energy)) == pytest.approx(
+            ke_truth, rel=1e-9, abs=1e-12
+        )
+        assert float(np.sum(result.segment_potential_energy)) == pytest.approx(
+            pe_truth, rel=1e-9, abs=1e-12
+        )
+
+    def test_potential_energy_uses_body_com_not_frame_origin(self) -> None:
+        """Offset geoms make xipos != xpos; the xpos read was ~21% off."""
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.80665"/>
+          <worldbody>
+            <body name="upper" pos="0 0 2">
+              <joint name="j1" type="hinge" axis="0 1 0"/>
+              <geom type="box" pos="0.3 0.1 -0.2" size="0.3 0.05 0.05" mass="3"/>
+              <body name="lower" pos="0.6 0 0">
+                <joint name="j2" type="hinge" axis="0 1 0"/>
+                <geom type="box" pos="0.25 -0.15 -0.3" size="0.25 0.05 0.05" mass="2"/>
+              </body>
+            </body>
+          </worldbody>
+          <actuator><motor joint="j1"/><motor joint="j2"/></actuator>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        qpos = np.array([0.3, -0.7])
+        qvel = np.array([1.7, -2.3])
+        pe_truth, ke_truth = self._mujoco_energy(model, qpos, qvel)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(
+            qpos, qvel, np.zeros(model.nv), np.zeros(model.nv)
+        )
+
+        assert float(np.sum(result.segment_potential_energy)) == pytest.approx(
+            pe_truth, rel=1e-9
+        )
+        assert float(np.sum(result.segment_kinetic_energy)) == pytest.approx(
+            ke_truth, rel=1e-9
+        )
+
+        # Confirm the body frame origin really is a different point.
+        data = mujoco.MjData(model)
+        data.qpos[:] = qpos
+        mujoco.mj_forward(model, data)
+        assert not np.allclose(data.xpos[1], data.xipos[1])
+
+    def test_potential_energy_honours_non_vertical_gravity(self) -> None:
+        xml = """
+        <mujoco>
+          <option gravity="3.0 0 -9.80665"/>
+          <worldbody>
+            <body name="b" pos="1.0 0 2.0">
+              <joint name="j" type="hinge" axis="0 1 0"/>
+              <geom type="sphere" size="0.1" mass="4"/>
+            </body>
+          </worldbody>
+        </mujoco>
+        """
+        model = mujoco.MjModel.from_xml_string(xml)
+        qpos = np.zeros(model.nv)
+        qvel = np.zeros(model.nv)
+        pe_truth, _ = self._mujoco_energy(model, qpos, qvel)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(qpos, qvel, qvel, qvel)
+        assert float(np.sum(result.segment_potential_energy)) == pytest.approx(
+            pe_truth, rel=1e-9
+        )
+
+
+class TestEnergyConservationResidual:
+    """#8002: the residual was hardcoded to 0.0, fabricating a clean validation."""
+
+    @staticmethod
+    def _arm_model() -> mujoco.MjModel:
+        xml = """
+        <mujoco>
+          <option gravity="0 0 -9.80665"/>
+          <worldbody>
+            <body name="upper" pos="0 0 2">
+              <joint name="j1" type="hinge" axis="0 1 0"/>
+              <geom type="box" pos="0.3 0.1 -0.2" size="0.3 0.05 0.05" mass="3"/>
+              <body name="lower" pos="0.6 0 0">
+                <joint name="j2" type="hinge" axis="0 1 0"/>
+                <geom type="box" pos="0.25 -0.15 -0.3" size="0.25 0.05 0.05" mass="2"/>
+              </body>
+            </body>
+          </worldbody>
+          <actuator><motor joint="j1"/><motor joint="j2"/></actuator>
+        </mujoco>
+        """
+        return mujoco.MjModel.from_xml_string(xml)
+
+    def test_residual_is_zero_for_consistent_state(self) -> None:
+        model = self._arm_model()
+        data = mujoco.MjData(model)
+        qpos = np.array([0.3, -0.7])
+        qvel = np.array([1.7, -2.3])
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        data.ctrl[:] = np.array([4.0, -1.5])
+        mujoco.mj_forward(model, data)
+
+        analyzer = PowerFlowAnalyzer(model)
+        result = analyzer.compute_power_flow(
+            qpos, qvel, data.qacc.copy(), data.qfrc_actuator.copy()
+        )
+        assert result.energy_conservation_residual < 1e-8
+
+    def test_residual_reports_injected_spurious_power(self) -> None:
+        model = self._arm_model()
+        data = mujoco.MjData(model)
+        qpos = np.array([0.3, -0.7])
+        qvel = np.array([1.7, -2.3])
+        data.qpos[:] = qpos
+        data.qvel[:] = qvel
+        data.ctrl[:] = np.array([4.0, -1.5])
+        mujoco.mj_forward(model, data)
+
+        analyzer = PowerFlowAnalyzer(model)
+        bogus = data.qfrc_actuator.copy() + np.array([50.0, 0.0])
+        result = analyzer.compute_power_flow(qpos, qvel, data.qacc.copy(), bogus)
+
+        # The extra 50 Nm on joint 1 injects |50 * qvel[0]| W the state cannot
+        # account for.
+        assert result.energy_conservation_residual == pytest.approx(
+            abs(50.0 * qvel[0]), rel=1e-9
+        )

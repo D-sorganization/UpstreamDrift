@@ -1,0 +1,248 @@
+# Software and Data Availability {#sec-appendix-inventory}
+
+The open-source implementation separates the analytical model, torque
+programs, counterfactual evaluation, energy accounting, robustness analyses,
+and figure generation. The scientific entry points are collected under
+[`scripts/research/proximal_distal_energy/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/scripts/research/proximal_distal_energy),
+with shared model parameters and dynamics under
+[`simulation_backends/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/src/shared/python/simulation_backends).
+This is a provenance statement, not a capability claim about the surrounding
+software.
+
+The current evidence boundary includes these known limitations:
+
+- A multi-phase matched-state torque-killswitch ensemble is complete for one
+  declared torque program; other torque programs, model classes, and uncertainty
+  distributions remain necessary before making general persistence claims.
+- The archived two-hand ZTCF remains pointwise along the BASE state history.
+  Separate forward rigid-club and coupled moving-base/flexible-club models now
+  demonstrate finite zero-command persistence. A reduced full-body spatial
+  common-state tier now tests nonplanar inverse dynamics, but passive spatial
+  contact and human variants remain open validation steps.
+- The primary model has two planar links and a fixed hub; torso, hub-path,
+  long-axis rotation, and closed-loop arm effects are absent.
+- The shaft extension is a three-coordinate point-mass surrogate with one
+  linear torsional mode. It is not a calibrated distributed-beam or equipment
+  model, and extreme low-stiffness deflections exceed its linear premise.
+- The coupled actuator adds delay, first-order activation, rate and
+  torque--velocity limits, and impedance, but it remains a nonphysiological
+  command surrogate.
+- Coupled uncertainty is screened over declared engineering envelopes;
+  population distributions and measurement uncertainty are not estimated.
+- No human motion or force data are analyzed; the result is mechanistic and
+  model-derived, not a skill-group effect.
+- The model ladder now executes reduced and subject-scaled forward two-hand
+  contact, distributed grip, passive first-mode shaft, and planar finite-base
+  ground/free-moment tiers in MuJoCo and Pinocchio. The interfaces and support
+  law remain synthetic, bilateral, and uncalibrated; three-dimensional
+  unilateral foot contact and governed human validation remain unexecuted.
+
+# Reproducibility Guide {#sec-appendix-repro}
+
+From the repository root (Python 3.11+ with the project dependencies):
+
+```bash
+# Primary sweep, counterfactuals, and interface-power analysis
+python3 -m scripts.research.proximal_distal_energy.run_experiments
+
+# Registered WSCG source extraction and interaction-force analysis
+python3 -m scripts.research.proximal_distal_energy.extract_wscg_charts
+python3 -m scripts.research.proximal_distal_energy.run_interaction_force_study
+python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
+python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
+python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
+python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
+python3 -m scripts.research.proximal_distal_energy.run_forward_two_arm_study
+python3 -m scripts.research.proximal_distal_energy.run_moving_base_flexible_study
+python3 -m scripts.research.proximal_distal_energy.run_shaft_beam_reference
+python3 -m scripts.research.proximal_distal_energy.run_spatial_full_body_study
+python3 -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution
+python3 -m scripts.research.proximal_distal_energy.run_articulated_native_constraint_discrepancy
+python3 -m scripts.research.proximal_distal_energy.make_articulated_native_constraint_discrepancy_figure
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_diagnostic
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_atlas
+python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_posthoc_sensitivity
+python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
+python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
+python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
+
+# Robustness analyses
+python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
+python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
+python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
+
+# Figures and document
+python3 -m scripts.research.proximal_distal_energy.make_figures
+python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
+python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
+python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
+python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
+python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
+python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
+python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
+python3 -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
+python3 -m scripts.research.proximal_distal_energy.make_shaft_beam_reference_figures
+python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
+python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
+cd docs/research/proximal_distal_energy_transfer
+quarto render proximal_distal_energy_transfer.qmd --to pdf
+cd ../../..
+python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
+```
+
+Outputs land in `data/` (JSON and NPZ with integrator and parameter provenance)
+and `figures/` (PDF and SVG). The open-chain analyses use fixed-step RK4; the
+forward constrained two-hand analysis uses velocity Verlet with mass-metric
+projection. The analyses contain no stochastic elements. Re-runs should
+reproduce the recorded values up to floating-point environment differences.
+The final optimizer requires
+PyMuPDF, performs lossless object/stream compaction, and refuses an artifact
+that changes the page count, URI-link count, or outline-entry count.
+
+# Validation Evidence {#sec-appendix-validation}
+
+Tests exercise analytical double-pendulum ground truth, optional
+cross-backend agreement, drift-plus-control reconstruction, work--energy
+consistency, deterministic replay, impact edge cases, headline values, and
+the parameter-case contract. The wrist-interface balance also checks that
+the club mechanical-energy rate matches the summed interface powers to the
+finite-difference tolerance. These checks reduce numerical and
+implementation error; they do not validate the structural model assumptions.
+
+# Model Parameters and Program Definitions {#sec-appendix-params}
+
+| Parameter | Value | Notes |
+|---|---|---|
+| Arm length $l_1$ | 0.75 m | baseline |
+| Arm mass $m_1$ | 7.5 kg | both arms lumped |
+| Arm COM ratio | 0.45 | $l_{c1} = 0.3375$ m |
+| Arm inertia about COM | 0.3516 kg·m² | about hub: 1.2059 kg·m² |
+| Club length $l_2$ | 1.0 m | grip to clubhead |
+| Shaft mass | 0.15 kg | COM ratio 0.43 |
+| Clubhead mass | 0.20 kg | point mass at tip |
+| Club composite mass $m_2$ | 0.35 kg | $l_{c2} = 0.7557$ m |
+| Club inertia about COM | 0.0403 kg·m² | about wrist: 0.2402 kg·m² |
+| Plane inclination | 35° | projected gravity 8.033 m/s² |
+| Damping (shoulder, wrist) | 0.4, 0.25 N·m·s/rad | viscous |
+| Integrator | RK4, $\Delta t = 1$ ms | analytical ODE backend |
+| Initial state | $\theta_1=-2.2$, $\theta_2=-1.57$ rad, $\dot q = 0$ | top of backswing |
+| Shoulder torque $\tau_s$ | 60 / 100 N·m | constant from $t=0$ |
+| Wrist drive | +15 N·m from $t_{\mathrm{on}}$ | onset grid 0–0.35 s, step 0.025 |
+| Wrist restraint $R$ | 5 / 10 N·m before $t_{\mathrm{on}}$ | restrain-then-drive only |
+| Impact | first $\theta_1+\theta_2 = 0$ crossing | valid iff $\theta_1 \le 2.0$ rad |
+
+: Baseline model parameters and experiment constants. {#tbl-params}
+
+Recorded outputs:
+
+- `data/e1_sweep.json` — one row per torque program plus provenance.
+- `data/representative_traces.npz` — representative state, control,
+  counterfactual, energy, speed, and interface-power traces.
+- `data/results_summary.json` — representative impacts and phase budgets.
+- `data/e1b_bounded_sweep.json` — torque-velocity-bounded sweep.
+- `data/e1c_sensitivity.json` — alternative impact-definition results.
+- `data/e1d_parameter_sensitivity.json` — 13 one-at-a-time parameter cases.
+- `data/interaction_force_mechanisms.npz` — exact force, power, geometry, and
+  matched-state killswitch arrays.
+- `data/interaction_force_summary.json` — headline force, work, and divergence
+  metrics with counterfactual contracts.
+- `data/wscg_2024_hand_force_series.csv` — hash-verified values from the source
+  presentation's embedded chart cache.
+- `data/wscg_2024_source_provenance.json` — source hashes, series inventory, and
+  interpretation boundary.
+- `data/counterfactual_ensemble.json` — 96 baseline cut/horizon/timestep rows,
+  gravity and damping ablations, convergence metrics, and WSCG DELTA checks.
+- `data/counterfactual_selected_traces.npz` — commanded and zero-torque state,
+  force, and power traces for three representative cuts.
+- `data/wscg_two_hand_raw/*.csv` — portable, column-labeled exports of the
+  archived BASE, ZTCF, and DELTA two-hand tables.
+- `data/two_hand_wscg_analysis.json` — source hashes, wrench-reconstruction
+  residuals, reversal times, sensitivity results, and interpretation boundary.
+- `data/two_hand_wscg_analysis.npz` — local force modes, moment and power
+  decompositions, poses, and geometry-counterfactual arrays.
+- `data/bilateral_wrench_identifiability_study.json` — three-dimensional
+  point-force and full bilateral-wrench ranks, null spaces, grip-span sweep,
+  proper-rotation audit, sensing boundary, and explicit nonhuman claims.
+- `data/constraint_internal_force_diagnostics.json` — source-hash-bound planar
+  closure and bilateral wrench-map ranks, explicit coordinate/wrench scales,
+  singular and coincident-contact controls, tolerance sensitivity, and
+  nonhuman inference boundaries.
+- `data/closed_loop_singularity_margin.json` — exact same-origin closure on
+  both assembly branches, full-phase scaled singular margins, exact triangle
+  degeneracies, and phase, geometry, scale, unit, tolerance, impossible-
+  geometry, and manufactured-rank controls.
+- `data/phase_event_stability.{json,npz}` — nondimensional finite-time state
+  transitions, singular gains and exponents, transverse-event derivatives,
+  direct perturbation controls, near-grazing rejection, saltation controls,
+  equivalent-unit checks, and the fail-closed periodicity/Floquet gate.
+- `data/trajectory_control_authority.{json,npz}` — exact-step
+  trajectory-varying input maps, continuous-energy-equivalent Gramians,
+  event-tangent projection, channel masks, direct nonlinear pulse controls,
+  frozen-local countermodels, refinement, additivity, zero-input, and
+  equivalent-unit gates.
+- `data/bounded_event_reachability.{json,npz}` — finite event-tangent
+  continuation, exact-RK4 multiple shooting and independent replay, four
+  channel masks, declared amplitude/slew limits, typed failures, and
+  multistart, mesh, step, zero-authority, and adverse-state controls.
+- `data/event_topology_robustness.{json,npz}` — global direction-aware event
+  enumeration, eleven-delay continuation, matched small synthetic
+  perturbations, pair-level adequacy intervals, and full retained events.
+- `data/event_topology_stress_extension.{json,npz}` — separately
+  preregistered fixed stress-to-failure ladder with absent and multiple
+  crossings retained rather than selected away.
+- `data/event_topology_channel_matrix.{json,npz}` — both, shoulder-only,
+  wrist-only, and zero-authority delay/noise maps; event-state and speed arrays;
+  integration-step refinement; and global-horizon truncation controls.
+- `data/nonlinear_controller_comparison_registration.json` — outcome-blind
+  tuning/evaluation split, nine declared families, matched plant, constraints,
+  objectives, typed failures, ranking suppression, and single-worker identity.
+- `data/nonlinear_controller_solver_qualification.json` — one bounded projected
+  first-order iLQR kernel with derivative, bound, descent, replay,
+  initialization-sensitivity, and typed nonfinite-dynamics gates; collocation
+  NMPC remains unavailable.
+- `data/nonlinear_controller_plant_transport.json` — 12 controller-to-ODE
+  parity cases across three integration steps, exact replay, immutable inputs,
+  typed invalid cases, and zero ranking authority.
+- `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
+  dynamics factorization, analytic physical-map rank witness, three exact
+  nonunique parameter families, dimensionless finite-record rank, unit and
+  scale audits, conditional noise bounds, and a zero-motion killswitch.
+- `data/shaft_contribution_study.json` — matched rigid/flexible results,
+  termwise acceleration and power summaries, ablations, 120 robustness cases,
+  endpoint windows, timestep convergence, and interpretation boundaries.
+- `data/shaft_contribution_traces.npz` — reference, rigid, and ablation state,
+  speed, force, acceleration-contribution, power, work, and energy traces.
+- `data/mechanism_ladder_study.json` — common-schema invariance residuals,
+  prescribed mobile-hub cases, closed-loop constraint diagnostics, and the
+  fail-closed model-discrepancy table.
+- `data/mechanism_ladder_traces.npz` — three-link interface, mobile-hub, and
+  closed-loop conditioning arrays used by the higher-order figures.
+- `data/forward_two_arm_study.json` — forward model parameters, command,
+  closure, killswitch ensemble, negative control, and numerical sensitivities.
+- `data/forward_two_arm_study.npz` — baseline and representative branch states,
+  contact forces, force modes, moments, power, energy, and solver residuals.
+- `data/moving_base_flexible_study.{json,npz}` — coupled base/flex branch,
+  negative control, parameter screen, convergence, states, forces, and energy.
+- `data/shaft_beam_reference.{json,npz}` — synthetic modal identification,
+  finite-element convergence, paired one/six-mode responses, and work--energy
+  closure; not equipment calibration.
+- `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed
+  wrench interventions, two-formulation inverse dynamics, and spatial states.
+- `data/articulated_manufactured_solution.json` — independent analytical,
+  MuJoCo, and Pinocchio inverse-dynamics residuals; three-level Richardson
+  estimates; measured free-subtree conservation drift; and the corruption
+  killswitch contract.
+- `data/articulated_native_constraint_discrepancy.{json,npz}` — one
+  same-state MuJoCo-native bilateral `connect`/`mj_step` branch and one
+  projected Kelvin--Voigt/shared-mass-and-bias branch, including the
+  equality-disabled killswitch, six-row native-constraint gate, refinement,
+  attachment separation, generalized force, and nonzero state discrepancy.
+- `data/uncertainty_control_study.{json,npz}` — declared design, actuator
+  contract, uncertainty intervals, PRCC screen, identifiability audit,
+  training/held-out program comparison, closure, and rollout arrays.
+- `data/experimental_protocol_v1.json` — frozen inclusion, measurement,
+  processing, participant-split, prediction, and inference contract.
+- `data/experimental_protocol_{dry_run,readiness}.json` — synthetic-only intake
+  fixture and fail-closed readiness classification; no human observations.
+- `release_manifest.json` and `CHECKSUMS.sha256` — exact release artifact
+  inventory, model-tier presets, claim status, open gates, hashes, and sizes.

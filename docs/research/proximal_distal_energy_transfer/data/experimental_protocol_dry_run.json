@@ -1,0 +1,53 @@
+{
+  "dataset_status": "synthetic_dry_run",
+  "participants": [
+    {
+      "pseudonym": "SYN-P001",
+      "pseudonym_source": "governed_random_assignment",
+      "split": "training"
+    },
+    {
+      "pseudonym": "SYN-P002",
+      "pseudonym_source": "governed_random_assignment",
+      "split": "held_out"
+    }
+  ],
+  "modalities": {
+    "full_body_kinematics": {
+      "units": ["m", "rad"],
+      "sample_rate_hz": 500.0,
+      "sync_uncertainty_ms": 0.5,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "bilateral_hand_wrenches": {
+      "units": ["N", "N*m"],
+      "sample_rate_hz": 2000.0,
+      "sync_uncertainty_ms": 0.5,
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "club_kinematics": {
+      "units": ["m", "rad"],
+      "sample_rate_hz": 1000.0,
+      "sync_uncertainty_ms": 0.5,
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "ground_reaction": {
+      "units": ["N", "N*m"],
+      "sample_rate_hz": 2000.0,
+      "sync_uncertainty_ms": 0.5,
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "launch_monitor": {
+      "units": ["m/s", "deg"],
+      "sample_rate_hz": 10.0,
+      "sync_uncertainty_ms": 2.0,
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "surface_emg": {
+      "units": ["V"],
+      "sample_rate_hz": 2500.0,
+      "sync_uncertainty_ms": 0.5,
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  }
+}

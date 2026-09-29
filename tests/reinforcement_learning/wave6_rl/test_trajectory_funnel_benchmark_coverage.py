@@ -1,0 +1,336 @@
+"""Comprehensive coverage tests for TrajectoryFunnelBenchmark.
+
+Targets the entire ``src/reinforcement_learning`` package: reward functions,
+convergence estimator, and deterministic simulation entry point.  No training
+loops, deterministic seeded runs only.
+"""
+
+from __future__ import annotations
+
+import logging
+
+import numpy as np
+import pytest
+
+from src.reinforcement_learning import TrajectoryFunnelBenchmark
+from src.reinforcement_learning import trajectory_funnel_benchmark as tfb_module
+
+pytestmark = pytest.mark.unit
+
+# ---------------------------------------------------------------------------
+# Construction / mode validation
+# ---------------------------------------------------------------------------
+
+
+class TestConstruction:
+    def test_default_mode_is_transverse(self) -> None:
+        bench = TrajectoryFunnelBenchmark()
+        assert bench.mode == "transverse"
+
+    @pytest.mark.parametrize("mode", ["transverse", "setpoint"])
+    def test_valid_modes(self, mode: str) -> None:
+        bench = TrajectoryFunnelBenchmark(mode=mode)
+        assert bench.mode == mode
+
+    @pytest.mark.parametrize("bad_mode", ["", "TRANSVERSE", "foo", "set_point"])
+    def test_invalid_mode_raises(self, bad_mode: str) -> None:
+        with pytest.raises(AssertionError, match="Mode must be"):
+            TrajectoryFunnelBenchmark(mode=bad_mode)
+
+
+# ---------------------------------------------------------------------------
+# setpoint_reward
+# ---------------------------------------------------------------------------
+
+
+class TestSetpointReward:
+    def setup_method(self) -> None:
+        self.bench = TrajectoryFunnelBenchmark(mode="setpoint")
+
+    def test_zero_error_returns_zero(self) -> None:
+        s = np.array([1.0, 2.0, 3.0, 4.0])
+        assert self.bench.setpoint_reward(s, s) == pytest.approx(0.0)
+
+    def test_negative_squared_distance(self) -> None:
+        # 3-4-5 triangle: distance^2 = 25
+        c = np.array([3.0, 4.0])
+        t = np.array([0.0, 0.0])
+        assert self.bench.setpoint_reward(c, t) == pytest.approx(-25.0)
+
+    def test_symmetry(self) -> None:
+        a = np.array([1.0, -2.0, 0.5])
+        b = np.array([-3.0, 1.0, 2.0])
+        assert self.bench.setpoint_reward(a, b) == pytest.approx(
+            self.bench.setpoint_reward(b, a)
+        )
+
+    def test_always_non_positive(self) -> None:
+        rng = np.random.default_rng(0)
+        for _ in range(20):
+            c = rng.standard_normal(5)
+            t = rng.standard_normal(5)
+            assert self.bench.setpoint_reward(c, t) <= 0.0
+
+    def test_return_type_is_python_float(self) -> None:
+        c = np.array([1.0, 0.0])
+        t = np.array([0.0, 0.0])
+        result = self.bench.setpoint_reward(c, t)
+        assert type(result) is float
+
+    def test_none_current_state_raises(self) -> None:
+        with pytest.raises(AssertionError, match="current_state must be provided"):
+            self.bench.setpoint_reward(None, np.array([1.0]))  # type: ignore[arg-type]
+
+    def test_higher_distance_lower_reward(self) -> None:
+        t = np.zeros(3)
+        r_near = self.bench.setpoint_reward(np.array([0.1, 0.0, 0.0]), t)
+        r_far = self.bench.setpoint_reward(np.array([10.0, 0.0, 0.0]), t)
+        assert r_near > r_far
+
+    def test_high_dimensional(self) -> None:
+        c = np.ones(50)
+        t = np.zeros(50)
+        # ||1||^2 over 50 dims = 50
+        assert self.bench.setpoint_reward(c, t) == pytest.approx(-50.0)
+
+
+# ---------------------------------------------------------------------------
+# trajectory_funnel_reward
+# ---------------------------------------------------------------------------
+
+
+class TestTrajectoryFunnelReward:
+    def setup_method(self) -> None:
+        self.bench = TrajectoryFunnelBenchmark(mode="transverse")
+
+    def test_on_trajectory_first_point(self) -> None:
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [3.0, 0.0]])
+        # Exactly on first point: distance 0, phase_velocity_reward = 0
+        r = self.bench.trajectory_funnel_reward(ref[0], ref, 0.0)
+        assert r == pytest.approx(0.0)
+
+    def test_on_trajectory_last_point_gives_phase_bonus(self) -> None:
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [3.0, 0.0]])
+        # On last point: distance 0, phase_velocity_reward = 0.5 * 3/4 = 0.375
+        r = self.bench.trajectory_funnel_reward(ref[-1], ref, 1.0)
+        assert r == pytest.approx(0.5 * (3 / 4))
+
+    def test_transverse_cost_scales_with_squared_distance(self) -> None:
+        ref = np.array([[0.0, 0.0]])
+        # min squared distance = 4, transverse cost = -40, phase bonus = 0
+        r = self.bench.trajectory_funnel_reward(np.array([2.0, 0.0]), ref, 0.0)
+        assert r == pytest.approx(-40.0)
+
+    def test_picks_geometrically_closest_point(self) -> None:
+        # Closest reference point is index 2: phase reward = 0.5 * 2/4 = 0.25
+        ref = np.array([[10.0, 0.0], [5.0, 0.0], [0.0, 0.0], [-5.0, 0.0]])
+        r = self.bench.trajectory_funnel_reward(np.array([0.0, 0.0]), ref, 0.0)
+        assert r == pytest.approx(0.25)
+
+    def test_return_type_is_python_float(self) -> None:
+        ref = np.array([[0.0, 0.0], [1.0, 0.0]])
+        r = self.bench.trajectory_funnel_reward(np.array([0.0, 0.0]), ref, 0.0)
+        assert type(r) is float
+
+    def test_none_current_state_raises(self) -> None:
+        ref = np.array([[0.0, 0.0]])
+        with pytest.raises(AssertionError, match="current_state must be provided"):
+            self.bench.trajectory_funnel_reward(None, ref, 0.0)  # type: ignore[arg-type]
+
+    def test_phase_argument_ignored_without_a_phase_window(self) -> None:
+        """With phase_window=None the projection is global (phase slippage)."""
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
+        state = np.array([0.9, 0.0])
+        r0 = self.bench.trajectory_funnel_reward(state, ref, 0.0)
+        r1 = self.bench.trajectory_funnel_reward(state, ref, 1.0)
+        assert r0 == r1
+
+    def test_phase_argument_used_when_phase_window_set(self) -> None:
+        """#7983: current_phase is no longer dead - it gates the projection."""
+        bench = TrajectoryFunnelBenchmark(mode="transverse", phase_window=0.1)
+        ref = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
+        state = np.array([0.9, 0.0])
+        assert bench.trajectory_funnel_reward(
+            state, ref, 0.5
+        ) != bench.trajectory_funnel_reward(state, ref, 0.0)
+
+    def test_high_dim_trajectory(self) -> None:
+        ref = np.zeros((10, 4))
+        ref[:, 0] = np.linspace(0, 1, 10)
+        r = self.bench.trajectory_funnel_reward(np.zeros(4), ref, 0.0)
+        # closest is index 0, distance 0
+        assert r == pytest.approx(0.0)
+
+    def test_batched_rewards_match_scalar_projection(self) -> None:
+        ref = np.array([[0.0, 0.0], [1.0, 0.25], [2.0, 1.0], [3.0, 2.25]])
+        states = np.array([[0.1, 0.0], [0.9, 0.2], [2.7, 2.0]])
+
+        batched = self.bench._trajectory_funnel_rewards(states, ref)
+        scalar = np.array(
+            [self.bench.trajectory_funnel_reward(state, ref, 0.0) for state in states]
+        )
+
+        assert batched == pytest.approx(scalar)
+
+
+# ---------------------------------------------------------------------------
+# _estimate_convergence
+# ---------------------------------------------------------------------------
+
+
+class TestEstimateConvergence:
+    def setup_method(self) -> None:
+        self.bench = TrajectoryFunnelBenchmark()
+
+    def test_empty_trajectory(self) -> None:
+        epoch, var = self.bench._estimate_convergence([])
+        assert epoch == 0
+        assert var == float("inf")
+
+    def test_constant_trajectory_terminal_variance_zero(self) -> None:
+        traj = [1.0] * 50
+        epoch, var = self.bench._estimate_convergence(traj)
+        # rolling means are constant → relative improvement = 0 < threshold
+        assert epoch == 10  # first index where i >= window_size
+        assert var == pytest.approx(0.0)
+
+    def test_no_convergence_returns_len(self) -> None:
+        # Strictly increasing trajectory never plateaus
+        traj = list(np.linspace(1.0, 100.0, 30).tolist())
+        epoch, var = self.bench._estimate_convergence(traj, threshold=1e-9)
+        assert epoch == len(traj)
+        assert var > 0.0
+
+    def test_short_trajectory_below_window(self) -> None:
+        traj = [1.0, 2.0, 3.0]  # shorter than default window_size=10
+        epoch, var = self.bench._estimate_convergence(traj)
+        # Loop range(10, 3) is empty → epoch stays at len()
+        assert epoch == len(traj)
+        # final_window has >1 element → std computed
+        assert var == pytest.approx(float(np.std(traj)))
+
+    def test_single_element_terminal_variance_zero(self) -> None:
+        epoch, var = self.bench._estimate_convergence([5.0])
+        assert epoch == 1
+        assert var == 0.0
+
+    def test_custom_window_and_threshold(self) -> None:
+        traj = [1.0] * 30
+        epoch, _var = self.bench._estimate_convergence(
+            traj, window_size=5, threshold=0.5
+        )
+        assert epoch == 5
+
+    def test_zero_prev_rolling_mean_skips_division(self) -> None:
+        """If a rolling mean is exactly zero the relative-improvement guard
+        must avoid division-by-zero and not declare convergence at that step."""
+        # symmetric around zero so rolling mean lands on 0.0 at some windows
+        traj = [-1.0, 1.0] * 20
+        epoch, _ = self.bench._estimate_convergence(traj, window_size=2)
+        # Should not crash; either converged at some point or len()
+        assert 0 <= epoch <= len(traj)
+
+    def test_rolling_means_match_naive_sliding_windows(self) -> None:
+        rewards = np.array([1.0, 3.0, 6.0, 10.0, 15.0, 21.0])
+        expected = np.array(
+            [np.mean(rewards[max(0, i - 2) : i + 1]) for i in range(len(rewards))],
+            dtype=np.float64,
+        )
+
+        assert self.bench._rolling_means(rewards, window_size=3) == pytest.approx(
+            expected
+        )
+
+    def test_near_zero_previous_mean_uses_epsilon_denominator(self) -> None:
+        traj = [1.0e-15] * 3 + [1.1e-15] * 3
+        epoch, _ = self.bench._estimate_convergence(
+            traj, window_size=3, threshold=1.0e-3
+        )
+
+        assert epoch == 3
+
+    def test_terminal_std_uses_float64_accumulation(self) -> None:
+        traj = [np.float32(100_000.0 + offset) for offset in range(16)]
+        _, terminal_std = self.bench._estimate_convergence(
+            traj, window_size=len(traj), threshold=0.0
+        )
+        expected = float(np.std(np.asarray(traj, dtype=np.float64), dtype=np.float64))
+
+        assert terminal_std == pytest.approx(expected, rel=0.0, abs=1.0e-12)
+
+
+# ---------------------------------------------------------------------------
+# simulate_agent_training
+# ---------------------------------------------------------------------------
+
+
+class TestTrainAgent:
+    """#7983: train_agent must run a real agent, not a noise schedule."""
+
+    def test_setpoint_result_schema(self) -> None:
+        bench = TrajectoryFunnelBenchmark(mode="setpoint")
+        result = bench.train_agent(n_iterations=5, n_steps=10, state_dim=3)
+        assert set(result.keys()) == {
+            "mode",
+            "convergence_iteration",
+            "terminal_return_std",
+            "initial_return",
+            "final_return",
+            "mean_transverse_error",
+            "terminal_setpoint_error",
+        }
+        assert result["mode"] == "setpoint"
+        assert isinstance(result["convergence_iteration"], int)
+        assert isinstance(result["terminal_return_std"], float)
+
+    def test_transverse_result_schema(self) -> None:
+        bench = TrajectoryFunnelBenchmark(mode="transverse")
+        result = bench.train_agent(n_iterations=5, n_steps=10, state_dim=3)
+        assert result["mode"] == "transverse"
+
+    def test_deterministic_repeatable(self) -> None:
+        """A fixed seed makes runs reproducible."""
+        b1 = TrajectoryFunnelBenchmark(mode="setpoint")
+        b2 = TrajectoryFunnelBenchmark(mode="setpoint")
+        r1 = b1.train_agent(n_iterations=5, n_steps=8, state_dim=2)
+        r2 = b2.train_agent(n_iterations=5, n_steps=8, state_dim=2)
+        assert r1 == r2
+
+    def test_learning_curve_length_matches_iterations(self) -> None:
+        """The convergence index is an iteration index, not a step index."""
+        bench = TrajectoryFunnelBenchmark(mode="transverse")
+        result = bench.train_agent(n_iterations=7, n_steps=6, state_dim=2)
+        assert len(bench.learning_curve) == 7
+        assert 0 <= int(result["convergence_iteration"]) <= 7
+
+    def test_minimal_run(self) -> None:
+        bench = TrajectoryFunnelBenchmark(mode="transverse")
+        result = bench.train_agent(n_iterations=2, n_steps=3, state_dim=2)
+        assert result["convergence_iteration"] >= 0
+        assert np.isfinite(result["terminal_return_std"])
+
+    def test_modes_produce_different_dynamics(self) -> None:
+        sp = TrajectoryFunnelBenchmark(mode="setpoint")
+        tv = TrajectoryFunnelBenchmark(mode="transverse")
+        sp.train_agent(n_iterations=10, n_steps=10, state_dim=3)
+        tv.train_agent(n_iterations=10, n_steps=10, state_dim=3)
+        assert sp.learning_curve != tv.learning_curve
+
+    def test_logger_reports_training(self, caplog: pytest.LogCaptureFixture) -> None:
+        bench = TrajectoryFunnelBenchmark(mode="transverse")
+        with caplog.at_level(logging.INFO, logger=tfb_module.__name__):
+            bench.train_agent(n_iterations=2, n_steps=3, state_dim=2)
+        msgs = " ".join(rec.getMessage() for rec in caplog.records)
+        assert "Training complete" in msgs
+
+
+# ---------------------------------------------------------------------------
+# Package smoke
+# ---------------------------------------------------------------------------
+
+
+def test_package_exports_benchmark() -> None:
+    from src import reinforcement_learning as pkg
+
+    assert "TrajectoryFunnelBenchmark" in pkg.__all__
+    assert pkg.TrajectoryFunnelBenchmark is TrajectoryFunnelBenchmark

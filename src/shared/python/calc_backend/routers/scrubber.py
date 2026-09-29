@@ -1,0 +1,169 @@
+# ruff: noqa: E501
+"""Scrubber calculator router.  See issue #613."""
+
+from __future__ import annotations
+
+from typing import Any, Final
+
+from fastapi import APIRouter, HTTPException
+
+from ..contracts.scrubber import ScrubberRequest, ScrubberResponse
+
+router = APIRouter(prefix="/api/calc/scrubber", tags=["scrubber"])
+
+
+def _as_float(value: Any, field_name: str) -> float:
+    """Convert calculator outputs to float for strict response contracts."""
+    if isinstance(value, int | float):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Invalid numeric value for {field_name}: {value}",
+            ) from exc
+    raise HTTPException(
+        status_code=422, detail=f"Invalid type for {field_name}: {type(value).__name__}"
+    )
+
+
+# Convergence controls for the area/flux/flooding/diameter iteration.
+_FLUX_AREA_SEED_M2: Final[float] = 1.0  # initial cross-section guess [m2]
+_FLUX_MAX_ITERATIONS: Final[int] = 50
+_FLUX_AREA_REL_TOL: Final[float] = 1e-9  # relative area convergence tolerance
+
+
+def _solve_flux_flooding_diameter(
+    gas_flow_kg_hr: float,
+    liquid_flow_kg_hr: float,
+    gas_density: float,
+    percent_of_flood: float,
+    packing: Any,
+) -> tuple[float, dict[str, Any]]:
+    """Iterate column area -> liquid flux -> flooding velocity -> diameter.
+
+    The liquid mass flux is ``liquid_flow / (3600 * area)``, but the area is
+    itself an output of the diameter solve, which depends on the flooding
+    velocity, which depends on the flux. We therefore iterate to a fixed
+    point so the flux used to size the column is self-consistent with the
+    solved cross-sectional area (issue #3181), rather than silently assuming
+    a 1 m2 basis.
+
+    Returns the converged ``(flooding_velocity, column_result)``. ``area``
+    is seeded at 1 m2; if the diameter solve cannot produce a positive area
+    (e.g. zero flooding velocity) the seed area is retained so behaviour
+    degrades gracefully.
+    """
+    from shared.python.sidekick.process_calculators.scrubber_calculator import (
+        WATER_DENSITY,
+        WATER_VISCOSITY,
+        calculate_column_diameter,
+        calculate_flooding_velocity,
+    )
+
+    area_m2 = _FLUX_AREA_SEED_M2
+    flooding_velocity = 0.0
+    column_result: dict[str, Any] = {}
+
+    for _ in range(_FLUX_MAX_ITERATIONS):
+        liquid_mass_flux = liquid_flow_kg_hr / (3600.0 * area_m2)  # kg/(m2.s)
+
+        flooding_velocity = calculate_flooding_velocity(
+            liquid_mass_flux=liquid_mass_flux,
+            gas_density=gas_density,
+            liquid_density=WATER_DENSITY,
+            packing=packing,
+            liquid_viscosity=WATER_VISCOSITY,
+        )
+
+        column_result = calculate_column_diameter(
+            gas_flow_kg_hr=gas_flow_kg_hr,
+            gas_density=gas_density,
+            flooding_velocity=flooding_velocity,
+            percent_of_flood=percent_of_flood,
+        )
+
+        new_area = _as_float(
+            column_result.get("cross_section_m2", 0.0), "cross_section_m2"
+        )
+        if new_area <= 0.0:
+            # Degenerate solve (no positive area); keep current basis.
+            break
+
+        if abs(new_area - area_m2) <= _FLUX_AREA_REL_TOL * new_area:
+            area_m2 = new_area
+            break
+        area_m2 = new_area
+
+    return flooding_velocity, column_result
+
+
+@router.post("", response_model=ScrubberResponse)
+def calculate_scrubber(request: ScrubberRequest) -> ScrubberResponse:
+    """Calculate packed-bed scrubber column sizing and caustic requirements."""
+    from shared.python.sidekick.process_calculators.scrubber_calculator import (
+        PACKING_DATABASE,
+        calculate_caustic_requirement,
+        calculate_gas_density,
+        calculate_gas_viscosity,
+    )
+
+    packing = PACKING_DATABASE.get(request.packing_type)
+    if packing is None:
+        available = ", ".join(sorted(PACKING_DATABASE.keys()))
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unknown packing type '{request.packing_type}'. Available: {available}",
+        )
+
+    try:
+        gas_density = calculate_gas_density(
+            request.gas_temperature_k,
+            request.gas_pressure_pa,
+            request.gas_molecular_weight,
+        )
+        # Gas viscosity calculated for reference but not directly needed by
+        # the column-sizing functions called below.
+        _ = calculate_gas_viscosity(
+            request.gas_temperature_k, request.gas_molecular_weight
+        )
+
+        # Liquid mass flux depends on the (unknown) column cross-sectional
+        # area: flux = liquid_flow / (3600 * area). Flooding velocity then
+        # depends on the L/G flux ratio, and the solved diameter (hence area)
+        # depends on the flooding velocity. Iterate area -> flux -> flooding
+        # velocity -> diameter -> area to self-consistency so the flux used is
+        # consistent with the solved diameter, instead of assuming a fixed
+        # 1 m2 basis (issue #3181).
+        flooding_velocity, column_result = _solve_flux_flooding_diameter(
+            gas_flow_kg_hr=request.gas_flow_kg_hr,
+            liquid_flow_kg_hr=request.liquid_flow_kg_hr,
+            gas_density=gas_density,
+            percent_of_flood=request.percent_of_flood,
+            packing=packing,
+        )
+
+        caustic_result = calculate_caustic_requirement(
+            acid_gas_removed=request.acid_gas_removed_kg_hr,
+            caustic_concentration=request.caustic_concentration_pct,
+        )
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    return ScrubberResponse(
+        gas_density_kg_m3=gas_density,
+        flooding_velocity_m_s=flooding_velocity,
+        design_velocity_m_s=_as_float(
+            column_result.get("design_velocity_m_s", 0.0), "design_velocity_m_s"
+        ),
+        column_diameter_m=_as_float(column_result.get("diameter_m", 0.0), "diameter_m"),
+        column_diameter_ft=_as_float(
+            column_result.get("diameter_ft", 0.0), "diameter_ft"
+        ),
+        cross_section_m2=_as_float(
+            column_result.get("cross_section_m2", 0.0), "cross_section_m2"
+        ),
+        caustic_requirement=caustic_result,
+    )

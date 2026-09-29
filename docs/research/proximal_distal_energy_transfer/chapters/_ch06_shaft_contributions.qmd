@@ -1,0 +1,337 @@
+# Gravity, Momentum, Damping, and Shaft-Flex Contributions {#sec-shaft-contributions}
+
+## The Attribution Question {#sec-shaft-question}
+
+The preceding chapters established two different passive mechanisms. In the
+double pendulum, interaction forces can accelerate the distal segment at zero
+instantaneous wrist torque. In the archived two-hand model, separated contact
+forces can create a negative midpoint couple while the commanded free torques
+are zero. Neither result identifies the share attributable to gravity,
+velocity-dependent dynamics, dissipation, or shaft deformation. This chapter
+separates those terms in one declared, reproducible surrogate and asks four
+narrow questions:
+
+1. Which terms create the instantaneous distal angular acceleration?
+2. Which terms supply external work, dissipate energy, or merely redistribute
+   it?
+3. How much does one lumped shaft-flex mode change the matched delivery?
+4. Do those conclusions persist when stiffness, damping, torque-cut time,
+   impact window, and integration step are varied?
+
+The analysis is deliberately a mechanism study. It is not a calibrated model
+of a named shaft, a reconstruction of a human swing, or a validation of the
+archived Simscape model. The implementation and machine-readable results are
+available in
+[`flexible_shaft_study.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/flexible_shaft_study.py)
+and
+[`shaft_contribution_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json).
+
+## A Matched Flexible and Rigid Pair {#sec-shaft-model}
+
+The model is a planar, three-coordinate, point-mass chain. The first coordinate
+is the arm angle, the second is the wrist-relative club angle, and the third,
+$\phi_2$, is a lumped torsional shaft-deflection coordinate between proximal
+shaft mass and clubhead mass. The generalized state is
+
+$$
+\mathbf q=(\theta_1,\phi_1,\phi_2)^\mathsf T.
+$$ {#eq-shaft-state}
+
+The flexible and rigid cases have the same lengths, masses, gravity, joint
+damping, initial condition, and prescribed shoulder/wrist torque history. The
+rigid case is the exact coordinate reduction
+$\phi_2=\dot\phi_2=0$, not a separately tuned model. This matched construction
+isolates the consequence of admitting one elastic degree of freedom.
+
+![Matched Mass Distribution With and Without a Shaft-Flex Coordinate](figures/fig_shaft_model_schematic.pdf){#fig-shaft-model-schematic width=100%}
+
+The reference parameters are intentionally transparent: an 0.75 m arm, 0.45 m
+proximal shaft, 0.55 m distal shaft, 7.5 kg arm point mass, 0.15 kg proximal
+shaft point mass, and 0.20 kg distal head point mass. Projected gravity is
+8.033 m/s². The linear shaft mode uses $k_s=80$ N·m/rad and
+$c_s=0.6$ N·m·s/rad. These values define the demonstration; they are not
+presented as a fitted equipment specification.
+
+This point-mass idealization is more restrictive than a distributed Euler--
+Bernoulli or Timoshenko beam. It omits bending-plane coupling, torsion,
+frequency-dependent material loss, clubhead inertia, grip compliance, and
+three-dimensional handle motion. Large deflections in the sensitivity grid
+therefore identify stress tests of the surrogate, not credible predictions of
+a real shaft.
+
+## Equation-Level Contribution Accounting {#sec-shaft-equations}
+
+The equations are written as
+
+$$
+\mathbf M(\mathbf q)\ddot{\mathbf q}
+=\boldsymbol\tau_{\mathrm{ctrl}}
+-\mathbf C(\mathbf q,\dot{\mathbf q})
+-\mathbf G(\mathbf q)
++\boldsymbol\tau_{\mathrm{joint\,damp}}
++\boldsymbol\tau_{s}
++\boldsymbol\tau_{s,d},
+$$ {#eq-shaft-eom}
+
+where $\mathbf C$ contains the velocity-dependent inertial terms. The linear
+elastic and viscous shaft actions are
+
+$$
+\tau_s=-k_s\phi_2,
+\qquad
+\tau_{s,d}=-c_s\dot\phi_2.
+$$ {#eq-shaft-moments}
+
+For every right-hand-side term $\mathbf f_j$, the corresponding generalized
+acceleration contribution is
+
+$$
+\ddot{\mathbf q}_j=\mathbf M^{-1}\mathbf f_j,
+\qquad
+\ddot{\mathbf q}=\sum_j\ddot{\mathbf q}_j.
+$$ {#eq-shaft-acceleration-decomposition}
+
+This is an exact algebraic decomposition at each state. It avoids assigning
+physical meaning to a single off-diagonal mass-matrix entry without accounting
+for the full coupled solve. In the tested trace, reconstructed and directly
+solved accelerations agree to floating-point precision.
+
+![Momentum, Gravity, Damping, Control, and Shaft Terms Sum Exactly](figures/fig_shaft_acceleration_contributions.pdf){#fig-shaft-acceleration-contributions width=100%}
+
+@fig-shaft-acceleration-contributions shows the contributions to the absolute
+distal angular acceleration. The shaft-elastic term can be locally large
+because the reduced distal inertia is small. That statement concerns
+acceleration, not energy creation. A large instantaneous acceleration
+contribution can reverse sign later and perform nearly zero net work.
+
+### Momentum Is Not an External Energy Source {#sec-shaft-momentum-work}
+
+For diagnostic symmetry, the analysis records the generalized quantity
+$(-\mathbf C)^\mathsf T\dot{\mathbf q}$ and its time integral. In the reference
+trace that signed integral is 8.52 J. It must not be interpreted as 8.52 J of
+external work. The Coriolis/centrifugal vector arises from the coordinate
+representation of internal inertial coupling; it redistributes kinetic energy
+among generalized coordinates while the complete kinetic-energy derivative
+retains the required mass-matrix terms. Only boundary actuation, conservative
+potential changes, and declared dissipative processes enter the total energy
+balance below.
+
+The same caution applies to labels such as “centrifugal power.” A coordinate
+projection is useful for attribution, but it is not a new reservoir. The
+mechanism is exchange through coupled geometry and constraint forces.
+Numerically, the Christoffel-form identity
+$\dot{\mathbf q}^{\mathsf T}\mathbf C
+=\tfrac12\dot{\mathbf q}^{\mathsf T}\dot{\mathbf M}\dot{\mathbf q}$
+closes within $3.6\times10^{-7}$ W throughout the reference trace using a
+centered directional derivative of $\mathbf M$. This is the missing
+mass-matrix-rate term that prevents the 8.52 J coordinate integral from being
+treated as external work.
+
+## Shaft Interface Force, Moment, and Power {#sec-shaft-interface}
+
+The internal shaft interface transmits a planar force $\mathbf F_s$ and a
+moment $M_s=\tau_s+\tau_{s,d}$. The power delivered across the interface is
+the sum of force power and moment power, evaluated with consistent action,
+velocity, and sign conventions. The internal force performs equal and
+opposite power at the common joint point. The opposed couples act at different
+angular velocities, so their two-body sum is
+$M_s(\omega_d-\omega_p)=M_s\dot\phi_2$: it changes shaft storage and dissipates
+energy rather than cancelling. The recorded port arrays retain both sides of
+this identity.
+
+At the reference delivery crossing, the model predicts 56.34 N of interface
+force, -3.58° of shaft flex, +5.00 N·m of elastic moment, and -0.083 N·m of
+viscous moment. The positive elastic moment is especially important when this
+chapter is compared with @sec-two-hand-wrench: it cannot explain the archived
+-19.63 N·m pointwise two-hand midpoint couple. The two quantities belong to
+different models, reference points, and physical mechanisms.
+
+At the nearest stored 0.5 ms delivery sample, the distal-side interface force
+power is 32.09 W and couple power is 74.60 W. The two-sided joint power is only
+0.682 W because most of those distal-side terms are balanced by opposite work
+on the proximal link; the remainder is the instantaneous elastic/damping
+relative-coordinate power. A one-sided 106.69 W interface delivery must
+therefore not be reported as net creation of whole-system energy.
+
+## Closed Work--Energy Accounting {#sec-shaft-energy}
+
+The stored shaft energy is
+
+$$
+U_s=\tfrac12 k_s\phi_2^2,
+$$ {#eq-shaft-strain-energy}
+
+and the complete mechanical energy is
+
+$$
+E=T+V_g+U_s.
+$$ {#eq-shaft-total-energy}
+
+Because gravity and the shaft spring are included in $E$, the external and
+dissipative balance is
+
+$$
+\frac{dE}{dt}
+=\boldsymbol\tau_{\mathrm{ctrl}}^\mathsf T\dot{\mathbf q}
++\boldsymbol\tau_{\mathrm{joint\,damp}}^\mathsf T\dot{\mathbf q}
+-c_s\dot\phi_2^2.
+$$ {#eq-shaft-energy-rate}
+
+The shaft spring is absent from the right side because it stores and returns
+energy. Its signed generalized-power integral equals the negative change in
+strain energy, apart from numerical integration error; it is not a loss term.
+
+![Shaft Strain Energy Is Small but Explicitly Closed](figures/fig_shaft_energy_closure.pdf){#fig-shaft-energy-closure width=100%}
+
+The reference run receives 164.38 J of control work. Joint damping removes
+9.21 J and shaft damping removes 0.97 J. Peak shaft strain energy is 0.720 J,
+compared with 227.88 J peak kinetic energy. The maximum accumulated closure
+error is 0.0322 J, approximately 0.02% of control work. Away from the
+piecewise-command switch, the root-mean-square differential residual is
+0.0092 W. This closure is a numerical consistency result, not validation of
+the assumed physical parameters.
+
+## Reference Delivery: Flexibility Changes Timing Modestly {#sec-shaft-reference-results}
+
+![Matched Rigid and Flexible Deliveries Differ Modestly in the Reference Case](figures/fig_shaft_matched_comparison.pdf){#fig-shaft-matched-comparison width=100%}
+
+Clubhead velocity is evaluated analytically from the generalized state rather
+than by differentiating stored positions. The flexible reference reaches the
+declared delivery crossing at 0.42725 s with 20.799 m/s clubhead speed. The
+matched rigid reduction reaches it 2.73 ms earlier at 20.691 m/s. The
+flexible-minus-rigid difference is therefore
++0.108 m/s, or approximately 0.52% of the rigid value. Peak speeds are 21.213
+and 21.160 m/s, respectively. A second-order difference of stored tip positions
+differs from the analytic velocity by at most 0.00134 m/s in the flexible
+trace and 0.00915 m/s in the rigid trace; it is retained as a numerical audit,
+not the published velocity authority.
+
+This result supports a restrained conclusion. The admitted elastic coordinate
+changes local forces, angular accelerations, pose, and delivery timing, but the
+reference speed effect is small. It does not support a general assertion that
+shaft recoil is either negligible or a primary source of clubhead speed.
+Different stiffness, damping, actuation, geometry, and endpoint definitions
+can change the result.
+
+![Flexible and Rigid Centerlines Separate Near Delivery](figures/fig_shaft_pose_overlay.pdf){#fig-shaft-pose-overlay width=100%}
+
+The centerline overlays in @fig-shaft-pose-overlay show why endpoint timing
+matters. Small angular differences accumulate into a visible distal-position
+change as the chain extends. Comparing speeds at a common clock time, a common
+configuration crossing, or the maximum within a time window answers different
+questions.
+
+## Physics Ablations {#sec-shaft-ablations}
+
+![Ablations Change Delivery More Than Reference Shaft Flex](figures/fig_shaft_physics_ablations.pdf){#fig-shaft-physics-ablations width=100%}
+
+Removing projected gravity lowers reference delivery speed from 20.799 to
+16.035 m/s and delays the crossing to 0.458 s. Removing the declared joint
+damping raises it to 22.969 m/s and delays the crossing to 0.435 s. Removing
+shaft damping produces 20.508 m/s at 0.428 s, increases impact flex to -5.66°,
+and raises peak stored strain energy from 0.720 to 2.805 J.
+
+These are controlled ablations, not estimates of causal shares in a human
+swing. Turning off one term changes the subsequent state and hence every other
+state-dependent term. The comparison nevertheless establishes an important
+scale result for this model: gravity and joint damping alter the delivered
+speed more than the matched reference flex-versus-rigid change.
+
+## Robustness Across Stiffness, Damping, and Torque-Cut Time {#sec-shaft-robustness}
+
+The sensitivity study evaluates 120 combinations of six stiffnesses
+(10--320 N·m/rad), four damping values (0--1.2 N·m·s/rad), and five command
+histories (no cut or cuts at 0.12, 0.18, 0.24, and 0.30 s). An extended 0.75 s
+horizon is used so that every declared case reaches its first delivery
+crossing.
+
+![Stiffness and Torque-Cut-Time Slices at Reference Damping](figures/fig_shaft_robustness_maps.pdf){#fig-shaft-robustness-maps width=100%}
+
+The two heatmaps are a declared two-dimensional slice at the reference shaft
+damping of 0.6 N·m·s/rad; they do not marginalize over the other three damping
+levels. The quantitative attribution below uses all 120 combinations in the
+full factorial grid.
+
+Across the full grid, delivery speed spans 12.99--22.65 m/s and crossing time
+spans 0.425--0.719 s. Peak strain energy spans 0.161--18.05 J. In a
+descriptive main-effect sum-of-squares decomposition of this balanced
+deterministic grid, torque-cut time accounts for 99.14% of delivery-speed
+variation, while stiffness and damping account for 0.140% and 0.083%,
+respectively. For peak strain energy, the corresponding main-effect fractions
+are 23.78% for stiffness, 27.06% for damping, and 2.62% for cut time; 46.54%
+remains in interactions and other nonadditive structure. These are grid
+descriptors, not sampling uncertainty or human causal shares. They demonstrate
+why equipment-only comparisons are incomplete when actuation history is not
+matched.
+
+The full grid also includes impact flex from -42.9° to +11.1°. Those extreme
+values violate the small-deflection premise implicit in a one-mode linear
+torsional surrogate. They are retained as transparent stress-test results,
+not interpreted as physically realizable shaft shapes. A distributed-beam
+model with calibrated material and boundary properties is required before
+making equipment-design claims.
+
+## Impact Window and Numerical Resolution {#sec-shaft-endpoint-resolution}
+
+![Impact Definition and Numerical Resolution](figures/fig_shaft_window_timestep.pdf){#fig-shaft-window-timestep width=100%}
+
+The left panel of @fig-shaft-window-timestep reports speed at the first
+configuration crossing and maxima within ±5, ±10, and ±20 ms. For the
+reference case, the values are 20.799, 20.915, 21.016, and 21.156 m/s. The
+window is therefore part of the estimand, not a plotting preference.
+
+Halving the reference 0.5 ms step to 0.25 ms changes crossing speed by 5.6
+mm/s and crossing time by 41 microseconds. Doubling it to 1 ms changes speed by
+11.3 mm/s and time by 82 microseconds. The maximum energy-closure error scales
+from 0.0161 J at 0.25 ms to 0.0647 J at 1 ms, consistent with a converging
+fixed-step calculation around a piecewise command.
+
+## Implications for Late-Downswing Strategy {#sec-shaft-strategy}
+
+Three strategy-relevant hypotheses are motivated by the declared comparisons.
+
+First, transfer is geometric and state dependent. Momentum coupling can create
+large distal acceleration without being an external energy source. Its useful
+effect depends on link orientation, angular velocities, and the direction of
+the constraint force relative to distal velocity.
+
+Second, elastic storage is a timing mechanism. A spring can temporarily retain
+energy, alter configuration, and return energy later, but the net benefit is
+not the peak strain-energy value. The relevant comparison is a matched endpoint
+under matched actuation, with damping and timing included.
+
+Third, “negative torque” requires an identified object and reference point. In
+the WSCG two-hand audit, the late negative midpoint couple is a force-generated
+grip wrench. In this flexible surrogate, the reference shaft elastic moment at
+delivery is positive. Conflating these signs would erase the distinction
+between handle-contact geometry and shaft recoil.
+
+Accordingly, the model defines a testable optimization hypothesis rather than
+a prescription: among trajectories satisfying the same endpoint, loading, and
+actuation constraints, those with late positive distal-side interface work and
+less dissipative work may deliver greater clubhead speed. Whether a golfer
+should actively restrain, release, or oppose a joint at a particular instant
+cannot be inferred from segment-speed order, one-sided interface power, or
+torque sign alone. It requires two-sided joint power, interface wrench, state
+history, a declared outcome window, and governed human evidence.
+
+## Falsification and Next Model Requirements {#sec-shaft-falsification}
+
+The present explanation would be weakened if a higher-fidelity model with
+matched mass distribution and actuation showed any of the following:
+
+- the contribution sum fails after independent equation implementation;
+- work--energy closure requires an unmodeled energy source;
+- the flex-versus-rigid result reverses under small, physically calibrated
+  parameter changes rather than only under broad stress tests;
+- measured handle forces and shaft deformation cannot reproduce the predicted
+  sign and timing of interface power; or
+- a distributed shaft and two-hand closed-loop model attributes the archived
+  negative couple primarily to an applied free torque rather than separated
+  contact forces.
+
+The next step is therefore not to add realism indiscriminately. It is to add
+degrees of freedom in an auditable sequence: moving hub, closed two-arm loop,
+distributed shaft, three-dimensional rotation, and finally data-constrained
+parameters. At each step, the rigid/flexible reduction, force/moment balance,
+work--energy closure, and endpoint definition should remain explicit.

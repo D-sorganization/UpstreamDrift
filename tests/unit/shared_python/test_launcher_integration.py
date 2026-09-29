@@ -1,0 +1,87 @@
+"""Integration tests for the application launcher and engine detection."""
+
+from __future__ import annotations
+
+import sys
+from typing import Any
+from unittest.mock import MagicMock
+
+import pytest
+from PyQt6 import QtWidgets
+from src.shared.python.config.environment import is_docker, is_production, is_wsl
+from src.shared.python.dashboard import launcher
+from src.shared.python.engine_core import engine_availability
+
+
+@pytest.fixture(scope="session")
+def qapp() -> Any:
+    """Fixture to ensure a QApplication exists."""
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv)
+    return app
+
+
+def test_environment_detection() -> None:
+    """Test environment detection functions."""
+    # These depend on the actual env, but we can verify they run without error
+    # and return booleans
+    assert isinstance(is_docker(), bool)
+    assert isinstance(is_wsl(), bool)
+    assert isinstance(is_production(), bool)
+
+
+def test_engine_availability_check() -> None:
+    """Test that we can check for physics engines."""
+    # We expect at least one standard library to be available (numpy)
+    assert engine_availability.NUMPY_AVAILABLE is True
+
+    # Check is_engine_available function
+    assert engine_availability.is_engine_available("numpy") is True
+    assert engine_availability.is_engine_available("non_existent_engine") is False
+
+
+def test_dashboard_launch(monkeypatch: pytest.MonkeyPatch, qapp: Any) -> None:
+    """Test launching the dashboard with a mock engine."""
+
+    # Mock valid engine class
+    mock_engine_class = MagicMock()
+    mock_engine = MagicMock()
+    mock_engine_class.return_value = mock_engine
+
+    mock_qapp = MagicMock()
+    mock_qapp.exec.return_value = 0
+    mock_window = MagicMock()
+    mock_exit = MagicMock()
+    mock_event_loop_runner = MagicMock(return_value=0)
+
+    monkeypatch.setattr(launcher, "get_qapp", MagicMock(return_value=mock_qapp))
+    monkeypatch.setattr(launcher, "UnifiedDashboardWindow", mock_window)
+    monkeypatch.setattr(launcher.sys, "exit", mock_exit)
+
+    # Run launch
+    launcher.launch_dashboard(
+        mock_engine_class,
+        title="Test Dashboard",
+        engine_args=["arg1"],
+        engine_kwargs={"kwarg1": "val"},
+        event_loop_runner=mock_event_loop_runner,
+    )
+
+    # Verify initialization
+    mock_engine_class.assert_called_once_with("arg1", kwarg1="val")
+    mock_window.assert_called_once_with(mock_engine, title="Test Dashboard")
+    mock_event_loop_runner.assert_called_once_with(mock_qapp)
+    mock_qapp.exec.assert_not_called()
+    mock_exit.assert_called_once_with(0)
+
+
+def test_mujoco_availability_logic() -> None:
+    """Verify MuJoCo logic (ensure it's not strictly disabled by default logic anymore)."""
+    # This test verifies that checking for mujoco doesn't raise an error
+    # even if it returns False.
+    try:
+        available = engine_availability.is_engine_available("mujoco")
+        assert isinstance(available, bool)
+    except Exception as e:  # noqa: BLE001 - verifying no exception is raised
+        pytest.fail(f"Checking MuJoCo availability raised exception: {e}")

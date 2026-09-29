@@ -1,0 +1,577 @@
+"""Anthropic adapter for Claude 3.x models.
+
+This adapter provides integration with Anthropic's Claude API,
+including tool use and streaming support.
+
+Requirements:
+    - Anthropic API key (user-provided)
+    - anthropic package: pip install anthropic
+
+Cost Model:
+    - Claude 3 Opus: ~$15/million input, ~$75/million output
+    - Claude 3 Sonnet: ~$3/million input, ~$15/million output
+    - Typical workflow: ~$0.30-0.70
+
+Example:
+    >>> import os
+    >>> from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
+    >>> adapter = AnthropicAdapter(api_key=os.environ["ANTHROPIC_API_KEY"])
+    >>> response = adapter.send_message("Analyze this swing", context, tools)
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.config import (
+    DEFAULT_ANTHROPIC_MAX_TOKENS,
+    DEFAULT_ANTHROPIC_MODEL,
+    DEFAULT_ANTHROPIC_TIMEOUT,
+    get_anthropic_model,
+    get_anthropic_timeout,
+)
+from src.shared.python.ai.exceptions import (
+    AIProviderError,
+)
+from src.shared.python.ai.types import (
+    AgentChunk,
+    AgentResponse,
+    ConversationContext,
+    ProviderCapabilities,
+    ProviderCapability,
+    ToolCall,
+)
+from src.shared.python.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+logger = get_logger(__name__)
+
+# Backwards compatibility aliases
+ANTHROPIC_DEFAULT_MODEL = DEFAULT_ANTHROPIC_MODEL
+ANTHROPIC_DEFAULT_TIMEOUT = DEFAULT_ANTHROPIC_TIMEOUT
+ANTHROPIC_MAX_TOKENS = DEFAULT_ANTHROPIC_MAX_TOKENS
+
+
+class AnthropicAdapter(BaseAgentAdapter):
+    """Adapter for Anthropic Claude models.
+
+    Provides integration with Anthropic's Claude API:
+    - Tool use
+    - Streaming responses
+    - Long context (200K tokens)
+
+    Attributes:
+        api_key: Anthropic API key.
+        model: Model name to use.
+        timeout: Request timeout [s].
+
+    Example:
+        >>> import os
+        >>> adapter = AnthropicAdapter(api_key=os.environ["ANTHROPIC_API_KEY"])
+        >>> success, message = adapter.validate_connection()
+        >>> if success:
+        ...     response = adapter.send_message(
+        ...         "Analyze joint torques",
+        ...         context,
+        ...         tools
+        ...     )
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str | None = None,
+        timeout: float | None = None,
+        app_context: str = "assistant",
+    ) -> None:
+        """Initialize Anthropic adapter.
+
+        Configuration is loaded from environment variables if not provided:
+            - ANTHROPIC_MODEL: Model name (default: claude-3-sonnet-20240229)
+            - ANTHROPIC_TIMEOUT: Timeout in seconds (default: 60.0)
+
+        Args:
+            api_key: Anthropic API key (required).
+            model: Model name. Uses ANTHROPIC_MODEL env var or default.
+            timeout: Request timeout [s]. Uses ANTHROPIC_TIMEOUT env var or default.
+            app_context: Registry key for the consuming application's system
+                prompt preamble (e.g. ``"upstream_drift"``, ``"gasification"``).
+                Defaults to ``"assistant"``, a brand-neutral preamble. See
+                :mod:`shared.python.ai.system_prompts` (issue #3179).
+        """
+        if api_key is None:
+            raise ValueError("api_key must be provided")
+        if api_key is None:
+            raise ValueError("api_key must be provided")
+        self._api_key = api_key
+        self._model = model or get_anthropic_model()
+        self._timeout = timeout if timeout is not None else get_anthropic_timeout()
+        self._app_context = app_context
+        self._client: Any = None  # Lazy-loaded Anthropic client
+
+        logger.info("Initialized AnthropicAdapter: model=%s", self._model)
+
+    def _get_client(self) -> Any:
+        """Get or create Anthropic client.
+
+        Returns:
+            Anthropic client instance.
+
+        Raises:
+            AIProviderError: If anthropic package not installed.
+        """
+        if self._client is None:
+            try:
+                from anthropic import Anthropic
+
+                self._client = Anthropic(
+                    api_key=self._api_key,
+                    timeout=self._timeout,
+                )
+            except ImportError as e:
+                raise AIProviderError(
+                    "anthropic package required for AnthropicAdapter. "
+                    "Install with: pip install anthropic",
+                    provider="anthropic",
+                ) from e
+        return self._client
+
+    @precondition(
+        lambda message: bool(message.strip()), "message must not be empty or blank"
+    )
+    def send_message(
+        self,
+        message: str,
+        context: ConversationContext,
+        tools: list[ToolDeclaration],
+    ) -> AgentResponse:
+        """Send a message to Anthropic Claude.
+
+        Args:
+            message: User message to process.
+            context: Current conversation context.
+            tools: Available tools for this request.
+
+        Returns:
+            AgentResponse with model's reply.
+        """
+        if message is None:
+            raise ValueError("message must be provided")
+        if message is None:
+            raise ValueError("message must be provided")
+        client = self._get_client()
+
+        # Format messages
+        messages = self._format_messages(context, message)
+        system = self._build_system_message(context)
+
+        # Format tools
+        anthropic_tools = [t.to_anthropic_format() for t in tools] if tools else None
+
+        try:
+            kwargs: dict[str, Any] = {
+                "model": self._model,
+                "max_tokens": 4096,
+                "system": system,
+                "messages": messages,
+            }
+            if anthropic_tools:
+                kwargs["tools"] = anthropic_tools
+
+            response = client.messages.create(**kwargs)
+            return self._parse_response(response)
+
+        except (RuntimeError, ValueError, OSError) as e:
+            return self._handle_error(e)
+
+    def stream_response(
+        self,
+        message: str,
+        context: ConversationContext,
+        tools: list[ToolDeclaration],
+    ) -> Iterator[AgentChunk]:
+        """Stream response from Anthropic.
+
+        Args:
+            message: User message to process.
+            context: Current conversation context.
+            tools: Available tools.
+
+        Yields:
+            AgentChunk instances as they arrive.
+        """
+        if message is None:
+            raise ValueError("message must be provided")
+        if message is None:
+            raise ValueError("message must be provided")
+        client = self._get_client()
+        messages = self._format_messages(context, message)
+        system = self._build_system_message(context)
+        anthropic_tools = [t.to_anthropic_format() for t in tools] if tools else None
+
+        try:
+            kwargs: dict[str, Any] = {
+                "model": self._model,
+                "max_tokens": 4096,
+                "system": system,
+                "messages": messages,
+            }
+            if anthropic_tools:
+                kwargs["tools"] = anthropic_tools
+
+            with client.messages.stream(**kwargs) as stream:
+                index = 0
+                for event in stream:
+                    if hasattr(event, "type"):
+                        if event.type == "content_block_delta":
+                            delta = event.delta
+                            if hasattr(delta, "text"):
+                                yield AgentChunk(
+                                    content=delta.text,
+                                    is_final=False,
+                                    index=index,
+                                )
+                                index += 1
+                        elif event.type == "message_stop":
+                            yield AgentChunk(
+                                content="",
+                                is_final=True,
+                                index=index,
+                            )
+
+        except (RuntimeError, TypeError, ValueError) as e:
+            logger.error("Anthropic streaming error: %s", e)
+            raise AIProviderError(
+                f"Anthropic streaming error: {e}",
+                provider="anthropic",
+            ) from e
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        """Return Anthropic capabilities.
+
+        Returns:
+            ProviderCapabilities for Anthropic.
+        """
+        return ProviderCapabilities(
+            supported=frozenset(
+                {
+                    ProviderCapability.FUNCTION_CALLING,
+                    ProviderCapability.STREAMING,
+                    ProviderCapability.VISION,
+                    ProviderCapability.LONG_CONTEXT,
+                    ProviderCapability.SYSTEM_MESSAGE,
+                }
+            ),
+            max_tokens=ANTHROPIC_MAX_TOKENS,
+            model_name=self._model,
+            provider_name="anthropic",
+        )
+
+    # ------------------------------------------------------------------ #
+    # Tools issue #2871: provider catalogue + reasoning capabilities
+    # ------------------------------------------------------------------ #
+
+    # Static fallback catalogue used when the live API is unreachable.
+    _STATIC_MODELS: tuple[str, ...] = (
+        "claude-3-5-sonnet-20240620",
+        "claude-3-opus-20240229",
+        "claude-3-sonnet-20240229",
+        "claude-3-haiku-20240307",
+    )
+
+    def list_models(self) -> list[str]:
+        """Return Anthropic model ids; falls back to a static catalogue."""
+        try:
+            client = self._get_client()
+            response = client.models.list()
+            data = getattr(response, "data", None) or []
+            ids = [
+                getattr(entry, "id", None)
+                for entry in data
+                if getattr(entry, "id", None)
+            ]
+            str_ids = [str(model_id) for model_id in ids if str(model_id).strip()]
+            if str_ids:
+                return str_ids
+        except Exception:  # noqa: BLE001 - any provider failure → fallback
+            logger.debug(
+                "Anthropic list_models live probe failed; using static catalogue",
+                exc_info=True,
+            )
+        return list(self._STATIC_MODELS)
+
+    def thinking_capabilities(self) -> Any:
+        """Return reasoning-budget levels for the current Anthropic model."""
+        # Local imports to avoid the chat package depending on adapters at
+        # module-import time.
+        from shared.python.chat_contracts.models import (
+            make_full_thinking_capabilities,
+            make_none_only_capabilities,
+        )
+
+        model = (self._model or "").lower()
+        # Claude 3.5/3 Sonnet + Opus support extended thinking budgets.
+        if "sonnet" in model or "opus" in model:
+            return make_full_thinking_capabilities(provider="anthropic")
+        return make_none_only_capabilities(provider="anthropic")
+
+    def validate_connection(self) -> tuple[bool, str]:
+        """Test connection to Anthropic.
+
+        Returns:
+            Tuple of (success, diagnostic_message).
+        """
+        try:
+            client = self._get_client()
+
+            # Simple test message
+            response = client.messages.create(
+                model=self._model,
+                max_tokens=10,
+                messages=[{"role": "user", "content": "Hi"}],
+            )
+
+            if response.content:
+                return True, f"Connected to Anthropic with {self._model}"
+
+            return True, "Connected to Anthropic"
+
+        except AIProviderError:
+            return False, (
+                "anthropic package not installed. Install with: pip install anthropic"
+            )
+        except (RuntimeError, ValueError, OSError) as e:
+            error_str = str(e).lower()
+            if "authentication" in error_str or "api key" in error_str:
+                return False, "Invalid API key. Check your Anthropic API key."
+            if "rate limit" in error_str:
+                return False, "Rate limited. Try again later."
+            return False, f"Connection error: {e}"
+
+    def _format_messages(
+        self,
+        context: ConversationContext,
+        current_message: str,
+    ) -> list[dict[str, Any]]:
+        """Format messages for Anthropic API.
+
+        Anthropic requires alternating user/assistant messages.
+
+        Args:
+            context: Conversation context.
+            current_message: Current user message.
+
+        Returns:
+            List of message dicts for Anthropic.
+        """
+        if context is None:
+            raise ValueError("context must be provided")
+        if context is None:
+            raise ValueError("context must be provided")
+        messages: list[dict[str, Any]] = []
+
+        # Process conversation history
+        for msg in context.messages:
+            content: Any = msg.content
+
+            # Handle tool results
+            if msg.role == "tool":
+                # In Anthropic, tool results are part of user messages
+                content = [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": msg.tool_call_id,
+                        "content": msg.content,
+                    }
+                ]
+                role = "user"
+            else:
+                role = msg.role
+
+            # Handle assistant tool calls
+            if msg.tool_calls:
+                content = []
+                if msg.content:
+                    content.append({"type": "text", "text": msg.content})
+                content.extend(
+                    [
+                        {
+                            "type": "tool_use",
+                            "id": tc.id,
+                            "name": tc.name,
+                            "input": tc.arguments,
+                        }
+                        for tc in msg.tool_calls
+                    ]
+                )
+
+            messages.append(
+                {
+                    "role": role,
+                    "content": content,
+                }
+            )
+
+        # Add current message
+        messages.append(
+            {
+                "role": "user",
+                "content": current_message,
+            }
+        )
+
+        # Ensure alternating roles (Anthropic requirement)
+        messages = self._ensure_alternating_roles(messages)
+
+        return messages
+
+    def _ensure_alternating_roles(
+        self,
+        messages: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Ensure messages alternate between user and assistant.
+
+        Anthropic requires strictly alternating roles.
+
+        Args:
+            messages: List of messages.
+
+        Returns:
+            Messages with alternating roles.
+        """
+        if messages is None:
+            raise ValueError("messages must be provided")
+        if messages is None:
+            raise ValueError("messages must be provided")
+        if not messages:
+            return messages
+
+        result: list[dict[str, Any]] = []
+
+        for msg in messages:
+            if not result:
+                result.append(msg)
+                continue
+
+            last_role = result[-1]["role"]
+            current_role = msg["role"]
+
+            # If same role, merge content
+            if last_role == current_role:
+                last_content = result[-1]["content"]
+                current_content = msg["content"]
+
+                # Handle string content
+                if isinstance(last_content, str) and isinstance(current_content, str):
+                    result[-1]["content"] = f"{last_content}\n\n{current_content}"
+                else:
+                    # Handle list content
+                    if isinstance(last_content, str):
+                        last_content = [{"type": "text", "text": last_content}]
+                    if isinstance(current_content, str):
+                        current_content = [{"type": "text", "text": current_content}]
+                    result[-1]["content"] = last_content + current_content
+            else:
+                result.append(msg)
+
+        return result
+
+    def _build_system_message(self, context: ConversationContext) -> str:
+        """Build Anthropic-optimized system message.
+
+        Args:
+            context: Current conversation context.
+
+        Returns:
+            System message string.
+        """
+        if context is None:
+            raise ValueError("context must be provided")
+        if context is None:
+            raise ValueError("context must be provided")
+        from shared.python.ai.system_prompts import build_system_prompt
+
+        expertise = context.user_expertise.name.lower()
+        context_instructions = self.build_context_instruction_section(context)
+
+        # Brand-neutral preamble + capabilities are injected by app_context
+        # rather than hardcoded here (issue #3179). Persisted-memory context
+        # is appended as extra instructions when present.
+        # Annotate a local rather than cast(): build_system_prompt is typed
+        # Any under the CI mypy --follow-imports=skip lane, so the annotation
+        # pins the return type there while remaining valid (not a redundant
+        # cast) under the import-following local lane.
+        prompt: str = build_system_prompt(
+            app_context=self._app_context,
+            expertise_level=expertise,
+            extra_instructions=context_instructions or None,
+        )
+        return prompt
+
+    def _parse_response(self, response: Any) -> AgentResponse:
+        """Parse Anthropic response into AgentResponse.
+
+        Args:
+            response: Raw Anthropic response.
+
+        Returns:
+            Parsed AgentResponse.
+        """
+        # Extract content blocks
+        content_parts: list[str] = []
+        tool_calls: list[ToolCall] = []
+
+        for block in response.content:
+            if block.type == "text":
+                content_parts.append(block.text)
+            elif block.type == "tool_use":
+                tool_calls.append(
+                    ToolCall(
+                        id=block.id,
+                        name=block.name,
+                        arguments=block.input,
+                    )
+                )
+
+        content = "\n".join(content_parts)
+
+        # Extract usage and normalize to canonical keys (issue #2763)
+        raw_usage: dict[str, int] = {}
+        if hasattr(response, "usage"):
+            raw_usage = {
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+            }
+        usage = self._normalize_token_counts(raw_usage)
+
+        return AgentResponse(
+            content=content,
+            tool_calls=tool_calls,
+            finish_reason=response.stop_reason or "end_turn",
+            usage=usage,
+            metadata={
+                "model": response.model,
+                "id": response.id,
+            },
+        )
+
+    def _handle_error(self, error: Exception) -> AgentResponse:
+        """Handle Anthropic API errors.
+
+        Delegates to :meth:`~BaseAgentAdapter._classify_error` for the
+        shared string-scan classification logic.
+
+        Args:
+            error: The exception that occurred.
+
+        Raises:
+            Appropriate AIError subclass.
+        """
+        raise self._classify_error(
+            error, provider="anthropic", timeout=self._timeout
+        ) from error

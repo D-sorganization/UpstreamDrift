@@ -1,0 +1,109 @@
+"""Canonical pose interchange — engine-agnostic skeleton pose representation.
+
+Foundation for the Pose Studio EPIC (#4895). Establishes a single
+canonical pose convention so per-engine adapters do not have to
+round-trip through every other engine's convention pairwise.
+
+Public surface:
+
+- :class:`CanonicalPose` — frozen dataclass holding pelvis SE(3) +
+  per-joint angles in the canonical convention (intrinsic XYZ Euler in
+  degrees, joint names matching :func:`reference_golfer_setup`).
+- :class:`PoseConventionAdapter` — runtime-checkable :class:`Protocol`
+  every engine adapter implements.
+- :class:`JointSlot` — describes one joint's slot in an engine's
+  ``q`` vector (for adapters that need layout metadata).
+- :func:`canonical_zero_pose` — the all-zero canonical pose.
+- :func:`canonical_from_reference_setup` — the canonical address pose
+  derived from :func:`reference_golfer_setup`.
+
+The canonical pose convention is documented in
+`docs/adr/0012-canonical-pose-interchange.md`. The additive dynamic-state
+surface is documented in `docs/conventions/canonical-v2.md` and
+`docs/adr/0026-canonical-dynamic-state-v2.md`.
+"""
+
+from __future__ import annotations
+
+from src.shared.python.pose_interchange.canonical import (
+    CONVENTION_TAG,
+    CanonicalPose,
+    canonical_from_reference_setup,
+    canonical_zero_pose,
+)
+from src.shared.python.pose_interchange.canonical_state import (
+    CONVENTION_TAG_V2,
+    CanonicalState,
+    canonical_state_zero,
+)
+from src.shared.python.pose_interchange.live_kinematics import (
+    CapabilityError,
+    LiveKinematicsService,
+    ServiceCapabilities,
+)
+from src.shared.python.pose_interchange.cir_bridge import (
+    canonical_pose_to_joint_trajectory,
+    joint_trajectory_to_canonical_pose,
+)
+from src.shared.python.pose_interchange.protocol import (
+    JointSlot,
+    PoseConventionAdapter,
+)
+from src.shared.python.pose_interchange.se3 import (
+    compose_se3,
+    euler_xyz_deg_to_quat_wxyz,
+    inverse_se3,
+    quat_exp,
+    quat_log,
+    quat_to_matrix,
+    se3_from_xyz_xyz_deg,
+    se3_to_xyz_xyz_deg,
+)
+
+# Public API version (SemVer MAJOR.MINOR.PATCH).
+#
+# Bump rules (per issue #5917, ADR-0012):
+# - MAJOR: breaking change to ``CanonicalPose`` fields, the
+#   ``PoseConventionAdapter`` protocol, or the canonical convention
+#   itself (introduce ``canonical-v2`` instead when possible).
+# - MINOR: backwards-compatible additions (new helpers, new adapter
+#   methods with defaults, new optional fields).
+# - PATCH: bug fixes that do not change the public surface.
+#
+# 2.0.0 (CC-2, ADR-0026): adds the ``canonical-v2`` dynamic state surface
+# (``CanonicalState`` + manifold ops). The ``canonical-v1`` pose API below is
+# unchanged and remains valid for pose-only callers.
+__version__ = "2.0.0"
+
+# Canonical *pose* (v1) schema version. Mirrors ``CONVENTION_TAG`` for
+# downstream consumers that prefer numeric comparison; the string tag
+# (``canonical-v1``) remains the on-the-wire identifier. The canonical-v2
+# dynamic state carries its own ``CONVENTION_TAG_V2`` ("canonical-v2").
+SCHEMA_VERSION = "1.0.0"
+
+__all__ = [
+    "CONVENTION_TAG",
+    "CONVENTION_TAG_V2",
+    "CanonicalPose",
+    "CanonicalState",
+    "CapabilityError",
+    "JointSlot",
+    "LiveKinematicsService",
+    "PoseConventionAdapter",
+    "SCHEMA_VERSION",
+    "ServiceCapabilities",
+    "__version__",
+    "canonical_from_reference_setup",
+    "canonical_pose_to_joint_trajectory",
+    "canonical_state_zero",
+    "canonical_zero_pose",
+    "compose_se3",
+    "euler_xyz_deg_to_quat_wxyz",
+    "inverse_se3",
+    "joint_trajectory_to_canonical_pose",
+    "quat_exp",
+    "quat_log",
+    "quat_to_matrix",
+    "se3_from_xyz_xyz_deg",
+    "se3_to_xyz_xyz_deg",
+]

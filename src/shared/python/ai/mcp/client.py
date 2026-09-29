@@ -1,0 +1,288 @@
+"""``McpClient`` — single-server JSON-RPC wrapper for MCP.
+
+Two transports are supported:
+
+- **stdio**: spawn the configured command as a long-lived child process and
+  exchange newline-delimited JSON-RPC 2.0 frames over its stdin/stdout.
+  On disconnect we send SIGTERM and wait up to 5 seconds before killing.
+- **http**: POST JSON-RPC bodies to the configured URL via ``httpx``.
+
+Both transports implement the ``McpTransportProtocol`` so tests can substitute
+an in-memory fake — the unit suite does this and never touches a real
+subprocess or network socket.
+
+Process-sandbox policy (stdio):
+    Children receive only an allow-listed environment (PATH, HOME, plus
+    any per-server ``env`` mapping). This prevents leaking secrets unrelated
+    to the requested server.
+
+Design notes:
+    * Public methods enforce DbC preconditions (``is_connected``,
+      non-empty tool name).
+    * Connect/disconnect are idempotent.
+    * No external callers should reach into ``client._transport`` — LOD.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import os
+from typing import Any, Protocol
+
+import httpx
+
+from src.shared.python.ai.mcp.contracts import (
+    McpResourceDescriptor,
+    McpServerConfig,
+    McpToolDescriptor,
+    McpTransport,
+)
+
+_LOG = logging.getLogger(__name__)
+_STOP_GRACE_SECONDS = 5.0
+_ALLOWLIST_ENV_KEYS = ("PATH", "HOME", "USERPROFILE", "SYSTEMROOT", "TEMP", "TMP")
+
+
+class McpTransportProtocol(Protocol):
+    """Minimal transport contract for ``McpClient``."""
+
+    async def start(self) -> None: ...
+    async def stop(self) -> None: ...
+    async def request(self, method: str, params: dict[str, Any]) -> dict[str, Any]: ...
+
+
+def _sandboxed_env(extra: dict[str, str]) -> dict[str, str]:
+    """Return an allow-listed environment merged with the per-server ``env``."""
+    base: dict[str, str] = {}
+    for key in _ALLOWLIST_ENV_KEYS:
+        value = os.environ.get(key)
+        if value is not None:
+            base[key] = value
+    base.update(extra)
+    return base
+
+
+class StdioTransport:
+    """Spawns the configured command and speaks JSON-RPC over stdio."""
+
+    def __init__(self, config: McpServerConfig) -> None:
+        self._config = config
+        self._process: asyncio.subprocess.Process | None = None
+        self._lock = asyncio.Lock()
+        self._next_id = 1
+
+    async def start(self) -> None:
+        if self._process is not None:
+            return
+        assert self._config.command is not None  # validated by Pydantic
+        self._process = await asyncio.create_subprocess_exec(
+            self._config.command,
+            *self._config.args,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=_sandboxed_env(self._config.env),
+        )
+
+    async def stop(self) -> None:
+        process = self._process
+        if process is None:
+            return
+        self._process = None
+        if process.returncode is not None:
+            return
+        try:
+            process.terminate()
+        except ProcessLookupError:
+            return
+        try:
+            await asyncio.wait_for(process.wait(), timeout=_STOP_GRACE_SECONDS)
+        except TimeoutError:
+            _LOG.warning(
+                "MCP server %s did not exit in %.1fs; killing",
+                self._config.name,
+                _STOP_GRACE_SECONDS,
+            )
+            try:
+                process.kill()
+            except ProcessLookupError:
+                return
+            await process.wait()
+
+    async def request(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
+        if self._process is None:
+            raise RuntimeError("stdio transport not started")
+        if self._process.stdin is None or self._process.stdout is None:
+            raise RuntimeError("stdio transport streams unavailable")
+        async with self._lock:
+            request_id = self._next_id
+            self._next_id += 1
+            payload = {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "method": method,
+                "params": params,
+            }
+            data = (json.dumps(payload) + "\n").encode("utf-8")
+            self._process.stdin.write(data)
+            await self._process.stdin.drain()
+            line = await asyncio.wait_for(
+                self._process.stdout.readline(),
+                timeout=self._config.timeout_seconds,
+            )
+            if not line:
+                raise RuntimeError("MCP server closed stdout")
+            response = json.loads(line.decode("utf-8"))
+            if "error" in response:
+                raise RuntimeError(f"MCP error: {response['error']}")
+            result = response.get("result", {})
+            if not isinstance(result, dict):
+                raise RuntimeError("MCP result was not a JSON object")
+            return result
+
+
+class HttpTransport:
+    """POSTs JSON-RPC frames to the configured URL."""
+
+    def __init__(self, config: McpServerConfig) -> None:
+        self._config = config
+        self._client: httpx.AsyncClient | None = None
+        self._next_id = 1
+
+    async def start(self) -> None:
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self._config.timeout_seconds)
+
+    async def stop(self) -> None:
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None
+
+    async def request(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
+        if self._client is None or self._config.url is None:
+            raise RuntimeError("http transport not started")
+        request_id = self._next_id
+        self._next_id += 1
+        payload = {
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "method": method,
+            "params": params,
+        }
+        resp = await self._client.post(self._config.url, json=payload)
+        resp.raise_for_status()
+        body = resp.json()
+        if "error" in body:
+            raise RuntimeError(f"MCP error: {body['error']}")
+        result = body.get("result", {})
+        if not isinstance(result, dict):
+            raise RuntimeError("MCP result was not a JSON object")
+        return result
+
+
+def _default_transport(config: McpServerConfig) -> McpTransportProtocol:
+    if config.transport is McpTransport.STDIO:
+        return StdioTransport(config)
+    return HttpTransport(config)
+
+
+class McpClient:
+    """Single-server MCP client.
+
+    Lifecycle:
+        >>> client = McpClient(cfg)
+        >>> await client.connect()
+        >>> tools = await client.list_tools()
+        >>> result = await client.call_tool("search", {"q": "hi"})
+        >>> await client.disconnect()
+
+    Preconditions (DbC):
+        * ``list_tools`` / ``list_resources`` / ``call_tool`` require
+          ``is_connected``.
+        * ``call_tool`` requires a non-empty tool name.
+    """
+
+    def __init__(
+        self,
+        config: McpServerConfig,
+        transport: McpTransportProtocol | None = None,
+    ) -> None:
+        self._config = config
+        self._transport: McpTransportProtocol = transport or _default_transport(config)
+        self._connected = False
+
+    @property
+    def config(self) -> McpServerConfig:
+        return self._config
+
+    @property
+    def is_connected(self) -> bool:
+        return self._connected
+
+    async def connect(self) -> None:
+        """Start the transport and perform the MCP ``initialize`` handshake."""
+        if self._connected:
+            return
+        await self._transport.start()
+        try:
+            await self._transport.request(
+                "initialize",
+                {
+                    "protocolVersion": "2024-11-05",
+                    "clientInfo": {"name": "upstreamdrift", "version": "0.1.0"},
+                    "capabilities": {},
+                },
+            )
+        except Exception:
+            await self._transport.stop()
+            raise
+        self._connected = True
+
+    async def disconnect(self) -> None:
+        """Stop the transport. Idempotent."""
+        if not self._connected:
+            return
+        self._connected = False
+        await self._transport.stop()
+
+    async def list_tools(self) -> list[McpToolDescriptor]:
+        if not self._connected:
+            raise RuntimeError("MCP client not connected")
+        raw = await self._transport.request("tools/list", {})
+        tools_raw = raw.get("tools", [])
+        return [
+            McpToolDescriptor(
+                name=t["name"],
+                description=t.get("description", ""),
+                input_schema=t.get(
+                    "inputSchema",
+                    t.get("input_schema", {"type": "object", "properties": {}}),
+                ),
+            )
+            for t in tools_raw
+        ]
+
+    async def list_resources(self) -> list[McpResourceDescriptor]:
+        if not self._connected:
+            raise RuntimeError("MCP client not connected")
+        raw = await self._transport.request("resources/list", {})
+        return [
+            McpResourceDescriptor(
+                uri=r["uri"],
+                name=r.get("name", ""),
+                description=r.get("description", ""),
+                mime_type=r.get("mimeType") or r.get("mime_type"),
+            )
+            for r in raw.get("resources", [])
+        ]
+
+    async def call_tool(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
+        if not name:
+            raise ValueError("tool name must be non-empty")
+        if not self._connected:
+            raise RuntimeError("MCP client not connected")
+        return await self._transport.request(
+            "tools/call", {"name": name, "arguments": args}
+        )

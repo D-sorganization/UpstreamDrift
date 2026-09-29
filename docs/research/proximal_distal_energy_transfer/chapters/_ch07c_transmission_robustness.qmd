@@ -1,0 +1,193 @@
+# Transmission Pathways, Robust Speed, and Task Stability {#sec-transmission-robustness}
+
+## Why a Second Adversarial Pass Is Necessary
+
+The preceding model ladder makes a bounded mechanical case: interaction forces,
+constraint reactions, separated hand forces, and elastic states can transmit
+power to the distal system, and delayed distal actuation can outperform early
+drive in several declared models. Those results do **not** establish that the
+fastest nominal program is repeatable, that low joint variability is desirable,
+that a negative torque removes energy, or that a human strategy is
+self-stabilizing. This chapter therefore asks a different question: *which
+transmission variables can be manipulated, and how do speed, variability,
+loading, and perturbation rejection trade against one another?*
+
+The full finding-by-finding adjudication is published in
+[`ADVERSARIAL_TRANSMISSION_REVIEW.md`](../ADVERSARIAL_TRANSMISSION_REVIEW.md),
+and the numerical record is
+[`transmission_robustness_study.json`](../data/transmission_robustness_study.json).
+
+![The transmission ledger distinguishes pathway identity from kinematic
+sequence, torque sign from power sign, pointwise drift from a forward future,
+and model robustness from human stability.](figures/fig_transmission_pathway_framework.pdf){#fig-transmission-pathway-framework width=100%}
+
+## A Pathway Ledger Rather Than a Single Transfer Number
+
+Let $S$ be the distal subsystem and let every wrench be expressed at a declared
+point in a declared frame. Its mechanical-energy balance is
+
+$$
+\Delta E_S =
+\underbrace{\int \mathbf{F}_{J}\!\cdot\!\mathbf{v}_{J}\,dt}_{W_{\mathrm{constraint}}}
++\underbrace{\int \boldsymbol{\tau}_{J}\!\cdot\!\boldsymbol{\omega}_{S}\,dt}_{W_{\mathrm{direct}}}
++\underbrace{\Delta U_{\mathrm{shaft}}}_{W_{\mathrm{elastic}}}
++\underbrace{W_g}_{\mathrm{gravity}}
+-\underbrace{D}_{\mathrm{dissipation}}
++\varepsilon_E .
+$$
+
+For the whole constrained model, external control work, gravity (already in
+potential energy), damping, and projection correction replace internal contact
+work, which cancels by ideal-constraint power. The present 4 ms projected
+integrator has a worst normalized work--energy residual of 3.77%; that is a
+declared numerical limitation, not a machine-precision closure claim. The
+two-point contact-power identity itself closes to
+$6.40\times10^{-14}$ W. Future strategy comparisons should report both.
+
+This ledger produces a useful hierarchy of manipulable variables:
+
+- **Timing and phase:** clock onset, configuration threshold, phase estimate,
+  torque slope, and activation delay;
+- **Geometry:** hand path, grip separation, moment arms, club orientation, and
+  the reference point at which a wrench is resolved;
+- **Mechanical state:** proximal angular momentum, relative wrist state, shaft
+  strain energy, base motion, and hand-force common/differential modes;
+- **Regulation:** impedance, damping, feedback gain, sensory/observer delay,
+  saturation, and task-dependent error coordinates;
+- **Equipment and subject parameters:** inertia distribution, shaft
+  stiffness/damping, anthropometry, strength, and contact properties.
+
+No scalar “transfer efficiency” uniquely identifies these pathways without an
+explicit numerator, denominator, boundary, and time interval.
+
+## Paired Perturbations and Held-Out Evaluation
+
+Four preregistered programs were evaluated in the existing moving-base,
+two-hand, compliant-club tier: clock-triggered restrain-then-drive,
+arm-angle-triggered handoff, the same state trigger with higher impedance, and
+early drive. Ten training and fifteen held-out perturbations varied initial arm
+and wrist angles and velocities, command scale, activation delay, shaft
+stiffness, and grip separation. Every program received the same samples
+(common random numbers). Outcomes were lower-tail delivery speed, speed
+dispersion, a planar face/path proxy, peak hand force, squared-torque effort,
+event time, late contact work, late direct-wrist work, and shaft-energy release.
+
+![Held-out lower-tail speed and dispersion do not select the same program, and
+face/path error trades against peak hand force. Marker size in the left panel
+increases with peak-force exposure.](figures/fig_robust_speed_variability_pareto.pdf){#fig-robust-speed-variability width=100%}
+
+All four programs remain Pareto-nondominated. Relative to the clock trigger,
+the state trigger increases held-out 10th-percentile delivery speed from 4.94
+to 5.28 m/s, reduces mean face/path proxy error from 9.44 to 2.29 degrees, and
+slightly reduces delivery-speed amplification. It also raises the
+90th-percentile peak hand force from 166.9 to 208.1 N. Higher impedance raises
+nominal speed to 5.78 m/s and reduces mean face/path proxy error to 1.26
+degrees, but does not minimize speed dispersion. Early drive has the smallest
+speed standard deviation only because it occupies a much slower regime; low
+variance around a poor mean is not robust performance.
+
+This membership is stable to the available held-out cases: recomputing all
+five objectives after omitting each of the fifteen cases leaves all four
+programs nondominated in every recomputation. That is stability of a
+four-program comparison, not evidence that the Pareto frontier is complete;
+unexamined controls can still dominate the registered set.
+
+![State-triggered handoff reduces speed and face/path amplification relative to
+clock timing but amplifies peak hand force. The right panel expresses paired
+mean changes as percentages so unlike units are not visually conflated.](figures/fig_clock_vs_state_perturbation_response.pdf){#fig-clock-state-response width=100%}
+
+These results justify only a model-conditional statement: triggering on a
+mechanical state can reduce sensitivity to clock-time variation because the
+transition follows the realized trajectory, but the same change can redirect
+the disturbance into contact loading. A self-stabilizing strategy must specify
+the task error it attenuates and the costs it is allowed to increase.
+
+## Task-Null Variability and Motor Abundance
+
+Movement variability is not synonymous with outcome error. Golf data show that
+marker-trajectory variability need not correlate with ball-speed variability
+[@tucker2014], and uncontrolled-manifold analysis has found greater
+task-compatible variance in more skilled golfers [@morrison2016]. This agrees
+with the broader principle of motor abundance: variability parallel to a task
+solution manifold can preserve a salient outcome, whereas variability
+orthogonal to it changes the outcome [@latash2014practice].
+
+For local inputs $\mathbf{x}$ and task outcomes $\mathbf{y}$,
+
+$$
+\delta\mathbf{y}\approx \mathbf{J}_y\,\delta\mathbf{x},\qquad
+\mathcal{N}=\ker(\mathbf{J}_y).
+$$
+
+The eight-input, three-outcome local map has rank three and nullity five. Under
+the held-out perturbation covariance, projected task-null variance is 0.1322
+and task-relevant variance is 0.00466, giving the declared local index
+
+$$
+\Delta V = \frac{V_{\mathcal{N}}-V_{\perp}}{V_{\mathcal{N}}+V_{\perp}}=0.932.
+$$
+
+![The local outcome Jacobian identifies task-sensitive input directions and a
+five-dimensional null space. This is a model input--outcome partition, not
+evidence of a neural synergy.](figures/fig_task_null_variability_map.pdf){#fig-task-null-map width=100%}
+
+The result is descriptive and local. Curvature can make a direction that is
+null infinitesimally task-relevant at larger amplitude. The correct future test
+is therefore trial-level covariance relative to a nonlinear, participant-
+specific impact manifold—not a recommendation to minimize all joint variance.
+The raw, unit-dependent singular values are 1141.3, 60.36, and 7.75. Relative
+thresholds give effective rank two at 1% and 5% of the leading singular value,
+and rank one at 10% and 20%; rescaling inputs or outcomes changes these values.
+Moreover, applying this local linearization across the held-out envelope gives
+RMSE of 0.115 m/s, 2.69 degrees, and 7.48 N for speed, face/path, and peak hand
+force. The algebraic rank/nullity result therefore must not be promoted to a
+globally predictive manifold or a neural-control dimension.
+
+## Biological Realization and Impedance
+
+Coactivation can increase endpoint stiffness and attenuate an imposed
+disturbance [@deRugy2018], but excessive co-contraction can also be energetically
+inefficient and does not guarantee stability when the source is internal or
+feedback is delayed [@latash2015stability]. The reduced muscle bridge in
+@sec-frames-biology-engines demonstrates redundancy and preparation history;
+it does not identify time-varying human impedance or reflex gains.
+**Human self-stabilization is untested.** Such a biological claim requires controlled,
+phase-registered perturbations, bilateral wrench
+measurement, EMG, and an identified mapping from muscle activation to endpoint
+impedance.
+
+Likewise, repeatability should be evaluated above measurement noise and across
+sessions. Launch-monitor speed and distance can be reliable in talented
+golfers, but other variables have wider reliability ranges [@shaw2023]. The
+experimental protocol must propagate device error rather than label every
+observed difference a motor-control effect.
+
+## Falsifiable Performance Implications
+
+The present evidence supports a research program rather than a universal
+instruction:
+
+1. **Optimize a distribution, not one trajectory.** Maximize lower-tail impact
+   performance subject to face, path, strike, hand-force, effort, and injury-
+   relevant constraints.
+2. **Prefer state variables only when observable.** A configuration- or
+   phase-triggered handoff can reject timing variation, but sensing delay,
+   estimation noise, and saturation must be included.
+3. **Preserve useful abundance.** Stabilize club impact variables while
+   allowing task-null variation in joints, muscles, and hand-force allocation.
+4. **Treat impedance as a tradeoff.** More stiffness may improve one error and
+   worsen force, effort, or coupled stability.
+5. **Measure the pathway.** Kinematics alone cannot distinguish proximal work,
+   constraint-force transport, direct wrist moment, shaft release, gravity,
+   and dissipation.
+6. **Propagate to the ball.** Pure distance claims require strike location,
+   dynamic loft, attack angle, ball speed, spin, carry, and lateral dispersion,
+   not clubhead speed alone.
+
+The strongest near-term experiment is participant-held-out and phase-
+perturbed: synchronize whole-body motion, force plates, bilateral hand wrenches,
+shaft response, EMG, club/ball impact, and launch; estimate task-null and
+task-relevant covariance; and test whether state-relative handoff predicts a
+better speed--dispersion--load frontier than clock-relative timing. Failure to
+replicate that frontier would reject the performance implication while leaving
+the narrower multibody mechanism intact.

@@ -1,0 +1,106 @@
+{
+  "schema_version": "proximal-distal-observer-recovery-v1",
+  "study_id": "delayed-observer-trajectory-recovery-v1",
+  "registered_before_preferred_result": true,
+  "model_tier": "moving_base_two_hand_compliant_club",
+  "design": {
+    "paired_common_random_numbers": true,
+    "held_out_perturbations": 15,
+    "seed": 8595,
+    "duration_s": 0.24,
+    "step_s": 0.004,
+    "matched_reference_rule": "same nuisance parameters and sensor realization; initial state perturbation removed"
+  },
+  "observer_conditions": {
+    "clock": {
+      "name": "clock",
+      "trigger": "clock",
+      "delay_s": 0.0,
+      "angle_noise_sd_rad": 0.0,
+      "impedance_nms_rad": 0.08
+    },
+    "perfect_state": {
+      "name": "perfect_state",
+      "trigger": "state",
+      "delay_s": 0.0,
+      "angle_noise_sd_rad": 0.0,
+      "impedance_nms_rad": 0.08
+    },
+    "delayed_noisy": {
+      "name": "delayed_noisy",
+      "trigger": "state",
+      "delay_s": 0.032,
+      "angle_noise_sd_rad": 0.012,
+      "impedance_nms_rad": 0.08
+    },
+    "delayed_noisy_higher_impedance": {
+      "name": "delayed_noisy_higher_impedance",
+      "trigger": "state",
+      "delay_s": 0.032,
+      "angle_noise_sd_rad": 0.012,
+      "impedance_nms_rad": 0.24
+    }
+  },
+  "metric_names": [
+    "initial_normalized_error",
+    "terminal_error_ratio",
+    "minimum_error_ratio",
+    "recovery_time_s",
+    "returned_to_viable_set",
+    "terminal_delivery_speed_m_s",
+    "peak_hand_force_n",
+    "effort_proxy_nms"
+  ],
+  "recovery_definition": {
+    "error_state": "six angles and six rates normalized by declared engineering scales",
+    "threshold": "error at or below 50 percent of initial perturbation",
+    "sustained_samples": "all remaining samples through delivery",
+    "requires_sustained_error_decay": true,
+    "nonrecovery_time_s": 0.24
+  },
+  "summaries": {
+    "clock": {
+      "recovery_fraction": 0.2,
+      "median_terminal_error_ratio": 0.7865915741580711,
+      "median_recovery_time_s": 0.24,
+      "q90_peak_hand_force_n": 164.98755604879835,
+      "mean_effort_proxy_nms": 90.55338736463497
+    },
+    "perfect_state": {
+      "recovery_fraction": 0.13333333333333333,
+      "median_terminal_error_ratio": 0.80419398019582,
+      "median_recovery_time_s": 0.24,
+      "q90_peak_hand_force_n": 200.5021646517346,
+      "mean_effort_proxy_nms": 93.37023109304776
+    },
+    "delayed_noisy": {
+      "recovery_fraction": 0.2,
+      "median_terminal_error_ratio": 0.7909376103232465,
+      "median_recovery_time_s": 0.24,
+      "q90_peak_hand_force_n": 177.91778985339172,
+      "mean_effort_proxy_nms": 92.55864302215603
+    },
+    "delayed_noisy_higher_impedance": {
+      "recovery_fraction": 0.13333333333333333,
+      "median_terminal_error_ratio": 0.8355710600853253,
+      "median_recovery_time_s": 0.24,
+      "q90_peak_hand_force_n": 150.1309093823735,
+      "mean_effort_proxy_nms": 91.14772187356328
+    }
+  },
+  "adverse_costs": ["peak_hand_force_n", "effort_proxy_nms"],
+  "claim_status": {
+    "low_sensitivity_is_recovery": "rejected",
+    "model_policy_recovery": "conditional_on_reported_policy_and_envelope",
+    "human_self_correction": "untested",
+    "universal_timing_advantage": "unsupported"
+  },
+  "limitations": [
+    "The observer is a first-order delayed approximation, not an identified human sensory estimator.",
+    "The perturbation envelope is an engineering design, not a fitted golfer population.",
+    "Recovery to a matched model trajectory is not proof of motor learning, reflex correction, or coaching benefit.",
+    "The terminal sample is a delivery proxy rather than a ball-impact collision."
+  ],
+  "source_sha256": "c099f51010683e4b2a1bfac700c0d35f60e768c835898bfdabb19ab27f3f7744",
+  "array_artifact": "observer_recovery_study.npz"
+}

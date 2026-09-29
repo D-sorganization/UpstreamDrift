@@ -1,0 +1,110 @@
+# Distributed-Shaft Reference and Modal Reduction {#sec-shaft-beam-reference}
+
+## Structural Question and Evidence Boundary
+
+The coupled model in @sec-coupled-base-flex admits one linear torsional flex
+coordinate. That coordinate is sufficient to test whether stored elastic
+energy can coexist with the two-hand negative-couple mechanism, but it cannot
+represent a distributed bending field or decide when higher shaft modes
+matter. This section therefore compares a one-mode reduction with a
+higher-order Euler--Bernoulli reference assembled by the repository's shared
+finite-element shaft implementation. The exact analysis and evidence are in
+[`shaft_beam_reference.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/shaft_beam_reference.py),
+[`run_shaft_beam_reference.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_shaft_beam_reference.py),
+and
+[`shaft_beam_reference.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json).
+
+This is a structural verification experiment, not an equipment calibration.
+The modal observations used for identification are generated from a declared
+synthetic truth. No measured shaft frequencies, EI profile, clubhead inertia,
+or human loading data enter the result.
+
+## Distributed Beam and Tip Inertia
+
+Each tapered beam element carries transverse displacement and section rotation
+at both nodes. Its standard consistent mass and bending-stiffness matrices are
+assembled into $M_b$ and $K_b$, the butt displacement and
+rotation are clamped, and declared clubhead translation and rotary inertia are
+added at the free-end degrees of freedom. The generalized eigenproblem is
+
+$$
+\mathbf K_b\boldsymbol\phi_i
+=\omega_i^2\mathbf M_b\boldsymbol\phi_i,
+\qquad
+\boldsymbol\phi_i^\mathsf T\mathbf M_b\boldsymbol\phi_j=\delta_{ij}.
+$$ {#eq-beam-eigenproblem}
+
+The reference shaft is 1.0 m long with a 15.0 mm butt diameter, 8.5 mm tip
+diameter, 1.0 mm wall, 1,600 kg/m^3 density, 112 GPa elastic modulus, 0.205 kg
+tip mass, and $4.8\times10^{-4}$ kg m^2 tip rotary inertia. These values define
+the synthetic test article only. Twenty-four elements form the executed
+reference; comparison against 48 elements changes the first three frequencies
+by at most 0.0896%. The converged first three frequencies are 5.240, 62.931,
+and 137.909 Hz.
+
+## Synthetic Identification and Uncertainty
+
+Two parameters—the elastic modulus and clubhead mass—are identified from the
+first two synthetic modal frequencies. Optimization occurs in log-parameter
+space to enforce positivity. With an assumed independent frequency uncertainty
+of 0.05 Hz, local covariance is propagated from the residual Jacobian. The
+fit recovers 112.000 GPa and 0.2050 kg with a maximum modal residual of
+$9.94\times10^{-9}$ Hz. The corresponding assumed-noise 95% intervals are
+111.651--112.350 GPa and 0.1970--0.2133 kg.
+
+![Synthetic Identification and Beam Convergence](figures/fig_shaft_beam_identification.pdf){#fig-shaft-beam-identification width=94%}
+
+@fig-shaft-beam-identification verifies that the inference path can recover an
+identifiable synthetic truth. It does not show that real equipment follows the
+uniform-modulus, axisymmetric, Euler--Bernoulli assumptions. Practical
+equipment identification still requires measured modal frequencies, boundary
+conditions, mass properties, and their uncertainties.
+
+## Matched Reduced and Higher-Order Responses
+
+The mass-normalized modal coordinates satisfy
+
+$$
+\ddot\eta_i+2\zeta\omega_i\dot\eta_i+\omega_i^2\eta_i
+=\boldsymbol\phi_i^\mathsf T\mathbf f(t),
+$$ {#eq-beam-modal-response}
+
+with a damping ratio of 0.018. The reduced model retains only the first mode. The
+higher-order reference retains six modes. Both receive exactly the same load
+history and use fixed-step fourth-order Runge--Kutta integration at 12.5
+$\mu$s. A slow 80 ms tip-force pulse probes first-mode behavior; a short 4 ms
+tip-force-and-moment pulse deliberately introduces higher-frequency content.
+
+![Reduced and Higher-Order Tip Responses](figures/fig_shaft_beam_response.pdf){#fig-shaft-beam-response width=100%}
+
+Under the slow pulse, the tip-deflection RMS discrepancy is 0.000687 mm. Under
+the short pulse it grows to 0.0413 mm, sixty times larger, even though the
+peak values remain close (5.287 mm reduced and 5.339 mm reference). Peak-only
+agreement therefore conceals a structural discrepancy in the response history.
+The one-mode model is a useful low-frequency surrogate, not a general
+replacement for the distributed beam.
+
+## Work--Energy Closure and Remaining Coupling Gate
+
+For either modal truncation,
+
+$$
+E=\tfrac12\sum_i(\dot\eta_i^2+\omega_i^2\eta_i^2),
+\qquad
+\dot E=P_{\mathrm{tip}}-
+\sum_i2\zeta\omega_i\dot\eta_i^2.
+$$ {#eq-beam-energy}
+
+![Beam Input, Damping, and Energy Closure](figures/fig_shaft_beam_energy.pdf){#fig-shaft-beam-energy width=100%}
+
+The maximum absolute integrated work--energy residual is
+$2.87\times10^{-7}$ J for the six-mode reference and
+$2.77\times10^{-8}$ J for the one-mode reduction. This closes the isolated
+beam comparison and makes damping loss explicit.
+
+The isolated experiment narrows, but does not itself close, the structural
+coupling gap. @sec-forward-modal-shaft next inserts the transported modes into
+the moving-base, two-hand KKT solve and repeats the contact, constraint, and
+whole-system energy interventions. Equipment-specific language remains
+prohibited until measured modal, damping, inertia, and boundary-condition data
+are supplied.

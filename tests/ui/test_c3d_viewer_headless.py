@@ -1,0 +1,53 @@
+"""Headless smoke test for C3D Viewer."""
+
+from __future__ import annotations
+
+import importlib
+import sys
+import types
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+
+# Handle import of module with invalid identifier (3D_Golf_Model)
+def import_c3d_viewer() -> types.ModuleType | None:
+    """Import the C3D viewer module dynamically."""
+    module_name = (
+        "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
+    )
+    try:
+        return importlib.import_module(module_name)
+    except ImportError:
+        return None
+
+
+@pytest.mark.skipif(sys.platform == "linux", reason="Requires X11 or Xvfb on Linux")
+def test_c3d_viewer_instantiation(qtbot) -> None:
+    """Test that the main window can be instantiated without crashing."""
+    with patch.dict(sys.modules, {"c3d_reader": MagicMock()}):
+        c3d_viewer = import_c3d_viewer()
+
+        if c3d_viewer is None:
+            pytest.skip("Could not import c3d_viewer due to path issues")
+
+        # Now instantiate
+        window = c3d_viewer.C3DViewerMainWindow()
+
+        # qtbot.addWidget may fail with dynamically imported QWidgets
+        # from non-standard module paths (pytest-qt type check limitation)
+        try:
+            qtbot.addWidget(window)
+        except TypeError:
+            # Manually ensure cleanup
+            window.close()
+            window.deleteLater()
+
+        assert window.windowTitle() == "C3D Motion Analysis Viewer"
+        assert window.model is None
+
+        # Verify tabs exist
+        central_widget = window.centralWidget()
+        assert central_widget is not None
+        if hasattr(central_widget, "count"):
+            assert central_widget.count() >= 1

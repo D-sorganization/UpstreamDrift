@@ -1,0 +1,107 @@
+{
+  "claims_native_success": false,
+  "clubs": {
+    "driver": {
+      "g2": {
+        "claims_native_success": false,
+        "club": "driver",
+        "declared_armature_kg_m2": 0.005,
+        "document_id": "anthro_driver",
+        "g1_end_s": 0.85,
+        "node_integrator": "rk45",
+        "replay_integrator": "rk45",
+        "rk45_rtol": 1e-6,
+        "stage_ends_s": [1.0, 1.2],
+        "target_end_s": 1.2,
+        "target_horizon": "G2"
+      },
+      "g3": {
+        "claims_native_success": false,
+        "club": "driver",
+        "declared_armature_kg_m2": 0.005,
+        "document_id": "anthro_driver",
+        "g1_end_s": 0.85,
+        "node_integrator": "rk45",
+        "replay_integrator": "rk45",
+        "rk45_rtol": 1e-6,
+        "stage_ends_s": [1.0, 1.2, 1.4, 1.6, 1.814],
+        "target_end_s": 1.814,
+        "target_horizon": "G3"
+      },
+      "robustness": [
+        {
+          "claims_native_success": false,
+          "club": "driver",
+          "kind": "timestep_refinement",
+          "required_for_g2_g3": true
+        },
+        {
+          "claims_native_success": false,
+          "club": "driver",
+          "kind": "contact_transition",
+          "required_for_g2_g3": true
+        },
+        {
+          "claims_native_success": false,
+          "club": "driver",
+          "kind": "initial_state_perturbation",
+          "required_for_g2_g3": true
+        }
+      ]
+    },
+    "iron": {
+      "g2": {
+        "claims_native_success": false,
+        "club": "iron",
+        "declared_armature_kg_m2": 0.005,
+        "document_id": "anthro_iron",
+        "g1_end_s": 0.85,
+        "node_integrator": "rk45",
+        "replay_integrator": "rk45",
+        "rk45_rtol": 1e-6,
+        "stage_ends_s": [1.0, 1.2],
+        "target_end_s": 1.2,
+        "target_horizon": "G2"
+      },
+      "g3": {
+        "claims_native_success": false,
+        "club": "iron",
+        "declared_armature_kg_m2": 0.005,
+        "document_id": "anthro_iron",
+        "g1_end_s": 0.85,
+        "node_integrator": "rk45",
+        "replay_integrator": "rk45",
+        "rk45_rtol": 1e-6,
+        "stage_ends_s": [1.0, 1.2, 1.4, 1.6, 1.827],
+        "target_end_s": 1.827,
+        "target_horizon": "G3"
+      },
+      "robustness": [
+        {
+          "claims_native_success": false,
+          "club": "iron",
+          "kind": "timestep_refinement",
+          "required_for_g2_g3": true
+        },
+        {
+          "claims_native_success": false,
+          "club": "iron",
+          "kind": "contact_transition",
+          "required_for_g2_g3": true
+        },
+        {
+          "claims_native_success": false,
+          "club": "iron",
+          "kind": "initial_state_perturbation",
+          "required_for_g2_g3": true
+        }
+      ]
+    }
+  },
+  "depends_on": ["MS-107", "MS-100", "MS-102"],
+  "issue": 10385,
+  "milestone": "MS-111",
+  "notes": "Software contracts for G2/G3 continuation, armature-propagated independent replay, and fail-closed integrator parity. Native ControlTower desk success is not claimed.",
+  "qualification": "awaiting_native_evidence",
+  "schema_version": "pinocchio-g2-g3-continuation/1.0.0"
+}

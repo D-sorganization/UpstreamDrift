@@ -1,0 +1,967 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "calibration.references",
+      "title": "Paper and Ruler Placements",
+      "description": "Capture-owned original frames, identified reference points, measured dimensions and repeatable observation revisions.",
+      "evidence": "src/tools/capture_rig/reference_calibration/dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open a capture and choose Calibration, then Paper / Ruler References. Review the recorded camera and optical settings.",
+        "Keep the reference stationary across camera views. Name each new placement, choose a clear original frame with the video timeline, mark the same physical corners and save a revision."
+      ]
+    },
+    {
+      "id": "calibration.layout",
+      "title": "Reviewed Camera Layout",
+      "description": "Canonical fixed-intrinsics estimation with explicit world anchor, fit/validation residuals and preserved lens distortion.",
+      "evidence": "src/tools/capture_rig/reference_calibration/solver.py",
+      "view": "workflow",
+      "instructions": [
+        "Use compatible lens profiles and overlapping paper observations from multiple cameras and placements. Confirm the ball/target anchor.",
+        "Estimate camera positions, inspect independent validation and limitations, then use the reviewed layout for Match. Changed optics require a new session."
+      ]
+    },
+    {
+      "id": "operator",
+      "title": "Operator",
+      "description": "Record, review, compare and export.",
+      "evidence": "docs/motion_capture/capture_rig.md",
+      "view": "system"
+    },
+    {
+      "id": "desktop",
+      "title": "Desktop Workbench",
+      "description": "PyQt tools and local camera sessions.",
+      "evidence": "src/launchers/embedded_host.py",
+      "view": "system"
+    },
+    {
+      "id": "web",
+      "title": "Web and Tauri",
+      "description": "Browser tools; native-only gaps remain explicit.",
+      "evidence": "ui/src/App.tsx",
+      "view": "system"
+    },
+    {
+      "id": "api",
+      "title": "Application API",
+      "description": "Jobs, artifacts and engine orchestration.",
+      "evidence": "src/api/server.py",
+      "view": "system"
+    },
+    {
+      "id": "pipeline",
+      "title": "Motion Pipeline",
+      "description": "Canonical motion input, scaling and retargeting.",
+      "evidence": "src/shared/python/motion_pipeline",
+      "view": "system"
+    },
+    {
+      "id": "engines",
+      "title": "Physics Engines",
+      "description": "Optional backend capabilities; qualify each result.",
+      "evidence": "src/shared/python/engine_core",
+      "view": "system"
+    },
+    {
+      "id": "files",
+      "title": "Session and Export Files",
+      "description": "Versioned artifacts and provenance.",
+      "evidence": "src/motion_capture/provenance.py",
+      "view": "system"
+    },
+    {
+      "id": "tools",
+      "title": "Tools Contracts",
+      "description": "Pinned vendor-owned shared schemas and libraries.",
+      "evidence": "src/motion_capture/rig/tools_bridge.py",
+      "view": "system"
+    },
+    {
+      "id": "capture.camera_setup",
+      "title": "Camera Setup",
+      "description": "Discover supported USB cameras, name views and save reusable recording plans.",
+      "evidence": "src/tools/capture_rig/camera_setup_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open Camera Setup in the header, or Set Up Cameras to Record in the wizard.",
+        "Scan or load a plan, choose unique views and camera modes, then Save and Use.",
+        "Run Plan Check and Preview before recording; review calibration separately."
+      ]
+    },
+    {
+      "id": "capture.library",
+      "title": "Capture Library",
+      "description": "Find, import, open and edit captures; save swing notes and manage archive/storage.",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Import existing videos, or select a recorded capture and open it.",
+        "Name the swing and add notes so you can recognize this take later."
+      ]
+    },
+    {
+      "id": "capture.selection",
+      "title": "Swing Selection",
+      "description": "Preview source frames, mark in/out and crop before inference.",
+      "evidence": "src/tools/capture_rig/swing_editor.py",
+      "view": "workflow",
+      "instructions": [
+        "Play or step through the recording to find the swing. Select its first and last frames.",
+        "Crop around the player if needed, then Save. Keep the full range to use the entire recording.",
+        "When analysis already exists, the editor offers a separate editable copy so earlier results remain available."
+      ]
+    },
+    {
+      "id": "capture.references",
+      "title": "Coaching References",
+      "description": "Saved lines, arrows, circles, ellipses and rectangles in original camera pixels.",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Choose a camera view and pause at the frame you want to discuss.",
+        "Draw lines, arrows, circles, ellipses or rectangles. Select a shape to adjust it, or use Undo.",
+        "Save your references before returning. Use the editor’s export controls to share an annotated image or video."
+      ]
+    },
+    {
+      "id": "capture.experts",
+      "title": "Expert Reference Library",
+      "description": "Import linked 2D video or validated C3D/model marker motion with explicit units, axes and joint names.",
+      "evidence": "src/tools/capture_rig/reference_library_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Import an expert video or a C3D/model motion file. Check the units and axes when importing motion.",
+        "Give the reference a recognizable name and notes. Choose it in Expert Comparison."
+      ]
+    },
+    {
+      "id": "capture.comparison",
+      "title": "Expert Comparison",
+      "description": "Place an expert video or model, pair swing events, and review through the selected camera.",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "view": "workflow",
+      "instructions": [
+        "Choose an expert reference and align it with the player in the camera view.",
+        "Pair matching swing events to synchronize playback, then adjust placement and opacity.",
+        "Save the comparison before returning. Review the alignment carefully before exporting it."
+      ]
+    },
+    {
+      "id": "comparison.outputs",
+      "title": "Comparison Deliverables",
+      "description": "Encoded comparison video and portable evidence sidecar.",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "view": "workflow"
+    },
+    {
+      "id": "clubs.catalog",
+      "title": "Attributed Club Catalog",
+      "description": "Optional component quantities, source claims and build revisions.",
+      "evidence": "src/shared/python/club_data/catalog.py",
+      "view": "system"
+    },
+    {
+      "id": "clubs.exchange",
+      "title": "Club Catalog Exchange",
+      "description": "Validated JSON/CSV and offline manufacturer examples; source review preserves player overrides.",
+      "evidence": "src/shared/python/club_data/catalog_io.py",
+      "view": "system"
+    },
+    {
+      "id": "clubs.bag",
+      "title": "My Clubs",
+      "description": "Catalog/custom clubs, notes, archive and capture-owned equipment snapshots.",
+      "evidence": "src/tools/capture_rig/equipment_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Search the catalog or add a custom club. Enter only the specifications you know; keep estimates and unknown values explicit.",
+        "Assign the selected club to this capture. Editing your bag later preserves the capture’s saved club details.",
+        "Skip this step if the club details are unavailable. Current body models record equipment context without applying a club constraint."
+      ]
+    },
+    {
+      "id": "capture.model_analysis",
+      "title": "Model Analysis",
+      "description": "Analyze reference motion with the shared timeline, drawings, appearance and metric references.",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Select a motion asset in the reference library and choose Analyze Model.",
+        "Adjust club visibility, ellipsoids, opacity, placement and handedness; add drawings or 3D references.",
+        "Save the portable analysis recipe or export a still or video. The camera is virtual."
+      ]
+    },
+    {
+      "id": "capture.world_references",
+      "title": "Metric Reference Planes and Points",
+      "description": "Scene-bound reference geometry in metres with explicit ADR-0041 axes.",
+      "evidence": "src/tools/capture_rig/geometry_controls.py",
+      "view": "workflow",
+      "instructions": [
+        "Open 3D References in model analysis or comparison.",
+        "Enter point coordinates or three non-collinear plane anchors, extent and opacity in the displayed world frame.",
+        "Save after reviewing camera and scene identity; changed evidence requires review."
+      ]
+    },
+    {
+      "id": "calibration.reuse",
+      "title": "Reuse Calibration for a New Swing",
+      "description": "Explicit review and a portable copy of the original camera estimate and observation evidence.",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_dialog.py",
+      "view": "workflow",
+      "instructions": [
+        "Open the new swing and choose Calibration, then Reuse a Camera Layout. From Capture Library lists saved calibrations by capture name, review date and scene, including archived captures.",
+        "Review the source settings and confirm unchanged optics, camera positions, ball origin and target direction. Use for This Swing retains source evidence; changed conditions require recalibration."
+      ]
+    },
+    {
+      "id": "analysis.measurements",
+      "title": "Registered Metric Readouts",
+      "description": "Shared point and signed plane distances from the displayed registered motion; missing samples stay unavailable.",
+      "evidence": "src/tools/capture_rig/reference_readout.py",
+      "view": "system"
+    },
+    {
+      "id": "simulation.trace_import",
+      "title": "Simulation Trace Import",
+      "description": "Bounded Trace v2 marker motion with explicit axes, names and optional club topology.",
+      "evidence": "src/motion_capture/reference/trace_import.py",
+      "view": "system"
+    },
+    {
+      "id": "pose.world_references",
+      "title": "Pose Studio World References",
+      "description": "Shared scene editor and native mesh adapter beside canonical FK; explicit Y-up to Z-up conversion.",
+      "evidence": "src/tools/pose_studio/reference_geometry.py",
+      "view": "system"
+    }
+  ],
+  "edges": [
+    {
+      "source": "capture.camera_setup",
+      "target": "step.setup",
+      "artifact": "Versioned camera plan",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/camera_setup_actions.py",
+      "constraint": "Native ELP discovery on Windows; connection checks do not qualify modes or calibration",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "calibration.references",
+      "artifact": "Original frames and fixed camera settings",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/operations.py",
+      "constraint": "Calibration marking retains original pixels independently of swing trims and crops",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.references",
+      "target": "calibration.layout",
+      "artifact": "Identified placements and held-out observations",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_calibration/worker.py",
+      "constraint": "Requires the compatible Tools provider, multiple overlapping paper placements and an explicit world anchor; ruler endpoints alone cannot locate cameras",
+      "view": "workflow"
+    },
+    {
+      "source": "step.intrinsics",
+      "target": "calibration.layout",
+      "artifact": "Reviewed lens profiles with distortion",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/calibration_profiles.py",
+      "constraint": "Physical identity, zoom, focus, resolution and crop must match the recording",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "step.reconstruct",
+      "artifact": "Reviewed camera poses and complete intrinsics",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/lens.py",
+      "constraint": "Review does not certify physical accuracy; original distorted observations are corrected once before the ideal-pixel fit",
+      "view": "workflow"
+    },
+    {
+      "source": "operator",
+      "target": "desktop",
+      "artifact": "Camera and analysis controls",
+      "kind": "runtime",
+      "evidence": "src/tools/capture_rig/gui.py",
+      "constraint": "Local desktop workflow",
+      "view": "system"
+    },
+    {
+      "source": "operator",
+      "target": "web",
+      "artifact": "Available browser tools",
+      "kind": "runtime",
+      "evidence": "ui/src/App.tsx",
+      "constraint": "Feature parity registry lists gaps and exemptions",
+      "view": "system"
+    },
+    {
+      "source": "web",
+      "target": "api",
+      "artifact": "REST and WebSocket requests",
+      "kind": "runtime",
+      "evidence": "ui/src/api/fetch.ts",
+      "constraint": "Requires a reachable authorized backend",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "files",
+      "artifact": "Session bundles and video",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/session.py",
+      "constraint": "Camera media remains local",
+      "view": "system"
+    },
+    {
+      "source": "files",
+      "target": "pipeline",
+      "artifact": "TRC marker file",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "User exports and imports; not a live automatic connection",
+      "view": "system"
+    },
+    {
+      "source": "pipeline",
+      "target": "engines",
+      "artifact": "Canonical motion and retargeting",
+      "kind": "contract",
+      "evidence": "src/shared/python/motion_pipeline",
+      "constraint": "Backend and model-dependent capability; validate units and conventions",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "tools",
+      "artifact": "Pinned mocap schema",
+      "kind": "contract",
+      "evidence": "src/motion_capture/rig/tools_bridge.py",
+      "constraint": "Fail-closed optional Tools contract bridge",
+      "view": "system"
+    },
+    {
+      "source": "step.setup",
+      "target": "step.capture",
+      "artifact": "Resolved plan / imported views",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "constraint": "Check plan before recording; importing existing files is supported",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.intrinsics",
+      "artifact": "Separate chessboard take",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/intrinsics.py",
+      "constraint": "Multi-view lens calibration; once per camera/mode, not each swing",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.detect",
+      "artifact": "Recorded swing videos",
+      "kind": "file",
+      "evidence": "src/motion_capture/rig/ingest.py",
+      "constraint": "One observation set per estimator",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.annotate",
+      "artifact": "Video frames",
+      "kind": "file",
+      "evidence": "src/motion_capture/annotate/guide.py",
+      "constraint": "Sparse manual points; mark occlusion rather than invent coordinates",
+      "view": "workflow"
+    },
+    {
+      "source": "step.detect",
+      "target": "step.review",
+      "artifact": "2-D observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "constraint": "Review confidence, coverage, jitter and provenance",
+      "view": "workflow"
+    },
+    {
+      "source": "step.annotate",
+      "target": "step.review",
+      "artifact": "Converted observation set",
+      "kind": "file",
+      "evidence": "src/motion_capture/annotate/to_observations.py",
+      "constraint": "Run annotations-to-observations; optional merge with detector output",
+      "view": "workflow"
+    },
+    {
+      "source": "step.detect",
+      "target": "step.analyze_2d",
+      "artifact": "Single-view observations",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/analytics2d.py",
+      "constraint": "2-D normalized measurements, not metric depth",
+      "view": "workflow"
+    },
+    {
+      "source": "step.intrinsics",
+      "target": "step.reconstruct",
+      "artifact": "intrinsics.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/pipeline.py",
+      "constraint": "Two or more views plus measured segments; reuse calibrated camera placement when appropriate",
+      "view": "workflow"
+    },
+    {
+      "source": "step.review",
+      "target": "step.reconstruct",
+      "artifact": "Reviewed multi-view observations",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/pipeline.py",
+      "constraint": "Reliability review does not prove geometric observability",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "step.fit_model",
+      "artifact": "joints_3d_m.npy",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/model/fit.py",
+      "constraint": "Fit residuals are not independent physical validation",
+      "view": "workflow"
+    },
+    {
+      "source": "step.fit_model",
+      "target": "step.kinetics",
+      "artifact": "joint_angles.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/model/dynamics.py",
+      "constraint": "Model-dependent inverse dynamics; inspect replay drift and assumptions",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "step.export",
+      "artifact": "Reconstruction artifacts",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "TRC uses millimetres; canonical JSON states units",
+      "view": "workflow"
+    },
+    {
+      "source": "step.export",
+      "target": "pipeline",
+      "artifact": "TRC / canonical JSON",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "Explicit artifact import into motion pipeline",
+      "view": "workflow"
+    },
+    {
+      "source": "step.analyze_2d",
+      "target": "files",
+      "artifact": "Annotated clips and metrics",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/clips.py",
+      "constraint": "Coaching reference; single-view outputs are not 3-D",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "step.capture",
+      "artifact": "Existing session / imported videos",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_actions.py",
+      "constraint": "Sidecar notes survive catalog rebuild; archived captures remain on disk",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "capture.selection",
+      "artifact": "Original camera recordings",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/swing_editor.py",
+      "constraint": "Keep an address hold for calibration and the finish for analysis",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "step.detect",
+      "artifact": "swing_edits.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/rig/ingest.py",
+      "constraint": "Only selected frames and crop reach inference; original pixels and clocks are retained",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "files",
+      "artifact": "Swing video + provenance",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/swing_export.py",
+      "constraint": "Separate output; source hash, exact recipe and any encoder padding are recorded",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "capture.references",
+      "artifact": "Original camera view + saved drawing layer",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "constraint": "Visual references remain separate from measured pose observations",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "capture.references",
+      "artifact": "Original camera view + saved drawing layer",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "constraint": "Visual references remain separate from measured pose observations",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.references",
+      "target": "files",
+      "artifact": "Annotated PNG / swing video + portable drawing sidecar",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/coaching_export.py",
+      "constraint": "Draw at source resolution before crop; retain original frame numbers and preserve media",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "capture.experts",
+      "artifact": "Saved reference assets, titles, notes and archive state",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "constraint": "Import and manage reference assets, then open Compare Reference for the selected camera view",
+      "view": "workflow"
+    },
+    {
+      "source": "files",
+      "target": "capture.experts",
+      "artifact": "C3D, canonical marker animation or expert video",
+      "kind": "file",
+      "evidence": "src/motion_capture/reference/importers.py",
+      "constraint": "Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.experts",
+      "target": "capture.comparison",
+      "artifact": "Expert video / marker animation",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "2D image alignment or camera-projected 3D motion; manual registration is explicit",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "capture.comparison",
+      "artifact": "Saved trim, crop, drawings and original clock",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Preview and export share the same composition pipeline",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "capture.comparison",
+      "artifact": "Camera intrinsics, distortion and pose",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Changed camera or motion evidence requires manual review",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "comparison.outputs",
+      "artifact": "Comparison video + reproducible sidecar",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "constraint": "Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published",
+      "view": "workflow"
+    },
+    {
+      "source": "clubs.exchange",
+      "target": "clubs.catalog",
+      "artifact": "Attributed build records",
+      "kind": "contract",
+      "evidence": "src/shared/python/club_data/catalog_io.py",
+      "constraint": "Validated source claims; player overrides retain catalog provenance",
+      "view": "system"
+    },
+    {
+      "source": "clubs.catalog",
+      "target": "clubs.bag",
+      "artifact": "Attributed build and player overrides",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/club_editor.py",
+      "constraint": "Unknown and estimated quantities remain explicit; catalog base is preserved",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "clubs.bag",
+      "artifact": "Selected capture identity",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "constraint": "Assignment is explicit; existing snapshots and reports remain unchanged",
+      "view": "workflow"
+    },
+    {
+      "source": "clubs.bag",
+      "target": "step.fit_model",
+      "artifact": "Selected club snapshot and eligible SI context",
+      "kind": "workflow",
+      "evidence": "src/motion_capture/reconstruct/model/session.py",
+      "constraint": "Current body models apply no club constraints; equipment is recorded in provenance",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.experts",
+      "target": "capture.model_analysis",
+      "artifact": "Selected marker motion",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_library_dialog.py",
+      "constraint": "Motion assets only; no recording is required",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "capture.references",
+      "artifact": "Shared drawing editor",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Drawings use the original virtual-camera pixel grid",
+      "view": "system"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "capture.references",
+      "artifact": "Draw on Comparison",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Save registration first; editor and PNG retain original pixels, video applies saved crop",
+      "view": "system"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "capture.world_references",
+      "artifact": "Shared geometry controls",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Virtual camera is explicit; illustrative volumes are not anatomical meshes",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "capture.world_references",
+      "artifact": "Shared geometry controls",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Metric projection requires camera evidence; geometry is bound to the scene",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.world_references",
+      "target": "comparison.outputs",
+      "artifact": "Saved world geometry",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "constraint": "The shared compositor retains geometry, layer order and source identity",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.layout",
+      "target": "calibration.reuse",
+      "artifact": "Original reviewed result and archived observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse.py",
+      "constraint": "Same named views, physical cameras and recorded image sizes; fresh operator confirmation of unchanged optics and scene",
+      "view": "workflow"
+    },
+    {
+      "source": "calibration.reuse",
+      "target": "step.reconstruct",
+      "artifact": "Capture-owned reviewed layout assignment",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_evidence.py",
+      "constraint": "Processing revalidates copied source evidence; this is reuse, not a new numerical solve or accuracy certification",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "calibration.reuse",
+      "artifact": "Named saved calibrations and capture identity",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_calibration/reuse_catalog.py",
+      "constraint": "Catalog metadata is not evidence approval; selecting an estimate verifies archived source evidence before fresh optics/scene confirmation",
+      "view": "workflow"
+    },
+    {
+      "source": "engines",
+      "target": "simulation.trace_import",
+      "artifact": "Trace v2 HDF5 marker channels",
+      "kind": "contract",
+      "evidence": "src/motion_capture/reference/trace_import.py",
+      "constraint": "Marker channels and metres required; named scalar metadata declares axes and topology; no q-only FK guessing",
+      "view": "system"
+    },
+    {
+      "source": "simulation.trace_import",
+      "target": "capture.experts",
+      "artifact": "Validated reference asset",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_import.py",
+      "constraint": "Confirm mapping; unknown frame requires explicit axes; gaps remain masked",
+      "view": "system"
+    },
+    {
+      "source": "capture.model_analysis",
+      "target": "analysis.measurements",
+      "artifact": "Registered motion, world references and scene clock",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/model_analysis_dialog.py",
+      "constraint": "Same sampler as rendering; signed distances in metres",
+      "view": "system"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "analysis.measurements",
+      "artifact": "Registered motion, camera scene and time",
+      "kind": "contract",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Geometric readouts only; not anatomical metrics",
+      "view": "system"
+    },
+    {
+      "source": "capture.world_references",
+      "target": "pose.world_references",
+      "artifact": "Shared GeometryControls and ReferenceGeometry",
+      "kind": "contract",
+      "evidence": "src/tools/pose_studio/reference_geometry.py",
+      "constraint": "Scene-bound JSON; static pose clock zero; no implicit camera-scene rebinding",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "pose.world_references",
+      "artifact": "Pose Studio 3D References button",
+      "kind": "contract",
+      "evidence": "src/tools/pose_studio/gui.py",
+      "constraint": "Canonical viewport qualified; optional engine-native renderers are not implied",
+      "view": "system"
+    }
+  ],
+  "capture_goals": {
+    "schema_version": "capture-goals/1",
+    "steps": [
+      {
+        "id": "capture.library",
+        "action": "library",
+        "node_id": null,
+        "requires": [],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "capture.selection",
+        "action": "edit",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "capture.references",
+        "action": "draw",
+        "node_id": null,
+        "requires": ["capture.selection"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "capture.experts",
+        "action": "references",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "compare.video",
+        "action": "compare_reference",
+        "node_id": "capture.comparison",
+        "requires": ["capture.selection", "capture.experts"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.detect",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["capture.selection"],
+        "workflow_key": "detect",
+        "minimum_views": 1,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.analyze_2d",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.detect"],
+        "workflow_key": "analyze_2d",
+        "minimum_views": 1,
+        "maximum_views": 1,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.intrinsics",
+        "action": "calibration",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": "intrinsics",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.review",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.detect"],
+        "workflow_key": "review",
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": false
+      },
+      {
+        "id": "step.reconstruct",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.review", "step.intrinsics"],
+        "workflow_key": "reconstruct",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      },
+      {
+        "id": "clubs.bag",
+        "action": "my_clubs",
+        "node_id": null,
+        "requires": ["capture.library"],
+        "workflow_key": null,
+        "minimum_views": 0,
+        "maximum_views": null,
+        "needs_calibration": false,
+        "optional": true
+      },
+      {
+        "id": "step.fit_model",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.reconstruct", "clubs.bag"],
+        "workflow_key": "fit_model",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      },
+      {
+        "id": "step.export",
+        "action": "workflow",
+        "node_id": null,
+        "requires": ["step.reconstruct"],
+        "workflow_key": "export",
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      },
+      {
+        "id": "compare.projected",
+        "action": "compare_reference",
+        "node_id": "capture.comparison",
+        "requires": ["step.reconstruct", "capture.experts"],
+        "workflow_key": null,
+        "minimum_views": 2,
+        "maximum_views": null,
+        "needs_calibration": true,
+        "optional": false
+      }
+    ],
+    "goals": [
+      {
+        "id": "edit",
+        "title": "Trim and Crop a Swing",
+        "steps": ["capture.selection"]
+      },
+      {
+        "id": "draw",
+        "title": "Add Coaching Lines and Shapes",
+        "steps": ["capture.references"]
+      },
+      {
+        "id": "compare_video",
+        "title": "Compare with an Expert Video",
+        "steps": ["compare.video"]
+      },
+      {
+        "id": "analyze_2d",
+        "title": "Measure Single-View Swing Timing",
+        "steps": ["step.analyze_2d"]
+      },
+      {
+        "id": "reconstruct",
+        "title": "Reconstruct Multiple Views in 3-D",
+        "steps": ["step.reconstruct"]
+      },
+      {
+        "id": "fit_model",
+        "title": "Fit a Body Model to a Reconstruction",
+        "steps": ["step.fit_model"]
+      },
+      {
+        "id": "export_motion",
+        "title": "Export Reconstructed Motion",
+        "steps": ["step.export"]
+      },
+      {
+        "id": "project_reference",
+        "title": "Project an Expert into Reconstructed Cameras",
+        "steps": ["compare.projected"]
+      }
+    ]
+  }
+}

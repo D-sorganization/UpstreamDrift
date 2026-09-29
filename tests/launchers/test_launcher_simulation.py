@@ -1,0 +1,696 @@
+"""Tests for launcher_simulation.py."""
+
+import os  # noqa: E402
+import sys  # noqa: E402
+import threading  # noqa: E402
+import time  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any
+from unittest.mock import MagicMock, patch  # noqa: E402
+
+import pytest  # noqa: E402
+from PyQt6.QtWidgets import QMainWindow, QMessageBox  # noqa: E402
+from src.launchers.launcher_simulation import SimulationManager  # noqa: E402
+
+pytestmark = pytest.mark.unit
+
+
+class DummyModel:
+    def __init__(self, id, name, type, path=None):
+        self.id = id
+        self.name = name
+        self.type = type
+        self.path = path
+
+
+class DummyLauncher(QMainWindow):
+    def __getattr__(self, name: str) -> Any:
+        if hasattr(self, "manager"):
+            manager = self.manager
+            if name in manager.__dict__ or hasattr(type(manager), name):
+                attr = getattr(manager, name)
+                import types
+
+                if isinstance(attr, types.MethodType):
+                    return types.MethodType(attr.__func__, self)
+                return attr
+        raise AttributeError(name)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = SimulationManager(self)
+
+        self.selected_model = None
+        self.show_toast = MagicMock()
+        self.lbl_status = MagicMock()
+        self.chk_docker = MagicMock()
+        self.chk_docker.isChecked.return_value = False
+        self.chk_wsl = MagicMock()
+        self.chk_wsl.isChecked.return_value = False
+        self.chk_gpu = MagicMock()
+        self.chk_gpu.isChecked.return_value = False
+        self.docker_available = False
+        self.process_manager = MagicMock()
+        self.model_handler_registry = MagicMock()
+        self.docker_launcher = MagicMock()
+        self.running_processes = {}
+        self.models = {
+            "m1": DummyModel("m1", "M1", "mjcf", path="test.xml"),
+            "m2": DummyModel("m2", "M2", "matlab_app", path="test.slx"),
+        }
+
+    def _get_model(self, model_id: str) -> DummyModel | None:
+        return self.models.get(model_id)
+
+
+@pytest.fixture
+def launcher(qapp) -> DummyLauncher:
+    return DummyLauncher()
+
+
+def test_get_subprocess_env(launcher) -> None:
+    with patch("os.environ.copy", return_value={"PYTHONPATH": "old/path"}):
+        env = launcher._get_subprocess_env()
+        assert "PYTHONPATH" in env
+        assert env["MUJOCO_PLUGIN_PATH"] == ""
+
+
+@patch("src.launchers.launcher_simulation.subprocess.run")
+def test_check_module_dependencies(mock_run, launcher) -> None:
+    mock_run.return_value.stdout = "OK"
+    success, err = launcher._check_module_dependencies("mjcf")
+    assert success is True
+    expected_flags = 0 if os.name != "nt" else 0x08000000
+    assert mock_run.call_args.kwargs["creationflags"] == expected_flags
+
+    mock_run.return_value.stdout = "ImportError: no module"
+    success, err = launcher._check_module_dependencies("mjcf")
+    assert success is False
+    assert "dependency check failed" in err
+
+    # Timeout
+    import subprocess
+
+    mock_run.side_effect = subprocess.TimeoutExpired("cmd", 10)
+    success, err = launcher._check_module_dependencies("drake")
+    assert success is False
+
+    # OS Error
+    mock_run.side_effect = OSError("failed")
+    success, err = launcher._check_module_dependencies("pinocchio")
+    assert success is False
+
+    # Unknown type
+    success, err = launcher._check_module_dependencies("not_a_real_type")
+    assert success is True
+
+
+@patch("src.launchers.launcher_simulation.QMessageBox.warning")
+def test_show_dependency_error(mock_warning, launcher) -> None:
+    launcher._show_dependency_error("m1", "DLL load failed")
+    mock_warning.assert_called_once()
+
+    launcher._show_dependency_error("m1", "ImportError: module not found")
+    assert mock_warning.call_count == 2
+
+
+def test_try_launch_special_app(launcher) -> None:
+    with patch.object(launcher, "_launch_urdf_generator") as mock_urdf:
+        assert launcher._try_launch_special_app("urdf_generator") is True
+        mock_urdf.assert_called_once()
+
+    with patch.object(launcher, "_launch_c3d_viewer") as mock_c3d:
+        assert launcher._try_launch_special_app("c3d_viewer") is True
+        mock_c3d.assert_called_once()
+
+    with patch.object(launcher, "_launch_shot_tracer") as mock_shot:
+        assert launcher._try_launch_special_app("shot_tracer") is True
+        mock_shot.assert_called_once()
+
+    with patch.object(launcher, "_launch_training_controller") as mock_train:
+        assert launcher._try_launch_special_app("training_controller") is True
+        mock_train.assert_called_once()
+
+    # Stub _open_library_tab to avoid AttributeError or ImportError
+    launcher._open_library_tab = MagicMock()
+    assert launcher._try_launch_special_app("library_tool") is True
+    launcher._open_library_tab.assert_called_once()
+
+    launcher._install_sidekick_sidebar = MagicMock()
+    launcher._toggle_sidekick = MagicMock()
+    launcher.open_sidekick_tab = MagicMock()
+    launcher.sidekick_sidebar = None
+    assert launcher._try_launch_special_app("sidekick") is True
+    launcher._install_sidekick_sidebar.assert_called_once()
+    launcher._toggle_sidekick.assert_called_once_with(True)
+    launcher.open_sidekick_tab.assert_called_once_with("chat")
+
+    assert launcher._try_launch_special_app("normal_model") is False
+
+
+def test_try_launch_docker(launcher) -> None:
+    launcher.chk_docker.isChecked.return_value = True
+    launcher.docker_available = True
+
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+    with patch.object(launcher, "_launch_docker_container") as mock_launch:
+        assert launcher._try_launch_docker(model) is True
+        mock_launch.assert_called_once()
+
+    # Model missing path
+    model = DummyModel("m1", "M1", "mjcf")
+    launcher._try_launch_docker(model)
+    launcher.show_toast.assert_called_with(
+        "Model path missing for Docker launch.", "error"
+    )
+
+    # Exception
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+    with patch.object(launcher, "_launch_docker_container", side_effect=OSError("err")):
+        launcher._try_launch_docker(model)
+        launcher.show_toast.assert_called()
+
+
+@patch("src.launchers.launcher_simulation.QMessageBox.question")
+def test_check_local_dependencies(mock_question, launcher) -> None:
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+
+    # WSL enabled
+    launcher.chk_wsl.isChecked.return_value = True
+    assert launcher._check_local_dependencies(model) is True
+
+    # WSL disabled, cached deps OK
+    launcher.chk_wsl.isChecked.return_value = False
+    launcher._dependency_status_cache = {"m1": (True, "")}
+    assert launcher._check_local_dependencies(model) is True
+
+    # Cached deps fail, docker available
+    launcher.docker_available = True
+    launcher._dependency_status_cache = {"m1": (False, "error")}
+    mock_question.return_value = QMessageBox.StandardButton.Yes
+    with patch.object(launcher, "launch_simulation") as mock_launch:
+        assert launcher._check_local_dependencies(model) is False
+        launcher.chk_docker.setChecked.assert_called_with(True)
+        mock_launch.assert_called_once()
+
+    launcher._dependency_status_cache = {"m1": (False, "error")}
+    mock_question.return_value = QMessageBox.StandardButton.No
+    with patch.object(launcher, "_show_dependency_error"):
+        assert launcher._check_local_dependencies(model) is False
+
+
+@pytest.mark.unit
+def test_dependency_probe_runs_off_gui_thread_and_dedupes(launcher, qtbot) -> None:
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+    launcher._dependency_status_cache = {}
+    release_probe = threading.Event()
+    calls = []
+
+    def slow_check(key: str) -> tuple[bool, str]:
+        calls.append(key)
+        release_probe.wait(timeout=2)
+        return True, ""
+
+    with patch.object(launcher, "_check_module_dependencies", side_effect=slow_check):
+        start = time.perf_counter()
+        assert launcher._start_dependency_probe(model.id, model) is True
+        elapsed = time.perf_counter() - start
+        assert elapsed < 0.1
+
+        assert launcher._start_dependency_probe(model.id, model) is True
+        assert len(launcher._dependency_probe_workers) == 1
+
+        release_probe.set()
+        qtbot.waitUntil(
+            lambda: launcher._dependency_status_cache.get("m1") == (True, ""),
+            timeout=3000,
+        )
+
+    assert calls == ["mjcf"]
+
+
+def test_execute_local_launch(launcher) -> None:
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+
+    handler = MagicMock()
+    handler.launch.return_value = True
+    launcher.model_handler_registry.get_handler.return_value = handler
+
+    launcher._execute_local_launch(model)
+    launcher.show_toast.assert_called_with("M1 Launched", "success")
+
+    handler.launch.return_value = False
+    launcher._execute_local_launch(model)
+    launcher.show_toast.assert_called_with(
+        "Failed to launch M1 — check console", "error"
+    )
+
+    # Handler missing
+    launcher.model_handler_registry.get_handler.return_value = None
+    with patch.object(launcher, "_launch_generic_mjcf") as mock_mjcf:
+        launcher._execute_local_launch(model)
+        mock_mjcf.assert_called_once()
+
+    # Unknown type
+    model2 = DummyModel("m3", "M3", "unknown_type", path="test.xml")
+    model2.path = "test.txt"  # Not .xml
+    launcher._execute_local_launch(model2)
+    launcher.show_toast.assert_called_with(
+        "Unknown launch type: unknown_type", "warning"
+    )
+
+    # Missing path
+    model3 = DummyModel("m4", "M4", "type")
+    launcher._execute_local_launch(model3)
+    launcher.show_toast.assert_called_with("Model path missing.", "error")
+
+
+def test_launch_simulation(launcher) -> None:
+    # No selected model
+    launcher.launch_simulation()
+
+    # Special app
+    launcher.selected_model = "urdf_generator"
+    with patch.object(launcher, "_try_launch_special_app", return_value=True):
+        launcher.launch_simulation()
+
+    # Missing model configuration
+    launcher.selected_model = "m99"
+    launcher.launch_simulation()
+    launcher.show_toast.assert_called_with("Model configuration not found.", "error")
+
+    # Matlab app
+    launcher.selected_model = "m2"
+    with patch.object(launcher, "_launch_matlab_app") as mock_matlab:
+        launcher.launch_simulation()
+        mock_matlab.assert_called_once()
+
+    # Docker launch
+    launcher.selected_model = "m1"
+    with patch.object(launcher, "_try_launch_docker", return_value=True):
+        launcher.launch_simulation()
+
+    # Execute local
+    with (
+        patch.object(launcher, "_try_launch_docker", return_value=False),
+        patch.object(launcher, "_check_local_dependencies", return_value=True),
+        patch.object(launcher, "_execute_local_launch") as mock_exec,
+    ):
+        launcher.launch_simulation()
+        mock_exec.assert_called_once()
+
+    # Execute local error
+    with (
+        patch.object(launcher, "_try_launch_docker", return_value=False),
+        patch.object(launcher, "_check_local_dependencies", return_value=True),
+        patch.object(launcher, "_execute_local_launch", side_effect=ValueError("Test")),
+    ):
+        launcher.launch_simulation()
+        launcher.show_toast.assert_called_with("Launch Failed: Test", "error")
+
+
+@patch.dict("sys.modules", {"mujoco": MagicMock(), "mujoco.viewer": MagicMock()})
+def test_launch_generic_mjcf(launcher) -> None:
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
+        process = MagicMock()
+        launcher.process_manager.launch_script.return_value = process
+        launcher._launch_generic_mjcf(Path("test.xml"))
+        launcher.show_toast.assert_called_with("Launched Passive Viewer", "success")
+
+        launcher.process_manager.launch_script.return_value = None
+        with pytest.raises(RuntimeError):
+            launcher._launch_generic_mjcf(Path("test.xml"))
+
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
+        launcher._launch_generic_mjcf(Path("test.xml"))
+        sys.modules["mujoco"].viewer.launch_passive.assert_called_once()
+
+    # Exception
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
+        sys.modules["mujoco"].viewer.launch_passive.side_effect = RuntimeError("Crash")
+        with pytest.raises(RuntimeError):
+            launcher._launch_generic_mjcf(Path("test.xml"))
+
+
+@patch("src.launchers.launcher_process_manager.start_vcxsrv")
+@patch("src.launchers.launcher_simulation.QMessageBox.warning")
+@patch("src.launchers.launcher_simulation.QMessageBox.critical")
+def test_launch_docker_container(mock_crit, mock_warn, mock_start, launcher) -> None:
+    mock_start.return_value = True
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+    repo_path = Path("test.xml")
+
+    # Image missing
+    launcher.docker_launcher.check_image_exists.return_value = False
+    launcher._launch_docker_container(model, repo_path)
+    mock_warn.assert_called_once()
+
+    # Launch success
+    launcher.docker_launcher.check_image_exists.return_value = True
+    process = MagicMock()
+    launcher.docker_launcher.launch_container.return_value = process
+    launcher._launch_docker_container(model, repo_path)
+    launcher.process_manager.attach_process.assert_called_once()
+
+    # Launch fail
+    launcher.docker_launcher.launch_container.return_value = None
+    launcher._launch_docker_container(model, repo_path)
+    mock_crit.assert_called_once()
+
+    # Exception
+    launcher.docker_launcher.launch_container.side_effect = ValueError("test")
+    launcher._launch_docker_container(model, repo_path)
+    assert mock_crit.call_count == 2
+
+    # Windows vcxsrv unavailable
+    with patch("src.launchers.launcher_simulation.os.name", "nt"):
+        mock_start.return_value = False
+        with patch(
+            "src.launchers.launcher_simulation.QMessageBox.question",
+            return_value=QMessageBox.StandardButton.No,
+        ):
+            launcher._launch_docker_container(model, repo_path)
+
+
+def test_launch_script_process(launcher) -> None:
+    # WSL mode
+    launcher.chk_wsl.isChecked.return_value = True
+    launcher.process_manager.launch_in_wsl.return_value = True
+    launcher._launch_script_process("name", Path("script.py"), Path("cwd"))
+    launcher.show_toast.assert_called_with("name Launched in WSL", "success")
+
+    launcher.process_manager.launch_in_wsl.return_value = False
+    with patch("src.launchers.launcher_simulation.QMessageBox.critical") as mock_crit:
+        launcher._launch_script_process("name", Path("script.py"), Path("cwd"))
+        mock_crit.assert_called_once()
+
+    # Local mode
+    launcher.chk_wsl.isChecked.return_value = False
+    launcher.process_manager.launch_script.return_value = MagicMock()
+    launcher._launch_script_process("name", Path("script.py"), Path("cwd"))
+    launcher.show_toast.assert_called_with("name Launched", "success")
+
+    # Local mode fail
+    launcher.process_manager.launch_script.return_value = None
+    with patch("src.launchers.launcher_simulation.QMessageBox.critical") as mock_crit:
+        launcher._launch_script_process("name", Path("script.py"), Path("cwd"))
+        mock_crit.assert_called_once()
+
+
+def test_launch_module_process(launcher) -> None:
+    launcher.chk_wsl.isChecked.return_value = True
+    launcher.process_manager.launch_module_in_wsl.return_value = True
+    launcher._launch_module_process("name", "mod", Path("cwd"))
+    launcher.show_toast.assert_called_with("name Launched in WSL", "success")
+
+    launcher.chk_wsl.isChecked.return_value = False
+    launcher.process_manager.launch_module.return_value = MagicMock()
+    launcher._launch_module_process("name", "mod", Path("cwd"))
+    launcher.show_toast.assert_called_with("name Launched", "success")
+
+    # Local mode fail
+    launcher.process_manager.launch_module.return_value = None
+    with patch("src.launchers.launcher_simulation.QMessageBox.critical") as mock_crit:
+        launcher._launch_module_process("name", "mod", Path("cwd"))
+        mock_crit.assert_called_once()
+
+
+def test_launch_urdf_generator_embedded_wires_cleanup_signal(launcher) -> None:
+    """Issue #6510: destroyed signal must be connected to tool.cleanup."""
+    mock_widget = MagicMock()
+    mock_tool = MagicMock()
+    mock_tool.create_main_widget.return_value = mock_widget
+    launcher.workspace_tabs = MagicMock()
+    launcher.workspace_tabs.count.return_value = 0
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch(
+        "src.shared.python.launcher_embed.get_embeddable_tool", return_value=mock_tool
+    ):
+        launcher._launch_urdf_generator()
+
+    mock_widget.destroyed.connect.assert_called_once_with(mock_tool.cleanup)
+    launcher.dock_widget_as_tab.assert_called_once_with(mock_widget, "Model Explorer")
+    launcher.show_toast.assert_called_with("Model Explorer loaded as tab.", "success")
+
+
+def test_launch_urdf_generator(launcher) -> None:
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
+        launcher.process_manager.launch_script.return_value = MagicMock()
+        launcher._launch_urdf_generator()
+        launcher.show_toast.assert_called_with("URDF Generator launched.", "success")
+
+        # Already running
+        proc = MagicMock()
+        proc.poll.return_value = None
+        launcher.running_processes["urdf_generator"] = proc
+        launcher._launch_urdf_generator()
+        launcher.show_toast.assert_called_with(
+            "URDF Generator is already running.", "warning"
+        )
+
+        launcher.running_processes.pop("urdf_generator", None)
+        launcher.process_manager.launch_script.return_value = None
+        launcher._launch_urdf_generator()
+        launcher.show_toast.assert_called_with(
+            "Launch failed: ProcessManager returned None", "error"
+        )
+
+
+def test_launch_c3d_viewer(launcher) -> None:
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
+        launcher.process_manager.launch_script.return_value = MagicMock()
+        launcher._launch_c3d_viewer()
+        launcher.show_toast.assert_called_with("C3D Viewer launched.", "success")
+
+        proc = MagicMock()
+        proc.poll.return_value = None
+        launcher.running_processes["c3d_viewer"] = proc
+        launcher._launch_c3d_viewer()
+        launcher.show_toast.assert_called_with(
+            "C3D Viewer is already running.", "warning"
+        )
+
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
+        launcher.running_processes.pop("c3d_viewer", None)
+        launcher._launch_c3d_viewer()
+        launcher.show_toast.assert_called_with("C3D Viewer script not found.", "error")
+
+
+def test_launch_c3d_viewer_all_candidates_missing_logs_full_search_list(
+    launcher, caplog
+) -> None:
+    """Pins #4595: when no candidate exists, log the full search list and toast.
+
+    The function must report ``C3D Viewer script not found`` AND log every
+    path it searched, not just the first miss.
+    """
+    import logging as _logging
+
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
+        launcher.running_processes.pop("c3d_viewer", None)
+        with caplog.at_level(
+            _logging.ERROR, logger="src.launchers.launcher_simulation"
+        ):
+            launcher._launch_c3d_viewer()
+    launcher.show_toast.assert_called_with("C3D Viewer script not found.", "error")
+    not_found = [
+        r for r in caplog.records if "C3D Viewer script not found" in r.getMessage()
+    ]
+    assert not_found, "expected an ERROR-level log entry"
+    msg = not_found[0].getMessage()
+    assert "run_c3d_viewer.py" in msg
+    assert "launch_pyqt6.py" in msg
+    assert "c3d_viewer.py" in msg
+
+
+def test_launch_c3d_viewer_falls_back_to_legacy_when_only_legacy_exists(
+    launcher,
+) -> None:
+    """Pins #4595: ``tools/c3d_viewer/c3d_viewer.py`` is a valid fallback."""
+    launcher.running_processes.pop("c3d_viewer", None)
+
+    def only_legacy_exists(self_path: Path) -> bool:
+        return str(self_path).endswith(str(Path("tools/c3d_viewer/c3d_viewer.py")))
+
+    launcher.process_manager.launch_script.return_value = MagicMock()
+    with patch(
+        "src.launchers.launcher_simulation.Path.exists",
+        autospec=True,
+        side_effect=only_legacy_exists,
+    ):
+        launcher._launch_c3d_viewer()
+
+    launcher.process_manager.launch_script.assert_called_once()
+    selected = launcher.process_manager.launch_script.call_args.args[1]
+    assert str(selected).endswith(str(Path("tools/c3d_viewer/c3d_viewer.py")))
+
+
+def test_launch_c3d_viewer_prefers_in_repo_wrapper_when_present(launcher) -> None:
+    """Pins #4595: ``run_c3d_viewer.py`` wrapper wins over vendor and legacy."""
+    launcher.running_processes.pop("c3d_viewer", None)
+    launcher.process_manager.launch_script.return_value = MagicMock()
+    # Every candidate exists; the wrapper is first in the search list.
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
+        launcher._launch_c3d_viewer()
+
+    launcher.process_manager.launch_script.assert_called_once()
+    selected = launcher.process_manager.launch_script.call_args.args[1]
+    assert str(selected).endswith("run_c3d_viewer.py")
+
+
+def test_launch_shot_tracer(launcher) -> None:
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
+        launcher.process_manager.launch_script.return_value = MagicMock()
+        launcher._launch_shot_tracer()
+        launcher.show_toast.assert_called_with("Shot Tracer launched.", "success")
+
+        proc = MagicMock()
+        proc.poll.return_value = None
+        launcher.running_processes["shot_tracer"] = proc
+        launcher._launch_shot_tracer()
+        launcher.show_toast.assert_called_with(
+            "Shot Tracer is already running.", "warning"
+        )
+
+    with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
+        launcher._launch_shot_tracer()
+        launcher.show_toast.assert_called_with("Shot Tracer script not found.", "error")
+
+
+@patch("src.launchers.launcher_simulation.secure_popen")
+def test_launch_matlab_app(mock_popen, launcher) -> None:
+    model = DummyModel("m2", "M2", "matlab_app", path="test.slx")
+    mock_popen.return_value = MagicMock()
+
+    launcher._launch_matlab_app(model)
+    mock_popen.assert_called_once()
+
+    # Path missing
+    model.path = None
+    launcher._launch_matlab_app(model)
+    launcher.show_toast.assert_called_with("Invalid MATLAB configuration.", "error")
+
+    # .bat script
+    model.path = "test.bat"
+    launcher._launch_matlab_app(model)
+    assert mock_popen.call_count == 2
+
+    # .m script
+    model.path = "test.m"
+    launcher._launch_matlab_app(model)
+    assert mock_popen.call_count == 3
+
+    # other script
+    model.path = "test.txt"
+    launcher._launch_matlab_app(model)
+    assert mock_popen.call_count == 4
+
+    # Exception
+    model.path = "test.slx"
+    mock_popen.side_effect = PermissionError("test")
+    launcher._launch_matlab_app(model)
+    launcher.show_toast.assert_called_with("Launch failed: test", "error")
+
+    # Missing mathlab not found error
+    mock_popen.side_effect = FileNotFoundError("test")
+    launcher._launch_matlab_app(model)
+    launcher.show_toast.assert_called_with(
+        "MATLAB executable not found in PATH.", "error"
+    )
+
+
+@patch("src.launchers.launcher_simulation.secure_popen")
+def test_launch_matlab_app_contains_wrapped_missing_executable_error(
+    mock_popen, launcher
+) -> None:
+    """A missing MATLAB executable must not propagate out of the launcher."""
+    from src.shared.python.security.secure_subprocess import SecureSubprocessError
+
+    model = DummyModel("simscape_2d", "Simscape 2D", "matlab_app", path="test.slx")
+    missing_executable = FileNotFoundError(
+        2, "The system cannot find the file specified"
+    )
+    mock_popen.side_effect = SecureSubprocessError(
+        f"Subprocess launch failed: {missing_executable}"
+    )
+    mock_popen.side_effect.__cause__ = missing_executable
+
+    assert launcher._launch_matlab_app(model) is False
+
+    launcher.show_toast.assert_called_with(
+        "MATLAB executable not found in PATH.", "error"
+    )
+
+
+def test_dependency_map_checks(launcher) -> None:
+    from src.launchers.launcher_simulation import DEPENDENCY_MAP
+
+    assert "custom_humanoid" in DEPENDENCY_MAP
+    assert "mujoco_unified" in DEPENDENCY_MAP
+    assert DEPENDENCY_MAP["mujoco_unified"]["module"] == "mujoco"
+
+
+@patch("src.launchers.launcher_simulation.subprocess.run")
+def test_check_module_dependencies_with_map(mock_run, launcher) -> None:
+    mock_run.return_value.stdout = "OK"
+    success, err = launcher._check_module_dependencies("mujoco_unified")
+    assert success is True
+
+    mock_run.return_value.stdout = "ImportError"
+    success, err = launcher._check_module_dependencies("mujoco_unified")
+    assert success is False
+    assert "MuJoCo dependency check failed" in err
+
+
+def test_check_local_dependencies_with_dialog(launcher) -> None:
+    model = DummyModel("mujoco_unified", "MuJoCo", "custom_humanoid", path="test.xml")
+
+    launcher._dependency_status_cache = {
+        "mujoco_unified": (False, "Missing dependency info")
+    }
+    launcher.show_dependency_error = MagicMock()
+
+    res = launcher._check_local_dependencies(model)
+    assert res is False
+    launcher.show_dependency_error.assert_called_once_with(
+        "MuJoCo",
+        "MuJoCo",
+        "pip install mujoco",
+        "https://mujoco.org",
+        "Missing dependency info",
+    )
+
+
+def test_execute_local_launch_with_unavailable_dockable_ui(launcher) -> None:
+    class DummyHandlerWithUI:
+        def can_handle(self, model_type: str) -> bool:
+            return True
+
+        def get_dockable_ui(self, model: Any, repo_path: Path) -> Any | None:
+            return None
+
+        def launch(self, model: Any, repo_path: Path, process_manager: Any) -> bool:
+            return True
+
+    model = DummyModel("m1", "M1", "mjcf", path="test.xml")
+
+    # Mock handler that returns a widget with is_tool_available = False
+    ui_widget = MagicMock(spec=QMainWindow)
+    ui_widget.is_tool_available = False
+
+    handler = DummyHandlerWithUI()
+    handler.get_dockable_ui = MagicMock(return_value=ui_widget)
+    launcher.model_handler_registry.get_handler.return_value = handler
+
+    # Mock docking capability on the launcher
+    launcher.dock_widget_as_tab = MagicMock()
+
+    with patch("src.launchers.launcher_simulation.Styles") as mock_styles:
+        mock_styles.STATUS_ERROR = "status-error"
+        launcher._execute_local_launch(model)
+
+    launcher.dock_widget_as_tab.assert_called_once_with(ui_widget, "M1")
+    launcher.show_toast.assert_called_with("Failed to load M1", "error")
+    launcher.lbl_status.setText.assert_called_with("* Launch Error")
+    launcher.lbl_status.setStyleSheet.assert_called_with("status-error")

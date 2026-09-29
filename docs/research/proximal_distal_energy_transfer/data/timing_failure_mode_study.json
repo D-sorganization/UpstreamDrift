@@ -1,0 +1,449 @@
+{
+  "schema_version": "timing-failure-mode-study/v1",
+  "study_id": "planar-proximal-acceleration-braking-release-factorial",
+  "model_tier": "fixed_hub_double_pendulum",
+  "registered_grid": {
+    "proximal_acceleration_onset_s": [0.0, 0.04, 0.08],
+    "proximal_braking_onset_s": [0.2, 0.26, 0.32],
+    "distal_release_onset_s": [0.1, 0.18, 0.26]
+  },
+  "case_count": 27,
+  "valid_case_count": 18,
+  "rows": [
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.30562731383098685,
+      "rate_casting_event_s": 0.19167376388827168,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.318624935044426,
+      "clubhead_speed_m_s": 35.7358973895898,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.3770284217237284,
+      "rate_casting_event_s": 0.24070689680732416,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.35594812602263676,
+      "clubhead_speed_m_s": 32.205376701507355,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.4678330333046083,
+      "rate_casting_event_s": 0.30530946067057074,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.30343934167513914,
+      "rate_casting_event_s": 0.19167376388827168,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.310183149268352,
+      "clubhead_speed_m_s": 40.69697199196886,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.3636167343704265,
+      "rate_casting_event_s": 0.24116955150853672,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.33899624263274636,
+      "clubhead_speed_m_s": 36.62060590785775,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.44489852306710925,
+      "rate_casting_event_s": 0.2985322702984164,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.30490800477752883,
+      "rate_casting_event_s": 0.19167376388827168,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.30993099600170443,
+      "clubhead_speed_m_s": 42.33344436346964,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.36036963375839026,
+      "rate_casting_event_s": 0.24116955150853672,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.33449094749988834,
+      "clubhead_speed_m_s": 40.193600910455324,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.0,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.43336225501630377,
+      "rate_casting_event_s": 0.30004829463673954,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.32115633715063496,
+      "rate_casting_event_s": 0.20378179770760396,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.3437768856772407,
+      "clubhead_speed_m_s": 33.453606556569675,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.40258515329295463,
+      "rate_casting_event_s": 0.2581386794411785,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.38710722396575054,
+      "clubhead_speed_m_s": 30.999647501186452,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.5571140300324966,
+      "rate_casting_event_s": 0.36035455472064887,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.3172688749359508,
+      "rate_casting_event_s": 0.2045286352319653,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.3313254391390853,
+      "clubhead_speed_m_s": 38.667636085960325,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.3855669766431078,
+      "rate_casting_event_s": 0.25732782859355835,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.3645333394455314,
+      "clubhead_speed_m_s": 35.451466630752705,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.5441730692155369,
+      "rate_casting_event_s": 0.3600840937299609,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.3193153289921208,
+      "rate_casting_event_s": 0.2045286352319653,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.33013656932907226,
+      "clubhead_speed_m_s": 41.47789009180293,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.3794776902373236,
+      "rate_casting_event_s": 0.25732782859355835,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.35639445507940226,
+      "clubhead_speed_m_s": 39.737766914491544,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.04,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.5586357232801532,
+      "rate_casting_event_s": 0.3830844395520158,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.3355932177454629,
+      "rate_casting_event_s": 0.21277645883509702,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.36920855694131305,
+      "clubhead_speed_m_s": 31.064774914599123,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.4244785012790791,
+      "rate_casting_event_s": 0.2729201080087372,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.4169871976885455,
+      "clubhead_speed_m_s": 29.836908482996996,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.2,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.6511664190518555,
+      "rate_casting_event_s": 0.42123401277425443,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.33031279514178663,
+      "rate_casting_event_s": 0.21552927617023895,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.352429861714328,
+      "clubhead_speed_m_s": 36.26702312535548,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.40415507730771016,
+      "rate_casting_event_s": 0.26969260179008103,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.388744687618844,
+      "clubhead_speed_m_s": 34.306008408078334,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.26,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": 0.745788633818409,
+      "rate_casting_event_s": 0.5060801231294454,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.1,
+      "angle_casting_event_s": 0.3326556876974217,
+      "rate_casting_event_s": 0.21552927617023895,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.3494230799278092,
+      "clubhead_speed_m_s": 39.96117618814353,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.18,
+      "angle_casting_event_s": 0.3955931115773876,
+      "rate_casting_event_s": 0.2704939278205851,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "valid",
+      "impact_time_s": 0.3767586635509307,
+      "clubhead_speed_m_s": 39.018218278065525,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    },
+    {
+      "proximal_acceleration_onset_s": 0.08,
+      "proximal_braking_onset_s": 0.32,
+      "distal_release_onset_s": 0.26,
+      "angle_casting_event_s": null,
+      "rate_casting_event_s": 0.6917218504416458,
+      "casting_definitions_agree_within_20_ms": false,
+      "impact_status": "invalid",
+      "impact_time_s": null,
+      "clubhead_speed_m_s": null,
+      "initial_state": {
+        "q_rad": [-2.2, -1.57],
+        "v_rad_s": [0.0, 0.0]
+      }
+    }
+  ],
+  "fastest_valid_case": {
+    "proximal_acceleration_onset_s": 0.0,
+    "proximal_braking_onset_s": 0.32,
+    "distal_release_onset_s": 0.1,
+    "angle_casting_event_s": 0.30490800477752883,
+    "rate_casting_event_s": 0.19167376388827168,
+    "casting_definitions_agree_within_20_ms": false,
+    "impact_status": "valid",
+    "impact_time_s": 0.30993099600170443,
+    "clubhead_speed_m_s": 42.33344436346964,
+    "initial_state": {
+      "q_rad": [-2.2, -1.57],
+      "v_rad_s": [0.0, 0.0]
+    }
+  },
+  "casting_definitions": {
+    "angle": "first relative wrist-angle crossing of -0.75 rad",
+    "rate": "first relative wrist-rate crossing of +2.0 rad/s",
+    "agreement_window_s": 0.02
+  },
+  "claim_status": {
+    "universal_casting_event": "unsupported",
+    "universal_optimal_timing": "unsupported",
+    "human_coaching_strategy": "untested"
+  },
+  "limitations": [
+    "The factorial changes control work and does not yet provide a matched-work causal contrast.",
+    "The fixed hub omits torso dynamics, articulated arms, bilateral contact, shaft flex, and impact collision.",
+    "Casting thresholds are operational alternatives, not diagnoses of human technique."
+  ]
+}

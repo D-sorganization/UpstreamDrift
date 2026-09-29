@@ -1,0 +1,306 @@
+"""Motion matching: shared loaders, oracle, cost, and visualisation.
+
+This package is promoted from buried-under-Simscape to the
+canonical Python entry point every engine imports from. The top-level
+surface mirrors the MATLAB ``motion_matching/shared/`` layout one-to-one.
+"""
+
+from __future__ import annotations
+
+import importlib
+import sys
+import types
+from collections.abc import Sequence
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .matching_strategy import (
+        ALL_ENGINES,
+        STRATEGY_SCHEMA_VERSION,
+        CandidateStrategyPackage,
+        ContactReactionHistory,
+        ControllerSpecification,
+        MatchingStrategyContract,
+        QualificationStage,
+        StageQualificationMatrix,
+        StageReport,
+        StageState,
+        StrategyComparisonService,
+        StrategyPreset,
+    )
+    from .align_to_simulation_grid import (
+        AlignedTrajectory,
+        align_to_simulation_grid,
+        detect_impact_index,
+    )
+    from .body_skeleton import (
+        BodySegment,
+        BodySegmentGroup,
+        default_body_segments,
+    )
+    from .cost import (
+        CostBreakdown,
+        CostOptions,
+        SimOutput,
+        compute_cost,
+    )
+    from .fit_result import CanonicalFitResult
+    from .body_target import (
+        BODY_TARGET_SCHEMA_VERSION,
+        MAX_BODY_POSITION_NORM_M,
+        BodyEvent,
+        BodyTarget,
+    )
+    from .load_club_target import (
+        ALLOWED_SHEETS,
+        load_club_target,
+        load_club_target_c3d,
+        load_club_target_excel,
+        load_club_target_mat,
+    )
+    from .multi_source_target import MultiSourceTarget
+    from .plot_error_timecourse import plot_error_timecourse
+    from .plot_fit_quality_card import (
+        FitQualityScalars,
+        fit_quality_summary,
+        plot_fit_quality_card,
+    )
+    from .plot_trajectory_overlay import plot_trajectory_overlay
+    from .polynomial_torque import POLY_DEGREE, evaluate_polynomial_torque
+    from .named_state import (
+        NAMED_STATE_SCHEMA_VERSION,
+        NamedStateManifest,
+        NamedStateConformanceAdapter,
+        CaptureAttachmentDeclaration,
+        QuaternionVelocityMap,
+        SmallBodyVirtualWorkOracle,
+        validate_named_state_conformance,
+    )
+    from .sim_out import FitResult, SimFitResult, SimOut
+    from .synthesize_target_from_coefficients import (
+        THETA_BOUNDS,
+        EngineSimulator,
+        SynthOptions,
+        synthesize_target_from_coefficients,
+    )
+    from .target import (
+        AlignOptions,
+        BallImpactState,
+        ClubBallTarget,
+        ClubTarget,
+        SourceProvenance,
+        extract_ball_impact_from_clubtarget,
+    )
+    from .validate_theta import (
+        COEFFS_PER_JOINT,
+        DEFAULT_THETA_BOUND_TABLE,
+        validate_theta,
+    )
+    from .validators import (
+        REGULARIZER_KINDS,
+        must_be_finite_vector,
+        must_be_monotonic_time,
+        must_be_regularizer_kind,
+        must_be_unit_quaternion_rows,
+        must_have_fields,
+    )
+
+__all__ = [
+    "ALL_ENGINES",
+    "ALLOWED_SHEETS",
+    "AlignOptions",
+    "AlignedTrajectory",
+    "BODY_TARGET_SCHEMA_VERSION",
+    "CandidateStrategyPackage",
+    "ContactReactionHistory",
+    "ControllerSpecification",
+    "MatchingStrategyContract",
+    "QualificationStage",
+    "StageQualificationMatrix",
+    "StageReport",
+    "StageState",
+    "STRATEGY_SCHEMA_VERSION",
+    "StrategyComparisonService",
+    "StrategyPreset",
+    "BallImpactState",
+    "BodyEvent",
+    "BodySegment",
+    "BodySegmentGroup",
+    "BodyTarget",
+    "COEFFS_PER_JOINT",
+    "CanonicalFitResult",
+    "ClubBallTarget",
+    "ClubTarget",
+    "CostBreakdown",
+    "CostOptions",
+    "DEFAULT_THETA_BOUND_TABLE",
+    "EngineSimulator",
+    "FitQualityScalars",
+    "FitResult",
+    "MAX_BODY_POSITION_NORM_M",
+    "MultiSourceTarget",
+    "POLY_DEGREE",
+    "REGULARIZER_KINDS",
+    "SimOut",
+    "SimFitResult",
+    "SimOutput",
+    "SourceProvenance",
+    "SynthOptions",
+    "THETA_BOUNDS",
+    "align_to_simulation_grid",
+    "compute_cost",
+    "compute_total_work",
+    "default_body_segments",
+    "detect_impact_index",
+    "extract_ball_impact_from_clubtarget",
+    "fit_quality_summary",
+    "load_body_target",
+    "load_body_target_c3d",
+    "load_club_target",
+    "load_club_target_c3d",
+    "load_club_target_excel",
+    "load_club_target_mat",
+    "must_be_finite_vector",
+    "must_be_monotonic_time",
+    "must_be_regularizer_kind",
+    "must_be_unit_quaternion_rows",
+    "must_have_fields",
+    "plot_error_timecourse",
+    "plot_fit_quality_card",
+    "plot_trajectory_overlay",
+    "NAMED_STATE_SCHEMA_VERSION",
+    "NamedStateConformanceAdapter",
+    "NamedStateManifest",
+    "CaptureAttachmentDeclaration",
+    "QuaternionVelocityMap",
+    "SmallBodyVirtualWorkOracle",
+    "validate_named_state_conformance",
+    "evaluate_polynomial_torque",
+    "synthesize_target_from_coefficients",
+    "validate_theta",
+]
+
+_LAZY_EXPORTS = {
+    "ALL_ENGINES": ".matching_strategy",
+    "STRATEGY_SCHEMA_VERSION": ".matching_strategy",
+    "CandidateStrategyPackage": ".matching_strategy",
+    "ContactReactionHistory": ".matching_strategy",
+    "ControllerSpecification": ".matching_strategy",
+    "MatchingStrategyContract": ".matching_strategy",
+    "QualificationStage": ".matching_strategy",
+    "StageQualificationMatrix": ".matching_strategy",
+    "StageReport": ".matching_strategy",
+    "StageState": ".matching_strategy",
+    "StrategyComparisonService": ".matching_strategy",
+    "StrategyPreset": ".matching_strategy",
+    "AlignedTrajectory": ".align_to_simulation_grid",
+    "align_to_simulation_grid": ".align_to_simulation_grid",
+    "detect_impact_index": ".align_to_simulation_grid",
+    "BodySegment": ".body_skeleton",
+    "BodySegmentGroup": ".body_skeleton",
+    "default_body_segments": ".body_skeleton",
+    "compute_total_work": ".cost",
+    "CostBreakdown": ".cost",
+    "CostOptions": ".cost",
+    "SimOutput": ".cost",
+    "compute_cost": ".cost",
+    "CanonicalFitResult": ".fit_result",
+    "BODY_TARGET_SCHEMA_VERSION": ".body_target",
+    "MAX_BODY_POSITION_NORM_M": ".body_target",
+    "BodyEvent": ".body_target",
+    "BodyTarget": ".body_target",
+    "load_body_target": ".load_body_target",
+    "load_body_target_c3d": ".loaders.c3d_body",
+    "ALLOWED_SHEETS": ".load_club_target",
+    "load_club_target": ".load_club_target",
+    "load_club_target_c3d": ".load_club_target",
+    "load_club_target_excel": ".load_club_target",
+    "load_club_target_mat": ".load_club_target",
+    "MultiSourceTarget": ".multi_source_target",
+    "plot_error_timecourse": ".plot_error_timecourse",
+    "FitQualityScalars": ".plot_fit_quality_card",
+    "fit_quality_summary": ".plot_fit_quality_card",
+    "plot_fit_quality_card": ".plot_fit_quality_card",
+    "plot_trajectory_overlay": ".plot_trajectory_overlay",
+    "POLY_DEGREE": ".polynomial_torque",
+    "evaluate_polynomial_torque": ".polynomial_torque",
+    "FitResult": ".sim_out",
+    "SimFitResult": ".sim_out",
+    "SimOut": ".sim_out",
+    "THETA_BOUNDS": ".synthesize_target_from_coefficients",
+    "EngineSimulator": ".synthesize_target_from_coefficients",
+    "SynthOptions": ".synthesize_target_from_coefficients",
+    "synthesize_target_from_coefficients": ".synthesize_target_from_coefficients",
+    "AlignOptions": ".target",
+    "BallImpactState": ".target",
+    "ClubBallTarget": ".target",
+    "ClubTarget": ".target",
+    "SourceProvenance": ".target",
+    "extract_ball_impact_from_clubtarget": ".target",
+    "COEFFS_PER_JOINT": ".validate_theta",
+    "DEFAULT_THETA_BOUND_TABLE": ".validate_theta",
+    "validate_theta": ".validate_theta",
+    "REGULARIZER_KINDS": ".validators",
+    "must_be_finite_vector": ".validators",
+    "must_be_monotonic_time": ".validators",
+    "must_be_regularizer_kind": ".validators",
+    "must_be_unit_quaternion_rows": ".validators",
+    "must_have_fields": ".validators",
+    "NAMED_STATE_SCHEMA_VERSION": ".named_state",
+    "NamedStateManifest": ".named_state",
+    "NamedStateConformanceAdapter": ".named_state",
+    "CaptureAttachmentDeclaration": ".named_state",
+    "QuaternionVelocityMap": ".named_state",
+    "SmallBodyVirtualWorkOracle": ".named_state",
+    "validate_named_state_conformance": ".named_state",
+}
+
+
+def compute_total_work(*args: Any, **kwargs: Any) -> float:
+    from .compute_total_work import compute_total_work as _compute_total_work
+
+    return _compute_total_work(*args, **kwargs)
+
+
+def load_body_target(
+    path: Path | str,
+    *,
+    opts: Any | None = None,
+    marker_set: Sequence[str] | None = None,
+    impact_source: Any | None = None,
+) -> Any:
+    from .load_body_target import load_body_target as _load_body_target
+
+    return _load_body_target(
+        path, opts=opts, marker_set=marker_set, impact_source=impact_source
+    )
+
+
+def load_body_target_c3d(*args: Any, **kwargs: Any) -> Any:
+    from .load_body_target import load_body_target_c3d as _load_body_target_c3d
+
+    return _load_body_target_c3d(*args, **kwargs)
+
+
+def __getattr__(name: str) -> Any:
+    if name in _LAZY_EXPORTS:
+        module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+        return getattr(module, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return list(_LAZY_EXPORTS.keys())
+
+
+class _MotionMatchingModule(types.ModuleType):
+    def __getattribute__(self, name: str) -> Any:
+        value = super().__getattribute__(name)
+        if name in _LAZY_EXPORTS and isinstance(value, types.ModuleType):
+            module = importlib.import_module(_LAZY_EXPORTS[name], __package__)
+            return getattr(module, name)
+        return value
+
+
+sys.modules[__name__].__class__ = _MotionMatchingModule

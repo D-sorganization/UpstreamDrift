@@ -1,0 +1,555 @@
+"""
+Driven double pendulum dynamics with control-affine structure.
+
+This module models a two-link planar manipulator (shoulder + wrist) swinging on a
+user-specified plane (e.g., a golf swing plane). It exposes control-affine
+dynamics, supports arbitrary user forcing functions, and reports joint torques
+for educational demonstrations of chaos and control.
+"""
+
+from __future__ import annotations
+
+import ast
+import math
+import typing
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Callable
+
+from dataclasses import dataclass
+
+# Security: Use simpleeval for safe expression evaluation instead of eval()
+from simpleeval import SimpleEval
+from src.shared.python.core.constants import GRAVITY_M_S2
+
+from ._rk4 import rk4_step
+
+# Physical constants with documented units and references
+# International gravity standard at 45 degrees latitude (m/s^2)
+GRAVITATIONAL_ACCELERATION = GRAVITY_M_S2
+
+# Typical anatomical and equipment references for defaults
+DEFAULT_ARM_LENGTH_M = 0.75  # Representative combined arm length (meters)
+DEFAULT_ARM_MASS_KG = 7.5  # Nominal combined mass of both arms (kilograms)
+DEFAULT_ARM_CENTER_OF_MASS_RATIO = 0.45  # Dimensionless fraction of length
+DEFAULT_ARM_INERTIA_SCALING = 1.0 / 12.0  # Uniform rod inertia coefficient about COM
+
+DEFAULT_SHAFT_LENGTH_M = 1.0  # Representative golf shaft length (meters)
+DEFAULT_SHAFT_MASS_KG = 0.15  # Typical steel shaft + grip mass (kilograms)
+DEFAULT_CLUBHEAD_MASS_KG = 0.20  # Typical driver clubhead mass (kilograms)
+DEFAULT_SHAFT_COM_RATIO = 0.43  # Empirical COM ratio for a driver (dimensionless)
+DEFAULT_PLANE_INCLINATION_DEG = 35.0  # Golf swing plane tilt from vertical (degrees)
+
+# Damping constants for energy dissipation in joints (N·m·s/rad)
+DEFAULT_DAMPING_SHOULDER = 0.4
+DEFAULT_DAMPING_WRIST = 0.25
+
+# Numerical tolerance for detecting singular mass matrices (dimensionless)
+MASS_MATRIX_SINGULAR_TOLERANCE = 1e-12
+
+Matrix2x2 = tuple[tuple[float, float], tuple[float, float]]
+
+
+class ExpressionFunction:
+    """Safe evaluation of user-provided expressions using simpleeval.
+
+    The expression can use standard math functions, state variables, and time
+    (``t``). Uses simpleeval library to prevent arbitrary code execution.
+
+    Security: Replaced eval() with simpleeval to eliminate code injection risk.
+    AST validation at construction time rejects disallowed constructs with
+    descriptive ValueError messages before evaluation.
+    """
+
+    _ALLOWED_FUNCTIONS: typing.ClassVar[dict[str, typing.Any]] = {
+        name: getattr(math, name)
+        for name in (
+            "sin",
+            "cos",
+            "tan",
+            "asin",
+            "acos",
+            "atan",
+            "atan2",
+            "sqrt",
+            "log",
+            "log10",
+            "exp",
+            "fabs",
+        )
+    }
+
+    _ALLOWED_NAMES: typing.ClassVar[dict[str, typing.Any]] = {
+        "pi": math.pi,
+        "tau": math.tau,
+    }
+
+    #: AST node types that are never legal in an expression
+    _DISALLOWED_NODES: typing.ClassVar[tuple[type, ...]] = (
+        ast.List,
+        ast.Dict,
+        ast.Set,
+        ast.ListComp,
+        ast.DictComp,
+        ast.SetComp,
+        ast.GeneratorExp,
+        ast.Import,
+        ast.ImportFrom,
+        ast.Lambda,
+        ast.IfExp,
+    )
+
+    #: Names that map to state variables or constants at call time
+    _VALID_VARIABLE_NAMES: typing.ClassVar[frozenset[str]] = frozenset(
+        {
+            "t",
+            "theta1",
+            "theta2",
+            "omega1",
+            "omega2",
+            "pi",
+            "tau",
+        }
+    )
+
+    def __init__(self, expression: str) -> None:
+        if not (expression is not None):
+            raise ValueError("expression must be provided")
+        self.expression = expression.strip()
+        # Validate the AST before accepting the expression
+        self._validate_ast(self.expression)
+        # Initialize simpleeval with allowed functions and constants
+        self._evaluator = SimpleEval()
+        self._evaluator.functions = self._ALLOWED_FUNCTIONS.copy()
+        self._evaluator.names = self._ALLOWED_NAMES.copy()
+
+    def _validate_ast(self, expression: str) -> None:  # noqa: C901
+        """Walk the AST and raise ValueError for any disallowed constructs."""
+        if not (expression is not None):
+            raise ValueError("expression must be provided")
+        try:
+            tree = ast.parse(expression, mode="eval")
+        except SyntaxError as exc:
+            raise ValueError(f"Syntax error in expression: {exc}") from exc
+
+        allowed_func_names = set(self._ALLOWED_FUNCTIONS.keys())
+
+        for node in ast.walk(tree):
+            # Disallowed node types (lists, dicts, comprehensions, imports…)
+            if isinstance(node, self._DISALLOWED_NODES):
+                node_name = type(node).__name__
+                raise ValueError(f"Disallowed syntax in expression: {node_name}")
+
+            # Attribute access (e.g. sin.__doc__, theta1.__class__)
+            if isinstance(node, ast.Attribute):
+                raise ValueError("Disallowed syntax in expression: Attribute")
+
+            # Function calls: only allow direct name calls (Name node as func)
+            if isinstance(node, ast.Call):
+                if not isinstance(node.func, ast.Name):
+                    raise ValueError("Only direct function calls are permitted")
+                func_name = node.func.id
+                if func_name not in allowed_func_names:
+                    raise ValueError(f"Function '{func_name}' is not permitted")
+
+            # Name references: must be allowed variables or function names
+            if isinstance(node, ast.Name):
+                # Allow names that are functions (they appear as Call.func too)
+                name = node.id
+                if (
+                    name not in self._VALID_VARIABLE_NAMES
+                    and name not in allowed_func_names
+                ):
+                    raise ValueError(f"Use of unknown variable '{name}'")
+
+    def __call__(self, t: float, state: DoublePendulumState) -> float:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        context: dict[str, float] = {
+            "t": t,
+            "theta1": state.theta1,
+            "theta2": state.theta2,
+            "omega1": state.omega1,
+            "omega2": state.omega2,
+        }
+        # Update names with current state
+        self._evaluator.names.update(context)
+        # Safe evaluation - no code injection possible
+        result = self._evaluator.eval(self.expression)
+        return float(result)
+
+
+@dataclass
+class SegmentProperties:
+    """Physical properties of a single pendulum segment."""
+
+    length_m: float
+    mass_kg: float
+    center_of_mass_ratio: float
+    inertia_about_com: float
+
+    @property
+    def center_of_mass_distance(self) -> float:
+        """Return distance from proximal joint to center of mass."""
+        return self.length_m * self.center_of_mass_ratio
+
+    @property
+    def inertia_about_proximal_joint(self) -> float:
+        """Compute inertia about the proximal joint via parallel axis."""
+        return self.inertia_about_com + self.mass_kg * self.center_of_mass_distance**2
+
+
+@dataclass
+class LowerSegmentProperties:
+    """Composite properties for a golf-club-like lower segment."""
+
+    length_m: float
+    shaft_mass_kg: float
+    clubhead_mass_kg: float
+    shaft_com_ratio: float
+
+    @property
+    def total_mass(self) -> float:
+        """Return combined mass of shaft and clubhead."""
+        return self.shaft_mass_kg + self.clubhead_mass_kg
+
+    @property
+    def center_of_mass_distance(self) -> float:
+        """Compute mass-weighted center of mass distance from grip."""
+        shaft_com = self.length_m * self.shaft_com_ratio
+        weighted_sum = (
+            shaft_com * self.shaft_mass_kg + self.length_m * self.clubhead_mass_kg
+        )
+        return weighted_sum / self.total_mass
+
+    @property
+    def inertia_about_com(self) -> float:
+        """Compute composite rotational inertia about center of mass."""
+        shaft_inertia_com = (1.0 / 12.0) * self.shaft_mass_kg * self.length_m**2
+        # Shaft COM is at shaft_com_ratio * length, not at midpoint
+        shaft_com_position = self.length_m * self.shaft_com_ratio
+        shaft_offset = (shaft_com_position - self.center_of_mass_distance) ** 2
+        clubhead_offset = (self.length_m - self.center_of_mass_distance) ** 2
+        parallel_axis = (
+            self.shaft_mass_kg * shaft_offset + self.clubhead_mass_kg * clubhead_offset
+        )
+        return shaft_inertia_com + parallel_axis
+
+    @property
+    def inertia_about_proximal_joint(self) -> float:
+        """Compute inertia about the proximal joint via parallel axis."""
+        return (
+            self.inertia_about_com + self.total_mass * self.center_of_mass_distance**2
+        )
+
+
+@dataclass
+class DoublePendulumParameters:
+    """Configuration for the double pendulum."""
+
+    upper_segment: SegmentProperties
+    lower_segment: LowerSegmentProperties
+    plane_inclination_deg: float = DEFAULT_PLANE_INCLINATION_DEG
+    damping_shoulder: float = DEFAULT_DAMPING_SHOULDER
+    damping_wrist: float = DEFAULT_DAMPING_WRIST
+    gravity_m_s2: float = GRAVITATIONAL_ACCELERATION
+    gravity_enabled: bool = True
+    constrained_to_plane: bool = True
+
+    @classmethod
+    def default(cls) -> DoublePendulumParameters:
+        """Create parameters with default golf-swing segment properties."""
+        upper_inertia = (
+            DEFAULT_ARM_INERTIA_SCALING * DEFAULT_ARM_MASS_KG * DEFAULT_ARM_LENGTH_M**2
+        )
+        upper_segment = SegmentProperties(
+            length_m=DEFAULT_ARM_LENGTH_M,
+            mass_kg=DEFAULT_ARM_MASS_KG,
+            center_of_mass_ratio=DEFAULT_ARM_CENTER_OF_MASS_RATIO,
+            inertia_about_com=upper_inertia,
+        )
+        lower_segment = LowerSegmentProperties(
+            length_m=DEFAULT_SHAFT_LENGTH_M,
+            shaft_mass_kg=DEFAULT_SHAFT_MASS_KG,
+            clubhead_mass_kg=DEFAULT_CLUBHEAD_MASS_KG,
+            shaft_com_ratio=DEFAULT_SHAFT_COM_RATIO,
+        )
+        return cls(upper_segment=upper_segment, lower_segment=lower_segment)
+
+    @property
+    def plane_inclination_rad(self) -> float:
+        """Return swing plane inclination in radians."""
+        return math.radians(self.plane_inclination_deg)
+
+    @property
+    def projected_gravity(self) -> float:
+        """Compute gravity component projected onto the swing plane."""
+        if not self.gravity_enabled:
+            return 0.0
+        if not self.constrained_to_plane:
+            return self.gravity_m_s2
+        return self.gravity_m_s2 * math.cos(self.plane_inclination_rad)
+
+
+@dataclass
+class DoublePendulumState:
+    """Dynamic state of the pendulum."""
+
+    theta1: float  # Angle of upper segment from vertical (in-plane)
+    theta2: float  # Relative angle of lower segment from upper segment (in-plane)
+    omega1: float  # Angular velocity of upper segment
+    omega2: float  # Angular velocity of lower segment
+    phi: float = 0.0  # Out-of-plane angle (above/below plane, in radians)
+    omega_phi: float = 0.0  # Out-of-plane angular velocity
+
+
+@dataclass
+class JointTorques:
+    """Torque decomposition at the joints."""
+
+    applied: tuple[float, float]
+    gravitational: tuple[float, float]
+    damping: tuple[float, float]
+    coriolis_centripetal: tuple[float, float]
+
+
+class DoublePendulumDynamics:
+    """Control-affine driven double pendulum."""
+
+    def __init__(
+        self,
+        parameters: DoublePendulumParameters | None = None,
+        forcing_functions: (
+            tuple[Callable[[float, DoublePendulumState], float], ...] | None
+        ) = None,
+    ) -> None:
+        self.parameters = parameters or DoublePendulumParameters.default()
+        self._cache_parameters()
+
+        def zero_input(_: float, __: DoublePendulumState) -> float:
+            """Return zero forcing for undriven joints."""
+            return 0.0
+
+        self.forcing_functions = forcing_functions or (zero_input, zero_input)
+
+    def _cache_parameters(self) -> None:
+        """Cache constant physical properties to avoid re-computation."""
+        p = self.parameters
+        self._m1 = p.upper_segment.mass_kg
+        self._m2 = p.lower_segment.total_mass
+        self._l1 = p.upper_segment.length_m
+        self._lc1 = p.upper_segment.center_of_mass_distance
+        self._lc2 = p.lower_segment.center_of_mass_distance
+        self._i1 = p.upper_segment.inertia_about_proximal_joint
+        self._i2 = p.lower_segment.inertia_about_proximal_joint
+        self._d1 = p.damping_shoulder
+        self._d2 = p.damping_wrist
+
+    def refresh_cache(self) -> None:
+        """Refresh cached physical properties from parameters."""
+        self._cache_parameters()
+
+    def mass_matrix(self, theta2: float) -> Matrix2x2:
+        """Compute the 2x2 mass matrix for the given relative angle."""
+        # Use cached values
+        if not (theta2 is not None):
+            raise ValueError("theta2 must be provided")
+        m2 = self._m2
+        l1 = self._l1
+        lc2 = self._lc2
+        i1 = self._i1
+        i2 = self._i2
+        cos_theta2 = math.cos(theta2)
+
+        m11 = i1 + i2 + m2 * l1**2 + 2 * m2 * l1 * lc2 * cos_theta2
+        m12 = i2 + m2 * l1 * lc2 * cos_theta2
+        m22 = i2
+        return ((m11, m12), (m12, m22))
+
+    def coriolis_vector(
+        self, theta2: float, omega1: float, omega2: float
+    ) -> tuple[float, float]:
+        """Compute Coriolis and centripetal force vector."""
+        if not (theta2 is not None):
+            raise ValueError("theta2 must be provided")
+        m2 = self._m2
+        l1 = self._l1
+        lc2 = self._lc2
+        sin_theta2 = math.sin(theta2)
+        h = -m2 * l1 * lc2 * sin_theta2
+        c1 = h * (2 * omega1 * omega2 + omega2**2)
+        c2 = -h * omega1**2
+        return c1, c2
+
+    def gravity_vector(self, theta1: float, theta2: float) -> tuple[float, float]:
+        """Compute gravitational torque vector for both joints."""
+        if not (theta1 is not None):
+            raise ValueError("theta1 must be provided")
+        m1 = self._m1
+        m2 = self._m2
+        l1 = self._l1
+        lc1 = self._lc1
+        lc2 = self._lc2
+        # Project gravity is dynamic (depends on flags)
+        g = self.parameters.projected_gravity
+        g1 = (m1 * lc1 + m2 * l1) * g * math.sin(theta1) + m2 * lc2 * g * math.sin(
+            theta1 + theta2
+        )
+        g2 = m2 * lc2 * g * math.sin(theta1 + theta2)
+        return g1, g2
+
+    def damping_vector(self, omega1: float, omega2: float) -> tuple[float, float]:
+        """Compute viscous damping torques for both joints."""
+        if not (omega1 is not None):
+            raise ValueError("omega1 must be provided")
+        d1 = self._d1 * omega1
+        d2 = self._d2 * omega2
+        return d1, d2
+
+    def _invert_mass_matrix(self, theta2: float) -> tuple[Matrix2x2, Matrix2x2]:
+        mass = self.mass_matrix(theta2)
+        determinant = mass[0][0] * mass[1][1] - mass[0][1] * mass[1][0]
+        if abs(determinant) <= MASS_MATRIX_SINGULAR_TOLERANCE:
+            msg = "Mass matrix determinant too close to zero; check pendulum parameters"
+            raise ZeroDivisionError(msg)
+        inv_m = (
+            (mass[1][1] / determinant, -mass[0][1] / determinant),
+            (-mass[1][0] / determinant, mass[0][0] / determinant),
+        )
+        return mass, inv_m
+
+    def control_affine(
+        self, state: DoublePendulumState
+    ) -> tuple[tuple[float, ...], tuple[tuple[float, ...], ...]]:
+        """Decompose dynamics into drift and control-input matrices."""
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
+        g1, g2 = self.gravity_vector(state.theta1, state.theta2)
+        d1, d2 = self.damping_vector(state.omega1, state.omega2)
+        _, inv_m = self._invert_mass_matrix(state.theta2)
+
+        drift_acc1 = -(inv_m[0][0] * (c1 + g1 + d1) + inv_m[0][1] * (c2 + g2 + d2))
+        drift_acc2 = -(inv_m[1][0] * (c1 + g1 + d1) + inv_m[1][1] * (c2 + g2 + d2))
+        f = (state.omega1, state.omega2, drift_acc1, drift_acc2)
+
+        g_matrix = (
+            (inv_m[0][0], inv_m[0][1]),
+            (inv_m[1][0], inv_m[1][1]),
+        )
+        control_matrix = (
+            (0.0, 0.0),
+            (0.0, 0.0),
+            g_matrix[0],
+            g_matrix[1],
+        )
+        return f, control_matrix
+
+    def applied_torques(
+        self, t: float, state: DoublePendulumState
+    ) -> tuple[float, float]:
+        """Evaluate user-defined forcing functions at the given state."""
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        tau1 = self.forcing_functions[0](t, state)
+        tau2 = self.forcing_functions[1](t, state)
+        return tau1, tau2
+
+    def inverse_dynamics(
+        self, state: DoublePendulumState, accelerations: tuple[float, float]
+    ) -> tuple[float, float]:
+        """Compute joint torques required to realize the provided accelerations."""
+
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
+        g1, g2 = self.gravity_vector(state.theta1, state.theta2)
+        d1, d2 = self.damping_vector(state.omega1, state.omega2)
+        mass, _ = self._invert_mass_matrix(state.theta2)
+
+        acc1, acc2 = accelerations
+        tau1 = mass[0][0] * acc1 + mass[0][1] * acc2 + c1 + g1 + d1
+        tau2 = mass[1][0] * acc1 + mass[1][1] * acc2 + c2 + g2 + d2
+        return tau1, tau2
+
+    def joint_torque_breakdown(
+        self, state: DoublePendulumState, control: tuple[float, float]
+    ) -> JointTorques:
+        """Decompose joint torques into applied, gravity, damping, and Coriolis."""
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
+        g1, g2 = self.gravity_vector(state.theta1, state.theta2)
+        d1, d2 = self.damping_vector(state.omega1, state.omega2)
+        return JointTorques(
+            applied=control,
+            gravitational=(g1, g2),
+            damping=(d1, d2),
+            coriolis_centripetal=(c1, c2),
+        )
+
+    def derivatives(
+        self, t: float, state: DoublePendulumState
+    ) -> tuple[float, float, float, float]:
+        """Compute state derivatives (velocities and accelerations)."""
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        tau1, tau2 = self.applied_torques(t, state)
+        c1, c2 = self.coriolis_vector(state.theta2, state.omega1, state.omega2)
+        g1, g2 = self.gravity_vector(state.theta1, state.theta2)
+        d1, d2 = self.damping_vector(state.omega1, state.omega2)
+        _, inv_m = self._invert_mass_matrix(state.theta2)
+        acc1 = inv_m[0][0] * (tau1 - c1 - g1 - d1) + inv_m[0][1] * (tau2 - c2 - g2 - d2)
+        acc2 = inv_m[1][0] * (tau1 - c1 - g1 - d1) + inv_m[1][1] * (tau2 - c2 - g2 - d2)
+        return state.omega1, state.omega2, acc1, acc2
+
+    def step(
+        self, t: float, state: DoublePendulumState, dt: float
+    ) -> DoublePendulumState:
+        """Advance the state by one RK4 integration step."""
+
+        if not (t is not None):
+            raise ValueError("t must be provided")
+
+        # Preserve phi and omega_phi (out-of-plane motion not yet in dynamics);
+        # they are carried through unchanged by the planar integrator.
+        phi = getattr(state, "phi", 0.0)
+        omega_phi = getattr(state, "omega_phi", 0.0)
+
+        def _derivs(time: float, vec: tuple[float, ...]) -> tuple[float, ...]:
+            theta1, theta2, omega1, omega2 = vec
+            current = DoublePendulumState(
+                theta1=theta1,
+                theta2=theta2,
+                omega1=omega1,
+                omega2=omega2,
+                phi=phi,
+                omega_phi=omega_phi,
+            )
+            return tuple(self.derivatives(time, current))
+
+        new_theta1, new_theta2, new_omega1, new_omega2 = rk4_step(
+            _derivs,
+            (state.theta1, state.theta2, state.omega1, state.omega2),
+            t,
+            dt,
+        )
+
+        return DoublePendulumState(
+            theta1=new_theta1,
+            theta2=new_theta2,
+            omega1=new_omega1,
+            omega2=new_omega2,
+            phi=phi,
+            omega_phi=omega_phi,
+        )
+
+
+def compile_forcing_functions(
+    shoulder_expression: str, wrist_expression: str
+) -> tuple[
+    Callable[[float, DoublePendulumState], float],
+    Callable[[float, DoublePendulumState], float],
+]:
+    """Compile shoulder and wrist torque expressions into callables."""
+    return ExpressionFunction(shoulder_expression), ExpressionFunction(wrist_expression)

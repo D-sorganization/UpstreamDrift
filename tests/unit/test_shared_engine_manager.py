@@ -1,0 +1,198 @@
+"""Unit tests for shared engine manager."""
+
+import sys
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+from src.shared.python.engine_core import engine_manager as engine_manager_module
+from src.shared.python.engine_core.engine_availability import (
+    EngineStatus as RuntimeAvailabilityStatus,
+)
+from src.shared.python.engine_core.engine_manager import (
+    EngineManager,
+    EngineStatus,
+    EngineType,
+    GolfModelingError,
+)
+
+
+class TestEngineManager(unittest.TestCase):
+    """Test cases for EngineManager."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.mock_root = Path("/mock/root")
+
+        # Patch engine probes individually
+        self.mujoco_patcher = patch(
+            "src.shared.python.engine_core.engine_probes.MuJoCoProbe"
+        )
+        self.mock_mujoco_probe_cls = self.mujoco_patcher.start()
+        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
+
+        self.drake_patcher = patch(
+            "src.shared.python.engine_core.engine_probes.DrakeProbe"
+        )
+        self.mock_drake_probe_cls = self.drake_patcher.start()
+        self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = True
+
+        self.pinocchio_patcher = patch(
+            "src.shared.python.engine_core.engine_probes.PinocchioProbe"
+        )
+        self.mock_pinocchio_probe_cls = self.pinocchio_patcher.start()
+
+        self.pendulum_patcher = patch(
+            "src.shared.python.engine_core.engine_probes.PendulumProbe"
+        )
+        self.mock_pendulum_probe_cls = self.pendulum_patcher.start()
+
+        self.matlab_patcher = patch(
+            "src.shared.python.engine_core.engine_probes.MatlabProbe"
+        )
+        self.mock_matlab_probe_cls = self.matlab_patcher.start()
+
+        # Patch setup_logging
+        self.logging_patcher = patch(
+            "src.shared.python.data_io.common_utils.setup_structured_logging"
+        )
+        self.logging_patcher.start()
+
+    def tearDown(self) -> None:
+        """Tear down test fixtures."""
+        self.mujoco_patcher.stop()
+        self.drake_patcher.stop()
+        self.pinocchio_patcher.stop()
+        self.pendulum_patcher.stop()
+        self.matlab_patcher.stop()
+        self.logging_patcher.stop()
+
+    def test_initialization_discovery(self) -> None:
+        """Test that engines are discovered correctly."""
+        with patch.object(EngineManager, "_discover_engines") as mock_discover:
+            manager = EngineManager(self.mock_root)
+            mock_discover.assert_called_once()
+
+        manager = EngineManager(self.mock_root)
+
+        path_mock_mujoco = MagicMock(spec=Path)
+        path_mock_mujoco.exists.return_value = True
+
+        path_mock_drake = MagicMock(spec=Path)
+        path_mock_drake.exists.return_value = False
+
+        manager.engine_paths = {
+            EngineType.MUJOCO: path_mock_mujoco,
+            EngineType.DRAKE: path_mock_drake,
+        }
+
+        manager._discover_engines()
+
+        self.assertEqual(
+            manager.engine_status[EngineType.MUJOCO], EngineStatus.AVAILABLE
+        )
+        self.assertEqual(
+            manager.engine_status[EngineType.DRAKE], EngineStatus.UNAVAILABLE
+        )
+
+    def test_shared_engine_manager_switch_engine_success(self) -> None:
+        """Test successful engine switch."""
+        manager = EngineManager(self.mock_root)
+        manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+
+        with patch.object(manager, "_load_engine") as mock_load:
+            success = manager.switch_engine(EngineType.MUJOCO)
+
+            self.assertTrue(success)
+            self.assertEqual(manager.current_engine, EngineType.MUJOCO)
+            mock_load.assert_called_with(EngineType.MUJOCO)
+
+    def test_shared_engine_manager_switch_engine_unavailable(self) -> None:
+        """Test switching to unavailable engine."""
+        manager = EngineManager(self.mock_root)
+        manager.engine_status[EngineType.MUJOCO] = EngineStatus.UNAVAILABLE
+
+        success = manager.switch_engine(EngineType.MUJOCO)
+        self.assertFalse(success)
+
+    def test_shared_engine_manager_switch_engine_failure(self) -> None:
+        """Test handling of engine loading failure."""
+        manager = EngineManager(self.mock_root)
+        manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+
+        with patch.object(
+            manager, "_load_engine", side_effect=GolfModelingError("Fail")
+        ):
+            success = manager.switch_engine(EngineType.MUJOCO)
+            self.assertFalse(success)
+            self.assertEqual(
+                manager.engine_status[EngineType.MUJOCO], EngineStatus.ERROR
+            )
+
+    def test_load_mujoco_engine_details(self) -> None:
+        """Test detailed steps of loading MuJoCo engine."""
+        manager = EngineManager(self.mock_root)
+        manager.engine_paths[EngineType.MUJOCO] = Path("/mock/mujoco")
+
+        # Configure probe specifically for this test
+        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
+
+        mock_mujoco_pkg = MagicMock()
+        mock_mujoco_pkg.__version__ = "3.2.3"
+        mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
+
+        # Create mock physics engine class
+        mock_engine_cls = MagicMock()
+        mock_engine_instance = MagicMock()
+        mock_engine_cls.return_value = mock_engine_instance
+
+        # Mock the physics_engine module
+        mock_physics_engine_mod = MagicMock()
+        mock_physics_engine_mod.MuJoCoPhysicsEngine = mock_engine_cls
+
+        # Add the full module hierarchy to sys.modules
+        # Note: loaders now use src.engines.* import paths (Phase 1 decoupling)
+        with (
+            patch.dict(
+                sys.modules,
+                {
+                    "mujoco": mock_mujoco_pkg,
+                    "src.engines.physics_engines.mujoco": MagicMock(),
+                    "src.engines.physics_engines.mujoco.python": MagicMock(),
+                    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
+                    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_mod,
+                },
+            ),
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
+            # The launch path deep-probes the runtime for real (#8934); the
+            # mocked mujoco module would be flagged, so stub the deep probe.
+            patch.object(
+                engine_manager_module,
+                "get_runtime_engine_status",
+                lambda name: RuntimeAvailabilityStatus.AVAILABLE,
+            ),
+        ):
+            # Use the actual method that exists in EngineManager
+            manager._load_engine(EngineType.MUJOCO)
+            # Check that the engine was loaded successfully
+            self.assertEqual(
+                manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
+            )
+            self.assertIsNotNone(manager.active_physics_engine)
+
+    def test_shared_engine_manager_get_engine_info(self) -> None:
+        """Test information retrieval."""
+        manager = EngineManager(self.mock_root)
+        manager.engine_status = {EngineType.MUJOCO: EngineStatus.AVAILABLE}
+
+        info = manager.get_engine_info()
+        self.assertIn("mujoco", info["available_engines"])
+
+    def test_shared_engine_manager_validate_engine_configuration(self) -> None:
+        """Test configuration validation."""
+        manager = EngineManager(self.mock_root)
+        manager.engine_status = {EngineType.MUJOCO: EngineStatus.AVAILABLE}
+
+        with patch("pathlib.Path.exists", return_value=True):
+            self.assertTrue(manager.validate_engine_configuration(EngineType.MUJOCO))

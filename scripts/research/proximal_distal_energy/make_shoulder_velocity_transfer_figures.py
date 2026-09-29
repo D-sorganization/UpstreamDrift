@@ -1,0 +1,184 @@
+"""Render the phase-resolved shoulder-velocity transfer atlas."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import matplotlib
+import numpy as np
+
+matplotlib.use("Agg")
+matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-shoulder-velocity-v3"
+import matplotlib.pyplot as plt  # noqa: E402
+
+from scripts.research.proximal_distal_energy.run_shoulder_velocity_transfer_study import (
+    FIGURE_DIR,
+    JSON_PATH,
+    write_outputs,
+)
+
+_COLORS = {
+    "Transition": "#4C78A8",
+    "Early Downswing": "#72B7B2",
+    "Mid-Downswing": "#F58518",
+    "Delivery and Release": "#E45756",
+    "Pre-Impact": "#7A5195",
+}
+
+
+def _load_rows() -> list[dict]:
+    if not JSON_PATH.exists():
+        write_outputs()
+    return json.loads(JSON_PATH.read_text(encoding="utf-8"))["rows"]
+
+
+def _save(figure: plt.Figure, stem: str) -> tuple[Path, Path]:
+    FIGURE_DIR.mkdir(parents=True, exist_ok=True)
+    pdf = FIGURE_DIR / f"{stem}.pdf"
+    svg = FIGURE_DIR / f"{stem}.svg"
+    figure.savefig(
+        pdf,
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
+    figure.savefig(svg, bbox_inches="tight", metadata={"Date": None})
+    plt.close(figure)
+    return pdf, svg
+
+
+def _power_by_phase(rows: list[dict]) -> tuple[Path, Path]:
+    constraints = (
+        "preserve_relative_club_rate",
+        "preserve_absolute_club_rate",
+        "preserve_total_kinetic_energy",
+    )
+    figure, axes = plt.subplots(1, 3, figsize=(14.8, 4.5), sharey=True)
+    for axis, constraint in zip(
+        axes,
+        constraints,
+        strict=True,
+    ):
+        for phase, color in _COLORS.items():
+            selected = [
+                row
+                for row in rows
+                if row["phase"] == phase and row["velocity_constraint"] == constraint
+            ]
+            if not selected:
+                continue
+            axis.plot(
+                [row["proximal_velocity_rad_s"] for row in selected],
+                [row["drift_grip_power_w"] for row in selected],
+                marker="o",
+                linewidth=1.6,
+                color=color,
+                label=phase,
+            )
+        axis.axhline(0.0, color="#555555", linewidth=0.8)
+        title = {
+            "preserve_relative_club_rate": "Relative Club Rate Preserved",
+            "preserve_absolute_club_rate": "Absolute Club Rate Preserved",
+            "preserve_total_kinetic_energy": "Total Kinetic Energy Preserved",
+        }[constraint]
+        axis.set_title(title)
+        axis.set_xlabel("Proximal-Link Angular Velocity (rad/s)")
+        axis.grid(alpha=0.25)
+    axes[0].set_ylabel("Pointwise Drift Interface Power (W)")
+    axes[2].legend(loc="upper left", fontsize=8)
+    figure.suptitle(
+        "Drift Interface Power Depends on Phase and the Matched-Velocity Contract"
+    )
+    figure.tight_layout()
+    return _save(figure, "fig_shoulder_velocity_drift_power")
+
+
+def _braking_map(rows: list[dict]) -> tuple[Path, Path]:
+    figure, axis = plt.subplots(figsize=(8.2, 5.0))
+    for phase, color in _COLORS.items():
+        selected = [
+            row
+            for row in rows
+            if row["phase"] == phase
+            and row["velocity_constraint"] == "preserve_absolute_club_rate"
+        ]
+        axis.scatter(
+            [row["clubhead_speed_m_s"] for row in selected],
+            [row["total_grip_power_w"] for row in selected],
+            color=color,
+            label=phase,
+            s=34,
+        )
+    axis.axhline(0.0, color="#333333", linewidth=1.0)
+    axis.fill_between(
+        [0.0, axis.get_xlim()[1]],
+        axis.get_ylim()[0],
+        0.0,
+        color="#E45756",
+        alpha=0.08,
+        label="Negative Interface-Force Work Rate",
+    )
+    axis.set_title("High Proximal Speed Does Not Uniformly Remove Interface Braking")
+    axis.set_xlabel("Instantaneous Clubhead Speed (m/s)")
+    axis.set_ylabel("Total Interface-Force Power (W)")
+    axis.grid(alpha=0.25)
+    axis.legend(fontsize=8, ncol=2)
+    figure.tight_layout()
+    return _save(figure, "fig_shoulder_velocity_braking_map")
+
+
+def _slope_summary(rows: list[dict]) -> tuple[Path, Path]:
+    phases = list(_COLORS)
+    constraints = (
+        "preserve_relative_club_rate",
+        "preserve_absolute_club_rate",
+        "preserve_total_kinetic_energy",
+    )
+    slopes = np.zeros((len(phases), len(constraints)))
+    for row_index, phase in enumerate(phases):
+        for column, constraint in enumerate(constraints):
+            selected = [
+                row
+                for row in rows
+                if row["phase"] == phase and row["velocity_constraint"] == constraint
+            ]
+            if selected:
+                x = np.asarray([row["proximal_velocity_rad_s"] for row in selected])
+                y = np.asarray([row["drift_grip_power_w"] for row in selected])
+                slopes[row_index, column] = np.polyfit(x, y, 1)[0]
+            else:
+                slopes[row_index, column] = np.nan
+    limit = float(np.nanmax(np.abs(slopes)))
+    figure, axis = plt.subplots(figsize=(7.5, 5.0))
+    image = axis.imshow(slopes, cmap="coolwarm", vmin=-limit, vmax=limit, aspect="auto")
+    axis.set_xticks(
+        (0, 1, 2),
+        ("Relative Rate Held", "Absolute Rate Held", "Kinetic Energy Held"),
+    )
+    axis.set_yticks(np.arange(len(phases)), phases)
+    for row in range(slopes.shape[0]):
+        for column in range(slopes.shape[1]):
+            label = (
+                "N/A" if np.isnan(slopes[row, column]) else f"{slopes[row, column]:.1f}"
+            )
+            axis.text(column, row, label, ha="center", va="center")
+    axis.set_title("Finite-Range Drift-Power Slope Changes Sign Across Swing Phases")
+    colorbar = figure.colorbar(image, ax=axis)
+    colorbar.set_label("Slope (W per rad/s)")
+    figure.tight_layout()
+    return _save(figure, "fig_shoulder_velocity_phase_sensitivity")
+
+
+def make_figures() -> tuple[Path, ...]:
+    """Render all registered figures and return their paths."""
+    rows = _load_rows()
+    return (*_power_by_phase(rows), *_braking_map(rows), *_slope_summary(rows))
+
+
+def main() -> None:
+    for path in make_figures():
+        print(path)
+
+
+if __name__ == "__main__":
+    main()

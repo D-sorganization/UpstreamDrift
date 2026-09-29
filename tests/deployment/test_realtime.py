@@ -1,0 +1,835 @@
+"""Tests for real-time control module."""
+
+from __future__ import annotations
+
+import logging
+import threading
+import time
+
+import numpy as np
+import pytest
+
+from tests.support.waiting import wait_until
+
+pytestmark = pytest.mark.unit
+
+
+class TestRobotState:
+    """Tests for RobotState dataclass."""
+
+    def test_robot_state_creation(self) -> None:
+        """Test creating a robot state."""
+        from src.deployment.realtime import RobotState
+
+        state = RobotState(
+            timestamp=0.0,
+            joint_positions=np.zeros(7),
+            joint_velocities=np.zeros(7),
+            joint_torques=np.zeros(7),
+        )
+
+        assert state.n_joints == 7
+        assert state.timestamp == 0.0
+
+    def test_robot_state_vector(self) -> None:
+        """Test getting state vector."""
+        from src.deployment.realtime import RobotState
+
+        positions = np.array([1, 2, 3, 4, 5, 6, 7], dtype=np.float64)
+        velocities = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], dtype=np.float64)
+
+        state = RobotState(
+            timestamp=0.0,
+            joint_positions=positions,
+            joint_velocities=velocities,
+            joint_torques=np.zeros(7),
+        )
+
+        state_vector = state.get_state_vector()
+        assert len(state_vector) == 14
+        np.testing.assert_array_equal(state_vector[:7], positions)
+        np.testing.assert_array_equal(state_vector[7:], velocities)
+
+
+class TestControlCommand:
+    """Tests for ControlCommand dataclass."""
+
+    def test_position_command(self) -> None:
+        """Test creating a position command."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        cmd = ControlCommand.position_command(
+            timestamp=0.0,
+            positions=np.zeros(7),
+        )
+
+        assert cmd.mode == ControlMode.POSITION
+        assert cmd.position_targets is not None
+        assert len(cmd.position_targets) == 7
+
+    def test_torque_command(self) -> None:
+        """Test creating a torque command."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        cmd = ControlCommand.torque_command(
+            timestamp=0.0,
+            torques=np.ones(7),
+        )
+
+        assert cmd.mode == ControlMode.TORQUE
+        assert cmd.torque_commands is not None
+        np.testing.assert_array_equal(cmd.torque_commands, np.ones(7))
+
+    def test_impedance_command(self) -> None:
+        """Test creating an impedance command."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        cmd = ControlCommand.impedance_command(
+            timestamp=0.0,
+            positions=np.zeros(7),
+            stiffness=np.ones(7) * 100,
+            damping=np.ones(7) * 10,
+        )
+
+        assert cmd.mode == ControlMode.IMPEDANCE
+        assert cmd.stiffness is not None
+        assert cmd.damping is not None
+
+    def test_command_validation(self) -> None:
+        """Test command validation."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        # Valid position command
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+            position_targets=np.zeros(7),
+        )
+        assert cmd.validate(7)
+
+        # Invalid: missing position_targets
+        cmd_invalid = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+        )
+        with pytest.raises(ValueError):
+            cmd_invalid.validate(7)
+
+
+class TestRealTimeController:
+    """Tests for RealTimeController."""
+
+    def test_controller_creation(self) -> None:
+        """Test creating a controller."""
+        from src.deployment.realtime import RealTimeController
+
+        controller = RealTimeController(
+            control_frequency=1000.0,
+            communication_type="simulation",
+        )
+
+        assert controller.control_frequency == 1000.0
+        assert controller.dt == 0.001
+        assert not controller.is_connected
+        assert not controller.is_running
+
+    def test_controller_connect(self) -> None:
+        """Test connecting to simulated robot."""
+        from src.deployment.realtime import RealTimeController, RobotConfig
+
+        controller = RealTimeController(communication_type="simulation")
+        config = RobotConfig(name="test_robot", n_joints=7)
+
+        success = controller.connect(config)
+        assert success
+        assert controller.is_connected
+
+        controller.disconnect()
+        assert not controller.is_connected
+
+    def test_controller_timing_stats(self) -> None:
+        """Test timing statistics."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,  # Low frequency for test
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test_robot", n_joints=7)
+        controller.connect(config)
+
+        def simple_callback(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(7),
+            )
+
+        controller.set_control_callback(simple_callback)
+        controller.start()
+
+        # Wait until the control loop has actually run a cycle (event-based,
+        # not a fixed sleep — issue #7156).
+        wait_until(
+            lambda: controller.get_timing_stats().total_cycles > 0,
+            message="control loop did not complete a cycle",
+        )
+
+        controller.stop()
+
+        stats = controller.get_timing_stats()
+        assert stats.total_cycles > 0
+        assert stats.mean_cycle_time > 0
+
+        controller.disconnect()
+
+    def test_loopback_physics(self) -> None:
+        """Test LOOPBACK physics simulation."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="loopback",
+        )
+        config = RobotConfig(name="test_robot", n_joints=1)
+        controller.connect(config)
+
+        # Trigger initialization
+        controller._read_state()
+
+        # Test TORQUE mode
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.TORQUE,
+            torque_commands=np.array([1.0]),
+        )
+        controller._send_command(cmd)
+
+        q, qd = controller._sim_state  # type: ignore
+        # After 1 step (dt=0.01) with tau=1: v=0.01, p=0.0001
+        assert qd[0] > 0
+        assert q[0] > 0
+
+        # Test VELOCITY mode
+        cmd_vel = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.VELOCITY,
+            velocity_targets=np.array([2.0]),
+        )
+        controller._send_command(cmd_vel)
+
+        q_new, qd_new = controller._sim_state  # type: ignore
+        assert qd_new[0] == 2.0
+        assert q_new[0] > q[0]
+
+        # Test POSITION mode
+        cmd_pos = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+            position_targets=np.array([10.0]),
+        )
+        controller._send_command(cmd_pos)
+
+        q_pos, qd_pos = controller._sim_state  # type: ignore
+        assert q_pos[0] == 10.0
+        assert qd_pos[0] == 0.0
+
+    @pytest.mark.parametrize(
+        "command, match",
+        [
+            pytest.param(
+                {"mode": "TORQUE"},
+                "Torque mode requires torque_commands",
+                id="torque",
+            ),
+            pytest.param(
+                {"mode": "POSITION"},
+                "Position mode requires position_targets",
+                id="position",
+            ),
+            pytest.param(
+                {"mode": "VELOCITY"},
+                "Velocity mode requires velocity_targets",
+                id="velocity",
+            ),
+            pytest.param(
+                {"mode": "IMPEDANCE", "position_targets": np.zeros(2)},
+                "Impedance mode requires stiffness and damping",
+                id="impedance",
+            ),
+        ],
+    )
+    def test_loopback_rejects_missing_required_command_payloads(
+        self,
+        command: dict[str, object],
+        match: str,
+    ) -> None:
+        """#7695: LOOPBACK commands must fail closed when payloads are missing."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="loopback",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+        controller._read_state()
+        before_q, before_qd = controller._sim_state  # type: ignore[misc]
+
+        command_kwargs = dict(command)
+        mode_name = command_kwargs.pop("mode")
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=getattr(ControlMode, str(mode_name)),
+            **command_kwargs,
+        )
+
+        with pytest.raises(ValueError, match=match):
+            controller._send_command(cmd)
+
+        after_q, after_qd = controller._sim_state  # type: ignore[misc]
+        np.testing.assert_array_equal(after_q, before_q)
+        np.testing.assert_array_equal(after_qd, before_qd)
+
+    def test_loopback_copies_caller_owned_arrays_before_storing_sim_state(
+        self,
+    ) -> None:
+        """#7696: caller-owned command arrays must not alias into _sim_state."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="loopback",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        positions = np.array([1.0, 2.0])
+        controller._send_command(
+            ControlCommand(
+                timestamp=0.0,
+                mode=ControlMode.POSITION,
+                position_targets=positions,
+            )
+        )
+        positions[:] = [99.0, 100.0]
+        q, qd = controller._sim_state  # type: ignore[misc]
+        np.testing.assert_array_equal(q, np.array([1.0, 2.0]))
+        np.testing.assert_array_equal(qd, np.zeros(2))
+
+        velocities = np.array([3.0, 4.0])
+        controller._send_command(
+            ControlCommand(
+                timestamp=0.0,
+                mode=ControlMode.VELOCITY,
+                velocity_targets=velocities,
+            )
+        )
+        _, stored_qd = controller._sim_state  # type: ignore[misc]
+        velocities[:] = [88.0, 89.0]
+        np.testing.assert_array_equal(stored_qd, np.array([3.0, 4.0]))
+
+    def test_wait_for_state_wakes_within_one_cycle(self) -> None:
+        """#6975: wait_for_state must return within one cycle, not block to full timeout."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=3)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+
+        try:
+            t0 = time.perf_counter()
+            state = controller.wait_for_state(timeout=1.0)
+            elapsed = time.perf_counter() - t0
+            assert state is not None, "wait_for_state returned None (timed out)"
+            # At 100 Hz a cycle is 10 ms; allow 10× margin → 100 ms
+            assert elapsed < 0.1, (
+                f"wait_for_state blocked {elapsed:.3f}s, expected <0.1s"
+            )
+        finally:
+            controller.stop()
+            controller.disconnect()
+
+    def test_get_timing_stats_thread_safe(self) -> None:
+        """#6976: get_timing_stats must not raise when called concurrently."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=3)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+
+        errors: list[Exception] = []
+
+        def reader() -> None:
+            for _ in range(50):
+                try:
+                    controller.get_timing_stats()
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(exc)
+
+        threads = [threading.Thread(target=reader) for _ in range(4)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        controller.stop()
+        controller.disconnect()
+
+        assert not errors, f"Thread-safety errors in get_timing_stats: {errors}"
+
+    def test_cycle_times_bounded(self) -> None:
+        """#6976: cycle_times must not grow without bound."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=500.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=1)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(1),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+        # Wait for the loop to run rather than betting on a fixed sleep (#7156).
+        wait_until(
+            lambda: controller.get_timing_stats().total_cycles > 0,
+            message="control loop did not start cycling",
+        )
+        controller.stop()
+
+        stats = controller.get_timing_stats()
+        assert stats.total_cycles <= 10000
+        controller.disconnect()
+
+    def test_connect_while_running_raises(self) -> None:
+        """#6977: connect() must raise RuntimeError while control loop is active."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=100.0,
+            communication_type="simulation",
+        )
+        config = RobotConfig(name="test", n_joints=3)
+        controller.connect(config)
+
+        def cb(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+
+        try:
+            with pytest.raises(RuntimeError, match="running"):
+                controller.connect(config)
+        finally:
+            controller.stop()
+            controller.disconnect()
+
+
+class TestControlLoopFailureEscalation:
+    """Tests for consecutive-failure escalation (issue #6943)."""
+
+    def test_loop_aborts_and_zeroes_torque_after_n_failures(self) -> None:
+        """A persistently failing callback aborts the loop and zeroes torque."""
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=3,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        sent: list[object] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        def failing_callback(_state: RobotState) -> object:
+            raise RuntimeError("simulated hardware fault")
+
+        controller.set_control_callback(failing_callback)
+        controller.start()
+
+        # Wait for the loop to self-abort (bounded, event-based — #7156).
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="control loop did not self-abort after persistent failures",
+        )
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        # A zero-torque command was issued as the safety fallback.
+        assert sent, "expected a zero-torque safety command"
+        last = sent[-1]
+        np.testing.assert_array_equal(
+            last.torque_commands,  # type: ignore[attr-defined]
+            np.zeros(2),
+        )
+
+    def test_loop_abort_survives_zero_torque_send_failure(
+        self,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """A failing emergency zero-torque send must not keep the loop running."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=2,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        def raising_send(_command: ControlCommand) -> None:
+            raise OSError("faulted command bus")
+
+        controller._send_command = raising_send  # type: ignore[method-assign]
+
+        def torque_callback(state: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.ones(2),
+            )
+
+        controller.set_control_callback(torque_callback)
+
+        with caplog.at_level(logging.ERROR):
+            controller.start()
+            wait_until(
+                lambda: not controller.is_running,
+                timeout=2.0,
+                message="control loop did not stop after abort send failure",
+            )
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        assert "Emergency zero-torque command failed during control-loop abort" in (
+            caplog.text
+        )
+
+    @pytest.mark.unit
+    def test_emergency_stop_send_failure_still_aborts(self) -> None:
+        """Abort completes even when the emergency zero-torque send raises.
+
+        The escalation path issues a best-effort zero-torque command as a
+        safety fallback. If the hardware comm layer raises while sending that
+        command, the controller must still terminate the loop, clear
+        ``is_running``, and record the abort instead of leaving the thread
+        wedged. This exercises the ``_command_zero_torque_for_abort`` except
+        branch that earlier tests stubbed away (issue #7697).
+        """
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=2,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        send_calls = {"count": 0}
+
+        def raising_send(_command: object) -> None:
+            # Every send raises, including the emergency zero-torque fallback,
+            # so the hardware-failure branch of the abort path is exercised.
+            send_calls["count"] += 1
+            raise OSError("simulated hardware comm failure")
+
+        controller._send_command = raising_send  # type: ignore[method-assign]
+
+        def callback(state: RobotState) -> object:
+            from src.deployment.realtime import ControlCommand, ControlMode
+
+            return ControlCommand(
+                timestamp=state.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(2),
+            )
+
+        controller.set_control_callback(callback)
+        controller.start()
+
+        # The loop must self-abort even though every send (control and the
+        # emergency fallback) raises (#7156 bounded wait).
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="control loop did not self-abort when send raised",
+        )
+
+        assert not controller.is_running
+        assert controller.aborted_on_failure
+        # The emergency zero-torque fallback was attempted (and raised),
+        # proving the hardware-failure abort branch ran.
+        assert send_calls["count"] >= 1
+
+    def test_transient_failures_do_not_abort(self) -> None:
+        """An occasional failure that recovers must not abort the loop."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+            max_consecutive_failures=5,
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=1))
+
+        state = {"calls": 0}
+
+        def flaky_callback(s: RobotState) -> ControlCommand:
+            state["calls"] += 1
+            if state["calls"] % 4 == 0:
+                raise RuntimeError("transient")
+            return ControlCommand(
+                timestamp=s.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(1),
+            )
+
+        controller.set_control_callback(flaky_callback)
+        controller.start()
+        # Wait until several callbacks (including transient failures, every 4th)
+        # have run, then assert the loop survived them (#7156).
+        wait_until(
+            lambda: state["calls"] >= 8,
+            message="callback did not run enough cycles to exercise failures",
+        )
+
+        assert controller.is_running
+        assert not controller.aborted_on_failure
+        controller.stop()
+        controller.disconnect()
+
+    def test_invalid_max_consecutive_failures_rejected(self) -> None:
+        """Precondition: max_consecutive_failures must be positive."""
+        from src.deployment.realtime import RealTimeController
+
+        with pytest.raises(ValueError):
+            RealTimeController(max_consecutive_failures=0)
+
+
+class TestControllerStopTimeout:
+    """Tests for stop() join-timeout handling (issue #6944)."""
+
+    def test_stop_raises_and_skips_zero_command_on_join_timeout(self) -> None:
+        """If the thread won't stop, stop() raises and skips the zero command."""
+        from src.deployment.realtime import RealTimeController, RobotConfig
+
+        controller = RealTimeController(communication_type="simulation")
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        sent: list[object] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        class _StuckThread:
+            def join(self, timeout: float | None = None) -> None:
+                return None
+
+            def is_alive(self) -> bool:
+                return True
+
+        controller._control_thread = _StuckThread()  # type: ignore[assignment]
+
+        with pytest.raises(RuntimeError, match="did not stop"):
+            controller.stop()
+
+        # No zero command was sent because the loop is still alive.
+        assert sent == []
+        # The (still-alive) thread handle is retained, not cleared.
+        assert controller._control_thread is not None
+
+    def test_stop_sends_zero_command_when_thread_confirmed_stopped(self) -> None:
+        """Normal stop confirms the join and commands zero torque once."""
+        from src.deployment.realtime import (
+            ControlCommand,
+            ControlMode,
+            RealTimeController,
+            RobotConfig,
+            RobotState,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=3))
+
+        sent: list[object] = []
+        controller._send_command = sent.append  # type: ignore[method-assign]
+
+        def cb(s: RobotState) -> ControlCommand:
+            return ControlCommand(
+                timestamp=s.timestamp,
+                mode=ControlMode.TORQUE,
+                torque_commands=np.zeros(3),
+            )
+
+        controller.set_control_callback(cb)
+        controller.start()
+        # Wait for at least one command to be sent before stopping (#7156).
+        wait_until(lambda: bool(sent), message="no command sent before stop")
+        controller.stop()
+
+        assert not controller.is_running
+        assert controller._control_thread is None
+        assert sent, "expected a zero-torque command on clean stop"
+        np.testing.assert_array_equal(
+            sent[-1].torque_commands,  # type: ignore[attr-defined]
+            np.zeros(3),
+        )
+
+
+class TestIsRunningCleared:
+    """Issue #7740: ``_is_running`` must not survive an abort-raises path."""
+
+    @pytest.mark.unit
+    def test_is_running_cleared_when_run_loop_raises(self) -> None:
+        """If ``_run_control_loop`` raises, the ``finally`` clears ``is_running``.
+
+        The control loop's inner cycle catches ``(RuntimeError, ValueError,
+        OSError)``, so to exercise the bare ``finally`` we make
+        ``_run_control_loop`` raise an *uncaught* exception type. Without the
+        ``try/finally`` (under ``_running_lock``) a stale ``True`` would persist
+        after the thread died.
+        """
+        from src.deployment.realtime import (
+            RealTimeController,
+            RobotConfig,
+        )
+
+        controller = RealTimeController(
+            control_frequency=200.0,
+            communication_type="simulation",
+        )
+        controller.connect(RobotConfig(name="test_robot", n_joints=2))
+
+        def boom() -> None:
+            raise KeyboardInterrupt("uncaught loop failure")
+
+        controller._run_control_loop = boom  # type: ignore[method-assign]
+        controller.set_control_callback(lambda _s: None)  # type: ignore[arg-type,return-value]
+        controller.start()
+
+        wait_until(
+            lambda: not controller.is_running,
+            timeout=2.0,
+            message="is_running not cleared after the control loop raised",
+        )
+        assert not controller.is_running
+
+
+class TestRobotConfig:
+    """Tests for RobotConfig."""
+
+    def test_realtime_config_defaults(self) -> None:
+        """Test default configuration."""
+        from src.deployment.realtime import RobotConfig
+
+        config = RobotConfig(name="test", n_joints=7)
+
+        assert config.name == "test"
+        assert config.n_joints == 7
+        assert len(config.joint_names) == 7
+        assert config.joint_names[0] == "joint_0"

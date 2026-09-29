@@ -1,0 +1,701 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
+"""Drake Physics Engine wrapper implementation.
+
+Wraps pydrake.multibody to provide a compliant PhysicsEngine interface.
+
+Refactored to use shared engine availability module (DRY principle).
+
+Design by Contract:
+    Preconditions:
+        - step/forward/reset: Engine must be finalized
+        - compute_* methods: Engine must be finalized
+
+    Postconditions:
+        - compute_* methods: Results must be finite arrays
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any, cast
+
+import numpy as np
+
+from src.shared.python.core.contracts import (
+    check_finite,
+    invariant,
+    postcondition,
+    precondition,
+)
+from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+# Pydrake imports - only import if available
+if DRAKE_AVAILABLE:
+    import pydrake.math  # noqa: F401
+    import pydrake.multibody.parsing as mbparsing  # noqa: F401
+    import pydrake.multibody.plant as mbp  # noqa: F401
+    import pydrake.systems.analysis as analysis
+    import pydrake.systems.framework as framework
+    from pydrake.all import (
+        AddMultibodyPlantSceneGraph,
+        DiagramBuilder,
+        JacobianWrtVariable,
+        LoadModelDirectives,  # noqa: F401
+        MultibodyPlant,
+        Parser,
+        ProcessModelDirectives,  # noqa: F401
+        RigidTransform,  # noqa: F401
+        RotationMatrix,  # noqa: F401
+    )
+    from pydrake.multibody.tree import JointActuatorIndex
+
+from src.shared.python.core import constants
+from src.shared.python.engine_core.base_physics_engine import BasePhysicsEngine
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
+
+logger = get_logger(__name__)
+
+DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
+
+
+@invariant(
+    lambda self: not self._is_finalized or self.plant_context is not None,
+    "Finalized engine must have a valid plant context",
+)
+class DrakePhysicsEngine(BasePhysicsEngine):
+    """Encapsulates Drake MultibodyPlant and simulation control.
+
+    Implements the shared PhysicsEngine protocol via BasePhysicsEngine,
+    gaining checkpoint save/restore (Checkpointable contract), path validation,
+    and model name tracking from the base class.
+    """
+
+    def __init__(self, time_step: float = DEFAULT_TIME_STEP) -> None:
+        """Initialize the Drake physics engine.
+
+        Args:
+            time_step: Simulation time step in seconds.
+        """
+        super().__init__()
+        if time_step is None:
+            raise ValueError("time_step must be provided")
+        self.builder = DiagramBuilder()
+        self.plant: MultibodyPlant
+        self.scene_graph: Any
+        # AddMultibodyPlantSceneGraph returns (plant, scene_graph)
+        result = AddMultibodyPlantSceneGraph(self.builder, time_step)
+        self.plant = result[0]
+        self.scene_graph = result[1]
+
+        self.diagram: framework.Diagram | None = None
+        self.context: framework.Context | None = None
+        self.plant_context: framework.Context | None = None
+
+        self.model_name_str: str = ""
+        self._is_finalized = False
+        self.simulator: analysis.Simulator | None = None
+
+    @property
+    def engine_type(self) -> str:
+        """Get engine type identifier (Checkpointable contract)."""
+        return "drake"
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if the engine has been finalized and is ready for simulation."""
+        return self._is_finalized and self.plant_context is not None
+
+    @property
+    def model_name(self) -> str:
+        """Return the name of the currently loaded model."""
+        return self.model_name_str
+
+    def _ensure_finalized(self) -> None:
+        """Finalize the plant and build diagram if not already done."""
+        if not self._is_finalized:
+            self.plant.Finalize()
+            self.diagram = self.builder.Build()
+            self.context = self.diagram.CreateDefaultContext()
+            self.plant_context = self.plant.GetMyContextFromRoot(self.context)
+            # Create persistent simulator to avoid overhead
+            self.simulator = analysis.Simulator(self.diagram, self.context)
+            self.simulator.Initialize()
+            self._is_finalized = True
+
+    def _load_from_path_impl(self, path: str) -> None:
+        """Engine-specific path loading (called by BasePhysicsEngine)."""
+        parser = Parser(self.plant)
+        model_name = path.split("/")[-1].split(".")[0]
+        self.model_name_str = model_name
+        parser.AddModels(Path(path))
+        self._ensure_finalized()
+
+    def _load_from_string_impl(self, content: str, extension: str | None) -> None:
+        """Engine-specific string loading (called by BasePhysicsEngine)."""
+        parser = Parser(self.plant)
+        ext = extension if extension else "urdf"
+        parser.AddModelsFromString(content, ext)
+        self.model_name_str = "StringLoadedModel"
+        self._ensure_finalized()
+
+    def load_from_path(self, path: str) -> None:
+        """Load model from file path (URDF, SDF, MJCF if supported)."""
+        # Drake Parser supports SDF, URDF, MJCF (experimental)
+        if path is None:
+            raise ValueError("path must be provided")
+        try:
+            self._load_from_path_impl(path)
+            self._is_initialized = True
+        except (RuntimeError, TypeError, ValueError) as e:
+            logger.error("Failed to load Drake model from path %s: %s", path, e)
+            raise
+
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
+        """Load model from string content."""
+        if content is None:
+            raise ValueError("content must be provided")
+        try:
+            self._load_from_string_impl(content, extension)
+            self._is_initialized = True
+        except (RuntimeError, TypeError, ValueError) as e:
+            logger.error("Failed to load Drake model from string: %s", e)
+            raise
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    def reset(self) -> None:
+        """Reset the simulation to its initial state."""
+        if self.context and self.plant_context and self.simulator:
+            # Reset time to zero
+            self.context.SetTime(0.0)
+
+            # Reset to default state (positions and velocities)
+            # pydrake stubs expect (context, positions) but the single-arg overload
+            # resets to defaults; suppress the type checker mismatch.
+            self.plant.SetDefaultPositions(self.plant_context)  # type: ignore[call-overload]
+            self.plant.SetDefaultVelocities(self.plant_context)  # type: ignore[attr-defined]
+
+            # Re-initialize the simulator with the reset state
+            self.simulator.Initialize()
+
+            logger.debug("Drake engine reset to initial state")
+        else:
+            logger.warning("Attempted to reset Drake engine before initialization.")
+
+    @precondition(
+        lambda self, dt=None: self.is_initialized, "Engine must be initialized"
+    )  # noqa: E501
+    def step(self, dt: float | None = None) -> None:
+        """Advance the simulation by one time step."""
+        self._ensure_finalized()
+
+        if not self.simulator or not self.context:
+            logger.error("Cannot step: Simulator not initialized.")
+            return
+
+        current_time = self.context.get_time()
+        step_size = dt if dt is not None else self.plant.time_step()
+        self.simulator.AdvanceTo(current_time + step_size)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    def forward(self) -> None:
+        """Compute forward kinematics/dynamics without advancing time."""
+        if not self.plant_context:
+            logger.warning(
+                "Cannot compute forward dynamics: plant context not initialized"
+            )  # noqa: E501
+            return
+
+        # Drake uses lazy evaluation, but we can force computation by accessing
+        # derived quantities. This ensures all kinematic and dynamic quantities
+        # are up-to-date
+        try:
+            # Force computation of mass matrix (triggers forward dynamics computation)
+            _ = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+            # Force computation of bias forces (ensures kinematics are updated)
+            nv = self.plant.num_velocities()
+            if nv > 0:
+                vdot_zero = np.zeros(nv)
+                _ = self.plant.CalcInverseDynamics(
+                    self.plant_context,
+                    vdot_zero,
+                    self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap,
+                )
+
+            logger.debug("Drake forward dynamics computation completed")
+        except (ValueError, TypeError, RuntimeError) as e:
+            logger.error("Failed to compute forward dynamics: %s", e)
+            raise
+
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Get the current state (positions, velocities)."""
+        if not self.plant_context:
+            logger.debug("get_state called on uninitialized engine")
+            return np.array([]), np.array([])
+
+        q = self.plant.GetPositions(self.plant_context)
+        v = self.plant.GetVelocities(self.plant_context)
+        return q, v
+
+    def get_link_transforms(self) -> dict[str, np.ndarray]:
+        """Return every non-world body pose without advancing Drake."""
+        if not self.plant_context:
+            raise RuntimeError("Engine must be initialized")
+        result: dict[str, np.ndarray] = {}
+        indices = self.plant.GetBodyIndices(self.plant.world_model_instance())
+        for index in indices:
+            body = self.plant.get_body(index)
+            pose = self.plant.EvalBodyPoseInWorld(self.plant_context, body)
+            transform = np.eye(4)
+            transform[:3, :3] = pose.rotation().matrix()
+            transform[:3, 3] = pose.translation()
+            result[body.name()] = transform
+        return result
+
+    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Set the current state."""
+        if q is None:
+            raise ValueError("q must be provided")
+        if not self.plant_context:
+            logger.warning("set_state called on uninitialized engine")
+            return
+
+        self.plant.SetPositions(self.plant_context, q)
+        self.plant.SetVelocities(self.plant_context, v)
+
+    def set_control(self, u: np.ndarray) -> None:
+        """Apply control inputs (torques/forces)."""
+        if u is None:
+            raise ValueError("u must be provided")
+        if not self.plant_context:
+            logger.warning("set_control called on uninitialized engine")
+            return
+
+        self.plant.get_actuation_input_port().FixValue(self.plant_context, u)
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Drake's verified canonical-core capability surface."""
+        return EngineCapabilities(
+            engine_name="Drake",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.FULL,
+            inverse_dynamics=CapabilityLevel.FULL,
+            parameter_gradients=CapabilityLevel.PARTIAL,
+            state_control_gradients=CapabilityLevel.FULL,
+            forward_sim=CapabilityLevel.FULL,
+            contact_step=CapabilityLevel.FULL,
+            trajectory_opt=CapabilityLevel.FULL,
+            extra={
+                "gradient_scalar": "AutoDiffXd",
+                "contact_model": "hydroelastic_or_point_contact",
+                "model_exports": ("urdf", "sdf"),
+            },
+        )
+
+    def get_time(self) -> float:
+        """Get the current simulation time."""
+        if self.context:
+            return cast(float, self.context.get_time())
+        return 0.0
+
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names."""
+        if not self.plant:
+            return []
+
+        # Drake has actuators.
+        names = []
+        for i in range(self.plant.num_actuators()):
+            actuator_idx = JointActuatorIndex(i)
+            act = self.plant.get_joint_actuator(actuator_idx)
+            names.append(act.name())
+
+        if not names:
+            # If there are no actuators defined, fall back to generic names
+            # derived from the number of generalized velocities (dofs).
+            names.extend([f"dof_{i}" for i in range(self.plant.num_velocities())])
+
+        return names
+
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call (performance optimization).
+
+        PERFORMANCE FIX: Returns all commonly-needed state in one call to avoid
+        multiple separate engine queries.
+
+        Returns:
+            Dictionary with 'q', 'v', 't', and 'M' (mass matrix).
+        """
+        if not self.plant_context:
+            return {"q": np.array([]), "v": np.array([]), "t": 0.0, "M": None}
+
+        # Get state
+        q = self.plant.GetPositions(self.plant_context)
+        v = self.plant.GetVelocities(self.plant_context)
+        t = float(self.context.get_time()) if self.context else 0.0
+
+        # Compute mass matrix
+        # Note: CalcMassMatrixViaInverseDynamics is efficient in Drake
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+        return {"q": q, "v": v, "t": t, "M": M}
+
+    # -------- Dynamics Interface --------
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Mass matrix must contain finite values")
+    def compute_mass_matrix(self) -> np.ndarray:
+        """Compute the dense inertia matrix M(q)."""
+        if not self.plant_context:
+            return np.array([])
+
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+        return cast(np.ndarray, M)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Bias forces must contain finite values")
+    def compute_bias_forces(self) -> np.ndarray:
+        """Compute bias forces C(q,v) + g(q)."""
+        if not self.plant_context:
+            return np.array([])
+
+        # C + g = InverseDynamics(q, v, 0)
+        # Using CalcInverseDynamics(context, known_vdot, external_forces)
+        # with known_vdot = 0.
+
+        nv = self.plant.num_velocities()
+        vdot_zero = np.zeros(nv)
+        forces = self.plant.CalcInverseDynamics(
+            self.plant_context,
+            vdot_zero,
+            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap
+        )
+        return cast(np.ndarray, forces)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity forces must contain finite values")
+    def compute_gravity_forces(self) -> np.ndarray:
+        """Compute gravity forces g(q)."""
+        if not self.plant_context:
+            return np.array([])
+
+        # g(q) = GravityForces(context)
+        return cast(
+            np.ndarray, self.plant.CalcGravityGeneralizedForces(self.plant_context)
+        )  # noqa: E501
+
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics must contain finite values")
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute inverse dynamics tau = ID(q, v, a)."""
+        if qacc is None:
+            raise ValueError("qacc must be provided")
+        if not self.plant_context:
+            return np.array([])
+
+        forces = self.plant.CalcInverseDynamics(
+            self.plant_context,
+            qacc,
+            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap
+        )
+        return cast(np.ndarray, forces)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    def compute_contact_forces(self) -> np.ndarray:
+        """Compute total contact forces (ground reaction force, GRF).
+
+        Uses Drake's ContactResults API to query real contact forces from the
+        simulation context. Requires that the simulator has advanced at least
+        one step so contact results are populated.
+
+        Returns:
+            f: (3,) vector representing total ground reaction force [N].
+                Returns zeros if no contacts exist or simulator is unavailable.
+        """
+        if not self.plant_context or not self.diagram or not self.context:
+            return np.zeros(3)
+
+        try:
+            # Get the contact results output port from the plant
+            contact_results_port = self.plant.get_contact_results_output_port()
+            contact_results = contact_results_port.Eval(self.plant_context)
+
+            # Sum all point contact forces
+            total_force = np.zeros(3)
+            n_contacts = contact_results.num_point_pair_contacts()
+
+            for i in range(n_contacts):
+                point_contact = contact_results.point_pair_contact_info(i)
+                # Contact force is along the contact normal, scaled by force magnitude
+                contact_force = point_contact.contact_force()
+                total_force += np.array(
+                    [contact_force[0], contact_force[1], contact_force[2]]
+                )  # noqa: E501
+
+            if n_contacts > 0:
+                logger.debug(
+                    "Computed GRF from %d contact points: magnitude=%.2f N",
+                    n_contacts,
+                    float(np.linalg.norm(total_force)),
+                )
+
+            return total_force
+
+        except (AttributeError, RuntimeError, TypeError) as e:
+            # ContactResults API may not be available in all Drake configurations
+            logger.warning(
+                "Could not query ContactResults: %s. "
+                "Returning zero GRF. Ensure the simulator has advanced at "
+                "least one step for contact results to be populated.",
+                e,
+            )
+            return np.zeros(3)
+
+    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
+        """Compute spatial Jacobian for a specific body."""
+        if body_name is None:
+            raise ValueError("body_name must be provided")
+        if not self.plant_context:
+            return None
+
+        # Find body frame
+        try:
+            body = self.plant.GetBodyByName(body_name)
+            frame = body.body_frame()
+        except (RuntimeError, ValueError, OSError):
+            return None
+
+        # CalcJacobianSpatialVelocity
+        # J_spatial (6 x nq)? Or (6 x nv). Drake supports nv.
+
+        # Typically we want Jacobian w.r.t velocities (v).
+        J = self.plant.CalcJacobianSpatialVelocity(
+            self.plant_context,
+            JacobianWrtVariable.kV,
+            frame,
+            np.zeros(3),  # Offset in B?
+            self.plant.world_frame(),
+            self.plant.world_frame(),  # Expressed in world?
+        )
+        J = cast(np.ndarray, J)
+
+        # J is (6, nv). Top 3 angular, bottom 3 linear?
+        # Drake SpatialVelocity is (w, v) -> Angular, Linear.
+
+        jacr = J[:3, :]
+        jacp = J[3:, :]
+
+        return {
+            "linear": jacp,
+            "angular": jacr,
+            "spatial": J,  # Standard: Angular (0-3), Linear (3-6)
+        }
+
+    # -------- Section F: Drift-Control Decomposition --------
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero control inputs.
+
+        Section F Implementation: Uses Drake's CalcInverseDynamics with zero
+        applied forces and then solves for acceleration via M^-1 * (bias forces).
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if not self.plant_context:
+            return np.array([])
+
+        # Get mass matrix
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+        # Get bias forces (C(q,v)v + g(q))
+        nv = self.plant.num_velocities()
+        vdot_zero = np.zeros(nv)
+        bias = self.plant.CalcInverseDynamics(
+            self.plant_context,
+            vdot_zero,
+            self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap
+        )
+
+        # Drift = -M^-1 * bias
+        # (Since bias = M*0 + C + g, we have C + g = bias, and drift acc = -M^-1*(C+g))
+        # Actually: tau = M*a + C + g, so if tau=0: 0 = M*a + C + g → a = -M^-1*(C+g)
+        a_drift = -np.linalg.solve(M, bias)
+
+        return cast(np.ndarray, a_drift)
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from applied torques only.
+
+        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if tau is None:
+            raise ValueError("tau must be provided")
+        if not self.plant_context:
+            return np.array([])
+
+        # Get mass matrix
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+        # Control component: M^-1 * tau
+        a_control = np.linalg.solve(M, tau)
+
+        return cast(np.ndarray, a_control)
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving state.
+        This isolates drift (gravity + Coriolis) from control effects.
+
+        **Purpose**: Answer "What would happen if all actuators turned off?"
+
+        **Physics**: With τ=0, acceleration is purely passive:
+            q̈_ZTCF = M(q)⁻¹ · (-C(q,v) - g(q))
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+            v: Joint velocities (n_v,) [rad/s or m/s]
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        if not self.plant_context:
+            return np.array([])
+
+        # Save current state
+        saved_q = self.plant.GetPositions(self.plant_context)
+        saved_v = self.plant.GetVelocities(self.plant_context)
+
+        try:
+            # Set to counterfactual state
+            self.plant.SetPositions(self.plant_context, q)
+            self.plant.SetVelocities(self.plant_context, v)
+
+            # Compute mass matrix at counterfactual state
+            M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+            # Compute bias forces at counterfactual state (C(q,v) + g(q))
+            nv = self.plant.num_velocities()
+            vdot_zero = np.zeros(nv)
+            bias = self.plant.CalcInverseDynamics(
+                self.plant_context,
+                vdot_zero,
+                self.plant.MakeMultibodyForces(self.plant),  # type: ignore[attr-defined]  # pydrake stub gap,
+            )
+
+            # ZTCF: τ = 0, so M*a + bias = 0 → a = -M^-1 * bias
+            a_ztcf = -np.linalg.solve(M, bias)
+
+            return cast(np.ndarray, a_ztcf)
+
+        finally:
+            # Restore original state
+            self.plant.SetPositions(self.plant_context, saved_q)
+            self.plant.SetVelocities(self.plant_context, saved_v)
+
+    def _read_actuation_generalized_force(self) -> np.ndarray:
+        """Read the fixed actuation as a generalized force vector (#7051).
+
+        Drake's actuation input port carries the per-actuator command ``u``
+        (length ``num_actuators``). The generalized force it contributes is
+        ``B @ u`` where ``B = plant.MakeActuationMatrix()`` is the
+        ``num_velocities × num_actuators`` selection matrix.
+
+        Returns the ``(num_velocities,)`` generalized actuation force, or a
+        zero vector when no actuation has been fixed on the context, the
+        port is unconnected, or the actuation matrix cannot be formed. This
+        keeps ZVCF well-defined (passive, gravity-only) under the legacy
+        ``tau = 0`` assumption while honouring any nonzero fixed control.
+        """
+        nv = self.plant.num_velocities()
+        try:
+            port = self.plant.get_actuation_input_port()
+            if not port.HasValue(self.plant_context):
+                return np.zeros(nv)
+            u = np.asarray(port.Eval(self.plant_context), dtype=float)
+            if u.size == 0:
+                return np.zeros(nv)
+            b_matrix = np.asarray(self.plant.MakeActuationMatrix(), dtype=float)
+            tau = b_matrix @ u
+            if tau.shape != (nv,):
+                logger.warning(
+                    "ZVCF actuation map produced shape %s, expected (%d,); "
+                    "falling back to zero actuation.",
+                    tau.shape,
+                    nv,
+                )
+                return np.zeros(nv)
+            return tau
+        except (RuntimeError, ValueError, TypeError, AttributeError) as exc:
+            logger.debug(
+                "No fixed actuation available for ZVCF (%s); using tau=0.",
+                exc,
+            )
+            return np.zeros(nv)
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration at fixed configuration with velocity and declared
+        applied control set to zero.
+
+        **Purpose**: Answer "What acceleration would occur if motion FROZE?"
+
+        **Physics**: With v=0, acceleration has no velocity-dependent terms:
+            q̈_ZVCF = M(q)⁻¹ · (-g(q))
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        if not self.plant_context:
+            return np.array([])
+
+        # Save current state
+        saved_q = self.plant.GetPositions(self.plant_context)
+        saved_v = self.plant.GetVelocities(self.plant_context)
+
+        try:
+            # Set to counterfactual configuration with v=0
+            self.plant.SetPositions(self.plant_context, q)
+            self.plant.SetVelocities(self.plant_context, np.zeros_like(saved_v))
+
+            # Compute mass matrix at counterfactual configuration
+            M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+            # With v=0, bias = g(q) only (no Coriolis terms)
+            # Use gravity forces directly
+            g = self.plant.CalcGravityGeneralizedForces(self.plant_context)
+
+            # Canonical ZVCF: M*a + g = 0 → a = M^-1 * (-g)
+            # Note: g is the gravity force vector, not gravity generalized force
+            # CalcGravityGeneralizedForces returns -g in the equation M*a + c + g = τ
+            a_zvcf = np.linalg.solve(M, -g)
+
+            return cast(np.ndarray, a_zvcf)
+
+        finally:
+            # Restore original state
+            self.plant.SetPositions(self.plant_context, saved_q)
+            self.plant.SetVelocities(self.plant_context, saved_v)

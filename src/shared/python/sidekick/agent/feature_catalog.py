@@ -1,0 +1,213 @@
+"""Feature catalog — Sidekick's machine-readable self-knowledge index.
+
+Epic #5967 / sub-issue #5970 (S1).
+
+The catalog answers three questions a planner or chat turn keeps asking:
+
+1. "What features do you have?"          → :func:`build_feature_catalog`
+2. "Tell me about feature X."            → :func:`lookup_feature`
+3. "Which features are about <topic>?"   → :func:`search_features`
+
+All entries are sourced from first-party code (the calculator and
+process-calculator packages, the subtab help map, the workflow registry,
+the theme tokens). Nothing here invents capabilities; the catalog is a
+lens onto existing modules.
+
+Design notes:
+
+* **DbC.** :class:`FeatureEntry` is frozen and validates its own
+  invariants in ``__post_init__``. :func:`lookup_feature` raises
+  :class:`KeyError` with suggestions on a miss — never returns ``None``.
+* **LOD.** Callers see three module-level functions; the internal indices
+  are not exposed.
+* **DRY.** Subtab summaries are read from
+  :data:`sidekick.ui.tools_sidebar.help_content.DEFAULT_SIDEBAR_TAB_HELP`
+  rather than recopied. Calculator and process-calculator entries are
+  discovered via :mod:`pkgutil` introspection of the existing packages.
+* **Headless-safe.** No PyQt6 imports. No filesystem reads beyond what
+  the standard ``importlib`` machinery does.
+* **Error handling.** Per-source discovery wraps every import-time
+  failure (third-party module ``__init__`` code raises an unbounded
+  set of exception types — narrow tuples drop real failures and the
+  catalog ends up advertising broken module paths). See the baseline
+  bump justification in ``scripts/config/error_handling_baseline.json``.
+"""
+
+from __future__ import annotations
+
+import difflib
+import logging
+from collections.abc import Mapping, Sequence
+from types import MappingProxyType
+
+from .feature_discovery import discover_sources
+from .feature_types import FeatureEntry, FeatureKind
+
+logger = logging.getLogger(__name__)
+
+__all__ = [
+    "FeatureEntry",
+    "FeatureKind",
+    "build_feature_catalog",
+    "lookup_feature",
+    "search_features",
+]
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+_CATALOG_CACHE: Mapping[str, FeatureEntry] | None = None
+
+
+def build_feature_catalog(*, force_refresh: bool = False) -> Mapping[str, FeatureEntry]:
+    """Construct (or return a cached copy of) the catalog.
+
+    Postconditions:
+
+    * Non-empty mapping keyed by ``feature_id``.
+    * Insertion order is deterministic (sorted by ``feature_id``).
+    * Every value is a :class:`FeatureEntry` whose ``module`` is importable
+      from the configured Python path.
+
+    Discovery imports a wide tree of first-party modules (calculators,
+    process calculators, theme tokens) and reads ``help_content.py`` via
+    AST. On a fresh interpreter that walk can be slow because each
+    leaf-module import drags in numpy/pandas/scipy/matplotlib. We cache
+    the result so subsequent calls in the same process are O(1).
+    Tests that want a fresh build can pass ``force_refresh=True``.
+
+    Failures in individual discovery sources are logged and skipped —
+    they never abort catalog construction. This is the only place in
+    the agent layer that swallows discovery errors.
+    """
+    global _CATALOG_CACHE
+    if _CATALOG_CACHE is not None and not force_refresh:
+        return _CATALOG_CACHE
+
+    entries: dict[str, FeatureEntry] = {}
+
+    for source in discover_sources():
+        try:
+            for entry in source():
+                # Last-writer-wins is intentional: a richer source (e.g.
+                # the help map) can override a thinner one (introspection).
+                entries[entry.feature_id] = entry
+        except Exception as exc:  # noqa: BLE001 - discovery sources may raise
+            # any exception type from third-party imports
+            logger.debug(
+                "feature_catalog: discovery source %s failed: %s",
+                source.__name__,
+                exc,
+            )
+
+    # Deterministic ordering so downstream tests and prompt generators do
+    # not flap.
+    ordered = dict(sorted(entries.items(), key=lambda kv: kv[0]))
+    _CATALOG_CACHE = MappingProxyType(ordered)
+    return _CATALOG_CACHE
+
+
+def lookup_feature(feature_id: str) -> FeatureEntry:
+    """Return the entry for ``feature_id`` or raise :class:`KeyError`.
+
+    Args:
+        feature_id: A non-empty feature id, e.g. ``"subtab.calculator"``.
+
+    Raises:
+        ValueError: If ``feature_id`` is empty.
+        KeyError: If no such feature exists. The message lists the three
+            closest matches (Levenshtein-ish via :mod:`difflib`).
+    """
+    if not feature_id:
+        raise ValueError("feature_id must be a non-empty string")
+    catalog = build_feature_catalog()
+    entry = catalog.get(feature_id)
+    if entry is None:
+        suggestions = difflib.get_close_matches(
+            feature_id, catalog.keys(), n=3, cutoff=0.4
+        )
+        hint = f" Did you mean: {', '.join(suggestions)}?" if suggestions else ""
+        raise KeyError(f"unknown feature_id {feature_id!r}.{hint}")
+    # Postcondition: returned entry's id matches the request.
+    assert entry.feature_id == feature_id  # noqa: S101 - DbC invariant
+    return entry
+
+
+def search_features(query: str, *, limit: int = 5) -> tuple[FeatureEntry, ...]:
+    """Token-overlap relevance search across feature_id + title + summary.
+
+    No LLM call. Deterministic, fast, and good enough for chat hints.
+
+    Args:
+        query: A non-empty (after stripping) search string.
+        limit: Maximum number of entries to return. Must be positive.
+
+    Returns:
+        Tuple of entries sorted by descending relevance, capped at
+        ``limit``. Empty tuple when nothing matches.
+
+    Raises:
+        ValueError: If ``query`` is blank or ``limit`` is non-positive.
+    """
+    if not query or not query.strip():
+        raise ValueError("query must be a non-blank string")
+    if limit <= 0:
+        raise ValueError(f"limit must be positive, got {limit}")
+
+    tokens = _tokenise(query)
+    if not tokens:
+        return ()
+
+    catalog = build_feature_catalog()
+    scored: list[tuple[int, str, FeatureEntry]] = []
+    for entry in catalog.values():
+        score = _score(entry, tokens)
+        if score > 0:
+            # Tie-break on feature_id so order is deterministic.
+            scored.append((-score, entry.feature_id, entry))
+
+    scored.sort()
+    return tuple(entry for _, _, entry in scored[:limit])
+
+
+# ---------------------------------------------------------------------------
+# Internals
+# ---------------------------------------------------------------------------
+
+
+def _tokenise(text: str) -> list[str]:
+    """Lowercase, split on non-alphanumeric, drop empties."""
+    out: list[str] = []
+    buf: list[str] = []
+    for ch in text.lower():
+        if ch.isalnum():
+            buf.append(ch)
+        elif buf:
+            out.append("".join(buf))
+            buf.clear()
+    if buf:
+        out.append("".join(buf))
+    return out
+
+
+def _score(entry: FeatureEntry, tokens: Sequence[str]) -> int:
+    """Token-overlap score across feature_id + title + summary.
+
+    Title hits weigh more than summary; id hits weigh most.
+    """
+    id_tokens = set(_tokenise(entry.feature_id))
+    title_tokens = set(_tokenise(entry.title))
+    summary_tokens = set(_tokenise(entry.summary))
+
+    score = 0
+    for token in tokens:
+        if token in id_tokens:
+            score += 4
+        if token in title_tokens:
+            score += 2
+        if token in summary_tokens:
+            score += 1
+    return score

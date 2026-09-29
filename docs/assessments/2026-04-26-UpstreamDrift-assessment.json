@@ -1,0 +1,1380 @@
+{
+  "meta": {
+    "repo": "D-sorganization/UpstreamDrift",
+    "date": "2026-04-26",
+    "head_short": "1fb9f04a1",
+    "head_long": "1fb9f04a14caa2167fa6803f90dbf53a3aedbd58",
+    "branch": "code-quality-review-6432541943834702653",
+    "assessor": "pragmatic-ao-assessment-agent"
+  },
+  "scores": {
+    "A": 8,
+    "B": 7,
+    "C": 5,
+    "D": 6,
+    "E": 5,
+    "F": 0,
+    "G": 6,
+    "H": 4,
+    "I": 7,
+    "J": 3,
+    "K": 3,
+    "L": 4,
+    "M": 5,
+    "N": 8,
+    "O": 7
+  },
+  "overall": 5.2,
+  "findings": [
+    {
+      "criterion": "C",
+      "severity": "P2",
+      "principle": "PP7",
+      "text": "No .coverage file found"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in server.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in cross_engine_dashboard.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in docker_manager.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in golf_launcher.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in help_dialogs.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in launcher_layout_manager.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in launcher_model_handlers.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in launcher_process_manager.py"
+    },
+    {
+      "criterion": "D",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "try/except returning None without logging in model_registry.py"
+    },
+    {
+      "criterion": "E",
+      "severity": "P2",
+      "principle": "PP4",
+      "text": "No benchmarks/ directory"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file diagnostics.py (622 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file cross_engine_dashboard.py (740 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file golf_launcher.py (783 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file launcher_process_manager.py (865 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file launcher_simulation.py (639 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file launcher_ui_setup.py (556 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file settings_dialog.py (574 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file shot_tracer.py (517 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mesh_loader.py (850 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file skeleton_mapper.py (832 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file visualization.py (576 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file vr_interaction.py (601 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file component_library.py (797 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file joint_manipulator.py (833 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file main_window.py (797 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mesh_browser.py (817 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file model_library.py (1030 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file model_loader_dialog.py (1059 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file segment_panel.py (643 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file urdf_builder.py (712 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file urdf_code_editor.py (833 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file urdf_editor_window.py (583 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file visualization_widget.py (688 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file _mujoco_viewer_backend.py (530 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file analyzer.py (762 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file cli_utils.py (628 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file control_interface.py (689 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file sample_tools.py (623 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file tool_registry.py (549 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file types.py (528 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file workflow_engine.py (675 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file nonlinear_dynamics.py (684 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file reporting.py (557 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file swing_plane_visualization.py (505 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file club_data_tab.py (578 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file display.py (510 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file loader.py (668 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file targets.py (532 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file environment.py (584 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file handedness_support.py (536 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file model_pack_manifest.py (617 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file datetime_utils.py (502 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file error_utils.py (752 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file type_utils.py (580 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file advanced_analysis.py (756 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file widgets.py (984 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file export.py (539 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file swing_capture_import.py (752 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file processor.py (532 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file base_physics_engine.py (558 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file checkpoint.py (664 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file engine_probes.py (731 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file launcher.py (686 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file help_content.py (574 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file help_system.py (795 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file plot_generator.py (679 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file video_pose_pipeline.py (635 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file viewpoint_controls.py (645 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file injury_risk.py (622 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file joint_stress.py (514 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file spinal_load_analysis.py (760 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file logging_config.py (632 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file swing_optimizer.py (502 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file cross_engine_perturbation.py (505 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file native_backend.py (761 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file pendulum_perturbation_analyzer.py (609 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file physics_golfer_jax.py (724 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file physics_triple.py (616 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file cross_engine_runner.py (546 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file perturbation_base.py (564 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file aerodynamics.py (1123 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file flight_models.py (616 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file ground_reaction_forces.py (646 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file terrain_mixin.py (527 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file terrain_representation.py (1272 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file _impact_physics.py (661 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file core.py (529 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file matplotlib_renderer.py (614 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file themes.py (597 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file library.py (685 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file widgets.py (825 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file pose6dof.py (1229 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file colors.py (561 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file stylesheets.py (614 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file theme_manager.py (585 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file simulation_gui_base.py (541 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file comparative_plotting.py (594 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file data_fitting.py (1065 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file core.py (666 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file state_manager.py (579 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file calculator_state_mixin.py (814 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file data_processor_widget.py (606 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file unit_converter_widget.py (588 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file tables.py (585 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file electrical_model.py (534 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file utils.py (531 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file signal_toolkit_processing_mixin.py (808 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file signal_toolkit_ui_mixin.py (829 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file theme_manager_dialog.py (525 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file test_plot_theme.py (729 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file kinematics.py (668 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file kinetics.py (830 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file signal.py (512 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file base_pendulum_widget.py (687 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file controls_widget_golfer.py (630 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file main_window.py (615 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file panel_builders.py (952 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file perturbation_panel.py (569 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file swing_comparison_dialog.py (535 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file rest_api.py (620 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file manual_builder.py (598 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file parametric_builder.py (682 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file main.py (823 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mjcf_converter.py (649 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file urdf_parser.py (712 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file physics_validation.py (585 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file types.py (744 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file validation.py (530 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file editor_modifications.py (801 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file frankenstein_editor.py (749 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file text_editor.py (516 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file model_explorer.py (730 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file calculator.py (631 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file repository.py (552 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mdl_parser.py (631 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file anthropometry.py (642 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file segment_definitions.py (759 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mesh_generator_makehuman.py (707 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mesh_generator_smplx.py (713 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file _mesh_makehuman.py (705 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file _mesh_smplx.py (688 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file api.py (722 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file inertia_calculator.py (640 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file mesh_processor.py (823 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file test_processor.py (534 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file core.py (553 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file anthropic_adapter.py (550 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file ollama_adapter.py (514 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file openai_adapter.py (529 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file settings_dialog.py (792 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file footstep_planner.py (623 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file noise_models.py (510 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file collision_checker.py (540 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file rrt_star.py (542 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file wbc_controller.py (829 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file objects.py (694 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file engine.py (664 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file controller.py (596 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file coordination.py (646 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file retargeter.py (718 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file manipulation_envs.py (564 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file physics.py (552 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file state.py (541 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file Motion_Capture_Plotter.py (1442 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file motion_capture_plotter_visualization.py (730 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file golf_camera_system.py (1018 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file golf_visualizer_renderer.py (727 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file golf_gui_tabs.py (611 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file golf_opengl_renderer.py (1020 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file wiffle_data_loader.py (716 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file head_models.py (525 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file ball_roll_physics.py (625 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file dual_hand_ik_solver.py (560 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file motion_visualizer.py (719 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file pose_editor_tab.py (816 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file main_window.py (531 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file urdf_exporter.py (541 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file opensim_physics_engine.py (792 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file muscle_analysis.py (564 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file humanoid_launcher_analysis.py (501 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file advanced_gui_methods.py (590 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file advanced_kinematics.py (625 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file biomechanics.py (730 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file examples_chaotic_pendulum.py (706 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file grip_modelling_tab.py (888 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file meshcat_adapter.py (506 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file motion_optimization.py (602 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file pinocchio_interface.py (616 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file polynomial_generator.py (670 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file power_flow.py (545 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file recording_library.py (773 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file sim_rendering_mixin.py (715 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file sim_widget.py (998 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file parallel_mechanisms.py (503 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file aba.py (518 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file main_window.py (544 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file humanoid_config_tab.py (761 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file manipulation_tab.py (784 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file physics_tab.py (513 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file visualization_tab.py (897 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file deepmind_control_suite_MuJoCo_GUI.py (950 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file sim.py (753 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file visualization.py (510 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file drake_golf_model.py (828 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file drake_gui_ui.py (542 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file drake_ui_mixin.py (643 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file drake_visualization_mixin.py (740 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file pose_editor_tab.py (843 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file double_pendulum.py (586 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file triple_pendulum.py (508 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file double_pendulum_gui.py (916 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file pendulum_pyqt_app.py (580 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file controller.py (533 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file security.py (505 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file requests.py (511 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file responses.py (659 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file analysis_tools.py (622 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P0",
+      "principle": "PP1",
+      "text": "God file physics.py (625 lines) exceeds 500-line soft cap"
+    },
+    {
+      "criterion": "F",
+      "severity": "P2",
+      "principle": "PP1",
+      "text": "Many magic float literals (85) in sample"
+    },
+    {
+      "criterion": "H",
+      "severity": "P0",
+      "principle": "PP6",
+      "text": "Possible hard-coded credentials in source"
+    },
+    {
+      "criterion": "J",
+      "severity": "P2",
+      "principle": "PP6",
+      "text": "print() statements found (use logging)"
+    },
+    {
+      "criterion": "K",
+      "severity": "P1",
+      "principle": "PP8",
+      "text": "20 TODO/FIXME/XXX comments -- link to issues"
+    },
+    {
+      "criterion": "M",
+      "severity": "P2",
+      "principle": "PP3",
+      "text": "No deploy/ directory"
+    },
+    {
+      "criterion": "M",
+      "severity": "P2",
+      "principle": "PP5",
+      "text": "No VERSION file"
+    }
+  ]
+}

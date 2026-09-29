@@ -1,0 +1,641 @@
+# Camera Rig Capture
+
+For a guided route through the app, see [Guided Swing Capture](capture_wizard.md).
+Create reusable recording plans with the native [Camera Setup](camera_setup.md) editor.
+
+Version: 1.0.0
+
+Issues: #9590 (child of #9422); Tools #4706
+
+`motion_capture.rig` is UpstreamDrift's orchestration layer for a multi-camera
+USB rig: it declares an experimental condition as a _rig plan_, checks that
+plan against the live USB topology, captures every planned camera together,
+and reports what each camera actually delivered. It owns no camera or capture
+contract; those belong to Tools `sidekick.lab.mocap` under
+[ADR-0041](../adr/0041-markerless-mocap-consumer-authority.md) and are
+consumed through `tools_bridge` when the pinned Tools release ships them.
+
+The constraints it encodes were measured in the
+[USB camera rig bring-up](usb_camera_rig_bringup.md).
+
+## Rig Plan
+
+A plan binds named views to camera _identities_ and capture settings. Identity
+is the USB serial, or the port-path fallback for units that expose none; it is
+never an OpenCV index, which reshuffles on replug and would silently swap views.
+
+```json
+{
+  "schema_version": "rig-plan/1.0.0",
+  "name": "three-view-driver",
+  "cameras": [
+    { "view": "face_on", "serial": "2605160001" },
+    { "view": "down_line", "serial": "2601240001", "mode": { "fps": 60 } },
+    {
+      "view": "overhead",
+      "unserialized": true,
+      "controls": { "exposure": -6, "auto_exposure": false }
+    }
+  ],
+  "notes": "Sonnet root ports 4/5/6; TS4 free."
+}
+```
+
+### Naming the Cameras
+
+The durable name of a camera is the **view** it is bound to; the binding is
+what follows the unit around. Two of the three ELP units expose a USB serial
+(`2605160001`, `2601240001`): Windows keys their device instance on it, so a
+serial binding recognises the unit on any jack of any dock. The third unit
+reports no serial. Bind it with `"unserialized": true`: `plan-check` resolves
+it by elimination (the one enumerated ELP without a serial), so it also keeps
+its view when moved. If a second serial-less unit ever appears the binding is
+reported ambiguous rather than guessed, and a `port_path` binding is the
+fallback for that case. Label the camera bodies with their serial (or "no
+serial") and the view name from the plan, and the label and the software agree.
+
+Changing an experimental condition means saving a new plan file, not editing
+code: resolution, frame rate, exposure and gain are per camera, and the plan
+travels with the session it produced. `RigPlan.load` rejects other schema
+versions rather than guessing.
+
+## Plan Check
+
+```bash
+python3 -m motion_capture.rig plan-check --plan plans/three-view-driver.json
+```
+
+Walks every camera's hub chain through Windows PnP (one enumeration plus one
+bulk property query per hub tier, about 20 s for three cameras), matches the
+plan by
+identity, and reports missing cameras, cameras that share a USB 2.0 root port
+(only one of them can stream), and enumerated cameras the plan does not claim.
+Exit 0 means the plan is realizable on this host as wired.
+
+## Capture Session
+
+```bash
+python3 -m motion_capture.rig capture --plan plans/three-view-driver.json \
+  --duration 8 --out sessions/2026-09-06T14
+```
+
+Opens each camera in plan order (pausing between opens, because Media
+Foundation tears down asynchronously), starts them behind one barrier so their
+isochronous reservations compete for real, and measures per camera: achieved
+frames per second, failed reads, worst inter-frame gap, and reopens. Every
+frame is stamped in the `host_monotonic_ns` clock domain; arrival time is not
+exposure time, and the manifest's `timing` block is where the sync stage will
+record how they relate.
+
+The manifest names one outcome using the acceptance-program vocabulary:
+
+| Outcome       | Meaning                                                             | Exit |
+| ------------- | ------------------------------------------------------------------- | ---- |
+| `supported`   | every camera reached at least 90 % of its requested rate            | 0    |
+| `degraded`    | every camera streamed, at least one below 90 %                      | 1    |
+| `blocked`     | at least one camera opened but delivered nothing, or failed to open | 1    |
+| `unavailable` | no camera delivered frames                                          | 2    |
+
+A camera that stops delivering is reopened once (a lost reservation is
+permanent on the old handle); if it still delivers nothing, the reason is
+recorded and the outcome is `blocked`, never a silently shorter session.
+
+## Recording
+
+Decoding MJPEG to BGR costs about two cores per 1920x1200 at 60 fps stream;
+copying the compressed stream to disk costs almost nothing. `recorder.py`
+wraps `ffmpeg -f dshow ... -c:v copy` through `core.process_safety.managed_popen`
+and addresses each camera by its DirectShow device path
+(`recorder.dshow_device_ref`), which is what keeps three identically named
+units distinct. Windows grants one process exclusive access to a camera, so a
+session either observes through frame sources or records through recorders,
+not both on the same camera.
+
+## Layout Model
+
+Multiview pictures (live preview, playback and composite export) are all
+rendered through one pure model, `tools/capture_rig/layout_model.py` (#9810).
+A `LayoutSpec` (JSON schema `rig-layout/1.0.0`) is a named `rows`x`cols` grid
+(1..4 each, so up to 16 tiles) on a canvas; every `Tile` names a `source`
+(`live`/`recorded`/`overlay` of a view plus optional variants, or `empty`), a
+`cell` (row, col, rowspan, colspan; tiles may not overlap), `rotation`
+(0/90/180/270), `flip_h`/`flip_v`, a normalised `crop`, `fit`
+(`fit` letterboxes, `fill` centre-crops, `stretch`) and an optional label.
+`to_dict()`/`from_dict()` round-trip it and name the offending field on a
+`ValueError`; `with_tile`/`without_tile`/`move_tile` return new specs.
+`compose(frames, spec, size, palette)` draws a mapping of BGR frames (keyed by
+`SourceRef.key`, e.g. `live:face_on`) into one image with theme-derived
+`Palette` colours; missing sources show a placeholder. Built-in presets:
+`single`, `side_by_side`, `three_across`, `two_by_two`, `three_by_three`,
+`four_by_four`, `primary_plus_strip`.
+
+`layout_presets.LayoutStore` (#9811) saves named layouts with a provenance
+stamp in two scopes: user (`<AppConfigLocation>/UpstreamDrift/capture_rig/layouts/`)
+and session (`<session>/layouts/`, so a layout travels with a take); built-in
+presets appear read-only in `list()`.
+
+### Layout Editor
+
+`tools/capture_rig/layout_editor.LayoutEditor` (#9812) is the interactive
+front end of the layout model: grid spinners (up to 4x4) and a preset menu
+(built-ins plus the layouts in the user and session scopes of `LayoutStore`),
+a composed thumbnail of the whole layout drawn through the same `compose()`
+the preview and export use, and per-tile controls: source, rotate, flip,
+crop (switch _Crop_ on and drag a rectangle over the tile), fit, label and
+span (+/- row and column). Click a tile to select it; drag it onto another
+cell to move it (the two swap). _Save as..._, _Load_ and _Delete_ go through
+the store; _Undo_/_Redo_ keep the last 20 edits. The widget emits
+`layout_changed(LayoutSpec)` once per edit; frames for the thumbnails come
+from an injected `frame_provider(SourceRef)`; every control's tooltip says
+what it does and, when grey, why.
+
+### Composite Video Export
+
+`rig multipicture --session S --layout NAME|PATH --out X.mp4` writes several
+streams as one video through a layout (`tools/capture_rig/mosaic.py`, #9815).
+`--layout` is a built-in preset (filled with the session's playable views in
+plan order), a layout saved in the session then the user scope of
+`LayoutStore`, or a path to a `rig-layout/1.0.0` JSON file. `recorded` tiles
+show the view's playable file; `overlay` tiles draw the observation set
+(`--set`, default `observations`) and the 3-D tracks of `--variants` on it.
+Sources are synchronised by frame index plus the per-view offsets of the
+manifest's strobe `timing` block; a shorter source holds its last frame.
+`--from/--to` bound the frame range, `--size WxH` sets the canvas, `--speed`
+is a playback-rate change (every frame kept, fps scaled: 0.5 halves the fps).
+`X.json` beside the video records the layout, sources (file, fps, offset),
+frame range, speed and the standard provenance block. `compare-takes` stitches
+through the same compositor. The tile's _Export multiview_ button exports
+through the live pane's chosen layout (#9813).
+
+Measured on the lab's three-camera rig, with both composite figures and the
+recorder's frame counts:
+[`evidence/capture_rig_multiview.md`](evidence/capture_rig_multiview.md).
+
+## Live Preview
+
+_Preview cameras_ opens every planned view through the same camera binding
+the recorder uses (`src/motion_capture/rig/binding.py`) and composites the
+latest frame of every view into one canvas above the player (#9813), one
+worker thread per camera, refreshed at up to 15 Hz. The plan path is prefilled with the lab plan and the session folder
+with a fresh `sessions/<timestamp>-take`, so _Record_ works out of the box:
+pressing it releases the cameras (ffmpeg needs the devices), runs the
+recorder, loads the take into the player and resumes the preview. A plan that
+cannot be realised on this machine is reported on the preview's status line
+rather than raised.
+
+### Multiview Live and Playback
+
+Both viewing panes are drawn through a `LayoutSpec` (#9813, #9814). The
+picker above each canvas lists the built-in presets and every saved layout;
+_Edit..._ opens the layout editor beside it, with live thumbnails, and each
+edit applies as you make it. A view that the layout does not show is still
+captured, and the same view may appear twice (full plus a cropped detail).
+The chosen layout name is saved with the pane arrangement, so both come back
+on the next start.
+
+Playback composites several of the session's sources at once: `recorded`
+tiles show the raw recording (or its proxy) and `overlay` tiles the same
+footage with the detector's pose and the ticked variants' models drawn on it,
+so raw and overlay of one view can sit side by side. Frame _k_ is the same
+instant in every tile — when the manifest carries a strobe-alignment block
+each reader is shifted by its whole-frame offset. Scrubbing, play/pause,
+speed, single-frame stepping and _Export PNG..._ (the canvas exactly as shown)
+sit under the canvas.
+
+### Panes, Layouts and Recording Controls
+
+The **live view is the middle of the tile** and every control sits in a dock
+around it (#9846, #9847). The centre holds the preview canvas with the record
+transport under it — the thing you actually watch — and it keeps the spare
+width of the window; the **Workflow** rail and step details are docked on the
+left, **Settings** (Capture / Process / Match) under them, **Playback** and
+**Results** tabbed on the right, and **Actions** across the bottom. Before
+this the controls were the central widget and Qt squeezed the video docks to
+68 px each; now the video is the widest thing on screen at any window size,
+and the whole tile can be made about 420 px wide instead of 3276 px.
+
+When the window width falls below 1400 px, the widget automatically engages
+**compact mode** (`src/tools/capture_rig/responsive.py`): the Workflow and Settings
+docks tabify into a single 240 px column on the left, keeping the central live
+preview dominant (> 50% of window width, 656 px at 1280x800) with zero horizontal
+scrollbar. At 1400 px and wider, **roomy mode** restores the dual-column left
+dock structure.
+
+Each dock behaves like a pane: drag its title bar to another edge, tear it off
+to float it (onto a second monitor if you like), tab two together, or close
+one. Every dock scrolls when its content is larger than the space it has, so
+the window never grows past the screen. **Layout** (top right) saves the
+current arrangement under a name, loads or deletes a saved one, and **Reset
+layout** returns to the default with every pane shown and the drawers shut.
+The last arrangement is restored on the next start; an arrangement saved by an
+older version of the tile names docks that no longer exist, so it is declined
+and the default is used instead of half-restoring it.
+
+The **log is a drawer**, not a pane. The command output is a dock tabbed
+behind **Actions**, closed at start and opened by the **Log** button in the
+header — so it occupies no height of its own and can never take space from the
+video, which is what it used to do with a layout stretch of `1`.
+
+Measured before/after metrics and visual layout captures:
+[`evidence/capture_rig_responsive_evidence.md`](evidence/capture_rig_responsive_evidence.md).
+
+### Appearance
+
+The tile follows the application theme (#9816). Its header is one toolbar:
+the session line on the left, then a status strip of three chips (cameras
+bound, recorder state with the live REC readout, and the outcome of the last
+take) and the **Layout** bar on the right. The action buttons are grouped by
+workflow step, each group opening with a label naming the step it belongs to,
+so the grid reads in the same order as the Workflow rail. The groups sit in a
+wrapping (flow) layout (`src/tools/capture_rig/flow_layout.py`, #9844) — as
+do the header, the status chips, the layout bar and the record transport
+(#9846), and long text elides rather than widening the tile
+(`src/tools/capture_rig/labels.py`): they
+reflow onto as many rows as the pane is wide enough for, and a section label
+always opens the row its first button starts on, so the grid never sets a
+minimum width wider than a single button and the tile can be made narrow
+enough for a laptop panel. Every colour and style comes
+from `src/tools/capture_rig/styling.py`, which composes them from the active
+palette and the fleet `Styles` constants: nothing in the tile names a colour,
+spacing comes from `LayoutMetrics`, and switching theme (standalone window or
+embedded in the launcher alike) restyles the header, chips, preview tiles and
+the recording badge immediately. `tests/tools/capture_rig/test_theme_compliance.py`
+fails the build on a literal colour or an ad-hoc stylesheet string in the package.
+
+The live view opens with the tile. Under the tiles sits a transport strip:
+
+- **Record / Stop**: one button; during the countdown it reads _Cancel_.
+- **Take length**: 5 / 10 / 15 / 30 s presets or a custom spinner.
+- **Countdown**: none, 3, 5 or 10 s between pressing Record and the recorder
+  starting, so you can walk to address.
+- **REC readout**: a blinking red indicator with elapsed / total time and a
+  progress bar; the same `● REC 00:04 / 00:10` badge is stamped on every tile.
+
+A camera cannot be opened twice, so during a take the recorder itself keeps the
+view alive: with `--live-preview DIR` each ffmpeg process also decodes its stream at quarter
+resolution and rewrites `DIR/<view>.jpg` eight times a second (atomically), and the
+tile shows those snapshots until the take is written, then returns to the
+direct preview. **Stop** ends a take early through `--stop-file PATH`: the
+recorder polls for the file, stops every camera together and removes it.
+
+## Recording a Session
+
+```bash
+python3 -m motion_capture.rig record --plan plans/three-view-driver.json   --duration 10 --out sessions/2026-09-06T14-record
+```
+
+Enumerates the cameras, checks the plan, resolves each planned camera's
+DirectShow device path, and stream-copies its compressed MJPEG to
+`<out>/<view>_<identity>.mkv` for the requested duration (issue #9600). The
+result is a **session bundle**: `plan.json` (the plan as recorded),
+`recordings.json` (per view: file, bytes, recorder exit code, requested mode)
+and `session_manifest.json`, whose outcome reuses the capture vocabulary — a
+view whose recorder failed or wrote nothing makes the session `blocked`, never
+a quietly shorter dataset. `--dry-run` writes the bundle without touching a
+camera and is what the tests exercise.
+
+`--mode WxH@FPS[:FOURCC]` applies one capture mode to every selected view and
+`--views a,b` restricts the run to a subset of the plan (plan order); both
+derive a new plan whose name records the overrides, and both are accepted by
+`plan-check`, `capture` and `record`. `recordings.json` also carries
+`recorder_note` (ffmpeg's last stderr lines, kept when a recorder failed or
+delivered nothing) and `recorder_wall_s` (host seconds the recorder ran). A
+recorder that exits 0 but decodes zero frames makes the session `blocked`.
+
+## Session Check
+
+```bash
+python3 -m motion_capture.rig session-check --session sessions/2026-09-06T14-record
+```
+
+Validates a bundle without opening any video: the three JSON files parse
+against their schemas, every plan view has a recording entry, every successful
+entry's file exists with the indexed size, and the manifest outcome is the one
+the recordings imply. Exit 0 when sound. Later stages (ingest, alignment,
+export) read bundles, so this is the gate between "the cameras ran" and "this
+session can be trusted".
+
+## Proxies
+
+```bash
+python3 -m motion_capture.rig proxy --session sessions/<date>-record [--encoder libx264|h264_nvenc|h264_mf] [--crf 18]
+```
+
+Writes a browser-playable H.264/yuv420p `.mp4` beside every usable recording
+and `proxies.json` (encoder, exit code, bytes, reason). Proxies exist for the
+web players; ingest and session-check never read them.
+
+## Reconstruct
+
+```bash
+python3 -m motion_capture.rig reconstruct --session S --cameras cameras.json --anchor neck=0.53
+```
+
+Cleans the ingested views with the dynamics prior and jointly fits camera
+placement, 3-D joints and bone lengths, starting from the given camera records
+(a previous `reconstruction.json` works) or, with `--intrinsics` on a first
+take, from a placement initialised from the golfer's joints. See
+[Self-Calibrating Markerless Pipeline](self_calibrating_pipeline.md).
+
+## Swing Selection and Capture Library
+
+Use **Library** in the Capture Rig header to manage captures. **Add session folder**
+registers an existing session; **Import videos** starts the normal video import into
+a new library capture. Select a row to edit its title and multiline swing notes.
+Save notes before opening another capture. Search matches both titles and notes.
+**Open capture** returns to the rig; **Edit swing** opens the selection editor.
+The header also offers **Edit swing** for the currently loaded take.
+
+In the editor, pick a camera view, scrub to the swing and use **Mark in** and
+**Mark out**. Frame numbers start at zero and both endpoints are included. Drag
+between corners to crop around the player, or enter exact source-pixel coordinates.
+**Play selection** previews the selected interval. **Reset crop** restores the full
+image; **Reset this view** restores its complete recording. **Save selection** stores
+a reversible recipe in `swing_edits.json`. Ingest uses that recipe while retaining
+original camera coordinates and timestamps. Original recordings remain intact.
+An already analyzed take requires an editable copy so its old results remain valid.
+Keep an address hold at the beginning and the finish at the end for analysis.
+**Export swing** saves the selection and writes a separate MP4 or AVI in a background
+worker, with cancellation and a provenance JSON beside it. This coaching export
+contains video only; original files retain their audio. Choose a new filename.
+The export retains the crop exactly; an odd width/height gets one replicated edge
+pixel as encoder padding, recorded in provenance. Main multiview playback continues
+to show the original synchronized scene; selection playback is in the editor.
+
+The library's **Archive** action hides a capture from the active list; use the
+archived filter and **Restore** to bring it back. Archiving does not free disk space.
+Session storage and linked media are reported separately. **Open folder** provides
+access to files. **Rename recording** updates the recording index and is available
+only for owned, unprocessed files; capture titles and notes can be changed separately.
+Editable copies reference original videos, so those files must remain available.
+Changing **Library folder** selects a different catalog and does not move media.
+
+## Ingest
+
+```bash
+python3 -m motion_capture.rig ingest --session sessions/<date>-record
+```
+
+Runs the registered pose estimator (`mediapipe` by default — the Tasks-API
+`MediaPipeEstimator`, issue #9602) over every successful recording in a bundle
+and writes `observations/<view>.json`: one `KeypointObservation` per frame in
+UpstreamDrift's existing observation records (pixel coordinates, per-keypoint
+confidence, `time_s` from the recording's frame index and rate), the
+`DetectorLayout` naming the keypoint order, provenance (estimator, model path
+and variant, mediapipe version, camera identity, requested mode) and the
+session's `timing` block copied verbatim. `observations.json` indexes the
+views; a view whose recording failed is `unavailable` with the reason rather
+than absent. Single-camera depth stays model-conditioned and is not written;
+`CanonicalObservations` (which needs camera calibrations) is assembled by the
+calibration stage, not here.
+
+When the session was captured with `--timing` (issue #9603), each row also
+carries `time_ref_s`, `time_ref_uncertainty_s` and `time_ref_source`: the same
+instant expressed in the reference view's arrival clock through the strobe
+offset, with the quadrature uncertainty. The per-view `time_s` is never
+rewritten. `timing_report.json` restates each view's offset, uncertainty and
+rate deviation and adds the skew it is expected to accumulate over its
+recording, which is what tells the reconstruction stage whether one offset per
+session is sufficient.
+
+## Match Tab, Overlays and Provenance
+
+The _Match_ tab names a variant, ticks the cameras to use and picks the
+observation set and the source (triangulate, or image space with the
+cameras of another variant). _Reconstruct_, _Fit model_, _Kinetics_,
+_Compare models_ and _Export_ all act on that variant. In the player, the
+_Model overlay_ checkboxes draw any registered variants' joints and model on
+the current view (views a variant never used are labelled held out); `rig
+overlay` writes the same as a clip. Clicking a row in any results table
+opens the _Provenance_ tab with the file's lineage down to the recordings
+and the detector plug-in (`rig lineage`).
+
+## Annotate and Edit Points
+
+_Annotate / edit points_ opens a dialog on the player's view. The banner
+names the frame and joint to click; `S` skips an occluded joint, `B` goes
+back, `N` moves to the next frame, `J` jumps, `Q` finishes and saves
+`annotations/<view>.json`. With an observation set selected in the player
+the same dialog edits that set: the detector's points are drawn, a click
+replaces one, `S` rejects it, `A` accepts the frame as detected. `rig
+annotations-to-observations` (with `--merge-with SET` for corrections)
+turns the file into an observation set the pipeline uses like any other.
+
+## Extending the Rig
+
+- **A new camera type** implements the `FrameSource` protocol in `sources.py`:
+  `open(mode, controls)` negotiates and must prove frames arrive, `read()`
+  never blocks forever, `close()` is idempotent. `SyntheticFrameSource` shows
+  the minimum, including fault injection for tests.
+- **A new recording path** implements `Recorder` (`start` / `stop`).
+- **A new condition** is a plan file. Nothing in the package hard-codes the
+  camera count, the resolution, or the views.
+
+## Tools Schema Bridge
+
+`tools_bridge.probe_tools_schema()` reports `unavailable` while the pinned
+Tools family (`shared.python.sidekick.lab.mocap`) does not resolve,
+`incompatible` when it resolves but lacks expected submodules or ships a
+session schema other than the one this adapter maps (`mocap-session/1.0.0`),
+and `ready` otherwise. The result is written into every manifest under
+`tools_schema`.
+
+When the probe is `ready`, `capture` and `record` also write
+`mocap_session.json` beside `session_manifest.json`: the session in the one
+canonical Tools `MocapSessionManifest`, built through the Tools builders and
+serialized by the Tools canonical serializer (#9422). The rig contributes only
+what it knows — plan name and start time as the session identity, each view's
+device identity and serial, the host-monotonic arrival clock, the capture
+method and licence, and the classify reasons as warnings. The world frame is
+the ADR-0041 candidate `affinedrift-world-v1`; it names the convention, not a
+calibration. A session is `finalized` only when the capture was `supported`,
+`--consent-recorded` was given and a calibration id was supplied; otherwise it
+is `incomplete` and the warnings say why. The Tools policy contract decides
+what the recording terms permit — a real `record` take retains raw video, so
+without `--consent-recorded` the export is refused and
+`tools_schema.export` records `rejected` with the Tools reason rather than a
+faked session. Nothing here restates the schema; a pin that ships a different
+one makes the export `unavailable`, not wrong.
+
+`tools_bridge.map_camera_records(manifest, plan)` gives each rig camera as Tools
+records (#9604): the same `CameraIdentity` the export writes, plus a
+`CameraCapabilities` advertising the negotiated mode (the requested mode when a
+camera never negotiated one) as its single resolution, frame rate and pixel
+format. UVC rig cameras declare no shutter kind, no hardware trigger, no device
+clock and no microsecond exposure range, so those are `unknown`, `unsupported`
+(with the reason) and absent rather than guessed. One record per manifest
+camera, in order; an unready schema, an unbound or duplicate view, or a clock
+domain without a Tools `ClockKind` is refused.
+
+## Time Sync
+
+Three cameras on three USB root ports stamp frames in the host's monotonic
+clock at _arrival_. ADR-0041 forbids promoting arrival time to exposure time,
+so `sync.py` never rewrites a frame's timestamp. With `capture --timing` (issue
+#9591) the session records each frame's mean brightness, finds the first frame
+in which a shared strobe becomes visible per camera, and writes a `timing`
+block to the manifest: per view, the offset of its arrival clock from the
+reference view's, the uncertainty (both cameras' frame intervals combined in
+quadrature, because a flash that lands anywhere inside one interval is first
+seen in the next frame), the measured frame interval, and its deviation from
+the nominal rate in parts per million. A view whose strobe is not found, or a
+session whose reference view has none, is reported `unavailable` with the
+reason; nothing is interpolated. The record is evidence for the reconstruction
+stage to apply or reject, never a correction applied to frames.
+
+## Diagnostic Script
+
+`scripts/diagnose_mocap_camera_rig.py` is a thin CLI over this package for
+bring-up: it builds a one-view-per-camera plan from the enumerated topology,
+runs a solo session per camera and one concurrent session, and compares the
+measured streaming count against the topology prediction.
+
+## Coaching References
+
+Open **Library → Draw References**, choose a camera view, or use **Draw References**
+inside **Edit Swing**. Draw a line, arrow, circle, ellipse or rectangle directly on
+the original video. Use Select to pick a stroke; drag it to move, or drag either
+white handle to resize. The reference list can select hidden or overlapping shapes.
+**Add at Centre** and the source-pixel coordinate fields support keyboard-only
+creation and adjustment. Apply commits the coordinate and visibility fields.
+
+Colour and width apply to the selection or the next drawing. Arrow keys nudge a
+selected reference one source pixel (Shift moves ten); Delete removes it. Undo/Redo
+and Ctrl+Z/Ctrl+Shift+Z restore edits, including Clear. Choose the first and last
+visible source frames, or turn Visible off. Source frames are zero-based and both
+bounds are included. A circle keeps equal width and height. These are visual
+coaching guides, not tracked landmarks, measured angles or automatic swing analysis.
+
+Save References writes a separate versioned layer under the session's `coaching/`
+folder, so reopening the session in the library restores it. Save/Discard/Cancel
+protects unfinished work, including Escape. Original video and pose data are not
+rewritten; references may be added to previously analyzed captures.
+
+**Export Still** writes a new lossless PNG of the current frame and a portable JSON
+sidecar. **Export Annotated Swing** uses the saved trim/crop, with progress and
+cancellation. If no selection exists, it exports the full original view. Preview
+shows the original image so the same references remain positioned correctly when
+a crop changes. Both exports draw at source resolution before cropping; sidecars
+retain the layer, original frame coordinates and crop recipe. Video output is
+silent and retains the original source hash. Still sidecars identify the source
+path and original frame/time. Selection handles are editor controls and are not
+exported. Choose new output filenames; existing media/sidecars are never replaced.
+
+Fabric JSON from the Tools web editor is not yet an interchangeable layer. Text,
+freehand and external expert/model projection belong to separate future contracts;
+the advanced reference-projection epic is #9863.
+
+## Expert Reference Imports
+
+Open **Library → Expert References** to manage comparison assets separately from
+player captures. Use **Import motion** for C3D, existing `body_target_json_v1`
+exports or a `marker-trajectory/1.0.0` wrapper around the shared CIR
+`MarkerTrajectory` document. The CIR contains Cartesian marker positions in metres;
+engine animations must export marker trajectories first. Joint angles or a mesh
+alone do not establish a camera-visible motion reference.
+
+Confirm source units, assign the signed source axes that become reference X/Y/Z,
+and review every marker-to-joint name. You may add skeleton connections as one
+`joint name, joint name` pair per line. Canonical body targets already declare
+metres and right-handed Z-up axes. C3D uses the existing Rust-preferred adapter,
+with ezc3d fallback; missing markers are preserved, including entirely missing
+labelled tracks. No gap filling or resampling occurs during reference import.
+
+**Import video** links the original expert recording. Its frame clock is based on
+the reader's nominal frame rate; this import alone does not qualify variable-rate
+timing, another viewpoint or 3D registration. Source SHA-256 fingerprints are saved.
+Titles, lesson notes and archive state reopen from the portable reference catalog
+inside the capture library's `references` folder. Restoring an archive entry does
+not copy or delete source media. Long operations run in a worker; wait for the
+current operation to finish before closing the dialog.
+
+Camera registration, synchronization and comparison exports follow import as
+separate steps of epic #9863; importing an asset does not align it to the player.
+
+## Reference Comparison Timing and Evidence
+
+Open **Library → Compare Reference** and choose the capture camera and expert
+asset. A 3-D layer uses that camera's reconstruction and stored lens distortion;
+its status reads **Camera Projection · Manual Alignment**. Loading a camera
+alone does not establish the expert's placement or measurement accuracy. A 2-D
+expert remains an image reference. Missing camera evidence leaves projection
+unavailable and its reason appears in the status tooltip.
+
+Saved comparisons retain the reference geometry/mapping identity, actual camera
+parameters, clock evidence and visual alignment recipe. Library title/notes
+changes do not invalidate geometry. If camera parameters, geometry or recorded
+clock alignment changed, the workspace offers manual review of the previous placement and events. Saving after review preserves the previous settings beside the active sidecar. Corrupt settings are reported without replacement. Originals remain unchanged.
+
+The backend supports affine offset/rate mapping or paired named events. Every
+event needs a time in both recordings; times increase together and interval
+rates stay between 0.25 and 4. One event aligns that instant while retaining the
+selected rate. Multiple events replace the affine offset with piecewise linear
+alignment. Missing joints remain masked; interpolation spans at most 0.25
+reference seconds by default, with an explicit saved gap allowance for sparse
+sources. Exact source samples remain usable beside long gaps.
+
+Preview and export map original frame time into the recorded scene clock before
+sampling the reference. Without usable recorded timing, the saved clock is
+labelled `nominal-frame-rate-unverified`. Use the Timing tab to edit affine alignment or paired swing events.
+
+## Comparison Preview and Export
+
+The comparison preview follows the saved swing trim and crop. Player pixels,
+detected pose, saved coaching references and the expert layer are composed in
+that order at original resolution, then cropped, padded at odd right/bottom
+edges and stamped with the source frame and scene time. Export Comparison Video
+uses the same composition. Motion opacity blends the projected skeleton; expert
+videos retain their image coverage under the saved homography. The default
+expert placement fits its aspect ratio within the player image. A 2-D alignment
+maps source expert pixels to source player pixels and does not infer a viewpoint.
+
+Choose a new AVI or MP4 destination. Output is silent, retains every selected
+source frame and includes a JSON sidecar with the reference geometry/mapping,
+drawings, registration, camera/clock evidence, selection, output dimensions and
+source hashes. Slow-motion exports change the playback rate without dropping
+frames. The supported output rate is at least one frame per second.
+
+Export verifies all encoded frames and rechecks source and camera evidence before
+publishing. Missing frames, changed linked media, invalid drawings or camera
+changes report a failure and leave the destination unpublished. Cancellation also
+publishes neither file. Comparison preview retains one expert decoder while the
+asset is selected; switching assets or closing releases it.
+
+## Calibrate With Common References
+
+Open **Calibration → Paper / Ruler References…** for capture-owned US Letter,
+A4, yardstick or metre-stick observations. Follow the dialog's Help tab or the
+[common-reference guide](common_reference_calibration.md). Repeated placements
+share fixed camera settings; estimation requires compatible lens profiles,
+identified paper corners and an explicit world anchor. Review the saved fit and
+validation evidence before selecting the camera layout for Match.
+
+## Align an Expert With a Player
+
+Open Capture Library, select a capture and choose Compare Reference, then select
+its camera view and an imported expert. The selected trim, crop and coaching
+references appear in the comparison automatically.
+
+1. In Placement, set model translation in metres, rotation in degrees and model
+   scale, or move/rotate/resize an expert video. Apply the placement to preview it.
+2. In Timing, uncheck Follow Player Clock to scrub the expert independently.
+   Position both players at the same swing event, choose Pair Current Frames,
+   and name it (for example Top or Impact). Add more pairs or edit their times
+   in the table, then Apply Events. Invalid or incomplete pairs keep the last
+   usable alignment. Outside the expert time range the source preview is blank
+   and explains why.
+3. Use Notes to record the lesson objective and observations, and adjust the
+   reference colour, opacity and visibility. Notes persist with this comparison.
+4. Save Comparison, or export the composed result. Switching experts or closing
+   prompts to save, discard or continue editing when changes are pending.
+
+Reset Alignment can be undone with Undo Change. Ctrl+S saves; Alt+P plays or
+pauses; Alt+Left and Alt+Right step the player one frame; Alt+U undoes the last
+alignment change. Text editing retains its normal keyboard behavior.
+
+The inspector moves below the preview on smaller windows. Timing uses two
+columns in this layout, with an independent expert preview and event controls.
+Controls remain scrollable when the window cannot display them all. Visual QA
+uses explicitly synthetic camera/motion fixtures in
+`docs/development/artifacts/reference-comparison/`; it is layout evidence, not
+validation of a physical camera calibration or a coaching measurement.

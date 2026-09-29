@@ -1,0 +1,154 @@
+{
+  "conflicts": [
+    "Unit conflict: workbook declares inches but reviewed authority is centimetres (Definitions sheet declares inches; repository MATLAB/Python loaders and grip-to-face length (~1.07 m) qualify centimetre interpretation.).",
+    "Ball label is not a calibrated force/impulse observation; CHS and ball type remain descriptive only.",
+    "Filtering Experiments is an alias of TW_ProV1 \u2014 listed once among the four unique trials.",
+    "Body motion is a plausible inferred candidate under golf priors and geometry choices \u2014 it was not measured in the club-only Excel source."
+  ],
+  "fast_match_schema": "club-fast-matching/1.0.0",
+  "governing_issue": 10613,
+  "keyboard_actions": {
+    "cancel": "Escape",
+    "clone_session": "L",
+    "compare_candidates": "C",
+    "inspect_evidence": "I",
+    "preview": "P",
+    "verified_fit": "V"
+  },
+  "legend": [
+    {
+      "detail": "Butt/head position and orientation from Club-Only Excel.",
+      "label": "Observed club frames",
+      "role": "observed"
+    },
+    {
+      "detail": "Model-projected club observables compared to the trial clock.",
+      "label": "Predicted club frames",
+      "role": "observed"
+    },
+    {
+      "detail": "Body motion is a plausible inferred candidate under golf priors and geometry choices \u2014 it was not measured in the club-only Excel source.",
+      "label": "Inferred body candidate",
+      "role": "inferred"
+    },
+    {
+      "detail": "User-selected priors and geometry are assumptions, not measurements.",
+      "label": "Prior / geometry choices",
+      "role": "inferred"
+    }
+  ],
+  "native_g1_pass": false,
+  "parent_epic": 10602,
+  "qualification_blockers": [
+    "native_g1_qualification_requires_desk_native_receipt",
+    "software_contract_ui_integration_is_not_native_evidence"
+  ],
+  "sample_result": {
+    "backend": "driven_double_pendulum",
+    "body_motion_disclaimer": "Body motion is a plausible inferred candidate under golf priors and geometry choices \u2014 it was not measured in the club-only Excel source.",
+    "candidate_ids": ["cold:0"],
+    "display_status": "preview",
+    "error_time_tradeoffs": [
+      {
+        "club_fit": 0.05,
+        "evaluations": 1.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.000983
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 2.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.001062
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 3.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.001089
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 4.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.00111
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 5.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.001131
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 6.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.001151
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 7.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.00117
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 8.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.001188
+      },
+      {
+        "club_fit": 0.05,
+        "evaluations": 9.0,
+        "plausibility": 0.0,
+        "runtime_s": 0.001207
+      }
+    ],
+    "geometry_choices": {
+      "handedness": "right"
+    },
+    "infeasible_models": [],
+    "kind": "club_only_ui_result",
+    "meta_dataset_id": "club-only-excel",
+    "meta_session_id": "evidence-co09-session",
+    "model_id": "driven_double_pendulum",
+    "native_g1_pass": false,
+    "preset": "fast_preview",
+    "prior_choices": {
+      "pose_prior": "address_plausible"
+    },
+    "qualification_blockers": [
+      "native_g1_qualification_requires_desk_native_receipt",
+      "software_contract_fast_match_is_not_native_evidence"
+    ],
+    "schema_version": "club-only-ui-integration/1.0.0",
+    "session_id": "evidence-co09-session",
+    "trial_clock_hz": 240.0,
+    "trial_id": "TW_wiffle"
+  },
+  "sample_session": {
+    "body_motion_disclaimer": "Body motion is a plausible inferred candidate under golf priors and geometry choices \u2014 it was not measured in the club-only Excel source.",
+    "computation_budget": {
+      "max_evaluations": 48,
+      "max_pareto": 5,
+      "max_time_s": 8.0
+    },
+    "geometry_choices": {
+      "handedness": "right"
+    },
+    "model_id": "driven_double_pendulum",
+    "neural_proposal_slot": "empty_provider",
+    "preset": "fast_preview",
+    "prior_choices": {
+      "pose_prior": "address_plausible"
+    },
+    "session_id": "evidence-co09-session",
+    "source_kind": "club_only_excel",
+    "trial_id": "TW_wiffle",
+    "user_edits": {}
+  },
+  "schema_version": "club-only-ui-integration/1.0.0",
+  "source_kinds": ["tour_average", "club_only_excel"],
+  "unique_trial_count": 4,
+  "workbook_identity_schema": "club-workbook-identity/1.0.0"
+}

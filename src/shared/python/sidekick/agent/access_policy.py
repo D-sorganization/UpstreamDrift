@@ -1,0 +1,123 @@
+"""Access policy for SidekickActionService (epic #5967 / S6 / #5975).
+
+The default policy is **read-allow, write/destructive-deny**. Callers
+opt in to writes by passing an explicit allowlist; destructive actions
+additionally require the ``_confirmed=True`` flag in params.
+
+Why default-deny: agents drift. A new write action should be denied
+until a human has decided it's OK to expose to the LLM. Adding it to
+the allowlist is one line of config in the chat-layer wiring.
+
+Design contracts:
+
+* **DbC.** :class:`PolicyDecision` requires a non-empty ``reason`` so
+  audit logs are always self-explanatory.
+* **LOD.** The policy is a pure function of
+  ``(descriptor, params)`` — it never reaches into the handler or the
+  service.
+* **DRY.** Confirmation gating logic is owned here; the host adapter's
+  per-capability confirmation (S4) and this policy use the same
+  ``_confirmed`` parameter convention so the chip UI emits exactly one
+  flag.
+* **Headless-safe.** No PyQt6 or platform-specific imports.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from typing import Any
+
+from .action_service import ActionDescriptor
+
+__all__ = [
+    "PolicyDecision",
+    "SidekickActionPolicy",
+]
+
+
+_CONFIRMED_KEY = "_confirmed"
+
+
+@dataclass(frozen=True, slots=True)
+class PolicyDecision:
+    """Result of one policy check."""
+
+    allowed: bool
+    reason: str
+
+    def __post_init__(self) -> None:
+        if not self.reason:
+            raise ValueError("reason must be a non-empty explanation")
+
+
+@dataclass(frozen=True, slots=True)
+class SidekickActionPolicy:
+    """Default-deny policy with per-side-effects allowlists.
+
+    Attributes:
+        allow_read: When ``False``, even read actions are denied. The
+            default is ``True`` because reads are observably safe.
+        allow_write: Set of ``action_id``s permitted at the ``write``
+            side-effect tier. Empty by default.
+        allow_destructive: Set of ``action_id``s permitted at the
+            ``destructive`` tier. Empty by default. Destructive actions
+            in this set still require ``_confirmed=True``.
+    """
+
+    allow_read: bool = True
+    allow_write: frozenset[str] = field(default_factory=frozenset)
+    allow_destructive: frozenset[str] = field(default_factory=frozenset)
+
+    @classmethod
+    def permissive(cls) -> SidekickActionPolicy:
+        """Convenience: allow every action_id at every tier. Destructive
+        actions still require ``_confirmed=True`` — there is no way to
+        bypass the confirmation flag, by design."""
+        return cls(
+            allow_read=True,
+            allow_write=frozenset({"*"}),
+            allow_destructive=frozenset({"*"}),
+        )
+
+    def decide(
+        self, descriptor: ActionDescriptor, params: Mapping[str, Any]
+    ) -> PolicyDecision:
+        """Return a :class:`PolicyDecision` for one action.
+
+        Pure function; no side effects.
+        """
+        side_effects = descriptor.side_effects
+        if side_effects == "read":
+            return PolicyDecision(
+                allowed=self.allow_read,
+                reason="default-allow-read" if self.allow_read else "reads-denied",
+            )
+        if side_effects == "write":
+            if _matches(self.allow_write, descriptor.action_id):
+                return PolicyDecision(
+                    allowed=True, reason=f"write allowlisted: {descriptor.action_id}"
+                )
+            return PolicyDecision(
+                allowed=False,
+                reason=f"write not in allowlist: {descriptor.action_id}",
+            )
+        # destructive
+        if not _matches(self.allow_destructive, descriptor.action_id):
+            return PolicyDecision(
+                allowed=False,
+                reason=f"destructive not in allowlist: {descriptor.action_id}",
+            )
+        if not bool(params.get(_CONFIRMED_KEY)):
+            return PolicyDecision(
+                allowed=False,
+                reason=f"destructive {descriptor.action_id} requires _confirmed=True",
+            )
+        return PolicyDecision(
+            allowed=True, reason=f"destructive confirmed: {descriptor.action_id}"
+        )
+
+
+def _matches(allowlist: frozenset[str], action_id: str) -> bool:
+    """Wildcard ``"*"`` matches everything; otherwise exact match."""
+    return "*" in allowlist or action_id in allowlist

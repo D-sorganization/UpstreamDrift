@@ -1,0 +1,67 @@
+"""Pre-flight discovery for the GitHub MCP server integration.
+
+Before adding the GitHub server to an :class:`McpClientPool`, callers
+(typically the UD MCP Prefs UI) want to know whether the integration is
+actually usable on this machine. :func:`is_github_mcp_available` reports
+that without spawning a subprocess.
+
+Checks performed (in order, short-circuiting on the first failure so the
+returned message points at the *first* thing the operator needs to fix):
+
+1. ``GITHUB_PERSONAL_ACCESS_TOKEN`` env var is set and non-empty (unless
+   an explicit ``token`` argument is passed by the caller).
+2. ``npx`` is on ``PATH`` (the launcher we use for the server package).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+import shutil
+
+from src.shared.python.ai.integrations.github_mcp.server_config import (
+    GITHUB_MCP_PACKAGE,
+    GITHUB_MCP_TOKEN_ENV_VAR,
+)
+
+_LOG = logging.getLogger(__name__)
+
+
+def is_github_mcp_available(token: str | None = None) -> tuple[bool, str]:
+    """Return ``(available, reason)``.
+
+    Args:
+        token: Optional explicit token override. When supplied, the env-var
+            check is bypassed and the token's emptiness is what matters
+            (this is the path the UD Prefs UI uses when the operator has
+            just typed a token into the form but hasn't exported it yet).
+
+    Returns:
+        A ``(bool, str)`` tuple. The string is operator-facing and explains
+        either why the integration is unavailable, or confirms it is ready.
+    """
+    effective_token = (
+        token if token is not None else os.environ.get(GITHUB_MCP_TOKEN_ENV_VAR)
+    )
+    if not effective_token or not effective_token.strip():
+        msg = (
+            f"GitHub MCP unavailable: {GITHUB_MCP_TOKEN_ENV_VAR} is not set. "
+            "Create a Personal Access Token at https://github.com/settings/tokens "
+            "and export it as that env var."
+        )
+        _LOG.debug(msg)
+        return False, msg
+
+    if shutil.which("npx") is None:
+        msg = (
+            "GitHub MCP unavailable: 'npx' was not found on PATH. "
+            "Install Node.js (which provides npx) to launch "
+            f"{GITHUB_MCP_PACKAGE}."
+        )
+        _LOG.debug(msg)
+        return False, msg
+
+    return True, (
+        f"GitHub MCP available via npx + {GITHUB_MCP_PACKAGE} "
+        f"(auth from {GITHUB_MCP_TOKEN_ENV_VAR})."
+    )

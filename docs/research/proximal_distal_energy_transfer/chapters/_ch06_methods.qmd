@@ -1,0 +1,189 @@
+# Computational Methods {#sec-methods}
+
+This chapter specifies the simulation experiments whose results appear
+in @sec-results. Everything described here is implemented in three
+committed modules under
+[`scripts/research/proximal_distal_energy/`](https://github.com/D-sorganization/UpstreamDrift/tree/main/scripts/research/proximal_distal_energy)
+(`swing_model.py`, `interaction_forces.py`, `torque_programs.py`,
+`run_experiments.py`, and `run_interaction_force_study.py`, with figures from
+the paired figure scripts), and every output carries a provenance
+record (git SHA, integrator settings, parameter values). The
+reproduction commands are in @sec-appendix-repro.
+
+## Model {#sec-methods-model}
+
+The simulated plant is a backend-neutral two-segment golf model
+(@sec-platform): an arm segment rotating about a fixed hub, hinged at
+the wrist to a club segment consisting of a distributed shaft plus a
+clubhead point mass at the tip, moving in an inclined swing plane with
+projected gravity. Baseline parameters are
+(`GolfModelParams.default()`; full table in @sec-appendix-params):
+arm length 0.75 m and mass 7.5 kg; club length 1.0 m with 0.15 kg shaft
+and 0.20 kg clubhead; plane inclination 35°; viscous damping 0.4 and
+0.25 N·m·s/rad at shoulder and wrist. Angles follow the declared
+convention: $\theta_1$ is the arm angle from the downward vertical in
+the swing plane, $\theta_2$ the wrist angle of the club relative to the
+arm, and the club's absolute angle is
+$\theta_{\mathrm{club}} = \theta_1 + \theta_2$.
+
+Rollouts use the ODE reference backend (analytic dynamics, fixed-step
+RK4) with $\Delta t = 1$ ms over a 0.9 s horizon. Every rollout starts
+from the same top-of-backswing state,
+$\theta_1(0) = -2.2$ rad, $\theta_2(0) = -1.57$ rad (a 90° wrist cock),
+$\dot q(0) = 0$ — an arm carried well past horizontal with the club
+folded over the shoulder, comparable to the classical two-lever setups
+[@jorgensen1999; @pickering1999].
+
+## Torque Programs {#sec-methods-programs}
+
+All programs share a constant shoulder torque $\tau_s$ active from $t=0$
+(two levels: 60 and 100 N·m), so the sweep isolates the wrist channel.
+The wrist torque follows one of three profiles, parameterized by an
+onset time $t_{\mathrm{on}}$:
+
+- **passive**: $\tau_w(t) = 0$ throughout (free hinge) — the White
+  limit [@white2006];
+- **drive-only**: $\tau_w(t) = 0$ for $t < t_{\mathrm{on}}$, then
+  $\tau_w = +15$ N·m (opening);
+- **restrain-then-drive**: $\tau_w(t) = -R$ (cock-retaining) for
+  $t < t_{\mathrm{on}}$ with $R \in \{5, 10\}$ N·m, then
+  $\tau_w = +15$ N·m.
+
+The onset grid is $t_{\mathrm{on}} \in \{0, 0.025, \dots, 0.35\}$ s
+(15 values). With both shoulder-torque levels this yields 92 distinct
+programs; `drive-only` at $t_{\mathrm{on}} = 0$ is the S1
+("transfer early") pole of the design and `restrain-then-drive` with
+late onset is the S2 pole. Torque magnitudes sit inside the ranges used
+by comparable two- and three-segment studies
+[@sprigings2000; @pickering1999], scaled to this model's inertias.
+These profiles are a finite heuristic design, not a continuous optimal-control
+solution and not a physiological activation reconstruction. Consequently,
+"best" below always means grid-selected within the declared programs and
+endpoint rule.
+
+**E1b (actuator-bound sensitivity).** Because constant torques overstate
+what muscle can deliver at speed, a companion sweep
+(`e1b_bounded_torque.py`) replaces both concentric drives with a linear
+torque-velocity bound,
+$\tau(\omega) = \tau_{\mathrm{iso}}\,\mathrm{clip}(1 - \omega/\omega_{\max}, 0, 1)$
+(shoulder: $\tau_{\mathrm{iso}} = 100$ N·m, $\omega_{\max} = 20$ rad/s
+against arm speed; wrist: 20 N·m, 30 rad/s against opening speed;
+restraint constant, since eccentric torque does not taper with
+shortening velocity). State-dependent torques require closed-loop
+integration, done with the backend's own `mass_matrix`/`bias_forces`
+primitives under the identical RK4 settings.
+
+**E1e (finite command-rise sensitivity).** A separate audit replaces each
+post-initial command change with an exact-discrete first-order transition at
+20, 35, and 50 ms, alongside the unfiltered reference. The command at the top
+of the downswing is treated as preloaded; only later changes are filtered. This
+tests whether the ideal step switch creates the ordering. It is a command-level
+sensitivity, not a calcium-kinetics model, muscle identification, or OCP.
+
+## Impact Definition and Validity {#sec-methods-impact}
+
+Impact is the first upward crossing of
+$\theta_{\mathrm{club}} = 0$ (club pointing straight down in the swing
+plane), linearly interpolated between samples; the score of a program is
+the clubhead (distal tip) speed at that instant. Because the shoulder
+torque is constant, a program that keeps the club folded through the
+bottom of the swing can postpone the crossing into a second rotation
+while the shoulder keeps pumping energy — an artifact, not a swing. A
+trial is therefore outside the registered delivery-zone estimand unless the
+arm angle at the crossing
+satisfies $\theta_1 \le 2.0$ rad (a first-pass delivery); 29 of the 92
+programs were excluded by this rule, all of them heavy-restraint or
+very-late-onset programs. Every attempted program now records its first
+geometric crossing, speed, arm angle, and explicit acceptance status even when
+excluded. Bounds from 1.5 to 2.5 rad accept 58 to 69 of 92 programs; the
+grid-selected profile and onset remain unchanged at both shoulder-torque
+levels. This supports threshold robustness of the selected result, but it does
+not make 2.0 rad an anatomical cutoff or validate the endpoint as impact.
+
+## Recorded Quantities {#sec-methods-quantities}
+
+For every program: the full state trajectory, applied controls, impact
+time and clubhead speed. For four representative programs at
+$\tau_s = 60$ N·m (passive; drive-only at $t_{\mathrm{on}}=0$; the best
+drive-only; the best restrain-then-drive), additionally:
+
+**Segment energies.** Arm kinetic energy
+$\tfrac12 I_1^{\mathrm{hub}}\dot\theta_1^2$; club kinetic energy
+$\tfrac12 m_2 \lVert \mathbf v_{c2} \rVert^2 + \tfrac12 I_2^{\mathrm{com}}
+(\dot\theta_1+\dot\theta_2)^2$ with the club centre-of-mass velocity
+$\mathbf v_{c2}$ computed analytically from the state.
+
+**Wrist-interface power accounting (E4).** Following
+@sec-rw [@robertson1980; @winter2009]: the joint-force power
+$P_f = \mathbf F \cdot \mathbf v_{\mathrm{wrist}}$, with the joint
+reaction force recovered from Newton's second law for the club segment,
+$\mathbf F = m_2 \mathbf a_{c2} - m_2 \mathbf g$ (centre-of-mass
+acceleration evaluated analytically as
+$J_{c2}(q)\ddot q+\dot J_{c2}(q,\dot q)\dot q$); the net
+wrist moment power on the club
+$(\tau_w - b_w\dot\theta_2)(\dot\theta_1+\dot\theta_2)$; the wrist
+actuator power $\tau_w \dot\theta_2$; and the residual check that the
+club's total mechanical energy rate equals joint-force power plus
+moment power (reported as a figure in @sec-results; gravity is not
+added separately because potential energy is included in the club's
+mechanical energy).
+
+**Pointwise counterfactual split (E2).** At every sample, the
+`drift_and_control_split` (@eq-superposition) evaluated with the
+applied torques, yielding drift and control components of both joint
+accelerations; the club's absolute angular-acceleration split is the
+row sum.
+
+**Exact interaction-force audit (E5).** Analytic club-centre-of-mass
+acceleration replaces finite differentiation and separates the wrist reaction
+force into proximal and distal tangential and centripetal terms plus gravity
+reaction (@sec-force-decomposition). Each vector is projected onto the analytic
+wrist velocity to obtain a signed power pathway. A late-downswing matched-state
+experiment then integrates the commanded and zero-torque futures for 120 ms,
+explicitly distinguishing a trajectory-level killswitch from pointwise ZTCF
+(@sec-counterfactual-contracts). Newton balance, club moment balance, force and
+power reconstruction, matched initial state, and initial ZTCF equivalence are
+unit-tested.
+
+**Matched-state counterfactual ensemble (E6).** Eight cut times, including
+three samples bracketing the 0.100 s wrist-command switch, are crossed with four
+forward horizons and three fixed timesteps. Commanded and zero-torque futures
+share the exact interpolated source state. Divergence is recorded in generalized
+position and velocity, wrist force, force power, integrated force work, and
+terminal clubhead speed. The 80 ms subset is repeated with gravity disabled and
+with damping disabled. The 0.5 ms grid is the timestep reference, and the
+registered WSCG chart's stored DELTA series are independently reconstructed as
+BASE minus counterfactual after time alignment (@sec-killswitch-ensemble).
+
+**Phase budgets.** With the downswing divided at $t_{\mathrm{imp}}/2$:
+club kinetic-energy gain, wrist actuator work, shoulder work, and
+integrated joint-force transfer, per half. The value at the exact split is
+linearly interpolated and included as the terminal point of the early integral
+and the initial point of the late integral, so the two trapezoidal integrals
+close to the unsplit integral without an omitted sample interval.
+
+**Robustness analyses (E1c and E1d).** E1c re-scores the same 92
+trajectories using fixed arm positions, peak horizontal clubhead velocity,
+peak first-pass speed, a matched arm angle, and five validity bounds. E1d
+repeats the four-strategy comparison after changing one model input at a
+time: arm length (±10%), arm mass (±15%), club length (±10%), clubhead mass
+(±20%), swing-plane inclination (25° and 45° versus 35°), and both damping
+coefficients (0.5× and 1.5×). For each E1d case, late-drive and
+restrain-then-drive onset are reselected on the original onset grid. E1e
+repeats the complete 92-program sweep under finite command transitions.
+These ranges test local structural sensitivity; they are not population
+percentiles or confidence intervals.
+
+## Design Rationale and Scope {#sec-methods-scope}
+
+This deliberately simple model is a planar 2-DOF chain with a fixed hub and rigid
+shaft. That choice is the point, not a compromise: the classical timing
+results were established in exactly this model class
+(@sec-doublependulum), so the analysis first reproduces the class's
+behavior under explicit instrumentation — where every energy
+pathway is exactly measurable and the counterfactual contract is tested
+— before scaling to models where the same questions are harder to
+instrument. What the 2-DOF results can and cannot establish is taken up
+explicitly in @sec-discussion; the extension pathway (re-simulation
+parity, higher-fidelity models, and motion capture) is specified in
+@sec-conclusions.

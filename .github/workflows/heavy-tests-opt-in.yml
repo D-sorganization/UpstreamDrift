@@ -1,0 +1,242 @@
+name: Heavy Integration Tests (Opt-In)
+# -----------------------------------------------------------------------------
+# ISOLATION CONTRACT: This workflow MUST NOT run on standard PR required lanes.
+#   - Trigger: manual dispatch OR weekly schedule ONLY
+#   - Runner: d-sorg-fleet-docker (or dedicated runner if configured)
+#   - Marker: live_simulation (explicitly EXCLUDED from ci-standard.yml)
+#
+# Parity: mirrors scripts/run_local_heavy_tests.sh exactly.
+#         If you add a test here, add it there too and vice-versa.
+# -----------------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+    inputs:
+      engine:
+        description: "Engine lane to test"
+        required: false
+        default: "all"
+        type: choice
+        options: ["all", "pinocchio", "drake", "jaxsim", "mujoco"]
+      python_version:
+        description: "Python version to test with"
+        required: false
+        default: "3.11"
+        type: choice
+        options: ["3.10", "3.11", "3.12"]
+  schedule:
+    - cron: "0 2 * * 0" # Weekly Sunday 02:00 UTC
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+  run-heavy-tests:
+    needs: pick-runner
+    name: Heavy Integration Tests (${{ matrix.engine }})
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 90
+    env:
+      HEAVY_TEST_SLACK_WEBHOOK: ${{ secrets.HEAVY_TEST_SLACK_WEBHOOK }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: pinocchio
+            python-version: "3.11"
+            marker: "live_simulation and requires_pinocchio"
+            test-path: "tests/heavy_integration"
+          - engine: drake
+            python-version: "3.11"
+            marker: "requires_drake"
+            test-path: "tests"
+          - engine: jaxsim
+            python-version: "3.11"
+            marker: "requires_jaxsim"
+            test-path: "tests"
+          - engine: mujoco
+            python-version: "3.11"
+            marker: "requires_mujoco and not slow"
+            test-path: "tests"
+
+    steps:
+      - name: Skip unselected engine lane
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.engine != 'all' && inputs.engine != matrix.engine }}
+        run: echo "Skipping ${{ matrix.engine }} because workflow_dispatch selected ${{ inputs.engine }}."
+
+      - name: Checkout repository
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: ${{ runner.os != 'Windows' && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Set up Python
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ inputs.python_version || matrix.python-version }}
+          cache: pip
+
+      - name: Purge pip cache
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        run: python -m pip cache purge || true
+      - name: Install system display dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        run: |
+          sudo apt-get -o DPkg::Lock::Timeout=300 update -qq
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y --no-install-recommends \
+            xvfb x11-utils mesa-utils \
+            libgl1 libegl1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
+            libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \
+            libdbus-1-3 libxrandr2 libxss1 libxcursor1 libxcomposite1 \
+            libasound2-dev libxi6 libxtst6
+
+      - name: Install Python dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        timeout-minutes: 20
+        run: |
+          python -m ensurepip --upgrade || true
+          pip install --upgrade pip
+          python -m ensurepip --upgrade || true
+          if [ -f pyproject.toml ]; then pip install -e ".[dev,test]" || pip install -e .; fi
+          python -m ensurepip --upgrade || true
+          if [ -f requirements.lock ]; then pip install -r requirements.lock; fi
+          python3 scripts/ci/bootstrap_conformance_deps.py
+          python -m ensurepip --upgrade || true
+          pip install \
+            pinocchio \
+            pink \
+            mujoco \
+            mediapipe \
+            meshcat \
+            pyvista \
+            vtk \
+            scipy \
+            sympy \
+            trimesh \
+            c3d \
+            ezdxf \
+            pytest pytest-cov pytest-timeout pytest-xdist
+          # Prevent environment pollution conflict between pytest-recording and pytest-vcr
+          pip uninstall -y pytest-vcr pytest-recording || true
+
+      - name: Verify heavy dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        run: |
+          python -c "
+          import sys
+          deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'ezc3d', 'ezdxf']
+          failures = []
+          for pkg in deps:
+              try:
+                  __import__(pkg)
+                  print(f'OK {pkg}')
+              except ImportError as exc:
+                  failures.append(f'{pkg}: {exc}')
+                  print(f'FAIL {pkg}: {exc}')
+          if failures:
+              sys.exit(1)
+          "
+
+      - name: Run heavy ${{ matrix.engine }} tests
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        timeout-minutes: 60
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            pytest \
+              -v \
+              -m "${{ matrix.marker }}" \
+              --timeout=300 \
+              --timeout-method=thread \
+              --tb=short \
+              --no-header \
+              -p no:randomly \
+              --junit-xml="heavy_test_results_${{ matrix.engine }}.xml" \
+              --cov=. \
+              --cov-report="xml:heavy_coverage_${{ matrix.engine }}.xml" \
+              --cov-report=term-missing \
+              "${{ matrix.test-path }}" \
+            | tee "heavy_test_output_${{ matrix.engine }}.log"
+
+      - name: Summarize heavy test results
+        if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
+        run: |
+          echo "## Heavy Integration Test Report - UpstreamDrift" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Engine lane: ${{ matrix.engine }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Python version: ${{ inputs.python_version || matrix.python-version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "heavy_test_results_${{ matrix.engine }}.xml" ]; then
+            python3 - <<'PYEOF'
+          import os
+          import xml.etree.ElementTree as ET
+          engine = '${{ matrix.engine }}'
+          tree = ET.parse(f'heavy_test_results_{engine}.xml')
+          root = tree.getroot()
+          suite = root.find('.//testsuite') or root
+          total = int(suite.get('tests', 0))
+          failures = int(suite.get('failures', 0))
+          errors = int(suite.get('errors', 0))
+          skipped = int(suite.get('skipped', 0))
+          passed = total - failures - errors - skipped
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as fh:
+              fh.write(f"| Status | Count |\n|--------|-------|\n")
+              fh.write(f"| Passed | {passed} |\n")
+              fh.write(f"| Failed | {failures} |\n")
+              fh.write(f"| Errors | {errors} |\n")
+              fh.write(f"| Skipped | {skipped} |\n")
+              fh.write(f"| Total | {total} |\n\n")
+          PYEOF
+          fi
+          echo "### Tail of test output" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -40 "heavy_test_output_${{ matrix.engine }}.log" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload heavy test artifacts
+        if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: heavy-test-results-UpstreamDrift-${{ matrix.engine }}-${{ github.run_id }}
+          path: |
+            heavy_test_results_${{ matrix.engine }}.xml
+            heavy_test_output_${{ matrix.engine }}.log
+            heavy_coverage_${{ matrix.engine }}.xml
+          retention-days: 30
+
+      - name: Notify on failure
+        if: ${{ failure() && env.HEAVY_TEST_SLACK_WEBHOOK != '' && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
+        run: |
+          curl -s -X POST "$HEAVY_TEST_SLACK_WEBHOOK" \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"Heavy integration tests failed for UpstreamDrift (${{ matrix.engine }}) on ${GITHUB_REF_NAME}. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"

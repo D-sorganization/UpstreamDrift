@@ -1,0 +1,213 @@
+# Unified Results Schema v2
+
+**Implemented by:** CC-4 (#6776)  
+**Canonical module:** `src/shared/python/simulation_backends/trace_io.py`  
+**Schema version constant:** `SCHEMA_VERSION = "2.1.0"` (in `protocol.py`)
+
+This document is the authoritative reference for the unified HDF5 result
+format that covers every simulation backend (ODE, MuJoCo, MuJoCo Warp) and
+the BunkerShot3D sand-interaction results. Every file written by `write_trace`
+is self-describing and versioned.
+
+---
+
+## Scope
+
+Two formats existed before CC-4:
+
+| Format       | Owner                    | Groups                                                                                                              |
+| ------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `Trace` v1.x | `simulation_backends`    | `/t`, `/q`, `/v`, `/u`                                                                                              |
+| BunkerShot3D | `bunkershot3d.io.schema` | `/clubhead/`, `/wrench/`, `/grains/` (contiguous arrays since BunkerShot3D schema v2; one group per timestep in v1) |
+
+**v2 unifies them** by extending `Trace` with optional trajectory and
+wrench groups. BunkerShot3D files can be imported via
+`read_bunkershot3d_result` and are never used as an internal intermediate.
+
+---
+
+## HDF5 Layout
+
+### Root attributes
+
+| Attribute        | Type   | Description                                              |
+| ---------------- | ------ | -------------------------------------------------------- |
+| `schema_version` | str    | `"MAJOR.MINOR.PATCH"` stamped at write time              |
+| `backend`        | str    | Backend name, e.g. `"ode"`, `"mujoco"`, `"bunkershot3d"` |
+| `dt`             | float  | Integration step [s]                                     |
+| `kind`           | str    | `"single"` (Trace) or `"batch"` (BatchTrace)             |
+| `meta_<key>`     | scalar | One attribute per scalar provenance entry                |
+
+### Required datasets
+
+| Dataset | Shape                     | dtype   | Description                    |
+| ------- | ------------------------- | ------- | ------------------------------ |
+| `t`     | `(T,)`                    | float64 | Sample times [s]               |
+| `q`     | `(T, nq)` or `(N, T, nq)` | float64 | Generalised positions [rad]    |
+| `v`     | `(T, nv)` or `(N, T, nv)` | float64 | Generalised velocities [rad/s] |
+
+### Optional datasets (v2+, single Trace only)
+
+| Dataset              | Shape                | dtype        | Description                                        |
+| -------------------- | -------------------- | ------------ | -------------------------------------------------- |
+| `u`                  | `(T, nu)`            | float64      | Applied controls [N·m]; omitted if passive         |
+| `torques`            | `(T, nu)`            | float64      | Joint torques / generalised forces [N·m]           |
+| `wrench`             | `(T, 6)`             | float64      | Contact wrench `[fx, fy, fz, tx, ty, tz]` [N, N·m] |
+| `markers`            | `(T, n_markers, 3)`  | float64      | Predicted marker positions [m]                     |
+| `contacts`           | `(T, n_contacts, 3)` | float64      | Contact point positions [m]                        |
+| `muscle_names`       | `(n_muscles,)`       | UTF-8 string | Muscle output column labels                        |
+| `muscle_activations` | `(T, n_muscles)`     | float64      | Muscle activations `[0, 1]`                        |
+| `muscle_forces`      | `(T, n_muscles)`     | float64      | Muscle forces [N]                                  |
+| `muscle_lengths`     | `(T, n_muscles)`     | float64      | Muscle-tendon lengths [m]                          |
+| `muscle_velocities`  | `(T, n_muscles)`     | float64      | Muscle contraction velocities [m/s]                |
+
+Datasets that are `None` are **omitted** from the file; the reader returns
+`None` for absent datasets.
+
+The muscle-output datasets are additive v2.1 fields used by the MyoSuite
+adapter. They are activation-driven outputs, not joint-torque inverse-dynamics
+results. Writers should provide `muscle_names` whenever any muscle history is
+present so downstream analysis can map columns to muscles.
+
+### ZTCF/ZVCF analysis profile
+
+`persist_ztcf_zvcf_analysis` writes pointwise canonical-v2 analysis artifacts
+using the same CC-4 root attributes and required state datasets. These files
+set `kind = "ztcf_zvcf_analysis"` and are not forward rollout traces.
+
+| Dataset                | Shape     | dtype   | Description                                              |
+| ---------------------- | --------- | ------- | -------------------------------------------------------- |
+| `t`                    | `(T,)`    | float64 | Sample times [s]                                         |
+| `q`                    | `(T, nq)` | float64 | canonical-v2 configurations                              |
+| `v`                    | `(T, nv)` | float64 | canonical-v2 generalized velocities                      |
+| `u`                    | `(T, nv)` | float64 | Applied generalized controls, zero-filled when passive   |
+| `ztcf_acceleration`    | `(T, nv)` | float64 | Drift acceleration `solve(M(q), -bias(q, v))`            |
+| `zvcf_acceleration`    | `(T, nv)` | float64 | Zero-velocity acceleration `solve(M(q), u - bias(q, 0))` |
+| `drift_acceleration`   | `(T, nv)` | float64 | Affine drift term; equal to `ztcf_acceleration`          |
+| `control_acceleration` | `(T, nv)` | float64 | Control contribution `solve(M(q), u)`                    |
+
+For floating-base canonical-v2 states, `nq` may differ from `nv` because the
+base quaternion is a configuration manifold coordinate while velocity and
+acceleration live in tangent space. Analysis code must size accelerations from
+`nv`, not from `nq`.
+
+### AffineDrift coupling artifact
+
+Double-pendulum coupling back to AffineDrift is exposed through
+`src.shared.python.analysis.affine_drift_coupling`. The coupling consumes the
+shared `Trace` kinematics above, then persists a separate HDF5 artifact with
+`kind = "affine_drift_coupling"` instead of mutating the base Trace schema.
+
+| Dataset                 | Shape       | dtype   | Description                                        |
+| ----------------------- | ----------- | ------- | -------------------------------------------------- |
+| `t`                     | `(T,)`      | float64 | Sample times [s] from the source Trace             |
+| `q`                     | `(T, 2)`    | float64 | Extracted double-pendulum joint positions [rad]    |
+| `v`                     | `(T, 2)`    | float64 | Extracted double-pendulum joint velocities [rad/s] |
+| `tau`                   | `(T, 2)`    | float64 | Applied torques from `u`/`torques`, or zeros       |
+| `drift_acceleration`    | `(T, 2)`    | float64 | `solve(M(q), -bias(q, v))`                         |
+| `control_acceleration`  | `(T, 2)`    | float64 | `M(q)^-1 tau`                                      |
+| `total_acceleration`    | `(T, 2)`    | float64 | Drift plus control acceleration                    |
+| `affine_drift`          | `(T, 4)`    | float64 | State drift `[v, drift_acceleration]`              |
+| `affine_control_matrix` | `(T, 4, 2)` | float64 | Control-affine map for `x = [q0, q1, v0, v1]`      |
+
+The artifact is pointwise on estimated kinematics and is not a forward
+counterfactual rollout.
+
+---
+
+## BunkerShot3D Profile
+
+BunkerShot3D results have their own versioned schema (an integer
+`schema_version` root attribute, see `bunkershot3d/io/schema.py`). They are
+**import-only** here: `read_bunkershot3d_result` delegates to
+`BunkerShotResultReader`, which accepts both BunkerShot3D schema versions, and
+maps the result to the unified schema as follows:
+
+| BunkerShot3D v2 (current)          | v1 (legacy, read-only)                     | Trace v2 field                       |
+| ---------------------------------- | ------------------------------------------ | ------------------------------------ |
+| `/clubhead/position` `(T, 3)`      | `/clubhead/t_<t>/position` (3,)            | `markers[:, 0, :]` shape `(T, 1, 3)` |
+| `/wrench/force` + `torque` `(T,3)` | `/wrench/t_<t>/force` + `torque` (3,) each | `wrench` columns `[:3]` + `[3:]`     |
+| `/grains/…`                        | `/grains/t_<t>/…`                          | dropped (not mapped)                 |
+| —                                  | —                                          | `q`, `v` → empty `(T, 0)` arrays     |
+
+v1 files stored one HDF5 group per timestep and were read back in
+`sorted(keys)` order over `t_<time>` strings, which orders wrongly from
+t >= 10 s. The v1 path now orders frames by the numeric `time` attribute
+instead, migrating on read; the source file is never rewritten. A wrench series
+whose length differs from the clubhead series is rejected rather than silently
+mis-aligned.
+
+BunkerShot3D results are **never** written back in the BunkerShot3D format
+by the analysis layer; all downstream analysis reads `Trace` objects.
+
+---
+
+## Versioning Policy
+
+| File major | Accepted          | Notes                                                    |
+| ---------- | ----------------- | -------------------------------------------------------- |
+| `1`        | ✓ (auto-migrated) | v1.x files lack optional datasets; all default to `None` |
+| `2`        | ✓ (current)       | Full v2 support                                          |
+| other      | ✗                 | `ValueError` raised                                      |
+
+Minor and patch differences within an accepted major are always accepted
+(additive changes only).
+
+---
+
+## Migration API
+
+```python
+from src.shared.python.simulation_backends.trace_io import (
+    read_trace,             # reads v1 or v2; auto-migrates v1
+    migrate_from_v1,        # explicitly reads a v1 file
+    read_bunkershot3d_result,  # imports a BunkerShot3D HDF5 file
+    write_trace,            # always writes v2
+)
+```
+
+### Auto-migration example
+
+```python
+# Works transparently for both v1 and v2 files:
+trace = read_trace("old_v1_file.h5")
+assert trace.torques is None   # new fields default to None
+```
+
+### Explicit v1 migration
+
+```python
+trace = migrate_from_v1("old_v1_file.h5")
+# trace.schema_version == "1.0.0" (preserved from file)
+```
+
+### BunkerShot3D import
+
+```python
+trace = read_bunkershot3d_result("bunker_sim.h5")
+# trace.markers: clubhead positions, shape (T, 1, 3)
+# trace.wrench:  contact wrench,    shape (T, 6)
+# trace.q / v:   empty (T, 0) arrays — no joint states
+```
+
+---
+
+## Provenance (pending CC-6)
+
+The `meta_` attribute namespace carries scalar provenance today. When
+CC-6 (#6778, `ProvenanceStamp`) merges, a dedicated `/provenance` group
+will be written by every `write_trace` call. The flat `meta_` attributes
+will remain for backward compatibility.
+
+---
+
+## See also
+
+- `src/shared/python/simulation_backends/protocol.py` — `Trace` dataclass
+- `src/shared/python/simulation_backends/trace_io.py` — read/write/migrate
+- `src/bunkershot3d/io/schema.py` — legacy BunkerShot3D reader (for direct
+  BunkerShot3D access; prefer `read_bunkershot3d_result` for cross-engine
+  analysis)
+- ADR-0023 — `simulation_backends` architecture
+- CC-6 (#6778) — ProvenanceStamp (pending)
+- CC-25 (#6798) — WrenchTrace into unified schema (pending)

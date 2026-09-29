@@ -1,0 +1,146 @@
+{
+  "protocol_id": "proximal-distal-human-falsification-v1",
+  "schema_version": "experimental-falsification-v1",
+  "registration_status": "frozen_before_human_outcomes",
+  "frozen_at_utc": "2026-08-11T22:45:00Z",
+  "inclusion_criteria": [
+    "Adult participant with documented informed consent for the declared measurements and reuse boundary.",
+    "At least eight valid driver swings after prespecified quality exclusions.",
+    "All required non-EMG streams synchronized within their declared uncertainty bounds."
+  ],
+  "exclusion_criteria": [
+    "Unresolved coordinate-calibration failure or inverse-dynamics residual above threshold.",
+    "Missing bilateral hand-wrench, club, or ground-reaction data in the primary event window.",
+    "Any participant whose held-out assignment was disclosed before model and threshold freeze."
+  ],
+  "modalities": [
+    {
+      "name": "full_body_kinematics",
+      "units": ["m", "rad"],
+      "minimum_rate_hz": 200.0,
+      "maximum_sync_uncertainty_ms": 2.0,
+      "required_for": ["EXP-H1", "EXP-H2", "EXP-H3", "EXP-H4"]
+    },
+    {
+      "name": "bilateral_hand_wrenches",
+      "units": ["N", "N*m"],
+      "minimum_rate_hz": 1000.0,
+      "maximum_sync_uncertainty_ms": 1.0,
+      "required_for": ["EXP-H1", "EXP-H2", "EXP-H3"]
+    },
+    {
+      "name": "club_kinematics",
+      "units": ["m", "rad"],
+      "minimum_rate_hz": 500.0,
+      "maximum_sync_uncertainty_ms": 1.0,
+      "required_for": ["EXP-H1", "EXP-H2", "EXP-H3", "EXP-H4"]
+    },
+    {
+      "name": "ground_reaction",
+      "units": ["N", "N*m"],
+      "minimum_rate_hz": 1000.0,
+      "maximum_sync_uncertainty_ms": 1.0,
+      "required_for": ["EXP-H1", "EXP-H2", "EXP-H3"]
+    },
+    {
+      "name": "launch_monitor",
+      "units": ["m/s", "deg"],
+      "minimum_rate_hz": 1.0,
+      "maximum_sync_uncertainty_ms": 5.0,
+      "required_for": ["EXP-H4"]
+    },
+    {
+      "name": "surface_emg",
+      "units": ["V"],
+      "minimum_rate_hz": 2000.0,
+      "maximum_sync_uncertainty_ms": 1.0,
+      "required_for": ["EXP-H4"]
+    }
+  ],
+  "predictions": [
+    {
+      "prediction_id": "EXP-H1",
+      "hypothesis_id": "H1",
+      "estimand": "Late-window distal interface drift-work share under uncertainty-propagated inverse dynamics.",
+      "expected_sign_or_interval": "Participant-level median drift work is positive in the registered late window.",
+      "falsifier": "The hierarchical interval includes the predeclared negligible region or reconstruction/residual gates fail.",
+      "analysis_level": "participant-level estimates followed by hierarchical partial pooling",
+      "required_modalities": [
+        "full_body_kinematics",
+        "bilateral_hand_wrenches",
+        "club_kinematics",
+        "ground_reaction"
+      ]
+    },
+    {
+      "prediction_id": "EXP-H2",
+      "hypothesis_id": "H2",
+      "estimand": "Within-swing association between force-velocity alignment and transported wrench power around registered sign crossings.",
+      "expected_sign_or_interval": "Power changes sign with the registered projection while force magnitude alone does not explain the crossing.",
+      "falsifier": "Sign-crossing order falls outside the synchronization interval or disappears under frame/reference transport controls.",
+      "analysis_level": "within-participant event-aligned contrast",
+      "required_modalities": [
+        "full_body_kinematics",
+        "bilateral_hand_wrenches",
+        "club_kinematics",
+        "ground_reaction"
+      ]
+    },
+    {
+      "prediction_id": "EXP-H3",
+      "hypothesis_id": "H3",
+      "estimand": "Late negative equivalent club couple conditional on low measured distal activation and sensitivity-bounded passive terms.",
+      "expected_sign_or_interval": "A negative interval persists beyond combined timing and inverse-dynamics uncertainty in a declared subset.",
+      "falsifier": "The sign is explained by measured active/passive contributions or is not stable to residual and filtering sensitivity.",
+      "analysis_level": "observational participant-level interval; no causal passivity claim",
+      "required_modalities": [
+        "full_body_kinematics",
+        "bilateral_hand_wrenches",
+        "club_kinematics",
+        "ground_reaction"
+      ]
+    },
+    {
+      "prediction_id": "EXP-H4",
+      "hypothesis_id": "H4",
+      "estimand": "Timing interval between opposing distal EMG onset, modeled drift-force reversal, and held-out delivery outcomes.",
+      "expected_sign_or_interval": "Opposing activation precedes the registered reversal by more than synchronization uncertainty and predicts held-out outcomes after declared covariates.",
+      "falsifier": "No anticipatory interval or held-out association remains after onset, filtering, and multiplicity sensitivity.",
+      "analysis_level": "observational timing and prediction; no causal neural strategy claim",
+      "required_modalities": [
+        "full_body_kinematics",
+        "club_kinematics",
+        "launch_monitor",
+        "surface_emg"
+      ]
+    }
+  ],
+  "held_out_fraction": 0.25,
+  "split_unit": "participant",
+  "identity_policy": "pseudonym_only_no_identity_inference",
+  "filtering_contract": {
+    "primary": "zero-lag fourth-order Butterworth with cutoff selected before outcome access",
+    "sensitivity": [
+      "residual-analysis cutoff",
+      "plus_or_minus_20_percent_cutoff"
+    ],
+    "no_event_specific_retuning": true
+  },
+  "calibration_contract": {
+    "laboratory_frame": "right-handed SI frame",
+    "club_frame": "measured rigid-cluster transform",
+    "wrench_reference": "registered club reference point",
+    "functional_joint_centers": true
+  },
+  "residual_thresholds": {
+    "force_residual_body_weight_fraction": 0.1,
+    "moment_residual_body_weight_height_fraction": 0.05,
+    "maximum_event_sync_uncertainty_ms": 2.0
+  },
+  "missing_data_contract": {
+    "primary_window_imputation": "prohibited",
+    "short_kinematic_gap_ms_max": 10.0,
+    "participant_exclusion_before_unblinding": true
+  },
+  "inference_boundary": "Observed timing and association do not establish that a modeled controller or passive mechanism caused a human outcome."
+}

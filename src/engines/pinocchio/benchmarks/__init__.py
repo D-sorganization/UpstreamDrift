@@ -1,0 +1,1 @@
+"""Pinocchio benchmark entry points."""

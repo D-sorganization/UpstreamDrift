@@ -1,0 +1,531 @@
+# Proximal Velocity, Geometry, and Drift-Mediated Transfer {#sec-shoulder-velocity-transfer}
+
+## The Question Must Be Posed as a State-Matched Counterfactual
+
+The motivating hypothesis is that releasing while the proximal system is
+moving rapidly can permit the club to gain speed with less opposing interface
+work. The subjective description of such motion as a "fling" is not itself an
+observable. Moreover, the phrase *high shoulder velocity* conflates at least
+four quantities: thorax angular velocity, shoulder-joint velocity, hand-path
+velocity, and the angular velocity of the proximal link in a reduced pendulum.
+This section tests only the last quantity. In the model,
+$\dot q_1$ is the angular velocity of the proximal rigid link about a fixed
+hub. It is neither measured thorax rotation nor an anatomical shoulder-joint
+coordinate.
+
+The distinction matters empirically. Horan and Kavanagh measured 14 male
+professional golfers and reported the largest upper-body peak speed at the
+thorax together with strong thorax--pelvis coupling; neither the sample nor
+cross-correlation identifies a causal club-transfer mechanism [@horan2012]. A
+systematic review of 92 kinematic studies found substantial methodological
+variation and insufficient consensus for generalizing many performance
+results [@bourgain2022]. Choi and Park instrumented an axially divided grip in
+nine registered professional golfers and reported counteracting hand forces
+and asymmetric inferred hand kinetics; that result shows why a net club wrench
+does not uniquely identify its bilateral allocation, but it is not a direct
+six-axis measurement at each hand [@koike2020]. The present result is therefore
+a model-level map from achieved state to instantaneous acceleration,
+interface-force, and power contributions. It is not a human causal result or a
+coaching rule.
+
+At a fixed configuration $q$ and applied torque $u$, the implementation uses
+the sign-explicit equations
+
+$$
+M(q)\ddot q + b(q,\dot q)=B u,
+\qquad
+\ddot q_{\mathrm{drift}}=-M^{-1}b,
+\qquad
+\ddot q_{\mathrm{control}}=M^{-1}Bu,
+\qquad
+\ddot q = \ddot q_{\mathrm{drift}} + \ddot q_{\mathrm{control}},
+$$
+
+where the drift term is evaluated at the achieved state with the modeled
+controls zeroed. Here $b$ contains the model's velocity-dependent, gravity, and
+damping terms. It does **not** mean passive human motion. The planar wrist-
+interface force on the club is reconstructed from the same pointwise
+acceleration split; dotting each force with the wrist-point velocity gives its
+interface power. Acceleration, force, and power must close componentwise before
+a sample is admitted.
+
+## Three Velocity-Matching Rules
+
+Changing $\dot q_1$ alone is not a unique intervention because the distal
+angular rate may be expressed either relative to the proximal link or in the
+laboratory frame. We therefore evaluate three declared counterfactual families:
+
+1. **Preserve Relative Club Rate:** hold
+   $\dot q_2$ fixed while changing $\dot q_1$. This co-transports the
+   club's absolute angular rate with the proximal link while leaving the
+   relative coordinate rate fixed.
+2. **Preserve Absolute Club Rate:** hold $\dot q_1+\dot q_2$ fixed while
+   changing $\dot q_1$. This changes the
+   relative rate and asks whether proximal speed alone improves the transfer
+   when distal laboratory-frame angular rate is matched.
+3. **Preserve Total Kinetic Energy:** hold
+   $T=\tfrac12\dot q^\mathsf{T}M(q)\dot q$ fixed. For each feasible proximal
+   rate, solve the mass-matrix quadratic for the relative club rate and select
+   the branch continuous with the reference state. This removes instantaneous
+   stored kinetic energy as an explanation, but not the prior work used to
+   create the state.
+
+At five samples from one registered reference trajectory, nine proximal rates
+are evaluated for each rate-matching rule. The grid is centered on the
+achieved proximal rate and adds
+offsets from -75% through +75% of
+$\max(|\dot q_{1,\mathrm{ref}}|,4\ \mathrm{rad\,s^{-1}})$, so every family
+contains its reference state and the zero-rate transition sample remains
+testable. The labels Transition, Early Downswing, Mid-Downswing, Delivery and
+Release, and Pre-Impact refer to 0%, 15%, 40%, 70%, and 95% of this model's
+time to club-vertical crossing; except for the endpoint definitions, they are
+not human event detections. Configuration, torque command, model parameters,
+and gravity are held fixed within a family. The energy-matched family spans
+the feasible reference branch at each nonzero-energy phase. Transition begins
+at zero velocity, for which the only zero-kinetic-energy velocity state is the
+zero vector; its energy-matched dose is therefore non-identifiable and
+explicitly omitted. The first two rules change kinetic energy. All three are
+local state-field sensitivity sweeps, not trajectory optimizations.
+
+## Phase-Resolved Results
+
+![Drift interface power across proximal angular-velocity sweeps. Each panel states
+the velocity-matching rule; the large late-swing benefit is not invariant to
+that rule.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_drift_power.pdf){#fig-shoulder-velocity-drift-power width=100%}
+
+The result rejects a phase-independent benefit. Under relative-rate matching,
+the least-squares slope of drift interface power with proximal rate is $+1.97$
+W/(rad/s) at transition, $-0.80$ in early downswing, $-8.25$ in mid-downswing,
+$+65.06$ in delivery, and $+283.74$ before impact. Under absolute-rate
+matching, the corresponding slopes are $+0.84$, $+0.09$, $-18.78$, $-5.96$,
+and $+184.58$ W/(rad/s). These slopes describe the declared finite ranges and
+are not derivatives at the reference state. The associated linear-fit $R^2$
+values range from 0.028 to 0.999; in particular, the early absolute-rate and
+delivery absolute-rate slopes summarize strongly nonlinear responses poorly.
+Reference-centered three-point slopes are therefore reported separately; the
+delivery absolute-rate value is -0.92 W/(rad/s), versus -5.96 W/(rad/s) over
+the full range.
+The largest positive endpoint change survives both matching rules only in the
+pre-impact state. Delivery remains strongly positive when relative club rate
+is preserved but has a negative endpoint change when absolute club rate is
+preserved.
+
+The energy-matched result is more adverse to a monotonic rule. Its drift-power
+slope is -1.77 W/(rad/s) in early downswing, -22.98 in mid-downswing, -56.71
+in delivery, and +5.70 before impact. None of the four energy-matched curves
+is monotonic. Before impact, the fitted $R^2$ is only 0.005 and the endpoint
+change is +15.72 W, compared with +3807.53 W when relative club rate—and thus
+stored energy—is allowed to co-vary. The maximum kinetic-energy residual
+across 36 energy-matched states is $5.7\times10^{-14}$ J. This does not prove
+that proximal speed is harmful; it shows that the largest apparent benefit is
+not invariant to stored-energy control.
+
+![Negative interface power across phase and velocity-matching rule. Shading
+marks states in which the modeled wrist reaction removes mechanical energy
+from the club at that instant.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_braking_map.pdf){#fig-shoulder-velocity-braking-map width=100%}
+
+The braking map supplies the sharper test of the motivating hypothesis.
+Higher proximal velocity does not uniformly reduce braking. Mid-downswing
+contains the strongest opposing region: minimum pointwise grip power reaches
+$-148.8$ W under relative-rate matching and $-296.5$ W under absolute-rate
+matching. In delivery, relative-rate matching contains no negative grip-power
+sample, whereas absolute-rate matching reaches $-130.2$ W. The apparent
+"clean fling" is therefore a relationship among phase, configuration, sweep
+range, and relative motion, not a consequence of proximal speed in isolation.
+Across the transition sweep, the newly included negative proximal-rate states
+also reach -37.1 W and -32.8 W under the two matching rules.
+
+![Signed finite-range slope of drift interface power with proximal angular velocity. Positive
+cells indicate that faster proximal motion increases drift-mediated interface
+power within the declared local sweep.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_phase_sensitivity.pdf){#fig-shoulder-velocity-phase-sensitivity width=100%}
+
+## Proximal Acceleration as a Separate Intervention
+
+Velocity and acceleration are not interchangeable. A third pointwise study
+holds configuration, velocity, model parameters, gravity, and distal actuator
+torque fixed, then solves the proximal actuator torque required to impose each
+of nine proximal accelerations at each of the five phases. Every row therefore
+has the same state and instantaneous kinetic energy within its phase, but not
+the same actuator torque, instantaneous power, accumulated work, or prior
+reachability. Target-acceleration residual is below
+$5.7\times10^{-14}$ rad/s² and force closure is exact at stored precision.
+
+![Identical-state proximal-acceleration interventions. The left panel reports
+interface-force power; the right exposes the proximal torque needed to impose
+the acceleration.](data/proximal_acceleration_transfer/figures/fig_proximal_acceleration_transfer.pdf){#fig-proximal-acceleration-transfer width=100%}
+
+At transition, grip velocity is zero, so every acceleration target has zero
+instantaneous interface power; this is a geometric null, not an absence of
+required torque. Across early, mid, delivery, and pre-impact phases, interface-
+power slopes are +0.62, +0.98, +1.40, and +1.57 W per rad/s². That result does
+not imply that continued proximal acceleration always accelerates the club.
+The club-angular-acceleration response slope is +0.116, +0.573, and +0.619 in
+the first three nonzero phases but reverses to -0.287 before impact. In that
+pre-impact state, the proximal torque required across the dose ranges from
+-69 to +189 N m and proximal actuator power from -612 to +1677 W. Increasing
+proximal acceleration can therefore raise interface power while reducing the
+club's instantaneous angular acceleration and changing actuator/load cost.
+Only a forward, work- and load-matched intervention can determine whether that
+pointwise response improves delivery.
+
+## Trajectory-Level Strategy Search
+
+The pointwise sweep does not show whether a control program can reach a
+favorable state. A second experiment therefore varies three trajectory-level
+decisions: the time at which the 60 N m proximal drive is reduced (0.12, 0.18,
+0.24, or 0.30 s), the post-cut proximal torque (0, 30, or 60 N m), and the
+wrist release time (0.10, 0.14, 0.18, 0.22, or 0.26 s). Every program uses a
+10 N m opposing wrist command before release and a 15 N m drive afterward.
+All 60 attempted programs are retained; only 26 cross club vertical inside the
+registered delivery window.
+
+![Release-state proximal velocity against impact speed and negative interface
+work, followed by impact speed against net actuator work, for every valid-
+impact trajectory. Color denotes release time in the first two panels; gray
+connectors identify the approximate work-matched pairs in the third.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_associations.pdf){#fig-shoulder-velocity-strategy-associations width=100%}
+
+Within this finite grid, the motivating model hypothesis does not survive as a
+standalone rule. Proximal-link velocity at release correlates with lower impact speed
+($r=-0.692$) and greater post-release negative grip work ($r=+0.943$) among the
+valid trials. In a descriptive standardized regression that also includes
+release time, proximal-drive cut time, and post-cut proximal torque, the
+release-velocity coefficient remains negative ($\beta=-0.514$). The 26-row
+design has rank 5 for five coefficients including the intercept and condition
+number 3.51, but no sampling-based uncertainty interval is meaningful for this
+deterministic grid. This is not a causal estimate: release velocity and timing
+are mechanically coupled, the grid is small, and conditioning on valid impact
+creates selection. It nevertheless supplies a model counterexample to the
+claim that waiting for the modeled proximal link to attain a larger angular
+velocity is sufficient to improve transfer.
+
+The forward ledger now integrates proximal and distal actuator power from the
+start of motion through impact. Eight sampled program pairs differ by 2.56
+rad/s in release-state proximal rate while matching both net and positive
+actuator work within 5%. In all eight, the higher-rate member is slower by
+4.31--9.28 m/s. These pairs are reused, not independent, and no pair also
+matches peak interface force within 10%; peak-force differences are 34--46%.
+This is an adverse model counterexample under approximate work matching, not a
+load-matched causal estimate or a human optimum.
+
+### Joint Work- and Load-Matched Forward Screen
+
+The load confound is testable rather than merely acknowledged. A follow-on
+finite factorial fixes both proximal-drive cut and wrist-release time at 0.14
+s, then crosses six early proximal torques, four post-cut proximal torques,
+three opposing wrist torques, and three post-release wrist torques. All 216
+attempts remain in the record; 148 satisfy the same club-vertical impact
+definition. Candidate pairs must differ by at least 1.5 rad/s in proximal rate
+at release while matching net actuator work and positive actuator work within
+5% and peak modeled interface force within 10%.
+
+The primary screen contains 109 admissible candidate pairs. To prevent one
+trajectory from being counted repeatedly, a frozen greedy rule selects 46
+disjoint pairs, ordered first by the sum of the three relative mismatches and
+then by larger rate separation. The higher-rate member is faster in 20 pairs
+and slower in 26. Its speed difference ranges from -3.85 to +1.45 m/s, with a
+mean of -0.13 m/s. Thus, load matching removes the uniformly adverse result of
+the earlier eight reused work-only pairs, but it does not reveal a monotonic
+benefit. It exposes a mixed response: rate is one state coordinate within a
+coupled control and geometry history.
+
+![Independent primary matches retain favorable and adverse higher-rate
+outcomes. The sensitivity panel reports the mean higher-minus-lower rate speed
+difference and the number of favorable pairs over all independent pairs in
+each tolerance cell.](data/joint_matched_proximal_rate/figures/fig_joint_matched_proximal_rate.pdf){#fig-joint-matched-proximal-rate width=100%}
+
+| Work Tolerance | Load Tolerance | Independent Pairs | Higher Rate Faster | Higher Rate Slower | Mean Speed Difference (m/s) |
+|---:|---:|---:|---:|---:|---:|
+| 2.5% | 5% | 16 | 5 | 11 | -0.216 |
+| 2.5% | 10% | 27 | 11 | 16 | -0.105 |
+| 2.5% | 15% | 32 | 11 | 21 | -0.493 |
+| 5% | 5% | 30 | 11 | 19 | -0.274 |
+| 5% | 10% | 46 | 20 | 26 | -0.127 |
+| 5% | 15% | 49 | 22 | 27 | -0.115 |
+| 7.5% | 5% | 33 | 13 | 20 | -0.235 |
+| 7.5% | 10% | 49 | 23 | 26 | -0.060 |
+| 7.5% | 15% | 53 | 25 | 28 | -0.029 |
+
+Every tolerance cell retains both signs, and every cell has more slower than
+faster higher-rate members. This sign mixture is the important result; the
+small negative means are not estimates of a human effect. Programs can differ
+in several actuator commands, greedy matching is not a globally optimal
+assignment, and valid-impact conditioning remains a selection. A decisive
+next test must independently intervene on the achieved rate or acceleration,
+match the full delivery state and work/load ledgers, and repeat the contrast
+in spatial, subject-scaled, and held-out human tiers.
+
+![Registered impact speed across the complete timing grid. An X denotes a
+program that fails to reach club vertical inside the declared delivery
+window.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_grid.pdf){#fig-shoulder-velocity-strategy-grid width=100%}
+
+The highest-speed valid program releases at 0.10 s, retains the full 60 N m
+proximal drive, and reaches 38.85 m/s. Its post-release interface-force work is
+127.21 J, decomposed into 132.08 J drift and -4.87 J control, with 6.11 J of
+negative interface work and a 315.39 N peak net planar wrist-interface force.
+That value is neither hand's anatomical grip force. The exact work-closure
+residual is $2.1\times10^{-14}$ J. Re-evaluating this fixed program at 0.5 ms
+changes impact speed by 0.00035 m/s, total interface work by 0.0023 J, and peak
+force by less than $10^{-6}$ N without changing impact validity. The program
+was not reselected at the refined step. The large modeled interface load makes
+clear why speed alone is an incomplete objective.
+
+![Nondominated speed, braking-work, and peak-force outcomes. Open red markers
+identify programs for which no sampled alternative is at least as good on all
+three objectives and strictly better on one.](data/shoulder_velocity_transfer/figures/fig_shoulder_velocity_strategy_pareto.pdf){#fig-shoulder-velocity-strategy-pareto width=88%}
+
+No single program dominates all registered objectives. Impact speed and peak
+net interface force are strongly associated within the 26 valid programs
+($r=0.977$). Twenty-one of the 26 are nondominated, so this sparse Pareto screen
+is weakly discriminating rather than evidence of 21 distinct optimal human
+strategies. Several nominally different programs are
+trajectory-equivalent because their proximal-drive cut occurs after impact;
+they are retained for auditability rather than silently deduplicated. The
+result is a finite-grid Pareto set, not a unique or continuous optimum.
+
+## Rotating-Base, Bilateral-Hand Mechanism Test
+
+The fixed-hub results above cannot distinguish a moving torso from a proximal
+pendulum coordinate and cannot recover the two hand reactions independently.
+The next registered tier therefore introduces seven generalized coordinates:
+finite-inertia torso rotation, lead- and trail-arm rotation relative to the
+torso, planar grip-center translation, proximal-club rotation, and distal-shaft
+rotation relative to the proximal club. Four holonomic constraints close the
+lead and trail hands onto two club points separated by 0.13 m. The equations
+are solved as a full-rank KKT system,
+
+$$
+\begin{bmatrix}M(q)&-J(q)^\mathsf{T}\\J(q)&0\end{bmatrix}
+\begin{bmatrix}\ddot q\\\lambda\end{bmatrix}
+=
+\begin{bmatrix}Q_u-b(q,\dot q)\\-\dot J(q,\dot q)\dot q\end{bmatrix},
+$$
+
+where the four multipliers $\lambda$ are reshaped into two planar hand
+reactions. Their resultant and force-generated club couple are separately
+observable. Equal and opposite reactions are applied to the arm and club
+subsystems. The torso is driven through a declared torque channel, has 4.8
+kg m$^2$ inertia, and is not relabeled from a fixed-hub link. The distal club
+is joined through an 80 N m/rad torsional spring and 0.6 N m s/rad damper.
+These values define a mechanism experiment, not identified human parameters.
+
+The implementation rejects nonfinite or nonphysical parameters, rank-deficient
+constraints, and states outside the closure tolerance. Position and velocity
+are projected after every step. The bilateral contact-power identity is checked
+two ways: by summing each reaction dotted with its grip-point velocity and by
+combining resultant force power at the grip center with force-couple power.
+The full mechanical-energy change must equal integrated actuator and damping
+power plus the explicitly recorded projection-energy change. Null and adverse
+rows remain in the record.
+
+### Registered State Matching and Programs
+
+The initial torso rates are 1.5, 3.5, and 5.5 rad/s. Two matching contracts
+are used. Under **relative-club-rate matching**, initial proximal-club rate is
+torso rate plus 1 rad/s. Under **absolute-club-rate matching**, proximal-club
+rate remains 3 rad/s while torso rate changes. Each state is propagated under
+one of three torso commands: +55 N m, 0 N m, or -55 N m. The bilateral arms
+receive equal 7 N m commands, and each wrist changes from -3 to +4 N m at 25
+ms. The terms accelerating, constant-rate, and decelerating name these declared
+torso-command windows; the finite-inertia torso rate is an outcome and is not
+clamped.
+
+![Delivery speed across the rotating-base grid. An X identifies a retained row
+outside the registered 100 N peak-grip-force or 0.08 J work-closure envelope;
+lines are descriptive connections, not fitted human response curves.](data/rotating_base_torso_velocity/figures/fig_rotating_base_matched_grid.pdf){#fig-rotating-base-matched-grid width=100%}
+
+Thirteen of the 18 full-resolution rows satisfy the registered envelope. Across
+valid rows, initial torso rate and delivery speed are positively associated
+($r=0.604$), but initial torso rate and negative grip work are also positively
+associated ($r=0.273$). Thus, the model reproduces the apparent speed benefit
+without reproducing the proposed universal reduction in braking. Under
+relative-rate matching and positive torso torque, delivery speed rises from
+3.78 to 7.44 m/s across the initial-rate grid while negative grip work rises
+from 0.66 to 1.41 J. Under the zero-torso-torque program, speed rises from 2.00
+to 5.97 m/s while negative grip work rises from 0.81 to 2.31 J. These are
+conditional trajectory differences, not effects of changing one human joint
+velocity.
+
+The matching contract changes the interpretation. With absolute club rate
+fixed and positive torso torque, delivery speed rises from 4.10 to 6.20 m/s,
+whereas negative grip work falls from 0.86 to 0.11 J. This contrast is the
+central result: rapid base motion can accompany a cleaner modeled transfer
+when the distal laboratory-frame state is matched, yet it can accompany more
+opposing work when the relative state is matched. "Release at high torso
+speed" is therefore under-specified unless club rate, geometry, shaft state,
+and actuator work are also declared.
+
+![Torso rate, delivery speed, bilateral contact power, and force-generated
+couple for the three initial-rate levels under the relative-rate, zero-torso-
+torque program. The wrist command changes at 25 ms, producing the visible but
+auditable discontinuity.](data/rotating_base_torso_velocity/figures/fig_rotating_base_force_power_atlas.pdf){#fig-rotating-base-force-power-atlas width=100%}
+
+The force-power atlas shows why force magnitude alone cannot define transfer.
+Positive early contact power becomes negative after the wrist-command change,
+then briefly returns toward zero before becoming negative again. The force-
+generated couple changes sign during the same interval. A large reaction can
+be nearly perpendicular to grip velocity and transmit little power; a smaller
+reaction aligned against velocity can remove energy. The recorded outcomes
+therefore include distal-segment kinetic-energy gain, total control work,
+bilateral wrist work, force-couple work, negative contact work, negative
+along-path impulse, and peak reaction for every attempted row.
+
+### Same-State Killswitches and Geometric Controls
+
+At 30 ms, three counterfactuals branch from numerically identical states and
+commands: torso torque, both arm torques, or both wrist moments are set to zero
+while all other channels continue. The maximum pre-branch generalized-state
+difference is exactly zero at stored precision. Continuing the torso command
+adds 1.22 m/s to delivery speed relative to its killswitch. Continuing the
+bilateral arm commands *reduces* delivery speed by 1.36 m/s relative to their
+killswitch in this program. Continuing the wrist commands adds 1.81 m/s, while
+its post-branch contact-work difference has the opposite sign from the speed
+difference. These nonmonotonic results prevent the total gain from being
+assigned to a single colloquial "fling" mechanism.
+
+![Delivery-speed changes under exact same-state command killswitches and shaft-
+stiffness sensitivity. A positive bar means the continued baseline command
+finishes faster than the corresponding command-zero branch.](data/rotating_base_torso_velocity/figures/fig_rotating_base_falsification_summary.pdf){#fig-rotating-base-falsification-summary width=100%}
+
+Two geometry controls test the bilateral couple. Coincident grip points make
+the force-generated couple exactly zero. Reversing only the signed moment arms
+while holding the solved forces and state fixed reverses the couple from
++1.351 to -1.351 N m. The latter is an algebraic sign test, not a dynamically
+feasible human grip exchange. Shaft stiffnesses of 40, 80, and 160 N m/rad
+produce delivery speeds of 4.26, 4.06, and 4.03 m/s in the selected reference
+program. The uncertainty screen also perturbs torso inertia, arm mass, shaft
+damping, grip spacing, and wrist-release timing. Narrowing grip spacing raises
+the peak reaction above the registered 100 N ceiling, while an earlier wrist-
+command change increases speed but also makes contact work more negative.
+These cases expose a speed--load--braking trade rather than a single optimum.
+
+The supported mechanism claim is consequently limited: in this planar,
+finite-inertia, closed-loop model, torso-rate history changes bilateral reaction
+work and delivery speed conditional on matching rule, command history, grip
+geometry, and shaft parameters. The study does not identify scapular control,
+anatomical shoulder velocity, safe loading, or a coaching instruction. Only
+synchronized bilateral grip wrenches and segment kinematics can test whether
+the same decomposition predicts held-out human swings.
+
+## Candidate Design Hypotheses Stated as Testable Conditions
+
+Within this model tier, the implications are better stated as five testable
+design hypotheses than as a command to maximize torso speed:
+
+1. **Build Proximal Speed Before the Favorable Geometry.** Additional proximal
+   speed has its largest positive association with drift grip power in the
+   late states. Acceleration history matters because the target velocity must
+   be reached without imposing a compensating distal rate that changes the
+   counterfactual.
+2. **Enter Delivery With Compatible Relative Motion.** The delivery result
+   changes sign across the two velocity-matching rules. The proximal link and
+   club must arrive with a relative angular rate that lets the interaction
+   force do positive work; proximal speed alone is insufficient.
+3. **Avoid Sustained Negative Interface Power.** The measurable adverse outcome is
+   not a vaguely defined "braking force" but negative interface power and its time
+   integral. A high force perpendicular to hand or club velocity can transmit
+   little power, whereas a smaller force aligned against velocity can remove
+   energy.
+4. **Do Not Infer a Useful Release From Drift Acceleration Alone.** A positive
+   state-matched drift acceleration can coexist with adverse interface power or
+   an unfavorable subsequent trajectory. Distal-torque reduction must be
+   evaluated by forward outcomes, not one pointwise term.
+5. **Treat Torso Speed as a Candidate State Variable, Not the Objective.** A
+   future human-scaled optimization should treat club delivery speed, opposing
+   work, peak load, face/path, robustness, and anatomical limits as separate
+   registered outcomes. Thorax angular velocity would be one measured state,
+   not an objective justified by the present fixed-hub coordinate.
+
+These conditions distinguish *velocity at transfer* from *continued positive
+proximal torque*. A proximal segment may be moving rapidly while decelerating.
+Indeed, outward energy flow can coincide with proximal deceleration, but
+deceleration itself does not prove transfer: energy may leave through the base,
+gravity, damping, or an actuator. A trajectory-level study must therefore
+report proximal actuator power, grip-interface power, club energy change, and
+external work together.
+
+## Critical Variables for the Two-Hand Extension
+
+The double pendulum cannot decide how two hands should create or resist the
+club moment. The next mechanically closed tier must preserve the following
+variables rather than collapsing them into one wrist torque:
+
+- thorax or hub angular velocity and acceleration;
+- common-mode hand velocity, which largely transports the grip;
+- differential hand velocity and separation, which create a force-generated
+  couple;
+- lead- and trail-hand force vectors and their points of application;
+- direct wrist moments, separated from the moment of hand forces;
+- arm configuration and hand-path curvature;
+- club relative angle, relative angular velocity, and shaft deformation;
+- bilateral negative work, peak force, constraint residual, and delivery
+  speed.
+
+A sampled two-hand strategy is nondominated only if no sampled alternative raises
+delivery speed without worsening at least one registered cost. This prevents a
+large speed gain obtained through excessive grip load, opposing hand work, or
+an unstable timing boundary from being called optimal. The existing
+fixed-shoulder two-arm model can test force allocation, the moving-base flexible
+tier can test translation and shaft response, and the rotating-base tier above
+tests a finite-inertia planar torso coordinate with bilateral closure. None is
+an anatomical torso--scapula--arm model. Subject-scaled parameters and
+synchronized bilateral human measurements remain required before the question
+can be interpreted as a human torso-velocity strategy.
+
+## Falsification Criteria and Experimental Observables
+
+The high-proximal-velocity hypothesis is weakened or rejected if any of the
+following occurs in a registered, held-out analysis:
+
+- drift grip power fails to increase with proximal velocity in the declared
+  delivery state;
+- the sign changes under small, physiologically plausible perturbations of
+  configuration or parameter estimates;
+- negative grip work or peak grip force increases enough to dominate the
+  club-energy gain;
+- the effect disappears when the same distal laboratory-frame state is
+  matched;
+- a two-hand model attributes the gain to direct wrist work rather than the
+  force-generated interaction term; or
+- synchronized human measurements show no within-player association after
+  conditioning on club state, hand path, and phase.
+
+The minimum experimental record is synchronized pelvis and thorax kinematics,
+upper-arm and hand kinematics, club pose and twist, bilateral six-axis grip
+wrenches, ground reaction, and launch conditions. Bilateral six-axis hand
+wrenches would require validated instrumentation or an explicitly identified
+inverse solution; a net club wrench is insufficient. The preregistered estimands
+should include phase-resolved grip power, bilateral common/differential-mode
+power, proximal actuator-power proxies, club kinetic-energy change, and the
+conditional effect of thorax velocity at matched club state. Because published
+golf kinematic methods remain heterogeneous [@bourgain2022], coordinate
+definitions, filtering, event timing, and reference-point transport must be
+declared before examining outcomes.
+
+## Reproducibility and Claim Boundary
+
+The committed evidence contains 126 velocity cases (90 across five phase
+labels and two rate-matching rules, plus 36 energy-matched states across four
+nonzero-energy phases), 45 identical-state proximal-acceleration cases, all 60
+timing-grid programs, and all 216 joint-matching programs. The machine-readable JSON files record every row, phase
+summary, closure test, invalid-impact attempt, Pareto membership,
+model-tier statement, falsifier, limitation, and dependency hash; paired NPZ
+files preserve the numerical arrays. Repeated generation is byte-identical for
+both JSON and NPZ artifacts. The pointwise generating scripts are
+`shoulder_velocity_transfer.py`,
+`run_shoulder_velocity_transfer_study.py`, and
+`make_shoulder_velocity_transfer_figures.py`. The trajectory scripts are
+`shoulder_velocity_strategy_search.py`,
+`run_joint_matched_proximal_rate_study.py`,
+`run_shoulder_velocity_strategy_study.py`, and
+`make_shoulder_velocity_strategy_figures.py`.
+
+The supported conclusion is narrow: in the reference fixed-hub planar model,
+increasing proximal-link angular velocity can markedly increase late drift-
+mediated interface power when stored energy co-varies, but the effect is
+phase-, range-, and state-definition-dependent, can reverse earlier, and
+nearly disappears in the energy-matched pre-impact screen. A separate finite
+control grid, including approximate actuator-work matches, supplies a
+counterexample to using release-state proximal rate as a standalone rule. The
+study does not establish
+an optimal human thorax velocity, a causal shoulder strategy, a bilateral hand
+allocation, or a universal instruction to release while rotating rapidly.

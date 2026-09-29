@@ -1,0 +1,89 @@
+{
+  "artifacts": {},
+  "identity": {
+    "backend": "scipy_ode",
+    "candidate_ancestry": ["canonical_c3d_loader"],
+    "capture": "iron",
+    "capture_sha256": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
+    "controls_hash": null,
+    "file_hashes": {},
+    "fit_mode": "torque_driven",
+    "fixed_geometry_hash": "",
+    "fixed_inertia_hash": "",
+    "frame_convention": "z_up_y_forward",
+    "horizon": "G3",
+    "identity_hash": "a65b27190b4ba5e474655d68f11627d45fb05728ad25dbbb5efbaaba858d46b1",
+    "integrator": "",
+    "max_evaluations_budget": null,
+    "measurement_map_version": "tour-measurement-map/1.0.0",
+    "model_id": "driven_triple_pendulum",
+    "plane_convention": "transverse_sagittal_frontal",
+    "provider_pin": "unknown",
+    "q0_hash": null,
+    "runtime_hashes": {},
+    "seed": 0,
+    "solver_config": {
+      "basis": "bernstein_degree_6_triple",
+      "max_nfev": 30,
+      "method": "trf"
+    },
+    "solver_name": "scipy_least_squares_triple",
+    "topology": "planar_driven_pendulum",
+    "v0_hash": null,
+    "wall_clock_budget_s": null
+  },
+  "is_synthetic": false,
+  "metrics": {
+    "coverage_fraction": 1.0,
+    "endpoint_error_m": 0.2663363119928057,
+    "impact_error_m": 0.6516060180914418,
+    "in_plane_rmse_m": 0.5256449613533931,
+    "landmark_set_signature": "762d27d6b1c198c81c16ea1b99a02defc2a3122f90bce902e1b4973e1e81c670",
+    "max_marker_error_m": 0.9856129447255201,
+    "n_excluded": 0,
+    "n_valid": 62,
+    "optimizer_weighted_loss": 0.254931267304794,
+    "out_of_plane_residual_m": 0.015,
+    "p95_marker_error_m": 0.9148437631780613,
+    "pelvis_yaw_rmse_rad": null,
+    "per_marker": {
+      "Grip": {
+        "max_m": 0.4632275605204852,
+        "p95_m": 0.431735349241367,
+        "rmse_m": 0.26053531146283854,
+        "total_count": 31,
+        "valid_count": 31
+      },
+      "Marker_3": {
+        "max_m": 0.9856129447255201,
+        "p95_m": 0.9550393782771526,
+        "rmse_m": 0.5256449613533931,
+        "total_count": 31,
+        "valid_count": 31
+      }
+    },
+    "per_phase": {},
+    "total_observations": 62,
+    "whole_marker_rmse_m": 0.41483808523039944
+  },
+  "notes": "",
+  "replay_command": "python -m src.engines.physics_engines.pendulum.python.motion_matching.qualification_triple --capture iron",
+  "reports": {
+    "l1_hub_m": 0.315,
+    "l2_arm_m": 0.5850000000000001,
+    "l3_club_m": 0.7,
+    "replay_agreement_m": 0.2454076428491856,
+    "replay_head_rmse_m": 0.5256449613533931,
+    "tools_shipped_replay_rmse_m": 0.5824082441612191,
+    "unforced_rmse_m": 0.5049071868222852
+  },
+  "schema_version": "tour-baseline-package/1.0.0",
+  "statuses": {
+    "dynamic_feasibility": "physically_feasible",
+    "has_native_replay": true,
+    "kinematic_accuracy": "exceeds_threshold",
+    "product_promotion": "exploratory",
+    "scientific_qualification": "disqualified",
+    "solver_convergence": "max_iterations"
+  }
+}

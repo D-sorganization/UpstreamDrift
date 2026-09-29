@@ -1,0 +1,137 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "movement-optimizer"
+version = "1.0.0"
+description = "Biomechanics trajectory optimizer for barbell exercises using Lagrangian inverse dynamics"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24,<2.0",
+    "scipy>=1.10",
+    "matplotlib>=3.7,<4.0",
+    "PyQt6>=6.5,<7.0",
+    "openpyxl>=3.1",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-timeout>=2.3",
+    "hypothesis>=6.0",
+    "tomli>=2.0; python_version < '3.11'",
+    "PyYAML>=6.0",
+]
+rust = [
+    "maturin>=1.5",
+]
+
+[project.scripts]
+movement-optimizer = "movement_optimizer.__main__:main"
+
+[project.entry-points."biomech.tool_pack"]
+movement_optimizer = "movement_optimizer.tool_pack"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+movement_optimizer = ["assets/*.svg"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "N", "UP", "B", "SIM", "RUF", "C90",
+]
+ignore = [
+    "E501",
+    "N802",
+    "N803",
+    "N806",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.isort]
+known-first-party = ["movement_optimizer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+# 180s (was 60s): heavy PyQt6 + physics-sim tests run ~20-50s and tip past 60s only
+# under concurrent self-hosted-runner contention (all 3 Python matrix legs share a host).
+# Still catches genuine hangs/infinite loops. See PR #487.
+timeout = 180
+timeout_method = "thread"
+
+# This app is built on PyQt6. Pin pytest-qt to the same binding so it never
+# loads PySide6 first -- the two Qt bindings cannot share one process, and a
+# stray PySide6 load makes every PyQt6 import (app code and the shared theme
+# package alike) fail with a Qt DLL error.
+qt_api = "pyqt6"
+
+# Default lane: fast, deterministic, offline.
+# See: D-sorganization/Repository_Management docs/FLEET_TESTING_STANDARDS.md §2
+addopts = """
+  -v
+  --tb=short
+  -p no:xvfb
+  -ra
+  --strict-markers
+  --strict-config
+  --durations=20
+  -m "not slow and not live_simulation and not e2e and not requires_network"
+"""
+
+markers = [
+  # ---- tier markers ----
+  "unit: pure logic, fully mocked, < 100 ms wall-clock",
+  "integration: cross-module / file-system / process boundaries, < 5 s",
+  "e2e: full-stack smoke tests; nightly + release gate only",
+  "slow: > 1 s wall-clock; deselect with -m 'not slow'",
+  # Reserved gate: no test carries this marker yet, but the default lane and
+  # the nightly workflow (.github/workflows/nightly.yml) deselect it by name,
+  # so the definition must stay for --strict-markers. Apply to any future
+  # heavy real-engine simulation test rather than re-introducing the marker.
+  "live_simulation: requires a real physics / math engine; deselect by default",
+  "validates_physics: asserts physical correctness against hand-computed reference values (not parity/smoke)",
+
+  # ---- environment markers ----
+  "requires_network: needs real outbound network; deselect by default",
+  "requires_gpu: needs CUDA / Metal / ROCm",
+  "requires_gl: needs OpenGL or a display",
+  "headless_safe: verified under QT_QPA_PLATFORM=offscreen",
+
+  # ---- per-engine markers ----
+  "requires_qt: skip when PyQt6 bindings unavailable",
+  "requires_rust: skip when the maturin-built Rust extension is unavailable",
+
+  # ---- workflow markers ----
+  "serial: must run with -n 0 (xdist parallel breaks this test)",
+  "benchmark: deterministic perf smoke; not a primary correctness gate",
+  "smoke: release-blocking smoke; subset of e2e",
+]
+
+[tool.coverage.report]
+# Coverage floor ratcheted up after the swingset/chain forces + theme + optimizer
+# work landed (measured ~90.9% locally; new feature code is ~100%). 85 leaves a
+# margin for the fleet-theme-only tests that skip in a bare CI venv (where
+# ud-tools is not installed). Refs: D-sorganization/Repository_Management#1140
+fail_under = 85
+
+[tool.mypy]
+ignore_missing_imports = true

@@ -1,0 +1,659 @@
+"""Tests for launcher_diagnostics."""
+
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
+
+import pytest  # noqa: E402
+import yaml  # noqa: E402
+from src.launchers.launcher_diagnostics import (  # noqa: E402
+    DiagnosticResult,
+    LauncherDiagnostics,
+    reset_layout_config,
+    run_cli_diagnostics,
+)
+
+
+def test_launcher_diagnostics_diagnostic_result_to_dict() -> None:
+    result = DiagnosticResult(
+        name="test", status="pass", message="ok", details={"a": 1}, duration_ms=10.123
+    )
+    d = result.to_dict()
+    assert d["name"] == "test"
+    assert d["status"] == "pass"
+    assert d["message"] == "ok"
+    assert d["details"] == {"a": 1}
+    assert d["duration_ms"] == 10.12
+
+
+@patch.object(LauncherDiagnostics, "check_shared_tools_freshness")
+@patch.object(LauncherDiagnostics, "check_tools_sidebar")
+@patch.object(LauncherDiagnostics, "check_biomech_siblings")
+@patch.object(LauncherDiagnostics, "check_engine_availability")
+@patch.object(LauncherDiagnostics, "check_pyqt6_availability")
+@patch.object(LauncherDiagnostics, "check_asset_files")
+@patch.object(LauncherDiagnostics, "check_layout_config")
+@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
+@patch.object(LauncherDiagnostics, "check_model_registry")
+@patch.object(LauncherDiagnostics, "check_models_yaml")
+@patch.object(LauncherDiagnostics, "check_python_environment")
+def test_run_all_checks(
+    mock_freshness,
+    mock_sidebar,
+    mock_siblings,
+    mock_engine,
+    mock_qt,
+    mock_assets,
+    mock_layout,
+    mock_compatibility,
+    mock_registry,
+    mock_yaml,
+    mock_env,
+) -> None:
+    diag = LauncherDiagnostics()
+
+    # Mock some results
+    res1 = DiagnosticResult("test1", "pass", "msg1")
+    res2 = DiagnosticResult("test2", "fail", "msg2")
+    res3 = DiagnosticResult("test3", "warning", "msg3")
+
+    def add_results(*args, **kwargs) -> None:
+        diag.results.extend([res1, res2, res3])
+
+    mock_env.side_effect = add_results
+
+    report = diag.run_all_checks()
+
+    assert report["summary"]["total_checks"] == 3
+    assert report["summary"]["passed"] == 1
+    assert report["summary"]["failed"] == 1
+    assert report["summary"]["warnings"] == 1
+    assert report["summary"]["status"] == "degraded"
+    assert len(report["checks"]) == 3
+    assert "recommendations" in report
+
+
+def test_launcher_diagnostics_check_python_environment() -> None:
+    diag = LauncherDiagnostics()
+    res = diag.check_python_environment()
+    assert res.name == "python_environment"
+    assert res.status == "pass"
+    assert "platform" in res.details
+
+
+@patch("pathlib.Path.exists")
+def test_check_models_yaml_missing(mock_exists) -> None:
+    mock_exists.return_value = False
+    diag = LauncherDiagnostics()
+    res = diag.check_models_yaml()
+
+    assert res.name == "models_yaml"
+    assert res.status == "fail"
+    assert "not found" in res.message
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_valid(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+
+    valid_data = {
+        "models": [{"id": id} for id in LauncherDiagnostics.EXPECTED_TILE_IDS]
+    }
+
+    with patch("builtins.open", mock_open(read_data=yaml.dump(valid_data))):
+        res = diag.check_models_yaml()
+
+    assert res.name == "models_yaml"
+    assert res.status == "pass"
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_empty(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", mock_open(read_data="")):
+        res = diag.check_models_yaml()
+
+    assert res.name == "models_yaml"
+    assert res.status == "fail"
+    assert "empty" in res.message
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_missing_models_key(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", mock_open(read_data="foo: bar")):
+        res = diag.check_models_yaml()
+
+    assert res.name == "models_yaml"
+    assert res.status == "fail"
+    assert "missing 'models'" in res.message
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_incomplete(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+
+    valid_data = {"models": [{"id": "mujoco_unified"}]}
+
+    with patch("builtins.open", mock_open(read_data=yaml.dump(valid_data))):
+        res = diag.check_models_yaml()
+
+    assert res.name == "models_yaml"
+    assert res.status == "fail"
+    assert "Missing" in res.message
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+def test_check_model_registry_success(mock_registry_class) -> None:
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+
+    # Mock getting all expected models
+    mock_models = [
+        MagicMock(id=id, name="Test") for id in LauncherDiagnostics.EXPECTED_TILE_IDS
+    ]
+    mock_registry.get_all_models.return_value = mock_models
+
+    res = diag.check_model_registry()
+    assert res.status == "pass"
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+def test_check_model_registry_missing(mock_registry_class) -> None:
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+
+    # Mock returning fewer models
+    mock_models = [MagicMock(id="mujoco_unified", name="Test")]
+    mock_registry.get_all_models.return_value = mock_models
+
+    res = diag.check_model_registry()
+    assert res.status == "fail"
+    assert "missing" in res.message
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch(
+    "src.launchers.launcher_provider_compatibility.evaluate_launcher_model_compatibility"
+)
+def test_check_launcher_provider_compatibility_success(
+    mock_evaluate, mock_registry_class
+):
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+    mock_registry.get_all_models.return_value = [MagicMock(id="mujoco_unified")]
+
+    compatible_result = MagicMock()
+    compatible_result.model_id = "mujoco_unified"
+    compatible_result.provider = "local"
+    compatible_result.is_compatible = True
+    compatible_result.issues = ()
+    mock_evaluate.return_value = [compatible_result]
+
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "pass"
+    assert res.details["compatible_model_ids"] == ["mujoco_unified"]
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch(
+    "src.launchers.launcher_provider_compatibility.evaluate_launcher_model_compatibility"
+)
+def test_check_launcher_provider_compatibility_warning(
+    mock_evaluate, mock_registry_class
+):
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+    mock_registry.get_all_models.return_value = [MagicMock(id="external_model")]
+
+    incompatible_result = MagicMock()
+    incompatible_result.model_id = "external_model"
+    incompatible_result.provider = "drake_models"
+    incompatible_result.is_compatible = False
+    incompatible_result.issues = ("source root does not exist",)
+    mock_evaluate.return_value = [incompatible_result]
+
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "warning"
+    assert res.details["incompatible_models"][0]["model_id"] == "external_model"
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=ImportError("mock"),
+)
+def test_check_launcher_provider_compatibility_import_error(mock_registry_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "warning"
+    assert "unavailable" in res.message
+
+
+@patch("pathlib.Path.exists")
+def test_check_layout_config_missing(mock_exists) -> None:
+    # Mock first exists (CONFIG_DIR) and second/third (LAYOUT_CONFIG_FILE)
+    mock_exists.side_effect = [True, False, False]
+    diag = LauncherDiagnostics()
+    res = diag.check_layout_config()
+    assert res.status == "pass"
+    assert "No saved layout" in res.message
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_layout_config_json_error(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", mock_open(read_data="{bad json")):
+        res = diag.check_layout_config()
+        assert res.status == "warning"
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_layout_config_success(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    layout_data = {"model_order": LauncherDiagnostics.EXPECTED_TILE_IDS}
+    with patch("builtins.open", mock_open(read_data=json.dumps(layout_data))):
+        res = diag.check_layout_config()
+        assert res.status == "pass"
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_layout_config_incomplete(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    layout_data = {"model_order": ["mujoco_unified"]}
+    with patch("builtins.open", mock_open(read_data=json.dumps(layout_data))):
+        res = diag.check_layout_config()
+        assert res.status == "warning"
+        assert "missing" in res.message
+
+
+@patch("pathlib.Path.exists")
+def test_check_asset_files_dir_missing(mock_exists) -> None:
+    mock_exists.return_value = False
+    diag = LauncherDiagnostics()
+    res = diag.check_asset_files()
+    assert res.status == "fail"
+
+
+@patch("pathlib.Path.exists", autospec=True)
+@patch("pathlib.Path.iterdir")
+def test_check_asset_files_success(mock_iterdir, mock_exists) -> None:
+    def exists_side_effect(self) -> bool:
+        # Only some assets exist
+        return "mujoco" not in str(self)
+
+    mock_exists.side_effect = exists_side_effect
+
+    # Mock iterdir to return some files
+    mock_file = MagicMock()
+    mock_file.is_file.return_value = True
+    mock_file.name = "drake.png"
+    mock_iterdir.return_value = [mock_file]
+
+    diag = LauncherDiagnostics()
+    res = diag.check_asset_files()
+    # It will warn because mujoco is missing
+    assert res.status == "warning"
+
+
+@patch("src.shared.python.engine_core.engine_manager.EngineManager")
+def test_check_engine_availability_success(mock_manager_class) -> None:
+    diag = LauncherDiagnostics()
+    mock_mgr = MagicMock()
+    mock_manager_class.return_value = mock_mgr
+
+    # Mock some engines installed
+    import enum
+
+    class MockStatus(enum.Enum):
+        AVAILABLE = "available"
+
+    class MockType(enum.Enum):
+        MUJOCO = "mujoco"
+
+    mock_probe_result = MagicMock()
+    mock_probe_result.status = MockStatus.AVAILABLE
+    mock_probe_result.is_available.return_value = True
+    mock_probe_result.version = "1.0"
+    mock_probe_result.missing_dependencies = []
+    mock_probe_result.diagnostic_message = "ok"
+
+    mock_probe = MagicMock()
+    mock_probe.probe.return_value = mock_probe_result
+
+    mock_mgr.get_available_engines.return_value = [MockType.MUJOCO]
+    mock_mgr.engine_status = {MockType.MUJOCO: MockStatus.AVAILABLE}
+    mock_mgr.engine_paths = {MockType.MUJOCO: "/fake"}
+    mock_mgr.probes = {MockType.MUJOCO: mock_probe}
+
+    res = diag.check_engine_availability()
+    assert res.status == "pass"
+
+
+@pytest.mark.unit
+def test_reset_layout_config_overwrites_existing_backup(tmp_path: Path) -> None:
+    config_file = tmp_path / "launcher_layout.json"
+    backup_file = config_file.with_suffix(".json.bak")
+    backup_file.write_text("old backup", encoding="utf-8")
+    config_file.write_text("first layout", encoding="utf-8")
+
+    with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file):
+        assert reset_layout_config() is True
+        config_file.write_text("second layout", encoding="utf-8")
+        assert reset_layout_config() is True
+
+    assert not config_file.exists()
+    assert backup_file.read_text(encoding="utf-8") == "second layout"
+
+
+@patch.object(LauncherDiagnostics, "run_all_checks")
+def test_run_cli_diagnostics(mock_run) -> None:
+    mock_run.return_value = {
+        "summary": {"status": "healthy", "passed": 1, "failed": 0, "warnings": 0},
+        "checks": [{"name": "check1", "status": "pass", "message": "msg"}],
+        "recommendations": ["Do this"],
+    }
+    run_cli_diagnostics()
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_yaml_error(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", mock_open(read_data="[ : invalid yaml")):
+        res = diag.check_models_yaml()
+    assert res.status == "fail"
+    assert "YAML parsing error" in res.message
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=ImportError("mock"),
+)
+def test_check_model_registry_import_error(mock_registry_class) -> None:
+    diag = LauncherDiagnostics()
+    res = diag.check_model_registry()
+    assert res.status == "fail"
+    assert "Failed to import" in res.message
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=RuntimeError("mock"),
+)
+def test_check_model_registry_runtime_error(mock_registry_class) -> None:
+    diag = LauncherDiagnostics()
+    res = diag.check_model_registry()
+    assert res.status == "fail"
+    assert "ModelRegistry error" in res.message
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_layout_config_os_error(mock_exists) -> None:
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", side_effect=OSError("denied")):
+        res = diag.check_layout_config()
+    assert res.status == "warning"
+    assert "Error reading layout" in res.message
+
+
+def test_check_pyqt6_availability_success() -> None:
+    diag = LauncherDiagnostics()
+    with (
+        patch("PyQt6.QtCore.PYQT_VERSION_STR", "6.0", create=True),
+        patch("PyQt6.QtCore.QT_VERSION_STR", "6.0", create=True),
+        patch("PyQt6.QtWidgets.QApplication", create=True),
+    ):
+        res = diag.check_pyqt6_availability()
+    assert res.status == "pass"
+    assert "PyQt6 available" in res.message
+
+
+def test_check_pyqt6_availability_import_error() -> None:
+    diag = LauncherDiagnostics()
+    with patch.dict("sys.modules", {"PyQt6.QtCore": None, "PyQt6.QtWidgets": None}):
+        res = diag.check_pyqt6_availability()
+    assert res.status == "fail"
+
+
+@patch("src.shared.python.engine_core.engine_manager.EngineManager")
+def test_check_engine_availability_probe_error(mock_manager_class) -> None:
+    diag = LauncherDiagnostics()
+    mock_mgr = MagicMock()
+    mock_manager_class.return_value = mock_mgr
+
+    import enum
+
+    class MockStatus(enum.Enum):
+        AVAILABLE = "available"
+
+    class MockType(enum.Enum):
+        MUJOCO = "mujoco"
+
+    mock_probe = MagicMock()
+    mock_probe.probe.side_effect = RuntimeError("probe failed")
+
+    mock_mgr.get_available_engines.return_value = []
+    mock_mgr.engine_status = {MockType.MUJOCO: MockStatus.AVAILABLE}
+    mock_mgr.engine_paths = {MockType.MUJOCO: "/fake"}
+    mock_mgr.probes = {MockType.MUJOCO: mock_probe}
+
+    res = diag.check_engine_availability()
+    assert res.status == "warning"
+
+
+@patch("src.shared.python.engine_core.engine_manager.EngineManager")
+def test_check_engine_availability_no_probe(mock_manager_class) -> None:
+    diag = LauncherDiagnostics()
+    mock_mgr = MagicMock()
+    mock_manager_class.return_value = mock_mgr
+
+    import enum
+
+    from src.shared.python.engine_core.engine_registry import EngineStatus
+
+    class MockType(enum.Enum):
+        MUJOCO = "mujoco"
+
+    # No probe
+    mock_mgr.get_available_engines.return_value = [MockType.MUJOCO]
+    mock_mgr.engine_status = {MockType.MUJOCO: EngineStatus.AVAILABLE}
+    mock_mgr.engine_paths = {MockType.MUJOCO: "/fake"}
+    mock_mgr.probes = {}
+
+    res = diag.check_engine_availability()
+    assert res.status == "pass"
+
+
+@patch(
+    "src.shared.python.engine_core.engine_manager.EngineManager",
+    side_effect=ImportError("mock"),
+)
+def test_check_engine_availability_import_error(mock_manager_class) -> None:
+    diag = LauncherDiagnostics()
+    res = diag.check_engine_availability()
+    assert res.status == "warning"
+
+
+@patch(
+    "src.shared.python.engine_core.engine_manager.EngineManager",
+    side_effect=RuntimeError("mock"),
+)
+def test_check_engine_availability_runtime_error(mock_manager_class) -> None:
+    diag = LauncherDiagnostics()
+    res = diag.check_engine_availability()
+    assert res.status == "warning"
+
+
+def test_generate_recommendations() -> None:
+    diag = LauncherDiagnostics()
+    res1 = DiagnosticResult("models_yaml", "fail", "msg", {})
+    res2 = DiagnosticResult("model_registry", "fail", "msg", {})
+    res3 = DiagnosticResult("pyqt6_availability", "fail", "msg", {})
+    res4 = DiagnosticResult("asset_files", "fail", "msg", {})
+    res5 = DiagnosticResult(
+        "layout_config", "warning", "msg", {"missing_from_saved": ["drake"]}
+    )
+    res6 = DiagnosticResult("asset_files", "warning", "msg", {})
+    res7 = DiagnosticResult("launcher_provider_compatibility", "warning", "msg", {})
+
+    diag.results.extend([res1, res2, res3, res4, res5, res6, res7])
+    recs = diag._generate_recommendations()
+    assert len(recs) == 7
+
+    # Test healthy branch
+    diag.results.clear()
+    diag.results.append(DiagnosticResult("test", "pass", "ok"))
+    recs = diag._generate_recommendations()
+    assert len(recs) == 1
+    assert "operational" in recs[0]
+
+
+@patch("pathlib.Path.exists", return_value=True)
+@patch("pathlib.Path.replace", side_effect=OSError("mock"))
+def test_reset_layout_config_error(mock_replace, mock_exists) -> None:
+    from src.launchers.launcher_diagnostics import reset_layout_config
+
+    assert reset_layout_config() is False
+
+
+@patch.object(LauncherDiagnostics, "run_all_checks")
+def test_run_cli_diagnostics_failures_and_warnings(mock_run) -> None:
+    mock_run.return_value = {
+        "summary": {"status": "degraded", "passed": 0, "failed": 1, "warnings": 1},
+        "checks": [
+            {
+                "name": "fail_check",
+                "status": "fail",
+                "message": "fail msg",
+                "details": {"missing_expected_ids": ["x"]},
+            },
+            {
+                "name": "warn_check",
+                "status": "warning",
+                "message": "warn msg",
+                "details": {"missing_from_saved": ["y"]},
+            },
+        ],
+        "recommendations": ["Do this", "Do that"],
+    }
+    run_cli_diagnostics()
+
+
+@patch("src.launchers.launcher_diagnostics._run_git_cmd")
+@patch.object(LauncherDiagnostics, "_find_sibling_tools_root")
+@patch("pathlib.Path.is_dir")
+def test_check_shared_tools_freshness_scenarios(
+    mock_is_dir, mock_find_sibling, mock_run_git
+) -> None:
+    diag = LauncherDiagnostics()
+
+    # Scenario 1: Submodule not initialized
+    mock_is_dir.return_value = False
+    mock_find_sibling.return_value = None
+    mock_run_git.side_effect = lambda cmd, **kwargs: (
+        "160000 1234567890abcdef1234567890abcdef12345678 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else ""
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert res.details["submodule_status"] == "not_initialized"
+    assert "not initialized" in res.message
+
+    # Scenario 2: Submodule out of sync with pin
+    mock_is_dir.return_value = True
+    mock_run_git.side_effect = lambda cmd, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "2222222222222222222222222222222222222222"
+            if "rev-parse" in cmd[1] and "HEAD" in cmd[2]
+            else (
+                "2222222222222222222222222222222222222222"
+                if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                else ""
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert res.details["submodule_status"] == "out_of_sync_with_pin"
+
+    # Scenario 3: Sibling Tools repo out of sync
+    from pathlib import Path
+
+    mock_find_sibling.return_value = Path("/fake/sibling/Tools")
+    mock_run_git.side_effect = lambda cmd, cwd=None, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "1111111111111111111111111111111111111111"
+            if "rev-parse" in cmd[1]
+            and "HEAD" in cmd[2]
+            and cwd
+            and "vendor" in str(cwd)
+            else (
+                "3333333333333333333333333333333333333333"
+                if "rev-parse" in cmd[1]
+                and "HEAD" in cmd[2]
+                and cwd
+                and "Tools" in str(cwd)
+                else (
+                    "1111111111111111111111111111111111111111"
+                    if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                    else ""
+                )
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert res.details["sibling_status"] == "out_of_sync_with_submodule"
+
+    # Scenario 4: Submodule behind remote branch
+    mock_find_sibling.return_value = None
+    mock_run_git.side_effect = lambda cmd, cwd=None, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "1111111111111111111111111111111111111111"
+            if "rev-parse" in cmd[1] and "HEAD" in cmd[2]
+            else (
+                "4444444444444444444444444444444444444444"
+                if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                else (
+                    "1111111111111111111111111111111111111111"
+                    if "merge-base" in cmd[1]
+                    else ""
+                )
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "warning"
+    assert "behind remote" in res.message
+
+    # Scenario 5: Fully synchronized
+    mock_run_git.side_effect = lambda cmd, cwd=None, **kwargs: (
+        "160000 1111111111111111111111111111111111111111 0\tvendor/ud-tools"
+        if "ls-files" in cmd[1]
+        else (
+            "1111111111111111111111111111111111111111"
+            if "rev-parse" in cmd[1] and "HEAD" in cmd[2]
+            else (
+                "1111111111111111111111111111111111111111"
+                if "rev-parse" in cmd[1] and "origin" in cmd[2]
+                else ""
+            )
+        )
+    )
+
+    res = diag.check_shared_tools_freshness()
+    assert res.status == "pass"

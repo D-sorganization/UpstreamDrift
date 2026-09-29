@@ -1,0 +1,50 @@
+# Documentation Authority and Release Boundary
+
+## Purpose
+
+The manual will explain scientific calculations from theory and assumptions
+through typed inputs, units, coordinate and time conventions, algorithms,
+implementation symbols, tests, uncertainty, limitations, user surfaces, and
+artifacts. UpstreamDrift source and evidence remain authoritative; the manual
+cannot approve a calculation that its owning source, evidence, or human review
+has not approved.
+
+## Canonical Source
+
+Only QMD under `manuals/upstreamdrift` is editable manual source. Existing user
+guides, ADRs, research articles, LaTeX projects, and generated publications are
+separate governed products. They can supply reviewed references, but none is a
+second mutable source for this manual.
+
+Generated LaTeX, PDF, DOCX, and HTML are non-editable artifacts. A correction
+starts in canonical QMD, then regenerates every affected representation through
+the qualified toolchain. UP-D3 owns that toolchain; UP-D8 owns artifact review
+and publication evidence.
+
+## Evidence Classes
+
+Every calculation and claim must be classified as observed, derived,
+model-scenario, external, provisional, unavailable, or approved within an
+explicit scope. Model results are not human measurements. A citation does not
+qualify code, and a passing render does not qualify a calculation.
+
+## Approval and Failure Semantics
+
+The default is deny-until-approved. Missing inventory coverage, source
+authority, units, coordinate or time convention, implementation symbol, test,
+validity range, uncertainty, artifact digest, page review, or human approval
+keeps the affected item blocked. Unsupported values are never replaced with
+synthetic or plausible values without an explicit model-scenario contract.
+
+## Exemptions
+
+Future freshness exemptions must be structured, narrowly scoped, justified,
+owned, reviewed, and expiring. An exemption cannot authorize an equation,
+scientific claim, artifact, operating use, or public projection.
+
+## Current Boundary
+
+UP-D0 establishes governance only. The empty calculation registry is honest
+evidence that UP-D1 has not completed the inventory. No completeness,
+multi-format reproducibility, page inspection, accessibility, or publication
+claim is made by this scaffold.

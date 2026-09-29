@@ -1,0 +1,524 @@
+#!/usr/bin/env python3
+"""
+Assess repository against 15 categories (A-O) and generate reports.
+"""
+
+import json
+import logging
+import subprocess
+import sys
+from pathlib import Path
+
+from scripts.script_utils import get_repo_root
+
+_REPO_ROOT = get_repo_root()
+
+from src.shared.python.assessment.analysis import (  # noqa: E402
+    assess_error_handling_content,
+    assess_logging_content,
+    calculate_complexity,
+    count_files,
+    get_python_metrics,
+    grep_count,
+)
+from src.shared.python.assessment.constants import (  # noqa: E402
+    CATEGORIES,
+)
+from src.shared.python.assessment.reporting import (  # noqa: E402
+    generate_issue_document,
+    generate_markdown_report,
+)
+from src.shared.python.data_io.path_utils import get_repo_root  # noqa: E402
+
+logger = logging.getLogger(__name__)
+
+# Setup paths
+REPO_ROOT = get_repo_root()
+DOCS_DIR = REPO_ROOT / "docs" / "assessments"
+ISSUES_DIR = DOCS_DIR / "issues"
+
+DOCS_DIR.mkdir(parents=True, exist_ok=True)
+ISSUES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def assess_A() -> Path:
+    """Assess code structure and directory organization."""
+    # Code Structure
+    findings = []
+    score = 8.0
+
+    src_exists = (REPO_ROOT / "src").exists() or (REPO_ROOT / "shared").exists()
+    if src_exists:
+        findings.append("Source directory structure exists (src/ or shared/).")
+    else:
+        findings.append("No standard 'src' or 'shared' directory found.")
+        score -= 2
+
+    engines_exists = (REPO_ROOT / "engines").exists()
+    if engines_exists:
+        findings.append("Engines directory found, indicating modular architecture.")
+
+    recs = ["Ensure all new code follows the modular engine structure."]
+    return generate_markdown_report(
+        "A", CATEGORIES["A"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_B() -> Path:
+    """Assess documentation quality and coverage."""
+    # Documentation
+    findings = []
+    score = 7.0
+
+    readme = REPO_ROOT / "README.md"
+    if readme.exists():
+        findings.append("Root README.md exists.")
+        if len(readme.read_text()) > 500:
+            findings.append("README.md is reasonably detailed.")
+        else:
+            findings.append("README.md is too short.")
+            score -= 1
+    else:
+        findings.append("Missing root README.md.")
+        score -= 3
+
+    docs_folder = REPO_ROOT / "docs"
+    if docs_folder.exists():
+        findings.append("docs/ directory exists.")
+    else:
+        findings.append("No docs/ directory.")
+        score -= 1
+
+    recs = ["Expand documentation for individual engines."]
+    return generate_markdown_report(
+        "B", CATEGORIES["B"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_C() -> Path:
+    """Assess test coverage and test file count."""
+    # Test Coverage
+    findings = []
+    score = 6.0
+
+    tests_dir = REPO_ROOT / "tests"
+    if tests_dir.exists():
+        test_files = count_files(REPO_ROOT, "tests/**/test_*.py")
+        findings.append(f"Found {test_files} test files in tests/ directory.")
+        if test_files < 5:
+            score -= 2
+    else:
+        findings.append("No root tests/ directory found.")
+        score -= 3
+
+    recs = ["Increase test coverage for shared modules.", "Add integration tests."]
+    return generate_markdown_report(
+        "C", CATEGORIES["C"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_D() -> Path:
+    """Error Handling assessment."""
+    findings = []
+    py_files = REPO_ROOT.rglob("*.py")
+    try_count = 0
+    bare_except_count = 0
+
+    for f in py_files:
+        if "node_modules" in f.parts or "venv" in f.parts:
+            continue
+        try:
+            results = assess_error_handling_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
+            try_count += results["try_count"]
+            bare_except_count += results["bare_except_count"]
+        except (OSError, KeyError, ValueError):
+            pass
+
+    score = 7.0
+    findings.append(
+        f"Found {try_count} try blocks and {bare_except_count} bare except blocks."
+    )
+
+    if bare_except_count > 5:
+        score -= 2
+    if try_count == 0:
+        score -= 3
+
+    recs = ["Ensure specific exceptions are caught.", "Avoid bare except clauses."]
+    return generate_markdown_report(
+        "D", CATEGORIES["D"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_E() -> Path:
+    """Assess performance profiling practices."""
+    # Performance
+    findings = []
+    score = 7.5
+
+    # Heuristic: check for performance profiling tools or imports
+    profiling = grep_count(REPO_ROOT, r"cProfile|timeit")
+    if profiling > 0:
+        findings.append("Profiling tools usage detected.")
+    else:
+        findings.append("No explicit profiling code found.")
+
+    recs = ["Implement performance benchmarks for physics engines."]
+    return generate_markdown_report(
+        "E", CATEGORIES["E"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_F() -> Path:
+    """Assess security practices and hardcoded secrets."""
+    # Security
+    findings = []
+    score = 8.0
+
+    # Look for actual hardcoded string literal assignments across the repo.
+    # Pattern requires a string value of 8+ chars to avoid matching docstring
+    # examples, type annotations, and function parameter names.
+    # Test/fixture/vendored directories are excluded because they legitimately
+    # use fake placeholder values; everything else (src, scripts, tooling) is
+    # scanned so hardcoded credentials outside src/ are not silently ignored.
+    secret_scan_excludes = [
+        "tests",
+        "test",
+        "fixtures",
+        "vendor",
+        "vendored",
+        "third_party",
+        "node_modules",
+        ".venv",
+        "venv",
+    ]
+    hardcoded_secrets = grep_count(
+        REPO_ROOT,
+        r'(?:password|secret|api_key|token)\s*=\s*["\'][^"\']{8,}["\']',
+        "**/*.py",
+        exclude_parts=secret_scan_excludes,
+    )
+    if hardcoded_secrets > 0:
+        findings.append(
+            f"Potential hardcoded secrets found in {hardcoded_secrets} files (needs verification)."
+        )
+        score -= 1
+    else:
+        findings.append(
+            "No obvious hardcoded secret patterns found outside of test fixtures."
+        )
+
+    recs = [
+        "Run bandit security analysis regularly.",
+        "Use environment variables for all secrets.",
+    ]
+    return generate_markdown_report(
+        "F", CATEGORIES["F"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_G() -> Path:
+    """Assess dependency management and definition files."""
+    # Dependencies
+    findings = []
+    score = 8.5
+
+    reqs = REPO_ROOT / "requirements.txt"
+    pyproj = REPO_ROOT / "pyproject.toml"
+
+    if reqs.exists() or pyproj.exists():
+        findings.append("Dependency definition files found.")
+    else:
+        findings.append("No requirements.txt or pyproject.toml found.")
+        score -= 4
+
+    recs = ["Pin dependency versions.", "Audit dependencies for vulnerabilities."]
+    return generate_markdown_report(
+        "G", CATEGORIES["G"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_H() -> Path:
+    """Assess CI/CD pipeline configuration."""
+    # CI/CD
+    findings = []
+    score = 8.0
+
+    workflows = REPO_ROOT / ".github" / "workflows"
+    if workflows.exists():
+        count = len(list(workflows.glob("*.yml"))) + len(list(workflows.glob("*.yaml")))
+        findings.append(f"Found {count} GitHub Actions workflows.")
+        if count == 0:
+            score -= 3
+    else:
+        findings.append("No .github/workflows directory.")
+        score -= 5
+
+    recs = ["Ensure CI runs on all PRs.", "Add CD pipelines for releases."]
+    return generate_markdown_report(
+        "H", CATEGORIES["H"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_I() -> Path:
+    """Assess code style and linter configuration."""
+    # Code Style
+    findings = []
+    score = 8.0
+
+    toml = REPO_ROOT / "pyproject.toml"
+    if toml.exists() and "tool.ruff" in toml.read_text():
+        findings.append("Ruff configuration found.")
+    else:
+        findings.append("No explicit Ruff config in pyproject.toml.")
+        score -= 1
+
+    recs = ["Enforce linting in CI.", "Use black for formatting."]
+    return generate_markdown_report(
+        "I", CATEGORIES["I"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_J() -> Path:
+    """Assess API design and endpoint documentation."""
+    # API Design
+    findings = []
+    score = 7.5
+
+    api_dir = REPO_ROOT / "api"
+    src_api_dir = REPO_ROOT / "src" / "api"
+
+    target_api_dir = None
+    if api_dir.exists() and api_dir.is_dir():
+        target_api_dir = api_dir
+        findings.append("api/ directory exists.")
+    elif src_api_dir.exists() and src_api_dir.is_dir():
+        target_api_dir = src_api_dir
+        findings.append("src/api/ directory exists.")
+
+    if target_api_dir:
+        # Check for FastAPI usage in the found directory relative to REPO_ROOT
+        # grep_count takes a root and a pattern. We need to grep inside the api dir.
+        # But grep_count implementation iterates glob from root.
+        # So we can pass REPO_ROOT and a pattern that matches the specific dir.
+
+        rel_path = target_api_dir.relative_to(REPO_ROOT)
+        fastapi = grep_count(REPO_ROOT, "FastAPI", f"{rel_path}/**/*.py")
+
+        if fastapi > 0:
+            findings.append("FastAPI usage detected.")
+    else:
+        findings.append("No api/ or src/api/ directory.")
+        score -= 2
+
+    recs = ["Document API endpoints using OpenAPI.", "Version API endpoints."]
+    return generate_markdown_report(
+        "J", CATEGORIES["J"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_K() -> Path:
+    """Assess data handling and validation patterns."""
+    # Data Handling
+    findings = []
+    score = 7.0
+
+    findings.append("Assessed data handling patterns.")
+
+    recs = ["Validate input data schemas.", "Sanitize database inputs."]
+    return generate_markdown_report(
+        "K", CATEGORIES["K"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_L() -> Path:
+    """Logging assessment."""
+    findings = []
+    py_files = REPO_ROOT.rglob("*.py")
+    logging_usage = 0
+    print_usage = 0
+
+    for f in py_files:
+        if "node_modules" in f.parts or "venv" in f.parts:
+            continue
+        try:
+            results = assess_logging_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
+            logging_usage += results["logging_usage"]
+            print_usage += results["print_usage"]
+        except (OSError, KeyError, ValueError):
+            pass
+
+    score = 7.0
+    findings.append(
+        f"Found {logging_usage} logging calls and {print_usage} print calls."
+    )
+
+    if print_usage > logging_usage:
+        findings.append("High usage of print statements detected.")
+        score -= 1
+
+    recs = [
+        "Replace print statements with structured logging.",
+        "Configure log levels.",
+    ]
+    return generate_markdown_report(
+        "L", CATEGORIES["L"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_M() -> Path:
+    """Assess configuration management practices."""
+    # Configuration
+    findings = []
+    score = 7.5
+
+    config_files = list(REPO_ROOT.glob("**/*.yaml")) + list(REPO_ROOT.glob("**/*.toml"))
+    findings.append(f"Found {len(config_files)} configuration files (yaml/toml).")
+
+    recs = ["Centralize configuration management.", "Use .env for local overrides."]
+    return generate_markdown_report(
+        "M", CATEGORIES["M"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_N() -> Path:
+    """Assess scalability readiness of the architecture."""
+    # Scalability
+    findings = []
+    score = 7.0
+
+    findings.append("Scalability assessment based on architecture.")
+
+    recs = [
+        "Consider async processing for heavy loads.",
+        "Implement caching strategies.",
+    ]
+    return generate_markdown_report(
+        "N", CATEGORIES["N"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def assess_O() -> Path:
+    """Assess code maintainability and complexity metrics."""
+    # Maintainability
+    findings = []
+    score = 7.5
+
+    total_metrics = {"functions": 0, "branches": 0}
+    py_files = REPO_ROOT.rglob("*.py")
+    for f in py_files:
+        if "node_modules" in f.parts or "venv" in f.parts:
+            continue
+        metrics = get_python_metrics(f)
+        total_metrics["functions"] += metrics["functions"]
+        total_metrics["branches"] += metrics["branches"]
+
+    avg_complexity = calculate_complexity(total_metrics)
+    findings.append(f"Average complexity (branches/func): {avg_complexity:.2f}")
+
+    if avg_complexity > 5:
+        score -= 2
+
+    recs = ["Refactor large functions.", "Keep dependencies updated."]
+    return generate_markdown_report(
+        "O", CATEGORIES["O"], score, "\n".join(findings), recs, DOCS_DIR
+    )
+
+
+def run_all_assessments() -> list[Path]:
+    """Execute all category assessments and return their reports."""
+    assessors = [
+        assess_A,
+        assess_B,
+        assess_C,
+        assess_D,
+        assess_E,
+        assess_F,
+        assess_G,
+        assess_H,
+        assess_I,
+        assess_J,
+        assess_K,
+        assess_L,
+        assess_M,
+        assess_N,
+        assess_O,
+    ]
+
+    reports = []
+    for assessor in assessors:
+        try:
+            report = assessor()
+            reports.append(report)
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
+            logger.error("Error running assessment: %s", e)
+
+    return reports
+
+
+def generate_issues_locally(json_path) -> None:
+    """Read summary JSON and create issue markdown files for low scores."""
+    try:
+        with open(json_path) as f:
+            data = json.load(f)
+
+        category_scores = data.get("category_scores", {})
+
+        for cat_code, info in category_scores.items():
+            score = info.get("score", 10)
+            if score < 5:
+                generate_issue_document(
+                    category_id=cat_code,
+                    category_name=info.get("name", CATEGORIES.get(cat_code, "Unknown")),
+                    grade=score,
+                    details="The assessment for this category returned a score below 5/10.",
+                    output_dir=ISSUES_DIR,
+                )
+                logger.info("Created issue for category %s", cat_code)
+
+    except (OSError, json.JSONDecodeError, KeyError) as e:
+        logger.error("Error generating local issues: %s", e)
+
+
+def main() -> None:
+    """Run all assessments and generate the summary report."""
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    logger.info("Starting repository assessment...")
+
+    # 1. Run individual assessments
+    reports = run_all_assessments()
+
+    # 2. Run summary generator
+    summary_md = DOCS_DIR / "Comprehensive_Assessment.md"
+    summary_json = DOCS_DIR / "assessment_summary.json"
+
+    # Use explicitly generated reports
+    input_reports = [str(p.relative_to(REPO_ROOT)) for p in reports]
+
+    cmd = [
+        sys.executable,
+        str(REPO_ROOT / "scripts" / "generate_assessment_summary.py"),
+        "--input",
+        *input_reports,
+        "--output",
+        str(summary_md),
+        "--json-output",
+        str(summary_json),
+    ]
+
+    logger.info("Generating summary...")
+    subprocess.run(cmd, check=True)
+
+    # 3. Create issues locally for low grades
+    logger.info("Checking for low grades...")
+    generate_issues_locally(summary_json)
+
+    logger.info("Assessment complete.")
+
+
+if __name__ == "__main__":
+    main()

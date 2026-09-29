@@ -1,0 +1,43 @@
+{
+  "number": 9613,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/9613",
+  "title": "Rig soak: three-camera sessions intermittently fail to open cameras (dshow I/O error) and a camera re-enumerates mid-series",
+  "body": "Evidence from 2026-09-06 evening on the lab rig (all cameras on the Sonnet root hub `9&1d291187`; cam_c two hub tiers deep behind the TS4, which was chained on the Sonnet contrary to runbook rule 3):\n\n- Back-to-back three-camera `record` runs at 1920x1200@60 for 4 s: runs 1 and 2 supported (59.8/60.0/60.1 fps, 59.8/60.1/60.0 fps); runs 3-5 aborted at `plan-check` with `missing=['cam_b']`; run 6 (640x480@200) opened cam_a at 200.5 fps while cam_b and cam_c failed with `Error opening input files: I/O error` (rc -5) before delivering a frame.\n- `DEVPKEY_Device_LastArrivalDate` shows `USB\\VID_32E4&PID_5234\\2605160001` re-arrived at 20:50:23, i.e. one camera dropped off the bus and re-enumerated during the series.\n- The earlier 10-mode sweep showed the same pattern: every three-camera run lost two cameras at open (rc -5, 0 bytes) while the single-camera runs of the same modes succeeded; a later three-camera run at 60 fps then succeeded 3/3.\n- Solo opens of each camera succeed; 1600x1200@120 opens and decodes zero frames (`I/O error` during demuxing).\n\nSince the fix in the flexibility PR, `recordings.json` carries `recorder_note` (ffmpeg's last stderr) and `recorder_wall_s`, and a zero-frame recording is `blocked`, so the failure is at least named. Still unknown: whether the TS4-behind-Sonnet chain, USB power on the Sonnet, or the DirectShow graph race is the cause.\n\nAcceptance: 10 consecutive three-camera `record` runs at 1920x1200@60 with the TS4 on its own Thunderbolt port and every camera directly on a Sonnet jack, all `supported`, no re-enumeration in `LastArrivalDate`; then repeat with the TS4 chained to reproduce or clear rule 3. Consider a `record --repeat N` soak mode that records this evidence automatically. Part of #9599 / #9422.",
+  "updated_at": "2026-09-19T17:38:37Z",
+  "labels": [
+    {
+      "id": 9842881837,
+      "node_id": "LA_kwDOQqJAi88AAAACSq51LQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/bug",
+      "name": "bug",
+      "color": "d73a4a",
+      "default": true,
+      "description": "Something isn't working",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 10796034821,
+      "node_id": "LA_kwDOQqJAi88AAAACg35rBQ",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/P2",
+      "name": "P2",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Medium priority",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 12266883256,
+      "node_id": "LA_kwDOQqJAi88AAAAC2ynIuA",
+      "url": "https://api.github.com/repos/D-sorganization/UpstreamDrift/labels/triaged-2026-09",
+      "name": "triaged-2026-09",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Reviewed in the 2026-09-19 backlog triage",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "open"
+}

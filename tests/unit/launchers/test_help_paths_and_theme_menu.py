@@ -1,0 +1,316 @@
+"""Regression tests for broken help paths (#8014, #7986) and theme dupes (#8026).
+
+* The Help menu's *User Guide* and *Project Map* entries resolved to files that
+  have never existed, so they silently fell back to the GitHub repo URL / a
+  "not found" warning while their tooltips promised a bundled document.
+* ``ContextHelpDock`` claimed "No specific documentation available" for 11 of
+  the 22 mapped tiles because its hard-coded doc paths pointed at directories
+  that were never created.
+* ``View > Theme`` listed every custom theme twice and split the exclusive
+  check state across the duplicate pair.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+pytest.importorskip("PyQt6")
+
+from src.launchers import about_dialog, help_dialogs  # noqa: E402
+from src.launchers.launcher_dialogs import DialogsManager  # noqa: E402
+from src.shared.python.config.model_registry import ModelRegistry  # noqa: E402
+
+pytestmark = pytest.mark.unit
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+class TestUserGuidePaths:
+    """#8014 — Help > User Guide must find a real bundled document."""
+
+    def test_at_least_one_candidate_exists(self) -> None:
+        candidates = about_dialog.user_guide_candidates()
+        existing = [c for c in candidates if c.exists()]
+        assert existing, f"No bundled user guide found. Searched: {candidates}"
+
+    def test_every_candidate_lives_inside_the_repository(self) -> None:
+        """The old ``parents[3]`` candidate resolved outside the checkout."""
+        repo_root = Path(about_dialog.__file__).resolve().parents[2]
+        for candidate in about_dialog.user_guide_candidates():
+            assert repo_root in candidate.parents, (
+                f"{candidate} escapes the repository root {repo_root} — #8014"
+            )
+
+
+class TestProjectMapPaths:
+    """#8014 — Help > Project Map must find a real document."""
+
+    def test_candidates_are_real_files(self) -> None:
+        candidates = [REPO_ROOT / rel for rel in DialogsManager.PROJECT_MAP_CANDIDATES]
+        existing = [c for c in candidates if c.exists()]
+        assert existing, f"No Project Map found. Searched: {candidates}"
+
+    def test_help_content_points_at_a_real_file(self) -> None:
+        from src.shared.python.gui_pkg import help_content
+
+        entry = help_content.FEATURE_HELP["project_map"]
+        text = entry["description"] + "\n".join(entry["tips"])
+        assert "docs/PROJECT_MAP.md" not in text.replace(
+            "docs/architecture/PROJECT_MAP.md", ""
+        ).replace("docs/governance/PROJECT_MAP.md", ""), (
+            "help_content still advertises the nonexistent docs/PROJECT_MAP.md"
+        )
+
+
+class TestContextHelpDocResolution:
+    """#7986 — every doc path the dock hands back must exist."""
+
+    def test_every_mapped_tile_resolves_to_an_existing_file(self, qapp) -> None:
+        dock = help_dialogs.ContextHelpDock()
+        try:
+            broken: list[tuple[str, str]] = []
+            for model in ModelRegistry().get_all_models():
+                path = dock._get_doc_file(model.id)
+                if path is not None and not path.exists():
+                    broken.append((model.id, str(path)))
+            assert not broken, f"doc paths resolve to missing files: {broken}"
+        finally:
+            dock.deleteLater()
+
+    @pytest.mark.parametrize(
+        "model_id",
+        [
+            "putting_green",
+            "putting_green_gui",
+            "c3d_viewer",
+            "video_analyzer",
+            "mediapipe_analysis",
+            "model_explorer",
+            "project_map",
+        ],
+    )
+    def test_previously_broken_tiles_now_have_docs(self, qapp, model_id) -> None:
+        dock = help_dialogs.ContextHelpDock()
+        try:
+            path = dock._get_doc_file(model_id)
+            assert path is not None and path.exists(), (
+                f"{model_id} still has no resolvable documentation"
+            )
+        finally:
+            dock.deleteLater()
+
+    def test_missing_docs_report_what_was_searched(self, qapp) -> None:
+        """An unmapped tile gets an honest message, not a bare 'not available'."""
+        dock = help_dialogs.ContextHelpDock()
+        try:
+            dock.update_context("totally_unmapped_tile")
+            text = dock.text_area.toPlainText()
+            assert "totally_unmapped_tile" in text
+            assert "no documentation mapping yet" in text
+            assert "docs/user_guide/user_manual.md" in text
+        finally:
+            dock.deleteLater()
+
+    def test_searched_paths_are_listed_when_candidates_all_miss(
+        self, qapp, monkeypatch
+    ) -> None:
+        dock = help_dialogs.ContextHelpDock()
+        try:
+            monkeypatch.setattr(
+                type(dock),
+                "_doc_candidates",
+                lambda self, model_id: [REPO_ROOT / "docs" / "nope.md"],
+            )
+            dock.update_context("some_tile")
+            text = dock.text_area.toPlainText()
+            assert "No documentation file has been written" in text
+            assert "docs/nope.md" in text
+        finally:
+            dock.deleteLater()
+
+
+class TestThemeMenuHasNoDuplicates:
+    """#8026 — custom themes must appear exactly once."""
+
+    def test_extra_themes_exclude_custom_themes(self) -> None:
+        """The two menu sections must not overlap."""
+        from src.shared.python.theme import ThemeManager
+
+        manager = ThemeManager.instance()
+        presets = {"Dark", "Light", "High Contrast"}
+        custom = set(manager.get_custom_theme_names())
+        extra = [
+            t
+            for t in manager.get_available_themes()
+            if t not in presets and t not in custom
+        ]
+        assert not (set(extra) & custom), (
+            "extra-themes section still overlaps the custom-themes section"
+        )
+
+    def test_source_filters_custom_names_out_of_extras(self) -> None:
+        from src.launchers import launcher_theme
+
+        source = Path(launcher_theme.__file__).read_text(encoding="utf-8")
+        assert "custom_lookup" in source, (
+            "launcher_theme no longer excludes custom themes from the "
+            "built-in section — #8026 would regress"
+        )
+
+
+class TestInAppHelpSystem:
+    """#8843 — In-app help system roots and component mappings."""
+
+    def test_user_manual_path_exists(self) -> None:
+        from src.shared.python.gui_pkg import help_system
+
+        assert help_system.USER_MANUAL_PATH.exists()
+        content = help_system.get_user_manual_content()
+        assert "# User Manual Not Found" not in content
+        assert "UpstreamDrift User Manual" in content
+
+    def test_all_ui_help_topics_resolve_to_feature_help(self) -> None:
+        from src.shared.python.gui_pkg import help_content
+
+        missing: list[str] = []
+        for component_id, topic_id in help_content.UI_HELP_TOPICS.items():
+            help_dict = help_content.get_component_help(component_id)
+            if help_dict is None:
+                missing.append(f"{component_id} -> {topic_id}")
+            else:
+                assert "title" in help_dict
+                assert "description" in help_dict
+        assert not missing, f"Components resolve to no feature help: {missing}"
+
+    def test_all_registered_topics_resolve_content(self) -> None:
+        from src.shared.python.gui_pkg import help_content, help_system
+
+        missing: list[str] = []
+        for topic_id in help_content.HELP_TOPICS:
+            content = help_system.get_help_topic_content(topic_id)
+            if "Topic Not Found" in content or "Error Loading" in content:
+                missing.append(topic_id)
+            assert "../USER_MANUAL.md" not in content, (
+                f"Topic {topic_id} contains dead ../USER_MANUAL.md link"
+            )
+        assert not missing, f"Topics could not be loaded: {missing}"
+
+    def test_list_help_topics_includes_getting_started(self) -> None:
+        from src.shared.python.gui_pkg import help_system
+
+        topics = help_system.list_help_topics()
+        topic_ids = [t[0] for t in topics]
+        assert "getting_started" in topic_ids
+        assert "analysis_tools" in topic_ids
+        assert "simulation_controls" in topic_ids
+        assert "user_manual" not in topic_ids
+
+
+class TestToolHelpAffordances:
+    """#8846 — GUI tool windows must expose a Help menu and calculation docs."""
+
+    def test_build_help_menu_with_doc_target(self, qapp) -> None:
+        from PyQt6.QtWidgets import QMainWindow
+        from src.launchers.help_menu import build_help_menu
+
+        win = QMainWindow()
+        try:
+            bar = win.menuBar()
+            menu = build_help_menu(
+                bar,
+                win,
+                doc_target=(
+                    "Ball Flight Model Documentation",
+                    "docs/physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md",
+                ),
+            )
+            labels = [a.text() for a in menu.actions() if not a.isSeparator()]
+            assert "&Ball Flight Model Documentation" in labels
+            assert "&User Guide" in labels
+            assert "&Motion-Match Loaders" in labels
+            assert "&About" in labels
+        finally:
+            win.deleteLater()
+
+    @pytest.mark.parametrize(
+        ("module_path", "window_cls_name", "expected_doc_action"),
+        [
+            (
+                "src.tools.ball_flight_gui.gui",
+                "BallFlightWindow",
+                "&Ball Flight Model Documentation",
+            ),
+            (
+                "src.tools.bunker_shot_gui.gui",
+                "BunkerShotWindow",
+                "&BunkerShot3D Credibility Statement",
+            ),
+            (
+                "src.tools.putting_green_gui.gui",
+                "PuttingGreenWindow",
+                "&Putting Kinematics & Kinetics Review",
+            ),
+            (
+                "src.tools.swing_flight_pipeline.gui",
+                "SwingFlightWindow",
+                "&Ball Flight Model Documentation",
+            ),
+            (
+                "src.tools.golf_environment.gui",
+                "EnvironmentWindow",
+                "&Environment & Architecture Map",
+            ),
+            (
+                "src.tools.video_analyzer.gui",
+                "VideoAnalyzerWindow",
+                "&Video Analysis Tutorial",
+            ),
+            (
+                "src.tools.launch_monitor_analytics.gui",
+                "LaunchMonitorAnalyticsWindow",
+                "&User Manual",
+            ),
+            (
+                "src.tools.simulation_backends_launcher.gui",
+                "SimulationBackendsWindow",
+                "&Double Pendulum Dynamics",
+            ),
+        ],
+    )
+    def test_tool_window_exposes_help_menu_and_doc_affordance(
+        self, qapp, module_path: str, window_cls_name: str, expected_doc_action: str
+    ) -> None:
+        import importlib
+
+        mod = importlib.import_module(module_path)
+        cls = getattr(mod, window_cls_name)
+        win = cls()
+        try:
+            bar = win.menuBar()
+            assert bar is not None
+            menus = [action.menu() for action in bar.actions() if action.menu()]
+            help_menus = [m for m in menus if m.title() == "&Help"]
+            assert len(help_menus) == 1, f"Expected 1 &Help menu in {window_cls_name}"
+            help_menu = help_menus[0]
+            action_texts = [
+                a.text() for a in help_menu.actions() if not a.isSeparator()
+            ]
+            assert expected_doc_action in action_texts, (
+                f"{window_cls_name} missing expected doc action {expected_doc_action}"
+            )
+            assert "&User Guide" in action_texts
+            assert "&About" in action_texts
+        finally:
+            win.deleteLater()
+
+
+@pytest.fixture
+def qapp():
+    from PyQt6.QtWidgets import QApplication
+
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication([])
+    return app

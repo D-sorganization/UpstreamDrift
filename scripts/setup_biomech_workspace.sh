@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Editable installs of the five sibling biomechanics repos for local
+# development. Each sibling is installed only if a checkout exists next to
+# the UpstreamDrift checkout. Missing siblings are skipped silently — CI
+# falls through to the vendored snapshot tier.
+#
+# See ``docs/biomech-workspace.md`` and ``docs/adr/0014-shared-biomech-models.md``.
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/.." && pwd)"
+workspace_root="$(cd -- "$repo_root/.." && pwd)"
+
+biomech_repos=(
+  "MuJoCo_Models"
+  "Drake_Models"
+  "Pinocchio_Models"
+  "OpenSim_Models"
+  "Movement-Optimizer"
+)
+
+installed=()
+skipped=()
+failed=()
+
+for repo in "${biomech_repos[@]}"; do
+  sibling_path="$workspace_root/$repo"
+  if [ ! -d "$sibling_path" ]; then
+    skipped+=("$repo")
+    continue
+  fi
+  if [ ! -f "$sibling_path/pyproject.toml" ]; then
+    skipped+=("$repo (no pyproject.toml)")
+    continue
+  fi
+  echo "Installing $repo from $sibling_path"
+  if python3 -m pip install -e "$sibling_path"; then
+    installed+=("$repo")
+  else
+    failed+=("$repo")
+  fi
+done
+
+echo ""
+echo "Biomech workspace summary:"
+echo "  installed: ${#installed[@]} (${installed[*]:-none})"
+echo "  skipped  : ${#skipped[@]} (${skipped[*]:-none})"
+echo "  failed   : ${#failed[@]} (${failed[*]:-none})"
+
+if [ "${#failed[@]}" -gt 0 ]; then
+  exit 1
+fi

@@ -1,0 +1,30 @@
+id: upstream_drift
+title: UpstreamDrift Wizard Knowledge Pack
+chunk_chars: 1800
+sources:
+  - repo: UpstreamDrift
+    authority: product
+    include:
+      - "docs/user_guide/**/*.md"
+      - "docs/help/**/*.md"
+      - "docs/sidekick/**/*.md"
+      - "docs/tutorials/**/*.md"
+      - "README.md"
+    exclude:
+      - "docs/development/**"
+      - "docs/assessments/**"
+      - "docs/plans/**"
+      - "docs/handoffs/**"
+      - "docs/generated/**"
+  - repo: UpstreamDrift
+    authority: reference
+    include:
+      - "docs/adr/**/*.md"
+      - "docs/api/**/*.md"
+      - "docs/codemap/**/*.md"
+    exclude:
+      - "docs/development/**"
+      - "docs/assessments/**"
+      - "docs/plans/**"
+      - "docs/handoffs/**"
+      - "docs/generated/**"

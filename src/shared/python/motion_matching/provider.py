@@ -1,0 +1,408 @@
+"""Canonical ``FitSwingProvider`` Protocol and registry.
+
+Per cross-engine parity (#4513) and the canonical fit_swing API (#4514),
+every physics engine's motion-matching driver MUST implement the
+:class:`FitSwingProvider` Protocol so the upstream matcher can dispatch
+through a single registry instead of a switch on engine name.
+
+This module is intentionally minimal: it defines the Protocol, a plain
+:class:`FitOptions` carrier, a :class:`MultiSourceTarget` adapter
+(``target.club`` / ``target.body`` slots), and a thread-safe registry.
+Engine-specific options (cost weights, integrator settings, minimizer
+flags) live alongside each engine's ``fit_swing.py`` and are passed
+through ``FitOptions.engine_options``.
+
+Neural motion matching (NM-01 #10616) treats FitSwingProvider as the
+native refinement boundary for masked trajectory-to-control proposals.
+
+Public API:
+    FitSwingProvider  -- Protocol every engine implements.
+    FitOptions        -- canonical carrier for fit knobs + engine extras.
+    MultiSourceTarget -- bundle of (optional) club + body targets.
+    register_provider -- attach a provider instance to the registry.
+    get_provider      -- look up a provider by ``engine_name``.
+    available_engines -- list registered engine names.
+"""
+
+from dataclasses import dataclass, field
+import logging
+import threading
+from typing import Any, Protocol, runtime_checkable
+
+from .club_ball_target import ClubBallTarget
+from .club_target import ClubTarget
+from .fit_result import CanonicalFitResult
+from .multi_source_target import MultiSourceTarget as _PublicMultiSourceTarget
+
+__all__ = [
+    "FitOptions",
+    "FitSwingProvider",
+    "MultiSourceTarget",
+    "available_engines",
+    "classical_baseline_fit_options",
+    "execute_body_fit",
+    "get_provider",
+    "has_body_target",
+    "publish_leaderboard_row",
+    "register_provider",
+    "resolve_body_target",
+    "resolve_club_target",
+]
+
+
+@dataclass(frozen=True)
+class FitOptions:
+    """Canonical, engine-agnostic carrier for ``fit_swing`` options.
+
+    The canonical knobs (max iterations, RNG seed) live as direct fields;
+    everything else is funnelled through ``engine_options`` so engine
+    adapters can pass their native options dataclass without losing
+    type information.
+
+    Attributes:
+        maxiter:        upper bound on solver iterations (engines free to
+                        clamp to their own ceiling).
+        rng_seed:       seed for any stochastic warm-start draws.
+        engine_options: opaque per-engine options object (e.g. the engine's
+                        own ``FitOptions`` dataclass). The provider adapter
+                        is responsible for reading the right type.
+    """
+
+    maxiter: int = 200
+    rng_seed: int = 0
+    engine_options: Any = None
+
+
+def classical_baseline_fit_options(
+    *,
+    maxiter: int = 200,
+    rng_seed: int = 0,
+    engine_options: Any = None,
+) -> FitOptions:
+    """Build FitOptions for NM-01 cold-classical / polish baselines."""
+    if isinstance(maxiter, bool) or not isinstance(maxiter, int) or maxiter < 1:
+        raise ValueError(f"maxiter must be a positive int, got {maxiter!r}")
+    if isinstance(rng_seed, bool) or not isinstance(rng_seed, int) or rng_seed < 0:
+        raise ValueError(f"rng_seed must be a non-negative int, got {rng_seed!r}")
+    return FitOptions(maxiter=maxiter, rng_seed=rng_seed, engine_options=engine_options)
+
+
+@dataclass(frozen=True)
+class MultiSourceTarget:
+    """Bundle of (optional) club and body targets.
+
+    Per #4519 each provider declares whether it consumes ``.club`` and / or
+    ``.body``; MuJoCo currently consumes only ``.club``.
+
+    At least one of ``club`` or ``body`` MUST be set; constructing the
+    bundle with neither raises :class:`ValueError`.
+    """
+
+    club: ClubTarget | None = None
+    body: Any = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.club is None and self.body is None:
+            raise ValueError(
+                "MultiSourceTarget must have at least one of "
+                "(club, body) set; both are None"
+            )
+
+
+@runtime_checkable
+class FitSwingProvider(Protocol):
+    """Engine-side adapter from canonical motion-matching API to a fitter.
+
+    Each physics engine ships exactly one provider instance and registers
+    it via :func:`register_provider` at import time. The matcher then
+    drives every engine through this Protocol.
+
+    Required attributes:
+        engine_name: lowercase engine identifier (``"mujoco"``, etc.).
+
+    Required methods:
+        fit_swing(target, opts) -> CanonicalFitResult
+        supports_body_target() -> bool
+        supports_ball_target() -> bool
+
+    Optional methods:
+        engine_version() -> str
+            Version string of the underlying physics engine wheel
+            (e.g. ``pydrake.__version__``). Used to stamp leaderboard rows
+            so two runs against different wheels are distinguishable.
+            Defaults to ``"unknown"`` for back-compat with providers that
+            predate this hook (issue #4705).
+    """
+
+    engine_name: str
+
+    def fit_swing(
+        self,
+        target: MultiSourceTarget | ClubTarget,
+        opts: FitOptions,
+    ) -> CanonicalFitResult: ...
+
+    def supports_body_target(self) -> bool: ...
+
+    def supports_ball_target(self) -> bool: ...
+
+    def engine_version(self) -> str:
+        """Return the underlying engine's version string.
+
+        Default implementation returns ``"unknown"`` so providers
+        predating issue #4705 stay Protocol-compliant. Real providers
+        should override to query their engine's ``__version__``
+        attribute (with a ``try/except ImportError`` fallback so the
+        provider stays constructible without the engine wheel).
+        """
+        return "unknown"
+
+
+# --- Registry ---------------------------------------------------------------
+
+_REGISTRY: dict[str, FitSwingProvider] = {}
+_REGISTRY_LOCK = threading.Lock()
+_logger = logging.getLogger(__name__)
+
+
+def _provider_qualname(provider: object) -> str:
+    """Return the fully-qualified ``module.qualname`` for a provider class.
+
+    Used to detect re-registrations that originate from the *same* logical
+    provider class even after :func:`importlib.reload` has rebuilt the
+    class object (and thus broken ``type(a) is type(b)`` identity).
+    """
+    cls = type(provider)
+    module = getattr(cls, "__module__", "") or ""
+    qualname = getattr(cls, "__qualname__", cls.__name__)
+    return f"{module}.{qualname}" if module else qualname
+
+
+def register_provider(provider: FitSwingProvider) -> None:
+    """Register ``provider`` under its ``engine_name``.
+
+    Registration is idempotent: re-registering the same provider instance,
+    or any instance of the same provider class (matched by fully-qualified
+    ``module.qualname`` so :func:`importlib.reload` shadows still count),
+    is a no-op and emits a DEBUG log. Registering a *different* provider
+    class for an already-occupied ``engine_name`` raises :class:`ValueError`
+    naming both the existing and the incoming class.
+    """
+    name = getattr(provider, "engine_name", None)
+    if not isinstance(name, str) or not name:
+        raise ValueError(
+            f"provider must expose a non-empty engine_name str, got {name!r}"
+        )
+    with _REGISTRY_LOCK:
+        existing = _REGISTRY.get(name)
+        if existing is provider:
+            _logger.debug(
+                "register_provider: %r already registered (same instance); no-op",
+                name,
+            )
+            return
+        if existing is not None:
+            q_existing = _provider_qualname(existing)
+            q_provider = _provider_qualname(provider)
+            if (
+                type(existing) is type(provider)
+                or q_existing == q_provider
+                or q_existing.split(".")[-2:] == q_provider.split(".")[-2:]
+            ):
+                # Same logical class — covers both ordinary re-imports,
+                # ``importlib.reload`` shadows, and import-path aliases.
+                _logger.debug(
+                    "register_provider: %r already registered to %s; no-op",
+                    name,
+                    q_existing,
+                )
+                return
+            raise ValueError(
+                f"engine_name {name!r} is already registered to "
+                f"{q_existing}; got {q_provider}"
+            )
+        _REGISTRY[name] = provider
+
+
+def get_provider(engine_name: str) -> FitSwingProvider:
+    """Return the provider registered under ``engine_name``.
+
+    Raises :class:`KeyError` if no provider has registered yet (callers
+    typically need to import the engine's motion-matching package first).
+    """
+    with _REGISTRY_LOCK:
+        if engine_name not in _REGISTRY:
+            raise KeyError(
+                f"no FitSwingProvider registered for {engine_name!r}; "
+                f"registered: {sorted(_REGISTRY)}"
+            )
+        return _REGISTRY[engine_name]
+
+
+def available_engines() -> list[str]:
+    """Return the sorted list of currently-registered engine names."""
+    with _REGISTRY_LOCK:
+        return sorted(_REGISTRY)
+
+
+# --- Shared provider helpers (issue #6935) ----------------------------------
+#
+# Every engine provider previously re-implemented two identical steps in its
+# ``fit_swing``: (1) unwrap the canonical target into a bare ``ClubTarget``,
+# and (2) append a leaderboard row. Those copies had FORKED -- e.g. a
+# ``ClubBallTarget`` unwrapped on Drake/OpenSim but raised ``TypeError`` on
+# MuJoCo/Pendulum, and only Pinocchio forwarded ``target_id``. These two
+# helpers are the single source of truth so a new wrapper type or leaderboard
+# column is a one-line change in one place.
+
+
+def resolve_club_target(target: Any) -> ClubTarget:
+    """Unwrap an arbitrary motion-matching target into a :class:`ClubTarget`.
+
+    This is the canonical, engine-agnostic unwrap every provider delegates
+    to (issue #6935). It accepts, **uniformly across all engines**:
+
+    * a bare :class:`ClubTarget` (returned as-is);
+    * a :class:`ClubBallTarget` (its ``.club`` payload is returned; the
+      ball-impact boundary is intentionally discarded -- no engine consumes
+      it yet);
+    * a :class:`MultiSourceTarget` (its ``.club`` slot is returned).
+
+    Behaviour is UNIFIED: prior to #6935 a ``ClubBallTarget`` unwrapped on
+    Drake/OpenSim/MyoSuite but raised ``TypeError`` on MuJoCo/Pendulum/
+    Pinocchio. All engines now accept it identically.
+
+    Args:
+        target: One of the three supported target shapes above.
+
+    Returns:
+        The resolved :class:`ClubTarget`.
+
+    Raises:
+        ValueError: If a :class:`MultiSourceTarget` has ``club=None`` or a
+            non-:class:`ClubTarget` payload.
+        TypeError: If ``target`` is none of the supported types.
+    """
+    if isinstance(target, ClubTarget):
+        return target
+    if isinstance(target, ClubBallTarget):
+        return target.club
+    if isinstance(target, (MultiSourceTarget, _PublicMultiSourceTarget)):
+        if target.club is None:
+            raise ValueError(
+                "resolve_club_target requires target.club to be set; "
+                "got MultiSourceTarget with club=None"
+            )
+        if not isinstance(target.club, ClubTarget):
+            raise ValueError(
+                f"target.club must be a ClubTarget, got {type(target.club).__name__}"
+            )
+        return target.club
+    raise TypeError(
+        "target must be a ClubTarget, ClubBallTarget, or MultiSourceTarget; "
+        f"got {type(target).__name__}"
+    )
+
+
+def publish_leaderboard_row(
+    engine_name: str,
+    result: Any,
+    version: str,
+    *,
+    target_id: str | None = None,
+) -> None:
+    """Append ``result`` to the cross-engine leaderboard (issue #6935).
+
+    Thin, canonical wrapper over
+    :func:`src.shared.python.motion_matching.leaderboard.maybe_append_row`
+    so every provider publishes identically -- including forwarding
+    ``target_id`` (previously only Pinocchio did). Publication is opt-in
+    (gated by ``UD_LEADERBOARD_PUBLISH=1`` inside ``maybe_append_row``) and
+    never raises, so wiring this into a ``fit_swing`` path is free for the
+    common case.
+
+    Args:
+        engine_name: Lowercase engine identifier used as the row key.
+        result: The :class:`CanonicalFitResult` (or engine ``FitResult``)
+            just produced.
+        version: Engine version string to stamp on the row.
+        target_id: Optional explicit target identifier. When ``None`` the
+            leaderboard derives one from the result's provenance fields.
+    """
+    # Imported lazily to avoid importing the (heavier) leaderboard module at
+    # provider-registry import time.
+    from .leaderboard import maybe_append_row
+
+    maybe_append_row(engine_name, result, version, target_id=target_id)
+
+
+def has_body_target(target: Any) -> bool:
+    """Return True if target carries a non-None body payload."""
+    if isinstance(target, (MultiSourceTarget, _PublicMultiSourceTarget)):
+        return target.body is not None
+    return hasattr(target, "body") and target.body is not None
+
+
+def resolve_body_target(target: Any) -> Any:
+    """Extract and validate the body target from target.
+
+    Args:
+        target: A MultiSourceTarget with .body set, or an object with a .body attribute.
+
+    Returns:
+        The body target payload.
+
+    Raises:
+        ValueError: If target has .body set to None.
+        TypeError: If target is not a MultiSourceTarget and lacks a .body attribute.
+    """
+    if isinstance(target, (MultiSourceTarget, _PublicMultiSourceTarget)):
+        if target.body is None:
+            raise ValueError(
+                "resolve_body_target requires target.body to be set; "
+                "got MultiSourceTarget with body=None"
+            )
+        return target.body
+    if hasattr(target, "body"):
+        body = target.body
+        if body is None:
+            raise ValueError("target.body is None")
+        return body
+    raise TypeError(
+        f"target must be a MultiSourceTarget with body set; got {type(target).__name__}"
+    )
+
+
+def execute_body_fit(
+    engine_name: str,
+    target: Any,
+    opts: Any = None,
+    *,
+    engine_version: str = "unknown",
+) -> CanonicalFitResult:
+    """Fail closed for unwired body-target fit lane (#10960 P0-1).
+
+    Body-target fitting requires a real physical solve. Unwired lanes must
+    fail closed rather than returning fabricated success receipts or echoing
+    caller-supplied acceptance verdicts.
+
+    Args:
+        engine_name: Non-empty lowercase engine identifier.
+        target: Target containing a body target payload.
+        opts: Canonical fit options (unused while unwired).
+        engine_version: Engine version string (unused while unwired).
+
+    Returns:
+        Never returns; always raises.
+
+    Raises:
+        ValueError: If ``engine_name`` is empty or not a string, or if ``target.body`` is None.
+        TypeError: If ``target`` does not carry a body target attribute.
+        NotImplementedError: Always raised because the body-target fit lane is
+            not wired.
+    """
+    if not isinstance(engine_name, str) or not engine_name:
+        raise ValueError(f"engine_name must be a non-empty str, got {engine_name!r}")
+    resolve_body_target(target)
+    raise NotImplementedError("body-target fit lane is not wired (#10960 P0-1)")

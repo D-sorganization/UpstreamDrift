@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Anthropometrics validation report — C3D_TA_Driver</title>
+<style>
+body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 2em; color: #222; }
+h1 { font-size: 1.6em; }
+h2 { font-size: 1.2em; margin-top: 1.6em; }
+table { border-collapse: collapse; margin-top: 0.5em; }
+th, td { border: 1px solid #ccc; padding: 4px 10px; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+.ok { color: #117a0d; font-weight: bold; }
+.fail { color: #b30000; font-weight: bold; }
+.note { color: #555; font-style: italic; }
+code { background: #f3f3f3; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>Anthropometrics validation report</h1>
+<p>
+Subject <code>C3D_TA_Driver</code> — height 1.8000 m,
+mass 75.0000 kg, source method <code>de_leva_1996</code>,
+21 segments.
+</p>
+
+<h2>1. Mass closure</h2>
+<p>
+Sum of segment masses ÷ subject mass =
+<strong>1.000000</strong> (target 1.000000 ± 1%).
+Status: <span class="ok">OK</span>.
+</p>
+
+<h2>2. Inertia spectral check</h2>
+<p>
+Per-segment principal moments and triangle-inequality status.
+</p>
+<table>
+<thead>
+<tr><th>Segment</th><th>I<sub>1</sub></th><th>I<sub>2</sub></th><th>I<sub>3</sub></th><th>PD</th><th>Triangle</th></tr>
+</thead>
+<tbody>
+<tr><td>head</td><td>2.990966e-02</td><td>4.026423e-02</td><td>4.343881e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>neck</td><td>5.905712e-04</td><td>2.131962e-03</td><td>2.131962e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>thorax</td><td>5.180989e-02</td><td>1.710035e-01</td><td>1.965313e-01</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>lumbar</td><td>1.195093e-02</td><td>4.016840e-02</td><td>4.518484e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>pelvis</td><td>4.693966e-02</td><td>5.327371e-02</td><td>5.847725e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_shoulder</td><td>4.095122e-05</td><td>1.638049e-04</td><td>1.638049e-04</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_shoulder</td><td>4.095122e-05</td><td>1.638049e-04</td><td>1.638049e-04</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_upper_arm</td><td>5.324805e-03</td><td>1.543455e-02</td><td>1.732524e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_upper_arm</td><td>5.324805e-03</td><td>1.543455e-02</td><td>1.732524e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_forearm</td><td>1.150233e-03</td><td>5.517049e-03</td><td>5.984574e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_forearm</td><td>1.150233e-03</td><td>5.517049e-03</td><td>5.984574e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_hand</td><td>2.602918e-03</td><td>4.259969e-03</td><td>6.383972e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_hand</td><td>2.602918e-03</td><td>4.259969e-03</td><td>6.383972e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_hip</td><td>8.190244e-06</td><td>8.190244e-06</td><td>8.190244e-06</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_hip</td><td>8.190244e-06</td><td>8.190244e-06</td><td>8.190244e-06</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_thigh</td><td>4.293014e-02</td><td>2.093060e-01</td><td>2.093060e-01</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_thigh</td><td>4.293014e-02</td><td>2.093060e-01</td><td>2.093060e-01</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_shin</td><td>6.324511e-03</td><td>3.696163e-02</td><td>3.876438e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_shin</td><td>6.324511e-03</td><td>3.696163e-02</td><td>3.876438e-02</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>left_foot</td><td>1.107249e-03</td><td>4.322493e-03</td><td>4.756290e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+<tr><td>right_foot</td><td>1.107249e-03</td><td>4.322493e-03</td><td>4.756290e-03</td><td class="ok">OK</td><td class="ok">OK</td></tr>
+</tbody>
+</table>
+<p>
+Overall positive-definite: <span class="ok">OK</span>.
+Overall triangle inequality: <span class="ok">OK</span>.
+</p>
+
+<h2>3. Length closure (sanity)</h2>
+<p>
+Sum of axial segment lengths ÷ subject height =
+<strong>2.833500</strong>. No hard threshold —
+this is a sanity figure only.
+</p>
+
+<h2>4. Mocap-derived segment lengths (informational)</h2>
+<table><thead><tr><th>Segment</th><th>Length (m)</th></tr></thead><tbody><tr><td>left_forearm</td><td>0.278115</td></tr><tr><td>left_shin</td><td>0.424466</td></tr><tr><td>left_thigh</td><td>0.506506</td></tr><tr><td>left_upper_arm</td><td>0.333055</td></tr><tr><td>right_forearm</td><td>0.281721</td></tr><tr><td>right_shin</td><td>0.422392</td></tr><tr><td>right_thigh</td><td>0.507398</td></tr><tr><td>right_upper_arm</td><td>0.323733</td></tr></tbody></table>
+
+</body>
+</html>

@@ -1,0 +1,758 @@
+# mypy: ignore-errors
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive
+# domain responsibility. It requires domain-aware structural extraction.
+
+"""Sample tools for AI integration with Golf Suite.
+
+This module provides pre-built tools that expose Golf Modeling Suite
+capabilities to the AI assistant. These tools can be invoked by the
+AI to perform analysis, load data, and explain concepts.
+
+Example:
+    >>> from shared.python.ai.sample_tools import register_golf_suite_tools
+    >>> from shared.python.ai.tool_registry import ToolRegistry
+    >>> registry = ToolRegistry()
+    >>> register_golf_suite_tools(registry)
+"""
+
+from __future__ import annotations
+
+import functools
+from pathlib import Path
+from typing import Any
+
+from src.shared.python.ai.education import EducationSystem
+from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
+from src.shared.python.ai.types import ExpertiseLevel
+from src.shared.python.contracts import ensure, require
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+# The verdict keys a placeholder result must carry. Metadata may not set them:
+# they are the whole point of the payload.
+_NOT_IMPLEMENTED_STATUS = "not_implemented"
+_RESERVED_VERDICT_KEYS = frozenset({"success", "error", "status"})
+
+
+def _not_implemented_tool_result(
+    *,
+    capability: str,
+    message: str,
+    **metadata: Any,
+) -> dict[str, Any]:
+    """Return an honest result for a registered-but-unimplemented chat tool.
+
+    A chat tool that starts no work must not describe a job. Three tools here
+    used to answer ``"... queued ..."`` with ``success=True`` for work that was
+    never begun; this helper is the single place the honest verdict is built,
+    so a new placeholder cannot hand-roll a dishonest dict.
+
+    The invariant -- *a tool that reports queued must have enqueued something*,
+    contrapositive: *a tool that enqueues nothing must report failure* -- is
+    enforced as a real precondition/postcondition pair rather than by
+    convention, because convention is what failed: UpstreamDrift #7391
+    established the behaviour and #8322 silently reverted it.
+
+    Args:
+        capability: Stable identifier for the missing capability.
+        message: Operator-facing text. Must not claim work is under way.
+        **metadata: Extra payload keys echoed back to the caller.
+
+    Returns:
+        A payload reporting ``success=False`` and ``status="not_implemented"``.
+
+    Raises:
+        PreconditionError: If ``metadata`` tries to set a verdict key.
+        PostconditionError: If the assembled payload is not an honest refusal.
+    """
+    require(
+        not _RESERVED_VERDICT_KEYS.intersection(metadata),
+        "Placeholder metadata may not override the verdict keys "
+        f"{sorted(_RESERVED_VERDICT_KEYS)}; got "
+        f"{sorted(_RESERVED_VERDICT_KEYS.intersection(metadata))}.",
+    )
+
+    payload: dict[str, Any] = {
+        "success": False,
+        "error": _NOT_IMPLEMENTED_STATUS,
+        "status": _NOT_IMPLEMENTED_STATUS,
+        "capability": capability,
+        "message": message,
+        **metadata,
+    }
+
+    ensure(
+        payload["success"] is False
+        and payload["status"] == _NOT_IMPLEMENTED_STATUS
+        and payload["error"] == _NOT_IMPLEMENTED_STATUS,
+        "A placeholder tool result must report an honest failure.",
+        value=payload,
+    )
+    return payload
+
+
+@functools.lru_cache(maxsize=1)
+def _get_education_system() -> EducationSystem:
+    """Get or create the process-wide education system.
+
+    Memoized with :func:`functools.lru_cache`, which owns the single cached
+    instance internally — no module-level mutable global.
+    """
+    return EducationSystem()
+
+
+def register_golf_suite_tools(registry: ToolRegistry) -> None:
+    """Register all Golf Suite tools with the registry.
+
+    Args:
+        registry: Tool registry to register tools with.
+    """
+    _register_data_tools(registry)
+    _register_analysis_tools(registry)
+    _register_education_tools(registry)
+    _register_validation_tools(registry)
+    _register_agent_control_tools(registry)
+    _register_cli_tools(registry)
+    _register_codemap_tools_proxy(registry)
+    _register_sidekick_analytics(registry)
+    logger.info("Registered Golf Suite tools")
+
+
+def _register_sidekick_analytics(registry: ToolRegistry) -> None:
+    """Register the Sidekick analytics tool.
+
+    Unlike the neighbouring optional codemap proxy, an ImportError here is
+    deliberately allowed to propagate rather than logged and swallowed: the
+    system prompt advertises this tool unconditionally, so a silent
+    registration failure would leave the assistant offering a capability it
+    cannot invoke -- the defect this wiring exists to fix.
+    """
+    from src.shared.python.ai.tools.sidekick_analytics import (
+        register_sidekick_analytics_tools,
+    )
+
+    register_sidekick_analytics_tools(registry)
+
+
+def _register_list_sample_files_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="list_sample_files",
+        description=(
+            "List available sample C3D motion capture files that can be "
+            "used for analysis. Returns a list of file paths and descriptions."
+        ),
+        category=ToolCategory.DATA_LOADING,
+        expertise_level=1,
+    )
+    def list_sample_files() -> dict[str, Any]:
+        """List available sample C3D files."""
+        # Check for sample data directory
+        sample_dir = Path("data/samples")
+        if not sample_dir.exists():
+            return {
+                "files": [],
+                "message": "No sample data directory found. Please add C3D files.",
+            }
+
+        c3d_files = list(sample_dir.glob("*.c3d"))
+        files = [
+            {
+                "path": str(f),
+                "name": f.stem,
+                "size_kb": f.stat().st_size // 1024,
+            }
+            for f in c3d_files
+        ]
+
+        return {
+            "files": files,
+            "count": len(files),
+            "message": f"Found {len(files)} sample C3D files.",
+        }
+
+
+def _register_load_c3d_tool(registry: ToolRegistry) -> None:  # type: ignore[return]
+    @registry.register(
+        name="load_c3d",
+        description=(
+            "Load a C3D motion capture file for analysis. Extracts marker "
+            "positions, frame rate, and metadata. Returns summary of loaded data."
+        ),
+        category=ToolCategory.DATA_LOADING,
+        expertise_level=1,
+    )
+    def load_c3d(file_path: str) -> dict[str, Any]:
+        """Load and validate a C3D file.
+
+        Args:
+            file_path: Path to the C3D file.
+
+        Returns:
+            Summary of loaded data.
+        """
+        path = Path(file_path)
+        if not path.exists():
+            return {"success": False, "error": f"File not found: {file_path}"}
+
+        if path.suffix.lower() != ".c3d":
+            return {"success": False, "error": "File must be a .c3d file"}
+
+        try:
+            # Try to import c3d library
+            try:
+                import c3d
+            except ImportError:
+                return {
+                    "success": False,
+                    "error": "c3d library not installed. Run: pip install c3d",
+                }
+
+            with open(path, "rb") as f:
+                reader = c3d.Reader(f)
+
+                # Extract metadata
+                point_labels = reader.point_labels
+                frame_count = reader.last_frame - reader.first_frame + 1
+                frame_rate = reader.point_rate
+
+                return {
+                    "success": True,
+                    "file": str(path),
+                    "markers": len(point_labels),
+                    "marker_names": list(point_labels)[:10],  # First 10
+                    "frames": frame_count,
+                    "frame_rate": frame_rate,
+                    "duration_s": frame_count / frame_rate if frame_rate > 0 else 0,
+                    "message": (
+                        f"Loaded {path.name}: {len(point_labels)} markers, "
+                        f"{frame_count} frames at {frame_rate} Hz"
+                    ),
+                }
+
+        except ImportError as e:
+            return {"success": False, "error": f"Failed to load C3D: {e}"}
+
+    return load_c3d  # type: ignore[return-value]
+
+
+def _register_marker_info_tool(registry: ToolRegistry, load_c3d_fn: Any) -> None:
+    @registry.register(
+        name="get_marker_info",
+        description=(
+            "Get information about markers in a loaded C3D file, including "
+            "which body segments they represent."
+        ),
+        category=ToolCategory.DATA_LOADING,
+        expertise_level=2,
+    )
+    def get_marker_info(file_path: str) -> dict[str, Any]:
+        """Get marker information from a C3D file.
+
+        Args:
+            file_path: Path to the C3D file.
+
+        Returns:
+            Marker information.
+        """
+        # Common marker name patterns
+        segment_mapping = {
+            "LSHO": "Left Shoulder",
+            "RSHO": "Right Shoulder",
+            "LELB": "Left Elbow",
+            "RELB": "Right Elbow",
+            "LWRI": "Left Wrist",
+            "RWRI": "Right Wrist",
+            "LASI": "Left Pelvis (ASIS)",
+            "RASI": "Right Pelvis (ASIS)",
+            "LPSI": "Left Pelvis (PSIS)",
+            "RPSI": "Right Pelvis (PSIS)",
+            "LKNE": "Left Knee",
+            "RKNE": "Right Knee",
+            "LANK": "Left Ankle",
+            "RANK": "Right Ankle",
+            "LTOE": "Left Toe",
+            "RTOE": "Right Toe",
+            "C7": "7th Cervical Vertebra",
+            "T10": "10th Thoracic Vertebra",
+            "CLAV": "Clavicle",
+            "STRN": "Sternum",
+        }
+
+        result = load_c3d_fn(file_path)
+        if not result.get("success"):
+            # Return the error from load_c3d
+            error_result: dict[str, Any] = result
+            return error_result
+
+        markers = result.get("marker_names", [])
+        identified = []
+        for marker in markers:
+            marker_upper = marker.strip().upper()
+            if marker_upper in segment_mapping:
+                identified.append(
+                    {
+                        "marker": marker,
+                        "segment": segment_mapping[marker_upper],
+                    }
+                )
+
+        return {
+            "success": True,
+            "total_markers": result.get("markers", 0),
+            "identified": identified,
+            "message": f"Identified {len(identified)} standard markers.",
+        }
+
+
+def _register_data_tools(registry: ToolRegistry) -> None:
+    """Register data loading and management tools."""
+    _register_list_sample_files_tool(registry)
+    load_c3d_fn = _register_load_c3d_tool(registry)  # type: ignore[func-returns-value]
+    _register_marker_info_tool(registry, load_c3d_fn)
+
+
+def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="run_inverse_dynamics",
+        description=(
+            "Run inverse dynamics to calculate joint torques from motion data. "
+            "Uses physics engine to compute forces that produced the observed motion."
+        ),
+        category=ToolCategory.SIMULATION,
+        requires_confirmation=True,
+        expertise_level=2,
+    )
+    def run_inverse_dynamics(
+        file_path: str,
+        engine: str = "mujoco",
+    ) -> dict[str, Any]:
+        """Run inverse dynamics simulation.
+
+        Args:
+            file_path: Path to C3D file.
+            engine: Physics engine to use (mujoco, drake, pinocchio).
+
+        Returns:
+            Simulation results summary.
+        """
+        if file_path is None:
+            raise ValueError("file_path must be provided")
+        valid_engines = ["mujoco", "drake", "pinocchio"]
+        if engine.lower() not in valid_engines:
+            return {
+                "success": False,
+                "error": f"Invalid engine. Choose from: {valid_engines}",
+            }
+
+        return _not_implemented_tool_result(
+            capability="inverse_dynamics",
+            message=(
+                "Inverse dynamics is not available through chat yet; no "
+                "computation was performed. Use the biomechanics analysis API "
+                "or the motion pipeline to compute joint torques."
+            ),
+            engine=engine,
+            file=file_path,
+        )
+
+
+def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="interpret_torques",
+        description=(
+            "Interpret joint torque results from inverse dynamics. Provides "
+            "context on whether values are typical for golf swings."
+        ),
+        category=ToolCategory.ANALYSIS,
+        expertise_level=1,
+    )
+    def interpret_torques(
+        shoulder_torque: float = 100.0,
+        hip_torque: float = 150.0,
+        wrist_torque: float = 30.0,
+    ) -> dict[str, Any]:
+        """Interpret joint torque values.
+
+        Args:
+            shoulder_torque: Peak shoulder torque [N·m].
+            hip_torque: Peak hip torque [N·m].
+            wrist_torque: Peak wrist torque [N·m].
+
+        Returns:
+            Interpretation of torque values.
+        """
+        # Typical ranges for golf swing (approximate)
+        if shoulder_torque is None:
+            raise ValueError("shoulder_torque must be provided")
+        if shoulder_torque is None:
+            raise ValueError("shoulder_torque must be provided")
+        ranges = {
+            "shoulder": {"low": 40, "typical": 80, "high": 150, "unit": "N·m"},
+            "hip": {"low": 60, "typical": 120, "high": 200, "unit": "N·m"},
+            "wrist": {"low": 10, "typical": 25, "high": 50, "unit": "N·m"},
+        }
+
+        def classify(value: float, range_info: dict[str, Any]) -> str:
+            """Classify a torque value relative to its typical range."""
+            if value is None:
+                raise ValueError("value must be provided")
+            if value is None:
+                raise ValueError("value must be provided")
+            if value < range_info["low"]:
+                return "Below typical"
+            if value <= range_info["high"]:
+                return "Within typical range"
+            return "Above typical (high stress)"
+
+        return {
+            "shoulder": {
+                "value": shoulder_torque,
+                "classification": classify(shoulder_torque, ranges["shoulder"]),
+                "typical_range": (
+                    f"{ranges['shoulder']['low']}-{ranges['shoulder']['high']} N·m"
+                ),
+            },
+            "hip": {
+                "value": hip_torque,
+                "classification": classify(hip_torque, ranges["hip"]),
+                "typical_range": f"{ranges['hip']['low']}-{ranges['hip']['high']} N·m",
+            },
+            "wrist": {
+                "value": wrist_torque,
+                "classification": classify(wrist_torque, ranges["wrist"]),
+                "typical_range": (
+                    f"{ranges['wrist']['low']}-{ranges['wrist']['high']} N·m"
+                ),
+            },
+            "message": (
+                "Torque values have been classified based on typical ranges "
+                "observed in amateur and professional golf swings."
+            ),
+        }
+
+
+def _register_analysis_tools(registry: ToolRegistry) -> None:
+    """Register analysis and simulation tools."""
+    _register_inverse_dynamics_tool(registry)
+    _register_interpret_torques_tool(registry)
+
+
+def _register_explain_concept_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="explain_concept",
+        description=(
+            "Explain a biomechanics or physics concept at the user's expertise "
+            "level. Use this when the user asks 'what is X?' or needs clarification."
+        ),
+        category=ToolCategory.EDUCATIONAL,
+        expertise_level=1,
+    )
+    def explain_concept(
+        term: str,
+        expertise_level: int = 1,
+    ) -> dict[str, Any]:
+        """Explain a biomechanics concept.
+
+        Args:
+            term: The term or concept to explain.
+            expertise_level: User's expertise level (1-4).
+
+        Returns:
+            Explanation at appropriate level.
+        """
+        if term is None:
+            raise ValueError("term must be provided")
+        if term is None:
+            raise ValueError("term must be provided")
+        edu = _get_education_system()
+
+        # Map level number to enum
+        level_map = {
+            1: ExpertiseLevel.BEGINNER,
+            2: ExpertiseLevel.INTERMEDIATE,
+            3: ExpertiseLevel.ADVANCED,
+            4: ExpertiseLevel.EXPERT,
+        }
+        level = level_map.get(expertise_level, ExpertiseLevel.BEGINNER)
+
+        explanation = edu.explain(term, level)
+        entry = edu.get_entry(term)
+
+        result: dict[str, Any] = {
+            "term": term,
+            "explanation": explanation,
+            "level": level.name.lower(),
+        }
+
+        if entry:
+            result["related_terms"] = entry.related_terms
+            if entry.formula:
+                result["formula"] = entry.formula
+            if entry.units:
+                result["units"] = entry.units
+
+        return result
+
+
+def _register_list_glossary_terms_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="list_glossary_terms",
+        description=(
+            "List available terms in the glossary, optionally filtered by category. "
+            "Categories include: dynamics, kinematics, golf, simulation, validation."
+        ),
+        category=ToolCategory.EDUCATIONAL,
+        expertise_level=1,
+    )
+    def list_glossary_terms(category: str | None = None) -> dict[str, Any]:
+        """List glossary terms.
+
+        Args:
+            category: Optional category filter.
+
+        Returns:
+            List of available terms.
+        """
+        edu = _get_education_system()
+
+        terms = edu.list_terms(category=category) if category else edu.list_terms()
+
+        categories = edu.list_categories()
+
+        return {
+            "terms": terms,
+            "count": len(terms),
+            "categories": categories,
+            "filter": category,
+        }
+
+
+def _register_search_glossary_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="search_glossary",
+        description=(
+            "Search the glossary for terms matching a query. Searches term names, "
+            "categories, and definitions."
+        ),
+        category=ToolCategory.EDUCATIONAL,
+        expertise_level=1,
+    )
+    def search_glossary(query: str) -> dict[str, Any]:
+        """Search the glossary.
+
+        Args:
+            query: Search query.
+
+        Returns:
+            Matching terms.
+        """
+        edu = _get_education_system()
+        results = edu.search(query)
+
+        return {
+            "query": query,
+            "results": [
+                {
+                    "term": r.term,
+                    "category": r.category,
+                }
+                for r in results
+            ],
+            "count": len(results),
+        }
+
+
+def _register_education_tools(registry: ToolRegistry) -> None:
+    """Register educational and explanation tools."""
+    _register_explain_concept_tool(registry)
+    _register_list_glossary_terms_tool(registry)
+    _register_search_glossary_tool(registry)
+
+
+def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="validate_cross_engine",
+        description=(
+            "Run cross-engine validation to verify results are consistent "
+            "across multiple physics engines (MuJoCo, Drake, Pinocchio)."
+        ),
+        category=ToolCategory.VALIDATION,
+        requires_confirmation=True,
+        expertise_level=3,
+    )
+    def validate_cross_engine(
+        file_path: str,
+        tolerance: float = 0.02,
+    ) -> dict[str, Any]:
+        """Run cross-engine validation.
+
+        Args:
+            file_path: Path to data file.
+            tolerance: Acceptable tolerance for agreement.
+
+        Returns:
+            Validation results.
+        """
+        return _not_implemented_tool_result(
+            capability="cross_engine_validation",
+            message=(
+                "Cross-engine validation is not available through chat yet; "
+                "no comparison was performed. Use the motion pipeline "
+                "validation API to compare engines on a real run."
+            ),
+            file=file_path,
+            engines=["mujoco", "drake", "pinocchio"],
+            tolerance=tolerance,
+        )
+
+
+def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="check_energy_conservation",
+        description=(
+            "Check energy conservation in a simulation to verify physical "
+            "plausibility. Energy should be conserved or explained by work done."
+        ),
+        category=ToolCategory.VALIDATION,
+        expertise_level=3,
+    )
+    def check_energy_conservation(tolerance: float = 0.01) -> dict[str, Any]:
+        """Check energy conservation.
+
+        Args:
+            tolerance: Acceptable energy drift tolerance.
+
+        Returns:
+            Energy conservation check results.
+        """
+        return _not_implemented_tool_result(
+            capability="energy_conservation_check",
+            message=(
+                "Energy conservation checking is not available through chat "
+                "yet; no check was performed. It needs simulation data "
+                "supplied through the motion pipeline."
+            ),
+            tolerance=tolerance,
+        )
+
+
+def _register_list_physics_engines_tool(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="list_physics_engines",
+        description="List available physics engines and their status.",
+        category=ToolCategory.CONFIGURATION,
+        expertise_level=1,
+    )
+    def list_physics_engines() -> dict[str, Any]:
+        """List available physics engines.
+
+        Uses importlib.util.find_spec to check availability without importing,
+        which avoids potential crashes from engine initialization.
+        """
+        import importlib.util
+
+        def _check_module(name: str) -> bool:
+            """Safely check if a module is available."""
+            try:
+                return importlib.util.find_spec(name) is not None
+            except (ValueError, ModuleNotFoundError):
+                # ValueError: __spec__ is not set (partially initialized module)
+                # ModuleNotFoundError: module not found
+                return False
+
+        engines = []
+
+        # Check MuJoCo (avoid importing due to potential initialization issues)
+        if _check_module("mujoco"):
+            engines.append({"name": "MuJoCo", "status": "available"})
+        else:
+            engines.append({"name": "MuJoCo", "status": "not installed"})
+
+        # Check Drake
+        if _check_module("pydrake"):
+            engines.append({"name": "Drake", "status": "available"})
+        else:
+            engines.append({"name": "Drake", "status": "not installed"})
+
+        # Check Pinocchio
+        if _check_module("pinocchio"):
+            engines.append({"name": "Pinocchio", "status": "available"})
+        else:
+            engines.append({"name": "Pinocchio", "status": "not installed"})
+
+        available = sum(1 for e in engines if e["status"] == "available")
+
+        return {
+            "engines": engines,
+            "available_count": available,
+            "message": f"{available} of 3 physics engines available.",
+        }
+
+
+def _register_validation_tools(registry: ToolRegistry) -> None:
+    """Register validation and verification tools."""
+    _register_cross_engine_validation_tool(registry)
+    _register_energy_conservation_tool(registry)
+    _register_list_physics_engines_tool(registry)
+
+
+def _register_agent_control_tools(registry: ToolRegistry) -> None:
+    """Register agent control tools for AI-powered app management."""
+    try:
+        from src.shared.python.ai.tools.agent_control import (
+            AgentController,
+            create_agent_tools_for_registry,
+        )
+
+        AgentController()
+        tools = create_agent_tools_for_registry()
+
+        for tool_def in tools:
+            registry.register(
+                name=tool_def["name"],
+                description=tool_def["description"],
+                category=ToolCategory.CONFIGURATION,
+                expertise_level=2,
+            )(tool_def["handler"])
+
+        logger.info("Registered %d agent control tools", len(tools))
+
+    except ImportError as e:
+        logger.warning("Could not register agent control tools: %s", e)
+
+
+def _register_cli_tools(registry: ToolRegistry) -> None:
+    """Register CLI tools (Claude Code, Codex, Shell)."""
+    try:
+        from src.shared.python.ai.tools.cli_tools import (
+            CLIToolManager,
+            create_cli_tools_for_registry,
+        )
+
+        CLIToolManager()
+        tools = create_cli_tools_for_registry()
+
+        for tool_def in tools:
+            registry.register(
+                name=tool_def["name"],
+                description=tool_def["description"],
+                category=ToolCategory.CONFIGURATION,
+                expertise_level=3,
+            )(tool_def["handler"])
+
+        logger.info("Registered %d CLI tools", len(tools))
+
+    except ImportError as e:
+        logger.warning("Could not register CLI tools: %s", e)
+
+
+def _register_codemap_tools_proxy(registry: ToolRegistry) -> None:
+    """Register codemap tools if available."""
+    try:
+        from src.shared.python.ai.tools.codemap_tools import register_codemap_tools
+
+        register_codemap_tools(registry)
+    except ImportError as e:
+        logger.warning("Could not register codemap tools: %s", e)

@@ -1,0 +1,334 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "source_revision": "7e88c4726fec9b5f2f5e65a366a90fc7fadba3d5",
+  "construct_s": 73.1549287,
+  "joint_positions": [
+    {
+      "ID": "j1.Px.p",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "m"
+    },
+    {
+      "ID": "j1.Py.p",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "m"
+    },
+    {
+      "ID": "j1.Pz.p",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "m"
+    },
+    {
+      "ID": "j1.Rx.q",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j1.Ry.q",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j1.Rz.q",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j2.Rx.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j2.Ry.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j3.Rz.q",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j4.Rz.q",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j5.Rz.q",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j6.Rx.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j6.Ry.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j7.Rx.q",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j7.Ry.q",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j7.Rz.q",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j8.Rx.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j8.Ry.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j9.Rz.q",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j10.Rz.q",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j11.Rx.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j11.Ry.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j12.Rx.q",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j12.Ry.q",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j12.Rz.q",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j13.Rx.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    },
+    {
+      "ID": "j13.Ry.q",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg"
+    }
+  ],
+  "joint_velocities": [
+    {
+      "ID": "j1.Px.v",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "m/s"
+    },
+    {
+      "ID": "j1.Py.v",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "m/s"
+    },
+    {
+      "ID": "j1.Pz.v",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "m/s"
+    },
+    {
+      "ID": "j1.Rx.w",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j1.Ry.w",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j1.Rz.w",
+      "JointType": "Bushing Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j2.Rx.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j2.Ry.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j3.Rz.w",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j4.Rz.w",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j5.Rz.w",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j6.Rx.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j6.Ry.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j7.Rx.w",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j7.Ry.w",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j7.Rz.w",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j8.Rx.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j8.Ry.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j9.Rz.w",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j10.Rz.w",
+      "JointType": "Revolute Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j11.Rx.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j11.Ry.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j12.Rx.w",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j12.Ry.w",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j12.Rz.w",
+      "JointType": "Gimbal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j13.Rx.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    },
+    {
+      "ID": "j13.Ry.w",
+      "JointType": "Universal Joint",
+      "BlockPath": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "Unit": "deg/s"
+    }
+  ],
+  "status": "success"
+}

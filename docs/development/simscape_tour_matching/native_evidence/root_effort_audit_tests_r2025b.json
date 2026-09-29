@@ -1,0 +1,25 @@
+{
+  "matlab": "R2025b Update 5",
+  "red": [
+    "root channels/unit-aware result absent in old audit",
+    "native direct force comparison failed by 381.557 N because force frames differed",
+    "explicit proper-rotation regression failed before frame support"
+  ],
+  "green": {
+    "native_TestCase_methods_passed": 3,
+    "exit_code": 0,
+    "log": "C:/Users/diete/SimscapeTour9921/root-force-frame-green.log"
+  },
+  "coverage": [
+    "nonuniform native timestamps",
+    "known torque and force perturbations",
+    "force-frame rotation and separate SI units",
+    "missing/invalid force frame rejected",
+    "reaction torque cannot replace actuator log"
+  ],
+  "saved_candidate": "prefix-200ms-linear-01",
+  "audited_coordinates": 22,
+  "unlogged_coordinates": 5,
+  "failure_evidence": "root_effort_audit_200ms_unqualified_r2025b.json",
+  "qualified_evidence": "root_effort_audit_200ms_qualified_r2025b.json"
+}

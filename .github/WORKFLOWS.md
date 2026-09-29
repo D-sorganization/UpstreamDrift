@@ -1,0 +1,118 @@
+# Workflow Inventory
+
+This inventory is the ownership ledger for active GitHub Actions workflows.
+
+The current durable guardrail is a no-growth cap at 78 active workflows. The
+consolidation target for issue #3835 remains 25 active workflows or fewer after
+owners validate low-risk removals.
+
+## Security Audit: `pull_request_target` Workflows (issue #5915)
+
+Audited 2026-05-23. Two workflows use `pull_request_target`; both are safe:
+
+**`Jules-Redundant-PR-Closer.yml`** — trigger covers `opened/reopened/synchronize/closed`
+from forks but does **not** check out the PR head ref. It only checks out
+`Repository_Management` at `ref: main`. The app token grants
+`contents:read / pull-requests:write / issues:write`; no secrets beyond the
+Jules app credentials are exposed. ✅ Safe.
+
+**`anti-phantom-merge.yml`** — uses `pull_request_target` only for `labeled/unlabeled`
+events (to honor admin overrides). On those events it checks out the PR head SHA to
+run `git diff` commands but does **not** execute any code from the checked-out tree.
+The `${{ github.token }}` used has `contents:read / pull-requests:write / issues:read`.
+The shell steps are defined in the base-branch workflow (not the PR head), so the
+checkout is read-only data, not executable code. ✅ Safe.
+
+**Action item**: when adding new `pull_request_target` triggers, ensure no PR-head
+code is executed and no secrets beyond minimum necessary permissions are exposed.
+
+Runner note: most workflows use the self-hosted `d-sorg-fleet` runner. That
+runner is administered by repository infrastructure owners. When it is offline,
+jobs that target it fail or remain queued rather than silently passing. Because
+the runner executes jobs with workflow-scoped `GITHUB_TOKEN` permissions and any
+secrets explicitly exposed by each workflow, every write scope must be visible in
+this table and treated as a security boundary.
+
+## Agent Automation Budget Contract
+
+Mutating workflows owned by `@agents` are permitted only under these default
+guardrails until the active workflow count reaches the 25-workflow target:
+
+- **Max wall time:** each mutating agent workflow must set a workflow or job
+  timeout and fail closed when the budget is exhausted.
+- **Max parallel sessions:** agent launchers must keep explicit parallelism
+  limits in workflow inputs or command arguments; unbounded fan-out is not
+  allowed.
+- **Concurrency:** queue writers and branch mutators must document the
+  concurrency group, queue lock, or idempotency key that prevents duplicate
+  writes.
+- **Audit artifact:** prompts, target refs, modified files, approvals, command
+  outcomes, and generated PR/issue links must be reconstructable from workflow
+  logs or durable artifacts without exposing secrets.
+- **Human approval:** destructive, release-impacting, or security-impacting
+  agent actions require owner review before merge, release, or workflow-control
+  mutation.
+
+| File                                 | Trigger                                        | Owner     | Permissions                                  | Purpose                                                                                              | Replaceable by           |
+| ------------------------------------ | ---------------------------------------------- | --------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------ |
+| agent-metrics-dashboard.yml          | workflow_dispatch/schedule                     | @infra    | contents: read                               | KEEP: publish agent metrics dashboard data.                                                          | n/a                      |
+| anti-phantom-merge.yml               | pull_request                                   | @core     | contents: read / pull-requests: write        | KEEP: blocks phantom PRs with zero real diff (anti-phantom-merge gate).                              | n/a                      |
+| approve-same-repo-runs.yml           | schedule/workflow_dispatch                     | @infra    | actions: write                               | KEEP: approves same-repo action_required runs so bot branch-updates cannot freeze PRs (#8754).       | n/a                      |
+| architecture-map-contract.yml        | push/pull_request                              | @core     | contents: read                               | KEEP: validates maintainable Mermaid C4 architecture maps (C4.md contract).                          | n/a                      |
+| auto-update-prs.yml                  | workflow_dispatch/schedule                     | @infra    | contents/pull-requests: write                | MERGE: keep PRs updated with base branch.                                                            | n/a                      |
+| Bot-CI-Trigger.yml                   | issue_comment/workflow_dispatch                | @infra    | contents/actions: write                      | MERGE: comment-driven CI trigger for bot workflows.                                                  | PR-Comment-Responder.yml |
+| ci-engine-models.yml                 | pull_request/push/workflow_dispatch            | @core     | contents: read                               | KEEP: drake URDF regeneration drift gate (#4129).                                                    | n/a                      |
+| ci-failure-digest.yml                | workflow_run/workflow_dispatch                 | @infra    | contents/issues: write                       | KEEP: summarize CI failures for maintainers.                                                         | n/a                      |
+| ci-optional-stack.yml                | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: optional dependency stack checks.                                                              | n/a                      |
+| ci-standard.yml                      | push/pull_request/workflow_dispatch/schedule   | @core     | contents: read                               | KEEP: authoritative lint, format, unit, DRY ratchet, and budget checks.                              | n/a                      |
+| Code-Metrics.yml                     | workflow_dispatch                              | @core     | contents/pull-requests: write                | KEEP: advisory code metrics reporting; blocking DRY ratchet lives in ci-standard.                    | n/a                      |
+| critical-files-guard.yml             | pull_request                                   | @core     | contents: read                               | KEEP: protect critical file changes.                                                                 | n/a                      |
+| docker-security-scan.yml             | pull_request/workflow_dispatch                 | @security | contents/security-events: write              | KEEP: Docker image security scan.                                                                    | n/a                      |
+| docker-size-gates.yml                | push/pull_request/workflow_dispatch            | @infra    | contents: read                               | KEEP: Docker artifact size gates (legacy image + per-profile matrix).                                | n/a                      |
+| docker-smoke.yml                     | push/pull_request/workflow_dispatch            | @infra    | contents: read                               | KEEP: Phase 2 modular-profile capability and dep-leakage smoke tests.                                | n/a                      |
+| docs-ci.yml                          | pull_request/workflow_dispatch                 | @docs     | contents: read                               | KEEP: documentation validation.                                                                      | n/a                      |
+| docs-governance.yml                  | pull_request/workflow_dispatch                 | @docs     | contents: read                               | KEEP: docs governance checks.                                                                        | n/a                      |
+| heavy-tests-opt-in.yml               | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: manually opted per-engine heavy tests on the self-hosted fleet.                                | n/a                      |
+| humanoid-models-drift.yml            | pull_request                                   | @physics  | contents/pull-requests: read/write           | KEEP: PARITY-MODEL-BUILD drift gate (issue #4094, spec §2.6).                                        | n/a                      |
+| maturin-movement-optimizer.yml       | push/pull_request/workflow_dispatch            | @core     | contents: read                               | KEEP: builds vendored movement_optimizer_core Rust wheel + runs parity non-skipped (#7604).          | n/a                      |
+| motion-matching-leaderboard.yml      | pull_request/workflow_dispatch                 | @physics  | contents/pull-requests: write                | KEEP: cross-option motion-matching leaderboard reports.                                              | n/a                      |
+| Jules-Auto-Assign-Issues.yml         | issues/workflow_dispatch                       | @triage   | issues: write                                | KEEP: automated issue assignment.                                                                    | n/a                      |
+| Jules-Diff-Verifier.yml              | pull_request                                   | @core     | contents: read / pull-requests: write        | KEEP: diff-substance check gate; blocks phantom Jules PRs from merging.                              | n/a                      |
+| Jules-Issue-Mention-Handler.yml      | issues/issue_comment/workflow_dispatch         | @triage   | issues: write                                | MERGE: mention-triggered issue routing.                                                              | n/a                      |
+| issue-closure-policy.yml             | issues                                         | @core     | issues: write / pull-requests: read          | KEEP: reopens epic/acceptance-criteria issues closed without a merged PR or wontfix.                 | n/a                      |
+| Jules-Redundant-Issue-Closer.yml     | issues/schedule/workflow_dispatch              | @agents   | contents: read / issues: write               | KEEP: close duplicate agent-created issues by normalized title.                                      | n/a                      |
+| Jules-Redundant-PR-Closer.yml        | pull_request_target/schedule/workflow_dispatch | @agents   | contents: read / pull-requests/issues: write | KEEP: close redundant agent PRs by fleet priority order.                                             | n/a                      |
+| Maintenance-Global-Control.yml       | workflow_dispatch                              | @infra    | actions: write                               | KEEP: global workflow control plane.                                                                 | n/a                      |
+| cross-engine-equivalence.yml         | pull_request/push/workflow_dispatch            | @physics  | contents: read                               | KEEP: PARITY-EQUIVALENCE plus Canonical Core conformance gate (issues #4096, #6780).                 | n/a                      |
+| cross-engine-leaderboard.yml         | pull_request/workflow_dispatch                 | @physics  | contents/pull-requests: write                | KEEP: PARITY-LEADERBOARD result report (issue #4097).                                                | n/a                      |
+| cross-engine-leaderboard-publish.yml | pull_request/push/workflow_dispatch            | @physics  | contents: write                              | KEEP: publish machine-readable cross-engine leaderboard JSON (issue #4713).                          | n/a                      |
+| jaxsim-upgrade-guard.yml             | pull_request/workflow_dispatch                 | @physics  | contents: read                               | KEEP: pinned JaxSim optional dependency upgrade guard with equivalence/gradient checks.              | n/a                      |
+| urdf-cross-engine-equivalence.yml    | pull_request/push/workflow_dispatch            | @physics  | contents: read                               | KEEP: URDF cross-engine forward-sim equivalence gate (issue #4542).                                  | n/a                      |
+| docs-currency-warning.yml            | pull_request                                   | @docs     | contents: read / pull-requests: write        | KEEP: advisory motion_matching docs-currency PR comment.                                             | n/a                      |
+| nightly-cross-engine.yml             | schedule/workflow_dispatch                     | @physics  | contents: read                               | KEEP: nightly cross-engine validation.                                                               | n/a                      |
+| Nightly-Doc-Organizer.yml            | schedule/workflow_dispatch                     | @docs     | contents/pull-requests: write                | MERGE: nightly docs cleanup.                                                                         | docs-ci.yml              |
+| lint-workflow-files.yml              | pull_request                                   | @core     | contents: read / pull-requests: write        | KEEP: enforces timeout, concurrency, and cancel-in-progress on modified workflows.                   | n/a                      |
+| local-only-runner-guard.yml          | pull_request/push/workflow_dispatch            | @core     | contents: read                               | KEEP: canary that rejects any workflow routing jobs to GitHub-hosted runners.                        | n/a                      |
+| package-standalone-sidekick.yml      | pull_request                                   | @core     | contents: read                               | KEEP: builds sdist + wheel, uploads as artifacts, and smoke-tests the wheel.                         | n/a                      |
+| pdf-size-guard.yml                   | pull_request                                   | @docs     | contents: read                               | KEEP: PDF signature and repository-boundary guard.                                                   | n/a                      |
+| pr-auto-labeler.yml                  | pull_request                                   | @triage   | pull-requests: write                         | KEEP: PR labeling.                                                                                   | n/a                      |
+| quality-gate.yml                     | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: blocking repo-wide Law-of-Demeter ratchet for production `src/` Python code.                   | n/a                      |
+| realtime-soak.yml                    | workflow_dispatch/schedule                     | @realtime | contents: read                               | KEEP: nightly/manual Rust realtime WebSocket soak validation (#5235).                                | n/a                      |
+| PR-Comment-Responder.yml             | issue_comment/workflow_dispatch                | @triage   | issues/pull-requests: write                  | KEEP: canonical PR comment responder.                                                                | n/a                      |
+| release.yml                          | push                                           | @release  | contents: read; job-scoped release/attest    | KEEP: exact-main companion artifacts and draft-first verified tag releases.                          | n/a                      |
+| release-sidekick-binary.yml          | push/workflow_dispatch                         | @release  | contents: write                              | KEEP: produces one-file Sidekick binaries via PyInstaller.                                           | n/a                      |
+| security-osv-monitor.yml             | schedule/workflow_dispatch                     | @security | contents/issues/security-events: write       | KEEP: scheduled OSV vulnerability triage SLA monitor.                                                | n/a                      |
+| spec-check.yml                       | pull_request/workflow_dispatch                 | @core     | contents: read                               | KEEP: SPEC freshness validation.                                                                     | n/a                      |
+| stale-cleanup.yml                    | schedule/workflow_dispatch                     | @infra    | issues/pull-requests: write                  | KEEP: stale issue and PR cleanup.                                                                    | n/a                      |
+| Stub-Introduction-Guard.yml          | pull_request                                   | @core     | contents: read                               | KEEP: fails PRs that introduce new stub/placeholder patterns without a tracking issue.               | n/a                      |
+| tauri-build.yml                      | push/pull_request/workflow_dispatch            | @desktop  | contents: read                               | KEEP: Tauri desktop build.                                                                           | n/a                      |
+| Verify-Issue-Closure.yml             | issues                                         | @core     | issues: write / pull-requests: read          | KEEP: reopens issues closed without implementation evidence, with cascade protection.                | n/a                      |
+| vendor-freshness.yml                 | schedule/workflow_dispatch                     | @infra    | contents/issues: write                       | KEEP: vendored dependency freshness.                                                                 | n/a                      |
+| anti-phantom-merge.yml               | pull_request                                   | @infra    | contents: read                               | KEEP: blocks merges that claim to fix an issue without changes that close it.                        | n/a                      |
+| issue-closure-policy.yml             | issues/pull_request                            | @infra    | issues: write                                | KEEP: enforces "no closure without evidence" policy on issue closes.                                 | n/a                      |
+| Jules-Diff-Verifier.yml              | pull_request                                   | @infra    | contents: read                               | KEEP: anti-phantom-merge diff substance verifier.                                                    | anti-phantom-merge.yml   |
+| lint-workflow-files.yml              | pull_request                                   | @infra    | contents: read                               | KEEP: lint .github/workflows/\*.yml for syntax + actionlint findings.                                | n/a                      |
+| Stub-Introduction-Guard.yml          | pull_request                                   | @infra    | contents: read                               | KEEP: rejects newly-introduced TRACKED_TASK/`pass`/`...` stubs.                                      | n/a                      |
+| Verify-Issue-Closure.yml             | issues                                         | @infra    | issues: write                                | KEEP: reopens issues closed without a merged PR (#641 fleet policy).                                 | issue-closure-policy.yml |
+| lock-refresh.yml                     | workflow_dispatch                              | @infra    | contents/pull-requests: write                | KEEP: regenerates pip lockfiles on ubuntu + Python 3.12 via `make sync-deps` and opens a PR (#9533). | n/a                      |
+| wizard-pack.yml                      | push/pull_request/workflow_dispatch            | @core     | contents: read                               | KEEP: builds and verifies Sidekick Drift Wizard SQLite knowledge pack artifact (#10943).             | n/a                      |

@@ -1,0 +1,60 @@
+{
+  "schema_version": "typed-slack-study/v1",
+  "study_id": "one-class-at-a-time-scalar-slack-contract",
+  "model_tier": "synthetic_scalar_constitutive_screen",
+  "classes": [
+    "contact_disengagement",
+    "transmission_backlash",
+    "structural_preload",
+    "biological_series_compliance",
+    "control_deadband"
+  ],
+  "cases": {
+    "contact_disengagement": {
+      "engaged_fraction": 0.44663834041489625,
+      "peak_abs_transmitted": 3.000788993952046,
+      "peak_stored_energy": 0.03749999999999999,
+      "signed_input_work": 0.0014016383361273033,
+      "energy_residual": -1.0625181290357943e-17
+    },
+    "transmission_backlash": {
+      "engaged_fraction": 0.8932766808297925,
+      "peak_abs_transmitted": 3.000788993952046,
+      "peak_stored_energy": 0.03749999999999999,
+      "signed_input_work": 0.005606553344509248,
+      "energy_residual": -8.673617379884035e-18
+    },
+    "structural_preload": {
+      "engaged_fraction": 1.0,
+      "peak_abs_transmitted": 4.080788993952047,
+      "peak_stored_energy": 0.06936,
+      "signed_input_work": 0.007106115168784344,
+      "energy_residual": 1.0191500421363742e-17
+    },
+    "biological_series_compliance": {
+      "engaged_fraction": 0.44663834041489625,
+      "peak_abs_transmitted": 3.000788993952046,
+      "peak_stored_energy": 0.03749999999999999,
+      "signed_input_work": 0.0028032766722546204,
+      "energy_residual": -7.37257477290143e-18
+    },
+    "control_deadband": {
+      "engaged_fraction": 0.8932766808297925,
+      "peak_abs_transmitted": 2.9999999999999996,
+      "peak_stored_energy": 0.0,
+      "signed_input_work": -6.938893903907228e-18,
+      "energy_residual": 0.0
+    }
+  },
+  "claims": {
+    "global_slack_benefit": "unsupported",
+    "class_interchangeability": "rejected_by_state_and_energy_definition",
+    "human_strategy": "untested"
+  },
+  "limitations": [
+    "The common displacement is synthetic and not a fitted swing or tissue trajectory.",
+    "Contact disengagement and biological series compliance share a unilateral scalar form here but retain different measurement and interpretation requirements.",
+    "The control deadband has no elastic storage; its coefficient is an input transmission gain, not physical stiffness.",
+    "No delivery-speed benefit, tissue effect, or human strategy is evaluated in this constitutive screen."
+  ]
+}

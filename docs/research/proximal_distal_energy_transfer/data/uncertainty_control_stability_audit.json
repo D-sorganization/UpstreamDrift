@@ -1,0 +1,111 @@
+{
+  "schema_version": "proximal-distal-uncertainty-stability-audit-v1",
+  "prcc_leave_one_out": {
+    "replicates": 24,
+    "point_leaders": {
+      "delivery_speed_m_s": "activation_delay_s",
+      "face_path_error_deg": "activation_time_constant_s",
+      "peak_individual_hand_force_n": "limb_mass_scale",
+      "effort_proxy_nms": "activation_delay_s",
+      "minimum_force_generated_couple_nm": "grip_separation_scale",
+      "peak_shaft_flex_deg": "shaft_stiffness_scale"
+    },
+    "leader_counts": {
+      "delivery_speed_m_s": {
+        "activation_delay_s": 24
+      },
+      "face_path_error_deg": {
+        "activation_time_constant_s": 24
+      },
+      "peak_individual_hand_force_n": {
+        "limb_mass_scale": 12,
+        "activation_delay_s": 3,
+        "activation_time_constant_s": 9
+      },
+      "effort_proxy_nms": {
+        "activation_delay_s": 24
+      },
+      "minimum_force_generated_couple_nm": {
+        "grip_separation_scale": 24
+      },
+      "peak_shaft_flex_deg": {
+        "shaft_stiffness_scale": 24
+      }
+    },
+    "sign_flip_counts": {
+      "delivery_speed_m_s": {
+        "impedance_scale": 4
+      },
+      "face_path_error_deg": {
+        "inertia_distribution_scale": 5,
+        "base_mass_scale": 4,
+        "base_stiffness_scale": 2,
+        "joint_damping_scale": 2,
+        "shaft_damping_scale": 1,
+        "activation_delay_s": 1
+      },
+      "peak_individual_hand_force_n": {
+        "inertia_distribution_scale": 5,
+        "shaft_damping_scale": 7
+      },
+      "effort_proxy_nms": {
+        "inertia_distribution_scale": 1,
+        "base_mass_scale": 13
+      },
+      "minimum_force_generated_couple_nm": {
+        "limb_mass_scale": 3,
+        "base_stiffness_scale": 2,
+        "shaft_stiffness_scale": 1,
+        "activation_delay_s": 1,
+        "activation_time_constant_s": 2
+      },
+      "peak_shaft_flex_deg": {
+        "limb_mass_scale": 3,
+        "base_mass_scale": 9,
+        "base_stiffness_scale": 9,
+        "joint_damping_scale": 1,
+        "activation_time_constant_s": 9
+      }
+    }
+  },
+  "held_out_pareto_jackknife": {
+    "replicates": 6,
+    "point_members": [
+      "passive_wrist",
+      "early_drive",
+      "late_drive",
+      "restrain_then_drive",
+      "higher_impedance",
+      "later_release",
+      "lower_drive",
+      "early_restrain"
+    ],
+    "membership_counts": {
+      "passive_wrist": 6,
+      "early_drive": 6,
+      "late_drive": 6,
+      "restrain_then_drive": 5,
+      "higher_impedance": 6,
+      "later_release": 4,
+      "lower_drive": 5,
+      "early_restrain": 5
+    }
+  },
+  "identifiability_threshold_sensitivity": {
+    "singular_values": [
+      1.7852424865951584,
+      1.1455600250283682,
+      1.0389709785013266,
+      0.8627451203878257,
+      0.3794525964694398,
+      0.23906807413293657
+    ],
+    "rank_by_fraction_of_largest": {
+      "0.01": 6,
+      "0.05": 6,
+      "0.1": 6,
+      "0.2": 5
+    }
+  },
+  "interpretation": "small-sample perturbation audit only; instability weakens ranking and Pareto-membership claims and cannot quantify population uncertainty"
+}

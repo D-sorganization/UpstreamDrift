@@ -1,0 +1,1164 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
+"""
+Local-first API server for Golf Modeling Suite.
+
+Runs entirely on localhost with NO authentication required.
+This is the default mode - free, offline, no accounts needed.
+
+API Versioning (#2070):
+    All routes are served under ``/api/v1/`` for forward compatibility.
+    Legacy ``/api/`` routes are also registered for backward compatibility.
+
+Diagnostic Features:
+- /api/diagnostics - JSON diagnostic report
+- /api/diagnostics/html - Browser-friendly diagnostic page
+- /api/debug/routes - List all registered routes
+- /api/debug/static - Check static file configuration
+
+Matched Swing Results (MS-85, #10358):
+- /api/v1/matched-swings — ledger index (local-only; registered via route_registry)
+- /api/v1/matched-swings/{id} — receipt, candidate NPZ, parity, and GIF artefacts
+"""
+
+from __future__ import annotations
+
+import mimetypes
+import os
+import secrets
+import threading
+import time
+from collections.abc import Callable
+from pathlib import Path
+from secrets import compare_digest
+from typing import Any
+from urllib.parse import urlparse
+
+# Fix MIME types for JavaScript modules on Windows
+# Windows registry often has incorrect/missing MIME types for .js files
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
+mimetypes.add_type("image/svg+xml", ".svg")
+mimetypes.add_type("application/json", ".json")
+mimetypes.add_type("image/png", ".png")
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/x-icon", ".ico")
+
+# Ensure we're running in local mode with explicit security configuration
+os.environ.setdefault("GOLF_SUITE_MODE", "local")
+# Auth is disabled ONLY in local mode for development convenience.
+# This is an intentional security boundary: local servers have NO auth by design.
+# Production servers MUST NOT use local_server.py and MUST enforce authentication.
+# See issue #2714 for security hardening requirements.
+if os.environ.get("GOLF_SUITE_MODE") == "local":
+    os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
+else:
+    # Production and other modes: auth is REQUIRED unless explicitly overridden
+    # by deployment configuration (e.g., cloud IAM, OAuth2 middleware)
+    os.environ.setdefault("GOLF_AUTH_DISABLED", "false")
+
+# NOTE: These imports are placed after env setup intentionally
+# The environment variables must be set before FastAPI initialization
+from fastapi import Depends, FastAPI, HTTPException, Request  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
+
+from src.api._version import __version__  # noqa: E402
+from src.api.debug_guard import debug_endpoints_enabled  # noqa: E402
+from src.api.diagnostics import (  # noqa: E402
+    APIDiagnostics,
+    get_diagnostic_endpoint_html,
+)
+from src.api.route_registry import (  # noqa: E402
+    register_routes,
+    ws_compatible_auth_dependency,
+)
+from src.api.routes import (  # noqa: E402
+    chat_ws,
+    observability,
+    realtime,
+    simulation_ws,
+)
+from src.api.services.chat_service import ChatService  # noqa: E402
+from src.api.task_manager import TaskManager  # noqa: E402
+from src.api.services.chat_app_context import make_app_state_provider  # noqa: E402
+from src.shared.python.app_state import get_state_logger  # noqa: E402
+from src.shared.python.config.environment import is_production  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
+
+logger = get_logger(__name__)
+
+# API versioning constants (#2070)
+API_VERSION = "v1"
+API_PREFIX = f"/api/{API_VERSION}"
+LAUNCHER_CSRF_HEADER = "X-Launcher-CSRF-Token"
+
+
+# Track startup metrics for diagnostics
+_startup_metrics: dict[str, Any] = {
+    "startup_time": None,
+    "static_files_mounted": False,
+    "ui_path": None,
+    "engines_loaded": [],
+    "errors": [],
+}
+
+
+def _raise_if_diagnostics_disabled() -> None:
+    """Hide development diagnostics from production deployments."""
+    if is_production():
+        raise HTTPException(status_code=404)
+
+
+class _LazyServiceProxy:
+    """Lazily instantiate heavy API services on first attribute access."""
+
+    def __init__(self, factory: Callable[[], Any]) -> None:
+        self._factory = factory
+        self._service: Any | None = None
+
+    def _resolve(self) -> Any:
+        if self._service is None:
+            self._service = self._factory()
+        return self._service
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._resolve(), name)
+
+
+class _UnavailableEngineManager:
+    """Engine manager fallback used when optional engine imports are unavailable."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+
+    def get_available_engines(self) -> list[Any]:
+        return []
+
+    def get_current_engine(self) -> None:
+        return None
+
+    def get_engine_status(self, _engine_type: Any) -> Any:
+        from src.shared.python.engine_core.engine_registry import EngineStatus
+
+        return EngineStatus.UNAVAILABLE
+
+    def get_active_physics_engine(self) -> None:
+        return None
+
+
+def _load_engine_manager_class() -> Any:
+    from src.shared.python.engine_core.engine_manager import EngineManager
+
+    return EngineManager
+
+
+def _create_engine_manager() -> Any:
+    try:
+        manager_class = _load_engine_manager_class()
+        return manager_class()
+    except (ImportError, RuntimeError, OSError) as exc:
+        reason = f"Engine manager unavailable during local API startup: {exc}"
+        logger.warning(reason)
+        _startup_metrics["errors"].append(reason)
+        return _UnavailableEngineManager(reason)
+
+
+def _create_simulation_service(engine_manager: Any) -> Any:
+    from src.api.services.simulation_service import SimulationService
+
+    return SimulationService(engine_manager)
+
+
+def _create_analysis_service(engine_manager: Any) -> Any:
+    from src.api.services.analysis_service import AnalysisService
+
+    return AnalysisService(engine_manager)
+
+
+def _resolve_ui_dist_path() -> Path:
+    """Resolve the UI build path for static file serving."""
+    from src.shared.python.config.environment import get_golf_ui_dist
+
+    env_override = get_golf_ui_dist()
+    if env_override:
+        return Path(env_override)
+    return Path(__file__).parent.parent.parent / "ui" / "dist"
+
+
+def _configure_cors(app: FastAPI) -> None:
+    """Configure CORS middleware for local origins."""
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:3000",  # Vite dev server
+            "http://localhost:5173",  # Vite default
+            "http://localhost:8080",  # Production UI
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:8001",
+            "http://127.0.0.1:8080",
+            "http://localhost:8001",
+        ],
+        allow_credentials=True,
+        # SECURITY (issue #6636 F3): match server.py hardening — do NOT use "*"
+        # for methods/headers while credentials are enabled.
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "X-API-Key",
+            "X-Launcher-CSRF-Token",
+        ],
+    )
+
+
+def _register_api_routers(app: FastAPI) -> None:
+    """Register all API route routers on the app.
+
+    Routes are mounted at both the versioned prefix (``/api/v1/``) and the
+    legacy prefix (``/api/``) to maintain backward compatibility (#2070).
+
+    Issue #8010: this used to hand-mount a fixed subset of routers, so the
+    packaged Tauri desktop app (which serves the React bundle from *this*
+    module) 404'd on ~100 endpoints that worked fine under ``npm run dev``
+    — dev proxies to ``src.api.server``, which mounts every discovered
+    router. The two entry points now share ``route_registry.register_routes``
+    so the desktop build can never drift behind the web build again. Auth
+    dependencies attached by the registry are no-ops here because local mode
+    sets ``GOLF_SUITE_AUTH_DISABLED``.
+
+    ``chat_ws``, ``simulation_ws`` and ``realtime`` are excluded from
+    auto-discovery (they expose WebSocket endpoints that authenticate
+    themselves) and are therefore mounted explicitly, exactly as ``server.py``
+    does.
+    """
+    for prefix in (API_PREFIX, "/api"):
+        count = register_routes(app, prefix=prefix)
+        logger.info("Registered %d route modules under %s", count, prefix or "/")
+
+        app.include_router(
+            simulation_ws.router, prefix=prefix, tags=["Simulation WebSocket"]
+        )
+        app.include_router(
+            chat_ws.router,
+            prefix=prefix,
+            tags=["Chat"],
+            dependencies=[Depends(ws_compatible_auth_dependency)],
+        )
+        app.include_router(
+            realtime.router,
+            prefix=prefix,
+            tags=["Realtime"],
+            dependencies=[Depends(ws_compatible_auth_dependency)],
+        )
+
+
+def _load_launcher_manifest() -> dict[str, Any]:
+    """Load the launcher manifest via the shared process-level cache.
+
+    Delegates to ``src.api.launcher_manifest_cache`` so this server and
+    ``src/api/routes/launcher.py`` share one loader code path (issue #8937).
+
+    Returns:
+        Parsed manifest dict, or a default empty manifest if not found.
+    """
+    from src.api.launcher_manifest_cache import get_cached_manifest
+
+    try:
+        return get_cached_manifest().to_dict()
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        logger.error("[launch] Failed to load launcher manifest: %s", exc)
+        return {"version": "1.0.0", "tiles": []}
+
+
+def _new_launcher_csrf_token() -> str:
+    """Generate the local launcher capability token for mutating endpoints."""
+    return secrets.token_urlsafe(32)
+
+
+def _is_loopback_origin(value: str) -> bool:
+    """Return True when an Origin/Referer value points at a loopback host."""
+    parsed = urlparse(value)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    hostname = parsed.hostname
+    return hostname in {"localhost", "127.0.0.1", "::1"}
+
+
+# Hosts considered "the same machine as the API server" for native-window
+# launches. "testclient" is the in-process Starlette TestClient peer.
+_LOCAL_CLIENT_HOSTS = frozenset({"127.0.0.1", "::1", "localhost", "testclient"})
+
+
+def _is_local_request_client(request: Request) -> bool:
+    """Return True when the request originates from the server's own machine.
+
+    Native-window tiles spawn Qt windows on the host running the API server;
+    launching them from a remote browser would open an invisible window on
+    the server (issue #7461), so callers refuse those with a 409.
+    """
+    if request is None:
+        raise ValueError("request must be provided")
+    client = request.client
+    if client is None:
+        # In-process ASGI invocation (no network peer) — local by definition.
+        return True
+    return client.host in _LOCAL_CLIENT_HOSTS
+
+
+def _native_window_remote_refusal(tile_id: str, mode: str) -> JSONResponse:
+    """Build the honest 409 response for non-local native-window launches."""
+    return JSONResponse(
+        status_code=409,
+        content={
+            "detail": (
+                f"Tile '{tile_id}' (web mode '{mode}') opens a native desktop "
+                "window on the machine running the API server. Launching it "
+                "from a remote browser would open an invisible server-side "
+                "window. Use the desktop (Tauri) app or run the server "
+                "locally."
+            ),
+            "reason": "native-window tiles cannot be launched from a remote client",
+            "web_mode": mode,
+        },
+    )
+
+
+def _enforce_launcher_mutation_guard(request: Request) -> None:
+    """Require a local capability token and reject browser cross-site writes."""
+    if request is None:
+        raise ValueError("request must be provided")
+
+    expected_token = getattr(request.app.state, "launcher_csrf_token", "")
+    provided_token = request.headers.get(LAUNCHER_CSRF_HEADER, "")
+    if not expected_token or not compare_digest(provided_token, expected_token):
+        raise HTTPException(
+            status_code=403,
+            detail="Launcher mutation token is required",
+        )
+
+    for header_name in ("origin", "referer"):
+        header_value = request.headers.get(header_name)
+        if header_value and not _is_loopback_origin(header_value):
+            raise HTTPException(
+                status_code=403,
+                detail="Launcher mutation origin is not allowed",
+            )
+
+
+def _with_launcher_csrf_token(manifest: dict[str, Any], token: str) -> dict[str, Any]:
+    """Attach the local UI capability token without mutating cached manifest data."""
+    response = dict(manifest)
+    response["launcher_csrf_token"] = token
+    response["launcher_csrf_header"] = LAUNCHER_CSRF_HEADER
+    return response
+
+
+def _safe_join(root: Path, user_path: str) -> Path | None:
+    """Join ``user_path`` onto ``root`` while rejecting traversal.
+
+    Normalizes the combined path and verifies it remains within ``root``.
+    Returns ``None`` if the request is unsafe (absolute path, traversal via
+    ``..``, ``NUL`` byte, symlink escape) so the caller can emit a 404.
+
+    Args:
+        root: Trusted root directory the file must live under.
+        user_path: Caller-supplied relative path fragment.
+
+    Returns:
+        The resolved absolute path if it is inside ``root``, else ``None``.
+    """
+    if not user_path or "\x00" in user_path:
+        return None
+    # Reject explicitly absolute requests. ``Path.is_absolute`` catches
+    # POSIX/Windows absolutes; the drive/root checks catch Windows-style
+    # roots that may not register as absolute on POSIX hosts.
+    candidate = Path(user_path)
+    if candidate.is_absolute() or candidate.drive or candidate.root:
+        return None
+    try:
+        resolved_root = root.resolve(strict=False)
+        resolved = (resolved_root / candidate).resolve(strict=False)
+    except (OSError, RuntimeError):
+        return None
+    try:
+        resolved.relative_to(resolved_root)
+    except ValueError:
+        return None
+    return resolved
+
+
+def _find_logo_file(logo_name: str) -> Path | None:
+    """Search for a logo file in known asset directories.
+
+    The caller-supplied ``logo_name`` is joined onto each candidate root via
+    :func:`_safe_join` so that ``..`` traversal, absolute paths, and symlink
+    escape are rejected before touching the filesystem.
+
+    Args:
+        logo_name: Filename of the logo to find.
+
+    Returns:
+        Path to the logo file, or None if not found or rejected as unsafe.
+    """
+    for root in (
+        Path(__file__).parent.parent.parent / "assets" / "logos",
+        Path(__file__).parent.parent / "launchers" / "assets",
+    ):
+        resolved = _safe_join(root, logo_name)
+        if resolved is not None and resolved.exists() and resolved.is_file():
+            return resolved
+    return None
+
+
+def _find_tile_in_manifest(
+    tile_id: str,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Find a tile by ID in the launcher manifest.
+
+    Args:
+        tile_id: The tile identifier to search for.
+
+    Returns:
+        Tuple of (manifest dict, tile dict) or (None, None) if not found.
+    """
+    from src.api.launcher_manifest_cache import get_cached_manifest
+
+    try:
+        manifest_obj = get_cached_manifest()
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        logger.error("[launch] Failed to load launcher manifest: %s", exc)
+        return None, None
+
+    for t in manifest_obj.tiles:
+        if t.id == tile_id:
+            return manifest_obj.to_dict(include_hidden=True), t.to_dict()
+    return manifest_obj.to_dict(include_hidden=True), None
+
+
+def _execute_tile_launch(
+    tile_id: str, tile: dict[str, Any], launcher_service: Any
+) -> dict[str, Any] | JSONResponse:
+    """Execute the launch of a tile using the appropriate handler.
+
+    Args:
+        tile_id: The tile identifier.
+        tile: Tile configuration dict from the manifest.
+        launcher_service: The launcher service managing handlers.
+
+    Returns:
+        Success dict or JSONResponse with error details.
+    """
+    if not (tile_id is not None):
+        raise ValueError("tile_id must be provided")
+    model_type = tile.get("type", "")
+    repo_path = Path(__file__).parent.parent.parent
+    logger.info(
+        "[launch] Resolved tile: name=%s type=%s path=%s",
+        tile.get("name"),
+        model_type,
+        tile.get("path"),
+    )
+
+    class _TileModel:
+        """Minimal model object compatible with handler.launch()."""
+
+        def __init__(self, data: dict[str, Any]) -> None:
+            for k, v in data.items():
+                setattr(self, k, v)
+
+    model = _TileModel(tile)
+
+    handler = launcher_service.get_handler(model_type)
+    if handler is None:
+        logger.error("[launch] No handler for type=%s (tile=%s)", model_type, tile_id)
+        return JSONResponse(
+            status_code=400,
+            content={"detail": f"No handler for type: {model_type}"},
+        )
+
+    logger.info(
+        "[launch] Using handler %s for tile %s",
+        type(handler).__name__,
+        tile_id,
+    )
+    success = handler.launch(model, repo_path, launcher_service.process_manager)
+    if success:
+        logger.info(
+            "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
+        )
+        return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
+    logger.error(
+        "[launch] Handler returned failure for tile %s (type=%s)",
+        tile_id,
+        model_type,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Failed to launch {tile.get('name', tile_id)}"},
+    )
+
+
+def _register_launcher_endpoints(app: FastAPI) -> None:
+    """Register launcher manifest, logo, launch, process, and stop endpoints."""
+    from src.api.services.launcher_service import LauncherService
+
+    _repo_root = Path(__file__).parent.parent.parent
+    _launcher_service = LauncherService(repo_root=_repo_root)
+    app.state.process_manager = _launcher_service.process_manager
+    app.state.launcher_csrf_token = _new_launcher_csrf_token()
+
+    @app.get("/api/launcher/manifest")
+    async def get_launcher_manifest() -> dict[str, Any]:
+        """Return the launcher manifest (tile configuration) for the web UI."""
+        import anyio.to_thread
+
+        # Cache misses re-run provider probes; keep them off the event loop
+        # (issue #8937).
+        manifest = await anyio.to_thread.run_sync(_load_launcher_manifest)
+        return _with_launcher_csrf_token(
+            manifest,
+            app.state.launcher_csrf_token,
+        )
+
+    @app.get("/api/launcher/logos/{logo_name:path}")
+    async def get_launcher_logo(logo_name: str) -> Any:
+        """Serve logo images from assets/logos directory."""
+        from fastapi.responses import FileResponse
+
+        found = _find_logo_file(logo_name)
+        if found is not None:
+            return FileResponse(str(found))
+        return JSONResponse(
+            status_code=404, content={"detail": f"Logo not found: {logo_name}"}
+        )
+
+    @app.post("/api/launcher/launch/{tile_id}", response_model=None)
+    async def launch_tile(
+        request: Request, tile_id: str
+    ) -> dict[str, Any] | JSONResponse:
+        """Launch an engine or tool by tile ID.
+
+        Looks up the tile in the launcher manifest and uses the model
+        handler registry to spawn it as a subprocess.
+        """
+        _enforce_launcher_mutation_guard(request)
+        logger.info("[launch] Received launch request for tile_id=%s", tile_id)
+
+        import anyio.to_thread
+
+        manifest, tile = await anyio.to_thread.run_sync(_find_tile_in_manifest, tile_id)
+        if manifest is None:
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "Launcher manifest not found"},
+            )
+        if tile is None:
+            logger.warning("[launch] Tile not found: %s", tile_id)
+            return JSONResponse(
+                status_code=404,
+                content={"detail": f"Tile not found: {tile_id}"},
+            )
+
+        # Web-reachability guard (issue #7461): a POST launch spawns a
+        # native window on *this* host. Refuse for non-local clients so the
+        # window never opens invisibly on the server.
+        web_contract = tile.get("web") or {}
+        web_mode = web_contract.get("mode", "native-window")
+        if web_mode != "route" and not _is_local_request_client(request):
+            logger.warning(
+                "[launch] Refusing non-local native-window launch: tile=%s client=%s",
+                tile_id,
+                request.client,
+            )
+            return _native_window_remote_refusal(tile_id, web_mode)
+
+        return _execute_tile_launch(tile_id, tile, _launcher_service)
+
+    @app.get("/api/launcher/processes")
+    async def list_running_processes() -> dict[str, Any]:
+        """List currently running engine/tool processes."""
+        return {"processes": _launcher_service.get_running_processes()}
+
+    @app.post("/api/launcher/stop/{name}", response_model=None)
+    async def stop_process(
+        request: Request, name: str
+    ) -> dict[str, Any] | JSONResponse:
+        """Stop a running engine/tool process by name."""
+        _enforce_launcher_mutation_guard(request)
+        if not _launcher_service.stop_process(name):
+            logger.warning("[stop] Process not found: %s", name)
+            return JSONResponse(
+                status_code=404, content={"detail": f"Process not found: {name}"}
+            )
+        return {"status": "stopped", "name": name}
+
+
+def _register_health_and_diagnostic_endpoints(
+    app: FastAPI, engine_manager: Any
+) -> None:
+    """Register health check and diagnostic endpoints."""
+
+    if not (app is not None):
+        raise ValueError("app must be provided")
+
+    app.include_router(observability.router, prefix="")
+
+    @app.get("/api/health")
+    async def health_check() -> dict[str, Any]:
+        """Return server health status and available engines."""
+        return {
+            "status": "healthy",
+            "mode": "local",
+            "auth_required": False,
+            "engines": [e.value for e in engine_manager.get_available_engines()],
+            "ui_available": _startup_metrics.get("static_files_mounted", False),
+        }
+
+    _register_diagnostic_and_debug_endpoints(app)
+
+
+def _register_diagnostic_and_debug_endpoints(app: FastAPI) -> None:
+    """Register opt-in diagnostic and debug endpoints."""
+
+    if not debug_endpoints_enabled():
+        return
+
+    @app.get("/api/diagnostics")
+    async def get_diagnostics() -> dict[str, Any]:
+        """Return comprehensive diagnostic information as JSON."""
+        _raise_if_diagnostics_disabled()
+        diagnostics = APIDiagnostics(app)
+        results = diagnostics.run_all_checks()
+        results["startup_metrics"] = _startup_metrics
+        return results
+
+    @app.get("/api/diagnostics/html", response_class=HTMLResponse)
+    async def get_diagnostics_html() -> HTMLResponse:
+        """Return diagnostic information as an HTML page."""
+        _raise_if_diagnostics_disabled()
+        diagnostics = APIDiagnostics(app)
+        results = diagnostics.run_all_checks()
+        results["startup_metrics"] = _startup_metrics
+        html_content = get_diagnostic_endpoint_html(results)
+        return HTMLResponse(content=html_content)
+
+    @app.get("/api/debug/routes")
+    async def debug_routes() -> dict[str, Any]:
+        """List all registered API routes for debugging."""
+        _raise_if_diagnostics_disabled()
+        routes = []
+        for route in app.routes:
+            route_info = {
+                "path": getattr(route, "path", "unknown"),
+                "methods": list(getattr(route, "methods", [])),
+                "name": getattr(route, "name", "unnamed"),
+            }
+            routes.append(route_info)
+        return {
+            "total_routes": len(routes),
+            "routes": sorted(routes, key=lambda x: x["path"]),
+        }
+
+    @app.get("/api/debug/static")
+    async def debug_static() -> dict[str, Any]:
+        """Check static file configuration."""
+        _raise_if_diagnostics_disabled()
+        ui_path = Path(__file__).parent.parent.parent / "ui" / "dist"
+        details: dict[str, Any] = {
+            "ui_path": str(ui_path),
+            "ui_exists": ui_path.exists(),
+            "startup_metrics": _startup_metrics,
+        }
+
+        if ui_path.exists():
+            details["index_html"] = (ui_path / "index.html").exists()
+            details["assets_dir"] = (ui_path / "assets").exists()
+            if (ui_path / "assets").exists():
+                js_files = list((ui_path / "assets").glob("*.js"))
+                css_files = list((ui_path / "assets").glob("*.css"))
+                details["js_files"] = [f.name for f in js_files]
+                details["css_files"] = [f.name for f in css_files]
+
+        return details
+
+
+def _mount_logos_directory(app: FastAPI) -> None:
+    """Mount the logos directory as a static file route.
+
+    Args:
+        app: The FastAPI application instance.
+    """
+    logos_path = Path(__file__).parent.parent.parent / "assets" / "logos"
+    if logos_path.exists():
+        app.mount(
+            "/logos",
+            StaticFiles(directory=str(logos_path)),
+            name="logos",
+        )
+        logger.info(f"Mounted /logos from {logos_path}")
+
+
+def _mount_assets_directory(app: FastAPI, ui_path: Path) -> None:
+    """Mount the UI assets directory as a static file route.
+
+    Args:
+        app: The FastAPI application instance.
+        ui_path: Path to the UI build directory.
+    """
+    if not (app is not None):
+        raise ValueError("app must be provided")
+    assets_path = ui_path / "assets"
+    if assets_path.exists():
+        app.mount(
+            "/assets",
+            StaticFiles(directory=str(assets_path)),
+            name="static_assets",
+        )
+        logger.info(f"Mounted /assets from {assets_path}")
+    else:
+        logger.warning(f"Assets directory not found at {assets_path}")
+        _startup_metrics["errors"].append(f"Assets directory missing: {assets_path}")
+
+
+def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
+    """Register the SPA catch-all route to serve index.html for non-API paths.
+
+    Args:
+        app: The FastAPI application instance.
+        ui_path: Path to the UI build directory.
+    """
+    if not (app is not None):
+        raise ValueError("app must be provided")
+    index_html = ui_path / "index.html"
+    if index_html.exists():
+        from fastapi.responses import FileResponse
+
+        @app.get("/{full_path:path}")
+        async def serve_spa(request: Request, full_path: str) -> Any:
+            """Serve the SPA index.html for all non-API routes."""
+            if not (request is not None):
+                raise ValueError("request must be provided")
+            if full_path.startswith("api/"):
+                return JSONResponse(
+                    status_code=404,
+                    content={"detail": "API route not found", "path": full_path},
+                )
+            if full_path:
+                static_file = _safe_join(ui_path, full_path)
+                if (
+                    static_file is not None
+                    and static_file.exists()
+                    and static_file.is_file()
+                ):
+                    return FileResponse(str(static_file))
+            return FileResponse(str(index_html))
+
+
+def _get_ui_not_built_html() -> str:
+    """Return an HTML page informing the user that the UI has not been built.
+
+    Returns:
+        HTML string with setup instructions.
+    """
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Golf Modeling Suite - Setup Required</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: #f0f0f0;
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .container {
+                text-align: center;
+                padding: 40px;
+                background: rgba(0,0,0,0.3);
+                border-radius: 16px;
+                max-width: 600px;
+            }
+            h1 { color: #0a84ff; margin-bottom: 10px; }
+            .emoji { font-size: 4em; margin-bottom: 20px; }
+            .code {
+                background: #0d0d0d;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-family: monospace;
+                margin: 20px 0;
+                text-align: left;
+            }
+            a {
+                color: #0a84ff;
+                text-decoration: none;
+            }
+            a:hover { text-decoration: underline; }
+            .btn {
+                display: inline-block;
+                background: #0a84ff;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                margin-top: 20px;
+                text-decoration: none;
+            }
+            .btn:hover {
+                background: #0066cc;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="emoji">\U0001f3cc\ufe0f\u200d\u2642\ufe0f</div>
+            <h1>Golf Modeling Suite</h1>
+            <h2>Web UI Setup Required</h2>
+            <p>The web interface has not been built yet. Run these commands:</p>
+            <div class="code">
+                cd ui<br>
+                npm install<br>
+                npm run build
+            </div>
+            <p>Then restart the server.</p>
+            <p style="color: #888; margin-top: 30px;">
+                <strong>API is working!</strong> Check:
+            </p>
+            <p>
+                <a href="/api/health">/api/health</a> |
+                <a href="/api/docs">/api/docs</a> |
+                <a href="/api/diagnostics/html">/api/diagnostics/html</a>
+            </p>
+            <a href="/api/diagnostics/html" class="btn">Run Diagnostics</a>
+        </div>
+    </body>
+    </html>
+    """
+
+
+def _register_error_page_catch_all(app: FastAPI) -> None:
+    """Register a catch-all route that shows a helpful error page when UI is not built.
+
+    Args:
+        app: The FastAPI application instance.
+    """
+
+    @app.get("/{full_path:path}", response_model=None)
+    async def serve_error_page(
+        request: Request, full_path: str
+    ) -> HTMLResponse | JSONResponse:
+        """Serve a helpful error page when UI is not built."""
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        if full_path.startswith("api/"):
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "API route not found", "path": full_path},
+            )
+        return HTMLResponse(content=_get_ui_not_built_html(), status_code=503)
+
+
+def _resolve_impact_explorer_dist_path() -> Path:
+    """Return the vendored Impact Explorer web build directory.
+
+    The Rate of Closure Impact Explorer ships a complete React app inside
+    the vendored Tools tree; Tools builds it to a static bundle
+    (``npm ci && npm run build`` in the directory below). When that bundle
+    exists, the launcher tile's ``/tools/impact-explorer`` route can embed
+    the real product instead of pointing web users at a desktop-only
+    ``native-window`` dead end.
+    """
+    return (
+        Path(__file__).parent.parent.parent
+        / "vendor"
+        / "ud-tools"
+        / "src"
+        / "rate_of_closure"
+        / "web"
+        / "dist"
+    )
+
+
+def _mount_impact_explorer_directory(app: FastAPI) -> None:
+    """Mount the vendored Impact Explorer web bundle when it has been built.
+
+    Missing bundle is tolerated (same posture as the UI build itself): the
+    ``/tools/impact-explorer`` page shows an honest fallback that names the
+    build command, and ``_startup_metrics['impact_explorer_web']`` records
+    availability either way so degradation is explicit, never silent.
+    """
+    dist = _resolve_impact_explorer_dist_path()
+    if dist.exists():
+        app.mount(
+            "/impact-explorer-app",
+            StaticFiles(directory=str(dist), html=True),
+            name="impact_explorer_app",
+        )
+        _startup_metrics["impact_explorer_web"] = True
+        logger.info(f"Mounted /impact-explorer-app from {dist}")
+    else:
+        _startup_metrics["impact_explorer_web"] = False
+        logger.info(
+            "Impact Explorer web bundle not built at %s; the "
+            "/tools/impact-explorer page will show its fallback",
+            dist,
+        )
+
+
+def _mount_static_files_and_spa(app: FastAPI) -> None:
+    """Mount static UI files and SPA catch-all, or an error page if UI is not built."""
+    ui_path = _resolve_ui_dist_path()
+    _startup_metrics["ui_path"] = str(ui_path)
+
+    # The vendored Impact Explorer bundle is independent of the host UI
+    # build: the Vite dev server proxies /impact-explorer-app straight here,
+    # so dev mode (no ui/dist) must still serve it.
+    _mount_impact_explorer_directory(app)
+
+    if ui_path.exists():
+        logger.info(f"UI build found at {ui_path}, mounting static files")
+        _startup_metrics["static_files_mounted"] = True
+        _mount_logos_directory(app)
+        _mount_assets_directory(app, ui_path)
+        _register_spa_catch_all(app, ui_path)
+    else:
+        warning = f"UI build not found at {ui_path}. Run npm install && npm run build."
+        logger.warning(warning)
+        _startup_metrics["errors"].append(warning)
+        _register_error_page_catch_all(app)
+
+
+def create_local_app() -> FastAPI:
+    """Create FastAPI app configured for local use.
+
+    Routes are registered at both ``/api/v1/`` (versioned, canonical) and
+    ``/api/`` (legacy, deprecated) for backward compatibility (#2070).
+    """
+    app = FastAPI(
+        title="Golf Modeling Suite",
+        description=(
+            "Local physics simulation for golf biomechanics.\n\n"
+            "## Versioning\n"
+            f"Current API version: **{API_VERSION}**. "
+            f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
+            "Legacy `/api/` routes are maintained for backward compatibility."
+        ),
+        version=__version__,
+        docs_url="/api/docs",  # Swagger UI available locally
+        redoc_url="/api/redoc",
+    )
+
+    # CORS: Allow local origins only
+    _configure_cors(app)
+
+    # Initialize services (lazy loading)
+    engine_manager = _create_engine_manager()
+
+    # Store in app state for dependency injection
+    app.state.engine_manager = engine_manager
+    app.state.simulation_service = _LazyServiceProxy(
+        lambda: _create_simulation_service(engine_manager)
+    )
+    app.state.analysis_service = _LazyServiceProxy(
+        lambda: _create_analysis_service(engine_manager)
+    )
+    # Shared ChatAppContext schema (#5470, #7453): same provider contract as
+    # src/api/server.py so desktop and web chat context cannot drift.
+    app.state.chat_service = ChatService(
+        app_state_provider=make_app_state_provider(
+            lambda: app.state.engine_manager,
+            lambda: app.state.simulation_service,
+            lambda: get_state_logger().store,
+        )
+    )
+    task_manager = TaskManager()
+    app.state.task_manager = task_manager
+    app.state.api_started_at = time.time()
+
+    @app.on_event("shutdown")
+    async def shutdown_task_manager() -> None:
+        await task_manager.shutdown()
+
+    # Desktop-specific overrides FIRST (issue #8010). FastAPI resolves
+    # first-match-wins, and the shared routers now mounted below also define
+    # ``GET /health`` (routes/core.py) and ``GET /launcher/manifest``
+    # (routes/launcher.py). The local variants are not duplicates: the local
+    # manifest carries the launcher CSRF token and native-window launch state
+    # the desktop shell requires, and the local health check reports the
+    # in-process engine manager. Registering them ahead of the routers keeps
+    # them reachable.
+
+    # Launcher endpoints (manifest, logos, launch, processes, stop)
+    _register_launcher_endpoints(app)
+
+    # Health check and diagnostic endpoints
+    _register_health_and_diagnostic_endpoints(app, engine_manager)
+
+    # Register every discovered route module (no auth required in local mode)
+    _register_api_routers(app)
+
+    # Store engine manager for diagnostics
+    _startup_metrics["engines_loaded"] = [
+        e.value for e in engine_manager.get_available_engines()
+    ]
+    logger.info(
+        "Engine availability at startup: available=%s unavailable_reason=%s",
+        _startup_metrics["engines_loaded"],
+        getattr(engine_manager, "reason", None),
+    )
+
+    # Serve static UI files in production
+    _mount_static_files_and_spa(app)
+
+    _startup_metrics["startup_time"] = time.strftime(
+        "%Y-%m-%dT%H:%M:%SZ", time.gmtime()
+    )
+    return app
+
+
+def print_logo_animated() -> None:
+    """Print the Upstream Drift logo with scroll animation."""
+    import sys
+
+    # ANSI escape codes
+    ORANGE = "\033[38;5;208m"
+    RESET = "\033[0m"
+
+    logo = [
+        r"██╗   ██╗██████╗ ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗",
+        r"██║   ██║██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║",
+        r"██║   ██║██████╔╝███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║",
+        r"██║   ██║██╔═══╝ ╚════██║   ██║   ██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║",
+        r"╚██████╔╝██║     ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║",
+        r" ╚═════╝ ╚═╝     ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝",
+        r"",
+        r"██████╗ ██████╗ ██╗███████╗████████╗",
+        r"██╔══██╗██╔══██╗██║██╔════╝╚══██╔══╝",
+        r"██║  ██║██████╔╝██║█████╗     ██║   ",
+        r"██║  ██║██╔══██╗██║██╔══╝     ██║   ",
+        r"██████╔╝██║  ██║██║██║        ██║   ",
+        r"╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ",
+    ]
+
+    logger.info("")
+    try:
+        for line in logo:
+            logger.info("    %s%s%s", ORANGE, line, RESET)
+            sys.stdout.flush()
+            # Scroll effect delay removed: time.sleep() blocks async/GUI contexts
+    except UnicodeEncodeError:
+        logger.info("    %sUPSTREAM DRIFT%s", ORANGE, RESET)
+    logger.info("")
+
+
+def print_matrix_status(message: str, indent: int = 4) -> None:
+    """Print status message in matrix green style."""
+    if not (message is not None):
+        raise ValueError("message must be provided")
+    GREEN = "\033[38;5;46m"  # Bright matrix green
+    RESET = "\033[0m"
+    logger.info("%s%s>%s %s%s%s", " " * indent, GREEN, RESET, GREEN, message, RESET)
+
+
+def print_server_info(host: str, port: int) -> None:
+    """Print server info box."""
+    if not (host is not None):
+        raise ValueError("host must be provided")
+    CYAN = "\033[38;5;51m"
+    RESET = "\033[0m"
+
+    try:
+        logger.info(f"""
+{CYAN}    ┌─────────────────────────────────────────────────────────┐
+    │              Golf Modeling Suite - Local Server         │
+    ├─────────────────────────────────────────────────────────┤
+    │  Running at: http://{host}:{port:<5}                       │
+    │  API Docs:   http://{host}:{port}/api/docs               │
+    │                                                         │
+    │  Mode: LOCAL (no auth required)                         │
+    │  Press Ctrl+C to stop.                                  │
+    └─────────────────────────────────────────────────────────┘{RESET}
+    """)
+    except UnicodeEncodeError:
+        logger.info("\n    Golf Modeling Suite - Local Server")
+        logger.info("    Running at: http://%s:%s", host, port)
+        logger.info("    API Docs:   http://%s:%s/api/docs", host, port)
+        logger.info("    Mode: LOCAL (no auth required)")
+        logger.info("    Press Ctrl+C to stop.\n")
+
+
+def _schedule_browser_open(host: str, port: int, delay: float = 1.5) -> threading.Timer:
+    """Schedule a one-shot browser open as a daemon timer.
+
+    Using a daemon thread ensures that if the server fails to bind (e.g. the
+    port is already in use), the process exits immediately instead of blocking
+    until the timer fires (issue #6924).
+
+    Returns:
+        The started, already-running daemon :class:`threading.Timer`.
+    """
+    import webbrowser
+
+    def open_browser() -> None:
+        from src.shared.python.config.environment import is_browser_suppressed
+
+        if not is_browser_suppressed():
+            webbrowser.open(f"http://{host}:{port}")
+
+    timer = threading.Timer(delay, open_browser)
+    timer.daemon = True
+    timer.start()
+    return timer
+
+
+def main() -> None:
+    """Launch local server with auto-open browser."""
+    import uvicorn
+
+    DIM = "\033[2m"
+    RESET = "\033[0m"
+
+    logger.info("\n%sInitializing Golf Modeling Suite...%s\n", DIM, RESET)
+
+    app = create_local_app()
+
+    host = "127.0.0.1"
+    from src.shared.python.config.environment import get_golf_port
+
+    port = get_golf_port(default=8000)
+
+    # Print startup info in matrix green (no artificial delays -- cosmetic sleeps removed)
+    print_matrix_status("Loading physics engine manager...")
+    print_matrix_status("Registering API routes...")
+    print_matrix_status("Configuring static file server...")
+    print_matrix_status(f"Server ready on port {port}")
+    logger.info("")
+
+    # Open browser after server starts (daemon timer; see #6924)
+    _schedule_browser_open(host, port)
+
+    # Print server info
+    print_server_info(host, port)
+
+    # Logo last - stays visible at bottom of terminal
+    print_logo_animated()
+
+    # Start server (this blocks)
+    uvicorn.run(app, host=host, port=port, log_level="info")
+
+
+if __name__ == "__main__":
+    main()
+
+# Clarified web UI as primary entry point (Issue #6096)
+
+# Main entry point documented in issue 6096

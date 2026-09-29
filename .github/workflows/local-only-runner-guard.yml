@@ -1,0 +1,159 @@
+name: Local-Only Workflow Runner Guard
+
+# Enforces that every workflow in this repo routes its jobs to the d-sorg
+# self-hosted fleet. The guard runs on ubuntu-latest because it is the canary
+# that must remain operable when the fleet itself is down. The job is named
+# "Reject hosted runner routing" — together with the workflow name above, these
+# are the only two names allowlisted to run on hosted runners across the org.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  reject-hosted-runner-routing:
+    name: Reject hosted runner routing
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Install PyYAML
+        run: pip install --disable-pip-version-check pyyaml==6.0.2
+
+      - name: Verify workflows use approved local routing or the reversible CI_RUNNER_MODE hosted fast lane
+        shell: python
+        run: |
+          import re
+          import sys
+          from pathlib import Path
+
+          import yaml
+
+          # Workflow files allowlisted to run on hosted runners. The guard itself
+          # is here because it is the canary. The runner-health-alert canary in
+          # Repository_Management is allowlisted only in that repo; the entry is
+          # harmless elsewhere.
+          ALLOWLIST_FILES = {
+              "local-only-runner-guard.yml",
+              "runner-health-alert.yml",
+          }
+          # Job names allowlisted to run on hosted runners. Matches the two
+          # human-facing names every repo's CI standard refers to.
+          ALLOWLIST_JOB_NAMES = {
+              "Reject hosted runner routing",
+              "Local-Only Workflow Runner Guard",
+          }
+          HOSTED = re.compile(r"^(ubuntu|macos|windows)(-latest|-\d+)?$")
+
+          def collect_runs_on(job: dict) -> list[str]:
+              runs_on = job.get("runs-on")
+              values: list[str] = []
+              if isinstance(runs_on, str):
+                  values.append(runs_on)
+              elif isinstance(runs_on, list):
+                  values.extend(v for v in runs_on if isinstance(v, str))
+              # Resolve matrix.os: walk strategy.matrix.os and strategy.matrix.include[*].os
+              if any("matrix.os" in v for v in values):
+                  values = []
+                  strategy = job.get("strategy") or {}
+                  matrix = strategy.get("matrix") or {}
+                  if isinstance(matrix, dict):
+                      os_axis = matrix.get("os")
+                      if isinstance(os_axis, list):
+                          values.extend(v for v in os_axis if isinstance(v, str))
+                      include = matrix.get("include")
+                      if isinstance(include, list):
+                          for item in include:
+                              if isinstance(item, dict) and isinstance(item.get("os"), str):
+                                  values.append(item["os"])
+              return values
+
+          fleet_expression_hint = "$" + "{{ needs.pick-runner.outputs.runner }}"
+          violations: list[str] = []
+          wf_dir = Path(".github/workflows")
+          if not wf_dir.is_dir():
+              print("No .github/workflows directory; nothing to check.")
+              sys.exit(0)
+
+          for wf in sorted(wf_dir.glob("*.y*ml")):
+              if wf.name in ALLOWLIST_FILES:
+                  continue
+              try:
+                  data = yaml.safe_load(wf.read_text(encoding="utf-8"))
+              except yaml.YAMLError as exc:
+                  violations.append(f"{wf.name}: failed to parse YAML: {exc}")
+                  continue
+              if not isinstance(data, dict):
+                  continue
+              jobs = data.get("jobs") or {}
+              if not isinstance(jobs, dict):
+                  continue
+              for job_id, job in jobs.items():
+                  if not isinstance(job, dict):
+                      continue
+                  if job.get("name") in ALLOWLIST_JOB_NAMES:
+                      continue
+                  # Reusable workflow callers don't have runs-on; skip
+                  if "uses" in job and "runs-on" not in job:
+                      continue
+                  values = collect_runs_on(job)
+                  if not values:
+                      # Could be a pick-runner expression;
+                      # treat the raw expression text as the value to inspect.
+                      raw = job.get("runs-on")
+                      if isinstance(raw, str):
+                          values = [raw]
+                  for v in values:
+                      v_clean = v.strip()
+                      # Expressions that resolve at runtime to fleet labels are OK
+                      if "CI_RUNNER_MODE" in v_clean or "pick-runner" in v_clean or "d-sorg-fleet" in v_clean or "self-hosted" in v_clean:
+                          continue
+                      if HOSTED.match(v_clean):
+                          violations.append(
+                              f"{wf.name}::{job_id}: runs-on '{v_clean}' is a hosted runner; "
+                              f"route to d-sorg-fleet-docker (or `{fleet_expression_hint}`)."
+                          )
+
+          if violations:
+              print("\n".join(f"::error::{v}" for v in violations))
+              print()
+              print(f"{len(violations)} workflow(s) leak to hosted runners.")
+              print(
+                  "Allowed: local-only-runner-guard.yml, runner-health-alert.yml, "
+                  "and jobs literally named 'Reject hosted runner routing'."
+              )
+              sys.exit(1)
+
+          print("All workflows use approved local routing or the reversible CI_RUNNER_MODE hosted fast lane.")

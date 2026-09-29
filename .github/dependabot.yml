@@ -1,0 +1,68 @@
+# Dependabot configuration (Issues #767, #1493)
+# Automatically creates PRs to update dependencies
+
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Group minor/patch updates to reduce PR noise
+      python-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # casadi is pinned by the qualified Bioptim runtime contract:
+    # tests/unit/optimization/test_bioptim_dependency_contract.py
+    # (test_bioptim_admits_the_numerically_checked_runtime) requires the
+    # optimal-control + bioptim extras to accept exactly casadi 3.6.7 and
+    # reject newer releases until re-qualified numerically. Drop this
+    # ignore only alongside a re-qualification of the contract test.
+    ignore:
+      - dependency-name: "casadi"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci/cd"
+      - "automated"
+    commit-message:
+      prefix: "chore(ci)"
+
+  # npm (UI dependencies)
+  - package-ecosystem: "npm"
+    directory: "/ui"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+    commit-message:
+      prefix: "chore(ui-deps)"
+    # @vitejs/plugin-react 6.x requires Vite 8 (peerDependencies vite
+    # ^8.0.0; Vite 7 exports no ./internal entrypoint), so a lone major
+    # bump cannot merge against ui's vite ^7.3.2 — see issue #9249.
+    # Drop this ignore when the ui toolchain upgrades to Vite 8.
+    ignore:
+      - dependency-name: "@vitejs/plugin-react"
+        update-types:
+          - "version-update:semver-major"

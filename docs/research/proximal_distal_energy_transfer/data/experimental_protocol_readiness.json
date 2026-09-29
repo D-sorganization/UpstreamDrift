@@ -1,0 +1,27 @@
+{
+  "schema_version": "experimental-falsification-readiness-v1",
+  "protocol_id": "proximal-distal-human-falsification-v1",
+  "readiness": {
+    "status": "synthetic_dry_run_only",
+    "pipeline_ready": true,
+    "claims_evaluable": false,
+    "participant_count": 2,
+    "held_out_count": 1,
+    "limitations": [
+      "Synthetic records qualify schema and processing readiness only.",
+      "No human, physiological, skill, or causal claim may be evaluated."
+    ]
+  },
+  "human_data_evaluation": "not_executed",
+  "claim_status": {
+    "EXP-H1": "untested_no_governed_human_data",
+    "EXP-H2": "untested_no_governed_human_data",
+    "EXP-H3": "untested_no_governed_human_data",
+    "EXP-H4": "untested_no_governed_human_data"
+  },
+  "source_sha256": {
+    "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_v1.json": "c3af53b966083702eab7ca99a39e5e99d35dfbf7e7a8ae3ff8261a1945bc0834",
+    "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_dry_run.json": "6b193ae754d54150e158fc559a045eee5dd497a64e0a393e58e30e1165f12c93"
+  },
+  "interpretation_boundary": "This artifact qualifies schema, split, modality, provenance, and fail-closed behavior only; it contains no human measurements."
+}

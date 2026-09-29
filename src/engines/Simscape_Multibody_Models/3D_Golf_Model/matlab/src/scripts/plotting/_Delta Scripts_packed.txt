@@ -1,0 +1,1967 @@
+%%% MATLAB PROJECT PACKER - v1.0 %%%
+%%% Source Folder Base: C:\Users\diete\MATLAB Drive\Projects\Model Rebuild\Scripts\_Delta Scripts %%%
+%%% Pack Time: 02-May-2025 09:29:41 %%%
+
+%%% START FILE: MASTER_SCRIPT_DeltaCharts_3D.m %%%
+cd(matlabdrive);
+cd '3DModel';
+cd 'Scripts/_Delta Scripts';
+%PauseTime=0;
+
+SCRIPT_501_3D_PLOT_DELTA_AngularWork;
+SCRIPT_502_3D_PLOT_DELTA_AngularPower;
+SCRIPT_503_3D_PLOT_DELTA_LinearPower;
+SCRIPT_504_3D_PLOT_DELTA_LinearWork;
+SCRIPT_505_3D_PLOT_DELTA_JointTorqueInputs;
+SCRIPT_506_3D_PLOT_DELTA_TotalWork;
+SCRIPT_507_3D_PLOT_DELTA_TotalPower;
+SCRIPT_512_3D_QUIVER_DELTA_NetForceEquivalentCouple;
+SCRIPT_513_3D_QUIVER_DELTA_NetForce;
+SCRIPT_514_3D_QUIVER_DELTA_LHRHForceQuiver;
+SCRIPT_515_3D_QUIVER_DELTA_LHRHTorque;
+SCRIPT_516_3D_QUIVER_DELTA_AllTorqueandMoments;
+SCRIPT_517_3D_QUIVER_DELTA_AllMoments;
+% SCRIPT_518_3D_QUIVER_DELTA_LeftUpperArmMoments;
+% SCRIPT_519_3D_QUIVER_DELTA_RightUpperArmMoments;
+% SCRIPT_520_3D_QUIVER_DELTA_LForearmMoments;
+% SCRIPT_521_3D_QUIVER_DELTA_RForearmMoments;
+SCRIPT_522_3D_PLOT_DELTA_ForceAlongHandPath;
+SCRIPT_525_3D_PLOT_DELTA_LHRHForceAlongHandPath;
+SCRIPT_526_3D_PLOT_DELTA_LinearImpulse;
+SCRIPT_527_3D_PLOT_DELTA_LinearWork;
+SCRIPT_528_3D_PLOT_DELTA_LinearImpulse;
+SCRIPT_529_3D_PLOT_DELTA_EquivalentCoupleandMOF;
+SCRIPT_530_3D_PLOT_DELTA_LSWork;
+SCRIPT_531_3D_PLOT_DELTA_LSPower;
+SCRIPT_532_3D_PLOT_DELTA_RSWork;
+SCRIPT_533_3D_PLOT_DELTA_RSPower;
+SCRIPT_534_3D_PLOT_DELTA_LEWork;
+SCRIPT_535_3D_PLOT_DELTA_LEPower;
+SCRIPT_536_3D_PLOT_DELTA_REWork;
+SCRIPT_537_3D_PLOT_DELTA_REPower;
+SCRIPT_538_3D_PLOT_DELTA_LHWork;
+SCRIPT_539_3D_PLOT_DELTA_LHPower;
+SCRIPT_540_3D_PLOT_DELTA_RHWork;
+SCRIPT_541_3D_PLOT_DELTA_RHPower;
+SCRIPT_542_3D_QUIVER_DELTA_LHRHLinearImpulse;
+SCRIPT_543_3D_QUIVER_DELTA_LHRH_BaseData_AngularImpulse;
+SCRIPT_544_3D_QUIVER_DELTA_TotalLinearImpulse;
+SCRIPT_545_3D_QUIVER_DELTA_TotalAngularImpulse;
+SCRIPT_546_3D_QUIVER_DELTA_NetForceCoupleShaftsAdded;
+SCRIPT_548_3D_PLOT_DELTA_LocalHandForces;
+SCRIPT_549_3D_QUIVER_DELTA_LHRHMoments;
+% SCRIPT_550_3D_PLOT_DELTA_TorqueInputvsTorqueOutput;
+
+% clear PauseTime;
+
+%%% END FILE: MASTER_SCRIPT_DeltaCharts_3D.m %%%
+
+%%% START FILE: SCRIPT_501_3D_PLOT_DELTA_AngularWork.m %%%
+figure(501);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LSAngularWorkonArm);
+plot(DELTAQ.Time,DELTAQ.RSAngularWorkonArm);
+plot(DELTAQ.Time,DELTAQ.LEAngularWorkonForearm);
+plot(DELTAQ.Time,DELTAQ.REAngularWorkonForearm);
+plot(DELTAQ.Time,DELTAQ.LHAngularWorkonClub);
+plot(DELTAQ.Time,DELTAQ.RHAngularWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Work','RS Angular Work','LE Angular Work','RE Angular Work','LH Angular Work','RH Angular Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Angular Work');
+pause(PauseTime);
+
+%Close Figure
+close(501);
+
+%%% END FILE: SCRIPT_501_3D_PLOT_DELTA_AngularWork.m %%%
+
+%%% START FILE: SCRIPT_502_3D_PLOT_DELTA_AngularPower.m %%%
+figure(502);
+hold on;
+
+plot(ZTCFQ.Time,DELTAQ.LSonArmAngularPower);
+plot(ZTCFQ.Time,DELTAQ.RSonArmAngularPower);
+plot(ZTCFQ.Time,DELTAQ.LEonForearmAngularPower);
+plot(ZTCFQ.Time,DELTAQ.REonForearmAngularPower);
+plot(ZTCFQ.Time,DELTAQ.LHonClubAngularPower);
+plot(ZTCFQ.Time,DELTAQ.RHonClubAngularPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Power','RS Angular Power','LE Angular Power','RE Angular Power','LH Angular Power','RH Angular Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Angular Power');
+pause(PauseTime);
+
+%Close Figure
+close(502);
+
+%%% END FILE: SCRIPT_502_3D_PLOT_DELTA_AngularPower.m %%%
+
+%%% START FILE: SCRIPT_503_3D_PLOT_DELTA_LinearPower.m %%%
+figure(503);
+hold on;
+
+plot(ZTCFQ.Time,DELTAQ.LSonArmLinearPower);
+plot(ZTCFQ.Time,DELTAQ.RSonArmLinearPower);
+plot(ZTCFQ.Time,DELTAQ.LEonForearmLinearPower);
+plot(ZTCFQ.Time,DELTAQ.REonForearmLinearPower);
+plot(ZTCFQ.Time,DELTAQ.LHonClubLinearPower);
+plot(ZTCFQ.Time,DELTAQ.RHonClubLinearPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power','RS Linear Power','LE Linear Power','RE Linear Power','LH Linear Power','RH Linear Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Linear Power');
+pause(PauseTime);
+
+%Close Figure
+close(503);
+
+%%% END FILE: SCRIPT_503_3D_PLOT_DELTA_LinearPower.m %%%
+
+%%% START FILE: SCRIPT_504_3D_PLOT_DELTA_LinearWork.m %%%
+figure(504);
+hold on;
+
+plot(ZTCFQ.Time,DELTAQ.LSLinearWorkonArm);
+plot(ZTCFQ.Time,DELTAQ.RSLinearWorkonArm);
+plot(ZTCFQ.Time,DELTAQ.LELinearWorkonForearm);
+plot(ZTCFQ.Time,DELTAQ.RELinearWorkonForearm);
+plot(ZTCFQ.Time,DELTAQ.LHLinearWorkonClub);
+plot(ZTCFQ.Time,DELTAQ.RHLinearWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work','RS Linear Work','LE Linear Work','RE Linear Work','LH Linear Work','LH Linear Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Linear Work on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(504);
+
+%%% END FILE: SCRIPT_504_3D_PLOT_DELTA_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_505_3D_PLOT_DELTA_JointTorqueInputs.m %%%
+figure(505);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.HipTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.HipTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.HipTorqueZInput);
+plot(DELTAQ.Time,DELTAQ.TranslationForceXInput);
+plot(DELTAQ.Time,DELTAQ.TranslationForceYInput);
+plot(DELTAQ.Time,DELTAQ.TranslationForceZInput);
+plot(DELTAQ.Time,DELTAQ.TorsoTorqueInput);
+plot(DELTAQ.Time,DELTAQ.SpineTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.SpineTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.LScapTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.LScapTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.RScapTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.RScapTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.LSTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.LSTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.LSTorqueZInput);
+plot(DELTAQ.Time,DELTAQ.RSTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.RSTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.RSTorqueZInput);
+plot(DELTAQ.Time,DELTAQ.LETorqueInput);
+plot(DELTAQ.Time,DELTAQ.RETorqueInput);
+plot(DELTAQ.Time,DELTAQ.LFTorqueInput);
+plot(DELTAQ.Time,DELTAQ.RFTorqueInput);
+plot(DELTAQ.Time,DELTAQ.LWTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.LWTorqueYInput);
+plot(DELTAQ.Time,DELTAQ.RWTorqueXInput);
+plot(DELTAQ.Time,DELTAQ.RWTorqueYInput);
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Hip Torque X','Hip Torque Y','Hip Torque Z','Translation Force X',...
+    'Translation Force Y','Translation Force Z','Torso Torque','Spine Torque X',...
+    'Spine Torque Y','LScap Torque X','Left Scap Torque Y','RScap Torque X',...
+    'RScapTorqueY','LS Torque X','LS Torque Y','LS Torque Z','RS Torque X','RS Torque Y',...
+    'RS Torque Z','LE Torque','RE Torque','LF Torque','RF Torque','LW Torque X',...
+    'LW Torque Y','RW Torque X','RW Torque Y');
+legend('Location','southeast');
+%Add a Title
+title('Joint Torque Inputs');
+%subtitle('Left Hand, Right Hand, Total');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Joint Torque Inputs');
+pause(PauseTime);
+
+%Close Figure
+close(505);
+
+%%% END FILE: SCRIPT_505_3D_PLOT_DELTA_JointTorqueInputs.m %%%
+
+%%% START FILE: SCRIPT_506_3D_PLOT_DELTA_TotalWork.m %%%
+figure(506);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.TotalLSWork);
+plot(DELTAQ.Time,DELTAQ.TotalRSWork);
+plot(DELTAQ.Time,DELTAQ.TotalLEWork);
+plot(DELTAQ.Time,DELTAQ.TotalREWork);
+plot(DELTAQ.Time,DELTAQ.TotalLHWork);
+plot(DELTAQ.Time,DELTAQ.TotalRHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Work','RS Total Work','LE Total Work','RE Total Work','LH Total Work','RH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Total Work');
+pause(PauseTime);
+
+%Close Figure
+close(506);
+
+%%% END FILE: SCRIPT_506_3D_PLOT_DELTA_TotalWork.m %%%
+
+%%% START FILE: SCRIPT_507_3D_PLOT_DELTA_TotalPower.m %%%
+figure(507);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.TotalLSPower);
+plot(DELTAQ.Time,DELTAQ.TotalRSPower);
+plot(DELTAQ.Time,DELTAQ.TotalLEPower);
+plot(DELTAQ.Time,DELTAQ.TotalREPower);
+plot(DELTAQ.Time,DELTAQ.TotalLHPower);
+plot(DELTAQ.Time,DELTAQ.TotalRHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Power','RS Total Power','LE Total Power','RE Total Power','LH Total Power','RH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Total Power');
+pause(PauseTime);
+
+%Close Figure
+close(507);
+
+%%% END FILE: SCRIPT_507_3D_PLOT_DELTA_TotalPower.m %%%
+
+%%% START FILE: SCRIPT_512_3D_QUIVER_DELTA_NetForceEquivalentCouple.m %%%
+%Generate Club Quiver Plot
+figure(512);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.TotalHandForceGlobal(:,1),DELTAQ.TotalHandForceGlobal(:,2),DELTAQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.EquivalentMidpointCoupleGlobal(:,1),DELTAQ.EquivalentMidpointCoupleGlobal(:,2),DELTAQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','Net Force','Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('DELTA');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Net Force and Equivalent MP Couple');
+pause(PauseTime);
+
+
+%Close Figure
+close(512);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_512_3D_QUIVER_DELTA_NetForceEquivalentCouple.m %%%
+
+%%% START FILE: SCRIPT_513_3D_QUIVER_DELTA_NetForce.m %%%
+%Generate Club Quiver Plot
+figure(513);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.TotalHandForceGlobal(:,1),DELTAQ.TotalHandForceGlobal(:,2),DELTAQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+%Add Legend to Plot
+legend('','','','','Net Force');
+
+%Add a Title
+title('Net Force');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Net Force');
+pause(PauseTime);
+
+%Close Figure
+close(513);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_513_3D_QUIVER_DELTA_NetForce.m %%%
+
+%%% START FILE: SCRIPT_514_3D_QUIVER_DELTA_LHRHForceQuiver.m %%%
+%Generate Club Quiver Plot
+figure(514);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH Total Force Quiver Plot
+LHForceQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),DELTAQ.LHonClubFGlobal(:,1),DELTAQ.LHonClubFGlobal(:,2),DELTAQ.LHonClubFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Force Quiver Plot
+RHForceQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),DELTAQ.RHonClubFGlobal(:,1),DELTAQ.RHonClubFGlobal(:,2),DELTAQ.RHonClubFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[1 0 0];
+RHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+RHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/RHForceQuiver.ScaleFactor;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.TotalHandForceGlobal(:,1),DELTAQ.TotalHandForceGlobal(:,2),DELTAQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+NetForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/NetForceQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Force','RH Force','Net Force');
+
+%Add a Title
+title('Hand Forces');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(514);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear RHForceQuiver;
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_514_3D_QUIVER_DELTA_LHRHForceQuiver.m %%%
+
+%%% START FILE: SCRIPT_515_3D_QUIVER_DELTA_LHRHTorque.m %%%
+%Generate Club Quiver Plot
+figure(515);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH Total Torque Quiver Plot
+LHTorqueQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),DELTAQ.LHonClubTGlobal(:,1),DELTAQ.LHonClubTGlobal(:,2),DELTAQ.LHonClubTGlobal(:,3));
+LHTorqueQuiver.LineWidth=1;
+LHTorqueQuiver.Color=[0 0 1];
+LHTorqueQuiver.AutoScaleFactor=2;
+LHTorqueQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Torque Quiver Plot
+RHTorqueQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),DELTAQ.RHonClubTGlobal(:,1),DELTAQ.RHonClubTGlobal(:,2),DELTAQ.RHonClubTGlobal(:,3));
+RHTorqueQuiver.LineWidth=1;
+RHTorqueQuiver.Color=[1 0 0];
+RHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHTorqueQuiver.AutoScaleFactor=LHTorqueQuiver.ScaleFactor/RHTorqueQuiver.ScaleFactor;
+
+%Generate Total Torque Quiver Plot
+NetTorqueQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.TotalHandTorqueGlobal(:,1),DELTAQ.TotalHandTorqueGlobal(:,2),DELTAQ.TotalHandTorqueGlobal(:,3));
+NetTorqueQuiver.LineWidth=1;
+NetTorqueQuiver.Color=[0 1 0];
+NetTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+NetTorqueQuiver.AutoScaleFactor=LHTorqueQuiver.ScaleFactor/NetTorqueQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Torque','RH Torque','Net Torque');
+
+%Add a Title
+title('Total Torque');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Hand Torques');
+pause(PauseTime);
+
+%Close Figure
+close(515);
+
+%Clear Figure from Workspace
+clear LHTorqueQuiver;
+clear RHTorqueQuiver;
+clear NetTorqueQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_515_3D_QUIVER_DELTA_LHRHTorque.m %%%
+
+%%% START FILE: SCRIPT_516_3D_QUIVER_DELTA_AllTorqueandMoments.m %%%
+%Generate Club Quiver Plot
+figure(516);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),DELTAQ.LHMOFonClubGlobal(:,1),DELTAQ.LHMOFonClubGlobal(:,2),DELTAQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=4;
+
+%Generate LH Total Torque Quiver Plot
+LHTorqueQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),DELTAQ.LHonClubTGlobal(:,1),DELTAQ.LHonClubTGlobal(:,2),DELTAQ.LHonClubTGlobal(:,3));
+LHTorqueQuiver.LineWidth=1;
+LHTorqueQuiver.Color=[0 0 1];
+LHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+LHTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/LHTorqueQuiver.ScaleFactor;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),DELTAQ.RHMOFonClubGlobal(:,1),DELTAQ.RHMOFonClubGlobal(:,2),DELTAQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate RH Total Torque Quiver Plot
+RHTorqueQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),DELTAQ.RHonClubTGlobal(:,1),DELTAQ.RHonClubTGlobal(:,2),DELTAQ.RHonClubTGlobal(:,3));
+RHTorqueQuiver.LineWidth=1;
+RHTorqueQuiver.Color=[1 0 0];
+RHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHTorqueQuiver.ScaleFactor;
+
+%Generate Total MOF Quiver Plot
+TotalMOFQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.MPMOFonClubGlobal(:,1),DELTAQ.MPMOFonClubGlobal(:,2),DELTAQ.MPMOFonClubGlobal(:,3));
+TotalMOFQuiver.LineWidth=1;
+TotalMOFQuiver.Color=[0 0 0.5];
+TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Generate Total Torque Quiver Plot
+NetTorqueQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.TotalHandTorqueGlobal(:,1),DELTAQ.TotalHandTorqueGlobal(:,2),DELTAQ.TotalHandTorqueGlobal(:,3));
+NetTorqueQuiver.LineWidth=1;
+NetTorqueQuiver.Color=[0 1 0];
+NetTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+NetTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/NetTorqueQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','LH Torque','RH MOF','RH Torque','Total MOF','Net Torque');
+
+%Add a Title
+title('All Torques and Moments on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Torques and Moments');
+pause(PauseTime);
+
+%Close Figure
+close(516);
+
+%Clear Figure from Workspace
+clear LHTorqueQuiver;
+clear RHTorqueQuiver;
+clear NetTorqueQuiver;
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_516_3D_QUIVER_DELTA_AllTorqueandMoments.m %%%
+
+%%% START FILE: SCRIPT_517_3D_QUIVER_DELTA_AllMoments.m %%%
+%Generate Club Quiver Plot
+figure(517);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),DELTAQ.LHMOFonClubGlobal(:,1),DELTAQ.LHMOFonClubGlobal(:,2),DELTAQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=2;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),DELTAQ.RHMOFonClubGlobal(:,1),DELTAQ.RHMOFonClubGlobal(:,2),DELTAQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate RH MOF Quiver Plot
+TotalMOFQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.MPMOFonClubGlobal(:,1),DELTAQ.MPMOFonClubGlobal(:,2),DELTAQ.MPMOFonClubGlobal(:,3));
+TotalMOFQuiver.LineWidth=1;
+TotalMOFQuiver.Color=[0 0 0.5];
+TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','RH MOF','Total MOF');
+
+%Add a Title
+title('All Moments of Force on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Club Moments of Force');
+pause(PauseTime);
+
+%Close Figure
+close(517);
+
+%Clear Figure from Workspace
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_517_3D_QUIVER_DELTA_AllMoments.m %%%
+
+%%% START FILE: SCRIPT_518_3D_QUIVER_DELTA_LeftUpperArmMoments.m %%%
+%Generate Club Quiver Plot
+figure(518);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Elbow on Left Upper Arm Total Force Quiver Plot
+LElbowQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),DELTAQ.LForearmonLArmFGlobal(:,1),DELTAQ.LForearmonLArmFGlobal(:,2),DELTAQ.LForearmonLArmFGlobal(:,3));
+LElbowQuiver.LineWidth=1;
+LElbowQuiver.Color=[0 0 1];
+LElbowQuiver.AutoScaleFactor=2;
+LElbowQuiver.MaxHeadSize=0.1;
+
+%Generate Shoulder on Left Upper Arm Total Force Quiver Plot
+LSForceQuiver=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),DELTAQ.LSonLArmFGlobal(:,1),DELTAQ.LSonLArmFGlobal(:,2),DELTAQ.LSonLArmFGlobal(:,3));
+LSForceQuiver.LineWidth=1;
+LSForceQuiver.Color=[1 0 0];
+LSForceQuiver.MaxHeadSize=0.1;
+LSForceQuiver.AutoScaleFactor=LElbowQuiver.ScaleFactor/LSForceQuiver.ScaleFactor;
+
+%Generate Left Elbow MOF on Left Upper Arm
+LEMOFLArmQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),DELTAQ.LElbowonLArmMOFGlobal(:,1),DELTAQ.LElbowonLArmMOFGlobal(:,2),DELTAQ.LElbowonLArmMOFGlobal(:,3));
+LEMOFLArmQuiver.LineWidth=1;
+LEMOFLArmQuiver.Color=[0 0.75 0];
+LEMOFLArmQuiver.MaxHeadSize=0.1;
+LEMOFLArmQuiver.AutoScaleFactor=2;
+
+%Generate Left Shoulder MOF on Left Upper Arm
+LSMOFLArm=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),DELTAQ.LShoulderonLArmMOFGlobal(:,1),DELTAQ.LShoulderonLArmMOFGlobal(:,2),DELTAQ.LShoulderonLArmMOFGlobal(:,3));
+LSMOFLArm.LineWidth=1;
+LSMOFLArm.Color=[0 0.5 0];
+LSMOFLArm.MaxHeadSize=0.1;
+LSMOFLArm.AutoScaleFactor=LEMOFLArmQuiver.ScaleFactor/LSMOFLArm.ScaleFactor;
+
+%Generate Left Arm Quivers
+LeftArm=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),DELTAQ.LeftArmdx(:,1),DELTAQ.LeftArmdy(:,1),DELTAQ.LeftArmdz(:,1),0);
+LeftArm.ShowArrowHead='off';
+LeftArm.LineWidth=1;
+LeftArm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','LE Force','LS Force','LE MOF','LS MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Left Upper Arm');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Left Upper Arm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(518);
+
+%Clear Figure from Workspace
+clear LElbowQuiver;
+clear LSForceQuiver;
+clear LEMOFLArmQuiver;
+clear LSMOFLArm;
+clear LeftArm;
+clear RHForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_518_3D_QUIVER_DELTA_LeftUpperArmMoments.m %%%
+
+%%% START FILE: SCRIPT_519_3D_QUIVER_DELTA_RightUpperArmMoments.m %%%
+%Generate Club Quiver Plot
+figure(519);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Elbow on Right Upper Arm Total Force Quiver Plot
+RElbowQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),DELTAQ.RForearmonRArmFGlobal(:,1),DELTAQ.RForearmonRArmFGlobal(:,2),DELTAQ.RForearmonRArmFGlobal(:,3));
+RElbowQuiver.LineWidth=1;
+RElbowQuiver.Color=[0 0 1];
+RElbowQuiver.AutoScaleFactor=2;
+RElbowQuiver.MaxHeadSize=0.1;
+
+%Generate Shoulder on Right Upper Arm Total Force Quiver Plot
+RSForceQuiver=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),DELTAQ.RSonRArmFGlobal(:,1),DELTAQ.RSonRArmFGlobal(:,2),DELTAQ.RSonRArmFGlobal(:,3));
+RSForceQuiver.LineWidth=1;
+RSForceQuiver.Color=[1 0 0];
+RSForceQuiver.MaxHeadSize=0.1;
+RSForceQuiver.AutoScaleFactor=RElbowQuiver.ScaleFactor/RSForceQuiver.ScaleFactor;
+
+%Generate Right Elbow MOF on Right Upper Arm
+REMOFRArmQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),DELTAQ.RElbowonRArmMOFGlobal(:,1),DELTAQ.RElbowonRArmMOFGlobal(:,2),DELTAQ.RElbowonRArmMOFGlobal(:,3));
+REMOFRArmQuiver.LineWidth=1;
+REMOFRArmQuiver.Color=[0 0.75 0];
+REMOFRArmQuiver.MaxHeadSize=0.1;
+REMOFRArmQuiver.AutoScaleFactor=2;
+
+%Generate Right Shoulder MOF on Right Upper Arm
+RSMOFRArm=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),DELTAQ.RShoulderonRArmMOFGlobal(:,1),DELTAQ.RShoulderonRArmMOFGlobal(:,2),DELTAQ.RShoulderonRArmMOFGlobal(:,3));
+RSMOFRArm.LineWidth=1;
+RSMOFRArm.Color=[0 0.5 0];
+RSMOFRArm.MaxHeadSize=0.1;
+RSMOFRArm.AutoScaleFactor=REMOFRArmQuiver.ScaleFactor/RSMOFRArm.ScaleFactor;
+
+%Generate Right Arm Quivers
+RightArm=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),DELTAQ.RightArmdx(:,1),DELTAQ.RightArmdy(:,1),DELTAQ.RightArmdz(:,1),0);
+RightArm.ShowArrowHead='off';
+RightArm.LineWidth=1;
+RightArm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','RE Force','RS Force','RE MOF','RS MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Right Upper Arm');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Right Upper Arm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(519);
+
+%Clear Figure from Workspace
+clear RElbowQuiver;
+clear RSForceQuiver;
+clear REMOFRArmQuiver;
+clear RSMOFRArm;
+clear RightArm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_519_3D_QUIVER_DELTA_RightUpperArmMoments.m %%%
+
+%%% START FILE: SCRIPT_520_3D_QUIVER_DELTA_LForearmMoments.m %%%
+%Generate Club Quiver Plot
+figure(520);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Club on LW Total Force Quiver Plot
+LHForceQuiver=quiver3(ZTCFQ.LWx(:,1),ZTCFQ.LWy(:,1),ZTCFQ.LWz(:,1),DELTAQ.ClubonLWFGlobal(:,1),DELTAQ.ClubonLWFGlobal(:,2),DELTAQ.ClubonLWFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate LE Total Force on L Forearm Quiver Plot
+LEForceQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),DELTAQ.LArmonLForearmFGlobal(:,1),DELTAQ.LArmonLForearmFGlobal(:,2),DELTAQ.LArmonLForearmFGlobal(:,3));
+LEForceQuiver.LineWidth=1;
+LEForceQuiver.Color=[1 0 0];
+LEForceQuiver.MaxHeadSize=0.1;
+LEForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/LEForceQuiver.ScaleFactor;
+
+%Generate Left Elbow MOF on Left Forearm
+LEMOFLForearmQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),DELTAQ.LElbowonLForearmMOFGlobal(:,1),DELTAQ.LElbowonLForearmMOFGlobal(:,2),DELTAQ.LElbowonLForearmMOFGlobal(:,3));
+LEMOFLForearmQuiver.LineWidth=1;
+LEMOFLForearmQuiver.Color=[0 0.75 0];
+LEMOFLForearmQuiver.MaxHeadSize=0.1;
+LEMOFLForearmQuiver.AutoScaleFactor=2;
+
+%Generate Left Wrist MOF on Left Forearm
+LWristMOFLForearm=quiver3(ZTCFQ.LWx(:,1),ZTCFQ.LWy(:,1),ZTCFQ.LWz(:,1),DELTAQ.LWristonLForearmMOFGlobal(:,1),DELTAQ.LWristonLForearmMOFGlobal(:,2),DELTAQ.LWristonLForearmMOFGlobal(:,3));
+LWristMOFLForearm.LineWidth=1;
+LWristMOFLForearm.Color=[0 0.5 0];
+LWristMOFLForearm.MaxHeadSize=0.1;
+LWristMOFLForearm.AutoScaleFactor=LEMOFLForearmQuiver.ScaleFactor/LWristMOFLForearm.ScaleFactor;
+
+%Generate LeftForearm Quivers
+LeftForearm=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),DELTAQ.LeftForearmdx(:,1),DELTAQ.LeftForearmdy(:,1),DELTAQ.LeftForearmdz(:,1),0);
+LeftForearm.ShowArrowHead='off';
+LeftForearm.LineWidth=1;
+LeftForearm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','LH Force','LE Force','LE MOF','LH MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Left Forearm');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Left Forearm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(520);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear LEForceQuiver;
+clear LEMOFLForearmQuiver;
+clear LWristMOFLForearm;
+clear LeftForearm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_520_3D_QUIVER_DELTA_LForearmMoments.m %%%
+
+%%% START FILE: SCRIPT_521_3D_QUIVER_DELTA_RForearmMoments.m %%%
+%Generate Club Quiver Plot
+figure(521);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate RW Total Force Quiver Plot
+RHForceQuiver=quiver3(ZTCFQ.RWx(:,1),ZTCFQ.RWy(:,1),ZTCFQ.RWz(:,1),DELTAQ.ClubonRWFGlobal(:,1),DELTAQ.ClubonRWFGlobal(:,2),DELTAQ.ClubonRWFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[0 0 1];
+RHForceQuiver.AutoScaleFactor=2;
+RHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RE Total Force Quiver Plot
+REForceQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),DELTAQ.RArmonRForearmFGlobal(:,1),DELTAQ.RArmonRForearmFGlobal(:,2),DELTAQ.RArmonRForearmFGlobal(:,3));
+REForceQuiver.LineWidth=1;
+REForceQuiver.Color=[1 0 0];
+REForceQuiver.MaxHeadSize=0.1;
+REForceQuiver.AutoScaleFactor=RHForceQuiver.ScaleFactor/REForceQuiver.ScaleFactor;
+
+%Generate Right Elbow MOF on Right Forearm
+REMOFLForearmQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),DELTAQ.RElbowonRForearmMOFGlobal(:,1),DELTAQ.RElbowonRForearmMOFGlobal(:,2),DELTAQ.RElbowonRForearmMOFGlobal(:,3));
+REMOFLForearmQuiver.LineWidth=1;
+REMOFLForearmQuiver.Color=[0 0.75 0];
+REMOFLForearmQuiver.MaxHeadSize=0.1;
+REMOFLForearmQuiver.AutoScaleFactor=2;
+
+%Generate Right Wrist MOF on Right Forearm
+RWristMOFLForearm=quiver3(ZTCFQ.RWx(:,1),ZTCFQ.RWy(:,1),ZTCFQ.RWz(:,1),DELTAQ.RWristonRForearmMOFGlobal(:,1),DELTAQ.RWristonRForearmMOFGlobal(:,2),DELTAQ.RWristonRForearmMOFGlobal(:,3));
+RWristMOFLForearm.LineWidth=1;
+RWristMOFLForearm.Color=[0 0.5 0];
+RWristMOFLForearm.MaxHeadSize=0.1;
+RWristMOFLForearm.AutoScaleFactor=REMOFLForearmQuiver.ScaleFactor/RWristMOFLForearm.ScaleFactor;
+
+%Generate Right Forearm Quivers
+RightForearm=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),DELTAQ.RightForearmdx(:,1),DELTAQ.RightForearmdy(:,1),DELTAQ.RightForearmdz(:,1),0);
+RightForearm.ShowArrowHead='off';
+RightForearm.LineWidth=1;
+RightForearm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','RH Force','RE Force','RE MOF','RH MOF');
+
+%Add a Title
+title('Moments of Force Acting on Right Forearm');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Right Forearm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(521);
+
+%Clear Figure from Workspace
+clear RHForceQuiver;
+clear REForceQuiver;
+clear REMOFLForearmQuiver;
+clear RWristMOFLForearm;
+clear RightForearm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_521_3D_QUIVER_DELTA_RForearmMoments.m %%%
+
+%%% START FILE: SCRIPT_522_3D_PLOT_DELTA_ForceAlongHandPath.m %%%
+figure(522);
+plot(ZTCFQ.Time,DELTAQ.ForceAlongHandPath);
+xlabel('Time (s)');
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Force Along Hand Path');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Force Along Hand Path');
+pause(PauseTime);
+
+%Close Figure
+close(522);
+
+%%% END FILE: SCRIPT_522_3D_PLOT_DELTA_ForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_525_3D_PLOT_DELTA_LHRHForceAlongHandPath.m %%%
+figure(525);
+hold on;
+
+plot(ZTCFQ.Time,DELTAQ.LHForceAlongHandPath);
+plot(ZTCFQ.Time,DELTAQ.RHForceAlongHandPath);
+plot(ZTCFQ.Time,DELTAQ.ForceAlongHandPath);
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Force on Left Hand Path','RH Force on Right Hand Path','Net Force Along MP Hand Path');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+subtitle('DELTA');
+%subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Force Along Hand Path - LH RH Total');
+pause(PauseTime);
+
+%Close Figure
+close(525);
+
+%%% END FILE: SCRIPT_525_3D_PLOT_DELTA_LHRHForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_526_3D_PLOT_DELTA_LinearImpulse.m %%%
+figure(526);
+plot(ZTCFQ.Time,DELTAQ.LinearImpulseonClub);
+xlabel('Time (s)');
+ylabel('Impulse (Ns)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Linear Impulse');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Impulse');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Linear Impulse');
+pause(PauseTime);
+
+%Close Figure
+close(526);
+
+%%% END FILE: SCRIPT_526_3D_PLOT_DELTA_LinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_527_3D_PLOT_DELTA_LinearWork.m %%%
+figure(527);
+hold on;
+
+plot(ZTCFQ.Time,DELTAQ.LHLinearWorkonClub);
+plot(ZTCFQ.Time,DELTAQ.RHLinearWorkonClub);
+plot(ZTCFQ.Time,DELTAQ.LinearWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work','RH Linear Work','Net Force Linear Work (midpoint)');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work');
+subtitle('DELTA');
+%subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Linear Work');
+pause(PauseTime);
+
+%Close Figure
+close(527);
+
+%%% END FILE: SCRIPT_527_3D_PLOT_DELTA_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_528_3D_PLOT_DELTA_LinearImpulse.m %%%
+figure(528);
+hold on;
+
+plot(ZTCFQ.Time,DELTAQ.LHLinearImpulseonClub);
+plot(ZTCFQ.Time,DELTAQ.RHLinearImpulseonClub);
+plot(ZTCFQ.Time,DELTAQ.LinearImpulseonClub);
+
+ylabel('Linear Impulse (kgm/s)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Impulse','RH Linear Impulse','Net Force Linear Impulse (midpoint)');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Impulse');
+subtitle('DELTA');
+%subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Linear Impulse LH,RH,Total');
+pause(PauseTime);
+
+%Close Figure
+close(528);
+
+%%% END FILE: SCRIPT_528_3D_PLOT_DELTA_LinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_529_3D_PLOT_DELTA_EquivalentCoupleandMOF.m %%%
+figure(529);
+hold on;
+
+EQMPLOCAL=DELTAQ.EquivalentMidpointCoupleLocal(:,3);
+MPMOFLOCAL=DELTAQ.MPMOFonClubLocal(:,3);
+SUMOFMOMENTSLOCAL=DELTAQ.SumofMomentsonClubLocal(:,3);
+
+plot(ZTCFQ.Time,EQMPLOCAL);
+plot(ZTCFQ.Time,MPMOFLOCAL);
+plot(ZTCFQ.Time,SUMOFMOMENTSLOCAL);
+
+clear("EQMPLOCAL");
+clear("MPMOFLOCAL");
+clear("SUMOFMOMENTSLOCAL");
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Equivalent Midpoint Couple','Total Force on Midpoint MOF','Sum of Moments');
+legend('Location','southeast');
+
+%Add a Title
+title('Equivalent Couple, Moment of Force, Sum of Moments');
+subtitle('DELTA - Grip Reference Frame');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Equivalent Couple and MOF');
+pause(PauseTime);
+
+%Close Figure
+close(529);
+
+%%% END FILE: SCRIPT_529_3D_PLOT_DELTA_EquivalentCoupleandMOF.m %%%
+
+%%% START FILE: SCRIPT_530_3D_PLOT_DELTA_LSWork.m %%%
+figure(530);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LSLinearWorkonArm);
+plot(DELTAQ.Time,DELTAQ.LSAngularWorkonArm);
+plot(DELTAQ.Time,DELTAQ.TotalLSWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work','LS Angular Work','LS Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Shoulder Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Left Shoulder Work');
+pause(PauseTime);
+
+%Close Figure
+close(530);
+
+%%% END FILE: SCRIPT_530_3D_PLOT_DELTA_LSWork.m %%%
+
+%%% START FILE: SCRIPT_531_3D_PLOT_DELTA_LSPower.m %%%
+figure(531);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LSonArmLinearPower);
+plot(DELTAQ.Time,DELTAQ.LSonArmAngularPower);
+plot(DELTAQ.Time,DELTAQ.TotalLSPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power','LS Angular Power','LS Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Shoulder Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Left Shoulder Power');
+pause(PauseTime);
+
+%Close Figure
+close(531);
+
+%%% END FILE: SCRIPT_531_3D_PLOT_DELTA_LSPower.m %%%
+
+%%% START FILE: SCRIPT_532_3D_PLOT_DELTA_RSWork.m %%%
+figure(532);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.RSLinearWorkonArm);
+plot(DELTAQ.Time,DELTAQ.RSAngularWorkonArm);
+plot(DELTAQ.Time,DELTAQ.TotalRSWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RS Linear Work','RS Angular Work','RS Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Shoulder Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Right Shoulder Work');
+pause(PauseTime);
+
+%Close Figure
+close(532);
+
+%%% END FILE: SCRIPT_532_3D_PLOT_DELTA_RSWork.m %%%
+
+%%% START FILE: SCRIPT_533_3D_PLOT_DELTA_RSPower.m %%%
+figure(533);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.RSonArmLinearPower);
+plot(DELTAQ.Time,DELTAQ.RSonArmAngularPower);
+plot(DELTAQ.Time,DELTAQ.TotalRSPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RS Linear Power','RS Angular Power','RS Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Shoulder Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Right Shoulder Power');
+pause(PauseTime);
+
+%Close Figure
+close(533);
+
+%%% END FILE: SCRIPT_533_3D_PLOT_DELTA_RSPower.m %%%
+
+%%% START FILE: SCRIPT_534_3D_PLOT_DELTA_LEWork.m %%%
+figure(534);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LELinearWorkonForearm);
+plot(DELTAQ.Time,DELTAQ.LEAngularWorkonForearm);
+plot(DELTAQ.Time,DELTAQ.TotalLEWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LE Linear Work','LE Angular Work','LE Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Elbow Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Left Elbow Work');
+pause(PauseTime);
+
+%Close Figure
+close(534);
+
+%%% END FILE: SCRIPT_534_3D_PLOT_DELTA_LEWork.m %%%
+
+%%% START FILE: SCRIPT_535_3D_PLOT_DELTA_LEPower.m %%%
+figure(535);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LEonForearmLinearPower);
+plot(DELTAQ.Time,DELTAQ.LEonForearmAngularPower);
+plot(DELTAQ.Time,DELTAQ.TotalLEPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LE Linear Power','LE Angular Power','LE Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Elbow Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Left Elbow Power');
+pause(PauseTime);
+
+%Close Figure
+close(535);
+
+%%% END FILE: SCRIPT_535_3D_PLOT_DELTA_LEPower.m %%%
+
+%%% START FILE: SCRIPT_536_3D_PLOT_DELTA_REWork.m %%%
+figure(536);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.RELinearWorkonForearm);
+plot(DELTAQ.Time,DELTAQ.REAngularWorkonForearm);
+plot(DELTAQ.Time,DELTAQ.TotalREWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RE Linear Work','RE Angular Work','RE Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Elbow Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Right Elbow Work');
+pause(PauseTime);
+
+%Close Figure
+close(536);
+
+%%% END FILE: SCRIPT_536_3D_PLOT_DELTA_REWork.m %%%
+
+%%% START FILE: SCRIPT_537_3D_PLOT_DELTA_REPower.m %%%
+figure(537);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.REonForearmLinearPower);
+plot(DELTAQ.Time,DELTAQ.REonForearmAngularPower);
+plot(DELTAQ.Time,DELTAQ.TotalREPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RE Linear Power','RE Angular Power','RE Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Elbow Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Right Elbow Power');
+pause(PauseTime);
+
+%Close Figure
+close(537);
+
+%%% END FILE: SCRIPT_537_3D_PLOT_DELTA_REPower.m %%%
+
+%%% START FILE: SCRIPT_538_3D_PLOT_DELTA_LHWork.m %%%
+figure(538);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LHLinearWorkonClub);
+plot(DELTAQ.Time,DELTAQ.LHAngularWorkonClub);
+plot(DELTAQ.Time,DELTAQ.TotalLHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work','LH Angular Work','LH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Wrist Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Left Wrist Work');
+pause(PauseTime);
+
+%Close Figure
+close(538);
+
+%%% END FILE: SCRIPT_538_3D_PLOT_DELTA_LHWork.m %%%
+
+%%% START FILE: SCRIPT_539_3D_PLOT_DELTA_LHPower.m %%%
+figure(539);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.LHonClubLinearPower);
+plot(DELTAQ.Time,DELTAQ.LHonClubAngularPower);
+plot(DELTAQ.Time,DELTAQ.TotalLHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Power','LH Angular Power','LH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Wrist Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Left Wrist Power');
+pause(PauseTime);
+
+%Close Figure
+close(539);
+
+%%% END FILE: SCRIPT_539_3D_PLOT_DELTA_LHPower.m %%%
+
+%%% START FILE: SCRIPT_540_3D_PLOT_DELTA_RHWork.m %%%
+figure(540);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.RHLinearWorkonClub);
+plot(DELTAQ.Time,DELTAQ.RHAngularWorkonClub);
+plot(DELTAQ.Time,DELTAQ.TotalRHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RH Linear Work','RH Angular Work','RH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Wrist Work on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Right Wrist Work');
+pause(PauseTime);
+
+%Close Figure
+close(540);
+
+%%% END FILE: SCRIPT_540_3D_PLOT_DELTA_RHWork.m %%%
+
+%%% START FILE: SCRIPT_541_3D_PLOT_DELTA_RHPower.m %%%
+figure(541);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.RHonClubLinearPower);
+plot(DELTAQ.Time,DELTAQ.RHonClubAngularPower);
+plot(DELTAQ.Time,DELTAQ.TotalRHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RH Linear Power','RH Angular Power','RH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Wrist Power on Distal Segment');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Right Wrist Power');
+pause(PauseTime);
+
+%Close Figure
+close(541);
+
+%%% END FILE: SCRIPT_541_3D_PLOT_DELTA_RHPower.m %%%
+
+%%% START FILE: SCRIPT_542_3D_QUIVER_DELTA_LHRHLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(542);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Linear Impulse Quiver Plot
+LHLinearImpulseQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),DELTAQ.LHLinearImpulseonClub(:,1),DELTAQ.LHLinearImpulseonClub(:,2),DELTAQ.LHLinearImpulseonClub(:,3));
+LHLinearImpulseQuiver.LineWidth=1;
+LHLinearImpulseQuiver.Color=[0 1 0];
+LHLinearImpulseQuiver.MaxHeadSize=0.1;
+LHLinearImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Linear Impulse Quiver Plot
+RHLinearImpulseQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),DELTAQ.RHLinearImpulseonClub(:,1),DELTAQ.RHLinearImpulseonClub(:,2),DELTAQ.RHLinearImpulseonClub(:,3));
+RHLinearImpulseQuiver.LineWidth=1;
+RHLinearImpulseQuiver.Color=[.8 .2 0];
+RHLinearImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulses so that LH and RH are scaled the same.
+RHLinearImpulseQuiver.AutoScaleFactor=LHLinearImpulseQuiver.ScaleFactor/RHLinearImpulseQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Linear Impulse','RH Linear Impulse');
+
+%Add a Title
+title('LH and RH Linear Impulse on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - LHRH Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(542);
+
+%Clear Figure from Workspace
+clear LHLinearImpulseQuiver;
+clear RHLinearImpulseQuiver;
+clear ZTCFLHLinearImpulseQuiver;
+clear ZTCFRHLinearImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_542_3D_QUIVER_DELTA_LHRHLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_543_3D_QUIVER_DELTA_LHRH_BaseData_AngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(543);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Angular Impulse Quiver Plot
+LHAngularImpulseQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),DELTAQ.LHAngularImpulseonClub(:,1),DELTAQ.LHAngularImpulseonClub(:,2),DELTAQ.LHAngularImpulseonClub(:,3));
+LHAngularImpulseQuiver.LineWidth=1;
+LHAngularImpulseQuiver.Color=[0 1 0];
+LHAngularImpulseQuiver.MaxHeadSize=0.1;
+LHAngularImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Angular Impulse Quiver Plot
+RHAngularImpulseQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),DELTAQ.RHAngularImpulseonClub(:,1),DELTAQ.RHAngularImpulseonClub(:,2),DELTAQ.RHAngularImpulseonClub(:,3));
+RHAngularImpulseQuiver.LineWidth=1;
+RHAngularImpulseQuiver.Color=[.8 .2 0];
+RHAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulses so that LH and RH are scaled the same.
+RHAngularImpulseQuiver.AutoScaleFactor=LHAngularImpulseQuiver.ScaleFactor/RHAngularImpulseQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','LH Angular Impulse','RH Angular Impulse');
+
+%Add a Title
+title('LH and RH Angular Impulse on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - LHRH Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(543);
+
+%Clear Figure from Workspace
+clear LHAngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFLHAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_543_3D_QUIVER_DELTA_LHRH_BaseData_AngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_544_3D_QUIVER_DELTA_TotalLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(544);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Linear Impulse on Club Quiver Plot
+TotalLinearImpulse=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),DELTAQ.LinearImpulseonClub(:,1),DELTAQ.LinearImpulseonClub(:,2),DELTAQ.LinearImpulseonClub(:,3));
+TotalLinearImpulse.LineWidth=1;
+TotalLinearImpulse.Color=[0 1 0];
+TotalLinearImpulse.MaxHeadSize=0.1;
+TotalLinearImpulse.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','Total Linear Impulse');
+
+%Add a Title
+title('Total Linear Impulse on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Total Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(544);
+
+%Clear Figure from Workspace
+clear TotalLinearImpulse;
+clear MPSumofMomentsQuiver;
+clear ZTCFTotalLinearImpulse;
+clear ZTCFMPSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_544_3D_QUIVER_DELTA_TotalLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_545_3D_QUIVER_DELTA_TotalAngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(545);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Create Total Angular Impulse Array by Adding LH and RH Angular Impulse
+TotalAngularImpulse=DELTAQ.LHAngularImpulseonClub+DELTAQ.RHAngularImpulseonClub;
+
+%Generate Total Hand Angular Impulse Quiver Plot
+AngularImpulseQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),TotalAngularImpulse(:,1),TotalAngularImpulse(:,2),TotalAngularImpulse(:,3));
+AngularImpulseQuiver.LineWidth=1;
+AngularImpulseQuiver.Color=[0 1 0];
+AngularImpulseQuiver.MaxHeadSize=0.1;
+AngularImpulseQuiver.AutoScaleFactor=3;
+
+%Add Legend to Plot
+legend('','','','','Total Impulse');
+
+%Add a Title
+title('Total Angular Impulse on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Total Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(545);
+
+%Clear Figure from Workspace
+clear AngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear TotalAngularImpulse;
+
+%%% END FILE: SCRIPT_545_3D_QUIVER_DELTA_TotalAngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_546_3D_QUIVER_DELTA_NetForceCoupleShaftsAdded.m %%%
+%Generate Club Quiver Plot
+figure(546);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+run SCRIPT_DELTA_ShaftandGripatMaxCHSandAlphaReversal.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.TotalHandForceGlobal(:,1),DELTAQ.TotalHandForceGlobal(:,2),DELTAQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.EquivalentMidpointCoupleGlobal(:,1),DELTAQ.EquivalentMidpointCoupleGlobal(:,2),DELTAQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','','','','','Net Force','Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('DELTA');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - Net Force and Equivalent MP Couple Shafts Added');
+pause(PauseTime);
+
+%Close Figure
+close(546);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear GripDELTAAlpha;
+clear GripMaxCHS;
+clear ShaftDELTAAlpha;
+clear ShaftMaxCHS;
+
+%%% END FILE: SCRIPT_546_3D_QUIVER_DELTA_NetForceCoupleShaftsAdded.m %%%
+
+%%% START FILE: SCRIPT_548_3D_PLOT_DELTA_LocalHandForces.m %%%
+figure(548);
+hold on;
+
+plot(DELTAQ.Time(:,1),DELTAQ.LHonClubForceLocal(:,1));
+plot(DELTAQ.Time(:,1),DELTAQ.LHonClubForceLocal(:,2));
+plot(DELTAQ.Time(:,1),DELTAQ.LHonClubForceLocal(:,3));
+
+plot(DELTAQ.Time(:,1),DELTAQ.RHonClubForceLocal(:,1));
+plot(DELTAQ.Time(:,1),DELTAQ.RHonClubForceLocal(:,2));
+plot(DELTAQ.Time(:,1),DELTAQ.RHonClubForceLocal(:,3));
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Left Hand X','Left Hand Y','Left Hand Z','Right Hand X','Right Hand Y','Right Hand Z');
+legend('Location','southeast');
+
+%Add a Title
+title('Local Hand Forces on Club');
+subtitle('DELTA');
+
+%Save Figure
+savefig('Delta Charts/DELTA_Plot - Local Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(548);
+
+%%% END FILE: SCRIPT_548_3D_PLOT_DELTA_LocalHandForces.m %%%
+
+%%% START FILE: SCRIPT_549_3D_QUIVER_DELTA_LHRHMoments.m %%%
+%Generate Club Quiver Plot
+figure(549);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),DELTAQ.LHMOFonClubGlobal(:,1),DELTAQ.LHMOFonClubGlobal(:,2),DELTAQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=10;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),DELTAQ.RHMOFonClubGlobal(:,1),DELTAQ.RHMOFonClubGlobal(:,2),DELTAQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate Total MOF Quiver Plot
+%TotalMOFQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),DELTAQ.MPMOFonClubGlobal(:,1),DELTAQ.MPMOFonClubGlobal(:,2),DELTAQ.MPMOFonClubGlobal(:,3));
+%TotalMOFQuiver.LineWidth=1;
+%TotalMOFQuiver.Color=[0 0 0.5];
+%TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+%TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','RH MOF');
+
+%Add a Title
+title('LHRH Moments of Force on Club');
+subtitle('DELTA');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('Delta Quiver Plots/DELTA_Quiver Plot - LHRH Moments of Force');
+pause(PauseTime);
+
+%Close Figure
+close(549);
+
+%Clear Figure from Workspace
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_549_3D_QUIVER_DELTA_LHRHMoments.m %%%
+
+%%% START FILE: SCRIPT_550_3D_PLOT_DELTA_TorqueInputvsTorqueOutput.m %%%
+figure(550);
+hold on;
+
+plot(DELTAQ.Time,DELTAQ.HipConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.HipConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.HipConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.TorsoConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.TorsoConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.TorsoConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.SpineConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.SpineConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.SpineConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.LScapConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.LScapConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.LScapConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.RScapConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.RScapConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.RScapConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.LSConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.LSConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.LSConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.RSConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.RSConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.RSConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.LEConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.LEConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.LEConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.REConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.REConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.REConstraintTorqueZ);
+
+
+plot(DELTAQ.Time,DELTAQ.LFConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.LFConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.LFConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.RFConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.RFConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.RFConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.LWConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.LWConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.LWConstraintTorqueZ);
+
+plot(DELTAQ.Time,DELTAQ.RWConstraintTorqueX);
+plot(DELTAQ.Time,DELTAQ.RWConstraintTorqueY);
+plot(DELTAQ.Time,DELTAQ.RWConstraintTorqueZ);
+
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Hip Constraint Torque X','Hip Constraint Torque Y','Hip Constraint Torque Z',...
+    'Torso Constraint Torque X','Torso Constraint Torque Y','Torso Constraint Torque Z',...
+    'Spine Constraint Torque X','Spine Constraint Torque Y','Spine Constraint Torque Z',...
+    'LScap Constraint Torque X','LScap Constraint Torque Y','LScap Constraint Torque Z',...
+    'RScap Constraint Torque X','RScap Constraint Torque Y','RScap Constraint Torque Z',...
+    'LS Constraint Torque X','LS Constraint Torque Y','LS Constraint Torque Z',...
+    'RS Constraint Torque X','RS Constraint Torque Y','RS Constraint Torque Z',...
+    'LE Constraint Torque X','LE Constraint Torque Y','LE Constraint Torque Z',...
+    'RE Constraint Torque X','RE Constraint Torque Y','RE Constraint Torque Z',...
+    'LF Constraint Torque X','LF Constraint Torque Y','LF Constraint Torque Z',...
+    'RF Constraint Torque X','RF Constraint Torque Y','RF Constraint Torque Z',...
+    'LW Constraint Torque X','LW Constraint Torque Y','LW Constraint Torque Z',...
+    'RW Constraint Torque X','RW Constraint Torque Y','RW Constraint Torque Z');
+
+legend('Location','southeast');
+
+%Add a Title
+title('Joint Torque Inputs');
+subtitle('DELTA');
+
+%Save Figure
+savefig('DELTA Charts/DELTA_Plot - Joint Torque Inputs');
+pause(PauseTime);
+
+%Close Figure
+close(550);
+
+%%% END FILE: SCRIPT_550_3D_PLOT_DELTA_TorqueInputvsTorqueOutput.m %%%
+
+%%% START FILE: SCRIPT_DELTA_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%Grip Quiver for DELTAAlpha Reversal
+GripDELTAAlpha=quiver3(ClubQuiverDELTAAlphaReversal.ButtxDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.ButtyDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.ButtzDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.GripdxDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.GripdyDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.GripdzDELTAAlphaReversal,0);
+GripDELTAAlpha.ShowArrowHead='off';
+GripDELTAAlpha.LineWidth=3;			            %Set grip line width
+GripDELTAAlpha.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Alpha Reversal
+ShaftDELTAAlpha=quiver3(ClubQuiverDELTAAlphaReversal.RHxDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.RHyDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.RHzDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.ShaftdxDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.ShaftdyDELTAAlphaReversal,ClubQuiverDELTAAlphaReversal.ShaftdzDELTAAlphaReversal,0);
+ShaftDELTAAlpha.ShowArrowHead='off';		        %Turn off arrow heads
+ShaftDELTAAlpha.LineWidth=3;			            %Adjust line weighting
+ShaftDELTAAlpha.Color=[0.0745 0.6235 1.0000];
+hold on;				                    %Hold the current plot when you generate new
+
+%Grip Quiver for Max CHS
+GripMaxCHS=quiver3(ClubQuiverMaxCHS.ButtxMaxCHS,ClubQuiverMaxCHS.ButtyMaxCHS,ClubQuiverMaxCHS.ButtzMaxCHS,ClubQuiverMaxCHS.GripdxMaxCHS,ClubQuiverMaxCHS.GripdyMaxCHS,ClubQuiverMaxCHS.GripdzMaxCHS,0);
+GripMaxCHS.ShowArrowHead='off';
+GripMaxCHS.LineWidth=3;			            %Set grip line width
+GripMaxCHS.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Max CHS
+ShaftMaxCHS=quiver3(ClubQuiverMaxCHS.RHxMaxCHS,ClubQuiverMaxCHS.RHyMaxCHS,ClubQuiverMaxCHS.RHzMaxCHS,ClubQuiverMaxCHS.ShaftdxMaxCHS,ClubQuiverMaxCHS.ShaftdyMaxCHS,ClubQuiverMaxCHS.ShaftdzMaxCHS,0);
+ShaftMaxCHS.ShowArrowHead='off';		    %Turn off arrow heads
+ShaftMaxCHS.LineWidth=3;			        %Adjust line weighting
+ShaftMaxCHS.Color=[0.9294 0.6941 0.1255];
+
+%Set View
+view(-0.0885,-10.6789);
+
+%%% END FILE: SCRIPT_DELTA_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubCOMDotsBaseData.m %%%
+COMDots=quiver3(BASEQ.ClubCOM(:,1),BASEQ.ClubCOM(:,2),BASEQ.ClubCOM(:,3),BASEQ.ClubCOM(:,1),BASEQ.ClubCOM(:,2),BASEQ.ClubCOM(:,3));
+COMDots.AutoScaleFactor=0.00001;
+COMDots.ShowArrowHead='off';
+COMDots.Marker='o';
+
+%%% END FILE: SCRIPT_QuiverClubCOMDotsBaseData.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubCOMDotsDELTA.m %%%
+COMDots=quiver3(ZTCFQQ.ClubCOM(:,1),ZTCFQQ.ClubCOM(:,2),ZTCFQQ.ClubCOM(:,3),ZTCFQQ.ClubCOM(:,1),ZTCFQQ.ClubCOM(:,2),ZTCFQQ.ClubCOM(:,3));
+COMDots.AutoScaleFactor=0.00001;
+COMDots.ShowArrowHead='off';
+COMDots.Marker='o';
+
+%%% END FILE: SCRIPT_QuiverClubCOMDotsDELTA.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+%Reads from a Table named Data in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate Shaft Quivers
+Shaft=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.Shaftdx(:,1),BASEQ.Shaftdy(:,1),BASEQ.Shaftdz(:,1),0);
+Shaft.ShowArrowHead='off';		%Turn off arrow heads
+Shaft.LineWidth=1;			    %Adjust line weighting
+Shaft.Color=[0.5 0.5 0.5];		%Set shaft color gray
+hold on;				        %Hold the current plot when you generate new
+
+%Generate Grip Quivers
+Grip=quiver3(BASEQ.Buttx(:,1),BASEQ.Butty(:,1),BASEQ.Buttz(:,1),BASEQ.Gripdx(:,1),BASEQ.Gripdy(:,1),BASEQ.Gripdz(:,1),0);
+Grip.ShowArrowHead='off';
+Grip.LineWidth=1;			    %Set grip line width
+Grip.Color=[0 0 0];			    %Set grip color to black
+
+%Calculate height of table
+H=height(BASEQ);
+
+%Calculate how many rows to copy
+h=H-1;
+
+%Generate Hand Path Quivers
+HandPath=quiver3(BASEQ.MPx(1:h,1),BASEQ.MPy(1:h,1),BASEQ.MPz(1:h,1),BASEQ.MPPx(1:h,1),BASEQ.MPPy(1:h,1),BASEQ.MPPz(1:h,1),0);
+HandPath.ShowArrowHead='off';		%Turn off arrow heads
+HandPath.LineWidth=1;			    %Adjust line weighting
+HandPath.Color=[0 0 0];		        %Set shaft color black
+
+%Generate Club Path Quivers
+ClubPath=quiver3(BASEQ.CHx(1:h,1),BASEQ.CHy(1:h,1),BASEQ.CHz(1:h,1),BASEQ.CHPx(1:h,1),BASEQ.CHPy(1:h,1),BASEQ.CHPz(1:h,1),0);
+ClubPath.ShowArrowHead='off';		%Turn off arrow heads
+ClubPath.LineWidth=1;			    %Adjust line weighting
+ClubPath.Color=[0 0 0];		        %Set shaft color black
+
+% clear Grip;
+% clear Shaft;
+% clear HandPath;
+% clear ClubPath;
+clear h;
+clear H;
+
+%%% END FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+
+%%% START FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%Grip Quiver for Alpha Reversal
+GripAlpha=quiver3(ClubQuiverAlphaReversal.ButtxAlphaReversal,ClubQuiverAlphaReversal.ButtyAlphaReversal,ClubQuiverAlphaReversal.ButtzAlphaReversal,ClubQuiverAlphaReversal.GripdxAlphaReversal,ClubQuiverAlphaReversal.GripdyAlphaReversal,ClubQuiverAlphaReversal.GripdzAlphaReversal,0);
+GripAlpha.ShowArrowHead='off';
+GripAlpha.LineWidth=3;			            %Set grip line width
+GripAlpha.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Alpha Reversal
+ShaftAlpha=quiver3(ClubQuiverAlphaReversal.RHxAlphaReversal,ClubQuiverAlphaReversal.RHyAlphaReversal,ClubQuiverAlphaReversal.RHzAlphaReversal,ClubQuiverAlphaReversal.ShaftdxAlphaReversal,ClubQuiverAlphaReversal.ShaftdyAlphaReversal,ClubQuiverAlphaReversal.ShaftdzAlphaReversal,0);
+ShaftAlpha.ShowArrowHead='off';		        %Turn off arrow heads
+ShaftAlpha.LineWidth=3;			            %Adjust line weighting
+ShaftAlpha.Color=[0.0745 0.6235 1.0000];
+hold on;				                    %Hold the current plot when you generate new
+
+%Grip Quiver for Max CHS
+GripMaxCHS=quiver3(ClubQuiverMaxCHS.ButtxMaxCHS,ClubQuiverMaxCHS.ButtyMaxCHS,ClubQuiverMaxCHS.ButtzMaxCHS,ClubQuiverMaxCHS.GripdxMaxCHS,ClubQuiverMaxCHS.GripdyMaxCHS,ClubQuiverMaxCHS.GripdzMaxCHS,0);
+GripMaxCHS.ShowArrowHead='off';
+GripMaxCHS.LineWidth=3;			            %Set grip line width
+GripMaxCHS.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Max CHS
+ShaftMaxCHS=quiver3(ClubQuiverMaxCHS.RHxMaxCHS,ClubQuiverMaxCHS.RHyMaxCHS,ClubQuiverMaxCHS.RHzMaxCHS,ClubQuiverMaxCHS.ShaftdxMaxCHS,ClubQuiverMaxCHS.ShaftdyMaxCHS,ClubQuiverMaxCHS.ShaftdzMaxCHS,0);
+ShaftMaxCHS.ShowArrowHead='off';		    %Turn off arrow heads
+ShaftMaxCHS.LineWidth=3;			        %Adjust line weighting
+ShaftMaxCHS.Color=[0.9294 0.6941 0.1255];
+
+%Set View
+view(-0.0885,-10.6789);
+
+%%% END FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%%% END OF PACKED PROJECT %%%

@@ -1,0 +1,210 @@
+# The Timing Question and the Counterfactual Framework {#sec-timing-framework}
+
+## Two Strategies, Stated Precisely {#sec-strategies}
+
+At the conceptual human-system level, let $E_p(t)$ be the kinetic energy of a
+declared proximal subsystem. In the primary model below, however, that
+subsystem is only the first rigid link about a fixed hub; it is not an
+identified trunk-and-arms energy. Over a downswing
+$t \in [t_0, t_{\mathrm{imp}}]$, and define the transfer functional
+$P_{\mathrm{w}}(t)$ as the inter-segment power crossing the wrist
+interface — joint-force power plus moment power, in the sense of
+@sec-rw. The two strategies are:
+
+- **S1 (transfer early):** make $P_{\mathrm{w}}(t)$ large as soon after
+  transition as possible; the club begins acquiring its final energy
+  early.
+- **S2 (retain early, release late):** keep $P_{\mathrm{w}}(t)$ small
+  early (the wrist transmits centripetal force but little power) while
+  proximal torques maximize $E_p$; then allow or drive a large
+  $P_{\mathrm{w}}$ concentrated in the final phase.
+
+The double-pendulum and optimal-control studies reviewed in
+@sec-mechanics provide mixed, model-dependent evidence relevant to S2.
+Several favor delayed release, late wrist drive, or an early negative and
+late positive wrist-torque program [@pickering1999; @sprigings2000;
+@sprigings2002; @sharp2009]. White supports passive
+geometry-mediated transfer but reports only a second-order release-timing
+effect and a distance penalty for increasing constant positive wrist
+torque in his driven model [@white2006]. The following mechanisms are
+therefore hypotheses to separate experimentally and computationally, not
+a consensus proof:
+
+1. **Inertia management.** With the wrist cocked, the system's moment of
+   inertia about the hub is small, so proximal torque buys angular
+   velocity cheaply; early release raises the inertia while proximal
+   torque is still accelerating the system [@white2006; @jorgensen1999].
+2. **Actuator timing and limits.** In Sprigings and Neal's declared
+   torque-generator model, the optimum placed active wrist torque late,
+   but its timing depended strongly on the assumed torque-profile shape
+   [@sprigings2000]. Sprigings and MacKenzie separately found a small
+   benefit from a 50 ms actively resisted delay and a much larger penalty
+   when post-release wrist torque was removed [@sprigings2002]. These
+   simulations do not identify a muscle-level strategy.
+3. **Geometry-mediated transfer.** White's undriven model demonstrates
+   energy redistribution as the club unfolds, while Miura's translating-
+   hub model predicts an inward-pull gain under its prescribed geometry
+   [@white2006; @miura2001]. Whether either mechanism dominates a measured
+   human swing requires state-resolved force and power data.
+4. **Interaction dynamics can redistribute acceleration and power.**
+   Motion-dependent terms can accelerate a distal segment while opposing
+   a proximal segment, but they are consequences of the evolving state
+   and prior actuator work—not free energy [@putnam1993; @herring1992].
+   Their contribution must be evaluated from a declared decomposition.
+
+Some cross-sectional studies report skill-group differences in release or
+segment-peak timing (@sec-skill), whereas Neal and colleagues found no
+significant difference in contiguous-segment peak-speed lags between
+player-rated well-timed and mistimed shots from 25 highly skilled amateurs
+[@neal2007]. Those observations do not establish a performance plateau or
+locate the remaining variance in release shape, hub-path geometry, or transfer
+efficiency. They motivate measuring those variables directly rather than
+inferring them from peak order.
+
+## What Would Falsify S2? {#sec-falsify}
+
+To keep the question scientific rather than rhetorical, we state what
+evidence would count against the retain-early/release-late hypothesis:
+
+- an optimal-control solution, in a validated 3D model with
+  physiological actuator limits, whose optimal wrist-interface power is
+  front-loaded;
+- measured expert swings in which early wrist-interface power
+  (normalized) is *positively* associated with clubhead speed across
+  players;
+- state-matched affine drift/control analyses showing that in faster swings the
+  control term dominates club acceleration *early* rather than late;
+- **or, in the direct manipulation of @sec-methods: torque programs
+  that drive the wrist early outperforming programs that retain early
+  and drive late, under matched proximal effort.**
+
+The last test is executed in @sec-results.
+
+## ZTCF and ZVCF: Definitions {#sec-ztcf-defs}
+
+Two counterfactual accelerations are defined *pointwise* at each
+measured state $(q, \dot q, \tau)$ of a swing:
+
+$$
+\ddot q_{\mathrm{ZTCF}}
+  \;=\; M(q)^{-1}\,\bigl(-\,b(q,\dot q)\bigr),
+$$ {#eq-ztcf}
+
+$$
+\ddot q_{\mathrm{ZVCF}}
+  \;=\; M(q)^{-1}\,\bigl(-b(q,\mathbf{0})\bigr)
+  \;=\; M(q)^{-1}\,\bigl(-g(q)\bigr),
+$$ {#eq-zvcf}
+
+where the simplification in @eq-zvcf holds for the implemented
+double-pendulum bias convention because its Coriolis term (quadratic in
+velocity) and viscous dissipation (linear in velocity) vanish at
+$\dot q = \mathbf 0$, leaving the declared gravity term. A different engine
+may include other velocity-independent terms and must be checked rather than
+assuming this reduction. The ZTCF (@eq-ztcf) answers *"what would the declared
+model do right now if every included actuator switched off while the state and
+constraint set stayed fixed?"* — it is the
+**drift** field of the affine control system, containing gravity plus
+all retained autonomous plant dynamics. The ZVCF (@eq-zvcf) answers
+*"what instantaneous acceleration remains at this pose when velocity and the
+declared applied control are both zero?"* It is not the pure control
+contribution. The separately named zero-velocity control-preserved evaluation
+is $M^{-1}(\tau-b(q,0))$. Because @eq-eom is affine in $\tau$ at a fixed state and unchanged
+constraint set, the actual acceleration superposes exactly:
+
+$$
+\ddot q \;=\;
+\underbrace{M^{-1}(-b(q,\dot q))}_{\text{drift}\;=\;\text{ZTCF}}
+\;+\;
+\underbrace{M^{-1}\tau}_{\text{control}},
+$$ {#eq-superposition}
+
+an identity enforced to numerical tolerance by the accompanying tests
+(@sec-appendix-validation).
+
+## Two Operational Variants {#sec-ztcf-variants}
+
+Two distinct operationalizations are available, and the difference
+matters for interpretation.
+
+**Pointwise (instantaneous) counterfactuals.** The engine-agnostic
+Python implementation
+([`simulation_backends/ztcf_zvcf.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/simulation_backends/ztcf_zvcf.py))
+evaluates @eq-ztcf and @eq-zvcf at each sample of an already-measured
+trajectory — explicitly *not* a forward-integrated rollout. Each sample
+answers a local "what if"; this is the right tool for drift/control
+*time profiles* along a real swing, and it is the tool used in
+@sec-results.
+
+**Legacy rerun-based pointwise sampler.** The original MATLAB/Simscape pipeline
+([`run_ztcf_simulation.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_ztcf_simulation.m))
+reruns the full model with a torque "killswitch" applied at time $t$ for a
+sweep of $t$ values, but
+[`run_single_ztcf_point.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/simulation/run_single_ztcf_point.m)
+retains only the first sample at killswitch activation. It therefore samples a
+state-matched instantaneous torque-removal response; it does **not** tabulate a
+future reached after evolving with torque off. The pipeline forms the
+difference table
+$\mathrm{DELTA} = \mathrm{BASE} - \mathrm{ZTCF}$
+([`process_data_tables.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/process_data_tables.m)),
+which is an operational BASE-minus-sampled-response residual, not an isolated
+muscle or actuator contribution. A companion ZVCF model applies the measured
+torques to the
+same pose with velocities zeroed
+([`SCRIPT_ZVCF_GENERATOR.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Model%20Output/Scripts/SCRIPT_ZVCF_GENERATOR.m));
+the ZVCF model may be run without gravity under its documented convention so
+gravity is not counted in both operands. This convention must be checked
+against the model configuration; the script's statement that the complete
+multibody system is a series of linear differential equations is not correct.
+The acceleration split is meaningful *pointwise*, at matched states, in the
+sense of @eq-superposition. Separately integrated futures do not superpose at
+the trajectory level because $M$ and $b$ evolve differently once their states
+diverge. The MATLAB pipeline additionally computes the
+linear work $\int \mathbf F\cdot\mathbf v\,dt$, angular work
+$\int \boldsymbol\tau\cdot\boldsymbol\omega\,dt$, and summed work and power
+([`calculate_work_impulse.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_work_impulse.m),
+[`calculate_total_work_power.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/core/processing/calculate_total_work_power.m))
+for the stored tables. However, `process_data_tables.m` subtracts all BASE and
+ZTCF columns before `calculate_work_impulse.m` dots the resulting DELTA force
+with the resulting DELTA velocity. In general,
+$(\mathbf F_b-\mathbf F_z)\cdot(\mathbf v_b-\mathbf v_z)$ is not
+$\mathbf F_b\cdot\mathbf v_b-\mathbf F_z\cdot\mathbf v_z$. The optimized
+`calculate_total_work_power.m` also advertises fractional contributions in its
+header but does not calculate them. Consequently, the legacy DELTA work and
+power columns are **not** accepted here as an additive Robertson--Winter
+pathway partition. Valid pointwise contribution power must project force
+components onto one common achieved interface velocity, as the Python evidence
+does. The repository also contains a kinematic-sequence plot computed
+separately for the stored BASE, ZTCF, and DELTA tables
+([`SCRIPT_324_PLOT_ZTCF_KinematicSequence.m`](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/_ZTCF%20Scripts/SCRIPT_324_PLOT_ZTCF_KinematicSequence.m)).
+
+## The Counterfactual Form of the Timing Hypothesis {#sec-hypothesis}
+
+The affine drift/control language makes the S2 hypothesis crisp. Along a
+measured downswing, project acceleration components onto a declared club speed
+coordinate and compute power from force or moment components paired with their
+conjugate velocities. An acceleration projection cannot itself be integrated
+as energy. As a registered model hypothesis—not an empirical fact—S2 predicts:
+
+- **Early downswing:** the *control* term should dominate energy input
+  at proximal joints, while at the wrist the control contribution to
+  club angular acceleration should be small or negative (restraining lag
+  against the developing centrifugal field). The club's ZTCF profile
+  should show the drift field already "wants" to open the wrist —
+  control is *holding energy back*.
+- **Late downswing:** the *drift* term (parametric transfer, centrifugal
+  release) should dominate club acceleration, with a brief late window
+  of positive wrist control power [@sprigings2000]. The active share of
+  club-side work should concentrate before release; the passive share
+  may account for most club energy gain after release in the declared model
+  [@white2006].
+
+This pattern was initially motivated by torque-removal analyses.
+@sec-results provides a reproducible quantitative test in a two-segment
+model; conversely, had the early-drive programs won the
+sweep, S2 would have been falsified in exactly the terms of
+@sec-falsify. Bounded-actuator, impact-definition, and model-parameter
+sensitivity checks are reported here. The next chapter supplies the distinct
+forward matched-state killswitch test that the legacy sampler does not.
+Like-for-like Simscape parity, 3D full-body models, and measured swings remain
+future work.

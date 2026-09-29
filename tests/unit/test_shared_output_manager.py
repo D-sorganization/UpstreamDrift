@@ -1,0 +1,156 @@
+"""Unit tests for shared output manager."""
+
+import contextlib
+import shutil
+import unittest
+from datetime import datetime, timezone
+from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
+import pandas as pd
+from src.shared.python.data_io.output_manager import OutputFormat, OutputManager
+
+# Python 3.10 compatibility: datetime.UTC is only available in 3.11+
+UTC = timezone.utc  # noqa: UP017
+
+
+class TestOutputManager(unittest.TestCase):
+    """Test cases for OutputManager."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.test_dir = Path.cwd() / "tests" / "output_test_temp"
+        if self.test_dir.exists():
+            shutil.rmtree(self.test_dir)
+        self.manager = OutputManager(self.test_dir)
+        self.manager.create_output_structure()
+
+    def tearDown(self) -> None:
+        """Clean up test fixtures."""
+        if self.test_dir.exists():
+            with contextlib.suppress(PermissionError, OSError):
+                shutil.rmtree(self.test_dir)
+
+    def test_initialization_directory_creation(self) -> None:
+        """Test that directory structure is created."""
+        self.manager.create_output_structure()
+
+        self.assertTrue((self.test_dir / "simulations" / "mujoco").exists())
+        self.assertTrue((self.test_dir / "analysis" / "biomechanics").exists())
+        self.assertTrue((self.test_dir / "reports").exists())
+
+    def test_shared_output_manager_save_load_csv(self) -> None:
+        """Test saving and loading CSV files."""
+        data = {"col1": [1, 2, 3], "col2": [4, 5, 6]}
+        df = pd.DataFrame(data)
+
+        path = self.manager.save_simulation_results(
+            df, "test_csv", format_type=OutputFormat.CSV
+        )
+
+        self.assertTrue(path.exists())
+        loaded_df = self.manager.load_simulation_results(
+            path.stem, format_type=OutputFormat.CSV
+        )
+        assert isinstance(loaded_df, pd.DataFrame)
+        pd.testing.assert_frame_equal(df, loaded_df)
+
+    def test_shared_output_manager_save_load_json(self) -> None:
+        """Test saving and loading JSON files."""
+        data = {"key": "value", "list": [1, 2, 3], "nested": {"a": 1}}
+
+        path = self.manager.save_simulation_results(
+            data, "test_json", format_type=OutputFormat.JSON
+        )
+
+        self.assertTrue(path.exists())
+        loaded_data = self.manager.load_simulation_results(
+            path.stem, format_type=OutputFormat.JSON
+        )
+        self.assertEqual(loaded_data, data)
+
+    def test_save_load_pickle(self) -> None:
+        """Test that Pickle format raises security error."""
+        data = {"key": "value", "array": np.array([1, 2, 3])}
+
+        with self.assertRaisesRegex(ValueError, "Pickle format is disabled"):
+            self.manager.save_simulation_results(
+                data, "test_pickle", format_type=OutputFormat.PICKLE
+            )
+
+    def test_save_json_numpy_serialization(self) -> None:
+        """Test JSON serialization of NumPy types."""
+        data = {
+            "array": np.array([1, 2, 3]),
+            "float": np.float64(1.5),
+            "int": np.int64(10),
+        }
+
+        path = self.manager.save_simulation_results(
+            data, "test_numpy_json", format_type=OutputFormat.JSON
+        )
+
+        loaded_data = self.manager.load_simulation_results(
+            path.stem, format_type=OutputFormat.JSON
+        )
+
+        # The loaded data should be the same structure as saved
+        self.assertEqual(loaded_data["array"], [1, 2, 3])  # type: ignore[call-overload]
+        self.assertEqual(loaded_data["float"], 1.5)  # type: ignore[call-overload]
+        self.assertEqual(loaded_data["int"], 10)  # type: ignore[call-overload]
+
+    def test_get_simulation_list(self) -> None:
+        """Test retrieving list of simulations."""
+        # Manually create files to verify list logic independent of save logic
+        sim_dir = self.manager.directories["simulations"] / "mujoco"
+        sim_dir.mkdir(parents=True, exist_ok=True)
+
+        (sim_dir / "sim1.csv").touch()
+        (sim_dir / "sim2.json").touch()
+
+        sims = self.manager.get_simulation_list(engine="mujoco")
+
+        self.assertIn("sim1.csv", sims)
+        self.assertIn("sim2.json", sims)
+
+    def test_export_analysis_report_html(self) -> None:
+        """Test exporting HTML report."""
+        data = {"summary": "test", "value": 123}
+        path = self.manager.export_analysis_report(
+            data, "test_report", format_type="html"
+        )
+
+        self.assertTrue(path.exists())
+        with open(path) as f:
+            content = f.read()
+            self.assertIn("<html>", content)
+            self.assertIn("test", content)
+            self.assertIn("123", content)
+
+    def test_shared_output_manager_cleanup_old_files(self) -> None:
+        """Test cleaning up old files."""
+
+        self.manager.create_output_structure()
+
+        # Create a file in the temp directory
+        old_file = self.manager.directories["cache"] / "temp" / "old.txt"
+        old_file.parent.mkdir(parents=True, exist_ok=True)
+        old_file.touch()
+
+        # Mock now_local to return a future date so the file appears old
+        # The cleanup function uses now_local() for cutoff calculation
+        # Use timezone-aware datetime since now_local returns timezone-aware
+        fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=UTC)
+        with (
+            patch(
+                "src.shared.python.data_io._simulation_store.now_local",
+                return_value=fixed_now,
+            ),
+            # Also mock unlink to verify it was called and avoid actual deletion
+            patch.object(Path, "unlink") as mock_unlink,
+        ):
+            cleaned = self.manager.cleanup_old_files()
+
+            self.assertGreaterEqual(cleaned, 1)
+            self.assertTrue(mock_unlink.called)

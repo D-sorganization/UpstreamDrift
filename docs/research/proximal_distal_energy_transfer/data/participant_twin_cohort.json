@@ -1,0 +1,555 @@
+{
+  "schema_version": "participant-twin-provenance/v1",
+  "cohort_id": "participant-twin-synthetic-benchmark-v1",
+  "registered_at_utc": "2026-09-06T00:00:00Z",
+  "governance": {
+    "data_class": "synthetic_benchmark",
+    "ethics_reference": "not_applicable_synthetic_benchmark",
+    "consent_and_reuse_basis": "not_applicable_synthetic_benchmark",
+    "private_data_authority": "not_applicable_synthetic_benchmark",
+    "calibration_records": "not_applicable_synthetic_benchmark",
+    "time_synchronization_records": "not_applicable_synthetic_benchmark",
+    "analysis_release_authorization": "not_applicable_synthetic_benchmark",
+    "identity_policy": "pseudonym_only_no_identity_inference",
+    "pseudonym_derivation": "synthetic_salted_digest_no_real_identity"
+  },
+  "club_pool": [
+    "cl-127bc4d16f04af7e",
+    "cl-598b4baeb7000819",
+    "cl-92758a9a607ef78e",
+    "cl-e1e0150ddfe80b27"
+  ],
+  "participants": [
+    {
+      "participant_pseudonym": "pt-19c8e3e9cb7f9905",
+      "session_pseudonyms": [
+        "ss-4e2fb2382b609ad0",
+        "ss-55bdbcf832623136"
+      ],
+      "club_pseudonyms": [
+        "cl-127bc4d16f04af7e",
+        "cl-598b4baeb7000819"
+      ],
+      "strata": {
+        "anthropometry_band": "band_a",
+        "skill_band": "recreational",
+        "sex": "female",
+        "age_band": "18_29",
+        "handedness": "left",
+        "injury_history": "none_reported",
+        "impairment": "limited_shoulder_range",
+        "club_class": "iron",
+        "task": "full_swing_iron"
+      },
+      "trajectory_ids": [
+        "tj-3bdea80ac839a6b0",
+        "tj-447daa16befec867",
+        "tj-6af97cef8a57841e",
+        "tj-7a836b1c689c8059",
+        "tj-95b1d5150be442e7",
+        "tj-d57992ee6bb74dcb"
+      ],
+      "holdout_role": "participant_held_out"
+    },
+    {
+      "participant_pseudonym": "pt-1ad654d5d1053f3c",
+      "session_pseudonyms": [
+        "ss-30cf32a2a3b828cf",
+        "ss-86490b4a0b01523f"
+      ],
+      "club_pseudonyms": [
+        "cl-598b4baeb7000819",
+        "cl-92758a9a607ef78e"
+      ],
+      "strata": {
+        "anthropometry_band": "band_b",
+        "skill_band": "competitive_amateur",
+        "sex": "male",
+        "age_band": "30_44",
+        "handedness": "right",
+        "injury_history": "prior_upper_limb",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-43604573706b731c",
+        "tj-4eef2f988d1c6e8b",
+        "tj-84241b487b1f343c",
+        "tj-9cb157f24c975c05",
+        "tj-a94d3a913fc65f89",
+        "tj-aab7303e9a51eaeb"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-1f697304766a1407",
+      "session_pseudonyms": [
+        "ss-4ef9b9126f9f8e2e",
+        "ss-951d6b51190ca72f"
+      ],
+      "club_pseudonyms": [
+        "cl-92758a9a607ef78e",
+        "cl-e1e0150ddfe80b27"
+      ],
+      "strata": {
+        "anthropometry_band": "band_c",
+        "skill_band": "elite",
+        "sex": "other_or_undisclosed",
+        "age_band": "60_plus",
+        "handedness": "right",
+        "injury_history": "none_reported",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-04827c1a90bdb24b",
+        "tj-7fb15d8b9485fca4",
+        "tj-8111c380bcc8ccf6",
+        "tj-9b693aa462a4a06f",
+        "tj-ac05e4fafc014b0f",
+        "tj-b98154145806d6a7"
+      ],
+      "holdout_role": "participant_held_out"
+    },
+    {
+      "participant_pseudonym": "pt-28560263a14132dc",
+      "session_pseudonyms": [
+        "ss-2a834b81584c1219",
+        "ss-ee6b69befcd17c3e"
+      ],
+      "club_pseudonyms": [
+        "cl-127bc4d16f04af7e",
+        "cl-e1e0150ddfe80b27"
+      ],
+      "strata": {
+        "anthropometry_band": "band_a",
+        "skill_band": "recreational",
+        "sex": "female",
+        "age_band": "18_29",
+        "handedness": "right",
+        "injury_history": "prior_lumbar",
+        "impairment": "none_reported",
+        "club_class": "iron",
+        "task": "full_swing_iron"
+      },
+      "trajectory_ids": [
+        "tj-6ff59db3453e0a12",
+        "tj-b0f5de6e5704845b",
+        "tj-be9a68325ef84766",
+        "tj-c28190db3fca3a17",
+        "tj-e1e636f901787854",
+        "tj-fba5e57f401e9a3b"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-3622a3dfa41fe56a",
+      "session_pseudonyms": [
+        "ss-254eef16c48d91c2",
+        "ss-f38f8bb15876dbe4"
+      ],
+      "club_pseudonyms": [
+        "cl-127bc4d16f04af7e",
+        "cl-598b4baeb7000819"
+      ],
+      "strata": {
+        "anthropometry_band": "band_b",
+        "skill_band": "competitive_amateur",
+        "sex": "male",
+        "age_band": "30_44",
+        "handedness": "right",
+        "injury_history": "none_reported",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-2ef0545b0fa901cc",
+        "tj-8de17b2208c5e8b3",
+        "tj-ab83bcc529dc5cc6",
+        "tj-c28a18bf9744a483",
+        "tj-c71041665f1350c9",
+        "tj-fbb2426f29491920"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-44e8342b29aa93a5",
+      "session_pseudonyms": [
+        "ss-3b5d8bb0f216d96f",
+        "ss-c69a11e4cc4f4459"
+      ],
+      "club_pseudonyms": [
+        "cl-598b4baeb7000819",
+        "cl-92758a9a607ef78e"
+      ],
+      "strata": {
+        "anthropometry_band": "band_c",
+        "skill_band": "elite",
+        "sex": "other_or_undisclosed",
+        "age_band": "45_59",
+        "handedness": "left",
+        "injury_history": "prior_upper_limb",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-25f576a834094763",
+        "tj-38f8295524810e14",
+        "tj-7068219f58f2f509",
+        "tj-86d974bd86a66aef",
+        "tj-f3e0ad74578fffe8",
+        "tj-f7650c4ccddae210"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-782b40556133cdce",
+      "session_pseudonyms": [
+        "ss-36383bcb34c90475",
+        "ss-d07c662ed954297b"
+      ],
+      "club_pseudonyms": [
+        "cl-92758a9a607ef78e",
+        "cl-e1e0150ddfe80b27"
+      ],
+      "strata": {
+        "anthropometry_band": "band_a",
+        "skill_band": "recreational",
+        "sex": "female",
+        "age_band": "18_29",
+        "handedness": "right",
+        "injury_history": "none_reported",
+        "impairment": "none_reported",
+        "club_class": "iron",
+        "task": "full_swing_iron"
+      },
+      "trajectory_ids": [
+        "tj-4c869a1be7fed7c1",
+        "tj-876c519725f2d577",
+        "tj-87c4a48ffdc6fac5",
+        "tj-8d00e8b7745eb472",
+        "tj-c1eac5fecf002fac",
+        "tj-e80ef76ba9739347"
+      ],
+      "holdout_role": "participant_held_out"
+    },
+    {
+      "participant_pseudonym": "pt-8076116f55882982",
+      "session_pseudonyms": [
+        "ss-3dc896c6b97f3379",
+        "ss-6ca5b42a5a39d3fa"
+      ],
+      "club_pseudonyms": [
+        "cl-127bc4d16f04af7e",
+        "cl-e1e0150ddfe80b27"
+      ],
+      "strata": {
+        "anthropometry_band": "band_b",
+        "skill_band": "competitive_amateur",
+        "sex": "male",
+        "age_band": "30_44",
+        "handedness": "right",
+        "injury_history": "none_reported",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-401b9b97b1b615fb",
+        "tj-639e3aa50176f730",
+        "tj-95da3d59f6c86dbe",
+        "tj-c6263d61c187a9b1",
+        "tj-e50ed656b8e358a6",
+        "tj-f41654819bfbef5c"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-de59f77cce973df7",
+      "session_pseudonyms": [
+        "ss-1f7cf3d3014396a7",
+        "ss-c9dbd087b5a571b5"
+      ],
+      "club_pseudonyms": [
+        "cl-127bc4d16f04af7e",
+        "cl-598b4baeb7000819"
+      ],
+      "strata": {
+        "anthropometry_band": "band_c",
+        "skill_band": "elite",
+        "sex": "other_or_undisclosed",
+        "age_band": "45_59",
+        "handedness": "right",
+        "injury_history": "none_reported",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-18217b591c8b01d4",
+        "tj-4382c07bb6db7f0a",
+        "tj-70426142f49ddc62",
+        "tj-8ef0dad1275e1fab",
+        "tj-9759609f0108f804",
+        "tj-c14c8ad61977ec8b"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-dea52daebefdb436",
+      "session_pseudonyms": [
+        "ss-0345282a173a543d",
+        "ss-e347fe480ed98492"
+      ],
+      "club_pseudonyms": [
+        "cl-598b4baeb7000819",
+        "cl-92758a9a607ef78e"
+      ],
+      "strata": {
+        "anthropometry_band": "band_a",
+        "skill_band": "recreational",
+        "sex": "female",
+        "age_band": "18_29",
+        "handedness": "right",
+        "injury_history": "prior_upper_limb",
+        "impairment": "none_reported",
+        "club_class": "iron",
+        "task": "full_swing_iron"
+      },
+      "trajectory_ids": [
+        "tj-22e857b9270e82d9",
+        "tj-30970711e88500cb",
+        "tj-4e826b0a4c39e2a6",
+        "tj-57eeb7edc08f02ab",
+        "tj-97f916293ab394d5",
+        "tj-ff2c8f8be329df63"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-e233ccc029c5dec2",
+      "session_pseudonyms": [
+        "ss-b40f7c020d961f7e",
+        "ss-c0a561f02553356d"
+      ],
+      "club_pseudonyms": [
+        "cl-92758a9a607ef78e",
+        "cl-e1e0150ddfe80b27"
+      ],
+      "strata": {
+        "anthropometry_band": "band_b",
+        "skill_band": "competitive_amateur",
+        "sex": "male",
+        "age_band": "30_44",
+        "handedness": "left",
+        "injury_history": "prior_lumbar",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-1038516cdc58e741",
+        "tj-3e6771a425c0a457",
+        "tj-64f9275d12e10057",
+        "tj-778933c6c6c627de",
+        "tj-9e9345601b9ea2af",
+        "tj-dcc08f7d8125b815"
+      ],
+      "holdout_role": "training"
+    },
+    {
+      "participant_pseudonym": "pt-ec55835708e3659a",
+      "session_pseudonyms": [
+        "ss-42822000e1aa98e6",
+        "ss-62e73903012ddfed"
+      ],
+      "club_pseudonyms": [
+        "cl-127bc4d16f04af7e",
+        "cl-e1e0150ddfe80b27"
+      ],
+      "strata": {
+        "anthropometry_band": "band_c",
+        "skill_band": "elite",
+        "sex": "other_or_undisclosed",
+        "age_band": "45_59",
+        "handedness": "right",
+        "injury_history": "none_reported",
+        "impairment": "none_reported",
+        "club_class": "driver",
+        "task": "full_swing_driver"
+      },
+      "trajectory_ids": [
+        "tj-19441374b7f145fa",
+        "tj-33ba7162ac7bd443",
+        "tj-529e3a199261b7e1",
+        "tj-835474e97f796cdb",
+        "tj-de877dd07868350c",
+        "tj-f0c206dd476b2624"
+      ],
+      "holdout_role": "participant_held_out"
+    }
+  ],
+  "split": {
+    "split_id": "participant-twin-frozen-split-v1",
+    "split_salt": "8f2c41a90b7d4e6512c3a80fd961b47e",
+    "holdout_fraction": 0.3333333333333333,
+    "calibration_trajectory_count": 3,
+    "frozen_before_outcome_access": true,
+    "outcome_fields_present": false,
+    "participant_held_out": [
+      "pt-19c8e3e9cb7f9905",
+      "pt-1f697304766a1407",
+      "pt-782b40556133cdce",
+      "pt-ec55835708e3659a"
+    ],
+    "trajectory_roles": {
+      "tj-04827c1a90bdb24b": "evaluation",
+      "tj-1038516cdc58e741": "calibration",
+      "tj-18217b591c8b01d4": "evaluation",
+      "tj-19441374b7f145fa": "evaluation",
+      "tj-22e857b9270e82d9": "evaluation",
+      "tj-25f576a834094763": "calibration",
+      "tj-2ef0545b0fa901cc": "evaluation",
+      "tj-30970711e88500cb": "evaluation",
+      "tj-33ba7162ac7bd443": "calibration",
+      "tj-38f8295524810e14": "calibration",
+      "tj-3bdea80ac839a6b0": "evaluation",
+      "tj-3e6771a425c0a457": "calibration",
+      "tj-401b9b97b1b615fb": "calibration",
+      "tj-43604573706b731c": "evaluation",
+      "tj-4382c07bb6db7f0a": "calibration",
+      "tj-447daa16befec867": "calibration",
+      "tj-4c869a1be7fed7c1": "calibration",
+      "tj-4e826b0a4c39e2a6": "calibration",
+      "tj-4eef2f988d1c6e8b": "evaluation",
+      "tj-529e3a199261b7e1": "evaluation",
+      "tj-57eeb7edc08f02ab": "evaluation",
+      "tj-639e3aa50176f730": "evaluation",
+      "tj-64f9275d12e10057": "calibration",
+      "tj-6af97cef8a57841e": "evaluation",
+      "tj-6ff59db3453e0a12": "evaluation",
+      "tj-70426142f49ddc62": "evaluation",
+      "tj-7068219f58f2f509": "evaluation",
+      "tj-778933c6c6c627de": "evaluation",
+      "tj-7a836b1c689c8059": "evaluation",
+      "tj-7fb15d8b9485fca4": "evaluation",
+      "tj-8111c380bcc8ccf6": "calibration",
+      "tj-835474e97f796cdb": "calibration",
+      "tj-84241b487b1f343c": "evaluation",
+      "tj-86d974bd86a66aef": "calibration",
+      "tj-876c519725f2d577": "calibration",
+      "tj-87c4a48ffdc6fac5": "evaluation",
+      "tj-8d00e8b7745eb472": "calibration",
+      "tj-8de17b2208c5e8b3": "evaluation",
+      "tj-8ef0dad1275e1fab": "evaluation",
+      "tj-95b1d5150be442e7": "calibration",
+      "tj-95da3d59f6c86dbe": "evaluation",
+      "tj-9759609f0108f804": "calibration",
+      "tj-97f916293ab394d5": "calibration",
+      "tj-9b693aa462a4a06f": "calibration",
+      "tj-9cb157f24c975c05": "calibration",
+      "tj-9e9345601b9ea2af": "evaluation",
+      "tj-a94d3a913fc65f89": "calibration",
+      "tj-aab7303e9a51eaeb": "calibration",
+      "tj-ab83bcc529dc5cc6": "calibration",
+      "tj-ac05e4fafc014b0f": "calibration",
+      "tj-b0f5de6e5704845b": "evaluation",
+      "tj-b98154145806d6a7": "evaluation",
+      "tj-be9a68325ef84766": "calibration",
+      "tj-c14c8ad61977ec8b": "calibration",
+      "tj-c1eac5fecf002fac": "evaluation",
+      "tj-c28190db3fca3a17": "calibration",
+      "tj-c28a18bf9744a483": "evaluation",
+      "tj-c6263d61c187a9b1": "evaluation",
+      "tj-c71041665f1350c9": "calibration",
+      "tj-d57992ee6bb74dcb": "calibration",
+      "tj-dcc08f7d8125b815": "evaluation",
+      "tj-de877dd07868350c": "calibration",
+      "tj-e1e636f901787854": "calibration",
+      "tj-e50ed656b8e358a6": "calibration",
+      "tj-e80ef76ba9739347": "evaluation",
+      "tj-f0c206dd476b2624": "evaluation",
+      "tj-f3e0ad74578fffe8": "evaluation",
+      "tj-f41654819bfbef5c": "calibration",
+      "tj-f7650c4ccddae210": "evaluation",
+      "tj-fba5e57f401e9a3b": "evaluation",
+      "tj-fbb2426f29491920": "calibration",
+      "tj-ff2c8f8be329df63": "calibration"
+    }
+  },
+  "stratification_vocabulary": {
+    "anthropometry_band": [
+      "band_a",
+      "band_b",
+      "band_c",
+      "withheld"
+    ],
+    "skill_band": [
+      "recreational",
+      "competitive_amateur",
+      "elite",
+      "withheld"
+    ],
+    "sex": [
+      "female",
+      "male",
+      "other_or_undisclosed",
+      "withheld"
+    ],
+    "age_band": [
+      "18_29",
+      "30_44",
+      "45_59",
+      "60_plus",
+      "withheld"
+    ],
+    "handedness": [
+      "left",
+      "right",
+      "withheld"
+    ],
+    "injury_history": [
+      "none_reported",
+      "prior_upper_limb",
+      "prior_lumbar",
+      "withheld"
+    ],
+    "impairment": [
+      "none_reported",
+      "limited_shoulder_range",
+      "limited_lumbar_range",
+      "withheld"
+    ],
+    "club_class": [
+      "driver",
+      "iron",
+      "wedge",
+      "putter",
+      "withheld"
+    ],
+    "task": [
+      "full_swing_driver",
+      "full_swing_iron",
+      "half_swing",
+      "withheld"
+    ]
+  },
+  "evidence_domain": {
+    "declared_scope": [
+      "synthetic_benchmark_parameter_recovery",
+      "synthetic_benchmark_held_out_prediction"
+    ],
+    "prohibited_inferences": [
+      "coaching_prescription",
+      "injury_risk_prediction",
+      "talent_identification",
+      "anatomical_or_muscle_strategy_identification",
+      "transport_to_strata_unrepresented_in_training"
+    ]
+  },
+  "inference_boundary": "This cohort is a synthetic benchmark. It cannot establish any human, anatomical, equipment, injury, or coaching conclusion, and it cannot substitute for the governed participant data required by UpstreamDrift issues 8450 and 8556."
+}

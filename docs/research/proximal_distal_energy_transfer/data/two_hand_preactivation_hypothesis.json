@@ -1,0 +1,93 @@
+{
+  "schema_version": "two-hand-preactivation-hypothesis-v1",
+  "study_type": "model_only_delayed_actuator_preview_hypothesis",
+  "source": {
+    "path": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.npz",
+    "sha256": "084b49ba093fe8a713e2d98b5fab24bebd7f352fe65a03e1dd0ed29cf1413239",
+    "trace_semantics": "archived stitched same-state BASE, pointwise ZTCF, and DELTA; not a forward zero-torque trajectory"
+  },
+  "protocol": {
+    "target": "archived BASE equivalent midpoint couple",
+    "drift": "archived stitched pointwise ZTCF equivalent midpoint couple",
+    "required_control": "BASE minus pointwise ZTCF (archived DELTA)",
+    "actuator": "first-order unit-gain lag with exact zero-order-hold update",
+    "late_window_s": [0.16, 0.25],
+    "preview_grid_s": [
+      0.0, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01,
+      0.011, 0.012, 0.013, 0.014, 0.015, 0.016, 0.017, 0.018, 0.019, 0.02,
+      0.021, 0.022, 0.023, 0.024, 0.025, 0.026, 0.027, 0.028, 0.029, 0.03,
+      0.031, 0.032, 0.033, 0.034, 0.035, 0.036, 0.037, 0.038, 0.039, 0.04,
+      0.041, 0.042, 0.043, 0.044, 0.045, 0.046, 0.047, 0.048, 0.049, 0.05,
+      0.051, 0.052, 0.053, 0.054, 0.055, 0.056, 0.057, 0.058, 0.059, 0.06,
+      0.061, 0.062, 0.063, 0.064, 0.065, 0.066, 0.067, 0.068, 0.069, 0.07,
+      0.071, 0.072, 0.073, 0.074, 0.075, 0.076, 0.077, 0.078, 0.079, 0.08
+    ],
+    "initial_condition": "actuator output initialized to first command sample"
+  },
+  "source_reversal": {
+    "time_of_pointwise_ztcf_minimum_s": 0.2148,
+    "pointwise_ztcf_minimum_nm": -19.6304815091102,
+    "base_at_ztcf_minimum_nm": -22.7842186913133,
+    "control_residual_at_ztcf_minimum_nm": -3.15373718220311,
+    "drift_fraction_at_ztcf_minimum": 0.8615823862590692,
+    "base_peak_abs_nm": 23.1676632013881,
+    "control_residual_peak_abs_nm": 3.18025176979525,
+    "closure_max_abs_nm": 1.1546319456101628e-13
+  },
+  "reference_actuator": {
+    "time_constant_s": 0.03,
+    "best_preview_s": 0.024,
+    "reactive_rmse_nm": 1.252334003233535,
+    "preview_rmse_nm": 0.5311727683147726,
+    "improvement_percent": 57.58537523190453,
+    "naive_net_target_rmse_nm": 19.064179749233613
+  },
+  "time_constant_sensitivity": [
+    {
+      "time_constant_s": 0.01,
+      "reactive_rmse_nm": 0.5284912698375496,
+      "best_preview_s": 0.009000000000000001,
+      "best_preview_rmse_nm": 0.10888082964881737,
+      "improvement_percent": 79.39779976265535,
+      "naive_net_target_rmse_nm": 16.279314833142983
+    },
+    {
+      "time_constant_s": 0.02,
+      "reactive_rmse_nm": 0.9261580605506697,
+      "best_preview_s": 0.017,
+      "best_preview_rmse_nm": 0.30857047022758277,
+      "improvement_percent": 66.6827420317311,
+      "naive_net_target_rmse_nm": 17.359364251402727
+    },
+    {
+      "time_constant_s": 0.03,
+      "reactive_rmse_nm": 1.252334003233535,
+      "best_preview_s": 0.024,
+      "best_preview_rmse_nm": 0.5311727683147726,
+      "improvement_percent": 57.58537523190453,
+      "naive_net_target_rmse_nm": 19.064179749233613
+    },
+    {
+      "time_constant_s": 0.04,
+      "reactive_rmse_nm": 1.5292083766323459,
+      "best_preview_s": 0.03,
+      "best_preview_rmse_nm": 0.7486850165550775,
+      "improvement_percent": 51.04100736069423,
+      "naive_net_target_rmse_nm": 21.046534157375998
+    },
+    {
+      "time_constant_s": 0.05,
+      "reactive_rmse_nm": 1.7648474730971218,
+      "best_preview_s": 0.035,
+      "best_preview_rmse_nm": 0.9516800020626797,
+      "improvement_percent": 46.075793145308964,
+      "naive_net_target_rmse_nm": 22.833625092118226
+    }
+  ],
+  "claim_boundary": {
+    "human_preactivation": "not_established",
+    "clubhead_speed_outcome": "not_evaluated",
+    "muscle_activation": "not_modeled",
+    "interpretation": "preview reduces delayed residual-couple tracking error in this declared signal model; it does not establish a human strategy"
+  }
+}

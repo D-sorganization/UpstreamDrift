@@ -1,0 +1,114 @@
+"""Humanoid Character Builder — anthropometric domain layer built on model_generation.
+
+Humanoid Character Builder provides high-level anthropometric modeling
+and character customization layered on model_generation.
+
+This module is designed to:
+- Depend only on model_generation, not on other Golf Modeling Suite modules
+- Provide clean, well-defined interfaces for integration
+- Support parallel development without merge conflicts
+- Be easily relocatable to shared tool repositories
+
+Usage:
+    from humanoid_character_builder import (
+        CharacterBuilder,
+        BodyParameters,
+        InertiaMode,
+    )
+
+    # Create a character with custom parameters
+    params = BodyParameters(
+        height_m=1.80,
+        mass_kg=80.0,
+        build_type="athletic",
+    )
+
+    builder = CharacterBuilder()
+    result = builder.build(params)
+
+    # Export as URDF with meshes
+    result.export_urdf("./output/my_humanoid")
+
+    # Or get individual segment inertia
+    inertia = builder.compute_segment_inertia(
+        "left_thigh",
+        mass=10.5,
+        mode=InertiaMode.MESH_UNIFORM_DENSITY,
+    )
+
+Version: 0.1.0
+License: Same as Golf Modeling Suite
+"""
+
+__version__ = "0.1.0"
+__author__ = "Golf Modeling Suite Contributors"
+
+# Core types - always available
+from shared.python.humanoid_character_builder.core.anthropometry import (
+    AnthropometryData,
+    get_segment_length_ratio,
+    get_segment_mass_ratio,
+)
+from shared.python.humanoid_character_builder.core.body_parameters import (
+    AppearanceParameters,
+    BodyParameters,
+    SegmentParameters,
+)
+from shared.python.humanoid_character_builder.core.segment_definitions import (
+    HUMANOID_JOINTS,
+    HUMANOID_SEGMENTS,
+    JointDefinition,
+    SegmentDefinition,
+)
+
+# Generators
+from shared.python.humanoid_character_builder.generators.urdf_generator import (
+    HumanoidURDFGenerator,
+    URDFGeneratorConfig,
+)
+
+# Main API
+from shared.python.humanoid_character_builder.interfaces.api import (
+    CharacterBuilder,
+    CharacterBuildResult,
+)
+
+# Inertia calculation
+from shared.python.humanoid_character_builder.mesh.inertia_calculator import (
+    InertiaMode,
+    InertiaResult,
+    MeshInertiaCalculator,
+)
+from shared.python.humanoid_character_builder.mesh.primitive_inertia import (
+    PrimitiveInertiaCalculator,
+    PrimitiveShape,
+)
+
+__all__ = [
+    # Version
+    "__version__",
+    # Core types
+    "BodyParameters",
+    "SegmentParameters",
+    "AppearanceParameters",
+    "SegmentDefinition",
+    "JointDefinition",
+    "HUMANOID_SEGMENTS",
+    "HUMANOID_JOINTS",
+    # Anthropometry
+    "AnthropometryData",
+    "get_segment_mass_ratio",
+    "get_segment_length_ratio",
+    # Inertia
+    "InertiaMode",
+    "InertiaResult",
+    "MeshInertiaCalculator",
+    "PrimitiveInertiaCalculator",
+    "PrimitiveShape",
+    # Generators
+    "HumanoidURDFGenerator",
+    "URDFGeneratorConfig",
+    # Main API
+    "CharacterBuilder",
+    "CharacterBuildResult",
+]

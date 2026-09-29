@@ -1,0 +1,107 @@
+"""MuJoCo golf swing biomechanical analysis package.
+
+This package provides professional-grade robotics analysis tools for golf swing
+simulation and optimization, including:
+
+- Biomechanical analysis with force/torque extraction
+- Advanced kinematics (Jacobians, manipulability, IK)
+- Multiple control schemes (impedance, admittance, hybrid)
+- Trajectory optimization
+- Parallel mechanism analysis (constraint Jacobians)
+- Motion primitive libraries
+- Motion capture integration and retargeting
+- Kinematic-dependent force analysis (Coriolis, centrifugal)
+- Inverse dynamics solvers
+- Telemetry capture and reporting
+"""
+
+# Control system
+# Motion capture and force analysis
+# Advanced robotics modules
+# Core modules
+try:
+    from . import (
+        advanced_control,
+        advanced_kinematics,
+        biomechanics,
+        control_system,
+        inverse_dynamics,
+        kinematic_forces,
+        models,
+        motion_capture,
+        motion_optimization,
+        plotting,
+        urdf_io,
+    )
+    from .control_system import ActuatorControl, ControlSystem, ControlType
+except (ImportError, OSError):
+    # If core modules fail to load (e.g. strict headless environments with no GL),
+    # we allow partial loading.
+    for _name in (
+        "advanced_control",
+        "advanced_kinematics",
+        "biomechanics",
+        "control_system",
+        "inverse_dynamics",
+        "kinematic_forces",
+        "models",
+        "motion_capture",
+        "motion_optimization",
+        "plotting",
+        "urdf_io",
+        "ActuatorControl",
+        "ControlSystem",
+        "ControlType",
+    ):
+        globals()[_name] = None  # type: ignore
+
+# Telemetry
+from .telemetry import TelemetryRecorder, TelemetryReport
+
+# GUI modules - optional, may fail in headless environments
+_has_gui = False
+try:
+    from . import sim_widget
+
+    _has_gui = True
+except (ImportError, TypeError):
+    # GUI not available (e.g., in headless CI or PyQt6 metaclass conflict)
+    # Don't expose these in __all__ to avoid AttributeErrors
+    sim_widget = None  # type: ignore[assignment]
+
+__version__ = "2.1.0"
+
+# Build __all__ conditionally based on available modules
+__all__ = [
+    "ActuatorControl",
+    "ControlSystem",
+    "ControlType",
+    "TelemetryRecorder",
+    "TelemetryReport",
+    "advanced_control",
+    "advanced_kinematics",
+    "biomechanics",
+    "control_system",
+    "inverse_dynamics",
+    "kinematic_forces",
+    "models",
+    "motion_capture",
+    "motion_optimization",
+    "plotting",
+    "urdf_io",
+]
+
+# Only include GUI modules in __all__ if they're available
+if _has_gui:
+    __all__ += ["sim_widget"]
+
+# Register the embed adapter with the launcher's embeddable-tool
+# registry on import. Wrapped in ``contextlib.suppress(ImportError)``
+# so ``import mujoco_humanoid_golf`` continues to work in headless
+# contexts where PyQt6 / the ``mujoco`` wheel (transitively pulled in
+# by ``_embed_adapter``) is unavailable. See Subtask 5 / #4998 of
+# EPIC #4993.
+import contextlib  # noqa: E402
+
+with contextlib.suppress(ImportError):
+    from . import _embed_adapter  # noqa: F401

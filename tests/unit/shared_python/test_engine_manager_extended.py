@@ -1,0 +1,359 @@
+from __future__ import annotations
+
+import shutil
+from collections.abc import Generator
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+from src.shared.python.engine_core.engine_manager import (
+    EngineManager,
+    EngineStatus,
+    EngineType,
+    GolfModelingError,
+)
+
+# --- Fixtures ---
+
+
+@pytest.fixture
+def mock_suite_root(tmp_path) -> Path:
+    """Create a mock suite root directory structure."""
+    root = tmp_path / "golf_suite"
+    root.mkdir()
+
+    engines = root / "engines"
+    engines.mkdir()
+
+    physics = engines / "physics_engines"
+    physics.mkdir()
+
+    (physics / "mujoco").mkdir()
+    (physics / "drake").mkdir()
+    (physics / "pinocchio").mkdir()
+    (physics / "jaxsim").mkdir()
+    (physics / "opensim").mkdir()
+    (physics / "myosuite").mkdir()
+    # Add missing engine dirs that EngineManager.engine_paths requires
+    (physics / "pendulum").mkdir()
+    (physics / "putting_green").mkdir()
+
+    simscape = engines / "Simscape_Multibody_Models"
+    simscape.mkdir()
+    (simscape / "2D_Golf_Model").mkdir()
+    (simscape / "3D_Golf_Model").mkdir()
+
+    (engines / "pendulum_models").mkdir()
+
+    return root
+
+
+@pytest.fixture
+def engine_manager(
+    mock_suite_root,
+) -> Generator[EngineManager, None, None]:  # noqa: ANN001
+    """Initialize EngineManager with mock root."""
+    # Patch probes globally for the lifetime of the fixture
+    # This ensures new instances created inside methods are also mocked
+    with (
+        patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe") as MockMuJoCo,
+        patch("src.shared.python.engine_core.engine_probes.DrakeProbe") as MockDrake,
+        patch(
+            "src.shared.python.engine_core.engine_probes.PinocchioProbe"
+        ) as MockPinocchio,
+        patch("src.shared.python.engine_core.engine_probes.JaxSimProbe") as MockJaxSim,
+        patch(
+            "src.shared.python.engine_core.engine_probes.OpenSimProbe"
+        ) as MockOpenSim,
+        patch("src.shared.python.engine_core.engine_probes.MyoSimProbe") as MockMyoSim,
+        patch("src.shared.python.engine_core.engine_probes.MatlabProbe") as MockMatlab,
+        patch(
+            "src.shared.python.engine_core.engine_probes.PendulumProbe"
+        ) as MockPendulum,
+    ):
+        manager = EngineManager(mock_suite_root)
+
+        # Store mocks in manager for tests to access if needed (though not standard)
+        manager._mocks = {  # type: ignore[attr-defined]
+            EngineType.MUJOCO: MockMuJoCo,
+            EngineType.DRAKE: MockDrake,
+            EngineType.PINOCCHIO: MockPinocchio,
+            EngineType.JAXSIM: MockJaxSim,
+            EngineType.OPENSIM: MockOpenSim,
+            EngineType.MYOSIM: MockMyoSim,
+            EngineType.MATLAB_2D: MockMatlab,
+            EngineType.PENDULUM: MockPendulum,
+        }
+
+        yield manager
+
+
+# --- Tests ---
+
+
+def test_engine_manager_extended_initialization(
+    engine_manager, mock_suite_root
+) -> None:
+    """Test EngineManager initializes with correct root and empty engine."""
+    assert engine_manager.suite_root == mock_suite_root
+    assert engine_manager.current_engine is None
+    assert len(engine_manager.engine_status) > 0
+
+
+def test_discover_engines(mock_suite_root) -> None:
+    """Engines with a present dir AND importable runtime are AVAILABLE (#6884).
+
+    Runtime-backed engines (MuJoCo/Drake/Pinocchio/OpenSim/MyoSim) require the
+    availability layer to report the package as installed, so it is patched to
+    AVAILABLE. Engines whose directories the fixture does not create (JaxSim,
+    golf_swing_pendulum) remain UNAVAILABLE.
+    """
+    from src.shared.python.engine_core import engine_manager as em
+
+    with patch.object(em, "is_dependency_present", lambda name: True):
+        manager = EngineManager(mock_suite_root)
+
+    present_engines = (
+        EngineType.MUJOCO,
+        EngineType.DRAKE,
+        EngineType.PINOCCHIO,
+        EngineType.OPENSIM,
+        EngineType.MYOSIM,
+        EngineType.PENDULUM,
+        EngineType.MATLAB_2D,
+        EngineType.MATLAB_3D,
+        EngineType.PUTTING_GREEN,
+        EngineType.GOLF_SWING_PENDULUM,
+    )
+    for engine_type in present_engines:
+        assert manager.engine_status[engine_type] == EngineStatus.AVAILABLE
+
+    # JaxSim has both an adapter directory and a patched-available runtime.
+    assert manager.engine_status[EngineType.JAXSIM] == EngineStatus.AVAILABLE
+
+
+def test_discover_engines_missing(mock_suite_root) -> None:
+    """Test missing engine directory is marked unavailable."""
+    # Remove a directory
+    shutil.rmtree(mock_suite_root / "engines" / "physics_engines" / "mujoco")
+
+    with (
+        patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe"),
+        patch("src.shared.python.engine_core.engine_probes.DrakeProbe"),
+        patch("src.shared.python.engine_core.engine_probes.PinocchioProbe"),
+        patch("src.shared.python.engine_core.engine_probes.JaxSimProbe"),
+        patch("src.shared.python.engine_core.engine_probes.OpenSimProbe"),
+        patch("src.shared.python.engine_core.engine_probes.MyoSimProbe"),
+        patch("src.shared.python.engine_core.engine_probes.MatlabProbe"),
+        patch("src.shared.python.engine_core.engine_probes.PendulumProbe"),
+    ):
+        manager = EngineManager(mock_suite_root)
+
+    assert manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.UNAVAILABLE
+
+
+def test_switch_engine_unknown(engine_manager) -> None:
+    """Test switching to an unknown engine returns False."""
+    assert engine_manager.switch_engine("unknown_engine") is False
+
+
+def test_engine_manager_extended_switch_engine_unavailable(engine_manager) -> None:
+    """Test switching to an unavailable engine returns False."""
+    engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.UNAVAILABLE
+    assert engine_manager.switch_engine(EngineType.MUJOCO) is False
+
+
+def test_engine_manager_extended_switch_engine_success(engine_manager) -> None:
+    """Test successful engine switch."""
+    with patch.object(engine_manager, "_load_engine") as mock_load:
+        result = engine_manager.switch_engine(EngineType.MUJOCO)
+        assert result is True
+        mock_load.assert_called_once_with(EngineType.MUJOCO)
+        assert engine_manager.current_engine == EngineType.MUJOCO
+
+
+def test_engine_manager_extended_switch_engine_failure(engine_manager) -> None:
+    """Test engine switch failure sets error status."""
+    with patch.object(
+        engine_manager, "_load_engine", side_effect=GolfModelingError("Load failed")
+    ):
+        result = engine_manager.switch_engine(EngineType.MUJOCO)
+        assert result is False
+        assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
+
+
+def test_load_engine_no_loader(engine_manager) -> None:
+    """Test loading engine with no registered loader raises error."""
+    # Mock the registry to return None (no registration)
+    from src.shared.python.engine_core.engine_registry import get_registry
+
+    registry = get_registry()
+
+    with (
+        patch.object(registry, "get", return_value=None),
+        pytest.raises(GolfModelingError),
+    ):
+        engine_manager._load_engine(EngineType.MUJOCO)
+
+
+def test_load_mujoco_engine_success(engine_manager) -> None:
+    """Test successful MuJoCo engine loading via switch_engine."""
+    engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+
+    # Mock _load_engine so no real loading happens
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
+
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
+        result = engine_manager.switch_engine(EngineType.MUJOCO)
+
+        assert result is True
+        assert engine_manager.active_physics_engine is not None
+        assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
+
+
+def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
+    """Test MuJoCo engine loading failure via probe."""
+    # Test probe failure through switch_engine
+    engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+
+    with patch(
+        "src.shared.python.engine_core.engine_probes.MuJoCoProbe"
+    ) as mock_probe_class:
+        mock_probe = MagicMock()
+        mock_probe.probe.return_value.is_available.return_value = False
+        mock_probe.probe.return_value.diagnostic_message = "Not ready"
+        mock_probe_class.return_value = mock_probe
+
+        # This should fail during the loading process
+        with patch(
+            "src.shared.python.engine_core.engine_loaders.load_mujoco_engine"
+        ) as mock_loader:
+            mock_loader.side_effect = GolfModelingError("MuJoCo not ready")
+
+            result = engine_manager.switch_engine(EngineType.MUJOCO)
+            assert result is False
+            assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
+
+
+def test_load_drake_engine_success(engine_manager) -> None:
+    """Test successful Drake engine loading via switch_engine."""
+    engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
+
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
+        result = engine_manager.switch_engine(EngineType.DRAKE)
+
+        assert result is True
+        assert engine_manager.active_physics_engine is not None
+        assert engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
+
+
+def test_load_pinocchio_engine_success(engine_manager) -> None:
+    """Test successful Pinocchio engine loading via switch_engine."""
+    engine_manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
+
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
+        result = engine_manager.switch_engine(EngineType.PINOCCHIO)
+
+        assert result is True
+        assert engine_manager.active_physics_engine is not None
+        assert engine_manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.LOADED
+
+
+def test_load_matlab_engine_success(engine_manager) -> None:
+    """Test MATLAB loading through the registry factory."""
+    engine_manager.engine_status[EngineType.MATLAB_2D] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+    mock_registration = MagicMock()
+    mock_registration.factory.return_value = mock_engine_instance
+
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_registry:
+        mock_get_registry.return_value.get.return_value = mock_registration
+        result = engine_manager.switch_engine(EngineType.MATLAB_2D)
+
+    assert result is True
+    mock_get_registry.return_value.get.assert_called_once_with(EngineType.MATLAB_2D)
+    mock_registration.factory.assert_called_once_with()
+    assert engine_manager.active_physics_engine is mock_engine_instance
+
+
+def test_load_pendulum_engine(engine_manager) -> None:
+    """Test pendulum engine loading via switch_engine with mocked _load_engine."""
+    engine_manager.engine_status[EngineType.PENDULUM] = EngineStatus.AVAILABLE
+    mock_engine_instance = MagicMock()
+
+    def fake_load(engine_type: EngineType) -> None:  # noqa: ANN001
+        engine_manager.active_physics_engine = mock_engine_instance
+        engine_manager.engine_status[engine_type] = EngineStatus.LOADED
+
+    with patch.object(engine_manager, "_load_engine", side_effect=fake_load):
+        result = engine_manager.switch_engine(EngineType.PENDULUM)
+        assert result is True
+        assert engine_manager.engine_status[EngineType.PENDULUM] == EngineStatus.LOADED
+
+
+def test_cleanup(engine_manager) -> None:
+    """Test engine manager cleanup resets state."""
+    mock_engine = MagicMock()
+    engine_manager.active_physics_engine = mock_engine
+    engine_manager.cleanup()
+    mock_engine.close.assert_called_once_with()
+    assert engine_manager.active_physics_engine is None
+    assert engine_manager.current_engine is None
+
+
+def test_engine_manager_extended_get_engine_info(engine_manager) -> None:
+    """Test engine info retrieval."""
+    info = engine_manager.get_engine_info()
+    assert "available_engines" in info
+    assert "engine_status" in info
+
+
+def test_engine_manager_extended_validate_engine_configuration(engine_manager) -> None:
+    """Test engine configuration validation."""
+    assert engine_manager.validate_engine_configuration(EngineType.MUJOCO) is False
+    (engine_manager.engine_paths[EngineType.MUJOCO] / "python").mkdir()
+    assert engine_manager.validate_engine_configuration(EngineType.MUJOCO) is True
+
+
+def test_probe_all_engines(engine_manager) -> None:
+    """Test probing all engines populates results."""
+    engine_manager.probe_all_engines()
+    # probe_results should contain results for each registered probe
+    assert len(engine_manager.probe_results) == len(engine_manager.probes)
+
+
+def test_get_diagnostic_report(engine_manager) -> None:
+    """Test diagnostic report generation."""
+    # Mock probes to have deterministic output
+    for mock_cls in engine_manager._mocks.values():  # type: ignore[attr-defined]
+        mock_instance = mock_cls.return_value
+        mock_instance.probe.return_value.is_available.return_value = True
+        mock_instance.probe.return_value.status = EngineStatus.AVAILABLE
+        mock_instance.probe.return_value.version = "1.0.0"
+        mock_instance.probe.return_value.missing_dependencies = []
+        mock_instance.probe.return_value.diagnostic_message = "Ready"
+        mock_instance.probe.return_value.engine_name = "MockEngine"
+
+    # Set specific name
+    engine_manager._mocks[  # type: ignore[attr-defined]
+        EngineType.MUJOCO
+    ].return_value.probe.return_value.engine_name = "mujoco"
+
+    report = engine_manager.get_diagnostic_report()
+    assert "Engine Readiness Report" in report
+    assert "MUJOCO" in report

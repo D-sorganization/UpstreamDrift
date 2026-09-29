@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "schedule": [
+    {
+      "effective_on": "2026-01-01",
+      "max_exclusions": 47
+    },
+    {
+      "effective_on": "2026-08-01",
+      "max_exclusions": 45
+    },
+    {
+      "effective_on": "2026-10-01",
+      "max_exclusions": 36
+    },
+    {
+      "effective_on": "2027-01-01",
+      "max_exclusions": 21
+    },
+    {
+      "effective_on": "2027-04-01",
+      "max_exclusions": 11
+    },
+    {
+      "effective_on": "2027-07-01",
+      "max_exclusions": 0
+    }
+  ],
+  "coverage_gates": [
+    {
+      "name": "api-routes",
+      "path": "src/api/routes/",
+      "min_coverage": 84.3,
+      "owner": "@api",
+      "reason": "FastAPI route handlers are production entry points and need package-level coverage beyond the global floor",
+      "ratchet_on": "2027-01-01"
+    },
+    {
+      "name": "data-io",
+      "path": "src/shared/python/data_io/",
+      "min_coverage": 50.1,
+      "owner": "@motion-analysis",
+      "reason": "motion-data import and export paths need package-level coverage without relying on broad global coverage",
+      "ratchet_on": "2027-01-01"
+    },
+    {
+      "name": "execution-checkpointing",
+      "path": "src/shared/python/engine_core/",
+      "min_coverage": 22.4,
+      "owner": "@engine-core",
+      "reason": "execution and checkpoint recovery code needs explicit coverage tracking",
+      "ratchet_on": "2027-01-01"
+    },
+    {
+      "name": "deployment",
+      "path": "src/deployment/",
+      "min_coverage": 48.4,
+      "owner": "@deployment",
+      "reason": "deployment controllers and digital-twin runtime paths need package-level regression coverage",
+      "ratchet_on": "2027-01-01"
+    },
+    {
+      "name": "optimization",
+      "path": "src/shared/python/optimization/",
+      "min_coverage": 49.9,
+      "owner": "@physics-core",
+      "reason": "swing optimization code needs package-level coverage before tightening numeric refactors",
+      "ratchet_on": "2027-01-01"
+    },
+    {
+      "name": "engine-adapters",
+      "path": "src/engines/",
+      "min_coverage": 7.1,
+      "owner": "@engine-integrations",
+      "reason": "engine adapter behavior needs explicit package-level coverage across optional physics backends",
+      "ratchet_on": "2027-01-01"
+    }
+  ],
+  "exclusions": [
+    {
+      "path": "src/engines/Simscape_Multibody_Models/2D_Golf_Model",
+      "owner": "@engine-integrations",
+      "reason": "invalid Python package name blocks mypy package discovery Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model",
+      "owner": "@engine-integrations",
+      "reason": "invalid Python package name blocks mypy package discovery Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "vendor/",
+      "owner": "@platform",
+      "reason": "vendored third-party code is not owned by this repository Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/models/",
+      "owner": "@model-assets",
+      "reason": "third-party model assets include generated and legacy Python files Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/plotting/",
+      "owner": "@ui-platform",
+      "reason": "plotting package needs incremental GUI and third-party stub cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/ui/qt/widgets/",
+      "owner": "@ui-platform",
+      "reason": "Qt widgets need incremental annotation and PyQt stub cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/launchers/",
+      "owner": "@platform",
+      "reason": "runtime launcher imports require incremental typing cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/pose_editor/",
+      "owner": "@ui-platform",
+      "reason": "pose editor UI code needs incremental PyQt typing cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/ai/gui/",
+      "owner": "@ui-platform",
+      "reason": "AI GUI code needs incremental UI and service typing cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/pose_editor_tab.py",
+      "owner": "@engine-integrations",
+      "reason": "Pinocchio pose editor depends on partially typed GUI integration code Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/src/pose_editor_tab.py",
+      "owner": "@engine-integrations",
+      "reason": "Drake pose editor depends on partially typed GUI integration code Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/pose_estimation/",
+      "owner": "@motion-analysis",
+      "reason": "pose estimation depends on partially typed computer-vision libraries Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/ui/adapters/",
+      "owner": "@ui-platform",
+      "reason": "UI adapter layer needs incremental protocol typing cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/ui/",
+      "owner": "@ui-platform",
+      "reason": "UI package needs incremental PyQt typing cleanup Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/src/",
+      "owner": "@engine-integrations",
+      "reason": "Drake mixin decomposition has pre-existing attr-defined issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_analysis.py",
+      "owner": "@engine-integrations",
+      "reason": "MuJoCo launcher mixin decomposition has pre-existing attr-defined issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_sim.py",
+      "owner": "@engine-integrations",
+      "reason": "MuJoCo launcher mixin decomposition has pre-existing attr-defined issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
+      "owner": "@engine-integrations",
+      "reason": "MuJoCo launcher mixin decomposition has pre-existing attr-defined issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/drake/python/tests/",
+      "owner": "@engine-integrations",
+      "reason": "engine-local test stubs have pre-existing typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "installer/",
+      "owner": "@platform",
+      "reason": "installer scripts use runtime import layouts outside package typing Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/sidekick/",
+      "owner": "@physics-core",
+      "reason": "sidekick package contains complex PyQt and process calculator typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/perturbation/statistics.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose pre-existing perturbation statistics typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/model_generation/core/physics_validation.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose pre-existing physics validation typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/model_generation/core/constants.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose pre-existing constant typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/learning/imitation/dataset.py",
+      "owner": "@learning",
+      "reason": "numpy stubs expose pre-existing imitation dataset typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/docker/",
+      "owner": "@engine-integrations",
+      "reason": "docker helper code uses runtime environment imports Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/deployment/realtime/controller.py",
+      "owner": "@deployment",
+      "reason": "numpy stubs expose pre-existing realtime controller typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose pre-existing pendulum simulator typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/signal_toolkit/",
+      "owner": "@signal-toolkit",
+      "reason": "shared-path package aliasing and numpy stubs expose pre-existing signal toolkit typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/api/routes/putting_green.py",
+      "owner": "@api",
+      "reason": "numpy stubs expose pre-existing putting green route typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/api/routes/physics.py",
+      "owner": "@api",
+      "reason": "numpy stubs expose pre-existing physics route typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/api/routes/analysis_tools.py",
+      "owner": "@api",
+      "reason": "numpy stubs expose pre-existing analysis route typing issues Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/deployment/digital_twin/twin.py",
+      "owner": "@deployment",
+      "reason": "numpy stubs expose floating and signedinteger narrowing divergence Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/analysis/nonlinear_dynamics.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose floating and signedinteger narrowing divergence Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    },
+    {
+      "path": "src/shared/python/optimization/swing_optimizer.py",
+      "owner": "@physics-core",
+      "reason": "numpy stubs expose floating and signedinteger narrowing divergence Re-attested 2026-09-25 pending owner review (#9411 M-2).",
+      "expires_on": "2027-01-01"
+    }
+  ]
+}

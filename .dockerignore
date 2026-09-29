@@ -1,0 +1,75 @@
+# Version control
+.git
+.gitignore
+
+# Node modules (frontend installs its own)
+ui/node_modules
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.eggs
+dist
+build
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Rust build artifacts (the image compiles the PyO3 wheels from source; the
+# local target/ dir is large and must not bloat the build context — #7600)
+target/
+
+# Testing / CI artifacts
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+.coverage
+*.coveragerc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker (avoid recursive build context)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation markdown (not needed in image)
+docs/
+*.md
+!README.md
+
+# MATLAB Simscape models — large, not needed in container
+src/engines/Simscape_Multibody_Models/
+
+# Test and dev files not needed in image
+tests/
+conftest.py
+requirements-dev.lock
+
+# Data and logs
+*.db
+*.log
+data/
+logs/
+
+# Environment files (exclude secrets, keep the example template)
+.env
+.env.*
+!.env.example
+
+# Dockerfile.modular verifies and packages these exact pinned Tools roots.
+# Keep them inside the context even when broad documentation, test, or data
+# exclusions above would otherwise remove a nested source artifact.
+!vendor/ud-tools/src/shared/**
+!vendor/ud-tools/src/sidekick/**
+!vendor/ud-tools/src/chat/**
+!vendor/ud-tools/src/python/src/utils/**
+!vendor/ud-tools/src/contracts.py

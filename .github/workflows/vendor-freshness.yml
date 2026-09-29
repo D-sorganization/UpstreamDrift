@@ -1,0 +1,170 @@
+name: Vendor Submodule Freshness
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    # Run nightly at 02:00 UTC
+    - cron: "0 8 * * 0,4"
+  workflow_dispatch:
+    inputs:
+      auto_bump:
+        description: "Automatically open a PR if a submodule is stale?"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # -- Dispatcher: route to self-hosted if available --------------------------
+  pick-runner:
+    # Dispatcher placement only. This repo is public, so a hosted runner is
+    # free and unmetered; pinning the dispatcher meant every run waited for a
+    # self-hosted slot just to decide where to run. The runner it SELECTS is
+    # unchanged, so no workload moves off the fleet.
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+  check-vendor-freshness:
+    timeout-minutes: 30
+    needs: pick-runner
+    name: Check vendor submodule freshness
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    outputs:
+      stale: ${{ steps.check.outputs.stale }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: false
+          fetch-depth: 0
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+      - name: Check Cargo / pyproject Tools pins equal the submodule gitlink
+        # UD #9406 (RM #1505 Phase 1): the Rust `tools-core` rev and any
+        # `ud-tools @ git+...` pip pin must match vendor/ud-tools exactly.
+        run: python scripts/shared_tools/check_tools_pins.py
+
+      - name: Run freshness check
+        id: check
+        run: |
+          python scripts/check_vendor_updates.py --no-network --json > vendor_status.json
+          cat vendor_status.json
+          STALE=$(python -c "
+          import json
+          with open('vendor_status.json', encoding='utf-8') as handle:
+              data = json.load(handle)
+          stale = [d for d in data if not d['is_current']]
+          print('true' if stale else 'false')
+          ")
+          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload status report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: vendor-freshness-report
+          path: vendor_status.json
+          retention-days: 7
+
+  bump-submodule:
+    timeout-minutes: 30
+    name: Open bump PR if stale
+    needs: [pick-runner, check-vendor-freshness]
+    if: >
+      needs.check-vendor-freshness.outputs.stale == 'true' &&
+      (github.event_name == 'schedule' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_bump == 'true'))
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
+          token: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update vendor/ud-tools to latest Tools main
+        run: |
+          git submodule update --remote vendor/ud-tools
+          NEW_SHA=$(git -C vendor/ud-tools rev-parse HEAD)
+          echo "NEW_SHA=$NEW_SHA" >> "$GITHUB_ENV"
+
+      - name: Check for actual changes
+        id: diff
+        run: |
+          if git diff --quiet HEAD -- vendor/ud-tools; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create bump branch
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          BRANCH="chore/bump-ud-tools-$(date +%Y%m%d)"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -B "$BRANCH"
+          git add vendor/ud-tools
+          SHORT="${NEW_SHA:0:12}"
+          git commit -m "chore(vendor): bump ud-tools to ${SHORT}"
+
+      - name: Push branch
+        if: steps.diff.outputs.changed == 'true'
+        run: git push origin "$BRANCH" --force
+
+      - name: Open PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          SHORT="${NEW_SHA:0:12}"
+          gh pr create \
+            --title "chore(vendor): bump ud-tools to ${SHORT}" \
+            --body "Automated nightly submodule bump from vendor-freshness CI job. Review the Tools CHANGELOG before merging." \
+            --label "dependencies" \
+            --label "automated"

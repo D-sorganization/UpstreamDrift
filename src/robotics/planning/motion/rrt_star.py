@@ -1,0 +1,550 @@
+"""RRT* (Optimal RRT) motion planner.
+
+This module implements the RRT* algorithm which extends RRT with
+asymptotically optimal path planning via rewiring.
+
+Reference:
+    Karaman, S., & Frazzoli, E. (2011). Sampling-based algorithms
+    for optimal motion planning. IJRR.
+"""
+
+from __future__ import annotations
+
+import math
+import time
+from collections import deque
+from dataclasses import dataclass
+
+import numpy as np
+from src.robotics.planning.motion._tree_index import TreeConfigIndex
+from src.robotics.planning.motion.planner_base import (
+    CollisionCheckerProtocol,
+    MotionPlanner,
+    PlannerConfig,
+    PlannerResult,
+    PlannerStatus,
+)
+from src.robotics.planning.motion.rrt import TreeNode
+from src.shared.python.core.contracts import invariant
+
+
+@dataclass
+class RRTStarConfig(PlannerConfig):
+    """Configuration for RRT* planner.
+
+    Additional Attributes:
+        rewire_radius: Radius for rewiring neighbors (None = auto).
+        rewire_factor: Factor for computing rewire radius.
+        use_kd_tree: Use periodically rebuilt cKDTree for neighbor queries.
+    """
+
+    rewire_radius: float | None = None
+    rewire_factor: float = 1.1
+    use_kd_tree: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate configuration."""
+        super().__post_init__()
+        if self.rewire_radius is not None and self.rewire_radius <= 0:
+            raise ValueError("rewire_radius must be positive")
+        if self.rewire_factor <= 0:
+            raise ValueError("rewire_factor must be positive")
+
+
+@invariant(
+    lambda self: self._config.rewire_factor > 0,
+    "RRT* rewire_factor must be positive",
+)
+class RRTStarPlanner(MotionPlanner):
+    """RRT* (optimal RRT) motion planner.
+
+    RRT* extends basic RRT with:
+    1. Near-neighbor search for finding potential parent nodes
+    2. Rewiring to maintain asymptotically optimal paths
+
+    Design by Contract:
+        Preconditions:
+            - Start and goal configurations must be valid
+            - Bounds must be set before planning
+
+        Postconditions:
+            - If SUCCESS, returned path is collision-free
+            - Path cost approaches optimal as iterations increase
+
+        Invariants:
+            - Tree maintains optimal-cost parent for each node
+
+    Example:
+        >>> planner = RRTStarPlanner(collision_checker)
+        >>> planner.set_bounds(lower, upper)
+        >>> result = planner.plan(q_start, q_goal)
+        >>> print(f"Path length: {result.path_length}")
+    """
+
+    def __init__(
+        self,
+        collision_checker: CollisionCheckerProtocol,
+        config: RRTStarConfig | None = None,
+    ) -> None:
+        """Initialize RRT* planner.
+
+        Args:
+            collision_checker: Collision checking interface.
+            config: RRT* configuration.
+        """
+        if collision_checker is None:
+            raise ValueError("collision_checker must be provided")
+        super().__init__(collision_checker, config or RRTStarConfig())
+        self._config: RRTStarConfig = self._config  # type: ignore[assignment]
+        self._nodes: list[TreeNode] = []
+        self._node_index = TreeConfigIndex(use_kd_tree=self._config.use_kd_tree)
+        self._children: dict[int, list[int]] = {}
+        self._num_collision_checks = 0
+        self._dimension = 0
+
+    def plan(
+        self,
+        q_start: np.ndarray,
+        q_goal: np.ndarray,
+    ) -> PlannerResult:
+        """Plan an optimal path using RRT*.
+
+        Args:
+            q_start: Start configuration.
+            q_goal: Goal configuration.
+
+        Returns:
+            PlannerResult with path and statistics.
+        """
+        if q_start is None:
+            raise ValueError("q_start must be provided")
+        q_start = np.asarray(q_start)
+        q_goal = np.asarray(q_goal)
+        self._dimension = len(q_start)
+
+        self._reset_tree()
+        self._num_collision_checks = 0
+        start_time = time.perf_counter()
+
+        validation_result = self._validate_start_goal(q_start, q_goal, start_time)
+        if validation_result is not None:
+            return validation_result
+
+        self._append_node(TreeNode(config=q_start.copy(), parent_idx=-1, cost=0.0))
+
+        goal_idx = -1
+        best_goal_cost = float("inf")
+        iterations = 0
+
+        while iterations < self._config.max_iterations:
+            if time.perf_counter() - start_time > self._config.max_time:
+                break
+            iterations += 1
+
+            new_idx, new_cost = self._expand_tree_star(q_goal)
+            if new_idx < 0:
+                continue
+
+            goal_idx, best_goal_cost = self._try_connect_goal(
+                new_idx,
+                new_cost,
+                q_goal,
+                goal_idx,
+                best_goal_cost,
+            )
+
+        return self._build_result(goal_idx, iterations, start_time)
+
+    def _validate_start_goal(
+        self,
+        q_start: np.ndarray,
+        q_goal: np.ndarray,
+        start_time: float,
+    ) -> PlannerResult | None:
+        if q_start is None:
+            raise ValueError("q_start must be provided")
+        if not self._is_valid(q_start):
+            return PlannerResult(
+                status=PlannerStatus.INVALID_START,
+                planning_time=time.perf_counter() - start_time,
+            )
+        if not self._is_valid(q_goal):
+            return PlannerResult(
+                status=PlannerStatus.INVALID_GOAL,
+                planning_time=time.perf_counter() - start_time,
+            )
+        return None
+
+    def _expand_tree_star(self, q_goal: np.ndarray) -> tuple[int, float]:
+        if q_goal is None:
+            raise ValueError("q_goal must be provided")
+        q_rand = self._sample_with_goal_bias(q_goal)
+        nearest_idx = self._find_nearest(q_rand)
+        q_nearest = self._nodes[nearest_idx].config
+        q_new = self._steer(q_nearest, q_rand)
+
+        self._num_collision_checks += 1
+        if not self._is_valid(q_new):
+            return -1, 0.0
+
+        near_indices = self._find_near(q_new)
+        best_parent_idx = self._choose_parent(q_new, near_indices)
+        if best_parent_idx < 0:
+            return -1, 0.0
+
+        parent_node = self._nodes[best_parent_idx]
+        new_cost = parent_node.cost + self._distance(parent_node.config, q_new)
+        new_node = TreeNode(
+            config=q_new.copy(),
+            parent_idx=best_parent_idx,
+            cost=new_cost,
+        )
+        new_idx = len(self._nodes)
+        self._append_node(new_node)
+
+        self._rewire(new_idx, near_indices)
+        return new_idx, new_cost
+
+    def _try_connect_goal(
+        self,
+        new_idx: int,
+        new_cost: float,
+        q_goal: np.ndarray,
+        goal_idx: int,
+        best_goal_cost: float,
+    ) -> tuple[int, float]:
+        if new_idx is None:
+            raise ValueError("new_idx must be provided")
+        q_new = self._nodes[new_idx].config
+        dist_to_goal = self._distance(q_new, q_goal)
+        if dist_to_goal > self._config.goal_tolerance:
+            return goal_idx, best_goal_cost
+
+        self._num_collision_checks += self._config.collision_check_resolution
+        if not self._is_path_valid(q_new, q_goal):
+            return goal_idx, best_goal_cost
+
+        goal_cost = new_cost + dist_to_goal
+        if goal_cost >= best_goal_cost:
+            return goal_idx, best_goal_cost
+
+        if goal_idx >= 0:
+            if not self._is_ancestor(goal_idx, new_idx):
+                self._set_parent(goal_idx, new_idx)
+                self._nodes[goal_idx].cost = goal_cost
+                self._propagate_cost_update(goal_idx)
+        else:
+            goal_node = TreeNode(
+                config=q_goal.copy(),
+                parent_idx=new_idx,
+                cost=goal_cost,
+            )
+            goal_idx = len(self._nodes)
+            self._append_node(goal_node)
+        best_goal_cost = goal_cost
+        return goal_idx, best_goal_cost
+
+    def _build_result(
+        self,
+        goal_idx: int,
+        iterations: int,
+        start_time: float,
+    ) -> PlannerResult:
+        if goal_idx is None:
+            raise ValueError("goal_idx must be provided")
+        planning_time = time.perf_counter() - start_time
+
+        if goal_idx >= 0:
+            path = self._extract_path(goal_idx)
+            return PlannerResult(
+                status=PlannerStatus.SUCCESS,
+                path=path,
+                path_length=self._compute_path_length(path),
+                num_iterations=iterations,
+                planning_time=planning_time,
+                num_nodes=len(self._nodes),
+                num_collision_checks=self._num_collision_checks,
+            )
+
+        status = (
+            PlannerStatus.TIMEOUT
+            if time.perf_counter() - start_time >= self._config.max_time
+            else PlannerStatus.FAILURE
+        )
+        return PlannerResult(
+            status=status,
+            num_iterations=iterations,
+            planning_time=planning_time,
+            num_nodes=len(self._nodes),
+            num_collision_checks=self._num_collision_checks,
+        )
+
+    def _compute_rewire_radius(self) -> float:
+        """Compute the rewiring radius based on tree size.
+
+        Uses the formula from RRT* paper:
+        r = gamma * (log(n)/n)^(1/d)
+
+        Returns:
+            Rewiring radius.
+        """
+        if self._config.rewire_radius is not None:
+            return self._config.rewire_radius
+
+        n = len(self._nodes)
+        if n < 2:
+            return self._config.step_size * 2
+
+        d = self._dimension
+        # Compute volume of unit ball in d dimensions
+        unit_ball_vol = (np.pi ** (d / 2)) / math.gamma(d / 2 + 1)
+
+        # Get configuration space volume
+        if self._lower_bounds is not None and self._upper_bounds is not None:
+            space_vol = np.prod(self._upper_bounds - self._lower_bounds)
+        else:
+            space_vol = 1.0
+
+        # Compute gamma
+        gamma = (
+            self._config.rewire_factor
+            * 2
+            * (1 + 1 / d) ** (1 / d)
+            * (space_vol / unit_ball_vol) ** (1 / d)
+        )
+
+        # Compute radius
+        radius = min(
+            gamma * (np.log(n) / n) ** (1 / d),
+            self._config.step_size * 3,
+        )
+        return max(radius, self._config.step_size)
+
+    def _find_nearest(self, q: np.ndarray) -> int:
+        """Find index of nearest node in tree.
+
+        Args:
+            q: Query configuration.
+
+        Returns:
+            Index of nearest node.
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        return self._node_index.nearest(q)
+
+    def _find_near(self, q: np.ndarray) -> list[int]:
+        """Find all nodes within rewiring radius.
+
+        Args:
+            q: Query configuration.
+
+        Returns:
+            List of indices of near nodes.
+        """
+        if q is None:
+            raise ValueError("q must be provided")
+        radius = self._compute_rewire_radius()
+        return self._node_index.within_radius(q, radius)
+
+    def _choose_parent(
+        self,
+        q_new: np.ndarray,
+        near_indices: list[int],
+    ) -> int:
+        """Choose best parent for new node from near neighbors.
+
+        Args:
+            q_new: New configuration.
+            near_indices: Indices of near nodes.
+
+        Returns:
+            Index of best parent, or -1 if no valid parent.
+        """
+        if q_new is None:
+            raise ValueError("q_new must be provided")
+        best_cost = float("inf")
+        best_idx = -1
+
+        for idx in near_indices:
+            node = self._nodes[idx]
+            new_cost = node.cost + self._distance(node.config, q_new)
+
+            if new_cost < best_cost:
+                # Check if path is collision-free
+                self._num_collision_checks += self._config.collision_check_resolution
+                if self._is_path_valid(node.config, q_new):
+                    best_cost = new_cost
+                    best_idx = idx
+
+        return best_idx
+
+    def _is_ancestor(self, candidate_idx: int, node_idx: int) -> bool:
+        """Check if candidate_idx is an ancestor of node_idx in the tree."""
+        if candidate_idx is None:
+            raise ValueError("candidate_idx must be provided")
+        idx = node_idx
+        visited: set[int] = set()
+        while idx >= 0:
+            if idx == candidate_idx:
+                return True
+            if idx in visited:
+                break
+            visited.add(idx)
+            idx = self._nodes[idx].parent_idx
+        return False
+
+    def _rewire(self, new_idx: int, near_indices: list[int]) -> None:
+        """Rewire tree to improve costs through new node.
+
+        Args:
+            new_idx: Index of newly added node.
+            near_indices: Indices of near nodes to consider.
+        """
+        if new_idx is None:
+            raise ValueError("new_idx must be provided")
+        new_node = self._nodes[new_idx]
+
+        for idx in near_indices:
+            if idx == new_idx or idx == new_node.parent_idx:
+                continue
+            # Skip if near node is an ancestor of new node (would create cycle)
+            if self._is_ancestor(idx, new_idx):
+                continue
+
+            node = self._nodes[idx]
+            new_cost = new_node.cost + self._distance(new_node.config, node.config)
+
+            if new_cost < node.cost:
+                # Check if path is collision-free
+                self._num_collision_checks += self._config.collision_check_resolution
+                if self._is_path_valid(new_node.config, node.config):
+                    # Rewire: update parent and cost
+                    self._set_parent(idx, new_idx)
+                    node.cost = new_cost
+                    # Propagate cost updates to descendants
+                    self._propagate_cost_update(idx)
+
+    def _propagate_cost_update(self, start_idx: int) -> None:
+        """Propagate cost updates to all descendants.
+
+        Args:
+            start_idx: Index of node whose cost was updated.
+        """
+        # Find all children and update their costs
+        if start_idx is None:
+            raise ValueError("start_idx must be provided")
+        queue: deque[int] = deque([start_idx])
+        while queue:
+            current_idx = queue.popleft()
+            current_node = self._nodes[current_idx]
+
+            for child_idx in self._children.get(current_idx, ()):
+                child = self._nodes[child_idx]
+                child.cost = current_node.cost + self._distance(
+                    current_node.config,
+                    child.config,
+                )
+                queue.append(child_idx)
+
+    def _reset_tree(self) -> None:
+        self._nodes = []
+        self._node_index = TreeConfigIndex(use_kd_tree=self._config.use_kd_tree)
+        self._children = {}
+
+    def _append_node(self, node: TreeNode) -> int:
+        if node is None:
+            raise ValueError("node must be provided")
+        idx = len(self._nodes)
+        self._nodes.append(node)
+        indexed_idx = self._node_index.append(node.config)
+        if indexed_idx != idx:
+            raise RuntimeError("tree node index is inconsistent")
+        self._children.setdefault(idx, [])
+        if node.parent_idx >= 0:
+            self._add_child(node.parent_idx, idx)
+        return idx
+
+    def _set_parent(self, child_idx: int, parent_idx: int) -> None:
+        if child_idx is None:
+            raise ValueError("child_idx must be provided")
+        if parent_idx is None:
+            raise ValueError("parent_idx must be provided")
+        child = self._nodes[child_idx]
+        old_parent_idx = child.parent_idx
+        if old_parent_idx == parent_idx:
+            return
+        if old_parent_idx >= 0:
+            self._remove_child(old_parent_idx, child_idx)
+        child.parent_idx = parent_idx
+        self._add_child(parent_idx, child_idx)
+
+    def _add_child(self, parent_idx: int, child_idx: int) -> None:
+        children = self._children.setdefault(parent_idx, [])
+        if child_idx not in children:
+            children.append(child_idx)
+
+    def _remove_child(self, parent_idx: int, child_idx: int) -> None:
+        children = self._children.get(parent_idx)
+        if children is None:
+            return
+        try:
+            children.remove(child_idx)
+        except ValueError:
+            return
+
+    def _extract_path(self, goal_idx: int) -> list[np.ndarray]:
+        """Extract path from tree by backtracking from goal.
+
+        Args:
+            goal_idx: Index of goal node.
+
+        Returns:
+            List of configurations from start to goal.
+        """
+        if goal_idx is None:
+            raise ValueError("goal_idx must be provided")
+        path = []
+        idx = goal_idx
+        visited: set[int] = set()
+
+        while idx >= 0 and idx not in visited:
+            visited.add(idx)
+            path.append(self._nodes[idx].config.copy())
+            idx = self._nodes[idx].parent_idx
+
+        path.reverse()
+        return path
+
+    def get_tree_nodes(self) -> list[np.ndarray]:
+        """Get all nodes in the tree (for visualization).
+
+        Returns:
+            List of configurations in tree.
+        """
+        return [node.config.copy() for node in self._nodes]
+
+    def get_tree_edges(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        """Get all edges in the tree (for visualization).
+
+        Returns:
+            List of (parent, child) configuration pairs.
+        """
+        edges = []
+        for node in self._nodes:
+            if node.parent_idx >= 0:
+                parent_config = self._nodes[node.parent_idx].config
+                edges.append((parent_config.copy(), node.config.copy()))
+        return edges
+
+    def get_best_cost(self) -> float:
+        """Get cost of best path found so far.
+
+        Returns:
+            Cost of best path, or inf if no path found.
+        """
+        # Find goal node (last node if goal was reached)
+        for node in reversed(self._nodes):
+            if node.parent_idx >= 0:
+                return node.cost
+        return float("inf")

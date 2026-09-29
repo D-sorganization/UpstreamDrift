@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "name": "club_head",
+      "target": "marker_group:club_head",
+      "style": {
+        "shape": "diamond",
+        "size_px": 10.0,
+        "edge_color": "#1a0033",
+        "edge_width": 0.75,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#3b0f70"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "ball",
+      "target": "marker_group:ball",
+      "style": {
+        "shape": "sphere",
+        "size_px": 7.5,
+        "edge_color": "#1a0033",
+        "edge_width": 0.6,
+        "fill_color": {
+          "kind": "static",
+          "hex_value": "#7e3ff2"
+        },
+        "opacity": 1.0
+      }
+    },
+    {
+      "name": "left_hand",
+      "target": "marker_group:left_hand",
+      "style": {
+        "shape": "star",
+        "size_px": 7.0,
+        "edge_color": "#1a0033",
+        "edge_width": 0.5,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "Purples",
+          "palette_index": 180
+        },
+        "opacity": 0.95
+      }
+    },
+    {
+      "name": "right_hand",
+      "target": "marker_group:right_hand",
+      "style": {
+        "shape": "star",
+        "size_px": 7.0,
+        "edge_color": "#1a0033",
+        "edge_width": 0.5,
+        "fill_color": {
+          "kind": "palette",
+          "palette_name": "Purples",
+          "palette_index": 220
+        },
+        "opacity": 0.95
+      }
+    },
+    {
+      "name": "skeleton",
+      "target": "marker_group:skeleton",
+      "style": {
+        "shape": "point",
+        "size_px": 4.5,
+        "edge_color": "#2a0050",
+        "edge_width": 0.3,
+        "fill_color": {
+          "kind": "data_driven",
+          "channel": {
+            "name": "joint_angle",
+            "unit": "rad",
+            "shape": [0],
+            "dtype": "float64"
+          },
+          "colormap": "magma",
+          "vmin": -3.14159,
+          "vmax": 3.14159,
+          "nan_color": "#552288"
+        }
+      }
+    }
+  ]
+}

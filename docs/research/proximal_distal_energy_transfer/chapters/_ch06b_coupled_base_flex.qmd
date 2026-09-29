@@ -1,0 +1,322 @@
+# Coupled Base Motion and Club Compliance {#sec-coupled-base-flex}
+
+## Why the Mechanisms Must Be Coupled {#sec-coupled-motivation}
+
+The preceding forward two-hand experiment establishes that separated contact
+forces can create a late negative club couple after all commanded joint torques
+are set to zero. The shaft study separately establishes that elastic storage,
+viscous loss, and interaction forces can be closed in a forward model. Those
+results do not by themselves establish that the negative-couple mechanism
+survives when the shoulder base moves and the club flexes. Prescribing a mobile
+hub after solving a fixed-base trajectory cannot answer that question because
+base acceleration then changes reactions without being changed by them.
+Likewise, attaching a flexible point-mass chain to a single arm does not test
+whether two-hand differential forces survive the added compliance.
+
+This chapter therefore evaluates one coupled system in which base translation,
+arm motion, grip reactions, proximal-club rotation, and shaft deflection are all
+simultaneous forward-dynamics outputs. The implementation, complete traces, and
+portable evidence record are available in
+[`moving_base_flexible_club.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/moving_base_flexible_club.py),
+[`run_moving_base_flexible_study.py`](https://github.com/D-sorganization/UpstreamDrift/blob/main/scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py),
+and
+[`moving_base_flexible_study.json`](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json).
+
+The question is deliberately narrow: does the registered planar mechanism
+remain mechanically possible after these two omitted degrees of freedom are
+admitted? The experiment does not calibrate a golfer, identify muscle forces,
+or predict the effect of a named shaft.
+
+## Coordinates and Geometry {#sec-coupled-coordinates}
+
+The generalized coordinate vector is
+
+$$
+\mathbf q =
+(\theta_R,\phi_R,\theta_L,\phi_L,x_b,y_b,x_g,y_g,\alpha,\beta)^\mathsf T,
+$$ {#eq-coupled-state}
+
+where $(x_b,y_b)$ translates a finite-mass shoulder base,
+$(x_g,y_g)$ is the proximal club's grip-center position, $\alpha$ is its
+absolute angle, and $\beta$ is the distal-club angle relative to $\alpha$.
+Each arm uses an absolute upper-arm angle $\theta$ and a relative elbow angle
+$\phi$. The distal angle is therefore $\alpha+\beta$.
+
+For the planar direction and tangent operators
+
+$$
+\mathbf e(\gamma)=
+\begin{bmatrix}\sin\gamma\\-\cos\gamma\end{bmatrix},
+\qquad
+\mathbf t(\gamma)=
+\frac{\partial\mathbf e}{\partial\gamma}=
+\begin{bmatrix}\cos\gamma\\\sin\gamma\end{bmatrix},
+$$ {#eq-coupled-direction}
+
+the right-hand position, for example, is
+
+$$
+\mathbf r_{h,R}=\mathbf r_b+\mathbf s_R
++L_u\mathbf e(\theta_R)
++L_f\mathbf e(\theta_R+\phi_R),
+$$ {#eq-coupled-hand-position}
+
+and the corresponding grip point is
+
+$$
+\mathbf r_{g,R}=\mathbf r_g+d_R\mathbf e(\alpha).
+$$ {#eq-coupled-grip-position}
+
+The four holonomic constraints are
+
+$$
+\boldsymbol\Phi(\mathbf q)=
+\begin{bmatrix}
+\mathbf r_{h,R}-\mathbf r_{g,R}\\
+\mathbf r_{h,L}-\mathbf r_{g,L}
+\end{bmatrix}=\mathbf 0,
+\qquad
+\mathbf J=\frac{\partial\boldsymbol\Phi}{\partial\mathbf q}.
+$$ {#eq-coupled-constraints}
+
+This construction leaves six feasible degrees of freedom at regular
+configurations. The two contact-force vectors are solved Lagrange multipliers;
+they are not allocated after the motion is known.
+
+![Endogenous Base Motion, Club Flex, and Two-Hand Interaction Forces](figures/fig_coupled_base_flex_force_geometry.pdf){#fig-coupled-base-flex-geometry width=100%}
+
+@fig-coupled-base-flex-geometry shows four states from the same forward
+trajectory. The square is the translating base, the black and purple segments
+are the proximal and distal club, and the arrows are the independently solved
+forces on the club. The force-generated couple becomes negative when the
+weighted tangential projections of the two arrows reverse; neither force norm
+nor shaft curvature alone determines that sign.
+
+## Inertia, Convective Terms, and the KKT Solve {#sec-coupled-dynamics}
+
+The mass matrix is assembled from each center-of-mass Jacobian $\mathbf J_i$
+and angular-velocity map $\mathbf H_i$:
+
+$$
+\mathbf M(\mathbf q)=
+\sum_i m_i\mathbf J_i^\mathsf T\mathbf J_i
++\sum_i I_i\mathbf H_i^\mathsf T\mathbf H_i.
+$$ {#eq-coupled-mass}
+
+This includes translation--rotation coupling between the base and both arms,
+and between the grip center and both club segments. The convective vector is
+formed from the exact centripetal accelerations of each center of mass. For a
+segment contribution $L\mathbf e(\gamma)$, that acceleration is
+$-L\dot\gamma^2\mathbf e(\gamma)$. This direct Jacobian construction avoids a
+finite-difference mass-matrix derivative in the primary dynamics.
+
+The acceleration-constraint bias $\dot{\mathbf J}\dot{\mathbf q}$ is likewise
+evaluated from the exact centripetal terms of the two arms and grip offsets,
+not by differentiating $\mathbf J$ in the solver. An independent centered
+directional derivative of $\mathbf J$ agrees within
+$6.28\times10^{-8}$ m/s² over the reference trace under a registered
+$10^{-7}$ m/s² audit tolerance.
+
+The base is connected to the world by an isotropic linear spring and damper;
+the shaft mode has its own torsional spring and damper:
+
+$$
+\mathbf Q_b=-k_b\mathbf r_b-c_b\dot{\mathbf r}_b,
+\qquad
+Q_\beta=-k_s\beta-c_s\dot\beta.
+$$ {#eq-coupled-passive-actions}
+
+These values define a transparent mechanism experiment. The reference values
+are $m_b=35$ kg, $k_b=24{,}000$ N/m, $c_b=500$ N·s/m,
+$k_s=80$ N·m/rad, and $c_s=0.6$ N·m·s/rad. They are not fitted torso or shaft
+properties.
+
+At every step, the acceleration and contact multipliers solve
+
+$$
+\begin{bmatrix}
+\mathbf M&-\mathbf J^\mathsf T\\
+\mathbf J&\mathbf 0
+\end{bmatrix}
+\begin{bmatrix}\ddot{\mathbf q}\\\boldsymbol\lambda\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf Q_{\mathrm{control}}+\mathbf Q_{\mathrm{damp}}
+-\mathbf h-\nabla V\\
+-\dot{\mathbf J}\dot{\mathbf q}
+\end{bmatrix}.
+$$ {#eq-coupled-kkt}
+
+The solver fails closed if the mass matrix is not positive definite, the
+four-row constraint Jacobian loses rank, or either KKT residual exceeds its
+declared tolerance. Velocity-Verlet integration is followed by mass-metric
+configuration and velocity projection. Projection corrections and their
+energy changes remain explicit numerical diagnostics rather than hidden
+stabilization work.
+
+## Separating Grip and Shaft Moments {#sec-coupled-wrenches}
+
+The force-generated couple about the grip center is
+
+$$
+M_F=(\mathbf r_{g,R}-\mathbf r_g)\times\mathbf F_R
++(\mathbf r_{g,L}-\mathbf r_g)\times\mathbf F_L.
+$$ {#eq-coupled-force-couple}
+
+Direct wrist torque is reported separately as
+$M_W=\tau_{w,R}+\tau_{w,L}$. The internal shaft moment is also separate:
+
+$$
+M_s=-k_s\beta-c_s\dot\beta.
+$$ {#eq-coupled-shaft-moment}
+
+$M_s$ is internal to the whole club, whereas $M_F+M_W$ is the external grip
+couple on it. Combining them into a single curve would obscure both the system
+boundary and the mechanism.
+
+The two-point contact power closes against the wrench transported to the grip
+center:
+
+$$
+\mathbf F_R\cdot\mathbf v_R+
+\mathbf F_L\cdot\mathbf v_L
+=(\mathbf F_R+\mathbf F_L)\cdot\mathbf v_g+M_F\dot\alpha.
+$$ {#eq-coupled-power-identity}
+
+The maximum discrepancy is $1.28\times10^{-13}$ W in the reference trace.
+This identity is important because a negative couple need not imply negative
+net contact power: resultant force power can offset or exceed couple power.
+
+## Whole-System Energy Balance {#sec-coupled-energy}
+
+The mechanical energy contains kinetic energy of the base, four arm segments,
+and two club segments; gravitational potential; base-spring energy; and shaft
+strain energy:
+
+$$
+E=T+V_g+\tfrac12k_b\|\mathbf r_b\|^2+
+\tfrac12k_s\beta^2.
+$$ {#eq-coupled-energy}
+
+Ideal constraints perform zero net work on the complete system: the executable
+audit evaluates $\boldsymbol\lambda^\mathsf T\mathbf J\dot{\mathbf q}$ at
+every stored state, and its maximum absolute residual is
+$2.65\times10^{-13}$ W. This is the complete two-sided action--reaction power,
+not the one-sided power delivered to the club. The remaining balance is
+
+$$
+\frac{dE}{dt}
+=\mathbf Q_{\mathrm{control}}^\mathsf T\dot{\mathbf q}
+-c_b\|\dot{\mathbf r}_b\|^2
+-c_s\dot\beta^2
+-c_j\sum_{k=1}^{4}\dot q_k^2.
+$$ {#eq-coupled-energy-rate}
+
+Over 0.4 s, the reference run gains 91.521 J of mechanical energy from
+111.133 J of applied work and -19.624 J of declared dissipation. The absolute
+work--energy residual is 0.0130 J. It falls monotonically from 0.0483 J at a
+2 ms step to 0.0254 J at 1 ms and 0.0130 J at 0.5 ms. The maximum position
+projection falls from 69.2 µm to 8.87 µm and then 1.12 µm over the same
+refinement. Constraint rank remains four; the maximum position, velocity, KKT,
+and acceleration-constraint residuals are respectively
+$7.47\times10^{-11}$ m, $2.42\times10^{-15}$ m/s,
+$2.05\times10^{-13}$, and $1.77\times10^{-13}$.
+
+The reference projections change mechanical energy by -0.0758 J in signed
+sum (0.0758 J in absolute sum), with no individual correction larger than
+0.000439 J. That cumulative correction is larger than the raw 0.0130 J
+work--energy residual, so both quantities are retained; the residual alone
+must not be read as the complete integration-error budget.
+
+## Coupled Reference Response {#sec-coupled-reference}
+
+![Coupled Transfer Observables](figures/fig_coupled_base_flex_transfer.pdf){#fig-coupled-base-flex-transfer width=100%}
+
+The base moves by at most 26.9 mm and the shaft coordinate reaches 7.08° in
+absolute value, so neither added coordinate is dormant. Peak shaft strain
+energy is 0.611 J and peak clubhead speed is 10.98 m/s. These values are model
+outputs under the declared loads, not equipment or performance predictions.
+
+The force-generated grip couple spans -4.15 to +22.95 N·m and first crosses
+negative at 0.2175 s. By contrast, the direct wrist torque spans -1 to 0 N·m.
+The negative force-couple interval therefore cannot be relabeled as the direct
+wrist command. The shaft elastic moment reaches 9.89 N·m in absolute value and
+the damping moment reaches 3.15 N·m, but both remain separately identified at
+their internal interface.
+
+## Same-State Intervention and Geometric Negative Control {#sec-coupled-counterfactuals}
+
+At exactly 0.200 s, the commanded trajectory is branched without changing any
+of its ten coordinates or velocities. All six joint commands are then set to
+zero for 50 ms. The branch begins with a force-generated couple of -0.675 N·m,
+reaches -2.17 N·m, and remains negative for the full recorded interval. Its
+work--energy residual is 0.00266 J; the energy loss is accounted for by the
+declared damping terms.
+
+The force couple changes discontinuously at the intervention even though the
+coordinates and velocities do not. This is expected: contact multipliers are
+algebraic dynamics outputs, so removing generalized force at the same state
+changes the reactions required to satisfy the acceleration constraints.
+
+This intervention does not establish that muscles are passive. It establishes
+that, after the coupled state has been created, continued applied torque is not
+mathematically necessary for the modeled negative grip couple over that
+interval. The contact reactions still depend on inertia, gravity, base
+restoring forces, shaft elasticity, and damping.
+
+The geometric negative control sets both grip offsets to zero while retaining
+two independent hand constraints. @eq-coupled-force-couple then
+predicts $M_F=0$ for any finite contact forces. The executed trace returns zero
+to machine precision. This rules out a solver sign convention or contact-force
+magnitude alone as the source of the reported couple.
+
+![Counterfactual and Numerical Falsification Tests](figures/fig_coupled_base_flex_falsification.pdf){#fig-coupled-base-flex-falsification width=100%}
+
+## Mechanism Sensitivity {#sec-coupled-sensitivity}
+
+The registered sensitivity cases vary one parameter while retaining the same
+initial configuration and open-loop command. Halving base stiffness to
+12 kN/m increases maximum base displacement to 49.6 mm and moves the first
+negative crossing to 0.211 s; doubling it to 48 kN/m reduces displacement to
+15.9 mm and yields a 0.217 s crossing. Both retain a negative minimum couple.
+
+Changing shaft stiffness from 40 to 160 N·m/rad changes peak flex from 11.26°
+to 3.98° and peak strain energy from 0.773 to 0.386 J. The negative-couple
+minimum changes from -3.73 to -4.38 N·m. Removing shaft damping increases
+flex to 9.38°, stored energy to 1.072 J, and peak clubhead speed to 13.05 m/s;
+it advances the first negative crossing to 0.160 s and deepens the minimum
+couple to -10.09 N·m. All sensitivity cases now use the same 0.5 ms step as
+the reference, so parameter effects are not mixed with a coarser integrator.
+
+These cases demonstrate local transport of the mechanism, not global
+robustness. The parameter range is too small to represent population or
+equipment uncertainty, and the open-loop command is not reoptimized after a
+parameter change. The appropriate next step is a registered ensemble with
+identifiability and uncertainty bounds, developed after the spatial model so
+that planar parameter compensation is not mistaken for physical certainty.
+
+## What This Tier Supports and What It Does Not {#sec-coupled-interpretation}
+
+Three findings now survive the move from a rigid fixed-base model to this
+coupled tier:
+
+1. separated hand-force moment arms can generate a late negative club couple;
+2. the couple can persist for a finite interval after a same-state command
+   removal; and
+3. force/couple power, whole-system energy, constraints, and numerical
+   projection can be closed simultaneously while base motion and shaft flex
+   evolve endogenously.
+
+The result would be contradicted at this tier if the sign reversal disappeared,
+the zero-command branch became immediately nonnegative, coincident grip points
+retained a force couple, base or flex motion had to be prescribed, wrench power
+failed its identity, or the finding changed under timestep refinement. None of
+those registered failure conditions occurs in the executed study.
+
+The model still omits base rotation, legs and ground reactions, anatomical
+joints, out-of-plane motion, distributed beam modes, contact compliance,
+activation dynamics, and measured parameter distributions. It also cannot
+identify biological effort from constraint forces. Consequently, this chapter
+supports a planar mechanism-feasibility statement only. The next fidelity gate
+is a spatial full-body experiment that preserves the same wrench, intervention,
+energy, and discrepancy observables in two independent dynamics engines.

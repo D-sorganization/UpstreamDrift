@@ -1,0 +1,82 @@
+"""Multi-Agent Peer Review System (Tools #2738).
+
+Public surface:
+
+- :class:`Reviewer` — abstract base for reviewer agents.
+- :class:`ReviewerDescriptor`, :class:`ReviewRequest`,
+  :class:`ReviewSubject`, :class:`ReviewVerdict`, :class:`PeerReviewResult`
+  — Pydantic contracts.
+- :class:`ReviewerRegistry` — agent-id-to-reviewer map plus panel builder.
+- :class:`ReviewCoordinator` — fan-out orchestrator that runs a panel
+  under a deadline and computes consensus.
+- :func:`compute_consensus` — pure consensus function.
+- :func:`request_peer_review` — chat-dock integration helper.
+- :class:`PeerReviewError` (and subclasses).
+
+Orthogonality: this package does NOT depend on Skills (#2737), MCP
+(#2884), Jupyter (#2889), Workspace (#2883), or Terminal (#2882). The
+only file that knows about the chat dock is ``chat_integration.py``.
+"""
+
+from __future__ import annotations
+
+from .base import Reviewer
+from .builtin import AdvocateReviewer, CriticReviewer, SpecialistReviewer
+from .chat_integration import request_peer_review
+from .consensus import compute_consensus
+from .contracts import (
+    ConsensusKind,
+    PeerReviewResult,
+    ReviewerDescriptor,
+    ReviewerRole,
+    ReviewRequest,
+    ReviewSubject,
+    ReviewVerdict,
+    SubjectKind,
+    VerdictKind,
+)
+from .coordinator import ReviewCoordinator, VerdictSink
+from .errors import (
+    InsufficientPanelError,
+    NoReviewersError,
+    PeerReviewError,
+    ReviewerTimeoutError,
+)
+from .prompts import PEER_REVIEW_SYSTEM_PROMPT
+from .registry import ReviewerRegistry
+from .transcript import format_transcript
+
+__all__ = [
+    # Contracts
+    "ConsensusKind",
+    "PeerReviewResult",
+    "ReviewerDescriptor",
+    "ReviewerRole",
+    "ReviewRequest",
+    "ReviewSubject",
+    "ReviewVerdict",
+    "SubjectKind",
+    "VerdictKind",
+    # Base + registry + coordinator
+    "Reviewer",
+    "ReviewerRegistry",
+    "ReviewCoordinator",
+    "VerdictSink",
+    # Consensus
+    "compute_consensus",
+    # Builtin reviewers
+    "AdvocateReviewer",
+    "CriticReviewer",
+    "SpecialistReviewer",
+    # Errors
+    "InsufficientPanelError",
+    "NoReviewersError",
+    "PeerReviewError",
+    "ReviewerTimeoutError",
+    # Chat
+    "request_peer_review",
+    # Transcript
+    "format_transcript",
+    # Prompts
+    "PEER_REVIEW_SYSTEM_PROMPT",
+]

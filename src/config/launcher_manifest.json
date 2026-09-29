@@ -1,0 +1,1174 @@
+{
+  "version": "1.0.0",
+  "description": "Single source of truth for all launcher tiles across PyQt and Tauri/React UIs",
+  "tiles": [
+    {
+      "id": "model_explorer",
+      "name": "Model Explorer",
+      "description": "Browse, select, and build URDF/MJCF models",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/model_explorer/launch_model_explorer.py",
+      "logo": "urdf_icon.svg",
+      "status": "utility",
+      "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
+      "order": 1,
+      "web": {
+        "mode": "route",
+        "route": "/tools/model-explorer"
+      }
+    },
+    {
+      "id": "mujoco_unified",
+      "name": "MuJoCo",
+      "description": "Unified MuJoCo interface: Humanoid Simulation & Analytics Dashboard",
+      "category": "physics_engine",
+      "type": "custom_humanoid",
+      "path": "src/launchers/mujoco_dashboard.py",
+      "engine_type": "mujoco",
+      "logo": "mujoco_humanoid.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "rigid_body",
+        "contact",
+        "tendons",
+        "actuators",
+        "mass_matrix",
+        "jacobian",
+        "force_vectors",
+        "torque_vectors",
+        "contact_forces",
+        "wrench",
+        "screw_theory",
+        "video_export",
+        "dataset_export",
+        "biomechanics",
+        "spatial_algebra",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime",
+        "realtime_ws",
+        "unreal_streaming",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 2,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "drake_golf",
+      "name": "Drake",
+      "description": "Drake robotics framework with MeshCat visualization",
+      "category": "physics_engine",
+      "type": "drake",
+      "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
+      "engine_type": "drake",
+      "logo": "drake.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "rigid_body",
+        "optimization",
+        "contact",
+        "mass_matrix",
+        "jacobian",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime",
+        "realtime_ws",
+        "unreal_streaming",
+        "screw_theory",
+        "spatial_algebra",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 3,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "pinocchio_golf",
+      "name": "Pinocchio",
+      "description": "Pinocchio rigid body dynamics with analytical derivatives",
+      "category": "physics_engine",
+      "type": "pinocchio",
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
+      "engine_type": "pinocchio",
+      "logo": "pinocchio.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "rigid_body",
+        "inverse_kinematics",
+        "mass_matrix",
+        "jacobian",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime_ws",
+        "unreal_streaming",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 4,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "opensim_golf",
+      "name": "OpenSim",
+      "description": "OpenSim musculoskeletal modeling for biomechanics analysis",
+      "category": "physics_engine",
+      "type": "opensim",
+      "path": "src/engines/physics_engines/opensim/python/opensim_gui.py",
+      "engine_type": "opensim",
+      "logo": "opensim.svg",
+      "status": "engine_ready",
+      "capabilities": [
+        "musculoskeletal",
+        "inverse_kinematics",
+        "muscle_analysis",
+        "mass_matrix",
+        "jacobian",
+        "biomechanics",
+        "actuator_controls"
+      ],
+      "order": 5,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "myosim_suite",
+      "name": "MyoSuite",
+      "description": "MyoSuite muscle-actuated simulation environment",
+      "category": "physics_engine",
+      "type": "myosim",
+      "path": "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py",
+      "engine_type": "myosuite",
+      "logo": "myosim.svg",
+      "status": "experimental",
+      "capabilities": [
+        "musculoskeletal",
+        "muscle_control",
+        "neural_activation",
+        "mass_matrix",
+        "jacobian"
+      ],
+      "order": 6,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "putting_green",
+      "name": "Putting Green",
+      "description": "Author and practice on realistic greens: surface presets, terrain import, wind, and ball-roll physics (ud-legacy-roll/1). Greens export to the Impact Explorer's putting analytics via the shared green-surface wire.",
+      "category": "simulation",
+      "type": "putting_green",
+      "path": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "engine_type": "putting_green",
+      "logo": "putting_green.svg",
+      "status": "simulator",
+      "web_route": "/tools/putting-green",
+      "capabilities": ["surface_modeling", "ball_physics", "terrain"],
+      "order": 8,
+      "web": {
+        "mode": "route",
+        "route": "/tools/putting-green"
+      }
+    },
+    {
+      "id": "matlab_suite",
+      "name": "Matlab Models",
+      "description": "Access 2D/3D Simscape models and Analysis Tools",
+      "category": "external",
+      "type": "special_app",
+      "path": "src/launchers/matlab_suite_dialog.py",
+      "logo": "matlab_logo.svg",
+      "status": "external",
+      "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
+      "order": 9,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "motion_target_preview",
+      "name": "Motion-Match Preview",
+      "description": "Preview multi-source motion-capture targets (C3D, .mat, body markers, club/ball) on a shared timegrid before driving a physics-engine model.",
+      "category": "motion_matching",
+      "type": "special_app",
+      "path": "src/tools/starting_pose_matcher/__main__.py",
+      "logo": "motion_target_preview.svg",
+      "status": "utility",
+      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
+      "tags": ["c3d", "mocap", "club", "body", "preview"],
+      "order": 10,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "motion_capture",
+      "name": "Motion Capture",
+      "description": "C3D Viewer, OpenPose, and MediaPipe Analysis \u2014 with retargeting, inverse-dynamics solving, signal processing, and anthropometric scaling pipeline",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/freemocap_sidecar/run_freemocap.py",
+      "logo": "c3d_icon.svg",
+      "status": "utility",
+      "web_route": "/tools/motion-capture",
+      "capabilities": [
+        "c3d_viewer",
+        "openpose",
+        "mediapipe",
+        "pose_estimation",
+        "retargeting",
+        "id_solving",
+        "signal_processing",
+        "scaling"
+      ],
+      "order": 11,
+      "web": {
+        "mode": "route",
+        "route": "/tools/motion-capture"
+      }
+    },
+    {
+      "id": "video_analyzer",
+      "name": "Video Analyzer (Pose & Motion Tracking)",
+      "description": "Video-based motion analysis with pose estimation and tracking: extract poses and joint tracks from swing video. Not for converting or trimming video files -- see Video Processor for that.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "tools://src/video_analyzer/launch_video_analyzer.py",
+      "provider": "tools",
+      "working_dir": ".",
+      "python_paths": ["src", "src/shared/python"],
+      "logo": "video_analyzer.svg",
+      "status": "external",
+      "web_route": "/tools/video-analyzer",
+      "capabilities": [
+        "video_processing",
+        "pose_estimation",
+        "motion_tracking",
+        "frame_analysis"
+      ],
+      "order": 12,
+      "web": {
+        "mode": "route",
+        "route": "/tools/video-analyzer"
+      }
+    },
+    {
+      "id": "video_processor",
+      "name": "Video Processor (Convert & Extract Frames)",
+      "description": "Shared Tools media processor for video conversion, frame extraction, and analysis: format-convert clips and pull individual frames. Not for pose or motion tracking -- see Video Analyzer for that.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "tools://src/media_processing/video_processor/apps/web/launch_platform.py",
+      "provider": "tools",
+      "working_dir": "src/media_processing/video_processor/apps/web",
+      "python_paths": ["src", "src/shared/python"],
+      "logo": "video_analyzer.svg",
+      "status": "external",
+      "web_route": "/tools/video-processor",
+      "capabilities": [
+        "video_processing",
+        "format_conversion",
+        "frame_extraction",
+        "media_analysis"
+      ],
+      "order": 13,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "data_explorer",
+      "name": "Data Explorer (Import & Visualize)",
+      "description": "Import, filter, and visualize simulation datasets interactively. Not for signal processing or calculators -- see Data Processor for that.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "tools://src/data_explorer/data_explorer_app.py",
+      "provider": "tools",
+      "working_dir": ".",
+      "python_paths": ["src", "src/shared/python"],
+      "logo": "data_explorer.svg",
+      "status": "external",
+      "web_route": "/tools/data-explorer",
+      "capabilities": ["data_import", "filtering", "visualization", "export"],
+      "order": 14,
+      "web": {
+        "mode": "route",
+        "route": "/tools/data-explorer"
+      }
+    },
+    {
+      "id": "data_processor",
+      "name": "Data Processor (Signal & Time-Series)",
+      "description": "Shared Tools signal processing and time-series data analysis tool: filter, transform, and compute statistics over recorded signals. Not for open-ended dataset browsing -- see Data Explorer for that.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "tools://src/data_processing/data_processor/launch_pyqt6.py",
+      "provider": "tools",
+      "working_dir": ".",
+      "python_paths": [
+        "src",
+        "src/shared/python",
+        "src/data_processing/data_processor/python"
+      ],
+      "logo": "data_explorer.svg",
+      "status": "external",
+      "web_route": "/tools/data-processor",
+      "capabilities": [
+        "data_import",
+        "signal_processing",
+        "time_series",
+        "filtering",
+        "statistics",
+        "export",
+        "process_calculators"
+      ],
+      "order": 15,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "rate_of_closure",
+      "name": "Rate of Closure Impact Explorer",
+      "description": "Full swing-impact-ball-flight simulation suite: 3D clubhead delivery, impact physics with gear effect, ball flight, putting with green surfaces, launch-monitor analytics, and 3D shot playback. Putting analytics accepts greens authored in Putting Green. Its launch-monitor tab is the in-context surface of the same analytics engine as Launch Monitor Analytics.",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "tools://src/rate_of_closure/launch_pyqt6.py",
+      "provider": "tools",
+      "working_dir": ".",
+      "python_paths": ["src", "src/shared/python"],
+      "logo": "rate_of_closure.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "rate_of_closure",
+        "impact_analysis",
+        "clubhead_kinematics",
+        "attack_angle",
+        "face_rotation",
+        "putting_simulation",
+        "launch_monitor_analytics",
+        "3d_visualization"
+      ],
+      "order": 7,
+      "web": {
+        "mode": "route",
+        "route": "/tools/impact-explorer"
+      }
+    },
+    {
+      "id": "project_map",
+      "name": "Project Map",
+      "description": "Complete map of all features, modules, and hidden gems in the suite",
+      "category": "tool",
+      "type": "special_app",
+      "path": "docs/architecture/PROJECT_MAP.md",
+      "logo": "project_map.svg",
+      "status": "utility",
+      "capabilities": [
+        "documentation",
+        "feature_discovery",
+        "project_overview"
+      ],
+      "order": 16,
+      "web": {
+        "mode": "unavailable",
+        "reason": "Documentation file; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "cross_engine_dashboard",
+      "name": "Cross-Engine Dashboard",
+      "description": "Compare simulation results across MuJoCo, Drake, Pinocchio with perturbation and robustness analysis",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/launchers/cross_engine_dashboard.py",
+      "logo": "cross_engine.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "cross_validation",
+        "perturbation",
+        "robustness_scoring",
+        "comparison",
+        "cross_engine_robustness"
+      ],
+      "order": 17,
+      "web": {
+        "mode": "route",
+        "route": "/tools/cross-engine"
+      }
+    },
+    {
+      "id": "biomech_exercise",
+      "name": "Exercise Dashboard",
+      "description": "Biomechanics exercise workflows with injury risk and joint stress analysis",
+      "category": "biomechanics",
+      "type": "biomech_exercise",
+      "path": "src/launchers/exercise_dashboard.py",
+      "logo": "biomechanics.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "injury_risk",
+        "joint_stress",
+        "swing_modification",
+        "exercise_presets"
+      ],
+      "order": 18,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "shot_tracer",
+      "name": "Shot Tracer",
+      "description": "Multi-model trajectory visualization and comparison",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/launchers/_shot_tracer_gui.py",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": ["trajectory_visualization", "multi_model_comparison"],
+      "web_route": "/ball-flight",
+      "order": 19,
+      "web": {
+        "mode": "route",
+        "route": "/ball-flight"
+      }
+    },
+    {
+      "id": "motion_matching",
+      "name": "Motion Matching",
+      "description": "Match the tour-average driver or 7-iron capture with full-body forward dynamics on the anthropometric golfer (address, full-capture IK, contact tracking, receipts and playback).",
+      "category": "motion_matching",
+      "type": "special_app",
+      "path": "src/tools/motion_matching/__main__.py",
+      "logo": "motion_matching.svg",
+      "status": "beta",
+      "capabilities": ["mocap", "matching", "forward_dynamics", "receipts"],
+      "tags": ["mocap", "matching", "forward_dynamics", "driver", "iron"],
+      "order": 103,
+      "web": {
+        "mode": "unavailable",
+        "reason": "PyQt6 tool driving a local pipeline; no web page yet (#10106)"
+      }
+    },
+    {
+      "id": "pose_studio",
+      "name": "Pose Studio",
+      "description": "Interactive pose editor for joint angle manipulation and retargeting",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/pose_studio/__main__.py",
+      "logo": "pose_studio.svg",
+      "status": "gui_ready",
+      "capabilities": ["pose_editing", "retargeting", "joint_manipulation"],
+      "order": 20,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "capture_rig",
+      "name": "Capture Rig",
+      "description": "Multi-camera capture, pose ingest and reconstruction with an overlay player",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/capture_rig/__main__.py",
+      "logo": "capture_rig.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "video_capture",
+        "camera_control",
+        "pose_estimation",
+        "video_processing"
+      ],
+      "order": 102,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "golf_simulation_suite",
+      "name": "Golf Simulation Suite",
+      "description": "Prototype visualization and demo inspection suite; not a production physics solver",
+      "category": "simulation",
+      "type": "golf_simulation",
+      "path": "src/tools/golf_simulation_suite/__main__.py",
+      "logo": "golf_logo.svg",
+      "status": "prototype",
+      "maturity": "prototype",
+      "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
+      "order": 21,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "swing_optimizer",
+      "name": "Swing Optimizer",
+      "description": "Multi-objective trajectory optimization library (src/shared/python/optimization/); interactive GUI planned under ORG-16",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/shared/python/optimization/swing_optimizer.py",
+      "logo": "swing_optimizer.svg",
+      "status": "experimental",
+      "maturity": "experimental",
+      "capabilities": [
+        "trajectory_optimization",
+        "constraint_solving",
+        "cost_functions"
+      ],
+      "order": 22,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "injury_analysis",
+      "name": "Injury Risk Analysis",
+      "description": "Joint stress, spinal load, and swing modification scoring library (src/shared/python/injury/); interactive GUI planned under ORG-17",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/shared/python/injury/injury_risk.py",
+      "logo": "injury_analysis.svg",
+      "status": "experimental",
+      "maturity": "experimental",
+      "capabilities": [
+        "injury_risk",
+        "joint_stress",
+        "spinal_load",
+        "swing_modification"
+      ],
+      "order": 23,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "terrain_engine",
+      "name": "Terrain Engine",
+      "description": "Terrain and topography configuration for surface modeling and ball physics",
+      "category": "tool",
+      "type": "special_app",
+      "path": "",
+      "web_route": "/tools/terrain",
+      "logo": "project_map.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "topography",
+        "terrain_query"
+      ],
+      "order": 24,
+      "web": {
+        "mode": "route",
+        "route": "/tools/terrain"
+      }
+    },
+    {
+      "id": "dataset_generator",
+      "name": "Dataset Generator",
+      "description": "Generate and import swing datasets with configurable strategies and export",
+      "category": "tool",
+      "type": "special_app",
+      "path": "",
+      "web_route": "/tools/dataset",
+      "logo": "data_explorer.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "dataset_generation",
+        "swing_import",
+        "parameter_sweep",
+        "export"
+      ],
+      "order": 25,
+      "web": {
+        "mode": "route",
+        "route": "/tools/dataset"
+      }
+    },
+    {
+      "id": "bunkershot3d",
+      "name": "BunkerShot3D Designer Workbench",
+      "description": "Wedge sole design against the F0 dynamic-RFT bunker model: W2 sole parameters, W3 sand condition, W7 metrics, A/B comparison, and a validity verdict on every result",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/tools/bunker_shot_gui/gui.py",
+      "logo": "bunkershot3d.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "wedge_sole_design",
+        "sand_simulation",
+        "playability_window",
+        "bounce_utilisation",
+        "ab_comparison",
+        "validity_envelope"
+      ],
+      "order": 26,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "pendulum_simulator",
+      "name": "Pendulum Simulator",
+      "description": "Interactive proximal\u2013distal companion for double, triple, and 8-DOF golfer dynamics",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "tools://src/double_pendulum_golf/__main__.py",
+      "provider": "tools",
+      "source_root": "../Tools/src/pendulum_simulator",
+      "working_dir": ".",
+      "python_paths": ["src"],
+      "logo": "pendulum.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "educational",
+        "pendulum",
+        "proximal_distal",
+        "counterfactuals",
+        "force_vectors"
+      ],
+      "order": 27,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "swing_objective_lab",
+      "name": "Swing Objective Lab",
+      "description": "Compare downswings optimized for clubhead speed against ones optimized for centrifugal release, Coriolis transfer, energy transfer, or grip impulse",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "tools://src/double_pendulum_golf/swing_objectives/__main__.py",
+      "provider": "tools",
+      "source_root": "../Tools/src/pendulum_simulator",
+      "working_dir": ".",
+      "python_paths": ["src"],
+      "logo": "pendulum.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "pendulum",
+        "trajectory_optimization",
+        "objective_comparison",
+        "proximal_distal",
+        "counterfactuals"
+      ],
+      "web_route": "/tools/swing-objective-lab",
+      "order": 101,
+      "web": {
+        "mode": "route",
+        "route": "/tools/swing-objective-lab"
+      }
+    },
+    {
+      "id": "chat_assistant",
+      "name": "AI Assistant",
+      "description": "Chat-based AI assistant (WebSocket chat UI). The calculator, workspace, and data-explorer tool integrations are not implemented yet (#9478)",
+      "category": "tool",
+      "type": "special_app",
+      "path": "",
+      "web_route": "/chat",
+      "logo": "sidekick.svg",
+      "status": "gui_ready",
+      "capabilities": ["ai_chat"],
+      "order": 28,
+      "web": {
+        "mode": "route",
+        "route": "/chat"
+      }
+    },
+    {
+      "id": "character_builder",
+      "name": "Character Builder",
+      "description": "Build and customize humanoid URDF models with anthropometric scaling",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/shared/python/model_generation/cli/main.py",
+      "logo": "urdf_icon.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "urdf_generation",
+        "anthropometry",
+        "mesh_generation",
+        "collision_geometry"
+      ],
+      "order": 29,
+      "web": {
+        "mode": "route",
+        "route": "/tools/character-builder"
+      }
+    },
+    {
+      "id": "drake_dashboard",
+      "name": "Drake Dashboard",
+      "description": "Interactive Drake simulation dashboard",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/launchers/drake_dashboard.py",
+      "engine_type": "drake",
+      "logo": "drake.svg",
+      "status": "experimental",
+      "hidden": true,
+      "hidden_reason": "Consolidated into the Engine Hub (#9479): use the Drake tile for the single-engine view and Cross-Engine Dashboard for comparison. Retained and still resolvable at its own route so no capability is lost.",
+      "hidden_owner": "@launcher",
+      "web_route": "/tools/drake-dashboard",
+      "capabilities": [
+        "rigid_body",
+        "optimization",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 30,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "mujoco_dashboard",
+      "name": "MuJoCo Dashboard",
+      "description": "Interactive MuJoCo simulation dashboard",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/launchers/mujoco_dashboard.py",
+      "engine_type": "mujoco",
+      "logo": "mujoco_humanoid.svg",
+      "status": "experimental",
+      "hidden": true,
+      "hidden_reason": "Consolidated into the Engine Hub (#9479): use the MuJoCo tile for the single-engine view and Cross-Engine Dashboard for comparison. Retained and still resolvable at its own route so no capability is lost.",
+      "hidden_owner": "@launcher",
+      "web_route": "/tools/mujoco-dashboard",
+      "capabilities": [
+        "rigid_body",
+        "contact",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 31,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "pinocchio_dashboard",
+      "name": "Pinocchio Dashboard",
+      "description": "Interactive Pinocchio simulation dashboard",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/launchers/pinocchio_dashboard.py",
+      "engine_type": "pinocchio",
+      "logo": "pinocchio.svg",
+      "status": "experimental",
+      "hidden": true,
+      "hidden_reason": "Consolidated into the Engine Hub (#9479): use the Pinocchio tile for the single-engine view and Cross-Engine Dashboard for comparison. Retained and still resolvable at its own route so no capability is lost.",
+      "hidden_owner": "@launcher",
+      "web_route": "/tools/pinocchio-dashboard",
+      "capabilities": [
+        "rigid_body",
+        "inverse_kinematics",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ],
+      "order": 32,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "canonical_core_estimation",
+      "name": "Canonical-Core Estimation",
+      "description": "Workspace entry point for CC-19 estimation services and canonical-state fit handoff.",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/tools/canonical_core/estimation.py",
+      "web_route": "/tools/canonical-core/estimation",
+      "logo": "biomechanics.svg",
+      "status": "experimental",
+      "default_launch": "tab",
+      "shell_surfaces": ["pyqt6", "react"],
+      "capabilities": [
+        "canonical_core",
+        "estimation",
+        "services_layer",
+        "biomechanics"
+      ],
+      "order": 33,
+      "web": {
+        "mode": "route",
+        "route": "/tools/canonical-core/estimation"
+      }
+    },
+    {
+      "id": "canonical_core_comparison",
+      "name": "Canonical-Core Comparison",
+      "description": "Workspace entry point for CC-27 comparison services and cross-engine canonical-state review.",
+      "category": "biomechanics",
+      "type": "special_app",
+      "path": "src/tools/canonical_core/comparison.py",
+      "web_route": "/tools/canonical-core/comparison",
+      "logo": "biomechanics.svg",
+      "status": "experimental",
+      "default_launch": "tab",
+      "shell_surfaces": ["pyqt6", "react"],
+      "capabilities": [
+        "canonical_core",
+        "comparison",
+        "services_layer",
+        "biomechanics"
+      ],
+      "order": 34,
+      "web": {
+        "mode": "route",
+        "route": "/tools/canonical-core/comparison"
+      }
+    },
+    {
+      "id": "analysis_tools_api",
+      "name": "Analysis Tools",
+      "description": "REST API access to 6 analysis endpoints (swing metrics, biomechanics)",
+      "category": "analysis",
+      "type": "special_app",
+      "path": "src/api/routes/analysis_tools.py",
+      "web_route": "/api/analysis",
+      "logo": "exercise_dashboard.svg",
+      "status": "ready",
+      "capabilities": ["swing_metrics", "biomechanics", "api"],
+      "order": 35,
+      "web": {
+        "mode": "route",
+        "route": "/tools/analysis"
+      }
+    },
+    {
+      "id": "motion_pipeline",
+      "name": "Motion Pipeline",
+      "description": "Full markerless mocap to forward-dynamics pipeline (video in, motion out)",
+      "category": "motion_matching",
+      "type": "special_app",
+      "path": "src/shared/python/motion_pipeline/api.py",
+      "web_route": "/tools/motion-pipeline",
+      "logo": "motion_target_preview.svg",
+      "status": "experimental",
+      "capabilities": ["markerless_mocap", "forward_dynamics", "pipeline"],
+      "order": 36,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API service; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "perturbation_analysis",
+      "name": "Perturbation Analysis",
+      "description": "Cross-engine robustness analysis via perturbation testing",
+      "category": "analysis",
+      "type": "api_backed",
+      "path": "",
+      "web_route": "/api/perturbation",
+      "logo": "exercise_dashboard.svg",
+      "status": "experimental",
+      "capabilities": ["perturbation", "robustness", "cross_engine"],
+      "order": 37,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "force_overlays",
+      "name": "Force Overlays",
+      "description": "Physics visualization: joint forces and torques overlaid on 3D model",
+      "category": "tool",
+      "type": "api_backed",
+      "path": "",
+      "web_route": "/api/force-overlays",
+      "logo": "movement_optimizer_icon.svg",
+      "status": "experimental",
+      "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
+      "order": 38,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "realtime_ws",
+      "name": "Realtime WebSocket",
+      "description": "Live simulation data stream via WebSocket pub-sub",
+      "category": "tool",
+      "type": "api_backed",
+      "path": "",
+      "web_route": "/ws/realtime",
+      "logo": "movement_optimizer_icon.svg",
+      "status": "experimental",
+      "capabilities": ["websocket", "realtime", "pubsub"],
+      "order": 39,
+      "web": {
+        "mode": "unavailable",
+        "reason": "WebSocket endpoint only; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "aip",
+      "name": "AI Protocol (AIP)",
+      "description": "AI-native simulation control protocol with structured method dispatch",
+      "category": "tool",
+      "type": "api_backed",
+      "path": "",
+      "web_route": "/api/aip",
+      "logo": "sidekick.svg",
+      "status": "experimental",
+      "capabilities": ["ai_methods", "protocol", "dispatch"],
+      "order": 40,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "actuator_controls",
+      "name": "Actuator Controls",
+      "description": "Live actuator parameter tuning and control scheme editor",
+      "category": "tool",
+      "type": "api_backed",
+      "path": "",
+      "web_route": "/api/actuator-controls",
+      "logo": "movement_optimizer_icon.svg",
+      "status": "experimental",
+      "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
+      "order": 41,
+      "web": {
+        "mode": "unavailable",
+        "reason": "REST API endpoint only; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "unreal_integration",
+      "name": "Unreal Integration",
+      "description": "Unreal Engine streaming and VR visualization for golf swing simulation",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/unreal_integration/__init__.py",
+      "web_route": "/docs/unreal-integration",
+      "logo": "capture_rig.svg",
+      "status": "external",
+      "capabilities": ["streaming", "vr", "visualization"],
+      "order": 42,
+      "web": {
+        "mode": "unavailable",
+        "reason": "Python integration library; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "robotics_module",
+      "name": "Robotics Module",
+      "description": "Locomotion planning, contact mechanics, and robot control for humanoid models",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/robotics/__init__.py",
+      "web_route": "/docs/robotics",
+      "logo": "urdf_icon.svg",
+      "status": "experimental",
+      "capabilities": ["locomotion", "contact", "planning"],
+      "order": 43,
+      "web": {
+        "mode": "unavailable",
+        "reason": "Python module; no dedicated web page yet"
+      }
+    },
+    {
+      "id": "tools_calculator_hub",
+      "name": "Tools Calculator Suite",
+      "description": "Engineering process calculators from the Tools repo (50+ calculators). NOTE (#9478): currently opens the shared Data Processor window (byte-identical launch target, no adapter or web route of its own); a dedicated calculator surface is a follow-up.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "tools://src/data_processing/data_processor/launch_pyqt6.py",
+      "provider": "tools",
+      "working_dir": ".",
+      "python_paths": [
+        "src",
+        "src/shared/python",
+        "src/data_processing/data_processor/python"
+      ],
+      "web_route": "/tools/calculators",
+      "logo": "data_explorer.svg",
+      "status": "external",
+      "capabilities": ["process_calculators", "engineering", "analysis"],
+      "order": 44,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "pid_generator",
+      "name": "P&ID Generator",
+      "description": "Programmatic P&ID Generator from the Tools repo - create ISA-5.1 piping diagrams",
+      "category": "tool",
+      "type": "special_app",
+      "provider": "tools",
+      "path": "tools://src/shared/python/programmatic_pid/cli.py",
+      "web_route": "/docs/pid-generator",
+      "logo": "project_map.svg",
+      "status": "experimental",
+      "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
+      "order": 45,
+      "web": {
+        "mode": "unavailable",
+        "reason": "CLI tool (generate-pid); no GUI or web page yet"
+      }
+    },
+    {
+      "id": "launch_monitor_analytics",
+      "name": "Launch Monitor Analytics",
+      "description": "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends. The deep-desk workbench for the same analytics engine as the Rate of Closure Impact Explorer's launch-monitor tab.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/launch_monitor_analytics/__main__.py",
+      "logo": "data_explorer.svg",
+      "status": "ready",
+      "capabilities": [
+        "launch_monitor_import",
+        "session_aggregation",
+        "correlation_network",
+        "regression",
+        "neural_network",
+        "monitor_comparison",
+        "dispersion",
+        "longitudinal_trends"
+      ],
+      "order": 48,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "starting_pose_matcher",
+      "name": "Starting-Pose Matcher (legacy)",
+      "description": "Legacy alias for the motion-target preview tile. Hidden by default; kept for one release so saved layouts continue to resolve.",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/starting_pose_matcher/__main__.py",
+      "logo": "pose_studio.svg",
+      "status": "utility",
+      "hidden": true,
+      "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
+      "hidden_owner": "@launcher",
+      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
+      "order": 100,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "simulation_backends",
+      "name": "Simulation Backends",
+      "description": "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends: edit the golf double-pendulum model, run rollouts and parameter sweeps, cross-validate dynamics, and export HDF5 traces.",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/tools/simulation_backends_launcher/__main__.py",
+      "logo": "cross_engine.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "backend_selection",
+        "rollout",
+        "parameter_sweep",
+        "cross_validation",
+        "ztcf_zvcf",
+        "hdf5_export"
+      ],
+      "order": 46,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "golf_simulator",
+      "name": "Golf Simulator Console",
+      "description": "Capability-aware destination controls and replay submission for simulator integration",
+      "category": "simulation",
+      "type": "special_app",
+      "path": "src/tools/golf_simulator/gui.py",
+      "logo": "golf_logo.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "shot_input",
+        "destination_selection",
+        "session_lifecycle",
+        "replay_transport",
+        "uncertainty_recovery"
+      ],
+      "order": 47,
+      "web": {
+        "mode": "route",
+        "route": "/tools/golf-simulator"
+      }
+    },
+    {
+      "id": "shadow_tracker",
+      "name": "Shadow Tracker",
+      "description": "Articulated silhouette tracking, manual mask correction, and forward rollout verification",
+      "category": "motion_capture",
+      "type": "special_app",
+      "path": "src/tools/shadow_tracker/__main__.py",
+      "logo": "shadow_tracker.svg",
+      "status": "utility",
+      "capabilities": [
+        "video_import",
+        "manual_mask_editing",
+        "bundle_persistence",
+        "worst_frame_navigation",
+        "canonical_export"
+      ],
+      "order": 49,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "matched_swing_browser",
+      "name": "Results Browser",
+      "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/matched_swing_browser/__main__.py",
+      "logo": "matched_swing_browser.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "motion_matching",
+        "results_browser",
+        "physical_acceptance",
+        "ledger",
+        "video_export",
+        "report_export"
+      ],
+      "order": 50,
+      "web": {
+        "mode": "route",
+        "route": "/tools/matched-swings"
+      }
+    }
+  ]
+}

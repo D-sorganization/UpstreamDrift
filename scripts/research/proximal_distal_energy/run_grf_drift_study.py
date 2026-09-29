@@ -1,0 +1,440 @@
+"""Reproducible numerical study: can support reactions isolate active control?
+
+This script implements a reproducible double-pendulum ground/support-reaction
+decomposition under the counterfactual zero-torque (ZTCF) and zero-velocity
+(ZVCF) frameworks. It computes deterministic reference traces, evaluates how
+closely the passive drift predicts the total reaction, and exports
+machine-readable JSON/NPZ evidence alongside publication figures.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import CubicSpline
+
+from scripts.research.proximal_distal_energy.double_pendulum_attribution import (
+    double_pendulum_support_reaction_decomposition,
+)
+from scripts.research.proximal_distal_energy.swing_model import PlanarInertials
+from src.shared.python.physics import evaluate_reaction_prediction
+from src.shared.python.simulation_backends import GolfModelParams
+
+matplotlib.rcParams["svg.hashsalt"] = "upstreamdrift-grf-drift-study-v1"
+
+SCHEMA_VERSION = "grf-drift-attribution-v1"
+
+FIGURE_STEMS = (
+    "fig_reaction_attribution_trace",
+    "fig_reaction_vector_field",
+    "fig_falsification_decision_tree",
+)
+COLORS = {
+    "total": "#111827",
+    "configuration": "#6B7280",
+    "velocity": "#059669",
+    "control": "#DC2626",
+    "ztcf": "#2563EB",
+    "zvcf": "#D97706",
+    "zero_velocity_control_preserved": "#7C3AED",
+}
+
+
+def _source_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+def _manifest() -> dict[str, Any]:
+    return {
+        "repository": "D-sorganization/UpstreamDrift",
+        "entrypoint": "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
+        "schema": SCHEMA_VERSION,
+        "method_anchor": "double_pendulum_support_reaction_decomposition",
+    }
+
+
+def _reference_trace() -> tuple[
+    GolfModelParams, np.ndarray, np.ndarray, np.ndarray, np.ndarray
+]:
+    params = GolfModelParams.default()
+
+    nodes_time = np.array([0.0, 0.12, 0.22, 0.30])
+    nodes_q = np.array(
+        [
+            [-2.40, 0.45],
+            [-1.70, 0.95],
+            [-0.80, 1.45],
+            [0.10, 0.15],
+        ]
+    )
+    nodes_u = np.array(
+        [
+            [55.0, -12.0],
+            [120.0, 18.0],
+            [25.0, 35.0],
+            [-30.0, -5.0],
+        ]
+    )
+    time = np.linspace(0.0, 0.30, 241)
+
+    def interpolate(values: np.ndarray) -> np.ndarray:
+        return np.column_stack(
+            [
+                CubicSpline(nodes_time, values[:, idx], bc_type="natural")(time)
+                for idx in range(values.shape[1])
+            ]
+        )
+
+    q = interpolate(nodes_q)
+    velocity = np.column_stack(
+        [
+            CubicSpline(nodes_time, nodes_q[:, idx], bc_type="natural").derivative()(
+                time
+            )
+            for idx in range(nodes_q.shape[1])
+        ]
+    )
+    controls = interpolate(nodes_u)
+    return params, time, q, velocity, controls
+
+
+def _json_array(value: np.ndarray) -> list[float]:
+    return [float(item) for item in np.asarray(value).reshape(-1)]
+
+
+def _build_record(
+    result: Any,
+    time: np.ndarray,
+    body_weight: float,
+    metrics: Any,
+    total_impulse: np.ndarray,
+    component_impulses: dict[str, np.ndarray],
+    closures: tuple[np.ndarray, np.ndarray, np.ndarray],
+) -> dict[str, Any]:
+    total_closure, zvcf_closure, control_preserved_closure = closures
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "evidence_class": "model_internal_falsification_benchmark",
+        "human_validation": False,
+        "model": {
+            "name": "fixed-base planar double pendulum",
+            "support_interpretation": "shoulder support reaction on mechanism",
+            "frame": result.frame,
+            "units": result.units,
+            "samples": int(time.size),
+            "analysis_end_s": float(time[-1]),
+            "planar_weight_scale_N": body_weight,
+        },
+        "counterfactual_contract": {
+            "pointwise": True,
+            "ztcf": "configuration plus velocity reaction at zero applied control",
+            "zvcf": "configuration reaction at zero generalized velocity and zero declared applied control",
+            "zero_velocity_control_preserved": "configuration plus control reaction after algebraically zeroing declared velocity-dependent terms",
+            "zvcf_validity": (
+                "autonomous holonomic constraint with velocity_bias(q, 0) = 0 "
+                "and constraint_bias(q, 0) = 0"
+            ),
+            "rheonomic_warning": (
+                "recompute and retain any time-dependent constraint bias that "
+                "remains when generalized velocity is zero"
+            ),
+            "overlap_warning": "ZTCF and ZVCF share configuration reaction and are not additive",
+        },
+        "net_force_consistency": {
+            "status": "required_identity",
+            "identity": (
+                "net external force = total mass times center-of-mass acceleration"
+            ),
+            "known_external_loads": ["gravity", "declared non-contact loads"],
+            "model_added_value_required_for": [
+                "reaction moments",
+                "bilateral allocation",
+                "registered counterfactual predictions",
+            ],
+        },
+        "drift_only_prediction": {
+            "target": "modeled_total_support_reaction",
+            "predictor": "pointwise_ZTCF_support_reaction",
+            "component_names": list(metrics.component_names),
+            "bias_N": _json_array(metrics.bias),
+            "rmse_N": _json_array(metrics.rmse),
+            "nrmse_planar_weight": _json_array(metrics.nrmse),
+            "r_squared": _json_array(metrics.r_squared),
+            "r_squared_definition": "1 - fixed_prediction_SSE / target_TSS",
+            "r_squared_is_squared_correlation": False,
+            "impulse_error_Ns": _json_array(metrics.impulse_error),
+            "total_impulse_Ns": _json_array(total_impulse),
+            "component_impulses_Ns": {
+                name: _json_array(value) for name, value in component_impulses.items()
+            },
+        },
+        "closure": {
+            "max_abs_total_N": float(np.max(np.abs(total_closure))),
+            "max_abs_zvcf_N": float(np.max(np.abs(zvcf_closure))),
+            "max_abs_zero_velocity_control_preserved_N": float(
+                np.max(np.abs(control_preserved_closure))
+            ),
+        },
+        "non_identifiable": [
+            "bilateral foot-force allocation",
+            "center of pressure without a spatial contact model",
+            "free moment without a three-dimensional contact wrench",
+            "muscle torques from reaction residuals alone",
+        ],
+        "required_human_falsification_data": [
+            "synchronized bilateral six-axis force plates",
+            "whole-body and club kinematics",
+            "segment inertial parameters and coordinate transforms",
+            "declared filtering, event, and held-out evaluation protocols",
+        ],
+        "source_manifest": _manifest(),
+    }
+
+
+def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Build the deterministic record and trace arrays without writing files."""
+    params, time, q, velocity, controls = _reference_trace()
+    result = double_pendulum_support_reaction_decomposition(
+        time, q, velocity, controls, params
+    )
+    arrays = {
+        "time_s": time,
+        "q_rad": q,
+        "velocity_rad_s": velocity,
+        "control_Nm": controls,
+        "total": result.total,
+        "configuration": result.configuration,
+        "velocity": result.velocity,
+        "control": result.control,
+        "ztcf": result.ztcf,
+        "zvcf": result.zvcf,
+        "zero_velocity_control_preserved": (result.zero_velocity_control_preserved),
+    }
+    inertials = PlanarInertials.from_params(params)
+    total_mass = float(inertials.m1 + inertials.m2)
+    body_weight = total_mass * float(inertials.g_proj)
+    scale = np.full(2, body_weight)
+    metrics = evaluate_reaction_prediction(
+        time,
+        result.total,
+        result.ztcf,
+        normalization_scale=scale,
+        component_names=("target_horizontal", "swing_plane_vertical"),
+    )
+    total_impulse = np.trapezoid(result.total, time, axis=0)
+    component_impulses = {
+        name: np.trapezoid(arrays[name], time, axis=0)
+        for name in (
+            "configuration",
+            "velocity",
+            "control",
+            "ztcf",
+            "zvcf",
+            "zero_velocity_control_preserved",
+        )
+    }
+    total_closure = result.total - (
+        result.configuration + result.velocity + result.control
+    )
+    zvcf_closure = result.zvcf - result.configuration
+    control_preserved_closure = result.zero_velocity_control_preserved - (
+        result.configuration + result.control
+    )
+    record = _build_record(
+        result,
+        time,
+        body_weight,
+        metrics,
+        total_impulse,
+        component_impulses,
+        (total_closure, zvcf_closure, control_preserved_closure),
+    )
+    return record, arrays
+
+
+def _save_figure(figure: plt.Figure, output: Path, stem: str) -> None:
+    svg_path = output / f"{stem}.svg"
+    figure.savefig(svg_path, bbox_inches="tight", metadata={"Date": None})
+    svg_text = svg_path.read_text(encoding="utf-8")
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n",
+        encoding="utf-8",
+    )
+    figure.savefig(
+        output / f"{stem}.pdf", bbox_inches="tight", metadata={"CreationDate": None}
+    )
+    plt.close(figure)
+
+
+def _plot_pointwise_attribution(
+    arrays: dict[str, np.ndarray], phase: np.ndarray, output: Path
+) -> None:
+    fig, axes = plt.subplots(2, 1, figsize=(8.2, 6.3), sharex=True)
+    for component, axis in enumerate(axes):
+        for name in (
+            "total",
+            "configuration",
+            "velocity",
+            "control",
+            "ztcf",
+            "zvcf",
+            "zero_velocity_control_preserved",
+        ):
+            label = (
+                name.upper()
+                if name in {"ztcf", "zvcf"}
+                else (
+                    "Zero-Velocity Control-Preserved"
+                    if name == "zero_velocity_control_preserved"
+                    else name.title()
+                )
+            )
+            axis.plot(
+                phase,
+                arrays[name][:, component],
+                label=label,
+                color=COLORS[name],
+                linewidth=1.7,
+            )
+        axis.axhline(0.0, color="#9CA3AF", linewidth=0.7)
+        axis.set_ylabel(
+            ("Target-Horizontal" if component == 0 else "Swing-Plane Vertical")
+            + " Force (N)"
+        )
+        axis.grid(alpha=0.22)
+    axes[0].legend(ncol=3, fontsize=8)
+    axes[-1].set_xlabel("Normalized Time to Model Impact (%)")
+    fig.suptitle("Pointwise Support-Reaction Attribution")
+    fig.tight_layout()
+    _save_figure(fig, output, FIGURE_STEMS[0])
+
+
+def _plot_reaction_vectors(
+    arrays: dict[str, np.ndarray],
+    time: np.ndarray,
+    phase: np.ndarray,
+    output: Path,
+) -> None:
+    indices = np.linspace(0, time.size - 1, 6, dtype=int)
+    fig, axes = plt.subplots(2, 3, figsize=(8.2, 5.6), sharex=True, sharey=True)
+    for axis, index in zip(axes.flat, indices, strict=True):
+        for name in ("total", "ztcf", "control"):
+            vector = arrays[name][index]
+            axis.quiver(
+                0.0,
+                0.0,
+                vector[0],
+                vector[1],
+                angles="xy",
+                scale_units="xy",
+                scale=1.0,
+                color=COLORS[name],
+                label=name.upper() if name == "ztcf" else name.title(),
+            )
+        axis.set_title(f"{phase[index]:.0f}%")
+        axis.grid(alpha=0.22)
+        axis.set_aspect("equal", adjustable="box")
+    limit = 1.08 * max(
+        float(np.max(np.abs(arrays["total"]))), float(np.max(np.abs(arrays["ztcf"])))
+    )
+    for axis in axes.flat:
+        axis.set_xlim(-limit, limit)
+        axis.set_ylim(-limit, limit)
+    axes[0, 0].legend(fontsize=8)
+    fig.supxlabel("Target-Horizontal Force (N)")
+    fig.supylabel("Swing-Plane Vertical Force (N)")
+    fig.suptitle("Support-Reaction Vectors Along the Achieved Trajectory")
+    fig.tight_layout()
+    _save_figure(fig, output, FIGURE_STEMS[1])
+
+
+def _plot_falsification_ladder(output: Path) -> None:
+    fig, axis = plt.subplots(figsize=(8.2, 4.7))
+    axis.axis("off")
+    boxes = (
+        (0.12, "Measured Inputs\nKinematics + Force Plates"),
+        (0.38, "Declared Model\nFrames + Inertials + Contacts"),
+        (0.64, "Pointwise Predictions\nTotal + ZTCF + ZVCF"),
+        (0.88, "Held-Out Tests\nRMSE + Impulse + COP"),
+    )
+    for x, label in boxes:
+        axis.text(
+            x,
+            0.60,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9.5,
+            bbox={
+                "boxstyle": "round,pad=0.5",
+                "facecolor": "#F3F4F6",
+                "edgecolor": "#374151",
+            },
+        )
+        if x < 0.88:
+            axis.annotate(
+                "",
+                xy=(x + 0.145, 0.60),
+                xytext=(x + 0.115, 0.60),
+                arrowprops={"arrowstyle": "->", "color": "#374151"},
+            )
+    axis.text(
+        0.02,
+        0.22,
+        "Failure is informative: rank deficiency, dynamic inconsistency, poor held-out waveform fit, impulse bias, or unstable parameter sensitivity rejects the stated model.",
+        fontsize=10,
+        wrap=True,
+    )
+    axis.set_title(
+        "Falsification Ladder for Human Ground-Reaction Attribution",
+        fontsize=14,
+        pad=16,
+    )
+    fig.tight_layout()
+    _save_figure(fig, output, FIGURE_STEMS[2])
+
+
+def _make_figures(
+    record: dict[str, Any], arrays: dict[str, np.ndarray], output: Path
+) -> None:
+    output.mkdir(parents=True, exist_ok=True)
+    time = arrays["time_s"]
+    phase = 100.0 * (time - time[0]) / (time[-1] - time[0])
+    _plot_pointwise_attribution(arrays, phase, output)
+    _plot_reaction_vectors(arrays, time, phase, output)
+    _plot_falsification_ladder(output)
+
+
+def write_study(output_root: Path | str) -> dict[str, Path]:
+    """Write machine-readable evidence and publication figures."""
+    output = Path(output_root)
+    output.mkdir(parents=True, exist_ok=True)
+    record, arrays = build_study()
+    json_path = output / "grf_drift_study.json"
+    npz_path = output / "grf_drift_traces.npz"
+    json_path.write_text(
+        json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    np.savez_compressed(npz_path, **arrays)
+    figure_path = output / "figures"
+    _make_figures(record, arrays, figure_path)
+    return {"json": json_path, "npz": npz_path, "figures": figure_path}
+
+
+def main() -> None:
+    """Regenerate the committed study evidence."""
+    output = (
+        _source_root() / "docs/research/proximal_distal_energy_transfer/data/grf_drift"
+    )
+    write_study(output)
+
+
+if __name__ == "__main__":
+    main()

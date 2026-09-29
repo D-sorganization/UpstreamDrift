@@ -1,0 +1,143 @@
+"""
+Tests verifying the MPM driver runs a real physics loop, not a hard-coded mock.
+Resolves issue #5676 (and orig #5553).
+
+Current state (after #8612):
+- The driver uses MuJoCo discrete spheres as a granular media approximation.
+- It has a 500-step relaxation phase (hardcoded, see issue #5676 acceptance
+  criterion).
+- Impact steps are derived from config.trajectory.duration and the *Courant
+  stable* timestep, not the timestep authored in the MJCF.
+- The contact wrench is computed from actual MuJoCo contact forces (not a
+  constant), signed for geom order and including the r x F moment.
+- A trajectory CSV is mandatory: the 5.0 m/s fallback was a silent physical
+  substitution and is now an error.
+
+DbC postconditions:
+- State must evolve over at least 2 timesteps.
+- Output must change when input configuration changes.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+mujoco = pytest.importorskip(
+    "mujoco", reason="mujoco not installed — skipping MPM driver tests"
+)
+
+import numpy as np  # noqa: E402
+from _bunker_fixtures_8612 import (  # noqa: E402
+    write_config,
+    write_straight_trajectory,
+)
+
+from bunkershot3d.backends.mpm.driver import MPMDriver  # noqa: E402
+from bunkershot3d.io.schema import BunkerShotResultReader  # noqa: E402
+
+_SPEED = 1.0
+
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def dummy_config(tmp_path: Path) -> Path:
+    write_straight_trajectory(tmp_path / "swing_data.csv", speed=_SPEED, duration=0.02)
+    return write_config(
+        tmp_path / "canonical.yaml",
+        grain_count=10,
+        diameter_mean=0.01,
+        diameter_sigma_log=0.1,
+        duration=0.005,
+        rate_hz=1000.0,
+        trajectory_file="swing_data.csv",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+
+
+def test_driver_state_evolves(dummy_config: Path, tmp_path: Path) -> None:
+    """
+    Smoke test: driver runs for >=2 timesteps and state evolves.
+
+    DbC postcondition: clubhead position must change by at least 1e-4 m.
+    """
+    driver = MPMDriver(dummy_config)
+    output_path = tmp_path / "result.h5"
+    driver.run(output_path)
+
+    assert output_path.exists(), "Output HDF5 file was not created"
+
+    reader = BunkerShotResultReader(output_path)
+    times, positions, _ = reader.read_clubhead_states()
+    reader.close()
+
+    assert len(times) >= 2, f"Expected >=2 timesteps, got {len(times)}"
+    # The clubhead follows the prescribed swing along +x.
+    dist = float(np.linalg.norm(positions[-1] - positions[0]))
+    assert dist > 1e-4, f"Clubhead state did not evolve (displacement={dist:.2e} m)"
+
+
+def test_driver_output_changes_with_input(dummy_config: Path, tmp_path: Path) -> None:
+    """
+    Unit test: driver output changes when the input configuration changes.
+
+    DbC postcondition: final clubhead positions must differ between runs
+    with different trajectory durations.
+    """
+    import yaml
+
+    # Run once with default trajectory duration (0.005 s)
+    driver1 = MPMDriver(dummy_config)
+    out1 = tmp_path / "result1.h5"
+    driver1.run(out1)
+
+    # Modify the config to use a longer duration -> more movement
+    with open(dummy_config, encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    cfg["trajectory"]["duration"] = 0.010
+    cfg2_path = tmp_path / "canonical2.yaml"
+    with open(cfg2_path, "w", encoding="utf-8") as f:
+        yaml.dump(cfg, f)
+
+    driver2 = MPMDriver(cfg2_path)
+    out2 = tmp_path / "result2.h5"
+    driver2.run(out2)
+
+    reader1 = BunkerShotResultReader(out1)
+    _, pos1, _ = reader1.read_clubhead_states()
+    pos1_end = pos1[-1].copy()
+    reader1.close()
+
+    reader2 = BunkerShotResultReader(out2)
+    _, pos2, _ = reader2.read_clubhead_states()
+    pos2_end = pos2[-1].copy()
+    reader2.close()
+
+    assert not np.allclose(pos1_end, pos2_end), (
+        f"Driver output did not change with input state: "
+        f"pos1_end={pos1_end}, pos2_end={pos2_end}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tests for issue #6644 F4 — seeded RNG for grain placement
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_grain_placement_is_reproducible(dummy_config: Path) -> None:
+    """F4: _generate_xml must produce identical grain positions on repeated calls."""
+    driver = MPMDriver(dummy_config)
+    xml1 = driver._generate_xml()
+    xml2 = driver._generate_xml()
+    assert xml1 == xml2, (
+        "Grain placement is non-deterministic — use a seeded RNG (np.random.default_rng)"
+    )

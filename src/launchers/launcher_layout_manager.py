@@ -1,0 +1,878 @@
+"""Layout management for the Golf Launcher.
+
+This module provides centralized layout persistence and grid management
+for the Golf Modeling Suite launcher application.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from src.launchers.launcher_constants import (
+    TILE_SCALE_DEFAULT,
+    ViewMode,
+    validate_tile_scale,
+    view_mode_settings,
+)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from PyQt6.QtWidgets import QGridLayout
+
+logger = get_logger(__name__)
+
+
+class LayoutConfig:
+    """Configuration constants for layout management."""
+
+    GRID_COLUMNS = 4
+    DEFAULT_WINDOW_WIDTH = 1280
+    DEFAULT_WINDOW_HEIGHT = 800
+    MIN_WINDOW_Y = 50  # Ensure window title bar is visible
+
+
+def _view_mode_from_string(name: str | None) -> ViewMode:
+    """Parse a stored string into a :class:`ViewMode`, defaulting to LIST_LARGE.
+
+    Accepts both the current enum key names (e.g. ``"LARGE"``) and legacy
+    aliases that may have been persisted by older launchers before PR #5688
+    renamed the enum members (e.g. ``"comfortable"``).
+
+    Backward-compat mapping (pre-#5688 → current)
+    -----------------------------------------------
+    ``"comfortable"``  → ``ViewMode.LARGE``       (tile grid, NOT list)
+    ``"compact"``      → ``ViewMode.MEDIUM``
+    ``"dense"``        → ``ViewMode.SMALL``
+    ``"list"``         → ``ViewMode.LIST_LARGE``
+    ``"panel"``        → ``ViewMode.LIST_LARGE``  (old sidebar panel layout)
+    ``"floating"``     → ``ViewMode.LIST_LARGE``  (old floating window layout)
+
+    DbC postcondition: always returns a :class:`ViewMode` member.
+    """
+    if not name:
+        return ViewMode.LIST_LARGE
+    # Backward compat: map pre-#5688 token names → new canonical enum key names.
+    # "comfortable" must map → LARGE (tile grid), NOT list mode (fixes #5690).
+    _compat: dict[str, str] = {
+        "comfortable": "LARGE",
+        "compact": "MEDIUM",
+        "dense": "SMALL",
+        "list": "LIST_LARGE",
+        # Pre-#5688 layout tokens that were never valid enum names
+        "panel": "LIST_LARGE",
+        "floating": "LIST_LARGE",
+    }
+    raw = str(name).strip().lower()
+    key = _compat.get(raw, str(name).strip().upper())
+    try:
+        mode = ViewMode[key]
+    except KeyError:
+        logger.warning("Unknown view_mode %r, falling back to LIST_LARGE", name)
+        mode = ViewMode.LIST_LARGE
+    assert isinstance(mode, ViewMode), (  # DbC postcondition
+        f"_view_mode_from_string postcondition violated: got {mode!r}"
+    )
+    return mode
+
+
+class LayoutManager:
+    """Manages layout persistence and grid organization for the launcher.
+
+    This class handles:
+    - Model order tracking and persistence
+    - Layout save/load operations
+    - Grid rebuilding logic
+    - Drag-and-drop model swapping
+    """
+
+    def __init__(
+        self,
+        config_file: Path,
+        available_models: dict[str, Any],
+        get_model_func: Any,
+        create_card_func: Any,
+        create_header_func: Any = None,
+        on_clear_filters: Any = None,
+    ) -> None:
+        """Initialize the layout manager.
+
+        Args:
+            config_file: Path to the layout configuration JSON file.
+            available_models: Dictionary of available model configurations.
+            get_model_func: Callback to retrieve a model by ID.
+            create_card_func: Callback to create a model card widget.
+            create_header_func: Callback to create category header labels.
+            on_clear_filters: Callback invoked when user clicks "Clear filters"
+                in the empty-state message.
+        """
+        if config_file is None:
+            raise ValueError("config_file must be provided")
+        self.config_file = config_file
+        self.config_dir = config_file.parent
+        self.available_models = available_models
+        self._get_model = get_model_func
+        self._create_card = create_card_func
+        self._create_header = create_header_func
+        self._on_clear_filters = on_clear_filters
+
+        # State
+        self.model_order: list[str] = []
+        self.model_cards: dict[str, Any] = {}
+        self.edit_mode = False
+        self.current_filter_text = ""
+        self.current_view_mode: ViewMode = ViewMode.LIST_LARGE
+        self.tile_scale: float = TILE_SCALE_DEFAULT
+        self.current_category_filter = "All"
+        self.favorites: list[str] = []
+        self.launch_stats: dict[str, dict[str, Any]] = {}
+        self.workspace: dict[str, Any] | None = None
+        self.dock_state: str | None = None
+        self._empty_state_label: Any = None
+
+    def record_launch(self, model_id: str) -> None:
+        """Increment launch count and record the last launched time for history tracking."""
+        if model_id is None:
+            raise ValueError("model_id must be provided")
+        if model_id not in self.launch_stats:
+            self.launch_stats[model_id] = {"count": 0, "last_launched": ""}
+        self.launch_stats[model_id]["count"] += 1
+        from datetime import datetime
+
+        self.launch_stats[model_id]["last_launched"] = datetime.now().isoformat()
+
+    def _is_visible_model(self, model_id: str) -> bool:
+        """Return whether a known model is eligible for a launcher card.
+
+        Hidden aliases remain registered so historical references can resolve,
+        but they must never be restored from a saved layout or rendered in the
+        PyQt6 grid.
+        """
+        model = self.available_models.get(model_id)
+        return model is not None and getattr(model, "hidden", False) is not True
+
+    def initialize_model_order(self, default_ids: list[str] | None = None) -> None:
+        """Set a sensible default grid ordering.
+
+        Args:
+            default_ids: Optional list of default model IDs to use.
+        """
+        if default_ids is None:
+            default_ids = [
+                "mujoco_unified",
+                "drake_golf",
+                "pinocchio_golf",
+                "opensim_golf",
+                "myosim_suite",
+                "putting_green",
+                "matlab_suite",
+                "c3d_viewer",
+                "openpose_analysis",
+                "mediapipe_analysis",
+                "model_explorer",
+                "video_analyzer",
+                "data_explorer",
+                "data_processor",
+                "project_map",
+                "library_tool",
+            ]
+            for model_id, model in self.available_models.items():
+                is_hidden = getattr(model, "hidden", False) is True
+                if not is_hidden and model_id not in default_ids:
+                    default_ids.append(model_id)
+
+        # Filter to available models
+        available_ids = [
+            model_id for model_id in default_ids if self._is_visible_model(model_id)
+        ]
+        missing_ids = [
+            model_id
+            for model_id in default_ids
+            if model_id not in self.available_models
+        ]
+
+        self.model_order = available_ids
+
+        logger.info(
+            f"Model order initialized with {len(self.model_order)} of {len(default_ids)} tiles"
+        )
+        if missing_ids:
+            logger.warning(f"Missing models from defaults: {missing_ids}")
+            logger.debug(f"Available model IDs: {list(self.available_models.keys())}")
+
+    def save_layout(self, window_state: dict[str, Any]) -> None:
+        """Save the current model layout to configuration file.
+
+        Args:
+            window_state: Dictionary containing window geometry and UI options.
+        """
+        try:
+            # Ensure config directory exists
+            self.config_dir.mkdir(parents=True, exist_ok=True)
+
+            layout_data = {
+                "model_order": self.model_order,
+                "selected_model": window_state.get("selected_model"),
+                "window_geometry": window_state.get("geometry", {}),
+                "options": window_state.get("options", {}),
+                "view_mode": self.current_view_mode.name.lower(),
+                "tile_scale": float(self.tile_scale),
+                "favorites": self.favorites,
+                "launch_stats": self.launch_stats,
+            }
+            if "workspace" in window_state:
+                layout_data["workspace"] = window_state["workspace"]
+            elif self.workspace is not None:
+                layout_data["workspace"] = self.workspace
+
+            if "dock_state" in window_state:
+                layout_data["dock_state"] = window_state["dock_state"]
+            elif self.dock_state is not None:
+                layout_data["dock_state"] = self.dock_state
+
+            with open(self.config_file, "w", encoding="utf-8") as f:
+                json.dump(layout_data, f, indent=2)
+
+            logger.info(f"Layout saved to {self.config_file}")
+
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            logger.error(f"Failed to save layout: {e}")
+
+    def load_layout(self) -> dict[str, Any] | None:
+        """Load the saved model layout from configuration file.
+
+        Returns:
+            Loaded layout data dict, or None if no saved layout exists.
+        """
+        try:
+            if not self.config_file.exists():
+                logger.info("No saved layout found, using defaults")
+                return None
+
+            with open(self.config_file, encoding="utf-8") as f:
+                layout_data = json.load(f)
+
+            from src.launchers.workspace_navigation import migrate_saved_layout
+
+            layout_data = migrate_saved_layout(layout_data)
+
+            # Restore model order if valid
+            saved_order = [
+                model_id
+                for model_id in layout_data.get("model_order", [])
+                if self._is_visible_model(model_id)
+            ]
+            if saved_order:
+                for model_id, model in self.available_models.items():
+                    is_hidden = getattr(model, "hidden", False) is True
+                    if not is_hidden and model_id not in saved_order:
+                        saved_order.append(model_id)
+                self.model_order = saved_order
+                logger.info("Model layout restored from saved configuration")
+
+            self.favorites = layout_data.get("favorites", [])
+            self.favorites = [
+                fid
+                for fid in self.favorites
+                if fid in self.available_models or fid == "library_tool"
+            ]
+            self.launch_stats = layout_data.get("launch_stats", {})
+
+            # View-mode + tile-scale are additive keys; missing ones use defaults.
+            self.current_view_mode = _view_mode_from_string(
+                layout_data.get("view_mode")
+            )
+            raw_scale = layout_data.get("tile_scale")
+            if raw_scale is not None:
+                try:
+                    self.tile_scale = validate_tile_scale(float(raw_scale))
+                except (TypeError, ValueError) as exc:
+                    logger.warning(
+                        "Invalid tile_scale %r in saved layout: %s", raw_scale, exc
+                    )
+
+            self.workspace = layout_data.get("workspace")
+            self.dock_state = layout_data.get("dock_state")
+
+            return layout_data
+
+        except (json.JSONDecodeError, OSError, KeyError) as e:
+            logger.error(f"Failed to load layout from {self.config_file}: {e}")
+            return None
+
+    def sync_model_cards(self) -> None:
+        """Ensure widgets match the current model order."""
+        # Remove cards that are no longer selected
+        for model_id in list(self.model_cards.keys()):
+            if model_id not in self.model_order:
+                widget = self.model_cards.pop(model_id)
+                widget.setParent(None)
+                widget.deleteLater()
+
+        # Create cards for any newly added models
+        _scale, _cols, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        _compact = self.current_view_mode == ViewMode.LIST_SMALL
+        for model_id in self.model_order:
+            if model_id not in self.model_cards:
+                model = self._get_model(model_id)
+                if model:
+                    self.model_cards[model_id] = self._build_card(
+                        model,
+                        tile_scale=self.tile_scale,
+                        show_description=show_desc,
+                        list_mode=is_list,
+                        list_compact=_compact,
+                    )
+
+    def apply_model_selection(self, selected_ids: list[str]) -> list[str]:
+        """Apply a new set of selected models from the layout dialog.
+
+        Args:
+            selected_ids: List of model IDs selected by the user.
+
+        Returns:
+            The new ordered list of model IDs.
+        """
+        # Keep existing order for models that are still selected
+        if selected_ids is None:
+            raise ValueError("selected_ids must be provided")
+        ordered_selection = [
+            model_id
+            for model_id in self.model_order
+            if model_id in selected_ids and self._is_visible_model(model_id)
+        ]
+
+        # Append newly selected models
+        for model_id in selected_ids:
+            if model_id not in ordered_selection and self._is_visible_model(model_id):
+                ordered_selection.append(model_id)
+
+        self.model_order = ordered_selection
+        return self.model_order
+
+    def swap_models(self, source_id: str, target_id: str) -> bool:
+        """Swap two models in the grid layout.
+
+        Args:
+            source_id: ID of the source model being dragged.
+            target_id: ID of the target model being dropped on.
+
+        Returns:
+            True if swap was successful, False otherwise.
+        """
+        if source_id is None:
+            raise ValueError("source_id must be provided")
+        if not self.edit_mode:
+            return False
+
+        try:
+            idx1 = self.model_order.index(source_id)
+            idx2 = self.model_order.index(target_id)
+
+            # Swap in list
+            self.model_order[idx1], self.model_order[idx2] = (
+                self.model_order[idx2],
+                self.model_order[idx1],
+            )
+            return True
+
+        except ValueError:
+            return False  # ID not found
+
+    def get_model_categories(self, model: Any) -> list[str]:
+        """Determine the list of categories this model belongs to from the registry."""
+        launcher = getattr(model, "launcher", None)
+        raw_cats: list[str] = []
+        if isinstance(launcher, dict):
+            cat = launcher.get("category")
+            if cat:
+                raw_cats.append(str(cat))
+            cats_multi = launcher.get("categories")
+            if isinstance(cats_multi, (list, tuple)):
+                raw_cats.extend(str(c) for c in cats_multi)
+            elif isinstance(cats_multi, str) and cats_multi:
+                raw_cats.append(cats_multi)
+        elif launcher:
+            cat = getattr(launcher, "category", None)
+            if cat:
+                raw_cats.append(str(cat))
+            cats_multi = getattr(launcher, "categories", None)
+            if isinstance(cats_multi, (list, tuple)):
+                raw_cats.extend(str(c) for c in cats_multi)
+            elif isinstance(cats_multi, str) and cats_multi:
+                raw_cats.append(cats_multi)
+
+        mapping = {
+            "physics_engine": "Engines",
+            "engines": "Engines",
+            "biomechanics": "Biomechanics",
+            "simulation": "Simulation",
+            "motion_matching": "Tools",
+            "motion_capture": "Tools",
+            "tool": "Tools",
+            "tools": "Tools",
+            "analysis": "Tools",
+            "external": "Tools",
+            "developer_tools": "Tools",
+            "documentation": "Documentation",
+        }
+        mapped_cats: list[str] = []
+        for cat in raw_cats:
+            cat_norm = str(cat).strip().lower()
+            mapped = mapping.get(cat_norm)
+            if mapped and mapped not in mapped_cats:
+                mapped_cats.append(mapped)
+
+        return mapped_cats
+
+    def _get_model_category(self, model: Any) -> str:
+        """Compatibility wrapper for legacy category queries."""
+        cats = self.get_model_categories(model)
+        if cats:
+            first = cats[0]
+            compat = {
+                "Engines": "Physics Engines",
+                "Tools": "Tools & Data",
+            }
+            return compat.get(first, first)
+
+        # Legacy fallback for models without launcher metadata
+        t = str(getattr(model, "type", "") or "").lower()
+        if any(term in t for term in ["biomech", "movement_optimizer"]):
+            return "Biomechanics"
+        if t in (
+            "custom_humanoid",
+            "drake",
+            "pinocchio",
+            "opensim",
+            "myosim",
+            "matlab_suite",
+        ):
+            return "Physics Engines"
+        if t == "putting_green":
+            return "Simulation"
+        if t == "document":
+            return "Documentation"
+        return "Tools & Data"
+
+    def get_filtered_order(self) -> list[str]:
+        """Get model order filtered by current search text and category.
+
+        Supports task-oriented workspaces (ORG-05), Favorites, History,
+        and legacy category filters.
+
+        Returns:
+            List of model IDs matching the current filters.
+        """
+        from src.launchers.workspace_navigation import (
+            ALIAS_MAP,
+            PRIMARY_WORKSPACES,
+            SECONDARY_WORKSPACES,
+            get_workspace_tools,
+        )
+
+        filter_val = self.current_category_filter or "All"
+        ws_id: str | None = None
+        if filter_val.startswith("workspace:"):
+            ws_id = filter_val.split(":", 1)[1]
+        elif filter_val in PRIMARY_WORKSPACES or filter_val in SECONDARY_WORKSPACES:
+            ws_id = filter_val
+        else:
+            for pid, pinfo in {**PRIMARY_WORKSPACES, **SECONDARY_WORKSPACES}.items():
+                if pinfo.title.lower() == filter_val.lower():
+                    ws_id = pid
+                    break
+
+        source_list = self.model_order
+
+        if ws_id == "favorites" or filter_val == "Favorites":
+            source_list = [mid for mid in self.model_order if mid in self.favorites]
+        elif ws_id == "history" or filter_val == "History":
+            launched = []
+            unlaunched = []
+            for mid in self.model_order:
+                stats = self.launch_stats.get(mid, {})
+                count = stats.get("count", 0)
+                if count > 0:
+                    launched.append((mid, count, stats.get("last_launched", "")))
+                else:
+                    unlaunched.append(mid)
+            launched.sort(key=lambda x: (x[1], x[2]), reverse=True)
+            source_list = [x[0] for x in launched] + unlaunched
+
+        ws_tools: set[str] | None = None
+        if ws_id and ws_id not in ("all_tools", "favorites", "history"):
+            ws_tools = set(get_workspace_tools(ws_id))
+
+        filtered = []
+        for model_id in source_list:
+            model = self._get_model(model_id)
+            if not model or getattr(model, "hidden", False) is True:
+                continue
+
+            if ws_tools is not None:
+                canonical = ALIAS_MAP.get(model_id, model_id)
+                if model_id not in ws_tools and canonical not in ws_tools:
+                    continue
+            elif (
+                filter_val not in ("All", "Favorites", "History")
+                and ws_id != "all_tools"
+                and not self.current_filter_text
+            ):
+                categories = self.get_model_categories(model)
+                if filter_val not in categories:
+                    continue
+
+            if self.current_filter_text:
+                search_content = f"{model.name} {model.id} {model.description}".lower()
+                if self.current_filter_text not in search_content:
+                    continue
+
+            filtered.append(model_id)
+
+        return filtered
+
+    def _build_card(self, model: Any, **kwargs: Any) -> Any:
+        """Invoke ``_create_card`` with optional keyword arguments.
+
+        Falls back to a positional-only call so legacy callbacks that accept
+        ``(model,)`` continue to work.
+        """
+        try:
+            return self._create_card(model, **kwargs)
+        except TypeError:
+            return self._create_card(model)
+
+    def set_view_mode(self, mode: ViewMode) -> None:
+        """Apply a new :class:`ViewMode` and propagate scaling to existing cards.
+
+        The actual grid is not rebuilt here — call :meth:`rebuild_grid` after.
+        """
+        if not isinstance(mode, ViewMode):
+            try:
+                mode = ViewMode(int(mode))
+            except (ValueError, TypeError) as exc:
+                raise TypeError(
+                    f"mode must be a ViewMode, got {type(mode).__name__}"
+                ) from exc
+        scale, _cols, show_desc, is_list = view_mode_settings(mode)
+        _compact = mode == ViewMode.LIST_SMALL
+        self.current_view_mode = mode
+        self.tile_scale = scale
+        # When switching list topology the cards need full rebuild.
+        was_list = any(
+            getattr(c, "_list_mode", False) for c in self.model_cards.values()
+        )
+        was_compact = any(
+            getattr(c, "_list_compact", False) for c in self.model_cards.values()
+        )
+        if is_list != was_list or _compact != was_compact:
+            for c in list(self.model_cards.values()):
+                c.setParent(None)
+                c.deleteLater()
+            self.model_cards.clear()
+        else:
+            for card in self.model_cards.values():
+                if hasattr(card, "set_tile_scale"):
+                    card.set_tile_scale(
+                        scale,
+                        show_description=show_desc,
+                        list_mode=is_list,
+                        list_compact=_compact,
+                    )
+
+    def set_tile_scale(self, scale: float) -> None:
+        """Update tile_scale and resize all live cards in place."""
+        self.tile_scale = validate_tile_scale(scale)
+        _scale, _cols, show_desc, is_list = view_mode_settings(self.current_view_mode)
+        for card in self.model_cards.values():
+            if hasattr(card, "set_tile_scale"):
+                card.set_tile_scale(
+                    self.tile_scale,
+                    show_description=show_desc,
+                    list_mode=is_list,
+                )
+
+    def rebuild_grid(self, grid_layout: QGridLayout) -> None:  # noqa: C901
+        """Rebuild the grid layout based on current model order and view mode.
+
+        Args:
+            grid_layout: The Qt grid layout to populate.
+        """
+        # Clean current layout. Reusable model cards must be hidden before
+        # detaching: on Qt, a visible parentless widget becomes a top-level
+        # window, which made search/filter rebuilds flash every tile onscreen.
+        if grid_layout is None:
+            raise ValueError("grid_layout must be provided")
+
+        # Clear stretch factors from previous layout
+        for c in range(grid_layout.columnCount()):
+            grid_layout.setColumnStretch(c, 0)
+
+        reusable_card_ids = {id(card) for card in self.model_cards.values()}
+        while grid_layout.count():
+            item = grid_layout.takeAt(0)
+            if item:
+                widget = item.widget()
+                if widget:
+                    if id(widget) in reusable_card_ids:
+                        widget.hide()
+                    else:
+                        widget.deleteLater()
+                    widget.setParent(None)
+
+        scale, base_cols, show_desc, is_list = view_mode_settings(
+            self.current_view_mode
+        )
+        # Honour any explicit tile_scale set by the zoom slider, but fall
+        # back to the view-mode default if it matches the previous mode.
+        active_scale = self.tile_scale if self.tile_scale > 0 else scale
+
+        # Dynamically determine columns based on available scroll area viewport width if not in list mode
+        if is_list:
+            columns = 1
+        else:
+            available_width = 800  # fallback
+            container = grid_layout.parentWidget()
+            is_real_widget = (
+                container is not None
+                and not hasattr(container, "mock_add_spec")
+                and type(container).__name__
+                not in ("Mock", "MagicMock", "NonCallableMagicMock")
+            )
+            if is_real_widget:
+                viewport = container.parentWidget()
+                if viewport is not None and type(viewport).__name__ not in (
+                    "Mock",
+                    "MagicMock",
+                ):
+                    w = viewport.width()
+                    if isinstance(w, int | float) and not hasattr(w, "mock_add_spec"):
+                        available_width = w
+                    scroll_area = viewport.parentWidget()
+                    if (
+                        scroll_area is not None
+                        and type(scroll_area).__name__ not in ("Mock", "MagicMock")
+                        and hasattr(scroll_area, "viewport")
+                    ):
+                        v = scroll_area.viewport()
+                        if v is not None and type(v).__name__ not in (
+                            "Mock",
+                            "MagicMock",
+                        ):
+                            vw = v.width()
+                            if isinstance(vw, int | float) and not hasattr(
+                                vw, "mock_add_spec"
+                            ):
+                                available_width = vw
+
+            card_width = max(100, int(240 * active_scale))
+            spacing = 20
+            try:
+                s = grid_layout.spacing()
+                if (
+                    isinstance(s, (int, float))
+                    and not hasattr(s, "mock_add_spec")
+                    and s >= 0
+                ):
+                    spacing = int(s)
+            except (AttributeError, TypeError, ValueError):
+                pass
+
+            # Allow some margin on the sides (e.g. 20px total padding)
+            usable_width = available_width - 20
+            columns = max(1, (usable_width + spacing) // (card_width + spacing))
+
+        if not is_list:
+            for c in range(columns):
+                grid_layout.setColumnStretch(c, 1)
+
+        # Get filtered model order
+        filtered_order = self.get_filtered_order()
+
+        widgets_to_add = []
+        for model_id in filtered_order:
+            if model_id not in self.model_cards:
+                model = self._get_model(model_id)
+                if model:
+                    self.model_cards[model_id] = self._build_card(
+                        model,
+                        tile_scale=active_scale,
+                        show_description=show_desc,
+                        list_mode=is_list,
+                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
+                    )
+            else:
+                # Existing card — make sure it matches current scale/mode.
+                card = self.model_cards[model_id]
+                if hasattr(card, "set_tile_scale"):
+                    card.set_tile_scale(
+                        active_scale,
+                        show_description=show_desc,
+                        list_mode=is_list,
+                        list_compact=(self.current_view_mode == ViewMode.LIST_SMALL),
+                    )
+
+            if model_id in self.model_cards:
+                widgets_to_add.append(self.model_cards[model_id])
+
+        # Handle empty filter results with a user-friendly message
+        # Only show empty state when an active filter causes zero results
+        has_active_filter = bool(self.current_filter_text) or (
+            self.current_category_filter and self.current_category_filter != "All"
+        )
+        if not widgets_to_add and has_active_filter:
+            self._show_empty_state(grid_layout)
+            return
+
+        # Remove empty state label if it exists (results found)
+        if self._empty_state_label is not None:
+            self._empty_state_label.setParent(None)
+            self._empty_state_label.deleteLater()
+            self._empty_state_label = None
+
+        # Add to grid as a flat, continuously wrapping list (no headers!)
+        row = 0
+        col = 0
+        for widget in widgets_to_add:
+            if is_list:
+                # Each card occupies a full row, one card per row.
+                grid_layout.addWidget(widget, row, 0, 1, 1)
+                widget.show()
+                row += 1
+            else:
+                grid_layout.addWidget(widget, row, col)
+                widget.show()
+                col += 1
+                if col >= columns:
+                    col = 0
+                    row += 1
+
+        # Final cleanup for grid layout rows
+        if not is_list and col > 0:
+            row += 1
+
+    def _show_empty_state(self, grid_layout: QGridLayout) -> None:
+        """Display a centered empty-state label when no models match filters.
+
+        Args:
+            grid_layout: The Qt grid layout to add the empty state to.
+        """
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import QLabel
+
+        # Build descriptive message
+        parts = []
+        if self.current_filter_text:
+            parts.append(f'"{self.current_filter_text}"')
+        if self.current_category_filter and self.current_category_filter != "All":
+            parts.append(f"in {self.current_category_filter}")
+
+        if parts:
+            filter_desc = " ".join(parts)
+            message = f"No models found matching {filter_desc}"
+        else:
+            message = "No models available"
+
+        # Create or reuse empty state label
+        if self._empty_state_label is None:
+            self._empty_state_label = QLabel()
+            self._empty_state_label.setAlignment(
+                Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+            )
+            self._empty_state_label.setOpenExternalLinks(False)
+            self._empty_state_label.setTextFormat(Qt.TextFormat.RichText)
+            self._empty_state_label.setWordWrap(True)
+            self._empty_state_label.setStyleSheet("""
+                QLabel {
+                    color: #888888;
+                    font-size: 14px;
+                    padding: 40px;
+                }
+                QLabel a {
+                    color: #007acc;
+                    text-decoration: none;
+                }
+                QLabel a:hover {
+                    text-decoration: underline;
+                }
+            """)
+            # Connect clear-filters link if callback provided
+            if self._on_clear_filters is not None:
+                self._empty_state_label.linkActivated.connect(
+                    self._handle_empty_state_link
+                )
+
+        html = f"""
+            <div style="text-align: center;">
+                <p style="font-size: 16px; margin-bottom: 12px;">{message}</p>
+                <p><a href="clear-filters">Clear filters</a></p>
+            </div>
+        """
+        self._empty_state_label.setText(html)
+        grid_layout.addWidget(self._empty_state_label, 0, 0, 1, -1)
+        self._empty_state_label.show()
+
+    def _handle_empty_state_link(self, link: str) -> None:
+        """Handle clicks on links in the empty-state label.
+
+        Args:
+            link: The href value of the clicked link.
+        """
+        if link == "clear-filters" and self._on_clear_filters is not None:
+            self._on_clear_filters()
+
+    def set_edit_mode(self, enabled: bool) -> None:
+        """Set layout edit mode.
+
+        Args:
+            enabled: Whether editing is enabled.
+        """
+        if enabled is None:
+            raise ValueError("enabled must be provided")
+        self.edit_mode = enabled
+
+        # Update all cards to accept/reject drops
+        for card in self.model_cards.values():
+            card.setAcceptDrops(enabled)
+
+    def update_search_filter(self, text: str) -> None:
+        """Update the search filter text.
+
+        Args:
+            text: Search text to filter by.
+        """
+        self.current_filter_text = text.lower()
+
+
+def compute_centered_geometry(
+    screen_width: int,
+    screen_height: int,
+    window_width: int = LayoutConfig.DEFAULT_WINDOW_WIDTH,
+    window_height: int = LayoutConfig.DEFAULT_WINDOW_HEIGHT,
+    screen_x: int = 0,
+    screen_y: int = 0,
+) -> tuple[int, int, int, int]:
+    """Compute centered window geometry.
+
+    Args:
+        screen_width: Available screen width.
+        screen_height: Available screen height.
+        window_width: Desired window width.
+        window_height: Desired window height.
+        screen_x: Screen X offset.
+        screen_y: Screen Y offset.
+
+    Returns:
+        Tuple of (x, y, width, height) for centered window.
+    """
+    if screen_width is None:
+        raise ValueError("screen_width must be provided")
+    x = screen_x + (screen_width - window_width) // 2
+    y = screen_y + (screen_height - window_height) // 2
+
+    # Ensure window title bar is visible
+    y = max(y, LayoutConfig.MIN_WINDOW_Y)
+
+    return x, y, window_width, window_height

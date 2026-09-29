@@ -1,0 +1,243 @@
+"""Induced Acceleration Analysis for MuJoCo models."""
+
+from __future__ import annotations
+
+import typing
+
+import mujoco
+import numpy as np
+
+from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+
+
+class InducedAccelerationResult(typing.TypedDict):
+    """Dictionary containing induced acceleration components."""
+
+    gravity: np.ndarray
+    velocity: np.ndarray
+    control: np.ndarray
+    constraint: np.ndarray
+    total: np.ndarray
+
+
+class MuJoCoInducedAccelerationAnalyzer:
+    """Analyzes induced accelerations (Gravity, Velocity, Control) for MuJoCo models."""
+
+    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
+        """Initialize analyzer."""
+        if model is None:
+            raise ValueError("model must be provided")
+        self.model = model
+        self.data = data
+        # Hold the option struct directly so callers never have to reach
+        # through ``model.opt.<field>`` (Law of Demeter).
+        self._model_opt = model.opt
+
+        # Pre-allocate Jacobian buffers
+        self._jacp = np.zeros((3, self.model.nv))
+        self._jacr = np.zeros((3, self.model.nv))
+
+    def _gravity(self) -> np.ndarray:
+        """Return the model's world-frame gravity vector [3].
+
+        Delegating accessor so callers do not reach through
+        ``model.opt.gravity`` (Law of Demeter).
+        """
+        return np.asarray(self._model_opt.gravity)
+
+    def compute_components(
+        self, tau_app: np.ndarray | None = None
+    ) -> InducedAccelerationResult:  # noqa: E501
+        """Compute acceleration components induced by different forces.
+
+        Decomposes Euler-Lagrange equation: M(q)qdd + C(q,qd)qd + G(q) = tau + J^T f_c
+        Into:
+          qdd_g = -M^-1 * G(q)
+          qdd_c = -M^-1 * C(q,qd)qd
+          qdd_t = M^-1 * tau
+          qdd_cn = M^-1 * J^T f_c
+
+        Args:
+            tau_app: Applied control torques (optional).
+
+        Returns:
+            Dictionary of acceleration components.
+        """
+        nv = self.model.nv
+
+        # 1. Mass Matrix M
+        M = full_mass_matrix(mujoco, self.model, self.data)
+
+        # 2. Compute G(q) (Gravity Force vector)
+        # In MuJoCo qfrc_bias = C + G.
+        # To get G only, we set qvel=0 and compute inverse dynamics.
+        # OPTIMIZATION: Use mj_rne with flg_acc=0 instead of mj_forward.
+        # mj_rne(..., 0, ...) computes ID(q, qvel, 0) -> C(q,qvel)*qvel + G(q).
+        # Since we set qvel=0, this becomes G(q).
+        # This avoids the overhead of mj_forward (collision, constraints, etc.)
+        saved_qvel = self.data.qvel.copy()
+        saved_cvel = self.data.cvel.copy()
+
+        try:
+            self.data.qvel[:] = 0
+            # Explicitly zero cvel to ensure correctness for mj_rne
+            self.data.cvel[:] = 0
+
+            term_G = np.zeros(nv)
+            # flg_acc=0 ignores qacc, so we compute ID(q, 0, 0) = G(q)
+            mujoco.mj_rne(self.model, self.data, 0, term_G)
+
+        finally:
+            # Restore qvel and cvel
+            self.data.qvel[:] = saved_qvel
+            self.data.cvel[:] = saved_cvel
+            # Restore full state dynamics (needed for qfrc_bias calculation below)
+            mujoco.mj_forward(self.model, self.data)
+
+        # 3. Compute C(q,v) (Coriolis/Centrifugal)
+        # With qvel restored, qfrc_bias is C + G
+        term_C_plus_G = self.data.qfrc_bias.copy()
+        term_C = term_C_plus_G - term_G
+
+        # 4. Solve for induced accelerations
+        # OPTIMIZATION: Batch solve linear systems (M * X = B) to reuse matrix
+        # decomposition.
+        # Stack RHS vectors: [-G, -C, tau, J^T f_c]
+
+        # self.data.qfrc_actuator contains generalized actuator forces
+        tau_vec = tau_app if tau_app is not None else self.data.qfrc_actuator
+
+        # Stack RHS vectors into a matrix (nv, 4)
+        rhs_stack = np.column_stack(
+            (-term_G, -term_C, tau_vec, self.data.qfrc_constraint)
+        )  # noqa: E501
+
+        # Solve M * results = rhs_stack
+        # This performs one LU/Cholesky decomposition instead of 4
+        results = np.linalg.solve(M, rhs_stack)
+
+        # Unpack results
+        acc_g = results[:, 0]
+        acc_c = results[:, 1]
+        acc_t = results[:, 2]
+        acc_cn = results[:, 3]
+
+        total = acc_g + acc_c + acc_t + acc_cn
+
+        return {
+            "gravity": acc_g,
+            "velocity": acc_c,
+            "control": acc_t,
+            "constraint": acc_cn,
+            "total": total,
+        }
+
+    def _body_world_acceleration(self, body_id: int) -> np.ndarray:
+        """Return the classical world-frame linear acceleration of a body origin.
+
+        MuJoCo only fills ``data.cacc`` (and the rest of the constraint-aware
+        acceleration fields) inside :func:`mujoco.mj_rnePostConstraint`, which is
+        not part of ``mj_forward``/``mj_step``. Reading ``data.cacc`` without
+        calling it therefore yields a zero vector.
+
+        ``data.cacc`` is also a *spatial* acceleration expressed in the com-based
+        frame (world-aligned axes, origin at the subtree COM), not a body-local
+        vector, so it cannot be converted with ``xmat``. :func:`mj_objectAcceleration`
+        performs the correct ``a_O + alpha x r + omega x v_p`` transfer to the body
+        origin; its result is the *proper* (accelerometer-style) acceleration, so
+        gravity is added back to recover the coordinate acceleration.
+
+        Args:
+            body_id: MuJoCo body id.
+
+        Returns:
+            World-frame linear acceleration of the body origin [3].
+        """
+        if body_id < 0 or body_id >= self.model.nbody:
+            raise ValueError(
+                f"body_id must be in [0, {self.model.nbody}), got {body_id}"
+            )
+
+        # Populates data.cacc / data.cfrc_int / data.cfrc_ext.
+        mujoco.mj_rnePostConstraint(self.model, self.data)
+
+        spatial = np.zeros(6)
+        mujoco.mj_objectAcceleration(
+            self.model,
+            self.data,
+            mujoco.mjtObj.mjOBJ_BODY,
+            body_id,
+            spatial,
+            0,  # flg_local=0 -> world-aligned axes
+        )
+
+        # spatial = [angular(3), linear(3)]; MuJoCo reports proper acceleration.
+        return np.asarray(spatial[3:6]) + self._gravity()
+
+    def compute_task_space_components(
+        self, body_name: str, qdd_comps: InducedAccelerationResult | None = None
+    ) -> dict[str, np.ndarray] | None:
+        """Compute task space (linear) induced accelerations for a body in World Frame.
+
+        Decomposes body acceleration into:
+        - Gravity: J * qdd_g
+        - Control: J * qdd_t
+        - Constraint: J * qdd_cn
+        - Velocity: J * qdd_c + Bias (where Bias = Total - J * qdd_total)
+
+        Args:
+            body_name: Name of the body
+            qdd_comps: Optional pre-computed joint space components.
+
+        Returns:
+            Dictionary of 3D acceleration vectors (World Frame) or None if not found.
+        """
+        if body_name is None:
+            raise ValueError("body_name must be provided")
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+        if body_id == -1:
+            return None
+
+        # 1. Get Joint Space Components
+        # If not provided, compute them (this might temp modify data, but restores it
+        # and leaves a consistent forward pass behind).
+        if qdd_comps is None:
+            qdd_comps = self.compute_components()
+
+        # 2. Capture the true world-frame linear acceleration of the body origin.
+        a_total_actual_world = self._body_world_acceleration(body_id)
+
+        # 3. Get Jacobian (Linear)
+        # Reshape buffers
+        mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, body_id)
+        J = self._jacp  # 3 x nv
+
+        # 4. Compute Task Space Components (J * qdd)
+        # These are vectors in World Frame because J is in World Frame.
+        a_g = J @ qdd_comps["gravity"]
+        a_t = J @ qdd_comps["control"]
+        a_cn = J @ qdd_comps["constraint"]
+        a_c_joint = J @ qdd_comps["velocity"]  # Only J * qdd_c part
+
+        # 5. Compute Bias (J_dot * q_dot)
+        # We derive this from total acceleration.
+        # a_total_actual = J * qdd_total_actual + J_dot * q_dot
+
+        # qdd_total_actual should match sum(qdd_comps)
+        qdd_total = qdd_comps["total"]
+        a_total_from_qdd = J @ qdd_total
+
+        # Bias = Total (World) - J * qdd_total (World)
+        a_bias = a_total_actual_world - a_total_from_qdd
+
+        # 6. Combine Velocity terms
+        # Velocity induced = J * qdd_c + Bias
+        a_v = a_c_joint + a_bias
+
+        return {
+            "gravity": a_g,
+            "velocity": a_v,
+            "control": a_t,
+            "constraint": a_cn,
+            "total": a_total_actual_world,
+        }

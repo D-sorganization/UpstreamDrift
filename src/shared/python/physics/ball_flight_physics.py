@@ -1,0 +1,76 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
+"""Ball flight physics simulation with Magnus effect and drag.
+
+This module implements research-grade ball flight physics including:
+- Magnus effect (spin-induced forces)
+- Drag forces (Reynolds number dependent)
+- Launch angle and velocity effects
+- 3D trajectory calculation
+- Landing dispersion patterns
+
+Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
+
+This file is now a backward-compatible coordinator module. The implementation
+has been decomposed into focused submodules (P1 sprint, issue #2486):
+
+- ``ball_properties``       — BallProperties dataclass and aerodynamic constants
+- ``ball_launch_conditions`` — LaunchConditions, EnvironmentalConditions, TrajectoryPoint
+- ``ball_simulator``        — BallFlightSimulator (Rust-kernel backed)
+- ``ball_enhanced_simulator`` — EnhancedBallFlightSimulator (toggleable aero + Monte Carlo)
+
+.. deprecated::
+    The RK4 integration loop in this module has a Rust kernel equivalent
+    in ``upstream_physics`` (via ``rust_kernel.create_integrator_config``).
+    New simulation code should use the Rust-backed integrator for native
+    performance and WASM parity with the React frontend.
+
+Implemented (issue #3504):
+- Drag-crisis model for dimpled spheres -- see
+  :func:`src.shared.python.physics.atmosphere.cd_dimpled_sphere`
+  (Bearman & Harvey 1976, Mehta 1985).
+- Environmental gradient via the ISA-troposphere air density model in
+  :func:`src.shared.python.physics.atmosphere.air_density`, plumbed through
+  :class:`EnvironmentalConditions.from_altitude` and the
+  ``track_altitude_density`` flag on :class:`EnhancedBallFlightSimulator`.
+
+Still tracked under issue #3504 (follow-up PRs):
+- Hydrodynamic Lubrication (wet ball physics).
+- Dimple Geometry Optimization.
+- Mud Ball Physics.
+"""
+
+from __future__ import annotations
+
+# Re-export everything for backward compatibility.
+# All public symbols remain importable from this module.
+from src.shared.python.physics.ball_enhanced_simulator import (
+    EnhancedBallFlightSimulator,
+)
+from src.shared.python.physics.ball_launch_conditions import (
+    EnvironmentalConditions,
+    LaunchConditions,
+    TrajectoryPoint,
+)
+from src.shared.python.physics.ball_properties import (
+    MAX_LIFT_COEFFICIENT,
+    MIN_SPEED_THRESHOLD,
+    NUMERICAL_EPSILON,
+    BallProperties,
+)
+from src.shared.python.physics.ball_simulator import BallFlightSimulator
+
+__all__ = [
+    "BallProperties",
+    "LaunchConditions",
+    "EnvironmentalConditions",
+    "TrajectoryPoint",
+    "BallFlightSimulator",
+    "EnhancedBallFlightSimulator",
+    # Constants
+    "MIN_SPEED_THRESHOLD",
+    "MAX_LIFT_COEFFICIENT",
+    "NUMERICAL_EPSILON",
+]

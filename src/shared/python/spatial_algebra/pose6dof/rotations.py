@@ -1,0 +1,192 @@
+import math
+import numpy as np
+import numpy.typing as npt
+
+from src.shared.python.contracts import require
+from src.shared.python.math_utils.quaternion import slerp as _canonical_slerp
+
+from ..spatial_vectors import skew
+
+from typing import TypeAlias
+
+Vec3: TypeAlias = npt.NDArray[np.float64]
+Mat3: TypeAlias = npt.NDArray[np.float64]
+Quat: TypeAlias = npt.NDArray[np.float64]
+
+
+def euler_to_rotation_matrix(
+    euler: Vec3 | list[float] | tuple[float, float, float],
+) -> Mat3:
+    euler = np.asarray(euler, dtype=np.float64)
+    require(
+        euler.shape == (3,),
+        "euler must be a length-3 array [roll, pitch, yaw]",
+        euler.shape,
+    )
+    roll, pitch, yaw = euler[0], euler[1], euler[2]
+
+    cr, sr = np.cos(roll), np.sin(roll)
+    cp, sp = np.cos(pitch), np.sin(pitch)
+    cy, sy = np.cos(yaw), np.sin(yaw)
+
+    R = np.array(
+        [
+            [cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr],
+            [sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr],
+            [-sp, cp * sr, cp * cr],
+        ],
+        dtype=np.float64,
+    )
+    return R
+
+
+def rotation_matrix_to_euler(R: Mat3) -> Vec3:
+    R = np.asarray(R, dtype=np.float64)
+    require(R.shape == (3, 3), "R must be a (3, 3) rotation matrix", R.shape)
+
+    if np.abs(R[2, 0]) >= 1.0 - 1e-10:
+        yaw = 0.0
+        if R[2, 0] < 0:
+            pitch = np.pi / 2
+            roll = np.arctan2(R[0, 1], R[0, 2])
+        else:
+            pitch = -np.pi / 2
+            roll = np.arctan2(-R[0, 1], -R[0, 2])
+    else:
+        pitch = -np.arcsin(R[2, 0])
+        cp = np.cos(pitch)
+        roll = np.arctan2(R[2, 1] / cp, R[2, 2] / cp)
+        yaw = np.arctan2(R[1, 0] / cp, R[0, 0] / cp)
+
+    return np.array([roll, pitch, yaw], dtype=np.float64)
+
+
+def euler_to_quaternion(
+    euler: Vec3 | list[float] | tuple[float, float, float],
+) -> Quat:
+    euler = np.asarray(euler, dtype=np.float64)
+    roll, pitch, yaw = euler[0] / 2, euler[1] / 2, euler[2] / 2
+
+    cr, sr = np.cos(roll), np.sin(roll)
+    cp, sp = np.cos(pitch), np.sin(pitch)
+    cy, sy = np.cos(yaw), np.sin(yaw)
+
+    w = cr * cp * cy + sr * sp * sy
+    x = sr * cp * cy - cr * sp * sy
+    y = cr * sp * cy + sr * cp * sy
+    z = cr * cp * sy - sr * sp * cy
+
+    return np.array([w, x, y, z], dtype=np.float64)
+
+
+def quaternion_to_euler(quat: Quat | list[float]) -> Vec3:
+    quat = np.asarray(quat, dtype=np.float64)
+    require(
+        quat.shape == (4,), "quat must be a length-4 array [w, x, y, z]", quat.shape
+    )
+    q_norm = float(math.sqrt(np.dot(quat, quat)))
+    require(
+        q_norm > 1e-10,
+        "quat must not be a zero vector",
+        q_norm,
+    )
+    w, x, y, z = quat[0], quat[1], quat[2], quat[3]
+
+    sinr_cosp = 2 * (w * x + y * z)
+    cosr_cosp = 1 - 2 * (x * x + y * y)
+    roll = np.arctan2(sinr_cosp, cosr_cosp)
+
+    sinp = 2 * (w * y - z * x)
+    pitch = np.copysign(np.pi / 2, sinp) if np.abs(sinp) >= 1 else np.arcsin(sinp)
+
+    siny_cosp = 2 * (w * z + x * y)
+    cosy_cosp = 1 - 2 * (y * y + z * z)
+    yaw = np.arctan2(siny_cosp, cosy_cosp)
+
+    return np.array([roll, pitch, yaw], dtype=np.float64)
+
+
+def quaternion_to_rotation_matrix(quat: Quat | list[float]) -> Mat3:
+    quat = np.asarray(quat, dtype=np.float64)
+    require(
+        quat.shape == (4,), "quat must be a length-4 array [w, x, y, z]", quat.shape
+    )
+    q_norm = float(math.sqrt(np.dot(quat, quat)))
+    require(
+        q_norm > 1e-10,
+        "quat must not be a zero vector",
+        q_norm,
+    )
+    quat = quat / q_norm
+    w, x, y, z = quat[0], quat[1], quat[2], quat[3]
+
+    R = np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
+            [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
+            [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)],
+        ],
+        dtype=np.float64,
+    )
+    return R
+
+
+def rotation_matrix_to_quaternion(R: Mat3) -> Quat:
+    R = np.asarray(R, dtype=np.float64)
+    require(R.shape == (3, 3), "R must be a (3, 3) rotation matrix", R.shape)
+    from src.shared.python.math_utils.quaternion import rotmat_to_quat
+
+    return rotmat_to_quat(R)
+
+
+def axis_angle_to_rotation_matrix(axis: Vec3 | list[float], angle: float) -> Mat3:
+    axis = np.asarray(axis, dtype=np.float64)
+    require(axis.shape == (3,), "axis must be a (3,) vector", axis.shape)
+    a_norm = float(math.hypot(axis[0], axis[1], axis[2]))
+    require(
+        a_norm > 1e-10,
+        "axis must not be a zero vector",
+        a_norm,
+    )
+    axis = axis / a_norm
+
+    K = skew(axis)
+    R = np.eye(3) + np.sin(angle) * K + (1 - np.cos(angle)) * (K @ K)
+    return R
+
+
+def quaternion_multiply(q1: Quat | list[float], q2: Quat | list[float]) -> Quat:
+    if q1 is None:
+        raise ValueError("q1 must be provided")
+    q1 = np.asarray(q1, dtype=np.float64)
+    q2 = np.asarray(q2, dtype=np.float64)
+
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+
+    return np.array(
+        [
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        ],
+        dtype=np.float64,
+    )
+
+
+def quaternion_inverse(q: Quat | list[float]) -> Quat:
+    q = np.asarray(q, dtype=np.float64)
+    return np.array([q[0], -q[1], -q[2], -q[3]], dtype=np.float64) / np.dot(q, q)
+
+
+def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
+    """Spherical linear interpolation between two unit quaternions.
+
+    Thin delegate to the canonical implementation in
+    :mod:`src.shared.python.math_utils.quaternion` so the algorithm and the
+    nlerp-fallback threshold live in exactly one place (issue #7707).
+    """
+    if q1 is None:
+        raise ValueError("q1 must be provided")
+    return _canonical_slerp(q1, q2, t)

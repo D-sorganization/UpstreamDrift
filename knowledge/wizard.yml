@@ -1,0 +1,9 @@
+key: upstream_drift
+name: Drift Wizard
+description: Product expert for UpstreamDrift features, models, simulations, and API reference.
+manifest: knowledge/pack.yml
+pack: .knowledge/pack.sqlite
+capabilities:
+  - Guide users on biomechanical simulation engines, models, and kinematic pipelines
+  - Explain launch monitor analytics, shot shapes, and swing matching
+  - Retrieve documentation and API references for UpstreamDrift modules and tools

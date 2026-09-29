@@ -1,0 +1,32 @@
+{
+  "model_order": [
+    "mujoco_unified",
+    "drake_golf",
+    "pinocchio_golf",
+    "opensim_golf",
+    "myosim_suite",
+    "putting_green",
+    "matlab_suite",
+    "c3d_viewer",
+    "openpose_analysis",
+    "mediapipe_analysis",
+    "model_explorer",
+    "video_analyzer",
+    "data_explorer",
+    "project_map"
+  ],
+  "selected_model": null,
+  "window_geometry": {
+    "x": 0,
+    "y": 0,
+    "width": 1920,
+    "height": 1032
+  },
+  "options": {
+    "live_visualization": true,
+    "gpu_acceleration": false,
+    "docker_mode": false
+  },
+  "view_mode": "large",
+  "tile_scale": 0.25
+}

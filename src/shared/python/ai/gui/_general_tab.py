@@ -1,0 +1,79 @@
+"""General preferences tab for the AI settings dialog (Tools #2762)."""
+
+from __future__ import annotations
+
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QGroupBox,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
+
+
+class GeneralPreferencesTab(QWidget):
+    """Verbosity + streaming controls."""
+
+    # Mirrors the legacy mapping from response_style -> deprecated
+    # ``expertise_level`` so downstream code that still reads the integer
+    # remains in sync until it migrates (Tools #2552).
+    STYLE_TO_LEGACY_LEVEL: dict[str, int] = {
+        "concise": 4,
+        "standard": 2,
+        "detailed": 1,
+    }
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._build()
+
+    def _build(self) -> None:
+        layout = QVBoxLayout(self)
+
+        expertise_group = QGroupBox("Response Verbosity")
+        expertise_layout = QVBoxLayout(expertise_group)
+
+        self.expertise_combo = QComboBox()
+        self.expertise_combo.addItem("Concise", "concise")
+        self.expertise_combo.addItem("Standard", "standard")
+        self.expertise_combo.addItem("Detailed", "detailed")
+        expertise_layout.addWidget(self.expertise_combo)
+
+        expertise_desc = QLabel(
+            "How verbose the AI's replies should be. 'Concise' favours "
+            "code and short bullet lists; 'Detailed' walks through "
+            "reasoning and trade-offs."
+        )
+        expertise_desc.setWordWrap(True)
+        expertise_layout.addWidget(expertise_desc)
+
+        layout.addWidget(expertise_group)
+
+        response_group = QGroupBox("Response Settings")
+        response_layout = QVBoxLayout(response_group)
+
+        self.streaming_check = QCheckBox("Enable streaming responses")
+        self.streaming_check.setToolTip(
+            "Show responses as they're generated (more responsive)"
+        )
+        response_layout.addWidget(self.streaming_check)
+
+        layout.addWidget(response_group)
+        layout.addStretch()
+
+    # ---- helpers --------------------------------------------------------
+
+    def select_response_style(self, style: str) -> None:
+        target = (style or "standard").lower()
+        for i in range(self.expertise_combo.count()):
+            if self.expertise_combo.itemData(i) == target:
+                self.expertise_combo.setCurrentIndex(i)
+                return
+
+    def current_response_style(self) -> str:
+        data = self.expertise_combo.currentData()
+        return data if isinstance(data, str) else "standard"
+
+
+__all__ = ["GeneralPreferencesTab"]

@@ -1,0 +1,724 @@
+{
+  "matlab": "25.2.0.3177638 (R2025b) Update 5",
+  "source_revision": "7e88c4726fec9b5f2f5e65a366a90fc7fadba3d5",
+  "joints": [
+    {
+      "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Hip Kinetically Driven/Hip Joint",
+      "parameters": {
+        "PxTorqueActuationMode": "InputTorque",
+        "PxMotionActuationMode": "ComputedMotion",
+        "PyTorqueActuationMode": "InputTorque",
+        "PyMotionActuationMode": "ComputedMotion",
+        "PzTorqueActuationMode": "InputTorque",
+        "PzMotionActuationMode": "ComputedMotion",
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion",
+        "RzTorqueActuationMode": "InputTorque",
+        "RzMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Spine Tilt Kinetically Driven/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Hips and Torso Inputs/Torso Kinetically Driven/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "TorqueActuationMode": "InputTorque",
+        "MotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "TorqueActuationMode": "InputTorque",
+        "MotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Left Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "TorqueActuationMode": "InputTorque",
+        "MotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion",
+        "RzTorqueActuationMode": "InputTorque",
+        "RzMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "TorqueActuationMode": "InputTorque",
+        "MotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
+      "parameters": {
+        "TorqueActuationMode": "InputTorque",
+        "MotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion",
+        "RzTorqueActuationMode": "InputTorque",
+        "RzMotionActuationMode": "ComputedMotion"
+      }
+    },
+    {
+      "path": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
+      "parameters": {
+        "RxTorqueActuationMode": "InputTorque",
+        "RxMotionActuationMode": "ComputedMotion",
+        "RyTorqueActuationMode": "InputTorque",
+        "RyMotionActuationMode": "ComputedMotion"
+      }
+    }
+  ],
+  "modes": {
+    "ActuationMode": 1,
+    "KillDampFinalValue": 0,
+    "KillswitchFinalValue": 0,
+    "KillswitchInitialValue": 1,
+    "KillswitchStepTime": 1,
+    "KinematicMode": 3,
+    "ModelingMode": 3
+  },
+  "bus": [
+    {
+      "path": "CombinedSignalBus.LScapLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.048585804570717817, 0.2531848897633055, 0.59651962779715728]
+    },
+    {
+      "path": "CombinedSignalBus.LScapLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [8.3095601930618926e-7, 0, 0.00018268054374745923]
+    },
+    {
+      "path": "CombinedSignalBus.LScapLogs.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LScapLogs.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LScapLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.048585804570717817, 0.2531848897633055, 0.59651962779715728]
+    },
+    {
+      "path": "CombinedSignalBus.LScapLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        8.3095601988161728e-7, 2.5413698923060224e-16, 0.0001826805437474566
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RScapLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.033797271999158052, 0.19350663360874551, -0.93466406675558966]
+    },
+    {
+      "path": "CombinedSignalBus.RScapLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-1.5943063095758717e-5, 0, 7.7927855452063693e-5]
+    },
+    {
+      "path": "CombinedSignalBus.RScapLogs.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RScapLogs.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RScapLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.033797271999158052, 0.19350663360874551, -0.93466406675558966]
+    },
+    {
+      "path": "CombinedSignalBus.RScapLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -1.5943063080562536e-5, -1.6090427601422881e-14, 7.7927855455172643e-5
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.50612613599172807, -0.020963354520392712, 0.0523187268179201]
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0, 0, 0]
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.ActuatorTorqueZ",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.50612613599172807, -0.020963354520392712, 0.0523187268179201]
+    },
+    {
+      "path": "CombinedSignalBus.LSLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -9.77950359581925e-17, -2.6367796834847468e-16, -5.2692225582795515e-16
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.23175637921126452, 0.10544387456951895, -0.040346133874445606
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0, 0, 0]
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.ActuatorTorqueZ",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.23175637921126452, 0.10544387456951895, -0.040346133874445606
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RSLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0, 0, 0]
+    },
+    {
+      "path": "CombinedSignalBus.LELogs.LEJoint.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.733337274362081, 0.015997797800722781, -0.035151335771145736]
+    },
+    {
+      "path": "CombinedSignalBus.LELogs.LEJoint.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.0002043265571039213, -0.00619164994016901, 0]
+    },
+    {
+      "path": "CombinedSignalBus.LELogs.LEJoint.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.733337274362081, 0.015997797800722781, -0.035151335771145736]
+    },
+    {
+      "path": "CombinedSignalBus.LELogs.LEJoint.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.0002043265571039213, -0.00619164994016901, 3.9898639947466563e-17
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RELogs.REJoint.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.048854145208082893, 0.11064760669625563, -0.0036014847460627969
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RELogs.REJoint.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.00094987565880343214, -0.0013324916174349485, 0]
+    },
+    {
+      "path": "CombinedSignalBus.RELogs.REJoint.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.048854145208082893, 0.11064760669625563, -0.0036014847460627969
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RELogs.REJoint.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.00094987565880343214, -0.0013324916174349485, -2.4069288229178198e-17
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.LFLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.012253340260558805, -0.0043564897096737831, -0.6731032503790525
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.LFLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.0065725417132477381, -0.0068803368578629238, 0]
+    },
+    {
+      "path": "CombinedSignalBus.LFLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.012253340260558805, -0.0043564897096737831, -0.6731032503790525
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.LFLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.0065725417132477381, -0.0068803368578629238, -1.2728787614863998e-16
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RFLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.018192116253342105, -0.020204755467548609, 0.14102559741577161
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RFLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.0051881263395982952, -0.0066959002003353372, 0]
+    },
+    {
+      "path": "CombinedSignalBus.RFLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.018192116253342105, -0.020204755467548609, 0.14102559741577161
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RFLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.0051881263395982952, -0.0066959002003353372, 2.5153490401663703e-17
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.LWLogs.LWJoint.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.06148496037799564, -0.14160288692117357, 0.47382605529631755]
+    },
+    {
+      "path": "CombinedSignalBus.LWLogs.LWJoint.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [9.1474654997510383e-10, -0, -6.7092297773246431e-6]
+    },
+    {
+      "path": "CombinedSignalBus.LWLogs.LWJoint.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LWLogs.LWJoint.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.LWLogs.LWJoint.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0.06148496037799564, -0.14160288692117357, 0.47382605529631755]
+    },
+    {
+      "path": "CombinedSignalBus.LWLogs.LWJoint.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        9.1474658858899115e-10, 6.3208986552507332e-17, -6.7092297773246381e-6
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RWLogs.RWJoint.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.094255225724812736, 0.046568588883351678, -0.25969290303955844
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RWLogs.RWJoint.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.00023562943900141901, -0, -0.00023434333022979685]
+    },
+    {
+      "path": "CombinedSignalBus.RWLogs.RWJoint.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RWLogs.RWJoint.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.RWLogs.RWJoint.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.094255225724812736, 0.046568588883351678, -0.25969290303955844
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.RWLogs.RWJoint.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.0002356294390013532, -1.1422069887134789e-16, -0.0002343433302298631
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.ClubLogs.RHonClubForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.045989652203487788, 0.093930006325480486, 0.26171745487077691]
+    },
+    {
+      "path": "CombinedSignalBus.ClubLogs.RHonClubTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.0023894142454958375, 0.0014113914622699225, 0.00023436927685948603
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.ClubLogs.LHonClubForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.14276099947535484, -0.061811409285747645, -0.47156912007089147
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.ClubLogs.LHonClubTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.0015664020962726022, -0.003611148081023613, 6.735176406946243e-6
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.BaseonHipForceGlobal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        6.7354513208067365e-15, -6.66816608180592e-14, 7.3626074481897189e-14
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.BaseonHipTorqueGlobal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -1.1902023570007906e-14, 2.2830586869294795e-15, 8.7078641752207839e-16
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.TranslationForceXInput",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.TranslationForceYInput",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.TranslationForceZInput",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.HipTorqueXInput",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.HipTorqueYInput",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.HipTorqueZInput",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.HipLogs.BaseonHipForceHipBase",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0, 0, 0]
+    },
+    {
+      "path": "CombinedSignalBus.TorsoLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.023917863487627117, -0.0090113303807340464, 0.087367769175256613
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.TorsoLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.00058856860715273, 0.0015621781695053137, 0]
+    },
+    {
+      "path": "CombinedSignalBus.TorsoLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.023917863487627117, -0.0090113303807340464, 0.087367769175256613
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.TorsoLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.00058856860715273, 0.0015621781695053137, -3.8727701601182218e-16
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.SpineLogs.ConstraintForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.042759282479955404, 0.016110051864336832, -0.10484132301028852
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.SpineLogs.ConstraintTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [-0, 0, 0.00228599445056036]
+    },
+    {
+      "path": "CombinedSignalBus.SpineLogs.ActuatorTorqueX",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.SpineLogs.ActuatorTorqueY",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0
+    },
+    {
+      "path": "CombinedSignalBus.SpineLogs.ForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.042759282479955404, 0.016110051864336832, -0.10484132301028852
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.SpineLogs.TorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -3.916138247017642e-16, 6.0715321659188248e-16, 0.00228599445056036
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.TorqueonClubMagnitude",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0.0023610187497994637
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.TotalHandTorqueLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.00082301214922323525, -0.0021997566187536904, 0.00024110445326643227
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.TotalHandForceLocal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        -0.09677134727186705, 0.032118597039732841, -0.20985166520011456
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.TotalHandTorqueGlobal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [
+        0.000691630785085289, 0.0019623179585465042, -0.0011159590599985336
+      ]
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.TotalHandForceGlobal",
+      "class": "timeseries",
+      "size": [21, 3],
+      "first": [0.10260585560034916, -0.14395524833048118, -0.15225946338570862]
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.ForceonClubMagnitude",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0.23331099270260283
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.HandForceYankLocal",
+      "class": "timeseries",
+      "size": [21, 2],
+      "first": [0.12888994431159989, -0.24197026223984741]
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.ForceAlongHandPath",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": -0.018889199329565433
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.LHForceAlongHandPath",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": -0.05161926593853762
+    },
+    {
+      "path": "CombinedSignalBus.CalculatedSignalsLogs.RHForceAlongHandPath",
+      "class": "timeseries",
+      "size": [21, 1],
+      "first": 0.080462070759531323
+    }
+  ]
+}

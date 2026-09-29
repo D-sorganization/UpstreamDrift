@@ -1,0 +1,157 @@
+# ruff: noqa: E402
+"""Unit tests for OpenPose pose estimator."""
+
+import sys
+from collections.abc import Generator
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
+from src.shared.python.core.contracts import StateError
+
+# Mock pyopenpose using patch.dict (auto-cleans) BEFORE importing the estimator,
+# so the try/except import in the module succeeds.
+mock_op = MagicMock()
+
+with patch.dict(sys.modules, {"pyopenpose": mock_op}):
+    # Now import with pyopenpose mocked
+    from src.shared.python.pose_estimation import (  # noqa: E402
+        openpose_estimator as op_module,
+    )
+    from src.shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
+        OpenPoseEstimator,
+    )
+
+# Ensure the module-level 'op' reference uses our mock
+op_module.op = mock_op
+
+
+@pytest.fixture
+def op_mock() -> Generator[MagicMock, None, None]:
+    """Provide a fresh mock for pyopenpose."""
+    mock_op.reset_mock()
+    op_module.op = mock_op
+    yield mock_op
+
+
+@pytest.fixture
+def mock_op_wrapper(op_mock) -> MagicMock:
+    wrapper = MagicMock()
+    op_mock.WrapperPython.return_value = wrapper
+    return wrapper
+
+
+@pytest.fixture
+def estimator(mock_op_wrapper) -> OpenPoseEstimator:
+    est = OpenPoseEstimator()
+    # Mock loaded state for processing tests
+    est.wrapper = mock_op_wrapper
+    est._is_loaded = True
+    return est
+
+
+def test_openpose_estimator_initialization() -> None:
+    est = OpenPoseEstimator()
+    assert est.wrapper is None
+    assert est._is_loaded is False
+
+
+def test_load_model_success(estimator, op_mock) -> None:
+    # Reset to unloaded
+    estimator._is_loaded = False
+    estimator.wrapper = None
+
+    path = Path("/tmp/models")
+    estimator.load_model(path)
+
+    assert estimator._is_loaded is True
+    assert estimator.params["model_folder"] == str(path)
+    op_mock.WrapperPython.assert_called()
+    if estimator.wrapper is not None:
+        estimator.wrapper.configure.assert_called()
+        estimator.wrapper.start.assert_called()
+
+
+def test_load_model_failure(estimator, op_mock) -> None:
+    estimator._is_loaded = False
+    op_mock.WrapperPython.side_effect = RuntimeError("OpenPose Error")
+
+    with pytest.raises(RuntimeError):
+        estimator.load_model(Path("/tmp"))
+
+
+def test_estimate_from_image_not_loaded() -> None:
+    est = OpenPoseEstimator()
+    with pytest.raises(StateError):
+        est.estimate_from_image(np.zeros((100, 100, 3)))
+
+
+def test_estimate_from_image_success(estimator, op_mock) -> None:
+    # Setup mock datum
+    datum = MagicMock()
+    # Mock shape: (1 person, 25 parts, 3 values)
+    datum.poseKeypoints = np.ones((1, 25, 3))
+    # Make scores variable to test confidence calc
+    datum.poseKeypoints[0, :, 2] = 0.8
+
+    # Mock op.Datum()
+    op_mock.Datum.return_value = datum
+
+    # Mock wrapper behavior
+    estimator.wrapper.emplaceAndPop.side_effect = lambda x: (
+        None
+    )  # Modify datum in place effectively
+
+    img = np.zeros((100, 100, 3))
+    result = estimator.estimate_from_image(img)
+
+    assert result.confidence == pytest.approx(0.8)
+    assert len(result.raw_keypoints) == 25
+    assert "Nose" in result.raw_keypoints
+
+
+def test_estimate_from_image_no_pose(estimator, op_mock) -> None:
+    datum = MagicMock()
+    datum.poseKeypoints = None  # Or empty array
+    op_mock.Datum.return_value = datum
+
+    result = estimator.estimate_from_image(np.zeros((100, 100, 3)))
+    assert result.confidence == 0.0
+    assert len(result.raw_keypoints) == 0
+
+
+def test_estimate_from_video_success(estimator, op_mock) -> None:
+    # Mock cv2 module since it's imported locally
+    mock_cv2 = MagicMock()
+    with patch.dict(sys.modules, {"cv2": mock_cv2}):
+        # Setup VideoCapture mock
+        cap = mock_cv2.VideoCapture.return_value
+        cap.isOpened.return_value = True
+
+        # Return 2 frames then stop
+        cap.read.side_effect = [
+            (True, np.zeros((100, 100, 3))),
+            (True, np.zeros((100, 100, 3))),
+            (False, None),
+        ]
+        cap.get.return_value = 100.0  # Timestamp
+
+        # Mock image processing
+        datum = MagicMock()
+        datum.poseKeypoints = np.ones((1, 25, 3))
+        op_mock.Datum.return_value = datum
+
+        results = estimator.estimate_from_video(Path("test.mp4"))
+        assert len(results) == 2
+        assert results[0].timestamp == 0.1  # 100ms -> 0.1s
+
+
+def test_estimate_from_video_not_found(estimator) -> None:
+    mock_cv2 = MagicMock()
+    with patch.dict(sys.modules, {"cv2": mock_cv2}):
+        cap = mock_cv2.VideoCapture.return_value
+        cap.isOpened.return_value = False
+
+        with pytest.raises(FileNotFoundError):
+            estimator.estimate_from_video(Path("test.mp4"))

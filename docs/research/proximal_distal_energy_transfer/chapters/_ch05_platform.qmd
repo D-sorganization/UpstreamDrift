@@ -1,0 +1,40 @@
+# Computational Framework {#sec-platform}
+
+The numerical work uses an open-source, backend-neutral implementation
+of a planar two-segment golf model. Model parameters are represented once
+and rendered to the analytical equations of motion and optional simulation
+backends. The present results use the deterministic analytical ODE backend;
+they do not depend on a proprietary solver or graphical interface.
+
+## Analysis Components
+
+The workflow separates four responsibilities:
+
+1. **Dynamics.** A validated mass matrix and bias-force provider advances
+   the two generalized coordinates under specified shoulder and wrist
+   torques.
+2. **Counterfactual decomposition.** At each sampled state, acceleration is
+   split into passive drift and applied-control components. These pointwise
+   quantities are not presented as alternative forward trajectories.
+3. **Energy accounting.** Segment kinetic and potential energies, actuator
+   work, and wrist-interface force and moment power are evaluated with a
+   Robertson--Winter balance check [@robertson1980].
+4. **Reproducibility.** Fixed-step integration, explicit parameter records,
+   machine-readable outputs, and regression tests connect every reported
+   number to a declared computation.
+
+The source implementation and versioned data are linked once in the code
+and data availability statement (@sec-appendix-inventory). Repository names
+are omitted from the scientific argument because software provenance is not
+evidence for the physical claims.
+
+## Validation Boundary
+
+The implementation includes unit tests for drift-plus-control
+reconstruction, work--energy consistency, deterministic replay, impact
+detection, and headline ordering. The reduced full-body common-state tier now
+compares MuJoCo with an independent Lagrange--Christoffel implementation
+generated from one hashed model. That agreement reduces implementation risk
+for the declared inverse-dynamics estimand; it does not validate the primary
+planar model or remove structural limitations such as prescribed spatial hand
+loads, simplified inertias, missing forward contact, or simplified actuators.

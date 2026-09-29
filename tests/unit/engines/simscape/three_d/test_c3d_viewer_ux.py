@@ -1,0 +1,153 @@
+import os
+import sys
+import typing
+from unittest.mock import MagicMock, call, patch
+
+import pytest
+
+# Gracefully skip if PyQt6 is not installed (e.g. in CI environments)
+try:
+    import matplotlib  # noqa: F401
+    import matplotlib.artist  # noqa: F401
+    import matplotlib.figure  # noqa: F401
+
+    # Import dependencies to prevent reloading issues when patching sys.modules
+    import numpy  # noqa: F401
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QApplication
+except ImportError:
+    pytest.skip(
+        "Required packages (PyQt6, matplotlib, numpy) not installed",
+        allow_module_level=True,
+    )
+
+
+# Ensure QApplication exists
+@pytest.fixture(scope="session")
+def qapp() -> typing.Generator[QApplication, None, None]:
+    """Fixture that ensures a QApplication exists for the test session."""
+    instance = QApplication.instance()
+    if instance is None:
+        app = QApplication(sys.argv)
+    else:
+        app = typing.cast(QApplication, instance)
+    yield app
+
+
+def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
+    """
+    Test that opening a file triggers the expected UX behaviors
+    (wait cursor, status bar update).
+    """
+    # Mock ezc3d in sys.modules throughout the test
+    c3d_viewer_mod = pytest.importorskip(
+        "apps.c3d_viewer",
+        reason="apps.c3d_viewer not available (requires simscape 3D engine setup)",
+    )
+    with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
+        C3DViewerMainWindow = c3d_viewer_mod.C3DViewerMainWindow
+        window = C3DViewerMainWindow()
+
+        # We want to verify status bar messages.
+        # QMainWindow.statusBar() returns the QStatusBar widget.
+        real_status_bar = window.statusBar()
+        assert real_status_bar is not None
+
+        # Use patch.object to spy on showMessage
+        with patch.object(real_status_bar, "showMessage") as mock_show_message:
+            # Mock the file dialog
+            test_path = "/path/to/test.c3d"
+            with (
+                patch(
+                    "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
+                    return_value=(test_path, "C3D files (*.c3d)"),
+                ),
+                patch("ezc3d.c3d") as mock_c3d,
+            ):
+                mock_data = MagicMock()
+                mock_data.__getitem__.side_effect = lambda k: {
+                    "data": {
+                        "points": MagicMock(shape=(4, 1, 1)),
+                        "analogs": MagicMock(shape=(1, 1, 1)),
+                    },
+                    "parameters": {
+                        "POINT": {
+                            "LABELS": {"value": []},
+                            "UNITS": {"value": [""]},
+                            "RATE": {"value": [1.0]},
+                        },
+                        "ANALOG": {
+                            "LABELS": {"value": []},
+                            "RATE": {"value": [1.0]},
+                            "UNITS": {"value": []},
+                        },
+                        "TRIAL": {},
+                    },
+                }.get(k, {})
+                mock_c3d.return_value = mock_data
+
+                with (
+                    patch(
+                        "PyQt6.QtWidgets.QApplication.setOverrideCursor"
+                    ) as mock_set_cursor,
+                    patch(
+                        "PyQt6.QtWidgets.QApplication.restoreOverrideCursor"
+                    ) as mock_restore_cursor,
+                ):
+                    window.open_c3d_file()
+
+                    # Verify basic execution
+                    assert mock_c3d.called
+
+                    # Verify Cursor UX
+                    mock_set_cursor.assert_called_once_with(Qt.CursorShape.WaitCursor)
+                    mock_restore_cursor.assert_called_once()
+
+                    # Verify Status Bar UX
+                    # calls: "Loading test.c3d...",
+                    # "Loaded test.c3d successfully."
+                    assert mock_show_message.call_count == 2
+
+                    filename = os.path.basename(test_path)
+                    expected_calls = [
+                        call(f"Loading {filename}... (Async)"),
+                        call(f"Loaded {filename} successfully."),
+                    ]
+                    mock_show_message.assert_has_calls(expected_calls)
+
+
+def test_c3d_viewer_drag_and_drop(qapp: QApplication) -> None:
+    """
+    Test that drag and drop events trigger file loading.
+    """
+    c3d_viewer_mod = pytest.importorskip(
+        "apps.c3d_viewer",
+        reason="apps.c3d_viewer not available (requires simscape 3D engine setup)",
+    )
+    with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
+        C3DViewerMainWindow = c3d_viewer_mod.C3DViewerMainWindow
+        window = C3DViewerMainWindow()
+        assert window.acceptDrops()
+
+        # Mock the load_c3d_file_from_path method
+        with patch.object(window, "load_c3d_file_from_path") as mock_load:
+            # Create a mock drop event
+            from PyQt6.QtCore import QMimeData, QUrl
+
+            mime_data = QMimeData()
+            test_path = "/path/to/drop_test.c3d"
+            mime_data.setUrls([QUrl.fromLocalFile(test_path)])
+
+            # Note: Creating QDropEvent in tests can be tricky without full Qt setup
+            # We can mock the event object instead
+            mock_event = MagicMock()
+            mock_event.mimeData.return_value = mime_data
+
+            window.dropEvent(mock_event)
+
+            # Verify that load was called with the correct path
+            # QUrl.toLocalFile() might return absolute path
+            # We just check if it was called
+            assert mock_load.called
+            args, _ = mock_load.call_args
+            assert str(args[0]).endswith("drop_test.c3d")
