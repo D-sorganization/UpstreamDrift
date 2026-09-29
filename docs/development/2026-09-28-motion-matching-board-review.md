@@ -27,7 +27,7 @@ All distances below are millimetres unless stated. “RMS median” is the media
 
 <!-- prettier-ignore -->
 | Model / Lane | Best Useful Evidence Found | Remaining Gap / Interpretation |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| --- | --- | --- |
 | Simscape legacy run-102, driver | R2025b independent cold replay: 0.85 s, 307 samples; whole **20.267**, early **9.995**, terminal **40.301**, club cluster **8.389**; maximum marker-distance discrepancy against analytical replay **0.0605** | Terminal exceeds 35 by **5.301** (15.1% above ceiling; needs 13.2% reduction). Not through-impact/full-swing; cluster error is not independently calibrated clubface/impact accuracy. Run-103 gate is explicitly blocked. |
 | New GS3DX fitted-grip IK, driver | Branch `FIT.md`: 654 frames, **7.0 RMS median / 16.1 p95 / 19.1 max per frame**, 43 min; held-out downswing first-pass wrist medians **18/15**, clubhead-proxy median **29** | Strong kinematic advance. Whole-trial offsets are calibrated in sample; held-out results use another fit protocol. Not pooled full-marker dynamic error. Smoothed IK has different statistics (6.3 median, 25.2 p95, 26.3 max). |
 | GS3DX Shape through impact | Branch `SHAPE.md`, saved joint-centre-trunk reference: at 1.319 s, pelvis **22 RMS / 44 end**, horizontal COM **14.4 RMS / 19.7 max**, foot slip **38/16**, support **0.36–1.83 BW**, late peak **1.77 BW** | Progress in balance, not full-marker qualification. No force plates in this C3D; inferred GRF is not independent validation. Whole swing/iron and foot/contact criteria remain. |
@@ -84,7 +84,7 @@ The branch addresses singularities, mass distribution, grip, legs/ground and nec
 
 <!-- prettier-ignore -->
 | Option | Benefit | Cost / Decision |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --- | --- | --- |
 | Refine existing ellipsoids and frame-bearing solids | Fast, stable, easy sizing; already implemented substantially | First product tier; inspect shoulders, trunk continuity, feet and grip at all key poses. |
 | One anatomical File Solid per segment | Recognizable anatomy and silhouette without separate bones/muscles in the solver | Prototype head, trunk, hand and shoe first. Preserve custom inertia and units; audit mesh asset rights and attachment frames. Unknown compiled delta until measured. |
 | External skin/mesh rendering driven by saved body transforms | Rich visual quality with no extra Simulink dynamics blocks | Reuse existing viewer/mesh tooling; version transforms and test pose parity. Surface deformation is a visual assumption, not contact geometry. |
@@ -343,7 +343,7 @@ MMR IDs are local proposals. Suggested labels: `tier:strong` and existing domain
 
 <!-- prettier-ignore -->
 | Wave | Proposed Work | Exit Evidence |
-| ------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| --- | --- | --- |
 | A: Trust and Inventory | MMR-01/02/03/04; manual-video MMR-12 can proceed independently | One honest ledger, frozen metrics, promoted variant inventory, compiled budgets and manual archive journey. |
 | B: Anatomy and Native Fit | MMR-05/06/07/08/09/10/11/18 | Subject/model calibration, independent dual-club replays, preserved physics, measured optimizer cost and truthful reduced-model status. |
 | C: Video Reconstruction | MMR-13/14/15 | Grounded masks and camera/state binding, actual continuous pilot, calibrated uncertainty/abstention. |
