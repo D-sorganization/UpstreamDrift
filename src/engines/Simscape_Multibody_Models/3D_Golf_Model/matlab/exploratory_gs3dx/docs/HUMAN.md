@@ -183,6 +183,31 @@ support 0.52-2.02 BW). `GS3DX_Shape` drifts 21.6 mm. The spring is
 2,000 N·m/rad: stiff enough that the toes carry their share of the front
 support, soft enough that they still bend as the heel rises.
 
+## Through the Finish
+
+Every reference in the model workspace (leg servo, upper-body tracking, neck,
+balance) spans the whole capture, 654 frames to 1.814 s, so the balance run
+can carry on past impact (1.319 s). Run to 1.81 s with the built model
+(scratch `human/fin1.m`, `fin2.m`), against the capture's own ankle joint
+centres:
+
+| After impact                | Capture                 | `GS3DX_Human`                          |
+| --------------------------- | ----------------------- | -------------------------------------- |
+| Trail ankle rise (max)      | 129 mm                  | 142 mm                                 |
+| Trail ankle travel (end)    | 275 mm; foot turns 128° | 355 mm                                 |
+| Trail foot contacts         | -                       | Big Toe, then Lesser Toes (heel off)   |
+| Lead ankle travel (end)     | 36 mm; foot turns 30°   | 234 mm                                 |
+| Lead foot contacts          | -                       | Ball Out and Lesser Toes: outside edge |
+| Total vertical GRF, 1.55 s  | 0.63 BW (kinematic)     | 0.73 BW                                |
+| Pelvis RMS (before / after) | -                       | 21.9 / 56.6 mm                         |
+
+What works: the trail heel comes up and the trail foot pivots on its toes,
+as the capture's does, and the lead foot rolls onto its outside edge. What
+does not: from 1.35 s the golfer leans back onto the trail toe (0.73-0.83 BW
+on it at 1.55-1.6 s while the lead foot carries nothing), and the unloaded
+lead foot then slides 0.2 m. In the capture the lead foot turns 30° in place
+and carries the finish. The run to impact is unaffected.
+
 ## Ball Contact
 
 `gs3dx_capture_markers` gives two events:
