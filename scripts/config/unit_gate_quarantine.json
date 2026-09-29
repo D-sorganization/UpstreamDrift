@@ -4,9 +4,7 @@
   "ratchet": "Entries may only be removed, never added.",
   "node_ids": [
     "tests/ci/test_ci_infrastructure.py::TestCIEnvironmentCompatibility::test_physics_validation_script_targets_collect_tests",
-    "tests/launchers/test_launcher_model_sources.py::test_movement_optimizer_targets_sibling_public_entry_point",
     "tests/shared/wave10_contracts/test_level.py::TestResolveLevel::test_optimized_python_defaults_to_enforce_when_env_unset",
-    "tests/test_build_humanoid_models.py::test_mujoco_check_passes_on_canonical_constants",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_chat_input_same_object",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_chat_input_still_importable",
     "tests/unit/ai/gui/test_assistant_submodules.py::TestBackwardCompat::test_stream_worker_same_object",
@@ -24,7 +22,6 @@
     "tests/unit/sidekick/test_agent_panel_wiring.py::test_panel_invokes_sidekick_actions_on_gui_thread",
     "tests/unit/sidekick/test_agent_panel_wiring.py::test_panel_set_action_service_adds_prompt_and_tool_catalog",
     "tests/unit/sidekick/test_agent_panel_wiring.py::test_panel_without_action_service_exposes_no_sidekick_tools",
-    "tests/unit/test_contracts_module.py::TestInvariant::test_failing_invariant_raises_invariant_error",
     "tests/unit/test_data_processing_core_extended.py::TestCalculatedAndTransform::test_add_calculated_column_creates_new_column",
     "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_eq_returns_matching_rows",
     "tests/unit/test_data_processing_core_extended.py::TestFilterData::test_filter_gt_returns_filtered_rows",
@@ -36,8 +33,6 @@
     "tests/unit/test_safe_eval.py::TestSafeEval::test_safe_eval_does_not_call_python_eval",
     "tests/unit/test_safe_eval.py::TestSafeEval::test_safe_eval_supports_star_args_without_eval",
     "tests/unit/test_script_size_contracts_2515.py::TestSyngasCompressionCalculatorSize::test_loc_within_budget",
-    "tests/unit/test_unreal_integration/test_mesh_loader.py::TestMeshLoaderGLTF::test_gltf_with_skeleton",
-    "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_library_shapes_scrub_meets_30_fps",
-    "tests/unit/tools/starting_pose_matcher/test_body_style_switch.py::test_scrub_in_library_mode_updates_without_error"
+    "tests/unit/test_unreal_integration/test_mesh_loader.py::TestMeshLoaderGLTF::test_gltf_with_skeleton"
   ]
 }
