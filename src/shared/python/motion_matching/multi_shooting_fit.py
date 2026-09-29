@@ -645,7 +645,8 @@ def fit_multiple_shooting(
     # Evaluate unsegmented forward simulation across all time
     unsegmented_pred = unsegmented_forward(opt_theta, target.time)
     obs_all = np.isfinite(target.points).all(axis=2) & (target.weights > 0)
-    unseg_dists = np.linalg.norm((unsegmented_pred - target.points)[obs_all], axis=1)
+    diff_unseg = (unsegmented_pred - target.points)[obs_all]
+    unseg_dists = np.sqrt(np.einsum("ij,ij->i", diff_unseg, diff_unseg))
 
     is_finite = bool(
         np.isfinite(unsegmented_pred).all() and np.isfinite(unseg_dists).all()
@@ -659,7 +660,8 @@ def fit_multiple_shooting(
     # Missing observations or unequal endpoint clocks provide no gap evidence.
     terminal_replay_gap = None
     if w_time[-1] == target.time[-1] and np.any(obs_all[-1]):
-        gap_errors = np.linalg.norm(terminal_segmented - unsegmented_pred[-1], axis=1)
+        gap_diff = terminal_segmented - unsegmented_pred[-1]
+        gap_errors = np.sqrt(np.einsum("ij,ij->i", gap_diff, gap_diff))
         terminal_replay_gap = (
             observed_rms(gap_errors, obs_all[-1])
             if np.isfinite(gap_errors[obs_all[-1]]).all()
