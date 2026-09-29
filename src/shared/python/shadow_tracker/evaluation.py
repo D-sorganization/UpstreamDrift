@@ -21,6 +21,7 @@ from ._validation import (
 from .contracts import (
     CandidateResult,
     EvidenceQuality,
+    ExecutionStatus,
     FitRequest,
     FrameObservation,
     ReplayAudit,
@@ -491,8 +492,15 @@ def create_evaluated_result_bundle(
     candidates: Sequence[CandidateResult],
     observations: Sequence[FrameObservation],
     profile: GateProfile | None = None,
+    *,
+    execution_status: ExecutionStatus = "completed",
 ) -> ResultBundle:
-    """Construct an immutable ResultBundle with deterministic quality classification."""
+    """Construct an immutable ResultBundle with deterministic quality classification.
+
+    ``execution_status`` lets orchestration propagate the optimizer outcome (for
+    example ``failed``, ``cancelled`` or ``budget_exhausted``) instead of always
+    reporting a successful completion.
+    """
     check_id(bundle_id, "bundle_id")
     active_profile = profile or GateProfile.default_development_profile()
 
@@ -526,7 +534,7 @@ def create_evaluated_result_bundle(
         request=request,
         candidates=tuple(candidates),
         replay_audits=audits,
-        execution_status="completed",
+        execution_status=execution_status,
         evidence_quality=quality,
         metrics=bundle_metrics,
         hashes={"candidates_sha256": traj_hash},

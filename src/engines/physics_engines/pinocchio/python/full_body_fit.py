@@ -145,6 +145,38 @@ def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def raw_attachment_club_name(value: Any) -> str | None:
+    """Extract a scalar club name from the raw attachment receipt club field.
+
+    Standard calibrated receipts store ``club`` as a nested object such as
+    ``{"name": "driver", ...}``; legacy receipts store a plain string. Missing or
+    empty entries resolve to ``None``.
+    """
+    if value is None:
+        return None
+    if isinstance(value, Mapping):
+        value = value.get("name")
+        if value is None:
+            return None
+    text = str(value).strip()
+    return text or None
+
+
+def normalize_club_name(club: str | None) -> str | None:
+    """Normalize club variants so contamination checks compare like with like.
+
+    All iron variants (``iron``, ``iron7``) resolve to ``iron``; names are case-folded.
+    """
+    if club is None:
+        return None
+    text = str(club).strip().lower()
+    if not text:
+        return None
+    if text.startswith("iron"):
+        return "iron"
+    return text
+
+
 def load_inputs(
     document_path: Path,
     capture_path: Path,
@@ -157,6 +189,24 @@ def load_inputs(
     capture = load_tour_capture(capture_path)
     if attachments_receipt is not None:
         receipt = json.loads(attachments_receipt.read_text(encoding="utf-8"))
+        receipt_club = normalize_club_name(
+            raw_attachment_club_name(
+                receipt.get("club") or receipt.get("metadata", {}).get("club")
+            )
+        )
+        doc_club = normalize_club_name(
+            "iron"
+            if "iron" in str(document_path).lower()
+            else ("driver" if "driver" in str(document_path).lower() else None)
+        )
+        if (
+            doc_club is not None
+            and receipt_club is not None
+            and doc_club != receipt_club
+        ):
+            raise ValueError(
+                f"cross-club attachment contamination: {doc_club} fit cannot use {receipt_club} attachment receipt."
+            )
         attachments = receipt["ik"]["attachments_m"]
         source = str(attachments_receipt)
         if ground_height_m is None:
