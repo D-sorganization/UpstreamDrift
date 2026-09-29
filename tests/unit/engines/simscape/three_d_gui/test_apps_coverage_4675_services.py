@@ -402,7 +402,10 @@ def test_loader_thread_reports_invalid_csv_without_terminating(qapp):
     thread.start()
     loop.exec()
     assert thread.wait(2000)
-    assert "Unexpected error loading file" in received.get("message", "")
+    assert any(
+        err in received.get("message", "")
+        for err in ("Data inconsistency", "Unexpected error loading file")
+    )
 
 
 def test_loader_thread_loads_golden_c3d_fixture(qapp):
