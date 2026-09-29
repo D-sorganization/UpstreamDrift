@@ -79,6 +79,7 @@ def _extract_metric_value(data: Mapping[str, Any], *keys: str) -> float | None:
             if isinstance(val, (int, float)) and not math.isnan(val):
                 return float(val)
     for sub in (
+        "metrics",
         "shared_metrics",
         "restart_uninterrupted_metrics",
         "zero_displacement_parity",
@@ -125,6 +126,7 @@ def extract_candidate_sha(data: Mapping[str, Any]) -> str | None:
     for key in (
         "candidate_sha256",
         "candidate_sha",
+        "identity_hash",
         "returned_sha256",
         "config_sha256",
         "bundle_sha256",
@@ -138,6 +140,12 @@ def extract_candidate_sha(data: Mapping[str, Any]) -> str | None:
         val = data.get(key)
         if isinstance(val, str) and val.strip():
             return val.strip()
+    identity = data.get("identity")
+    if isinstance(identity, Mapping):
+        for k in ("identity_hash", "candidate_sha256", "candidate_sha"):
+            v = identity.get(k)
+            if isinstance(v, str) and v.strip():
+                return v.strip()
     outputs = data.get("outputs")
     if isinstance(outputs, Mapping):
         for k in ("calibrated_model_sha256", "scaled_model_sha256", "ik_npz_sha256"):
@@ -372,6 +380,16 @@ def extract_acceptance(
     if "acceptance" in data and isinstance(data["acceptance"], Mapping):
         block = dict(data["acceptance"])
         if block.get("gates"):
+            gates = block["gates"]
+            if isinstance(gates, Sequence):
+                any_failed = any(
+                    isinstance(g, Mapping)
+                    and str(g.get("status", "")).lower() in ("failed", "rejected")
+                    for g in gates
+                )
+                if any_failed:
+                    block["status"] = "REJECTED"
+                    block["is_physically_accepted"] = False
             return block
         return _unverified(
             block.get("horizon", "G1"), "acceptance block carries no gate results"
