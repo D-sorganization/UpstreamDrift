@@ -7087,6 +7087,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |
 | 2026-09-28 | #11071 | MJX L-BFGS arm re-run at 60 iterations (`mjx_benchmark_lbfgs60/`): 40.8 / 42.6 mm replay RMS but no convergence, so `none` stays the default; benchmark cases can reuse earlier receipts through `reuse.json`. |
 | 2026-09-28 | #11072 | MJX knot optimiser benchmark (#11058): `--mjx-method lbfgs`, shared-simulator rescoring of MJX references, and `scripts/benchmark_mjx_knot_solvers.py` with committed receipts and report. Promotion decision: keep `none` as the default. |
 | 2026-09-27 | #11060 | `shooting_fit` imports `full_body_forward_dynamics` at run time, so `--shooting-fit N` no longer raises `NameError` before its first pass (#11059). |

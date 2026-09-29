@@ -1,5 +1,14 @@
 # Motion-Matching Handoff
 
+## Product Review for Expert Panel — 2026-09-28
+
+- Branch: `docs/product-review-20260928`; documentation-only owner request; PR #11080.
+- Report: `docs/development/2026-09-28-product-review-board-proposals.md` — 12 prioritized issue briefs, source permalinks, executable counterexamples, dependencies and RunnerDashboard panel prompt.
+- Reviewed UpstreamDrift `599cce5d5cb7d6972dfa2ca4e5770ea09cfaa309` and Tools `3678409fc51024150ab28970b72e3b468935f345`; implementation and vendor pin unchanged.
+- Validation: 108 focused tests passed; report title case and full Ruff lint passed. Native engine, physical and human usability qualification were not performed.
+- Publication: GitHub CLI restored by selecting the valid stored account; live issue/PR reconciliation completed. Implementation issues are proposed only; no lease or claim on another agent's work.
+- Next: review R01–R12, deduplicate against current issues/PRs (closed #10960 and open critic PR #10977), and approve bounded implementation slices. No automatic merge, dispatch or scientific approval.
+
 Deferred external validation: six Board plans live in `docs/development/planning/`.
 Software remains active; no physical evidence is supplied. See the current
 `docs/development/HANDOFF.md` for #10783 enforcement, prior #9546 closure and publication gates.
