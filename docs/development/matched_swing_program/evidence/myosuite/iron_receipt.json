@@ -2,31 +2,17 @@
   "schema_version": 1,
   "engine": "myosuite",
   "club": "iron_7",
-  "status": "qualified",
-  "candidate_sha256": "ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086",
-  "model_sha256": "ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086",
-  "capture_sha256": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
-  "runtime_available": true,
-  "is_fresh_simulation": true,
-  "derivatives_consistent": true,
-  "energy_balance_checked": true,
-  "energy_summary": {
-    "kinetic_energy_j": 218.3,
-    "potential_energy_j": 19.1,
-    "energy_conservation_error": 1.15
-  },
-  "marker_metrics": {
-    "whole_rms_m": 0.0264,
-    "early_rms_m": 0.0211,
-    "terminal_rms_m": 0.0317,
-    "clubhead_rms_m": 0.0251,
-    "pelvis_yaw_error_pct": 8.1
-  },
-  "muscle_metrics": {
-    "max_activation": 0.91,
-    "min_activation": 0.01,
-    "mean_activation": 0.38
-  },
+  "status": "unavailable",
+  "candidate_sha256": "",
+  "model_sha256": "",
+  "capture_sha256": "",
+  "runtime_available": false,
+  "is_fresh_simulation": false,
+  "derivatives_consistent": false,
+  "energy_balance_checked": false,
+  "energy_summary": {},
+  "marker_metrics": {},
+  "muscle_metrics": {},
   "declared_limitations": [
     "Musculoskeletal excitation-activation dynamics governed by first-order filter with activation/deactivation time constants",
     "Hill-type muscle tendon unit (MTU) force-length-velocity multipliers with physiological bounds",
@@ -35,6 +21,18 @@
     "Four-foot Hunt-Crossley contact spheres with normal compliance and friction cone limits",
     "Absence of native joint-torque inverse dynamics (forward muscle excitation driven only)"
   ],
-  "rejection_reasons": [],
-  "diagnostic_message": "All qualification checks passed."
+  "rejection_reasons": [
+    "MyoSuite runtime is not installed on pinned host: no native musculoskeletal simulation was executed"
+  ],
+  "missing_evidence": [
+    "native MyoSuite rollout (myosuite/MuJoCo runtime)",
+    "candidate_sha256",
+    "model_sha256",
+    "capture_sha256",
+    "native_state/time_s dynamic rollout",
+    "aligned common-marker observations (markers_m/target_m)",
+    "native test count (native_tests_executed)"
+  ],
+  "remedy": "Install the myosuite/MuJoCo stack on the pinned host and re-run scripts/ci/run_native_engine_lane.sh --engine myosuite so native rollouts and club receipts are regenerated from real execution.",
+  "diagnostic_message": "MyoSuite runtime is not installed on host: live simulation unavailable. No previous native dynamic qualification existed for this club; all numeric fields previously recorded here were fabricated placeholders and were removed."
 }
