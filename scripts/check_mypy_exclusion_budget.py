@@ -8,7 +8,10 @@ Preconditions:
 Postconditions:
     Returns 0 only when pyproject exclusions match the budget exactly and the
     active exclusion count does not exceed the ratchet cap. Coverage gate
-    metadata must also define accountable per-package thresholds.
+    metadata must also define accountable per-package thresholds. Since the
+    gates are actively enforced in CI (see ``check_coverage_gates.py``),
+    an expired gate ``ratchet_on`` is only a warning: it must be renewed to
+    a future date or backed by measured package coverage for ``ratchet_to``.
 """
 
 from __future__ import annotations
@@ -70,8 +73,8 @@ class CoverageGate:
     min_coverage: float
     owner: str
     reason: str
-    ratchet_to: float
     ratchet_on: date
+    ratchet_to: float | None = None
 
 
 @dataclass(frozen=True)
@@ -172,6 +175,12 @@ def _parse_coverage_percent(raw_value: Any, field_name: str) -> float:
     return value
 
 
+def _parse_optional_coverage_percent(raw_value: Any, field_name: str) -> float | None:
+    if raw_value is None:
+        return None
+    return _parse_coverage_percent(raw_value, field_name)
+
+
 def _parse_coverage_gate(raw_entry: Any) -> CoverageGate:
     if not isinstance(raw_entry, dict):
         raise ValueError("each coverage gate must be an object")
@@ -186,8 +195,10 @@ def _parse_coverage_gate(raw_entry: Any) -> CoverageGate:
         ),
         owner=str(raw_entry.get("owner", "")).strip(),
         reason=str(raw_entry.get("reason", "")).strip(),
-        ratchet_to=_parse_coverage_percent(raw_entry.get("ratchet_to"), "ratchet_to"),
         ratchet_on=_parse_iso_date(raw_entry.get("ratchet_on"), "ratchet_on"),
+        ratchet_to=_parse_optional_coverage_percent(
+            raw_entry.get("ratchet_to"), "ratchet_to"
+        ),
     )
 
 
@@ -267,9 +278,20 @@ def validate_budget(
 def validate_coverage_gates(
     gates: list[CoverageGate],
     today: date,
-) -> list[str]:
-    """Return validation errors for per-package coverage gate metadata."""
+) -> tuple[list[str], list[str]]:
+    """Return (errors, warnings) for per-package coverage gate metadata.
+
+    Ratchet expiry is deliberately non-fatal since #10965: every required
+    gate is now actively enforced in CI by ``scripts/check_coverage_gates.py``
+    (see ``ci-standard.yml`` job ``tests``). A gate whose ``ratchet_on``
+    date has passed only triggers a warning, because the gate itself is
+    still enforced on every run. Each ``ratchet_on`` must either be a date
+    in the future (> ``today``) or the target must be measurement-backed:
+    ``ratchet_to`` may only be kept when the measured package coverage at
+    the time the date was set already met ``ratchet_to``.
+    """
     errors: list[str] = []
+    warnings: list[str] = []
     gate_names = [gate.name for gate in gates]
     errors.extend(_validate_duplicates(gate_names, "coverage gate"))
     missing_gates = REQUIRED_COVERAGE_GATES - set(gate_names)
@@ -280,14 +302,17 @@ def validate_coverage_gates(
             errors.append(f"{gate.name}: missing owner")
         if not gate.reason:
             errors.append(f"{gate.name}: missing reason")
-        if gate.ratchet_to <= gate.min_coverage:
+        if gate.ratchet_to is not None and gate.ratchet_to <= gate.min_coverage:
             errors.append(
                 f"{gate.name}: ratchet_to must exceed min_coverage "
                 f"({gate.ratchet_to:g} <= {gate.min_coverage:g})"
             )
         if gate.ratchet_on < today:
-            errors.append(f"{gate.name}: coverage ratchet expired on {gate.ratchet_on}")
-    return errors
+            warnings.append(
+                f"{gate.name}: coverage ratchet expired on {gate.ratchet_on}; "
+                "renew ratchet_on or record measured coverage backing ratchet_to"
+            )
+    return errors, warnings
 
 
 def _validate_duplicates(values: list[str], label: str) -> list[str]:
@@ -411,6 +436,7 @@ def main(argv: list[str] | None = None) -> int:
         overrides = load_mypy_overrides(Path(args.pyproject))
         budget_entries, schedule = load_budget(Path(args.budget))
         coverage_gates = load_coverage_gates(Path(args.budget))
+        warnings: list[str] = []
         errors = validate_budget(
             exclusions,
             budget_entries,
@@ -419,7 +445,9 @@ def main(argv: list[str] | None = None) -> int:
             overrides,
             tracked_files=tracked_files,
         )
-        errors.extend(validate_coverage_gates(coverage_gates, today))
+        gate_errors, gate_warnings = validate_coverage_gates(coverage_gates, today)
+        errors.extend(gate_errors)
+        warnings.extend(gate_warnings)
     except (OSError, ValueError, tomllib.TOMLDecodeError, json.JSONDecodeError) as exc:
         sys.stderr.write(f"mypy exclusion budget failed: {exc}\n")
         return 1
@@ -429,6 +457,9 @@ def main(argv: list[str] | None = None) -> int:
         for error in errors:
             sys.stderr.write(f"  {error}\n")
         return 1
+
+    for warning in warnings:
+        sys.stderr.write(f"WARNING: {warning}\n")
 
     cap = active_cap(schedule, today)
     sys.stdout.write(

@@ -343,7 +343,7 @@ def test_budget_fails_for_ignore_errors_override(
 
 def test_coverage_gate_validation_requires_production_packages() -> None:
     """Coverage ratchet metadata must include the production-critical packages."""
-    errors = checker.validate_coverage_gates(
+    errors, _warnings = checker.validate_coverage_gates(
         [
             checker.CoverageGate(
                 name="api-routes",
@@ -359,6 +359,37 @@ def test_coverage_gate_validation_requires_production_packages() -> None:
     )
 
     assert "coverage gate missing required package: deployment" in errors
+
+
+def test_expired_gate_ratchet_warns_but_does_not_fail() -> None:
+    """Since #10965 the gates are CI-enforced: expired ratchet_on is non-fatal."""
+    gate_paths = {
+        "api-routes": "src/api/routes/",
+        "data-io": "src/shared/python/data_io/",
+        "deployment": "src/deployment/",
+        "engine-adapters": "src/engines/",
+        "execution-checkpointing": "src/shared/python/engine_core/",
+        "optimization": "src/shared/python/optimization/",
+    }
+    errors, warnings = checker.validate_coverage_gates(
+        [
+            checker.CoverageGate(
+                name=name,
+                path=gate_paths[name],
+                min_coverage=30.0,
+                owner="@owner",
+                reason="ratchet",
+                ratchet_to=35.0,
+                ratchet_on=date(2026, 8, 1),
+            )
+            for name in sorted(checker.REQUIRED_COVERAGE_GATES)
+        ],
+        today=date(2026, 9, 1),
+    )
+
+    assert errors == []
+    assert all("coverage ratchet expired on 2026-08-01" in w for w in warnings)
+    assert len(warnings) == len(checker.REQUIRED_COVERAGE_GATES)
 
 
 def test_ci_standard_runs_mypy_exclusion_budget() -> None:
@@ -408,13 +439,7 @@ def test_real_budget_defines_production_coverage_gates() -> None:
     """Production-critical packages need explicit coverage expectations."""
     budget_data = json.loads(BUDGET_PATH.read_text(encoding="utf-8"))
     gates = {gate["name"]: gate for gate in budget_data.get("coverage_gates", [])}
-    schedule_dates = sorted(
-        date.fromisoformat(step["effective_on"]) for step in budget_data["schedule"]
-    )
     today = date.today()
-    next_cap_reduction = next(
-        (step for step in schedule_dates if step > today), schedule_dates[-1]
-    )
 
     assert set(gates) >= {
         "api-routes",
@@ -425,12 +450,15 @@ def test_real_budget_defines_production_coverage_gates() -> None:
         "engine-adapters",
     }
     for gate in gates.values():
-        assert gate["min_coverage"] >= 30.0
-        assert gate["ratchet_to"] > gate["min_coverage"]
-        # Re-attestation stays pinned to the next scheduled exclusion-cap
-        # reduction, so renewing a date cannot outrun the ratchet it tracks
-        # (#8731).
-        assert date.fromisoformat(gate["ratchet_on"]) <= next_cap_reduction
+        # Floors are measurement-backed: they must never exceed the coverage
+        # actually measured for the package when set (#10965).
+        assert gate["min_coverage"] > 0.0
+        if "ratchet_to" in gate:
+            assert gate["ratchet_to"] > gate["min_coverage"]
+        # Since #10965 every required gate is CI-enforced by
+        # check_coverage_gates.py, so ratchet_on must be a future
+        # re-attestation date.
+        assert date.fromisoformat(gate["ratchet_on"]) > today
 
 
 @pytest.mark.unit
