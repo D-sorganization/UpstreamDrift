@@ -1,3 +1,17 @@
+## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
+
+Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):
+- **Path Pattern Extension (`scripts/ci/check_phantom_guard_paths.py`)**:
+  - Extends `ISSUE_PATH_PATTERN` with negative lookbehind boundary protection `(?<![\w/.-])` and recognizes repository paths under `scripts/` and `.github/workflows/` (and `.github/`) alongside `src/`, `tests/`, `rust_core/`, and `api/`.
+  - Prevents matching fragments in the middle of non-path slash sequences (such as `engines/api/core/...`).
+  - Strips trailing punctuation (`.,;:)'"`) from extracted paths.
+- **Parenthetical Prose Filtering**:
+  - Implements `_drop_parenthetical_prose_fragments` to parse parenthetical blocks `(...)`, split them on commas into fragments, and drop prose fragments that lack recognized code/configuration file extensions.
+  - Preserves legitimate file references inside parentheses (e.g. `(scripts/check_lod.py, tests/foo.py)`) while discarding prose slash alternatives (e.g. `(engines/api/core/shared/robotics)`).
+- **Verification (`tests/scripts/test_check_phantom_guard_paths.py`)**:
+  - Adds unit test coverage for `scripts/` and `.github/workflows/` path extraction.
+  - Adds regression test reproducing issue #10965 / PR #11113 verifying Rule 3 passes cleanly on real `scripts/` diffs and excludes parenthetical prose fragments.
+
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
