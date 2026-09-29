@@ -203,10 +203,19 @@ centres:
 
 What works: the trail heel comes up and the trail foot pivots on its toes,
 as the capture's does, and the lead foot rolls onto its outside edge. What
-does not: from 1.35 s the golfer leans back onto the trail toe (0.73-0.83 BW
-on it at 1.55-1.6 s while the lead foot carries nothing), and the unloaded
-lead foot then slides 0.2 m. In the capture the lead foot turns 30° in place
-and carries the finish. The run to impact is unaffected.
+does not: at 1.55-1.6 s the trail toe carries 0.73-0.83 BW while the lead
+foot carries nothing, and the unloaded lead foot then slides 0.2 m (the
+capture's turns 30° in place). The run to impact is unaffected.
+
+It is not the centre of mass. Measured along the line from the trail ankle
+(0) to the lead ankle (1), the model's centre of mass ends at 0.60 and its
+balance reference at 0.58; the capture's (`gs3dx_kinematic_grf`, moved to
+the joint centres' address-waist origin) ends at 0.54. `GS3DX_Neck` and
+`GS3DX_Shape`, with three contacts per foot, do the same and worse: support
+falls to zero near 1.4 s and the trail foot slides 0.55 m (pelvis 84 mm RMS
+after impact against the Human's 57). What differs from the capture is the
+trail foot: from 1.45 s it runs 60-105 mm ahead of its reference as it
+pivots, so it sits under the centre of mass and takes the load.
 
 ## Ball Contact
 
