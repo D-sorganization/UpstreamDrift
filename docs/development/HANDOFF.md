@@ -9,7 +9,7 @@
 - Implementation commit: `SELF`
 - Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
 - Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979)
-- Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T01:43Z)
+- Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T10:14Z)
 - Development log: `DL-#10950`
 
 ## Objective and Status
@@ -220,8 +220,8 @@
       `gs3dx_joint_keys` (block path + primitive); IK/fit helpers still hard-code j15/j18/j19 and
       are only used on neck-free variants. agy's `gs3dx_capture_head_frame` +
       `gs3dx_capture_address_transform` ported (reviewed).
-  26. #10979 human shape (2026-09-28): `GS3DX_Human` (`gs3dx_build_human`, `docs/HUMAN.md`,
-      942 compiled) = Neck with: the unused "Inertia Sensor" subsystem removed (-75); trunk,
+  26. #10979 human shape (2026-09-28/29): `GS3DX_Human` (`gs3dx_build_human`, `docs/HUMAN.md`,
+      965 compiled; current state in Next Steps item 2) = Neck with: the unused "Inertia Sensor" subsystem removed (-75); trunk,
       neck, shoulder, arm, forearm cylinders and the misaligned `ZeroMassHipReference` bar hidden
       (inertia kept) and massless ellipsoids drawn on each parent's exposed reference frame (a
       cylinder with custom frames shows only its end frames); head radii 90x90x105 mm;
@@ -318,25 +318,38 @@ Creator` (newline); find it by BlockType.
 
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
-2. #10979 human, in progress (2026-09-28/29 owner review of the renders):
-   - **Balance regression (open).** `GS3DX_Human` balance to impact FAILS where Neck passes:
-     pelvis 213 mm RMS (Neck 21), COM 193 mm, support drops to 0 (falls), peak 1.13 BW at
-     0.10 s. Suspect: the 100 N\*m/rad midfoot spring carries the toe-sphere load (toe points
-     ~7 cm past the MTP axis, so ~14 deg of collapse). Diagnostic `scratch/human/diag1.m`
-     (K = 100 / 2000 / 20000 via `gs3dx_contact_check(variables=)`, 0.5 s) decides it.
-     Likely design fix: carry the load at the ball of the foot (contact under the MTP axis)
-     and keep a toe-tip contact on the forefoot, within the 975 compiled cap.
-   - **Ball contact frame (code + test committed; test run pending).** `gs3dx_capture_markers` now returns
-     `.ball_time`/`.ball_frame` (head back at its address position along the target line):
-     477.3 / 477; peak speed (`.impact_frame` 476) is 16 cm before the ball; speed drops
-     50.7 -> 41.4 m/s across contact. Test `ball_contact_follows_peak_speed`. Renders of
-     "impact" must use `ball_frame`.
-   - **Neck too long (open).** Head centre 0.28 m above the shoulder line vs ~0.22 m
-     anthropometric (Drillis-Contini 0.182H to vertex); `NeckLength` = 10 in resolves via
-     slResolve but is not in the model workspace; `scratch/human/probe_neck.m` finds its
-     source. Target ~7.5 in, then re-aim `NeckAddress` and review all proportions.
-   - Then: rerun balance, re-render address/top/ball stills + videos, write the design
-     report, commit, push.
+2. #10979 human, in progress (2026-09-29, owner reviews of the renders). State:
+   - **Done, tested (human 9/9, render 4/5 + mesh test fixed pending rerun):** five
+     contacts per foot; fixed "Neck Address" transform; neck pivot at C7 (`NeckLength`
+     7.717 in; lift is `-lift*Q0(:,3)`); driver head = massless File Solid of
+     `models/gs3dx_driver_head.stl` (Tools `rate_of_closure` Driver 10.5,
+     `models/README_DRIVER_HEAD.md`; File Solid needs `UnitType Custom`); neck shape now
+     runs head centre -> 50 mm past C7 and a "Trapezius" ellipsoid on UpperTorsoTop joins
+     it to the shoulders (owner: neck gap; test `neck_joins_the_head_and_the_trunk`).
+     965 compiled / 788 uncompiled. Renderer returns `out.focus` (bug found by the mesh
+     test; fixed, rerun queued).
+   - **Start kick FIXED:** bisected with scratch `human/bisect/bisect_human.m` (Neck copy +
+     builder stages). Not the feet/midfoot/foot inertia: the neck address moved the address
+     COM (-4.7, -0.9, +5.2) mm while `BalanceCOMRef` was anchored at Neck's COM, so the
+     balance loop kicked both feet off the ground at t = 0. `gs3dx_build_human` now
+     re-anchors `BalanceCOMRef` after saving (1 ms balance-off `gs3dx_contact_check`;
+     `report.com_shift`; test `balance_reference_is_anchored_at_this_body`). Support now
+     0.46-1.97 BW (was 0-10.3).
+   - **Balance drift (OPEN, top priority):** full run to impact (`human/balance_human3.m`):
+     pelvis 159 mm RMS (423 at impact), COM horizontal 142 mm RMS, ankle lift 79/76 mm;
+     `GS3DX_Neck` 21.6 mm. Running `human/balance_human4.m`: same with `MidfootStiffness`
+     1e5 (locked) and 800 N\*m/rad (stance-realistic) to test whether the compliant midfoot
+     (heels rising) is the cause. If locked recovers ~21 mm, pick a literature MTP stiffness
+     and document it; if not, compare per-contact loads with Neck's over the swing. Never
+     loosen tolerances.
+   - **Trap:** a failed `gs3dx_build_human` leaves `GS3DX_Human.slx` as a copy of
+     `GS3DX_Neck`; check size/mtime before trusting a run. `gs3dx_render` and
+     `gs3dx_contact_check` close the models they load: tests reload after them.
+   - Then: swing videos (`gs3dx_render ... video=`) for the owner, DESIGN_REPORT balance
+     status + limitations, commit, push.
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).
+5. Reproducibility: three inputs exist only in model workspaces (FitBalance `com_offset`,
+   Shape `com0`, Neck `NeckReference`); add a tool per input and save the values beside
+   the models so `docs/DESIGN_REPORT.md#reproducing-the-model` runs end to end.

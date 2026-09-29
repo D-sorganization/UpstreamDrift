@@ -8,6 +8,8 @@ classdef test_gs3dx_render < matlab.unittest.TestCase
 %        matches its FK pose and dimensions to 1e-9 m.
 %     3. The drawn brick of 'Lower Body/L Foot' matches its FK pose and
 %        dimensions to 1e-9 m.
+%     4. GS3DX_Human's File Solid driver head is drawn from its STL (mm)
+%        in its FK pose, and FOCUS centres a close-up on it.
 
     properties
         info struct
@@ -131,6 +133,26 @@ classdef test_gs3dx_render < matlab.unittest.TestCase
             testCase.verifyEqual(max(abs(V_local(1, :))), dims(1)/2, 'AbsTol', 1e-9, 'Brick dx/2');
             testCase.verifyEqual(max(abs(V_local(2, :))), dims(2)/2, 'AbsTol', 1e-9, 'Brick dy/2');
             testCase.verifyEqual(max(abs(V_local(3, :))), dims(3)/2, 'AbsTol', 1e-9, 'Brick dz/2');
+        end
+
+        function mesh_solid_is_drawn_from_its_stl_and_focus_follows_it(testCase)
+            % GS3DX_Human's driver head is a File Solid (STL in mm): drawn
+            % from the file in its FK pose, and a close-up follows it.
+            mdl = char(gs3dx_names().variants.human);
+            load_system(mdl);
+            testCase.addTeardown(@() close_system(mdl, 0));
+            out = gs3dx_render(mdl, testCase.ik, stills=1, output_dir=tempdir, ...
+                still_files="mesh_focus.png", focus="Driver Head", focus_width=0.15);
+            load_system(mdl);   % gs3dx_render closes what it loaded
+            head = out.solids(endsWith([out.solids.name], "/Driver Head"));
+            testCase.verifyEqual(head.shape, "Mesh");
+            tr = stlread(which(get_param(head.block, 'ExtGeomFileName')));
+            testCase.verifyEqual(sort(range(head.vertices_local, 2)), ...
+                sort(range(tr.Points, 1).' / 1000), 'AbsTol', 1e-9, 'extent of the STL, mm to m');
+            V = head.pose.R(:, :, 1) * head.vertices_local + head.pose.P(:, 1);
+            testCase.verifyLessThan(max(vecnorm(head.vertices_world{1} - V)), 1e-9, 'drawn in its FK pose');
+            testCase.verifyEqual(out.focus(:, 1), head.pose.P(:, 1), 'AbsTol', 1e-12, 'close-up centre');
+            testCase.verifyError(@() gs3dx_render(mdl, testCase.ik, focus="No Such Solid"), 'gs3dx:render');
         end
     end
 end
