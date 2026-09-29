@@ -1,4 +1,20 @@
-# Current Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+# Current Handoff — Archive Finished Development-Log Entries To DEVELOPMENT_LOG_ARCHIVE_2026.md
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-dl-archive` (baseline `origin/main` 710465816)
+- Branch: `claude/dl-archive-2026`
+- Commit: `SELF`
+- Pull request: see branch (docs-only; opened as draft, SPEC row keyed by the PR number).
+- Objective: `docs/development/DEVELOPMENT_LOG.md` was 345,986 bytes and failed Repository_Management's `shared_scripts/development_log.py` `[size_ceiling]` (200,000 bytes).
+- Done: 142 entries moved verbatim, in document order, to the new `docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md`: 135 `shipped` plus 7 `completed` (DL-#8932, DL-#10510, DL-#10511, DL-#10512, DL-#10513, DL-#10515, DL-#10516; `completed` is not a valid state, but every one of their PRs is merged, and without them the log stays at 203,441 bytes). There were no `abandoned` entries. Nothing was reworded or renumbered, live entries keep their order, and section headings are unchanged. The log is now 191,326 bytes.
+- The archive header matches the archiver's `# Development Log Archive — 2026` so `development_log.py --archive` can prepend later runs to it.
+- Validation: `python shared_scripts/development_log.py --repo-root <worktree>` (from Repository_Management main `f49f9829`) no longer reports `size_ceiling`. Per-finding diff against the baseline shows no new findings. 68 findings went away with the moved entries, including the `duplicate_entry` pairs for DL-#11034 and DL-#10336. A line-multiset check confirms every non-blank line of the old log is present exactly once across the log and the archive.
+- Known remaining (pre-existing, reported, not fixed): `wip_ceiling`: the validator counts 112 active entries against a cap of 75 (by State field there are 41 `in_progress` and 75 `in_review`; the validator skips headings that use `—` instead of `·`); `portfolio_wip_breach`: 41 `in_progress` against the 'golf' WIP limit of 8. Also still present: the `ready` state (DL-#10799), entries without a State (DL-#9546, DL-#9349), duplicates DL-#10381/DL-#10943, and many `unusable_last_verified` findings.
+- Next step: the owner parks or ships `in_progress`/`in_review` entries to bring the log within WIP 8 / active 75 (the list is in the PR body).
+
+---
+
+# Past Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `/tmp/ud-wt-10965` (baseline `origin/main` 64962e8d6)
