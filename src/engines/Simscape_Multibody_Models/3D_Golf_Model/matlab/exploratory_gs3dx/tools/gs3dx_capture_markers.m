@@ -18,7 +18,12 @@ function cap = gs3dx_capture_markers(file)
 %     .club_head, .club_grip  3 x frames centroids of the two club marker
 %               clusters (head = the one farther from the wrists at
 %               address); NaN where a cluster marker is missing
-%     .impact_frame  frame (1-based) of peak club-head cluster speed
+%     .impact_frame  frame (1-based) of peak club-head cluster speed; the
+%               head peaks just before it reaches the ball
+%     .ball_time    capture frame (fractional, 1-based) at which the club
+%               head, moving toward the target, returns to its address
+%               position along the target line: ball contact
+%     .ball_frame   round(.ball_time)
 %     .target_frame  3x3 [facing, lateral, up] columns at address (frame 1):
 %               lateral is the horizontal RAnkleOut -> LAnkleOut direction
 %               (toward the target for a right-handed golfer), up is +Z and
@@ -57,6 +62,19 @@ function cap = gs3dx_capture_markers(file)
     [cap.club_head, cap.club_grip] = local_club(zup, labels, cap.marker);
     [~, cap.impact_frame] = max(vecnorm(diff(cap.club_head, 1, 2)));
     cap.target_frame = local_target_frame(cap.marker);
+    [cap.ball_time, cap.ball_frame] = local_ball(cap.club_head, cap.target_frame(:, 2), cap.impact_frame);
+end
+
+function [t, f] = local_ball(head, lateral, impact)
+% First crossing, from the trail side, of the head's address position along
+% the target line, searched from 30 frames before peak speed.
+    y = lateral.' * (head - head(:, 1));
+    k = find(y(1:end - 1) < 0 & y(2:end) >= 0);
+    k = k(k >= impact - 30);
+    assert(~isempty(k), 'gs3dx:capture', 'The club head never returns to its address position');
+    k = k(1);
+    t = k + -y(k) / (y(k + 1) - y(k));
+    f = round(t);
 end
 
 function S = local_target_frame(marker)

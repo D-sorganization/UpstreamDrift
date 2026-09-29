@@ -67,6 +67,20 @@ classdef test_gs3dx_capture < matlab.unittest.TestCase
             testCase.verifyError(@() gs3dx_kinematic_grf(trunk="sternum"), 'MATLAB:validators:mustBeMember');
         end
 
+        function ball_contact_follows_peak_speed(testCase)
+            % Peak head speed comes a frame before the ball; at ball contact
+            % the head is back at its address position and loses speed.
+            c = gs3dx_capture_markers();
+            testCase.verifyEqual(c.impact_frame, 476);
+            testCase.verifyEqual(c.ball_frame, 477);
+            testCase.verifyGreaterThan(c.ball_time, c.impact_frame);
+            testCase.verifyLessThan(c.ball_time, c.impact_frame + 3);
+            y = c.target_frame(:, 2).' * (c.club_head - c.club_head(:, 1));
+            testCase.verifyLessThan(abs(y(c.ball_frame)), 0.06, 'head along the target line at ball contact (m)');
+            v = vecnorm(diff(c.club_head, 1, 2));
+            testCase.verifyLessThan(v(c.ball_frame + 1), 0.9 * v(c.impact_frame), 'speed lost to the ball');
+        end
+
         function capture_has_no_ground_reaction_data(testCase)
             testCase.verifyEqual(testCase.cap.force_plates_used, 0);
             testCase.verifyEqual(testCase.cap.n_analog, 0);
