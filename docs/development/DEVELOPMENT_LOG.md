@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #10965
+- **Branch:** `bot/issue-10965-coverage-gate-authority`
+- **Paths:** `scripts/check_coverage_gates.py`, `scripts/check_mypy_exclusion_budget.py`, `scripts/config/mypy_exclusion_budget.json`, `.github/workflows/ci-standard.yml`, `tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`
+- **Started:** 2026-09-28
+- **Last verified:** 2026-09-28 — 29 focused script-checker tests passed; checker smoke run against a real coverage.json fixture (strict exit 1 on unmatched, lax warning + exit 0).
+- **Summary:** Budget JSON is the single per-package coverage gate authority: `check_coverage_gates.py` reads the 6 gates from `mypy_exclusion_budget.json`, matches by path prefix, and `--strict` now fails on gates matching zero files (warning only without the flag). The `tests` CI job emits `coverage.json` and runs the checker with `--strict`. Gate floors set to locally measured coverage rounded DOWN (api-routes 84.3, data-io 50.1, engine-core 22.4, deployment 48.4, optimization 49.9, engines 7.1) with `ratchet_on` 2027-01-01; expired gate ratchets in `check_mypy_exclusion_budget.py` are now non-fatal warnings.
+- **Next step:** CI green, then ready and arm the PR.
+
 ### DL-#11083 — Motion Matching Board Review
 
 - **State:** in_review

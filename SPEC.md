@@ -1,3 +1,17 @@
+## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+
+Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
+- **Gate Checker (`scripts/check_coverage_gates.py`)**:
+  - Already loads the gate set directly from `scripts/config/mypy_exclusion_budget.json` (DRY, no duplicated gate list); gates match coverage report files by repository-relative path prefix using `summary.num_statements`/`covered_lines` (pytest `--cov-report=json` shape).
+  - `--strict` is now functional: a gate that matches zero files exits 1. Without `--strict`, unmatched gates print a `WARNING ... were skipped` line and exit 0 (never pass silently).
+- **Budget Validator (`scripts/check_mypy_exclusion_budget.py`)**:
+  - `validate_coverage_gates` returns `(errors, warnings)`; because every required gate is CI-enforced, an expired `ratchet_on` is non-fatal (warning only) and must be renewed to a future date or backed by measured package coverage. `ratchet_to` is optional.
+- **CI (`.github/workflows/ci-standard.yml`)**:
+  - The `tests` job emits `--cov-report=json:coverage.json` alongside the XML report, and a new `Enforce Budget Package Coverage Gates` step runs `python3 scripts/check_coverage_gates.py --report coverage.json --strict` after the per-package threshold enforcer.
+- **Measured floors** (`min_coverage` set to measurement rounded DOWN to 0.1, `ratchet_on` 2027-01-01): api-routes 84.3% (5221 stmts), data-io 50.1% (2891), execution-checkpointing 22.4% (2521), deployment 48.4% (1362), optimization 49.9% (2815), engine-adapters 7.1% (51393; optional-engine packages only covered when their backend is installed).
+- **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
+  - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
+
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
 Resolves test-order and module-identity pollution in `test_force_plate_stitching.py` under parallel execution:
