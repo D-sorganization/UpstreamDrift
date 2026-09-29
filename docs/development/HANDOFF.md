@@ -571,7 +571,7 @@ tests/ui/c3d_viewer`: 67 failed / 2686 passed here vs 65 / 2687 on `b8c27a7d2`; 
 
 ## Motion Matching Review Packet
 
-Owner-requested review on `docs/motion-matching-board-review`, PR pending. See
+Owner-requested review on `docs/motion-matching-board-review`, PR #11083. See
 [Board Packet](2026-09-28-motion-matching-board-review.md): 18 draft issue bodies,
 main and GS3DX branch evidence, metrics and licensing budgets, and Shadow Tracker
 integration/qualification gaps. No implementation issues claimed or closed.

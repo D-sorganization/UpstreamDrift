@@ -17,12 +17,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-MMR-REVIEW — Motion Matching Board Review
+### DL-#11083 — Motion Matching Board Review
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** owner-requested documentation review; tracked by its PR, pending
-- **PR:** pending
+- **Issue:** owner-requested documentation review; tracked by PR #11083
+- **PR:** #11083
 - **Branch:** `docs/motion-matching-board-review`
 - **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
 - **Started:** 2026-09-28
