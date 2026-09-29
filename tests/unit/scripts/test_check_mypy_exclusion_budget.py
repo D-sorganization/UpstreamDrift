@@ -89,6 +89,7 @@ def _budget(tmp_path: Path, entries: list[dict[str, str]], cap: int = 5) -> Path
     return _write(tmp_path / "scripts" / "config" / "budget.json", "\n".join(lines))
 
 
+@pytest.mark.unit
 def test_budget_passes_when_pyproject_matches_metadata_and_cap(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -130,6 +131,7 @@ def test_budget_passes_when_pyproject_matches_metadata_and_cap(
     assert "mypy exclusion budget passed" in capsys.readouterr().out
 
 
+@pytest.mark.unit
 def test_budget_fails_for_missing_owner(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -163,6 +165,7 @@ def test_budget_fails_for_missing_owner(
     assert "missing owner" in capsys.readouterr().err
 
 
+@pytest.mark.unit
 def test_budget_fails_for_expired_entry(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -196,6 +199,7 @@ def test_budget_fails_for_expired_entry(
     assert "expired on 2026-05-02" in capsys.readouterr().err
 
 
+@pytest.mark.unit
 def test_budget_fails_when_pyproject_adds_unbudgeted_exclusion(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -229,6 +233,7 @@ def test_budget_fails_when_pyproject_adds_unbudgeted_exclusion(
     assert "not present in budget" in capsys.readouterr().err
 
 
+@pytest.mark.unit
 def test_budget_fails_when_count_exceeds_current_schedule_cap(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -270,6 +275,7 @@ def test_budget_fails_when_count_exceeds_current_schedule_cap(
     assert "exclusions exceed active cap" in capsys.readouterr().err
 
 
+@pytest.mark.unit
 def test_budget_fails_when_schedule_cap_increases() -> None:
     """Ratchet schedules can hold steady or shrink, but cannot loosen."""
     errors = checker.validate_budget(
@@ -298,6 +304,7 @@ def test_budget_fails_when_schedule_cap_increases() -> None:
     assert any("max_exclusions increases" in error for error in errors)
 
 
+@pytest.mark.unit
 def test_budget_fails_for_ignore_errors_override(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -341,6 +348,7 @@ def test_budget_fails_for_ignore_errors_override(
     assert "ignore_errors=true" in capsys.readouterr().err
 
 
+@pytest.mark.unit
 def test_coverage_gate_validation_requires_production_packages() -> None:
     """Coverage ratchet metadata must include the production-critical packages."""
     errors, _warnings = checker.validate_coverage_gates(
@@ -361,6 +369,7 @@ def test_coverage_gate_validation_requires_production_packages() -> None:
     assert "coverage gate missing required package: deployment" in errors
 
 
+@pytest.mark.unit
 def test_expired_gate_ratchet_warns_but_does_not_fail() -> None:
     """Since #10965 the gates are CI-enforced: expired ratchet_on is non-fatal."""
     gate_paths = {
@@ -392,6 +401,7 @@ def test_expired_gate_ratchet_warns_but_does_not_fail() -> None:
     assert len(warnings) == len(checker.REQUIRED_COVERAGE_GATES)
 
 
+@pytest.mark.unit
 def test_ci_standard_runs_mypy_exclusion_budget() -> None:
     """The ratchet is only useful when the main CI gate runs it."""
     workflow = yaml.safe_load(
@@ -418,6 +428,7 @@ def test_ci_standard_runs_mypy_exclusion_budget() -> None:
     ]
 
 
+@pytest.mark.unit
 def test_real_budget_has_next_reduction_before_current_expiry() -> None:
     """The type-debt ratchet needs a concrete near-term shrink milestone."""
     budget_entries, schedule = checker.load_budget(BUDGET_PATH)
@@ -435,6 +446,7 @@ def test_real_budget_has_next_reduction_before_current_expiry() -> None:
     assert min(entry.effective_on for entry in future_reductions) <= earliest_expiry
 
 
+@pytest.mark.unit
 def test_real_budget_defines_production_coverage_gates() -> None:
     """Production-critical packages need explicit coverage expectations."""
     budget_data = json.loads(BUDGET_PATH.read_text(encoding="utf-8"))
