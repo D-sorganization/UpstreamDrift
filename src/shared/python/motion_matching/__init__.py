@@ -68,6 +68,15 @@ if TYPE_CHECKING:
     )
     from .plot_trajectory_overlay import plot_trajectory_overlay
     from .polynomial_torque import POLY_DEGREE, evaluate_polynomial_torque
+    from .named_state import (
+        NAMED_STATE_SCHEMA_VERSION,
+        NamedStateManifest,
+        NamedStateConformanceAdapter,
+        CaptureAttachmentDeclaration,
+        QuaternionVelocityMap,
+        SmallBodyVirtualWorkOracle,
+        validate_named_state_conformance,
+    )
     from .sim_out import FitResult, SimFitResult, SimOut
     from .synthesize_target_from_coefficients import (
         THETA_BOUNDS,
@@ -160,6 +169,13 @@ __all__ = [
     "plot_error_timecourse",
     "plot_fit_quality_card",
     "plot_trajectory_overlay",
+    "NAMED_STATE_SCHEMA_VERSION",
+    "NamedStateConformanceAdapter",
+    "NamedStateManifest",
+    "CaptureAttachmentDeclaration",
+    "QuaternionVelocityMap",
+    "SmallBodyVirtualWorkOracle",
+    "validate_named_state_conformance",
     "evaluate_polynomial_torque",
     "synthesize_target_from_coefficients",
     "validate_theta",
@@ -231,6 +247,13 @@ _LAZY_EXPORTS = {
     "must_be_regularizer_kind": ".validators",
     "must_be_unit_quaternion_rows": ".validators",
     "must_have_fields": ".validators",
+    "NAMED_STATE_SCHEMA_VERSION": ".named_state",
+    "NamedStateManifest": ".named_state",
+    "NamedStateConformanceAdapter": ".named_state",
+    "CaptureAttachmentDeclaration": ".named_state",
+    "QuaternionVelocityMap": ".named_state",
+    "SmallBodyVirtualWorkOracle": ".named_state",
+    "validate_named_state_conformance": ".named_state",
 }
 
 

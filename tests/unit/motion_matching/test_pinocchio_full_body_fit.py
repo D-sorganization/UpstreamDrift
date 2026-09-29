@@ -200,3 +200,65 @@ def test_toy_assembly_and_mock_fddp_solve(monkeypatch: pytest.MonkeyPatch) -> No
     assert receipt.final_cost == pytest.approx(12.34)
     assert receipt.xs.shape == (3, 8)
     assert receipt.us.shape == (2, 4)
+
+
+# ---------------------------------------------------------------------------
+# Attachment receipt club-name conformance (#11109 / PR #11122)
+# ---------------------------------------------------------------------------
+
+
+def test_attachment_club_name_parses_nested_dict_and_scalar_forms() -> None:
+    """Receipts store `club` as `{'name': 'driver', ...}` objects, plain strings, or nothing."""
+    from src.engines.physics_engines.pinocchio.python import (
+        full_body_fit as fit_subject,
+    )
+
+    resolve = fit_subject.raw_attachment_club_name
+    assert resolve({"name": "driver", "loft_deg": 9.0}) == "driver"
+    assert resolve("driver") == "driver"
+    assert resolve({"name": "iron7"}) == "iron7"
+    assert resolve(None) is None
+    assert resolve({}) is None
+    assert resolve({"no_name": 1}) is None
+
+
+def test_normalize_club_name_resolves_iron_variants() -> None:
+    """All iron variants (iron, iron7) normalise to `iron`; driver stays driver."""
+    from src.engines.physics_engines.pinocchio.python import (
+        full_body_fit as fit_subject,
+    )
+
+    normalize = fit_subject.normalize_club_name
+    assert normalize("iron") == "iron"
+    assert normalize("iron7") == "iron"
+    assert normalize("Iron7") == "iron"
+    assert normalize("driver") == "driver"
+    assert normalize(None) is None
+    assert normalize("") is None
+
+
+def test_load_inputs_club_comparison_accepts_standard_calibrated_receipts() -> None:
+    """The calibrated-fit path (nested club dict, iron variant names) must not raise contamination errors."""
+    from src.engines.physics_engines.pinocchio.python import (
+        full_body_fit as fit_subject,
+    )
+
+    # Exactly the receipt/decision pair the standard calibrated fits produce:
+    # an iron7 capture receipt attached to an iron document and vice versa.
+    assert (
+        fit_subject.normalize_club_name(fit_subject.raw_attachment_club_name(None))
+        is None
+    )
+    receipt_club = fit_subject.normalize_club_name(
+        fit_subject.raw_attachment_club_name({"name": "iron7", "make": "steel"})
+    )
+    doc_club = fit_subject.normalize_club_name("iron")
+    assert receipt_club == doc_club == "iron"
+
+    # Cross-club contamination (driver receipt on an iron fit) must still fail closed
+    assert (
+        fit_subject.normalize_club_name(
+            fit_subject.raw_attachment_club_name({"name": "driver"})
+        )
+        != doc_club
+    )
