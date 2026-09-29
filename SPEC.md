@@ -84,6 +84,25 @@ Establishes the authoritative marker observation manifest schema, holdout frame 
 - **Verification (`tests/unit/tour_baselines/test_observation_manifest.py`)**:
   - 17 unit tests covering schema validation, holdout disjointness, frozen manifest conformance (frames, rate, SHA, per-marker frame-level validity), pooled vs. median RMS divergence, masked NaN handling, fail-closed non-finite coordinate rejection, frozen-validity metric binding, calibration entry-point slicing invariants, and the event-based holdout boundary.
 
+## Named-State and Torque-Transfer Conformance (#11109)
+
+Implements named-state coordinate validation, double-cover invariant angular velocity mapping, and virtual work duality verification:
+- **Named-State Schema & Validation (`src/shared/python/motion_matching/named_state.py`)**:
+  - Implements `NamedStateManifest` under schema `named-state-conformance/1.0.0` validating coordinate names, velocity names, control names, armature identifiers, and capture provenance. Rejects unknown names, missing names, and non-finite values.
+  - Freezes `armature` and `interpolation` into read-only mappings at construction so the manifest contents and its recorded SHA cannot be mutated underneath recorded identities.
+  - Enforces deterministic, key-order invariant state vector packing preventing forward kinematics drift under dictionary permutations.
+- **Quaternion Angular Velocity Mapping (`QuaternionVelocityMap`)**:
+  - Implements continuous angular velocity extraction using the SO(3) logarithmic map over the shortest geodesic arc.
+  - Enforces antipodal double-cover sign invariance: $q$ and $-q$ evaluate to identical continuous angular velocities.
+- **Virtual Work & Small-Body Mechanics (`SmallBodyVirtualWorkOracle`)**:
+  - Verifies exact torque-force duality ($\tau = J^T F_{\text{tip}}$) and virtual work equality ($\tau^T \delta q = F^T \delta x$) across arbitrary generalized coordinate permutations.
+- **Cross-Club & Capture Replay Invariants (`CaptureAttachmentDeclaration`)**:
+  - Validates capture provenance, comparing the full attachment identity (club, document ID, document SHA-256, calibration hash, grip frame ID), strictly failing closed if iron capture runs attempt to reuse driver attachment receipts, and enforcing integrator tolerance fidelity between solve and replay.
+- **Full-Body Fit Integration (`src/engines/physics_engines/pinocchio/python/full_body_fit.py`)**:
+  - Integrates club-type attachment declarations and solver tolerance validation into `load_inputs`; the cross-club check parses nested club objects (`{"name": ...}`) and normalises iron variants (`iron7` -> `iron`) before comparing, so standard calibrated fits no longer raise false contamination errors.
+- **Verification & Testing (`tests/unit/motion_matching/test_named_state_conformance.py`)**:
+  - Unit tests covering key-order invariant packing, double-cover invariance, torque-force virtual work duality, fail-closed cross-club validations, full attachment identity, manifest mapping immutability, and the curated facade exports.
+
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
 Resolves test-order and module-identity pollution in `test_force_plate_stitching.py` under parallel execution:
@@ -7180,6 +7199,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11123 | Head/trunk/grip diagnostic receipts (#11106, first tranche): compose the calibrated attachment rotation into the observed SO(3) orientation residual before evaluation, require `receipt_sha256` on schema-1.0 receipt load, validate grip/clubface calibration frame endpoints, and freeze `marker_residuals_mm` receipts against post-construction mutation. |
 | 2026-09-29 | #11118 | Tour-baseline observation manifests (#11105): freeze per-marker frame-level validity spans derived from the sha-verified canonical captures, bind metric evaluation to the frozen frame-by-marker mask through a public manifest contract, enforce holdout protection inside the real calibration entry points by slicing manifest calibration frames, start the holdout at the recorded top-of-backswing event (driver frame 397, iron 394), make `markers` immutable, and regenerate the shared Tools divergence inventory from a full clone. |
 | 2026-09-29 | #11121 | Shadow Tracker fits fail closed on unavailable or unqualified backends, empty PTS windows, incomplete mask coverage and unknown frame timing; optimizer execution status propagates into result bundles; checkpoints fingerprint full camera calibration and invalidate on mask or camera edits (registered renderers refresh their camera maps); bundle replacement publishes through a single atomic directory swap (#11111). |
+| 2026-09-29 | #11122 | Named-state conformance: capture attachment identity checks compare document SHA-256 and grip frame ID, `NamedStateManifest` freezes `armature`/`interpolation` mappings at construction, the seven facade symbols join `motion_matching.__all__`, and `load_inputs` parses nested club objects and normalises `iron7` to `iron` so standard calibrated fits no longer raise false cross-club contamination errors (#11109). |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |
