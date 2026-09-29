@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T12:23:00Z",
+  "generated_at": "2026-09-29T12:51:19Z",
   "rows": [
     {
       "acceptance": null,
@@ -2534,11 +2534,11 @@
       "horizon_s": null,
       "lane": "replays",
       "metrics": {
-        "club_marker_rmse_m": null,
-        "early_marker_rmse_m": null,
+        "club_marker_rmse_m": 0.015952762868635062,
+        "early_marker_rmse_m": 0.01142617956954139,
         "pelvis_yaw_rmse_rad": null,
-        "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
+        "terminal_marker_rmse_m": 0.046305405150117544,
+        "whole_marker_rmse_m": 0.026365350715109214
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/replays/drake_receipt.json",
@@ -2557,11 +2557,11 @@
       "horizon_s": null,
       "lane": "replays",
       "metrics": {
-        "club_marker_rmse_m": null,
-        "early_marker_rmse_m": null,
+        "club_marker_rmse_m": 0.015955421510975575,
+        "early_marker_rmse_m": 0.011426891719752068,
         "pelvis_yaw_rmse_rad": null,
-        "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
+        "terminal_marker_rmse_m": 0.04630540451857026,
+        "whole_marker_rmse_m": 0.026366145791017103
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/replays/mujoco_receipt.json",
@@ -4077,7 +4077,7 @@
         "mot": null,
         "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
       },
-      "candidate_sha": null,
+      "candidate_sha": "4f65a8d6caec41e6c6370dc15773799e0d2812946267b22607fa8a56cede4758",
       "capture": "driver",
       "engine": "tools",
       "horizon_s": null,
@@ -4087,7 +4087,7 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
+        "whole_marker_rmse_m": 0.5670746802628351
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json",
@@ -4105,7 +4105,7 @@
         "mot": null,
         "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
       },
-      "candidate_sha": null,
+      "candidate_sha": "c8e4b704e85c39f2adad983b479d69e8aa5a2b31f94b0a0ed3840092bad9d95c",
       "capture": "iron",
       "engine": "tools",
       "horizon_s": null,
@@ -4115,7 +4115,7 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
+        "whole_marker_rmse_m": 0.4251354761242689
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json",
@@ -4133,7 +4133,7 @@
         "mot": null,
         "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
       },
-      "candidate_sha": null,
+      "candidate_sha": "6622df562122e18aedcececa89569fc658b45b67f1640cab9a522ba1b92168ea",
       "capture": "driver",
       "engine": "tools",
       "horizon_s": null,
@@ -4143,7 +4143,7 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
+        "whole_marker_rmse_m": 0.4896338751087979
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json",
@@ -4161,7 +4161,7 @@
         "mot": null,
         "npz": "docs/plans/tour_baselines/evidence/tb04_driver_baseline_package.npz"
       },
-      "candidate_sha": null,
+      "candidate_sha": "a65b27190b4ba5e474655d68f11627d45fb05728ad25dbbb5efbaaba858d46b1",
       "capture": "iron",
       "engine": "tools",
       "horizon_s": null,
@@ -4171,7 +4171,7 @@
         "early_marker_rmse_m": null,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
+        "whole_marker_rmse_m": 0.41483808523039944
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json",
@@ -4768,7 +4768,7 @@
             "unit": "m"
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -4832,7 +4832,7 @@
             "unit": ""
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "required_max_closure_residual_m",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -4840,7 +4840,7 @@
             "unit": ""
           },
           {
-            "measured": 1.8289190783135055e-5,
+            "measured": 1.8289190783135055e-05,
             "name": "required_max_closure_residual_rad",
             "reason": "Required finite G1 measurement",
             "status": "passed",
