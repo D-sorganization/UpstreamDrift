@@ -68,6 +68,12 @@
       "expires_on": "2026-11-30"
     },
     {
+      "path": "docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md",
+      "owner": "@maintainers",
+      "reason": "Append-only yearly archive of finished development-log entries, moved verbatim so the live log stays under the fleet validator's 200 KB ceiling (#11152); review at year end.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "docs/development/HANDOFF.md",
       "owner": "@maintainers",
       "reason": "Active development turnover document tracking across workstreams; pending topic decomposition.",
