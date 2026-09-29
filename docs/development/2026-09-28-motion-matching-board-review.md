@@ -69,9 +69,9 @@ The board demonstration should show synchronized measured marker dots, fitted ri
 
 ### Preserve and Qualify the New Work
 
-Pinned branch authorities: [FIT](https://github.com/D-sorganization/UpstreamDrift/blob/752a94fdd9444f98b5e6f9a39b6e1638ffdb269e/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/docs/FIT.md), [SHAPE](https://github.com/D-sorganization/UpstreamDrift/blob/752a94fdd9444f98b5e6f9a39b6e1638ffdb269e/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/docs/SHAPE.md), [NECK](https://github.com/D-sorganization/UpstreamDrift/blob/752a94fdd9444f98b5e6f9a39b6e1638ffdb269e/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/docs/NECK.md), [HUMAN](https://github.com/D-sorganization/UpstreamDrift/blob/752a94fdd9444f98b5e6f9a39b6e1638ffdb269e/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/docs/HUMAN.md), and [Block Budget](https://github.com/D-sorganization/UpstreamDrift/blob/752a94fdd9444f98b5e6f9a39b6e1638ffdb269e/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/docs/BLOCK_BUDGET_FINDINGS.md).
+Pinned branch authorities: [GS3DX Documentation at the Reviewed SHA](https://github.com/D-sorganization/UpstreamDrift/tree/752a94fdd9444f98b5e6f9a39b6e1638ffdb269e/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/docs). Read `FIT.md`, `SHAPE.md`, `NECK.md`, `HUMAN.md` and `BLOCK_BUDGET_FINDINGS.md` for the reported experiments.
 
-The changes address real limitations: coordinate singularities, unrealistic mass distribution, hand geometry, missing legs/ground, and missing neck motion. Do not recreate those fixes as new issues. Next work is to make the variants reproducible and reconcile their fitting, sensing, visualization and acceptance contracts. In particular:
+The branch addresses singularities, mass distribution, grip, legs/ground and neck motion. Qualify and integrate these improvements rather than recreating them:
 
 - The 80 kg subject mass is an assumption; the roughly 80.393 kg system includes the club. Capture kinematics do not identify absolute mass or validate muscle forces.
 - The original saved drive was ill-conditioned; equivalent variants were checked on a stable impact drive. That equivalence is useful but does not qualify the original drive or full capture.
@@ -121,7 +121,7 @@ For automated masks, benchmark a pinned provider rather than promising a model n
 
 ## Draft GitHub Issue Bodies
 
-Each **MMR** ID is local to this packet. Suggested labels are `tier:strong` plus existing domain labels; priorities below are proposed scheduling priorities, not automatically applied labels. Owner is a responsible team/role, not an assignment to another live agent. Effort is relative: S = bounded contract/docs slice, M = integration across a few boundaries, L = native research/qualification campaign. Every implementation slice must first reconcile current issues, check the lease, claim its actual issue, and name one acceptance owner. Existing thresholds stay frozen unless a separately reviewed evidence-backed contract change is approved.
+MMR IDs are local proposals. Suggested labels: `tier:strong` and existing domain labels. Owners are roles, not agent assignments. Effort: M = integration; L = native research/qualification. Before execution, reconcile existing work, check/post an issue lease and name an acceptance owner. Threshold changes require separately reviewed evidence.
 
 ### MMR-01 — Generate One Truthful Matching Status and Comparison Ledger
 
@@ -359,7 +359,7 @@ Completion requires both clubs, complete requested time coverage, repeatable nat
 
 ## Review Validation
 
-Review checks and limitations are recorded here after execution. Numerical findings above are read from committed evidence or explicitly attributed branch reports; none are newly measured athlete or engine results. The initial isolated-worktree test attempt failed collection because its Tools submodule was not initialized; the exact pin was subsequently initialized before rerunning. This environment setup failure is not reported as a matching defect.
+Numbers are committed evidence or attributed branch reports, not newly measured results. Initial test collection failed before the isolated worktree Tools pin was initialized; the rerun below passed. This setup failure is not a matching defect.
 
 - Focused pytest: `python3 -m pytest tests/unit/shadow_tracker tests/unit/motion_matching/test_acceptance.py tests/unit/motion_matching/test_acceptance_gate_honesty_10960.py tests/unit/motion_matching/pipeline/test_receipt_provenance_chain.py tests/acceptance/test_tour_baselines_journey.py -q -n 0 --no-cov --timeout=60` — 375 passed, no failures or skips; existing deprecation warnings. Includes decoder and calibration checks, synthetic fitting, gates/provenance and the baseline widget journey. This is not full scientific/native acceptance.
 - `python3 -m ruff check .` — passed; `python3 -m ruff format --check .` — 8,231 files already formatted. No Python source changed.
