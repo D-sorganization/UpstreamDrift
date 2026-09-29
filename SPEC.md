@@ -7102,6 +7102,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
+| 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |
