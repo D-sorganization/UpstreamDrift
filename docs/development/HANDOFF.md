@@ -319,6 +319,7 @@ Creator` (newline); find it by BlockType.
 1. Owner review of draft PR #10963; mark it ready once reviewed (a GUI open-check via
    computer use needs the owner to grant app access interactively).
 2. #10979 human, in progress (2026-09-29, owner reviews of the renders). State:
+
    - **Done, tested (human 9/9, render 5/5):** five
      contacts per foot; fixed "Neck Address" transform; neck pivot at C7 (`NeckLength`
      7.717 in; lift is `-lift*Q0(:,3)`); driver head = massless File Solid of
@@ -349,9 +350,17 @@ Creator` (newline); find it by BlockType.
    - **Trap:** a failed `gs3dx_build_human` leaves `GS3DX_Human.slx` as a copy of
      `GS3DX_Neck`; check size/mtime before trusting a run. `gs3dx_render` and
      `gs3dx_contact_check` close the models they load: tests reload after them.
-   - Next: simulate past impact through the finish (trail heel up onto the toes, lead foot
-     onto its outside edge); needs a reference past impact (the IK and leg reference stop
-     at impact + reach clamp) and a stop time beyond `.impact_frame`.
+   - **Finish (2026-09-29, scratch `human/fin1.m`, `fin2.m`):** all workspace references
+     span 654 frames (1.814 s), so `gs3dx_contact_check(..., stop_time=1.809)` runs through
+     the finish. Trail heel up onto Big Toe then Lesser Toes (ankle rise 142 mm vs capture
+     129), lead foot onto its outside edge: works. OPEN: from 1.35 s the golfer leans back
+     onto the trail toe (0.73-0.83 BW at 1.55-1.6 s, lead foot 0) and the unloaded lead
+     foot slides 234 mm (capture 36 mm, turns 30 deg in place); pelvis 56.6 mm RMS after
+     impact. Suspects, in order: `BalanceGain` (inverse Jacobian) assumes planted feet, so
+     it is wrong once the trail heel is up; the lead foot's 30 deg turn fought by contact
+     friction; COM reference past impact. Next: log the balance command and COM error after
+     1.3 s and compare with the COM over the lead foot.
+
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
 4. Optional owner inputs: the golfer's height/mass (mass is not identifiable from markers).

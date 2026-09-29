@@ -94,7 +94,7 @@ flowchart LR
   | Big Toe     | forefoot | under the toe tip              | 50 mm inside  |
   | Lesser Toes | forefoot | 94.5% (third and fourth toes)  | 50 mm outside |
 
-- **What the Topology Allows:** the outside ball and lesser toes let a foot roll onto its outside edge, the inside ball and big toe onto its inside edge; the ball spheres carry the load when the heel rises, and the sprung midfoot joint lets the trail foot come up onto its toe ([HUMAN.md](HUMAN.md#changes)). The simulations stop at impact, so the finish (trail toe up) is not yet exercised.
+- **What the Topology Allows:** the outside ball and lesser toes let a foot roll onto its outside edge, the inside ball and big toe onto its inside edge; the ball spheres carry the load when the heel rises, and the sprung midfoot joint lets the trail foot come up onto its toe ([HUMAN.md](HUMAN.md#changes)). Run past impact, the trail foot does come up onto its toes and the lead foot onto its outside edge ([HUMAN.md](HUMAN.md#through-the-finish)).
 - **Contact Parameters:** stiffness $1 \times 10^5$ N/m, damping $1 \times 10^3$ N·s/m, $\mu_s = 0.9$, $\mu_k = 0.7$ with a smooth stick-slip transition ([GROUND_CONTACT.md](GROUND_CONTACT.md#what-was-built)). The sphere masses sum to the three-sphere total, so the body mass is unchanged ([HUMAN.md](HUMAN.md#tests)).
 - **Observable Forces:** every contact force is logged in `FootContactForces`, left foot first ([HUMAN.md](HUMAN.md#changes)). This resolves heel against forefoot and inside against outside loading per foot.
 - **Limitation:** the capture has no force plates, so the contact parameters are modelling assumptions and the lead/trail split is not observed ([DATA_AUDIT.md](DATA_AUDIT.md#capture-inventory)).
@@ -175,7 +175,7 @@ Headless visualisation is `gs3dx_render`: offscreen MATLAB graphics in an invisi
 ## Known Limitations and Open Work
 
 - **`GS3DX_Human` balance:** four causes were isolated and designed out: the midfoot spring carrying the toe load, the neck starting 24° from its reference, a balance reference anchored at `GS3DX_Neck`'s centre of mass (which kicked the feet off the ground at t = 0), and front contacts short of the toe tip (which let the golfer drift 43 mm RMS). It now drifts 21.9 mm RMS to impact, 3.9 mm more than `GS3DX_Neck` with the same head; the compliant midfoot accounts for 1.7 mm of that ([HUMAN.md](HUMAN.md#why-the-human-drifted)).
-- **Simulation stops at impact:** follow-through, the trail heel rising and the roll onto the lead foot's outside edge are modelled (five contacts, sprung midfoot) but not yet simulated.
+- **Finish:** run past impact to 1.81 s, `GS3DX_Human` brings the trail heel up onto the toes (ankle rise 142 mm; capture 129 mm) and rolls the lead foot onto its outside edge, but from 1.35 s it leans back onto the trail toe and the unloaded lead foot slides 0.2 m (capture: 36 mm, a 30° turn in place); pelvis 56.6 mm RMS after impact ([HUMAN.md](HUMAN.md#through-the-finish)).
 - **Open face at contact:** the posed club face is 8.6° open at ball contact; the grip roll squares only the address ([HUMAN.md](HUMAN.md#results)).
 - **Club head at address:** the mesh sole sits 13.5 mm below the ground plane at address (the model's club reaches that far); it is drawn only.
 - **Ankle axial freedom:** the Universal ankle has no shank-axial turn, so the knees drift from the capture (median 27 / 32 mm) ([FIT.md](FIT.md#5-leg-servo-references-gs3dx_leg_reference-gs3dx_fitlegs)).
