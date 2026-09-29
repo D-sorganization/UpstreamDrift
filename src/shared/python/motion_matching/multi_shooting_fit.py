@@ -724,12 +724,14 @@ def verify_unsegmented_forward_rollout(
     """Verify that candidate theta produces a valid 100% continuous forward rollout from t=0."""
     pred = unsegmented_forward(theta, target.time)
     obs = np.isfinite(target.points).all(axis=2) & (target.weights > 0)
-    dists = np.linalg.norm((pred - target.points)[obs], axis=1)
+    diff = (pred - target.points)[obs]
+    dists = np.sqrt(np.einsum("ij,ij->i", diff, diff))
     rmse_m = float(np.sqrt(np.mean(dists**2)))
 
     # Terminal metrics
     term_obs = obs[-1]
-    term_dists = np.linalg.norm((pred[-1] - target.points[-1])[term_obs], axis=1)
+    term_diff = (pred[-1] - target.points[-1])[term_obs]
+    term_dists = np.sqrt(np.einsum("ij,ij->i", term_diff, term_diff))
     term_rmse = float(np.sqrt(np.mean(term_dists**2)))
     term_max = float(np.max(term_dists))
 
