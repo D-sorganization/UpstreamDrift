@@ -359,6 +359,16 @@ class ArticulatedSilhouetteRenderer:
             ry_head = camera.fy * self._club_radius_m / zc_head
             _rasterize_ellipse(club_mask, cu, cv, rx_head, ry_head, width, height)
 
+    def update_camera(self, camera: PinholeCameraModel) -> None:
+        """Replace this renderer's calibration for ``camera.camera_id`` in place.
+
+        Keeps recalibrated cameras (same ID, new intrinsics) and newly configured
+        camera IDs renderable without rebuilding the renderer.
+        """
+        if not isinstance(camera, PinholeCameraModel):
+            raise TypeError(f"Expected PinholeCameraModel, got {type(camera).__name__}")
+        self._cameras[camera.camera_id] = camera
+
     def render(self, request: RenderRequest) -> RenderResult:
         """Render articulated body and club silhouettes from canonical state vector."""
         camera, width, height = self._validate_request(request)

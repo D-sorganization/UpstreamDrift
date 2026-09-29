@@ -956,6 +956,8 @@ class ModelCapabilities:
     actuator_modes: tuple[str, ...]
     contact_modes: tuple[str, ...]
     is_available: bool
+    is_synthetic: bool = False
+    is_qualified: bool = False
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
