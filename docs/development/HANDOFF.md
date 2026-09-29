@@ -1,4 +1,20 @@
-# Current Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+# Current Handoff — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals (#11124)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `fix/phantom-guard-scripts-paths-11124`
+- Commit: `SELF`
+- Pull request: closes #11124.
+- Done:
+  - Extended `ISSUE_PATH_PATTERN` in `scripts/ci/check_phantom_guard_paths.py` with boundary lookbehind `(?<![\w/.-])` and recognized repository prefixes `scripts/` and `.github/workflows/` (and `.github/`).
+  - Added trailing punctuation trimming from extracted paths.
+  - Implemented `_drop_parenthetical_prose_fragments` to filter comma-separated fragments inside parentheses that lack recognized code/configuration file extensions.
+  - Added unit tests for scripts/workflows path extraction and parenthetical prose dropping, plus regression test reproducing issue #10965 / PR #11113.
+- Tests: TDD red-to-green workflow followed; 27 unit tests pass in `tests/scripts/test_check_phantom_guard_paths.py`. Ruff, Black, LOD, and Architecture Budget clean.
+- Next step: Submit PR for review and release lease.
+
+---
+
+# Past Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `/tmp/ud-wt-10965` (baseline `origin/main` 64962e8d6)
