@@ -311,6 +311,9 @@ def test_resolve_model_source_rejects_paths_outside_approved_roots() -> None:
 def test_movement_optimizer_targets_sibling_public_entry_point() -> None:
     """The ready tile must resolve to Movement-Optimizer's public CLI module."""
     repo_root = Path(__file__).resolve().parents[2]
+    sibling = repo_root.parent / "Movement_Optimizer"
+    if not sibling.is_dir():
+        pytest.skip("Movement_Optimizer sibling checkout is not present")
     model = ModelRegistry().get_model("movement_optimizer")
 
     assert model is not None
