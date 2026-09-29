@@ -1,3 +1,51 @@
+## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+
+Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
+- **Gate Checker (`scripts/check_coverage_gates.py`)**:
+  - Already loads the gate set directly from `scripts/config/mypy_exclusion_budget.json` (DRY, no duplicated gate list); gates match coverage report files by repository-relative path prefix using `summary.num_statements`/`covered_lines` (pytest `--cov-report=json` shape).
+  - `--strict` is now functional: a gate that matches zero files exits 1. Without `--strict`, unmatched gates print a `WARNING ... were skipped` line and exit 0 (never pass silently).
+- **Budget Validator (`scripts/check_mypy_exclusion_budget.py`)**:
+  - `validate_coverage_gates` returns `(errors, warnings)`; because every required gate is CI-enforced, an expired `ratchet_on` is non-fatal (warning only) and must be renewed to a future date or backed by measured package coverage. `ratchet_to` is optional.
+- **CI (`.github/workflows/ci-standard.yml`)**:
+  - The `tests` job emits `--cov-report=json:coverage.json` alongside the XML report, and a new `Enforce Budget Package Coverage Gates` step runs `python3 scripts/check_coverage_gates.py --report coverage.json --strict` after the per-package threshold enforcer.
+- **Measured floors** (`min_coverage` set to measurement rounded DOWN to 0.1, `ratchet_on` 2027-01-01): api-routes 84.3% (5221 stmts), data-io 50.1% (2891), execution-checkpointing 22.4% (2521), deployment 48.4% (1362), optimization 49.9% (2815), engine-adapters 7.1% (51393; optional-engine packages only covered when their backend is installed).
+- **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
+  - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
+
+## Shadow State, Camera, and Renderer Boundary Verification (#11110)
+
+Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
+- **No-Evidence Abstention & State Convention Support (`src/shared/python/shadow_tracker/initialization.py`)**:
+  - Updates `fit_initial_state_multiview` to enforce no-evidence abstention: when observations have zero valid pixels or all empty foreground masks, `best_hypothesis` returns `None` rather than selecting an ungrounded candidate. Winner scoring is seeded below the minimum observed score so a valid all-zero-IoU candidate set with real evidence still selects the first candidate, and candidate-poses inference uses an explicit length check so 2-D NumPy input matrices no longer raise a truthiness `ValueError`.
+  - Adds explicit `state_convention` parameter to `fit_initial_state_multiview`, inferring `canonical_articulated_v1` for 37/27-element kinematic states and `point_landmarks` for legacy states.
+- **Comprehensive Boundary Contract Suite (`tests/unit/shadow_tracker/test_boundary_contracts.py`)**:
+  - **No-Evidence Abstention**: Verifies empty masks and zero-valid-pixel observations abstain from selecting a winning hypothesis.
+  - **Geometric Sensitivity**: Proves joint angle modifications (shoulder, elbow, wrist) move expected geometry in `ArticulatedSilhouetteRenderer` and alter body/club masks without cross-channel contamination.
+  - **Offscreen & Near-Plane Clipping**: Validates partial silhouettes extending beyond image borders, completely out-of-frame positions (zero pixels, no crashes), and near-plane depth clipping ($z \le 0$).
+  - **Anamorphic Camera Fidelity**: Confirms $f_x \neq f_y$ generates elliptical projections and round-trips through `camera_bridge` without focal length coercion; the rendering check now asserts real axis scaling by comparing the anamorphic span against an isotropic reference (horizontal ~2x, vertical unchanged).
+  - **SE(3) & Distortion Consistency**: Tests 3D camera rotation inversion ($R_{cw} = R_{wc}^T$, $t_{cw} = -R_{wc}^T t_{wc}$) and distortion expansion (0, 4, 5 coefficients) with strict rejection of invalid lengths.
+  - **Dimension & Finite Checks**: Enforces fail-closed rejection on mismatched dimensions and non-finite coordinates.
+  - **Quaternion Normalization & Round-Trip**: Verifies unit quaternion normalization, non-unit normalization, zero-norm quaternion rejection, and machine-precision $q/v$ round-trip between native and canonical layouts.
+## Head, Trunk, and Grip Observability Diagnostic Receipts (#11106)
+
+Implements rigid attachment transform diagnostics and orientation residual reporting under schema `observability-diagnostics/1.0.0`:
+- **Rigid SE(3) Attachment Transform (`src/shared/python/motion_matching/diagnostics/observability_receipts.py`)**:
+  - Implements `AttachmentTransform` with physical SI units, analytical inversion, round-trip identity verification, and SHA-256 provenance hashing.
+- **Head Observability Diagnostics (`HeadDiagnosticCalculator`)**:
+  - Evaluates head marker residuals, anatomical head-centre displacement, and SO(3) orientation residuals using the Kabsch algorithm over nominal skull marker geometry (`HeadFront`, `HeadTop`, `HeadSide`).
+  - Fails closed if comparing marker centroids directly to anatomical body centre without an explicit attachment transform.
+  - Composes the calibrated attachment rotation (declared anatomical -> marker frame) into the Kabsch-observed orientation before evaluating the SO(3) residual, so a rotated marker mounting does not inflate orientation error.
+  - Isolates pure axial yaw rotation: reports zero translation error for head centre while preserving non-zero SO(3) orientation residual.
+- **Trunk Observability Diagnostics (`TrunkDiagnosticCalculator`)**:
+  - Models trunk centre-of-mass observables, distinguishing between joint-centre and C7-proxy reference frames to avoid false >80 mm torso displacement artifacts during axial turns.
+- **Grip and Clubface Calibration (`GripAndClubfaceCalibration`)**:
+  - Implements subject-calibrated lead-hand, trail-hand, grip, and clubface transforms under standard convention (`lead_left_trail_right`) with calibration hashing.
+- **Receipt Schema & Persistence (`ObservabilityDiagnosticReceipt`)**:
+  - Implements immutable receipt serializing to JSON with tamper-evident SHA-256 validation under schema `observability-diagnostics/1.0.0`; loading a schema-1.0 receipt whose `receipt_sha256` is missing fails closed.
+  - Validates grip/clubface calibration transform frame endpoints against the declared lead/trail hand, grip, and face frames, and freezes `marker_residuals_mm` into an immutable mapping at construction.
+- **Verification & Testing (`tests/unit/motion_matching/test_observability_diagnostics.py`)**:
+  - Unit tests covering axial turn invariance, fail-closed comparisons, frame conventions, and receipt serialization round-trips.
+
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
 Resolves test-order and module-identity pollution in `test_force_plate_stitching.py` under parallel execution:
@@ -7086,6 +7134,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
+| 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
+| 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
+| 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |
+| 2026-09-29 | #11117 | [MMR-01] Fail-closed matching-ledger and status gates for #11085: metrics-map traversal for `whole_marker_rmse_m`, candidate-SHA identity inspection, TB-05 driven triple pendulum disqualified everywhere, contradictory-status override confined to success claims (historical DIAGNOSTIC verdicts preserved, red/green tested). |
+| 2026-09-29 | #11120 | [MMR-14] Review fixes for shadow-tracker boundary tests (#11110): initialization seeding below the minimum winner score so valid all-zero-IoU candidates win with real evidence, explicit length check for NumPy candidate matrices (no truthiness ValueError), and a real fx/fy scaling assertion comparing anamorphic vs isotropic rendering spans. |
+| 2026-09-29 | #11123 | Head/trunk/grip diagnostic receipts (#11106, first tranche): compose the calibrated attachment rotation into the observed SO(3) orientation residual before evaluation, require `receipt_sha256` on schema-1.0 receipt load, validate grip/clubface calibration frame endpoints, and freeze `marker_residuals_mm` receipts against post-construction mutation. |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |
@@ -7130,7 +7185,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-25 | #10973 | Consolidate nine session PRs (#10948, #10947, #10964, #10966, #10967, #10969, #10961, #10972, #10949) into one branch. |
 | 2026-09-25 | #10967 | ZTCF/ZVCF fail closed in MyoSuite, pendulum and DTACK; DTACK canonical ZVCF (v=0, tau=0) split from control-kept variant (#10286). |
 | 2026-09-25 | #10602 | Score the Club-Only Matrix Only From Complete Recorded Fit Outcomes. |
-| 2026-09-26 | #10942 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims. |
 | 2026-09-25 | #10944 | Bump vendor/ud-tools to Tools main with K0 + K3a (prereq for #10943). |
 | 2026-09-25 | #9411 | Fit MyPy Exclusion Budget Under the 2026-10-01 Cap and Re-Attest Remaining Entries. |
 | 2026-09-25 | #9703 | Versioned immutable PreImpactBundle v1 with fail-closed contracts, explicit absent fields, power-invariant frame transforms and energy-reporting modal projection (IA-U2, #9703). |

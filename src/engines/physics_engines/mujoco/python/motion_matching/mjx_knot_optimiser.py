@@ -296,7 +296,8 @@ def diagnose_reference(
     m, speed, q_sim = np.asarray(m), np.asarray(speed), np.asarray(q_sim)
     finite = np.isfinite(m).all(axis=(1, 2))
     first_bad = int(np.argmin(finite)) if not finite.all() else -1
-    err = np.sqrt(np.sum((m - np.asarray(problem.targets)) ** 2, axis=2))
+    diff = m - np.asarray(problem.targets)
+    err = np.sqrt(np.einsum("...i,...i->...", diff, diff))
     valid = np.asarray(problem.valid)
     ok = valid & finite[:, None]
     rms = float(np.sqrt(np.mean(err[ok] ** 2))) if ok.any() else float("nan")
