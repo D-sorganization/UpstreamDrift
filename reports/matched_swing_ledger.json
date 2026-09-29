@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-29T09:54:37Z",
+  "generated_at": "2026-09-29T12:51:19Z",
   "rows": [
     {
       "acceptance": null,
@@ -681,7 +681,7 @@
         "is_physically_accepted": false,
         "note": "Relabelled under #10960 P1-8: dropped inherited MuJoCo fields (dynamics, address, ground, hip_calibration, club, grip_rotation, wrists_bounded, posture_top_of_backswing, and IK closure/attachments). Historical diagnostic evidence.",
         "qualification_note": "IK marker RMSE exceeds 5 mm threshold against MuJoCo canonical",
-        "status": "REJECTED"
+        "status": "DIAGNOSTIC"
       },
       "artefacts": {
         "gif": "docs/development/full_body_models/evidence/ground_support/anthro_driver_opensim/ik_playback.gif",
@@ -4768,7 +4768,7 @@
             "unit": "m"
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -4832,7 +4832,7 @@
             "unit": ""
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "required_max_closure_residual_m",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -4840,7 +4840,7 @@
             "unit": ""
           },
           {
-            "measured": 1.8289190783135055e-5,
+            "measured": 1.8289190783135055e-05,
             "name": "required_max_closure_residual_rad",
             "reason": "Required finite G1 measurement",
             "status": "passed",

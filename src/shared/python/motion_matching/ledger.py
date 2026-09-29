@@ -387,7 +387,21 @@ def extract_acceptance(
                     and str(g.get("status", "")).lower() in ("failed", "rejected")
                     for g in gates
                 )
-                if any_failed:
+                claims_success = (
+                    str(block.get("status", "")).upper()
+                    in (
+                        "PASSED",
+                        "ACCEPTED",
+                        "SUCCESS",
+                        "SUCCEEDED",
+                    )
+                    or block.get("is_physically_accepted") is True
+                )
+                # Confine the flood-gate override to blocks that claim success:
+                # physical and numerical gate results supersede self-reported
+                # status strings, but verdicts that never claimed acceptance
+                # (e.g. historical DIAGNOSTIC runs) are preserved verbatim.
+                if any_failed and claims_success:
                     block["status"] = "REJECTED"
                     block["is_physically_accepted"] = False
             return block
