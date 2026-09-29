@@ -14,17 +14,37 @@ import json
 from pathlib import Path
 from typing import Any, Literal
 
-from ._validation import MASK_SCHEMA_VERSION, check_id
+import numpy as np
+
+from ._validation import (
+    CANDIDATE_RESULT_SCHEMA_VERSION,
+    MASK_SCHEMA_VERSION,
+    RESULT_BUNDLE_SCHEMA_VERSION,
+    check_id,
+)
 from .artifacts import ShadowTrackerBundle, load_bundle, save_bundle
 from .contracts import (
-    CANDIDATE_RESULT_SCHEMA_VERSION,
+    CANONICAL_ARTICULATED_CONVENTION,
+    CandidateResult,
     FitRequest,
+    ForwardModel,
     FrameObservation,
+    ModelCapabilities,
+    POINT_LANDMARKS_CONVENTION,
+    ReplayAudit,
     ResultBundle,
     ShadowTrackerService,
     Shot,
+    SilhouetteRenderer,
+)
+from .evaluation import create_evaluated_result_bundle
+from .fitting import (
+    ControlFitter,
+    OptimizationCheckpoint,
+    OptimizationConfig,
 )
 from .mask_records import MaskFrame
+from .projection import PinholeCameraModel, camera_calibration_fingerprint
 from .segmentation import ManualMaskProvider
 from .source_records import FrameIdentity, SourceAsset
 
@@ -33,6 +53,10 @@ WorstFrameMetric = Literal["mask_coverage", "uncertainty", "silhouette_loss"]
 
 class UnavailableBackendError(RuntimeError):
     """Raised when an unverified automated fitting or inference backend is requested."""
+
+
+class StaleCheckpointError(RuntimeError):
+    """Raised when attempting to resume from or replay a checkpoint whose masks or camera have changed."""
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -58,6 +82,10 @@ class DefaultShadowTrackerService:
         self._assumptions: tuple[str, ...] = ()
         self._is_cancelled: bool = False
         self._execution_status: str = "idle"
+        self._forward_model: ForwardModel | None = None
+        self._renderer: SilhouetteRenderer | None = None
+        self._camera: PinholeCameraModel | None = None
+        self._checkpoints: list[OptimizationCheckpoint] = []
 
     @property
     def is_cancelled(self) -> bool:
@@ -68,6 +96,39 @@ class DefaultShadowTrackerService:
     def execution_status(self) -> str:
         """Current execution lifecycle state ('idle', 'running', 'cancelled', 'completed')."""
         return self._execution_status
+
+    @property
+    def checkpoints(self) -> tuple[OptimizationCheckpoint, ...]:
+        """Return all recorded optimization checkpoints from the most recent run."""
+        return tuple(self._checkpoints)
+
+    def register_backend(
+        self,
+        *,
+        forward_model: ForwardModel,
+        renderer: SilhouetteRenderer,
+        camera: PinholeCameraModel,
+    ) -> None:
+        """Register dynamic forward model, renderer, and camera models for fitting."""
+        self._forward_model = forward_model
+        self._renderer = renderer
+        self._camera = camera
+
+    def update_camera(self, camera: PinholeCameraModel) -> None:
+        """Update session camera calibration and invalidate existing fits and checkpoints.
+
+        In-package silhouette renderers expose ``update_camera`` and are refreshed in
+        place so rendering reflects the recalibration; renderers without the hook must
+        be re-registered by their owner via :meth:`register_backend`.
+        """
+        if not isinstance(camera, PinholeCameraModel):
+            raise TypeError(f"Expected PinholeCameraModel, got {type(camera).__name__}")
+        renderer = self._renderer
+        if renderer is not None and hasattr(renderer, "update_camera"):
+            renderer.update_camera(camera)
+        self._camera = camera
+        self._candidates.clear()
+        self._checkpoints.clear()
 
     def initialize_session(
         self,
@@ -89,6 +150,7 @@ class DefaultShadowTrackerService:
         for mask in initial_masks:
             self._mask_provider.register_mask(mask)
         self._candidates.clear()
+        self._checkpoints.clear()
         self._uncertainty = dict(uncertainty or {})
         self._assumptions = tuple(str(a) for a in assumptions)
         self._is_cancelled = False
@@ -186,8 +248,9 @@ class DefaultShadowTrackerService:
 
         self._mask_provider.register_mask(new_mask)
 
-        # Invalidate existing fits upon manual correction
+        # Invalidate existing fits and checkpoints upon manual correction
         self._candidates.clear()
+        self._checkpoints.clear()
 
         return new_mask
 
@@ -234,15 +297,286 @@ class DefaultShadowTrackerService:
             )
         return reports
 
-    def fit(self, request: FitRequest) -> ResultBundle:
-        """Run forward model fitting.
+    def resume_from_checkpoint(
+        self,
+        checkpoint: OptimizationCheckpoint,
+        request: FitRequest,
+    ) -> ResultBundle:
+        """Resume optimization from a previously recorded checkpoint.
 
-        Honest refusal: Automated forward fitting is currently unqualified.
+        Preconditions:
+            - Checkpoint's mask revision IDs must match the current session masks.
+            - Checkpoint's camera_id must match the current session camera.
         """
-        raise UnavailableBackendError(
-            "Automated forward fitting is currently unavailable: "
-            "forward dynamics gates ST-07 through ST-10 must pass qualification before fitting can proceed."
+        if not isinstance(checkpoint, OptimizationCheckpoint):
+            raise TypeError(
+                f"Expected OptimizationCheckpoint, got {type(checkpoint).__name__}"
+            )
+
+        current_mask_revs = tuple(
+            self._mask_provider.get_mask(fid).revision_id
+            for fid in sorted(self._observations.keys())
+            if self._mask_provider.has_mask(fid)
         )
+        if checkpoint.mask_revision_ids != current_mask_revs:
+            raise StaleCheckpointError(
+                f"Checkpoint is stale: mask revisions ({checkpoint.mask_revision_ids}) "
+                f"do not match current session masks ({current_mask_revs})."
+            )
+
+        if self._camera is None:
+            raise StaleCheckpointError(
+                "Checkpoint is stale: session has no registered camera "
+                f"(checkpoint camera {checkpoint.camera_id!r})."
+            )
+        if checkpoint.camera_id != self._camera.camera_id:
+            raise StaleCheckpointError(
+                f"Checkpoint is stale: camera ({checkpoint.camera_id!r}) "
+                f"does not match current session camera ({getattr(self._camera, 'camera_id', None)!r})."
+            )
+        current_calibration_sha = camera_calibration_fingerprint(self._camera)
+        if (
+            not checkpoint.camera_calibration_sha256
+            or checkpoint.camera_calibration_sha256 != current_calibration_sha
+        ):
+            raise StaleCheckpointError(
+                "Checkpoint is stale: camera calibration changed since the checkpoint "
+                f"(checkpoint fingerprint {checkpoint.camera_calibration_sha256[:12]!r} "
+                f"vs current {current_calibration_sha[:12]!r})."
+            )
+
+        return self.fit(request, initial_controls=checkpoint.parameters)
+
+    def _validate_fit_capabilities(
+        self,
+        request: FitRequest,
+    ) -> tuple[
+        ForwardModel,
+        SilhouetteRenderer,
+        PinholeCameraModel,
+        ModelCapabilities,
+        bool,
+    ]:
+        """Validate backend presence, capabilities, and qualification gates."""
+        if not isinstance(request, FitRequest):
+            raise TypeError(f"Expected FitRequest, got {type(request).__name__}")
+
+        if not self._observations:
+            raise ValueError("Cannot fit: session has no observations")
+
+        if (
+            self._forward_model is None
+            or self._renderer is None
+            or self._camera is None
+        ):
+            raise UnavailableBackendError(
+                "Automated forward fitting is currently unavailable: "
+                "forward dynamics gates ST-07 through ST-10 must pass qualification before fitting can proceed."
+            )
+
+        caps = self._forward_model.capabilities()
+        if not caps.is_available:
+            raise UnavailableBackendError(
+                f"Backend runtime is unavailable: forward model {type(self._forward_model).__name__} is not available."
+            )
+
+        if request.engine_capability_requirement:
+            supported = (
+                set(caps.actuator_modes)
+                | set(caps.contact_modes)
+                | set(caps.supported_bodies)
+                | {caps.state_convention}
+            )
+            for req_cap in request.engine_capability_requirement:
+                if req_cap not in supported:
+                    raise UnavailableBackendError(
+                        f"Backend does not satisfy required engine capability: {req_cap!r}"
+                    )
+
+        is_synthetic = bool(
+            getattr(caps, "is_synthetic", False)
+            or getattr(self._forward_model, "is_synthetic", False)
+        )
+        is_qualified = bool(
+            getattr(caps, "is_qualified", False)
+            or getattr(self._forward_model, "is_qualified", False)
+        )
+        if not is_qualified and not is_synthetic:
+            raise UnavailableBackendError(
+                "Automated forward fitting is currently unavailable: backend is unqualified for scientific release."
+            )
+
+        return (
+            self._forward_model,
+            self._renderer,
+            self._camera,
+            caps,
+            is_synthetic,
+        )
+
+    def _build_cancelled_bundle(self, request: FitRequest) -> ResultBundle:
+        """Construct a fail-closed cancelled ResultBundle."""
+        self._execution_status = "cancelled"
+        return ResultBundle(
+            schema_version=RESULT_BUNDLE_SCHEMA_VERSION,
+            bundle_id=f"bundle-cancelled-{request.request_id}",
+            request=request,
+            candidates=(),
+            replay_audits=(),
+            execution_status="cancelled",
+            evidence_quality="insufficient_evidence",
+            metrics={"status": "cancelled"},
+            hashes={"candidates_sha256": hashlib.sha256(b"[]").hexdigest()},
+        )
+
+    def _assemble_fit_result(
+        self,
+        request: FitRequest,
+        outcome: Any,
+        is_synthetic: bool,
+        observations: Sequence[FrameObservation],
+    ) -> ResultBundle:
+        """Construct and qualify the evaluated ResultBundle from fitter outcome."""
+        self._checkpoints = list(outcome.checkpoints)
+        self._execution_status = outcome.status
+
+        cand = outcome.candidate
+        if is_synthetic:
+            cand_diag = dict(cand.diagnostics)
+            cand_diag["is_synthetic"] = True
+            cand = CandidateResult(
+                schema_version=cand.schema_version,
+                candidate_id=cand.candidate_id,
+                request_id=cand.request_id,
+                initial_state=cand.initial_state,
+                trajectory=cand.trajectory,
+                diagnostics=cand_diag,
+                uncertainty_method="synthetic_residual",
+                replay_audit=cand.replay_audit,
+                is_accepted=False,
+            )
+
+        self._candidates = [cand]
+        bundle = create_evaluated_result_bundle(
+            bundle_id=f"bundle-{request.request_id}",
+            request=request,
+            candidates=(cand,),
+            observations=tuple(observations),
+            execution_status=outcome.status,
+        )
+
+        if is_synthetic:
+            bundle_metrics = dict(bundle.metrics)
+            bundle_metrics["is_synthetic"] = True
+            eq = (
+                "dynamic_candidate"
+                if bundle.evidence_quality == "validated_profile"
+                else bundle.evidence_quality
+            )
+            bundle = ResultBundle(
+                schema_version=bundle.schema_version,
+                bundle_id=bundle.bundle_id,
+                request=bundle.request,
+                candidates=bundle.candidates,
+                replay_audits=bundle.replay_audits,
+                execution_status=outcome.status,
+                evidence_quality=eq,
+                metrics=bundle_metrics,
+                hashes=dict(bundle.hashes),
+            )
+
+        return bundle
+
+    def fit(
+        self,
+        request: FitRequest,
+        *,
+        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
+    ) -> ResultBundle:
+        """Run forward model fitting with fail-closed capability gates and cancellation wiring."""
+        (
+            forward_model,
+            renderer,
+            camera,
+            caps,
+            is_synthetic,
+        ) = self._validate_fit_capabilities(request)
+
+        if self._is_cancelled:
+            return self._build_cancelled_bundle(request)
+
+        window_start_pts = int(request.time_window_start_pts)
+        window_end_pts = int(request.time_window_end_pts)
+        if window_end_pts < window_start_pts:
+            raise ValueError(
+                "Invalid fit request: time_window_end_pts "
+                f"({window_end_pts}) is before time_window_start_pts ({window_start_pts})."
+            )
+
+        sorted_frame_ids = sorted(self._observations.keys())
+        windowed_obs = [
+            obs
+            for obs in (self._observations[fid] for fid in sorted_frame_ids)
+            if window_start_pts <= int(obs.pts_ticks) <= window_end_pts
+        ]
+        if not windowed_obs:
+            raise ValueError(
+                "Cannot fit: the requested PTS window "
+                f"[{window_start_pts}, {window_end_pts}] contains no observations "
+                f"(session holds {len(sorted_frame_ids)} frames)."
+            )
+
+        missing_time = [
+            obs.frame_id for obs in windowed_obs if obs.physical_time_s is None
+        ]
+        if missing_time:
+            raise ValueError(
+                "Cannot fit: authoritative physical_time_s is unknown for frame(s) "
+                f"{', '.join(missing_time)}; refusing to fabricate timestamps. "
+                "Derive timing from authoritative PTS before fitting."
+            )
+
+        missing_masks = [
+            obs.frame_id
+            for obs in windowed_obs
+            if not self._mask_provider.has_mask(obs.frame_id)
+        ]
+        if missing_masks:
+            raise ValueError(
+                "Cannot fit: incomplete observation/mask coverage — the following "
+                f"frame(s) lack a manual mask: {', '.join(missing_masks)}."
+            )
+
+        obs_list = list(windowed_obs)
+        mask_list = [self._mask_provider.get_mask(obs.frame_id) for obs in obs_list]
+        time_points = [
+            float(time_s)
+            for obs in obs_list
+            if (time_s := obs.physical_time_s) is not None
+        ]
+        init_dim = (
+            42 if caps.state_convention == CANONICAL_ARTICULATED_CONVENTION else 6
+        )
+        init_st = tuple(0.0 for _ in range(init_dim))
+
+        fitter_config = OptimizationConfig(
+            budget_seconds=max(0.1, float(request.budget_seconds)),
+            max_iterations=50,
+        )
+        fitter = ControlFitter(
+            forward_model=forward_model,
+            renderer=renderer,
+            camera=camera,
+            observed_masks=mask_list,
+            time_points_s=time_points,
+            initial_state=init_st,
+            config=fitter_config,
+            cancel_callback=lambda: self._is_cancelled,
+        )
+
+        self._execution_status = "running"
+        outcome = fitter.fit(initial_controls=initial_controls)
+        return self._assemble_fit_result(request, outcome, is_synthetic, obs_list)
 
     def save_bundle(self, path: Path | str) -> None:
         """Atomically persist current session to a review bundle."""
