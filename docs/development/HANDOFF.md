@@ -4,14 +4,30 @@
 - Worktree: `UpstreamDrift-worktrees/w-ud-bolt-cons`
 - Branch: `claude/ud-bolt-consolidated-0929` (baseline `origin/main`)
 - Commit: `SELF`
-- Pull request: opened as a draft; supersedes #11112, #11128 and #11129 (originals left open, not closed).
+- Pull request: #11138; supersedes #11112, #11128 and #11129 (originals left open, closed citing the consolidator's squash SHA once it lands).
 - Done: took only the `src/` numeric rewrites from three open Bolt PRs, dropping each PR's own SPEC row (this branch writes one row), and the `.jules/bolt.md` note carried by #11128.
   - #11112 (`bot/bolt-norm-einsum-residual`): row/column `np.linalg.norm(..., axis=N)` becomes `sqrt(np.einsum(...))` across `bunkershot3d/ball/qualification_fit.py` (column norm, `axis=0`) and 8 `motion_matching` sites (`club_calibration`, `club_only/acceptance`, `club_only/control_replay`, `dynamics_filter`, `execution/downswing`, `hip_calibration`, `multi_shooting_fit`, `pipeline/reference`). Carried unchanged, including the new identity test.
   - #11128 (`bolt-opt-pink-tasks-vdot-...`): small fixed-size vector norms in `engines/physics_engines/pinocchio/python/pink_tasks.py` (weld rotation/translation residuals, marker error) become `math.sqrt(np.vdot(x, x))`. Carried the numeric rewrite but dropped the inline `# ⚡ Bolt: ...` rationale comments to match this repo's default no-comments-unless-non-obvious-WHY convention (no prior Bolt PR merged into this repo left such comments in source).
   - #11129 (`bolt-optimize-physics-validation-norm-...`): `physics_validation.py` Jacobian error norm becomes `math.sqrt(np.vdot(diff.ravel(), diff.ravel()))`. Carried the rewrite; fixed the PR's `import math` placement (it was appended after `import numpy as np`, violating isort stdlib-before-third-party grouping) and dropped its inline Bolt comment for the same reason as #11128.
 - Verified equivalence: `sqrt(einsum("ij,ij->i"))` / `("ij,ij->j")` / `("...i,...i->...")` and `sqrt(vdot(x,x))` are algebraically identical to `np.linalg.norm` for real arrays at every axis/keepdims/1-D/empty combination used; `tests/unit/motion_matching/test_row_norm_einsum_identity.py` (carried from #11112) checks this directly, including NaN/Inf and empty-array edges. `np.vdot` conjugates its first argument, which is a no-op for the real `float64` arrays at every #11128/#11129 call site.
-- Tests: `python -m pytest -q -o addopts="" -p no:cacheprovider --tools-mode vendored --timeout=0` over the test files covering every changed module (qualification_fit, club_calibration, club_only/acceptance+control_replay, dynamics_filter, hip_calibration, multi_shooting_fit, pipeline/reference, pink_tasks, physics_validation, plus the new identity test): 226 passed, 2 pre-existing failures unrelated to this change (`test_club_observation_contracts.py::test_public_input_validation_survives_python_dash_o` and the equivalent in `test_club_plausibility_acceptance.py` — both fail identically on `origin/main` with `ModuleNotFoundError: No module named 'bunkershot3d'` from a `python -O` subprocess whose `sys.path` doesn't include the repo root; unrelated to any file this branch touches). `execution/downswing.py`'s `_compute_downswing_metrics` has no dedicated unit test (it's a CLI experiment-runner module, exercised only via heavy/live-simulation harnesses); its two changed lines use the same `axis=1`/`axis=2` patterns the identity test covers directly. `ruff check` and `ruff format --check` pass on all 12 touched files.
-- Next step: CI green, then flip the SPEC row's `#TBD` to the real PR number and push again (per task instructions); leave #11112/#11128/#11129 open for the user/reviewer to close as superseded.
+- Tests: `python -m pytest -q -o addopts="" -p no:cacheprovider --tools-mode vendored --timeout=0` over the test files covering every changed module (qualification_fit, club_calibration, club_only/acceptance+control_replay, dynamics_filter, hip_calibration, multi_shooting_fit, pipeline/reference, pink_tasks, physics_validation, plus the new identity test): 226 passed, 2 pre-existing failures unrelated to this change (`test_club_observation_contracts.py::test_public_input_validation_survives_python_dash_o` and the equivalent in `test_club_plausibility_acceptance.py` — both fail identically on `origin/main` with `ModuleNotFoundError: No module named 'bunkershot3d'` from a `python -O` subprocess whose `sys.path` doesn't include the repo root; unrelated to any …
+- Next step: CI green on the refreshed head, then squash-merge this PR and close #11112/#11128/#11129 citing its squash SHA.
+
+---
+
+# Past Handoff — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals (#11124)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `fix/phantom-guard-scripts-paths-11124`
+- Commit: `SELF`
+- Pull request: closes #11124 (merged as #11131, squash `657d95287e`).
+- Done:
+  - Extended `ISSUE_PATH_PATTERN` in `scripts/ci/check_phantom_guard_paths.py` with boundary lookbehind `(?<![\w/.-])` and recognized repository prefixes `scripts/` and `.github/workflows/` (and `.github/`).
+  - Added trailing punctuation trimming from extracted paths.
+  - Implemented `_drop_parenthetical_prose_fragments` to filter comma-separated fragments inside parentheses that lack recognized code/configuration file extensions.
+  - Added unit tests for scripts/workflows path extraction and parenthetical prose dropping, plus regression test reproducing issue #10965 / PR #11113.
+- Tests: TDD red-to-green workflow followed; 27 unit tests pass in `tests/scripts/test_check_phantom_guard_paths.py`. Ruff, Black, LOD, and Architecture Budget clean.
+- Resolution: merged ahead of the consolidator (keep-both rewrite of this section at #11138 refresh); superseded by the merge itself.
 
 ---
 
