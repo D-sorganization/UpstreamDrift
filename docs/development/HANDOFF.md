@@ -1,4 +1,18 @@
-# Current Handoff — Fleet Critic Pass 2026-09-25
+# Current Handoff — Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `/tmp/ud-wt-10965` (baseline `origin/main` 64962e8d6)
+- Branch: `bot/issue-10965-coverage-gate-authority`
+- Commit: `SELF`
+- Pull request: closes #10965.
+- Done: `scripts/check_coverage_gates.py` reads the 6 gates directly from `scripts/config/mypy_exclusion_budget.json` (single DRY gate authority), matches coverage-report files by repository-relative path prefix using `summary.num_statements`/`covered_lines`, and `--strict` now fails (exit 1) on a gate matching zero files; without `--strict` it warns instead. `check_mypy_exclusion_budget.py` treats an expired gate `ratchet_on` as a non-fatal warning (gates are CI-enforced) and makes `ratchet_to` optional. The `tests` CI job emits `--cov-report=json:coverage.json` and a new step runs `python3 scripts/check_coverage_gates.py --report coverage.json --strict` after the threshold enforcer.
+- Measured floors (min_coverage rounded DOWN to 0.1, ratchet_on 2027-01-01, local targeted pytest with coverage, optional-engine backends not installed): api-routes 84.3% (4406/5221), data-io 50.1% (1450/2891), execution-checkpointing 22.4% (567/2521), deployment 48.4% (660/1362), optimization 49.9% (1405/2815), engine-adapters 7.1% (3687/51393).
+- Tests: TDD red (2 new unmatched/strict tests failed with old exit-2 semantics) then green; `tests/unit/scripts/test_check_coverage_gates.py` + `test_check_mypy_exclusion_budget.py`: 29 passed. Checker smoke against a real coverage.json fixture: strict exit 1 on unmatched gates, lax exit 0 with WARNING line.
+- Next step: CI green, then ready and arm the PR.
+
+---
+
+# Past Handoff — Fleet Critic Pass 2026-09-25
 
 ## Identity
 
@@ -246,7 +260,9 @@ One Low: Bolt speedup claims without benchmark fixtures.
 ---
 
 # Past Handoff — Ball-Flight Parity Fixture Export Is Opt-In (#11008)
+
 ---
+
 # Implementation Handoff - Drift Wizard Sidekick Product Knowledge Pack (#10943)
 
 ## Identity

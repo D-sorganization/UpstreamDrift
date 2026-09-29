@@ -161,8 +161,8 @@ def test_gate_below_floor_exits_1(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_gate_with_no_matching_files_exits_2(tmp_path: Path) -> None:
-    """A gate matching zero files is misconfigured and returns exit code 2."""
+def test_unmatched_gate_with_strict_exits_1(tmp_path: Path) -> None:
+    """--strict must turn a gate that matches zero files into a hard failure."""
     budget = _write_budget(
         tmp_path,
         [
@@ -170,14 +170,44 @@ def test_gate_with_no_matching_files_exits_2(tmp_path: Path) -> None:
             {"name": "unmatched", "path": "src/nonexistent/", "min_coverage": 30.0},
         ],
     )
-    report = _write_coverage_xml(
-        tmp_path,
-        {
-            "src/api/routes.py": (8, 10),
-        },
+    report = _write_coverage_json(tmp_path, {"src/api/routes.py": (8, 10)})
+    exit_code = checker.main(
+        [
+            "--report",
+            str(report),
+            "--budget",
+            str(budget),
+            "--strict",
+        ]
     )
-    exit_code = checker.main(["--report", str(report), "--budget", str(budget)])
-    assert exit_code == 2
+    assert exit_code == 1
+
+
+@pytest.mark.unit
+def test_unmatched_gate_without_strict_exits_0_with_warning(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Without --strict an unmatched gate warns (never passes silently)."""
+    budget = _write_budget(
+        tmp_path,
+        [
+            {"name": "api", "path": "src/api/", "min_coverage": 50.0},
+            {"name": "unmatched", "path": "src/nonexistent/", "min_coverage": 30.0},
+        ],
+    )
+    report = _write_coverage_json(tmp_path, {"src/api/routes.py": (8, 10)})
+    exit_code = checker.main(
+        [
+            "--report",
+            str(report),
+            "--budget",
+            str(budget),
+        ]
+    )
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "unmatched" in captured.out.lower()
+    assert "src/nonexistent/" in captured.out
 
 
 @pytest.mark.unit

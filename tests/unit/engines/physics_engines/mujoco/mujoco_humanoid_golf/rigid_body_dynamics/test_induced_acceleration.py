@@ -128,7 +128,7 @@ def test_compute_task_space_components(
     assert "gravity" in result
     assert "total" in result
     # Proper acceleration [10, 20, 30] plus gravity [0, 0, -9.80665].
-    np.testing.assert_allclose(result["total"], np.array([10.0, 20.0, 20.19]))
+    np.testing.assert_allclose(result["total"], np.array([10.0, 20.0, 20.19335]))
     # The four components must reconstruct the total exactly.
     np.testing.assert_allclose(
         result["gravity"]

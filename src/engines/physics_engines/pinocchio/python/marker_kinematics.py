@@ -590,15 +590,11 @@ class MarkerIkSolver:
         for i in range(n_nodes):
             pos = self.markers(q_refined[i])
             rows = np.flatnonzero(valid[i])
-            rms[i] = (
-                float(
-                    np.sqrt(
-                        np.mean(np.sum((pos[rows] - targets[i, rows]) ** 2, axis=1))
-                    )
-                )
-                if rows.size
-                else float("nan")
-            )
+            if rows.size:
+                diff = pos[rows] - targets[i, rows]
+                rms[i] = float(np.sqrt(np.vdot(diff, diff) / diff.shape[0]))
+            else:
+                rms[i] = float("nan")
             c = self._plant.closure_position_linearization(
                 self._map.as_dict(q_refined[i])
             )
