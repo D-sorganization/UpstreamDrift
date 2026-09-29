@@ -2,7 +2,7 @@
 
 ## Motion Matching Board Review — 2026-09-28
 
-- Branch: `docs/motion-matching-board-review`; owner-requested documentation review, PR pending.
+- Branch: `docs/motion-matching-board-review`; owner-requested documentation review, PR #11083.
 - Packet: `docs/development/2026-09-28-motion-matching-board-review.md`; 18 draft issue bodies, native evidence matrix, recent GS3DX branch review, anatomical/Home-budget options and historical-video roadmap.
 - Main reviewed: `94ade65293`; GS3DX PR #10963 reviewed at `752a94fdd9444f98b5e6f9a39b6e1638ffdb269e`. Active #10979 remains with its owner; no implementation claim or dispatch.
 - Validation: 375 focused tests passed; full Ruff lint/format and packet title case passed. No new native fit or MATLAB qualification campaign.
