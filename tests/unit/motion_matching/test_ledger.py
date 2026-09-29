@@ -299,6 +299,39 @@ def test_contradictory_status_strings_fail_closed_to_rejected() -> None:
 
 
 @pytest.mark.unit
+def test_failed_gate_override_is_confined_to_success_claims() -> None:
+    """A failed-gate override must only rewrite blocks that claim success.
+
+    Regression for review concern on #11117: the flood-gate override clobbered
+    historical DIAGNOSTIC verdicts (which do not claim acceptance) with REJECTED,
+    overwriting unrelated evidence.
+    """
+    from src.shared.python.motion_matching.ledger import extract_acceptance
+
+    diagnostic = {
+        "acceptance": {
+            "horizon": "G1",
+            "is_physically_accepted": False,
+            "status": "DIAGNOSTIC",
+            "gates": [
+                {
+                    "name": "max_normal_force_n",
+                    "status": "failed",
+                    "reason": "instrumented only",
+                },
+            ],
+        }
+    }
+    block = extract_acceptance("evidence/test4.json", diagnostic, None)
+    assert block is not None
+    assert block["status"] == "DIAGNOSTIC", (
+        "historical DIAGNOSTIC verdict must be preserved verbatim; the "
+        "failed-gate override may only rewrite success claims"
+    )
+    assert block["is_physically_accepted"] is False
+
+
+@pytest.mark.unit
 def test_fk_only_and_short_horizon_cannot_acquire_full_dynamics_badges() -> None:
     """FK-only and short-horizon receipts cannot acquire full-dynamics G2/G3 acceptance."""
     from src.shared.python.motion_matching.acceptance import evaluate, Horizon
