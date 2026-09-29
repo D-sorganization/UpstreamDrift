@@ -30,6 +30,15 @@ from src.engines.physics_engines.opensim.python.native_qualification import (
 
 pytestmark = pytest.mark.unit
 
+EVIDENCE_DIR = (
+    Path(__file__).resolve().parents[4]
+    / "docs"
+    / "development"
+    / "matched_swing_program"
+    / "evidence"
+    / "opensim"
+)
+
 
 def _make_dummy_candidate(
     club: str = "driver",
@@ -211,29 +220,112 @@ def test_receipt_serialization_round_trip(tmp_path: Path) -> None:
     assert loaded.candidate_sha256 == receipt.candidate_sha256
 
 
-def test_committed_dual_club_evidence_receipts_load_and_validate() -> None:
-    """Committed driver and 7-iron receipts must load cleanly and report qualified."""
-    repo_root = Path(__file__).resolve().parents[4]
-    evidence_dir = (
-        repo_root
-        / "docs"
-        / "development"
-        / "matched_swing_program"
-        / "evidence"
-        / "opensim"
-    )
-    driver_file = evidence_dir / "driver_receipt.json"
-    iron_file = evidence_dir / "iron_receipt.json"
+def test_committed_dual_club_evidence_receipts_are_fail_closed() -> None:
+    """Committed club receipts must honestly record unavailable engines.
+
+    No native OpenSim execution exists for these clubs on any available host,
+    so the only honest receipt is UNAVAILABLE with empty evidence fields,
+    recorded missing evidence, and a resolvable remedy. Placeholder shas or
+    invented metrics (previous content of these files) must never return.
+    """
+    driver_file = EVIDENCE_DIR / "driver_receipt.json"
+    iron_file = EVIDENCE_DIR / "iron_receipt.json"
 
     assert driver_file.is_file(), f"Missing driver receipt: {driver_file}"
     assert iron_file.is_file(), f"Missing 7-iron receipt: {iron_file}"
 
     driver_rcpt = OpenSimQualificationReceipt.load(driver_file)
-    assert driver_rcpt.status == OpenSimQualificationStatus.QUALIFIED
+    assert driver_rcpt.status == OpenSimQualificationStatus.UNAVAILABLE
     assert driver_rcpt.club == "driver"
-    assert driver_rcpt.derivatives_consistent is True
+    assert driver_rcpt.runtime_available is False
+    assert driver_rcpt.candidate_sha256 == ""
+    assert driver_rcpt.model_sha256 == ""
+    assert driver_rcpt.capture_sha256 == ""
+    assert driver_rcpt.marker_metrics == {}
+    assert driver_rcpt.muscle_metrics == {}
+    assert driver_rcpt.missing_evidence
+    assert any("marker" in ev for ev in driver_rcpt.missing_evidence)
+    assert "opensim" in driver_rcpt.remedy.lower()
 
     iron_rcpt = OpenSimQualificationReceipt.load(iron_file)
-    assert iron_rcpt.status == OpenSimQualificationStatus.QUALIFIED
+    assert iron_rcpt.status == OpenSimQualificationStatus.UNAVAILABLE
     assert iron_rcpt.club == "7-iron"
-    assert iron_rcpt.derivatives_consistent is True
+    assert iron_rcpt.runtime_available is False
+    assert iron_rcpt.candidate_sha256 == ""
+    assert iron_rcpt.missing_evidence
+    assert iron_rcpt.remedy
+
+
+def test_missing_native_test_count_does_not_qualify() -> None:
+    """An unrecorded native test count cannot be assumed nonzero (fail-closed)."""
+    cand = _make_dummy_candidate(club="driver")
+    replay = _make_dummy_replay()
+    receipt = validate_opensim_candidate_replay(cand, replay)
+    assert receipt.status == OpenSimQualificationStatus.REJECTED
+    assert any("native test count" in r.lower() for r in receipt.rejection_reasons)
+    assert any("native test" in ev for ev in receipt.missing_evidence)
+    assert receipt.remedy
+
+
+def test_unavailable_runtime_fails_closed_even_with_replay_payload() -> None:
+    """A replay payload cannot produce QUALIFIED while opensim is unavailable."""
+    cand = _make_dummy_candidate(club="driver")
+    replay = _make_dummy_replay()
+    receipt = validate_opensim_candidate_replay(cand, replay, opensim_available=False)
+    assert receipt.status == OpenSimQualificationStatus.UNAVAILABLE
+    assert receipt.runtime_available is False
+    assert receipt.missing_evidence
+    assert receipt.remedy
+
+
+def test_missing_marker_observations_do_not_qualify() -> None:
+    """Replays without aligned marker observations must not qualify."""
+    cand = _make_dummy_candidate(club="driver")
+    replay = _make_dummy_replay()
+    replay.pop("markers_m")
+    replay.pop("target_m")
+    receipt = validate_opensim_candidate_replay(
+        cand, replay, native_tests_executed=10, opensim_available=True
+    )
+    assert receipt.status == OpenSimQualificationStatus.REJECTED
+    assert receipt.marker_metrics == {}
+    assert any("marker" in ev for ev in receipt.missing_evidence)
+
+
+def test_missing_rollout_data_does_not_qualify() -> None:
+    """Replays without native state/time data must not qualify."""
+    cand = _make_dummy_candidate(club="driver")
+    replay = _make_dummy_replay()
+    replay.pop("native_state")
+    receipt = validate_opensim_candidate_replay(
+        cand, replay, native_tests_executed=10, opensim_available=True
+    )
+    assert receipt.status == OpenSimQualificationStatus.REJECTED
+    assert receipt.derivatives_consistent is False
+    assert receipt.energy_balance_checked is False
+    assert "native_state/time_s dynamic rollout" in receipt.missing_evidence
+
+
+def test_derivatives_mismatch_rejects() -> None:
+    """Joint velocities inconsistent with dq/dt must not qualify."""
+    cand = _make_dummy_candidate(club="driver")
+    replay = _make_dummy_replay()
+    state = np.asarray(replay["native_state"])
+    half = state.shape[1] // 2
+    state[:, half:] = state[:, half:] + 1.0
+    receipt = validate_opensim_candidate_replay(
+        cand, replay, native_tests_executed=10, opensim_available=True
+    )
+    assert receipt.status == OpenSimQualificationStatus.REJECTED
+    assert receipt.derivatives_consistent is False
+
+
+def test_marker_metrics_are_computed_not_invented() -> None:
+    """Only metrics derived from the recorded observations may appear."""
+    cand = _make_dummy_candidate(club="driver")
+    replay = _make_dummy_replay()
+    receipt = validate_opensim_candidate_replay(
+        cand, replay, native_tests_executed=10, opensim_available=True
+    )
+    assert set(receipt.marker_metrics) <= {"whole_rms_m"}
+    assert "pelvis_yaw_error_pct" not in receipt.marker_metrics
