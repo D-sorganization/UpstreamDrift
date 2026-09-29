@@ -1,3 +1,17 @@
+## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
+
+Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):
+- **Path Pattern Extension (`scripts/ci/check_phantom_guard_paths.py`)**:
+  - Extends `ISSUE_PATH_PATTERN` with negative lookbehind boundary protection `(?<![\w/.-])` and recognizes repository paths under `scripts/` and `.github/workflows/` (and `.github/`) alongside `src/`, `tests/`, `rust_core/`, and `api/`.
+  - Prevents matching fragments in the middle of non-path slash sequences (such as `engines/api/core/...`).
+  - Strips trailing punctuation (`.,;:)'"`) from extracted paths.
+- **Parenthetical Prose Filtering**:
+  - Implements `_drop_parenthetical_prose_fragments` to parse parenthetical blocks `(...)`, split them on commas into fragments, and drop prose fragments that lack recognized code/configuration file extensions.
+  - Preserves legitimate file references inside parentheses (e.g. `(scripts/check_lod.py, tests/foo.py)`) while discarding prose slash alternatives (e.g. `(engines/api/core/shared/robotics)`).
+- **Verification (`tests/scripts/test_check_phantom_guard_paths.py`)**:
+  - Adds unit test coverage for `scripts/` and `.github/workflows/` path extraction.
+  - Adds regression test reproducing issue #10965 / PR #11113 verifying Rule 3 passes cleanly on real `scripts/` diffs and excludes parenthetical prose fragments.
+
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
 Resolves the split-brain coverage gates by making the budget JSON the single gate authority:
@@ -7191,6 +7205,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | #11153 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `PyJWT>=2.14.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `pyjwt==2.13.0` to `pyjwt==2.14.0`, the first release clearing OSV GHSA-w6j9-cwv2-h6wq / CVE-2026-102274 that left every pip-audit lane (code-quality, dependency-consistency) red on the untouched upstream lockfiles; no consumer-code change. |
 | 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
 | 2026-09-29 | #11138 | Consolidate Bolt micro-optimisation PRs #11112, #11128, #11129: row/column norms switched to `sqrt(einsum)` (bunkershot3d qualification-fit scale, motion-matching club calibration/hull/hip/downswing/reference/multi-shooting/club-only), and small fixed-size vectors switched to `math.sqrt(np.vdot)` (pink_tasks weld/marker residuals, physics_validation Jacobian error). Numerically identical results; new identity test `tests/unit/motion_matching/test_row_norm_einsum_identity.py` covers axis=0/1/2, keepdims, empty, NaN/Inf. |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
