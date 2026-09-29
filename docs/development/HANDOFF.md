@@ -4,7 +4,7 @@
 - Worktree: `UpstreamDrift-worktrees/claude-ud-bolt-einsum`
 - Branch: `claude/ud-bolt-einsum-consolidated` (baseline `origin/main` 0206717f)
 - Commit: `SELF`
-- Pull request: not created yet. It supersedes the Bolt PRs #11073, #11074 and #11076, which conflicted on `SPEC.md` and carried `n/a` change-log rows.
+- Pull request: #11081 (https://github.com/D-sorganization/UpstreamDrift/pull/11081). It supersedes the Bolt PRs #11073, #11074 and #11076, which conflicted on `SPEC.md` and carried `n/a` change-log rows.
 - Done: took only the `src/` changes from the three Bolt PRs. Row-wise `np.linalg.norm(..., axis=1)` becomes `np.sqrt(np.einsum("ij,ij->i", d, d))` in `contact_identification`, `multi_shooting_fit` and `tour_baselines/calibration`, and max-norm reductions take one square root after `np.max` in `contact_mode_qualifier` and `calibration`. The unmeasured inline speed claims were removed.
 - Measured (NumPy 2.2.6, this workstation): 4.8x on 20000x3 rows and 1.8x on 657x3 rows; results match `np.linalg.norm` to 1e-15.
 - Excluded: #11077. On top of the same edits it reverts the `nightly-cross-engine.yml` hardening, deletes cross-engine validation tests and raises the architecture budget.
