@@ -96,28 +96,10 @@ def set_contract_level(level: ContractLevel) -> None:
     import sys
 
     _ContractState.level = level
-    for mod_name in (
-        __name__,
-        "contracts",
-        "shared.python.contracts",
-        "src.shared.python.contracts",
-        "src.shared.python._contracts_level",
-        "src.shared.python.core.contracts.level",
-    ):
-        if mod_name in sys.modules:
-            mod = sys.modules[mod_name]
-            try:
-                mod.DBC_LEVEL = level  # type: ignore[attr-defined]
-                mod.CONTRACTS_ENABLED = level != ContractLevel.OFF  # type: ignore[attr-defined]
-                if hasattr(mod, "_ContractState"):
-                    mod._ContractState.level = level
-                if hasattr(mod, "_contract_state") and isinstance(
-                    mod._contract_state, dict
-                ):
-                    mod._contract_state["level"] = level
-                    mod._contract_state["enabled"] = level != ContractLevel.OFF
-            except (AttributeError, TypeError):
-                pass
+    # Update module-level aliases so existing references see the new values
+    current_module = sys.modules[__name__]
+    current_module.DBC_LEVEL = level  # type: ignore[attr-defined]
+    current_module.CONTRACTS_ENABLED = level != ContractLevel.OFF  # type: ignore[attr-defined]
     logger.info("Contract enforcement level set to %s", level.value)
 
 
