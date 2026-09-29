@@ -301,7 +301,8 @@ def _compute_downswing_metrics(
             for t in ctx.times[keep]
         ]
     )
-    root_err = np.linalg.norm(sim_q[:, :3] - ctx.q_ref[keep, :3], axis=1)
+    root_diff = sim_q[:, :3] - ctx.q_ref[keep, :3]
+    root_err = np.sqrt(np.einsum("ij,ij->i", root_diff, root_diff))
     root_tilt = np.degrees(np.abs(sim_q[:, 3:6] - ctx.q_ref[keep, 3:6]).max(axis=1))
     m = (ctx.times >= 1.0) & (ctx.times < 1.6) & keep
 
@@ -347,8 +348,9 @@ def _compute_downswing_metrics(
     out["segment_rms_m"] = segment_rms(ctx.labels, errors, ctx.valid[keep])
     ref_markers = np.stack([ctx.kin.marker_positions(row) for row in ctx.q_ref[keep]])
     sim_markers = np.stack([ctx.kin.marker_positions(row) for row in sim_q])
+    marker_diff = sim_markers - ref_markers
     out["tracking_rms_vs_reference_m"] = float(
-        np.sqrt(np.mean(np.linalg.norm(sim_markers - ref_markers, axis=2) ** 2))
+        np.sqrt(np.mean(np.einsum("...i,...i->...", marker_diff, marker_diff)))
     )
     out["backswing_to_1s"] = {
         "root_error_max_m": float(root_err[ctx.times[keep] <= 1.0].max()),

@@ -15,6 +15,8 @@ These tests help catch:
 
 from __future__ import annotations
 
+import math
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -365,7 +367,8 @@ class PhysicsValidator:
             jacp_numerical[:, i] = (pos_plus - pos_minus) / (2 * epsilon)
 
         # Compute error
-        error = float(np.linalg.norm(jacp_analytical - jacp_numerical))
+        diff = (jacp_analytical - jacp_numerical).ravel()
+        error = float(math.sqrt(np.vdot(diff, diff)))
         passes = error < self.tolerance_jacobian
 
         message = (
