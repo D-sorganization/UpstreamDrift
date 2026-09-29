@@ -568,3 +568,12 @@ tests/ui/c3d_viewer`: 67 failed / 2686 passed here vs 65 / 2687 on `b8c27a7d2`; 
 
 1. Open the draft PR, add the SPEC row keyed by its number, get `quality-gate` green.
 2. Mark ready and arm through `scripts/automerge_guard.py`.
+
+## Motion Matching Review Packet
+
+Owner-requested review on `docs/motion-matching-board-review`, PR #11083. See
+[Board Packet](2026-09-28-motion-matching-board-review.md): 18 draft issue bodies,
+main and GS3DX branch evidence, metrics and licensing budgets, and Shadow Tracker
+integration/qualification gaps. No implementation issues claimed or closed.
+375 focused tests and full Ruff lint/format passed. Board approval and native
+qualification are separate next steps; preserve the active #10979 work.

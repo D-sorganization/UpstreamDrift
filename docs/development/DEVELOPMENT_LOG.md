@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11083 — Motion Matching Board Review
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** owner-requested documentation review; tracked by PR #11083
+- **PR:** #11083
+- **Branch:** `docs/motion-matching-board-review`
+- **Paths:** `docs/development/2026-09-28-motion-matching-board-review.md`
+- **Started:** 2026-09-28
+- **Last verified:** 2026-09-28 — 375 focused tests passed, full Ruff lint/format and packet title case passed.
+- **Summary:** Evidence-backed engine/model review, recent GS3DX improvements, 18 issue proposals, anatomical Home-budget options and historical-video readiness; no implementation/qualification claim.
+- **Next step:** Board disposition and overlap reconciliation before creating implementation children.
+
 ### DL-#11080 · Product Review for the Expert Panel
 
 - **State:** in_review
