@@ -75,11 +75,11 @@ classdef test_gs3dx_human < matlab.unittest.TestCase
                 testCase.verifyEqual(strrep(get_param(jt, 'ReferenceBlock'), newline, ' '), 'sm_lib/Joints/Revolute Joint');
                 testCase.verifyEqual(get_param(jt, 'SpringStiffness'), 'MidfootStiffness');
                 testCase.verifyEqual(get_param(jt, 'MotionActuationMode'), 'ComputedMotion');
-                for p = ["Heel In" "Heel Out" "Ball In" "Ball Out" "Toe"]
+                for p = ["Heel" "Ball In" "Ball Out" "Big Toe" "Lesser Toes"]
                     pc = get_param([sys '/' char(s + " " + p + " Point")], 'PortConnectivity');
                     peers = string(strrep(get_param([pc.DstBlock], 'Name'), newline, ' '));
-                    testCase.verifyEqual(any(peers == s + " Forefoot Frame"), p == "Toe", ...
-                        s + " " + p + ": only the toe rides on the forefoot");
+                    testCase.verifyEqual(any(peers == s + " Forefoot Frame"), endsWith(p, ["Toe" "Toes"]), ...
+                        s + " " + p + ": only the toes ride on the forefoot");
                 end
             end
             k = gs3dx_joint_keys(testCase.mdl);
@@ -87,11 +87,11 @@ classdef test_gs3dx_human < matlab.unittest.TestCase
         end
 
         function five_contacts_per_foot_left_first(testCase)
-            % Heel inside/outside, both metatarsal heads, the big toe; the
+            % The heel, both metatarsal heads, the big and lesser toes; the
             % force log keeps the left contacts first (GS3DX_CONTACT_CHECK).
             sys = [testCase.mdl '/Lower Body'];
             testCase.verifyEqual(str2double(get_param([sys '/Foot Contact Mux'], 'Inputs')), 10);
-            names = ["Heel In" "Heel Out" "Ball In" "Ball Out" "Toe"];
+            names = ["Heel" "Ball In" "Ball Out" "Big Toe" "Lesser Toes"];
             k = 0;
             for s = ["L" "R"]
                 for n = names

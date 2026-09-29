@@ -10,19 +10,20 @@ and its total mass is `GS3DX_Neck`'s.
 
 ## What Looked Wrong, and Why
 
-| Complaint                           | Cause found                                                                                                                                                                      |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Torso too large                     | The trunk was three 6 in radius cylinders: 30 cm deep and round. A torso is about 22 cm deep and wider than deep.                                                                |
-| Hips about 30° open                 | `ZeroMassHipReference`, a massless 12 in bar, sits 33° off the hip line and off the hips. The hip joint centres are 4.3° open, the capture 3.7°, and the widths match (0.180 m). |
-| Hip attachments look asymmetric     | The hip joints are placed from the capture; their midpoint is 3.8 cm forward of the lower-trunk cylinder's axis. Nothing centred on them was drawn.                              |
-| Clubface right of target at address | The grip roll: the face normal was 20.7° right of target (the purple rod drawn in the face plane, not along its normal).                                                         |
-| Feet backwards in renders           | Renders used the whole-body IK, which has no toe target, so each foot could spin about its shank. The simulation's leg reference sets the feet from the toe markers.             |
-| Head too far forward, long neck     | The neck is zero at address, so it continues the upper trunk's axis (59° from vertical at address): the head centre sat 126 mm from the capture's head markers.                  |
-| Neck too long (second review)       | The head centre is where the capture puts it, but the neck pivot sat 58 mm below the level of C7 along the neck axis, inside the chest, so the 10 in neck showed as a stalk.     |
-| "Impact" still before impact        | The impact frame was peak club-head speed (476). The head is then 16 cm short of the ball; it returns to its address position at frame 477.3.                                    |
-| Human falls in the balance run      | Two causes: the toe contacts sat 7 cm past the midfoot joint, so the 100 N·m/rad spring folded under the load; and the neck started 24° from its filtered reference.             |
-| Human hops at the start (rebuild)   | Placing the head moved the address centre of mass 7 mm; the balance reference was anchored to `GS3DX_Neck`'s, so the balance loop kicked both feet off the ground at t = 0.      |
-| Neck not joined to the shoulders    | The pivot (C7) is 25 mm above the chest ellipsoid's top, and the drawn neck stopped 16 mm short of the pivot: a 40 mm gap along the neck in every frame.                         |
+| Complaint                           | Cause found                                                                                                                                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Torso too large                     | The trunk was three 6 in radius cylinders: 30 cm deep and round. A torso is about 22 cm deep and wider than deep.                                                                              |
+| Hips about 30° open                 | `ZeroMassHipReference`, a massless 12 in bar, sits 33° off the hip line and off the hips. The hip joint centres are 4.3° open, the capture 3.7°, and the widths match (0.180 m).               |
+| Hip attachments look asymmetric     | The hip joints are placed from the capture; their midpoint is 3.8 cm forward of the lower-trunk cylinder's axis. Nothing centred on them was drawn.                                            |
+| Clubface right of target at address | The grip roll: the face normal was 20.7° right of target (the purple rod drawn in the face plane, not along its normal).                                                                       |
+| Feet backwards in renders           | Renders used the whole-body IK, which has no toe target, so each foot could spin about its shank. The simulation's leg reference sets the feet from the toe markers.                           |
+| Head too far forward, long neck     | The neck is zero at address, so it continues the upper trunk's axis (59° from vertical at address): the head centre sat 126 mm from the capture's head markers.                                |
+| Neck too long (second review)       | The head centre is where the capture puts it, but the neck pivot sat 58 mm below the level of C7 along the neck axis, inside the chest, so the 10 in neck showed as a stalk.                   |
+| "Impact" still before impact        | The impact frame was peak club-head speed (476). The head is then 16 cm short of the ball; it returns to its address position at frame 477.3.                                                  |
+| Human falls in the balance run      | Two causes: the toe contacts sat 7 cm past the midfoot joint, so the 100 N·m/rad spring folded under the load; and the neck started 24° from its filtered reference.                           |
+| Human hops at the start (rebuild)   | Placing the head moved the address centre of mass 7 mm; the balance reference was anchored to `GS3DX_Neck`'s, so the balance loop kicked both feet off the ground at t = 0.                    |
+| Human drifts through the swing      | The toe contacts sat 15 mm behind the toe tip and at 64% of the foot length, short of `GS3DX_Neck`'s toe corners. The golfer stands on its front contacts, so the pelvis drifted 31-43 mm RMS. |
+| Neck not joined to the shoulders    | The pivot (C7) is 25 mm above the chest ellipsoid's top, and the drawn neck stopped 16 mm short of the pivot: a 40 mm gap along the neck in every frame.                                       |
 
 ## Changes
 
@@ -72,7 +73,7 @@ and its total mass is `GS3DX_Neck`'s.
   Solids from the STL.
 - **Feet.** A revolute joint crosses each foot at the ball of the foot, 73% of
   the foot length from the heel and 25 mm above the sole. Its axis runs along
-  the foot's left axis. It has a spring (`MidfootStiffness`, 100 N·m/rad)
+  the foot's left axis. It has a spring (`MidfootStiffness`, 2,000 N·m/rad)
   and a damper (`MidfootDamping`, 0.5 N·m·s/rad). A positive angle bends the
   toes down; the heel rises over a negative angle. `ForefootMass`
   (0.25 kg) moves to the forefoot. The rearfoot keeps the rest, with its
@@ -80,22 +81,25 @@ and its total mass is `GS3DX_Neck`'s.
   parts are drawn as ellipsoids.
 - **Foot contacts.** Five 1 cm spheres per foot instead of three (see the
   table below). The ball of the foot carries the standing load on the rigid
-  rearfoot, so the midfoot spring carries only what the big toe pushes. As
-  the heel rises the rearfoot turns about the ball and the big toe holds the
-  toes on the ground, which is how a golfer comes up onto the trail toe.
-  Two heel spheres let the foot roll onto its inside or outside edge.
+  rearfoot, so the midfoot spring carries only what the toes push. As the
+  heel rises the rearfoot turns about the ball and the toes stay on the
+  ground, which is how a golfer comes up onto the trail toe. The outside
+  ball and the lesser toes let the foot roll onto its outside edge; the
+  inside ball and the big toe let it roll onto its inside edge. The toes
+  reach as far forward as `GS3DX_Neck`'s toe corners; a shorter reach let
+  the golfer drift (see "Why the Human Drifted").
   `FootContactForces` logs all ten, left foot first.
 - **Blocks.** The "Inertia Sensor" subsystem is removed. It held twelve
   sensors on physical ports that nothing reads, and cost 75 compiled blocks
   (975 → 900). The visuals, the feet and the neck bring the total to 965.
 
-| Contact  | Segment  | Along the foot (from the heel)                     | Across                            |
-| -------- | -------- | -------------------------------------------------- | --------------------------------- |
-| Heel In  | rearfoot | heel edge                                          | 25 mm inside (`HeelContactWidth`) |
-| Heel Out | rearfoot | heel edge                                          | 25 mm outside                     |
-| Ball In  | rearfoot | 73% of the foot length (first metatarsal head)     | inside edge (`FootContactWidth`)  |
-| Ball Out | rearfoot | 64% (fifth metatarsal head, `FootBallOutFraction`) | outside edge                      |
-| Toe      | forefoot | 15 mm behind the toe tip (`FootToeInset`)          | 20 mm inside (`FootToeOffset`)    |
+| Contact     | Segment  | Along the foot (from the heel)                             | Across                                |
+| ----------- | -------- | ---------------------------------------------------------- | ------------------------------------- |
+| Heel        | rearfoot | heel edge                                                  | on the foot's axis                    |
+| Ball In     | rearfoot | 73% of the foot length (first metatarsal head)             | inside edge (`FootContactWidth`)      |
+| Ball Out    | rearfoot | 64% (fifth metatarsal head, `FootBallOutFraction`)         | outside edge                          |
+| Big Toe     | forefoot | under the toe tip (`FootToeInset`, 0)                      | 50 mm inside (`FootToeOffset`)        |
+| Lesser Toes | forefoot | 94.5% (third and fourth toe pads, `FootLesserToeFraction`) | 50 mm outside (`FootLesserToeOffset`) |
 
 ## Why the First Human Build Fell
 
@@ -144,6 +148,41 @@ address centre of mass is 7 mm from where `BalanceCOMRef` starts, so the
 loop drove the legs at t = 0. Anchoring the reference at the model's own
 centre of mass (above) removes the error.
 
+## Why the Human Drifted
+
+With the start fixed, the golfer stood through the swing but its pelvis
+drifted from the reference: 42.9 mm RMS to impact with the midfoot locked,
+against 18.0 mm for `GS3DX_Neck` with the same head and anchor. A variant
+with `GS3DX_Neck`'s feet and contacts (the bisect in the previous section)
+drifted 18.0 mm, so the cause was the foot layout.
+
+The centre of pressure showed why. Both models stand on their front contacts
+for most of the swing, and the lead foot presses its inside front corner.
+`GS3DX_Neck`'s front corners sit under the toe tip, 55 mm either side of the
+foot's axis. The Human's front support was the balls of the foot (73% and
+64% of the foot length) and a big toe 15 mm short of the tip, so the base of
+support was shorter and the balance loop ran out of room. Layouts tried, all
+run to impact on the same model (`GS3DX_Human` plus in-memory contact moves):
+
+| Front contacts                                                     | Midfoot (N·m/rad) | Pelvis RMS / end (mm) | COM horizontal RMS (mm) |
+| ------------------------------------------------------------------ | ----------------- | --------------------- | ----------------------- |
+| Two heels, balls, big toe 15 mm short, 20 mm inside (first layout) | 100               | 159 / -               | -                       |
+| Same                                                               | 800               | 64.8 / 151            | 52.9                    |
+| Same                                                               | locked (10⁵)      | 42.9 / 90             | 31.4                    |
+| One heel; lesser toes at 165 mm, big toe 30 mm inside              | locked            | 31.0 / 49             | 19.6                    |
+| Lesser toes at 175 mm, 45 mm out; big toe 15 mm short, 45 mm in    | locked            | 26.0 / 46             | 15.6                    |
+| Same                                                               | 2,000             | 28.2 / 49             | 17.4                    |
+| Lesser toes at 190 mm, 50 mm out; big toe at the tip, 50 mm in     | locked            | 20.2 / 43             | 12.3                    |
+| `GS3DX_Neck`'s three contacts (toe corners at the tip, ±55 mm)     | none              | 18.0 / 42             | 10.3                    |
+
+(Distances along the foot are from the ankle; the toe tip is at 205 mm.)
+The last Human row is the built layout (see the contact table above). Built
+from `gs3dx_build_human`, with both toes on the forefoot, it drifts 20.2 mm
+RMS with the midfoot locked and 21.9 mm at 2,000 N·m/rad (COM 14.0 mm RMS,
+support 0.52-2.02 BW). `GS3DX_Shape` drifts 21.6 mm. The spring is
+2,000 N·m/rad: stiff enough that the toes carry their share of the front
+support, soft enough that they still bend as the heel rises.
+
 ## Ball Contact
 
 `gs3dx_capture_markers` gives two events:
@@ -182,6 +221,8 @@ angles from each model's `NeckReference`):
 ![GS3DX_Human down the line at address](screenshots/GS3DX_Human_dtl_addr.png)
 ![GS3DX_Human face-on at the top](screenshots/GS3DX_Human_fo_top.png)
 ![GS3DX_Human face-on at ball contact](screenshots/GS3DX_Human_fo_ball.png)
+![Lead foot at address, down the line: heel, balls and toes](screenshots/GS3DX_Human_foot_lead_dtl.png)
+![Trail foot at address, face-on](screenshots/GS3DX_Human_foot_trail_fo.png)
 ![Driver head at address, face-on close-up](screenshots/GS3DX_Human_club_fo.png)
 ![Driver head at address, down-the-line close-up](screenshots/GS3DX_Human_club_dtl.png)
 
@@ -205,8 +246,8 @@ such as the midfoot joints, are drawn at zero.
   spheres;
 - the total mass is unchanged, and each forefoot takes `ForefootMass` from its foot;
 - the sensor subsystem is gone and the model compiles within the reserve;
-- the midfoot joints are sprung revolutes, and only the toe contact rides on
-  the forefoot;
+- the midfoot joints are sprung revolutes, and only the big-toe and
+  lesser-toe contacts ride on the forefoot;
 - each foot has five contacts, and `FootContactForces` logs them left foot
   first in the documented order;
 - at the same joint angles, every solid both models draw (bar the head and
