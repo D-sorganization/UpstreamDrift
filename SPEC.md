@@ -46,6 +46,25 @@ Implements rigid attachment transform diagnostics and orientation residual repor
 - **Verification & Testing (`tests/unit/motion_matching/test_observability_diagnostics.py`)**:
   - Unit tests covering axial turn invariance, fail-closed comparisons, frame conventions, and receipt serialization round-trips.
 
+## Motion Matching Ground-Truth Observation Manifest and Error Metrics (#11105)
+
+Establishes the authoritative marker observation manifest schema, holdout frame protection, and mathematically sound error metric calculation for tour baselines:
+- **Observation Manifest Schema (`src/shared/python/tour_baselines/observation_manifest.py`)**:
+  - Defines `MarkerObservationSpec` and `ObservationManifest` enforcing SI metre units, per-club frame counts and sampling rates (Driver: 654 frames @ 360 Hz; Iron: 657 frames @ 359 Hz), and strictly disjoint calibration vs. holdout frame intervals.
+  - Freezes per-marker frame-level validity (missing spans derived from the sha-verified canonical captures) and reconstructs the frame-by-marker mask via `ObservationManifest.frame_validity()` in sorted marker column order; `ObservationManifest.require_frozen_validity()` is the public contract binding metric evaluation to that frozen mask.
+  - Normalizes the `markers` field to an immutable mapping at construction so serialized benchmark evidence cannot mutate after construction.
+  - Implements JSON round-trip serialization and deserialization (`to_json`, `from_json`) with comprehensive validation.
+  - Exposes `build_frozen_observation_manifest(club)` constructing authoritative frozen manifests for Tour baseline trials (`C3D_TA_Driver.c3d`, `C3D_TA_Iron.c3d`).
+- **Mathematically Sound Metric Aggregation**:
+  - Implements `compute_pooled_rmse` computing exact Euclidean root-mean-square error $\sqrt{\sum_{\text{valid}} \|p - o\|^2 / N_{\text{valid}}}$. Rejects zero valid observations (fail-closed), validates non-finite coordinates at valid locations, and safely ignores masked NaNs.
+  - Implements `compute_frame_wise_rms` returning per-frame RMS and median frame RMS, mathematically distinct from pooled Euclidean RMSE across frames with non-uniform marker visibility or error distribution.
+  - When a manifest is bound, both metric functions verify the caller-supplied mask bit-for-bit against the frozen frame-level validity before producing a number, so gap-filled or residual-invalid samples can never become measured evidence.
+- **Holdout Frame Inviolability & Calibration Protection**:
+  - Binds `calibrate_with_manifest_protection` to the real calibration entry point `calibrate_fixed_geometry(..., manifest=...)`: the trajectories must cover the manifest's frame count and only `manifest.calibration_frames` rows reach the estimator, so holdout observations cannot update calibrated parameters regardless of caller discipline.
+  - Holds out from the frozen top-of-backswing event of each club - driver frame 397 of 654, iron frame 394 of 657 - covering downswing, impact and follow-through; the earlier flat frame-251 boundary mis-described late-backswing frames (146 driver / 143 iron) as held-out swing phases.
+- **Verification (`tests/unit/tour_baselines/test_observation_manifest.py`)**:
+  - 17 unit tests covering schema validation, holdout disjointness, frozen manifest conformance (frames, rate, SHA, per-marker frame-level validity), pooled vs. median RMS divergence, masked NaN handling, fail-closed non-finite coordinate rejection, frozen-validity metric binding, calibration entry-point slicing invariants, and the event-based holdout boundary.
+
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
 Resolves test-order and module-identity pollution in `test_force_plate_stitching.py` under parallel execution:
@@ -7140,6 +7159,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11117 | [MMR-01] Fail-closed matching-ledger and status gates for #11085: metrics-map traversal for `whole_marker_rmse_m`, candidate-SHA identity inspection, TB-05 driven triple pendulum disqualified everywhere, contradictory-status override confined to success claims (historical DIAGNOSTIC verdicts preserved, red/green tested). |
 | 2026-09-29 | #11120 | [MMR-14] Review fixes for shadow-tracker boundary tests (#11110): initialization seeding below the minimum winner score so valid all-zero-IoU candidates win with real evidence, explicit length check for NumPy candidate matrices (no truthiness ValueError), and a real fx/fy scaling assertion comparing anamorphic vs isotropic rendering spans. |
 | 2026-09-29 | #11123 | Head/trunk/grip diagnostic receipts (#11106, first tranche): compose the calibrated attachment rotation into the observed SO(3) orientation residual before evaluation, require `receipt_sha256` on schema-1.0 receipt load, validate grip/clubface calibration frame endpoints, and freeze `marker_residuals_mm` receipts against post-construction mutation. |
+| 2026-09-29 | #11118 | Tour-baseline observation manifests (#11105): freeze per-marker frame-level validity spans derived from the sha-verified canonical captures, bind metric evaluation to the frozen frame-by-marker mask through a public manifest contract, enforce holdout protection inside the real calibration entry points by slicing manifest calibration frames, start the holdout at the recorded top-of-backswing event (driver frame 397, iron 394), make `markers` immutable, and regenerate the shared Tools divergence inventory from a full clone. |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-29 | #11112 | Row/column norms switched to `sqrt(einsum)` at the residual bolt sites across `motion_matching` (multi-shooting rollout distances, club calibration lengths and shaft norms, dynamics-filter hull edges, hip sphere fit, downswing root/marker tracking, reference marker errors, club-only acceptance and control-replay deltas), `bunkershot3d` qualification identifiability scale (identity proven by a NaN/Inf parametrized equivalence test). The `sidekick` electrical model section-widths site is excluded: `electrical_model.py` is a Tools-owned child copy (change moves to D-sorganization/Tools with a vendor/ud-tools pin bump). |

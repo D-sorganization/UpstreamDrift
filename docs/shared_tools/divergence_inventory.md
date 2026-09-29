@@ -121,7 +121,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 0 | 0 | 0 | 4 | 23 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `tour_baselines` | 0 | 0 | 0 | 17 | 0 | 0 |
+| `tour_baselines` | 0 | 0 | 0 | 18 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ui` | 0 | 0 | 0 | 29 | 9 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **421** | **279** | **124** | **1528** | **750** | **700** |
+| **Total** | **421** | **279** | **124** | **1529** | **750** | **700** |
 
 ## Diverged Files by Package
 
