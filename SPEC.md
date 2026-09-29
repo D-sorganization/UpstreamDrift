@@ -7100,6 +7100,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | n/a | Replaced np.linalg.norm with math.sqrt(np.vdot) in physics validation Jacobian finite differencing for performance (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |
