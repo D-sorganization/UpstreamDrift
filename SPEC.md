@@ -12,26 +12,6 @@ Resolves the split-brain coverage gates by making the budget JSON the single gat
 - **Testing (`tests/unit/scripts/test_check_coverage_gates.py`, `tests/unit/scripts/test_check_mypy_exclusion_budget.py`)**:
   - Adds strict/unmatched-gate exit semantics driving the checker with fixture coverage JSON files (below floor exit 1, above exit 0, unmatched+`--strict` exit 1, unmatched without `--strict` warning + exit 0) and a warning-only expired-ratchet test.
 
-## Fail-Closed Disqualified Tour Baseline Receipts in Motion Matching Ledger and Tracker (#11085)
-
-Implements [MMR-01] fail-closed qualification and rejection propagation across the motion-matching ledger, coverage matrix, and status tracking documents:
-- **TB-05 Driven Triple Pendulum Disqualification (`src/shared/python/tour_baselines/coverage.py`)**:
-  - Registers `_DRIVEN_TRIPLE_RECEIPTS` and `_DRIVEN_TRIPLE_REJECTION`.
-  - Updates `_cell_driven` so `driven_triple_pendulum` returns `EvidenceStatus.REJECTED` for both driver and 7-iron captures instead of `UNQUALIFIED`.
-  - Updates `docs/plans/tour_baselines/coverage_matrix.md` lines 25-26 to display `❌ Rejected`.
-- **Ledger Accuracy & Fail-Closed Gates (`src/shared/python/motion_matching/ledger.py`)**:
-  - `_extract_metric_value`: Adds traversal of the `"metrics"` mapping, correctly extracting `whole_marker_rmse_m` (415–567 mm) from `tb04_` and `tb05_` qualification receipts.
-  - `extract_candidate_sha`: Adds inspection of `identity_hash` and nested `identity` mapping.
-  - `extract_acceptance`: Hardens gate evaluation: physical and numerical gate results supersede self-reported success strings (PASSED/ACCEPTED with a failed or rejected gate fails closed to `status: "REJECTED"` and `is_physically_accepted: False`); the override is confined to success claims, so historical `DIAGNOSTIC` verdicts are preserved verbatim.
-- **Status Document Generator Hardening (`scripts/generate_matched_swing_status.py`)**:
-  - Configures `sys.stdout` and `sys.stderr` to UTF-8 on Windows to prevent `UnicodeEncodeError` when rendering emoji badges.
-  - Adds `_normalize_markdown` comparison in `--check` mode to ensure resilient whitespace handling across formatting variations.
-- **Ledger & Status Synchronization**:
-  - Re-indexes all receipts with `python -m src.shared.python.motion_matching ledger --write` (`reports/matched_swing_ledger.json`).
-  - Synchronizes tracker documentation with `python scripts/generate_matched_swing_status.py --write` (`docs/development/matched_swing_program/README.md`).
-- **TDD Test Coverage**:
-  - `tests/unit/tour_baselines/test_coverage_matrix.py`: Adds `test_disqualified_driven_triple_receipts_are_not_promoted`.
-  - `tests/unit/motion_matching/test_ledger.py`: Adds `test_disqualified_tour_baseline_receipts_are_indexed_as_rejected` and `test_contradictory_status_strings_fail_closed_to_rejected`.
 ## Shadow State, Camera, and Renderer Boundary Verification (#11110)
 
 Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
@@ -46,6 +26,25 @@ Enforces strict boundary contracts, no-evidence abstention, and edge-case handli
   - **SE(3) & Distortion Consistency**: Tests 3D camera rotation inversion ($R_{cw} = R_{wc}^T$, $t_{cw} = -R_{wc}^T t_{wc}$) and distortion expansion (0, 4, 5 coefficients) with strict rejection of invalid lengths.
   - **Dimension & Finite Checks**: Enforces fail-closed rejection on mismatched dimensions and non-finite coordinates.
   - **Quaternion Normalization & Round-Trip**: Verifies unit quaternion normalization, non-unit normalization, zero-norm quaternion rejection, and machine-precision $q/v$ round-trip between native and canonical layouts.
+## Head, Trunk, and Grip Observability Diagnostic Receipts (#11106)
+
+Implements rigid attachment transform diagnostics and orientation residual reporting under schema `observability-diagnostics/1.0.0`:
+- **Rigid SE(3) Attachment Transform (`src/shared/python/motion_matching/diagnostics/observability_receipts.py`)**:
+  - Implements `AttachmentTransform` with physical SI units, analytical inversion, round-trip identity verification, and SHA-256 provenance hashing.
+- **Head Observability Diagnostics (`HeadDiagnosticCalculator`)**:
+  - Evaluates head marker residuals, anatomical head-centre displacement, and SO(3) orientation residuals using the Kabsch algorithm over nominal skull marker geometry (`HeadFront`, `HeadTop`, `HeadSide`).
+  - Fails closed if comparing marker centroids directly to anatomical body centre without an explicit attachment transform.
+  - Composes the calibrated attachment rotation (declared anatomical -> marker frame) into the Kabsch-observed orientation before evaluating the SO(3) residual, so a rotated marker mounting does not inflate orientation error.
+  - Isolates pure axial yaw rotation: reports zero translation error for head centre while preserving non-zero SO(3) orientation residual.
+- **Trunk Observability Diagnostics (`TrunkDiagnosticCalculator`)**:
+  - Models trunk centre-of-mass observables, distinguishing between joint-centre and C7-proxy reference frames to avoid false >80 mm torso displacement artifacts during axial turns.
+- **Grip and Clubface Calibration (`GripAndClubfaceCalibration`)**:
+  - Implements subject-calibrated lead-hand, trail-hand, grip, and clubface transforms under standard convention (`lead_left_trail_right`) with calibration hashing.
+- **Receipt Schema & Persistence (`ObservabilityDiagnosticReceipt`)**:
+  - Implements immutable receipt serializing to JSON with tamper-evident SHA-256 validation under schema `observability-diagnostics/1.0.0`; loading a schema-1.0 receipt whose `receipt_sha256` is missing fails closed.
+  - Validates grip/clubface calibration transform frame endpoints against the declared lead/trail hand, grip, and face frames, and freezes `marker_residuals_mm` into an immutable mapping at construction.
+- **Verification & Testing (`tests/unit/motion_matching/test_observability_diagnostics.py`)**:
+  - Unit tests covering axial turn invariance, fail-closed comparisons, frame conventions, and receipt serialization round-trips.
 
 ## Direct Canonical Import and Extension Overlay Parent Attribute Cleanup (#11034)
 
@@ -7141,6 +7140,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11117 | [MMR-01] Fail-closed matching-ledger and status gates for #11085: metrics-map traversal for `whole_marker_rmse_m`, candidate-SHA identity inspection, TB-05 driven triple pendulum disqualified everywhere, contradictory-status override confined to success claims (historical DIAGNOSTIC verdicts preserved, red/green tested). |
 | 2026-09-29 | #11120 | [MMR-14] Review fixes for shadow-tracker boundary tests (#11110): initialization seeding below the minimum winner score so valid all-zero-IoU candidates win with real evidence, explicit length check for NumPy candidate matrices (no truthiness ValueError), and a real fx/fy scaling assertion comparing anamorphic vs isotropic rendering spans. |
+| 2026-09-29 | #11123 | Head/trunk/grip diagnostic receipts (#11106, first tranche): compose the calibrated attachment rotation into the observed SO(3) orientation residual before evaluation, require `receipt_sha256` on schema-1.0 receipt load, validate grip/clubface calibration frame endpoints, and freeze `marker_residuals_mm` receipts against post-construction mutation. |
 | 2026-09-28 | #11083 | Review motion matching across engines and recent GS3DX models; add 18 board issue proposals for anatomy, native verification, performance and historical-video reconstruction. |
 | 2026-09-29 | #11081 | Row-wise marker and force norms use `sqrt(einsum)` (consolidates Bolt #11073, #11074, #11076; 1.8-4.8x measured, identical results). |
 | 2026-09-28 | #11080 | Add the UpstreamDrift and consumed Tools product-review packet: 12 evidence-backed issue proposals, acceptance criteria, backlog reconciliation and RunnerDashboard panel brief; implementation and scientific qualification unchanged. |
