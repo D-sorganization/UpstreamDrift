@@ -38,7 +38,13 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 ISSUE_REF_PATTERN = re.compile(r"(?:Closes|Fixes|Resolves)\s+#([0-9]+)", re.IGNORECASE)
-ISSUE_PATH_PATTERN = re.compile(r"(?:src|tests|rust_core|api)/[A-Za-z0-9_/.-]+")
+ISSUE_PATH_PATTERN = re.compile(
+    r"(?:\.github/workflows|src|tests|rust_core|api|scripts)/[A-Za-z0-9_/.-]+"
+)
+# Prose parentheticals such as "(engines/api/core/shared/robotics)" are not
+# file references; dropping them before matching avoids false positives like
+# api/core/shared/robotics in UD #11124.
+_PARENTHETICAL_PATTERN = re.compile(r"\([^()]*\)")
 ENV_CHANGED_FILES = "PR_CHANGED_FILES"
 MAX_PATHS_SHOWN = 5
 
@@ -173,7 +179,8 @@ def _referenced_issue_numbers(pr_body: str) -> list[str]:
 
 def _issue_referenced_paths(issue_body: str) -> list[str]:
     """Return unique repo paths referenced in an issue body, sorted."""
-    return sorted(set(ISSUE_PATH_PATTERN.findall(issue_body)))
+    prose = _PARENTHETICAL_PATTERN.sub(" ", issue_body)
+    return sorted(set(ISSUE_PATH_PATTERN.findall(prose)))
 
 
 def _first_path_match(changed_files: list[str], referenced: list[str]) -> str | None:
