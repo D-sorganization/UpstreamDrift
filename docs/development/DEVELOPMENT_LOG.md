@@ -25,9 +25,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/capture-registry-11161`
 - **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`
 - **Started:** 2026-09-29
-- **Last verified:** 2026-09-30 — architecture budget OK after splitting nine functions; #11170 per-capture leaderboard folded in; scoped motion_matching/swing_comparison tests pass apart from pre-existing local failures (handoff).
+- **Last verified:** 2026-09-30 — turnover: HANDOFF lists the ordered open work (#11190, #11166, #11167-#11169, #11182); leaderboard freshness red until #11190. Earlier: architecture budget OK after splitting nine functions; #11170 per-capture leaderboard folded in; scoped motion_matching/swing_comparison tests pass apart from pre-existing local failures (handoff).
 - **Summary:** Part 1 of epic #11161 (#11162-#11164): neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, and engine-independent swing events and metrics. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
-- **Next step:** Get CI green on the draft PR from `feat/capture-registry-11161`.
+- **Next step:** Fix #11190 (Stage 1 varies non-tunable joint targets under FastRestart) with a failing Stage-1 residual test first, then regenerate `LEADERBOARD.md`.
 
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
