@@ -90,6 +90,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 950 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
 | 947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m` |
+| 946 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 938 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
@@ -100,7 +101,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 924 | `src/research/differentiable/engine.py` |
 | 921 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 921 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
-| 920 | `src/shared/python/motion_matching/club_only/matrix_qualification.py` |
 | 920 | `src/tools/bunker_shot_gui/report.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
@@ -121,8 +121,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 878 | `src/launchers/launcher_layout_manager.py` |
 | 877 | `src/bunkershot3d/io/schema.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
+| 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
-| 866 | `src/shared/python/tour_baselines/qualification.py` |
 | 865 | `src/shared/python/signal_toolkit/fitting.py` |
 | 864 | `src/tools/bunker_shot_gui/widgets.py` |
 | 860 | `src/shared/python/motion_matching/full_body_ik.py` |
@@ -162,6 +162,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |
 | 812 | `src/tools/starting_pose_matcher/live_view_controller.py` |
 | 811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py` |
+| 811 | `src/shared/python/motion_matching/club_only/ui_integration.py` |
 | 811 | `src/tools/model_explorer/joint_manipulator.py` |
 | 810 | `src/shared/python/humanoid_character_builder/mesh/mesh_processor.py` |
 | 809 | `src/shared/python/model_generation/converters/urdf_parser.py` |

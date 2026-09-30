@@ -15,7 +15,9 @@ from src.shared.python.motion_matching.provider import FitOptions
 )
 def test_fit_options_rejects_invalid_max_marker_rmse_m(bad: float) -> None:
     """NaN silently disables a gate and non-positive ceilings reject planar data."""
-    with pytest.raises(ValueError, match="max_marker_rmse_m must be finite and positive"):
+    with pytest.raises(
+        ValueError, match="max_marker_rmse_m must be finite and positive"
+    ):
         FitOptions(max_marker_rmse_m=bad)
 
 

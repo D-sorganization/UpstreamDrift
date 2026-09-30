@@ -155,7 +155,10 @@ def validate_and_project_target(
 
     if ceiling is not None and plane is not None:
         deviation_blocks = []
-        for marker_pts in (np.asarray(club.butt, dtype=float), np.asarray(club.clubhead, dtype=float)):
+        for marker_pts in (
+            np.asarray(club.butt, dtype=float),
+            np.asarray(club.clubhead, dtype=float),
+        ):
             if marker_pts.ndim == 2 and marker_pts.shape[-1] == 3:
                 deviation_blocks.append(plane.project_points_to_plane(marker_pts)[:, 2])
         if deviation_blocks:
