@@ -142,9 +142,11 @@ def _opensim_unavailable_receipt(candidate: dict[str, Any]):
         OpenSimQualificationReceipt,
         engine="opensim",
         status=OpenSimQualificationStatus.UNAVAILABLE,
-        missing_rollout_label="native OpenSim rollout (opensim runtime)",
-        rejection_reason="OpenSim runtime is not installed on host",
-        diagnostic_message="OpenSim runtime is not installed on host: live dynamic simulation unavailable.",
+        labels={
+            "missing_rollout_label": "native OpenSim rollout (opensim runtime)",
+            "rejection_reason": "OpenSim runtime is not installed on host",
+            "diagnostic_message": "OpenSim runtime is not installed on host: live dynamic simulation unavailable.",
+        },
         limitations=OPENSIM_ENGINE_LIMITATIONS,
         remedy=OPENSIM_UNAVAILABLE_REMEDY,
     )

@@ -232,13 +232,14 @@ def build_unavailable_receipt(
     *,
     engine: str,
     status: Any,
-    missing_rollout_label: str,
-    rejection_reason: str,
-    diagnostic_message: str,
+    labels: dict[str, str],
     limitations: tuple[str, ...],
     remedy: str,
 ):
-    """Fail-closed: without the engine runtime on host no native dynamic replay can be produced."""
+    """Fail-closed: without the engine runtime on host no native dynamic replay can be produced.
+
+    ``labels`` keys: missing_rollout_label, rejection_reason, diagnostic_message.
+    """
     return receipt_cls(
         schema_version=1,
         engine=engine,
@@ -252,8 +253,8 @@ def build_unavailable_receipt(
         derivatives_consistent=False,
         energy_balance_checked=False,
         declared_limitations=list(limitations),
-        rejection_reasons=[rejection_reason],
-        missing_evidence=[missing_rollout_label],
+        rejection_reasons=[labels["rejection_reason"]],
+        missing_evidence=[labels["missing_rollout_label"]],
         remedy=remedy,
-        diagnostic_message=diagnostic_message,
+        diagnostic_message=labels["diagnostic_message"],
     )
