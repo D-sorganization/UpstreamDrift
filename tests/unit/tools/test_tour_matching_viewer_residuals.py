@@ -227,13 +227,13 @@ class TestMissingEngineRecovery:
     """Acceptance criterion 6: graceful missing-engine recovery without crashing."""
 
     def test_missing_engine_shows_recovery_dialog(self, qtbot, monkeypatch) -> None:
-        from src.shared.python.motion_matching.native_viewers import (
-            ViewerUnavailableError,
-        )
+        import src.shared.python.motion_matching.native_viewers as native_viewers
         from src.tools.tour_matching_viewer.gui import TourMatchingViewerWidget
 
         widget = TourMatchingViewerWidget(spec_path=SPEC_PATH)
         qtbot.addWidget(widget)
+
+        ViewerUnavailableError = native_viewers.ViewerUnavailableError
 
         replay = _build_test_replay()
         widget.load_replay_data(replay)
@@ -242,10 +242,7 @@ class TestMissingEngineRecovery:
         def mock_launch(*args, **kwargs):
             raise ViewerUnavailableError("Simscape runtime not found on host")
 
-        monkeypatch.setattr(
-            "src.shared.python.motion_matching.native_viewers.open_in_native_viewer",
-            mock_launch,
-        )
+        monkeypatch.setattr(native_viewers, "open_in_native_viewer", mock_launch)
 
         # Simulating launcher call: must handle error gracefully
         with patch.object(widget, "_show_recovery_message") as mock_msg:

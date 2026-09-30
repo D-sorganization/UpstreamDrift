@@ -24,8 +24,12 @@ if not any(
     str(p).endswith("vendor/ud-tools/src/shared/python/sidekick/process_calculators")
     for p in _vendor_calc.__path__
 ):
-    _vendor_calc.__path__.append(str(_VENDOR_TOOLS_SHARED / "sidekick" / "process_calculators"))
-if not (_VENDOR_TOOLS_SHARED / "sidekick/process_calculators/psa_package/psa_model.py").is_file():
+    _vendor_calc.__path__.append(
+        str(_VENDOR_TOOLS_SHARED / "sidekick" / "process_calculators")
+    )
+if not (
+    _VENDOR_TOOLS_SHARED / "sidekick/process_calculators/psa_package/psa_model.py"
+).is_file():
     pytest.skip("vendored psa_package not checked out", allow_module_level=True)
 from sidekick.process_calculators.psa_package.psa_model import (
     DEFAULT_COMPONENTS,
