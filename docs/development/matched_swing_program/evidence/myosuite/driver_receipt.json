@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "engine": "myosuite",
+  "club": "driver",
+  "status": "unavailable",
+  "candidate_sha256": "",
+  "model_sha256": "",
+  "capture_sha256": "",
+  "runtime_available": false,
+  "is_fresh_simulation": false,
+  "derivatives_consistent": false,
+  "energy_balance_checked": false,
+  "energy_summary": {},
+  "marker_metrics": {},
+  "muscle_metrics": {},
+  "declared_limitations": [
+    "Musculoskeletal excitation-activation dynamics governed by first-order filter with activation/deactivation time constants",
+    "Hill-type muscle tendon unit (MTU) force-length-velocity multipliers with physiological bounds",
+    "Free-joint quaternion orientation normalization (w^2 + x^2 + y^2 + z^2 = 1) and spatial velocity state layout",
+    "Dual-grip weld constraint kinematics coupling hands to club shaft",
+    "Four-foot Hunt-Crossley contact spheres with normal compliance and friction cone limits",
+    "Absence of native joint-torque inverse dynamics (forward muscle excitation driven only)"
+  ],
+  "rejection_reasons": [
+    "MyoSuite runtime is not installed on pinned host: no native musculoskeletal simulation was executed"
+  ],
+  "missing_evidence": [
+    "native MyoSuite rollout (myosuite/MuJoCo runtime)",
+    "candidate_sha256",
+    "model_sha256",
+    "capture_sha256",
+    "native_state/time_s dynamic rollout",
+    "aligned common-marker observations (markers_m/target_m)",
+    "native test count (native_tests_executed)"
+  ],
+  "remedy": "Install the myosuite/MuJoCo stack on the pinned host and re-run scripts/ci/run_native_engine_lane.sh --engine myosuite so native rollouts and club receipts are regenerated from real execution.",
+  "diagnostic_message": "MyoSuite runtime is not installed on host: live simulation unavailable. No previous native dynamic qualification existed for this club; all numeric fields previously recorded here were fabricated placeholders and were removed."
+}
