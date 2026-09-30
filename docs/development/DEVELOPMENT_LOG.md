@@ -24,6 +24,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 613b0e28ed88b5af4719ecccfe876d5d9db90419 — 19 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native MyoSuite qualification NOT achieved: myosuite/MuJoCo unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10M] dual-club MyoSuite qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, non-finite values, and unnormalized root quaternions all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records (README model hashes marked as regeneration targets, not evidence). Real qualification still requires the myosuite/MuJoCo stack on a pinned host via the native lane.
 ### DL-#11094 — Qualify Drake Native Dual-Club Dynamics and Replay
+
 - **Owner:** UDFixTrio10x
 - **Issue:** #11094
 - **Branch:** `feat/mmr-10d-drake-dual-club-11094`
@@ -31,6 +32,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 3b23bd41502a7b7d028f291564997b6460f14cbc — 36 focused tests passed (test_drake_dual_club_qualification.py 16, test_run_native_engine_lane.py + test_native_lane_freshness.py 20); red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native Drake qualification NOT achieved: pydrake unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10D] dual-club Drake qualification (review audit follow-up): receipts now carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite energy all reject); fabricated marker metrics (scaled early/terminal/clubhead RMS, hardcoded pelvis_yaw_error_pct) and placeholder sha256 receipts (`c0ffee…`/`deadbeef…`) removed and replaced with honest fail-closed UNAVAILABLE evidence records. Adds drake to the nightly lane runner. Real qualification still requires pydrake on a pinned host via the native lane.
 - **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
+
 ### DL-#11184 — Restore the High-Severity UI Npm Audit Gate
 
 - **State:** in_review
@@ -3641,3 +3643,4 @@ Never place credentials, tokens, or customer data in a development log.
 No material development-log change — Bolt `np.linalg.norm` → `einsum` consolidation (#11073, #11074, #11076) is a behaviour-preserving micro-optimisation with no feature entry.
 No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/`math.sqrt(np.vdot)` consolidation (#11112, #11128, #11129) is a behaviour-preserving micro-optimisation with no feature entry.
 No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.
+No material development-log change — urllib3 (2.8.0, CVE-2026-97687) and PyJWT (2.15.0, CVE-2026-101918) floor/lock bumps (#11191) are dependency-only changes with no feature entry.
