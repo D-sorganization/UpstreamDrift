@@ -48,7 +48,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
 | 1105 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
-| 1102 | `src/shared/python/sidekick/process_calculators/psa_package/psa_gui.py` |
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
 | 1100 | `src/shared/python/movement_optimizer/models/swingset.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |

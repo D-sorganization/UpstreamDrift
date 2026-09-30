@@ -73,6 +73,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Published best-candidate viewer with honest residuals (MMR-16): enforced raw observation immutability on ReplayData, added residual vector computation, board-ready export stills with complete metadata banners, drive mode filtering, comparable candidate ranking in ascending RMS error preserving rejected verdicts, worst-residual jump navigation, camera and appearance presets preserving invariant physics scores, and graceful missing-engine recovery. Review fixes: wired `rank_candidates` into the browser's real list-build path (best comparable candidate first, rejected rows preserved), pooled per-marker 3D distances for the receipt-convention RMS in the residual summary, rendered-frame and multi-candidate captions, excluded zero-valid-marker frames from global-worst selection and mean statistics, and forwarded the selected row's provenance and verdict into the viewer load path.
 - **Remaining scope on #11102:** web/API surface parity, accessibility/native visual review and the remaining acceptance checkboxes; desktop PyQt fixes above do not close them.
 - **Next step:** main-lane rebase/CI and frontier review of PR #11132.
+### DL-#11103 — Clean-Host End-to-End and Native Release Gates
+
+- **State:** in_progress
+- **Owner:** local
+- **Issue:** #11103
+- **Branch:** `feat/mmr-17-native-release-gates-11103`
+- **Paths:** `src/shared/python/motion_matching/release_gates.py`, `scripts/ci/check_motion_matching_release_gates.py`, `tests/acceptance/test_clean_host_release_gates.py`, `tests/scripts/test_check_motion_matching_release_gates.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 14 focused acceptance and script tests passed; ruff check and format clean; architecture budget and hardcoded style ratchet pass.
+- **Summary:** Implements [MMR-17] clean-host end-to-end lifecycle verification and native release gate evaluation. Emits 4-state test matrix (passed, failed, skipped, unavailable). Fails closed on mandatory engine skips or zero-test native runs. Enforces dual-club coverage across advertised engines, detects adverse tampering/missing engines/unsupported models/corrupt captures, rejects mock engines attempting to satisfy physical gates, aligns UI and CLI metrics within 0.1 mm, and audits full clean-host lifecycle journeys with cancellation budgets.
+- **Next step:** Push branch, open PR with `Closes #11103`, and release lease.
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 

@@ -932,6 +932,9 @@ jobs:
       - name: Changed-File Architecture Budget Check
         run: python3 scripts/ci/check_architecture_budget.py
 
+      - name: Motion Matching Release Gate Audit (issue #11103)
+        run: python3 scripts/ci/check_motion_matching_release_gates.py --audit-only
+
       - name: DRY Duplication Ratchet (issue #7315)
         run: python3 scripts/ci/check_dry_duplication_gate.py
 

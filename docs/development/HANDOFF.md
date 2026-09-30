@@ -127,6 +127,24 @@
   - The same journey is not exercised on the supported web/API surfaces (installable-PyQt and web/API parity, accessibility keyboard review and missing-engine recovery on real hosts are unreviewed).
   - Human visual review of captions/stills and acceptance checkboxes in #11102 are unchecked; no claim is made that "all acceptance criteria" pass.
 - Next step: main-lane rebase/CI and frontier review of PR #11132.
+# Current Handoff — Clean-Host End-to-End and Native Release Gates (#11103)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-17-native-release-gates-11103`
+- Commit: `SELF`
+- Pull request: Closes #11103.
+- Done: Implemented [MMR-17] clean-host end-to-end lifecycle verification and native release gate evaluation:
+  - Created `src/shared/python/motion_matching/release_gates.py` providing 4-state test matrix reporting (`passed`, `failed`, `skipped`, `unavailable`).
+  - Implemented fail-closed evaluation: mandatory engines (MuJoCo, Drake, Pinocchio) marked skipped or with zero executed native tests fail release (`RELEASE_BLOCKED`).
+  - Implemented dual-club real-data path enforcement across advertised engines (Simscape, MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite).
+  - Implemented actionable diagnostics for adverse conditions (`TAMPERED_PACKAGE`, `MISSING_ENGINE`, `UNSUPPORTED_MODEL`, `CORRUPT_CAPTURE`).
+  - Added strict mock-detection preventing synthetic stubs from satisfying physical or scientific release gates.
+  - Implemented numerical alignment verification between UI presentation metrics and CLI reports within 0.1 mm tolerance.
+  - Implemented clean-host lifecycle journey audit (install -> C3D load -> calibrate -> fit -> cancel/resume -> replay -> compare -> export/import -> reopen -> uninstall/upgrade) and cancellation SLA (< 500 ms).
+  - Created CLI script `scripts/ci/check_motion_matching_release_gates.py` supporting `--matrix-out` and `--audit-only`.
+- Tests: 14 acceptance and script tests passed (`tests/acceptance/test_clean_host_release_gates.py`, `tests/scripts/test_check_motion_matching_release_gates.py`).
+- Pre-commit: Ruff check and format clean; architecture budget passes; hardcoded style ratchet passes.
+- Next step: CI green, auto-merge squash to main.
 
 ---
 
