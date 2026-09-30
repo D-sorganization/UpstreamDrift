@@ -105,7 +105,7 @@ def _check_derivatives_consistency(
 def _check_drake_execution_contract(
     replay: dict[str, Any],
     *,
-    expected_model_sha: str,
+    expected_model_sha: str | None,
     model_sha: str,
     native_tests_executed: int | None,
     rejection_reasons: list[str],
