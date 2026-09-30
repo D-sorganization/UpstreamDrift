@@ -159,3 +159,12 @@ def test_validate_only_cli(tmp_path, capsys) -> None:
     code = lane.main(["--engine", "opensim", "--validate-only", str(receipt_path)])
     assert code == 0
     assert "Valid:" in capsys.readouterr().out
+
+
+def test_engine_lanes_includes_drake_configuration() -> None:
+    assert "drake" in lane.ENGINE_LANES
+    drake_lane = lane.ENGINE_LANES["drake"]
+    assert drake_lane["pytest_marker"] == "requires_drake"
+    assert drake_lane["python_module"] == "pydrake"
+    assert drake_lane["distribution"] == "drake"
+    assert drake_lane["receipt_filename"] == "drake_receipt.json"

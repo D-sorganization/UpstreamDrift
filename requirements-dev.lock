@@ -221,7 +221,7 @@ pydantic-settings==2.14.2
     # via upstream-drift (pyproject.toml)
 pygments==2.20.0
     # via pytest
-pyjwt==2.14.0
+pyjwt==2.15.0
     # via upstream-drift (pyproject.toml)
 pyopengl==3.1.10
     # via mujoco
@@ -344,8 +344,10 @@ typing-inspection==0.4.2
     #   fastapi
     #   pydantic
     #   pydantic-settings
-urllib3==2.7.0
-    # via requests
+urllib3==2.8.0
+    # via
+    #   requests
+    #   upstream-drift (pyproject.toml)
 uvicorn[standard]==0.40.0
     # via upstream-drift (pyproject.toml)
 uvloop==0.22.1
