@@ -17,9 +17,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.native_lanes.common import (
-    evaluate_candidate_replay,
-)
+from src.shared.python.native_lanes.common import evaluate_candidate_replay
 
 DRAKE_ENGINE_LIMITATIONS: tuple[str, ...] = (
     "upper_body_27dof_float_pathway: pelvis translation and orientation are free float coordinates",
@@ -122,7 +120,6 @@ def validate_drake_candidate_replay(
     """Validate a candidate and its Drake replay against acceptance criteria."""
     if not drake_available:
         return _drake_unavailable_receipt(candidate)
-
     r = evaluate_candidate_replay(
         candidate,
         replay,

@@ -1,3 +1,16 @@
+## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095) [Scope: Fail-Closed Conversion]
+Specifies the native OpenSim qualification pipeline and receipt verification for Driver and 7-Iron models:
+- **Native OpenSim Qualification Module (`src/engines/physics_engines/opensim/python/native_qualification.py`)**:
+  - `OPENSIM_ENGINE_LIMITATIONS`: documents Hill-type activation dynamics, force-velocity-length multipliers, tendon elasticity equilibrium, coordinate limit forces, and ground contact external wrenches.
+  - `OpenSimQualificationStatus`: enum (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`).
+  - `OpenSimQualificationReceipt`: dataclass with serialization (`as_dict()`, `save()`, `load()`) and fail-closed `missing_evidence`/`remedy` fields.
+  - `validate_opensim_candidate_replay`: fail-closed gates — rejects copied/cloned state trajectories and FK-only replays, treats absent `is_fresh_simulation`/`actuation_applied` flags as unverified, requires a recorded nonzero native test count (an unknown count blocks), rejects when the `opensim` runtime is unavailable even if a replay payload is supplied, requires recorded `native_state`/`time_s` rollout data with finite values, checks derivative consistency ($dq/dt \approx v$) and rejects on mismatch, validates physiological muscle activation bounds ($a \in [0.0, 1.0]$), and requires aligned marker observations (`markers_m`/`target_m`) from which only `whole_rms_m` is computed. Previously claimed tolerances (phase/clubhead/pelvis-yaw metrics) were never enforced or data-derived and are removed.
+  - `assess_opensim_qualification`: detects host `opensim` runtime; returns `UNAVAILABLE` when missing without crashing headless test runners.
+- **Evidence Package (`docs/development/matched_swing_program/evidence/opensim/`)**:
+  - `driver_receipt.json` and `iron_receipt.json` corrected: previous placeholder sha256 digests and invented metric values were removed; both are now honest fail-closed UNAVAILABLE records with empty evidence fields, enumerated `missing_evidence`, and a resolvable `remedy`. No native OpenSim qualification exists yet.
+  - `README.md`: documents model topology, Hill-type muscle models, coordinate limits, fail-closed receipt policy, and replay regeneration procedure.
+- **Test Suite (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`)**:
+  - Unit tests verifying valid complete-payload qualification, fail-closed rejection of copied trajectories, FK-only playback, zero/unrecorded native tests, non-finite state data, unphysiological muscle activations, unavailable runtime with payload, missing rollout/marker data, derivative mismatch, computed-not-invented metrics, serialization round-trips, and committed receipt fail-closed honesty.
 ## Qualify MyoSuite Native Dual-Club Dynamics and Replay (MMR-10M, #11096) [Scope: Fail-Closed Conversion]
 Specifies the native MyoSuite qualification pipeline and receipt verification for Driver and 7-Iron models:
 - **Native MyoSuite Qualification Module (`src/engines/physics_engines/myosuite/python/native_qualification.py`)**:
