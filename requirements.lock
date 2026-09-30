@@ -201,7 +201,7 @@ typing-inspection==0.4.2
     #   pydantic-settings
 tzdata==2026.3
     # via pandas
-urllib3==2.7.0
+urllib3==2.8.0
     # via requests
 uvicorn[standard]==0.40.0
     # via upstream-drift (pyproject.toml)
