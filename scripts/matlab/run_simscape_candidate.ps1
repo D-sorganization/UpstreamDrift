@@ -39,7 +39,8 @@ param(
     [switch]$Fit,
     [string]$MatlabExe = "",
     [string]$RepoRoot = "",
-    [switch]$RefreshPythonCandidate
+    [switch]$RefreshPythonCandidate,
+    [switch]$ContinuousQualification
 )
 
 Set-StrictMode -Version Latest
@@ -199,6 +200,43 @@ print('refreshed', evidence / 'candidate.npz')
     try {
         & python -c $code
         if ($LASTEXITCODE -ne 0) { throw "Python candidate refresh failed" }
+    } finally {
+        Pop-Location
+    }
+}
+
+if ($ContinuousQualification) {
+    $py = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $py) { throw "python not on PATH for -ContinuousQualification" }
+    $code = @"
+import json
+from pathlib import Path
+from src.shared.python.motion_matching.simscape_replay_harness import (
+    load_replay_evidence_inputs,
+    qualify_simscape_continuous_replay,
+    save_replay_qualification_receipt,
+)
+
+evidence = Path(r'$evidenceDir')
+# Derive trajectory, control identity, provenance and profile from the native
+# evidence package (recomputed NPZ digest, candidate q0/qd0, receipt control
+# identity). No local defaults are asserted here.
+inputs = load_replay_evidence_inputs(evidence)
+receipt = qualify_simscape_continuous_replay(
+    trajectory=inputs.trajectory,
+    control=inputs.control,
+    provenance=inputs.provenance,
+    profile=inputs.profile,
+    horizon=inputs.horizon,
+)
+out_path = evidence / 'simscape_replay_qualification.json'
+save_replay_qualification_receipt(receipt, out_path)
+print(f'Continuous qualification receipt generated: {out_path} (is_qualified={receipt.is_qualified}, verdict={receipt.verdict.status})')
+"@
+    Push-Location $repo
+    try {
+        & python -c $code
+        if ($LASTEXITCODE -ne 0) { throw "Continuous qualification harness failed" }
     } finally {
         Pop-Location
     }
