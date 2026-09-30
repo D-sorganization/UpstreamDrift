@@ -119,6 +119,53 @@ Implements [MMR-16] publishing an interactive best-candidate viewer with honest 
   - Implements `launch_native_backend` and graceful `_show_recovery_message` handling missing engines (`ViewerUnavailableError`) without unhandled crashes.
 - **TDD Test Coverage (`tests/unit/tools/test_tour_matching_viewer_residuals.py`, `tests/unit/tools/test_matched_swing_browser_best_candidate.py`)**:
   - Verifies raw observation immutability, camera/appearance score invariance, worst-residual jump clock alignment, drive mode caption accuracy, board-ready export, and missing-engine recovery dialogs.
+## Integrate and Benchmark Real Body and Club Segmentation (MMR-13, #11099)
+
+Establishes honest segmentation model provenance, a fail-closed checkpoint
+pipeline and a dev-only validation adapter, and a gold-evidence benchmark
+harness (`src/shared/python/shadow_tracker/model_segmentation.py`,
+`shadow_tracker.__init__` façade registration, evidence package under
+`docs/development/matched_swing_program/evidence/segmentation/`). Review
+findings on the first cut revealed fabricated claims; the repaired state is:
+- **No fabricated weight pins:** the previously claimed `SAM_VIT_B_GOLF_SHA256` /
+  `MOBILESAM_GOLF_SHA256` constants were fabricated placeholders and are removed.
+  Pins are REQUIRED per-deployment operator configuration: `verify_checkpoint(name, path, expected_sha256=...)` validates 64-lowercase-hex pins, fails closed with `FileNotFoundError` on missing weights and `RuntimeError` on mismatch,
+  with no hidden network downloads. Model cards carry `checkpoint_sha256=None`
+  until an operator pins provisioned weights.
+- **Adapter never fabricates inference:** `RealSegmentationAdapter` is a dev-only
+  checkpoint-validation harness. It requires real decoded pixels per frame (RGB
+  array plus caller-supplied PTS/timebase and optional recorded physical times,
+  or explicit unknown-time provenance), lazily loads and executes the pinned
+  checkpoint through an optional runtime (torch or onnxruntime, lazily
+  imported), and decodes body/club masks only when a calibrated postprocess
+  decoder is supplied. Missing weights, unloadable artifacts, absent runtime,
+  or missing decode stage raise `SegmentationUnavailableError`; masks are never
+  synthesized from dimensions or condition labels, `frame_sha256` always hashes
+  the decoded pixels, and revision IDs bind mask content + full config so
+  divergent outputs for one frame register as distinct `ManualMaskProvider`
+  revisions instead of conflicting duplicates.
+- **Benchmark scores only independent gold:** `evaluate_segmentation_benchmark`
+  loads `clip_manifest.json` + SHA-256-verified gold label artifacts from the
+  evidence directory (recorded `.npy` label images; 0=background, 1=body,
+  2=club, 3=invalid) and a caller-provided decoded-pixel `frame_source`; the
+  adapter under test is never used to create gold. Without evidence or a
+  runnable runtime the report is a typed `blocked`/`missing_evidence` result
+  with `metrics_reported: false` and no IoU/recall/latency/memory numbers. The
+  committed `benchmark_report.json` records this blocked state for the evidence
+  actually present today (no clips, gold, or weights were ever recorded here).
+- **Evidence & Governance (`docs/development/matched_swing_program/evidence/segmentation/`)**:
+  `MODEL_CARD.md` (operator-supplied pin runbook, hardware budgets, failure
+  modes), `README.md` (gold contract + honest reproduction commands),
+  `benchmark_report.json` (machine-readable blocked status).
+- **Unit Verification (`tests/unit/shadow_tracker/test_model_segmentation_benchmark.py`)**:
+  red/green-tested contracts: no segmentation success without an executed
+  checkpoint, benchmark refuses self-evaluation and reports typed blocked
+  status, pixels-hash frame identity, revision-ID divergence, malformed-pin
+  rejection, gold-hash fail-closed, and façade lazy export (`RealSegmentationAdapter`).
+- **Status:** real SAM/MobileSAM weights, held-out clips, and independent gold
+  masks are NOT provisioned in this repository; no body-IoU/club-recall claims
+  are made. Manual-mask reviewed annotation via `ManualMaskProvider` remains
+  the working segmentation path until operator evidence lands.
 
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
@@ -7293,6 +7340,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11153 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `PyJWT>=2.14.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `pyjwt==2.13.0` to `pyjwt==2.14.0`, the first release clearing OSV GHSA-w6j9-cwv2-h6wq / CVE-2026-102274 that left every pip-audit lane (code-quality, dependency-consistency) red on the untouched upstream lockfiles; no consumer-code change. |
 | 2026-09-29 | #11130 | [MMR-11] Fail-closed reduced-model/club-only claims repair for #11097: planar-floor gate compares the current target's butt/clubhead plane distances (not the calibrated plane's stale residual) against a DbC-validated finite-positive `max_marker_rmse_m`; driven-triple receipts disqualified at projection time; promoted-package hash/residual integrity gates; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells. All are code-level gates; no package regeneration, Board cell selection, or native runs performed. |
 | 2026-09-29 | #11132 | [MMR-16] Review fixes for the best-candidate viewer (#11102): `rank_candidates` is wired into the matched-swing browser's real list-build path so the auto-selected first row is the best comparable candidate (ascending `whole_marker_rmse_m`, rejected rows kept visible with their verdicts), the viewer residual summary, rendered-frame and multi-candidate captions pool per-marker 3D distances like `tour_metrics.compute_shared_metrics`, frames with zero valid markers are excluded from global-worst selection and mean statistics, and the browser open-viewer path forwards the selected row's provenance (candidate hash, engine, drive mode, verdict) into the viewer load path; web/API parity and accessibility review remain open on the issue. |
+| 2026-09-29 | #11137 | [MMR-13] Honest segmentation provenance for #11099: removed the fabricated SHA-256 weight pins (pins are now required per-deployment operator config), made `RealSegmentationAdapter` a fail-closed dev-only checkpoint-validation harness that requires real decoded pixels, lazily executes the pinned checkpoint (torch/onnxruntime) with a calibrated postprocess decoder and raises typed `SegmentationUnavailableError` instead of synthesizing masks, hashes frame identity from decoded pixels, records unknown timing honestly, binds revision IDs to mask content + config, scores the benchmark only against SHA-256-verified independently recorded gold masks, and regenerates `benchmark_report.json` as a typed blocked/missing-evidence report with zero fabricated metrics. |
 | 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
 | 2026-09-29 | #11138 | Consolidate Bolt micro-optimisation PRs #11112, #11128, #11129: row/column norms switched to `sqrt(einsum)` (bunkershot3d qualification-fit scale, motion-matching club calibration/hull/hip/downswing/reference/multi-shooting/club-only), and small fixed-size vectors switched to `math.sqrt(np.vdot)` (pink_tasks weld/marker residuals, physics_validation Jacobian error). Numerically identical results; new identity test `tests/unit/motion_matching/test_row_norm_einsum_identity.py` covers axis=0/1/2, keepdims, empty, NaN/Inf. |
 | 2026-09-29 | #11098 | Historical-video evidence review workflow (MMR-12): multi-shot frame isolation, VFR/cut/slow-motion timing preservation, bounded decode limits with prompt cancellation, atomic fail-closed repeat imports (scope/revision validated before mutation), unknown physical-time provenance preserved, recoverable corrupt media handling, and installed PyQt review scrubbing with unmeasured-time-safe viewport rendering. |

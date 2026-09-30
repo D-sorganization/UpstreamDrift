@@ -111,7 +111,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
-| `shadow_tracker` | 0 | 0 | 0 | 20 | 0 | 0 |
+| `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `sidekick` | 227 | 71 | 24 | 36 | 56 | 298 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -132,7 +132,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **421** | **279** | **124** | **1531** | **750** | **700** |
+| **Total** | **421** | **279** | **124** | **1532** | **750** | **700** |
 
 ## Diverged Files by Package
 

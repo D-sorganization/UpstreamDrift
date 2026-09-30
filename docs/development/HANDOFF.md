@@ -127,6 +127,23 @@
   - The same journey is not exercised on the supported web/API surfaces (installable-PyQt and web/API parity, accessibility keyboard review and missing-engine recovery on real hosts are unreviewed).
   - Human visual review of captions/stills and acceptance checkboxes in #11102 are unchecked; no claim is made that "all acceptance criteria" pass.
 - Next step: main-lane rebase/CI and frontier review of PR #11132.
+# Current Handoff — Integrate and Benchmark Real Body and Club Segmentation (#11099)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-13-real-segmentation-11099` (worktree `/tmp/wtk/mmr-13-real-segmentation-11099`)
+- Commits: `5fa2c852d4` (review-fix code + tests + evidence), `9ed495fe7f` (docs), `310ee050e8` (verify-before-load hardening).
+- Pull request: #11137, refs #11099 (acceptance partly unmet by design until real evidence lands — see below).
+- Done (Codex review-fix pass on PR #11137, P1/P2 findings addressed):
+  - Removed the fabricated `SAM_VIT_B_GOLF_SHA256` / `MOBILESAM_GOLF_SHA256` constants; `verify_checkpoint(name, path, expected_sha256=...)` now requires an operator-supplied 64-lowercase-hex pin per deployment and stays fail-closed (`FileNotFoundError` missing weights, `RuntimeError` mismatch, no hidden downloads).
+  - `RealSegmentationAdapter` is an honestly labeled dev-only checkpoint-validation harness: `infer_frame(frame, pixels)` / `segment(request)` require real decoded pixels plus caller-supplied PTS/timebase (or honest unknown-time provenance: `physical_time_s=None` + explicit reason, never invented 10 ms); lazily verify/load/execute the pinned checkpoint via optional torch or onnxruntime; body/club masks decode only with a calibrated `postprocess` callable. Any missing precondition raises typed `SegmentationUnavailableError` — `segment()` can never report `model_inference` success without the checkpoint having loaded and run; masks are never synthesized from dimensions.
+  - `frame_sha256` always hashes decoded pixels (`ingestion.compute_frame_hash` with decoder/pixel-format binding), and revision IDs bind mask content + full config so divergent outputs for one frame register as distinct `ManualMaskProvider` revisions (no conflict, full lineage).
+  - `evaluate_segmentation_benchmark` now loads `clip_manifest.json` + SHA-256-verified independently recorded gold `.npy` label artifacts and a decoded-pixel `frame_source`; it never uses the adapter under test to produce gold. Absent evidence/runtime ⇒ typed `blocked`/`missing_evidence` report with `metrics_reported: false` and no fabricated IoU/recall/latency/memory numbers.
+  - Registered the adapter API on the public façade (`shadow_tracker.__init__` lazy exports: `RealSegmentationAdapter`, `SegmentationModelCard`, `SegmentationUnavailableError`, `evaluate_segmentation_benchmark`, `verify_checkpoint`, `PINNED_MODELS`).
+  - Regenerated the committed evidence honestly: `MODEL_CARD.md` (operator pin runbook), `README.md` (gold contract + real reproduction), `benchmark_report.json` (blocked status for the evidence actually present).
+  - Tests rewritten/extended in `tests/unit/shadow_tracker/test_model_segmentation_benchmark.py` (21 tests: no-success-without-checkpoint, hash-before-load on swapped/removed artifacts, benchmark refuses self-evaluation + typed blocked, hash-of-pixels, revision-ID divergence, malformed-pin rejection, gold-hash fail-closed, façade lazy export, committed evidence honesty).
+- Tests: `/tmp/ud-venv-11112/bin/python -m pytest tests/unit/shadow_tracker/test_model_segmentation_benchmark.py` → 21 passed (a 20-test red wave plus the hash-before-load red pair against `42cd315f50`); with `test_silhouette_segmentation.py` → 37 passed; package-wide `tests/unit/shadow_tracker` → 338 passed, 2 skipped, 22 pre-existing cv2-dependent `test_video_ingestion.py` failures/errors (OpenCV not installed in this venv; module untouched). Ruff check/format clean on changed files. `shared_scripts/spec_changelog.py validate` OK.
+- Honest status: real SAM/MobileSAM weights, held-out clips, and independent gold masks are NOT provisioned; torch/onnxruntime/cv2 are absent from the unit venv. No real-weights forward pass or numeric benchmark is claimed anywhere — the typed-unavailability path is the validated behavior. Issue acceptance items remaining: operator weights + pin + decode stage, recorded gold package, real-data benchmark run.
+- Next step: operator evidence provisioning, then regenerate `benchmark_report.json` with real measured metrics.
 
 ---
 

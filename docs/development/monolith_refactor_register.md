@@ -46,6 +46,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
+| 1107 | `src/shared/python/shadow_tracker/model_segmentation.py` |
 | 1105 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
 | 1102 | `src/shared/python/sidekick/process_calculators/psa_package/psa_gui.py` |

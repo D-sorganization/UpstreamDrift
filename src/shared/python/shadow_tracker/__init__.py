@@ -162,6 +162,14 @@ if TYPE_CHECKING:
     from .mask_records import (
         MaskFrame,
     )
+    from .model_segmentation import (
+        PINNED_MODELS,
+        RealSegmentationAdapter,
+        SegmentationModelCard,
+        SegmentationUnavailableError,
+        evaluate_segmentation_benchmark,
+        verify_checkpoint,
+    )
     from .projection import (
         AnalyticSilhouetteRenderer,
         PinholeCameraModel,
@@ -252,6 +260,12 @@ _LAZY_EXPORTS: dict[str, str] = {
     "track_occlusion_and_identity": ".segmentation",
     "ManualMaskProvider": ".segmentation",
     "ModelSegmentationProvider": ".segmentation",
+    "PINNED_MODELS": ".model_segmentation",
+    "RealSegmentationAdapter": ".model_segmentation",
+    "SegmentationModelCard": ".model_segmentation",
+    "SegmentationUnavailableError": ".model_segmentation",
+    "evaluate_segmentation_benchmark": ".model_segmentation",
+    "verify_checkpoint": ".model_segmentation",
     "PinholeCameraModel": ".projection",
     "project_point_to_pixel": ".projection",
     "AnalyticSilhouetteRenderer": ".projection",
@@ -391,7 +405,9 @@ __all__ = [
     "PiecewiseTimingMapping",
     "PilotEntry",
     "PinholeCameraModel",
+    "PINNED_MODELS",
     "QuantityConfidence",
+    "RealSegmentationAdapter",
     "RELEASE_QUALIFICATION_SCHEMA_VERSION",
     "ReleaseQualificationReport",
     "RenderRequest",
@@ -408,8 +424,10 @@ __all__ = [
     "ScientificRegistryEntry",
     "SHOT_SCHEMA_VERSION",
     "SUBJECT_BINDING_SCHEMA_VERSION",
+    "SegmentationModelCard",
     "SegmentationRequest",
     "SegmentationResult",
+    "SegmentationUnavailableError",
     "Segmenter",
     "ShadowTrackerService",
     "ShadowTrackerBundle",
@@ -449,6 +467,7 @@ __all__ = [
     "detect_telecine_duplicates",
     "estimate_short_window_velocity",
     "evaluate_candidate_evidence",
+    "evaluate_segmentation_benchmark",
     "extract_iso_bmff_pts",
     "filter_shot_frames",
     "fit_initial_state_multiview",
@@ -475,6 +494,7 @@ __all__ = [
     "validate_multiview_synchronization",
     "validate_shot_frames",
     "validate_split_isolation",
+    "verify_checkpoint",
     "verify_independent_replay",
 ]
 

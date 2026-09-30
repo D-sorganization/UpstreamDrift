@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "benchmark": "shadow_tracker_silhouette_segmentation",
+  "model": {
+    "model_name": "sam-vit-b-golf",
+    "architecture": "Segment Anything Model (ViT-B)",
+    "version": "1.0.0",
+    "license": "Apache-2.0",
+    "checkpoint_sha256": null,
+    "parameter_count_m": 91.0,
+    "input_resolution": [
+      1024,
+      1024
+    ],
+    "hardware_requirements": {
+      "min_ram_gb": "8",
+      "min_vram_gb": "4",
+      "gpu_recommended": "True",
+      "cpu_fallback": "Supported"
+    },
+    "redistribution_terms": "Permitted under Apache-2.0; offline checkpoint required.",
+    "known_limitations": [
+      "Motion blur in high-speed swing phases (>120 deg/frame) may diffuse clubhead boundaries",
+      "Thin steel/graphite shafts (<3 pixels) require contrast guidance or manual correction",
+      "Spectator, tree, or golf bag overlaps trigger partial occlusion flags"
+    ]
+  },
+  "status": "blocked",
+  "reason_code": "missing_evidence",
+  "missing_evidence": [
+    "clip_manifest.json",
+    "independent_gold_masks",
+    "pinned_checkpoint_weights"
+  ],
+  "metrics_reported": false,
+  "clips": []
+}
