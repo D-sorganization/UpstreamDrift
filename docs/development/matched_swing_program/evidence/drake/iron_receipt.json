@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "engine": "drake",
+  "club": "7-iron",
+  "status": "unavailable",
+  "candidate_sha256": "",
+  "model_sha256": "",
+  "capture_sha256": "",
+  "runtime_available": false,
+  "is_fresh_simulation": false,
+  "derivatives_consistent": false,
+  "energy_balance_checked": false,
+  "energy_summary": {},
+  "marker_metrics": {},
+  "declared_limitations": [
+    "upper_body_27dof_float_pathway: pelvis translation and orientation are free float coordinates",
+    "rigid_weld_closure: dual-grip closed loop enforced via 6D rigid weld constraint",
+    "continuous_polynomial_actuation: 6th-order Bernstein/power torque polynomials per joint",
+    "ground_contact_requires_full_body: upper-body slice does not model ground reaction forces"
+  ],
+  "rejection_reasons": [
+    "pydrake runtime is not installed on pinned host: no native dynamic simulation was executed"
+  ],
+  "missing_evidence": [
+    "native Drake rollout (pydrake runtime)",
+    "candidate_sha256",
+    "model_sha256",
+    "capture_sha256",
+    "native_state/time_s dynamic rollout",
+    "aligned common-marker observations (markers_m/target_m)",
+    "native test count (native_tests_executed)"
+  ],
+  "remedy": "Install pydrake on the pinned host (pip install drake) and re-run scripts/ci/run_native_engine_lane.sh --engine drake so native rollouts and club receipts are regenerated from real execution.",
+  "diagnostic_message": "pydrake runtime is not installed on host: live simulation unavailable. No previous native dynamic qualification existed for this club; all numeric fields previously recorded here were fabricated placeholders and were removed."
+}
