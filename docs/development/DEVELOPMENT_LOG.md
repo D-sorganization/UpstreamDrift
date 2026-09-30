@@ -572,18 +572,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** `check_coverage_gates.py` now takes its gates from `coverage_gates` in `scripts/config/mypy_exclusion_budget.json` (hard-coded COVERAGE_GATES/MODULE_PATTERNS were never enforced and are gone), reads Cobertura XML or coverage.py JSON, resolves XML filenames through `<sources>` against the repo root, and treats a gate with no matching files or an unmappable source as exit 2. Not wired into CI yet; the ratchet dates cannot move before 2026-10-01 because of the #8731 pin.
 - **Next step:** CI green, review, merge.
 
-### DL-#9191 · Verify Companion Screenshot Bytes and Pixel Dimensions
+### DL-#9191 · Govern Screenshot Schema, Capture Metadata, and Qualified Assets
 
 - **State:** in_review
-- **Owner:** claude
+- **Owner:** local
 - **Issue:** #9191
-- **PR:** draft PR from `agy/ud-9191-screenshot-verifier`
-- **Branch:** `agy/ud-9191-screenshot-verifier`
-- **Paths:** `scripts/verify_companion_screenshots.py`, `tests/unit/scripts/test_verify_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
-- **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — 57/57 pass across the verifier tests and tests/companion/test_companion_catalog.py; ruff clean; architecture budget OK.
-- **Summary:** `scripts/verify_companion_screenshots.py` recomputes SHA-256 and PNG IHDR pixel size for every captured screenshot record (path must resolve inside the repo, alt text required) and requires pending records to carry null asset fields plus a reason; the companion catalog tests run it on the exporter's real payload. Delivers the #9191 'SHA-256/dimension verification' item; the governed capture workflow, real assets and AffineDrift #4025 alignment remain.
-- **Next step:** CI green, review, merge.
+- **Branch:** `feat/comp-b3-screenshot-governance-9191`
+- **Paths:** `docs/api/contracts/upstreamdrift-companion-screenshots-v1.schema.json`, `docs/api/contracts/upstreamdrift-companion-v1.schema.json`, `scripts/companion_screenshots.py`, `scripts/companion_catalog.py`, `scripts/config/companion_screenshots.v1.json`, `docs/screenshots/`, `tests/companion/test_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `tests/companion/test_companion_publication.py`, `tests/fixtures/companion/current-v1.0.0.json`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 165/165 pass across tests/companion and screenshot verification suites; ruff check clean; ruff format clean; prettier clean; architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK.
+- **Summary:** Complete implementation of COMP-B3 screenshot governance (#9191): updated schemas with exact capture metadata (`capture_environment`, `source_commit`, pixels/viewport, and summary screenshot counts); implemented `scripts/companion_screenshots.py` with standard library PNG IHDR byte parsing, SHA-256 computation, registry loading/validation, and headless deterministic asset generation; generated 6 representative visual assets in `docs/screenshots/` (pendulum simulator desktop light/dark + mobile dark, project map, rate of closure, tour matching viewer); registered 74 visible programs in `scripts/config/companion_screenshots.v1.json` (6 captured, 70 pending with explicit reasons); wired screenshot registry and inventory into `scripts/companion_catalog.py` and publication bundle.
+- **Next step:** Create PR and release lease.
 
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 

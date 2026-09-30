@@ -597,7 +597,8 @@ def test_real_bundle_ships_consumer_payloads(
     assert screenshots["source"]["commit"] == head
     assert capabilities["source"]["commit"] == head
     assert screenshots["records"]
-    assert all(r["status"] == "pending" for r in screenshots["records"])
+    assert any(r["status"] == "captured" for r in screenshots["records"])
+    assert any(r["status"] == "pending" for r in screenshots["records"])
     assert capabilities["capabilities"]
     payloads, _ = publication._payload_inventory(bundle)
     embedded = {p["name"]: p["embedded_commit"] for p in payloads}
