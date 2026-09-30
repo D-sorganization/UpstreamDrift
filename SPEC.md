@@ -1,4 +1,4 @@
-## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095) [scope: fail-closed conversion]
+## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095) [Scope: Fail-Closed Conversion]
 Specifies the native OpenSim qualification pipeline and receipt verification for Driver and 7-Iron models:
 - **Native OpenSim Qualification Module (`src/engines/physics_engines/opensim/python/native_qualification.py`)**:
   - `OPENSIM_ENGINE_LIMITATIONS`: documents Hill-type activation dynamics, force-velocity-length multipliers, tendon elasticity equilibrium, coordinate limit forces, and ground contact external wrenches.
