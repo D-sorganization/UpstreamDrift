@@ -17,12 +17,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.native_lanes.common import (
-    check_execution_contract,
-    check_rollout_dynamics,
-    compute_marker_metrics,
-    evaluate_candidate_replay,
-)
+from src.shared.python.native_lanes.common import evaluate_candidate_replay
 
 DRAKE_ENGINE_LIMITATIONS: tuple[str, ...] = (
     "upper_body_27dof_float_pathway: pelvis translation and orientation are free float coordinates",
@@ -91,7 +86,6 @@ class DrakeQualificationReceipt:
         return cls(**data)
 
 
-
 def _drake_unavailable_receipt(candidate: dict[str, Any]) -> DrakeQualificationReceipt:
     """Fail-closed: without pydrake on host no native dynamic replay can be produced."""
     missing_evidence = ["native Drake rollout (pydrake runtime)"]
@@ -139,7 +133,9 @@ def validate_drake_candidate_replay(
         schema_version=1,
         engine="drake",
         club=r["club"],
-        status=DrakeQualificationStatus.QUALIFIED if not rejected else DrakeQualificationStatus.REJECTED,
+        status=DrakeQualificationStatus.QUALIFIED
+        if not rejected
+        else DrakeQualificationStatus.REJECTED,
         candidate_sha256=r["candidate_sha256"],
         model_sha256=r["model_sha256"],
         capture_sha256=r["capture_sha256"],
