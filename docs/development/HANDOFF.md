@@ -426,10 +426,12 @@ rom_weight=W)` applies the range penalty by continuation (free chain for the war
      Step 1 tooling: `gs3dx_feedback_torque` (pure; `test_gs3dx_feedback_torque` 5/5
      pass), `gs3dx_contact_check(..., feedback=true)`, `gs3dx_track_state` and
      `gs3dx_track_blocks` (shared with `gs3dx_track_learn`). The Human test
-     `feedback_torque_is_measured_on_every_driven_axis` has failed three times on log
-     access (stale workspace handle, model closed by `gs3dx_stance_frames`, hinge
-     primitive names); each fixed, the fourth run is pending, so this commit's feedback
-     path is not yet verified on the model.
+     `feedback_torque_is_measured_on_every_driven_axis` passes (2026-09-30, fifth run).
+     The fourth run exposed that Simscape numbers joints in block-path order, so
+     GS3DX_Human's neck renumbers every joint after it: `gs3dx_upper_body_joints` now
+     carries each joint's `.block` path and `gs3dx_track_blocks` matches on it, not on
+     GS3DX_Fit's ids. First 0.06 s RMS feedback: upper 30.5, legs 135.5, balance
+     172.5 N\*m; the full-swing table goes into docs/FORWARD_DYNAMICS.md.
    - **Batch MATLAB:** scripts end with `fprintf("GS3DX_BATCH_DONE\n"); quit(0, "force")`;
      the scratch lock runner kills its own MATLAB 90 s after the marker (exit hangs held
      the lock 10-15 min).

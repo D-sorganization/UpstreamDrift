@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-30 — ROM penalty by continuation passes `the_rom_penalty_keeps_the_ik_in_the_human_range` (37.7 mm, 0.71 deg); `test_gs3dx_feedback_torque` 5/5; Human feedback test pending its fourth run.
+- **Last verified:** 2026-09-30 — ROM penalty by continuation passes `the_rom_penalty_keeps_the_ik_in_the_human_range` (37.7 mm, 0.71 deg); `test_gs3dx_feedback_torque` 5/5; `feedback_torque_is_measured_on_every_driven_axis` passes on GS3DX_Human after joints are matched by block path (Human's neck renumbers the ids).
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
 - **Next step:** Record the `GS3DX_Human` feedback-torque table (roadmap step 1 of docs/FORWARD_DYNAMICS.md) once its test passes.
 
