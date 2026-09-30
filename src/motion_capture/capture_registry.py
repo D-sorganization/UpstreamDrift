@@ -250,4 +250,6 @@ def require_capture(
             import pytest
         except ImportError:
             raise exc from None
-        pytest.skip(f"Capture {capture_id!r} unavailable: {exc}")
+        raise pytest.skip.Exception(
+            f"Capture {capture_id!r} unavailable: {exc}"
+        ) from exc
