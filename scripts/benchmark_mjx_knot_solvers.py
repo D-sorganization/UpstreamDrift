@@ -13,6 +13,7 @@ exit code and wall clock. A case directory holding only ``reuse.json``
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import platform
@@ -25,6 +26,7 @@ from typing import Any
 
 from src.shared.python.motion_matching.solver_benchmark import (
     MJX_SOLVERS,
+    aggregate_seeded_rows,
     promotion_decision,
     render_report,
     row_from_receipt,
@@ -144,38 +146,91 @@ def _resolve_case(case: Path) -> Path:
     pointer = case / "reuse.json"
     if not pointer.is_file():
         return case
-    target = (case / json.loads(pointer.read_text(encoding="utf-8"))["from"]).resolve()
+    pointer_data = json.loads(pointer.read_text(encoding="utf-8"))
+    target = (case / pointer_data["from"]).resolve()
     if not (target / "run.json").is_file():
         raise FileNotFoundError(f"reuse pointer {pointer} names no run: {target}")
+    expected_sha256 = pointer_data.get("expected_sha256")
+    if expected_sha256:
+        receipt_path = target / "receipt.json"
+        if not receipt_path.is_file():
+            raise FileNotFoundError(
+                f"reuse pointer {pointer} target has no receipt.json: {receipt_path}"
+            )
+        actual_sha256 = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+        if actual_sha256 != expected_sha256:
+            raise ValueError(
+                f"Receipt SHA-256 mismatch for reused case {target}: "
+                f"expected {expected_sha256}, got {actual_sha256}"
+            )
     return target
 
 
-def load_row(capture: str, solver: str, evidence: Path) -> dict[str, Any]:
-    case = _resolve_case(evidence / f"{capture}_{solver}")
-    if solver == "ipopt":
-        note = case / "unavailable.json"
-        reason = json.loads(note.read_text(encoding="utf-8"))["reason"]
-        return unavailable_row(capture, solver, reason)
-    run = json.loads((case / "run.json").read_text(encoding="utf-8"))
-    if run["returncode"] != 0 or not (case / "receipt.json").is_file():
-        return unavailable_row(
-            capture, solver, f"pipeline exited {run['returncode']}; see run log"
+def load_rows_for_case(
+    capture: str, solver: str, evidence: Path
+) -> list[dict[str, Any]]:
+    """Load one or multiple seeded runs for a given (capture, solver) case."""
+    prefix = f"{capture}_{solver}"
+    exact = evidence / prefix
+    matching = sorted(evidence.glob(f"{prefix}_seed*"))
+    if not matching and exact.is_dir():
+        matching = [exact]
+    if not matching:
+        return [unavailable_row(capture, solver, f"no case directory for {prefix}")]
+    rows: list[dict[str, Any]] = []
+    for case_dir in matching:
+        case = _resolve_case(case_dir)
+        if solver == "ipopt":
+            note = case / "unavailable.json"
+            reason = (
+                json.loads(note.read_text(encoding="utf-8"))["reason"]
+                if note.is_file()
+                else "no IPOPT binding"
+            )
+            rows.append(unavailable_row(capture, solver, reason))
+            continue
+        run_path = case / "run.json"
+        if not run_path.is_file():
+            rows.append(unavailable_row(capture, solver, "no run.json"))
+            continue
+        run = json.loads(run_path.read_text(encoding="utf-8"))
+        if run.get("returncode", 0) != 0 or not (case / "receipt.json").is_file():
+            rows.append(
+                unavailable_row(
+                    capture,
+                    solver,
+                    f"pipeline exited {run.get('returncode')}; see run log",
+                )
+            )
+            continue
+        mjx_path = case / "mjx_optimisation_receipt.json"
+        receipt = json.loads((case / "receipt.json").read_text(encoding="utf-8"))
+        row = row_from_receipt(
+            capture,
+            solver,
+            receipt,
+            wall_clock_s=float(run["wall_clock_s"]),
+            mjx_receipt=(
+                json.loads(mjx_path.read_text(encoding="utf-8"))
+                if mjx_path.is_file()
+                else None
+            ),
         )
-    mjx_path = case / "mjx_optimisation_receipt.json"
-    return row_from_receipt(
-        capture,
-        solver,
-        json.loads((case / "receipt.json").read_text(encoding="utf-8")),
-        wall_clock_s=float(run["wall_clock_s"]),
-        mjx_receipt=(
-            json.loads(mjx_path.read_text(encoding="utf-8"))
-            if mjx_path.is_file()
-            else None
-        ),
+        rows.append(row)
+    return rows
+
+
+def load_row(capture: str, solver: str, evidence: Path) -> dict[str, Any]:
+    rows = load_rows_for_case(capture, solver, evidence)
+    if len(rows) == 1:
+        return rows[0]
+    aggregated = aggregate_seeded_rows(rows)
+    return (
+        aggregated[0] if aggregated else unavailable_row(capture, solver, "empty runs")
     )
 
 
-def render(evidence: Path) -> list[dict[str, Any]]:
+def render(evidence: Path, *, allow_synthetic: bool = False) -> list[dict[str, Any]]:
     run = json.loads((evidence / "provenance.json").read_text(encoding="utf-8"))
     # The notes describe the method, not the run, so they come from this file.
     provenance = {**run, "notes": list(SOLVER_NOTES)}
@@ -185,7 +240,7 @@ def render(evidence: Path) -> list[dict[str, Any]]:
         for solver in provenance["solvers"]
     ]
     decisions = [
-        promotion_decision(rows, candidate=solver)
+        promotion_decision(rows, candidate=solver, allow_synthetic=allow_synthetic)
         for solver in sorted(MJX_SOLVERS)
         if solver in provenance["solvers"]
     ]
@@ -221,6 +276,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--shooting-passes", type=int, default=8)
     parser.add_argument("--mjx-iterations", type=int, default=40)
+    parser.add_argument(
+        "--seeds",
+        type=int,
+        nargs="+",
+        default=[0],
+        help="RNG seeds for repeated runs (default: [0])",
+    )
+    parser.add_argument(
+        "--allow-synthetic",
+        action="store_true",
+        default=False,
+        help="Allow synthetic receipts during promotion decision (default: False)",
+    )
     parser.add_argument("--render-only", action="store_true")
     args = parser.parse_args(argv)
     evidence = Path(args.evidence)
@@ -240,6 +308,7 @@ def main(argv: list[str] | None = None) -> int:
             "solvers": args.solvers,
             "shooting_passes": args.shooting_passes,
             "mjx_iterations": args.mjx_iterations,
+            "seeds": args.seeds,
         }
         (evidence / "provenance.json").write_text(
             json.dumps(provenance, indent=2) + "\n", encoding="utf-8"
@@ -258,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
                     )
                     continue
                 run_case(capture, solver, args)
-    decisions = render(evidence)
+    decisions = render(evidence, allow_synthetic=args.allow_synthetic)
     print(json.dumps(decisions, indent=2))  # noqa: T201 - CLI output
     return 0
 
