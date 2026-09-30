@@ -1,3 +1,21 @@
+## Qualify Drake Native Dual-Club Dynamics and Replay (#11094) [Scope: Fail-Closed Conversion]
+Implements [MMR-10D] native dual-club dynamic qualification and automated nightly lane integration for Drake:
+- **Drake Dynamic Qualification Module (`src/engines/physics_engines/drake/python/native_qualification.py`)**:
+  - Implements `DrakeQualificationReceipt` and `DrakeQualificationStatus` (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`) enforcing strict fail-closed dynamic simulation contracts.
+  - Rejects copied state trajectories, FK-only playbacks without dynamic simulation, and zero or unrecorded collected native tests on pinned host (an unknown test count cannot be assumed nonzero).
+  - Verifies host runtime availability: when `pydrake` is missing on host, reports `UNAVAILABLE` rather than false green — including when a replay payload is present (a payload cannot qualify without the engine).
+  - Gates `QUALIFIED` on every recorded check: fresh simulation, actuation applied, recorded rollout data, derivative consistency (`dq/dt ≈ v`), finite energy accounting, and aligned marker observations; missing rollout/marker data is enumerated in `missing_evidence` with a resolvable `remedy`.
+  - Emits only metrics computed from recorded data (`whole_rms_m`): previously present synthesized phase/clubhead/pelvis-yaw values were removed as fabricated.
+  - Discloses engine-specific limitations (`upper_body_27dof_float_pathway`, `rigid_weld_closure`, `continuous_polynomial_actuation`, `ground_contact_requires_full_body`).
+  - Supports dual-club models across both `driver` and `7-iron`.
+- **Nightly CI Lane Harness Integration (`scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`)**:
+  - Adds `"drake"` configuration to `ENGINE_LANES` (`pytest_marker: "requires_drake"`, `python_module: "pydrake"`, `receipt_filename: "drake_receipt.json"`).
+  - Emits and validates honest native lane receipts in `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json` (unavailable engine ⇒ `status: fail`, 0 executed tests).
+- **Evidence Package (`docs/development/matched_swing_program/evidence/drake/`)**:
+  - `driver_receipt.json` and `iron_receipt.json` corrected: previous placeholder sha256 digests and invented metric values were removed; the receipts are now honest fail-closed UNAVAILABLE records with empty evidence fields, enumerated `missing_evidence`, and a resolvable `remedy`. No native Drake qualification exists yet.
+  - Documents evidence scope and constraints in `docs/development/matched_swing_program/evidence/drake/README.md`.
+- **TDD Test Coverage (`tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `tests/scripts/test_run_native_engine_lane.py`, `tests/docs/test_native_lane_freshness.py`)**:
+  - Unit and script tests verifying contract rejection logic, derivative checking, energy balance, fail-closed behavior for unavailable runtimes, unrecorded test counts, missing rollout/marker data computed-not-invented metrics, and committed receipt integrity.
 ## PreconditionError Exception-Identity Repair at the Shared Contracts Seam (#11175)
 
 - **Duplicate DbC exception class objects eliminated (`_contracts_exceptions` re-export seam)**:
@@ -7298,6 +7316,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-30 | #11191 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `urllib3==2.7.0` to `urllib3==2.8.0` to resolve CVE-2026-97687 (#11191); no consumer-code change. |
+| 2026-09-30 | #11187 | Restores the UI `npm audit --audit-level=high` gate with compatible `brace-expansion` and `undici` patched lockfile resolutions, guarded by a focused UI lockfile contract test; audit policy and manifest dependencies remain unchanged. |
 | 2026-09-29 | #11153 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `PyJWT>=2.14.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `pyjwt==2.13.0` to `pyjwt==2.14.0`, the first release clearing OSV GHSA-w6j9-cwv2-h6wq / CVE-2026-102274 that left every pip-audit lane (code-quality, dependency-consistency) red on the untouched upstream lockfiles; no consumer-code change. |
 | 2026-09-29 | #11130 | [MMR-11] Fail-closed reduced-model/club-only claims repair for #11097: planar-floor gate compares the current target's butt/clubhead plane distances (not the calibrated plane's stale residual) against a DbC-validated finite-positive `max_marker_rmse_m`; driven-triple receipts disqualified at projection time; promoted-package hash/residual integrity gates; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells. All are code-level gates; no package regeneration, Board cell selection, or native runs performed. |
 | 2026-09-29 | #11132 | [MMR-16] Review fixes for the best-candidate viewer (#11102): `rank_candidates` is wired into the matched-swing browser's real list-build path so the auto-selected first row is the best comparable candidate (ascending `whole_marker_rmse_m`, rejected rows kept visible with their verdicts), the viewer residual summary, rendered-frame and multi-candidate captions pool per-marker 3D distances like `tour_metrics.compute_shared_metrics`, frames with zero valid markers are excluded from global-worst selection and mean statistics, and the browser open-viewer path forwards the selected row's provenance (candidate hash, engine, drive mode, verdict) into the viewer load path; web/API parity and accessibility review remain open on the issue. |
@@ -9172,4 +9191,3 @@ Establishes the independent qualification service for candidate tour baseline pa
 - **BitNet Bounded Safety and Encodability (`BitnetAdapter._build_validated_prompt`)**:
   - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
   - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
-

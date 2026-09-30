@@ -17,6 +17,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11094 — Qualify Drake Native Dual-Club Dynamics and Replay
+
+- **Owner:** UDFixTrio10x
+- **Issue:** #11094
+- **Branch:** `feat/mmr-10d-drake-dual-club-11094`
+- **Paths:** `src/engines/physics_engines/drake/python/native_qualification.py`, `tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`, `tests/scripts/test_run_native_engine_lane.py`, `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json`, `docs/development/matched_swing_program/evidence/drake/`
+- **Last verified:** 2026-09-29 at 3b23bd41502a7b7d028f291564997b6460f14cbc — 36 focused tests passed (test_drake_dual_club_qualification.py 16, test_run_native_engine_lane.py + test_native_lane_freshness.py 20); red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native Drake qualification NOT achieved: pydrake unavailable on all reachable hosts.
+- **Summary:** Fail-closed conversion of the [MMR-10D] dual-club Drake qualification (review audit follow-up): receipts now carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite energy all reject); fabricated marker metrics (scaled early/terminal/clubhead RMS, hardcoded pelvis_yaw_error_pct) and placeholder sha256 receipts (`c0ffee…`/`deadbeef…`) removed and replaced with honest fail-closed UNAVAILABLE evidence records. Adds drake to the nightly lane runner. Real qualification still requires pydrake on a pinned host via the native lane.
+- **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
+
+### DL-#11184 — Restore the High-Severity UI Npm Audit Gate
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11184
+- **Branch:** `fix/main-npm-audit-11184`
+- **Paths:** `ui/package-lock.json`, `ui/src/test/dependencySecurityContract.test.ts`, `SPEC.md`
+- **Started:** 2026-09-30
+- **Last verified:** 2026-09-30 at `d3b3a27bea` — baseline audit reproduced two HIGH and two MODERATE advisories; after the lock-only patch `npm ci` passed, `npm audit --audit-level=high` passed with two MODERATE findings remaining, contract 2 passed, lint/type-check passed, UI tests 936 passed, and production build passed. Normal commit and push hooks passed.
+- **Summary:** Raised only the compatible transitive resolutions for `brace-expansion` (5.0.9 → 5.0.12) and `undici` (8.10.0 → 8.11.2); added a lockfile security contract. Manifest dependencies, overrides, audit threshold, and the two moderate findings are unchanged.
+- **Next step:** Root reviews draft PR #11187 and decides whether it is ready for merge.
+
 ### DL-#11175 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
 
 - **State:** in_review
