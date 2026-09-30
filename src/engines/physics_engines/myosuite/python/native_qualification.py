@@ -16,6 +16,13 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.native_lanes.common import (
+    check_execution_contract,
+    check_muscle_activations,
+    check_rollout_dynamics,
+    compute_marker_metrics,
+)
+
 # Authoritative engine-specific limitations for MyoSuite full-body musculoskeletal modeling
 MYOSUITE_ENGINE_LIMITATIONS: tuple[str, ...] = (
     "Musculoskeletal excitation-activation dynamics governed by first-order filter with activation/deactivation time constants",
@@ -86,41 +93,6 @@ class MyoSuiteQualificationReceipt:
         return cls(**data)
 
 
-def _check_derivatives_consistency(
-    time_s: np.ndarray, q: np.ndarray, v: np.ndarray, tol: float = 0.5
-) -> bool:
-    """Verify dq/dt aligns with reported joint velocities v via central differences."""
-    if len(time_s) < 3:
-        return False
-    dt = np.diff(time_s)
-    if np.any(dt <= 0.0):
-        return False
-    mean_dt = float(np.mean(dt))
-    num_grad = np.gradient(q, mean_dt, axis=0)
-    diff = np.abs(num_grad - v)
-    return bool(np.mean(diff) < tol)
-
-
-def _check_muscle_activations(
-    activations: np.ndarray | None,
-) -> tuple[bool, dict[str, float]]:
-    """Verify muscle activations respect physiological bounds [0.0, 1.0]."""
-    if activations is None:
-        return True, {}
-    arr = np.asarray(activations)
-    if arr.size == 0:
-        return True, {}
-    max_act = float(np.max(arr))
-    min_act = float(np.min(arr))
-    mean_act = float(np.mean(arr))
-    ok = min_act >= 0.0 and max_act <= 1.0
-    return ok, {
-        "max_activation": max_act,
-        "min_activation": min_act,
-        "mean_activation": mean_act,
-    }
-
-
 def _check_quaternion_normalization(q: np.ndarray, tol: float = 1e-4) -> bool:
     """Verify root free-joint quaternion (indices 3:7) has unit norm across trajectory."""
     if q.ndim != 2 or q.shape[1] < 7:
@@ -130,145 +102,43 @@ def _check_quaternion_normalization(q: np.ndarray, tol: float = 1e-4) -> bool:
     return bool(np.all(np.abs(norms - 1.0) <= tol))
 
 
-def _check_myosuite_execution_contract(
-    replay: dict[str, Any],
+# Engine shims over the shared native lane contracts (no duplicated logic).
+def _check_execution_contract(
+    replay,
     *,
-    expected_model_sha: str | None,
-    model_sha: str,
-    native_tests_executed: int | None,
-    rejection_reasons: list[str],
-    missing_evidence: list[str],
-) -> bool:
-    """Checks 1-3: freshness/copying, actuation, and native test count; returns is_fresh."""
-    if expected_model_sha is not None and model_sha != expected_model_sha:
-        rejection_reasons.append(
-            f"model_sha256 mismatch: expected {expected_model_sha}, got {model_sha}"
-        )
-
-    # 1. Copied state trajectory detection. Absent flags are treated as
-    # unverified (fail-closed), not assumed fresh.
-    is_fresh = replay.get("is_fresh_simulation") is True
-    if not replay.get("is_fresh_simulation") or replay.get("copied_from_reference"):
-        if replay.get("is_fresh_simulation") is None:
-            missing_evidence.append("is_fresh_simulation flag")
-        rejection_reasons.append(
-            "Copied state trajectory detected: saved controls must drive fresh native simulation"
-        )
-
-    # 2. FK-only playback detection. Absent flag is treated as unverified.
-    if replay.get("actuation_applied") is not True:
-        if replay.get("actuation_applied") is None:
-            missing_evidence.append("actuation_applied flag")
-        rejection_reasons.append(
-            "FK-only playback detected without native dynamic simulation or muscle excitation"
-        )
-
-    # 3. Nonzero native test count check. An unknown count cannot be assumed
-    # nonzero; it is missing evidence and blocks qualification.
-    if native_tests_executed is None:
-        missing_evidence.append("native test count (native_tests_executed)")
-        rejection_reasons.append(
-            "Native test count not recorded: nonzero native execution on "
-            "pinned host cannot be confirmed"
-        )
-    elif native_tests_executed <= 0:
-        rejection_reasons.append(
-            f"Zero collected native tests: qualification requires nonzero native execution on pinned host (got {native_tests_executed})"
-        )
-    return is_fresh
+    expected_model_sha,
+    model_sha,
+    native_tests_executed,
+    rejection_reasons,
+    missing_evidence,
+):
+    return check_execution_contract(
+        replay,
+        expected_model_sha=expected_model_sha,
+        model_sha=model_sha,
+        native_tests_executed=native_tests_executed,
+        rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        fk_only_message="FK-only playback detected without native dynamic simulation or muscle excitation",
+    )
 
 
-def _check_myosuite_rollout_dynamics(
-    replay: dict[str, Any],
-    *,
-    rejection_reasons: list[str],
-    missing_evidence: list[str],
-) -> tuple[bool, dict[str, float]]:
-    """Check 4: quaternion normalization, derivative consistency, energy balance; missing rollout is fail-closed."""
-    native_state = replay.get("native_state")
-    time_s = replay.get("time_s")
-    derivatives_ok = False
-    energy_summary: dict[str, float] = {}
-
-    if native_state is None or time_s is None:
-        missing_evidence.append("native_state/time_s dynamic rollout")
-        rejection_reasons.append(
-            "Native dynamic rollout data missing: no native_state/time_s "
-            "trajectory to verify derivative and energy contracts"
-        )
-    else:
-        state_arr = np.asarray(native_state)
-        time_arr = np.asarray(time_s)
-
-        if not np.all(np.isfinite(state_arr)) or not np.all(np.isfinite(time_arr)):
-            rejection_reasons.append(
-                "Non-finite values (NaN or Inf) detected in simulation state"
-            )
-        else:
-            n_coords = state_arr.shape[1] // 2
-            q = state_arr[:, :n_coords]
-            v = state_arr[:, n_coords:]
-
-            if not _check_quaternion_normalization(q):
-                rejection_reasons.append(
-                    "Free-joint root quaternion is not normalized to unit length (|norm - 1| > 1e-4)"
-                )
-
-            derivatives_ok = _check_derivatives_consistency(time_arr, q, v)
-            if not derivatives_ok:
-                rejection_reasons.append(
-                    "Reported joint velocities inconsistent with dq/dt central "
-                    "differences (independent derivative check failed)"
-                )
-            ke = 0.5 * np.sum(v**2, axis=1)
-            pe = (
-                9.81 * np.sum(q[:, :3], axis=1)
-                if q.shape[1] >= 3
-                else np.zeros(len(time_arr))
-            )
-
-            energy_summary = {
-                "kinetic_energy_j": float(np.mean(ke)),
-                "potential_energy_j": float(np.mean(pe)),
-                "energy_conservation_error": float(np.std(ke + pe)),
-            }
-            if not all(math.isfinite(value) for value in energy_summary.values()):
-                rejection_reasons.append(
-                    "Non-finite values detected in energy balance summary"
-                )
-    return derivatives_ok, energy_summary
+def _check_rollout_dynamics(replay, *, rejection_reasons, missing_evidence):
+    return check_rollout_dynamics(
+        replay,
+        rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        quaternion_cols=(3, 7),
+    )
 
 
-def _compute_myosuite_marker_metrics(
-    replay: dict[str, Any],
-    *,
-    rejection_reasons: list[str],
-    missing_evidence: list[str],
-) -> dict[str, float]:
-    """Check 6: only metrics computed from recorded observations are emitted."""
-    markers = replay.get("markers_m")
-    target = replay.get("target_m")
-    marker_metrics: dict[str, float] = {}
-    if markers is None or target is None:
-        missing_evidence.append(
-            "aligned common-marker observations (markers_m/target_m)"
-        )
-        rejection_reasons.append(
-            "Aligned common-marker metrics unavailable: replay is missing "
-            "markers_m/target_m from a native rollout against the same observations"
-        )
-    else:
-        m_arr = np.asarray(markers)
-        t_arr = np.asarray(target)
-        if np.all(np.isfinite(m_arr)) and np.all(np.isfinite(t_arr)):
-            diff = m_arr - t_arr
-            sq_err = np.sum(diff**2, axis=-1)
-            marker_metrics["whole_rms_m"] = float(np.sqrt(np.mean(sq_err)))
-        else:
-            rejection_reasons.append(
-                "Non-finite values detected in marker alignment observations"
-            )
-    return marker_metrics
+def _compute_marker_metrics(replay, *, rejection_reasons, missing_evidence):
+    return compute_marker_metrics(
+        replay,
+        rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        respect_valid_mask=False,
+    )
 
 
 def _myosuite_unavailable_receipt(
@@ -315,7 +185,7 @@ def validate_myosuite_candidate_replay(
     model_sha = str(candidate.get("model_sha256") or "")
     capture_sha = str(candidate.get("capture_sha256") or "")
 
-    is_fresh = _check_myosuite_execution_contract(
+    is_fresh = _check_execution_contract(
         replay,
         expected_model_sha=expected_model_sha,
         model_sha=model_sha,
@@ -323,7 +193,7 @@ def validate_myosuite_candidate_replay(
         rejection_reasons=rejection_reasons,
         missing_evidence=missing_evidence,
     )
-    derivatives_ok, energy_summary = _check_myosuite_rollout_dynamics(
+    derivatives_ok, energy_summary = _check_rollout_dynamics(
         replay,
         rejection_reasons=rejection_reasons,
         missing_evidence=missing_evidence,
@@ -331,13 +201,13 @@ def validate_myosuite_candidate_replay(
 
     # 5. Muscle activation bounds
     activations = replay.get("activations")
-    acts_ok, muscle_metrics = _check_muscle_activations(activations)
+    acts_ok, muscle_metrics = check_muscle_activations(activations)
     if not acts_ok:
         rejection_reasons.append(
             f"Muscle activation exceeds physiological bounds [0, 1]: max={muscle_metrics.get('max_activation')}"
         )
 
-    marker_metrics = _compute_myosuite_marker_metrics(
+    marker_metrics = _compute_marker_metrics(
         replay,
         rejection_reasons=rejection_reasons,
         missing_evidence=missing_evidence,
