@@ -87,6 +87,21 @@
   - Entire `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/` suites: 330 collected, all passing.
   - Ruff check/format and mypy clean on touched modules; architecture budget and spec changelog duplicate check: PASS.
 - Next step: CI green, then ready and arm the PR; release agent lease.
+# Current Handoff — Repair Reduced-Model and Club-Only Product Claims (MMR-11 #11097)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-11-reduced-model-claims-11097`
+- Commit: `SELF`
+- Pull request: Refs #11097 (partial: fail-closed gates shipped; not claiming "Closes" — see Open below).
+- Done (all code-level, unit-test-verified):
+  - Disqualified four historical unverified driven-triple pendulum receipts (`driver_amateur`, `driver_elite`, `iron_amateur`, `iron_elite`) at projection time in coverage; driver/iron matrix cells report rejection truthfully. Receipt/evidence files on disk were NOT rewritten.
+  - Enforced complete geometry, inertia, control, q0, and v0 hashes and non-positive out-of-plane residual rejection (`out_of_plane_rmse_m <= 0.0`) on promoted baseline packages, failing integrity checks fail-closed. Committed packages were NOT regenerated from raw artifacts in this PR.
+  - Early planar floor rejection in `validate_and_project_target` gates the CURRENT target's butt/clubhead distances to the selected plane against a DbC-validated `max_marker_rmse_m` (finite, strictly positive; NaN ceilings fail closed instead of silently disabling the gate), rejecting before expensive optimization.
+  - Required fresh continuous replay (`has_continuous_replay`) and labeled inferred body posture (`body_motion_disclaimer`) in club-only UI result views, preventing unqualified views from displaying verified status.
+  - Matrix qualification reports cannot claim all-complete while unresolved cells remain (`assert_matrix_not_all_complete_with_unresolved`); the ~80 unresolved cells are still unresolved and tracked.
+- Open (MMR-11 acceptance criteria NOT satisfied by this PR): raw-to-package reproduction/regeneration of reported baselines and residuals, Board-selected required club-only cells, and any native qualification run.
+- Tests: TDD red-to-green for both Codex findings (current-target planar-floor gating; ceiling DbC validation) plus all fail-closed gate tests. Scoped runs at `46b804bc69`: 18 passed (`tests/unit/motion_matching/test_fit_options_dbc.py`, `tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py`) and 86 passed (`tests/unit/tour_baselines/test_coverage_matrix.py`, `test_qualification.py`, `test_baseline_packages.py`, `tests/unit/motion_matching/test_club_matrix_qualification.py`, `test_club_ui_integration.py`). `ruff check` clean on changed files. Full suite, mypy and CI gates were not run by this slice.
+- Next step: raw-to-package regeneration and Board cell-selection follow-ups for #11097.
 
 ---
 
