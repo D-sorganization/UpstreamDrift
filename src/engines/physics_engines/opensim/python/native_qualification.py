@@ -99,7 +99,6 @@ class OpenSimQualificationReceipt:
         return cls(**data)
 
 
-
 def _opensim_unavailable_receipt(candidate: dict[str, Any]):
     return build_unavailable_receipt(
         candidate,
@@ -142,51 +141,6 @@ def validate_opensim_candidate_replay(
         r["rejection_reasons"].append(
             f"Muscle activation exceeds physiological bounds [0, 1]: max={muscle_metrics.get('max_activation')}"
         )
-    rejected = r["rejection_reasons"]
-    return OpenSimQualificationReceipt(
-        schema_version=1,
-        engine="opensim",
-        club=r["club"],
-        status=OpenSimQualificationStatus.QUALIFIED if not rejected else OpenSimQualificationStatus.REJECTED,
-        candidate_sha256=r["candidate_sha256"],
-        model_sha256=r["model_sha256"],
-        capture_sha256=r["capture_sha256"],
-        runtime_available=opensim_available,
-        is_fresh_simulation=r["is_fresh"],
-        derivatives_consistent=r["derivatives_ok"],
-        energy_balance_checked=bool(r["energy_summary"]),
-        energy_summary=r["energy_summary"],
-        marker_metrics=r["marker_metrics"],
-        muscle_metrics=muscle_metrics,
-        declared_limitations=list(OPENSIM_ENGINE_LIMITATIONS),
-        rejection_reasons=rejected,
-        missing_evidence=r["missing_evidence"],
-        remedy="" if not rejected else OPENSIM_UNAVAILABLE_REMEDY,
-        diagnostic_message="All checks passed."
-        if not rejected
-        else "; ".join(rejected),
-    )
-
-
-def assess_opensim_qualification(
-    candidate: dict[str, Any],
-    replay: dict[str, Any] | None = None,
-    *,
-    opensim_available: bool | None = None,
-    expected_model_sha: str | None = None,
-    native_tests_executed: int | None = None,
-) -> OpenSimQualificationReceipt:
-    """Assess qualification status, returning UNAVAILABLE if opensim runtime is missing."""
-    if not opensim_available:
-        return _opensim_unavailable_receipt(candidate)
-    r = evaluate_candidate_replay(
-        candidate,
-        replay,
-        native_tests_executed=native_tests_executed,
-        expected_model_sha=expected_model_sha,
-        fk_only_message="FK-only playback detected without native dynamic simulation or muscle excitation",
-        respect_valid_mask=false,
-    )
     rejected = r["rejection_reasons"]
     return OpenSimQualificationReceipt(
         schema_version=1,
