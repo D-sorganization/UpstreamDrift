@@ -31,7 +31,7 @@ from src.shared.python.motion_matching.pipeline.address import (
 from src.shared.python.motion_matching.pipeline.constants import (
     BUILD_RECEIPT,
     CANDIDATE,
-    CAPTURES,
+    CAPTURE_NAMES,
     CONSISTENCY_PRIOR,
     DEFAULT_MJX_ITERATIONS,
     LEG_SEEDS,
@@ -41,6 +41,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     SPEC,
     TRACKING_CUTOFF_HZ,
     UPPER_SPEC,
+    capture_path,
 )
 from src.shared.python.motion_matching.pipeline.trajectory_optimiser import (
     TRAJECTORY_OPTIMISERS,
@@ -124,7 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--capture",
-        choices=sorted(CAPTURES),
+        choices=list(CAPTURE_NAMES),
         default="driver",
         help="which canonical tour-average capture to match",
     )
@@ -263,7 +264,7 @@ def _init_pipeline(args: argparse.Namespace) -> PipelineContext:
     return PipelineContext(
         args=args,
         out_dir=out_dir,
-        c3d_path=CAPTURES[args.capture],
+        c3d_path=capture_path(args.capture),
         engine=getattr(args, "engine", "mujoco"),
         log=logging.getLogger("ground_support"),
         t_start=time.perf_counter(),
@@ -465,7 +466,7 @@ def _solve_pink_ik(
         )
         for r in pink_result.frame_residuals
     ]
-    q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
     audit_result = pink_service.audit_trajectory(q_smooth, solve_req, ik_opts)
     all_converged = bool(pink_result.passed)
     rate_limits_respected = bool(
@@ -557,7 +558,7 @@ def _solve_trajectory_ik(
         return _solve_pink_ik(ctx, lane, kin, scaled_spec, labels, initial_q)
     q_ik, fits = full_capture_ik(lane, kin, initial_q)
     errors = marker_errors(kin, q_ik, lane.points)
-    q_smooth = smooth_reference(q_ik, RATE_HZ, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
     q_ref, ref_fits = consistency_resolve(
         lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
     )
@@ -574,6 +575,7 @@ def _persist_dynamics_artifacts(
     q_ref: np.ndarray,
     sim_q: np.ndarray,
     lookat: np.ndarray,
+    rate_hz: float = RATE_HZ,
 ) -> None:
     """Write dynamics NPZ and render IK / tracking playback GIFs."""
     np.savez(
@@ -591,10 +593,20 @@ def _persist_dynamics_artifacts(
     )
     names = tuple(kin.coordinate_order)
     render_playback(
-        cal_res.spec_bytes, names, q_ref, lookat, out_dir / "ik_playback.gif"
+        cal_res.spec_bytes,
+        names,
+        q_ref,
+        lookat,
+        out_dir / "ik_playback.gif",
+        rate_hz=rate_hz,
     )
     render_playback(
-        cal_res.spec_bytes, names, sim_q, lookat, out_dir / "tracking_playback.gif"
+        cal_res.spec_bytes,
+        names,
+        sim_q,
+        lookat,
+        out_dir / "tracking_playback.gif",
+        rate_hz=rate_hz,
     )
 
 
@@ -663,7 +675,7 @@ def _simulate_and_receipt(
     out_dir = ctx.out_dir
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
-    q_track = smooth_reference(q_ref, RATE_HZ, TRACKING_CUTOFF_HZ)
+    q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
     zmp_filter_report: dict[str, Any] | None = None
     if args.zmp_filter:
@@ -701,7 +713,15 @@ def _simulate_and_receipt(
     )
     lookat = np.nanmean(lane.points[0], axis=0)
     _persist_dynamics_artifacts(
-        out_dir, record, sim_errors, cal_res, kin, q_ref, sim_q, lookat
+        out_dir,
+        record,
+        sim_errors,
+        cal_res,
+        kin,
+        q_ref,
+        sim_q,
+        lookat,
+        rate_hz=lane.rate_hz,
     )
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(

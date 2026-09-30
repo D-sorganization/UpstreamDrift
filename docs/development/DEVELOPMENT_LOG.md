@@ -23,11 +23,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #11161
 - **Branch:** `feat/capture-registry-11161`
-- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`
+- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`, `src/shared/python/motion_matching/pipeline/`
 - **Started:** 2026-09-29
-- **Last verified:** 2026-09-30 — architecture budget OK after splitting nine functions; #11170 per-capture leaderboard folded in; scoped motion_matching/swing_comparison tests pass apart from pre-existing local failures (handoff).
+- **Last verified:** 2026-09-30 — #11166 owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
 - **Summary:** Part 1 of epic #11161 (#11162-#11164): neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, and engine-independent swing events and metrics. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
-- **Next step:** Get CI green on the draft PR from `feat/capture-registry-11161`.
+- **Next step:** Bring the owner dynamics marker RMS under 0.15 m so the #11166 xfail can be removed.
 
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
