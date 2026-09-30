@@ -366,11 +366,53 @@ Creator` (newline); find it by BlockType.
      mm and ankle rise 142 mm at MidfootStiffness 300 and 1e4 alike; K only trades balance
      (pelvis pre/post impact 37.8/72.8 mm at 300, 20.5/59.7 at 1e4). Next suspects: foot
      feedback gains, the servo references through the pivot, contact friction.
+   - **Finish diagnosis continued (2026-09-29, scratch `human/fin8.m`-`fin13.m`):**
+     `BalanceFootKp` sweep 0/0.5/1/2: pelvis post-impact RMS 54.2/52.7/56.6/68.5 mm, lead
+     slide 78/114/236/87 mm, trail overshoot 160/100/100/190 mm, support min
+     0.05/0.23/0.25/0 BW. kf 0.5 is best; the foot term causes the lead slide but not the
+     trail overshoot. In EVERY run the trail foot is unloaded at 1.40-1.45 s and lands
+     ahead. Contact trace (`fin10.m`): from 1.27 s the trail foot stands on the Big Toe
+     sphere alone and the midfoot stays within 2 deg of flat. Toe-drive prototype
+     (`fin11.m`, in memory only, 970 compiled blocks): trail reference re-pitched so the
+     ball line reaches the floor (up on the toes past 1.4 s) + midfoot torque input K
+     theta_ref; the toe angle tracks, the lead foot improves (slip 57 mm), but the trail
+     foot still lifts at 1.40 s and slides 340 mm -> not the foot. Joint trace (`fin12.m`):
+     the trail KNEE flexes 5-9 deg past its reference at 1.40-1.43 s; with LegServoKp 100
+     N\*m/deg that is the balance command, not lag. Hypothesis: the vertical axis of the
+     COM loop (BalanceGain 12x3) commands a pelvis drop that the loaded lead leg resists,
+     so the light trail leg folds and lifts its foot. REJECTED by `fin13.m`
+     (BalanceGain(:, 1:2, :), horizontal only): kf 1 19.3/65.8 mm, kf 0.5 18.0/63.1 mm,
+     lead slip 40 mm but trail overshoot about 180 mm and the trail ankle still 18-24 mm
+     above its reference at 1.40-1.45 s. `fin14.m` found the likely cause: the REFERENCE
+     foot poses penetrate the floor (floor = mean address sole). Lead heel sphere -21 mm at
+     1.35 s, -30 at 1.40 s, -37 at 1.70 s; lead BallOut -10 to -13 mm; trail Big Toe -2 to
+     -12 mm from 1.2 s and Lesser Toes -22 mm by 1.7 s. The stiff servos drive the lead
+     heel into the ground, the reaction lifts the body and the light trail foot leaves the
+     floor. REJECTED by `fin15.m`: each reference foot raised so its lowest sphere sits on
+     the floor (lead up to 37.7 mm, 14.4 mm at impact; trail up to 25.3 mm), leg IK, rates
+     and BalanceGain recomputed. kf 1: pelvis 19.7/116.4 mm; kf 0.5: 18.8/110.0 mm. In both
+     the trail foot is unloaded from 1.45 s to the end and dragged 1.1 m. The small trail
+     penetration was the trail foot's only preload; the joint servos track angles relative
+     to the pelvis, so a lightly loaded trail foot follows every pelvis error. The captures
+     have no force plates, so a per-foot load target cannot come from data. REJECTED by
+     `fin16.m` (committed reference, kf 0.5, trail-leg LegServoKp/Kd rows 7-12 scaled):
+     x0.5 gives 28.9/78.1 mm (the trail foot relands and carries 0.3-0.4 BW through the
+     finish but still lifts at 1.45 s); x0.25 collapses (121.9/595.1 mm). Best remains the
+     committed model at kf 0.5 (20.4/52.7 mm). Next idea: a trail-foot vertical load loop
+     (contact-force sensor -> integral on the trail reference height, minimum preload
+     ~0.1 BW after 1.35 s), within the 975-block reserve.
+   - **Source anonymization (2026-09-29, owner request):** a read-only audit found the
+     capture and its vendor highly traceable on public main (raw files, vendor metadata,
+     derived TRC, docs). Owner decision pending between forward cleanup, making the repo
+     private, and a history rewrite (not recommended). Until decided: no pushes, and no
+     vendor/source names in new commits, PR text or docs.
    - **Simulated-motion render (2026-09-29):** `gs3dx_contact_check(..., joints=dt)` logs
      Simscape (decimation 10) and returns `.joints` via new `tools/gs3dx_simlog_joints.m`
-     (spherical S.Q quaternion -> S.ax*\*/S.q), which `gs3dx_render` draws. Test
-     `simulated_joints_render_the_simulated_body` checks the rendered heels track the
-     logged ankles. Finish videos: scratch `human/fin7.m` -> `human/sim_finish*\*.mp4`.
+     (a spherical joint's logged quaternion `S.Q` becomes `S.ax_x`/`ax_y`/`ax_z`/`q`),
+     which `gs3dx_render` draws. Test `simulated_joints_render_the_simulated_body` checks
+     the drawn pelvis stays fixed in the simulated pelvis frame. Finish videos: scratch
+     `human/fin7.m` -> `human/sim_finish_<view>.mp4`; copies on the owner's Desktop in
+     `GS3DX Swing Progress 2026-09-29`.
 
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.
