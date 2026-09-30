@@ -28,6 +28,23 @@
   - Added unit tests for scripts/workflows path extraction and parenthetical prose dropping, plus regression test reproducing issue #10965 / PR #11113.
 - Tests: TDD red-to-green workflow followed; 27 unit tests pass in `tests/scripts/test_check_phantom_guard_paths.py`. Ruff, Black, LOD, and Architecture Budget clean.
 - Resolution: merged ahead of the consolidator (keep-both rewrite of this section at #11138 refresh); superseded by the merge itself.
+# Current Handoff — Govern Screenshot Schema, Capture Metadata, and Qualified Assets (#9191)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/comp-b3-screenshot-governance-9191`
+- Issue: #9191
+- Commit: `SELF`
+- Pull request: Closes #9191.
+- Done:
+  - Updated screenshot schemas (`docs/api/contracts/upstreamdrift-companion-screenshots-v1.schema.json` and `docs/api/contracts/upstreamdrift-companion-v1.schema.json`) with exact capture metadata (`capture_environment`, `source_commit`, pixels/viewport, and summary screenshot counts).
+  - Implemented `scripts/companion_screenshots.py` single authority for screenshot verification, PNG IHDR byte extraction, SHA-256 digest validation, registry loading/validation, and headless deterministic asset generation with Matplotlib Agg backend.
+  - Generated 6 representative deterministic PNG visual assets in `docs/screenshots/` (pendulum simulator desktop light/dark + mobile dark, project map, rate of closure, tour matching viewer).
+  - Registered all 74 visible programs in `scripts/config/companion_screenshots.v1.json` (6 captured records, 70 pending records with explicit reasons).
+  - Wired screenshot registry and inventory into `scripts/companion_catalog.py` and consumer publication bundles.
+- Tests:
+  - 165 passed across `tests/companion` and `tests/unit/scripts/test_verify_companion_screenshots.py`.
+  - Architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK; ruff check and format clean; prettier clean.
+- Next step: Create PR and release lease.
 
 ---
 

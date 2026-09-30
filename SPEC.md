@@ -11,6 +11,25 @@ Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scr
 - **Verification (`tests/scripts/test_check_phantom_guard_paths.py`)**:
   - Adds unit test coverage for `scripts/` and `.github/workflows/` path extraction.
   - Adds regression test reproducing issue #10965 / PR #11113 verifying Rule 3 passes cleanly on real `scripts/` diffs and excludes parenthetical prose fragments.
+## Govern Screenshot Schema, Capture Metadata, and Qualified Assets (#9191)
+
+Establishes the authoritative screenshot metadata contract, representative visual artifacts, and companion catalog integration:
+- **Contract Schemas (`upstreamdrift-companion-screenshots-v1.schema.json`, `upstreamdrift-companion-v1.schema.json`)**:
+  - Enforces strict JSON Schema Draft 2020-12 shapes: `id`, `program_id`, `status` (`captured` | `pending`), `path`, `sha256`, `width`, `height`, `viewport`, `theme` (`light` | `dark`), `capture_workflow_id`, `capture_step_id`, `capture_environment`, `alt_text`, `caption`, `visible_limitations`, `artifact_class`, `source_commit`, and `reason`.
+  - Conditional `allOf` constraints enforce that pending records carry explicit non-empty reasons and null asset fields, while captured records require non-empty alt text, caption, capture environment, valid dimensions, and resolved in-repository assets.
+  - Adds screenshot metric fields (`screenshot_records`, `captured_screenshot_records`, `pending_screenshot_records`) to companion manifest `summary`.
+- **Governed Screenshot Authority (`scripts/companion_screenshots.py`)**:
+  - Implements fail-closed byte-level verification using standard library PNG IHDR chunk inspection and SHA-256 computation against repository files.
+  - Implements headless deterministic asset generation with `matplotlib` using the `Agg` backend (display-server free).
+  - Implements registry parser and validator `parse_registry()` and `load_and_parse_registry()` checking program and workflow resolution.
+- **Representative Assets & Registry (`docs/screenshots/`, `scripts/config/companion_screenshots.v1.json`)**:
+  - Generates 6 deterministic qualified PNG visual assets across desktop (1280x720) and mobile responsive (375x667) viewports in light and dark themes for `pendulum_simulator`, `project_map`, `tour_matching_viewer`, and `rate_of_closure`.
+  - Registers all 74 visible programs in `scripts/config/companion_screenshots.v1.json` (6 captured records, 70 pending records with explicit reasons).
+- **Companion Catalog Integration (`scripts/companion_catalog.py`)**:
+  - Adds `companion_screenshots.REGISTRY_PATH` to `INPUT_PATHS`.
+  - Integrates `screenshot_registry` in catalog `registries`, populates `screenshots` inventory with exact source-commit provenance, and updates `summary` with screenshot counts.
+- **Verification (`tests/companion/test_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `tests/companion/test_companion_publication.py`)**:
+  - Verifies registry syntax, asset hash matching, PNG header dimensions, pending-reason fail-closed behavior, dangling program/workflow refusal, and catalog serialization.
 
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 

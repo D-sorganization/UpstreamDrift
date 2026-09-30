@@ -53,6 +53,9 @@
     "engine_capability_records": 0,
     "qualified_engine_capability_records": 0,
     "undocumented_visible_program_records": 0,
-    "known_gap_records": 0
+    "known_gap_records": 0,
+    "screenshot_records": 0,
+    "captured_screenshot_records": 0,
+    "pending_screenshot_records": 0
   }
 }
