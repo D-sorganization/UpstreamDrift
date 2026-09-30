@@ -43,7 +43,11 @@ class SimulationResponse(BaseModel):
 
     success: bool = Field(..., description="Whether simulation completed successfully")
     duration: float = Field(..., description="Actual simulation duration", ge=0)
-    frames: int = Field(..., description="Number of simulation frames", ge=0)
+    frames: int = Field(
+        ...,
+        description="Number of recorded simulation frames, including initial sample at t=0",
+        ge=0,
+    )
     data: dict[str, Any] = Field(
         ..., description="Simulation data (states, controls, etc.)"
     )
@@ -54,9 +58,35 @@ class SimulationResponse(BaseModel):
 
     @model_validator(mode="after")
     def check_data_on_success(self) -> SimulationResponse:
-        """Postcondition: successful simulations must include state data."""
-        if self.success and not self.data:
-            raise ValueError("Successful simulation must include non-empty data")
+        """Postcondition: successful simulations must include non-empty, aligned state data."""
+        if self.success:
+            if not self.data:
+                raise ValueError("Successful simulation must include non-empty data")
+            if "times" in self.data:
+                if len(self.data["times"]) == 0:
+                    raise ValueError("Successful simulation cannot have empty times")
+                n_times = len(self.data["times"])
+                for channel in (
+                    "joint_positions",
+                    "joint_velocities",
+                    "joint_accelerations",
+                ):
+                    if channel in self.data:
+                        val = self.data[channel]
+                        if len(val) == 0:
+                            raise ValueError(
+                                f"Channel '{channel}' cannot be empty on successful simulation"
+                            )
+                        if len(val) != n_times:
+                            raise ValueError(
+                                f"Channel '{channel}' length ({len(val)}) does not match times length ({n_times})"
+                            )
+                if "control_inputs" in self.data:
+                    ctrls = self.data["control_inputs"]
+                    if len(ctrls) != n_times:
+                        raise ValueError(
+                            f"Channel 'control_inputs' length ({len(ctrls)}) does not match times length ({n_times})"
+                        )
         return self
 
     @property

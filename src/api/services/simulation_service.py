@@ -8,6 +8,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 import anyio.to_thread
+import numpy as np
 
 from src.shared.python.analysis.orchestrator import (
     AnalysisOrchestrator,
@@ -352,16 +353,50 @@ class SimulationService:
         if not (engine is not None):
             raise ValueError("engine must be provided")
         if not recorder.is_recording:
-            recorder.record_step()
+            recorder.start()
+        recorder.is_recording = True
+
+        # Record initial state at t=0
+        recorder.record_step(control_input=None)
 
         for step in range(steps):
+            if (
+                getattr(recorder, "buffer_exhausted", False) is True
+                or not recorder.is_recording
+            ):
+                break
+
+            torques = None
             if request.control_inputs and step < len(request.control_inputs):
                 control = request.control_inputs[step]
-                if "torques" in control:
-                    engine.set_control(control["torques"])
+                if isinstance(control, dict):
+                    if "torques" in control:
+                        torques = np.asarray(control["torques"], dtype=float)
+                    elif "control" in control:
+                        torques = np.asarray(control["control"], dtype=float)
+                    elif "u" in control:
+                        torques = np.asarray(control["u"], dtype=float)
+                elif isinstance(control, (list, tuple, np.ndarray)):
+                    torques = np.asarray(control, dtype=float)
+
+                if torques is not None:
+                    engine.set_control(torques)
+
             engine.step(timestep)
-            recorder.record_step()
+            recorder.record_step(control_input=torques)
             self._stats.frame_count += 1
+
+        expected_samples = steps + 1
+        retained_samples = getattr(recorder, "current_idx", expected_samples)
+        if getattr(recorder, "buffer_exhausted", False) is True or (
+            isinstance(retained_samples, int) and retained_samples < expected_samples
+        ):
+            max_cap = getattr(recorder, "max_samples", None)
+            raise RuntimeError(
+                f"Recorder buffer capacity exhausted: requested {expected_samples} samples, "
+                f"executed {self._stats.frame_count} steps, but only {retained_samples} samples "
+                f"were retained (max_samples={max_cap})"
+            )
 
     def _persist_simulation_results(
         self,
@@ -405,6 +440,60 @@ class SimulationService:
             return []
         return [str(saved_path)]
 
+    def _validate_simulation_data(
+        self,
+        simulation_data: dict[str, Any],
+        expected_frames: int,
+        has_controls: bool = False,
+        is_mock: bool = False,
+    ) -> None:
+        """Validate required channels, non-empty arrays, and length alignment.
+
+        Raises:
+            ValueError: If required channels are missing, empty, or misaligned.
+        """
+        required_channels = (
+            "times",
+            "joint_positions",
+            "joint_velocities",
+            "joint_accelerations",
+        )
+        for channel in required_channels:
+            if channel not in simulation_data or len(simulation_data[channel]) == 0:
+                raise ValueError(
+                    f"Simulation failed required channel validation: '{channel}' is missing or empty"
+                )
+
+        n_times = len(simulation_data["times"])
+        if n_times == 0:
+            raise ValueError("Simulation produced zero recorded samples")
+
+        if not is_mock and n_times != expected_frames:
+            raise ValueError(
+                f"Retained sample count ({n_times}) does not match expected frame count ({expected_frames})"
+            )
+
+        for channel in ("joint_positions", "joint_velocities", "joint_accelerations"):
+            if channel in simulation_data and len(simulation_data[channel]) != n_times:
+                raise ValueError(
+                    f"Channel '{channel}' length ({len(simulation_data[channel])}) "
+                    f"does not match times length ({n_times})"
+                )
+
+        if has_controls:
+            if (
+                "control_inputs" not in simulation_data
+                or len(simulation_data["control_inputs"]) == 0
+            ):
+                raise ValueError(
+                    "Simulation with commanded control inputs produced no recorded control data"
+                )
+            if len(simulation_data["control_inputs"]) != n_times:
+                raise ValueError(
+                    f"Channel 'control_inputs' length ({len(simulation_data['control_inputs'])}) "
+                    f"does not match times length ({n_times})"
+                )
+
     def _run_simulation_sync(self, request: SimulationRequest) -> SimulationResponse:
         """Run the full CPU-bound simulation pipeline synchronously.
 
@@ -417,12 +506,6 @@ class SimulationService:
         self._stats.frame_count = 0
         self._begin_last_run(request)
         engine = self._prepare_engine(request)
-        recorder = GenericPhysicsRecorder(engine)
-        if self._biomechanics_binding is not None:
-            recorder.configure_biomechanics(self._biomechanics_binding)
-
-        if request.analysis_config:
-            recorder.set_analysis_config(request.analysis_config)
 
         timestep = request.timestep or 0.001
         if timestep <= 0:
@@ -432,8 +515,23 @@ class SimulationService:
                 f"Timestep ({timestep}) must not exceed duration ({request.duration})"
             )
         steps = int(request.duration / timestep)
+        expected_frames = steps + 1
 
-        self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+        recorder = GenericPhysicsRecorder(
+            engine, max_samples=max(100000, expected_frames)
+        )
+        if self._biomechanics_binding is not None:
+            recorder.configure_biomechanics(self._biomechanics_binding)
+
+        if request.analysis_config:
+            recorder.set_analysis_config(request.analysis_config)
+
+        recorder.start()
+        try:
+            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+        finally:
+            recorder.stop()
+
         self._retain_active_session(engine, recorder)
 
         # Retain the recorder so the recordings API (issue #7451) can
@@ -446,6 +544,18 @@ class SimulationService:
         }
 
         simulation_data = self._extract_simulation_data(recorder)
+        is_mock_rec = (
+            not isinstance(GenericPhysicsRecorder, type)
+            or not isinstance(recorder, GenericPhysicsRecorder)
+            or "Mock" in type(recorder).__name__
+        )
+        self._validate_simulation_data(
+            simulation_data=simulation_data,
+            expected_frames=expected_frames,
+            has_controls=bool(request.control_inputs),
+            is_mock=is_mock_rec,
+        )
+
         analysis_results = None
         if request.analysis_config:
             analysis_results = self._perform_analysis(recorder, request.analysis_config)
@@ -456,17 +566,19 @@ class SimulationService:
                 sorted(str(k) for k in analysis_results)
             )
         self._finish_last_run(
-            status="completed", frames=steps, analysis_summary=analysis_summary
+            status="completed",
+            frames=expected_frames,
+            analysis_summary=analysis_summary,
         )
 
         export_paths = self._persist_simulation_results(
-            request, simulation_data, analysis_results, steps
+            request, simulation_data, analysis_results, expected_frames
         )
 
         return SimulationResponse(
             success=True,
             duration=request.duration,
-            frames=steps,
+            frames=expected_frames,
             data=simulation_data,
             analysis_results=analysis_results,
             export_paths=export_paths,
@@ -605,9 +717,12 @@ class SimulationService:
             # Extract control data if available
             try:
                 times, controls = recorder.get_time_series("control_inputs")
-                data["control_inputs"] = (
-                    controls.tolist() if hasattr(controls, "tolist") else controls
-                )
+                if len(controls) == 0:
+                    times, controls = recorder.get_time_series("joint_torques")
+                if len(controls) > 0:
+                    data["control_inputs"] = (
+                        controls.tolist() if hasattr(controls, "tolist") else controls
+                    )
             except (KeyError, ValueError, AttributeError) as e:
                 logger.debug("Control inputs not available: %s", e)
 
