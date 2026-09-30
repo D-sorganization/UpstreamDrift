@@ -1,0 +1,169 @@
+{
+  "is_qualified": false,
+  "is_uninterrupted": true,
+  "per_marker_rms_m": {
+    "BackLeft": 0.02231539830224235,
+    "BackRight": 0.029288554857298033,
+    "BackTop": 0.008131834544788705,
+    "HeadFront": 0.023726372654491002,
+    "HeadSide": 0.028768093148121447,
+    "HeadTop": 0.01381228456946798,
+    "LElbowOut": 0.022099864608202954,
+    "LShoulderBack": 0.018669955008594915,
+    "LShoulderTop": 0.024734755062830356,
+    "LUArmHigh": 0.025280035341993055,
+    "LWristTop": 0.030334576277040358,
+    "Marker_2:2:1": 0.008926927980730357,
+    "Marker_2:2:2": 0.011965144660404102,
+    "Marker_2:2:3": 0.011033175310465063,
+    "Marker_3:3:1": 0.012287329187660736,
+    "Marker_3:3:2": 0.013871422787594114,
+    "Marker_3:3:3": 0.012504173121674107,
+    "RElbowOut": 0.014234147908235049,
+    "RShoulderBack": 0.022944751972324012,
+    "RUArmHigh": 0.020716287273554478,
+    "RWristTop": 0.009978465346857833,
+    "WaistLBack": 0.01621042896484465,
+    "WaistLeft": 0.0328523210223263,
+    "WaistRBack": 0.016650122770909413,
+    "WaistRight": 0.02315905063523276
+  },
+  "phase_rms_m": {
+    "address": 0.0040014662122052624,
+    "backswing": 0.026254154201159938
+  },
+  "profile": "pure_torque",
+  "provenance": {
+    "candidate_sha256": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
+    "host": "DeskComputer",
+    "matlab_release": "2025b",
+    "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+    "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "replay_npz_sha256": "efec8a6ecf9479c1bf0f5604d21add5224373423f1441c6250c1c3cd484e25b5",
+    "run_id": "two_window_fit_9967_102",
+    "solver_clock_s": 23.2797995,
+    "wall_clock_s": 23.2797995
+  },
+  "receipt_dict": {
+    "acceptance_terminal_source": "full_marker",
+    "candidate_sha256": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
+    "capture": "driver",
+    "club_marker_rmse_m": 0.008391285435051065,
+    "controller_mode": "pure_torque",
+    "duration_s": 0.85,
+    "early_marker_rmse_m": 0.009995357264954529,
+    "engine": "simscape",
+    "horizon": "G1",
+    "is_uninterrupted": true,
+    "lane": "native",
+    "matlab_release": "2025b",
+    "model_profile": "reduced_27_no_neck",
+    "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",
+    "pelvis_yaw_error_pct": 0.5954129834382699,
+    "profile": "pure_torque",
+    "run_id": "two_window_fit_9967_102",
+    "solver_clock_s": 23.2797995,
+    "terminal_breakdown": {
+      "body_excluding_head_terminal_rms_m": 0.033673092368166846,
+      "full_marker_terminal_rms_m": 0.04030335259128564,
+      "head_cluster_terminal_rms_m": 0.0722581217129838,
+      "hub_cluster_terminal_rms_m": 0.05714545366906724
+    },
+    "terminal_marker_rmse_m": 0.04030335259128564,
+    "unavailable_physical_quantities": {
+      "max_closure_residual_m": "no closure residual measurement in marker replay package",
+      "max_normal_force_n": "no contact-force audit in marker replay package",
+      "max_penetration_m": "no ground-penetration measurement in marker replay package"
+    },
+    "wall_clock_s": 23.2797995,
+    "whole_marker_rmse_m": 0.020267269569536953
+  },
+  "run_id": "two_window_fit_9967_102",
+  "schema_version": "simscape-continuous-replay-receipt/1",
+  "terminal_breakdown": {
+    "body_excluding_head_terminal_rms_m": 0.033673092368166846,
+    "full_marker_terminal_rms_m": 0.04030335259128564,
+    "head_cluster_terminal_rms_m": 0.0722581217129838,
+    "hub_cluster_terminal_rms_m": 0.05714545366906724
+  },
+  "verdict": {
+    "gates": [
+      {
+        "measured": 0.020267269569536953,
+        "name": "whole_marker_rmse_m",
+        "reason": "",
+        "status": "passed",
+        "threshold": 0.025,
+        "unit": "m"
+      },
+      {
+        "measured": 0.009995357264954529,
+        "name": "early_marker_rmse_m",
+        "reason": "",
+        "status": "passed",
+        "threshold": 0.012,
+        "unit": "m"
+      },
+      {
+        "measured": 0.04030335259128564,
+        "name": "terminal_marker_rmse_m",
+        "reason": "terminal RMSE 40.30 mm > 35.00 mm",
+        "status": "failed",
+        "threshold": 0.035,
+        "unit": "m"
+      },
+      {
+        "measured": 0.008391285435051065,
+        "name": "club_marker_rmse_m",
+        "reason": "",
+        "status": "passed",
+        "threshold": 0.06,
+        "unit": "m"
+      },
+      {
+        "measured": 0.0722581217129838,
+        "name": "head_cluster_terminal_rms_m",
+        "reason": "head-cluster terminal RMS disclosed",
+        "status": "passed",
+        "threshold": 0.0,
+        "unit": "m"
+      },
+      {
+        "measured": null,
+        "name": "full_marker_terminal_source",
+        "reason": "acceptance terminal source=full_marker",
+        "status": "passed",
+        "threshold": 0.0,
+        "unit": "m"
+      },
+      {
+        "measured": 0.5954129834382699,
+        "name": "pelvis_yaw_error_pct",
+        "reason": "",
+        "status": "passed",
+        "threshold": 5.0,
+        "unit": "%"
+      },
+      {
+        "measured": null,
+        "name": "max_normal_force_n",
+        "reason": "native kinematic-fit lane has no contact audit",
+        "status": "not_applicable",
+        "threshold": 2354.4,
+        "unit": "N"
+      },
+      {
+        "measured": 0.85,
+        "name": "horizon_truncation",
+        "reason": "",
+        "status": "passed",
+        "threshold": 0.85,
+        "unit": "s"
+      }
+    ],
+    "horizon": "G1",
+    "is_physically_accepted": false,
+    "qualification_note": "Physical or kinematic thresholds violated",
+    "status": "REJECTED"
+  }
+}

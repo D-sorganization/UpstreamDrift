@@ -28,6 +28,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 — 27 focused unit tests pass in `test_check_phantom_guard_paths.py`; ruff, black, architecture budget, and LOD clean.
 - **Summary:** Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.
 - **Next step:** Submit PR for review and release lease.
+### DL-#11107 — Implement Simscape Continuous-Replay Qualification Harness
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11107
+- **Branch:** `feat/mmr-07-simscape-continuous-replay-11107`
+- **Paths:** `src/shared/python/motion_matching/simscape_replay_harness.py`, `tests/unit/motion_matching/test_simscape_continuous_replay_harness.py`, `scripts/matlab/run_simscape_candidate.ps1`, `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/simscape_replay_qualification.json`, `SPEC.md`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 at 27c0d34967 — 22 focused harness tests passed (11 review-fix regressions demonstrated red pre-fix, green post-fix); `tests/unit/motion_matching` 1901 passed, 11 failed all pre-existing (`c3d_reader.load_c3d`, `bunkershot3d`, stability-matrix precondition — verified identical on a pristine baseline checkout); ruff check/format and mypy clean on touched modules.
+- **Summary:** Added Simscape continuous-replay qualification harness with full-rate continuous trajectory validation, fail-closed contracts for missing samples, non-finite states, timestamp monotonicity, non-R2025b releases, motion prescription, and candidate hash mismatches. Structured qualification receipt schema records per-marker/phase channels, provenance, and evaluates against frozen G1 acceptance gates. Native candidate run-102 honestly rejected at terminal phase (40.3 mm vs 35 mm G1 ceiling). Review fixes (PR #11126 Codex P1/P2): metrics derive from the canonical `compute_replay_five_metrics()` (0.60 s early window, canonical club labels), pelvis yaw measured, unmeasured contact quantities disclosed as unavailable, elapsed-span/start validation, receipt loader null preservation, and `load_replay_evidence_inputs()` deriving digest/initial conditions/control identity from native evidence (run-102 receipt extended additively with `control_identity`, no measured value changed).
+- **Next step:** CI green, PR review.
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
