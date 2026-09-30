@@ -18,9 +18,11 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.native_lanes.common import (
+    begin_evaluation,
     check_execution_contract,
     check_rollout_dynamics,
     compute_marker_metrics,
+    identity_shas,
 )
 
 DRAKE_ENGINE_LIMITATIONS: tuple[str, ...] = (
@@ -163,12 +165,8 @@ def validate_drake_candidate_replay(
     if not drake_available:
         return _drake_unavailable_receipt(candidate)
 
-    rejection_reasons: list[str] = []
-    missing_evidence: list[str] = []
-    club = str(candidate.get("club") or "driver")
-    cand_sha = str(candidate.get("source_sha256") or "")
-    model_sha = str(candidate.get("model_sha256") or "")
-    capture_sha = str(candidate.get("capture_sha256") or "")
+    rejection_reasons, missing_evidence = begin_evaluation(replay)
+    club, cand_sha, model_sha, capture_sha = identity_shas(candidate)
 
     is_fresh = _check_execution_contract(
         replay,

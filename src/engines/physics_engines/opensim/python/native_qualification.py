@@ -22,6 +22,8 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.native_lanes.common import (
+    identity_shas,
+    begin_evaluation,
     build_unavailable_receipt,
     check_execution_contract,
     check_muscle_activations,
@@ -164,12 +166,8 @@ def validate_opensim_candidate_replay(
     if not opensim_available:
         return _opensim_unavailable_receipt(candidate)
 
-    rejection_reasons: list[str] = []
-    missing_evidence: list[str] = []
-    club = str(candidate.get("club") or "driver")
-    cand_sha = str(candidate.get("source_sha256") or "")
-    model_sha = str(candidate.get("model_sha256") or "")
-    capture_sha = str(candidate.get("capture_sha256") or "")
+    rejection_reasons, missing_evidence = begin_evaluation(replay)
+    club, cand_sha, model_sha, capture_sha = identity_shas(candidate)
 
     is_fresh = _check_execution_contract(
         replay,

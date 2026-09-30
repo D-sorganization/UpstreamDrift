@@ -258,3 +258,18 @@ def build_unavailable_receipt(
         remedy=remedy,
         diagnostic_message=labels["diagnostic_message"],
     )
+
+
+def begin_evaluation(replay: dict[str, Any]) -> tuple[list[str], list[str]]:
+    """Fresh rejection Reasons/missing-evidence accumulators for one evaluation."""
+    return [], []
+
+
+def identity_shas(candidate: dict[str, Any]) -> tuple[str, str, str, str]:
+    """Extract club and the three identity digests of a candidate payload."""
+    return (
+        str(candidate.get("club") or "driver"),
+        str(candidate.get("source_sha256") or ""),
+        str(candidate.get("model_sha256") or ""),
+        str(candidate.get("capture_sha256") or ""),
+    )
