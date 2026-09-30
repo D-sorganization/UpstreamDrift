@@ -61,6 +61,24 @@ Integrates historical-video evidence ingestion, non-destructive review, multi-sh
 - **Installed PyQt Review Journey (`src/tools/shadow_tracker/gui.py`)**:
   - `ShadowTrackerWidget` & `ShadowTrackerReviewModel`: Provides interactive video file import, keyboard navigation (`Key_Left`, `Key_Right`, `Key_Home`, `Key_End`, `Key_W` for worst-frame jump), shortcut bundle persistence (`Ctrl+S`, `Ctrl+O`, `Ctrl+I`), viewport rendering with clock authority metadata, and honest refusal reporting for unverified automated fitting backends.
   - Viewport renders unknown physical time safely (`Physical Time: unknown (<reason>)` via `format_clock_evidence_text`), so GUI-default imports with `physical_time_s=None` paint without `None` formatting errors.
+## Repeatable MJX Budget and Promotion Reports (#11108)
+
+Extends MJX trajectory-solver benchmarking with repeated seeded run aggregation, stage timings, failure retention, and content-hashed incumbent reuse:
+- **Seeded Run Aggregation (`src/shared/python/motion_matching/solver_benchmark.py`)**:
+  - Implements `aggregate_seeded_rows` across repeated random seeds for each (capture, solver) pair.
+  - Independently calculates median and p95 replay marker RMS and wall clock time.
+  - Enforces failure retention in the denominator: failed runs remain in total count and decrement the success rate, preventing hidden convergence faults.
+  - Aggregates per-stage timings (`stage_timings_s`) across optimization and shared-simulator replay.
+- **Content-Hashed Comparison & Integrity (`promotion_decision`, `_resolve_case`)**:
+  - Rejects comparisons across mismatched capture hashes or model geometry hashes.
+  - Enforces that candidates stopped on `max_iterations` never promote, even with lower replay RMS.
+  - Strictly prevents synthetic unit-test receipts from being promoted into production.
+  - Implements tamper-evident content-hashed incumbent reuse via `expected_sha256` verification in `reuse.json`.
+- **Benchmark Runner CLI (`scripts/benchmark_mjx_knot_solvers.py`)**:
+  - Supports `--seeds` argument for repeated evaluations and `--allow-synthetic` flag for synthetic verification.
+  - Discovers and aggregates multiple seeded cases (`<case>_seed*`) cleanly.
+- **Verification & Testing (`tests/unit/motion_matching/test_mjx_budget_and_promotion_reports.py`)**:
+  - Unit tests covering max_iterations promotion rejection, geometry/capture hash mismatch rejection, failure retention in denominator, independent median/p95 calculations, synthetic receipt rejection, and content-hashed reuse.
 
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
