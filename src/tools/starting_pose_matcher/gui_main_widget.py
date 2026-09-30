@@ -207,9 +207,18 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         self._build_ui()
         self._apply_camera_preset(_DEFAULT_CAMERA)
 
-        default_xlsx = Path(__file__).with_name("Wiffle_ProV1_club_3D_data.xlsx")
-        if default_xlsx.exists():
+        try:
+            from src.motion_capture.capture_registry import (
+                CaptureRegistryError,
+                resolve_capture,
+            )
+
+            default_xlsx = resolve_capture("club-workbook-wiffle")
             self._load_xlsx(str(default_xlsx))
+        except CaptureRegistryError:
+            default_xlsx = Path(__file__).with_name("Wiffle_ProV1_club_3D_data.xlsx")
+            if default_xlsx.exists():
+                self._load_xlsx(str(default_xlsx))
 
     # ===================================================================== #
     # UI                                                                    #

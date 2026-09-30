@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11161
+- **Branch:** `feat/capture-registry-11161`
+- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 169 passed, 24 skipped over the touched tests; the two failures are pre-existing or load-only (handoff).
+- **Summary:** Part 1 of epic #11161 (#11162-#11164): neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, and engine-independent swing events and metrics. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
+- **Next step:** Get CI green on the draft PR from `feat/capture-registry-11161`.
+
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
 - **State:** in_review
@@ -28,6 +40,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 — 27 focused unit tests pass in `test_check_phantom_guard_paths.py`; ruff, black, architecture budget, and LOD clean.
 - **Summary:** Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.
 - **Next step:** Submit PR for review and release lease.
+
 ### DL-#11107 — Implement Simscape Continuous-Replay Qualification Harness
 
 - **State:** in_review
@@ -39,6 +52,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 27c0d34967 — 22 focused harness tests passed (11 review-fix regressions demonstrated red pre-fix, green post-fix); `tests/unit/motion_matching` 1901 passed, 11 failed all pre-existing (`c3d_reader.load_c3d`, `bunkershot3d`, stability-matrix precondition — verified identical on a pristine baseline checkout); ruff check/format and mypy clean on touched modules.
 - **Summary:** Added Simscape continuous-replay qualification harness with full-rate continuous trajectory validation, fail-closed contracts for missing samples, non-finite states, timestamp monotonicity, non-R2025b releases, motion prescription, and candidate hash mismatches. Structured qualification receipt schema records per-marker/phase channels, provenance, and evaluates against frozen G1 acceptance gates. Native candidate run-102 honestly rejected at terminal phase (40.3 mm vs 35 mm G1 ceiling). Review fixes (PR #11126 Codex P1/P2): metrics derive from the canonical `compute_replay_five_metrics()` (0.60 s early window, canonical club labels), pelvis yaw measured, unmeasured contact quantities disclosed as unavailable, elapsed-span/start validation, receipt loader null preservation, and `load_replay_evidence_inputs()` deriving digest/initial conditions/control identity from native evidence (run-102 receipt extended additively with `control_identity`, no measured value changed).
 - **Next step:** CI green, PR review.
+
 ### DL-#11098 — Historical-Video Evidence Review Workflow
 
 - **State:** in_review
@@ -50,6 +64,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 0c31f341a7 — 330 tests collected across `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/`, all passing (review-fix regressions demonstrated red pre-fix, green post-fix); ruff check/format and mypy clean on touched modules.
 - **Summary:** Preserves multi-shot frame isolation and revision lineage in `DefaultShadowTrackerService`, implements video ingestion with container PTS and slow-motion affine timing mappings, bounded decode limits with prompt cancellation, recoverable session state on corrupt media, and keyboard review scrubbing with honest automated fit refusal in `ShadowTrackerWidget`. Review fixes (PR #11127 Codex P1s): repeat video imports stage and validate scope/revision/asset ownership before any session mutation (atomic failure), no-mapping imports keep `physical_time_s=None` with the canonical unknown-time reason (PTS authority stays in `timing_mode`/`clock_evidence`), and the viewport renders unknown physical time safely instead of formatting `None`.
 - **Next step:** Commit and submit PR; release agent lease.
+
 ### DL-#11097 — Repair Reduced-Model and Club-Only Product Claims (MMR-11)
 
 - **State:** in_review
@@ -61,6 +76,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at `46b804bc69` — scoped runs: `pytest tests/unit/motion_matching/test_fit_options_dbc.py tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py` (18 passed), and `pytest tests/unit/tour_baselines/test_coverage_matrix.py tests/unit/tour_baselines/test_qualification.py tests/unit/tour_baselines/test_baseline_packages.py tests/unit/motion_matching/test_club_matrix_qualification.py tests/unit/motion_matching/test_club_ui_integration.py` (86 passed). New TDD tests observed RED pre-fix (planar-floor gate used the calibrated plane's stale residual; missing `max_marker_rmse_m` DbC validation, NaN ceiling silently disabled the gate) and GREEN post-fix; `ruff check` clean on changed files. Not run / not available: full project suite, mypy, CI gates, raw-to-package regeneration, native runs.
 - **Summary:** Added code-level, fail-closed claims gates: four driven-triple pendulum receipts (`driver_amateur`, `driver_elite`, `iron_amateur`, `iron_elite`) disqualified at projection time (evidence files on disk unchanged); promoted-package hash and out-of-plane-residual integrity checks; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells; pendulum planar-floor early rejection now driven by the CURRENT target's plane distances with a DbC-validated `max_marker_rmse_m`.
 - **Open (per MMR-11 acceptance, not satisfied here):** raw-to-package reproduction/regeneration of the reported baselines, Board-selected required club-only cells, and native qualification runs. PR references (not "Closes") #11097 for these.
+
 ### DL-#11102 — Publish a Best-Candidate Viewer With Honest Residuals
 
 - **State:** in_review (review fixes for Codex findings on PR #11132)

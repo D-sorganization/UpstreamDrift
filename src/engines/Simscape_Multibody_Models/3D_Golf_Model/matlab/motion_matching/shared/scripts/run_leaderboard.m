@@ -170,6 +170,11 @@ function p = local_resolve_xlsx(arg)
         p = char(arg);
         return;
     end
+    try
+        p = resolve_capture("club-workbook-wiffle");
+        return;
+    catch
+    end
     here = fileparts(mfilename("fullpath"));
     % shared/scripts -> shared -> motion_matching -> matlab -> 3D_Golf_Model
     engine_root = fileparts(fileparts(fileparts(fileparts(here))));

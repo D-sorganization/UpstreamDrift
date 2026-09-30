@@ -60,6 +60,17 @@ from src.shared.python.workspace.results_browser import ResultFilter, ResultsBro
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture
+def club_workbooks() -> None:
+    """Skip unless the private club workbooks resolve (#11162)."""
+    from src.motion_capture.capture_registry import require_capture
+
+    require_capture("club-workbook-main")
+    require_capture("club-workbook-wiffle")
+
+
 EVIDENCE = (
     REPO_ROOT
     / "docs"
@@ -96,6 +107,7 @@ def test_source_kinds_include_club_only_excel() -> None:
     assert ClubOnlySourceKind.CLUB_ONLY_EXCEL in kinds
 
 
+@pytest.mark.usefixtures("club_workbooks")
 def test_import_lists_four_unique_trials_with_conflicts_and_coverage() -> None:
     catalog = import_club_only_workbook_catalog(REPO_ROOT)
     assert catalog.schema_version == IDENTITY_SCHEMA
@@ -116,6 +128,7 @@ def test_import_lists_four_unique_trials_with_conflicts_and_coverage() -> None:
     assert any("ball" in c.lower() for c in catalog.conflicts)
 
 
+@pytest.mark.usefixtures("club_workbooks")
 def test_unknown_units_and_ball_label_surface_as_named_conflicts() -> None:
     catalog = import_club_only_workbook_catalog(REPO_ROOT)
     joined = " | ".join(catalog.conflicts).lower()
@@ -429,6 +442,7 @@ def test_pipeline_club_only_request_binds_existing_facades() -> None:
     assert summary["native_g1_pass"] is False
 
 
+@pytest.mark.usefixtures("club_workbooks")
 def test_evidence_payload_is_versioned_and_honest() -> None:
     payload = ui_integration_evidence_payload(REPO_ROOT)
     assert payload["schema_version"] == UI_SCHEMA
@@ -486,13 +500,9 @@ def test_workbook_observation_loader_uses_selected_trial() -> None:
     from src.shared.python.motion_matching.club_only.ui_integration import (
         load_club_only_workbook_observation,
     )
-    from src.shared.python.motion_matching.club_only.workbook_identity import (
-        CLUB_DATA_RELATIVE,
-    )
+    from src.motion_capture.capture_registry import require_capture
 
-    workbook = REPO_ROOT / CLUB_DATA_RELATIVE
-    if not workbook.is_file():
-        pytest.skip("Club_Data.xlsx not present")
+    require_capture("club-workbook-main")
     obs_a = load_club_only_workbook_observation(REPO_ROOT, "TW_wiffle")
     obs_b = load_club_only_workbook_observation(REPO_ROOT, "GW_wiffle")
     assert obs_a.trial_id == "TW_wiffle"

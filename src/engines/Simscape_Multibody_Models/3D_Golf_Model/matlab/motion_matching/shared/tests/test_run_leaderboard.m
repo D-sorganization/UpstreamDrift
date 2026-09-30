@@ -118,13 +118,10 @@ classdef test_run_leaderboard < matlab.unittest.TestCase
             if ~license("test", "Simulink")
                 testCase.assumeFail("Simulink license unavailable");
             end
-            here = fileparts(mfilename("fullpath"));
-            engine_root = fileparts(fileparts(fileparts(fileparts(fileparts(here)))));
-            xlsx = fullfile(engine_root, "matlab", "src", "apps", ...
-                "golf_gui", "Motion Capture Plotter", ...
-                "Wiffle_ProV1_club_3D_data.xlsx");
-            if ~isfile(xlsx)
-                testCase.assumeFail("Wiffle xlsx not found at expected path");
+            try
+                xlsx = string(resolve_capture("club-workbook-wiffle"));
+            catch exc
+                testCase.assumeFail("skipped — club-workbook-wiffle not available: " + string(exc.message));
             end
             summary = run_leaderboard( ...
                 'Trials',     "TW_ProV1", ...

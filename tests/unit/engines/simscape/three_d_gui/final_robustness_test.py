@@ -12,12 +12,24 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
+def _get_wiffle_excel_path() -> Path:
+    try:
+        from src.motion_capture.capture_registry import (
+            CaptureRegistryError,
+            resolve_capture,
+        )
+
+        return resolve_capture("club-workbook-wiffle")
+    except CaptureRegistryError:
+        return Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
+
+
 def test_data_loading_accuracy() -> bool:
     """Test the accuracy of data loading"""
     logger.info("🔍 TESTING DATA LOADING ACCURACY")
     logger.info("%s", "=" * 60)
 
-    excel_file = Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
+    excel_file = _get_wiffle_excel_path()
 
     if not excel_file.exists():
         logger.info("❌ Excel file not found")
@@ -100,7 +112,7 @@ def test_data_consistency() -> bool:
         )
 
         loader = WiffleDataLoader(config)
-        excel_file = Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
+        excel_file = _get_wiffle_excel_path()
 
         excel_data = loader.load_excel_data(str(excel_file))
         baseq, ztcfq, deltaq = loader.convert_to_gui_format(excel_data)
@@ -173,9 +185,7 @@ def test_error_handling() -> bool:
                 prov1_sheet="NonExistentSheet", wiffle_sheet="NonExistentSheet"
             )
             loader = WiffleDataLoader(config)
-            excel_file = Path(
-                "../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"
-            )
+            excel_file = _get_wiffle_excel_path()
             loader.load_excel_data(str(excel_file))
             logger.error("❌ Should have raised error for non-existent sheets")
             return False
@@ -201,7 +211,7 @@ def test_performance() -> bool:
 
         from wiffle_data_loader import WiffleDataConfig, WiffleDataLoader
 
-        excel_file = Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
+        excel_file = _get_wiffle_excel_path()
 
         # Test loading performance
         config = WiffleDataConfig(

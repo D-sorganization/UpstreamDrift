@@ -1,4 +1,24 @@
-# Current Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
+# Current Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `UpstreamDrift-worktrees/claude-epic-11161`
+- Branch: `feat/capture-registry-11161` (baseline `origin/main` `c2a102a1b`)
+- Commit: `SELF`
+- Pull request: draft, opened from this branch; closes #11162, #11163 and #11164, part of epic #11161.
+- Objective: one resolver for every capture and club workbook (public or private), the pure functions that turn a fitted swing into a capture, and engine-independent swing-comparison metrics, so each engine can compare the owner's swing (`capture-O`) with the tour-average reference (`capture-A`).
+- Done:
+  - #11162: `data/capture_registry.json` (neutral ids `capture-A`, `capture-B`, `capture-O`, `club-workbook-main`, `club-workbook-wiffle`: location, relative path, SHA-256, size, rate, frames), `src/motion_capture/capture_registry.py` (`resolve_capture`, `require_capture`, `capture_info`, `list_captures`; SHA-256 verified; private entries resolve under `CAPTURE_DATA_DIR`), the MATLAB twin `motion_matching/shared/resolve_capture.m`, and `data/README.md`. Every consumer of the club workbooks (now private) resolves them through the registry and skips cleanly without private data. Consumers of the public C3Ds keep their direct paths (agent rewiring of about 35 files reverted as churn; the files are public).
+  - #11163: `src/motion_capture/capture_export.py` — `fill_short_gaps`, `relabel_markers`, `to_capture_frame`, `detect_impact_frame`, `subject_parameters` (owner-neutral subject id; DbC ranges).
+  - #11164: `src/shared/python/swing_comparison/` — `events` (address, top, impact, finish; capture-A gives 76/397/475/643, impact matching the GS3DX fit's 476), `motion` (SwingMotion + capture-A marker schema; split out of `metrics` to keep it under the 1200-line budget), `metrics` (tempo, segment rotations, kinematic sequence, lead arm, wrist, hand path, club), `report` (dict/Markdown).
+  - Review fixes over the agent output: 18 blind `except Exception` around `resolve_capture` narrowed to `CaptureRegistryError`; an `id` alias keyword (shadowing the builtin) removed from `subject_parameters`; third-party product names removed from test comments; three workbook tests given a `club_workbooks` skip fixture.
+- Tests: `python -m pytest -q -o addopts="" -p no:cacheprovider --timeout=300` over every touched test file: 169 passed, 24 skipped (private data absent), 2 failed — `test_club_observation_contracts.py::test_public_input_validation_survives_python_dash_o` fails identically on `origin/main` (recorded in the #11138 handoff) and `test_examples_produce_output.py[01_basic_simulation.py]` passes alone (timed out under the parallel load). With `CAPTURE_DATA_DIR` set to the private data checkout the workbook tests run and pass. Ruff check/format clean.
+- Review note: the capture-A tempo is 4.12 (backswing timed from the address event, not the takeaway), so the plausibility band in `test_integration_capture_a.py` is 2.0-4.2; tighten once takeaway detection lands.
+- Risks: `vendor/ud-tools` must be initialized for these tests (`git submodule update --init vendor/ud-tools`).
+- Next step: CI green on the draft, then the engine children #11165-#11169 and the cross-engine comparison #11170 build on `swing_comparison` and `capture_registry`.
+
+---
+
+# Past Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/w-ud-bolt-cons`
@@ -28,6 +48,7 @@
   - Added unit tests for scripts/workflows path extraction and parenthetical prose dropping, plus regression test reproducing issue #10965 / PR #11113.
 - Tests: TDD red-to-green workflow followed; 27 unit tests pass in `tests/scripts/test_check_phantom_guard_paths.py`. Ruff, Black, LOD, and Architecture Budget clean.
 - Resolution: merged ahead of the consolidator (keep-both rewrite of this section at #11138 refresh); superseded by the merge itself.
+
 # Current Handoff — Govern Screenshot Schema, Capture Metadata, and Qualified Assets (#9191)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -45,6 +66,7 @@
   - 165 passed across `tests/companion` and `tests/unit/scripts/test_verify_companion_screenshots.py`.
   - Architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK; ruff check and format clean; prettier clean.
 - Next step: Create PR and release lease.
+
 # Current Handoff — Implement Simscape Continuous-Replay Qualification Harness (#11107)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -68,6 +90,7 @@
   - Lint/format/type checks clean on touched modules: `ruff check`, `ruff format`, `mypy`.
   - Section 12 changelog entry updated in `SPEC.md` and verified with `check_spec_changelog_duplicates.py`.
 - Next step: CI green, PR review by owner.
+
 # Current Handoff — Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -87,6 +110,7 @@
   - Entire `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/` suites: 330 collected, all passing.
   - Ruff check/format and mypy clean on touched modules; architecture budget and spec changelog duplicate check: PASS.
 - Next step: CI green, then ready and arm the PR; release agent lease.
+
 # Current Handoff — Repair Reduced-Model and Club-Only Product Claims (MMR-11 #11097)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -102,6 +126,7 @@
 - Open (MMR-11 acceptance criteria NOT satisfied by this PR): raw-to-package reproduction/regeneration of reported baselines and residuals, Board-selected required club-only cells, and any native qualification run.
 - Tests: TDD red-to-green for both Codex findings (current-target planar-floor gating; ceiling DbC validation) plus all fail-closed gate tests. Scoped runs at `46b804bc69`: 18 passed (`tests/unit/motion_matching/test_fit_options_dbc.py`, `tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py`) and 86 passed (`tests/unit/tour_baselines/test_coverage_matrix.py`, `test_qualification.py`, `test_baseline_packages.py`, `tests/unit/motion_matching/test_club_matrix_qualification.py`, `test_club_ui_integration.py`). `ruff check` clean on changed files. Full suite, mypy and CI gates were not run by this slice.
 - Next step: raw-to-package regeneration and Board cell-selection follow-ups for #11097.
+
 # Current Handoff — Publish a Best-Candidate Viewer With Honest Residuals (#11102)
 
 - Repository: D-sorganization/UpstreamDrift

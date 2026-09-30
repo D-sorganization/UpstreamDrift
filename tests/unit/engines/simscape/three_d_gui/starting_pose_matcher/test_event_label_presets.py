@@ -30,14 +30,20 @@ _REPO = Path(__file__).resolve().parents[5]
 _PACKAGE_DIR = _REPO / "src" / "tools" / "starting_pose_matcher"
 _CORE_PY = _PACKAGE_DIR / "core.py"
 _MATCHER_PY = _PACKAGE_DIR / "gui.py"
-# Wiffle xlsx is still in the legacy MATLAB tree (it's a subject-specific
-# motion-capture asset, not part of the matcher's own package).
-_WIFFLE_XLSX = (
-    _REPO
-    / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui"
-    / "Motion Capture Plotter"
-    / "Wiffle_ProV1_club_3D_data.xlsx"
-)
+try:
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    _WIFFLE_XLSX = resolve_capture("club-workbook-wiffle")
+except CaptureRegistryError:
+    _WIFFLE_XLSX = (
+        _REPO
+        / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui"
+        / "Motion Capture Plotter"
+        / "Wiffle_ProV1_club_3D_data.xlsx"
+    )
 
 
 def _load_module_by_path(name: str, path: Path):
@@ -117,8 +123,9 @@ class TestEventLabelPresets:
 
 
 def _require_xlsx() -> None:
-    if not _WIFFLE_XLSX.exists():
-        pytest.skip(f"Wiffle xlsx fixture not available: {_WIFFLE_XLSX}")
+    from src.motion_capture.capture_registry import require_capture
+
+    require_capture("club-workbook-wiffle")
 
 
 # --------------------------------------------------------------------------- #

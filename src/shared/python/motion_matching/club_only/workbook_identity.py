@@ -426,11 +426,31 @@ def _ball_label_for_sheet(sheet_name: str, a1_label: str) -> tuple[str | None, s
     lambda result: result.schema == IDENTITY_SCHEMA,
     "identity package must use club-workbook-identity/1.0.0",
 )
-def build_club_workbook_identity(repo_root: Path | str) -> ClubWorkbookIdentity:
+def build_club_workbook_identity(
+    repo_root: Path | str,
+    *,
+    data_dir: Path | None = None,
+) -> ClubWorkbookIdentity:
     """Build and verify the frozen club-only workbook identity package."""
     root = Path(repo_root)
-    club_path = root / CLUB_DATA_RELATIVE
-    wiffle_path = root / WIFFLE_PROV1_RELATIVE
+    from src.motion_capture.capture_registry import (
+        CaptureRegistryError,
+        resolve_capture,
+    )
+
+    try:
+        club_path = resolve_capture(
+            "club-workbook-main", data_dir=data_dir, repo_root=root
+        )
+    except CaptureRegistryError:
+        club_path = root / CLUB_DATA_RELATIVE
+
+    try:
+        wiffle_path = resolve_capture(
+            "club-workbook-wiffle", data_dir=data_dir, repo_root=root
+        )
+    except CaptureRegistryError:
+        wiffle_path = root / WIFFLE_PROV1_RELATIVE
 
     club_hash = verify_workbook_hash(club_path, CLUB_DATA_SHA256)
     wiffle_hash = verify_workbook_hash(wiffle_path, WIFFLE_PROV1_SHA256)
