@@ -501,6 +501,14 @@ class IndependentBaselineQualifier:
         if not ident.fixed_inertia_hash:
             violations.append("Identity is missing required 'fixed_inertia_hash'")
 
+        # Verify out-of-plane residual for promoted packages
+        if package.statuses.product_promotion == ProductPromotionStatus.PROMOTED:
+            oop = package.metrics.out_of_plane_residual_m
+            if oop is None or not np.isfinite(oop) or oop <= 0.0:
+                violations.append(
+                    f"Promoted package cannot have fabricated or non-positive 'out_of_plane_residual_m': {oop}"
+                )
+
         identity_hash = ident.compute_hash()
         is_intact = len(violations) == 0
         return IntegrityReport(

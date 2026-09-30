@@ -29,6 +29,7 @@ BUILDER_MODULES = (
     REPO_ROOT / "scripts/companion_catalog.py",
     REPO_ROOT / "scripts/companion_evidence.py",
     REPO_ROOT / "scripts/companion_publication.py",
+    REPO_ROOT / "scripts/companion_screenshots.py",
 )
 pytestmark = pytest.mark.unit
 
@@ -89,6 +90,9 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "qualified_engine_capability_records": 4,
         "undocumented_visible_program_records": 62,
         "known_gap_records": 1,
+        "screenshot_records": 76,
+        "captured_screenshot_records": 6,
+        "pending_screenshot_records": 70,
     }
     assert len({record["id"] for record in catalog["programs"]}) == 76
     assert len({record["id"] for record in catalog["features"]}) == 46
@@ -312,6 +316,7 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
         "pyproject.toml",
         "scripts/config/companion_capability_evidence.v1.json",
         "scripts/config/companion_documentation.v1.json",
+        "scripts/config/companion_screenshots.v1.json",
         "scripts/config/companion_workflows.v1.json",
         "src/config/feature_parity.json",
         "src/config/launcher_manifest.json",
@@ -545,19 +550,25 @@ def test_capabilities_payload_resolves_every_program_and_validates() -> None:
     assert all(by_program[p] for p in program_ids), "program without capabilities"
 
 
-def test_screenshots_payload_is_pending_metadata_only() -> None:
+def test_screenshots_payload_is_governed_with_captured_and_pending_records() -> None:
     companion_catalog = _catalog_module()
     payloads = companion_catalog.build_payload_set(REPO_ROOT, require_clean=False)
     screenshots = payloads.screenshots
     schema = json.loads(SCREENSHOTS_SCHEMA_PATH.read_text(encoding="utf-8"))
 
     jsonschema.Draft202012Validator(schema).validate(screenshots)
-    visible = [p["id"] for p in payloads.catalog["programs"] if not p["hidden"]]
-    assert [r["program_id"] for r in screenshots["records"]] == visible
+    visible = {p["id"] for p in payloads.catalog["programs"] if not p["hidden"]}
+    assert {r["program_id"] for r in screenshots["records"]} == visible
     assert len(visible) < len(payloads.catalog["programs"])
-    for record in screenshots["records"]:
+
+    captured = [r for r in screenshots["records"] if r["status"] == "captured"]
+    pending = [r for r in screenshots["records"] if r["status"] == "pending"]
+    assert len(captured) == 6
+    assert len(pending) == 70
+
+    for record in pending:
         assert record["status"] == "pending"
-        assert record["id"] == f"{record['program_id']}-primary"
+        assert record["id"].endswith("-primary")
         assert record["reason"] == companion_catalog.SCREENSHOT_PENDING_REASON
         assert record["artifact_class"] == "illustrative"
         assert record["visible_limitations"] == []
@@ -570,12 +581,31 @@ def test_screenshots_payload_is_pending_metadata_only() -> None:
             "theme",
             "capture_workflow_id",
             "capture_step_id",
+            "capture_environment",
             "alt_text",
             "caption",
         ):
             assert record[field] is None, field
-    # The top-level manifest inventory stays empty until #9191 lands.
-    assert payloads.catalog["screenshots"] == []
+
+    for record in captured:
+        assert record["status"] == "captured"
+        assert record["reason"] is None
+        assert record["path"] is not None
+        assert record["sha256"] is not None
+        assert record["width"] > 0
+        assert record["height"] > 0
+        assert record["viewport"]["width"] > 0
+        assert record["viewport"]["height"] > 0
+        assert record["theme"] in ("light", "dark")
+        assert record["capture_workflow_id"] is not None
+        assert record["capture_step_id"] is not None
+        assert record["capture_environment"] is not None
+        assert record["alt_text"] is not None
+        assert record["caption"] is not None
+
+    # The top-level manifest inventory contains the governed records with source_commit
+    assert len(payloads.catalog["screenshots"]) == 76
+    assert all("source_commit" in r for r in payloads.catalog["screenshots"])
 
 
 def test_screenshots_payload_passes_screenshot_verifier() -> None:
@@ -613,6 +643,7 @@ def test_screenshot_schema_encodes_pending_and_captured_conditions() -> None:
         "theme": None,
         "capture_workflow_id": None,
         "capture_step_id": None,
+        "capture_environment": None,
         "alt_text": None,
         "caption": None,
         "visible_limitations": [],
@@ -630,6 +661,7 @@ def test_screenshot_schema_encodes_pending_and_captured_conditions() -> None:
         theme="dark",
         capture_workflow_id="wf",
         capture_step_id="step",
+        capture_environment="test-env",
         alt_text="The launcher",
         caption="Launcher tile",
         reason=None,

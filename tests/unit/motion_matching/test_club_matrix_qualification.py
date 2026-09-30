@@ -531,3 +531,42 @@ def test_r2025b_appears_only_in_simscape_matlab_remediation_strings() -> None:
         cell = matching[0]
         assert expected_runtime in cell.next_step_prompt
         assert "R2025b" not in cell.next_step_prompt
+
+
+def test_matrix_cannot_show_all_complete_with_unresolved_cells() -> None:
+    """Matrix cannot claim all-complete while required cells are unresolved."""
+    from src.shared.python.motion_matching.club_only.matrix_qualification import (
+        assert_matrix_not_all_complete_with_unresolved,
+    )
+
+    init_default_registry()
+    report = build_matrix_qualification_report()
+
+    # The default matrix has 80 cells (20 models x 4 trials), and unresolved cells exist
+    assert len(report.cells) == 80
+    assert not report.is_complete
+    assert len(report.unresolved_cells) > 0
+    assert report.claims_all_complete is False
+
+    from dataclasses import replace
+
+    # Attempting to construct or validate a report claiming all-complete when unresolved cells exist must fail
+    with pytest.raises(
+        ValueError,
+        match="matrix cannot show all-complete while required cells are unresolved",
+    ):
+        replace(report, claims_all_complete=True)
+
+    fake_report = type(
+        "FakeReport",
+        (),
+        {
+            "claims_all_complete": True,
+            "cells": report.cells,
+        },
+    )()
+    with pytest.raises(
+        ValueError,
+        match="matrix cannot show all-complete while required cells are unresolved",
+    ):
+        assert_matrix_not_all_complete_with_unresolved(fake_report)  # type: ignore[arg-type]
