@@ -35,7 +35,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CONSISTENCY_PRIOR,
     DEFAULT_MJX_ITERATIONS,
     LEG_SEEDS,
-    RATE_HZ,
     REFERENCE_CUTOFF_HZ,
     SHOOTING_RELAXATION,
     SPEC,
@@ -574,10 +573,15 @@ def _persist_dynamics_artifacts(
     kin: Any,
     q_ref: np.ndarray,
     sim_q: np.ndarray,
-    lookat: np.ndarray,
-    rate_hz: float = RATE_HZ,
+    lane: Lane,
 ) -> None:
-    """Write dynamics NPZ and render IK / tracking playback GIFs."""
+    """Write dynamics NPZ and render IK / tracking playback GIFs.
+
+    The playback looks at the capture's first-frame marker centroid and runs
+    at the capture's own rate.
+    """
+    lookat = np.nanmean(lane.points[0], axis=0)
+    rate_hz = lane.rate_hz
     np.savez(
         out_dir / "dynamics_record.npz",
         time_s=record.time_s,
@@ -711,7 +715,6 @@ def _simulate_and_receipt(
             tracking_backend=tracking,
         )
     )
-    lookat = np.nanmean(lane.points[0], axis=0)
     _persist_dynamics_artifacts(
         out_dir,
         record,
@@ -720,8 +723,7 @@ def _simulate_and_receipt(
         kin,
         q_ref,
         sim_q,
-        lookat,
-        rate_hz=lane.rate_hz,
+        lane,
     )
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(

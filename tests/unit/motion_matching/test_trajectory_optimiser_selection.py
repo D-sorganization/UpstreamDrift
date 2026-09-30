@@ -120,6 +120,7 @@ def test_receipt_absent_for_none_and_present_for_stubbed_optimiser(
     log = logging.getLogger("test_receipt")
     lane = MagicMock()
     lane.times = np.array([0.0, 0.05])
+    lane.rate_hz = 360.0  # the capture rate smooth_reference filters at
     lane.points = np.zeros((2, 1, 3))
     lane.ground = MagicMock()
 
@@ -300,6 +301,7 @@ def test_trajectory_optimiser_shared_simulator_rescoring(
     log = logging.getLogger("test_rescoring")
     lane = MagicMock()
     lane.times = np.array([0.0, 0.05])
+    lane.rate_hz = 360.0  # the capture rate smooth_reference filters at
     lane.points = np.zeros((2, 1, 3))
     lane.ground = MagicMock()
 
