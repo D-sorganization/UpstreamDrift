@@ -17,7 +17,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-<<<<<<< HEAD
 ### DL-#11096 — Qualify MyoSuite Native Dual-Club Dynamics and Replay
 - **Owner:** UDFixTrio10x
 - **Issue:** #11096
@@ -26,7 +25,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 613b0e28ed88b5af4719ecccfe876d5d9db90419 — 19 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native MyoSuite qualification NOT achieved: myosuite/MuJoCo unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10M] dual-club MyoSuite qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, non-finite values, and unnormalized root quaternions all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records (README model hashes marked as regeneration targets, not evidence). Real qualification still requires the myosuite/MuJoCo stack on a pinned host via the native lane.
 - **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
-=======
 ### DL-#11184 — Restore the High-Severity UI Npm Audit Gate
 
 - **State:** in_review
@@ -39,7 +37,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Raised only the compatible transitive resolutions for `brace-expansion` (5.0.9 → 5.0.12) and `undici` (8.10.0 → 8.11.2); added a lockfile security contract. Manifest dependencies, overrides, audit threshold, and the two moderate findings are unchanged.
 - **Next step:** Root reviews draft PR #11187 and decides whether it is ready for merge.
 
->>>>>>> origin/main
 ### DL-#11175 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
 
 - **State:** in_review
