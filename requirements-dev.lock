@@ -345,7 +345,9 @@ typing-inspection==0.4.2
     #   pydantic
     #   pydantic-settings
 urllib3==2.8.0
-    # via requests
+    # via
+    #   requests
+    #   upstream-drift (pyproject.toml)
 uvicorn[standard]==0.40.0
     # via upstream-drift (pyproject.toml)
 uvloop==0.22.1
