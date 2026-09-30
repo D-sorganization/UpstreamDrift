@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11175 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
+
+- **State:** in_review
+- **Owner:** fleet-orchestrator (agent: claude)
+- **Issue:** N/A (references the main CI red surfaced after the #11171 restore, `27632bd195`)
+- **Branch:** `bot/contracts-exception-identity`; PR #11175
+- **Paths:** `src/shared/python/_contracts_exceptions.py`, `tests/unit/motion_matching/test_stability_matrix.py`
+- **Started:** 2026-09-30
+- **Last verified:** 2026-09-30 — `pytest tests/unit/motion_matching/test_stability_matrix.py` 27 passed (red on main HEAD `27632bd195` with the new identity assertion before the fix); shard contract suites 95 passed; ruff check + format clean on changed files.
+- **Summary:** `_contracts_exceptions.py` redefined the DbC exceptions in parallel with the public `contracts` module, so `@precondition` violations raised via `contracts` could not be caught as the shard-imported `PreconditionError` — `TestStabilityMatrix::test_get_canonical_test_invalid` stayed red on main. The shard now re-exports the same class objects; both import paths remain usable and referentially identical, asserted in the test.
+- **Next step:** Merge PR #11175 (squash) and confirm main unit lane is green.
+
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
 - **State:** in_review
