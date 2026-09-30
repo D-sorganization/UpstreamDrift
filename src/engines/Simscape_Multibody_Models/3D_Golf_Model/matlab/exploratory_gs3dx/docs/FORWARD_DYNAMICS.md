@@ -58,14 +58,16 @@ swing, per joint and in total. Record it for every run.
 
 ### Dynamics and Balance
 
-| Lesson                                                                          | Evidence                                                                                                            |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Joint tracking alone does not balance a free-standing body                      | Balance off: pelvis 206 mm RMS, 503 mm at impact (docs/FIT.md §6)                                                   |
-| Centre-of-mass feedback through the legs holds it                               | Kp 3, Kd 0.4: pelvis 27 mm RMS (docs/FIT.md §7)                                                                     |
-| The reference must be dynamically consistent with the model's mass distribution | A model-offset COM reference asked for a 2.63 BW impact spike; the capture's own COM gives 1.44 BW (docs/FIT.md §7) |
-| Start from the reference state, not rest                                        | A 1.43 BW landing at 0.05 s from a zero-velocity start (docs/FIT.md §6)                                             |
-| Contact geometry decides stance stability                                       | Toe contacts 7 cm past the midfoot folded the foot; 15 mm short made the body drift 31–43 mm (docs/HUMAN.md)        |
-| Softer, human-like ankles break the current balance loop                        | Ankle 10 N·m/deg: pelvis 906 mm at impact (docs/FIT.md §7)                                                          |
+| Lesson                                                                                | Evidence                                                                                                                                  |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Joint tracking alone does not balance a free-standing body                            | Balance off: pelvis 206 mm RMS, 503 mm at impact (docs/FIT.md §6)                                                                         |
+| Centre-of-mass feedback through the legs holds it                                     | Kp 3, Kd 0.4: pelvis 27 mm RMS (docs/FIT.md §7)                                                                                           |
+| The reference must be dynamically consistent with the model's mass distribution       | A model-offset COM reference asked for a 2.63 BW impact spike; the capture's own COM gives 1.44 BW (docs/FIT.md §7)                       |
+| Start from the reference state, not rest                                              | A 1.43 BW landing at 0.05 s from a zero-velocity start (docs/FIT.md §6)                                                                   |
+| Contact geometry decides stance stability                                             | Toe contacts 7 cm past the midfoot folded the foot; 15 mm short made the body drift 31–43 mm (docs/HUMAN.md)                              |
+| Softer, human-like ankles break the current balance loop                              | Ankle 10 N·m/deg: pelvis 906 mm at impact (docs/FIT.md §7)                                                                                |
+| The leg servo and the balance loop fight: the leg reference is not balance-consistent | `GS3DX_Human`, whole swing: leg servo 328 N·m RMS and balance share 314 N·m RMS, but their sum is only about 101 N·m RMS (roadmap step 1) |
+| Joint ids differ between variants; identify joints by block path                      | `GS3DX_Human`'s neck renumbers every KinematicsSolver joint after it (`gs3dx_upper_body_joints` `.block`)                                 |
 
 ### Learning (ILC)
 
@@ -171,6 +173,27 @@ feedback=true)` returns `.feedback` (`gs3dx_feedback_torque`): the
    per-axis RMS and peak of the upper-body PD torque, the leg servo PD torque
    and the balance loop's share, and the total. The prescribed neck is not
    yet included. Accept: a table for `GS3DX_Human` to impact.
+   **Done 2026-09-30** (`test_gs3dx_human/feedback_torque_is_measured_on_every_driven_axis`).
+   The baseline for every later step, `GS3DX_Human` from `TrackStart` to 1.814 s
+   (31 min wall):
+
+   | Group                                | RMS (N·m) | Largest axis (RMS / peak N·m)        |
+   | ------------------------------------ | --------- | ------------------------------------ |
+   | Upper body PD (21 axes)              | 20.7      | Spine X 47.5 / 228; Torso 41.5 / 513 |
+   | Leg servo PD (12 axes)               | 327.6     | R knee 471.9 / 1229                  |
+   | Balance loop share (12 axes)         | 314.3     | R hip Y 460.0 / 1106                 |
+   | Leg servo + balance, summed per axis | about 101 | (derived from the total)             |
+   | Total, every axis and sample         | 62.8      |                                      |
+
+   Readings. The upper body is already close to feedforward-ready: 20.7 N·m
+   RMS, with the forearm rotations below 2 N·m; only the trunk (spine, torso
+   peak 513 N·m at the downswing) needs real work. The legs are the gap: each
+   loop alone carries 300+ N·m RMS, peaks above 1 kN·m at the knees and hips,
+   and the two largely cancel. The servo pulls the legs toward a reference
+   that the balance loop rejects, so step 4 (a dynamically consistent leg
+   reference) removes both at once and should come before gain annealing of
+   the legs.
+
 2. **Inverse-dynamics feedforward (idea 1).** Accept: from ID feedforward,
    RMS PD torque below the ILC iteration-2 value (10.3 N·m), in one
    simulation.
