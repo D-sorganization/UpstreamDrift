@@ -12,6 +12,27 @@
 - Limitation: no native Drake execution exists anywhere in this evidence; real qualification requires pydrake on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine drake`.
 - Next step: merge drivers follow; do not treat UNAVAILABLE receipts as engine qualification.
 # Current Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
+# Current Handoff — Restore the High-Severity UI Npm Audit Gate (#11184)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `C:/Users/diete/Repositories/Worktrees/luna-upstream11184-20260930`
+- Branch: `fix/main-npm-audit-11184`
+- Commit: `SELF` (publication metadata update; implementation commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667`)
+- Pull request: [#11187](https://github.com/D-sorganization/UpstreamDrift/pull/11187), draft with `agent:codex` label; branch `fix/main-npm-audit-11184`.
+- Governing issue: #11184 — restore the UI `npm audit --audit-level=high` gate using only compatible patched transitive resolutions.
+- Done: added `ui/src/test/dependencySecurityContract.test.ts`; moved only `brace-expansion` 5.0.9 → 5.0.12 and `undici` 8.10.0 → 8.11.2 in `ui/package-lock.json`; added one SPEC row and an active development-log entry. No manifest, override, audit-policy, or moderate-advisory changes.
+- RED evidence: baseline `npm ci` completed with 2 HIGH and 2 MODERATE advisories; baseline `npm audit --audit-level=high` exited 1. The regression contract failed on old lock versions 5.0.9 and 8.10.0.
+- GREEN evidence: final `npm ci` passed; `npm audit --audit-level=high` passed with 2 MODERATE findings left (`@humanfs/node` 0.16.7 and nested `fflate` 0.6.10); `npm ls brace-expansion undici --all` showed only 5.0.12 and 8.11.2 on the affected paths. Contract: 2 passed; lint and type-check passed; all UI tests passed (99 files, 936 tests); build passed. Vitest emitted jsdom `scrollTo` notices; build emitted a large-chunk warning.
+- Documentation checks: SPEC changelog validation and fleet hook passed. The repository development-log validator still exits 1 on pre-existing duplicate IDs, portfolio WIP/active-entry ceilings, and file-size ceiling; it reports no DL-#11184 finding.
+- Compatibility evidence: registry metadata confirms the published patch releases and parent ranges `minimatch@10.2.5` → `^5.0.5`, `jsdom@30.0.1` → `^8.9.0`. The selected versions stay within those ranges.
+- Coordination: fresh Repository_Management inbox was complete with no conflicts or new messages since 2026-09-29. Renewed the existing `codex-luna-upstream11184-20260930` presence, preserving its issue, branch and goal and adding `ui/src/test` and `docs/development`; presence expires at 13:04 UTC. Scoped REST lookup found no pre-existing PR for this branch. Authenticated `git ls-remote` confirmed `origin/main` remained exactly `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5` before publication.
+- Publication: root reviewed and accepted the bounded source, lockfile and test diff plus RED→GREEN evidence. Implementation commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667` and metadata commit `5d2f3257ed2342bd2c6064aebed6a99a9564700e` passed normal pre-commit hooks; both branch pushes passed normal pre-push hooks. Draft PR #11187 is open with `Closes #11184` in its body and `agent:codex` label. SPEC uses actual PR key #11187. Remote refs were verified after publication: topic branch at `5d2f3257ed2342bd2c6064aebed6a99a9564700e`, main still at `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5`. Two MODERATE audit findings remain (`@humanfs/node@0.16.7` and nested `fflate@0.6.10`). Root alone decides readiness and merge.
+- Worktree state: clean after publication metadata; no merge, release, cleanup, or unrelated changes were performed. The primary checkout’s pre-existing untracked paths and other worktrees remain untouched.
+- Next step: root decides whether draft PR #11187 is ready for review/merge. Do not mark ready, merge, release, or clean up as part of this handoff.
+
+---
+
+# Previous Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/w-ud-bolt-cons`
@@ -41,6 +62,7 @@
   - Added unit tests for scripts/workflows path extraction and parenthetical prose dropping, plus regression test reproducing issue #10965 / PR #11113.
 - Tests: TDD red-to-green workflow followed; 27 unit tests pass in `tests/scripts/test_check_phantom_guard_paths.py`. Ruff, Black, LOD, and Architecture Budget clean.
 - Resolution: merged ahead of the consolidator (keep-both rewrite of this section at #11138 refresh); superseded by the merge itself.
+
 # Current Handoff — Govern Screenshot Schema, Capture Metadata, and Qualified Assets (#9191)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -58,6 +80,7 @@
   - 165 passed across `tests/companion` and `tests/unit/scripts/test_verify_companion_screenshots.py`.
   - Architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK; ruff check and format clean; prettier clean.
 - Next step: Create PR and release lease.
+
 # Current Handoff — Implement Simscape Continuous-Replay Qualification Harness (#11107)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -81,6 +104,7 @@
   - Lint/format/type checks clean on touched modules: `ruff check`, `ruff format`, `mypy`.
   - Section 12 changelog entry updated in `SPEC.md` and verified with `check_spec_changelog_duplicates.py`.
 - Next step: CI green, PR review by owner.
+
 # Current Handoff — Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -100,6 +124,7 @@
   - Entire `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/` suites: 330 collected, all passing.
   - Ruff check/format and mypy clean on touched modules; architecture budget and spec changelog duplicate check: PASS.
 - Next step: CI green, then ready and arm the PR; release agent lease.
+
 # Current Handoff — Repair Reduced-Model and Club-Only Product Claims (MMR-11 #11097)
 
 - Repository: D-sorganization/UpstreamDrift
@@ -115,6 +140,7 @@
 - Open (MMR-11 acceptance criteria NOT satisfied by this PR): raw-to-package reproduction/regeneration of reported baselines and residuals, Board-selected required club-only cells, and any native qualification run.
 - Tests: TDD red-to-green for both Codex findings (current-target planar-floor gating; ceiling DbC validation) plus all fail-closed gate tests. Scoped runs at `46b804bc69`: 18 passed (`tests/unit/motion_matching/test_fit_options_dbc.py`, `tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py`) and 86 passed (`tests/unit/tour_baselines/test_coverage_matrix.py`, `test_qualification.py`, `test_baseline_packages.py`, `tests/unit/motion_matching/test_club_matrix_qualification.py`, `test_club_ui_integration.py`). `ruff check` clean on changed files. Full suite, mypy and CI gates were not run by this slice.
 - Next step: raw-to-package regeneration and Board cell-selection follow-ups for #11097.
+
 # Current Handoff — Publish a Best-Candidate Viewer With Honest Residuals (#11102)
 
 - Repository: D-sorganization/UpstreamDrift
