@@ -1,0 +1,71 @@
+{
+  "checker_source_sha256": "bf95a130825330e47af7ba309c43ad0d57897059012b15814d4f7d4ec430f32d",
+  "contract_hashes": {
+    "pyproject.toml": "71dcf7a7ff940d0792c1f18403b9a8e0fd9c7bfde1c7d9614c420ef8a6d91eec",
+    "scripts/ci/run_native_engine_lane.py": "bf95a130825330e47af7ba309c43ad0d57897059012b15814d4f7d4ec430f32d",
+    "scripts/ci/run_native_engine_lane.sh": "6b30ea9e15ac7ec641095a3e554cbb037e62876168f4c0c746520e26f7d56d0d"
+  },
+  "engine": "drake",
+  "engine_inventory": {
+    "available": false,
+    "error": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    module = importlib.import_module('pydrake')\n  File \"C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\importlib\\__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1324, in _find_and_load_unlocked\nModuleNotFoundError: No module named 'pydrake'",
+    "module_file": null,
+    "source_sha256": null,
+    "version": null
+  },
+  "failure_reasons": [],
+  "generated_at": "2026-09-29T15:58:07.039813+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "pytest_probe": {
+    "command": [
+      "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-m",
+      "pytest",
+      "tests",
+      "-m",
+      "requires_drake",
+      "-q",
+      "--tb=line",
+      "--junitxml=C:\\Users\\diete\\Repositories\\UpstreamDrift\\docs\\development\\matched_swing_program\\evidence\\nightly\\drake_native_lane_junit.xml"
+    ],
+    "name": "native_pytest_lane",
+    "result": {
+      "cases": [],
+      "collected": 0,
+      "errors": 0,
+      "failed": 0,
+      "parse_error": "missing junit file: C:\\Users\\diete\\Repositories\\UpstreamDrift\\docs\\development\\matched_swing_program\\evidence\\nightly\\drake_native_lane_junit.xml",
+      "passed": 0,
+      "skipped": 0
+    },
+    "returncode": null,
+    "status": "fail",
+    "stderr": "pytest timed out",
+    "stdout": "",
+    "timed_out": true
+  },
+  "python": "C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "repository_revision": "eb7b1b06a2d3a1e3afb1e03d63863b7f60871d16",
+  "runner_hint": "ControlTower with drake/pydrake venv; nightly-cross-engine.yml",
+  "schema_version": 1,
+  "scope": "native-engine pytest lane only; no model, fit, acceptance, or release claim",
+  "source_freshness": {
+    "details": "M scripts/ci/run_native_engine_lane.py\n M scripts/ci/run_native_engine_lane.sh",
+    "paths": [
+      "scripts/ci/run_native_engine_lane.py",
+      "scripts/ci/run_native_engine_lane.sh",
+      "pyproject.toml"
+    ],
+    "status": "dirty"
+  },
+  "status": "fail",
+  "test_cases": [],
+  "tests": {
+    "collected": 0,
+    "errors": 0,
+    "executed": 0,
+    "failed": 0,
+    "passed": 0,
+    "skipped": 0
+  }
+}
