@@ -53,7 +53,6 @@ def rigid_attachment_residuals(
             source = offsets[chosen] - offsets[chosen].mean(axis=0)
             target = observed[frame, chosen] - observed[frame, chosen].mean(axis=0)
             rotation = kabsch_rotation(source, target)
-            residuals[frame, chosen] = np.linalg.norm(
-                source @ rotation.T - target, axis=1
-            )
+            diff = source @ rotation.T - target
+            residuals[frame, chosen] = np.sqrt(np.einsum("ij,ij->i", diff, diff))
     return residuals

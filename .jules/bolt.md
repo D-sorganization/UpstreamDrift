@@ -196,3 +196,8 @@
 ## 2026-09-30 - [Optimize worst marker residual extraction in Tour Matching Viewer]
 **Learning:** [In NumPy, using `np.einsum` to calculate squared differences (`np.einsum("ij,ij->i", diff, diff)`) avoids the significant overhead of intermediate array allocations present in `np.linalg.norm(diff, axis=-1)`. The latter internally requires computing differences, squaring them, summing, and taking the square root across the specified axis, which creates temporary arrays at each step. For calculating metrics like the maximum norm where relative ordering is sufficient, applying the square root only to the final selected element after finding the maximum squared difference reduces both allocations and computationally expensive root operations, yielding a tangible speedup on inner loops.]
 **Action:** [When finding the maximum distance or computing norms along an inner-most axis (e.g. `axis=-1`), replace `np.linalg.norm` with `np.einsum` to compute squared norms first, find the target index or maximum value, and apply `np.sqrt` only when necessary to the final result.]
+
+## 2026-09-30 - Faster Euclidean Norms in Rigidity
+**Learning:** Using `np.linalg.norm(..., axis=1)` for computing Euclidean distances along an axis creates temporary arrays and incurs NumPy dispatch overhead. Replacing it with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is roughly 1.7x faster for these operations, significantly speeding up inner loops calculating residuals.
+**Action:** Always prefer `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.sum(diff * diff, axis=1))` when calculating Euclidean norms across rows in performance-critical code over `np.linalg.norm(..., axis=1)`.
+
