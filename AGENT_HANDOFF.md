@@ -16,6 +16,12 @@ Current slice (desktop PyQt): PR [#11132](https://github.com/D-sorganization/Ups
 - Validation: scoped pytest with `/tmp/ud-venv-11132` (PyQt6 + mujoco, offscreen) — red outcomes recorded pre-fix for every finding; then `tests/unit/tools/test_matched_swing_browser_best_candidate.py tests/unit/tools/test_tour_matching_viewer_residuals.py` 21 passed, targeted viewer suites 29 passed; `ruff check` / `ruff format --check` clean on changed files. Two stale combo pins updated (flattened-RMS value, removed `#d9534f` literal from 70762eb7fe).
 - Honest remainder on #11102: web/API surface parity, accessibility and native visual review, and the remaining acceptance checkboxes are NOT exercised by this slice; no "all acceptance criteria" claim is made.
 - Next: main-lane rebase/CI of PR #11132 and frontier review.
+## Active: Real Body and Club Segmentation Review-Fixes (#11099, PR #11137)
+
+- Branch: `feat/mmr-13-real-segmentation-11099`; review-fix head `310ee050e8` (worktree `/tmp/wtk/mmr-13-real-segmentation-11099`).
+- Codex P1/P2 findings on the first cut are repaired: fabricated SHA-256 weight pins removed (pins are now REQUIRED per-deployment operator config via `verify_checkpoint(..., expected_sha256=...)`); `RealSegmentationAdapter` is a fail-closed dev-only checkpoint-validation harness requiring real decoded pixels + PTS (unknown timing recorded honestly), lazily executing the pinned checkpoint through optional torch/onnxruntime with a calibrated body/club postprocess decoder, and raising typed `SegmentationUnavailableError` otherwise; frame hashes bind decoded pixels; revision IDs bind mask content + config; the benchmark scores only SHA-256-bound independently recorded gold artifacts and emits a typed blocked report (no fabricated metrics) with `metrics_reported: false`; adapter API lazy-registered on the `shadow_tracker` façade; SPEC has the required `#11137` change-log row.
+- Validation: `pytest tests/unit/shadow_tracker/test_model_segmentation_benchmark.py` → 21 passed (red 20 failed before the fixes); with `test_silhouette_segmentation.py` → 37 passed; Ruff clean on changed files; a third red/green pair verifies the checkpoint hash before any lazy load (swapped artifact ⇒ typed failure).
+- Honest gaps: no SAM/MobileSAM weights, held-out clips, or independent gold masks are provisioned, and torch/onnxruntime/cv2 are absent from the unit venv — no real-weights inference or numeric benchmark is claimed; next step is operator evidence provisioning.
 
 ## Motion Matching Board Review — 2026-09-28
 
@@ -50,22 +56,9 @@ Focused verification: `pytest tests/companion/test_companion_catalog.py tests/un
 - ADR-0041 Amendment 1 (#9630, #9619): consumer-side self-calibration fitters live in `src/motion_capture/reconstruct/`; Tools keeps vendor-neutral reference geometry.
 - Real-data acceptance is deferred to `docs/development/planning/DV-9619.md`; the rig soak to `DV-9613.md`.
 
-## TB-12: Publish Baseline Guide, Agent Runbooks and End-to-End Acceptance (#10597) [MERGED] / Epic #10584 [CLOSED]
+## TB-12: Baseline Guide / Agent Runbooks / End-to-End Acceptance (#10597) [MERGED] / Epic #10584 [CLOSED]
 
-Branch `feat/tb12-baseline-guide-acceptance-10597`; PR [#10814](https://github.com/D-sorganization/UpstreamDrift/pull/10814) merged to `main` (`fbebf5c47`) on 2026-09-24. Parent Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (CLOSED); governing issue [#10597](https://github.com/D-sorganization/UpstreamDrift/issues/10597).
-
-- Deliverables:
-  - User Guide: `docs/plans/tour_baselines/baseline_guide.md` (Title-Case headings, launcher navigation, Driver/Iron physics, 4-tier model hierarchy, visual semantics, physical 3D RMSE formulas, cryptographic provenance).
-  - Agent Runbook: `docs/plans/tour_baselines/agent_runbook.md` (clean-environment reproduction, submodule pin checks, MATLAB R2025b requirements for Simscape, tamper verification).
-  - Final Acceptance Report: `docs/plans/tour_baselines/final_acceptance_report.md` (coverage matrix, software integration sign-off vs. ongoing full-body physical qualification under #10363, #10378, #10430, #10440).
-  - End-to-End Acceptance Tests: `tests/acceptance/test_tour_baselines_journey.py` (8 acceptance tests covering roster completeness, detail inspectability, where-this-came-from provenance, headless replay, safe cloning, model comparisons, evidence audits, and reproduction commands).
-- Scientific Status & Boundaries:
-  - Planar double pendulum baselines (`driven_double_pendulum`) qualify within tolerance ($< 15$ mm 3D marker RMSE) with valid cryptographic packages.
-  - Planar upper-body golfer models reject due to out-of-plane planar projection residuals ($> 110$ mm normal residual vs 55 mm ceiling).
-  - Full-body and spatial models (Simscape, Pinocchio, Drake, OpenSim, MyoSuite) remain governed by their dedicated program issues (#10363, #10378, #10430, #10440) and fail-closed software contracts; no physical qualification or fake convergence is claimed.
-- Epic Closure: Concludes all 13 child work packages under Epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) (TB-00 through TB-12). All child packages are merged and closed.
-- Next Handoff: Full-body native model qualifications under governing programs (#10363, #10378, #10430, #10440).
-- Focused verification: `pytest tests/acceptance/test_tour_baselines_journey.py tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
+Merged via [#10814](https://github.com/D-sorganization/UpstreamDrift/pull/10814) (`fbebf5c47`, 2026-09-24; epic [#10584](https://github.com/D-sorganization/UpstreamDrift/issues/10584) CLOSED). Highlights (history in git): User Guide + Agent Runbook + Final Acceptance Report under `docs/plans/tour_baselines/`; end-to-end acceptance tests `tests/acceptance/test_tour_baselines_journey.py`. Planar double pendulum baselines qualify (< 15 mm 3D marker RMSE); planar upper-body models reject on out-of-plane residuals; full-body/spatial models remain governed by #10363, #10378, #10430, #10440 with fail-closed contracts. Verification: `pytest tests/acceptance/test_tour_baselines_journey.py tests/unit/motion_matching/test_tour_baselines_presenter.py -q -n 0 --no-cov`.
 
 ## NM-12: Publish Model Cards, Reproduction Commands and Final Turnover (#10627)
 
