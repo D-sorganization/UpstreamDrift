@@ -17,8 +17,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.native_lanes.common import (
-    identity_shas,
-    begin_evaluation,
+    evaluate_candidate_replay,
     build_unavailable_receipt,
     check_execution_contract,
     check_muscle_activations,
@@ -105,45 +104,6 @@ def _check_quaternion_normalization(q: np.ndarray, tol: float = 1e-4) -> bool:
     return bool(np.all(np.abs(norms - 1.0) <= tol))
 
 
-# Engine shims over the shared native lane contracts (no duplicated logic).
-def _check_execution_contract(
-    replay,
-    *,
-    expected_model_sha,
-    model_sha,
-    native_tests_executed,
-    rejection_reasons,
-    missing_evidence,
-):
-    return check_execution_contract(
-        replay,
-        expected_model_sha=expected_model_sha,
-        model_sha=model_sha,
-        native_tests_executed=native_tests_executed,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        fk_only_message="FK-only playback detected without native dynamic simulation or muscle excitation",
-    )
-
-
-def _check_rollout_dynamics(replay, *, rejection_reasons, missing_evidence):
-    return check_rollout_dynamics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        quaternion_cols=(3, 7),
-    )
-
-
-def _compute_marker_metrics(replay, *, rejection_reasons, missing_evidence):
-    return compute_marker_metrics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        respect_valid_mask=False,
-    )
-
-
 def _myosuite_unavailable_receipt(candidate: dict[str, Any]):
     return build_unavailable_receipt(
         candidate,
@@ -172,65 +132,41 @@ def validate_myosuite_candidate_replay(
     if not myosuite_available:
         return _myosuite_unavailable_receipt(candidate)
 
-    rejection_reasons, missing_evidence = begin_evaluation(replay)
-    club, cand_sha, model_sha, capture_sha = identity_shas(candidate)
-
-    is_fresh = _check_execution_contract(
+    r = evaluate_candidate_replay(
+        candidate,
         replay,
-        expected_model_sha=expected_model_sha,
-        model_sha=model_sha,
         native_tests_executed=native_tests_executed,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
+        expected_model_sha=expected_model_sha,
+        fk_only_message="FK-only playback detected without native dynamic simulation or muscle excitation",
+        respect_valid_mask=False,
+        quaternion_cols=(3, 7),
+        check_muscles=True,
     )
-    derivatives_ok, energy_summary = _check_rollout_dynamics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-    )
-
-    # 5. Muscle activation bounds
-    activations = replay.get("activations")
-    acts_ok, muscle_metrics = check_muscle_activations(activations)
-    if not acts_ok:
-        rejection_reasons.append(
-            f"Muscle activation exceeds physiological bounds [0, 1]: max={muscle_metrics.get('max_activation')}"
-        )
-
-    marker_metrics = _compute_marker_metrics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-    )
-
-    status = (
-        MyoSuiteQualificationStatus.QUALIFIED
-        if not rejection_reasons
-        else MyoSuiteQualificationStatus.REJECTED
-    )
-
+    rejected = r["rejection_reasons"]
     return MyoSuiteQualificationReceipt(
         schema_version=1,
         engine="myosuite",
-        club=club,
-        status=status,
-        candidate_sha256=cand_sha,
-        model_sha256=model_sha,
-        capture_sha256=capture_sha,
+        club=r["club"],
+        status=MyoSuiteQualificationStatus.QUALIFIED
+        if not rejected
+        else MyoSuiteQualificationStatus.REJECTED,
+        candidate_sha256=r["candidate_sha256"],
+        model_sha256=r["model_sha256"],
+        capture_sha256=r["capture_sha256"],
         runtime_available=myosuite_available,
-        is_fresh_simulation=is_fresh,
-        derivatives_consistent=derivatives_ok,
-        energy_balance_checked=bool(energy_summary),
-        energy_summary=energy_summary,
-        marker_metrics=marker_metrics,
-        muscle_metrics=muscle_metrics,
+        is_fresh_simulation=r["is_fresh"],
+        derivatives_consistent=r["derivatives_ok"],
+        energy_balance_checked=bool(r["energy_summary"]),
+        energy_summary=r["energy_summary"],
+        marker_metrics=r["marker_metrics"],
+        muscle_metrics=r["muscle_metrics"],
         declared_limitations=list(MYOSUITE_ENGINE_LIMITATIONS),
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        remedy=MYOSUITE_UNAVAILABLE_REMEDY if rejection_reasons else "",
-        diagnostic_message="All qualification checks passed."
-        if not rejection_reasons
-        else "; ".join(rejection_reasons),
+        rejection_reasons=rejected,
+        missing_evidence=r["missing_evidence"],
+        remedy="" if not rejected else MYOSUITE_UNAVAILABLE_REMEDY,
+        diagnostic_message="All checks passed."
+        if not rejected
+        else "; ".join(rejected),
     )
 
 

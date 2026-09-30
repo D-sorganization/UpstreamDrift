@@ -18,11 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from src.shared.python.native_lanes.common import (
-    begin_evaluation,
-    check_execution_contract,
-    check_rollout_dynamics,
-    compute_marker_metrics,
-    identity_shas,
+    evaluate_candidate_replay,
 )
 
 DRAKE_ENGINE_LIMITATIONS: tuple[str, ...] = (
@@ -92,44 +88,6 @@ class DrakeQualificationReceipt:
         return cls(**data)
 
 
-# Engine shims over the shared native lane contracts (no duplicated logic).
-def _check_execution_contract(
-    replay,
-    *,
-    expected_model_sha,
-    model_sha,
-    native_tests_executed,
-    rejection_reasons,
-    missing_evidence,
-):
-    return check_execution_contract(
-        replay,
-        expected_model_sha=expected_model_sha,
-        model_sha=model_sha,
-        native_tests_executed=native_tests_executed,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        fk_only_message="FK-only playback detected without native dynamic simulation",
-    )
-
-
-def _check_rollout_dynamics(replay, *, rejection_reasons, missing_evidence):
-    return check_rollout_dynamics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-    )
-
-
-def _compute_marker_metrics(replay, *, rejection_reasons, missing_evidence):
-    return compute_marker_metrics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        respect_valid_mask=True,
-    )
-
-
 def _drake_unavailable_receipt(candidate: dict[str, Any]) -> DrakeQualificationReceipt:
     """Fail-closed: without pydrake on host no native dynamic replay can be produced."""
     missing_evidence = ["native Drake rollout (pydrake runtime)"]
@@ -165,55 +123,38 @@ def validate_drake_candidate_replay(
     if not drake_available:
         return _drake_unavailable_receipt(candidate)
 
-    rejection_reasons, missing_evidence = begin_evaluation(replay)
-    club, cand_sha, model_sha, capture_sha = identity_shas(candidate)
-
-    is_fresh = _check_execution_contract(
+    r = evaluate_candidate_replay(
+        candidate,
         replay,
-        expected_model_sha=expected_model_sha,
-        model_sha=model_sha,
         native_tests_executed=native_tests_executed,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
+        expected_model_sha=expected_model_sha,
+        fk_only_message="FK-only playback detected without native dynamic simulation",
+        respect_valid_mask=True,
     )
-    derivatives_ok, energy_summary = _check_rollout_dynamics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-    )
-    marker_metrics = _compute_marker_metrics(
-        replay,
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-    )
-
-    status = (
-        DrakeQualificationStatus.QUALIFIED
-        if not rejection_reasons
-        else DrakeQualificationStatus.REJECTED
-    )
-
+    rejected = r["rejection_reasons"]
     return DrakeQualificationReceipt(
         schema_version=1,
         engine="drake",
-        club=club,
-        status=status,
-        candidate_sha256=cand_sha,
-        model_sha256=model_sha,
-        capture_sha256=capture_sha,
+        club=r["club"],
+        status=DrakeQualificationStatus.QUALIFIED
+        if not rejected
+        else DrakeQualificationStatus.REJECTED,
+        candidate_sha256=r["candidate_sha256"],
+        model_sha256=r["model_sha256"],
+        capture_sha256=r["capture_sha256"],
         runtime_available=drake_available,
-        is_fresh_simulation=is_fresh,
-        derivatives_consistent=derivatives_ok,
-        energy_balance_checked=bool(energy_summary),
-        energy_summary=energy_summary,
-        marker_metrics=marker_metrics,
+        is_fresh_simulation=r["is_fresh"],
+        derivatives_consistent=r["derivatives_ok"],
+        energy_balance_checked=bool(r["energy_summary"]),
+        energy_summary=r["energy_summary"],
+        marker_metrics=r["marker_metrics"],
         declared_limitations=list(DRAKE_ENGINE_LIMITATIONS),
-        rejection_reasons=rejection_reasons,
-        missing_evidence=missing_evidence,
-        remedy=DRAKE_UNAVAILABLE_REMEDY if rejection_reasons else "",
-        diagnostic_message="All qualification checks passed."
-        if not rejection_reasons
-        else "; ".join(rejection_reasons),
+        rejection_reasons=rejected,
+        missing_evidence=r["missing_evidence"],
+        remedy="" if not rejected else DRAKE_UNAVAILABLE_REMEDY,
+        diagnostic_message="All checks passed."
+        if not rejected
+        else "; ".join(rejected),
     )
 
 
