@@ -180,6 +180,21 @@ function report = replay_returned102_r2025b(repo)
         'mean_marker_euclidean_discrepancy_m', mean_marker_euclidean_discrepancy_m, ...
         'mean_marker_euclidean_discrepancy_mm', mean_marker_euclidean_discrepancy_m * 1000);
 
+    % Actuation/reset identity of this replay: the candidate is applied purely
+    % as polynomial torque coefficients through one continuous open-loop
+    % simulate_with_coefficients call (no prescribed coordinates, no root
+    % assistance, no mid-simulation state resets). Disclosed so the Python
+    % continuous-replay harness can verify the control identity from the
+    % receipt instead of assuming it.
+    report.control_identity = struct();
+    report.control_identity.profile = 'pure_torque';
+    report.control_identity.controller_mode = 'pure_torque';
+    report.control_identity.prescribed_coordinates = strings(0, 1);
+    report.control_identity.has_root_assistance = false;
+    report.control_identity.root_assistance_n_m = 0;
+    report.control_identity.has_state_resets = false;
+    report.control_identity.state_resets_count = 0;
+
     report.gates = struct( ...
         'gate1_whole_rms_25mm', whole_rms_m <= 0.025, ...
         'gate2_early_rms_12mm', early_rms_m <= 0.012, ...

@@ -33,6 +33,15 @@
     "mean_marker_euclidean_discrepancy_m": 1.100649469043581e-6,
     "mean_marker_euclidean_discrepancy_mm": 0.0011006494690435811
   },
+  "control_identity": {
+    "profile": "pure_torque",
+    "controller_mode": "pure_torque",
+    "prescribed_coordinates": [],
+    "has_root_assistance": false,
+    "root_assistance_n_m": 0,
+    "has_state_resets": false,
+    "state_resets_count": 0
+  },
   "gates": {
     "gate1_whole_rms_25mm": true,
     "gate2_early_rms_12mm": true,
