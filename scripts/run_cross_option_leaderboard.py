@@ -63,19 +63,6 @@ METRICS_JSON = RESULTS_DIR.parent / "leaderboard_metrics.json"
 REPORT_MD = RESULTS_DIR.parent / "CROSS_OPTION_LEADERBOARD_REPORT.md"
 VIZ_DIR = RESULTS_DIR.parent / "visualizations"
 
-WIFFLE_XLSX = (
-    REPO_ROOT
-    / "src"
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "matlab"
-    / "src"
-    / "apps"
-    / "golf_gui"
-    / "Motion Capture Plotter"
-    / "Wiffle_ProV1_club_3D_data.xlsx"
-)
 
 # Canonical test trial set; from #4081 / #4086.
 CANONICAL_TRIALS: tuple[str, ...] = ("TW_ProV1", "TW_wiffle", "GW_wiffle", "GW_ProV11")
@@ -272,19 +259,29 @@ def _json_safe_float(value: float) -> float | None:
     return value if math.isfinite(value) else None
 
 
+def _wiffle_workbook() -> Path:
+    """Resolve the Wiffle club workbook through the capture registry.
+
+    Raises ``CaptureDataUnavailable`` (a ``FileNotFoundError``) when the
+    private capture data is not present.
+    """
+    from src.motion_capture.capture_registry import resolve_capture
+
+    return resolve_capture("club-workbook-wiffle")
+
+
 def _load_target(trial: str) -> Any:
     """Load the canonical ClubTarget for trial from the Wiffle xlsx.
 
     Raises ImportError or FileNotFoundError if the loader / data aren't
     available; the caller treats those as honest skips.
     """
-    if not WIFFLE_XLSX.exists():
-        raise FileNotFoundError(f"canonical Wiffle xlsx not found: {WIFFLE_XLSX}")
+    workbook = _wiffle_workbook()
     # Late import: avoid forcing pandas / openpyxl install on report-only runs.
     sys.path.insert(0, str(REPO_ROOT))
     from src.shared.python.motion_matching import load_club_target_excel
 
-    return load_club_target_excel(WIFFLE_XLSX, sheet=trial)
+    return load_club_target_excel(workbook, sheet=trial)
 
 
 def _load_option_driver(option: str):

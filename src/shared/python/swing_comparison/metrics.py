@@ -136,6 +136,10 @@ class SegmentKinematicPeak:
         }
 
 
+KINEMATIC_SEGMENTS: tuple[str, ...] = ("pelvis", "thorax", "lead_arm", "club")
+"""Kinematic-sequence segments, proximal to distal."""
+
+
 @dataclass(frozen=True)
 class KinematicSequenceMetrics:
     """Kinematic sequence peak angular speeds and temporal ordering.
@@ -294,6 +298,22 @@ class SwingMetrics:
     wrist: WristMetrics
     hand_path: HandPathMetrics
     club: ClubMetrics
+
+    def _segment_peak(self, segment: str) -> SegmentKinematicPeak:
+        if segment not in KINEMATIC_SEGMENTS:
+            raise ValueError(
+                f"segment must be one of {KINEMATIC_SEGMENTS}, got {segment!r}"
+            )
+        peak: SegmentKinematicPeak = getattr(self.kinematic_sequence, segment)
+        return peak
+
+    def peak_speed(self, segment: str) -> float:
+        """Peak angular speed (deg/s) of a kinematic-sequence ``segment``."""
+        return self._segment_peak(segment).peak_speed
+
+    def peak_time(self, segment: str) -> float:
+        """Time (s) of the peak angular speed of a kinematic-sequence ``segment``."""
+        return self._segment_peak(segment).peak_time
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -960,20 +980,16 @@ def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
             - metrics_a.segment_rotation.x_factor_stretch
         ),
         "pelvis_peak_speed_deg_s": (
-            metrics_b.kinematic_sequence.pelvis.peak_speed
-            - metrics_a.kinematic_sequence.pelvis.peak_speed
+            metrics_b.peak_speed("pelvis") - metrics_a.peak_speed("pelvis")
         ),
         "thorax_peak_speed_deg_s": (
-            metrics_b.kinematic_sequence.thorax.peak_speed
-            - metrics_a.kinematic_sequence.thorax.peak_speed
+            metrics_b.peak_speed("thorax") - metrics_a.peak_speed("thorax")
         ),
         "lead_arm_peak_speed_deg_s": (
-            metrics_b.kinematic_sequence.lead_arm.peak_speed
-            - metrics_a.kinematic_sequence.lead_arm.peak_speed
+            metrics_b.peak_speed("lead_arm") - metrics_a.peak_speed("lead_arm")
         ),
         "club_peak_speed_deg_s": (
-            metrics_b.kinematic_sequence.club.peak_speed
-            - metrics_a.kinematic_sequence.club.peak_speed
+            metrics_b.peak_speed("club") - metrics_a.peak_speed("club")
         ),
         "elbow_min_included_angle_deg": (
             metrics_b.lead_arm.min_included_angle
