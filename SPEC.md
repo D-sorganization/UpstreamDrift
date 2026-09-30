@@ -1,4 +1,4 @@
-## Qualify MyoSuite Native Dual-Club Dynamics and Replay (MMR-10M, #11096) [scope: fail-closed conversion]
+## Qualify MyoSuite Native Dual-Club Dynamics and Replay (MMR-10M, #11096) [Scope: Fail-Closed Conversion]
 Specifies the native MyoSuite qualification pipeline and receipt verification for Driver and 7-Iron models:
 - **Native MyoSuite Qualification Module (`src/engines/physics_engines/myosuite/python/native_qualification.py`)**:
   - `MYOSUITE_ENGINE_LIMITATIONS`: documents musculoskeletal excitation-activation dynamics, Hill-type force-length-velocity multipliers, free-joint quaternion orientation normalization ($w^2 + x^2 + y^2 + z^2 = 1$), dual-grip weld constraints, four-foot Hunt-Crossley contact spheres, and absence of native joint-torque inverse dynamics.
@@ -11,6 +11,13 @@ Specifies the native MyoSuite qualification pipeline and receipt verification fo
   - `README.md`: documents model topology, muscle excitation-activation dynamics, coordinate limits, fail-closed receipt policy, and replay regeneration procedure.
 - **Test Suite (`tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`)**:
   - Unit tests verifying valid complete-payload qualification, fail-closed rejection of copied trajectories, FK-only playback, zero/unrecorded native tests, non-finite state data, unphysiological muscle activations, unnormalized root quaternions, unavailable runtime with payload, missing rollout/marker data, derivative mismatch, computed-not-invented metrics, serialization round-trips, and committed receipt fail-closed honesty.
+## PreconditionError Exception-Identity Repair at the Shared Contracts Seam (#11175)
+
+- **Duplicate DbC exception class objects eliminated (`_contracts_exceptions` re-export seam)**:
+  - `src/shared/python/_contracts_exceptions.py` no longer redefines `ContractViolationError`, `PreconditionError`, `PostconditionError`, or `InvariantError`; it re-exports the SAME class objects from the public `src.shared.python.contracts` module, while keeping shard-local `ContractEvaluationError` (with message validation).
+  - Both import paths (`src.shared.python.contracts` and `src.shared.python._contracts_exceptions`) now yield referentially identical classes, so `@precondition`/`@postcondition` failures raised in decorated code are catchable by code importing either seam — unblocks `tests/unit/motion_matching/test_stability_matrix.py::TestStabilityMatrix::test_get_canonical_test_invalid`, red on main since the #11171 restore.
+  - Regression guard strengthens the test with an object-identity assertion (`contracts.PreconditionError is _contracts_exceptions.PreconditionError`) plus `errisinstance` on the raised violation.
+
 ## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
 
 Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):
