@@ -10,10 +10,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 408,
+    "identical": 406,
     "diverged": 274,
     "ud-only": 1531,
-    "tools-only": 768,
+    "tools-only": 770,
     "spelling-only": 123
   },
   "packages": {
@@ -704,10 +704,10 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 214,
+      "identical": 212,
       "diverged": 66,
       "ud-only": 36,
-      "tools-only": 74,
+      "tools-only": 76,
       "spelling-only": 23
     },
     "signal_toolkit": {
@@ -27127,25 +27127,25 @@
     },
     {
       "path": "sidekick/tests/process_calculators/test_psa_model.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "sidekick",
       "subpackage": "tests",
-      "ud_bytes": 17873,
+      "ud_bytes": null,
       "tools_bytes": 17873,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/tests/process_calculators/test_psa_webapp.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "sidekick",
       "subpackage": "tests",
-      "ud_bytes": 8685,
+      "ud_bytes": null,
       "tools_bytes": 8685,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
