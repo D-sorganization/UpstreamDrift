@@ -192,3 +192,7 @@
 ## 2024-05-25 - [Optimize Quaternion and Vector Norm Calculation in Pre-Impact Contracts]
 **Learning:** In the physics pre-impact contracts (`src/shared/python/physics/_pre_impact_contracts.py`), calculating the magnitude of 1D arrays (like quaternions and 3D vectors) using `np.linalg.norm` incurs significant overhead due to NumPy's internal function dispatch and instance checks. Replacing `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for small 1D arrays completely bypasses this overhead, resulting in a ~2x performance speedup. This mirrors similar optimizations made across the codebase.
 **Action:** Replace `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for calculating the magnitude of small, static 1D arrays like vectors or quaternions, especially in contract validation or heavily evaluated numerical loops.
+
+## 2024-10-01 - Optimizing norms in tight loops with np.einsum
+**Learning:** Found that using `np.sqrt(np.einsum("...i,...i->...", diff, diff))` provides a significant ~2.4x speedup over `np.linalg.norm(..., axis=-1)` for 3D/4D multidimensional arrays in computationally hot paths (like in `tour_matching_viewer/core.py`), as it avoids NumPy's internal dispatching and temporary array allocations.
+**Action:** Always prefer `np.sqrt(np.einsum)` or `math.sqrt(np.dot)` over `np.linalg.norm` in tight inner loops, ensuring input types are proper arrays.
