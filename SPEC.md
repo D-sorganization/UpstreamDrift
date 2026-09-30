@@ -1,4 +1,4 @@
-## Qualify Drake Native Dual-Club Dynamics and Replay (#11094) [scope: fail-closed conversion]
+## Qualify Drake Native Dual-Club Dynamics and Replay (#11094) [Scope: Fail-Closed Conversion]
 Implements [MMR-10D] native dual-club dynamic qualification and automated nightly lane integration for Drake:
 - **Drake Dynamic Qualification Module (`src/engines/physics_engines/drake/python/native_qualification.py`)**:
   - Implements `DrakeQualificationReceipt` and `DrakeQualificationStatus` (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`) enforcing strict fail-closed dynamic simulation contracts.
