@@ -3,6 +3,42 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "scripts/companion_catalog.py",
+      "symbol": "_catalog_payload",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9191,
+      "reason": "Issue #9191: governs the companion screenshot contract; _catalog_payload validates or captures governed screenshot records end to end (101 lines > 100 budget). Decompose at a #11140 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "scripts/companion_screenshots.py",
+      "symbol": "verify_screenshot_record",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9191,
+      "reason": "Issue #9191: governs the companion screenshot contract; verify_screenshot_record validates or captures governed screenshot records end to end (111 lines > 100 budget). Decompose at a #11140 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "scripts/companion_screenshots.py",
+      "symbol": "parse_registry",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9191,
+      "reason": "Issue #9191: governs the companion screenshot contract; parse_registry validates or captures governed screenshot records end to end (116 lines > 100 budget). Decompose at a #11140 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "scripts/companion_screenshots.py",
+      "symbol": "generate_representative_assets",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9191,
+      "reason": "Issue #9191: governs the companion screenshot contract; generate_representative_assets validates or captures governed screenshot records end to end (201 lines > 100 budget). Decompose at a #11140 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "src/shared/python/model_generation/core/physics_validation.py",
       "symbol": "PhysicsValidator.validate_inertia_tensor",
       "rule": "function-lines",
