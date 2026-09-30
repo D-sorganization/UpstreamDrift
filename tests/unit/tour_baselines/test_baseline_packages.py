@@ -266,3 +266,65 @@ def test_evaluate_baseline_package_acceptance_integration() -> None:
 
     verdict = evaluate_baseline_package_acceptance(package)
     assert verdict.horizon.value == "G1"
+
+
+def test_promoted_package_rejects_missing_hashes() -> None:
+    """A promoted baseline package must have complete geometry, inertia, and control hashes."""
+    statuses = StatusBundle(
+        solver_convergence=SolverConvergenceStatus.CONVERGED,
+        kinematic_accuracy=KinematicAccuracyStatus.WITHIN_TOLERANCE,
+        dynamic_feasibility=DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE,
+        scientific_qualification=ScientificQualificationStatus.QUALIFIED,
+        product_promotion=ProductPromotionStatus.PROMOTED,
+        has_native_replay=True,
+    )
+    metrics = _sample_metrics()
+
+    from dataclasses import replace
+
+    valid_ident = _sample_identity()
+
+    for field_name in (
+        "fixed_geometry_hash",
+        "fixed_inertia_hash",
+        "controls_hash",
+        "q0_hash",
+        "v0_hash",
+    ):
+        bad_ident = replace(
+            valid_ident, **{field_name: "" if "fixed" in field_name else None}
+        )
+        with pytest.raises(ValueError, match="Promoted package"):
+            BaselinePackage(
+                identity=bad_ident,
+                statuses=statuses,
+                metrics=metrics,
+                replay_command="python -m simulate",
+                is_synthetic=False,
+            )
+
+
+def test_promoted_package_rejects_fabricated_out_of_plane() -> None:
+    """A promoted baseline package cannot have fabricated <= 0 or NaN out_of_plane_residual_m."""
+    statuses = StatusBundle(
+        solver_convergence=SolverConvergenceStatus.CONVERGED,
+        kinematic_accuracy=KinematicAccuracyStatus.WITHIN_TOLERANCE,
+        dynamic_feasibility=DynamicFeasibilityStatus.PHYSICALLY_FEASIBLE,
+        scientific_qualification=ScientificQualificationStatus.QUALIFIED,
+        product_promotion=ProductPromotionStatus.PROMOTED,
+        has_native_replay=True,
+    )
+    valid_ident = _sample_identity()
+
+    from dataclasses import replace
+
+    for bad_oop in (0.0, -0.005, None, float("nan")):
+        bad_metrics = replace(_sample_metrics(), out_of_plane_residual_m=bad_oop)
+        with pytest.raises(ValueError, match="Promoted package"):
+            BaselinePackage(
+                identity=valid_ident,
+                statuses=statuses,
+                metrics=bad_metrics,
+                replay_command="python -m simulate",
+                is_synthetic=False,
+            )

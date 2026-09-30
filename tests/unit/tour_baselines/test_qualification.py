@@ -757,3 +757,42 @@ def test_calibrated_pendulum_dynamics_caches_lengths_and_updates_on_mutation() -
 
     # 3. Direct DoublePendulumParameters hashing matches DoublePendulumDynamics hashing
     assert compute_pendulum_inertia_hash(dyn.parameters) == hash_after
+
+
+def test_promoted_package_fails_integrity_if_missing_hashes_or_fabricated_out_of_plane() -> (
+    None
+):
+    """Promoted packages cannot have missing hashes or fabricated out-of-plane residuals."""
+    from dataclasses import replace
+
+    qualifier = IndependentBaselineQualifier()
+    pkg = _make_test_package()
+
+    # 1. Direct construction rejection for promoted packages
+    with pytest.raises(ValueError, match="fixed_geometry_hash"):
+        bad_ident = replace(pkg.identity, fixed_geometry_hash="")
+        replace(
+            pkg,
+            identity=bad_ident,
+            statuses=replace(
+                pkg.statuses, product_promotion=ProductPromotionStatus.PROMOTED
+            ),
+        )
+
+    # 2. Deserialized / bypass tampered package integrity rejection
+    promoted_statuses = replace(
+        pkg.statuses, product_promotion=ProductPromotionStatus.PROMOTED
+    )
+    promoted_pkg = replace(pkg, statuses=promoted_statuses)
+
+    for bad_oop in (0.0, -0.01, float("nan")):
+        tampered_metrics = replace(promoted_pkg.metrics, out_of_plane_residual_m=0.015)
+        tampered_pkg = replace(promoted_pkg, metrics=tampered_metrics)
+        # Simulate deserializing an archive whose manifest had a fabricated out_of_plane value
+        object.__setattr__(tampered_pkg.metrics, "out_of_plane_residual_m", bad_oop)
+
+        report = qualifier.verify_integrity(tampered_pkg)
+        assert not report.is_intact
+        assert any("out_of_plane_residual_m" in v for v in report.violations)
+        with pytest.raises(IntegrityViolation, match="out_of_plane_residual_m"):
+            qualifier.qualify(tampered_pkg)
