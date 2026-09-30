@@ -530,9 +530,9 @@ function local_write_meta(meta_path, git_commit)
     end
     closer = onCleanup(@() fclose(fid)); %#ok<NASGU>
 
-    fprintf(fid, "{\n");
-    fprintf(fid, "  \"schema_version\": 1,\n");
-    fprintf(fid, "  \"git_head\": \"%s\",\n", sha);
-    fprintf(fid, "  \"regenerated_at\": \"%s\"\n", iso);
-    fprintf(fid, "}\n");
+    fprintf(fid, '{\n');
+    fprintf(fid, '  "schema_version": 1,\n');
+    fprintf(fid, '  "git_head": "%s",\n', sha);
+    fprintf(fid, '  "regenerated_at": "%s"\n', iso);
+    fprintf(fid, '}\n');
 end
