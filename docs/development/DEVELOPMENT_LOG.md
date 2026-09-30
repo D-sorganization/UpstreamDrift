@@ -39,6 +39,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 27c0d34967 — 22 focused harness tests passed (11 review-fix regressions demonstrated red pre-fix, green post-fix); `tests/unit/motion_matching` 1901 passed, 11 failed all pre-existing (`c3d_reader.load_c3d`, `bunkershot3d`, stability-matrix precondition — verified identical on a pristine baseline checkout); ruff check/format and mypy clean on touched modules.
 - **Summary:** Added Simscape continuous-replay qualification harness with full-rate continuous trajectory validation, fail-closed contracts for missing samples, non-finite states, timestamp monotonicity, non-R2025b releases, motion prescription, and candidate hash mismatches. Structured qualification receipt schema records per-marker/phase channels, provenance, and evaluates against frozen G1 acceptance gates. Native candidate run-102 honestly rejected at terminal phase (40.3 mm vs 35 mm G1 ceiling). Review fixes (PR #11126 Codex P1/P2): metrics derive from the canonical `compute_replay_five_metrics()` (0.60 s early window, canonical club labels), pelvis yaw measured, unmeasured contact quantities disclosed as unavailable, elapsed-span/start validation, receipt loader null preservation, and `load_replay_evidence_inputs()` deriving digest/initial conditions/control identity from native evidence (run-102 receipt extended additively with `control_identity`, no measured value changed).
 - **Next step:** CI green, PR review.
+### DL-#11098 — Historical-Video Evidence Review Workflow
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11098
+- **Branch:** `feat/mmr-12-historical-video-review-11098`
+- **Paths:** `src/shared/python/shadow_tracker/service.py`, `src/tools/shadow_tracker/gui.py`, `tests/unit/shadow_tracker/test_service.py`, `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 at 0c31f341a7 — 330 tests collected across `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/`, all passing (review-fix regressions demonstrated red pre-fix, green post-fix); ruff check/format and mypy clean on touched modules.
+- **Summary:** Preserves multi-shot frame isolation and revision lineage in `DefaultShadowTrackerService`, implements video ingestion with container PTS and slow-motion affine timing mappings, bounded decode limits with prompt cancellation, recoverable session state on corrupt media, and keyboard review scrubbing with honest automated fit refusal in `ShadowTrackerWidget`. Review fixes (PR #11127 Codex P1s): repeat video imports stage and validate scope/revision/asset ownership before any session mutation (atomic failure), no-mapping imports keep `physical_time_s=None` with the canonical unknown-time reason (PTS authority stays in `timing_mode`/`clock_evidence`), and the viewport renders unknown physical time safely instead of formatting `None`.
+- **Next step:** Commit and submit PR; release agent lease.
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
