@@ -64,7 +64,7 @@ function out = gs3dx_track_learn(info, opts)
     [b, a] = butter(4, opts.cutoff_hz / (rate / 2));
 
     spec = gs3dx_upper_body_joints();
-    blocks = local_blocks(mdl, spec);
+    blocks = gs3dx_track_blocks(simscape.multibody.KinematicsSolver(mdl).jointPositionVariables, spec);
     for k = 1:numel(spec)
         P = spec(k).prefix;
         j = struct('A', ws.getVariable([P 'TrackAngle']), 'R', ws.getVariable([P 'TrackRate']), ...
@@ -115,7 +115,7 @@ function out = gs3dx_track_learn(info, opts)
         for k = 1:nj
             P = prefixes{k};
             j = J.(P);
-            [q, qd] = local_state(log, j, tl, T);
+            [q, qd] = gs3dx_track_state(log, j, tl, T);
             e = j.A(:, use) - q;
             u = j.Kp .* e + j.Kd .* (j.R(:, use) - qd);
             out.joint_error(it, k) = sqrt(mean(e .^ 2, 'all'));
@@ -139,50 +139,6 @@ function out = gs3dx_track_learn(info, opts)
     for P = prefixes
         out.feedforward.(P{1}) = best.(P{1}).F;
     end
-end
-
-function blocks = local_blocks(mdl, spec)
-% Joint block of each chart, from the KinematicsSolver joint ids.
-    jp = simscape.multibody.KinematicsSolver(mdl).jointPositionVariables;
-    blocks = cell(1, numel(spec));
-    for k = 1:numel(spec)
-        b = unique(string(jp.BlockPath(startsWith(string(jp.ID), [spec(k).id '.']))));
-        assert(isscalar(b), 'gs3dx:tracklearn', 'No single joint block for %s', spec(k).id);
-        blocks{k} = char(b);
-    end
-end
-
-function [q, qd] = local_state(log, j, tl, T)
-% The chart's angles and rates of joint J, on the times TL.
-    node = simscape.logging.findNode(log, j.block);
-    assert(~isempty(node), 'gs3dx:tracklearn', 'No Simscape log of %s', j.block);
-    if numel(j.axes) == 3
-        t = node.S.Q.series.time;
-        Q = node.S.Q.series.values;
-        w = node.S.w.series.values('rad/s');
-        ref = interp1(T, j.A.', t, 'linear', 'extrap').';
-        ang = zeros(3, numel(t)); rate = zeros(3, numel(t));
-        z = zeros(3, 1);
-        for i = 1:numel(t)
-            [~, ang(:, i), rate(:, i)] = gs3dx_xyz_map(Q(i, :), w(i, :), z, z, z, ref(:, i));
-        end
-    else
-        prim = {'Rz'};
-        if numel(j.axes) == 2
-            prim = {'Rx', 'Ry'};
-        end
-        t = node.(prim{1}).q.series.time;
-        ang = zeros(numel(prim), numel(t)); rate = ang;
-        for p = 1:numel(prim)
-            ang(p, :) = node.(prim{p}).q.series.values('deg');
-            rate(p, :) = node.(prim{p}).w.series.values('deg/s');
-        end
-        % the branch of the reference (a start target may sit 360 deg off)
-        ang = ang - 360 * round((ang(:, 1) - j.A(:, 1)) / 360);
-    end
-    [t, iu] = unique(t);
-    q = interp1(t, ang(:, iu).', tl(:), 'linear', 'extrap').';
-    qd = interp1(t, rate(:, iu).', tl(:), 'linear', 'extrap').';
 end
 
 function s = local_note(msg)

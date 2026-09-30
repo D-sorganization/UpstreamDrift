@@ -3,11 +3,11 @@
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-simscape-gs3dx`
+- Working directory: `C:/Users/diete/Repositories/UpstreamDrift-worktrees/claude-gs3dx-v2`
 - Branch: `feat/simscape-gs3dx-exploratory`
 - Baseline commit: `2d5830d18` (origin/main)
 - Implementation commit: `SELF`
-- Pull request: #10963 (draft) https://github.com/D-sorganization/UpstreamDrift/pull/10963
+- Pull request: #10963 was closed by the 2026-09-29 history scrub; a new draft PR is opened from this branch (same branch, post-scrub history)
 - Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979)
 - Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T15:22Z)
 - Development log: `DL-#10950`
@@ -403,8 +403,8 @@ Creator` (newline); find it by BlockType.
      ~0.1 BW after 1.35 s), within the 975-block reserve.
    - **Source anonymization (2026-09-29, owner request):** a read-only audit found the
      capture and its vendor highly traceable on public main (raw files, vendor metadata,
-     derived TRC, docs). Owner decision pending between forward cleanup, making the repo
-     private, and a history rewrite (not recommended). Until decided: no pushes, and no
+     derived TRC, docs). Resolved 2026-09-29/30: history scrubbed, private data moved to
+     a private data repo resolved through `CAPTURE_DATA_DIR`; pushes resumed. Still: no
      vendor/source names in new commits, PR text or docs.
    - **Simulated-motion render (2026-09-29):** `gs3dx_contact_check(..., joints=dt)` logs
      Simscape (decimation 10) and returns `.joints` via new `tools/gs3dx_simlog_joints.m`
@@ -413,6 +413,26 @@ Creator` (newline); find it by BlockType.
      the drawn pelvis stays fixed in the simulated pelvis frame. Finish videos: scratch
      `human/fin7.m` -> `human/sim_finish_<view>.mp4`; copies on the owner's Desktop in
      `GS3DX Swing Progress 2026-09-29`.
+
+   - **Range of motion (#11158, 2026-09-30):** `gs3dx_joint_rom` (table), `gs3dx_rom_check`,
+     `gs3dx_rom_from_ik`, `gs3dx_rom_reference`, `docs/ROM.md`. `gs3dx_whole_body_ik(...,
+rom_weight=W)` applies the range penalty by continuation (free chain for the warm
+     starts, then a penalized polish per frame). Every 10th frame to impact: 23.3 mm free,
+     37.7 mm with weight 3 and every bounded range within 0.71 deg.
+     `test_gs3dx_joint_rom`: 5 of 6 pass; `human_references_stay_in_the_human_range` stays
+     red until the reference pipeline is rebuilt from the range-limited IK (11 rows out).
+   - **Forward-dynamics goal (#11173, 2026-09-30):** `docs/FORWARD_DYNAMICS.md` is the
+     playbook (ladder L0-L4, every lesson with evidence, convergence ideas, roadmap).
+     Step 1 tooling: `gs3dx_feedback_torque` (pure; `test_gs3dx_feedback_torque` 5/5
+     pass), `gs3dx_contact_check(..., feedback=true)`, `gs3dx_track_state` and
+     `gs3dx_track_blocks` (shared with `gs3dx_track_learn`). The Human test
+     `feedback_torque_is_measured_on_every_driven_axis` has failed three times on log
+     access (stale workspace handle, model closed by `gs3dx_stance_frames`, hinge
+     primitive names); each fixed, the fourth run is pending, so this commit's feedback
+     path is not yet verified on the model.
+   - **Batch MATLAB:** scripts end with `fprintf("GS3DX_BATCH_DONE\n"); quit(0, "force")`;
+     the scratch lock runner kills its own MATLAB 90 s after the marker (exit hangs held
+     the lock 10-15 min).
 
 3. #10979 learning drift: per-joint PD torque over more iterations (`out.joint_pd`), then a
    forgetting factor or PD-only loop joints.

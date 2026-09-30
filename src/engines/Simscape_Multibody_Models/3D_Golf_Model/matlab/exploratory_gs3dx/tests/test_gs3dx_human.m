@@ -218,6 +218,24 @@ classdef test_gs3dx_human < matlab.unittest.TestCase
         end
     end
 
+    methods (Test)
+        function feedback_torque_is_measured_on_every_driven_axis(testCase)
+            % The distance to pure forward dynamics (#11173): every chart
+            % axis (21), every leg axis (12) and the balance loop's 12.
+            ws = get_param(testCase.mdl, 'ModelWorkspace');
+            start = ws.getVariable('TrackStart');
+            c = gs3dx_contact_check(testCase.info, model=testCase.mdl, rest=true, stop_time=0.06, ...
+                variables=start, feedback=true);
+            fb = c.feedback;
+            testCase.log(1, formattedDisplayText(fb.groups));
+            n = @(g) nnz(fb.joints.group == g);
+            testCase.verifyEqual([n("upper") n("legs") n("balance")], [21 12 12]);
+            testCase.verifyEqual(size(fb.torque.legs), [12 numel(c.t)]);
+            testCase.verifyTrue(all(isfinite(fb.joints.rms_Nm)));
+            testCase.verifyGreaterThan(fb.total_rms_Nm, 0, 'A tracked run needs some feedback');
+        end
+    end
+
     methods
         function ik = address_ik(testCase)
             if isempty(testCase.ik)

@@ -30,13 +30,20 @@ function check = gs3dx_contact_check(info, opts)
 %                 JOINTS seconds (GS3DX_SIMLOG_JOINTS), a pose that
 %                 GS3DX_RENDER draws; the Simscape log keeps every 10th
 %                 solver step
+%     .feedback   with FEEDBACK true: the torque the run applied beyond
+%                 its feedforward (GS3DX_FEEDBACK_TORQUE), its distance to
+%                 pure forward dynamics (docs/FORWARD_DYNAMICS.md); needs a
+%                 tracked variant (GS3DX_FitLegs or later).  The balance
+%                 share uses the finite-difference COM rate, not the
+%                 model's filtered one (BalanceCOMTau).
 %     .status, .message    of the simulation
 %
 %   Options: drive ("impact"), stop_time (0.3 s), variables (struct of
 %   model-workspace overrides applied after the drive), rest (false),
 %   model (GS3DX_FullBodyContact; any model built from it, e.g. GS3DX_Golfer),
 %   signals (string array of logged signal names to return, default none),
-%   joints (0: pose sample interval in s for .joints, 0 = none).
+%   joints (0: pose sample interval in s for .joints, 0 = none),
+%   feedback (false: add .feedback).
 %   rest=true zeroes every *StartVelocity* variable, so the body starts
 %   still in the drive's pose: the standing test.  The impact drive alone
 %   starts mid-downswing with the whole-body momentum of a model whose
@@ -55,6 +62,7 @@ function check = gs3dx_contact_check(info, opts)
         opts.model (1,1) string = gs3dx_names().variants.contact
         opts.signals (1,:) string = strings(1, 0)
         opts.joints (1,1) double {mustBeNonnegative} = 0
+        opts.feedback (1,1) logical = false
     end
     mdl = char(opts.model);
     load_system(mdl);
@@ -73,12 +81,24 @@ function check = gs3dx_contact_check(info, opts)
     ground_R = ws.getVariable('GroundRotation');
     g = str2num(get_param([mdl '/Hips and Torso Inputs/Mechanism Configuration'], 'GravityVector')); %#ok<ST2NM> vector literal
     g = g(:);
-    if opts.joints > 0
+    simlog = opts.joints > 0 || opts.feedback;
+    if simlog
         % before the sensors go in; the joints are the same with them
         jp = simscape.multibody.KinematicsSolver(mdl).jointPositionVariables;
     end
+    if opts.feedback
+        % GS3DX_STANCE_FRAMES closes the model, so take the workspace now
+        p = struct();
+        for n = {ws.whos.name}
+            p.(n{1}) = ws.getVariable(n{1});
+        end
+        log_name = get_param(mdl, 'SimscapeLogName');
+    end
     frames = gs3dx_stance_frames(mdl, vars, stop_time=opts.stop_time, mass=true, shoulders=false, ...
-        simscape_log=10 * (opts.joints > 0));
+        simscape_log=10 * simlog);
+    if simlog
+        load_system(mdl);   % GS3DX_STANCE_FRAMES closed it; the Simscape log needs it loaded
+    end
     s = frames.series;
     logs = frames.out.logsout;
     assert(norm(-g / norm(g) - frames.up) < 1e-12, 'gs3dx:contact_check', 'Gravity and up disagree');
@@ -127,11 +147,59 @@ function check = gs3dx_contact_check(info, opts)
     if opts.joints > 0
         check.joints = gs3dx_simlog_joints(frames.out.simlog, mdl, jp, 0:opts.joints:opts.stop_time);
     end
+    if opts.feedback
+        check.feedback = local_feedback(p, log_name, vars, jp, frames.out, check, v, at);
+    end
     check.pelvis = max(vecnorm(s.pelvis_p - s.pelvis_p(:, 1)));
     check.pelvis_p = at(s.t, s.pelvis_p);
     check.pelvis_R = reshape(at(s.t, reshape(s.pelvis_R, 9, [])), 3, 3, []);
     check.status = "success";
     check.message = "";
+end
+
+function fb = local_feedback(p, log_name, vars, jp, out, check, com_rate, at)
+% GS3DX_FEEDBACK_TORQUE of the run: the workspace P as run, the chart joints
+% from the Simscape log and the leg servo's own angles from the leg buses.
+    for f = reshape(fieldnames(vars), 1, [])
+        p.(f{1}) = vars.(f{1});
+    end
+    assert(isfield(p, 'LegReferenceTime'), 'gs3dx:contact_check', ...
+        'FEEDBACK needs a tracked variant (GS3DX_FitLegs or later)');
+    t = check.t;
+    state = struct('t', t, 'upper', struct());
+    spec = gs3dx_upper_body_joints();
+    spec = spec(arrayfun(@(j) isfield(p, [j.prefix 'TrackAngle']), spec));
+    blocks = gs3dx_track_blocks(jp, spec);
+    log = out.get(log_name);
+    for k = 1:numel(spec)
+        P = spec(k).prefix;
+        j = struct('block', blocks{k}, 'axes', spec(k).axes, 'A', p.([P 'TrackAngle']));
+        [q, qd] = gs3dx_track_state(log, j, t, p.UpperBodyTrackTime);
+        state.upper.(P) = struct('q', q, 'qd', qd);
+    end
+    % leg servo state order (GS3DX_BUILD_CONTACT): [hip XYZ, knee, ankle XY] per side
+    pos = {{'AngularPositionX', 'AngularPositionY', 'AngularPosition_Z'}, {'AngularPosition'}, ...
+           {'AngularPositionX', 'AngularPositionY'}};
+    vel = {{'AngularVelocityX', 'AngularVelocityY', 'AngularVelocityZ'}, {'AngularVelocity'}, ...
+           {'AngularVelocityX', 'AngularVelocityY'}};
+    joints = {'Hip', 'Knee', 'Ankle'};
+    q = zeros(0, numel(t)); qd = q;
+    for P = 'LR'
+        for j = 1:3
+            bus = [P joints{j} 'Logs'];
+            for a = 1:numel(pos{j})
+                [tb, x] = local_bus_leaf(out.logsout, bus, pos{j}{a});
+                q(end + 1, :) = at(tb, x); %#ok<AGROW> twelve axes
+                [tb, x] = local_bus_leaf(out.logsout, bus, vel{j}{a});
+                qd(end + 1, :) = at(tb, x); %#ok<AGROW>
+            end
+        end
+    end
+    state.legs = struct('q', q, 'qd', qd);
+    state.com = check.com;
+    state.com_rate = com_rate;
+    state.feet = [check.feet.L.p; check.feet.R.p];
+    fb = gs3dx_feedback_torque(p, state);
 end
 
 function [t, x] = local_signal(logs, name)

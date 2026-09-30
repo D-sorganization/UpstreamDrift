@@ -58,6 +58,18 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         translation, and the fit wanders 15-36 cm; the
 %                         interpolated targets hold it.  The offset
 %                         calibration uses measured samples only.
+%     rom_weight          (0, m/rad) penalize every joint angle outside the
+%                         normal human range (GS3DX_JOINT_ROM rows with a
+%                         neutral): the residual gains, per such joint,
+%                         ROM_WEIGHT times how far (rad) the anatomical
+%                         angle lies beyond the range.  Without it the fit
+%                         may take anatomically impossible branches that
+%                         place the joint centres alike (the knees
+%                         hyperextended with the legs spun about their long
+%                         axes; the spine bent 81 deg sideways) (#11158).
+%                         Applied by continuation: every frame is first
+%                         fitted without it (that chain gives the warm
+%                         starts), then polished from that pose with it
 %     backward            (true) also track backward and keep the lower cost
 %                         per frame; with the weights above, false keeps one
 %                         continuous forward solution (the lower-cost frame
@@ -73,7 +85,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                  .rms (1 x frames, m, over the measured targets)
 %     .status      KinematicsSolver status per frame (1 = loop closed)
 %     .regularization  struct of posture_weight, smooth_weight, backward,
-%                  gap_weight
+%                  gap_weight, rom_weight
 
     arguments
         jc (1,1) struct
@@ -86,12 +98,14 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.posture_weight (1,1) double {mustBeNonnegative} = 0
         opts.smooth_weight (1,1) double {mustBeNonnegative} = 0
         opts.backward (1,1) logical = true
+        opts.rom_weight (1,1) double {mustBeNonnegative} = 0
         opts.gap_weight (1,1) double {mustBeInRange(opts.gap_weight, 0, 1)} = 0
     end
     s = local_setup(opts.model);
     s.verbose = opts.verbose;
     s.backward = opts.backward;
     s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
+    s.rom = local_rom(s, opts.rom_weight);
     nt = numel(s.names);
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
@@ -154,7 +168,44 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     end
     ik.rms = sqrt(mean(ik.residual .^ 2, 1, 'omitnan'));
     ik.regularization = struct('posture_weight', opts.posture_weight, ...
-        'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight);
+        'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight, ...
+        'rom_weight', opts.rom_weight);
+end
+
+function rom = local_rom(s, weight)
+% The range-of-motion penalty: for each bounded GS3DX_JOINT_ROM row of a
+% joint of this model, where its angle is (parameter index, or index into
+% the closed-loop outputs G) and its range in rad.
+    t = gs3dx_joint_rom();
+    t = t(~isnan(t.neutral_deg), :);
+    [has, at] = ismember(t.key, s.jkeys);
+    t = t(has, :);
+    id = s.ids(at(has));
+    rom.on = weight > 0 && height(t) > 0;
+    rom.weight = weight;
+    rom.closed = ismember(id, s.ids(s.closed));
+    [~, rom.index] = ismember(id, s.ids(s.closed));   % into G where closed
+    start = cumsum([0 s.layout.n]);
+    for k = find(~rom.closed(:).')
+        parts = split(id(k), '.');
+        j = find(string({s.layout.key}) == parts(1) + "." + parts(2));
+        assert(numel(j) == 1 && s.layout(j).n == 1, 'gs3dx:ik', 'ROM joint %s is not a single angle', id(k));
+        rom.index(k) = start(j) + 1;
+    end
+    rom.sign = t.sign;
+    rom.neutral = deg2rad(t.neutral_deg);
+    rom.lo = deg2rad(t.min_deg);
+    rom.hi = deg2rad(t.max_deg);
+    rom.n = height(t) * rom.on;
+end
+
+function r = local_rom_residual(rom, p, g)
+% ROM.weight times how far (rad) each anatomical angle lies outside its range.
+    q = zeros(numel(rom.index), 1);
+    q(~rom.closed) = p(rom.index(~rom.closed));
+    q(rom.closed) = deg2rad(g(rom.index(rom.closed)));
+    a = rom.sign .* (mod(q - rom.neutral + pi, 2 * pi) - pi);
+    r = rom.weight * (max(0, a - rom.hi) + max(0, rom.lo - a));
 end
 
 function reg = local_regularization(s, posture, smooth)
@@ -171,9 +222,17 @@ end
 
 function best = local_track(s, frames, p, g, off, data, weight, lm)
 % Forward then backward over FRAMES, each fit warm-started from its
-% neighbour; the lower cost per frame is kept.
+% neighbour; the lower cost per frame is kept.  With the range penalty the
+% warm starts come from a chain fitted without it, and each frame is then
+% polished from its own chain pose with the penalty on (continuation): a
+% penalized pose that left the markers' basin never seeds the next frame,
+% and the smoothing term holds the polish near the chain pose.
     n = numel(frames);
     best = struct('p', cell(1, n), 'g', cell(1, n), 'cost', num2cell(inf(1, n)));
+    chain = best;
+    free = s;
+    free.rom.on = false;
+    free.rom.n = 0;
     orders = {1:n, n:-1:1};
     if ~s.backward
         orders = orders(1);
@@ -181,16 +240,26 @@ function best = local_track(s, frames, p, g, off, data, weight, lm)
     for order = orders
         for i = order{1}
             t0 = tic;
-            [p, g, cost, iters] = local_fit(s, p, g, off, data(frames(i)), weight(frames(i)), lm);
+            d = data(frames(i));
+            w = weight(frames(i));
+            [p, g, cost, iters] = local_fit(free, p, g, off, d, w, lm);
+            if cost < chain(i).cost
+                chain(i) = struct('p', p, 'g', g, 'cost', cost);
+            end
+            if s.rom.on
+                [pr, gr, cost, it] = local_fit(s, chain(i).p, chain(i).g, off, d, w, lm);
+                iters = iters + it;
+            else
+                [pr, gr] = deal(p, g);
+            end
             if s.verbose
-                fprintf('ik frame %d: rms %.1f mm, %d iterations, %.1f s\n', frames(i), ...
-                    1000 * sqrt(cost / nnz(weight(frames(i)))), iters, toc(t0));
+                fprintf('ik frame %d: cost %.3g, %d iterations, %.1f s\n', frames(i), cost, iters, toc(t0));
             end
             if cost < best(i).cost
-                best(i) = struct('p', p, 'g', g, 'cost', cost);
+                best(i) = struct('p', pr, 'g', gr, 'cost', cost);
             end
-            p = best(i).p;
-            g = best(i).g;
+            p = chain(i).p;
+            g = chain(i).g;
         end
     end
 end
@@ -240,6 +309,7 @@ function s = local_setup(mdl)
     addInitialGuessVariables(ks, ids(s.closed));
     s.ks = ks;
     s.ids = ids;
+    s.jkeys = gs3dx_joint_keys(mdl, jp);
     s.nt = size(T, 1);
     s.nb = numel(bodies);
     s.isdeg = containers.Map(cellstr(ids), num2cell(jp.Unit == "deg"));
@@ -291,15 +361,18 @@ function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, lm)
 end
 
 function r = local_residual(s, p, g, off, d, w, p0)
-    [P, R, st] = local_fk(s, p, g);
+    [P, R, st, gc] = local_fk(s, p, g);
     if st < 1
-        r = 10 * ones(3 * s.nt + 2 * numel(p) * s.reg.on, 1);   % loop not closed: reject the step
+        r = 10 * ones(3 * s.nt + 2 * numel(p) * s.reg.on + s.rom.n, 1);   % loop not closed: reject the step
         return;
     end
     pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, s.nt)), 3, s.nt);
     r = reshape((pts - d) .* w, [], 1);
     if s.reg.on
         r = [r; s.reg.posture .* p; s.reg.smooth .* (p - p0)];
+    end
+    if s.rom.on
+        r = [r; local_rom_residual(s.rom, p, gc)];
     end
 end
 

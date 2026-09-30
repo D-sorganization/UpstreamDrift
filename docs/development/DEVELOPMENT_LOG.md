@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-09-30 — #10979 finish diagnosis: floor-feasible foot reference (fin15) and a softer trail leg (fin16) both rejected; the committed model at BalanceFootKp 0.5 stays best (20.4/52.7 mm). Earlier: `GS3DX_Human` balances to impact (pelvis 21.9 mm RMS vs `GS3DX_Neck` 18.0, `GS3DX_Shape` 21.6) after the toe contacts were moved under the toe tip (Big Toe, Lesser Toes on the forefoot) and `MidfootStiffness` set to 2,000 N·m/rad; 965 compiled; test_gs3dx_human 10/10, test_gs3dx_render 5/5; run through the finish (1.81 s): trail toe roll and lead outside-edge roll work, the trail foot overshoots its pivot and takes the load at 1.55 s (COM itself matches the capture; midfoot stiffness 300–1e4 does not change the overshoot); simulated motion now renders from the Simscape log (`gs3dx_simlog_joints`)
+- **Last verified:** 2026-09-30 — ROM penalty by continuation passes `the_rom_penalty_keeps_the_ik_in_the_human_range` (37.7 mm, 0.71 deg); `test_gs3dx_feedback_torque` 5/5; Human feedback test pending its fourth run.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Prototype a trail-foot vertical load loop (contact-force sensor, integral on the trail reference height, about 0.1 BW minimum preload after 1.35 s) within the 975-block reserve and run the full swing.
+- **Next step:** Record the `GS3DX_Human` feedback-torque table (roadmap step 1 of docs/FORWARD_DYNAMICS.md) once its test passes.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
