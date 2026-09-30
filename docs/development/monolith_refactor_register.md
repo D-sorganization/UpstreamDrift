@@ -80,6 +80,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 973 | `src/tools/bunker_shot_gui/viewport_widgets.py` |
 | 966 | `src/launchers/launcher_process_manager.py` |
 | 965 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` |
+| 965 | `src/tools/tour_matching_viewer/gui.py` |
 | 961 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 960 | `src/shared/python/signal_toolkit/widget_ui.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
@@ -104,6 +105,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 920 | `src/tools/bunker_shot_gui/report.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
+| 915 | `src/tools/tour_matching_viewer/core.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
@@ -123,6 +125,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 868 | `src/tools/matched_swing_browser/gui.py` |
 | 865 | `src/shared/python/signal_toolkit/fitting.py` |
 | 864 | `src/tools/bunker_shot_gui/widgets.py` |
 | 860 | `src/shared/python/motion_matching/full_body_ik.py` |
@@ -133,7 +136,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 849 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 849 | `src/tools/training_controller/gui.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
-| 845 | `src/tools/matched_swing_browser/gui.py` |
 | 844 | `src/shared/python/config/model_pack_manifest.py` |
 | 843 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py` |
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
