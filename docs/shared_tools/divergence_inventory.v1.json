@@ -12,7 +12,7 @@
   "totals": {
     "identical": 406,
     "diverged": 274,
-    "ud-only": 1531,
+    "ud-only": 1533,
     "tools-only": 770,
     "spelling-only": 123
   },
@@ -493,6 +493,13 @@
       "tools-only": 0,
       "spelling-only": 0
     },
+    "native_lanes": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 2,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
     "neural_motion": {
       "identical": 0,
       "diverged": 0,
@@ -898,7 +905,7 @@
       "classification": "ud-only",
       "package": "_contracts_exceptions.py",
       "subpackage": "",
-      "ud_bytes": 3872,
+      "ud_bytes": 2750,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17963,6 +17970,30 @@
       "package": "movement_optimizer",
       "subpackage": "",
       "ud_bytes": 4305,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "native_lanes/__init__.py",
+      "classification": "ud-only",
+      "package": "native_lanes",
+      "subpackage": "",
+      "ud_bytes": 50,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "native_lanes/common.py",
+      "classification": "ud-only",
+      "package": "native_lanes",
+      "subpackage": "",
+      "ud_bytes": 8483,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
