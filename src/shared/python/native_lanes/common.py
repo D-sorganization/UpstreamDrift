@@ -273,3 +273,64 @@ def identity_shas(candidate: dict[str, Any]) -> tuple[str, str, str, str]:
         str(candidate.get("model_sha256") or ""),
         str(candidate.get("capture_sha256") or ""),
     )
+
+
+def evaluate_candidate_replay(
+    candidate: dict[str, Any],
+    replay: dict[str, Any],
+    *,
+    native_tests_executed: int | None,
+    expected_model_sha: str | None,
+    fk_only_message: str,
+    quaternion_cols: tuple[int, int] | None = None,
+    respect_valid_mask: bool = False,
+    check_muscles: bool = False,
+) -> dict[str, Any]:
+    """Checks 1-6 in fixed order; returns the neutral result bundle for receipt assembly.
+
+    Only metrics computed from recorded observations are emitted; unavailable
+    runtime, copied trajectories, FK-only playbacks, and missing data reject.
+    """
+    rejection_reasons, missing_evidence = begin_evaluation(replay)
+    club, cand_sha, model_sha, capture_sha = identity_shas(candidate)
+    is_fresh = check_execution_contract(
+        replay,
+        expected_model_sha=expected_model_sha,
+        model_sha=model_sha,
+        native_tests_executed=native_tests_executed,
+        rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        fk_only_message=fk_only_message,
+    )
+    derivatives_ok, energy_summary = check_rollout_dynamics(
+        replay,
+        rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        quaternion_cols=quaternion_cols,
+    )
+    muscle_metrics: dict[str, float] | None = None
+    if check_muscles:
+        acts_ok, muscle_metrics = check_muscle_activations(replay.get("activations"))
+        if not acts_ok:
+            rejection_reasons.append(
+                f"Muscle activation exceeds physiological bounds [0, 1]: max={muscle_metrics.get('max_activation')}"
+            )
+    marker_metrics = compute_marker_metrics(
+        replay,
+        rejection_reasons=rejection_reasons,
+        missing_evidence=missing_evidence,
+        respect_valid_mask=respect_valid_mask,
+    )
+    return {
+        "muscle_metrics": muscle_metrics,
+        "club": club,
+        "candidate_sha256": cand_sha,
+        "model_sha256": model_sha,
+        "capture_sha256": capture_sha,
+        "is_fresh": is_fresh,
+        "derivatives_ok": derivatives_ok,
+        "energy_summary": energy_summary,
+        "marker_metrics": marker_metrics,
+        "rejection_reasons": rejection_reasons,
+        "missing_evidence": missing_evidence,
+    }
