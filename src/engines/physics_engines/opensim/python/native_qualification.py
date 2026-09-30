@@ -260,7 +260,9 @@ def _compute_opensim_marker_metrics(
     return marker_metrics
 
 
-def _opensim_unavailable_receipt(candidate: dict[str, Any]) -> OpenSimQualificationReceipt:
+def _opensim_unavailable_receipt(
+    candidate: dict[str, Any],
+) -> OpenSimQualificationReceipt:
     """Fail-closed: without the opensim bindings on host no native dynamic replay can be produced."""
     missing_evidence = ["native OpenSim rollout (opensim runtime)"]
     return OpenSimQualificationReceipt(
