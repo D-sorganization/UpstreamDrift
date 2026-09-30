@@ -22,6 +22,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.native_lanes.common import (
+    build_unavailable_receipt,
     check_execution_contract,
     check_muscle_activations,
     check_rollout_dynamics,
@@ -135,28 +136,17 @@ def _compute_marker_metrics(replay, *, rejection_reasons, missing_evidence):
     )
 
 
-def _opensim_unavailable_receipt(
-    candidate: dict[str, Any],
-) -> OpenSimQualificationReceipt:
-    """Fail-closed: without the opensim bindings on host no native dynamic replay can be produced."""
-    missing_evidence = ["native OpenSim rollout (opensim runtime)"]
-    return OpenSimQualificationReceipt(
-        schema_version=1,
+def _opensim_unavailable_receipt(candidate: dict[str, Any]):
+    return build_unavailable_receipt(
+        candidate,
+        OpenSimQualificationReceipt,
         engine="opensim",
-        club=str(candidate.get("club") or "driver"),
         status=OpenSimQualificationStatus.UNAVAILABLE,
-        candidate_sha256=str(candidate.get("source_sha256") or ""),
-        model_sha256=str(candidate.get("model_sha256") or ""),
-        capture_sha256=str(candidate.get("capture_sha256") or ""),
-        runtime_available=False,
-        is_fresh_simulation=False,
-        derivatives_consistent=False,
-        energy_balance_checked=False,
-        declared_limitations=list(OPENSIM_ENGINE_LIMITATIONS),
-        rejection_reasons=["OpenSim runtime is not installed on host"],
-        missing_evidence=missing_evidence,
-        remedy=OPENSIM_UNAVAILABLE_REMEDY,
+        missing_rollout_label="native OpenSim rollout (opensim runtime)",
+        rejection_reason="OpenSim runtime is not installed on host",
         diagnostic_message="OpenSim runtime is not installed on host: live dynamic simulation unavailable.",
+        limitations=OPENSIM_ENGINE_LIMITATIONS,
+        remedy=OPENSIM_UNAVAILABLE_REMEDY,
     )
 
 

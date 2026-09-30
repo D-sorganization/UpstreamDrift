@@ -224,3 +224,36 @@ def compute_marker_metrics(
             "Non-finite values detected in marker alignment observations"
         )
     return marker_metrics
+
+
+def build_unavailable_receipt(
+    candidate: dict[str, Any],
+    receipt_cls: Any,
+    *,
+    engine: str,
+    status: Any,
+    missing_rollout_label: str,
+    rejection_reason: str,
+    diagnostic_message: str,
+    limitations: tuple[str, ...],
+    remedy: str,
+):
+    """Fail-closed: without the engine runtime on host no native dynamic replay can be produced."""
+    return receipt_cls(
+        schema_version=1,
+        engine=engine,
+        club=str(candidate.get("club") or "driver"),
+        status=status,
+        candidate_sha256=str(candidate.get("source_sha256") or ""),
+        model_sha256=str(candidate.get("model_sha256") or ""),
+        capture_sha256=str(candidate.get("capture_sha256") or ""),
+        runtime_available=False,
+        is_fresh_simulation=False,
+        derivatives_consistent=False,
+        energy_balance_checked=False,
+        declared_limitations=list(limitations),
+        rejection_reasons=[rejection_reason],
+        missing_evidence=[missing_rollout_label],
+        remedy=remedy,
+        diagnostic_message=diagnostic_message,
+    )
