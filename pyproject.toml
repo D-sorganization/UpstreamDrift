@@ -61,6 +61,10 @@ dependencies = [
     # on every install path, not depend on whichever dependent resolves first.
     # PYSEC-2026-2132, fixed in 8.3.3 (#8738).
     "click>=8.3.3",
+    # Transitive via requests rather than imported directly. Declared here for
+    # the same reason as tornado/click above: the floor must bind on every install
+    # path (CVE-2026-97687, fixed in 2.8.0; #11191).
+    "urllib3>=2.8.0",
 
     "flask>=3.1.3",
 
