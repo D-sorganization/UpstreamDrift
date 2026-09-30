@@ -2609,7 +2609,7 @@ export interface SimulationResponse {
   success: boolean;
   /** Actual simulation duration */
   duration: number;
-  /** Number of simulation frames */
+  /** Number of recorded simulation frames, including initial sample at t=0 */
   frames: number;
   /** Simulation data (states, controls, etc.) */
   data: Record<string, unknown>;

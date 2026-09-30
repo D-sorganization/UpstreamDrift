@@ -18,10 +18,13 @@ class _PlaybackMixin:
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         if field_name is None:
             raise ValueError("field_name must be provided")
-        if field_name not in self.data:
+        lookup_name = field_name
+        if lookup_name == "control_inputs" and "control_inputs" not in self.data:
+            lookup_name = "joint_torques"
+        if lookup_name not in self.data:
             return np.array([]), np.array([])
 
-        values: Any = self.data[field_name]
+        values: Any = self.data[lookup_name]
 
         if values is None or self.current_idx == 0:
             return np.array([]), np.array([])

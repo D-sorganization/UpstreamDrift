@@ -7341,6 +7341,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-30 | #11193 | Ensure simulation recorder lifecycle, reject empty results, retain commanded control inputs, and surface buffer capacity exhaustion (#11142). |
 | 2026-09-30 | n/a | Optimize worst marker norm extraction with einsum in Tour Matching Viewer (spec-exempt: micro-optimization) |
 | 2026-09-30 | #11192 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and `PyJWT>=2.15.0`; both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved `urllib3` from `2.7.0` to `2.8.0` (resolves CVE-2026-97687) and `pyjwt` from `2.14.0` to `2.15.0` (resolves CVE-2026-101918) (#11191); no consumer-code change. |
 | 2026-09-30 | #11189 | Optimize `rigid_attachment_residuals` calculation in rigidity check with `np.sqrt(np.einsum)` (spec-exempt: micro-optimization) |

@@ -19,11 +19,13 @@ class _BuffersMixin:
     is_recording: bool
     _buffers_initialized: bool
     analysis_config: dict[str, Any]
+    buffer_exhausted: bool = False
 
     def _reset_buffers(self) -> None:
         self.current_idx = 0
         self.current_capacity = self.initial_capacity
         self._buffers_initialized = False
+        self.buffer_exhausted = False
         self.data = {
             "times": np.zeros(self.current_capacity),
             "kinetic_energy": np.zeros(self.current_capacity),
@@ -60,6 +62,7 @@ class _BuffersMixin:
                     f"Recorder buffer full at {self.max_samples} samples. "
                     "Stopping recording."
                 )
+                self.buffer_exhausted = True
                 self.is_recording = False
                 return
 
