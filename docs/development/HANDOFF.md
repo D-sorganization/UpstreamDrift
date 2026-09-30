@@ -45,6 +45,29 @@
   - 165 passed across `tests/companion` and `tests/unit/scripts/test_verify_companion_screenshots.py`.
   - Architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK; ruff check and format clean; prettier clean.
 - Next step: Create PR and release lease.
+# Current Handoff — Implement Simscape Continuous-Replay Qualification Harness (#11107)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-07-simscape-continuous-replay-11107`
+- Commit: `SELF`
+- Pull request: addresses #11107 (bounded implementation).
+- Done:
+  - Implemented `src/shared/python/motion_matching/simscape_replay_harness.py`:
+    - Full-rate, unbroken continuous-replay trajectory contract checking (`validate_continuous_replay_inputs`) with fail-closed enforcement for missing terminal samples, non-finite states, duplicated/non-monotonic timestamps, non-R2025b releases, hidden motion prescription, candidate hash mismatches, and state resets.
+    - Added `compute_per_marker_channels` and `compute_phase_channels` generating per-marker and per-phase RMS error distributions over full native coordinates.
+    - Integrated canonical metrics into `acceptance.evaluate()` without modifying frozen thresholds (`qualify_simscape_continuous_replay`).
+    - Added structured qualification receipt schema (`simscape-continuous-replay-receipt/1`) with lossless serialization (`save_replay_qualification_receipt`, `load_replay_qualification_receipt`).
+    - Implemented `load_continuous_replay_trajectory` to parse both explicit `q`/`v` and composite `native_state` arrays.
+  - Added `-ContinuousQualification` switch to `scripts/matlab/run_simscape_candidate.ps1`.
+  - Review fixes (Codex P1/P2 on this PR): duration gate requires start at t=0 and the elapsed horizon span; acceptance metrics delegate to canonical `compute_replay_five_metrics()` (0.60 s early window, canonical club-cluster labels); pelvis yaw measured from `WaistLeft`/`WaistRight`; unmeasured normal force/penetration/closure disclosed as unavailable instead of fabricated passes; receipt loader preserves null terminal channels; `load_replay_evidence_inputs()` derives the recomputed NPZ digest (fail-closed), candidate `q0`/`qd0`, and receipt-declared control identity; `replay_returned102_r2025b.m` records the actuation/reset identity (run-102 receipt extended additively, measured values unchanged).
+  - Evaluated existing native candidate replay evidence (`two_window_fit_9967_102`) producing `simscape_replay_qualification.json`, confirming honest rejection at the terminal phase (~40.3 mm > 35.0 mm G1 ceiling); canonical metrics cross-check the committed native receipt (early 9.995 mm, club 8.391 mm, yaw 0.595 %, terminal 40.30 mm).
+  - Implemented 22-test suite in `tests/unit/motion_matching/test_simscape_continuous_replay_harness.py` (11 fail-closed + 11 review-fix regressions, red-first documented in the PR body).
+- Validation:
+  - 22/22 tests passing in `test_simscape_continuous_replay_harness.py`.
+  - Full `tests/unit/motion_matching` run: 1901 passed, 11 failed — all pre-existing on the pristine baseline (`c3d_reader.load_c3d` absent, `bunkershot3d` absent, stability-matrix precondition); not regressions of this change.
+  - Lint/format/type checks clean on touched modules: `ruff check`, `ruff format`, `mypy`.
+  - Section 12 changelog entry updated in `SPEC.md` and verified with `check_spec_changelog_duplicates.py`.
+- Next step: CI green, PR review by owner.
 
 ---
 
