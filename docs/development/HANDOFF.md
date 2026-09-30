@@ -68,6 +68,25 @@
   - Lint/format/type checks clean on touched modules: `ruff check`, `ruff format`, `mypy`.
   - Section 12 changelog entry updated in `SPEC.md` and verified with `check_spec_changelog_duplicates.py`.
 - Next step: CI green, PR review by owner.
+# Current Handoff — Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-12-historical-video-review-11098` (baseline `origin/main` 7b74fb68c6)
+- Pull request: closes #11098.
+- Done:
+  - Preserved multi-shot frame isolation and revision lineage in `DefaultShadowTrackerService`: frames from multiple distinct shots sharing local `frame_id`s (e.g. `frame-000000`) are stored without collision under scoped `(shot_id, frame_id)` namespace indexing and retrieved deterministically.
+  - Manual mask updates invalidate downstream fit results deterministically while tracking revision lineage (`parent_revision_id`, `producer_id`, `correction_note`).
+  - Added video file ingestion via `import_video`: container PTS extraction, constant and variable-frame-rate (VFR) containers, affine timing mappings (slow motion), and shot boundary cut definitions.
+  - Bounded decode limits and prompt cancellation: passes `DecodeLimits` with active cancellation token callbacks to abort decode loops during ingestion rather than only upon completion.
+  - Fail-closed error handling: invalid media and missing codecs raise descriptive errors while leaving active session state intact and recoverable.
+  - Installed PyQt review journey: `ShadowTrackerWidget` and `ShadowTrackerReviewModel` support video import toolbar action, keyboard scrubbing (`Key_Left`, `Key_Right`, `Key_Home`, `Key_End`, `Key_W` for worst-frame jump), shortcut bundle persistence (`Ctrl+S`, `Ctrl+O`, `Ctrl+I`), viewport rendering with clock authority metadata, and honest refusal reporting for unverified automated fitting backends.
+  - Review fixes (Codex P1s on this PR): `import_video` stages the full decoded batch and validates scope ownership, single source asset, and revision-id uniqueness before any session mutation, so a failing repeat import leaves the reviewed session exactly intact; without an evidenced timing mapping imported frames keep `physical_time_s=None` with the canonical unknown-time reason (PTS authority stays in `timing_mode`/`clock_evidence`, never transplanted into fabricated provenance); the viewport renders unknown physical time as `Physical Time: unknown (<reason>)` via `format_clock_evidence_text` instead of formatting `None` (pre-fix `TypeError` aborted the paint event on GUI-default imports).
+- Tests:
+  - `tests/unit/shadow_tracker/test_service.py`: 16 passed (incl. repeat-import atomicity against scope collision / foreign asset, unknown-time provenance preserved in export, VFR/slow-motion timing, cancellation during decode, corrupt media recovery, bundle save/reload lineage).
+  - `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`: 7 passed (incl. unknown-time viewport rendering and clock-evidence text formatting, installed PyQt review journey, keyboard navigation, worst frame jump, mask correction dirty tracking, honest fit refusal).
+  - Entire `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/` suites: 330 collected, all passing.
+  - Ruff check/format and mypy clean on touched modules; architecture budget and spec changelog duplicate check: PASS.
+- Next step: CI green, then ready and arm the PR; release agent lease.
 
 ---
 
