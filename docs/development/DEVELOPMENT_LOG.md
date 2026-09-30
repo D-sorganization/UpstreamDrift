@@ -25,6 +25,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-29 at 3b23bd41502a7b7d028f291564997b6460f14cbc — 36 focused tests passed (test_drake_dual_club_qualification.py 16, test_run_native_engine_lane.py + test_native_lane_freshness.py 20); red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native Drake qualification NOT achieved: pydrake unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10D] dual-club Drake qualification (review audit follow-up): receipts now carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite energy all reject); fabricated marker metrics (scaled early/terminal/clubhead RMS, hardcoded pelvis_yaw_error_pct) and placeholder sha256 receipts (`c0ffee…`/`deadbeef…`) removed and replaced with honest fail-closed UNAVAILABLE evidence records. Adds drake to the nightly lane runner. Real qualification still requires pydrake on a pinned host via the native lane.
 - **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
+### DL-#11175 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
+
+- **State:** in_review
+- **Owner:** fleet-orchestrator (agent: claude)
+- **Issue:** N/A (references the main CI red surfaced after the #11171 restore, `27632bd195`)
+- **Branch:** `bot/contracts-exception-identity`; PR #11175
+- **Paths:** `src/shared/python/_contracts_exceptions.py`, `tests/unit/motion_matching/test_stability_matrix.py`
+- **Started:** 2026-09-30
+- **Last verified:** 2026-09-30 — `pytest tests/unit/motion_matching/test_stability_matrix.py` 27 passed (red on main HEAD `27632bd195` with the new identity assertion before the fix); shard contract suites 95 passed; ruff check + format clean on changed files.
+- **Summary:** `_contracts_exceptions.py` redefined the DbC exceptions in parallel with the public `contracts` module, so `@precondition` violations raised via `contracts` could not be caught as the shard-imported `PreconditionError` — `TestStabilityMatrix::test_get_canonical_test_invalid` stayed red on main. The shard now re-exports the same class objects; both import paths remain usable and referentially identical, asserted in the test.
+- **Next step:** Merge PR #11175 (squash) and confirm main unit lane is green.
+
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
 - **State:** in_review

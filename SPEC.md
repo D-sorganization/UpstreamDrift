@@ -16,6 +16,13 @@ Implements [MMR-10D] native dual-club dynamic qualification and automated nightl
   - Documents evidence scope and constraints in `docs/development/matched_swing_program/evidence/drake/README.md`.
 - **TDD Test Coverage (`tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `tests/scripts/test_run_native_engine_lane.py`, `tests/docs/test_native_lane_freshness.py`)**:
   - Unit and script tests verifying contract rejection logic, derivative checking, energy balance, fail-closed behavior for unavailable runtimes, unrecorded test counts, missing rollout/marker data computed-not-invented metrics, and committed receipt integrity.
+## PreconditionError Exception-Identity Repair at the Shared Contracts Seam (#11175)
+
+- **Duplicate DbC exception class objects eliminated (`_contracts_exceptions` re-export seam)**:
+  - `src/shared/python/_contracts_exceptions.py` no longer redefines `ContractViolationError`, `PreconditionError`, `PostconditionError`, or `InvariantError`; it re-exports the SAME class objects from the public `src.shared.python.contracts` module, while keeping shard-local `ContractEvaluationError` (with message validation).
+  - Both import paths (`src.shared.python.contracts` and `src.shared.python._contracts_exceptions`) now yield referentially identical classes, so `@precondition`/`@postcondition` failures raised in decorated code are catchable by code importing either seam — unblocks `tests/unit/motion_matching/test_stability_matrix.py::TestStabilityMatrix::test_get_canonical_test_invalid`, red on main since the #11171 restore.
+  - Regression guard strengthens the test with an object-identity assertion (`contracts.PreconditionError is _contracts_exceptions.PreconditionError`) plus `errisinstance` on the raised violation.
+
 ## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
 
 Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):

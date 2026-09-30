@@ -6,66 +6,29 @@ from src.shared.python._contracts_level import (
     ContractLevel,
     _ContractState,
 )
+from src.shared.python.contracts import (
+    ContractViolationError,
+    InvariantError,
+    PostconditionError,
+    PreconditionError,
+)
 
 logger = logging.getLogger(__name__)
 
+# Exception-identity seam: the classes above are re-exported from the public
+# ``src.shared.python.contracts`` module instead of being redefined here, so
+# decorators that raise (e.g. ``precondition`` / postcondition``) produce the
+# SAME class object that callers importing
+# ``from src.shared.python._contracts_exceptions import PreconditionError``
+# receive. Both import paths must remain usable and referentially identical.
 
-class ContractViolationError(AssertionError, ValueError):
-    """Base exception for contract violations.
-
-    The constructor validates its own arguments: a contract violation reported
-    without a condition type or message is not diagnosable, and silently
-    accepting ``None`` produces misleading detail strings such as
-    ``"[DbC None] None"``. Subclasses supply ``condition_type`` themselves and
-    forward ``message``, so both checks live here.
-
-    Raises:
-        ValueError: If ``condition_type`` or ``message`` is missing or blank.
-    """
-
-    def __init__(
-        self,
-        condition_type: str,
-        message: str,
-        value=None,
-    ) -> None:
-        if not isinstance(condition_type, str) or not condition_type.strip():
-            raise ValueError(
-                "condition_type must be provided as a non-empty string "
-                f"(got: {condition_type!r})"
-            )
-        if not isinstance(message, str) or not message.strip():
-            raise ValueError(
-                f"message must be provided as a non-empty string (got: {message!r})"
-            )
-        self.condition_type = condition_type
-        self.message = message
-        self.value = value
-        detail = f"[DbC {condition_type}] {message}"
-        if value is not None:
-            detail += f" (got: {value!r})"
-        super().__init__(detail)
-
-
-class PreconditionError(ContractViolationError):
-    """Raised when a pre-condition is violated."""
-
-    def __init__(self, message: str, value=None) -> None:
-        super().__init__("pre-condition", message, value)
-
-
-class PostconditionError(ContractViolationError):
-    """Raised when a post-condition is violated."""
-
-    def __init__(self, message: str, value=None) -> None:
-        super().__init__("post-condition", message, value)
-
-
-class InvariantError(ContractViolationError):
-    """Raised when a class or loop invariant is violated."""
-
-    def __init__(self, message: str, value=None) -> None:
-        super().__init__("invariant", message, value)
+__all__ = [
+    "ContractViolationError",
+    "PostconditionError",
+    "PreconditionError",
+    "InvariantError",
+    "ContractEvaluationError",
+]
 
 
 class ContractEvaluationError(ContractViolationError):
@@ -78,6 +41,10 @@ class ContractEvaluationError(ContractViolationError):
     """
 
     def __init__(self, message: str, value=None) -> None:
+        if not isinstance(message, str) or not message.strip():
+            raise ValueError(
+                f"message must be provided as a non-empty string (got: {message!r})"
+            )
         super().__init__("evaluation-error", message, value)
 
 
