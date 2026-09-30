@@ -34,6 +34,7 @@ from src.shared.python.motion_matching.club_only.seeds import (
 from src.shared.python.motion_matching.club_only.ui_integration import (
     UI_SCHEMA,
     ClubOnlySourceKind,
+    ClubOnlyUiResult,
     ClubOnlyUiSession,
     ObservationRole,
     VerificationDisplayStatus,
@@ -203,8 +204,85 @@ def test_unqualified_cannot_appear_verified() -> None:
                     "native_g1_pass": False,
                     "display_status": VerificationDisplayStatus.NATIVE_VERIFIED,
                     "qualification_blockers": ("blocker",),
+                    "has_continuous_replay": False,
                 },
             )()
+        )
+
+
+def test_verified_fit_requires_fresh_continuous_replay() -> None:
+    """Native verified status strictly requires fresh continuous replay evidence."""
+    # 1. Direct assert function rejects native_verified when has_continuous_replay is False
+    bad_view = type(
+        "FakeVerified",
+        (),
+        {
+            "native_g1_pass": True,
+            "display_status": VerificationDisplayStatus.NATIVE_VERIFIED,
+            "qualification_blockers": (),
+            "has_continuous_replay": False,
+        },
+    )()
+    with pytest.raises(ValueError, match="fresh continuous replay"):
+        assert_unqualified_cannot_appear_verified(bad_view)
+
+    # 2. Result view builder downgrades native_verified to unqualified if has_continuous_replay is missing
+    observation = build_calibrated_observation_fixture("TW_wiffle")
+    match = run_club_only_ui_match(
+        create_club_only_session(
+            trial_id=observation.trial_id,
+            model_id="double_pendulum",
+            preset=MatchPreset.VERIFIED_FIT,
+        ),
+        observation=observation,
+        seed=_retrieval_seed(observation),
+    )
+    # Even if native_g1_pass is set to True and blockers are cleared on match, lack of fresh continuous replay blocks native verification
+    from dataclasses import replace
+
+    match_with_fake_native = replace(
+        match.match,
+        native_g1_pass=True,
+        qualification_blockers=(),
+        claims_native_qualification=True,
+    )
+    ui_result = ClubOnlyUiResult(
+        session=match.session,
+        match=match_with_fake_native,
+        observation=observation,
+        checkpoint=match.checkpoint,
+        seed=_retrieval_seed(observation),
+    )
+    view = build_club_only_result_view(ui_result)
+    assert view.display_status is not VerificationDisplayStatus.NATIVE_VERIFIED
+    assert "missing_fresh_continuous_replay" in view.qualification_blockers
+
+
+def test_inferred_body_posture_always_labeled() -> None:
+    """Inferred body posture must always be labeled via a non-empty body motion disclaimer."""
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        ResultViewModel,
+    )
+
+    with pytest.raises(
+        ValueError, match="inferred body posture must always be labeled"
+    ):
+        ResultViewModel(
+            session_id="s1",
+            trial_id="TW_wiffle",
+            model_id="driven_double_pendulum",
+            preset=MatchPreset.FAST_PREVIEW,
+            display_status=VerificationDisplayStatus.PREVIEW,
+            native_g1_pass=False,
+            qualification_blockers=(),
+            trial_clock_hz=240.0,
+            native_time_s=np.array([0.0, 0.01]),
+            body_motion_disclaimer="",  # Missing disclaimer
+            candidate_ids=(),
+            error_time_tradeoffs=(),
+            infeasible_models=(),
+            prior_choices={},
+            geometry_choices={},
         )
 
 

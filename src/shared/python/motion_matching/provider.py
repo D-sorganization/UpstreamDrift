@@ -26,6 +26,7 @@ Public API:
 
 from dataclasses import dataclass, field
 import logging
+import math
 import threading
 from typing import Any, Protocol, runtime_checkable
 
@@ -71,6 +72,21 @@ class FitOptions:
     maxiter: int = 200
     rng_seed: int = 0
     engine_options: Any = None
+    max_marker_rmse_m: float | None = None
+
+    def __post_init__(self) -> None:
+        """DbC: a set ``max_marker_rmse_m`` must be finite and strictly positive (#11097).
+
+        NaN would silently disable every planar-floor comparison (each is
+        false) and non-positive ceilings would reject perfectly planar data.
+        Mirrors :func:`assess_planarity_lower_bound` in the upper-body
+        capture validation.
+        """
+        value = self.max_marker_rmse_m
+        if value is None:
+            return
+        if not math.isfinite(float(value)) or value <= 0.0:
+            raise ValueError("max_marker_rmse_m must be finite and positive")
 
 
 def classical_baseline_fit_options(

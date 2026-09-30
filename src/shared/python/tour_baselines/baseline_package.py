@@ -274,13 +274,32 @@ class BaselinePackage:
 
     def __post_init__(self) -> None:
         st = self.statuses
-        if (
-            self.is_synthetic
-            and st.product_promotion == ProductPromotionStatus.PROMOTED
-        ):
-            raise ValueError(
-                "Synthetic test package cannot have product_promotion set to PROMOTED."
-            )
+        if st.product_promotion == ProductPromotionStatus.PROMOTED:
+            if self.is_synthetic:
+                raise ValueError(
+                    "Synthetic test package cannot have product_promotion set to PROMOTED."
+                )
+            ident = self.identity
+            missing_hashes = [
+                h_name
+                for h_name in (
+                    "fixed_geometry_hash",
+                    "fixed_inertia_hash",
+                    "controls_hash",
+                    "q0_hash",
+                    "v0_hash",
+                )
+                if not getattr(ident, h_name, None)
+            ]
+            if missing_hashes:
+                raise ValueError(
+                    f"Promoted package cannot have missing geometry or control hashes: {missing_hashes}"
+                )
+            oop = self.metrics.out_of_plane_residual_m
+            if oop is None or not np.isfinite(oop) or oop <= 0.0:
+                raise ValueError(
+                    f"Promoted package cannot have fabricated or non-positive out_of_plane_residual_m: {oop}"
+                )
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize package manifest to a dictionary without embedded binary arrays."""

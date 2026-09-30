@@ -122,7 +122,7 @@ def validate_and_project_target(
             method=method,
         )
 
-    projected_club, _, plane_err = _resolve_plane(club, opts)
+    projected_club, plane, plane_err = _resolve_plane(club, opts)
     if plane_err is not None:
         return _build_failure_result(
             plane_err,
@@ -131,6 +131,47 @@ def validate_and_project_target(
             dof=dof,
             method=method,
         )
+
+    # Spatial planar floor check: a rigid 2D planar replay has zero displacement
+    # along the plane normal, so the CURRENT target's marker distances to the
+    # selected plane bound its attainable 3D marker error from below. When the
+    # ceiling is exceeded, a planar fit is mathematically futile: reject before
+    # optimization. Gating on the current target (not the residual recorded on
+    # a calibrated plane) means a stale/noisy calibration cannot reject a fine
+    # target and a clean calibration cannot pass a far-off target (#11097).
+    ceiling = getattr(opts, "max_marker_rmse_m", None) if opts else None
+    if ceiling is None and opts and getattr(opts, "engine_options", None):
+        ceiling = getattr(opts.engine_options, "max_marker_rmse_m", None)
+
+    if ceiling is not None and (not math.isfinite(float(ceiling)) or ceiling <= 0.0):
+        # Fail closed: NaN would otherwise silently disable the gate.
+        return _build_failure_result(
+            "max_marker_rmse_m must be finite and positive",
+            target_hash,
+            engine_version,
+            dof=dof,
+            method=method,
+        )
+
+    if ceiling is not None and plane is not None:
+        deviation_blocks = []
+        for marker_pts in (np.asarray(club.butt, dtype=float), np.asarray(club.clubhead, dtype=float)):
+            if marker_pts.ndim == 2 and marker_pts.shape[-1] == 3:
+                deviation_blocks.append(plane.project_points_to_plane(marker_pts)[:, 2])
+        if deviation_blocks:
+            deviations = np.concatenate(deviation_blocks)
+            finite = np.isfinite(deviations)
+            if finite.any():
+                marker_rmse = float(np.sqrt(np.mean(np.square(deviations[finite]))))
+                if marker_rmse > float(ceiling):
+                    return _build_failure_result(
+                        f"Planar floor failure: marker plane normal RMSE {marker_rmse:.6f} m "
+                        f"exceeds declared tolerance ceiling {float(ceiling):.6f} m; planar fit rejected before optimization",
+                        target_hash,
+                        engine_version,
+                        dof=dof,
+                        method=method,
+                    )
 
     return projected_club, target_hash, t_start
 
